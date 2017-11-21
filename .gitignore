@@ -1,0 +1,8 @@
+*.swp
+npm-debug.log*
+dist
+node_modules
+coverage
+.coveralls.yml
+.npm
+npm

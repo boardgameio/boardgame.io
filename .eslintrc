@@ -1,0 +1,16 @@
+{
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "env": {
+    "node": true,
+    "browser": true,
+    "jest/globals": true,
+  },
+  "parser": "babel-eslint",
+  "plugins": ["react", "jest"],
+  "rules": {
+    "no-console": "off",
+    "no-param-reassign": "off",
+    "no-tabs": "error",
+    "no-trailing-spaces": "error",
+  }
+}

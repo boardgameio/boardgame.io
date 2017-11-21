@@ -1,0 +1,46 @@
+// Copyright 2017 Google Inc.
+//
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
+
+$bg-color: #fff;
+$primary-color: #224;
+
+body {
+  margin: 0;
+  padding: 50px;
+  background: $bg-color;
+  color: $primary-color;
+  font-family: monospace;
+  font-size: 20px;
+}
+
+#board {
+  border-collapse: collapse;
+}
+
+#winner {
+  margin-top: 25px;
+  width: 168px;
+  text-align: center;
+}
+
+td {
+  text-align: center;
+  font-weight: bold;
+  font-size: 25px;
+  color: #555;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  border: 3px solid #aaa;
+}
+
+td.active {
+  cursor: pointer;
+}
+
+td.active:hover {
+  background: #eee;
+}

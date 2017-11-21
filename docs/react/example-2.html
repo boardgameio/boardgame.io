@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+body {
+  padding: 25px;
+}
+</style>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <script type="text/babel">
+function IsVictory(cells) {
+  const positions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  for (let pos of positions) {
+    const symbol = cells[pos[0]];
+    let winner = symbol;
+    for (let i of pos) {
+      if (cells[i] != symbol) {
+        winner = null;
+        break;
+      }
+    }
+    if (winner != null) return true;
+  }
+
+  return false;
+}
+
+const TicTacToe = BoardgameIO.Game({
+  G: { cells: Array(9).fill(null), winner: null },
+  
+  moves: {
+    clickCell(G, ctx, id) {
+      const cells = [...G.cells];
+
+      if (cells[id] === null) {
+        cells[id] = ctx.currentPlayer;
+      }
+
+      let winner = null;
+      if (IsVictory(cells)) {
+        winner = ctx.currentPlayer;
+      }
+
+      return { ...G, cells, winner };
+    }
+  }
+});
+
+
+class TicTacToeBoard extends React.Component {
+  onClick(id) {
+    if (this.props.G.winner == null) {
+      this.props.moves.clickCell(id);
+      this.props.endTurn();
+    }
+  }
+
+  render() {
+    let winner = '';
+    if (this.props.G.winner !== null) {
+      winner = <div>Winner: {this.props.G.winner}</div>;
+    }
+
+    const cellStyle = {
+      cursor: 'pointer',
+      border: '1px solid #555',
+      width: '50px',
+      height: '50px',
+      lineHeight: '50px',
+      textAlign: 'center',
+      fontFamily: 'monospace',
+      fontSize: '20px',
+      fontWeight: 'bold',
+    };
+
+    let tbody = [];
+    for (let i = 0; i < 3; i++) {
+      let cells = [];
+      for (let j = 0; j < 3; j++) {
+        const id = 3 * i + j;
+        cells.push(
+          <td style={cellStyle}
+              key={id}
+              onClick={() => this.onClick(id)}>
+            {this.props.G.cells[id]}
+          </td>
+        );
+      }
+      tbody.push(<tr key={i}>{cells}</tr>);
+    }
+
+    return (
+      <div>
+        <table id="board">
+        <tbody>{tbody}</tbody>
+        </table>
+        {winner}
+      </div>
+    );
+  }
+}
+
+var App = BoardgameIO.Client({
+  board: TicTacToeBoard,
+  game: TicTacToe,
+});
+
+
+ReactDOM.render(<App/>, document.getElementById('app'));
+  </script>
+
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="//unpkg.com/react@next/umd/react.development.js"></script>
+  <script src="//unpkg.com/react-dom@next/umd/react-dom.development.js"></script>
+  <script src="//unpkg.com/boardgame.io"></script>
+</body>
+
+</html>

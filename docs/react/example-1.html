@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <div id="app"></div>
+
+  <script type="text/babel">
+  var TicTacToe = BoardgameIO.Game({
+    G: { cells: Array(9).fill(null) },
+
+    moves: {
+      clickCell(G, ctx, id) {
+        let cells = [...G.cells];  // don't mutate original state.
+        cells[id] = ctx.currentPlayer;
+        return {...G, cells};      // don't mutate original state.
+      }
+    }
+  });
+
+  var App = BoardgameIO.Client({ game: TicTacToe });
+  ReactDOM.render(<App/>, document.getElementById('app'));
+  </script>
+
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="//unpkg.com/react@next/umd/react.development.js"></script>
+  <script src="//unpkg.com/react-dom@next/umd/react-dom.development.js"></script>
+  <script src="//unpkg.com/boardgame.io"></script>
+</body>
+
+</html>

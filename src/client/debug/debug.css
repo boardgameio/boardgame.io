@@ -1,0 +1,76 @@
+// Copyright 2017 Google Inc.
+//
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/MIT.
+
+.debug-ui {
+  float: right;
+  box-sizing: border-box;
+  background: #fff;
+  right: 0;
+  top: 0;
+  height: 100%;
+  opacity: .5;
+  font-family: monospace;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.debug-ui section {
+  margin-bottom: 20px;
+}
+
+.debug-ui textarea {
+  resize: none;
+}
+
+.debug-ui .move {
+  cursor: pointer;
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.debug-ui .move:hover {
+  color: #333;
+}
+
+.debug-ui .move.active {
+  color: #111;
+  font-weight: bold;
+}
+
+.debug-ui .arg-field {
+  outline: none;
+  font-family: monospace;
+}
+
+.debug-ui .key {
+  margin-bottom: 5px;
+}
+
+.debug-ui .key-box {
+  display: inline-block;
+  min-width: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  border: 1px solid #ccc;
+  box-shadow: 1px 1px 1px #888;
+  background: #eee;
+  color: #444;
+}
+
+.debug-ui .key.active .key-box {
+  background: #ddd;
+  border: 1px solid #999;
+  box-shadow: none;
+}
+
+.debug-ui .key-child {
+  display: inline-block;
+  height: 20px;
+  margin-left: 10px;
+}

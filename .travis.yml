@@ -1,0 +1,8 @@
+language: node_js
+before_install:
+  nvm install 7.6
+notifications:
+  email: false
+script:
+  curl -O https://raw.githubusercontent.com/danvk/travis-weigh-in/master/weigh_in.py && python weigh_in.py dist/boardgameio.min.js
+after_success: 'npm run test:coveralls'
