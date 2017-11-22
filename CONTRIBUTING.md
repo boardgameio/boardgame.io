@@ -3,6 +3,16 @@
 We'd love to accept your patches and contributions to this project. There are
 just a few small guidelines you need to follow.
 
+## Pull Requests
+
+We use GitHub pull requests for external contributions. Code must be well-tested.
+
+## Issue tracker
+
+Please use the Issue Tracker to discuss potential improvements you want to make
+before sending a Pull Request. It's probably a good idea to hold off on features
+before v1.0 is released.
+
 ## Contributor License Agreement
 
 Contributions to this project must be accompanied by a Contributor License
@@ -14,10 +24,3 @@ your current agreements on file or to sign a new one.
 You generally only need to submit a CLA once, so if you've already submitted one
 (even if it was for a different project), you probably don't need to do it
 again.
-
-## Code reviews
-
-All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose. Consult
-[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
