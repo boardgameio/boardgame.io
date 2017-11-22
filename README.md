@@ -27,6 +27,8 @@ networking or backend code.
 * More complex game types with ability to customize.
 * React components for common game elements (cards, dice etc.).
 
+### Full Documentation: [link](https://google.github.io/boardgame.io/)
+
 ## Installation
 
 ```
