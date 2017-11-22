@@ -53,6 +53,7 @@
 
 .debug-ui .key-box {
   display: inline-block;
+  cursor: pointer;
   min-width: 10px;
   padding-left: 5px;
   padding-right: 5px;
@@ -63,6 +64,10 @@
   box-shadow: 1px 1px 1px #888;
   background: #eee;
   color: #444;
+}
+
+.debug-ui .key-box:hover {
+  background: #ddd;
 }
 
 .debug-ui .key.active .key-box {
