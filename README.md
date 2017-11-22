@@ -12,6 +12,8 @@ when a particular move is made, and the framework takes
 care of the rest. You will not need to write any
 networking or backend code.
 
+### Full Documentation: [link](https://google.github.io/boardgame.io/)
+
 ## Features
 
 * Seamless game state management across client and server.
@@ -26,8 +28,6 @@ networking or backend code.
 * Game logs with time-travel capability.
 * More complex game types with ability to customize.
 * React components for common game elements (cards, dice etc.).
-
-### Full Documentation: [link](https://google.github.io/boardgame.io/)
 
 ## Installation
 
