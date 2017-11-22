@@ -39,3 +39,11 @@ include via a `<script>` tag.
 ```
 <script src="//unpkg.com/boardgame.io"></script>
 ```
+
+## Disclaimer
+
+This is not an official Google product.
+
+## License
+
+MIT
