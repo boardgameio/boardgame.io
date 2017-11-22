@@ -40,10 +40,10 @@ include via a `<script>` tag.
 <script src="//unpkg.com/boardgame.io"></script>
 ```
 
-## Disclaimer
+### Disclaimer
 
 This is not an official Google product.
 
-## License
+### License
 
 MIT
