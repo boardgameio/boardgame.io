@@ -3,6 +3,8 @@
 [![Travis](https://img.shields.io/travis/google/boardgame.io/master.svg)](https://travis-ci.org/google/boardgame.io)
 [![Coveralls](https://img.shields.io/coveralls/google/boardgame.io.svg)](https://coveralls.io/github/google/boardgame.io?branch=master)
 
+#### Full Documentation: [link](https://google.github.io/boardgame.io/)
+
 State management and React libraries for turn based games.
 
 The goal of this framework is to allow a game author to
@@ -11,8 +13,6 @@ simple functions that describe how the game state changes
 when a particular move is made, and the framework takes
 care of the rest. You will not need to write any
 networking or backend code.
-
-### Full Documentation: [link](https://google.github.io/boardgame.io/)
 
 ## Features
 
