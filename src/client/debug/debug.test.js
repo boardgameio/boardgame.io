@@ -19,7 +19,7 @@ Enzyme.configure({ adapter: new Adapter() });
 const gamestate = {
   G: {},
   ctx: {},
-  _log: [],
+  log: [],
 };
 
 test('GameLog', () => {
