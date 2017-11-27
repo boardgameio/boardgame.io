@@ -11,7 +11,55 @@ import ReactJson from 'react-json-view';
 import PropTypes from 'prop-types';
 import Mousetrap from 'mousetrap';
 import { restore } from '../../both/action-creators';
+import * as Actions from '../../both/action-types';
 import './debug.css';
+
+/*
+ * GameLog
+ *
+ * Component to log the actions in the game.
+ */
+export class GameLog extends React.Component {
+  static propTypes = {
+    log: PropTypes.array.isRequired,
+  }
+
+  render() {
+    let log = [];
+    let turns = [];
+    let currentTurn = [];
+
+    for (let i = 0; i < this.props.log.length; i++) {
+      const item = this.props.log[i];
+      if (item.type == Actions.END_TURN) {
+        turns.push(currentTurn);
+        currentTurn = [];
+      } else {
+        currentTurn.push(
+          <div key={i} className="log-move">
+          {JSON.stringify(item.move)}
+          </div>
+        );
+      }
+    }
+
+    for (let i = 0; i < turns.length; i++) {
+      const turn = turns[i];
+      log.push(
+        <div key={i} className="log-turn">
+        <div className="id">Turn #{i+1}</div>
+        {turn}
+        </div>
+      );
+    }
+
+    return (
+      <div className="gamelog">
+      {log}
+      </div>
+    );
+  }
+}
 
 /*
  * DebugMove
@@ -195,6 +243,7 @@ export class Debug extends React.Component {
     gamestate: PropTypes.shape({
       G: PropTypes.any.isRequired,
       ctx: PropTypes.any.isRequired,
+      _log: PropTypes.array.isRequired,
     }),
     gameid: PropTypes.string.isRequired,
     moveAPI: PropTypes.any,
@@ -318,6 +367,13 @@ export class Debug extends React.Component {
                  enableClipboard={false}
                  displayDataTypes={false} />
       </section>
+
+      {this.props.gamestate._log.length > 0 &&
+        <section>
+        <h3>log</h3>
+        <GameLog log={this.props.gamestate._log} />
+        </section>
+      }
 
       </div>
     );

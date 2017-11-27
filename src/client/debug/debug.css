@@ -81,3 +81,25 @@
   height: 20px;
   margin-left: 10px;
 }
+
+.gamelog .log-turn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  box-shadow: 1px 1px 1px #aaa;
+  margin-top: 5px;
+  padding: 5px;
+  text-align: center;
+  color: #555;
+}
+
+.gamelog .log-turn .id {
+  background: #eee;
+  padding: 5px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.gamelog .log-move {
+}

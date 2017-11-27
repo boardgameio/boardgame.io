@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { restore } from '../../both/action-creators';
+import { restore, makeMove, endTurn } from '../../both/action-creators';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { Debug, DebugMove, KeyboardShortcut } from './debug.js';
+import { GameLog, Debug, DebugMove, KeyboardShortcut } from './debug.js';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -18,8 +18,21 @@ Enzyme.configure({ adapter: new Adapter() });
 
 const gamestate = {
   G: {},
-  ctx: {}
+  ctx: {},
+  _log: [],
 };
+
+test('GameLog', () => {
+  const log = [
+    makeMove({ type: 'moveA' }),
+    endTurn(),
+    makeMove({ type: 'moveB' }),
+    endTurn(),
+  ];
+  const gamelog = Enzyme.mount(<GameLog log={log} />);
+  const turns = gamelog.find('.id').map(div => div.text());
+  expect(turns).toEqual(['Turn #1', 'Turn #2']);
+});
 
 test('is rendered', () => {
   const debug = Enzyme.mount(
