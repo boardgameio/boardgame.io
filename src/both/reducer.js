@@ -25,7 +25,7 @@ function createGameReducer({game, numPlayers}) {
       currentPlayer: 0,
       numPlayers: numPlayers,
     },
-    _log: [],
+    log: [],
     _id: 0,
   };
 
@@ -38,9 +38,9 @@ function createGameReducer({game, numPlayers}) {
     switch (action.type) {
       case Actions.MAKE_MOVE: {
         const G = game.reducer(state.G, action.move, state.ctx);
-        let _log = state._log.slice();
-        _log.push(action);
-        return {...state, G, _id: state._id + 1, _log};
+        let log = state.log.slice();
+        log.push(action);
+        return {...state, G, _id: state._id + 1, log};
       }
 
       case Actions.END_TURN: {
@@ -60,10 +60,10 @@ function createGameReducer({game, numPlayers}) {
         ctx = {...ctx, currentPlayer, turn};
 
         // Update log.
-        let _log = state._log.slice();
-        _log.push(action);
+        let log = state.log.slice();
+        log.push(action);
 
-        return {...state, G, ctx, _id: state._id + 1, _log};
+        return {...state, G, ctx, _id: state._id + 1, log};
       }
 
       case Actions.RESTORE: {

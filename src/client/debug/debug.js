@@ -243,7 +243,7 @@ export class Debug extends React.Component {
     gamestate: PropTypes.shape({
       G: PropTypes.any.isRequired,
       ctx: PropTypes.any.isRequired,
-      _log: PropTypes.array.isRequired,
+      log: PropTypes.array.isRequired,
     }),
     gameid: PropTypes.string.isRequired,
     moveAPI: PropTypes.any,
@@ -368,10 +368,10 @@ export class Debug extends React.Component {
                  displayDataTypes={false} />
       </section>
 
-      {this.props.gamestate._log.length > 0 &&
+      {this.props.gamestate.log.length > 0 &&
         <section>
         <h3>log</h3>
-        <GameLog log={this.props.gamestate._log} />
+        <GameLog log={this.props.gamestate.log} />
         </section>
       }
 

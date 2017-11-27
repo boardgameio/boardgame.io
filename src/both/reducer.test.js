@@ -92,9 +92,9 @@ test('log', () => {
   const actionC = endTurn();
 
   state = reducer(state, actionA);
-  expect(state._log).toEqual([actionA]);
+  expect(state.log).toEqual([actionA]);
   state = reducer(state, actionB);
-  expect(state._log).toEqual([actionA, actionB]);
+  expect(state.log).toEqual([actionA, actionB]);
   state = reducer(state, actionC);
-  expect(state._log).toEqual([actionA, actionB, actionC]);
+  expect(state.log).toEqual([actionA, actionB, actionC]);
 });
