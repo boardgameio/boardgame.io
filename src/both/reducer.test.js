@@ -81,3 +81,20 @@ test('numPlayers', () => {
   const state = reducer(undefined, endTurn());
   expect(state.ctx.numPlayers).toBe(4);
 });
+
+test('log', () => {
+  const reducer = createGameReducer({game});
+
+  let state = undefined;
+
+  const actionA = makeMove({ type: 'moveA' });
+  const actionB = makeMove({ type: 'moveB' });
+  const actionC = endTurn();
+
+  state = reducer(state, actionA);
+  expect(state._log).toEqual([actionA]);
+  state = reducer(state, actionB);
+  expect(state._log).toEqual([actionA, actionB]);
+  state = reducer(state, actionC);
+  expect(state._log).toEqual([actionA, actionB, actionC]);
+});
