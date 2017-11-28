@@ -1,11 +1,14 @@
 # How to Contribute
 
+## Pull Requests
+
 We use [Pull Requests](https://help.github.com/articles/about-pull-requests/) for external contributions. Code must be well-tested and not decrease the test coverage significantly.
 
-The following command must pass for a Pull Request to be considered:
+The following commands must pass for a Pull Request to be considered:
 
 ```
 $ npm test
+$ npm run lint
 ```
 
 You can also check the test coverage by running:
@@ -13,6 +16,10 @@ You can also check the test coverage by running:
 ```
 $ npm run test:coverage
 ```
+
+Please commit your changes to a separate topic branch (either in your
+clone or fork) so that we can work together making changes to it
+before it is ready to be merged.
 
 ## Issue tracker
 
