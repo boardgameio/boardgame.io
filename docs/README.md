@@ -18,12 +18,11 @@ networking or backend code.
 * Strong emphasis on ease of prototyping.
 * Debug UI to visualize state and simulate game moves even before you build UI components for your game.
 * Online multiplayer with realtime updates.
-* Optimistic updates: game state is updated immediately on the client, but verified on the server.
+* Game logs with ability to rewind to previous state.
 
 ### Upcoming
 
 * Lobby to create/join games.
-* Game logs with time-travel capability.
 * More complex game types with ability to customize.
 * React components for common game elements (cards, dice etc.).
 
