@@ -4,5 +4,6 @@ before_install:
 notifications:
   email: false
 script:
-  if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then curl -O https://raw.githubusercontent.com/danvk/travis-weigh-in/master/weigh_in.py && python weigh_in.py dist/boardgameio.min.js; fi
+  - if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then curl -O https://raw.githubusercontent.com/danvk/travis-weigh-in/master/weigh_in.py && python weigh_in.py dist/boardgameio.min.js; fi
+  - npm run lint
 after_success: 'npm run test:coveralls'
