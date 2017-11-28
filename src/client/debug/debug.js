@@ -35,9 +35,10 @@ export class GameLog extends React.Component {
         turns.push(currentTurn);
         currentTurn = [];
       } else {
+        const args = item.move.args || [];
         currentTurn.push(
           <div key={i} className="log-move">
-          {JSON.stringify(item.move)}
+          {item.move.type}({args.join(',')})
           </div>
         );
       }
