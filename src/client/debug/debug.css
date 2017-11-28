@@ -131,6 +131,7 @@
 
 .gamelog .log-move {
   border-left: 25px solid #ccc;
+  margin-top: 5px;
   background: #fff;
   padding: 5px;
 }
