@@ -257,6 +257,10 @@ export class Debug extends React.Component {
     this.assignShortcuts();
   }
 
+  state = {
+    showLog: false,
+  }
+
   assignShortcuts() {
     const taken = {'e': true, 's': true, 'r': true};
     this.shortcuts = null;
@@ -314,6 +318,14 @@ export class Debug extends React.Component {
     }
   }
 
+  onClickMain = () => {
+    this.setState({ showLog: false });
+  }
+
+  onClickLog = () => {
+    this.setState({ showLog: true });
+  }
+
   render() {
     let moves = [];
     for (let name in this.props.moveAPI) {
@@ -329,49 +341,57 @@ export class Debug extends React.Component {
     return (
       <div className='debug-ui'>
 
-      <section>
-      <div><strong>Game ID:</strong> {this.props.gameid}</div>
-      </section>
+      <div className='menu'>
+        <div className={this.state.showLog ? 'item' : 'item active'} onClick={this.onClickMain}>Main</div>
+        <div className={this.state.showLog ? 'item active' : 'item'} onClick={this.onClickLog}>Log</div>
+      </div>
 
-      <section>
-        <KeyboardShortcut value="s" onPress={this.saveState}>
-          save
-        </KeyboardShortcut>
-
-        <KeyboardShortcut value="r" onPress={this.restoreState}>
-          restore
-        </KeyboardShortcut>
-      </section>
-
-      <h3>actions</h3>
-
-      <section>
-      {moves}
-
-      <KeyboardShortcut value='e'>
-        <DebugMove fn={this.props.endTurn} name='endTurn' />
-      </KeyboardShortcut>
-      </section>
-
-      <h3>state</h3>
-
-      <section>
-      <ReactJson src={this.props.gamestate.G}
-                 name="G"
-                 enableClipboard={false}
-                 displayDataTypes={false} />
-      </section>
-
-      <section>
-      <ReactJson src={this.props.gamestate.ctx}
-                 name="ctx"
-                 enableClipboard={false}
-                 displayDataTypes={false} />
-      </section>
-
-      {this.props.gamestate.log.length > 0 &&
+      {this.state.showLog ||
+        <span>
         <section>
-        <h3>log</h3>
+        <div><strong>Game ID:</strong> {this.props.gameid}</div>
+        </section>
+
+        <section>
+          <KeyboardShortcut value="s" onPress={this.saveState}>
+            save
+          </KeyboardShortcut>
+
+          <KeyboardShortcut value="r" onPress={this.restoreState}>
+            restore
+          </KeyboardShortcut>
+        </section>
+
+        <h3>actions</h3>
+
+        <section>
+        {moves}
+
+        <KeyboardShortcut value='e'>
+          <DebugMove fn={this.props.endTurn} name='endTurn' />
+        </KeyboardShortcut>
+        </section>
+
+        <h3>state</h3>
+
+        <section>
+        <ReactJson src={this.props.gamestate.G}
+                   name="G"
+                   enableClipboard={false}
+                   displayDataTypes={false} />
+        </section>
+
+        <section>
+        <ReactJson src={this.props.gamestate.ctx}
+                   name="ctx"
+                   enableClipboard={false}
+                   displayDataTypes={false} />
+        </section>
+        </span>
+      }
+
+      {this.state.showLog &&
+        <section>
         <GameLog log={this.props.gamestate.log} />
         </section>
       }

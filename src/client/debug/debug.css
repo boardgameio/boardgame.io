@@ -8,6 +8,7 @@
 
 .debug-ui {
   float: right;
+  min-width: 300px;
   box-sizing: border-box;
   background: #fefefe;
   border: 3px solid #ddd;
@@ -81,6 +82,27 @@
   display: inline-block;
   height: 20px;
   margin-left: 10px;
+}
+
+.debug-ui .menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.debug-ui .menu .item {
+  cursor: pointer;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  margin-right: 10px;
+  padding: 5px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.debug-ui .menu .item.active {
+  font-weight: bold;
+  border-bottom: 3px solid #ccc;
 }
 
 .gamelog .log-turn {
