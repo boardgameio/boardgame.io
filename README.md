@@ -36,7 +36,7 @@ npm install boardgame.io
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See the contributing [guidelines](CONTRIBUTING.md).
 
 ## Disclaimer
 
