@@ -1,6 +1,7 @@
 language: node_js
 install:
-  nvm install 7.6
+  - nvm install 7.6
+  - npm install
 notifications:
   email: false
 script:
