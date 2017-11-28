@@ -23,7 +23,7 @@ function createGameReducer({game, numPlayers}) {
     ctx: {
       turn: 0,
       currentPlayer: 0,
-      numPlayers: numPlayers,
+      numPlayers,
     },
     log: [],
     _id: 0,
@@ -84,10 +84,10 @@ function createGameReducer({game, numPlayers}) {
 function createDispatchers(moveNames, store) {
   let dispatchers = {};
   for (const name of moveNames) {
-    dispatchers[name] = function(...args) {
+    dispatchers[name] = (...args) => {
       store.dispatch(ActionCreators.makeMove({
         type: name,
-        args: args
+        args
       }));
     };
   }
