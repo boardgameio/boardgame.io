@@ -35,6 +35,10 @@ networking or backend code.
 npm install boardgame.io
 ```
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Disclaimer
 
 This is not an official Google product.
