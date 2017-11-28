@@ -1,17 +1,30 @@
 # How to Contribute
 
 We'd love to accept your patches and contributions to this project. There are
-just a few small guidelines you need to follow.
+just a few guidelines that you need to follow.
 
 ## Pull Requests
 
-We use GitHub pull requests for external contributions. Code must be well-tested.
+We use GitHub pull requests for external contributions. Code must be well-tested
+and not decrease the testing coverage significantly.
+
+The following command must pass for a Pull Request to be considered:
+
+```
+$ npm test
+```
+
+You can check the test coverage by running:
+
+```
+$ npm run test:coverage
+```
 
 ## Issue tracker
 
 Please use the Issue Tracker to discuss potential improvements you want to make
 before sending a Pull Request. It's probably a good idea to hold off on features
-before v1.0 is released.
+before v1.0 is released (bug fixes are ok).
 
 ## Contributor License Agreement
 
