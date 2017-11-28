@@ -34,12 +34,18 @@ test('GameLog', () => {
   expect(turns).toEqual(['Turn #1', 'Turn #2']);
 });
 
-test('is rendered', () => {
+test('basic', () => {
   const debug = Enzyme.mount(
       <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
 
   const titles = debug.find('h3').map(title => title.text());
   expect(titles).toEqual(['actions', 'state']);
+
+  expect(debug.state('showLog')).toEqual(false);
+  debug.find('.menu .item').at(1).simulate('click');
+  expect(debug.state('showLog')).toEqual(true);
+  debug.find('.menu .item').at(0).simulate('click');
+  expect(debug.state('showLog')).toEqual(false);
 });
 
 test('parse arguments', () => {
