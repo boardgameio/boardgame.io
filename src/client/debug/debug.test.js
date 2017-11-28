@@ -8,6 +8,8 @@
 
 import React from 'react';
 import { restore, makeMove, endTurn } from '../../both/action-creators';
+import Game from '../../both/game';
+import { createGameReducer } from '../../both/reducer';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { GameLog, Debug, DebugMove, KeyboardShortcut } from './debug.js';
@@ -20,19 +22,12 @@ const gamestate = {
   G: {},
   ctx: {},
   log: [],
+  _initial: {
+    G: {},
+    ctx: {},
+    log: [],
+  },
 };
-
-test('GameLog', () => {
-  const log = [
-    makeMove({ type: 'moveA' }),
-    endTurn(),
-    makeMove({ type: 'moveB' }),
-    endTurn(),
-  ];
-  const gamelog = Enzyme.mount(<GameLog log={log} />);
-  const turns = gamelog.find('.id').map(div => div.text());
-  expect(turns).toEqual(['Turn #1', 'Turn #2']);
-});
 
 test('basic', () => {
   const debug = Enzyme.mount(
@@ -46,6 +41,55 @@ test('basic', () => {
   expect(debug.state('showLog')).toEqual(true);
   debug.find('.menu .item').at(0).simulate('click');
   expect(debug.state('showLog')).toEqual(false);
+});
+
+test('GameLog', () => {
+  const log = [
+    makeMove({ type: 'moveA' }),
+    endTurn(),
+    makeMove({ type: 'moveB' }),
+    endTurn(),
+  ];
+  const gamelog = Enzyme.mount(<GameLog log={log} />);
+  const turns = gamelog.find('.id').map(div => div.text());
+  expect(turns).toEqual(['Turn #1', 'Turn #2']);
+});
+
+test('GameLog rewind', () => {
+  const game = Game({
+    moves: {
+      'A': (G, ctx, arg) => arg,
+    }
+  });
+  const reducer = createGameReducer({game});
+  const store = createStore(reducer);
+
+  store.dispatch(makeMove({
+    type: 'A',
+    args: [1],
+  }));
+
+  store.dispatch(endTurn());
+
+  store.dispatch(makeMove({
+    type: 'A',
+    args: [2],
+  }));
+
+  store.dispatch(endTurn());
+
+  const root = Enzyme.mount(
+      <Provider store={store}>
+      <Debug gamestate={store.getState()} endTurn={() => {}} gameid="default" showLog={true} />
+      </Provider>
+  );
+
+  expect(store.getState().G).toEqual(2);
+  root.find('.log-turn').at(0).simulate('mouseover');
+  expect(store.getState().G).toEqual(1);
+  root.find('.log-turn').at(0).simulate('mouseout');
+  expect(store.getState().G).toEqual(2);
+
 });
 
 test('parse arguments', () => {
