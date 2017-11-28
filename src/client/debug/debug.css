@@ -9,7 +9,8 @@
 .debug-ui {
   float: right;
   box-sizing: border-box;
-  background: #fff;
+  background: #fefefe;
+  border: 3px solid #ddd;
   right: 0;
   top: 0;
   height: 100%;
@@ -84,10 +85,11 @@
 
 .gamelog .log-turn {
   display: flex;
+  border-radius: 4px;
   flex-direction: column;
   justify-content: space-between;
+  background: #fff;
   border: 1px solid #ccc;
-  box-shadow: 1px 1px 1px #aaa;
   margin-top: 5px;
   padding: 5px;
   text-align: center;
@@ -95,11 +97,13 @@
 }
 
 .gamelog .log-turn .id {
-  background: #eee;
   padding: 5px;
   font-weight: bold;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 .gamelog .log-move {
+  border-left: 25px solid #ccc;
+  background: #fff;
+  padding: 5px;
 }
