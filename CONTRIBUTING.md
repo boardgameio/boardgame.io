@@ -17,9 +17,8 @@ You can also check the test coverage by running:
 $ npm run test:coverage
 ```
 
-Please commit your changes to a separate topic branch (either in your
-clone or fork) so that we can work together making changes to it
-before it is ready to be merged.
+Please commit your changes to a separate branch so that we can
+work together making changes to it before it is ready to be merged.
 
 ## Issue tracker
 
