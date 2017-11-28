@@ -29,6 +29,11 @@ function createGameReducer({game, numPlayers}) {
     _id: 0,
   };
 
+  // Store the initial version of state so that we can see
+  // previous versions by replaying actions over the initial
+  // version.
+  initial._initial = {...initial};
+
   /*
    * GameState
    *

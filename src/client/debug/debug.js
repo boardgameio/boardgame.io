@@ -22,16 +22,19 @@ import './debug.css';
 export class GameLog extends React.Component {
   static propTypes = {
     log: PropTypes.array.isRequired,
+    onRewind: PropTypes.func,
   }
 
   render() {
     let log = [];
     let turns = [];
     let currentTurn = [];
+    let turnToLogIndex = {};
 
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
       if (item.type == Actions.END_TURN) {
+        turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
         currentTurn = [];
       } else {
@@ -47,7 +50,10 @@ export class GameLog extends React.Component {
     for (let i = 0; i < turns.length; i++) {
       const turn = turns[i];
       log.push(
-        <div key={i} className="log-turn">
+        <div key={i}
+             className="log-turn"
+             onMouseOver={() => this.props.onRewind(turnToLogIndex[i])}
+             onMouseOut={() => this.props.onRewind(null)}>
         <div className="id">Turn #{i+1}</div>
         {turn}
         </div>
@@ -245,16 +251,24 @@ export class Debug extends React.Component {
       G: PropTypes.any.isRequired,
       ctx: PropTypes.any.isRequired,
       log: PropTypes.array.isRequired,
+      _initial: PropTypes.any.isRequired,
     }),
     gameid: PropTypes.string.isRequired,
     moveAPI: PropTypes.any,
     restore: PropTypes.func,
     endTurn: PropTypes.func,
+    showLog: PropTypes.bool,
   }
 
   constructor(props) {
     super(props);
     this.assignShortcuts();
+  }
+
+  componentWillMount() {
+    if (this.props.showLog) {
+      this.setState({ showLog: true });
+    }
   }
 
   state = {
@@ -315,6 +329,24 @@ export class Debug extends React.Component {
     if (gamestateJSON !== null) {
       const gamestate = JSON.parse(gamestateJSON);
       this.context.store.dispatch(restore(gamestate));
+    }
+  }
+
+  onRewind = (logIndex) => {
+    if (logIndex == null) {
+      this.context.store.dispatch(restore(this._toRestore));
+      return;
+    }
+
+    this._toRestore = this.context.store.getState();
+
+    const initial = this.props.gamestate._initial;
+    this.context.store.dispatch(restore(initial));
+
+    for (let i = 0; i <= logIndex; i++) {
+      const action = this.props.gamestate.log[i];
+      action.remote = true;  // don't broadcast action.
+      this.context.store.dispatch(action);
     }
   }
 
@@ -392,7 +424,7 @@ export class Debug extends React.Component {
 
       {this.state.showLog &&
         <section>
-        <GameLog log={this.props.gamestate.log} />
+        <GameLog log={this.props.gamestate.log} onRewind={this.onRewind} />
         </section>
       }
 
