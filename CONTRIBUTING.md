@@ -1,12 +1,6 @@
 # How to Contribute
 
-We'd love to accept your patches and contributions to this project. There are
-just a few guidelines that you need to follow.
-
-## Pull Requests
-
-We use GitHub pull requests for external contributions. Code must be well-tested
-and not decrease the testing coverage significantly.
+We use [Pull Requests](https://help.github.com/articles/about-pull-requests/) for external contributions. Code must be well-tested and not decrease the test coverage significantly.
 
 The following command must pass for a Pull Request to be considered:
 
@@ -14,7 +8,7 @@ The following command must pass for a Pull Request to be considered:
 $ npm test
 ```
 
-You can check the test coverage by running:
+You can also check the test coverage by running:
 
 ```
 $ npm run test:coverage
@@ -22,9 +16,14 @@ $ npm run test:coverage
 
 ## Issue tracker
 
-Please use the Issue Tracker to discuss potential improvements you want to make
-before sending a Pull Request. It's probably a good idea to hold off on features
-before v1.0 is released (bug fixes are ok).
+Please use the [Issue Tracker](https://github.com/google/boardgame.io/issues) to discuss potential improvements you want to make
+before sending a Pull Request for larger changes. It's probably a good idea to hold off on features before v1.0 is released (bug fixes are ok).
+
+The Issue Tracker may also contain items labelled **help wanted**
+from time to time. This is a good place to look if you want to contribute but aren't sure where to start.
+
+You may also take on any issues that don't currently have an
+assignee (ask on the Issue thread and we'll assign it to you!).
 
 ## Contributor License Agreement
 
