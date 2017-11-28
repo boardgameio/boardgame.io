@@ -1,9 +1,11 @@
 language: node_js
-before_install:
+install:
   nvm install 7.6
 notifications:
   email: false
 script:
-  - if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then curl -O https://raw.githubusercontent.com/danvk/travis-weigh-in/master/weigh_in.py && python weigh_in.py dist/boardgameio.min.js; fi
   - npm run lint
-after_success: 'npm run test:coveralls'
+  - npm run test:coverage
+after_success:
+  - npm run test:coveralls
+  - if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then curl -O https://raw.githubusercontent.com/danvk/travis-weigh-in/master/weigh_in.py && python weigh_in.py dist/boardgameio.min.js; fi

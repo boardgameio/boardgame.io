@@ -8,7 +8,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --collectCoverageFrom=src/** --forceExit",
-    "test:coveralls": "npm run test:coverage && cat coverage/lcov.info | node node_modules/.bin/coveralls",
+    "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
     "clean": "rm -rf dist node_modules",
     "prepare": "BABEL_ENV=rollup rollup --config rollup.npm.js",
