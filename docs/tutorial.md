@@ -63,7 +63,7 @@ npm start
 ```
 
 ```react
-<iframe src='react/example-1.html' height='700' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='react/example-1.html' height='700' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 Notice that we have a fully playable game that we can
@@ -214,7 +214,7 @@ export default App;
 And there you have it. A basic tic-tac-toe game!
 
 ```react
-<iframe src='react/example-2.html' height='750' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='react/example-2.html' height='750' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 Editable version on CodePen: [link](https://codepen.io/nicolodavis/full/MEvrjq/)
