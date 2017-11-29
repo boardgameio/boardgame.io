@@ -10,6 +10,8 @@
     "test:coverage": "jest --coverage --collectCoverageFrom=src/** --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
+    "storybook": "start-storybook -p 3000 -c storybook",
+    "storybook:build": "build-storybook -c storybook -o docs/storybook",
     "clean": "rm -rf dist node_modules",
     "prepare": "BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
@@ -41,6 +43,7 @@
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
   "devDependencies": {
+    "@storybook/react": "^3.2.16",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.0.0",
@@ -113,6 +116,7 @@
       "raf/polyfill"
     ],
     "testPathIgnorePatterns": [
+      "storybook/",
       "/node_modules/",
       ".npm/"
     ]
