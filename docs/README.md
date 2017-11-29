@@ -19,12 +19,7 @@ networking or backend code.
 * Debug UI to visualize state and simulate game moves even before you build UI components for your game.
 * Online multiplayer with realtime updates.
 * Game logs with ability to rewind to previous state.
-
-### Upcoming
-
-* Lobby to create/join games.
-* More complex game types with ability to customize.
-* React components for common game elements (cards, dice etc.).
+* React components for common game elements (cards etc.).
 
 ### Installation
 
