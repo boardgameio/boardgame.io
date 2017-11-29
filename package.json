@@ -5,6 +5,7 @@
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
     "dev": "NODE_ENV=development babel-watch --presets es2015 example/server.js",
+    "examples": "npm run dev",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --collectCoverageFrom=src/** --forceExit",
