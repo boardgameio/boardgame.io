@@ -23,9 +23,9 @@ work together making changes to it before it is ready to be merged.
 ## Issue tracker
 
 Please use the [Issue Tracker](https://github.com/google/boardgame.io/issues) to discuss potential improvements you want to make
-before sending a Pull Request for larger changes. It's probably a good idea to hold off on features before v1.0 is released (bug fixes are ok).
+before sending a Pull Request for larger changes.
 
-The Issue Tracker may also contain items labelled **help wanted**
+The Issue Tracker may also contain items labelled **help wanted** or **good first issue**
 from time to time. This is a good place to look if you want to contribute but aren't sure where to start.
 
 You may also take on any issues that don't currently have an
