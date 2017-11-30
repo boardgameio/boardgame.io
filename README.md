@@ -18,7 +18,7 @@ networking or backend code.
 
 * Seamless game state management across client and server.
 * Strong emphasis on ease of prototyping.
-* Debug UI to visualize state and simulate game moves even before you build UI components for your game.
+* Debug UI to simulate moves even before you render the board.
 * Online multiplayer with realtime updates.
 * Game logs with ability to rewind to previous state.
 * React components for common game elements (cards etc.).
