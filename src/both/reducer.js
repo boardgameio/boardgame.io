@@ -32,7 +32,8 @@ function createGameReducer({game, numPlayers}) {
   // Store the initial version of state so that we can see
   // previous versions by replaying actions over the initial
   // version.
-  initial._initial = {...initial};
+  const deepCopy = obj => JSON.parse(JSON.stringify(obj));
+  initial._initial = deepCopy(initial);
 
   /*
    * GameState
