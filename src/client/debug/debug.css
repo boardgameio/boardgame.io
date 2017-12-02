@@ -108,19 +108,18 @@
 .gamelog .log-turn {
   cursor: pointer;
   display: flex;
-  border-radius: 4px;
   flex-direction: column;
   justify-content: space-between;
   background: #fff;
   border: 1px solid #ccc;
-  margin-top: 5px;
+  border-left: 5px solid #ccc;
   padding: 5px;
   text-align: center;
   color: #555;
 }
 
 .gamelog .log-turn:hover {
-  border: 1px solid #777;
+  border-left: 5px solid #555;
 }
 
 .gamelog .log-turn .id {
