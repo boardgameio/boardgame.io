@@ -44,6 +44,8 @@
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
   "devDependencies": {
+    "@storybook/addon-actions": "^3.2.16",
+    "@storybook/addon-options": "^3.2.16",
     "@storybook/react": "^3.2.16",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",

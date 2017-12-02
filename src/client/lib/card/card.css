@@ -8,17 +8,23 @@
 
 .bgio-card {
   display: flex;
+  user-select: none;
   font-family: monospace;
   font-weight: bold;
   font-size: 18px;
-  color: #666;
+  color: #999;
   text-align: center;
   flex-direction: column;
   justify-content: center;
   cursor: pointer;
   background: #eee;
   border-radius: 6px;
-  border: 1px solid #aaa;
+  border: 1px solid #cdcdcd;
   width: 100px;
   height: 140px;
+  transition: all 0.1s;
+}
+
+.bgio-card:hover {
+  transform: scale(1.2);
 }
