@@ -7,9 +7,11 @@
  */
 
 import { configure } from '@storybook/react';
+import { setOptions } from '@storybook/addon-options';
 
-function loadStories() {
-  require('./index.js');
-}
+setOptions({
+  name: 'boardgame.io',
+  showLeftPanel: false,
+});
 
-configure(loadStories, module);
+configure(() => require('./index.js'), module);

@@ -7,12 +7,32 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import './card.css';
 
 export class Card extends React.Component {
+  static propTypes = {
+    onHover: PropTypes.func,
+    onClick: PropTypes.func
+  }
+
+  constructor(props) {
+    super(props);
+  }
+
+  onClick = () => {
+    this.props.onClick();
+  }
+
+  onHover = () => {
+    this.props.onHover();
+  }
+
   render() {
     return (
-      <div className="bgio-card">
+      <div className="bgio-card"
+           onMouseOver={this.onHover}
+           onClick={this.onClick}>
       Card
       </div>
     );
