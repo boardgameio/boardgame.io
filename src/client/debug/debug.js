@@ -271,12 +271,36 @@ export class Debug extends React.Component {
     }
   }
 
+  componentDidMount() {
+    Mousetrap.bind('d', (e) => {
+      e.preventDefault();
+      this.setState(old => ({ showDebugUI: !old.showDebugUI }));
+    });
+
+    Mousetrap.bind('l', (e) => {
+      e.preventDefault();
+      this.setState(old => ({ showLog: !old.showLog }));
+    });
+  }
+
+  componentWillUnmount() {
+    Mousetrap.unbind('d');
+    Mousetrap.unbind('l');
+  }
+
   state = {
+    showDebugUI: true,
     showLog: false,
   }
 
   assignShortcuts() {
-    const taken = {'e': true, 's': true, 'r': true};
+    const taken = {
+      'e': true,
+      's': true,
+      'r': true,
+      'd': true,
+      'l': true,
+    };
     this.shortcuts = null;
 
     // Try assigning the first char of each move as the shortcut.
@@ -359,6 +383,10 @@ export class Debug extends React.Component {
   }
 
   render() {
+    if (!this.state.showDebugUI) {
+      return null;
+    }
+
     let moves = [];
     for (let name in this.props.moveAPI) {
       const fn = this.props.moveAPI[name];
@@ -385,12 +413,20 @@ export class Debug extends React.Component {
         </section>
 
         <section>
-          <KeyboardShortcut value="s" onPress={this.saveState}>
-            save
+          <div className='key'>
+          <div className='key-box'>d</div> toggle Debug UI
+          </div>
+
+          <div className='key'>
+          <div className='key-box'>l</div> toggle Log
+          </div>
+
+          <KeyboardShortcut value='s' onPress={this.saveState}>
+            save localStorage
           </KeyboardShortcut>
 
-          <KeyboardShortcut value="r" onPress={this.restoreState}>
-            restore
+          <KeyboardShortcut value='r' onPress={this.restoreState}>
+            restore localStorage
           </KeyboardShortcut>
         </section>
 
