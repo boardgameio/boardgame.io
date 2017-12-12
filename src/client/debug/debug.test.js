@@ -207,10 +207,10 @@ test('save / restore', () => {
   const getItem = jest.fn(() => restoredJSON);
   window.localStorage = { setItem, getItem };
 
-  debug.find('.key-box').at(0).simulate('click');
+  debug.find('.key-box').at(2).simulate('click');
   expect(setItem).toHaveBeenCalled();
 
-  debug.find('.key-box').at(1).simulate('click');
+  debug.find('.key-box').at(3).simulate('click');
   expect(getItem).toHaveBeenCalled();
 
   expect(loggedAction).toEqual(restore(restoredState));
