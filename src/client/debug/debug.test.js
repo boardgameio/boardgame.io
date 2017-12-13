@@ -215,3 +215,23 @@ test('save / restore', () => {
 
   expect(loggedAction).toEqual(restore(restoredState));
 });
+
+test('toggle Debug UI', () => {
+  const debug = Enzyme.mount(
+      <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
+
+  expect(debug.find('.debug-ui').length).toEqual(1);
+  debug.setState({ showDebugUI: false });
+  debug.setProps({});  // https://github.com/airbnb/enzyme/issues/1245
+  expect(debug.find('.debug-ui').length).toEqual(0);
+});
+
+test('toggle Log', () => {
+  const debug = Enzyme.mount(
+      <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
+
+  expect(debug.find('GameLog').length).toEqual(0);
+  debug.setState({ showLog: true });
+  debug.setProps({});  // https://github.com/airbnb/enzyme/issues/1245
+  expect(debug.find('GameLog').length).toEqual(1);
+});
