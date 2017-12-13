@@ -204,7 +204,7 @@ test('save / restore', () => {
   );
 
   const restoredState = { restore: true };
-  const restoredJSON = JSON.stringify(restoredState);
+  let restoredJSON = JSON.stringify(restoredState);
   const setItem = jest.fn();
   const getItem = jest.fn(() => restoredJSON);
   window.localStorage = { setItem, getItem };
@@ -216,6 +216,11 @@ test('save / restore', () => {
   expect(getItem).toHaveBeenCalled();
 
   expect(loggedAction).toEqual(restore(restoredState));
+
+  restoredJSON = null;
+  loggedAction = null;
+  debug.find('.key-box').at(3).simulate('click');
+  expect(loggedAction).toEqual(null);
 });
 
 test('toggle Debug UI', () => {
