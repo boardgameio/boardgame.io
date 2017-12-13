@@ -17,3 +17,15 @@ test('is rendered', () => {
   const game = Enzyme.mount(<Card />);
   expect(game.text()).toBe('Card');
 });
+
+test('handlers', () => {
+  const onHover = jest.fn();
+  const onClick = jest.fn();
+  const card = Enzyme.mount(<Card onHover={onHover} onClick={onClick} />);
+
+  card.simulate('mouseover');
+  card.simulate('click');
+
+  expect(onHover).toHaveBeenCalled();
+  expect(onClick).toHaveBeenCalled();
+});
