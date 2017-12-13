@@ -41,6 +41,8 @@ test('basic', () => {
   expect(debug.state('showLog')).toEqual(true);
   debug.find('.menu .item').at(0).simulate('click');
   expect(debug.state('showLog')).toEqual(false);
+
+  debug.unmount();
 });
 
 test('GameLog', () => {
