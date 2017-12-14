@@ -13,10 +13,29 @@ import { createGameReducer } from '../../both/reducer';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { GameLog, Debug, DebugMove, KeyboardShortcut } from './debug.js';
+import Mousetrap from 'mousetrap';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 Enzyme.configure({ adapter: new Adapter() });
+
+jest.mock('mousetrap', () => {
+  let keys = {};
+
+  return {
+    bind: (key, fn) => {
+      keys[key] = fn;
+    },
+    unbind: (key) => {
+      delete keys[key];
+    },
+    simulate: (key) => {
+      keys[key]({
+        preventDefault: () => {},
+      });
+    }
+  };
+});
 
 const gamestate = {
   G: {},
@@ -109,7 +128,14 @@ test('parse arguments', () => {
   expect(spy.mock.calls[1]).toEqual([3, undefined, 4]);
 });
 
-test('simulate shortcut', () => {
+test('KeyboardShortcut', () => {
+  const fn = jest.fn();
+  Enzyme.mount(<KeyboardShortcut value='e' onPress={fn} />);
+  Mousetrap.simulate('e');
+  expect(fn).toHaveBeenCalled();
+});
+
+test('DebugMove', () => {
   const fn = jest.fn();
   const root = Enzyme.mount(
       <KeyboardShortcut value='e'>
@@ -228,7 +254,7 @@ test('toggle Debug UI', () => {
       <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
 
   expect(debug.find('.debug-ui').length).toEqual(1);
-  debug.setState({ showDebugUI: false });
+  Mousetrap.simulate('d');
   debug.setProps({});  // https://github.com/airbnb/enzyme/issues/1245
   expect(debug.find('.debug-ui').length).toEqual(0);
 });
@@ -238,7 +264,7 @@ test('toggle Log', () => {
       <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
 
   expect(debug.find('GameLog').length).toEqual(0);
-  debug.setState({ showLog: true });
+  Mousetrap.simulate('l');
   debug.setProps({});  // https://github.com/airbnb/enzyme/issues/1245
   expect(debug.find('GameLog').length).toEqual(1);
 });
