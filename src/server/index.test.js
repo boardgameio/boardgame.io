@@ -10,29 +10,33 @@ import Server from './index';
 import * as ActionCreators from '../both/action-creators';
 import * as Redux from 'redux';
 
-class MockSocket {
-  constructor() {
-    this.callbacks = {};
-    this.emit = jest.fn();
-    this.broadcast = { emit: jest.fn() };
+jest.mock('koa-socket', () => {
+  class MockSocket {
+    constructor() {
+      this.callbacks = {};
+      this.emit = jest.fn();
+      this.broadcast = { emit: jest.fn() };
+    }
+
+    receive(type, data) {
+      this.callbacks[type](data);
+    }
+
+    on(type, callback) {
+      this.callbacks[type] = callback;
+    }
   }
 
-  receive(type, data) {
-    this.callbacks[type](data);
+  class MockIO {
+    constructor() {
+      this.socket = new MockSocket();
+    }
+    attach() {}
+    on(type, callback) { callback({ socket: this.socket }); }
   }
 
-  on(type, callback) {
-    this.callbacks[type] = callback;
-  }
-}
-
-class MockIO {
-  constructor() {
-    this.socket = new MockSocket();
-  }
-  attach() {}
-  on(type, callback) { callback({ socket: this.socket }); }
-}
+  return MockIO;
+});
 
 test('basic', () => {
   const server = Server({});
@@ -40,8 +44,8 @@ test('basic', () => {
 });
 
 test('sync', () => {
-  const io = new MockIO();
-  const server = Server({}, io);
+  const server = Server({});
+  const io = server.context.io;
   expect(server).not.toBe(undefined);
 
   const spy = jest.spyOn(Redux, 'createStore');
@@ -62,8 +66,8 @@ test('sync', () => {
 });
 
 test('action', () => {
-  const io = new MockIO();
-  const server = Server({}, io);
+  const server = Server({});
+  const io = server.context.io;
   expect(server).not.toBe(undefined);
 
   let action = ActionCreators.endTurn();

@@ -13,10 +13,11 @@ import { createGameReducer } from '../both/reducer';
 
 const games = {};
 
-function Server({game, numPlayers}, socketImpl) {
+function Server({game, numPlayers}) {
   const app = new Koa();
-  const io = socketImpl ? socketImpl : new IO();
+  const io = new IO();
 
+  app.context.io = io;
   io.attach(app);
 
   const reducer = createGameReducer({game, numPlayers});
