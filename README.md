@@ -8,9 +8,9 @@
 <a href="https://coveralls.io/github/google/boardgame.io?branch=master"><img src="https://img.shields.io/coveralls/google/boardgame.io.svg" alt="Coveralls" /></a>
 </p>
 
-# 
-
-#### Full Documentation: [link](https://google.github.io/boardgame.io/)
+<p align="center">
+  <strong>Full Documentation: <a href="https://google.github.io/boardgame.io">link</a></strong>
+</p>
 
 State management and React libraries for turn based games.
 
