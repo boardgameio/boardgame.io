@@ -12,8 +12,6 @@
   <strong>Full Documentation: <a href="https://google.github.io/boardgame.io">link</a></strong>
 </p>
 
-State management and React libraries for turn based games.
-
 The goal of this framework is to allow a game author to
 essentially translate the rules of a game to a series of
 simple functions that describe how the game state changes
