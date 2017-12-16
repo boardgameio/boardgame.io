@@ -114,10 +114,16 @@
   },
   "jest": {
     "moduleNameMapper": {
-      "\\.(css)$": "identity-obj-proxy"
+      "\\.(css)$": "identity-obj-proxy",
+      "boardgame.io/client": "<rootDir>/packages/client",
+      "boardgame.io/game": "<rootDir>/packages/game",
+      "boardgame.io/server": "<rootDir>/packages/server"
     },
     "setupFiles": [
       "raf/polyfill"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(boardgame.io)/)"
     ],
     "testPathIgnorePatterns": [
       "storybook/",
