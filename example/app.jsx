@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { render } from 'react-dom';
-import Client from '../packages/client';
+import Client from 'boardgame.io/client';
 import { TicTacToe } from './game';
 import './app.css';
 

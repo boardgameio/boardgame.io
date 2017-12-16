@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from '../packages/game';
+import Game from 'boardgame.io/game';
 
 function IsVictory(cells) {
   const positions = [
