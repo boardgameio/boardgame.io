@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" alt="boardgame.io" />
+  <img src="https://raw.githubusercontent.com/google/boardgame.io/master/docs/logo.svg?sanitize=true" alt="boardgame.io" />
 </p>
 
 <p align="center">
