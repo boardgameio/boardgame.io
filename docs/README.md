@@ -28,7 +28,7 @@ networking or backend code.
 ### Installation
 
 ```
-npm install boardgame.io
+npm install --save boardgame.io
 ```
 
 A browser-minified version is also available that you may

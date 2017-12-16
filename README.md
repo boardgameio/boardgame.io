@@ -32,7 +32,7 @@ networking or backend code.
 ### Installation
 
 ```
-$ npm install boardgame.io
+$ npm install --save boardgame.io
 ```
 
 ### Running examples in this repository
