@@ -11,14 +11,14 @@ import KoaStatic from 'koa-static';
 import KoaHelmet from 'koa-helmet';
 import KoaWebpack from 'koa-webpack';
 import WebpackConfig from './webpack.dev.js';
-import BoardgameIOServer from '../packages/server';
+import Server from 'boardgame.io/server';
 import { TicTacToe } from './game';
 
 const PORT = process.env.PORT || 8000;
 const DEV = (process.env.NODE_ENV === 'development');
 const PROD = !DEV;
 
-const app = BoardgameIOServer({ game: TicTacToe });
+const app = Server({ game: TicTacToe });
 
 if (DEV) {
   app.use(KoaWebpack({
