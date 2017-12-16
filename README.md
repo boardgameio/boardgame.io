@@ -23,12 +23,11 @@ networking or backend code.
 
 ## Features
 
-* Seamless game state management across client and server.
-* Strong emphasis on ease of prototyping.
-* Debug UI to simulate moves even before you render the board.
-* Online multiplayer with realtime updates.
-* Game logs with ability to rewind to previous state.
-* React components for common game elements (cards etc.).
+* **State Management**: Game state is managed seamlessly across browser, server and storage automatically.
+* **Prototyping**: Debugging interface to simulate moves even before you render the game.
+* **Multiplayer**: All browsers connected to the same game are synced in real time with no refreshes required.
+* **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
+* **UI toolkit**: React components for common game elements (cards etc.).
 
 ## Usage
 
