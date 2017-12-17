@@ -17,7 +17,7 @@
     "prepare": "BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
     "postpublish": "rm -f server.js client.js game.js",
-    "postinstall": "ln -s ../packages node_modules/boardgame.io"
+    "postinstall": "ln -s ../packages/node_modules/boardgame.io"
   },
   "main": "dist/boardgameio.js",
   "unpkg": "dist/boardgameio.min.js",
