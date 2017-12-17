@@ -302,24 +302,6 @@ export class Debug extends React.Component {
     }
   }
 
-  onRewind = (logIndex) => {
-    if (logIndex == null) {
-      this.context.store.dispatch(restore(this._toRestore));
-      return;
-    }
-
-    this._toRestore = this.context.store.getState();
-
-    const initial = this.props.gamestate._initial;
-    this.context.store.dispatch(restore(initial));
-
-    for (let i = 0; i <= logIndex; i++) {
-      const action = this.props.gamestate.log[i];
-      action.remote = true;  // don't broadcast action.
-      this.context.store.dispatch(action);
-    }
-  }
-
   onClickMain = () => {
     this.setState({ showLog: false });
   }
@@ -406,7 +388,7 @@ export class Debug extends React.Component {
 
       {this.state.showLog &&
         <section>
-        <GameLog log={this.props.gamestate.log} onRewind={this.onRewind} />
+        <GameLog log={this.props.gamestate.log} initialState={this.props.gamestate._initial} />
         </section>
       }
 
