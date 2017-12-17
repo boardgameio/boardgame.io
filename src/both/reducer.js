@@ -27,6 +27,7 @@ function createGameReducer({game, numPlayers}) {
     },
     log: [],
     _id: 0,
+    _initial: {}
   };
 
   // Store the initial version of state so that we can see

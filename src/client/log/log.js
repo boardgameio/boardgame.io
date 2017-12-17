@@ -12,7 +12,7 @@ import './log.css';
 export class GameLog extends React.Component {
   static propTypes = {
     log: PropTypes.array.isRequired,
-    initialState: PropTypes.any.isRequired
+    initialState: PropTypes.any.isRequired,
   }
 
   static contextTypes = {
