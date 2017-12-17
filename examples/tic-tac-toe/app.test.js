@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { App } from './app.jsx';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import { App } from './app';
 
 Enzyme.configure({ adapter: new Adapter() });
 

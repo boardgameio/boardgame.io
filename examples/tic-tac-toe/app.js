@@ -10,7 +10,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { render } from 'react-dom';
 import Client from 'boardgame.io/client';
-import { TicTacToe } from './game';
+import { TicTacToe } from './tic-tac-toe';
 import './app.css';
 
 class TicTacToeBoard extends React.Component {
