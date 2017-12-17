@@ -211,12 +211,6 @@ export class Debug extends React.Component {
     this.assignShortcuts();
   }
 
-  componentWillMount() {
-    if (this.props.showLog) {
-      this.setState({ showLog: true });
-    }
-  }
-
   componentDidMount() {
     Mousetrap.bind('d', (e) => {
       e.preventDefault();
