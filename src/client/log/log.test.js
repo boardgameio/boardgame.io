@@ -5,7 +5,6 @@ import { GameLog } from './log';
 import { createGameReducer } from '../../both/reducer';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { Debug } from '../debug/debug';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -18,7 +17,7 @@ test('GameLog', () => {
     makeMove({ type: 'moveB' }),
     endTurn(),
   ];
-  const gamelog = Enzyme.mount(<GameLog log={log} />);
+  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
   const turns = gamelog.find('.id').map(div => div.text());
   expect(turns).toEqual(['Turn #1', 'Turn #2']);
 });
@@ -48,7 +47,7 @@ test('GameLog rewind', () => {
 
   const root = Enzyme.mount(
       <Provider store={store}>
-      <Debug gamestate={store.getState()} endTurn={() => {}} gameid="default" showLog={true} />
+      <GameLog log={store.getState().log} initialState={store.getState()._initial} />
       </Provider>
   );
 
