@@ -4,7 +4,7 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
-    "dev": "NODE_ENV=development babel-watch --presets es2015 example/server.js",
+    "dev": "NODE_ENV=development babel-watch --presets es2015 examples/tic-tac-toe/server.js",
     "examples": "npm run dev",
     "test": "jest",
     "test:watch": "jest --watch",
