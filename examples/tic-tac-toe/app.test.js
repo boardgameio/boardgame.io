@@ -21,7 +21,7 @@ test('sanity', () => {
 
 test('makeMove changes the game state', () => {
   const game = Enzyme.mount(<App/>);
-  const board = game.find('TicTacToeBoard').instance();
+  const board = game.find('Board').instance();
 
   expect(board.props.G).toEqual({
     cells: Grid(9),
@@ -51,7 +51,7 @@ test('clicked cells are inactive', () => {
 
 test('victory', () => {
   const game = Enzyme.mount(<App/>);
-  const board = game.find('TicTacToeBoard').instance();
+  const board = game.find('Board').instance();
   const cells = Array(9).fill(null);
 
   expect(board.props.G).toEqual({
