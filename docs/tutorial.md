@@ -107,15 +107,15 @@ const TicTacToe = Game({
         cells[id] = ctx.currentPlayer;
       }
 
-      // Set winner to true if the current
-      // player just won.
-      let winner = null;
-      if (IsVictory(cells)) {
-        winner = ctx.currentPlayer;
-      }
-
-      return { ...G, cells, winner };
+      return { ...G, cells };
     }
+  },
+
+  winner(G, ctx, id) {
+    if (IsVictory(G.cells)) {
+      return ctx.currentPlayer;
+    }
+    return null;
   }
 });
 ```
@@ -135,7 +135,7 @@ import React from 'react';
 
 class TicTacToeBoard extends React.Component {
   onClick(id) {
-    if (this.props.G.winner == null) {
+    if (this.props.ctx.winner == null) {
       this.props.moves.clickCell(id);
       this.props.endTurn();
     }
@@ -143,8 +143,8 @@ class TicTacToeBoard extends React.Component {
 
   render() {
     let winner = '';
-    if (this.props.G.winner !== null) {
-      winner = <div>Winner: {this.props.G.winner}</div>;
+    if (this.props.ctx.winner !== null) {
+      winner = <div>Winner: {this.props.ctx.winner}</div>;
     }
 
     const cellStyle = {

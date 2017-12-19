@@ -15,7 +15,9 @@ import * as ActionCreators from './action-creators';
  * Creates the main game state reducer.
  */
 function createGameReducer({game, numPlayers}) {
-  if (!game)       game = { G: {}, names: [], reducer: G => G };
+  if (!game)       game = { G: {}, names: [],
+                            reducer: G => G,
+                            winner: () => null };
   if (!numPlayers) numPlayers = 2;
 
   const initial = {
@@ -24,6 +26,7 @@ function createGameReducer({game, numPlayers}) {
       turn: 0,
       currentPlayer: 0,
       numPlayers: numPlayers,
+      winner: null,
     },
     log: [],
     _id: 0,
@@ -50,6 +53,9 @@ function createGameReducer({game, numPlayers}) {
       }
 
       case Actions.END_TURN: {
+        // Update winner.
+        const winner = game.winner(state.G, state.ctx, state._id);
+
         // The game may have some end of turn clean up.
         const G = game.reducer(
             state.G, { type: Actions.END_TURN }, state.ctx);
@@ -63,7 +69,7 @@ function createGameReducer({game, numPlayers}) {
         // Update turn.
         const turn = ctx.turn + 1;
 
-        ctx = {...ctx, currentPlayer, turn};
+        ctx = {...ctx, currentPlayer, turn, winner};
 
         // Update log.
         const log = [...state.log, action];

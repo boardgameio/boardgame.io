@@ -9,7 +9,10 @@ Game({
   moves: {
     'moveName': moveFn,
     ...
-  }
+  },
+
+  // Gets current winner.
+  winner: winnerFn
 }
 ```
 
@@ -39,6 +42,7 @@ have `action.type` contain the name of the move, and
   - `moves` (*object*): The keys are move names, and the values
     are pure functions that return the new value of `G` once
     the move has been processed.
+  - `winner` (*function*): Function that returns the winner, or null if no winner so far.
 
 ### Returns
 
@@ -54,7 +58,7 @@ import Game from 'boardgame.io/game';
 
 var game = Game({
   G: {},
-  
+
   moves: {
     'moveWithoutArgs': function(G, ctx) {
       return Object.assign({}, G, ...);
@@ -63,6 +67,13 @@ var game = Game({
     'moveWithArgs': function(G, ctx, arg0, arg1) {
       return Object.assign({}, G, ...);
     }
+  },
+
+  winner: function(G, ctx, id)  {
+    if (G.a == 5) { //Check state for some winning condition
+      return ctx.currentPlayer;
+    }
+    return null;
   }
 });
 ```
@@ -74,7 +85,7 @@ import Game from 'boardgame.io/game';
 
 const game = Game({
   G: {},
-  
+
   moves: {
     moveWithoutArgs(G, ctx) {
       return {...G, ...};
@@ -83,6 +94,13 @@ const game = Game({
     moveWithArgs(G, ctx, arg0, arg1) {
       return {...G, ...}
     }
+  },
+
+  winner(G, ctx, id)  {
+    if (G.a == 5) { //Check state for some winning condition
+      return ctx.currentPlayer;
+    }
+    return null;
   }
 });
 ```

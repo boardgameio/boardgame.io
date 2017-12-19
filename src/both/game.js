@@ -37,15 +37,18 @@
  *     'moveWithArgs': (G, ctx, arg0, arg1) => {
  *       return Object.assign({}, G, ...);
  *     }
- *   }
+ *   },
+ *  winner: (G, ctx, id) => (G.a == 5 && G.b == 5) ? 0 : null
  * })
  */
-function Game({G, moves}) {
+function Game({G, moves, winner}) {
   if (!G)     G = {};
   if (!moves) moves = {};
+  if (!winner) winner = () => null;
 
   return {
-    G: G,
+    G,
+    winner,
     moveNames: Object.getOwnPropertyNames(moves),
     reducer: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {

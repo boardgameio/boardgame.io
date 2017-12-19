@@ -16,7 +16,8 @@ const game = Game({
     'A': G => G,
     'B': () => ({ moved: true }),
     'C': (G, ctx, a, b) => ({ a, b })
-  }
+  },
+  winner: (G, ctx) => (G.a == 5 && G.b == 5) ? ctx.currentPlayer : null
 });
 
 test('_id is incremented', () => {
@@ -67,6 +68,21 @@ test('move dispatchers', () => {
 
   api.C(1, 2);
   expect(store.getState().G).toEqual({ a: 1, b: 2 });
+});
+
+test('winner', () => {
+  const reducer = createGameReducer({game});
+  const store = createStore(reducer);
+  const api = createDispatchers(game.moveNames, store);
+
+  expect(store.getState().ctx.winner).toEqual(null);
+
+  api.C(1, 5);
+  expect(store.getState().ctx.winner).toEqual(null);
+
+  api.C(5, 5);
+  store.dispatch(endTurn());
+  expect(store.getState().ctx.winner).toEqual(0);
 });
 
 test('endTurn', () => {
