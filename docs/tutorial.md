@@ -102,7 +102,7 @@ const TicTacToe = Game({
     clickCell(G, ctx, id) {
       const cells = [...G.cells];
 
-      // Ensure we can overwrite cells.
+      // Ensure we can't overwrite cells.
       if (cells[id] === null) {
         cells[id] = ctx.currentPlayer;
       }
