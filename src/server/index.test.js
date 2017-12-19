@@ -74,6 +74,8 @@ test('action', () => {
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit.mock.calls.length).toBe(0);
 
+  io.socket.receive('sync', 'gameid');
+
   // Actions are broadcasted.
   action._gameid = 'gameid';
   action._id = 0;
