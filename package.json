@@ -7,7 +7,7 @@
     "dev": "NODE_ENV=development babel-watch --presets es2015 examples/tic-tac-toe/server.js",
     "examples": "npm run dev",
     "precommit": "npm run lint",
-    "prepush": "npm run test:coverage && npm run lint",
+    "prepush": "npm run test:coverage",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --collectCoverageFrom=src/** --forceExit",
