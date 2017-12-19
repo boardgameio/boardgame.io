@@ -13,6 +13,7 @@ the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 $ npm install -g create-react-app
 $ create-react-app game
 $ cd game
+$ npm install --save boardgame.io
 ```
 
 ## Define moves
