@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "NODE_ENV=development babel-watch --presets es2015 examples/tic-tac-toe/server.js",
     "examples": "npm run dev",
+    "precommit": "npm run lint",
+    "prepush": "npm run test:coverage",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --collectCoverageFrom=src/** --forceExit",
@@ -68,6 +70,7 @@
     "eslint-plugin-react": "^7.3.0",
     "generate-export-aliases": "^1.0.0",
     "html-webpack-plugin": "^2.30.1",
+    "husky": "^0.14.3",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^21.1.0",
     "koa-helmet": "^3.2.0",
