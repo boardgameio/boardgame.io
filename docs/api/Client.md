@@ -38,7 +38,7 @@ The component will receive as `props`:
 
 3. `moves`: An object containing functions to dispatch various
 moves that you have defined. The functions are named after the
-moves you created using [Moves()](/api/Moves.md). Each function
+moves you created using [Game()](/api/Game.md). Each function
 can take any number of arguments, and they are passed to the
 move function after `G` and `ctx`.
 
