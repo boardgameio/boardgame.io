@@ -77,7 +77,7 @@ export class Board extends React.Component {
   }
 
   isActive(id) {
-    if (this.props.G.winner != null) return false;
+    if (this.props.G.winner !== null) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }
