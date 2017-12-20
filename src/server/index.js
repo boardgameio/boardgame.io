@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Koa from 'koa';
-import IO from 'koa-socket';
-import * as Redux from 'redux';
+const Koa = require('koa');
+const IO = require('koa-socket');
+const Redux = require('redux');
 import { InMemory } from './db';
 import { createGameReducer } from '../both/reducer';
 
