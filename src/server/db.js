@@ -36,6 +36,11 @@ export class InMemory {
     return this.games.get(id);
   }
 
+  /**
+   * Read the game state from the in-memory object.
+   * @param {string} id - The game id.
+   * @returns {boolean} - True or false that defines the game with this id exists or not.
+   */
   has(id) {
     return this.games.has(id)
   }
