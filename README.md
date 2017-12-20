@@ -42,6 +42,12 @@ $ npm install
 $ npm run examples
 ```
 
+### Running the docs
+
+```
+$ npm run docsify
+```
+
 ## Contributing
 
 See the contributing [guidelines](CONTRIBUTING.md).
