@@ -4,6 +4,7 @@
     "node": true,
     "browser": true,
     "jest/globals": true,
+    "es6": true,
   },
   "parser": "babel-eslint",
   "plugins": ["react", "jest"],

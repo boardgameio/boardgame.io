@@ -29,7 +29,7 @@ function Server({game, numPlayers}) {
       const gameid = action._gameid;
       const store = db.get(gameid);
 
-      if (store == null) {
+      if (store === undefined) {
         return { error: 'game not found' };
       }
 
@@ -43,12 +43,10 @@ function Server({game, numPlayers}) {
     });
 
     socket.on('sync', gameid => {
-      let store = null;
-      if (db.get(gameid) == null) {
+      let store = db.get(gameid);
+      if (store === undefined) {
         store = Redux.createStore(reducer);
         db.set(gameid, store);
-      } else {
-        store = db.get(gameid);
       }
 
       const state = store.getState();
