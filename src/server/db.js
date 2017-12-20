@@ -14,7 +14,7 @@ export class InMemory {
    * Creates a new InMemory storage.
    */
   constructor() {
-    this.map = new Map();
+    this.games = new Map();
   }
 
   /**
@@ -23,7 +23,7 @@ export class InMemory {
    * @param {object} store - A Redux store to persist.
    */
   set(id, store) {
-    this.map.set(id, store);
+    this.games.set(id, store);
   }
 
   /**
@@ -33,6 +33,10 @@ export class InMemory {
    *                     if no game is found with this id.
    */
   get(id) {
-    return this.map.get(id);
+    return this.games.get(id);
+  }
+
+  has(id) {
+    return this.games.has(id)
   }
 }

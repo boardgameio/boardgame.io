@@ -20,4 +20,7 @@ test('basic', () => {
   db.set('gameid', store);
   // Must return created game.
   expect(db.get('gameid')).toEqual(store);
+
+  // Must return true if game exists
+  expect(db.has('gameid')).toEqual(true);
 });
