@@ -13,6 +13,7 @@ the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 $ npm install -g create-react-app
 $ create-react-app game
 $ cd game
+$ npm install --save boardgame.io
 ```
 
 ## Define moves
@@ -101,7 +102,7 @@ const TicTacToe = Game({
     clickCell(G, ctx, id) {
       const cells = [...G.cells];
 
-      // Ensure we can overwrite cells.
+      // Ensure we can't overwrite cells.
       if (cells[id] === null) {
         cells[id] = ctx.currentPlayer;
       }

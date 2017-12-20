@@ -9,9 +9,8 @@
 const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
+import { InMemory } from './db';
 import { createGameReducer } from '../both/reducer';
-
-const games = {};
 
 function Server({game, numPlayers}) {
   const app = new Koa();
@@ -21,32 +20,35 @@ function Server({game, numPlayers}) {
   io.attach(app);
 
   const reducer = createGameReducer({game, numPlayers});
+  const db = new InMemory(reducer);
 
   io.on('connection', (ctx) => {
     const socket = ctx.socket;
 
     socket.on('action', action => {
       const gameid = action._gameid;
+      const store = db.get(gameid);
 
-      if (!(gameid in games)) {
+      if (store === undefined) {
         return { error: 'game not found' };
       }
 
-      const store = games[gameid];
       const state = store.getState();
 
       if (state._id == action._id) {
         store.dispatch(action);
         socket.broadcast.emit('action', action);
+        db.set(gameid, store);
       }
     });
 
     socket.on('sync', gameid => {
-      if (!(gameid in games)) {
-        games[gameid] = Redux.createStore(reducer);
+      let store = db.get(gameid);
+      if (store === undefined) {
+        store = Redux.createStore(reducer);
+        db.set(gameid, store);
       }
 
-      const store = games[gameid];
       const state = store.getState();
       socket.emit('sync', state);
     });
