@@ -42,7 +42,7 @@ $ npm install
 $ npm run examples
 ```
 
-### Running the docs
+### Previewing docs
 
 ```
 $ npm run docsify
