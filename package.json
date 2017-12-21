@@ -5,6 +5,7 @@
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
     "dev": "NODE_ENV=development babel-watch --presets es2015 examples/tic-tac-toe/server.js",
+    "docsify": "docsify serve docs",
     "examples": "npm run dev",
     "precommit": "npm run lint",
     "prepush": "npm run test:coverage",
@@ -62,6 +63,7 @@
     "babel-watch": "^2.0.7",
     "coveralls": "^3.0.0",
     "css-loader": "^0.28.7",
+    "docsify-cli": "^4.1.12",
     "enzyme": "^3.0.0",
     "enzyme-adapter-react-16": "^1.0.0",
     "eslint": "^4.7.2",
