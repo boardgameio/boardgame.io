@@ -11,7 +11,7 @@
     "prepush": "npm run test:coverage",
     "test": "NODE_ENV=test jest --no-cache",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage --collectCoverageFrom=src/** --forceExit",
+    "test:coverage": "NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
     "storybook": "start-storybook -p 3000 -c storybook",
