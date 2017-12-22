@@ -7,6 +7,7 @@
  */
 
 import Server from './index';
+import Game from '../both/game';
 import * as ActionCreators from '../both/action-creators';
 import * as Redux from 'redux';
 
@@ -38,13 +39,15 @@ jest.mock('koa-socket', () => {
   return MockIO;
 });
 
+const game = Game({});
+
 test('basic', () => {
-  const server = Server({});
+  const server = Server({game});
   expect(server).not.toBe(undefined);
 });
 
 test('sync', () => {
-  const server = Server({});
+  const server = Server({game});
   const io = server.context.io;
   expect(server).not.toBe(undefined);
 
@@ -66,7 +69,7 @@ test('sync', () => {
 });
 
 test('action', () => {
-  const server = Server({});
+  const server = Server({game});
   const io = server.context.io;
   expect(server).not.toBe(undefined);
 
@@ -117,4 +120,29 @@ test('action', () => {
   action._id = 1;
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(2);
+});
+
+test('playerView', () => {
+  // Write the currentPlayer into G.
+  const game = Game({
+    playerView: (G, ctx) => {
+      return {...G, currentPlayer: ctx.currentPlayer};
+    }
+  });
+
+  const server = Server({game});
+  const io = server.context.io;
+
+  io.socket.receive('sync', 'gameid');
+  expect(io.socket.emit).lastCalledWith('sync', {
+    G: {currentPlayer: 0},
+    ctx: {currentPlayer: 0, numPlayers: 2, turn: 0},
+    log: [],
+    _id: 0,
+    _initial: {
+      G: {}, _id: 0, _initial: {},
+      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0},
+      log: []
+    }
+  });
 });

@@ -45,7 +45,11 @@ function Server({game, numPlayers}) {
 
       if (state._id == action._id) {
         store.dispatch(action);
-        socket.broadcast.emit('sync', store.getState());
+        const state = store.getState();
+        socket.broadcast.emit('sync', {
+          ...state,
+          G: game.playerView(state.G, state.ctx)
+        });
         db.set(gameid, store);
       }
     });
@@ -58,7 +62,10 @@ function Server({game, numPlayers}) {
       }
 
       const state = store.getState();
-      socket.emit('sync', state);
+      socket.emit('sync', {
+        ...state,
+        G: game.playerView(state.G, state.ctx)
+      });
     });
   });
 
