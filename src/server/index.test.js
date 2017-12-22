@@ -93,8 +93,16 @@ test('action', () => {
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit.mock.calls.length).toBe(1);
 
+  // ... and not if player != currentPlayer
+  action._gameid = 'gameid';
+  action._player = 100;
+  action._id = 0;
+  io.socket.receive('action', action);
+  expect(io.socket.broadcast.emit.mock.calls.length).toBe(1);
+
   // Another broadcasted action with proper _gameid and _id.
   action._gameid = 'gameid';
+  action._player = null;
   action._id = 1;
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit.mock.calls.length).toBe(2);
