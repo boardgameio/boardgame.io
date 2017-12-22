@@ -89,7 +89,11 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
         this._debug = React.createElement(
           connect(state => ({ gamestate: state}),
                   ActionCreators)(Debug),
-          { moveAPI, gameid: props.gameid }
+          {
+            moveAPI,
+            gameid: props.gameid,
+            player: props.player,
+          }
         );
       }
 
