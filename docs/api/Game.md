@@ -9,6 +9,11 @@ Game({
   moves: {
     'moveName': moveFn,
     ...
+  },
+
+  // Customized view.
+  playerView: (G, ctx) => {
+    return G;
   }
 }
 ```
@@ -39,6 +44,9 @@ have `action.type` contain the name of the move, and
   - `moves` (*object*): The keys are move names, and the values
     are pure functions that return the new value of `G` once
     the move has been processed.
+  - `playerView` (*function*): Returns a version of `G` that
+    is customized for the current player. See the document on
+    [Secret State](/secret-state) for more information.
 
 ### Returns
 
@@ -63,6 +71,10 @@ var game = Game({
     'moveWithArgs': function(G, ctx, arg0, arg1) {
       return Object.assign({}, G, ...);
     }
+  },
+
+  playerView: function(G, ctx) {
+    return SecretsRemoved(G, ctx.currentPlayer);
   }
 });
 ```
@@ -83,6 +95,10 @@ const game = Game({
     moveWithArgs(G, ctx, arg0, arg1) {
       return {...G, ...}
     }
+  },
+
+  playerView: (G, ctx) => {
+    return SecretsRemoved(G, ctx.currentPlayer);
   }
 });
 ```
