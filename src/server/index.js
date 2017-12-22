@@ -35,9 +35,21 @@ function Server({game, numPlayers}) {
 
       const state = store.getState();
 
+      // Bail out if the player making the move is not
+      // the current player. The null player is always
+      // allowed.
+      if (action._player != null &&
+          action._player != state.ctx.currentPlayer) {
+        return;
+      }
+
       if (state._id == action._id) {
         store.dispatch(action);
-        socket.broadcast.emit('action', action);
+        const state = store.getState();
+        socket.broadcast.emit('sync', {
+          ...state,
+          G: game.playerView(state.G, state.ctx)
+        });
         db.set(gameid, store);
       }
     });
@@ -50,7 +62,10 @@ function Server({game, numPlayers}) {
       }
 
       const state = store.getState();
-      socket.emit('sync', state);
+      socket.emit('sync', {
+        ...state,
+        G: game.playerView(state.G, state.ctx)
+      });
     });
   });
 

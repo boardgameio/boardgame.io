@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { setupMultiplayer, updateGameID, gameid } from './multiplayer';
+import * as M from './multiplayer';
 import { createGameReducer } from '../../both/reducer';
 import * as ActionCreators from '../../both/action-creators';
 
@@ -26,29 +26,24 @@ class MockSocket {
 }
 
 test('does not crash even when no socket is present', () => {
-  updateGameID('test');
-  expect(gameid).toBe('test');
+  M.updateGameID('test');
+  expect(M.gameid).toBe('test');
+
+  M.updatePlayer('player');
+  expect(M.player).toBe('player');
 });
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const store = setupMultiplayer(createGameReducer({}), mockSocket);
+  const store = M.setupMultiplayer(createGameReducer({}), mockSocket);
 
   // Returns a valid store.
   expect(store).not.toBe(undefined);
 
-  // Receive a remote action.
-  let action = ActionCreators.endTurn();
-  action.remote = true;
-  mockSocket.emit = jest.fn();
-  expect(store.getState().ctx.turn).toBe(0);
-  mockSocket.receive('action', action);
-  expect(store.getState().ctx.turn).toBe(1);
-  expect(mockSocket.emit.mock.calls.length).toBe(0);
+  const action = ActionCreators.endTurn();
 
   // Dispatch a local action.
   mockSocket.emit = jest.fn();
-  action = ActionCreators.endTurn();
   store.dispatch(action);
   expect(mockSocket.emit.mock.calls).toEqual([['action', action]]);
 
@@ -60,6 +55,6 @@ test('multiplayer', () => {
 
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
-  updateGameID('id');
+  M.updateGameID('id');
   expect(mockSocket.emit.mock.calls).toEqual([['sync', 'id']]);
 });
