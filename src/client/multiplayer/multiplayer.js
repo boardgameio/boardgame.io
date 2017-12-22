@@ -10,10 +10,11 @@ import * as ActionCreators from '../../both/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import io from 'socket.io-client';
 
-let gameid = 'default';
+export let gameid = 'default';
+export let player = null;
 let socket = null;
 
-function updateGameID(id) {
+export function updateGameID(id) {
   gameid = id;
 
   if (socket) {
@@ -21,7 +22,11 @@ function updateGameID(id) {
   }
 }
 
-function setupMultiplayer(GameReducer, socketImpl) {
+export function updatePlayer(id) {
+  player = id;
+}
+
+export function setupMultiplayer(GameReducer, socketImpl) {
   let store = null;
 
   if (socketImpl !== undefined) {
@@ -45,6 +50,7 @@ function setupMultiplayer(GameReducer, socketImpl) {
       action.remote = true;
       action._id = state._id;
       action._gameid = gameid;
+      action._player = player;
       socket.emit('action', action);
     }
 
@@ -63,5 +69,3 @@ function setupMultiplayer(GameReducer, socketImpl) {
 
   return store;
 }
-
-export { setupMultiplayer, updateGameID, gameid }

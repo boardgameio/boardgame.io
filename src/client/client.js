@@ -12,7 +12,7 @@ import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
 import * as ActionCreators from '../both/action-creators';
 import { Debug } from './debug/debug';
-import { setupMultiplayer, updateGameID } from './multiplayer/multiplayer';
+import { setupMultiplayer, updateGameID, updatePlayer } from './multiplayer/multiplayer';
 import { createGameReducer, createDispatchers } from '../both/reducer';
 import './client.css';
 
@@ -53,11 +53,17 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
    */
   return class WrappedBoard extends React.Component {
     static propTypes = {
-      gameid: PropTypes.string
+      // The ID of a game to connect to.
+      // Only relevant in multiplayer.
+      gameid: PropTypes.string,
+      // The ID of the player associated with this client.
+      // Only relevant in multiplayer.
+      player: PropTypes.string
     }
 
     static defaultProps = {
-      gameid: 'default'
+      gameid: 'default',
+      player: null
     }
 
     constructor(props) {
@@ -65,8 +71,9 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
       this.store = CreateStore();
 
-      if (multiplayer && props.gameid) {
+      if (multiplayer) {
         updateGameID(props.gameid);
+        updatePlayer(props.player);
       }
 
       const moveAPI = createDispatchers(game.moveNames, this.store);
@@ -95,6 +102,9 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       if (!multiplayer) return;
       if (nextProps.gameid != this.props.gameid) {
         updateGameID(nextProps.gameid);
+      }
+      if (nextProps.player != this.props.player) {
+        updatePlayer(nextProps.player);
       }
     }
 
