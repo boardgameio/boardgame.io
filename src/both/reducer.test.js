@@ -17,7 +17,7 @@ const game = Game({
     'B': () => ({ moved: true }),
     'C': (G, ctx, a, b) => ({ a, b })
   },
-  winner: (G, ctx) => (G.a == 5 && G.b == 5) ? ctx.currentPlayer : null
+  victory: (G, ctx) => (G.a == 5 && G.b == 5) ? ctx.currentPlayer : null
 });
 
 test('_id is incremented', () => {

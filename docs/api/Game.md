@@ -11,8 +11,15 @@ Game({
     ...
   },
 
-  // Gets current winner.
-  winner: winnerFn
+  // Determines the winner.
+  victory: (G, ctx) => {
+    return IsVictory(G) ? ctx.currentPlayer : null;
+  },
+
+  // Customized view.
+  playerView: (G, ctx) => {
+    return G;
+  }
 }
 ```
 
@@ -42,7 +49,10 @@ have `action.type` contain the name of the move, and
   - `moves` (*object*): The keys are move names, and the values
     are pure functions that return the new value of `G` once
     the move has been processed.
-  - `winner` (*function*): Function that returns the winner, or null if no winner so far.
+  - `victory` (*function*): Function that returns the winner, or null if no winner so far.
+  - `playerView` (*function*): Returns a version of `G` that
+    is customized for the current player. See the document on
+    [Secret State](/secret-state) for more information.
 
 ### Returns
 
@@ -69,11 +79,12 @@ var game = Game({
     }
   },
 
-  winner: function(G, ctx, id)  {
-    if (G.a == 5) { //Check state for some winning condition
-      return ctx.currentPlayer;
-    }
-    return null;
+  victory: function(G, ctx)  {
+    return IsWinner(G, ctx.currentPlayer)) ? ctx.currentPlayer : null;
+  },
+
+  playerView: function(G, ctx) {
+    return SecretsRemoved(G, ctx.currentPlayer);
   }
 });
 ```
@@ -96,11 +107,12 @@ const game = Game({
     }
   },
 
-  winner(G, ctx, id)  {
-    if (G.a == 5) { //Check state for some winning condition
-      return ctx.currentPlayer;
-    }
-    return null;
+  victory: function(G, ctx)  {
+    return IsWinner(G, ctx.currentPlayer)) ? ctx.currentPlayer : null;
+  },
+
+  playerView: (G, ctx) => {
+    return SecretsRemoved(G, ctx.currentPlayer);
   }
 });
 ```

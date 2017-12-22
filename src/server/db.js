@@ -12,11 +12,9 @@
 export class InMemory {
   /**
    * Creates a new InMemory storage.
-   * @param {function} reducer - The game reducer.
    */
-  constructor(reducer) {
-    this.reducer = reducer;
-    this.obj = {};
+  constructor() {
+    this.games = new Map();
   }
 
   /**
@@ -25,19 +23,25 @@ export class InMemory {
    * @param {object} store - A Redux store to persist.
    */
   set(id, store) {
-    this.obj[id] = store;
+    this.games.set(id, store);
   }
 
   /**
    * Read the game state from the in-memory object.
    * @param {string} id - The game id.
-   * @returns {object} - A Redux store with the game state, or null
+   * @returns {object} - A Redux store with the game state, or undefined
    *                     if no game is found with this id.
    */
   get(id) {
-    if (id in this.obj) {
-      return this.obj[id];
-    }
-    return null;
+    return this.games.get(id);
+  }
+
+  /**
+   * Read the game state from the in-memory object.
+   * @param {string} id - The game id.
+   * @returns {boolean} - True if a game with this id exists.
+   */
+  has(id) {
+    return this.games.has(id)
   }
 }

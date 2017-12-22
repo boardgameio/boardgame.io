@@ -76,7 +76,7 @@ test('move api', () => {
   expect(board.props.G).toEqual({ arg: 42 });
 });
 
-test('update gameid', () => {
+test('update gameid / player', () => {
   let Board = null;
   let game = null;
 
@@ -93,8 +93,11 @@ test('update gameid', () => {
   game = Enzyme.mount(<Board/>);
 
   expect(Multiplayer.gameid).toBe('default');
+  expect(Multiplayer.player).toBe(null);
   game.setProps({ gameid: 'next' });
+  game.setProps({ player: 'next' });
   expect(Multiplayer.gameid).toBe('default');
+  expect(Multiplayer.player).toBe(null);
 
   // Multiplayer.
 
@@ -107,17 +110,24 @@ test('update gameid', () => {
     board: TestBoard,
     multiplayer: true
   });
-  game = Enzyme.mount(<Board/>);
+  game = Enzyme.mount(<Board gameid='a' player='1' />);
 
-  const spy = jest.spyOn(Multiplayer, 'updateGameID');
+  const spy1 = jest.spyOn(Multiplayer, 'updateGameID');
+  const spy2 = jest.spyOn(Multiplayer, 'updatePlayer');
 
-  expect(Multiplayer.gameid).toBe('default');
-  game.setProps({ gameid: 'default' });
-  expect(Multiplayer.gameid).toBe('default');
-  expect(spy).not.toHaveBeenCalled();
+  expect(Multiplayer.gameid).toBe('a');
+  expect(Multiplayer.player).toBe('1');
+  game.setProps({ gameid: 'a' });
+  game.setProps({ player: '1' });
+  expect(Multiplayer.gameid).toBe('a');
+  expect(Multiplayer.player).toBe('1');
+  expect(spy1).not.toHaveBeenCalled();
+  expect(spy1).not.toHaveBeenCalled();
 
-  expect(Multiplayer.gameid).toBe('default');
   game.setProps({ gameid: 'next' });
+  game.setProps({ player: 'next' });
   expect(Multiplayer.gameid).toBe('next');
-  expect(spy).toHaveBeenCalled();
+  expect(Multiplayer.player).toBe('next');
+  expect(spy1).toHaveBeenCalled();
+  expect(spy2).toHaveBeenCalled();
 });

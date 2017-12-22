@@ -49,10 +49,14 @@ export const TicTacToe = Game({
       if (cells[id] === null) {
         cells[id] = ctx.currentPlayer;
       }
+
       return { ...G, cells };
     }
   },
-  winner: (G, ctx) => IsVictory(G.cells) ? ctx.currentPlayer : null
+
+  victory: (G, ctx) => {
+    return IsVictory(G.cells) ? ctx.currentPlayer : null;
+  }
 });
 
 export class Board extends React.Component {
@@ -71,7 +75,7 @@ export class Board extends React.Component {
   }
 
   isActive(id) {
-    if (this.props.ctx.winner != null) return false;
+    if (this.props.ctx.winner !== null) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }

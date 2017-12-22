@@ -29,30 +29,43 @@ function Server({game, numPlayers}) {
       const gameid = action._gameid;
       const store = db.get(gameid);
 
-      if (store == null) {
+      if (store === undefined) {
         return { error: 'game not found' };
       }
 
       const state = store.getState();
 
+      // Bail out if the player making the move is not
+      // the current player. The null player is always
+      // allowed.
+      if (action._player != null &&
+          action._player != state.ctx.currentPlayer) {
+        return;
+      }
+
       if (state._id == action._id) {
         store.dispatch(action);
-        socket.broadcast.emit('action', action);
+        const state = store.getState();
+        socket.broadcast.emit('sync', {
+          ...state,
+          G: game.playerView(state.G, state.ctx)
+        });
         db.set(gameid, store);
       }
     });
 
     socket.on('sync', gameid => {
-      let store = null;
-      if (db.get(gameid) == null) {
+      let store = db.get(gameid);
+      if (store === undefined) {
         store = Redux.createStore(reducer);
         db.set(gameid, store);
-      } else {
-        store = db.get(gameid);
       }
 
       const state = store.getState();
-      socket.emit('sync', state);
+      socket.emit('sync', {
+        ...state,
+        G: game.playerView(state.G, state.ctx)
+      });
     });
   });
 
