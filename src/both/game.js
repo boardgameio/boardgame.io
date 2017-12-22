@@ -41,16 +41,19 @@
  *       return Object.assign({}, G, ...);
  *     }
  *   },
+ *   winner: (G, ctx) => { ... },
  *   playerView: (G, ctx) => { ... },
  * })
  */
-function Game({G, moves, playerView}) {
+function Game({G, moves, victory, playerView}) {
   if (!G)           G = {};
   if (!moves)       moves = {};
+  if (!victory)     victory = () => null;
   if (!playerView)  playerView = G => G;
 
   return {
     G,
+    victory,
     playerView,
     moveNames: Object.getOwnPropertyNames(moves),
     reducer: (G, action, ctx) => {

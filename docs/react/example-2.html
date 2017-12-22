@@ -50,7 +50,7 @@ function IsVictory(cells) {
 }
 
 const TicTacToe = BoardgameIO.Game({
-  G: { cells: Array(9).fill(null), winner: null },
+  G: { cells: Array(9).fill(null) },
   
   moves: {
     clickCell(G, ctx, id) {
@@ -60,13 +60,12 @@ const TicTacToe = BoardgameIO.Game({
         cells[id] = ctx.currentPlayer;
       }
 
-      let winner = null;
-      if (IsVictory(cells)) {
-        winner = ctx.currentPlayer;
-      }
-
-      return { ...G, cells, winner };
+      return { ...G, cells };
     }
+  },
+
+  victory: (G, ctx) => {
+    return IsVictory(G.cells) ? ctx.currentPlayer : null;
   }
 });
 
@@ -80,15 +79,15 @@ class TicTacToeBoard extends React.Component {
   }
 
   isActive(id) {
-    if (this.props.G.winner !== null) return false;
+    if (this.props.ctx.winner !== null) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }
 
   render() {
     let winner = '';
-    if (this.props.G.winner !== null) {
-      winner = <div>Winner: {this.props.G.winner}</div>;
+    if (this.props.ctx.winner !== null) {
+      winner = <div>Winner: {this.props.ctx.winner}</div>;
     }
 
     const cellStyle = {
