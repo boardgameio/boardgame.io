@@ -36,7 +36,8 @@ function Server({game, numPlayers}) {
       const state = store.getState();
 
       // Bail out if the player making the move is not
-      // the current player.
+      // the current player. The null player is always
+      // allowed.
       if (action._player != null &&
           action._player != state.ctx.currentPlayer) {
         return;
