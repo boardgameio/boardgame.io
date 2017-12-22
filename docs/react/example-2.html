@@ -50,7 +50,7 @@ function IsVictory(cells) {
 }
 
 const TicTacToe = BoardgameIO.Game({
-  G: { cells: Array(9).fill(null), winner: null },
+  G: { cells: Array(9).fill(null) },
   
   moves: {
     clickCell(G, ctx, id) {
@@ -60,12 +60,7 @@ const TicTacToe = BoardgameIO.Game({
         cells[id] = ctx.currentPlayer;
       }
 
-      let winner = null;
-      if (IsVictory(cells)) {
-        winner = ctx.currentPlayer;
-      }
-
-      return { ...G, cells, winner };
+      return { ...G, cells };
     }
   },
 
