@@ -62,7 +62,7 @@ function createGameReducer({game, numPlayers}) {
 
       case Actions.END_TURN: {
         // Update winner.
-        const winner = game.victory(state.G, state.ctx, state._id);
+        const winner = game.victory(state.G, state.ctx);
 
         // The game may have some end of turn clean up.
         const G = game.reducer(

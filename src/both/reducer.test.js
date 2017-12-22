@@ -15,9 +15,9 @@ const game = Game({
   moves: {
     'A': G => G,
     'B': () => ({ moved: true }),
-    'C': (G, ctx, a, b) => ({ a, b })
+    'C': () => ({ victory: true })
   },
-  victory: (G, ctx) => (G.a == 5 && G.b == 5) ? ctx.currentPlayer : null
+  victory: (G, ctx) => G.victory ? ctx.currentPlayer : null
 });
 
 test('_id is incremented', () => {
@@ -66,23 +66,22 @@ test('move dispatchers', () => {
   api.B();
   expect(store.getState().G).toEqual({ moved: true });
 
-  api.C(1, 2);
-  expect(store.getState().G).toEqual({ a: 1, b: 2 });
+  api.C();
+  expect(store.getState().G).toEqual({ victory: true });
 });
 
-test('winner', () => {
+test('victory', () => {
   const reducer = createGameReducer({game});
-  const store = createStore(reducer);
-  const api = createDispatchers(game.moveNames, store);
 
-  expect(store.getState().ctx.winner).toEqual(null);
-
-  api.C(1, 5);
-  expect(store.getState().ctx.winner).toEqual(null);
-
-  api.C(5, 5);
-  store.dispatch(endTurn());
-  expect(store.getState().ctx.winner).toEqual(0);
+  let state = reducer(undefined, makeMove({ type: 'A' }));
+  state = reducer(state, endTurn());
+  expect(state.ctx.winner).toEqual(null);
+  state = reducer(state, makeMove({ type: 'B' }));
+  state = reducer(state, endTurn());
+  expect(state.ctx.winner).toEqual(null);
+  state = reducer(state, makeMove({ type: 'C' }));
+  state = reducer(state, endTurn());
+  expect(state.ctx.winner).toEqual(0);
 });
 
 test('endTurn', () => {
