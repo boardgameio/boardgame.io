@@ -76,11 +76,22 @@ test('action', () => {
 
   io.socket.receive('sync', 'gameid');
 
-  // Actions are broadcasted.
+  // Actions are broadcasted as state updates.
   action._gameid = 'gameid';
   action._id = 0;
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.broadcast.emit).lastCalledWith('sync', {
+    G: {},
+    ctx: {currentPlayer: 1, numPlayers: 2, turn: 1},
+    log: [{_gameid: "gameid", _id: 0, type: "END_TURN"}],
+    _id: 1,
+    _initial: {
+      G: {}, _id: 0, _initial: {},
+      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0},
+      log: []
+    }
+  });
 
   // ... but not if the gameid is not known.
   action._gameid = 'unknown';
@@ -100,9 +111,9 @@ test('action', () => {
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
-  // Another broadcasted action with proper _gameid and _id.
+  // Another broadcasted action.
   action._gameid = 'gameid';
-  action._player = null;
+  action._player = 1;
   action._id = 1;
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(2);

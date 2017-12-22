@@ -40,18 +40,10 @@ test('multiplayer', () => {
   // Returns a valid store.
   expect(store).not.toBe(undefined);
 
-  // Receive a remote action.
-  let action = ActionCreators.endTurn();
-  action.remote = true;
-  mockSocket.emit = jest.fn();
-  expect(store.getState().ctx.turn).toBe(0);
-  mockSocket.receive('action', action);
-  expect(store.getState().ctx.turn).toBe(1);
-  expect(mockSocket.emit.mock.calls.length).toBe(0);
+  const action = ActionCreators.endTurn();
 
   // Dispatch a local action.
   mockSocket.emit = jest.fn();
-  action = ActionCreators.endTurn();
   store.dispatch(action);
   expect(mockSocket.emit.mock.calls).toEqual([['action', action]]);
 
