@@ -86,12 +86,12 @@ test('action', () => {
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
   expect(io.socket.broadcast.emit).lastCalledWith('sync', {
     G: {},
-    ctx: {currentPlayer: 1, numPlayers: 2, turn: 1},
+    ctx: {currentPlayer: 1, numPlayers: 2, turn: 1, winner: null},
     log: [{_gameid: "gameid", _id: 0, type: "END_TURN"}],
     _id: 1,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0},
+      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
       log: []
     }
   });
@@ -136,12 +136,12 @@ test('playerView', () => {
   io.socket.receive('sync', 'gameid');
   expect(io.socket.emit).lastCalledWith('sync', {
     G: {currentPlayer: 0},
-    ctx: {currentPlayer: 0, numPlayers: 2, turn: 0},
+    ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
     log: [],
     _id: 0,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0},
+      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
       log: []
     }
   });
