@@ -35,6 +35,13 @@ function Server({game, numPlayers}) {
 
       const state = store.getState();
 
+      // Bail out if the player making the move is not
+      // the current player.
+      if (action._player != null &&
+          action._player != state.ctx.currentPlayer) {
+        return;
+      }
+
       if (state._id == action._id) {
         store.dispatch(action);
         socket.broadcast.emit('action', action);
