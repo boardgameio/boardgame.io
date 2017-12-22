@@ -46,8 +46,7 @@ export function setupMultiplayer(GameReducer, socketImpl) {
     const state = getState();
     const result = next(action);
 
-    if (!action.remote && whiteListedActions[action.type]) {
-      action.remote = true;
+    if (whiteListedActions[action.type]) {
       action._id = state._id;
       action._gameid = gameid;
       action._player = player;
@@ -58,10 +57,6 @@ export function setupMultiplayer(GameReducer, socketImpl) {
   }
 
   store = createStore(GameReducer, applyMiddleware(SocketUpdate));
-
-  socket.on('action', action => {
-    store.dispatch(action);
-  });
 
   socket.on('sync', state => {
     store.dispatch(ActionCreators.restore(state));
