@@ -45,7 +45,7 @@ function Server({game, numPlayers}) {
 
       if (state._id == action._id) {
         store.dispatch(action);
-        socket.broadcast.emit('action', action);
+        socket.broadcast.emit('sync', store.getState());
         db.set(gameid, store);
       }
     });
