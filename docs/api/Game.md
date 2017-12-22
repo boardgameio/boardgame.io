@@ -80,7 +80,7 @@ var game = Game({
   },
 
   victory: function(G, ctx)  {
-    return IsWinner(G, ctx.currentPlayer)) ? ctx.currentPlayer : null;
+    return IsWinner(G, ctx.currentPlayer) ? ctx.currentPlayer : null;
   },
 
   playerView: function(G, ctx) {
@@ -108,7 +108,7 @@ const game = Game({
   },
 
   victory: function(G, ctx)  {
-    return IsWinner(G, ctx.currentPlayer)) ? ctx.currentPlayer : null;
+    return IsWinner(G, ctx.currentPlayer) ? ctx.currentPlayer : null;
   },
 
   playerView: (G, ctx) => {
