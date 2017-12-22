@@ -51,15 +51,15 @@ test('sync', () => {
   const spy = jest.spyOn(Redux, 'createStore');
 
   // Sync causes the server to respond.
-  expect(io.socket.emit.mock.calls.length).toBe(0);
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
   io.socket.receive('sync', 'gameid');
-  expect(io.socket.emit.mock.calls.length).toBe(1);
+  expect(io.socket.emit).toHaveBeenCalledTimes(1);
   expect(spy).toHaveBeenCalled();
 
   // Sync a second time does not create a game.
   spy.mockReset();
   io.socket.receive('sync', 'gameid');
-  expect(io.socket.emit.mock.calls.length).toBe(2);
+  expect(io.socket.emit).toHaveBeenCalledTimes(2);
   expect(spy).not.toHaveBeenCalled();
 
   spy.mockRestore();
@@ -72,7 +72,7 @@ test('action', () => {
 
   let action = ActionCreators.endTurn();
   io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit.mock.calls.length).toBe(0);
+  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(0);
 
   io.socket.receive('sync', 'gameid');
 
@@ -80,30 +80,30 @@ test('action', () => {
   action._gameid = 'gameid';
   action._id = 0;
   io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit.mock.calls.length).toBe(1);
+  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
   // ... but not if the gameid is not known.
   action._gameid = 'unknown';
   io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit.mock.calls.length).toBe(1);
+  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
   // ... and not if the _id doesn't match the internal state.
   action._gameid = 'gameid';
   action._id = 0;
   io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit.mock.calls.length).toBe(1);
+  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
   // ... and not if player != currentPlayer
   action._gameid = 'gameid';
   action._player = 100;
   action._id = 0;
   io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit.mock.calls.length).toBe(1);
+  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
   // Another broadcasted action with proper _gameid and _id.
   action._gameid = 'gameid';
   action._player = null;
   action._id = 1;
   io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit.mock.calls.length).toBe(2);
+  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(2);
 });
