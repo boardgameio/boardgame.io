@@ -61,3 +61,21 @@ test('multiplayer', () => {
   m.updateGameID('id');
   expect(mockSocket.emit.mock.calls).toEqual([['sync', 'id']]);
 });
+
+test('move whitelist', () => {
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer(mockSocket);
+  const store = m.createStore(createGameReducer({}));
+
+  mockSocket.emit = jest.fn();
+
+  store.dispatch(ActionCreators.endTurn());
+  expect(mockSocket.emit).toHaveBeenCalledTimes(1);
+
+  store.dispatch(ActionCreators.makeMove());
+  expect(mockSocket.emit).toHaveBeenCalledTimes(2);
+
+  // Restore is not on the whitelist.
+  store.dispatch(ActionCreators.restore());
+  expect(mockSocket.emit).toHaveBeenCalledTimes(2);
+});
