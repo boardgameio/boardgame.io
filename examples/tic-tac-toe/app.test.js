@@ -31,8 +31,7 @@ test('makeMove changes the game state', () => {
   const board = game.find('Board').instance();
 
   expect(board.props.G).toEqual({
-    cells: Grid(9),
-    winner: null
+    cells: Grid(9)
   });
 
   const moves = [0, 1];
@@ -43,9 +42,9 @@ test('makeMove changes the game state', () => {
   }
 
   expect(board.props.G).toEqual({
-    cells: [0, 1].concat(Grid(7)),
-    winner: null
+    cells: [0, 1].concat(Grid(7))
   });
+  expect(board.props.ctx.winner).toEqual(null);
 });
 
 test('clicked cells are inactive', () => {
@@ -62,9 +61,9 @@ test('victory', () => {
   const cells = Array(9).fill(null);
 
   expect(board.props.G).toEqual({
-    cells: cells,
-    winner: null
+    cells: cells
   });
+  expect(board.props.ctx.winner).toEqual(null);
 
   const moves = [0, 3, 1, 4, 2];
 
@@ -74,9 +73,9 @@ test('victory', () => {
   }
 
   expect(board.props.G).toEqual({
-    cells: [0, 0, 0, 1, 1].concat(Grid(4)),
-    winner: 0,
+    cells: [0, 0, 0, 1, 1].concat(Grid(4))
   });
+  expect(board.props.ctx.winner).toEqual(0);
 });
 
 test('reset', () => {
@@ -88,7 +87,6 @@ test('reset', () => {
   game.find('#btn-reset').forEach(node => node.simulate('click'));
 
   expect(board.props.G).toEqual({
-    cells: Grid(9),
-    winner: null
+    cells: Grid(9)
   });
 })

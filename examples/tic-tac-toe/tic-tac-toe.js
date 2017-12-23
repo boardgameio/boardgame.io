@@ -41,8 +41,7 @@ const noFill = (n) => Array(n).fill(null);
 
 export const TicTacToe = Game({
   G: {
-    cells: noFill(9),
-    winner: null,
+    cells: noFill(9)
   },
 
   moves: {
@@ -53,18 +52,17 @@ export const TicTacToe = Game({
         cells[id] = ctx.currentPlayer;
       }
 
-      let winner = null;
-      if (IsVictory(cells)) {
-        winner = ctx.currentPlayer;
-      }
-
-      return { ...G, cells, winner };
+      return { ...G, cells };
     },
     resetGame(G) {
       const cells = noFill(9);
 
-      return { ...G, cells, winner: null }
+      return { ...G, cells }
     }
+  },
+
+  victory: (G, ctx) => {
+    return IsVictory(G.cells) ? ctx.currentPlayer : null;
   }
 });
 
@@ -86,7 +84,7 @@ export class Board extends React.Component {
     this.props.moves.resetGame();
   }
   isActive(id) {
-    if (this.props.G.winner !== null) return false;
+    if (this.props.ctx.winner !== null) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }
@@ -109,8 +107,8 @@ export class Board extends React.Component {
     }
 
     let winner = '';
-    if (this.props.G.winner !== null) {
-      winner = <div id='winner'>Winner: {this.props.G.winner}</div>;
+    if (this.props.ctx.winner !== null) {
+      winner = <div id='winner'>Winner: {this.props.ctx.winner}</div>;
     }
 
     return (
