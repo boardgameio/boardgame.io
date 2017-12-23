@@ -107,18 +107,19 @@ const TicTacToe = Game({
         cells[id] = ctx.currentPlayer;
       }
 
-      // Set winner to true if the current
-      // player just won.
-      let winner = null;
-      if (IsVictory(cells)) {
-        winner = ctx.currentPlayer;
-      }
-
-      return { ...G, cells, winner };
+      return { ...G, cells };
     }
+  },
+
+  victory: (G, ctx) => {
+    return IsVictory(G.cells) ? ctx.currentPlayer : null;
   }
 });
 ```
+
+!> The `victory` field takes a function that determines if
+   there is a winner. The winner itself is made available
+   at `ctx.winner`.
 
 ## Render board
 
@@ -142,15 +143,15 @@ class TicTacToeBoard extends React.Component {
   }
 
   isActive(id) {
-    if (this.props.G.winner !== null) return false;
+    if (this.props.ctx.winner !== null) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }
 
   render() {
     let winner = '';
-    if (this.props.G.winner !== null) {
-      winner = <div>Winner: {this.props.G.winner}</div>;
+    if (this.props.ctx.winner !== null) {
+      winner = <div>Winner: {this.props.ctx.winner}</div>;
     }
 
     const cellStyle = {

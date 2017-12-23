@@ -5,6 +5,7 @@
 
 - Advanced
   - [Multiplayer](multiplayer.md)
+  - [Secret State](secret-state.md)
 
 - API Reference
   - [Game](api/Game.md)

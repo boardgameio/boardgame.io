@@ -23,8 +23,11 @@
  * Array.
  *
  * Args:
- *   obj - The keys are move names, and the values
- *         are pure functions that process the move.
+ *   obj.G - The initial state G.
+ *   obj.moves - A dictionary of move functions.
+ *   obj.playerView - A function that returns a
+ *                    derivative of G suitable for
+ *                    showing the specified player.
  *
  * Usage:
  *
@@ -37,15 +40,21 @@
  *     'moveWithArgs': (G, ctx, arg0, arg1) => {
  *       return Object.assign({}, G, ...);
  *     }
- *   }
+ *   },
+ *   winner: (G, ctx) => { ... },
+ *   playerView: (G, ctx, player) => { ... },
  * })
  */
-function Game({G, moves}) {
-  if (!G)     G = {};
-  if (!moves) moves = {};
+function Game({G, moves, victory, playerView}) {
+  if (!G)           G = {};
+  if (!moves)       moves = {};
+  if (!victory)     victory = () => null;
+  if (!playerView)  playerView = G => G;
 
   return {
-    G: G,
+    G,
+    victory,
+    playerView,
     moveNames: Object.getOwnPropertyNames(moves),
     reducer: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {

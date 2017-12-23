@@ -200,6 +200,7 @@ export class Debug extends React.Component {
       _initial: PropTypes.any.isRequired,
     }),
     gameid: PropTypes.string.isRequired,
+    player: PropTypes.string,
     moveAPI: PropTypes.any,
     restore: PropTypes.func,
     endTurn: PropTypes.func,
@@ -320,6 +321,19 @@ export class Debug extends React.Component {
       );
     }
 
+    let players = [];
+    for (let i = 0; i < this.props.gamestate.ctx.numPlayers; i++) {
+      let className = 'player active';
+      if (i != this.props.gamestate.ctx.currentPlayer) {
+        className = 'player';
+      }
+      players.push(
+        <div className={className} key={i}>
+          {i}
+        </div>
+      );
+    }
+
     return (
       <div className='debug-ui'>
 
@@ -351,6 +365,11 @@ export class Debug extends React.Component {
             restore localStorage
           </KeyboardShortcut>
         </section>
+
+        <h3>players</h3>
+        <div className='player-box'>
+        {players}
+        </div>
 
         <h3>actions</h3>
 
