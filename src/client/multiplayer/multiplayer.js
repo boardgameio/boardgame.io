@@ -10,7 +10,16 @@ import * as ActionCreators from '../../both/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import io from 'socket.io-client';
 
+/**
+ * Multiplayer
+ *
+ * Handles all the multiplayer interactions on the client-side.
+ */
 export class Multiplayer {
+  /**
+   * Creates a new Mutiplayer instance.
+   * @param {object} socketImpl - Override for unit tests.
+   */
   constructor(socketImpl) {
     this.gameid = 'default';
     this.player = null;
@@ -23,6 +32,11 @@ export class Multiplayer {
 
   }
 
+  /**
+   * Creates a Redux store with some middleware that sends actions
+   * to the server whenever they are dispatched.
+   * @param {function} reducer - The game reducer.
+   */
   createStore(reducer) {
     let store = null;
 
@@ -56,6 +70,10 @@ export class Multiplayer {
     return store;
   }
 
+  /**
+   * Updates the game id.
+   * @param {string} id - The new game id.
+   */
   updateGameID(id) {
     this.gameid = id;
 
@@ -64,8 +82,11 @@ export class Multiplayer {
     }
   }
 
+  /**
+   * Updates the player associated with this client.
+   * @param {string} id - The new player id.
+   */
   updatePlayer(id) {
     this.player = id;
   }
 }
-
