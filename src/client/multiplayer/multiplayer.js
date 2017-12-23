@@ -69,7 +69,7 @@ export class Multiplayer {
     });
 
     // Initial sync to get game state.
-    this.socket.emit('sync', this.gameid);
+    this.socket.emit('sync', this.gameid, this.player);
 
     return store;
   }
@@ -82,7 +82,7 @@ export class Multiplayer {
     this.gameid = id;
 
     if (this.socket) {
-      this.socket.emit('sync', id);
+      this.socket.emit('sync', this.gameid, this.player);
     }
   }
 
@@ -92,5 +92,9 @@ export class Multiplayer {
    */
   updatePlayer(id) {
     this.player = id;
+
+    if (this.socket) {
+      this.socket.emit('sync', this.gameid, this.player);
+    }
   }
 }

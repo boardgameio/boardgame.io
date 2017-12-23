@@ -14,6 +14,7 @@ import * as Redux from 'redux';
 jest.mock('koa-socket', () => {
   class MockSocket {
     constructor() {
+      this.id = 'id';
       this.callbacks = {};
       this.emit = jest.fn();
       this.broadcast = { emit: jest.fn() };
@@ -28,7 +29,10 @@ jest.mock('koa-socket', () => {
     }
 
     to() {
-      return { broadcast: this.broadcast };
+      return {
+        broadcast: this.broadcast,
+        emit: this.emit
+      };
     }
 
     join() {}
@@ -49,7 +53,9 @@ const game = Game({});
 
 test('basic', () => {
   const server = Server({game});
+  const io = server.context.io;
   expect(server).not.toBe(undefined);
+  io.socket.receive('disconnect');
 });
 
 test('sync', () => {
@@ -80,13 +86,17 @@ test('action', () => {
   const action = ActionCreators.endTurn();
 
   io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(0);
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
+  io.socket.emit.mockReset();
 
   io.socket.receive('sync', 'gameid');
+  io.socket.id = 'second';
+  io.socket.receive('sync', 'gameid');
+  io.socket.emit.mockReset();
 
   // Actions are broadcasted as state updates.
   io.socket.receive('action', action, 0, 'gameid', null);
-  expect(io.socket.broadcast.emit).lastCalledWith(
+  expect(io.socket.emit).lastCalledWith(
     'sync', 'gameid', {
     G: {},
     ctx: {currentPlayer: 1, numPlayers: 2, turn: 1, winner: null},
@@ -98,38 +108,39 @@ test('action', () => {
       log: []
     }
   });
+  io.socket.emit.mockReset();
 
   // ... but not if the gameid is not known.
   io.socket.receive('action', action, 1, 'unknown');
-  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // ... and not if the _id doesn't match the internal state.
   io.socket.receive('action', action, 100, 'gameid');
-  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // ... and not if player != currentPlayer
   io.socket.receive('action', action, 1, 'gameid', 100);
-  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // Another broadcasted action.
   io.socket.receive('action', action, 1, 'gameid', 1);
-  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(2);
+  expect(io.socket.emit).toHaveBeenCalledTimes(1);
 });
 
 test('playerView', () => {
-  // Write the currentPlayer into G.
+  // Write the player into G.
   const game = Game({
-    playerView: (G, ctx) => {
-      return {...G, currentPlayer: ctx.currentPlayer};
+    playerView: (G, ctx, player) => {
+      return {...G, player};
     }
   });
 
   const server = Server({game});
   const io = server.context.io;
 
-  io.socket.receive('sync', 'gameid');
+  io.socket.receive('sync', 'gameid', 0);
   expect(io.socket.emit).lastCalledWith('sync', 'gameid', {
-    G: {currentPlayer: 0},
+    G: {player: 0},
     ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
     log: [],
     _id: 0,
