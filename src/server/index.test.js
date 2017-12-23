@@ -19,8 +19,8 @@ jest.mock('koa-socket', () => {
       this.broadcast = { emit: jest.fn() };
     }
 
-    receive(type, data) {
-      this.callbacks[type](data);
+    receive(type, ...args) {
+      this.callbacks[type](args[0], args[1]);
     }
 
     on(type, callback) {
@@ -84,7 +84,8 @@ test('action', () => {
   action._id = 0;
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
-  expect(io.socket.broadcast.emit).lastCalledWith('sync', {
+  expect(io.socket.broadcast.emit).lastCalledWith(
+    'sync', action._gameid, {
     G: {},
     ctx: {currentPlayer: 1, numPlayers: 2, turn: 1, winner: null},
     log: [{_gameid: "gameid", _id: 0, type: "END_TURN"}],
@@ -134,7 +135,7 @@ test('playerView', () => {
   const io = server.context.io;
 
   io.socket.receive('sync', 'gameid');
-  expect(io.socket.emit).lastCalledWith('sync', {
+  expect(io.socket.emit).lastCalledWith('sync', 'gameid', {
     G: {currentPlayer: 0},
     ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
     log: [],

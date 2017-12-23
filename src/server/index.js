@@ -46,7 +46,7 @@ function Server({game, numPlayers}) {
       if (state._id == action._id) {
         store.dispatch(action);
         const state = store.getState();
-        socket.broadcast.emit('sync', {
+        socket.broadcast.emit('sync', gameid, {
           ...state,
           G: game.playerView(state.G, state.ctx)
         });
@@ -62,7 +62,7 @@ function Server({game, numPlayers}) {
       }
 
       const state = store.getState();
-      socket.emit('sync', {
+      socket.emit('sync', gameid, {
         ...state,
         G: game.playerView(state.G, state.ctx)
       });
