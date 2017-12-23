@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as M from './multiplayer';
+import { Multiplayer } from './multiplayer';
 import { createGameReducer } from '../../both/reducer';
 import * as ActionCreators from '../../both/action-creators';
 
@@ -25,17 +25,20 @@ class MockSocket {
   }
 }
 
-test('does not crash even when no socket is present', () => {
-  M.updateGameID('test');
-  expect(M.gameid).toBe('test');
+test('update gameid / player', () => {
+  const m = new Multiplayer(null);
 
-  M.updatePlayer('player');
-  expect(M.player).toBe('player');
+  m.updateGameID('test');
+  expect(m.gameid).toBe('test');
+
+  m.updatePlayer('player');
+  expect(m.player).toBe('player');
 });
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const store = M.setupMultiplayer(createGameReducer({}), mockSocket);
+  const m = new Multiplayer(mockSocket);
+  const store = m.createStore(createGameReducer({}));
 
   // Returns a valid store.
   expect(store).not.toBe(undefined);
@@ -55,6 +58,6 @@ test('multiplayer', () => {
 
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
-  M.updateGameID('id');
+  m.updateGameID('id');
   expect(mockSocket.emit.mock.calls).toEqual([['sync', 'id']]);
 });
