@@ -25,9 +25,8 @@ function Server({game, numPlayers}) {
   io.on('connection', (ctx) => {
     const socket = ctx.socket;
 
-    socket.on('action', action => {
-      const gameid = action._gameid;
-      const store = db.get(gameid);
+    socket.on('action', (action, stateID, gameID, playerID) => {
+      const store = db.get(gameID);
 
       if (store === undefined) {
         return { error: 'game not found' };
@@ -38,31 +37,31 @@ function Server({game, numPlayers}) {
       // Bail out if the player making the move is not
       // the current player. The null player is always
       // allowed.
-      if (action._player != null &&
-          action._player != state.ctx.currentPlayer) {
+      if (playerID != null &&
+          playerID != state.ctx.currentPlayer) {
         return;
       }
 
-      if (state._id == action._id) {
+      if (state._id == stateID) {
         store.dispatch(action);
         const state = store.getState();
-        socket.broadcast.emit('sync', gameid, {
+        socket.broadcast.emit('sync', gameID, {
           ...state,
           G: game.playerView(state.G, state.ctx)
         });
-        db.set(gameid, store);
+        db.set(gameID, store);
       }
     });
 
-    socket.on('sync', gameid => {
-      let store = db.get(gameid);
+    socket.on('sync', gameID => {
+      let store = db.get(gameID);
       if (store === undefined) {
         store = Redux.createStore(reducer);
-        db.set(gameid, store);
+        db.set(gameID, store);
       }
 
       const state = store.getState();
-      socket.emit('sync', gameid, {
+      socket.emit('sync', gameID, {
         ...state,
         G: game.playerView(state.G, state.ctx)
       });

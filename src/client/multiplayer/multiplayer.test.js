@@ -48,7 +48,8 @@ test('multiplayer', () => {
   // Dispatch a local action.
   mockSocket.emit = jest.fn();
   store.dispatch(action);
-  expect(mockSocket.emit.mock.calls).toEqual([['action', action]]);
+  expect(mockSocket.emit).lastCalledWith(
+      'action', action, 0, 'default', null);
 
   // sync restores state.
   const restored = { restore: true };
