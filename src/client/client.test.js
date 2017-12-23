@@ -91,7 +91,7 @@ test('update gameid / player', () => {
   });
   game = Enzyme.mount(<Board/>);
   game.setProps({ gameid: 'a' });
-  expect(game.instance().multiplayerClient).toBe(null);
+  expect(game.instance().multiplayerClient).toBe(undefined);
 
   // Multiplayer.
 

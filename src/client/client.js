@@ -32,23 +32,10 @@ import './client.css';
  *   and dispatch actions such as MAKE_MOVE and END_TURN.
  */
 function Client({game, numPlayers, board, multiplayer, debug}) {
-  if (!multiplayer) multiplayer = false;
+  if (!multiplayer)        multiplayer = false;
   if (debug === undefined) debug = true;
 
   const GameReducer = createGameReducer({game, numPlayers});
-
-  let multiplayerClient = null;
-  if (multiplayer) {
-    multiplayerClient = new Multiplayer();
-  }
-
-  const CreateStore = () => {
-    if (multiplayer) {
-      return multiplayerClient.createStore(GameReducer);
-    } else {
-      return createStore(GameReducer);
-    }
-  };
 
   /*
    * WrappedBoard
@@ -74,13 +61,14 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
     constructor(props) {
       super(props);
 
-      this.store = CreateStore();
-      this.multiplayerClient = null;
+      this.store = null;
 
-      if (multiplayerClient) {
-        this.multiplayerClient = multiplayerClient;
-        multiplayerClient.updateGameID(props.gameid);
-        multiplayerClient.updatePlayer(props.player);
+      if (multiplayer) {
+        this.multiplayerClient = new Multiplayer(
+            undefined, props.gameid, props.player);
+        this.store = this.multiplayerClient.createStore(GameReducer);
+      } else {
+        this.store = createStore(GameReducer);
       }
 
       const moveAPI = createDispatchers(game.moveNames, this.store);
@@ -110,14 +98,13 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
     }
 
     componentWillReceiveProps(nextProps) {
-      if (!this.multiplayerClient) {
-        return;
-      }
-      if (nextProps.gameid != this.props.gameid) {
-        this.multiplayerClient.updateGameID(nextProps.gameid);
-      }
-      if (nextProps.player != this.props.player) {
-        this.multiplayerClient.updatePlayer(nextProps.player);
+      if (this.multiplayerClient) {
+        if (nextProps.gameid != this.props.gameid) {
+          this.multiplayerClient.updateGameID(nextProps.gameid);
+        }
+        if (nextProps.player != this.props.player) {
+          this.multiplayerClient.updatePlayer(nextProps.player);
+        }
       }
     }
 
