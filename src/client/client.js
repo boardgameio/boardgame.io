@@ -12,7 +12,7 @@ import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
 import * as ActionCreators from '../both/action-creators';
 import { Debug } from './debug/debug';
-import { setupMultiplayer, updateGameID, updatePlayer } from './multiplayer/multiplayer';
+import { Multiplayer } from './multiplayer/multiplayer';
 import { createGameReducer, createDispatchers } from '../both/reducer';
 import './client.css';
 
@@ -37,9 +37,14 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
   const GameReducer = createGameReducer({game, numPlayers});
 
+  let multiplayerClient = null;
+  if (multiplayer) {
+    multiplayerClient = new Multiplayer();
+  }
+
   const CreateStore = () => {
     if (multiplayer) {
-      return setupMultiplayer(GameReducer);
+      return multiplayerClient.createStore(GameReducer);
     } else {
       return createStore(GameReducer);
     }
@@ -70,10 +75,12 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       super(props);
 
       this.store = CreateStore();
+      this.multiplayerClient = null;
 
-      if (multiplayer) {
-        updateGameID(props.gameid);
-        updatePlayer(props.player);
+      if (multiplayerClient) {
+        this.multiplayerClient = multiplayerClient;
+        multiplayerClient.updateGameID(props.gameid);
+        multiplayerClient.updatePlayer(props.player);
       }
 
       const moveAPI = createDispatchers(game.moveNames, this.store);
@@ -103,12 +110,14 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
     }
 
     componentWillReceiveProps(nextProps) {
-      if (!multiplayer) return;
+      if (!this.multiplayerClient) {
+        return;
+      }
       if (nextProps.gameid != this.props.gameid) {
-        updateGameID(nextProps.gameid);
+        this.multiplayerClient.updateGameID(nextProps.gameid);
       }
       if (nextProps.player != this.props.player) {
-        updatePlayer(nextProps.player);
+        this.multiplayerClient.updatePlayer(nextProps.player);
       }
     }
 
