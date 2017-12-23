@@ -16,8 +16,8 @@ class MockSocket {
     this.emit = jest.fn();
   }
 
-  receive(type, data) {
-    this.callbacks[type](data);
+  receive(type, ...args) {
+    this.callbacks[type](args[0], args[1]);
   }
 
   on(type, callback) {
@@ -53,7 +53,9 @@ test('multiplayer', () => {
   // sync restores state.
   const restored = { restore: true };
   expect(store.getState()).not.toEqual(restored);
-  mockSocket.receive('sync', restored);
+  mockSocket.receive('sync', 'unknown gameid', restored);
+  expect(store.getState()).not.toEqual(restored);
+  mockSocket.receive('sync', 'default', restored);
   expect(store.getState()).toEqual(restored);
 
   // updateGameID causes a sync.

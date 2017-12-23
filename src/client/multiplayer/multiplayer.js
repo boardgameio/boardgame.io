@@ -65,8 +65,10 @@ export class Multiplayer {
 
     store = createStore(reducer, applyMiddleware(SocketUpdate));
 
-    this.socket.on('sync', state => {
-      store.dispatch(ActionCreators.restore(state));
+    this.socket.on('sync', (gameid, state) => {
+      if (gameid == this.gameid) {
+        store.dispatch(ActionCreators.restore(state));
+      }
     });
 
     // Initial sync to get game state.
