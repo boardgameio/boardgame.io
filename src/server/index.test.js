@@ -20,7 +20,7 @@ jest.mock('koa-socket', () => {
     }
 
     receive(type, ...args) {
-      this.callbacks[type](args[0], args[1]);
+      this.callbacks[type](args[0], args[1], args[2], args[3], args[4]);
     }
 
     on(type, callback) {
@@ -68,27 +68,23 @@ test('sync', () => {
   spy.mockRestore();
 });
 
-test('action', () => {
+test.only('action', () => {
   const server = Server({game});
   const io = server.context.io;
-  expect(server).not.toBe(undefined);
+  const action = ActionCreators.endTurn();
 
-  let action = ActionCreators.endTurn();
   io.socket.receive('action', action);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(0);
 
   io.socket.receive('sync', 'gameid');
 
   // Actions are broadcasted as state updates.
-  action._gameid = 'gameid';
-  action._id = 0;
-  io.socket.receive('action', action);
-  expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
+  io.socket.receive('action', action, 0, 'gameid', null);
   expect(io.socket.broadcast.emit).lastCalledWith(
-    'sync', action._gameid, {
+    'sync', 'gameid', {
     G: {},
     ctx: {currentPlayer: 1, numPlayers: 2, turn: 1, winner: null},
-    log: [{_gameid: "gameid", _id: 0, type: "END_TURN"}],
+    log: [{type: "END_TURN"}],
     _id: 1,
     _initial: {
       G: {}, _id: 0, _initial: {},
@@ -98,28 +94,19 @@ test('action', () => {
   });
 
   // ... but not if the gameid is not known.
-  action._gameid = 'unknown';
-  io.socket.receive('action', action);
+  io.socket.receive('action', action, 1, 'unknown');
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
   // ... and not if the _id doesn't match the internal state.
-  action._gameid = 'gameid';
-  action._id = 0;
-  io.socket.receive('action', action);
+  io.socket.receive('action', action, 100, 'gameid');
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
   // ... and not if player != currentPlayer
-  action._gameid = 'gameid';
-  action._player = 100;
-  action._id = 0;
-  io.socket.receive('action', action);
+  io.socket.receive('action', action, 1, 'gameid', 100);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(1);
 
   // Another broadcasted action.
-  action._gameid = 'gameid';
-  action._player = 1;
-  action._id = 1;
-  io.socket.receive('action', action);
+  io.socket.receive('action', action, 1, 'gameid', 1);
   expect(io.socket.broadcast.emit).toHaveBeenCalledTimes(2);
 });
 

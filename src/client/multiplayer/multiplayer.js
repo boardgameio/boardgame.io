@@ -54,10 +54,7 @@ export class Multiplayer {
       const result = next(action);
 
       if (whiteListedActions.has(action.type)) {
-        action._id = state._id;
-        action._gameid = this.gameid;
-        action._player = this.player;
-        this.socket.emit('action', action);
+        this.socket.emit('action', action, state._id, this.gameid, this.player);
       }
 
       return result;
