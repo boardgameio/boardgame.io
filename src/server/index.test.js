@@ -26,6 +26,12 @@ jest.mock('koa-socket', () => {
     on(type, callback) {
       this.callbacks[type] = callback;
     }
+
+    to() {
+      return { broadcast: this.broadcast };
+    }
+
+    join() {}
   }
 
   class MockIO {

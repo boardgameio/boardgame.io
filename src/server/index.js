@@ -45,7 +45,7 @@ function Server({game, numPlayers}) {
       if (state._id == stateID) {
         store.dispatch(action);
         const state = store.getState();
-        socket.broadcast.emit('sync', gameID, {
+        socket.to(gameID).broadcast.emit('sync', gameID, {
           ...state,
           G: game.playerView(state.G, state.ctx)
         });
@@ -54,6 +54,8 @@ function Server({game, numPlayers}) {
     });
 
     socket.on('sync', gameID => {
+      socket.join(gameID);
+
       let store = db.get(gameID);
       if (store === undefined) {
         store = Redux.createStore(reducer);
