@@ -27,7 +27,7 @@
  *   obj.moves - A dictionary of move functions.
  *   obj.playerView - A function that returns a
  *                    derivative of G suitable for
- *                    showing the current player.
+ *                    showing the specified player.
  *
  * Usage:
  *
@@ -42,7 +42,7 @@
  *     }
  *   },
  *   winner: (G, ctx) => { ... },
- *   playerView: (G, ctx) => { ... },
+ *   playerView: (G, ctx, player) => { ... },
  * })
  */
 function Game({G, moves, victory, playerView}) {

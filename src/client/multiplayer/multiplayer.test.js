@@ -62,7 +62,7 @@ test('multiplayer', () => {
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
   m.updateGameID('id');
-  expect(mockSocket.emit.mock.calls).toEqual([['sync', 'id']]);
+  expect(mockSocket.emit).lastCalledWith('sync', 'id', null);
 });
 
 test('move whitelist', () => {

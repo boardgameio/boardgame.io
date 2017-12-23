@@ -21,6 +21,8 @@ function Server({game, numPlayers}) {
 
   const reducer = createGameReducer({game, numPlayers});
   const db = new InMemory(reducer);
+  const clientInfo = new Map();
+  const roomInfo = new Map();
 
   io.on('connection', (ctx) => {
     const socket = ctx.socket;
@@ -43,18 +45,41 @@ function Server({game, numPlayers}) {
       }
 
       if (state._id == stateID) {
+        // Update server's version of the store.
         store.dispatch(action);
         const state = store.getState();
-        socket.to(gameID).broadcast.emit('sync', gameID, {
-          ...state,
-          G: game.playerView(state.G, state.ctx)
-        });
+
+        // Get clients connected to this current game.
+        const roomClients = roomInfo.get(gameID);
+        for (const client of roomClients.values()) {
+          // Don't send an update to the current client.
+          if (client == socket.id) {
+            continue;
+          }
+
+          const playerID = clientInfo.get(client);
+
+          socket.to(client).emit('sync', gameID, {
+            ...state,
+            G: game.playerView(state.G, state.ctx, playerID)
+          });
+        }
+
         db.set(gameID, store);
       }
     });
 
-    socket.on('sync', gameID => {
+    socket.on('sync', (gameID, playerID) => {
       socket.join(gameID);
+
+      let roomClients = roomInfo.get(gameID);
+      if (roomClients === undefined) {
+        roomClients = new Set();
+        roomInfo.set(gameID, roomClients);
+      }
+      roomClients.add(socket.id);
+
+      clientInfo.set(socket.id, { gameID, playerID });
 
       let store = db.get(gameID);
       if (store === undefined) {
@@ -65,8 +90,12 @@ function Server({game, numPlayers}) {
       const state = store.getState();
       socket.emit('sync', gameID, {
         ...state,
-        G: game.playerView(state.G, state.ctx)
+        G: game.playerView(state.G, state.ctx, playerID)
       });
+    });
+
+    socket.on('disconnect', () => {
+      clientInfo.delete(socket.id);
     });
   });
 
