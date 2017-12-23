@@ -20,17 +20,18 @@ export class Multiplayer {
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socketImpl - Override for unit tests.
+   * @param {string} gameid - The game ID to connect to.
+   * @param {string} player - The player ID associated with this client.
    */
-  constructor(socketImpl) {
-    this.gameid = 'default';
-    this.player = null;
+  constructor(socketImpl, gameid, player) {
+    this.gameid = gameid || 'default';
+    this.player = player || null;
 
     if (socketImpl !== undefined) {
       this.socket = socketImpl;
     } else {
       this.socket = io();
     }
-
   }
 
   /**
@@ -67,6 +68,9 @@ export class Multiplayer {
     this.socket.on('sync', state => {
       store.dispatch(ActionCreators.restore(state));
     });
+
+    // Initial sync to get game state.
+    this.socket.emit('sync', this.gameid);
 
     return store;
   }
