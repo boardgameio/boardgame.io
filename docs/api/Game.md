@@ -17,7 +17,7 @@ Game({
   },
 
   // Customized view.
-  playerView: (G, ctx) => {
+  playerView: (G, ctx, player) => {
     return G;
   }
 }
@@ -51,7 +51,7 @@ have `action.type` contain the name of the move, and
     the move has been processed.
   - `victory` (*function*): Function that returns the winner, or null if no winner so far.
   - `playerView` (*function*): Returns a version of `G` that
-    is customized for the current player. See the document on
+    is customized for a given player. See the document on
     [Secret State](/secret-state) for more information.
 
 ### Returns
