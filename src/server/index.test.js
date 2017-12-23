@@ -68,7 +68,7 @@ test('sync', () => {
   spy.mockRestore();
 });
 
-test.only('action', () => {
+test('action', () => {
   const server = Server({game});
   const io = server.context.io;
   const action = ActionCreators.endTurn();
