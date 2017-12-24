@@ -4,12 +4,8 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
-<<<<<<< HEAD
-    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/tic-tac-toe/server.js",
-=======
-    "dev": "NODE_ENV=development babel-watch --presets es2015 examples/tic-tac-toe/server.js",
+    "dev": cross-env "NODE_ENV=development babel-watch --presets es2015 examples/tic-tac-toe/server.js",
     "docsify": "docsify serve docs",
->>>>>>> master
     "examples": "npm run dev",
     "precommit": "npm run lint",
     "prepush": "npm run test:coverage",
