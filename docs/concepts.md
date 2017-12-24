@@ -13,7 +13,7 @@ The framework captures the game state in two objects: `G` and
   // Read-only metadata managed by the framework.
   ctx: {
     turn: 0,
-    currentPlayer: 0,
+    currentPlayer: '0',
     numPlayers: 2
   }
 }

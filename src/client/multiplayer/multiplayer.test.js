@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { setupMultiplayer, updateGameID, gameid } from './multiplayer';
+import { Multiplayer } from './multiplayer';
 import { createGameReducer } from '../../both/reducer';
 import * as ActionCreators from '../../both/action-creators';
 
@@ -16,8 +16,8 @@ class MockSocket {
     this.emit = jest.fn();
   }
 
-  receive(type, data) {
-    this.callbacks[type](data);
+  receive(type, ...args) {
+    this.callbacks[type](args[0], args[1]);
   }
 
   on(type, callback) {
@@ -25,41 +25,60 @@ class MockSocket {
   }
 }
 
-test('does not crash even when no socket is present', () => {
-  updateGameID('test');
-  expect(gameid).toBe('test');
+test('update gameid / player', () => {
+  const m = new Multiplayer(null);
+
+  m.updateGameID('test');
+  expect(m.gameid).toBe('test');
+
+  m.updatePlayer('player');
+  expect(m.player).toBe('player');
 });
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const store = setupMultiplayer(createGameReducer({}), mockSocket);
+  const m = new Multiplayer(mockSocket);
+  const store = m.createStore(createGameReducer({}));
 
   // Returns a valid store.
   expect(store).not.toBe(undefined);
 
-  // Receive a remote action.
-  let action = ActionCreators.endTurn();
-  action.remote = true;
-  mockSocket.emit = jest.fn();
-  expect(store.getState().ctx.turn).toBe(0);
-  mockSocket.receive('action', action);
-  expect(store.getState().ctx.turn).toBe(1);
-  expect(mockSocket.emit.mock.calls.length).toBe(0);
+  const action = ActionCreators.endTurn();
 
   // Dispatch a local action.
   mockSocket.emit = jest.fn();
-  action = ActionCreators.endTurn();
   store.dispatch(action);
-  expect(mockSocket.emit.mock.calls).toEqual([['action', action]]);
+  expect(mockSocket.emit).lastCalledWith(
+      'action', action, 0, 'default', null);
 
   // sync restores state.
   const restored = { restore: true };
   expect(store.getState()).not.toEqual(restored);
-  mockSocket.receive('sync', restored);
+  mockSocket.receive('sync', 'unknown gameid', restored);
+  expect(store.getState()).not.toEqual(restored);
+  mockSocket.receive('sync', 'default', restored);
   expect(store.getState()).toEqual(restored);
 
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
-  updateGameID('id');
-  expect(mockSocket.emit.mock.calls).toEqual([['sync', 'id']]);
+  m.updateGameID('id');
+  expect(mockSocket.emit).lastCalledWith('sync', 'id', null);
+});
+
+test('move whitelist', () => {
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer(mockSocket);
+  const store = m.createStore(createGameReducer({}));
+
+  mockSocket.emit = jest.fn();
+
+  store.dispatch(ActionCreators.endTurn());
+  expect(mockSocket.emit).toHaveBeenCalledTimes(1);
+
+  store.dispatch(ActionCreators.makeMove());
+  expect(mockSocket.emit).toHaveBeenCalledTimes(2);
+
+  // Restore is not on the whitelist.
+  store.dispatch(ActionCreators.restore());
+  expect(mockSocket.emit).toHaveBeenCalledTimes(2);
 });

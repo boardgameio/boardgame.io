@@ -6,27 +6,31 @@
  * https://opensource.org/licenses/MIT.
  */
 
-// Redux actions for the GameState reducer.
-
 import * as Actions from './action-types';
 
-/*
- * makeMove
- *
+/**
  * Generate a move to be dispatched to the game move reducer.
  *
- * move.type should contain the move name, and
- * move.args should contain any additional arguments.
+ * @param {object} move - The move to dispatch.
+ * @param {string} move.type - The move type.
+ * @param {Array}  move.args - Additional arguments.
  */
 export const makeMove = (move) => ({
   type: Actions.MAKE_MOVE,
   move: move,
 });
 
+/**
+ * End the current turn and yield to the next player.
+ */
 export const endTurn = () => ({
   type: Actions.END_TURN,
 });
 
+/**
+ * Used to reset the Redux store's state.
+ * @param {object} state - The state to restore.
+ */
 export const restore = (state) => ({
   type:  Actions.RESTORE,
   state: state,

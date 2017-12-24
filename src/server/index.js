@@ -21,13 +21,14 @@ function Server({game, numPlayers}) {
 
   const reducer = createGameReducer({game, numPlayers});
   const db = new InMemory(reducer);
+  const clientInfo = new Map();
+  const roomInfo = new Map();
 
   io.on('connection', (ctx) => {
     const socket = ctx.socket;
 
-    socket.on('action', action => {
-      const gameid = action._gameid;
-      const store = db.get(gameid);
+    socket.on('action', (action, stateID, gameID, playerID) => {
+      const store = db.get(gameID);
 
       if (store === undefined) {
         return { error: 'game not found' };
@@ -35,22 +36,66 @@ function Server({game, numPlayers}) {
 
       const state = store.getState();
 
-      if (state._id == action._id) {
+      // Bail out if the player making the move is not
+      // the current player. The null player is always
+      // allowed.
+      if (playerID != null &&
+          playerID != state.ctx.currentPlayer) {
+        return;
+      }
+
+      if (state._id == stateID) {
+        // Update server's version of the store.
         store.dispatch(action);
-        socket.broadcast.emit('action', action);
-        db.set(gameid, store);
+        const state = store.getState();
+
+        // Get clients connected to this current game.
+        const roomClients = roomInfo.get(gameID);
+        for (const client of roomClients.values()) {
+          // Don't send an update to the current client.
+          if (client == socket.id) {
+            continue;
+          }
+
+          const playerID = clientInfo.get(client);
+
+          socket.to(client).emit('sync', gameID, {
+            ...state,
+            G: game.playerView(state.G, state.ctx, playerID)
+          });
+        }
+
+        db.set(gameID, store);
       }
     });
 
-    socket.on('sync', gameid => {
-      let store = db.get(gameid);
+    socket.on('sync', (gameID, playerID) => {
+      socket.join(gameID);
+
+      let roomClients = roomInfo.get(gameID);
+      if (roomClients === undefined) {
+        roomClients = new Set();
+        roomInfo.set(gameID, roomClients);
+      }
+      roomClients.add(socket.id);
+
+      clientInfo.set(socket.id, { gameID, playerID });
+
+      let store = db.get(gameID);
       if (store === undefined) {
         store = Redux.createStore(reducer);
-        db.set(gameid, store);
+        db.set(gameID, store);
       }
 
       const state = store.getState();
-      socket.emit('sync', state);
+      socket.emit('sync', gameID, {
+        ...state,
+        G: game.playerView(state.G, state.ctx, playerID)
+      });
+    });
+
+    socket.on('disconnect', () => {
+      clientInfo.delete(socket.id);
     });
   });
 

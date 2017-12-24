@@ -11,7 +11,6 @@ import Client from './client';
 import Game from '../both/game';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import * as Multiplayer from './multiplayer/multiplayer';
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -76,7 +75,7 @@ test('move api', () => {
   expect(board.props.G).toEqual({ arg: 42 });
 });
 
-test('update gameid', () => {
+test('update gameid / player', () => {
   let Board = null;
   let game = null;
 
@@ -91,10 +90,8 @@ test('update gameid', () => {
     board: TestBoard,
   });
   game = Enzyme.mount(<Board/>);
-
-  expect(Multiplayer.gameid).toBe('default');
-  game.setProps({ gameid: 'next' });
-  expect(Multiplayer.gameid).toBe('default');
+  game.setProps({ gameid: 'a' });
+  expect(game.instance().multiplayerClient).toBe(undefined);
 
   // Multiplayer.
 
@@ -107,17 +104,25 @@ test('update gameid', () => {
     board: TestBoard,
     multiplayer: true
   });
-  game = Enzyme.mount(<Board/>);
+  game = Enzyme.mount(<Board gameid='a' player='1' />);
+  const m = game.instance().multiplayerClient;
 
-  const spy = jest.spyOn(Multiplayer, 'updateGameID');
+  const spy1 = jest.spyOn(m, 'updateGameID');
+  const spy2 = jest.spyOn(m, 'updatePlayer');
 
-  expect(Multiplayer.gameid).toBe('default');
-  game.setProps({ gameid: 'default' });
-  expect(Multiplayer.gameid).toBe('default');
-  expect(spy).not.toHaveBeenCalled();
+  expect(m.gameid).toBe('a');
+  expect(m.player).toBe('1');
+  game.setProps({ gameid: 'a' });
+  game.setProps({ player: '1' });
+  expect(m.gameid).toBe('a');
+  expect(m.player).toBe('1');
+  expect(spy1).not.toHaveBeenCalled();
+  expect(spy1).not.toHaveBeenCalled();
 
-  expect(Multiplayer.gameid).toBe('default');
   game.setProps({ gameid: 'next' });
-  expect(Multiplayer.gameid).toBe('next');
-  expect(spy).toHaveBeenCalled();
+  game.setProps({ player: 'next' });
+  expect(m.gameid).toBe('next');
+  expect(m.player).toBe('next');
+  expect(spy1).toHaveBeenCalled();
+  expect(spy2).toHaveBeenCalled();
 });
