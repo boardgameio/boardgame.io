@@ -37,7 +37,7 @@ export function createGameReducer({game, numPlayers}) {
     // Framework managed state.
     ctx: {
       turn: 0,
-      currentPlayer: 0,
+      currentPlayer: '0',
       numPlayers: numPlayers,
       winner: null,
     },
@@ -86,7 +86,7 @@ export function createGameReducer({game, numPlayers}) {
 
         // Update current player.
         const currentPlayer =
-            (ctx.currentPlayer + 1) % ctx.numPlayers;
+            (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
 
         // Update turn.
         const turn = ctx.turn + 1;

@@ -99,12 +99,12 @@ test('action', () => {
   expect(io.socket.emit).lastCalledWith(
     'sync', 'gameid', {
     G: {},
-    ctx: {currentPlayer: 1, numPlayers: 2, turn: 1, winner: null},
+    ctx: {currentPlayer: '1', numPlayers: 2, turn: 1, winner: null},
     log: [{type: "END_TURN"}],
     _id: 1,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
+      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
       log: []
     }
   });
@@ -119,11 +119,11 @@ test('action', () => {
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // ... and not if player != currentPlayer
-  io.socket.receive('action', action, 1, 'gameid', 100);
+  io.socket.receive('action', action, 1, 'gameid', '100');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // Another broadcasted action.
-  io.socket.receive('action', action, 1, 'gameid', 1);
+  io.socket.receive('action', action, 1, 'gameid', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(1);
 });
 
@@ -141,12 +141,12 @@ test('playerView', () => {
   io.socket.receive('sync', 'gameid', 0);
   expect(io.socket.emit).lastCalledWith('sync', 'gameid', {
     G: {player: 0},
-    ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
+    ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
     log: [],
     _id: 0,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: 0, numPlayers: 2, turn: 0, winner: null},
+      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
       log: []
     }
   });
