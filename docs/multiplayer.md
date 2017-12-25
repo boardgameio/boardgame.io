@@ -64,7 +64,7 @@ The `gameid` could be determined by a URL path, for example,
 so you could have all browsers that connect to a certain
 URL be synced to the same game.
 
-!> Lobby and user matching features are coming, but you can
+Lobby and user matching features are coming, but you can
 already create useful implementations where users can share
 URLs to get friends to join a game.
 
