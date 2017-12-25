@@ -19,7 +19,7 @@ import * as ActionCreators from './action-creators';
 export function createGameReducer({game, numPlayers}) {
   if (!game) {
     game = {
-      G: {},
+      setup: () => ({}),
       names: [],
       reducer: G => G,
       victory: () => null
@@ -32,7 +32,7 @@ export function createGameReducer({game, numPlayers}) {
 
   const initial = {
     // User managed state.
-    G: game.G,
+    G: game.setup(numPlayers),
 
     // Framework managed state.
     ctx: {

@@ -23,7 +23,7 @@ body {
 
   <script type="text/babel">
   var TicTacToe = BoardgameIO.Game({
-    G: { cells: Array(9).fill(null) },
+    setup: () => ({ cells: Array(9).fill(null) }),
 
     moves: {
       clickCell(G, ctx, id) {
