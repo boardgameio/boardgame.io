@@ -23,7 +23,7 @@
  * Array.
  *
  * Args:
- *   obj.G - The initial state G.
+ *   obj.setup - Function that returns the initial state of G.
  *   obj.moves - A dictionary of move functions.
  *   obj.playerView - A function that returns a
  *                    derivative of G suitable for
@@ -32,7 +32,10 @@
  * Usage:
  *
  * Game({
- *   G: {},
+ *   setup: (numPlayers) => {
+ *     const G = {...};
+ *     return G;
+ *   },
  *   moves: {
  *     'moveWithoutArgs': (G, ctx) => {
  *       return Object.assign({}, G, ...);
@@ -45,14 +48,14 @@
  *   playerView: (G, ctx, player) => { ... },
  * })
  */
-function Game({G, moves, victory, playerView}) {
-  if (!G)           G = {};
+function Game({setup, moves, victory, playerView}) {
+  if (!setup)       setup = () => ({});
   if (!moves)       moves = {};
   if (!victory)     victory = () => null;
   if (!playerView)  playerView = G => G;
 
   return {
-    G,
+    setup,
     victory,
     playerView,
     moveNames: Object.getOwnPropertyNames(moves),
