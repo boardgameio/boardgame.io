@@ -27,7 +27,7 @@ for Tic-Tac-Toe.
 
 In Tic-Tac-Toe, we have just one type of move that we shall
 name `clickCell`. The move function accepts
-the game state `G`, and returns the new game state
+the game state `G` and returns the new game state
 after the move is executed. `ctx` is a framework managed
 object that contains metadata like `turn` and `currentPlayer`.
 Everything after that is an argument that you pass in at the
@@ -96,7 +96,7 @@ Let's also prevent players from being able to overwrite cells.
 
 ```js
 function IsVictory(cells) {
-  // Return true if cells is in a winning configuration.
+  // Return true if cells are in a winning configuration.
 }
 
 const TicTacToe = Game({
@@ -132,7 +132,7 @@ it provides a declarative API to translate objects
 to UI elements.
 
 Creating a board is a fairly mechanical process of
-translating the game state `G` to actual cells that
+translating the game state `G` into actual cells that
 are clickable.
 
 ```js
