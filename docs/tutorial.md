@@ -20,7 +20,10 @@ $ npm install --save boardgame.io
 
 We create the game by providing the initial value of the
 game state `G` (through the `setup` function), and the moves
-of the game.
+of the game. The `setup` function also accepts a
+`numPlayers` parameter if you need to customize the initial
+state based on the number of players, but we don't need that
+for Tic-Tac-Toe.
 
 In Tic-Tac-Toe, we have just one type of move that we shall
 name `clickCell`. The move function accepts
