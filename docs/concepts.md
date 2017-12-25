@@ -19,7 +19,7 @@ The framework captures the game state in two objects: `G` and
 }
 ```
 
-These state objects are passed around everywhere, and maintained
+These state objects are passed around everywhere and maintained
 on both client and server seamlessly. The state in `ctx` is
 incrementally adoptable, meaning that you can manage all the
 state manually in `G` if you so desire.
