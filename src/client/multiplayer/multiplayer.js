@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MAKE_MOVE, END_TURN } from '../../both/action-types';
+import { MAKE_MOVE, END_TURN, RESTORE } from '../../both/action-types';
 import * as ActionCreators from '../../both/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import io from 'socket.io-client';
@@ -44,7 +44,8 @@ export class Multiplayer {
 
     const whiteListedActions = new Set([
       MAKE_MOVE,
-      END_TURN
+      END_TURN,
+      RESTORE
     ]);
 
     // Redux middleware to emit a message on a socket
