@@ -73,12 +73,18 @@ test('move whitelist', () => {
   mockSocket.emit = jest.fn();
 
   store.dispatch(ActionCreators.endTurn());
-  expect(mockSocket.emit).toHaveBeenCalledTimes(1);
+  expect(mockSocket.emit).toHaveBeenCalled();
+  mockSocket.emit.mockReset();
 
   store.dispatch(ActionCreators.makeMove());
-  expect(mockSocket.emit).toHaveBeenCalledTimes(2);
+  expect(mockSocket.emit).toHaveBeenCalled();
+  mockSocket.emit.mockReset();
 
-  // Restore is not on the whitelist.
   store.dispatch(ActionCreators.restore());
-  expect(mockSocket.emit).toHaveBeenCalledTimes(2);
+  expect(mockSocket.emit).toHaveBeenCalled();
+  mockSocket.emit.mockReset();
+
+  store.dispatch({ type: 'unknown' });
+  expect(mockSocket.emit).not.toHaveBeenCalled();
+  mockSocket.emit.mockReset();
 });
