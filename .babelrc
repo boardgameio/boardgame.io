@@ -14,5 +14,12 @@
     "rollup": {
       "plugins": ["external-helpers"]
     }
-  }
+  },
+  "plugins": [
+    ["module-resolver", {
+      "alias": {
+        "boardgame.io": "./packages",
+      }
+    }],
+  ]
 }

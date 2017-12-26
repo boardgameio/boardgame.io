@@ -13,11 +13,13 @@ import * as ActionCreators from './action-creators';
  * createGameReducer
  *
  * Creates the main game state reducer.
+ * @param {...object} game - Return value of Game().
+ * @param {...object} numPlayers - The number of players.
  */
-function createGameReducer({game, numPlayers}) {
+export function createGameReducer({game, numPlayers}) {
   if (!game) {
     game = {
-      G: {},
+      setup: () => ({}),
       names: [],
       reducer: G => G,
       victory: () => null
@@ -29,28 +31,40 @@ function createGameReducer({game, numPlayers}) {
   }
 
   const initial = {
-    G: game.G,
+    // User managed state.
+    G: game.setup(numPlayers),
+
+    // Framework managed state.
     ctx: {
       turn: 0,
-      currentPlayer: 0,
+      currentPlayer: '0',
       numPlayers: numPlayers,
       winner: null,
     },
+
+    // A list of actions performed so far. Used by the
+    // GameLog to display a journal of moves.
     log: [],
+
+    // A monotonically non-decreasing ID to ensure that
+    // state updates are only allowed from clients that
+    // are at the same version that the server.
     _id: 0,
+
+    // A snapshot of this object so that actions can be
+    // replayed over it to view old snapshots.
     _initial: {}
   };
 
-  // Store the initial version of state so that we can see
-  // previous versions by replaying actions over the initial
-  // version.
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
 
-  /*
-   * GameState
+  /**
+   * GameReducer
    *
    * Redux reducer that maintains the overall game state.
+   * @param {object} state - The state before the action.
+   * @param {object} action - A Redux action.
    */
   return (state = initial, action) => {
     switch (action.type) {
@@ -72,7 +86,7 @@ function createGameReducer({game, numPlayers}) {
 
         // Update current player.
         const currentPlayer =
-            (ctx.currentPlayer + 1) % ctx.numPlayers;
+            (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
 
         // Update turn.
         const turn = ctx.turn + 1;
@@ -99,8 +113,10 @@ function createGameReducer({game, numPlayers}) {
  * createDispatchers
  *
  * Creates a set of dispatchers to make moves.
+ * @param {Array} moveNames - A list of move names.
+ * @param {object} store - The Redux store to create dispatchers for.
  */
-function createDispatchers(moveNames, store) {
+export function createDispatchers(moveNames, store) {
   let dispatchers = {};
   for (const name of moveNames) {
     dispatchers[name] = function(...args) {
@@ -112,5 +128,3 @@ function createDispatchers(moveNames, store) {
   }
   return dispatchers;
 }
-
-export { createGameReducer, createDispatchers };

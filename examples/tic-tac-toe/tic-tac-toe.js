@@ -37,12 +37,12 @@ function IsVictory(cells) {
   return false;
 }
 
-const noFill = (n) => Array(n).fill(null);
+const emptyGrid = (n) => Array(n).fill(null);
 
 export const TicTacToe = Game({
-  G: {
-    cells: noFill(9)
-  },
+  setup: () => ({
+    cells: emptyGrid(9)
+  }),
 
   moves: {
     clickCell(G, ctx, id) {
@@ -54,10 +54,9 @@ export const TicTacToe = Game({
 
       return { ...G, cells };
     },
-    resetGame(G) {
-      const cells = noFill(9);
 
-      return { ...G, cells }
+    resetGame(G) {
+      return { ...G, cells: emptyGrid(9) }
     }
   },
 
@@ -80,9 +79,11 @@ export class Board extends React.Component {
       this.props.endTurn();
     }
   }
-  handleReset = () => {
+
+  onReset = () => {
     this.props.moves.resetGame();
   }
+
   isActive(id) {
     if (this.props.ctx.winner !== null) return false;
     if (this.props.G.cells[id] !== null) return false;
@@ -113,15 +114,14 @@ export class Board extends React.Component {
 
     return (
       <div>
-        <button
-          id="btn-reset"
-          onClick={this.handleReset}
-        >
+        <button id="btn-reset" onClick={this.onReset}>
           Reset
         </button>
+
         <table id="board">
         <tbody>{tbody}</tbody>
         </table>
+
         {winner}
       </div>
     );

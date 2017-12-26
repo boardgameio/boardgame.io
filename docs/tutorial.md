@@ -19,7 +19,11 @@ $ npm install --save boardgame.io
 ## Define moves
 
 We create the game by providing the initial value of the
-game state `G` and the moves of the game to `Game`.
+game state `G` (through the `setup` function), and the moves
+of the game. The `setup` function also accepts a
+`numPlayers` parameter if you need to customize the initial
+state based on the number of players, but we don't need that
+for Tic-Tac-Toe.
 
 In Tic-Tac-Toe, we have just one type of move that we shall
 name `clickCell`. The move function accepts
@@ -36,7 +40,7 @@ import Client from 'boardgame.io/client';
 import Game from 'boardgame.io/game';
 
 const TicTacToe = Game({
-  G: { cells: Array(9).fill(null) },
+  setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
     clickCell(G, ctx, id) {
@@ -52,7 +56,7 @@ const App = Client({ game: TicTacToe });
 export default App;
 ```
 
-!> The function must be pure, meaning that it must be
+!> The move function must be pure, meaning that it must be
 a repeatable calculation of state without any side effects.
 
 !> The move function can receive any number of additional
@@ -96,7 +100,7 @@ function IsVictory(cells) {
 }
 
 const TicTacToe = Game({
-  G: { cells: Array(9).fill(null) },
+  setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
     clickCell(G, ctx, id) {

@@ -81,7 +81,7 @@ test('victory', () => {
   expect(state.ctx.winner).toEqual(null);
   state = reducer(state, makeMove({ type: 'C' }));
   state = reducer(state, endTurn());
-  expect(state.ctx.winner).toEqual(0);
+  expect(state.ctx.winner).toEqual('0');
 });
 
 test('endTurn', () => {
