@@ -29,17 +29,27 @@ body {
 }
 
 td {
-  text-align: center;
-  font-weight: bold;
-  font-size: 25px;
-  color: #555;
   width: 50px;
   height: 50px;
+  font-size: 25px;
   line-height: 50px;
+}
+
+td, #btn-reset {
+  text-align: center;
+  font-weight: bold;
+  color: #555;
   border: 3px solid #aaa;
 }
 
-td.active {
+#btn-reset {
+  width: 167px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  line-height: 25px;
+}
+
+td.active, #btn-reset {
   cursor: pointer;
 }
 

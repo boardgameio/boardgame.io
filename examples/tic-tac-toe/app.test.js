@@ -15,6 +15,13 @@ Enzyme.configure({ adapter: new Adapter() });
 
 const Grid = (n) => Array(n).fill(null);
 
+const makeMove = (board, moves) => {
+  for (let id of moves) {
+    board.props.moves.clickCell(id);
+    board.props.endTurn();
+  }
+}
+
 test('sanity', () => {
   Enzyme.mount(<App/>);
 });
@@ -70,3 +77,16 @@ test('victory', () => {
   });
   expect(board.props.ctx.winner).toEqual('0');
 });
+
+test('reset', () => {
+  const game = Enzyme.mount(<App/>);
+  const board = game.find('Board').instance();
+
+  makeMove(board, [0,1])
+
+  game.find('#btn-reset').forEach(node => node.simulate('click'));
+
+  expect(board.props.G).toEqual({
+    cells: Grid(9)
+  });
+})
