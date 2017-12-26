@@ -96,7 +96,7 @@ Let's also prevent players from being able to overwrite cells.
 
 ```js
 function IsVictory(cells) {
-  // Return true if cells are in a winning configuration.
+  // Return true if `cells` is in a winning configuration.
 }
 
 const TicTacToe = Game({
