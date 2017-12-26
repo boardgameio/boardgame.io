@@ -11,11 +11,15 @@ $primary-color: #224;
 
 body {
   margin: 0;
-  padding: 50px;
+  padding: 0;
   background: $bg-color;
   color: $primary-color;
   font-family: monospace;
   font-size: 20px;
+}
+
+.client {
+  padding: 50px;
 }
 
 #board {
@@ -25,6 +29,30 @@ body {
 #winner {
   margin-top: 25px;
   width: 168px;
+  text-align: center;
+}
+
+.runner {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+}
+
+ul {
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  background: #eee;
+  padding: 20px;
+}
+
+li {
+  list-style: none;
+  margin-left: 50px;
+}
+
+.runner .run {
   text-align: center;
 }
 
