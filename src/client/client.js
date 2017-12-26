@@ -79,7 +79,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       if (board) {
         this._board = React.createElement(
           connect(state => state, ActionCreators)(board),
-          { moves: moveAPI }
+          { moves: moveAPI, player: props.player }
         );
       }
 
