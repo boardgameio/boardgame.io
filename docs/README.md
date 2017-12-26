@@ -11,7 +11,7 @@
 ---
 
 The goal of this framework is to allow a game author to
-essentially translate the rules of a game to a series of
+essentially translate the rules of a game into a series of
 simple functions that describe how the game state changes
 when a particular move is made, and the framework takes
 care of the rest. You will not need to write any
