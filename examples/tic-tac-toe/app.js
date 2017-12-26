@@ -23,11 +23,9 @@ const Multiplayer = () => (
   <div className="runner">
     <div className="run">
       <App debug={false} gameid="multi" player="0" />
-      <div>Player 0</div>
     </div>
     <div className="run">
       <App debug={false} gameid="multi" player="1" />
-      <div>Player 1</div>
     </div>
   </div>
 );

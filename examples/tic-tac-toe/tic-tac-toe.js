@@ -65,6 +65,7 @@ export class Board extends React.Component {
     ctx:      PropTypes.any.isRequired,
     endTurn:  PropTypes.func.isRequired,
     moves:    PropTypes.any.isRequired,
+    player:   PropTypes.string
   }
 
   onClick = (id) => {
@@ -75,6 +76,10 @@ export class Board extends React.Component {
   }
 
   isActive(id) {
+    if (this.props.player !== null &&
+        this.props.ctx.currentPlayer !== this.props.player) {
+      return false;
+    }
     if (this.props.ctx.winner !== null) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
@@ -97,9 +102,14 @@ export class Board extends React.Component {
       tbody.push(<tr key={i}>{cells}</tr>);
     }
 
-    let winner = '';
+    let winner = null;
     if (this.props.ctx.winner !== null) {
       winner = <div id='winner'>Winner: {this.props.ctx.winner}</div>;
+    }
+
+    let player = null;
+    if (this.props.player !== null) {
+      player = <div id='winner'>Player: {this.props.player}</div>;
     }
 
     return (
@@ -107,6 +117,7 @@ export class Board extends React.Component {
         <table id="board">
         <tbody>{tbody}</tbody>
         </table>
+        {player}
         {winner}
       </div>
     );
