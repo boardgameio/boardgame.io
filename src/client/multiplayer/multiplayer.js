@@ -54,7 +54,8 @@ export class Multiplayer {
       const state = getState();
       const result = next(action);
 
-      if (whiteListedActions.has(action.type)) {
+      if (whiteListedActions.has(action.type) &&
+          action._remote != true) {
         this.socket.emit('action', action, state._id, this.gameid, this.player);
       }
 
@@ -65,7 +66,9 @@ export class Multiplayer {
 
     this.socket.on('sync', (gameid, state) => {
       if (gameid == this.gameid) {
-        store.dispatch(ActionCreators.restore(state));
+        const action = ActionCreators.restore(state);
+        action._remote = true;
+        store.dispatch(action);
       }
     });
 
