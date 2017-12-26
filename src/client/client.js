@@ -50,12 +50,15 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       gameid: PropTypes.string,
       // The ID of the player associated with this client.
       // Only relevant in multiplayer.
-      player: PropTypes.string
+      player: PropTypes.string,
+      // Enable / disable the Debug UI.
+      debug: PropTypes.bool
     }
 
     static defaultProps = {
       gameid: 'default',
-      player: null
+      player: null,
+      debug: true
     }
 
     constructor(props) {
@@ -80,7 +83,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
         );
       }
 
-      if (debug) {
+      if (debug && props.debug) {
         this._debug = React.createElement(
           connect(state => ({ gamestate: state}),
                   ActionCreators)(Debug),
