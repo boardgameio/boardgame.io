@@ -67,13 +67,13 @@ test('sync', () => {
 
   // Sync causes the server to respond.
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
-  io.socket.receive('sync', 'gameid');
+  io.socket.receive('sync', 'gameID');
   expect(io.socket.emit).toHaveBeenCalledTimes(1);
   expect(spy).toHaveBeenCalled();
 
   // Sync a second time does not create a game.
   spy.mockReset();
-  io.socket.receive('sync', 'gameid');
+  io.socket.receive('sync', 'gameID');
   expect(io.socket.emit).toHaveBeenCalledTimes(2);
   expect(spy).not.toHaveBeenCalled();
 
@@ -89,15 +89,15 @@ test('action', () => {
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
   io.socket.emit.mockReset();
 
-  io.socket.receive('sync', 'gameid');
+  io.socket.receive('sync', 'gameID');
   io.socket.id = 'second';
-  io.socket.receive('sync', 'gameid');
+  io.socket.receive('sync', 'gameID');
   io.socket.emit.mockReset();
 
   // Actions are broadcasted as state updates.
-  io.socket.receive('action', action, 0, 'gameid', null);
+  io.socket.receive('action', action, 0, 'gameID', null);
   expect(io.socket.emit).lastCalledWith(
-    'sync', 'gameid', {
+    'sync', 'gameID', {
     G: {},
     ctx: {currentPlayer: '1', numPlayers: 2, turn: 1, winner: null},
     log: [{type: "END_TURN"}],
@@ -110,20 +110,20 @@ test('action', () => {
   });
   io.socket.emit.mockReset();
 
-  // ... but not if the gameid is not known.
+  // ... but not if the gameID is not known.
   io.socket.receive('action', action, 1, 'unknown');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // ... and not if the _id doesn't match the internal state.
-  io.socket.receive('action', action, 100, 'gameid');
+  io.socket.receive('action', action, 100, 'gameID');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // ... and not if player != currentPlayer
-  io.socket.receive('action', action, 1, 'gameid', '100');
+  io.socket.receive('action', action, 1, 'gameID', '100');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // Another broadcasted action.
-  io.socket.receive('action', action, 1, 'gameid', '1');
+  io.socket.receive('action', action, 1, 'gameID', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(1);
 });
 
@@ -138,8 +138,8 @@ test('playerView', () => {
   const server = Server({game});
   const io = server.context.io;
 
-  io.socket.receive('sync', 'gameid', 0);
-  expect(io.socket.emit).lastCalledWith('sync', 'gameid', {
+  io.socket.receive('sync', 'gameID', 0);
+  expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {player: 0},
     ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
     log: [],

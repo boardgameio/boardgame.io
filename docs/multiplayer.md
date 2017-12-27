@@ -53,18 +53,13 @@ app.listen(8000);
 
 By default, all client instances are synced to a game with
 an ID `'default'`. To play a new game instance, just pass
-`gameid` to your client `<App/>`. All clients that use
+`gameID` to your client `<App/>`. All clients that use
 this ID will now see the same board (synced in realtime).
 
 ```
-ReactDOM.render(<App gameid="my-game-id" />, document.getElementById('root'));
+ReactDOM.render(<App gameID="gameid" />, document.getElementById('root'));
 ```
 
-The `gameid` could be determined by a URL path, for example,
+The `gameID` could be determined by a URL path, for example,
 so you could have all browsers that connect to a certain
 URL be synced to the same game.
-
-!> Lobby and user matching features are coming, but you can
-already create useful implementations where users can share
-URLs to get friends to join a game.
-

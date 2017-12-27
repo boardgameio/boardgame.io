@@ -45,7 +45,7 @@
  *     }
  *   },
  *   winner: (G, ctx) => { ... },
- *   playerView: (G, ctx, player) => { ... },
+ *   playerView: (G, ctx, playerID) => { ... },
  * })
  */
 function Game({setup, moves, victory, playerView}) {

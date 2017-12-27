@@ -22,10 +22,10 @@ export const App = Client({
 const Multiplayer = () => (
   <div className="runner">
     <div className="run">
-      <App debug={false} gameid="multi" player="0" />
+      <App debug={false} gameID="multi" playerID="0" />
     </div>
     <div className="run">
-      <App debug={false} gameid="multi" player="1" />
+      <App debug={false} gameID="multi" playerID="1" />
     </div>
   </div>
 );
