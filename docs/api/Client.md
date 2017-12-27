@@ -56,10 +56,10 @@ const App = Client({
 ReactDOM.render(<App/>, document.getElementById('app'));
 ```
 
-The returned element can also take an optional `gameid`
+The returned element can also take an optional `gameID`
 argument when used in multiplayer mode to connect to a
 specific game (as opposed to the default one).
 
 ```
-<App gameid="my-game-id" />
+<App gameID="my-game-id" />
 ```

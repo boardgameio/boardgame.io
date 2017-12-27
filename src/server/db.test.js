@@ -15,12 +15,12 @@ test('basic', () => {
   const store = Redux.createStore(reducer);
 
   // Must return undefined when no game exists.
-  expect(db.get('gameid')).toEqual(undefined);
+  expect(db.get('gameID')).toEqual(undefined);
   // Create game.
-  db.set('gameid', store);
+  db.set('gameID', store);
   // Must return created game.
-  expect(db.get('gameid')).toEqual(store);
+  expect(db.get('gameID')).toEqual(store);
 
   // Must return true if game exists
-  expect(db.has('gameid')).toEqual(true);
+  expect(db.has('gameID')).toEqual(true);
 });

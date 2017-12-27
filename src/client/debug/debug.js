@@ -199,8 +199,8 @@ export class Debug extends React.Component {
       log: PropTypes.array.isRequired,
       _initial: PropTypes.any.isRequired,
     }),
-    gameid: PropTypes.string.isRequired,
-    player: PropTypes.string,
+    gameID: PropTypes.string.isRequired,
+    playerID: PropTypes.string,
     moveAPI: PropTypes.any,
     restore: PropTypes.func,
     endTurn: PropTypes.func,
@@ -345,7 +345,7 @@ export class Debug extends React.Component {
       {this.state.showLog ||
         <span>
         <section>
-        <div><strong>Game ID:</strong> {this.props.gameid}</div>
+        <div><strong>Game ID:</strong> {this.props.gameID}</div>
         </section>
 
         <section>
