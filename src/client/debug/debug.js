@@ -11,7 +11,7 @@ import ReactJson from 'react-json-view';
 import PropTypes from 'prop-types';
 import Mousetrap from 'mousetrap';
 import { GameLog } from '../log/log';
-import { restore } from '../../both/action-creators';
+import { restore } from '../../core/action-creators';
 import './debug.css';
 
 /*

@@ -10,10 +10,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
-import * as ActionCreators from '../both/action-creators';
+import * as ActionCreators from '../core/action-creators';
 import { Debug } from './debug/debug';
 import { Multiplayer } from './multiplayer/multiplayer';
-import { createGameReducer, createDispatchers } from '../both/reducer';
+import { createGameReducer, createDispatchers } from '../core/reducer';
 import './client.css';
 
 /*

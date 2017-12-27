@@ -8,7 +8,7 @@
 
 import React from 'react';
 import Client from './client';
-import Game from '../both/game';
+import Game from '../core/game';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 

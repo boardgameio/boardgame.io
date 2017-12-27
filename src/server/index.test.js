@@ -7,8 +7,8 @@
  */
 
 import Server from './index';
-import Game from '../both/game';
-import * as ActionCreators from '../both/action-creators';
+import Game from '../core/game';
+import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 
 jest.mock('koa-socket', () => {

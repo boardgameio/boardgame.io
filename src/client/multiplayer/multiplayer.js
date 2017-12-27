@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MAKE_MOVE, END_TURN, RESTORE } from '../../both/action-types';
-import * as ActionCreators from '../../both/action-creators';
+import { MAKE_MOVE, END_TURN, RESTORE } from '../../core/action-types';
+import * as ActionCreators from '../../core/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import io from 'socket.io-client';
 

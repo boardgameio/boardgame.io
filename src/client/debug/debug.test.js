@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { restore } from '../../both/action-creators';
+import { restore } from '../../core/action-creators';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { Debug, DebugMove, KeyboardShortcut } from './debug.js';
