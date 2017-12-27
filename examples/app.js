@@ -11,26 +11,16 @@ import { render } from 'react-dom';
 import { HashRouter as Router, Route, NavLink } from 'react-router-dom';
 import Client from 'boardgame.io/client';
 import { TicTacToe, Board } from './tic-tac-toe';
+import { Multiplayer } from './multiplayer';
 import './app.css';
+import './tic-tac-toe/tic-tac-toe.css';
 
-export const App = Client({
+export const Singleplayer = Client({
   game: TicTacToe,
-  board: Board,
-  multiplayer: true,
+  board: Board
 });
 
-const Multiplayer = () => (
-  <div className="runner">
-    <div className="run">
-      <App debug={false} gameID="multi" playerID="0" />
-    </div>
-    <div className="run">
-      <App debug={false} gameID="multi" playerID="1" />
-    </div>
-  </div>
-);
-
-const Runner = () => (
+const App = () => (
   <Router>
     <div>
     <ul>
@@ -38,14 +28,14 @@ const Runner = () => (
     <li><NavLink to="/multiplayer" exact={true}>Multiplayer</NavLink></li>
     </ul>
 
-    <Route exact path="/" component={App}/>
+    <Route exact path="/" component={Singleplayer}/>
     <Route path="/multiplayer" component={Multiplayer}/>
     </div>
   </Router>
 );
 
-render(<Runner/>, document.getElementById('app') ||
-                  document.createElement('div'));
+render(<App/>, document.getElementById('app') ||
+               document.createElement('div'));
 
 if (module.hot) {
   module.hot.accept();

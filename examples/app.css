@@ -26,12 +26,6 @@ body {
   border-collapse: collapse;
 }
 
-#winner {
-  margin-top: 25px;
-  width: 168px;
-  text-align: center;
-}
-
 .runner {
   display: flex;
   flex-direction: row;
@@ -68,25 +62,4 @@ a.active {
 
 .runner .run {
   text-align: center;
-}
-
-td {
-  text-align: center;
-  font-weight: bold;
-  font-size: 25px;
-  color: #555;
-  width: 50px;
-  height: 50px;
-  line-height: 50px;
-  border: 3px solid #aaa;
-  background: #fff;
-}
-
-td.active {
-  cursor: pointer;
-  background: #eeffe9;
-}
-
-td.active:hover {
-  background: #eeffff;
 }
