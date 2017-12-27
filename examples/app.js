@@ -9,16 +9,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { HashRouter as Router, Route, NavLink } from 'react-router-dom';
-import Client from 'boardgame.io/client';
-import { TicTacToe, Board } from './tic-tac-toe';
 import { Multiplayer } from './multiplayer';
+import { Singleplayer } from './tic-tac-toe';
 import './app.css';
-import './tic-tac-toe/tic-tac-toe.css';
-
-export const Singleplayer = Client({
-  game: TicTacToe,
-  board: Board
-});
 
 const App = () => (
   <Router>
