@@ -7,6 +7,6 @@
  */
 
 import Client from '../src/client/client.js';
-import Game from '../src/both/game.js';
+import Game from '../src/core/game.js';
 
 export default { Client, Game };

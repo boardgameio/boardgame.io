@@ -7,8 +7,8 @@
  */
 
 import { Multiplayer } from './multiplayer';
-import { createGameReducer } from '../../both/reducer';
-import * as ActionCreators from '../../both/action-creators';
+import { createGameReducer } from '../../core/reducer';
+import * as ActionCreators from '../../core/action-creators';
 
 class MockSocket {
   constructor() {
