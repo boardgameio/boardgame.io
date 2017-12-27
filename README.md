@@ -21,6 +21,8 @@ networking or backend code.
 
 ## Features
 
+[![Join the chat at https://gitter.im/google/boardgame.io](https://badges.gitter.im/google/boardgame.io.svg)](https://gitter.im/google/boardgame.io?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 * **State Management**: Game state is managed seamlessly across browser, server and storage automatically.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Multiplayer**: All browsers connected to the same game are synced in real time with no refreshes required.
