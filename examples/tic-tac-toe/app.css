@@ -52,6 +52,20 @@ li {
   margin-left: 50px;
 }
 
+a, a:visited {
+  color: #888;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #555;
+}
+
+a.active {
+  color: #333;
+  font-weight: bold;
+}
+
 .runner .run {
   text-align: center;
 }

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { BrowserRouter, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Route, NavLink } from 'react-router-dom';
 import Client from 'boardgame.io/client';
 import { TicTacToe, Board } from './tic-tac-toe';
 import './app.css';
@@ -31,17 +31,17 @@ const Multiplayer = () => (
 );
 
 const Runner = () => (
-  <BrowserRouter>
+  <Router>
     <div>
     <ul>
-    <li><Link to="/">Tic-Tac-Toe</Link></li>
-    <li><Link to="/multiplayer">Multiplayer</Link></li>
+    <li><NavLink to="/" exact={true}>Tic-Tac-Toe</NavLink></li>
+    <li><NavLink to="/multiplayer" exact={true}>Multiplayer</NavLink></li>
     </ul>
 
     <Route exact path="/" component={App}/>
     <Route path="/multiplayer" component={Multiplayer}/>
     </div>
-  </BrowserRouter>
+  </Router>
 );
 
 render(<Runner/>, document.getElementById('app') ||
