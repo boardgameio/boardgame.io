@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { makeMove, endTurn } from '../../both/action-creators';
-import Game from '../../both/game';
+import { makeMove, endTurn } from '../../core/action-creators';
+import Game from '../../core/game';
 import { GameLog } from './log';
-import { createGameReducer } from '../../both/reducer';
+import { createGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import Enzyme from 'enzyme';

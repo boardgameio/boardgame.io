@@ -7,8 +7,8 @@
  */
 
 import { Multiplayer } from './multiplayer';
-import { createGameReducer } from '../../both/reducer';
-import * as ActionCreators from '../../both/action-creators';
+import { createGameReducer } from '../../core/reducer';
+import * as ActionCreators from '../../core/action-creators';
 
 class MockSocket {
   constructor() {
@@ -25,14 +25,14 @@ class MockSocket {
   }
 }
 
-test('update gameid / player', () => {
+test('update gameID / playerID', () => {
   const m = new Multiplayer(null);
 
   m.updateGameID('test');
-  expect(m.gameid).toBe('test');
+  expect(m.gameID).toBe('test');
 
-  m.updatePlayer('player');
-  expect(m.player).toBe('player');
+  m.updatePlayerID('player');
+  expect(m.playerID).toBe('player');
 });
 
 test('multiplayer', () => {
@@ -54,7 +54,7 @@ test('multiplayer', () => {
   // sync restores state.
   const restored = { restore: true };
   expect(store.getState()).not.toEqual(restored);
-  mockSocket.receive('sync', 'unknown gameid', restored);
+  mockSocket.receive('sync', 'unknown gameID', restored);
   expect(store.getState()).not.toEqual(restored);
   mockSocket.receive('sync', 'default', restored);
   expect(store.getState()).toEqual(restored);

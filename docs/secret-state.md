@@ -19,8 +19,8 @@ player keyed by `player`.
 const App = Game({
   ...
 
-  playerView: (G, ctx, player) => {
-    return StripSecrets(G, player);
+  playerView: (G, ctx, playerID) => {
+    return StripSecrets(G, playerID);
   }
 });
 ```
@@ -33,9 +33,9 @@ player in a game, use the `player` prop to make the client
 aware of this.
 
 ```
-ReactDOM.render(<App gameid="gameid" player="1" />, document.getElementById('root'));
+ReactDOM.render(<App gameID="gameid" player="1" />, document.getElementById('root'));
 ```
 
 From now on, this client will see state that is customized
-for `player 1`, which is calculated using the `playerView`
+for `player "1"`, which is calculated using the `playerView`
 function above.

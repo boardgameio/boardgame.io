@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { restore } from '../../both/action-creators';
+import { restore } from '../../core/action-creators';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { Debug, DebugMove, KeyboardShortcut } from './debug.js';
@@ -48,7 +48,7 @@ const gamestate = {
 
 test('basic', () => {
   const debug = Enzyme.mount(
-      <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
+      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />);
 
   const titles = debug.find('h3').map(title => title.text());
   expect(titles).toEqual(['players', 'actions', 'state']);
@@ -134,7 +134,7 @@ test('shortcuts are unique a-z', () => {
     gamestate,
     endTurn: () => {},
     moveAPI,
-    gameid: 'default',
+    gameID: 'default',
   });
 
   const instance = Enzyme.mount(element).instance();
@@ -155,7 +155,7 @@ test('shortcuts are unique first char', () => {
     gamestate,
     endTurn: () => {},
     moveAPI,
-    gameid: 'default',
+    gameID: 'default',
   });
 
   const instance = Enzyme.mount(element).instance();
@@ -174,7 +174,7 @@ test('save / restore', () => {
 
   const debug = Enzyme.mount(
       <Provider store={store}>
-      <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />
+      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
       </Provider>
   );
 
@@ -200,7 +200,7 @@ test('save / restore', () => {
 
 test('toggle Debug UI', () => {
   const debug = Enzyme.mount(
-      <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
+      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />);
 
   expect(debug.find('.debug-ui').length).toEqual(1);
   Mousetrap.simulate('d');
@@ -210,7 +210,7 @@ test('toggle Debug UI', () => {
 
 test('toggle Log', () => {
   const debug = Enzyme.mount(
-      <Debug gamestate={gamestate} endTurn={() => {}} gameid="default" />);
+      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />);
 
   expect(debug.find('GameLog').length).toEqual(0);
   Mousetrap.simulate('l');

@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MAKE_MOVE, END_TURN, RESTORE } from '../../both/action-types';
-import * as ActionCreators from '../../both/action-creators';
+import { MAKE_MOVE, END_TURN, RESTORE } from '../../core/action-types';
+import * as ActionCreators from '../../core/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import io from 'socket.io-client';
 
@@ -20,12 +20,12 @@ export class Multiplayer {
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socketImpl - Override for unit tests.
-   * @param {string} gameid - The game ID to connect to.
-   * @param {string} player - The player ID associated with this client.
+   * @param {string} gameID - The game ID to connect to.
+   * @param {string} playerID - The player ID associated with this client.
    */
-  constructor(socketImpl, gameid, player) {
-    this.gameid = gameid || 'default';
-    this.player = player || null;
+  constructor(socketImpl, gameID, playerID) {
+    this.gameID = gameID || 'default';
+    this.playerID = playerID || null;
 
     if (socketImpl !== undefined) {
       this.socket = socketImpl;
@@ -56,7 +56,7 @@ export class Multiplayer {
 
       if (whiteListedActions.has(action.type) &&
           action._remote != true) {
-        this.socket.emit('action', action, state._id, this.gameid, this.player);
+        this.socket.emit('action', action, state._id, this.gameID, this.playerID);
       }
 
       return result;
@@ -64,8 +64,8 @@ export class Multiplayer {
 
     store = createStore(reducer, applyMiddleware(SocketUpdate));
 
-    this.socket.on('sync', (gameid, state) => {
-      if (gameid == this.gameid) {
+    this.socket.on('sync', (gameID, state) => {
+      if (gameID == this.gameID) {
         const action = ActionCreators.restore(state);
         action._remote = true;
         store.dispatch(action);
@@ -73,7 +73,7 @@ export class Multiplayer {
     });
 
     // Initial sync to get game state.
-    this.socket.emit('sync', this.gameid, this.player);
+    this.socket.emit('sync', this.gameID, this.playerID);
 
     return store;
   }
@@ -83,10 +83,10 @@ export class Multiplayer {
    * @param {string} id - The new game id.
    */
   updateGameID(id) {
-    this.gameid = id;
+    this.gameID = id;
 
     if (this.socket) {
-      this.socket.emit('sync', this.gameid, this.player);
+      this.socket.emit('sync', this.gameID, this.playerID);
     }
   }
 
@@ -94,11 +94,11 @@ export class Multiplayer {
    * Updates the player associated with this client.
    * @param {string} id - The new player id.
    */
-  updatePlayer(id) {
-    this.player = id;
+  updatePlayerID(id) {
+    this.playerID = id;
 
     if (this.socket) {
-      this.socket.emit('sync', this.gameid, this.player);
+      this.socket.emit('sync', this.gameID, this.playerID);
     }
   }
 }

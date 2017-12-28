@@ -10,10 +10,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
-import * as ActionCreators from '../both/action-creators';
+import * as ActionCreators from '../core/action-creators';
 import { Debug } from './debug/debug';
 import { Multiplayer } from './multiplayer/multiplayer';
-import { createGameReducer, createDispatchers } from '../both/reducer';
+import { createGameReducer, createDispatchers } from '../core/reducer';
 import './client.css';
 
 /*
@@ -47,17 +47,17 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
     static propTypes = {
       // The ID of a game to connect to.
       // Only relevant in multiplayer.
-      gameid: PropTypes.string,
+      gameID: PropTypes.string,
       // The ID of the player associated with this client.
       // Only relevant in multiplayer.
-      player: PropTypes.string,
+      playerID: PropTypes.string,
       // Enable / disable the Debug UI.
       debug: PropTypes.bool
     }
 
     static defaultProps = {
-      gameid: 'default',
-      player: null,
+      gameID: 'default',
+      playerID: null,
       debug: true
     }
 
@@ -68,7 +68,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
       if (multiplayer) {
         this.multiplayerClient = new Multiplayer(
-            undefined, props.gameid, props.player);
+            undefined, props.gameID, props.playerID);
         this.store = this.multiplayerClient.createStore(GameReducer);
       } else {
         this.store = createStore(GameReducer);
@@ -79,7 +79,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       if (board) {
         this._board = React.createElement(
           connect(state => state, ActionCreators)(board),
-          { moves: moveAPI, player: props.player }
+          { moves: moveAPI, playerID: props.playerID }
         );
       }
 
@@ -89,8 +89,8 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
                   ActionCreators)(Debug),
           {
             moveAPI,
-            gameid: props.gameid,
-            player: props.player,
+            gameID: props.gameID,
+            playerID: props.playerID,
           }
         );
       }
@@ -102,11 +102,11 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
     componentWillReceiveProps(nextProps) {
       if (this.multiplayerClient) {
-        if (nextProps.gameid != this.props.gameid) {
-          this.multiplayerClient.updateGameID(nextProps.gameid);
+        if (nextProps.gameID != this.props.gameID) {
+          this.multiplayerClient.updateGameID(nextProps.gameID);
         }
-        if (nextProps.player != this.props.player) {
-          this.multiplayerClient.updatePlayer(nextProps.player);
+        if (nextProps.playerID != this.props.playerID) {
+          this.multiplayerClient.updatePlayerID(nextProps.playerID);
         }
       }
     }
