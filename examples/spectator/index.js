@@ -31,7 +31,7 @@ const Spectator = () => (
       </div>
       <div className="run">
         <App gameID="spectator" />
-        Spectator
+        <div>&lt;App/&gt;</div>
       </div>
     </div>
   </div>
