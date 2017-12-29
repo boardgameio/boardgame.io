@@ -12,12 +12,12 @@ import './index.css';
 
 class Board extends React.Component {
   static propTypes = {
-    G:        PropTypes.any.isRequired,
-    ctx:      PropTypes.any.isRequired,
-    endTurn:  PropTypes.func.isRequired,
-    moves:    PropTypes.any.isRequired,
-    playerID:   PropTypes.string,
-    isMultiplayer:  PropTypes.bool
+    G:         PropTypes.any.isRequired,
+    ctx:       PropTypes.any.isRequired,
+    endTurn:   PropTypes.func.isRequired,
+    moves:     PropTypes.any.isRequired,
+    playerID:  PropTypes.string,
+    isActive:   PropTypes.bool
   }
 
   onClick = (id) => {
@@ -28,12 +28,7 @@ class Board extends React.Component {
   }
 
   isActive(id) {
-    if (this.props.isMultiplayer && this.props.ctx.currentPlayer !== this.props.playerID) {
-      return false;
-    }
-    if (this.props.ctx.winner !== null) return false;
-    if (this.props.G.cells[id] !== null) return false;
-    return true;
+    return this.props.isActive && this.props.G.cells[id] == null;
   }
 
   render() {
