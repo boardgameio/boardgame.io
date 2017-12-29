@@ -79,7 +79,11 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       if (board) {
         this._board = React.createElement(
           connect(state => state, ActionCreators)(board),
-          { moves: moveAPI, playerID: props.playerID }
+          {
+            moves: moveAPI,
+            playerID: props.playerID,
+            isMultiplayer: multiplayer   // Board ought to know if it's multiplayer for hotseat games
+          }
         );
       }
 

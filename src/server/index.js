@@ -37,10 +37,9 @@ function Server({game, numPlayers}) {
       const state = store.getState();
 
       // Bail out if the player making the move is not
-      // the current player. The null player is always
-      // allowed.
-      if (playerID != null &&
-          playerID != state.ctx.currentPlayer) {
+      // the current player. The null player is no
+      // longer allowed and is now a "view-only" player
+      if (playerID != state.ctx.currentPlayer) {
         return;
       }
 

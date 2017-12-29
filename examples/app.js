@@ -9,20 +9,27 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { HashRouter as Router, Route, NavLink } from 'react-router-dom';
-import { Multiplayer } from './multiplayer';
-import { Singleplayer } from './tic-tac-toe';
+import routes from './routes';
 import './app.css';
 
 const App = () => (
   <Router>
     <div>
-    <ul>
-    <li><NavLink to="/" exact={true}>Tic-Tac-Toe</NavLink></li>
-    <li><NavLink to="/multiplayer" exact={true}>Multiplayer</NavLink></li>
-    </ul>
+      <ul>
+        {
+          routes.map((route, idx) => (
+            <li key={idx}>
+              <NavLink to={route.path} exact={true}>{route.text}</NavLink>
+            </li>
+          ))
+        }
+      </ul>
 
-    <Route exact path="/" component={Singleplayer}/>
-    <Route path="/multiplayer" component={Multiplayer}/>
+      {
+        routes.map((route, idx) => (
+            <Route key={idx} exact path={route.path} component={route.component}/>
+        ))
+      }
     </div>
   </Router>
 );
