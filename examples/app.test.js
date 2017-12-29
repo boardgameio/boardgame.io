@@ -9,7 +9,7 @@
 import React from 'react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { Singleplayer as App } from './tic-tac-toe';
+import App from './singleplayer';
 
 Enzyme.configure({ adapter: new Adapter() });
 

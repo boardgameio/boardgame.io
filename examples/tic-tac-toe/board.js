@@ -17,7 +17,7 @@ class Board extends React.Component {
     endTurn:  PropTypes.func.isRequired,
     moves:    PropTypes.any.isRequired,
     playerID:   PropTypes.string,
-    isMultiplayer:  PropTypes.boolean
+    isMultiplayer:  PropTypes.bool
   }
 
   onClick = (id) => {
