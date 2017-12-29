@@ -35,7 +35,7 @@ function IsVictory(cells) {
   return false;
 }
 
-export const TicTacToe = Game({
+const TicTacToe = Game({
   setup: () => ({
     cells: Array(9).fill(null)
   }),
@@ -56,3 +56,5 @@ export const TicTacToe = Game({
     return IsVictory(G.cells) ? ctx.currentPlayer : null;
   }
 });
+
+export default TicTacToe;

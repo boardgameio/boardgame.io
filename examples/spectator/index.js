@@ -15,22 +15,26 @@ const App = Client({
   game: TicTacToe,
   board: Board,
   debug: false,
-  multiplayer: true,
+  multiplayer: true
 });
 
-const Multiplayer = () => (
+const Spectator = () => (
   <div>
     <div className="runner">
       <div className="run">
-        <App gameID="multi" playerID="0" />
+        <App gameID="spectator" playerID="0" />
         &lt;App playerID=&quot;0&quot;/&gt;
       </div>
       <div className="run">
-        <App gameID="multi" playerID="1" />
+        <App gameID="spectator" playerID="1" />
         &lt;App playerID=&quot;1&quot;/&gt;
+      </div>
+      <div className="run">
+        <App gameID="spectator" />
+        Spectator
       </div>
     </div>
   </div>
 );
 
-export default Multiplayer;
+export default Spectator;
