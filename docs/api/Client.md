@@ -9,7 +9,7 @@ Client({
   numPlayers: 2,
 
   // The React component representing your game board.
-  board: Component,
+  board: Board,
 
   // Set to true to enable sending move updates to the
   // server via WebSockets.
@@ -24,13 +24,7 @@ Creates a `boardgame.io` client. This is the entry point for
 the client application, and is the only call necessary on the
 client-side if you choose to roll your own move reducer.
 
-### Arguments
-1. obj(*object*): A config object with the options shown above.
-
-### Returns
-(`client`): A React component that can be used to render the app.
-
-The component will receive as `props`:
+The `Board` component will receive the following as `props`:
 
 1. `G`: The game state.
 
@@ -43,6 +37,26 @@ can take any number of arguments, and they are passed to the
 move function after `G` and `ctx`.
 
 4. `endTurn`: A function that ends the turn.
+
+5. `playerID`: The player ID associated with the client.
+
+6. `isActive`: `true` if the client is able to currently make
+a move or interact with the game.
+
+
+### Arguments
+1. obj(*object*): A config object with the options shown above.
+
+### Returns
+(`client`): A React component that runs the app.
+
+The component supports the following `props`:
+
+1. `gameID`: Connect to a particular game (multiplayer).
+
+2. `playerID`: Associate the client with a player (multiplayer).
+
+3. `debug`: Set to `false` to disable the Debug UI.
 
 ### Usage
 
