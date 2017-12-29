@@ -31,10 +31,34 @@ test('board is rendered', () => {
   });
 
   const game = Enzyme.mount(<Board/>);
-  const board = game.find('TestBoard');
+  const board = game.find(TestBoard);
+
+  expect(board.props().isActive).toBe(true);
 
   expect(board.text()).toBe('Board');
   expect(game.find('.debug-ui').length).toBe(1);
+});
+
+test('board props', () => {
+  let Board = Client({
+    game: Game({}),
+    board: TestBoard,
+  });
+  let board = Enzyme.mount(<Board/>).find(TestBoard);
+  expect(board.props().isActive).toBe(true);
+
+  Board = Client({
+    game: Game({}),
+    board: TestBoard,
+    multiplayer: true,
+  });
+
+  board = Enzyme.mount(<Board/>).find(TestBoard);
+  expect(board.props().isActive).toBe(false);
+  board = Enzyme.mount(<Board playerID={"0"}/>).find(TestBoard);
+  expect(board.props().isActive).toBe(true);
+  board = Enzyme.mount(<Board playerID={"1"}/>).find(TestBoard);
+  expect(board.props().isActive).toBe(false);
 });
 
 test('debug ui can be turned off', () => {
