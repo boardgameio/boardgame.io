@@ -201,9 +201,9 @@ export class Debug extends React.Component {
     }),
     gameID: PropTypes.string.isRequired,
     playerID: PropTypes.string,
-    moveAPI: PropTypes.any,
+    moves: PropTypes.any,
+    game: PropTypes.any,
     restore: PropTypes.func,
-    endTurn: PropTypes.func,
     showLog: PropTypes.bool,
   }
 
@@ -236,7 +236,6 @@ export class Debug extends React.Component {
 
   assignShortcuts() {
     const taken = {
-      'e': true,
       's': true,
       'r': true,
       'd': true,
@@ -244,11 +243,19 @@ export class Debug extends React.Component {
     };
     this.shortcuts = null;
 
+    const events = {};
+    for (let name in this.props.moves) {
+      events[name] = name;
+    }
+    for (let name in this.props.game) {
+      events[name] = name;
+    }
+
     // Try assigning the first char of each move as the shortcut.
     let t = taken;
     let shortcuts = {};
     let canUseFirstChar = true;
-    for (let name in this.props.moveAPI) {
+    for (let name in events) {
       let shortcut = name[0];
       if (t[shortcut]) {
         canUseFirstChar = false;
@@ -267,7 +274,7 @@ export class Debug extends React.Component {
       let t = taken;
       let next = 97;
       let shortcuts = {};
-      for (let name in this.props.moveAPI) {
+      for (let name in events) {
         let shortcut = String.fromCharCode(next);
 
         while (t[shortcut]) {
@@ -311,10 +318,21 @@ export class Debug extends React.Component {
     }
 
     let moves = [];
-    for (let name in this.props.moveAPI) {
-      const fn = this.props.moveAPI[name];
+    for (let name in this.props.moves) {
+      const fn = this.props.moves[name];
       const shortcut = this.shortcuts[name];
       moves.push(
+        <KeyboardShortcut key={name} value={shortcut}>
+          <DebugMove name={name} fn={fn} />
+        </KeyboardShortcut>
+      );
+    }
+
+    let events = [];
+    for (let name in this.props.game) {
+      const fn = this.props.game[name];
+      const shortcut = this.shortcuts[name];
+      events.push(
         <KeyboardShortcut key={name} value={shortcut}>
           <DebugMove name={name} fn={fn} />
         </KeyboardShortcut>
@@ -375,10 +393,7 @@ export class Debug extends React.Component {
 
         <section>
         {moves}
-
-        <KeyboardShortcut value='e'>
-          <DebugMove fn={this.props.endTurn} name='endTurn' />
-        </KeyboardShortcut>
+        {events}
         </section>
 
         <h3>state</h3>

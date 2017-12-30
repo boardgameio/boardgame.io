@@ -13,6 +13,7 @@ import { Provider, connect } from 'react-redux';
 import * as ActionCreators from '../core/action-creators';
 import { Debug } from './debug/debug';
 import { Multiplayer } from './multiplayer/multiplayer';
+import { createEventDispatchers } from '../core/flow';
 import { createGameReducer, createDispatchers } from '../core/reducer';
 import './client.css';
 
@@ -75,6 +76,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       }
 
       this.moveAPI = createDispatchers(game.moveNames, this.store);
+      this.gameAPI = createEventDispatchers(game.flow.eventNames, this.store);
       this.createBoard();
       this.createDebugUI();
 
@@ -107,6 +109,8 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
         this._board = React.createElement(Board, {
           moves: this.moveAPI,
+          game: this.gameAPI,
+          gameID: this.props.gameID,
           playerID: this.props.playerID,
         });
       }
@@ -118,7 +122,8 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
           connect(state => ({ gamestate: state}),
                   ActionCreators)(Debug),
           {
-            moveAPI: this.moveAPI,
+            moves: this.moveAPI,
+            game: this.gameAPI,
             gameID: this.props.gameID,
             playerID: this.props.playerID,
           }

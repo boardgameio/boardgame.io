@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { makeMove, endTurn } from '../../core/action-creators';
+import { makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { GameLog } from './log';
 import { createGameReducer } from '../../core/reducer';
@@ -21,9 +21,9 @@ Enzyme.configure({ adapter: new Adapter() });
 test('GameLog', () => {
   const log = [
     makeMove({ type: 'moveA' }),
-    endTurn(),
+    gameEvent({ type: 'endTurn' }),
     makeMove({ type: 'moveB' }),
-    endTurn(),
+    gameEvent({ type: 'endTurn' }),
   ];
   const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
   const turns = gamelog.find('.id').map(div => div.text());
@@ -44,14 +44,18 @@ test('GameLog rewind', () => {
     args: [1],
   }));
 
-  store.dispatch(endTurn());
+  store.dispatch(gameEvent({
+    type: 'endTurn',
+  }));
 
   store.dispatch(makeMove({
     type: 'A',
     args: [2],
   }));
 
-  store.dispatch(endTurn());
+  store.dispatch(gameEvent({
+    type: 'endTurn',
+  }));
 
   const root = Enzyme.mount(
       <Provider store={store}>

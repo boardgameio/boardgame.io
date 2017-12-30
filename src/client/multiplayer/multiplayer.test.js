@@ -7,6 +7,7 @@
  */
 
 import { Multiplayer } from './multiplayer';
+import Game from '../../core/game';
 import { createGameReducer } from '../../core/reducer';
 import * as ActionCreators from '../../core/action-creators';
 
@@ -38,12 +39,15 @@ test('update gameID / playerID', () => {
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer(mockSocket);
-  const store = m.createStore(createGameReducer({}));
+  const game = Game({});
+  const store = m.createStore(createGameReducer({game}));
 
   // Returns a valid store.
   expect(store).not.toBe(undefined);
 
-  const action = ActionCreators.endTurn();
+  const action = ActionCreators.gameEvent({
+    type: 'endTurn',
+  });
 
   // Dispatch a local action.
   mockSocket.emit = jest.fn();
@@ -68,15 +72,21 @@ test('multiplayer', () => {
 test('move whitelist', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer(mockSocket);
-  const store = m.createStore(createGameReducer({}));
+  const game = Game({});
+  const store = m.createStore(createGameReducer({game}));
 
   mockSocket.emit = jest.fn();
 
-  store.dispatch(ActionCreators.endTurn());
+  const endTurn = ActionCreators.gameEvent({
+    type: 'endTurn',
+  });
+  store.dispatch(endTurn);
   expect(mockSocket.emit).toHaveBeenCalled();
   mockSocket.emit.mockReset();
 
-  store.dispatch(ActionCreators.makeMove());
+  store.dispatch(ActionCreators.makeMove({
+    type: 'unknown',
+  }));
   expect(mockSocket.emit).toHaveBeenCalled();
   mockSocket.emit.mockReset();
 

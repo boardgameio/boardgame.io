@@ -7,24 +7,35 @@
  */
 
 import Game from './game';
-import { createGameFlow } from './flow';
-import { endTurn } from './action-creators';
+import { createStore } from 'redux';
+import { Flow, createEventDispatchers, DEFAULT } from './flow';
 
-const game = Game({});
-
-test('basic', () => {
-  const reducer = createGameFlow({game});
-
-  let state = undefined;
-  state = reducer(state, {});
-  expect(state.turn).toBe(0);
-  state = reducer(state, endTurn());
-  expect(state.turn).toBe(1);
+const flow = Flow({
+  events: {
+    endTurn() {
+      return { end: true };
+    }
+  }
 });
 
-test('flow reducer override', () => {
-  const flow = () => {};
-  const game = Game({ flow });
-  const reducer = createGameFlow({game});
-  expect(reducer).toBe(flow);
+const game = Game({ flow: () => flow });
+
+test('basic', () => {
+  expect(Flow({}).eventNames).toEqual([]);
+  expect(flow.eventNames).toEqual(['endTurn']);
+});
+
+test('dispatchers', () => {
+  const store = createStore(flow.reducer);
+  const api = createEventDispatchers(game.flow.eventNames, store);
+  expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
+});
+
+test('default flow', () => {
+  const flow = DEFAULT(game);
+
+  let ctx = flow.setup(2);
+  expect(ctx.turn).toBe(0);
+  ctx = flow.reducer(ctx, { type: 'endTurn' });
+  expect(ctx.turn).toBe(1);
 });

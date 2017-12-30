@@ -53,7 +53,7 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
-      if (item.type == Actions.END_TURN) {
+      if (item.type == Actions.GAME_EVENT) {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
         currentTurn = [];

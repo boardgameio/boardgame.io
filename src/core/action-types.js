@@ -7,5 +7,5 @@
  */
 
 export const MAKE_MOVE = 'MAKE_MOVE';
-export const END_TURN  = 'END_TURN';
+export const GAME_EVENT  = 'GAME_EVENT';
 export const RESTORE   = 'RESTORE';

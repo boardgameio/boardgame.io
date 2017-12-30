@@ -125,15 +125,14 @@ test('escape blurs DebugMove', () => {
 });
 
 test('shortcuts are unique a-z', () => {
-  const moveAPI = {
+  const moves = {
     'takeCard': () => {},
     'takeToken': () => {},
   };
 
   const element = React.createElement(Debug, {
     gamestate,
-    endTurn: () => {},
-    moveAPI,
+    moves,
     gameID: 'default',
   });
 
@@ -146,15 +145,14 @@ test('shortcuts are unique a-z', () => {
 });
 
 test('shortcuts are unique first char', () => {
-  const moveAPI = {
+  const moves = {
     'clickCell': () => {},
     'takeCard': () => {},
   };
 
   const element = React.createElement(Debug, {
     gamestate,
-    endTurn: () => {},
-    moveAPI,
+    moves,
     gameID: 'default',
   });
 
