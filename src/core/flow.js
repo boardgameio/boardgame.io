@@ -9,9 +9,11 @@
 import * as ActionCreators from './action-creators';
 
 /**
- * Helper to create a GameFlow reducer that manages ctx.
- * This is somewhat analogous to Game(), which creates
- * a reducer to manage G.
+ * Helper to create a reducer that manages ctx.
+ *
+ * You probably want GameFlow below, but you might
+ * need to use this directly if you are creating
+ * a very customized game flow that GameFlow cannot handle.
  *
  * @param {...object} ctx - The initial value of ctx.
  * @param {...object} events - Object containing functions
@@ -39,29 +41,17 @@ export function Flow({setup, events}) {
 }
 
 /**
- * createEventDispatchers
- *
- * Creates a set of dispatchers to dispatch game flow events.
- * @param {Array} eventNames - A list of event names.
- * @param {object} store - The Redux store to create dispatchers for.
- */
-export function createEventDispatchers(eventNames, store) {
-  let dispatchers = {};
-  for (const name of eventNames) {
-    dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.gameEvent({
-        type: name,
-        args: args
-      }));
-    };
-  }
-  return dispatchers;
-}
-
-/**
  * GameFlow
  *
- * Configuration of the game flow.
+ * Wrapper around Flow that (also) creates a reducer that manages ctx.
+ * This is somewhat analogous to Game(), which creates
+ * a reducer to manage G. It works at a higher level
+ * than Flow, incorporating phases and so on.
+ *
+ * @param {object} config - The config object that specifies various
+ *                          things about the flow of the game.
+ * @param {object} config.phases - An object specifying the phases of the
+ *                                 game as keys.
  */
 export const GameFlow = config => game => {
   const phaseKeys =
@@ -110,4 +100,24 @@ export const GameFlow = config => game => {
 
     events,
   });
+}
+
+/**
+ * createEventDispatchers
+ *
+ * Creates a set of dispatchers to dispatch game flow events.
+ * @param {Array} eventNames - A list of event names.
+ * @param {object} store - The Redux store to create dispatchers for.
+ */
+export function createEventDispatchers(eventNames, store) {
+  let dispatchers = {};
+  for (const name of eventNames) {
+    dispatchers[name] = function(...args) {
+      store.dispatch(ActionCreators.gameEvent({
+        type: name,
+        args: args
+      }));
+    };
+  }
+  return dispatchers;
 }
