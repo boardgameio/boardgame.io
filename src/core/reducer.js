@@ -52,7 +52,7 @@ export function createGameReducer({game, numPlayers}) {
     _initial: {}
   };
 
-  const GameFlow = game.flow || createGameFlow({game, numPlayers});
+  const GameFlow = createGameFlow({game, numPlayers});
   initial.ctx = GameFlow(undefined, { type: {} });
 
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));

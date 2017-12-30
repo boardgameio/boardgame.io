@@ -19,6 +19,10 @@ import * as Actions from './action-types';
  * @param {...object} numPlayers - The number of players.
  */
 export function createGameFlow({game, numPlayers}) {
+  if (game.flow) {
+    return game.flow;
+  }
+
   const initial = {
     turn: 0,
     currentPlayer: '0',
