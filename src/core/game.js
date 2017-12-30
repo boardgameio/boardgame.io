@@ -46,7 +46,7 @@ import { GameFlow } from './flow';
  *   playerView: (G, ctx, playerID) => { ... },
  *
  *   // OPTIONAL.
- *   flow: (game) => Flow,
+ *   flow: GameFlow({ ... })
  * })
  *
  * @param {...object} setup - Function that returns the initial state of G.
@@ -57,8 +57,6 @@ import { GameFlow } from './flow';
  *                                 derivative of G tailored for
  *                                 the specified player.
  * @param {...object} flow - Customize the flow of the game.
- *                           Has the following signature:
- *                           (game) => Flow,
  */
 function Game({setup, moves, victory, playerView, flow}) {
   if (!setup)       setup = () => ({});
@@ -82,7 +80,8 @@ function Game({setup, moves, victory, playerView, flow}) {
     },
   };
 
-  // Initialize the game flow object.
+  // The Flow needs a reference to the game object in order
+  // to access things like victory.
   game.flow = flow(game);
 
   return game;
