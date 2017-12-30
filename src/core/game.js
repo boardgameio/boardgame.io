@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as Flow from './flow';
+import { GameFlow } from './flow';
 
 /**
  * Game
@@ -63,7 +63,7 @@ function Game({setup, moves, victory, playerView, flow}) {
   if (!moves)       moves = {};
   if (!victory)     victory = () => null;
   if (!playerView)  playerView = G => G;
-  if (!flow)        flow = Flow.DEFAULT;
+  if (!flow)        flow = GameFlow({});
 
   const game = {
     setup,

@@ -58,25 +58,56 @@ export function createEventDispatchers(eventNames, store) {
   return dispatchers;
 }
 
-export const DEFAULT = game => Flow({
-  setup: (numPlayers) => ({
-    turn: 0,
-    currentPlayer: '0',
-    numPlayers: numPlayers,
-    winner: null,
-  }),
+/**
+ * GameFlow
+ *
+ * Configuration of the game flow.
+ */
+export const GameFlow = config => game => {
+  const phaseKeys =
+      config.phases ? Object.keys(config.phases) : [];
 
-  events: {
-    endTurn(ctx, G) {
-      // Update winner.
-      const winner = game.victory(G, ctx);
-      // Update current player.
-      const currentPlayer =
-          (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
-      // Update turn.
-      const turn = ctx.turn + 1;
-      // Return new ctx.
-      return {...ctx, currentPlayer, turn, winner};
-    },
+  const endTurn = (ctx, G) => {
+    // Update winner.
+    const winner = game.victory(G, ctx);
+    // Update current player.
+    const currentPlayer =
+        (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
+    // Update turn.
+    const turn = ctx.turn + 1;
+    // Return new ctx.
+    return {...ctx, currentPlayer, turn, winner};
+  };
+
+  const endPhase = ctx => {
+    const _phaseNum =
+        (ctx._phaseNum + 1) % phaseKeys.length;
+    const phase = phaseKeys[_phaseNum];
+    return {...ctx, phase, _phaseNum};
+  };
+
+  let events = { endTurn };
+  if (config.phases) {
+    events = {endTurn, endPhase};
   }
-});
+
+  return Flow({
+    setup: (numPlayers) => {
+      const initial = {
+        turn: 0,
+        currentPlayer: '0',
+        numPlayers: numPlayers,
+        winner: null,
+      };
+
+      if (config.phases) {
+        initial._phaseNum = 0;
+        initial.phase = phaseKeys[0];
+      }
+
+      return initial;
+    },
+
+    events,
+  });
+}

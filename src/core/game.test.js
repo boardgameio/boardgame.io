@@ -25,3 +25,11 @@ test('reducer', () => {
   expect(game.reducer(testObj, { type: 'A' })).toEqual(testObj);
   expect(game.reducer(testObj, { type: 'B' })).toEqual(null);
 });
+
+test('flow override', () => {
+  const fn = () => {};
+  const game = Game({
+    flow: () => fn
+  });
+  expect(game.flow).toBe(fn);
+});
