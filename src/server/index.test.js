@@ -83,7 +83,7 @@ test('sync', () => {
 test('action', () => {
   const server = Server({game});
   const io = server.context.io;
-  const action = ActionCreators.endTurn();
+  const action = ActionCreators.gameEvent({ type: 'endTurn' });
 
   io.socket.receive('action', action);
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
@@ -101,7 +101,7 @@ test('action', () => {
     'sync', 'gameID', {
     G: {},
     ctx: {currentPlayer: '1', numPlayers: 2, turn: 1, winner: null},
-    log: [{type: "END_TURN"}],
+    log: [{type: "GAME_EVENT", e: {type: "endTurn"}}],
     _id: 1,
     _initial: {
       G: {}, _id: 0, _initial: {},

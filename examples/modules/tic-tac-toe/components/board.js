@@ -12,18 +12,18 @@ import './board.css';
 
 class Board extends React.Component {
   static propTypes = {
-    G:        PropTypes.any.isRequired,
-    ctx:      PropTypes.any.isRequired,
-    endTurn:  PropTypes.func.isRequired,
-    moves:    PropTypes.any.isRequired,
-    playerID:   PropTypes.string,
-    isActive:   PropTypes.bool
+    G:         PropTypes.any.isRequired,
+    ctx:       PropTypes.any.isRequired,
+    moves:     PropTypes.any.isRequired,
+    game:      PropTypes.any.isRequired,
+    playerID:  PropTypes.string,
+    isActive:  PropTypes.bool
   }
 
   onClick = (id) => {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
-      this.props.endTurn();
+      this.props.game.endTurn();
     }
   }
 

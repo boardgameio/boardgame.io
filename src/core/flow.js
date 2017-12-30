@@ -6,46 +6,77 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as Actions from './action-types';
+import * as ActionCreators from './action-creators';
 
 /**
- * createGameFlow
+ * Helper to create a GameFlow reducer that manages ctx.
+ * This is somewhat analogous to Game(), which creates
+ * a reducer to manage G.
  *
- * Create a Redux reducer that maintains ctx.
- * The default responds to a single action END_TURN
- * that increments the currentPlayer and checks if
- * there is a winner.
- * @param {...object} game - Return value of Game().
- * @param {...object} numPlayers - The number of players.
+ * @param {...object} ctx - The initial value of ctx.
+ * @param {...object} events - Object containing functions
+ *                             named after events that this
+ *                             reducer will handle. Each function
+ *                             has the following signature:
+ *                             (ctx, G) => ctx
  */
-export function createGameFlow({game, numPlayers}) {
-  if (game.flow) {
-    return game.flow;
-  }
+export function Flow({setup, events}) {
+  if (!setup)  setup = () => ({});
+  if (!events) events = {};
 
-  const initial = {
+  return {
+    setup,
+    eventNames: Object.getOwnPropertyNames(events),
+    reducer: (state, action, G) => {
+      if (events.hasOwnProperty(action.type)) {
+        const context = events[action.type];
+        const args = [state, G].concat(action.args);
+        return events[action.type].apply(context, args);
+      }
+      return state;
+    },
+  };
+}
+
+/**
+ * createDispatchers
+ *
+ * Creates a set of dispatchers to dispatch game flow events.
+ * @param {Array} eventNames - A list of event names.
+ * @param {object} store - The Redux store to create dispatchers for.
+ */
+export function createEventDispatchers(eventNames, store) {
+  let dispatchers = {};
+  for (const name of eventNames) {
+    dispatchers[name] = function(...args) {
+      store.dispatch(ActionCreators.gameEvent({
+        type: name,
+        args: args
+      }));
+    };
+  }
+  return dispatchers;
+}
+
+export const DEFAULT = game => Flow({
+  setup: (numPlayers) => ({
     turn: 0,
     currentPlayer: '0',
     numPlayers: numPlayers,
     winner: null,
-  };
+  }),
 
-  return (ctx = initial, action, G) => {
-    switch (action.type) {
-      case Actions.END_TURN: {
-        // Update winner.
-        const winner = game.victory(G, ctx);
-        // Update current player.
-        const currentPlayer =
-            (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
-        // Update turn.
-        const turn = ctx.turn + 1;
-        // Return new ctx.
-        return {...ctx, currentPlayer, turn, winner};
-      }
-
-      default:
-        return ctx;
-    }
-  };
-}
+  events: {
+    endTurn(ctx, G) {
+      // Update winner.
+      const winner = game.victory(G, ctx);
+      // Update current player.
+      const currentPlayer =
+          (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
+      // Update turn.
+      const turn = ctx.turn + 1;
+      // Return new ctx.
+      return {...ctx, currentPlayer, turn, winner};
+    },
+  }
+});

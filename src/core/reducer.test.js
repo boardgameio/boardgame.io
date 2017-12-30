@@ -9,7 +9,7 @@
 import Game from './game';
 import { createStore } from 'redux';
 import { createGameReducer, createDispatchers } from './reducer';
-import { makeMove, endTurn, restore } from './action-creators';
+import { makeMove, gameEvent, restore } from './action-creators';
 
 const game = Game({
   moves: {
@@ -19,6 +19,8 @@ const game = Game({
   },
   victory: (G, ctx) => G.victory ? ctx.currentPlayer : null
 });
+
+const endTurn = () => gameEvent({ type: 'endTurn' });
 
 test('_id is incremented', () => {
   const reducer = createGameReducer({game});

@@ -8,7 +8,6 @@
 
 import * as Actions from './action-types';
 import * as ActionCreators from './action-creators';
-import { createGameFlow } from './flow';
 
 /**
  * createGameReducer
@@ -18,15 +17,6 @@ import { createGameFlow } from './flow';
  * @param {...object} numPlayers - The number of players.
  */
 export function createGameReducer({game, numPlayers}) {
-  if (!game) {
-    game = {
-      setup: () => ({}),
-      names: [],
-      reducer: G => G,
-      victory: () => null
-    };
-  }
-
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -36,7 +26,7 @@ export function createGameReducer({game, numPlayers}) {
     G: game.setup(numPlayers),
 
     // Framework managed state.
-    ctx: undefined,
+    ctx: game.flow.setup(numPlayers),
 
     // A list of actions performed so far. Used by the
     // GameLog to display a journal of moves.
@@ -52,12 +42,8 @@ export function createGameReducer({game, numPlayers}) {
     _initial: {}
   };
 
-  const GameFlow = createGameFlow({game, numPlayers});
-  initial.ctx = GameFlow(undefined, { type: {} });
-
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
-
 
   /**
    * GameReducer
@@ -74,8 +60,8 @@ export function createGameReducer({game, numPlayers}) {
         return {...state, G, _id: state._id + 1, log};
       }
 
-      case Actions.END_TURN: {
-        const ctx = GameFlow(state.ctx, action, state.G);
+      case Actions.GAME_EVENT: {
+        const ctx = game.flow.reducer(state.ctx, action.e, state.G);
         const log = [...state.log, action];
         return {...state, ctx, _id: state._id + 1, log};
       }
