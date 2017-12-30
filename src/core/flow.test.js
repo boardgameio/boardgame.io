@@ -8,34 +8,56 @@
 
 import Game from './game';
 import { createStore } from 'redux';
-import { Flow, createEventDispatchers, DEFAULT } from './flow';
+import { createGameReducer } from './reducer';
+import { Flow, createEventDispatchers, GameFlow } from './flow';
 
-const flow = Flow({
-  events: {
-    endTurn() {
-      return { end: true };
-    }
-  }
-});
-
-const game = Game({ flow: () => flow });
-
-test('basic', () => {
-  expect(Flow({}).eventNames).toEqual([]);
-  expect(flow.eventNames).toEqual(['endTurn']);
-});
-
-test('dispatchers', () => {
-  const store = createStore(flow.reducer);
-  const api = createEventDispatchers(game.flow.eventNames, store);
-  expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
+test('Flow', () => {
+  const flow = Flow({});
+  const state = {};
+  expect(flow.reducer(state, { type: 'unknown' })).toBe(state);
 });
 
 test('default flow', () => {
-  const flow = DEFAULT(game);
+  const game = Game({});
+  const flow = GameFlow({})(game);
 
+  expect(flow.eventNames).toEqual(['endTurn']);
   let ctx = flow.setup(2);
   expect(ctx.turn).toBe(0);
   ctx = flow.reducer(ctx, { type: 'endTurn' });
   expect(ctx.turn).toBe(1);
+});
+
+test('flow with phases', () => {
+  const game = Game({});
+  const flow = GameFlow({
+    phases: {
+      'A': {},
+      'B': {},
+    },
+  })(game);
+
+  expect(flow.eventNames).toEqual(['endTurn', 'endPhase']);
+  let ctx = flow.setup(2);
+  expect(ctx.turn).toBe(0);
+  ctx = flow.reducer(ctx, { type: 'endTurn' });
+  expect(ctx.turn).toBe(1);
+
+  expect(ctx.phase).toBe('A');
+  ctx = flow.reducer(ctx, { type: 'endPhase' });
+  expect(ctx.phase).toBe('B');
+  ctx = flow.reducer(ctx, { type: 'endPhase' });
+  expect(ctx.phase).toBe('A');
+});
+
+test('dispatchers', () => {
+  const game = Game({});
+  const reducer = createGameReducer({game, numPlayers: 2});
+  const store = createStore(reducer);
+  const api = createEventDispatchers(game.flow.eventNames, store);
+  expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
+
+  expect(store.getState().ctx.turn).toBe(0);
+  api.endTurn();
+  expect(store.getState().ctx.turn).toBe(1);
 });
