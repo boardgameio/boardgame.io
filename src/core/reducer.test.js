@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { createStore } from 'redux';
-import { createGameReducer, createDispatchers } from './reducer';
+import { createGameReducer, createMoveDispatchers } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
 
 const game = Game({
@@ -57,7 +57,7 @@ test('restore', () => {
 test('move dispatchers', () => {
   const reducer = createGameReducer({game});
   const store = createStore(reducer);
-  const api = createDispatchers(game.moveNames, store);
+  const api = createMoveDispatchers(game.moveNames, store);
 
   expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
   expect(api.unknown).toBe(undefined);

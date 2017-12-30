@@ -39,7 +39,7 @@ export function Flow({setup, events}) {
 }
 
 /**
- * createDispatchers
+ * createEventDispatchers
  *
  * Creates a set of dispatchers to dispatch game flow events.
  * @param {Array} eventNames - A list of event names.
