@@ -77,13 +77,13 @@ export function createGameReducer({game, numPlayers}) {
 }
 
 /**
- * createDispatchers
+ * createMoveDispatchers
  *
  * Creates a set of dispatchers to make moves.
  * @param {Array} moveNames - A list of move names.
  * @param {object} store - The Redux store to create dispatchers for.
  */
-export function createDispatchers(moveNames, store) {
+export function createMoveDispatchers(moveNames, store) {
   let dispatchers = {};
   for (const name of moveNames) {
     dispatchers[name] = function(...args) {

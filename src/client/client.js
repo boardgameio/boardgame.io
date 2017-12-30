@@ -14,7 +14,7 @@ import * as ActionCreators from '../core/action-creators';
 import { Debug } from './debug/debug';
 import { Multiplayer } from './multiplayer/multiplayer';
 import { createEventDispatchers } from '../core/flow';
-import { createGameReducer, createDispatchers } from '../core/reducer';
+import { createGameReducer, createMoveDispatchers } from '../core/reducer';
 import './client.css';
 
 /*
@@ -75,7 +75,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
         this.store = createStore(GameReducer);
       }
 
-      this.moveAPI = createDispatchers(game.moveNames, this.store);
+      this.moveAPI = createMoveDispatchers(game.moveNames, this.store);
       this.gameAPI = createEventDispatchers(game.flow.eventNames, this.store);
       this.createBoard();
       this.createDebugUI();
@@ -164,5 +164,4 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
   };
 }
 
-export { createDispatchers };
 export default Client;
