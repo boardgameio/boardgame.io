@@ -30,7 +30,7 @@ const ANIMATION_DURATION = 750;
  *   <Token x={1} y={2}>
  *     <Knight color='dark' />
  *   </Token>
- * </svg>
+ * </Grid>
  */
 class Token extends React.Component {
   static propTypes = {
