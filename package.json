@@ -129,7 +129,8 @@
       "\\.(css)$": "identity-obj-proxy",
       "boardgame.io/client": "<rootDir>/packages/client",
       "boardgame.io/game": "<rootDir>/packages/game",
-      "boardgame.io/server": "<rootDir>/packages/server"
+      "boardgame.io/server": "<rootDir>/packages/server",
+      "\\.(svg)$": "<rootDir>/.empty_module.js"
     },
     "setupFiles": [
       "raf/polyfill"

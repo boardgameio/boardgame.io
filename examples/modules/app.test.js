@@ -6,7 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
+// TODO: separate testing for TicTacToe from this overall test
+
 import React from 'react';
+import PropTypes from 'prop-types';
+import { MemoryRouter } from 'react-router';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import App from './app';
@@ -15,12 +19,22 @@ Enzyme.configure({ adapter: new Adapter() });
 
 const Grid = (n) => Array(n).fill(null);
 
+// This wraps up the App in a MemoryRouter, which let's us set the route how we want
+const RoutedApp = (props) => (
+  <MemoryRouter initialEntries={[ props.route ]}>
+    <App/>
+  </MemoryRouter>
+);
+RoutedApp.propTypes = {
+  route: PropTypes.string
+}
+
 test('sanity', () => {
-  Enzyme.mount(<App/>);
+  Enzyme.mount(<RoutedApp route='/' />);
 });
 
 test('makeMove changes the game state', () => {
-  const game = Enzyme.mount(<App/>);
+  const game = Enzyme.mount(<RoutedApp route='/tic-tac-toe' />);
   const board = game.find('Board').instance();
 
   expect(board.props.G).toEqual({
@@ -41,7 +55,7 @@ test('makeMove changes the game state', () => {
 });
 
 test('clicked cells are inactive', () => {
-  const game = Enzyme.mount(<App/>);
+  const game = Enzyme.mount(<RoutedApp route='/tic-tac-toe' />);
 
   expect(game.find('td').get(0).props.className).toBe('active');
   game.find('td').forEach(node => node.simulate('click'));
@@ -49,7 +63,7 @@ test('clicked cells are inactive', () => {
 });
 
 test('victory', () => {
-  const game = Enzyme.mount(<App/>);
+  const game = Enzyme.mount(<RoutedApp route='/tic-tac-toe' />);
   const board = game.find('Board').instance();
   const cells = Array(9).fill(null);
 
