@@ -63,12 +63,13 @@ function Game({setup, moves, victory, playerView, flow}) {
   if (!moves)       moves = {};
   if (!victory)     victory = () => null;
   if (!playerView)  playerView = G => G;
-  if (!flow)        flow = GameFlow({});
+  if (!flow)        flow = GameFlow({ victory });
 
-  const game = {
+  return {
     setup,
     victory,
     playerView,
+    flow,
     moveNames: Object.getOwnPropertyNames(moves),
     reducer: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
@@ -79,12 +80,6 @@ function Game({setup, moves, victory, playerView, flow}) {
       return G;
     },
   };
-
-  // The Flow needs a reference to the game object in order
-  // to access things like victory.
-  game.flow = flow(game);
-
-  return game;
 }
 
 export default Game;

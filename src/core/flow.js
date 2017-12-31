@@ -53,13 +53,13 @@ export function Flow({setup, events}) {
  * @param {object} config.phases - An object specifying the phases of the
  *                                 game as keys.
  */
-export const GameFlow = config => game => {
+export const GameFlow = config => {
   const phaseKeys =
       config.phases ? Object.keys(config.phases) : [];
 
   const endTurn = (ctx, G) => {
     // Update winner.
-    const winner = game.victory(G, ctx);
+    let winner = config.victory ? config.victory(G, ctx) : ctx.winner;
     // Update current player.
     const currentPlayer =
         (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
