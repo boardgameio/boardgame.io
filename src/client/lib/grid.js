@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-/*
+/**
  * Grid
  *
  * Component that will show children on cartesian plane using X and Y
@@ -42,20 +42,20 @@ class Grid extends React.Component {
     children: PropTypes.element,
   }
 
-  render() {
-    let cartesianCord = (props) => {
-      return {x: props.x, y: props.y};
-    };
+  cartesianCord = (props) => {
+    return {x: props.x, y: props.y};
+  }
 
+  render() {
     const childrenWithExtraProp = React.Children.map(this.props.children,
       child => {
         return React.cloneElement(child, {
-          _coordinateFn: cartesianCord
+          _coordinateFn: this.cartesianCord
         });
       }
     );
 
-    return (<svg viewBox={'0 0 '+this.props.cols+' '+this.props.rows}
+    return (<svg viewBox={'0 0 ' + this.props.cols + ' ' + this.props.rows}
                  style={this.props.style}>
               {childrenWithExtraProp}
             </svg>);

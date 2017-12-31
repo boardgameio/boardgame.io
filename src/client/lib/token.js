@@ -8,9 +8,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+
 const ANIMATION_DURATION = 750;
 
-/*
+/**
  * Token
  *
  * Component that handles board game piece behaviors and position on grid.
@@ -43,17 +44,17 @@ class Token extends React.Component {
   }
 
   /**
-  * Sets the x and y of the state on creation.
-  */
+   * Sets the x and y of the state on creation.
+   */
   componentWillMount() {
     this.setState(this._getSvgCoordinates());
   }
 
   /**
-  * If there is a change in x and y, saves old X, Y, and current time. Starts
-  * animation.
-  */
-  componentWillReceiveProps (nextProps) {
+   * If there is a change in x and y, saves old X, Y, and current time. Starts
+   * animation.
+   */
+  componentWillReceiveProps(nextProps) {
     if (nextProps.x != this.props.x || nextProps.y != this.props.y) {
       let svgCoord = this._getSvgCoordinates();
       this.setState({
@@ -67,9 +68,9 @@ class Token extends React.Component {
   }
 
   /**
-  * Recursively animates state x and y value in a given time.
-  * @param {number} now Unix timestamp when this was called.
-  */
+   * Recursively animates state x and y value in a given time.
+   * @param {number} now Unix timestamp when this was called.
+   */
   _animate(now) {
     return (() => {
       let elapsed = now - this.state.originTime;
@@ -79,8 +80,8 @@ class Token extends React.Component {
                                               ANIMATION_DURATION);
         this.setState({
           ...this.state,
-          x: (svgCoord.x-this.state.originX)*percentage + this.state.originX,
-          y: (svgCoord.y-this.state.originY)*percentage + this.state.originY,
+          x: (svgCoord.x - this.state.originX) * percentage + this.state.originX,
+          y: (svgCoord.y - this.state.originY) * percentage + this.state.originY,
         });
         requestAnimationFrame(this._animate(Date.now()));
       } else {
@@ -94,10 +95,10 @@ class Token extends React.Component {
   }
 
   /**
-  * Gets SVG coordinates. If a coordinate function is available, it will pass
-  * all props to it and receive back X and Y in SVG space
-  * @return {Object} Object with x and y parameter.
-  */
+   * Gets SVG coordinates. If a coordinate function is available, it will pass
+   * all props to it and receive back X and Y in SVG space
+   * @return {Object} Object with x and y parameter.
+   */
   _getSvgCoordinates() {
     if (this.props._coordinateFn) {
       return this.props._coordinateFn(this.props);
@@ -107,22 +108,22 @@ class Token extends React.Component {
   }
 
   /**
-  * Returns animation easing value. See http://easings.net/#easeInOutCubic.
-  * @param {number} t Current time.
-  * @param {number} b Beginning value.
-  * @param {number} c Final value.
-  * @param {number} d Duration.
-  */
-  _easeInOutCubic (t, b, c, d) {
-    t /= d/2;
-    if (t < 1) return c/2*t*t*t + b;
+   * Returns animation easing value. See http://easings.net/#easeInOutCubic.
+   * @param {number} t Current time.
+   * @param {number} b Beginning value.
+   * @param {number} c Final value.
+   * @param {number} d Duration.
+   */
+  _easeInOutCubic(t, b, c, d) {
+    t /= d / 2;
+    if (t < 1) return c / 2 * t * t * t + b;
     t -= 2;
-    return c/2*(t*t*t + 2) + b;
+    return c / 2 * (t * t * t + 2) + b;
   }
 
   render() {
     return (
-      <g transform={'translate('+this.state.x+','+this.state.y+')'}
+      <g transform={'translate(' + this.state.x + ',' + this.state.y + ')'}
          onClick={() => { this.props.onClick(this.props.x, this.props.y) }}>
         {this.props.children}
       </g>
