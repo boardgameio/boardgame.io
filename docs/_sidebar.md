@@ -6,6 +6,7 @@
 - Advanced
   - [Multiplayer](multiplayer.md)
   - [Secret State](secret-state.md)
+  - [Phases](phases.md)
 
 - API Reference
   - [Game](api/Game.md)
