@@ -9,7 +9,8 @@
 import * as ActionCreators from './action-creators';
 
 /**
- * Helper to create a reducer that manages ctx (and G).
+ * Helper to create a reducer that manages ctx (with the
+ * ability to also update G).
  *
  * You probably want GameFlow below, but you might
  * need to use this directly if you are creating
@@ -43,15 +44,44 @@ export function Flow({setup, events}) {
 /**
  * GameFlow
  *
- * Wrapper around Flow that (also) creates a reducer that manages ctx.
+ * Wrapper around Flow that creates a reducer to manage ctx.
+ * (with the ability to also update G).
+ *
  * This is somewhat analogous to Game(), which creates
- * a reducer to manage G. It works at a higher level
- * than Flow, incorporating phases and so on.
+ * a reducer to just manage G. It works at a higher level
+ * than Flow, also incorporating phases:
  *
  * @param {object} config - The config object that specifies various
  *                          things about the flow of the game.
- * @param {object} config.phases - An object specifying the phases of the
- *                                 game as keys.
+ *
+ * @param {Array} config.phases - A list of phases in the game.
+ *     Each phase is described by an object:
+ *       {
+ *         name: 'phase_name',
+ *         // Any setup code to run before the phase begins.
+ *         setup: (G, ctx) => G,
+ *         // Any cleanup code to run after the phase ends.
+ *         cleanup: (G, ctx) => G,
+ *       }
+ *
+ * @param {function} config.victory - Function that returns the
+ *     ID of the player that won if the game is in a victory state.
+ *     Signature: (G, ctx) => { ... },
+ *
+ * @example
+ * Game({
+ *   ...
+ *
+ *   flow: GameFlow({
+ *     victory: (G, ctx) => { ... },
+ *
+ *     phases: [
+ *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *       { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *       ...
+ *     ]
+ *   })
+ * })
  */
 export function GameFlow(config) {
   const initial = {
