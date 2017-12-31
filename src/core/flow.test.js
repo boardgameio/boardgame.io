@@ -35,7 +35,6 @@ test('flow with phases', () => {
     },
   });
 
-  expect(flow.eventNames).toEqual(['endTurn', 'endPhase', 'init']);
   let state = { ctx: flow.setup(2) };
   expect(state.ctx.turn).toBe(0);
   state = flow.reducer(state, { type: 'endTurn' });
