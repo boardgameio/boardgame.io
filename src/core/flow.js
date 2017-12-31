@@ -49,7 +49,9 @@ export function Flow({setup, events}) {
  *
  * This is somewhat analogous to Game(), which creates
  * a reducer to just manage G. It works at a higher level
- * than Flow, also incorporating phases:
+ * than Flow, also incorporating phases. You will typically
+ * not use this directly, but pass it options from the Game
+ * object, which accepts 'victory' and 'phases'.
  *
  * @param {object} config - The config object that specifies various
  *                          things about the flow of the game.
@@ -72,15 +74,13 @@ export function Flow({setup, events}) {
  * Game({
  *   ...
  *
- *   flow: GameFlow({
- *     victory: (G, ctx) => { ... },
+ *   victory: (G, ctx) => { ... },
  *
- *     phases: [
- *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
- *       { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
- *       ...
- *     ]
- *   })
+ *   phases: [
+ *     { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *     { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *     ...
+ *   ]
  * })
  */
 export function GameFlow(config) {
