@@ -54,9 +54,18 @@ export function Flow({setup, events}) {
  *                                 game as keys.
  */
 export function GameFlow(config) {
-  const phaseKeys =
-      config.phases ? Object.keys(config.phases) : [];
+  const initial = {
+    turn: 0,
+    currentPlayer: '0',
+    winner: null,
+  };
 
+  /**
+   * endTurn (Event)
+   *
+   * Ends the current turn.
+   * Passes the turn to the next turn in a round-robin fashion.
+   */
   const endTurn = ({ G, ctx }) => {
     // Update winner.
     let winner = config.victory ? config.victory(G, ctx) : ctx.winner;
@@ -69,6 +78,44 @@ export function GameFlow(config) {
     return { G, ctx: { ...ctx, currentPlayer, turn, winner } };
   };
 
+  // Simple flow if the user doesn't provide a config object.
+  // It provides a single 'endTurn' event, which passes the
+  // turn to players in a round-robin order, and checks for
+  // victory at the end of each turn.
+  if (!config.phases) {
+    return Flow({
+      setup: numPlayers => ({
+        ...initial,
+        numPlayers,
+      }),
+      events: { endTurn },
+    });
+  }
+
+  const phaseKeys = Object.keys(config.phases);
+
+  /**
+   * init (Event)
+   *
+   * Runs any setup code defined for the first phase of the game.
+   * This is called at the beginning of the game automatically
+   * before any turns are made.
+   */
+  const init = (state) => {
+    const currentPhaseConfig = config.phases[state.ctx.phase];
+    if (currentPhaseConfig.setup) {
+      return { ...state, G: currentPhaseConfig.setup(state.G, state.ctx) };
+    }
+    return state;
+  };
+
+  /**
+   * endPhase (Event)
+   *
+   * Ends the current phase.
+   * Also runs any phase cleanup code and setup code for the
+   * next phase (if any).
+   */
   const endPhase = (state) => {
     let G = state.G;
     let ctx = state.ctx;
@@ -94,41 +141,15 @@ export function GameFlow(config) {
     return { ...state, G, ctx: { ...state.ctx, phase, _phaseNum } };
   };
 
-  const init = (state) => {
-    let G = state.G;
-    let ctx = state.ctx;
-
-    const currentPhaseConfig = config.phases[ctx.phase];
-    if (currentPhaseConfig.setup) {
-      G = currentPhaseConfig.setup(G, ctx);
-    }
-
-    return { ...state, G, ctx };
-  };
-
-  let events = { endTurn };
-  if (config.phases) {
-    events = { endTurn, endPhase, init };
-  }
-
   return Flow({
-    setup: (numPlayers) => {
-      const initial = {
-        turn: 0,
-        currentPlayer: '0',
-        numPlayers: numPlayers,
-        winner: null,
-      };
+    setup: (numPlayers) => ({
+      ...initial,
+      numPlayers,
+      phase: phaseKeys[0],
+      _phaseNum: 0,
+    }),
 
-      if (config.phases) {
-        initial._phaseNum = 0;
-        initial.phase = phaseKeys[0];
-      }
-
-      return initial;
-    },
-
-    events,
+    events: { init, endTurn, endPhase }
   });
 }
 
