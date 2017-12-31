@@ -52,8 +52,10 @@ const TicTacToe = Game({
     }
   },
 
-  victory: (G, ctx) => {
-    return IsVictory(G.cells) ? ctx.currentPlayer : null;
+  flow: {
+    victory: (G, ctx) => {
+      return IsVictory(G.cells) ? ctx.currentPlayer : null;
+    }
   }
 });
 

@@ -39,39 +39,40 @@ import { GameFlow } from './flow';
  *     }
  *   },
  *
- *   victory: (G, ctx) => { ... },
- *
- *   phases: [
- *     { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
- *     { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
- *     ...
- *   ]
- *
  *   playerView: (G, ctx, playerID) => { ... },
  *
- *   flow: Flow({ ... })
+ *   flow: {
+ *     victory: (G, ctx) => { ... },
+ *
+ *     phases: [
+ *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *       { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *       ...
+ *     ]
+ *   },
  * })
  *
  * @param {...object} setup - Function that returns the initial state of G.
  * @param {...object} moves - A dictionary of move functions.
- * @param {...object} victory - A function that returns the ID of the
- *                              winner (if there is any).
- * @param {...object} phases - Option for GameFlow (see flow.js).
  * @param {...object} playerView - A function that returns a
  *                                 derivative of G tailored for
  *                                 the specified player.
- * @param {...object} flow - Customize the flow of the game.
+ * @param {...object} flow - Customize the flow of the game (see flow.js).
  */
-function Game({setup, moves, victory, phases, playerView, flow}) {
+function Game({setup, moves, playerView, flow}) {
   if (!setup)       setup = () => ({});
   if (!moves)       moves = {};
-  if (!victory)     victory = () => null;
   if (!playerView)  playerView = G => G;
-  if (!flow)        flow = GameFlow({ victory, phases });
+
+  if (!flow) {
+    flow = GameFlow({});
+  } else if (flow.victory || flow.phases) {
+    if (!flow.victory) flow.victory = () => null;
+    flow = GameFlow(flow);
+  }
 
   return {
     setup,
-    victory,
     playerView,
     flow,
     moveNames: Object.getOwnPropertyNames(moves),
