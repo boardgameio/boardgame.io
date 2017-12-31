@@ -52,7 +52,10 @@ import { GameFlow } from './flow';
  * @param {...object} setup - Function that returns the initial state of G.
  * @param {...object} moves - A dictionary of move functions.
  * @param {...object} victory - A function that returns the ID of the
- *                              winner (if there is any).
+ *                              winner (if there is any). This is a convenience
+ *                              shortcut for the victory field in GameFlow in case
+ *                              you don't specify the flow option. If you define a flow,
+ *                              specify victory there!
  * @param {...object} playerView - A function that returns a
  *                                 derivative of G tailored for
  *                                 the specified player.
