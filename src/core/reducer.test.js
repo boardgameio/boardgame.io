@@ -17,7 +17,9 @@ const game = Game({
     'B': () => ({ moved: true }),
     'C': () => ({ victory: true })
   },
-  victory: (G, ctx) => G.victory ? ctx.currentPlayer : null
+  flow: {
+    victory: (G, ctx) => G.victory ? ctx.currentPlayer : null
+  }
 });
 
 const endTurn = () => gameEvent({ type: 'endTurn' });
