@@ -92,8 +92,6 @@ export function GameFlow(config) {
     });
   }
 
-  const phaseKeys = Object.keys(config.phases);
-
   /**
    * init (Event)
    *
@@ -102,7 +100,7 @@ export function GameFlow(config) {
    * before any turns are made.
    */
   const init = (state) => {
-    const currentPhaseConfig = config.phases[state.ctx.phase];
+    const currentPhaseConfig = config.phases[0];
     if (currentPhaseConfig.setup) {
       return { ...state, G: currentPhaseConfig.setup(state.G, state.ctx) };
     }
@@ -121,19 +119,19 @@ export function GameFlow(config) {
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    const currentPhaseConfig = config.phases[ctx.phase];
+    const currentPhaseConfig = config.phases[ctx._phaseNum];
     if (currentPhaseConfig.cleanup) {
       G = currentPhaseConfig.cleanup(G, ctx);
     }
 
     // Update the phase.
     const _phaseNum =
-        (ctx._phaseNum + 1) % phaseKeys.length;
-    const phase = phaseKeys[_phaseNum];
+        (ctx._phaseNum + 1) % config.phases.length;
+    const phase = config.phases[_phaseNum].name;
     ctx = { ...ctx, _phaseNum, phase };
 
     // Run any setup code for the new phase.
-    const newPhaseConfig = config.phases[ctx.phase];
+    const newPhaseConfig = config.phases[ctx._phaseNum];
     if (newPhaseConfig.setup) {
       G = newPhaseConfig.setup(G, ctx);
     }
@@ -145,7 +143,7 @@ export function GameFlow(config) {
     setup: (numPlayers) => ({
       ...initial,
       numPlayers,
-      phase: phaseKeys[0],
+      phase: config.phases[0].name,
       _phaseNum: 0,
     }),
 

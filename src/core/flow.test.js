@@ -29,10 +29,10 @@ test('default flow', () => {
 
 test('flow with phases', () => {
   const flow = GameFlow({
-    phases: {
-      'A': {},
-      'B': {},
-    },
+    phases: [
+      { name: 'A' },
+      { name: 'B' },
+    ],
   });
 
   let state = { ctx: flow.setup(2) };
@@ -49,11 +49,9 @@ test('flow with phases', () => {
 
 test('init does nothing if first phase has no setup', () => {
   const flow = GameFlow({
-    phases: {
-      'A': {
-        cleanup: s => ({ ...s, 'cleanupA': true }),
-      },
-    },
+    phases: [
+      { name: 'A', cleanup: s => ({ ...s, 'cleanupA': true }) },
+    ],
   });
 
   const ctx = flow.setup(2);
@@ -64,16 +62,18 @@ test('init does nothing if first phase has no setup', () => {
 
 test('setup / cleanup', () => {
   const flow = GameFlow({
-    phases: {
-      'A': {
+    phases: [
+      {
+        name: 'A',
         setup: s => ({ ...s, 'setupA': true }),
         cleanup: s => ({ ...s, 'cleanupA': true }),
       },
-      'B': {
+      {
+        name: 'B',
         setup: s => ({ ...s, 'setupB': true }),
         cleanup: s => ({ ...s, 'cleanupB': true }),
       },
-    },
+    ],
   });
 
   let state = { G: {}, ctx: flow.setup(2) };
