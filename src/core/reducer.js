@@ -57,13 +57,13 @@ export function createGameReducer({game, numPlayers}) {
       case Actions.MAKE_MOVE: {
         const G = game.reducer(state.G, action.move, state.ctx);
         const log = [...state.log, action];
-        return {...state, G, _id: state._id + 1, log};
+        return {...state, G, log, _id: state._id + 1};
       }
 
       case Actions.GAME_EVENT: {
-        const ctx = game.flow.reducer(state.ctx, action.e, state.G);
+        const { G, ctx } = game.flow.reducer({ G: state.G, ctx: state.ctx }, action.e);
         const log = [...state.log, action];
-        return {...state, ctx, _id: state._id + 1, log};
+        return {...state, G, ctx, log, _id: state._id + 1};
       }
 
       case Actions.RESTORE: {
