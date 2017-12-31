@@ -69,16 +69,46 @@ export function GameFlow(config) {
     return { G, ctx: { ...ctx, currentPlayer, turn, winner } };
   };
 
-  const endPhase = ({ G, ctx }) => {
+  const endPhase = (state) => {
+    let G = state.G;
+    let ctx = state.ctx;
+
+    // Run any cleanup code for the phase that is about to end.
+    const currentPhaseConfig = config.phases[ctx.phase];
+    if (currentPhaseConfig.cleanup) {
+      G = currentPhaseConfig.cleanup(G, ctx);
+    }
+
+    // Update the phase.
     const _phaseNum =
         (ctx._phaseNum + 1) % phaseKeys.length;
     const phase = phaseKeys[_phaseNum];
-    return { G, ctx: { ...ctx, phase, _phaseNum } };
+    ctx = { ...ctx, _phaseNum, phase };
+
+    // Run any setup code for the new phase.
+    const newPhaseConfig = config.phases[ctx.phase];
+    if (newPhaseConfig.setup) {
+      G = newPhaseConfig.setup(G, ctx);
+    }
+
+    return { ...state, G, ctx: { ...state.ctx, phase, _phaseNum } };
+  };
+
+  const init = (state) => {
+    let G = state.G;
+    let ctx = state.ctx;
+
+    const currentPhaseConfig = config.phases[ctx.phase];
+    if (currentPhaseConfig.setup) {
+      G = currentPhaseConfig.setup(G, ctx);
+    }
+
+    return { ...state, G, ctx };
   };
 
   let events = { endTurn };
   if (config.phases) {
-    events = { endTurn, endPhase };
+    events = { endTurn, endPhase, init };
   }
 
   return Flow({

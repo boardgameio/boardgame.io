@@ -42,6 +42,10 @@ export function createGameReducer({game, numPlayers}) {
     _initial: {}
   };
 
+  const state = game.flow.reducer({ G: initial.G, ctx: initial.ctx }, { type: 'init' });
+  initial.G = state.G;
+  initial.ctx = state.ctx;
+
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
 
