@@ -26,13 +26,13 @@ import PropTypes from 'prop-types';
  *   <Token x={1} y={2}>
  *     <Knight color='dark' />
  *   </Token>
- * </svg>
+ * </Grid>
  *
  * or
  *
  * <Grid rows={1} cols={1} style={{width: '500px'}}>
  *   <Knight color='dark' />
- * </svg>
+ * </Grid>
  */
 class Grid extends React.Component {
   static propTypes = {
