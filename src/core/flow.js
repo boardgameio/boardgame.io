@@ -9,7 +9,7 @@
 import * as ActionCreators from './action-creators';
 
 /**
- * Helper to create a reducer that manages ctx.
+ * Helper to create a reducer that manages ctx (and G).
  *
  * You probably want GameFlow below, but you might
  * need to use this directly if you are creating
@@ -29,10 +29,10 @@ export function Flow({setup, events}) {
   return {
     setup,
     eventNames: Object.getOwnPropertyNames(events),
-    reducer: (state, action, G) => {
+    reducer: (state, action) => {
       if (events.hasOwnProperty(action.type)) {
         const context = events[action.type];
-        const args = [state, G].concat(action.args);
+        const args = [state].concat(action.args);
         return events[action.type].apply(context, args);
       }
       return state;
@@ -53,11 +53,11 @@ export function Flow({setup, events}) {
  * @param {object} config.phases - An object specifying the phases of the
  *                                 game as keys.
  */
-export const GameFlow = config => {
+export function GameFlow(config) {
   const phaseKeys =
       config.phases ? Object.keys(config.phases) : [];
 
-  const endTurn = (ctx, G) => {
+  const endTurn = ({ G, ctx }) => {
     // Update winner.
     let winner = config.victory ? config.victory(G, ctx) : ctx.winner;
     // Update current player.
@@ -65,20 +65,20 @@ export const GameFlow = config => {
         (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
     // Update turn.
     const turn = ctx.turn + 1;
-    // Return new ctx.
-    return {...ctx, currentPlayer, turn, winner};
+    // Return new state.
+    return { G, ctx: { ...ctx, currentPlayer, turn, winner } };
   };
 
-  const endPhase = ctx => {
+  const endPhase = ({ G, ctx }) => {
     const _phaseNum =
         (ctx._phaseNum + 1) % phaseKeys.length;
     const phase = phaseKeys[_phaseNum];
-    return {...ctx, phase, _phaseNum};
+    return { G, ctx: { ...ctx, phase, _phaseNum } };
   };
 
   let events = { endTurn };
   if (config.phases) {
-    events = {endTurn, endPhase};
+    events = { endTurn, endPhase };
   }
 
   return Flow({

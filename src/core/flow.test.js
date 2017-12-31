@@ -21,10 +21,10 @@ test('default flow', () => {
   const flow = GameFlow({});
 
   expect(flow.eventNames).toEqual(['endTurn']);
-  let ctx = flow.setup(2);
-  expect(ctx.turn).toBe(0);
-  ctx = flow.reducer(ctx, { type: 'endTurn' });
-  expect(ctx.turn).toBe(1);
+  let state = { ctx: flow.setup(2) };
+  expect(state.ctx.turn).toBe(0);
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.turn).toBe(1);
 });
 
 test('flow with phases', () => {
@@ -36,16 +36,16 @@ test('flow with phases', () => {
   });
 
   expect(flow.eventNames).toEqual(['endTurn', 'endPhase']);
-  let ctx = flow.setup(2);
-  expect(ctx.turn).toBe(0);
-  ctx = flow.reducer(ctx, { type: 'endTurn' });
-  expect(ctx.turn).toBe(1);
+  let state = { ctx: flow.setup(2) };
+  expect(state.ctx.turn).toBe(0);
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.turn).toBe(1);
 
-  expect(ctx.phase).toBe('A');
-  ctx = flow.reducer(ctx, { type: 'endPhase' });
-  expect(ctx.phase).toBe('B');
-  ctx = flow.reducer(ctx, { type: 'endPhase' });
-  expect(ctx.phase).toBe('A');
+  expect(state.ctx.phase).toBe('A');
+  state = flow.reducer(state, { type: 'endPhase' });
+  expect(state.ctx.phase).toBe('B');
+  state = flow.reducer(state, { type: 'endPhase' });
+  expect(state.ctx.phase).toBe('A');
 });
 
 test('dispatchers', () => {
