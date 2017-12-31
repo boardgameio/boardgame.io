@@ -13,5 +13,6 @@
     "no-param-reassign": "off",
     "no-tabs": "error",
     "no-trailing-spaces": "error",
+    "space-infix-ops": ["error", {"int32Hint": false}],
   }
 }
