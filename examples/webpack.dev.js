@@ -16,7 +16,7 @@ const port = (process.env.PORT || 8000);
 module.exports = {
   entry: [
     'webpack-hot-middleware/client',
-    path.resolve(__dirname, 'app.js')
+    path.resolve(__dirname, 'index.js')
   ],
 
   output: {
@@ -28,8 +28,8 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './index.html')}),
-    new webpack.HotModuleReplacementPlugin(),
-    new OpenBrowserPlugin({ url: `http://localhost:${port}/` })
+      new webpack.HotModuleReplacementPlugin(),
+      new OpenBrowserPlugin({ url: `http://localhost:${port}/` })
   ],
 
   module: {
@@ -47,6 +47,20 @@ module.exports = {
         exclude: /node_modules/,
         loaders: ['style-loader', 'css-loader', 'sass-loader']
       },
+      {
+        test: /\.svg$/,
+        use: [
+          {
+            loader: "babel-loader"
+          },
+          {
+            loader: "react-svg-loader",
+            options: {
+              jsx: true // true outputs JSX tags
+            }
+          }
+        ]
+      }
     ],
   },
 };

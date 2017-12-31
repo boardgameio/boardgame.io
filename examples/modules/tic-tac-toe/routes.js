@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Singleplayer from './singleplayer';
-import Multiplayer from './multiplayer';
-import Spectator from './spectator';
+import Singleplayer from './components/singleplayer';
+import Multiplayer from './components/multiplayer';
+import Spectator from './components/spectator';
 
 const routes = [
   {

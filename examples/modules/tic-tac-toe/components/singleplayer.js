@@ -8,9 +8,8 @@
 
 import React from 'react';
 import Client from 'boardgame.io/client';
-
-import TicTacToe from '../tic-tac-toe/game';
-import Board from '../tic-tac-toe/board';
+import TicTacToe from '../../../game';
+import Board from './board';
 
 const App = Client({
   game: TicTacToe,

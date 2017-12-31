@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import './index.css';
+import './board.css';
 
 class Board extends React.Component {
   static propTypes = {
