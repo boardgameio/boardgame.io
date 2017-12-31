@@ -18,8 +18,7 @@ test('Flow', () => {
 });
 
 test('default flow', () => {
-  const game = Game({});
-  const flow = GameFlow({})(game);
+  const flow = GameFlow({});
 
   expect(flow.eventNames).toEqual(['endTurn']);
   let ctx = flow.setup(2);
@@ -29,13 +28,12 @@ test('default flow', () => {
 });
 
 test('flow with phases', () => {
-  const game = Game({});
   const flow = GameFlow({
     phases: {
       'A': {},
       'B': {},
     },
-  })(game);
+  });
 
   expect(flow.eventNames).toEqual(['endTurn', 'endPhase']);
   let ctx = flow.setup(2);
