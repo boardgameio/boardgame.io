@@ -74,7 +74,7 @@ export class GameLog extends React.Component {
              className="log-turn"
              onMouseOver={() => this.onRewind(turnToLogIndex[i])}
              onMouseOut={() => this.onRewind(null)}>
-        <div className="id">Turn #{i+1}</div>
+        <div className="id">Turn #{i + 1}</div>
         {turn}
         </div>
       );
