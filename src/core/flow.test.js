@@ -33,6 +33,8 @@ test('FlowWithPhases', () => {
     phases: [
       { name: 'A' },
       { name: 'B' },
+      { name: 'C' },
+      { name: 'D' },
     ],
   });
 
@@ -45,6 +47,8 @@ test('FlowWithPhases', () => {
   state = flow.reducer(state, { type: 'endPhase' });
   expect(state.ctx.phase).toBe('B');
   state = flow.reducer(state, { type: 'endPhase' });
+  expect(state.ctx.phase).toBe('C');
+  state = flow.reducer(state, { type: 'endPhase', args: ['A'] });
   expect(state.ctx.phase).toBe('A');
 });
 
