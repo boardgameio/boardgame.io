@@ -66,8 +66,7 @@ function Game({setup, moves, playerView, flow}) {
 
   if (!flow) {
     flow = GameFlow({});
-  } else if (flow.victory || flow.phases) {
-    if (!flow.victory) flow.victory = () => null;
+  } else if (typeof flow === 'object' && !flow.reducer) {
     flow = GameFlow(flow);
   }
 
