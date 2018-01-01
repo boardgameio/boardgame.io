@@ -81,6 +81,9 @@ export function Flow({setup, events, validator}) {
  *   allowedMoves: ['moveA', ...],
  * }
  *
+ * A phase ends when the phaseEndCondition is met, or if the
+ * game reducer receives a 'endPhase' game event.
+ *
  * @param {function} config.victory - Function that returns the
  *     ID of the player that won if the game is in a victory state.
  *     Signature: (G, ctx) => { ... },
@@ -97,7 +100,7 @@ export function GameFlow(config) {
   };
 
   /**
-   * endPhase (Event)
+   * endPhase (game event)
    *
    * Ends the current phase.
    * Also runs any phase cleanup code and setup code for the
@@ -129,7 +132,7 @@ export function GameFlow(config) {
   };
 
   /**
-   * endTurn (Event)
+   * endTurn (game event)
    *
    * Ends the current turn.
    * Passes the turn to the next turn in a round-robin fashion.
