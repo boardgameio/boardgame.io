@@ -9,6 +9,7 @@
 import Game from './game';
 import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
+import { makeMove, gameEvent } from './action-creators';
 import { Flow, createEventDispatchers, GameFlow } from './flow';
 
 test('Flow', () => {
@@ -135,6 +136,59 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('0');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('3');
+});
+
+test('validator', () => {
+  let flow;
+  flow = Flow({});
+  expect(flow.validator()).toBe(true);
+  flow = Flow({ validator: () => false });
+  expect(flow.validator()).toBe(false);
+
+  let game = Game({
+    moves: {
+      'A': () => ({ A: true }),
+      'B': () => ({ B: true }),
+    },
+
+    flow: {
+      phases: [
+        { name: 'A', allowedMoves: 'A' },
+        { name: 'B', allowedMoves: 'B' },
+        { name: 'C' },
+      ]
+    }
+  });
+
+  const reducer = createGameReducer({game, numPlayers: 2});
+  let state = reducer(undefined, { type: 'init' });
+  expect(state.ctx.phase).toBe('A');
+
+  // B is disallowed in phase A.
+  state = reducer(state, makeMove({ type: 'B' }));
+  expect(state.G).toEqual({});
+  state = reducer(state, makeMove({ type: 'A' }));
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, gameEvent({ type: 'endPhase' }));
+  state.G = {};
+  expect(state.ctx.phase).toBe('B');
+
+  // A is disallowed in phase B.
+  state = reducer(state, makeMove({ type: 'A' }));
+  expect(state.G).toEqual({});
+  state = reducer(state, makeMove({ type: 'B' }));
+  expect(state.G).toEqual({ B: true });
+
+  state = reducer(state, gameEvent({ type: 'endPhase' }));
+  state.G = {};
+  expect(state.ctx.phase).toBe('C');
+
+  // All moves are allowed in phase C.
+  state = reducer(state, makeMove({ type: 'A' }));
+  expect(state.G).toEqual({ A: true });
+  state = reducer(state, makeMove({ type: 'B' }));
+  expect(state.G).toEqual({ B: true });
 });
 
 test('dispatchers', () => {

@@ -59,6 +59,10 @@ export function createGameReducer({game, numPlayers}) {
   return (state = initial, action) => {
     switch (action.type) {
       case Actions.MAKE_MOVE: {
+        // Ignore the move if it isn't valid at this point.
+        if (!game.flow.validator(state.G, state.ctx, action.move)) {
+          return state;
+        }
         const G = game.reducer(state.G, action.move, state.ctx);
         const log = [...state.log, action];
         return {...state, G, log, _id: state._id + 1};
