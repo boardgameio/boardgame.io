@@ -100,12 +100,12 @@ test('action', () => {
   expect(io.socket.emit).lastCalledWith(
     'sync', 'gameID', {
     G: {},
-    ctx: {currentPlayer: '1', numPlayers: 2, turn: 1, winner: null},
+    ctx: {currentPlayer: '1', numPlayers: 2, turn: 1},
     log: [{type: "GAME_EVENT", e: {type: "endTurn"}}],
     _id: 1,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
+      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0},
       log: []
     }
   });
@@ -142,12 +142,12 @@ test('playerView', () => {
   io.socket.receive('sync', 'gameID', 0);
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {player: 0},
-    ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
+    ctx: {currentPlayer: '0', numPlayers: 2, turn: 0},
     log: [],
     _id: 0,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
+      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0},
       log: []
     }
   });

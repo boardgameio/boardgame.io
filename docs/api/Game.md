@@ -14,7 +14,9 @@ Game({
   flow: {
     // Determines the winner.
     victory: (G, ctx) => {
-      return IsVictory(G) ? ctx.currentPlayer : null;
+      if (IsVictory(G)) {
+        return ctx.currentPlayer;
+      }
     },
   }
 
@@ -52,9 +54,9 @@ have `action.type` contain the name of the move, and
     are pure functions that return the new value of `G` once
     the move has been processed.
   - `playerView` (*function*): Returns a version of `G` that
-    is customized for a given player. See the document on
-    [Secret State](/secret-state) for more information.
-  - `flow` (*object*): Arguments to a `GameFlow`, to customize the flow of the game.
+    is customized for a given player. See [Secret State](/secret-state) for more information.
+  - `flow` (*object*): Arguments to customize the flow of the game. See
+    [Phases](/phases) for more information.
 
 ### Returns
 
@@ -87,9 +89,11 @@ const game = Game({
   },
 
   flow: {
-    victory: function(G, ctx)  {
-      return IsWinner(G, ctx.currentPlayer) ? ctx.currentPlayer : null;
-    }
+    victory: (G, ctx) => {
+      if (IsWinner(G, ctx.currentPlayer)) {
+        return ctx.currentPlayer;
+      }
+    },
   },
 
   playerView: (G, ctx) => {
