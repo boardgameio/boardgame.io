@@ -16,19 +16,27 @@ import * as ActionCreators from './action-creators';
  * need to use this directly if you are creating
  * a very customized game flow that GameFlow cannot handle.
  *
- * @param {...object} ctx - The initial value of ctx.
+ * @param {...object} setup - Function with the signature
+ *                            numPlayers => ctx
+ *                            that determines the initial value of ctx.
  * @param {...object} events - Object containing functions
  *                             named after events that this
  *                             reducer will handle. Each function
  *                             has the following signature:
- *                             (ctx, G) => ctx
+ *                             ({G, ctx}) => {G, ctx}
+ * @param {...object} validator - A move validator that returns false
+ *                                if a particular type of move is invalid
+ *                                at this point in the game.
+ *                                (G, ctx, moveName) => boolean
  */
-export function Flow({setup, events}) {
-  if (!setup)  setup = () => ({});
-  if (!events) events = {};
+export function Flow({setup, events, validator}) {
+  if (!setup)     setup = () => ({});
+  if (!events)    events = {};
+  if (!validator) validator = () => true;
 
   return {
     setup,
+    validator,
     eventNames: Object.getOwnPropertyNames(events),
     reducer: (state, action) => {
       if (events.hasOwnProperty(action.type)) {
@@ -69,6 +77,8 @@ export function Flow({setup, events}) {
  *   // Called when `endTurn` is processed and returns the next player.
  *   // If not specified, the default round-robin is used.
  *   turnOrder: (G, ctx) => playerID
+ *   // List of moves that are allowed in this phase.
+ *   allowedMoves: ['moveA', ...],
  * }
  *
  * @param {function} config.victory - Function that returns the
@@ -182,11 +192,20 @@ export function GameFlow(config) {
    * before any turns are made.
    */
   const init = (state) => {
-    const currentPhaseConfig = config.phases[0];
-    if (currentPhaseConfig.setup) {
-      return { ...state, G: currentPhaseConfig.setup(state.G, state.ctx) };
+    const conf = config.phases[0];
+    if (conf.setup) {
+      return { ...state, G: conf.setup(state.G, state.ctx) };
     }
     return state;
+  };
+
+  const validator = (G, ctx, move) => {
+    const conf = config.phases[ctx._phaseNum];
+    if (conf.allowedMoves) {
+      const set = new Set(conf.allowedMoves);
+      return set.has(move.type);
+    }
+    return true;
   };
 
   return Flow({
@@ -196,8 +215,8 @@ export function GameFlow(config) {
       phase: config.phases[0].name,
       _phaseNum: 0,
     }),
-
-    events: { init, endTurn, endPhase }
+    events: { init, endTurn, endPhase },
+    validator,
   });
 }
 
