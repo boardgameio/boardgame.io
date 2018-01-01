@@ -22,7 +22,7 @@ test('SimpleFlow', () => {
   const flow = SimpleFlow({});
 
   expect(flow.eventNames).toEqual(['endTurn']);
-  let state = { ctx: flow.setup(2) };
+  let state = { ctx: flow.ctx(2) };
   expect(state.ctx.turn).toBe(0);
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.turn).toBe(1);
@@ -36,7 +36,7 @@ test('FlowWithPhases', () => {
     ],
   });
 
-  let state = { ctx: flow.setup(2) };
+  let state = { ctx: flow.ctx(2) };
   expect(state.ctx.turn).toBe(0);
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.turn).toBe(1);
@@ -55,7 +55,7 @@ test('init', () => {
     ],
   });
 
-  const orig = flow.setup(2);
+  const orig = flow.ctx(2);
   let state = { ctx: orig };
   state = flow.reducer(state, { type: 'init' });
   expect(state).toEqual({ ctx: orig });
@@ -87,7 +87,7 @@ test('setup / cleanup', () => {
     ],
   });
 
-  let state = { G: {}, ctx: flow.setup(2) };
+  let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.reducer(state, { type: 'init' });
   expect(state.G).toEqual({ 'setupA': true });
   state = flow.reducer(state, { type: 'endPhase' });
@@ -109,7 +109,7 @@ test('phaseEndCondition', () => {
     ],
   });
 
-  let state = { ctx: flow.setup(2) };
+  let state = { ctx: flow.ctx(2) };
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.phase).toBe('A');
   state = flow.reducer(state, { type: 'endTurn' });
@@ -121,7 +121,7 @@ test('turnOrder', () => {
     phases: [{ name: 'A' }],
   });
 
-  let state = { ctx: flow.setup(10) };
+  let state = { ctx: flow.ctx(10) };
   state = flow.reducer(state, { type: 'init' });
   expect(state.ctx.currentPlayer).toBe('0');
   state = flow.reducer(state, { type: 'endTurn' });
@@ -133,7 +133,7 @@ test('turnOrder', () => {
     ],
   });
 
-  state = { ctx: flow.setup(10) };
+  state = { ctx: flow.ctx(10) };
   state = flow.reducer(state, { type: 'init' });
   expect(state.ctx.currentPlayer).toBe('any');
   state = flow.reducer(state, { type: 'endTurn' });
@@ -145,7 +145,7 @@ test('turnOrder', () => {
     ],
   });
 
-  state = { ctx: flow.setup(10) };
+  state = { ctx: flow.ctx(10) };
   state = flow.reducer(state, { type: 'init' });
   expect(state.ctx.currentPlayer).toBe('10');
   state = flow.reducer(state, { type: 'endTurn' });
@@ -208,7 +208,7 @@ test('validator', () => {
 test('victory', () => {
   const flow = FlowWithPhases({ victory: G => G.win });
 
-  let state = { G: {}, ctx: flow.setup(2) };
+  let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.winner).toBe(undefined);
 

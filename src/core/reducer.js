@@ -26,7 +26,7 @@ export function createGameReducer({game, numPlayers}) {
     G: game.setup(numPlayers),
 
     // Framework managed state.
-    ctx: game.flow.setup(numPlayers),
+    ctx: game.flow.ctx(numPlayers),
 
     // A list of actions performed so far. Used by the
     // GameLog to display a journal of moves.

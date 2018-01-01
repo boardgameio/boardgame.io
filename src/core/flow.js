@@ -29,13 +29,13 @@ import * as ActionCreators from './action-creators';
  *                                at this point in the game.
  *                                (G, ctx, moveName) => boolean
  */
-export function Flow({setup, events, validator}) {
-  if (!setup)     setup = () => ({});
+export function Flow({ctx, events, validator}) {
+  if (!ctx)       ctx = () => ({});
   if (!events)    events = {};
   if (!validator) validator = () => true;
 
   return {
-    setup,
+    ctx,
     validator,
     eventNames: Object.getOwnPropertyNames(events),
     reducer: (state, action) => {
@@ -106,7 +106,7 @@ export function SimpleFlow({ victory }) {
   };
 
   return Flow({
-    setup: numPlayers => ({
+    ctx: numPlayers => ({
       numPlayers,
       turn: 0,
       currentPlayer: '0',
@@ -253,7 +253,7 @@ export function FlowWithPhases({ phases, victory }) {
   };
 
   return Flow({
-    setup: numPlayers => ({
+    ctx: numPlayers => ({
       numPlayers,
       turn: 0,
       currentPlayer: '0',
