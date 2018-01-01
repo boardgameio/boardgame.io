@@ -141,13 +141,13 @@ test('turnOrder', () => {
 
   flow = GameFlow({
     phases: [
-      { name: 'A', turnOrder: () => '3' },
+      { name: 'A', turnOrder: { first: () => '10', next: () => '3' } }
     ],
   });
 
   state = { ctx: flow.setup(10) };
   state = flow.reducer(state, { type: 'init' });
-  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.currentPlayer).toBe('10');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('3');
 });

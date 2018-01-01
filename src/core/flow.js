@@ -60,10 +60,16 @@ export function Flow({setup, events, validator}) {
  */
 export const TurnOrder = {
   // Default round-robin order.
-  DEFAULT: (G, ctx) => ((+ctx.currentPlayer + 1) % ctx.numPlayers + ""),
+  DEFAULT: {
+    first: (G, ctx) => ctx.currentPlayer,
+    next: (G, ctx) => ((+ctx.currentPlayer + 1) % ctx.numPlayers + ""),
+  },
 
   // Any player can play and there isn't a currentPlayer really.
-  ANY: () => 'any',
+  ANY: {
+    first: () => 'any',
+    next: () => 'any',
+  },
 };
 
 /**
@@ -93,7 +99,13 @@ export const TurnOrder = {
  *   phaseEndCondition: (G, ctx) => boolean
  *   // Called when `endTurn` is processed, and returns the next player.
  *   // If not specified, TurnOrder.DEFAULT is used.
- *   turnOrder: (G, ctx) => playerID
+ *   turnOrder: {
+ *     // The first player.
+ *     first: (G, ctx) => playerID,
+ *     // Called whenever `endTurn` is processed to determine
+ *     // the next player.
+ *     next: (G, ctx) => playerID,
+ *   },
  *   // List of moves that are allowed in this phase.
  *   allowedMoves: ['moveA', ...],
  * }
@@ -106,6 +118,24 @@ export const TurnOrder = {
  *     Signature: (G, ctx) => { ... },
  */
 export function GameFlow(config) {
+  // Attach defaults.
+  if (config.phases) {
+    for (let conf of config.phases) {
+      if (!conf.turnOrder) {
+        conf.turnOrder = TurnOrder.DEFAULT;
+      }
+      if (!conf.phaseEndCondition) {
+        conf.phaseEndCondition = () => false;
+      }
+      if (!conf.setup) {
+        conf.setup = G => G;
+      }
+      if (!conf.cleanup) {
+        conf.cleanup = G => G;
+      }
+    }
+  }
+
   const initial = {
     turn: 0,
     currentPlayer: '0',
@@ -114,16 +144,9 @@ export function GameFlow(config) {
 
   // Helper to perform start-of-phase initialization.
   const startPhase = (state, phaseConfig) => {
-    if (phaseConfig.setup) {
-      const G = phaseConfig.setup(state.G, state.ctx);
-      state = { ...state, G };
-    }
-
-    if (phaseConfig.turnOrder == TurnOrder.ANY) {
-      state = { ...state, ctx: { ...state.ctx, currentPlayer: 'any' } };
-    }
-
-    return state;
+    const G = phaseConfig.setup(state.G, state.ctx);
+    const currentPlayer = phaseConfig.turnOrder.first(G, state.ctx);
+    return { ...state, G, ctx: { ...state.ctx, currentPlayer } };
   };
 
   /**
@@ -139,13 +162,10 @@ export function GameFlow(config) {
 
     // Run any cleanup code for the phase that is about to end.
     const currentPhaseConfig = config.phases[ctx._phaseNum];
-    if (currentPhaseConfig.cleanup) {
-      G = currentPhaseConfig.cleanup(G, ctx);
-    }
+    G = currentPhaseConfig.cleanup(G, ctx);
 
     // Update the phase.
-    const _phaseNum =
-        (ctx._phaseNum + 1) % config.phases.length;
+    const _phaseNum = (ctx._phaseNum + 1) % config.phases.length;
     const phase = config.phases[_phaseNum].name;
     ctx = { ...ctx, _phaseNum, phase };
 
@@ -161,8 +181,8 @@ export function GameFlow(config) {
    * Passes the turn to the next turn in a round-robin fashion.
    */
   const endTurn = (state) => {
-    let turnOrder = TurnOrder.DEFAULT;
     let phaseEndCondition = () => false;
+    let turnOrder = TurnOrder.DEFAULT;
 
     if (config.phases) {
       const conf = config.phases[state.ctx._phaseNum];
@@ -180,7 +200,7 @@ export function GameFlow(config) {
     let winner = config.victory ? config.victory(state.G, state.ctx) : state.ctx.winner;
 
     // Update current player.
-    const currentPlayer = turnOrder(state.G, state.ctx);
+    const currentPlayer = turnOrder.next(state.G, state.ctx);
 
     // Update turn.
     const turn = state.ctx.turn + 1;
