@@ -133,11 +133,11 @@ export function SimpleFlow({ gameEndIf }) {
  *   onPhaseBegin: (G, ctx) => G,
  *   // Any cleanup code to run after the phase ends.
  *   onPhaseEnd: (G, ctx) => G,
- *   // The phase ends if this function returns true.
- *   // The next phase is chosen in a round-robin fashion.
- *   // However, if the function returns a phase name, that
- *   // will be used as the next phase.
- *   phaseEndIf: (G, ctx) => boolean|string
+ *   // The phase ends if this function returns anything.
+ *   // If the return value is the name of another phase,
+ *   // that will be chosen as the next phase (as opposed
+ *   // to the next one in round-robin order).
+ *   phaseEndIf: (G, ctx) => {}
  *   // Called when `endTurn` is processed, and returns the next player.
  *   // If not specified, TurnOrder.DEFAULT is used.
  *   turnOrder: {
@@ -151,8 +151,8 @@ export function SimpleFlow({ gameEndIf }) {
  *   allowedMoves: ['moveA', ...],
  * }
  *
- * The phase ends when the phaseEndIf is met, or if the
- * game reducer receives a 'endPhase' game event.
+ * The phase ends when phaseEndIf is met, or if the
+ * game reducer receives a `endPhase` game event.
  *
  * @param {...object} gameEndIf - (G, ctx) => {}
  * The game ends if this returns anything other than undefined.
