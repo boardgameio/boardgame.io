@@ -65,7 +65,7 @@ const TicTacToe = BoardgameIO.Game({
   },
 
   flow: {
-    victory: (G, ctx) => {
+    gameEndIf: (G, ctx) => {
       if (IsVictory(G.cells)) {
         return ctx.currentPlayer;
       }
@@ -88,8 +88,8 @@ class TicTacToeBoard extends React.Component {
 
   render() {
     let winner = '';
-    if (this.props.ctx.winner !== null) {
-      winner = <div>Winner: {this.props.ctx.winner}</div>;
+    if (this.props.ctx.gameEnd !== null) {
+      winner = <div>Winner: {this.props.ctx.gameEnd}</div>;
     }
 
     const cellStyle = {

@@ -51,7 +51,7 @@ test('makeMove changes the game state', () => {
   expect(board.props.G).toEqual({
     cells: ['0', '1'].concat(Grid(7))
   });
-  expect(board.props.ctx.winner).toEqual(undefined);
+  expect(board.props.ctx.gameEnd).toEqual(undefined);
 });
 
 test('clicked cells are inactive', () => {
@@ -70,7 +70,7 @@ test('victory', () => {
   expect(board.props.G).toEqual({
     cells: cells
   });
-  expect(board.props.ctx.winner).toEqual(undefined);
+  expect(board.props.ctx.gameEnd).toEqual(undefined);
 
   const moves = [0, 3, 1, 4, 2];
 
@@ -82,5 +82,5 @@ test('victory', () => {
   expect(board.props.G).toEqual({
     cells: ['0', '0', '0', '1', '1'].concat(Grid(4))
   });
-  expect(board.props.ctx.winner).toEqual('0');
+  expect(board.props.ctx.gameEnd).toEqual('0');
 });
