@@ -9,6 +9,7 @@
 import React from 'react';
 import Client from './client';
 import Game from '../core/game';
+import { TurnOrder } from '../core/flow';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -59,6 +60,24 @@ test('board props', () => {
   expect(board.props().isActive).toBe(true);
   board = Enzyme.mount(<Board playerID={"1"}/>).find(TestBoard);
   expect(board.props().isActive).toBe(false);
+
+  Board = Client({
+    game: Game({
+      flow: {
+        phases: [
+          { name: 'A', turnOrder: TurnOrder.ANY },
+        ],
+      }
+    }),
+    board: TestBoard,
+    multiplayer: true,
+  });
+  board = Enzyme.mount(<Board/>).find(TestBoard);
+  expect(board.props().isActive).toBe(false);
+  board = Enzyme.mount(<Board playerID={"0"}/>).find(TestBoard);
+  expect(board.props().isActive).toBe(true);
+  board = Enzyme.mount(<Board playerID={"1"}/>).find(TestBoard);
+  expect(board.props().isActive).toBe(true);
 });
 
 test('debug ui can be turned off', () => {
