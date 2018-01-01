@@ -47,17 +47,27 @@ test('flow with phases', () => {
   expect(state.ctx.phase).toBe('A');
 });
 
-test('init does nothing if first phase has no setup', () => {
-  const flow = GameFlow({
+test('init', () => {
+  let flow = GameFlow({
     phases: [
-      { name: 'A', cleanup: s => ({ ...s, 'cleanupA': true }) },
+      { name: 'A', cleanup: () => ({ done: true }) },
     ],
   });
 
-  const ctx = flow.setup(2);
-  let state = { G: {}, ctx };
+  const orig = flow.setup(2);
+  let state = { ctx: orig };
   state = flow.reducer(state, { type: 'init' });
-  expect(state.ctx).toEqual(ctx);
+  expect(state).toEqual({ ctx: orig });
+
+  flow = GameFlow({
+    phases: [
+      { name: 'A', setup: () => ({ done: true }) },
+    ],
+  });
+
+  state = { ctx: orig };
+  state = flow.reducer(state, { type: 'init' });
+  expect(state.G).toEqual({ done: true });
 });
 
 test('setup / cleanup', () => {
@@ -88,6 +98,43 @@ test('setup / cleanup', () => {
     'setupB': true,
     'cleanupB': true,
   });
+});
+
+test('phaseEndCondition', () => {
+  const flow = GameFlow({
+    phases: [
+      { name: 'A', phaseEndCondition: (G, ctx) => (ctx.turn > 1) },
+      { name: 'B' },
+    ],
+  });
+
+  let state = { ctx: flow.setup(2) };
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.phase).toBe('A');
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.phase).toBe('B');
+});
+
+test('turnOrder', () => {
+  let flow = GameFlow({
+    phases: [{ name: 'A' }],
+  });
+
+  let state = { ctx: flow.setup(10) };
+  expect(state.ctx.currentPlayer).toBe('0');
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('1');
+
+  flow = GameFlow({
+    phases: [
+      { name: 'A', turnOrder: () => '3' },
+    ],
+  });
+
+  state = { ctx: flow.setup(10) };
+  expect(state.ctx.currentPlayer).toBe('0');
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('3');
 });
 
 test('dispatchers', () => {
