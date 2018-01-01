@@ -54,7 +54,9 @@ const TicTacToe = Game({
 
   flow: {
     victory: (G, ctx) => {
-      return IsVictory(G.cells) ? ctx.currentPlayer : null;
+      if (IsVictory(G.cells)) {
+        return ctx.currentPlayer;
+      }
     }
   }
 });

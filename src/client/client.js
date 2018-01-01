@@ -100,7 +100,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
             }
           }
 
-          if (state.ctx.winner !== null) {
+          if (state.ctx.winner !== undefined) {
             isActive = false;
           }
 

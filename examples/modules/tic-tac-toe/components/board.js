@@ -54,7 +54,7 @@ class Board extends React.Component {
     }
 
     let winner = null;
-    if (this.props.ctx.winner !== null) {
+    if (this.props.ctx.winner !== undefined) {
       winner = <div id='winner'>Winner: {this.props.ctx.winner}</div>;
     }
 

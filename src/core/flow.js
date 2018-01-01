@@ -12,9 +12,9 @@ import * as ActionCreators from './action-creators';
  * Helper to create a reducer that manages ctx (with the
  * ability to also update G).
  *
- * You probably want GameFlow below, but you might
+ * You probably want one of the wrappers below, but you might
  * need to use this directly if you are creating
- * a very customized game flow that GameFlow cannot handle.
+ * a very customized game flow that they cannot handle.
  *
  * @param {...object} setup - Function with the signature
  *                            numPlayers => ctx
@@ -73,22 +73,60 @@ export const TurnOrder = {
 };
 
 /**
- * GameFlow
+ * SimpleFlow
  *
- * Wrapper around Flow that creates a reducer to manage ctx.
- * (with the ability to also update G).
+ * Simple game flow that just passes the turn around in
+ * round-robin fashion without any game phases.
  *
- * This is somewhat analogous to Game(), which creates
- * a reducer to just manage G. It works at a higher level
- * than Flow, also incorporating phases. You will typically
- * not use this directly, but pass it options from the Game
- * object, which accepts 'victory' and 'phases'.
+ * @param {...object} victory - Function that returns the
+ *     ID of the player that won if the game is in a victory state.
+ *     Signature: (G, ctx) => { ... }
+ */
+export function SimpleFlow({ victory }) {
+  if (!victory) victory = () => undefined;
+  /**
+   * endTurn (game event)
+   *
+   * Ends the current turn.
+   * Passes the turn to the next turn in a round-robin fashion.
+   */
+  const endTurn = (state) => {
+    // Update winner.
+    const winner = victory(state.G, state.ctx);
+    // Update current player.
+    const currentPlayer = TurnOrder.DEFAULT.next(state.G, state.ctx);
+    // Update turn.
+    const turn = state.ctx.turn + 1;
+    // Return new state.
+    state = { G: state.G, ctx: { ...state.ctx, currentPlayer, turn } };
+    if (winner !== undefined) {
+      state.ctx.winner = winner;
+    }
+    return state;
+  };
+
+  return Flow({
+    setup: numPlayers => ({
+      numPlayers,
+      turn: 0,
+      currentPlayer: '0',
+    }),
+    events: { endTurn },
+  });
+}
+
+/**
+ * FlowWithPhases
  *
- * @param {object} config - The config object that specifies various
- *                          things about the flow of the game.
+ * A very customizable game flow that introduces phases to the
+ * game. Each phase can be configured with:
+ * - A custom turn order.
+ * - Automatically executed setup / cleanup code.
+ * - Custom phase end conditions.
+ * - A move whitelist that disallows other moves during the phase.
  *
- * @param {Array} config.phases - A list of phases in the game.
- *                                Each phase is described by an object:
+ * @param {...object} phases - A list of phases in the game.
+ * Each phase is described by an object:
  * {
  *   name: 'phase_name',
  *   // Any setup code to run before the phase begins.
@@ -110,37 +148,32 @@ export const TurnOrder = {
  *   allowedMoves: ['moveA', ...],
  * }
  *
- * A phase ends when the phaseEndCondition is met, or if the
+ * The phase ends when the phaseEndCondition is met, or if the
  * game reducer receives a 'endPhase' game event.
  *
- * @param {function} config.victory - Function that returns the
+ * @param {...object} victory - Function that returns the
  *     ID of the player that won if the game is in a victory state.
- *     Signature: (G, ctx) => { ... },
+ *     Signature: (G, ctx) => { ... }
  */
-export function GameFlow(config) {
+export function FlowWithPhases({ phases, victory }) {
   // Attach defaults.
-  if (config.phases) {
-    for (let conf of config.phases) {
-      if (!conf.turnOrder) {
-        conf.turnOrder = TurnOrder.DEFAULT;
-      }
-      if (!conf.phaseEndCondition) {
-        conf.phaseEndCondition = () => false;
-      }
-      if (!conf.setup) {
-        conf.setup = G => G;
-      }
-      if (!conf.cleanup) {
-        conf.cleanup = G => G;
-      }
+  if (!phases)  phases = [{ name: 'default' }];
+  if (!victory) victory = () => undefined;
+
+  for (let conf of phases) {
+    if (!conf.turnOrder) {
+      conf.turnOrder = TurnOrder.DEFAULT;
+    }
+    if (!conf.phaseEndCondition) {
+      conf.phaseEndCondition = () => false;
+    }
+    if (!conf.setup) {
+      conf.setup = G => G;
+    }
+    if (!conf.cleanup) {
+      conf.cleanup = G => G;
     }
   }
-
-  const initial = {
-    turn: 0,
-    currentPlayer: '0',
-    winner: null,
-  };
 
   // Helper to perform start-of-phase initialization.
   const startPhase = (state, phaseConfig) => {
@@ -161,16 +194,16 @@ export function GameFlow(config) {
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    const currentPhaseConfig = config.phases[ctx._phaseNum];
+    const currentPhaseConfig = phases[ctx._phaseNum];
     G = currentPhaseConfig.cleanup(G, ctx);
 
     // Update the phase.
-    const _phaseNum = (ctx._phaseNum + 1) % config.phases.length;
-    const phase = config.phases[_phaseNum].name;
+    const _phaseNum = (ctx._phaseNum + 1) % phases.length;
+    const phase = phases[_phaseNum].name;
     ctx = { ...ctx, _phaseNum, phase };
 
     // Run any setup code for the new phase.
-    const newPhaseConfig = config.phases[ctx._phaseNum];
+    const newPhaseConfig = phases[ctx._phaseNum];
     return startPhase({G, ctx}, newPhaseConfig);
   };
 
@@ -181,69 +214,37 @@ export function GameFlow(config) {
    * Passes the turn to the next turn in a round-robin fashion.
    */
   const endTurn = (state) => {
-    let phaseEndCondition = () => false;
-    let turnOrder = TurnOrder.DEFAULT;
-
-    if (config.phases) {
-      const conf = config.phases[state.ctx._phaseNum];
-
-      if (conf.turnOrder) {
-        turnOrder = conf.turnOrder;
-      }
-
-      if (conf.phaseEndCondition) {
-        phaseEndCondition = conf.phaseEndCondition;
-      }
-    }
-
+    const conf = phases[state.ctx._phaseNum];
     // Update winner.
-    let winner = config.victory ? config.victory(state.G, state.ctx) : state.ctx.winner;
-
+    const winner = victory(state.G, state.ctx);
     // Update current player.
-    const currentPlayer = turnOrder.next(state.G, state.ctx);
-
+    const currentPlayer = conf.turnOrder.next(state.G, state.ctx);
     // Update turn.
     const turn = state.ctx.turn + 1;
-
-    // Return new state.
-    state = { G: state.G, ctx: { ...state.ctx, currentPlayer, turn, winner } };
-
-    // End phase if condition is met.
-    if (phaseEndCondition(state.G, state.ctx)) {
-      state = endPhase(state);
+    // Update state.
+    state = { G: state.G, ctx: { ...state.ctx, currentPlayer, turn } };
+    if (winner !== undefined) {
+      state.ctx.winner = winner;
     }
 
+    // End phase if condition is met.
+    if (conf.phaseEndCondition(state.G, state.ctx)) {
+      state = endPhase(state);
+    }
     return state;
   };
 
-  // Simple flow if the user doesn't provide a config object.
-  // It provides a single 'endTurn' event, which passes the
-  // turn to players in a round-robin order, and checks for
-  // victory at the end of each turn.
-  if (!config.phases) {
-    return Flow({
-      setup: numPlayers => ({
-        ...initial,
-        numPlayers,
-      }),
-      events: { endTurn },
-    });
-  }
-
   /**
-   * init (Event)
+   * init (game event)
    *
    * Runs any setup code defined for the first phase of the game.
    * This is called at the beginning of the game automatically
    * before any turns are made.
    */
-  const init = (state) => {
-    const conf = config.phases[0];
-    return startPhase(state, conf);
-  };
+  const init = (state) => startPhase(state, phases[0]);
 
   const validator = (G, ctx, move) => {
-    const conf = config.phases[ctx._phaseNum];
+    const conf = phases[ctx._phaseNum];
     if (conf.allowedMoves) {
       const set = new Set(conf.allowedMoves);
       return set.has(move.type);
@@ -252,10 +253,11 @@ export function GameFlow(config) {
   };
 
   return Flow({
-    setup: (numPlayers) => ({
-      ...initial,
+    setup: numPlayers => ({
       numPlayers,
-      phase: config.phases[0].name,
+      turn: 0,
+      currentPlayer: '0',
+      phase: phases[0].name,
       _phaseNum: 0,
     }),
     events: { init, endTurn, endPhase },

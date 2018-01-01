@@ -10,7 +10,7 @@ import Game from './game';
 import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
-import { Flow, TurnOrder, createEventDispatchers, GameFlow } from './flow';
+import { Flow, SimpleFlow, FlowWithPhases, TurnOrder, createEventDispatchers } from './flow';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -18,8 +18,8 @@ test('Flow', () => {
   expect(flow.reducer(state, { type: 'unknown' })).toBe(state);
 });
 
-test('default flow', () => {
-  const flow = GameFlow({});
+test('SimpleFlow', () => {
+  const flow = SimpleFlow({});
 
   expect(flow.eventNames).toEqual(['endTurn']);
   let state = { ctx: flow.setup(2) };
@@ -28,8 +28,8 @@ test('default flow', () => {
   expect(state.ctx.turn).toBe(1);
 });
 
-test('flow with phases', () => {
-  const flow = GameFlow({
+test('FlowWithPhases', () => {
+  const flow = FlowWithPhases({
     phases: [
       { name: 'A' },
       { name: 'B' },
@@ -49,7 +49,7 @@ test('flow with phases', () => {
 });
 
 test('init', () => {
-  let flow = GameFlow({
+  let flow = FlowWithPhases({
     phases: [
       { name: 'A', cleanup: () => ({ done: true }) },
     ],
@@ -60,7 +60,7 @@ test('init', () => {
   state = flow.reducer(state, { type: 'init' });
   expect(state).toEqual({ ctx: orig });
 
-  flow = GameFlow({
+  flow = FlowWithPhases({
     phases: [
       { name: 'A', setup: () => ({ done: true }) },
     ],
@@ -72,7 +72,7 @@ test('init', () => {
 });
 
 test('setup / cleanup', () => {
-  const flow = GameFlow({
+  const flow = FlowWithPhases({
     phases: [
       {
         name: 'A',
@@ -102,7 +102,7 @@ test('setup / cleanup', () => {
 });
 
 test('phaseEndCondition', () => {
-  const flow = GameFlow({
+  const flow = FlowWithPhases({
     phases: [
       { name: 'A', phaseEndCondition: (G, ctx) => (ctx.turn > 1) },
       { name: 'B' },
@@ -117,7 +117,7 @@ test('phaseEndCondition', () => {
 });
 
 test('turnOrder', () => {
-  let flow = GameFlow({
+  let flow = FlowWithPhases({
     phases: [{ name: 'A' }],
   });
 
@@ -127,7 +127,7 @@ test('turnOrder', () => {
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('1');
 
-  flow = GameFlow({
+  flow = FlowWithPhases({
     phases: [
       { name: 'A', turnOrder: TurnOrder.ANY },
     ],
@@ -139,7 +139,7 @@ test('turnOrder', () => {
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('any');
 
-  flow = GameFlow({
+  flow = FlowWithPhases({
     phases: [
       { name: 'A', turnOrder: { first: () => '10', next: () => '3' } }
     ],
@@ -203,6 +203,18 @@ test('validator', () => {
   expect(state.G).toEqual({ A: true });
   state = reducer(state, makeMove({ type: 'B' }));
   expect(state.G).toEqual({ B: true });
+});
+
+test('victory', () => {
+  const flow = FlowWithPhases({ victory: G => G.win });
+
+  let state = { G: {}, ctx: flow.setup(2) };
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.winner).toBe(undefined);
+
+  state.G.win = 'A';
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.winner).toBe('A');
 });
 
 test('dispatchers', () => {

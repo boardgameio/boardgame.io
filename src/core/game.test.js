@@ -27,9 +27,9 @@ test('reducer', () => {
 });
 
 test('flow override', () => {
-  const fn = () => {};
+  const f = { reducer: () => {} };
   const game = Game({
-    flow: fn
+    flow: f
   });
-  expect(game.flow).toBe(fn);
+  expect(game.flow).toBe(f);
 });
