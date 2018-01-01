@@ -91,7 +91,10 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
           let isActive = true;
 
           if (multiplayer) {
-            if (this.props.playerID == null ||
+            if (this.props.playerID == null) {
+              isActive = false;
+            }
+            if (state.ctx.currentPlayer != 'any' &&
                 this.props.playerID != state.ctx.currentPlayer) {
               isActive = false;
             }
