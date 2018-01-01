@@ -134,7 +134,10 @@ export function SimpleFlow({ victory }) {
  *   // Any cleanup code to run after the phase ends.
  *   cleanup: (G, ctx) => G,
  *   // The phase ends if this function returns true.
- *   phaseEndCondition: (G, ctx) => boolean
+ *   // The next phase is chosen in a round-robin fashion.
+ *   // However, if the function returns a phase name, that
+ *   // will be used as the next phase.
+ *   phaseEndCondition: (G, ctx) => boolean|string
  *   // Called when `endTurn` is processed, and returns the next player.
  *   // If not specified, TurnOrder.DEFAULT is used.
  *   turnOrder: {
@@ -160,7 +163,12 @@ export function FlowWithPhases({ phases, victory }) {
   if (!phases)  phases = [{ name: 'default' }];
   if (!victory) victory = () => undefined;
 
+  let phaseKeys = [];
+  let phaseMap = {};
   for (let conf of phases) {
+    phaseKeys.push(conf.name);
+    phaseMap[conf.name] = conf;
+
     if (!conf.turnOrder) {
       conf.turnOrder = TurnOrder.DEFAULT;
     }
@@ -188,23 +196,29 @@ export function FlowWithPhases({ phases, victory }) {
    * Ends the current phase.
    * Also runs any phase cleanup code and setup code for the
    * next phase (if any).
+   *
+   * The next phase is chosen in a round-robin fashion, with the
+   * option to override that by passing nextPhase.
    */
-  const endPhase = (state) => {
+  const endPhase = (state, nextPhase) => {
     let G = state.G;
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    const currentPhaseConfig = phases[ctx._phaseNum];
-    G = currentPhaseConfig.cleanup(G, ctx);
+    G = phaseMap[ctx.phase].cleanup(G, ctx);
 
     // Update the phase.
-    const _phaseNum = (ctx._phaseNum + 1) % phases.length;
-    const phase = phases[_phaseNum].name;
-    ctx = { ...ctx, _phaseNum, phase };
+    if (nextPhase in phaseMap) {
+      ctx = { ...ctx, phase: nextPhase };
+    } else {
+      let index = phaseKeys.indexOf(ctx.phase);
+      index = (index + 1) % phases.length;
+      const phase = phases[index].name;
+      ctx = { ...ctx, phase };
+    }
 
     // Run any setup code for the new phase.
-    const newPhaseConfig = phases[ctx._phaseNum];
-    return startPhase({G, ctx}, newPhaseConfig);
+    return startPhase({G, ctx}, phaseMap[ctx.phase]);
   };
 
   /**
@@ -214,7 +228,7 @@ export function FlowWithPhases({ phases, victory }) {
    * Passes the turn to the next turn in a round-robin fashion.
    */
   const endTurn = (state) => {
-    const conf = phases[state.ctx._phaseNum];
+    const conf = phaseMap[state.ctx.phase];
     // Update winner.
     const winner = victory(state.G, state.ctx);
     // Update current player.
@@ -228,9 +242,11 @@ export function FlowWithPhases({ phases, victory }) {
     }
 
     // End phase if condition is met.
-    if (conf.phaseEndCondition(state.G, state.ctx)) {
-      state = endPhase(state);
+    const end = conf.phaseEndCondition(state.G, state.ctx);
+    if (end) {
+      state = endPhase(state, end);
     }
+
     return state;
   };
 
@@ -244,7 +260,7 @@ export function FlowWithPhases({ phases, victory }) {
   const init = (state) => startPhase(state, phases[0]);
 
   const validator = (G, ctx, move) => {
-    const conf = phases[ctx._phaseNum];
+    const conf = phaseMap[ctx.phase];
     if (conf.allowedMoves) {
       const set = new Set(conf.allowedMoves);
       return set.has(move.type);
@@ -258,7 +274,6 @@ export function FlowWithPhases({ phases, victory }) {
       turn: 0,
       currentPlayer: '0',
       phase: phases[0].name,
-      _phaseNum: 0,
     }),
     events: { init, endTurn, endPhase },
     validator,
