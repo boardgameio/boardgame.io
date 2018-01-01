@@ -133,7 +133,7 @@ export function SimpleFlow({ gameEndIf }) {
  *   onPhaseBegin: (G, ctx) => G,
  *   // Any cleanup code to run after the phase ends.
  *   onPhaseEnd: (G, ctx) => G,
- *   // The phase ends if this function returns anything.
+ *   // The phase ends if this function returns a truthy value.
  *   // If the return value is the name of another phase,
  *   // that will be chosen as the next phase (as opposed
  *   // to the next one in round-robin order).
