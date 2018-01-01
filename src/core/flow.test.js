@@ -10,7 +10,7 @@ import Game from './game';
 import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
-import { Flow, createEventDispatchers, GameFlow } from './flow';
+import { Flow, TurnOrder, createEventDispatchers, GameFlow } from './flow';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -122,9 +122,22 @@ test('turnOrder', () => {
   });
 
   let state = { ctx: flow.setup(10) };
+  state = flow.reducer(state, { type: 'init' });
   expect(state.ctx.currentPlayer).toBe('0');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('1');
+
+  flow = GameFlow({
+    phases: [
+      { name: 'A', turnOrder: TurnOrder.ANY },
+    ],
+  });
+
+  state = { ctx: flow.setup(10) };
+  state = flow.reducer(state, { type: 'init' });
+  expect(state.ctx.currentPlayer).toBe('any');
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('any');
 
   flow = GameFlow({
     phases: [
@@ -133,6 +146,7 @@ test('turnOrder', () => {
   });
 
   state = { ctx: flow.setup(10) };
+  state = flow.reducer(state, { type: 'init' });
   expect(state.ctx.currentPlayer).toBe('0');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('3');

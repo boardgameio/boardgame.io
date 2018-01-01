@@ -50,6 +50,23 @@ export function Flow({setup, events, validator}) {
 }
 
 /**
+ * TurnOrder
+ *
+ * Set of different turn orders possible in a phase.
+ * Each function returns the next player given G and ctx.
+ *
+ * You can define your own and pass it to the `turnOrder`
+ * setting in the phase config object (see below).
+ */
+export const TurnOrder = {
+  // Default round-robin order.
+  DEFAULT: (G, ctx) => ((+ctx.currentPlayer + 1) % ctx.numPlayers + ""),
+
+  // Any player can play and there isn't a currentPlayer really.
+  ANY: () => 'any',
+};
+
+/**
  * GameFlow
  *
  * Wrapper around Flow that creates a reducer to manage ctx.
@@ -74,8 +91,8 @@ export function Flow({setup, events, validator}) {
  *   cleanup: (G, ctx) => G,
  *   // The phase ends if this function returns true.
  *   phaseEndCondition: (G, ctx) => boolean
- *   // Called when `endTurn` is processed and returns the next player.
- *   // If not specified, the default round-robin is used.
+ *   // Called when `endTurn` is processed, and returns the next player.
+ *   // If not specified, TurnOrder.DEFAULT is used.
  *   turnOrder: (G, ctx) => playerID
  *   // List of moves that are allowed in this phase.
  *   allowedMoves: ['moveA', ...],
@@ -95,8 +112,18 @@ export function GameFlow(config) {
     winner: null,
   };
 
-  const defaultTurnOrder = (G, ctx) => {
-    return (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
+  // Helper to perform start-of-phase initialization.
+  const startPhase = (state, phaseConfig) => {
+    if (phaseConfig.setup) {
+      const G = phaseConfig.setup(state.G, state.ctx);
+      state = { ...state, G };
+    }
+
+    if (phaseConfig.turnOrder == TurnOrder.ANY) {
+      state = { ...state, ctx: { ...state.ctx, currentPlayer: 'any' } };
+    }
+
+    return state;
   };
 
   /**
@@ -124,11 +151,7 @@ export function GameFlow(config) {
 
     // Run any setup code for the new phase.
     const newPhaseConfig = config.phases[ctx._phaseNum];
-    if (newPhaseConfig.setup) {
-      G = newPhaseConfig.setup(G, ctx);
-    }
-
-    return { ...state, G, ctx: { ...state.ctx, phase, _phaseNum } };
+    return startPhase({G, ctx}, newPhaseConfig);
   };
 
   /**
@@ -138,7 +161,7 @@ export function GameFlow(config) {
    * Passes the turn to the next turn in a round-robin fashion.
    */
   const endTurn = (state) => {
-    let turnOrder = defaultTurnOrder;
+    let turnOrder = TurnOrder.DEFAULT;
     let phaseEndCondition = () => false;
 
     if (config.phases) {
@@ -196,10 +219,7 @@ export function GameFlow(config) {
    */
   const init = (state) => {
     const conf = config.phases[0];
-    if (conf.setup) {
-      return { ...state, G: conf.setup(state.G, state.ctx) };
-    }
-    return state;
+    return startPhase(state, conf);
   };
 
   const validator = (G, ctx, move) => {
