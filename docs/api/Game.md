@@ -12,8 +12,8 @@ Game({
   },
 
   flow: {
-    // Determines the winner.
-    victory: (G, ctx) => {
+    // Determines when the game ends.
+    gameEndIf: (G, ctx) => {
       if (IsVictory(G)) {
         return ctx.currentPlayer;
       }
@@ -89,7 +89,7 @@ const game = Game({
   },
 
   flow: {
-    victory: (G, ctx) => {
+    gameEndIf: (G, ctx) => {
       if (IsWinner(G, ctx.currentPlayer)) {
         return ctx.currentPlayer;
       }

@@ -55,7 +55,7 @@ test('FlowWithPhases', () => {
 test('init', () => {
   let flow = FlowWithPhases({
     phases: [
-      { name: 'A', cleanup: () => ({ done: true }) },
+      { name: 'A', onPhaseEnd: () => ({ done: true }) },
     ],
   });
 
@@ -66,7 +66,7 @@ test('init', () => {
 
   flow = FlowWithPhases({
     phases: [
-      { name: 'A', setup: () => ({ done: true }) },
+      { name: 'A', onPhaseBegin: () => ({ done: true }) },
     ],
   });
 
@@ -75,18 +75,18 @@ test('init', () => {
   expect(state.G).toEqual({ done: true });
 });
 
-test('setup / cleanup', () => {
+test('onPhaseBegin / onPhaseEnd', () => {
   const flow = FlowWithPhases({
     phases: [
       {
         name: 'A',
-        setup: s => ({ ...s, 'setupA': true }),
-        cleanup: s => ({ ...s, 'cleanupA': true }),
+        onPhaseBegin: s => ({ ...s, 'setupA': true }),
+        onPhaseEnd: s => ({ ...s, 'cleanupA': true }),
       },
       {
         name: 'B',
-        setup: s => ({ ...s, 'setupB': true }),
-        cleanup: s => ({ ...s, 'cleanupB': true }),
+        onPhaseBegin: s => ({ ...s, 'setupB': true }),
+        onPhaseEnd: s => ({ ...s, 'cleanupB': true }),
       },
     ],
   });
@@ -105,10 +105,10 @@ test('setup / cleanup', () => {
   });
 });
 
-test('phaseEndCondition', () => {
+test('phaseEndIf', () => {
   const flow = FlowWithPhases({
     phases: [
-      { name: 'A', phaseEndCondition: (G, ctx) => (ctx.turn > 1) },
+      { name: 'A', phaseEndIf: (G, ctx) => (ctx.turn > 1) },
       { name: 'B' },
     ],
   });
@@ -209,8 +209,8 @@ test('validator', () => {
   expect(state.G).toEqual({ B: true });
 });
 
-test('victory', () => {
-  const flow = FlowWithPhases({ victory: G => G.win });
+test('gameEndIf', () => {
+  const flow = FlowWithPhases({ gameEndIf: G => G.win });
 
   let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.reducer(state, { type: 'endTurn' });
@@ -218,7 +218,7 @@ test('victory', () => {
 
   state.G.win = 'A';
   state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.winner).toBe('A');
+  expect(state.ctx.gameEnd).toBe('A');
 });
 
 test('dispatchers', () => {

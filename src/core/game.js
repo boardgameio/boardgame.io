@@ -42,7 +42,7 @@ import { FlowWithPhases, SimpleFlow } from './flow';
  *   playerView: (G, ctx, playerID) => { ... },
  *
  *   flow: {
- *     victory: (G, ctx) => { ... },
+ *     gameEndIf: (G, ctx) => { ... },
  *
  *     phases: [
  *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },

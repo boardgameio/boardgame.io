@@ -78,12 +78,12 @@ export const TurnOrder = {
  * Simple game flow that just passes the turn around in
  * round-robin fashion without any game phases.
  *
- * @param {...object} victory - Function that returns the
- *     ID of the player that won if the game is in a victory state.
- *     Signature: (G, ctx) => { ... }
+ * @param {...object} gameEndIf - (G, ctx) => {}
+ * The game ends if this returns anything other than undefined.
+ * The return value is available at ctx.gameEnd.
  */
-export function SimpleFlow({ victory }) {
-  if (!victory) victory = () => undefined;
+export function SimpleFlow({ gameEndIf }) {
+  if (!gameEndIf) gameEndIf = () => undefined;
   /**
    * endTurn (game event)
    *
@@ -91,16 +91,16 @@ export function SimpleFlow({ victory }) {
    * Passes the turn to the next turn in a round-robin fashion.
    */
   const endTurn = (state) => {
-    // Update winner.
-    const winner = victory(state.G, state.ctx);
+    // Update gameEnd.
+    const gameEnd = gameEndIf(state.G, state.ctx);
     // Update current player.
     const currentPlayer = TurnOrder.DEFAULT.next(state.G, state.ctx);
     // Update turn.
     const turn = state.ctx.turn + 1;
     // Return new state.
     state = { G: state.G, ctx: { ...state.ctx, currentPlayer, turn } };
-    if (winner !== undefined) {
-      state.ctx.winner = winner;
+    if (gameEnd !== undefined) {
+      state.ctx.gameEnd = gameEnd;
     }
     return state;
   };
@@ -130,14 +130,14 @@ export function SimpleFlow({ victory }) {
  * {
  *   name: 'phase_name',
  *   // Any setup code to run before the phase begins.
- *   setup: (G, ctx) => G,
+ *   onPhaseBegin: (G, ctx) => G,
  *   // Any cleanup code to run after the phase ends.
- *   cleanup: (G, ctx) => G,
+ *   onPhaseEnd: (G, ctx) => G,
  *   // The phase ends if this function returns true.
  *   // The next phase is chosen in a round-robin fashion.
  *   // However, if the function returns a phase name, that
  *   // will be used as the next phase.
- *   phaseEndCondition: (G, ctx) => boolean|string
+ *   phaseEndIf: (G, ctx) => boolean|string
  *   // Called when `endTurn` is processed, and returns the next player.
  *   // If not specified, TurnOrder.DEFAULT is used.
  *   turnOrder: {
@@ -151,17 +151,17 @@ export function SimpleFlow({ victory }) {
  *   allowedMoves: ['moveA', ...],
  * }
  *
- * The phase ends when the phaseEndCondition is met, or if the
+ * The phase ends when the phaseEndIf is met, or if the
  * game reducer receives a 'endPhase' game event.
  *
- * @param {...object} victory - Function that returns the
- *     ID of the player that won if the game is in a victory state.
- *     Signature: (G, ctx) => { ... }
+ * @param {...object} gameEndIf - (G, ctx) => {}
+ * The game ends if this returns anything other than undefined.
+ * The return value is available at ctx.gameEnd.
  */
-export function FlowWithPhases({ phases, victory }) {
+export function FlowWithPhases({ phases, gameEndIf }) {
   // Attach defaults.
-  if (!phases)  phases = [{ name: 'default' }];
-  if (!victory) victory = () => undefined;
+  if (!phases)    phases = [{ name: 'default' }];
+  if (!gameEndIf) gameEndIf = () => undefined;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -172,20 +172,20 @@ export function FlowWithPhases({ phases, victory }) {
     if (!conf.turnOrder) {
       conf.turnOrder = TurnOrder.DEFAULT;
     }
-    if (!conf.phaseEndCondition) {
-      conf.phaseEndCondition = () => false;
+    if (!conf.phaseEndIf) {
+      conf.phaseEndIf = () => false;
     }
-    if (!conf.setup) {
-      conf.setup = G => G;
+    if (!conf.onPhaseBegin) {
+      conf.onPhaseBegin = G => G;
     }
-    if (!conf.cleanup) {
-      conf.cleanup = G => G;
+    if (!conf.onPhaseEnd) {
+      conf.onPhaseEnd = G => G;
     }
   }
 
   // Helper to perform start-of-phase initialization.
   const startPhase = (state, phaseConfig) => {
-    const G = phaseConfig.setup(state.G, state.ctx);
+    const G = phaseConfig.onPhaseBegin(state.G, state.ctx);
     const currentPlayer = phaseConfig.turnOrder.first(G, state.ctx);
     return { ...state, G, ctx: { ...state.ctx, currentPlayer } };
   };
@@ -205,7 +205,7 @@ export function FlowWithPhases({ phases, victory }) {
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    G = phaseMap[ctx.phase].cleanup(G, ctx);
+    G = phaseMap[ctx.phase].onPhaseEnd(G, ctx);
 
     // Update the phase.
     if (nextPhase in phaseMap) {
@@ -229,20 +229,20 @@ export function FlowWithPhases({ phases, victory }) {
    */
   const endTurn = (state) => {
     const conf = phaseMap[state.ctx.phase];
-    // Update winner.
-    const winner = victory(state.G, state.ctx);
+    // Update gameEnd.
+    const gameEnd = gameEndIf(state.G, state.ctx);
     // Update current player.
     const currentPlayer = conf.turnOrder.next(state.G, state.ctx);
     // Update turn.
     const turn = state.ctx.turn + 1;
     // Update state.
     state = { G: state.G, ctx: { ...state.ctx, currentPlayer, turn } };
-    if (winner !== undefined) {
-      state.ctx.winner = winner;
+    if (gameEnd !== undefined) {
+      state.ctx.gameEnd = gameEnd;
     }
 
     // End phase if condition is met.
-    const end = conf.phaseEndCondition(state.G, state.ctx);
+    const end = conf.phaseEndIf(state.G, state.ctx);
     if (end) {
       state = endPhase(state, end);
     }

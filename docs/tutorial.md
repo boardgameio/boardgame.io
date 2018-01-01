@@ -116,7 +116,7 @@ const TicTacToe = Game({
   },
 
   flow: {
-    victory: (G, ctx) => {
+    gameEndIf: (G, ctx) => {
       if (IsVictory(G.cells)) {
         return ctx.currentPlayer;
       }
@@ -125,9 +125,9 @@ const TicTacToe = Game({
 });
 ```
 
-!> The `victory` field takes a function that determines if
-   there is a winner. The winner itself is made available
-   at `ctx.winner`.
+!> The `gameEndIf` field takes a function that determines if
+   the game is over. If it returns anything other than `undefined`
+   the game ends, and the return value is available at `ctx.gameEnd`.
 
 ## Render board
 
@@ -151,15 +151,15 @@ class TicTacToeBoard extends React.Component {
   }
 
   isActive(id) {
-    if (this.props.ctx.winner !== null) return false;
+    if (!this.props.isActive) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }
 
   render() {
     let winner = '';
-    if (this.props.ctx.winner !== null) {
-      winner = <div>Winner: {this.props.ctx.winner}</div>;
+    if (this.props.ctx.gameEnd !== null) {
+      winner = <div>Winner: {this.props.ctx.gameEnd}</div>;
     }
 
     const cellStyle = {
