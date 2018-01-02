@@ -17,7 +17,7 @@ class Board extends React.Component {
     endTurn:  PropTypes.func.isRequired,
     moves:    PropTypes.any.isRequired,
     playerID:   PropTypes.string,
-    isMultiplayer:  PropTypes.bool
+    isActive:   PropTypes.bool
   }
 
   onClick = (id) => {
@@ -28,7 +28,7 @@ class Board extends React.Component {
   }
 
   isActive(id) {
-    if (this.props.isMultiplayer && this.props.ctx.currentPlayer !== this.props.playerID) {
+    if (!this.props.isActive) {
       return false;
     }
     if (this.props.ctx.winner !== null) return false;
