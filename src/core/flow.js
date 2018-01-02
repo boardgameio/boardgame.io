@@ -28,6 +28,9 @@ import * as ActionCreators from './action-creators';
  *                                if a particular type of move is invalid
  *                                at this point in the game.
  *                                (G, ctx, moveName) => boolean
+ * @param {...object} endTurnIf - The turn automatically ends if this function
+ *                                returns true.
+ *                                (G, ctx) => boolean
  */
 export function Flow({ctx, events, validator, endTurnIf}) {
   if (!ctx)       ctx = () => ({});
@@ -98,6 +101,8 @@ export const TurnOrder = {
  * @param {...object} endGameIf - (G, ctx) => {}
  * The game ends if this returns anything other than undefined.
  * The return value is available at ctx.gameover.
+ * @param {...object} endTurnIf - (G, ctx) => boolean
+ * The turn ends if this returns true.
  */
 export function SimpleFlow({ endGameIf, endTurnIf }) {
   if (!endGameIf) endGameIf = () => undefined;
@@ -161,11 +166,14 @@ export function SimpleFlow({ endGameIf, endTurnIf }) {
  *   // Any code to run when a player passes in this phase.
  *   onPass: (G, ctx) => G,
  *
- *   // The phase ends if this function returns a truthy value.
+ *   // The phase ends if this function returns true.
  *   // If the return value is the name of another phase,
  *   // that will be chosen as the next phase (as opposed
  *   // to the next one in round-robin order).
- *   endPhaseIf: (G, ctx) => {}
+ *   endPhaseIf: (G, ctx) => {},
+ *
+ *   // A turn (in this phase) ends if the following returns true.
+ *   endTurnIf: (G, ctx) => {},
  *
  *   // Called when `endTurn` is processed, and returns the next player.
  *   // If not specified, TurnOrder.DEFAULT is used.
