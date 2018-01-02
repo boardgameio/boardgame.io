@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 The boardgame.io Authors
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -74,7 +74,7 @@ export class GameLog extends React.Component {
              className="log-turn"
              onMouseOver={() => this.onRewind(turnToLogIndex[i])}
              onMouseOut={() => this.onRewind(null)}>
-        <div className="id">Turn #{i+1}</div>
+        <div className="id">Turn #{i + 1}</div>
         {turn}
         </div>
       );

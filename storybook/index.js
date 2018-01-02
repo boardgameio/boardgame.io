@@ -9,7 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { Card } from '../src/client/lib/card/card';
+import { Card } from '../src/ui/card';
 
 storiesOf('Card', module)
   .add('basic', () => (

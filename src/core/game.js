@@ -1,12 +1,12 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 The boardgame.io Authors
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT.
  */
 
-/*
+/**
  * Game
  *
  * Helper to generate the game move reducer. The returned
@@ -22,20 +22,12 @@
  * action.args contain any additional arguments as an
  * Array.
  *
- * Args:
- *   obj.setup - Function that returns the initial state of G.
- *   obj.moves - A dictionary of move functions.
- *   obj.playerView - A function that returns a
- *                    derivative of G suitable for
- *                    showing the specified player.
- *
- * Usage:
- *
  * Game({
  *   setup: (numPlayers) => {
  *     const G = {...};
  *     return G;
  *   },
+ *
  *   moves: {
  *     'moveWithoutArgs': (G, ctx) => {
  *       return Object.assign({}, G, ...);
@@ -44,11 +36,27 @@
  *       return Object.assign({}, G, ...);
  *     }
  *   },
- *   winner: (G, ctx) => { ... },
+ *
+ *   // OPTIONAL.
+ *   victory: (G, ctx) => { ... },
+ *
+ *   // OPTIONAL.
  *   playerView: (G, ctx, playerID) => { ... },
+ *
+ *   // OPTIONAL.
+ *   flow: (ctx, action, G) => ctx,
  * })
+ *
+ * @param {...object} setup - Function that returns the initial state of G.
+ * @param {...object} moves - A dictionary of move functions.
+ * @param {...object} victory - A function that returns the ID of the
+ *                              winner (if there is any).
+ * @param {...object} playerView - A function that returns a
+ *                                 derivative of G tailored for
+ *                                 the specified player.
+ * @param {...object} flow - A reducer that maintains ctx.
  */
-function Game({setup, moves, victory, playerView}) {
+function Game({setup, moves, victory, playerView, flow}) {
   if (!setup)       setup = () => ({});
   if (!moves)       moves = {};
   if (!victory)     victory = () => null;
@@ -58,6 +66,7 @@ function Game({setup, moves, victory, playerView}) {
     setup,
     victory,
     playerView,
+    flow,
     moveNames: Object.getOwnPropertyNames(moves),
     reducer: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {

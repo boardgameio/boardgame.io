@@ -19,7 +19,12 @@ Game({
   // Customized view.
   playerView: (G, ctx, player) => {
     return G;
-  }
+  },
+
+  // Reducer that manages ctx.
+  flow: (ctx, action, G) => {
+    return ctx;
+  },
 }
 ```
 
@@ -53,6 +58,9 @@ have `action.type` contain the name of the move, and
   - `playerView` (*function*): Returns a version of `G` that
     is customized for a given player. See the document on
     [Secret State](/secret-state) for more information.
+  - `flow` (*function*): Reducer that manages `ctx`. If `undefined`,
+    the default is used, which responds to a `END_TURN` event that
+    increments the `currentPlayer` and also checks for victory.
 
 ### Returns
 
@@ -60,6 +68,8 @@ have `action.type` contain the name of the move, and
 1. `G`: The initial value of G.
 2. `moveNames`: The names of the moves of the game.
 3. `reducer`: The reducer to maintain `G`.
+4. `playerView`: The selector with the player view.
+5. `flow`: The reducer to maintain `ctx`.
 
 ### Usage
 
@@ -88,6 +98,10 @@ const game = Game({
 
   playerView: (G, ctx) => {
     return SecretsRemoved(G, ctx.currentPlayer);
+  },
+
+  flow: (ctx, action, G) => {
+    return {...ctx, ...};
   }
 });
 ```

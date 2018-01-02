@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 The boardgame.io Authors
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -74,34 +74,56 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
         this.store = createStore(GameReducer);
       }
 
-      const moveAPI = createDispatchers(game.moveNames, this.store);
-
-      if (board) {
-        this._board = React.createElement(
-          connect(state => state, ActionCreators)(board),
-          {
-            moves: moveAPI,
-            playerID: props.playerID,
-            isMultiplayer: multiplayer   // Board ought to know if it's multiplayer for hotseat games
-          }
-        );
-      }
-
-      if (debug && props.debug) {
-        this._debug = React.createElement(
-          connect(state => ({ gamestate: state}),
-                  ActionCreators)(Debug),
-          {
-            moveAPI,
-            gameID: props.gameID,
-            playerID: props.playerID,
-          }
-        );
-      }
+      this.moveAPI = createDispatchers(game.moveNames, this.store);
+      this.createBoard();
+      this.createDebugUI();
 
       this.store.subscribe(() => {
         this.setState(this.store.getState());
       });
+    }
+
+    createBoard() {
+      if (board) {
+        const mapStateToProps = state => {
+          let isActive = true;
+
+          if (multiplayer) {
+            if (this.props.playerID == null ||
+                this.props.playerID != state.ctx.currentPlayer) {
+              isActive = false;
+            }
+          }
+
+          if (state.ctx.winner !== null) {
+            isActive = false;
+          }
+
+          return { ...state, isActive };
+        };
+
+        const Board =
+            connect(mapStateToProps, ActionCreators)(board);
+
+        this._board = React.createElement(Board, {
+          moves: this.moveAPI,
+          playerID: this.props.playerID,
+        });
+      }
+    }
+
+    createDebugUI() {
+      if (debug && this.props.debug) {
+        this._debug = React.createElement(
+          connect(state => ({ gamestate: state}),
+                  ActionCreators)(Debug),
+          {
+            moveAPI: this.moveAPI,
+            gameID: this.props.gameID,
+            playerID: this.props.playerID,
+          }
+        );
+      }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -113,6 +135,9 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
           this.multiplayerClient.updatePlayerID(nextProps.playerID);
         }
       }
+
+      this.createBoard();
+      this.createDebugUI();
     }
 
     componentWillMount() {

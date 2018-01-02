@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 The boardgame.io Authors
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -8,6 +8,7 @@
 
 import * as Actions from './action-types';
 import * as ActionCreators from './action-creators';
+import { createGameFlow } from './flow';
 
 /**
  * createGameReducer
@@ -35,12 +36,7 @@ export function createGameReducer({game, numPlayers}) {
     G: game.setup(numPlayers),
 
     // Framework managed state.
-    ctx: {
-      turn: 0,
-      currentPlayer: '0',
-      numPlayers: numPlayers,
-      winner: null,
-    },
+    ctx: undefined,
 
     // A list of actions performed so far. Used by the
     // GameLog to display a journal of moves.
@@ -56,8 +52,12 @@ export function createGameReducer({game, numPlayers}) {
     _initial: {}
   };
 
+  const GameFlow = createGameFlow({game, numPlayers});
+  initial.ctx = GameFlow(undefined, { type: {} });
+
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
+
 
   /**
    * GameReducer
@@ -75,28 +75,9 @@ export function createGameReducer({game, numPlayers}) {
       }
 
       case Actions.END_TURN: {
-        // Update winner.
-        const winner = game.victory(state.G, state.ctx);
-
-        // The game may have some end of turn clean up.
-        const G = game.reducer(
-            state.G, { type: Actions.END_TURN }, state.ctx);
-
-        let ctx = state.ctx;
-
-        // Update current player.
-        const currentPlayer =
-            (+ctx.currentPlayer + 1) % ctx.numPlayers + "";
-
-        // Update turn.
-        const turn = ctx.turn + 1;
-
-        ctx = {...ctx, currentPlayer, turn, winner};
-
-        // Update log.
+        const ctx = GameFlow(state.ctx, action, state.G);
         const log = [...state.log, action];
-
-        return {...state, G, ctx, _id: state._id + 1, log};
+        return {...state, ctx, _id: state._id + 1, log};
       }
 
       case Actions.RESTORE: {
