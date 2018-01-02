@@ -18,8 +18,7 @@ const App = Client({
 
 const Singleplayer = () => (
   <div style={{padding: 50}}>
-    <h1>Hotseat Tic-Tac-Toe</h1>
-    <p>Because tic-tac-toe just <b>needs</b> to be played on a computer....</p>
+    <h1>Singleplayer</h1>
     <App gameID="single" />
   </div>
 );

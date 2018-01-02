@@ -10,6 +10,10 @@
   padding: 50px;
 }
 
+.content {
+  padding-top: 0;
+}
+
 .runner {
   display: flex;
   flex-direction: row;

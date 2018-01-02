@@ -20,9 +20,7 @@ const App = Client({
 
 const Spectator = () => (
   <div style={{padding: 50}}>
-    <h1>Tic-Tac-Toe: E-Sports Edition</h1>
-    <p>#E-Sports Ready</p>
-    <p>But seriously, the idea of the &quot;spectator&quot; board is you could actually display a game board that isn&apos;t a &quot;client&quot;, so that people could sit around a bigger screen, using their phones as private &quot;hands&quot; and the bigger screen as the &quot;game table&quot;. The possibilities are on limited by YOUR IMAGINATION.</p>
+    <h1>Spectator</h1>
     <div className="runner">
       <div className="run">
         <App gameID="spectator" playerID="0" />
