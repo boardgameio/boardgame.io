@@ -150,10 +150,10 @@ test('onPhaseBegin / onPhaseEnd', () => {
   });
 });
 
-test('phaseEndIf', () => {
+test('endPhaseIf', () => {
   const flow = FlowWithPhases({
     phases: [
-      { name: 'A', phaseEndIf: (G, ctx) => (ctx.turn > 1) },
+      { name: 'A', endPhaseIf: (G, ctx) => (ctx.turn > 1) },
       { name: 'B' },
     ],
   });
@@ -286,8 +286,8 @@ test('validator', () => {
   expect(state.G).toEqual({ B: true });
 });
 
-test('gameEndIf', () => {
-  const flow = FlowWithPhases({ gameEndIf: G => G.win });
+test('endGameIf', () => {
+  const flow = FlowWithPhases({ endGameIf: G => G.win });
 
   let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.reducer(state, { type: 'endTurn' });
@@ -295,7 +295,7 @@ test('gameEndIf', () => {
 
   state.G.win = 'A';
   state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.gameEnd).toBe('A');
+  expect(state.ctx.gameover).toBe('A');
 });
 
 test('dispatchers', () => {

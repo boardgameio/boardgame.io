@@ -18,7 +18,7 @@ const game = Game({
     'C': () => ({ victory: true })
   },
   flow: {
-    gameEndIf: (G, ctx) => G.victory ? ctx.currentPlayer : null
+    endGameIf: (G, ctx) => G.victory ? ctx.currentPlayer : null
   }
 });
 
@@ -79,13 +79,13 @@ test('victory', () => {
 
   let state = reducer(undefined, makeMove({ type: 'A' }));
   state = reducer(state, endTurn());
-  expect(state.ctx.gameEnd).toEqual(null);
+  expect(state.ctx.gameover).toEqual(null);
   state = reducer(state, makeMove({ type: 'B' }));
   state = reducer(state, endTurn());
-  expect(state.ctx.gameEnd).toEqual(null);
+  expect(state.ctx.gameover).toEqual(null);
   state = reducer(state, makeMove({ type: 'C' }));
   state = reducer(state, endTurn());
-  expect(state.ctx.gameEnd).toEqual('0');
+  expect(state.ctx.gameover).toEqual('0');
 });
 
 test('endTurn', () => {
