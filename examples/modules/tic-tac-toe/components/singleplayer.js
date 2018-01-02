@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The boardgame.io Authors
+ * Copyright 2017 The boardgame.io Authors.
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -8,9 +8,8 @@
 
 import React from 'react';
 import Client from 'boardgame.io/client';
-
-import TicTacToe from '../tic-tac-toe/game';
-import Board from '../tic-tac-toe/board';
+import TicTacToe from '../../../game';
+import Board from './board';
 
 const App = Client({
   game: TicTacToe,
@@ -18,7 +17,10 @@ const App = Client({
 });
 
 const Singleplayer = () => (
-  <App gameID="single" />
+  <div style={{padding: 50}}>
+    <h1>Singleplayer</h1>
+    <App gameID="single" />
+  </div>
 );
 
 export default Singleplayer;

@@ -19,6 +19,7 @@
   font-family: monospace;
   font-size: 14px;
   padding: 20px;
+  box-sizing: content-box;
 }
 
 .debug-ui section {
@@ -112,11 +113,10 @@
 
 .debug-ui .player {
   cursor: pointer;
-  padding: 5px;
   text-align: center;
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
   border: 3px solid #eee;
 }
 
