@@ -102,7 +102,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
             }
           }
 
-          if (state.ctx.gameEnd !== undefined) {
+          if (state.ctx.gameover !== undefined) {
             isActive = false;
           }
 

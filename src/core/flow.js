@@ -93,12 +93,12 @@ export const TurnOrder = {
  * Simple game flow that just passes the turn around in
  * round-robin fashion without any game phases.
  *
- * @param {...object} gameEndIf - (G, ctx) => {}
+ * @param {...object} endGameIf - (G, ctx) => {}
  * The game ends if this returns anything other than undefined.
- * The return value is available at ctx.gameEnd.
+ * The return value is available at ctx.gameover.
  */
-export function SimpleFlow({ gameEndIf }) {
-  if (!gameEndIf) gameEndIf = () => undefined;
+export function SimpleFlow({ endGameIf }) {
+  if (!endGameIf) endGameIf = () => undefined;
   /**
    * endTurn (game event)
    *
@@ -106,16 +106,16 @@ export function SimpleFlow({ gameEndIf }) {
    * Passes the turn to the next turn in a round-robin fashion.
    */
   const endTurn = (state) => {
-    // Update gameEnd.
-    const gameEnd = gameEndIf(state.G, state.ctx);
+    // Update gameover.
+    const gameover = endGameIf(state.G, state.ctx);
     // Update current player.
     const currentPlayer = TurnOrder.DEFAULT.next(state.G, state.ctx);
     // Update turn.
     const turn = state.ctx.turn + 1;
     // Return new state.
     state = { G: state.G, ctx: { ...state.ctx, currentPlayer, turn } };
-    if (gameEnd !== undefined) {
-      state.ctx.gameEnd = gameEnd;
+    if (gameover !== undefined) {
+      state.ctx.gameover = gameover;
     }
     return state;
   };
@@ -161,7 +161,7 @@ export function SimpleFlow({ gameEndIf }) {
  *   // If the return value is the name of another phase,
  *   // that will be chosen as the next phase (as opposed
  *   // to the next one in round-robin order).
- *   phaseEndIf: (G, ctx) => {}
+ *   endPhaseIf: (G, ctx) => {}
  *
  *   // Called when `endTurn` is processed, and returns the next player.
  *   // If not specified, TurnOrder.DEFAULT is used.
@@ -177,17 +177,17 @@ export function SimpleFlow({ gameEndIf }) {
  *   allowedMoves: ['moveA', ...],
  * }
  *
- * The phase ends when phaseEndIf is met, or if the
+ * The phase ends when endPhaseIf is met, or if the
  * game reducer receives a `endPhase` game event.
  *
- * @param {...object} gameEndIf - (G, ctx) => {}
+ * @param {...object} endGameIf - (G, ctx) => {}
  * The game ends if this returns anything other than undefined.
- * The return value is available at ctx.gameEnd.
+ * The return value is available at ctx.gameover.
  */
-export function FlowWithPhases({ phases, gameEndIf }) {
+export function FlowWithPhases({ phases, endGameIf }) {
   // Attach defaults.
   if (!phases)    phases = [{ name: 'default' }];
-  if (!gameEndIf) gameEndIf = () => undefined;
+  if (!endGameIf) endGameIf = () => undefined;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -199,8 +199,8 @@ export function FlowWithPhases({ phases, gameEndIf }) {
     if (!conf.turnOrder) {
       conf.turnOrder = TurnOrder.DEFAULT;
     }
-    if (!conf.phaseEndIf) {
-      conf.phaseEndIf = () => false;
+    if (!conf.endPhaseIf) {
+      conf.endPhaseIf = () => false;
     }
     if (!conf.onPhaseBegin) {
       conf.onPhaseBegin = G => G;
@@ -269,10 +269,10 @@ export function FlowWithPhases({ phases, gameEndIf }) {
     const conf = phaseMap[ctx.phase];
     G = conf.onTurnEnd(G, ctx);
 
-    // Update gameEnd.
-    const gameEnd = gameEndIf(G, ctx);
-    if (gameEnd !== undefined) {
-      ctx.gameEnd = gameEnd;
+    // Update gameover.
+    const gameover = endGameIf(G, ctx);
+    if (gameover !== undefined) {
+      ctx.gameover = gameover;
       return { G, ctx };
     }
     // Update current player.
@@ -283,7 +283,7 @@ export function FlowWithPhases({ phases, gameEndIf }) {
     ctx = { ...ctx, currentPlayer, turn };
 
     // End phase if condition is met.
-    const end = conf.phaseEndIf(G, ctx);
+    const end = conf.endPhaseIf(G, ctx);
     if (end) {
       return endPhase({ G, ctx }, end);
     }
