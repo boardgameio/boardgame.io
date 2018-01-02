@@ -10,7 +10,7 @@ import Hotseat from './components/hotseat';
 
 const routes = [
   {
-    path: '/',
+    path: '/chess',
     text: 'Hotseat',
     component: Hotseat
   }

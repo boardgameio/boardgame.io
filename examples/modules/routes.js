@@ -6,34 +6,22 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import _ from 'lodash';
 import core from './core';
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
 
-const transform_routes = (routes, prefix) => {
-  routes = _.map(routes, (route) => {
-    route.path = prefix + route.path;
-    return route;
-  });
-  return routes;
-}
-
 const routes = [
-  core.routes[0],
   {
-    root: {
-      text: 'Tic-Tac-Toe',
-      path: '/tic-tac-toe'
-    },
-    routes: transform_routes(tic_tac_toe.routes, '/tic-tac-toe')
+    name: 'Boardgame.io',
+    routes: core.routes
   },
   {
-    root: {
-      text: 'Chess',
-      path: '/chess'
-    },
-    routes: transform_routes(chess.routes, '/chess')
+    name: 'Tic-Tac-Toe',
+    routes: tic_tac_toe.routes
+  },
+  {
+    name: 'Chess',
+    routes: chess.routes
   }
 ];
 

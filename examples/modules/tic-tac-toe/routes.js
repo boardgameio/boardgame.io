@@ -12,17 +12,17 @@ import Spectator from './components/spectator';
 
 const routes = [
   {
-    path: '/',
+    path: '/tic-tac-toe',
     text: 'Tic-Tac-Toe',
     component: Singleplayer
   },
   {
-    path: '/multiplayer',
+    path: '/tic-tac-toe/multiplayer',
     text: 'Multiplayer',
     component: Multiplayer
   },
   {
-    path: '/spectator',
+    path: '/tic-tac-toe/spectator',
     text: 'Spectator',
     component: Spectator
   }

@@ -7,63 +7,45 @@
  */
 
 import React from 'react';
-import { HashRouter as Router, Route, NavLink } from 'react-router-dom';
+import { HashRouter as Router, Route } from 'react-router-dom';
 import _ from 'lodash';
+import LiNavLink from './li-navlink';
 
 import routes from './routes';
 import './app.css';
-import Logo from './logo.svg';
 
+// CSS for the sidebar is taken from vue.css
 const App = () => (
   <Router>
-    <div>
-      <header>
-        <div className='header-container'>
-          <a href='/'><Logo height={40}/></a>
-
-          <nav className='main-menu'>
-
+    <main>
+      <aside className="sidebar">
+        <div className="sidebar-nav" style={{height: '90%'}}>
+          <ul>
             {
-              routes.map((route, idx) => {
-                if (route.root === undefined) {
-                  return (
-                    <NavLink key={idx} to={route.path} exact={true} className='menu-button'>{route.text}</NavLink>
-                  );
-                } else {
-                  return (
-                    <div key={idx} className='dropdown-wrapper menu-button'>
-                      <NavLink to={route.root.path} exact={true} className='menu-button'>{route.root.text}</NavLink>
-                      <div className='drop-menu fade-in effect'>
-                        {
-                          route.routes.map((_route, _idx) => (
-                            <NavLink key={`${idx}.${_idx}`} to={_route.path} exact={true} className='menu-button'>{_route.text}</NavLink>
-                          ))
-                        }
-                      </div>
-                    </div>
-                  );
-                }
-              })
+              routes.map((route_category, idx) => (
+                <li key={idx}>
+                  <p>{route_category.name}</p>
+                  <ul>
+                    {
+                      route_category.routes.map((route, _idx) => (
+                        <LiNavLink key={`${idx}.${_idx}`} to={route.path} exact={true} activeClassName='active'>{route.text}</LiNavLink>
+                      ))
+                    }
+                  </ul>
+                </li>
+              ))
             }
-
-          </nav>
+          </ul>
         </div>
-      </header>
-
-      {
-        _.flattenDeep(
-          routes.map(route => {
-            if (route.root === undefined) {
-              return route;
-            } else {
-              return route.routes;
-            }
-          })
-        ).map((route, idx) => (
-          <Route key={idx} exact path={route.path} component={route.component}/>
-        ))
-      }
-    </div>
+      </aside>
+      <section className="content">
+        {
+          _.flattenDeep(routes.map(route => route.routes)).map((route, idx) => (
+            <Route key={idx} exact path={route.path} component={route.component}/>
+          ))
+        }
+      </section>
+    </main>
   </Router>
 );
 

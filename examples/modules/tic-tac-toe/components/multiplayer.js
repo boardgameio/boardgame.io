@@ -19,7 +19,9 @@ const App = Client({
 });
 
 const Multiplayer = () => (
-  <div>
+  <div style={{padding: 50}}>
+    <h1>Multiplayer Tic-Tac-Toe</h1>
+    <p>Just imagine that this is in two separate browsers. Now imagine the insane action that is networked Tic-Tac-Toe. Are you excited? I know I am...</p>
     <div className="runner">
       <div className="run">
         <App gameID="multi" playerID="0" />
