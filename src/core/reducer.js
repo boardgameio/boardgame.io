@@ -57,30 +57,40 @@ export function createGameReducer({game, numPlayers}) {
    * @param {object} action - A Redux action.
    */
   return (state = initial, action) => {
-    switch (action.type) {
-      case Actions.MAKE_MOVE: {
-        // Ignore the move if it isn't valid at this point.
-        if (!game.flow.validator(state.G, state.ctx, action.move)) {
-          return state;
-        }
-        const G = game.reducer(state.G, action.move, state.ctx);
-        const log = [...state.log, action];
-        return {...state, G, log, _id: state._id + 1};
-      }
+    const processGameEvent = (state, action) => {
+      const { G, ctx } = game.flow.reducer(
+          { G: state.G, ctx: state.ctx }, action.e);
+      const log = [...state.log, action];
+      return {...state, G, ctx, log, _id: state._id + 1};
+    };
 
-      case Actions.GAME_EVENT: {
-        const { G, ctx } = game.flow.reducer(
-            { G: state.G, ctx: state.ctx }, action.e);
-        const log = [...state.log, action];
-        return {...state, G, ctx, log, _id: state._id + 1};
-      }
+    const processMove = (state, action) => {
+      let G = state.G;
+      let ctx = state.ctx;
 
-      case Actions.RESTORE: {
-        return action.state;
-      }
-
-      default:
+      // Ignore the move if it isn't valid at this point.
+      if (!game.flow.validator(G, ctx, action.move)) {
         return state;
+      }
+
+      G = game.reducer(G, action.move, ctx);
+      state = { ...state, G, ctx };
+
+      // End the turn automatically if endTurnIf is true.
+      if (game.flow.endTurnIf(G, ctx)) {
+        state = processGameEvent(
+            state, ActionCreators.gameEvent({ type: 'endTurn' }, action.move.playerID));
+      }
+
+      const log = [...state.log, action];
+      return {...state, log, _id: state._id + 1};
+    };
+
+    switch (action.type) {
+      case Actions.MAKE_MOVE:  return processMove(state, action);
+      case Actions.GAME_EVENT: return processGameEvent(state, action);
+      case Actions.RESTORE:    return action.state;
+      default:                 return state;
     }
   };
 }
