@@ -6,6 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
+* {
+  box-sizing: content-box;
+}
+
 .client {
   padding: 50px;
 }
