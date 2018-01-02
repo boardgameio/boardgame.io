@@ -70,7 +70,7 @@ export function createGameReducer({game, numPlayers}) {
 
       case Actions.GAME_EVENT: {
         const { G, ctx } = game.flow.reducer(
-            { G: state.G, ctx: state.ctx }, action.e, action.playerID);
+            { G: state.G, ctx: state.ctx }, action.e);
         const log = [...state.log, action];
         return {...state, G, ctx, log, _id: state._id + 1};
       }
