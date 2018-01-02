@@ -30,8 +30,7 @@ export const makeMove = (move) => ({
  */
 export const gameEvent = (e, playerID) => ({
   type: Actions.GAME_EVENT,
-  e,
-  playerID,
+  e: { ...e, playerID },
 });
 
 /**

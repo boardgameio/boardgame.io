@@ -114,9 +114,9 @@ test('pass', () => {
   let flow = FlowWithPhases({ phases: [{ name: 'A', turnOrder: TurnOrder.ANY }] });
   let state = { ctx: flow.ctx(2) };
   expect(state.ctx.allPassed).toBe(false);
-  state = flow.reducer(state, { type: 'pass' }, '0');
+  state = flow.reducer(state, { type: 'pass', playerID: '0' });
   expect(state.ctx.allPassed).toBe(false);
-  state = flow.reducer(state, { type: 'pass' }, '1');
+  state = flow.reducer(state, { type: 'pass', playerID: '1' });
   expect(state.ctx.allPassed).toBe(true);
 });
 

@@ -81,7 +81,7 @@ function Game({setup, moves, playerView, flow}) {
     moveNames: Object.getOwnPropertyNames(moves),
     reducer: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
-        const context = moves[action.type];
+        const context = { playerID: action.playerID };
         const args = [G, ctx].concat(action.args);
         return moves[action.type].apply(context, args);
       }

@@ -26,6 +26,19 @@ test('reducer', () => {
   expect(game.reducer(testObj, { type: 'B' })).toEqual(null);
 });
 
+test('playerID from context', () => {
+  const g = Game({
+    moves: {
+      A() {
+        return { playerID: this.playerID };
+      }
+    },
+  });
+
+  const state = g.reducer({}, { type: 'A', playerID: 'player' });
+  expect(state.playerID).toBe('player');
+});
+
 test('flow override', () => {
   const f = { reducer: () => {} };
   const game = Game({
