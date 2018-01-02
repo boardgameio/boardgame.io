@@ -84,6 +84,7 @@
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",
+    "react-svg-loader": "^2.1.0",
     "react-test-renderer": "^16.0.0",
     "regenerator-runtime": "^0.11.1",
     "rollup": "^0.50.0",
@@ -127,7 +128,8 @@
       "\\.(css)$": "identity-obj-proxy",
       "boardgame.io/client": "<rootDir>/packages/client",
       "boardgame.io/game": "<rootDir>/packages/game",
-      "boardgame.io/server": "<rootDir>/packages/server"
+      "boardgame.io/server": "<rootDir>/packages/server",
+      "\\.(svg)$": "<rootDir>/.empty_module.js"
     },
     "setupFiles": [
       "raf/polyfill"

@@ -6,6 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
+#board {
+  border-collapse: collapse;
+}
+
 #winner {
   margin-top: 25px;
   width: 168px;
