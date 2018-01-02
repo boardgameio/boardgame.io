@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The boardgame.io Authors
+ * Copyright 2017 The boardgame.io Authors.
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -8,15 +8,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import './index.css';
+import './board.css';
 
 class Board extends React.Component {
   static propTypes = {
-    G:         PropTypes.any.isRequired,
-    ctx:       PropTypes.any.isRequired,
-    endTurn:   PropTypes.func.isRequired,
-    moves:     PropTypes.any.isRequired,
-    playerID:  PropTypes.string,
+    G:        PropTypes.any.isRequired,
+    ctx:      PropTypes.any.isRequired,
+    endTurn:  PropTypes.func.isRequired,
+    moves:    PropTypes.any.isRequired,
+    playerID:   PropTypes.string,
     isActive:   PropTypes.bool
   }
 
@@ -28,7 +28,12 @@ class Board extends React.Component {
   }
 
   isActive(id) {
-    return this.props.isActive && this.props.G.cells[id] == null;
+    if (!this.props.isActive) {
+      return false;
+    }
+    if (this.props.ctx.winner !== null) return false;
+    if (this.props.G.cells[id] !== null) return false;
+    return true;
   }
 
   render() {
