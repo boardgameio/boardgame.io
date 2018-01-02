@@ -52,6 +52,41 @@ test('FlowWithPhases', () => {
   expect(state.ctx.phase).toBe('A');
 });
 
+test('callbacks', () => {
+  const onTurnEnd = jest.fn(G => G);
+  const onPass = jest.fn(G => G);
+  const onPhaseBegin = jest.fn(G => G);
+  const onPhaseEnd = jest.fn(G => G);
+
+  let flow = FlowWithPhases({
+    phases: [{
+      onTurnEnd,
+      onPass,
+      onPhaseBegin,
+      onPhaseEnd,
+    }],
+  });
+
+  let state = { ctx: flow.ctx(2) };
+
+  expect(onTurnEnd).not.toHaveBeenCalled();
+  expect(onPass).not.toHaveBeenCalled();
+  expect(onPhaseBegin).not.toHaveBeenCalled();
+  expect(onPhaseEnd).not.toHaveBeenCalled();
+
+  flow.reducer(state, { type: 'init' });
+  expect(onPhaseBegin).toHaveBeenCalled();
+
+  flow.reducer(state, { type: 'endTurn' });
+  expect(onTurnEnd).toHaveBeenCalled();
+
+  flow.reducer(state, { type: 'pass' });
+  expect(onPass).toHaveBeenCalled();
+
+  flow.reducer(state, { type: 'endPhase' });
+  expect(onPhaseEnd).toHaveBeenCalled();
+});
+
 test('init', () => {
   let flow = FlowWithPhases({
     phases: [
@@ -60,9 +95,9 @@ test('init', () => {
   });
 
   const orig = flow.ctx(2);
-  let state = { ctx: orig };
+  let state = { G: {}, ctx: orig };
   state = flow.reducer(state, { type: 'init' });
-  expect(state).toEqual({ ctx: orig });
+  expect(state).toEqual({ G: {}, ctx: orig });
 
   flow = FlowWithPhases({
     phases: [
@@ -73,6 +108,16 @@ test('init', () => {
   state = { ctx: orig };
   state = flow.reducer(state, { type: 'init' });
   expect(state.G).toEqual({ done: true });
+});
+
+test('pass', () => {
+  let flow = FlowWithPhases({ phases: [{ name: 'A', turnOrder: TurnOrder.ANY }] });
+  let state = { ctx: flow.ctx(2) };
+  expect(state.ctx.allPassed).toBe(false);
+  state = flow.reducer(state, { type: 'pass' }, '0');
+  expect(state.ctx.allPassed).toBe(false);
+  state = flow.reducer(state, { type: 'pass' }, '1');
+  expect(state.ctx.allPassed).toBe(true);
 });
 
 test('onPhaseBegin / onPhaseEnd', () => {
@@ -154,6 +199,38 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('10');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('3');
+
+  flow = FlowWithPhases({
+    phases: [
+      { name: 'A', turnOrder: TurnOrder.SKIP },
+    ],
+  });
+
+  state = { ctx: flow.ctx(3) };
+  state = flow.reducer(state, { type: 'init' });
+  expect(state.ctx.allPassed).toBe(false);
+
+  state = flow.reducer(state, { type: 'pass' });
+  expect(state.ctx.allPassed).toBe(false);
+
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.allPassed).toBe(false);
+
+  state = flow.reducer(state, { type: 'pass' });
+  expect(state.ctx.allPassed).toBe(false);
+  expect(state.ctx.currentPlayer).toBe('1');
+
+  state = flow.reducer(state, { type: 'endTurn' });
+  expect(state.ctx.allPassed).toBe(false);
+  expect(state.ctx.currentPlayer).toBe('1');
+
+  state = flow.reducer(state, { type: 'pass' });
+  expect(state.ctx.allPassed).toBe(true);
+  expect(state.ctx.currentPlayer).toBe(undefined);
+
+  state = flow.reducer(state, { type: 'pass' });
+  expect(state.ctx.allPassed).toBe(true);
+  expect(state.ctx.currentPlayer).toBe(undefined);
 });
 
 test('validator', () => {

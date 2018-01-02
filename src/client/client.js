@@ -76,7 +76,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       }
 
       this.moveAPI = createMoveDispatchers(game.moveNames, this.store);
-      this.gameAPI = createEventDispatchers(game.flow.eventNames, this.store);
+      this.gameAPI = createEventDispatchers(game.flow.eventNames, this.store, props.playerID);
       this.createBoard();
       this.createDebugUI();
 

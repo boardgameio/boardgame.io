@@ -38,9 +38,9 @@ export function Flow({ctx, events, validator}) {
     ctx,
     validator,
     eventNames: Object.getOwnPropertyNames(events),
-    reducer: (state, action) => {
+    reducer: (state, action, playerID) => {
       if (events.hasOwnProperty(action.type)) {
-        const context = events[action.type];
+        const context = { playerID };
         const args = [state].concat(action.args);
         return events[action.type].apply(context, args);
       }
@@ -69,6 +69,21 @@ export const TurnOrder = {
   ANY: {
     first: () => 'any',
     next: () => 'any',
+  },
+
+  // Similar to DEFAULT, but skips over any players that have passed.
+  SKIP: {
+    first: (G, ctx) => ctx.currentPlayer,
+    next: (G, ctx) => {
+      if (ctx.allPassed) return;
+      let nextPlayer = ctx.currentPlayer;
+      for (let i = 0; i < ctx.numPlayers; i++) {
+        nextPlayer = ((+nextPlayer + 1) % ctx.numPlayers + "");
+        if (!(nextPlayer in ctx.passMap)) {
+          return nextPlayer;
+        }
+      }
+    }
   },
 };
 
@@ -129,15 +144,25 @@ export function SimpleFlow({ gameEndIf }) {
  * Each phase is described by an object:
  * {
  *   name: 'phase_name',
+ *
  *   // Any setup code to run before the phase begins.
  *   onPhaseBegin: (G, ctx) => G,
+ *
  *   // Any cleanup code to run after the phase ends.
  *   onPhaseEnd: (G, ctx) => G,
+ *
+ *   // Any code to run when a turn ends in this phase.
+ *   onTurnEnd: (G, ctx) => G,
+ *
+ *   // Any code to run when a player passes in this phase.
+ *   onPass: (G, ctx) => G,
+ *
  *   // The phase ends if this function returns a truthy value.
  *   // If the return value is the name of another phase,
  *   // that will be chosen as the next phase (as opposed
  *   // to the next one in round-robin order).
  *   phaseEndIf: (G, ctx) => {}
+ *
  *   // Called when `endTurn` is processed, and returns the next player.
  *   // If not specified, TurnOrder.DEFAULT is used.
  *   turnOrder: {
@@ -147,6 +172,7 @@ export function SimpleFlow({ gameEndIf }) {
  *     // the next player.
  *     next: (G, ctx) => playerID,
  *   },
+ *
  *   // List of moves that are allowed in this phase.
  *   allowedMoves: ['moveA', ...],
  * }
@@ -165,6 +191,7 @@ export function FlowWithPhases({ phases, gameEndIf }) {
 
   let phaseKeys = [];
   let phaseMap = {};
+
   for (let conf of phases) {
     phaseKeys.push(conf.name);
     phaseMap[conf.name] = conf;
@@ -181,13 +208,20 @@ export function FlowWithPhases({ phases, gameEndIf }) {
     if (!conf.onPhaseEnd) {
       conf.onPhaseEnd = G => G;
     }
+    if (!conf.onTurnEnd) {
+      conf.onTurnEnd = G => G;
+    }
+    if (!conf.onPass) {
+      conf.onPass = G => G;
+    }
   }
 
   // Helper to perform start-of-phase initialization.
-  const startPhase = (state, phaseConfig) => {
-    const G = phaseConfig.onPhaseBegin(state.G, state.ctx);
-    const currentPlayer = phaseConfig.turnOrder.first(G, state.ctx);
-    return { ...state, G, ctx: { ...state.ctx, currentPlayer } };
+  const startPhase = function(state, phaseConfig) {
+    const ctx = { ...state.ctx, passMap: {}, allPassed: false };
+    const G = phaseConfig.onPhaseBegin(state.G, ctx);
+    ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
+    return { G, ctx };
   };
 
   /**
@@ -200,12 +234,13 @@ export function FlowWithPhases({ phases, gameEndIf }) {
    * The next phase is chosen in a round-robin fashion, with the
    * option to override that by passing nextPhase.
    */
-  const endPhase = (state, nextPhase) => {
+  const endPhase = function(state, nextPhase) {
     let G = state.G;
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    G = phaseMap[ctx.phase].onPhaseEnd(G, ctx);
+    const conf = phaseMap[ctx.phase];
+    G = conf.onPhaseEnd(G, ctx);
 
     // Update the phase.
     if (nextPhase in phaseMap) {
@@ -227,27 +262,60 @@ export function FlowWithPhases({ phases, gameEndIf }) {
    * Ends the current turn.
    * Passes the turn to the next turn in a round-robin fashion.
    */
-  const endTurn = (state) => {
-    const conf = phaseMap[state.ctx.phase];
+  const endTurn = function(state) {
+    let G = state.G;
+    let ctx = state.ctx;
+
+    const conf = phaseMap[ctx.phase];
+    G = conf.onTurnEnd(G, ctx);
+
     // Update gameEnd.
-    const gameEnd = gameEndIf(state.G, state.ctx);
-    // Update current player.
-    const currentPlayer = conf.turnOrder.next(state.G, state.ctx);
-    // Update turn.
-    const turn = state.ctx.turn + 1;
-    // Update state.
-    state = { G: state.G, ctx: { ...state.ctx, currentPlayer, turn } };
+    const gameEnd = gameEndIf(G, ctx);
     if (gameEnd !== undefined) {
-      state.ctx.gameEnd = gameEnd;
+      ctx.gameEnd = gameEnd;
+      return { G, ctx };
     }
+    // Update current player.
+    const currentPlayer = conf.turnOrder.next(G, ctx);
+    // Update turn.
+    const turn = ctx.turn + 1;
+    // Update state.
+    ctx = { ...ctx, currentPlayer, turn };
 
     // End phase if condition is met.
-    const end = conf.phaseEndIf(state.G, state.ctx);
+    const end = conf.phaseEndIf(G, ctx);
     if (end) {
-      state = endPhase(state, end);
+      return endPhase({ G, ctx }, end);
     }
 
-    return state;
+    return { G, ctx };
+  };
+
+  /**
+   * pass (game event)
+   *
+   * The current player passes (and ends the turn).
+   */
+  const pass = function(state) {
+    let G = state.G;
+    let ctx = state.ctx;
+    const conf = phaseMap[state.ctx.phase];
+    G = conf.onPass(G, ctx);
+
+    // Mark that the player has passed.
+    const playerID = ctx.currentPlayer == 'any' ? this.playerID : ctx.currentPlayer;
+
+    if (playerID !== undefined) {
+      let passMap = { ...ctx.passMap };
+      passMap[playerID] = true;
+      ctx = { ...ctx, passMap };
+
+      if (Object.keys(passMap).length >= ctx.numPlayers) {
+        ctx.allPassed = true;
+      }
+    }
+
+    return endTurn({ G, ctx });
   };
 
   /**
@@ -257,7 +325,7 @@ export function FlowWithPhases({ phases, gameEndIf }) {
    * This is called at the beginning of the game automatically
    * before any turns are made.
    */
-  const init = (state) => startPhase(state, phases[0]);
+  const init = function(state) { return startPhase(state, phases[0]) };
 
   const validator = (G, ctx, move) => {
     const conf = phaseMap[ctx.phase];
@@ -274,8 +342,10 @@ export function FlowWithPhases({ phases, gameEndIf }) {
       turn: 0,
       currentPlayer: '0',
       phase: phases[0].name,
+      passMap: {},
+      allPassed: false,
     }),
-    events: { init, endTurn, endPhase },
+    events: { init, endTurn, endPhase, pass },
     validator,
   });
 }
@@ -286,15 +356,13 @@ export function FlowWithPhases({ phases, gameEndIf }) {
  * Creates a set of dispatchers to dispatch game flow events.
  * @param {Array} eventNames - A list of event names.
  * @param {object} store - The Redux store to create dispatchers for.
+ * @param {string} playerID - The ID of the player dispatching these events.
  */
-export function createEventDispatchers(eventNames, store) {
+export function createEventDispatchers(eventNames, store, playerID) {
   let dispatchers = {};
   for (const name of eventNames) {
     dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.gameEvent({
-        type: name,
-        args: args
-      }));
+      store.dispatch(ActionCreators.gameEvent({ type: name, args }, playerID));
     };
   }
   return dispatchers;

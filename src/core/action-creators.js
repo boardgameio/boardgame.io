@@ -26,10 +26,12 @@ export const makeMove = (move) => ({
  * @param {object} e - The event to dispatch.
  * @param {string} e.type - The event type.
  * @param {Array}  e.args - Additional arguments.
+ * @param {string}  playerID - The ID of the player making this action.
  */
-export const gameEvent = (e) => ({
+export const gameEvent = (e, playerID) => ({
   type: Actions.GAME_EVENT,
   e,
+  playerID,
 });
 
 /**
