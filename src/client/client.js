@@ -75,8 +75,10 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
         this.store = createStore(GameReducer);
       }
 
-      this.moveAPI = createMoveDispatchers(game.moveNames, this.store);
-      this.gameAPI = createEventDispatchers(game.flow.eventNames, this.store, props.playerID);
+      this.moveAPI = createMoveDispatchers(
+          game.moveNames, this.store, props.playerID);
+      this.gameAPI = createEventDispatchers(
+          game.flow.eventNames, this.store, props.playerID);
       this.createBoard();
       this.createDebugUI();
 
@@ -146,6 +148,10 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
       this.createBoard();
       this.createDebugUI();
+      this.moveAPI = createMoveDispatchers(
+          game.moveNames, this.store, this.props.playerID);
+      this.gameAPI = createEventDispatchers(
+          game.flow.eventNames, this.store, this.props.playerID);
     }
 
     componentWillMount() {

@@ -38,9 +38,9 @@ export function Flow({ctx, events, validator}) {
     ctx,
     validator,
     eventNames: Object.getOwnPropertyNames(events),
-    reducer: (state, action, playerID) => {
+    reducer: (state, action) => {
       if (events.hasOwnProperty(action.type)) {
-        const context = { playerID };
+        const context = { playerID: action.playerID };
         const args = [state].concat(action.args);
         return events[action.type].apply(context, args);
       }
@@ -362,7 +362,11 @@ export function createEventDispatchers(eventNames, store, playerID) {
   let dispatchers = {};
   for (const name of eventNames) {
     dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.gameEvent({ type: name, args }, playerID));
+      store.dispatch(ActionCreators.gameEvent({
+        type: name,
+        args,
+        playerID
+      }));
     };
   }
   return dispatchers;

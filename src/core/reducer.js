@@ -92,13 +92,14 @@ export function createGameReducer({game, numPlayers}) {
  * @param {Array} moveNames - A list of move names.
  * @param {object} store - The Redux store to create dispatchers for.
  */
-export function createMoveDispatchers(moveNames, store) {
+export function createMoveDispatchers(moveNames, store, playerID) {
   let dispatchers = {};
   for (const name of moveNames) {
     dispatchers[name] = function(...args) {
       store.dispatch(ActionCreators.makeMove({
         type: name,
-        args: args
+        args,
+        playerID,
       }));
     };
   }
