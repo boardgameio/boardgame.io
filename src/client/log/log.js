@@ -51,6 +51,9 @@ export class GameLog extends React.Component {
     let currentTurn = [];
     let turnToLogIndex = {};
 
+    const ctx = this.props.initialState.ctx;
+    const numPlayers = ctx ? ctx.numPlayers : 2;
+
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
       if (item.type == Actions.END_TURN) {
@@ -69,9 +72,11 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i < turns.length; i++) {
       const turn = turns[i];
+      const currentPlayerNumber = i % numPlayers;
+      const classNames = "log-turn player" + currentPlayerNumber;
       log.push(
         <div key={i}
-             className="log-turn"
+             className={classNames}
              onMouseOver={() => this.onRewind(turnToLogIndex[i])}
              onMouseOut={() => this.onRewind(null)}>
         <div className="id">Turn #{i + 1}</div>
