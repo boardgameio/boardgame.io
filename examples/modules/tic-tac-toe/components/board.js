@@ -28,10 +28,7 @@ class Board extends React.Component {
   }
 
   isActive(id) {
-    if (!this.props.isActive) {
-      return false;
-    }
-    if (this.props.ctx.winner !== null) return false;
+    if (!this.props.isActive) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }

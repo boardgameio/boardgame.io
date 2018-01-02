@@ -94,6 +94,10 @@ test('action', () => {
   io.socket.receive('sync', 'gameID');
   io.socket.emit.mockReset();
 
+  // View-only players cannot send actions.
+  io.socket.receive('action', action, 0, 'gameID', null);
+  expect(io.socket.emit).not.toHaveBeenCalled();
+
   // Actions are broadcasted as state updates.
   // The playerID parameter is necessary to account for view-only players.
   io.socket.receive('action', action, 0, 'gameID', '0');

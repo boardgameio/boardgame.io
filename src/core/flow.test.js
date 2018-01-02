@@ -170,7 +170,7 @@ test('endGameIf', () => {
 
   let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.winner).toBe(undefined);
+  expect(state.ctx.gameover).toBe(undefined);
 
   state.G.win = 'A';
   state = flow.reducer(state, { type: 'endTurn' });
