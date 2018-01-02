@@ -95,8 +95,7 @@ test('action', () => {
   io.socket.emit.mockReset();
 
   // Actions are broadcasted as state updates.
-  // We need to stimulate with a playerID to account for a view-only
-  // null playerID
+  // The playerID parameter is necessary to account for view-only players.
   io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith(
     'sync', 'gameID', {
