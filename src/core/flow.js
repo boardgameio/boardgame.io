@@ -29,14 +29,16 @@ import * as ActionCreators from './action-creators';
  *                                at this point in the game.
  *                                (G, ctx, moveName) => boolean
  */
-export function Flow({ctx, events, validator}) {
+export function Flow({ctx, events, validator, endTurnIf}) {
   if (!ctx)       ctx = () => ({});
   if (!events)    events = {};
   if (!validator) validator = () => true;
+  if (!endTurnIf) endTurnIf = () => false;
 
   return {
     ctx,
     validator,
+    endTurnIf,
     eventNames: Object.getOwnPropertyNames(events),
     reducer: (state, action) => {
       if (events.hasOwnProperty(action.type)) {
@@ -97,8 +99,9 @@ export const TurnOrder = {
  * The game ends if this returns anything other than undefined.
  * The return value is available at ctx.gameover.
  */
-export function SimpleFlow({ endGameIf }) {
+export function SimpleFlow({ endGameIf, endTurnIf }) {
   if (!endGameIf) endGameIf = () => undefined;
+  if (!endTurnIf) endTurnIf = () => false;
   /**
    * endTurn (game event)
    *
@@ -127,6 +130,7 @@ export function SimpleFlow({ endGameIf }) {
       currentPlayer: '0',
     }),
     events: { endTurn },
+    endTurnIf,
   });
 }
 
@@ -201,6 +205,9 @@ export function FlowWithPhases({ phases, endGameIf }) {
     }
     if (!conf.endPhaseIf) {
       conf.endPhaseIf = () => false;
+    }
+    if (!conf.endTurnIf) {
+      conf.endTurnIf = () => false;
     }
     if (!conf.onPhaseBegin) {
       conf.onPhaseBegin = G => G;
@@ -336,6 +343,11 @@ export function FlowWithPhases({ phases, endGameIf }) {
     return true;
   };
 
+  const endTurnIf = (G, ctx) => {
+    const conf = phaseMap[ctx.phase];
+    return conf.endTurnIf(G, ctx);
+  };
+
   return Flow({
     ctx: numPlayers => ({
       numPlayers,
@@ -347,6 +359,7 @@ export function FlowWithPhases({ phases, endGameIf }) {
     }),
     events: { init, endTurn, endPhase, pass },
     validator,
+    endTurnIf,
   });
 }
 
