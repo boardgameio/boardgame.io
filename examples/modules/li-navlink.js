@@ -12,7 +12,6 @@ import { NavLink, Route } from 'react-router-dom';
 
 const LiNavLink = (props) => {
   const {to,exact, strict, activeClassName, className, activeStyle, style, isActive: getIsActive, ...rest } = props;
-  console.log(props);
   return (
       <Route
           path={typeof to === 'object' ? to.pathname : to}
