@@ -8,6 +8,7 @@
 
 import * as Actions from './action-types';
 import * as ActionCreators from './action-creators';
+import { TurnOrder } from './turn-order';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -79,56 +80,6 @@ export function Flow({ctx, events, init, validator, endTurnIf, endGameIf}) {
     },
   };
 }
-
-/**
- * TurnOrder
- *
- * Set of different turn orders possible in a phase.
- * Each function returns the next player given G and ctx.
- *
- * You can define your own and pass it to the `turnOrder`
- * setting in the phase config object (see below).
- */
-export const TurnOrder = {
-  /**
-   * DEFAULT
-   *
-   * The default round-robin turn order.
-   */
-  DEFAULT: {
-    first: (G, ctx) => ctx.currentPlayer,
-    next: (G, ctx) => ((+ctx.currentPlayer + 1) % ctx.numPlayers + ""),
-  },
-
-  /**
-   * ANY
-   *
-   * Any player can play and there isn't a currentPlayer really.
-   */
-  ANY: {
-    first: () => 'any',
-    next: () => 'any',
-  },
-
-  /**
-   * SKIP
-   *
-   * Round-robin, but skips over any players that have passed.
-   */
-  SKIP: {
-    first: (G, ctx) => ctx.currentPlayer,
-    next: (G, ctx) => {
-      if (ctx.allPassed) return;
-      let nextPlayer = ctx.currentPlayer;
-      for (let i = 0; i < ctx.numPlayers; i++) {
-        nextPlayer = ((+nextPlayer + 1) % ctx.numPlayers + "");
-        if (!(nextPlayer in ctx.passMap)) {
-          return nextPlayer;
-        }
-      }
-    }
-  },
-};
 
 /**
  * SimpleFlow

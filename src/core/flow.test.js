@@ -10,7 +10,8 @@ import Game from './game';
 import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
-import { Flow, SimpleFlow, FlowWithPhases, TurnOrder, createEventDispatchers } from './flow';
+import { Flow, SimpleFlow, FlowWithPhases, createEventDispatchers } from './flow';
+import { TurnOrder } from './turn-order';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -265,74 +266,6 @@ test('endTurnIf', () => {
     state = reducer(state, makeMove({ type: 'A' }));
     expect(state.ctx.currentPlayer).toBe('1');
   }
-});
-
-test('turnOrder', () => {
-  let flow = FlowWithPhases({
-    phases: [{ name: 'A' }],
-  });
-
-  let state = { ctx: flow.ctx(10) };
-  state = flow.init(state);
-  expect(state.ctx.currentPlayer).toBe('0');
-  state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.currentPlayer).toBe('1');
-
-  flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: TurnOrder.ANY },
-    ],
-  });
-
-  state = { ctx: flow.ctx(10) };
-  state = flow.init(state);
-  expect(state.ctx.currentPlayer).toBe('any');
-  state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.currentPlayer).toBe('any');
-
-  flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: { first: () => '10', next: () => '3' } }
-    ],
-  });
-
-  state = { ctx: flow.ctx(10) };
-  state = flow.init(state);
-  expect(state.ctx.currentPlayer).toBe('10');
-  state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.currentPlayer).toBe('3');
-
-  flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: TurnOrder.SKIP },
-    ],
-  });
-
-  state = { ctx: flow.ctx(3) };
-  state = flow.init(state);
-  expect(state.ctx.allPassed).toBe(false);
-
-  state = flow.reducer(state, { type: 'pass' });
-  expect(state.ctx.allPassed).toBe(false);
-
-  state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.allPassed).toBe(false);
-
-  state = flow.reducer(state, { type: 'pass' });
-  expect(state.ctx.allPassed).toBe(false);
-  expect(state.ctx.currentPlayer).toBe('1');
-
-  state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.allPassed).toBe(false);
-  expect(state.ctx.currentPlayer).toBe('1');
-
-  state = flow.reducer(state, { type: 'pass' });
-  expect(state.ctx.allPassed).toBe(true);
-  expect(state.ctx.currentPlayer).toBe(undefined);
-
-  state = flow.reducer(state, { type: 'pass' });
-  expect(state.ctx.allPassed).toBe(true);
-  expect(state.ctx.currentPlayer).toBe(undefined);
 });
 
 test('validator', () => {
