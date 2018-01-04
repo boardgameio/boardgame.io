@@ -9,7 +9,7 @@
 import React from 'react';
 import Client from './client';
 import Game from '../core/game';
-import { TurnOrder } from '../core/flow';
+import { TurnOrder } from '../core/turn-order';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
