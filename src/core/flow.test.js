@@ -74,7 +74,7 @@ test('callbacks', () => {
   expect(onPhaseBegin).not.toHaveBeenCalled();
   expect(onPhaseEnd).not.toHaveBeenCalled();
 
-  flow.reducer(state, { type: 'init' });
+  flow.init(state);
   expect(onPhaseBegin).toHaveBeenCalled();
 
   flow.reducer(state, { type: 'endTurn' });
@@ -106,7 +106,7 @@ test('init', () => {
   });
 
   state = { ctx: orig };
-  state = flow.reducer(state, { type: 'init' });
+  state = flow.init(state);
   expect(state.G).toEqual({ done: true });
 });
 
@@ -137,7 +137,7 @@ test('onPhaseBegin / onPhaseEnd', () => {
   });
 
   let state = { G: {}, ctx: flow.ctx(2) };
-  state = flow.reducer(state, { type: 'init' });
+  state = flow.init(state);
   expect(state.G).toEqual({ 'setupA': true });
   state = flow.reducer(state, { type: 'endPhase' });
   expect(state.G).toEqual({ 'setupA': true, 'cleanupA': true, 'setupB': true });
@@ -273,7 +273,7 @@ test('turnOrder', () => {
   });
 
   let state = { ctx: flow.ctx(10) };
-  state = flow.reducer(state, { type: 'init' });
+  state = flow.init(state);
   expect(state.ctx.currentPlayer).toBe('0');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('1');
@@ -285,7 +285,7 @@ test('turnOrder', () => {
   });
 
   state = { ctx: flow.ctx(10) };
-  state = flow.reducer(state, { type: 'init' });
+  state = flow.init(state);
   expect(state.ctx.currentPlayer).toBe('any');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('any');
@@ -297,7 +297,7 @@ test('turnOrder', () => {
   });
 
   state = { ctx: flow.ctx(10) };
-  state = flow.reducer(state, { type: 'init' });
+  state = flow.init(state);
   expect(state.ctx.currentPlayer).toBe('10');
   state = flow.reducer(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('3');
@@ -309,7 +309,7 @@ test('turnOrder', () => {
   });
 
   state = { ctx: flow.ctx(3) };
-  state = flow.reducer(state, { type: 'init' });
+  state = flow.init(state);
   expect(state.ctx.allPassed).toBe(false);
 
   state = flow.reducer(state, { type: 'pass' });
