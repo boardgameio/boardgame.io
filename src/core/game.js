@@ -43,6 +43,7 @@ import { FlowWithPhases, SimpleFlow } from './flow';
  *
  *   flow: {
  *     endGameIf: (G, ctx) => { ... },
+ *     endTurnIf: (G, ctx) => { ... },
  *
  *     phases: [
  *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
@@ -58,10 +59,9 @@ import { FlowWithPhases, SimpleFlow } from './flow';
  *                                 derivative of G tailored for
  *                                 the specified player.
  * @param {...object} flow - Customize the flow of the game (see flow.js).
- *                           Must contain the return value of Flow() or GameFlow().
- *                           If it contains any other object, it is presumed to
- *                           be the configuration object for GameFlow(), and is
- *                           replaced with GameFlow(flow).
+ *                           Must contain the return value of Flow().
+ *                           If it contains any other object, it is presumed to be a
+ *                           configuration object for SimpleFlow() or FlowWithPhases().
  */
 function Game({setup, moves, playerView, flow}) {
   if (!setup)       setup = () => ({});

@@ -166,20 +166,67 @@ test('endPhaseIf', () => {
 });
 
 test('endGameIf', () => {
-  const flow = FlowWithPhases({ endGameIf: G => G.win });
+  {
+    const flow = SimpleFlow({ endGameIf: G => G.win });
 
-  let state = { G: {}, ctx: flow.ctx(2) };
-  state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.gameover).toBe(undefined);
+    let state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.reducer(state, { type: 'endTurn' });
+    expect(state.ctx.gameover).toBe(undefined);
 
-  state.G.win = 'A';
-  state = flow.reducer(state, { type: 'endTurn' });
-  expect(state.ctx.gameover).toBe('A');
+    state.G.win = 'A';
+    state = flow.reducer(state, { type: 'endTurn' });
+    expect(state.ctx.gameover).toBe('A');
+  }
+
+  {
+    const flow = FlowWithPhases({ endGameIf: G => G.win });
+
+    let state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.reducer(state, { type: 'endTurn' });
+    expect(state.ctx.gameover).toBe(undefined);
+
+    state.G.win = 'A';
+    state = flow.reducer(state, { type: 'endTurn' });
+    expect(state.ctx.gameover).toBe('A');
+  }
+
+  {
+    const flow = FlowWithPhases({ phases: [
+      { name: 'default', endGameIf: G => G.win }
+    ]});
+
+    let state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.reducer(state, { type: 'endTurn' });
+    expect(state.ctx.gameover).toBe(undefined);
+
+    state.G.win = 'A';
+    state = flow.reducer(state, { type: 'endTurn' });
+    expect(state.ctx.gameover).toBe('A');
+  }
 });
 
 test('endTurnIf', () => {
   {
     const flow = SimpleFlow({ endTurnIf: G => G.endTurn });
+    const game = Game({
+      moves: {
+        'A': () => ({ endTurn: true }),
+        'B': G => G,
+      },
+      flow,
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = reducer(state, makeMove({ type: 'B' }));
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = reducer(state, makeMove({ type: 'A' }));
+    expect(state.ctx.currentPlayer).toBe('1');
+  }
+
+  {
+    const flow = FlowWithPhases({ endTurnIf: G => G.endTurn });
     const game = Game({
       moves: {
         'A': () => ({ endTurn: true }),
