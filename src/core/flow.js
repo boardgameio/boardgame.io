@@ -48,9 +48,17 @@ export function Flow({ctx, events, init, validator, endTurnIf, endGameIf}) {
 
   return {
     ctx,
-    validator,
     init,
+
+    // Disallow moves once the game is over.
+    // Also call any provided additional validation.
+    validator: (G, ctx, move) => {
+      if (ctx.gameover !== undefined) return false;
+      return validator(G, ctx, move);
+    },
+
     eventNames: Object.getOwnPropertyNames(events),
+
     reducer: (state, action) => {
       const dispatch = (state, action) => {
         if (events.hasOwnProperty(action.type)) {

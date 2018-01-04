@@ -269,12 +269,6 @@ test('endTurnIf', () => {
 });
 
 test('validator', () => {
-  let flow;
-  flow = Flow({});
-  expect(flow.validator()).toBe(true);
-  flow = Flow({ validator: () => false });
-  expect(flow.validator()).toBe(false);
-
   let game = Game({
     moves: {
       'A': () => ({ A: true }),
@@ -293,6 +287,13 @@ test('validator', () => {
   const reducer = createGameReducer({game, numPlayers: 2});
   let state = reducer(undefined, { type: 'init' });
   expect(state.ctx.phase).toBe('A');
+
+  // Basic.
+  let flow;
+  flow = Flow({});
+  expect(flow.validator(state.G, state.ctx)).toBe(true);
+  flow = Flow({ validator: () => false });
+  expect(flow.validator(state.G, state.ctx)).toBe(false);
 
   // B is disallowed in phase A.
   state = reducer(state, makeMove({ type: 'B' }));
@@ -319,6 +320,14 @@ test('validator', () => {
   expect(state.G).toEqual({ A: true });
   state = reducer(state, makeMove({ type: 'B' }));
   expect(state.G).toEqual({ B: true });
+
+  // But not once the game is over.
+  state.ctx.gameover = true;
+  state.G = {};
+  state = reducer(state, makeMove({ type: 'A' }));
+  expect(state.G).toEqual({});
+  state = reducer(state, makeMove({ type: 'B' }));
+  expect(state.G).toEqual({});
 });
 
 test('dispatchers', () => {
