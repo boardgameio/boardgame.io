@@ -37,9 +37,10 @@ import * as ActionCreators from './action-creators';
  *                                The return value is available at `ctx.gameover`.
  *                                (G, ctx) => {}
  */
-export function Flow({ctx, events, validator, endTurnIf, endGameIf}) {
+export function Flow({ctx, events, init, validator, endTurnIf, endGameIf}) {
   if (!ctx)       ctx = () => ({});
   if (!events)    events = {};
+  if (!init)      init = state => state;
   if (!validator) validator = () => true;
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
@@ -47,6 +48,7 @@ export function Flow({ctx, events, validator, endTurnIf, endGameIf}) {
   return {
     ctx,
     validator,
+    init,
     eventNames: Object.getOwnPropertyNames(events),
     reducer: (state, action) => {
       const dispatch = (state, action) => {
@@ -397,15 +399,6 @@ export function FlowWithPhases({ phases, endTurnIf, endGameIf }) {
     return endTurn({ G, ctx });
   };
 
-  /**
-   * init (game event)
-   *
-   * Runs any setup code defined for the first phase of the game.
-   * This is called at the beginning of the game automatically
-   * before any turns are made.
-   */
-  const init = function(state) { return startPhase(state, phases[0]) };
-
   const validator = (G, ctx, move) => {
     const conf = phaseMap[ctx.phase];
     if (conf.allowedMoves) {
@@ -424,7 +417,8 @@ export function FlowWithPhases({ phases, endTurnIf, endGameIf }) {
       passMap: {},
       allPassed: false,
     }),
-    events: { init, endTurn, endPhase, pass },
+    init: state => startPhase(state, phases[0]),
+    events: { endTurn, endPhase, pass },
     validator,
     endTurnIf: endTurnIfWrap,
     endGameIf: endGameIfWrap,

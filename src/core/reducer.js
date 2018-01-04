@@ -42,7 +42,7 @@ export function createGameReducer({game, numPlayers}) {
     _initial: {}
   };
 
-  const state = game.flow.reducer({ G: initial.G, ctx: initial.ctx }, { type: 'init' });
+  const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
   initial.G = state.G;
   initial.ctx = state.ctx;
 
