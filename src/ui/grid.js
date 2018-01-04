@@ -39,7 +39,10 @@ class Grid extends React.Component {
     rows: PropTypes.number,
     cols: PropTypes.number,
     style: PropTypes.object,
-    children: PropTypes.element,
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.element),
+        PropTypes.element
+    ]),
   }
 
   cartesianCord = (props) => {

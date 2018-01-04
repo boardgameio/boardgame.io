@@ -6,13 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Hotseat from './components/hotseat';
+import Singleplayer from './components/Singleplayer';
 
 const routes = [
   {
     path: '/chess',
-    text: 'Hotseat',
-    component: Hotseat
+    text: 'Singleplayer',
+    component: Singleplayer
   }
 ];
 
