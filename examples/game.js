@@ -57,7 +57,11 @@ const TicTacToe = Game({
       if (IsVictory(G.cells)) {
         return ctx.currentPlayer;
       }
-    }
+    },
+
+    phases: [
+      { name: 'default' },
+    ],
   }
 });
 

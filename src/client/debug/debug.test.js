@@ -51,7 +51,7 @@ test('basic', () => {
       <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />);
 
   const titles = debug.find('h3').map(title => title.text());
-  expect(titles).toEqual(['players', 'actions', 'state']);
+  expect(titles).toEqual(['players', 'moves', 'events', 'state']);
 
   expect(debug.state('showLog')).toEqual(false);
   debug.find('.menu .item').at(1).simulate('click');

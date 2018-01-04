@@ -389,10 +389,15 @@ export class Debug extends React.Component {
         {players}
         </div>
 
-        <h3>actions</h3>
+        <h3>moves</h3>
 
         <section>
         {moves}
+        </section>
+
+        <h3>events</h3>
+
+        <section>
         {events}
         </section>
 
