@@ -1,5 +1,14 @@
+/*
+ * Copyright 2018 The boardgame.io Authors.
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
+
 const NUM_COLS = 8;
 const NUM_ROWS = 8;
 const PRIMARY_COLOR = '#d18b47';
@@ -26,9 +35,9 @@ class Checkerboard extends React.Component {
           onClickCallback = this.props.onClick(cellCode);
         }
         rects.push((<rect
-          height="1"
           style={{fill: this._getCellColor(i, j, cellCode)}}
           width="1"
+          height="1"
           x={i}
           y={NUM_COLS - j - 1}
           key={NUM_COLS * j + i}

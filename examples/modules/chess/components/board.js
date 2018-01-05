@@ -30,14 +30,19 @@ class Board extends React.Component {
     playerID:   PropTypes.string,
     isActive:   PropTypes.bool
   }
+
+  constructor(props) {
+    super(props);
+    this.chess = new Chess();
+  }
+
   state = {
-    chess: new Chess(),
     selected: ''
   }
 
   componentWillReceiveProps(nextProps) {
-    this.state.chess.load_pgn(nextProps.G.pgn);
-    this.setState({...this.state, selected: ''});
+    this.chess.load_pgn(nextProps.G.pgn);
+    this.setState({ selected: '' });
   }
 
   render() {
@@ -57,8 +62,9 @@ class Board extends React.Component {
   click(cellCode) {
     return () => {
       if (!this.state.selected && this._isSelectable(cellCode)) {
-        this.setState({...this.state, selected: cellCode});
+        this.setState({ selected: cellCode });
       }
+
       if (this.state.selected) {
         let moves = this._getMoves();
         let move = moves.find((move) => (move.from == this.state.selected &&
@@ -67,7 +73,7 @@ class Board extends React.Component {
           this.props.moves.move(move.san);
           this.props.endTurn();
         } else {
-          this.setState({...this.state, selected: ''});
+          this.setState({ selected: '' });
         }
       }
     }
@@ -78,7 +84,7 @@ class Board extends React.Component {
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
         let cellCode = COL_NAMES[x] + (8 - y);
-        let p = this.state.chess.get(cellCode);
+        let p = this.chess.get(cellCode);
         if (p) {
           result.push((
             <Token y={y} x={x} animate={true}
@@ -105,7 +111,7 @@ class Board extends React.Component {
 
   _getStatus() {
     let message = null;
-    if (this.state.chess.in_check()) {
+    if (this.chess.in_check()) {
       message = 'CHECK';
     }
     if (this.props.ctx.winner) {
@@ -121,7 +127,7 @@ class Board extends React.Component {
   }
 
   _getInitialCell(cellCode) {
-    let history = this.state.chess.history({ verbose: true });
+    let history = this.chess.history({ verbose: true });
     let lastSeen = cellCode;
     for (let i = history.length - 1; i >= 0; i--) {
       let move = history[i];
@@ -133,9 +139,9 @@ class Board extends React.Component {
   }
 
   _isSelectable(cellCode) {
-    let piece = this.state.chess.get(cellCode);
+    let piece = this.chess.get(cellCode);
     return (piece && piece.color === this._getCurrentPlayer() &&
-            this.state.chess.moves({ square: cellCode }).length > 0);
+            this.chess.moves({ square: cellCode }).length > 0);
   }
 
   _getCurrentPlayer() {
@@ -150,8 +156,10 @@ class Board extends React.Component {
     if (!this.state.selected) {
       return [];
     }
-    return this.state.chess.moves({ verbose: true,
-                                    square: this.state.selected });
+    return this.chess.moves({
+      verbose: true,
+      square: this.state.selected
+    });
   }
 }
 
