@@ -51,9 +51,9 @@ export default [
   },
 
   {
-    input: 'packages/game.js',
-    output: { file: 'dist/game.js', format: 'umd' },
-    name: 'Moves',
+    input: 'packages/core.js',
+    output: { file: 'dist/core.js', format: 'umd' },
+    name: 'Core',
     plugins: plugins,
   },
 
