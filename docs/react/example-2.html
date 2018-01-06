@@ -51,7 +51,7 @@ function IsVictory(cells) {
 
 const TicTacToe = BoardgameIO.Game({
   setup: () => ({ cells: Array(9).fill(null) }),
-  
+
   moves: {
     clickCell(G, ctx, id) {
       const cells = [...G.cells];
@@ -139,7 +139,7 @@ ReactDOM.render(<App/>, document.getElementById('app'));
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
   <script src="//unpkg.com/react@next/umd/react.development.js"></script>
   <script src="//unpkg.com/react-dom@next/umd/react-dom.development.js"></script>
-  <script src="//unpkg.com/boardgame.io"></script>
+  <script src="boardgameio.min.js"></script>
 </body>
 
 </html>
