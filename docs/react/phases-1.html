@@ -1,18 +1,38 @@
-/*
- * Copyright 2018 The boardgame.io Authors.
- *
- * Use of this source code is governed by a MIT-style
- * license that can be found in the LICENSE file or at
- * https://opensource.org/licenses/MIT.
- */
+<!DOCTYPE html>
+<html>
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Game } from 'boardgame.io/core';
-import { Client } from 'boardgame.io/client';
-import './phases.css';
+<head>
+<style>
+body {
+  padding: 20px;
+}
+.msg {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+.phases li {
+  list-style: none;
+  width: 200px;
+  border: 1px solid #eee;
+  border-top: none;
+  padding: 5px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+}
+</style>
+</head>
 
-const game = Game({
+<body>
+  <div class="msg">interactive (not an image)</div>
+  <div id="app"></div>
+
+  <script type="text/babel">
+const game = BoardgameIO.Game({
   setup: () => ({ deck: 5, hand: 0 }),
 
   moves: {
@@ -37,13 +57,6 @@ const game = Game({
 });
 
 class Board extends React.Component {
-  static propTypes = {
-    G: PropTypes.any.isRequired,
-    ctx: PropTypes.any.isRequired,
-    moves: PropTypes.any,
-    game: PropTypes.any
-  }
-
   takeCard = () => {
     if (this.props.ctx.phase != 'take phase') return;
     this.props.moves.takeCard();
@@ -69,10 +82,19 @@ class Board extends React.Component {
   }
 }
 
-const Phases = Client({
+const Phases = BoardgameIO.Client({
   game,
   numPlayers: 1,
   board: Board,
 });
 
-export default Phases;
+ReactDOM.render(<Phases/>, document.getElementById('app'));
+  </script>
+
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="//unpkg.com/react@next/umd/react.development.js"></script>
+  <script src="//unpkg.com/react-dom@next/umd/react-dom.development.js"></script>
+  <script src="boardgameio.min.js"></script>
+</body>
+
+</html>
