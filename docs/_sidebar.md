@@ -3,7 +3,7 @@
   - [Concepts](concepts.md)
   - [Tutorial](tutorial.md)
 
-- Advanced
+- Guides
   - [Multiplayer](multiplayer.md)
   - [Secret State](secret-state.md)
   - [Phases](phases.md)
