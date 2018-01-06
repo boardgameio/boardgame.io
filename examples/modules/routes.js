@@ -9,6 +9,7 @@
 import core from './core';
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
+import phases from './phases';
 
 const routes = [
   {
@@ -22,6 +23,10 @@ const routes = [
   {
     name: 'Chess',
     routes: chess.routes
+  },
+  {
+    name: 'Phases',
+    routes: phases.routes
   }
 ];
 
