@@ -5,8 +5,8 @@
 
 - Guides
   - [Multiplayer](multiplayer.md)
-  - [Secret State](secret-state.md)
   - [Phases](phases.md)
+  - [Secret State](secret-state.md)
 
 - API Reference
   - [Game](api/Game.md)
