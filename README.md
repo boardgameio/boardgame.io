@@ -52,6 +52,18 @@ $ npm run examples
 
 Breaking changes:
 
+- `boardgameio.game` is now `boardgameio.core`, and does not have a default export.
+
+```
+// v0.16
+import { Game } from 'boardgame.io/core'
+```
+
+```
+// v0.15
+import Game from 'boardgame.io/game'
+```
+
 - `victory` is now `endGameIf`, and goes inside a `flow` section.
 - `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
 - `props.endTurn` is now `props.game.endTurn`.
