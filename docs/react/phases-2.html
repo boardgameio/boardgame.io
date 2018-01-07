@@ -18,6 +18,7 @@ body {
   list-style: none;
   width: 200px;
   border: 1px solid #eee;
+  border-top: none;
   padding: 5px;
   height: 30px;
   line-height: 30px;
@@ -38,15 +39,32 @@ const game = BoardgameIO.Game({
     drawCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
     playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),
   },
+
+  flow: {
+    phases: [
+      {
+        name: 'draw phase',
+        endPhaseIf: G => (G.deck <= 0),
+        allowedMoves: ['drawCard'],
+      },
+      {
+        name: 'play phase',
+        allowedMoves: ['playCard'],
+        endPhaseIf: G => (G.hand <= 0),
+      }
+    ],
+  }
 });
 
 class Board extends React.Component {
   drawCard = () => {
+    if (this.props.ctx.phase != 'draw phase') return;
     this.props.moves.drawCard();
     this.props.game.endTurn();
   }
 
   playCard = () => {
+    if (this.props.ctx.phase != 'play phase') return;
     this.props.moves.playCard();
     this.props.game.endTurn();
   }
@@ -54,9 +72,10 @@ class Board extends React.Component {
   render() {
     return (
       <div className="phases">
+        <li style={{ border: '3px solid #aaa' }}>{ this.props.ctx.phase }</li>
         <li>Deck: { this.props.G.deck }</li>
         <li>Hand: { this.props.G.hand }</li>
-        <li><button id="take" onClick={this.drawCard}>Draw Card</button></li>
+        <li><button id="draw" onClick={this.drawCard}>Draw Card</button></li>
         <li><button id="play" onClick={this.playCard}>Play Card</button></li>
       </div>
     );
