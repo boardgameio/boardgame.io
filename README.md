@@ -50,7 +50,7 @@ $ npm run examples
 
 - [Phases](http://boardgame.io/#/phases)
 
-Breaking changes:
+**Breaking Changes**
 
 - `boardgameio.game` is now `boardgameio.core`, and does not have a default export.
 
