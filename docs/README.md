@@ -42,6 +42,16 @@ include via a `<script>` tag.
 <script src="//unpkg.com/boardgame.io"></script>
 ```
 
+### New in v0.16
+
+- [Phases](http://boardgame.io/#/phases)
+
+Breaking changes:
+
+- `victory` is now `endGameIf`, and goes inside a `flow` section.
+- `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
+- `props.endTurn` is now `props.game.endTurn`.
+
 ### Disclaimer
 
 This is not an official Google product.
