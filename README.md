@@ -46,6 +46,16 @@ $ npm install
 $ npm run examples
 ```
 
+## New in v0.16
+
+- [Phases](http://boardgame.io/#/phases)
+
+Breaking changes:
+
+- `victory` is now `endGameIf`, and goes inside a `flow` section.
+- `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
+- `props.endTurn` is now `props.game.endTurn`.
+
 ## Contributing
 
 See the contributing [guidelines](CONTRIBUTING.md).
