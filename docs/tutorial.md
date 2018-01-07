@@ -94,6 +94,10 @@ The Tic-Tac-Toe game we have so far doesn't really terminate.
 Let's keep track of a winner in case one player wins the game.
 Let's also prevent players from being able to overwrite cells.
 
+In order to do this, we add a `flow` section to control the
+"flow" of the game. In this case, we just add a game termination
+condition to it.
+
 ```js
 function IsVictory(cells) {
   // Return true if `cells` is in a winning configuration.
@@ -126,7 +130,7 @@ const TicTacToe = Game({
 ```
 
 !> The `endGameIf` field takes a function that determines if
-   the game is over. If it returns anything other than `undefined`
+   the game is over. If it returns anything other than `undefined`,
    the game ends, and the return value is available at `ctx.gameover`.
 
 ## Render board
@@ -146,7 +150,7 @@ class TicTacToeBoard extends React.Component {
   onClick(id) {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
-      this.props.endTurn();
+      this.props.game.endTurn();
     }
   }
 
@@ -204,13 +208,17 @@ handler:
 
 ```js
 this.props.moves.clickCell(id);
-this.props.endTurn();
+this.props.game.endTurn();
 ```
 
 `props.moves` is an object passed in by the framework that
 contains functions to dispatch moves. `props.moves.clickCell`
 dispatches the *clickCell* move, and any data passed in is made
 available in the move handler.
+
+`props.game` is an object that contains functions to control
+the flow of the game, including the ability to end the turn,
+pass or end the current game phase (see [Phases](phases.md)).
 
 !> The framework doesn't end the turn until `endTurn` is called.
 This is to facilitate games where a player can take a number
