@@ -30,10 +30,10 @@
     "dist/boardgameio.es.js",
     "dist/server.js",
     "dist/client.js",
-    "dist/game.js",
+    "dist/core.js",
     "server.js",
     "client.js",
-    "game.js"
+    "core.js"
   ],
   "keywords": [
     "react",
@@ -120,7 +120,7 @@
     "exportAliases": {
       "client": "./dist/client.js",
       "server": "./dist/server.js",
-      "game": "./dist/game.js"
+      "core": "./dist/core.js"
     }
   },
   "jest": {
