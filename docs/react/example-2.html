@@ -78,7 +78,7 @@ class TicTacToeBoard extends React.Component {
   onClick(id) {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
-      this.props.endTurn();
+      this.props.game.endTurn();
     }
   }
 
@@ -88,7 +88,7 @@ class TicTacToeBoard extends React.Component {
 
   render() {
     let winner = '';
-    if (this.props.ctx.gameover !== null) {
+    if (this.props.ctx.gameover !== undefined) {
       winner = <div>Winner: {this.props.ctx.gameover}</div>;
     }
 
