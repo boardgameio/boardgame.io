@@ -45,7 +45,7 @@ Now let's say we want the game to work in two phases:
 In order to do this, we add a `flow` section to the `Game`
 constructor (you should already be familiar with this as the location
 where you placed `endGameIf` in the
-[tutorial](http://localhost:3000/#/tutorial?id=add-victory-condition)).
+[tutorial](#/tutorial?id=add-victory-condition)).
 
 It can also contain a `phases` array, which defines different
 phases in the game. Each phase can specify a list of `allowedMoves`,

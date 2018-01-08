@@ -1,36 +1,5 @@
 # Game
 
-```js
-Game({
-  // Initial value of G.
-  setup: (numPlayers) => ({}),
-
-  // Game moves.
-  moves: {
-    'moveName': moveFn,
-    ...
-  },
-
-  flow: {
-    // Determines when the game ends.
-    endGameIf: (G, ctx) => {
-      if (IsVictory(G)) {
-        return ctx.currentPlayer;
-      }
-    },
-    
-    phases: [
-      // TODO
-    ]
-  }
-
-  // Customized view.
-  playerView: (G, ctx, player) => {
-    return G;
-  },
-}
-```
-
 Creates a new game implementation described by the initial
 game state and the moves.
 
@@ -61,6 +30,9 @@ have `action.type` contain the name of the move, and
     is customized for a given player. See [Secret State](/secret-state) for more information.
   - `flow` (*object*): Arguments to customize the flow of the game. See
     [Phases](/phases) for more information.
+  - `phases` (*array*): Optional list of phases, within which many turns will be played. For example,
+    you might have a setup phase where players choose starting position followed by a main phase.
+    See [Phases](/phases) for more information.
 
 ### Returns
 
@@ -74,14 +46,16 @@ have `action.type` contain the name of the move, and
 ### Usage
 
 ```js
-import Game from 'boardgame.io/game';
+import { Game } from 'boardgame.io/core';
 
 const game = Game({
+  // Initial value of G.
   setup: (numPlayers) => {
     const G = {...};
     return G;
   },
 
+  // Game moves.
   moves: {
     moveWithoutArgs(G, ctx) {
       return {...G, ...};
@@ -100,8 +74,10 @@ const game = Game({
     },
   },
 
-  playerView: (G, ctx) => {
+  // View of game state which hides private information (e.g. face-down cards).
+  playerView: (G, ctx, player) => {
     return SecretsRemoved(G, ctx.currentPlayer);
   },
+
 });
 ```
