@@ -52,7 +52,7 @@ $ npm run examples
 
 **Breaking Changes**
 
-- `boardgameio.game` is now `boardgameio.core`, and does not have a default export.
+- `boardgame.io/game` is now `boardgame.io/core`, and does not have a default export.
 
 ```
 // v0.16
