@@ -50,6 +50,7 @@ export class GameLog extends React.Component {
     let turns = [];
     let currentTurn = [];
     let turnToLogIndex = {};
+    const playerIDs = new Map();
 
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
@@ -59,8 +60,16 @@ export class GameLog extends React.Component {
         currentTurn = [];
       } else {
         const args = item.move.args || [];
+
+        const playerID = item.move.playerID;
+        if (!playerIDs.has(playerID)) {
+          playerIDs.set(playerID, playerIDs.size)
+        }
+        const playerNumber = playerIDs.get(playerID);
+        const classNames = `log-move player${playerNumber}`;
+
         currentTurn.push(
-          <div key={i} className="log-move">
+          <div key={i} className={classNames}>
           {item.move.type}({args.join(',')})
           </div>
         );
