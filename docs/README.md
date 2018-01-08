@@ -48,7 +48,7 @@ include via a `<script>` tag.
 
 Breaking changes:
 
-- `boardgameio.game` is now `boardgameio.core`, and does not have a default export.
+- The `boardgame.io/game` package is now `boardgame.io/core`, and does not have a default export.
 - `victory` is now `endGameIf`, and goes inside a `flow` section.
 - `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
 - `props.endTurn` is now `props.game.endTurn`.
