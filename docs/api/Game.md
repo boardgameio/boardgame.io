@@ -30,7 +30,7 @@ have `action.type` contain the name of the move, and
     is customized for a given player. See [Secret State](/secret-state) for more information.
   - `flow` (*object*): Arguments to customize the flow of the game. See
     [Phases](/phases) for more information.
-  - `phases` (*array*): Optional list of phases, within which many turns will be played. For example,
+  - `flow.phases` (*array*): Optional list of phases, within which many turns will be played. For example,
     you might have a setup phase where players choose starting position followed by a main phase.
     See [Phases](/phases) for more information.
 
