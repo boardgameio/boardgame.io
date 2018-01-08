@@ -1,25 +1,5 @@
 # Client
 
-```js
-Client({
-  // The return value of Game().
-  game: game,
-
-  // The number of players.
-  numPlayers: 2,
-
-  // The React component representing your game board.
-  board: Board,
-
-  // Set to true to enable sending move updates to the
-  // server via WebSockets.
-  multiplayer: false,
-
-  // Set to false to disable the Debug UI.
-  debug: true
-})
-```
-
 Creates a `boardgame.io` client. This is the entry point for
 the client application, and is the only call necessary on the
 client-side if you choose to roll your own move reducer.
@@ -45,7 +25,7 @@ a move or interact with the game.
 
 
 ### Arguments
-1. obj(*object*): A config object with the options shown above.
+1. obj(*object*): A config object with the options shown below.
 
 ### Returns
 (`client`): A React component that runs the app.
@@ -64,7 +44,21 @@ The component supports the following `props`:
 import Client from 'boardgame.io/client';
 
 const App = Client({
-  ...
+  // The return value of Game().
+  game: game,
+
+  // The number of players.
+  numPlayers: 2,
+
+  // The React component representing your game board.
+  board: Board,
+
+  // Set to true to enable sending move updates to the
+  // server via WebSockets.
+  multiplayer: false,
+
+  // Set to false to disable the Debug UI.
+  debug: true
 });
 
 ReactDOM.render(<App/>, document.getElementById('app'));
