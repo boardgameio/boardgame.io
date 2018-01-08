@@ -1,22 +1,8 @@
 # Game
 
 Creates a new game implementation described by the initial
-game state and the moves.
-
-The moves are converted to a [Redux](http://redux.js.org/docs/basics/Reducers.html) reducer to maintain `G`. The reducer has the following signature:
-
-```js
-function(G, action, ctx) {
-}
-```
-
-You can roll your own if you like, or use any Redux
-addon to generate such a reducer.
-
-The convention used in this framework is to
-have `action.type` contain the name of the move, and
-`action.args` contain any additional arguments as an
-`Array`.
+game state and the moves. The moves are converted to a
+[Redux](http://redux.js.org/docs/basics/Reducers.html) reducer to maintain `G`.
 
 ### Arguments
 
@@ -30,18 +16,22 @@ have `action.type` contain the name of the move, and
     is customized for a given player. See [Secret State](/secret-state) for more information.
   - `flow` (*object*): Arguments to customize the flow of the game. See
     [Phases](/phases) for more information.
-  - `flow.phases` (*array*): Optional list of phases, within which many turns will be played. For example,
-    you might have a setup phase where players choose starting position followed by a main phase.
-    See [Phases](/phases) for more information.
+  - `flow.endGameIf` (*function*): *(G, ctx) => {}*
+     The game automatically ends if this function returns anything (checked after each move).
+     The return value is available at `ctx.gameover`.
+  - `flow.endTurnIf` (*function*): *(G, ctx) => boolean*
+     The turn automatically ends if this function returns true (checked after each move).
+  - `flow.phases` (*array*): Optional list of game phases. See
+    [Phases](/phases) for more information.
 
 ### Returns
 
 (`game`): An object that contains
-1. `G`: The initial value of G.
+1. `setup`: The same `setup` from the input object.
 2. `moveNames`: The names of the moves of the game.
 3. `reducer`: The reducer to maintain `G`.
-4. `playerView`: The selector with the player view.
-5. `flow`: The reducer to maintain `ctx`.
+4. `playerView`: The passed in `playerView` function.
+5. `flow`: An object derived from `obj.flow` containing a reducer to maintain `ctx`.
 
 ### Usage
 
