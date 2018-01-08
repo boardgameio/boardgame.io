@@ -24,8 +24,8 @@ on both client and server seamlessly. The state in `ctx` is
 incrementally adoptable, meaning that you can manage all the
 state manually in `G` if you so desire.
 
-!> More features are being added to `ctx`, including support
-for more complex game types involving phases etc.
+!> `ctx` contains other fields not shown here that complex games
+   can take advantage of, including support for player passing and game phases.
 
 ### Moves
 

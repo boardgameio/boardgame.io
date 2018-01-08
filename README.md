@@ -25,6 +25,8 @@ networking or backend code.
 * **State Management**: Game state is managed seamlessly across browser, server and storage automatically.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Multiplayer**: All browsers connected to the same game are synced in real time with no refreshes required.
+* **Game Phases**: with different game rules (including custom turn orders) per phase.
+* **Board Actions**: Automatic game moves not associated with any player.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
 * **UI toolkit**: React components for common game elements (cards etc.).
@@ -43,6 +45,28 @@ $ npm install --save boardgame.io
 $ npm install
 $ npm run examples
 ```
+
+## New in v0.16
+
+- [Phases](http://boardgame.io/#/phases)
+
+**Breaking Changes**
+
+- `boardgame.io/game` is now `boardgame.io/core`, and does not have a default export.
+
+```
+// v0.16
+import { Game } from 'boardgame.io/core'
+```
+
+```
+// v0.15
+import Game from 'boardgame.io/game'
+```
+
+- `victory` is now `endGameIf`, and goes inside a `flow` section.
+- `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
+- `props.endTurn` is now `props.game.endTurn`.
 
 ## Contributing
 

@@ -51,9 +51,9 @@ export default [
   },
 
   {
-    input: 'packages/game.js',
-    output: { file: 'dist/game.js', format: 'umd' },
-    name: 'Moves',
+    input: 'packages/core.js',
+    output: { file: 'dist/core.js', format: 'umd' },
+    name: 'Core',
     plugins: plugins,
   },
 
@@ -76,7 +76,10 @@ export default [
     input: 'packages/main.js',
     external: [ 'react' ],
     globals: { 'react': 'React' },
-    output: { file: pkg.unpkg, format: 'umd' },
+    output: [
+      { file: pkg.unpkg, format: 'umd' },
+      { file: 'docs/react/boardgameio.min.js', format: 'umd' },
+    ],
     name: 'BoardgameIO',
     plugins: plugins.concat([
       replace({

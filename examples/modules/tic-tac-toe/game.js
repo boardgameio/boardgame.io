@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from 'boardgame.io/game';
+import { Game } from 'boardgame.io/core';
 
 function IsVictory(cells) {
   const positions = [
@@ -52,8 +52,16 @@ const TicTacToe = Game({
     }
   },
 
-  victory: (G, ctx) => {
-    return IsVictory(G.cells) ? ctx.currentPlayer : null;
+  flow: {
+    endGameIf: (G, ctx) => {
+      if (IsVictory(G.cells)) {
+        return ctx.currentPlayer;
+      }
+    },
+
+    phases: [
+      { name: 'default' },
+    ],
   }
 });
 

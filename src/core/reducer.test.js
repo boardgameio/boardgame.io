@@ -8,8 +8,8 @@
 
 import Game from './game';
 import { createStore } from 'redux';
-import { createGameReducer, createDispatchers } from './reducer';
-import { makeMove, endTurn, restore } from './action-creators';
+import { createGameReducer, createMoveDispatchers } from './reducer';
+import { makeMove, gameEvent, restore } from './action-creators';
 
 const game = Game({
   moves: {
@@ -17,8 +17,12 @@ const game = Game({
     'B': () => ({ moved: true }),
     'C': () => ({ victory: true })
   },
-  victory: (G, ctx) => G.victory ? ctx.currentPlayer : null
+  flow: {
+    endGameIf: (G, ctx) => G.victory ? ctx.currentPlayer : undefined
+  }
 });
+
+const endTurn = () => gameEvent({ type: 'endTurn' });
 
 test('_id is incremented', () => {
   const reducer = createGameReducer({game});
@@ -55,7 +59,7 @@ test('restore', () => {
 test('move dispatchers', () => {
   const reducer = createGameReducer({game});
   const store = createStore(reducer);
-  const api = createDispatchers(game.moveNames, store);
+  const api = createMoveDispatchers(game.moveNames, store);
 
   expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
   expect(api.unknown).toBe(undefined);
@@ -75,13 +79,12 @@ test('victory', () => {
 
   let state = reducer(undefined, makeMove({ type: 'A' }));
   state = reducer(state, endTurn());
-  expect(state.ctx.winner).toEqual(null);
+  expect(state.ctx.gameover).toEqual(undefined);
   state = reducer(state, makeMove({ type: 'B' }));
   state = reducer(state, endTurn());
-  expect(state.ctx.winner).toEqual(null);
+  expect(state.ctx.gameover).toEqual(undefined);
   state = reducer(state, makeMove({ type: 'C' }));
-  state = reducer(state, endTurn());
-  expect(state.ctx.winner).toEqual('0');
+  expect(state.ctx.gameover).toEqual('0');
 });
 
 test('endTurn', () => {

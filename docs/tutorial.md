@@ -36,8 +36,8 @@ call-site of this move.
 ```js
 // src/App.js
 
-import Client from 'boardgame.io/client';
-import Game from 'boardgame.io/game';
+import { Client } from 'boardgame.io/client';
+import { Game } from 'boardgame.io/core';
 
 const TicTacToe = Game({
   setup: () => ({ cells: Array(9).fill(null) }),
@@ -94,6 +94,10 @@ The Tic-Tac-Toe game we have so far doesn't really terminate.
 Let's keep track of a winner in case one player wins the game.
 Let's also prevent players from being able to overwrite cells.
 
+In order to do this, we add a `flow` section to control the
+"flow" of the game. In this case, we just add a game termination
+condition to it.
+
 ```js
 function IsVictory(cells) {
   // Return true if `cells` is in a winning configuration.
@@ -115,15 +119,19 @@ const TicTacToe = Game({
     }
   },
 
-  victory: (G, ctx) => {
-    return IsVictory(G.cells) ? ctx.currentPlayer : null;
+  flow: {
+    endGameIf: (G, ctx) => {
+      if (IsVictory(G.cells)) {
+        return ctx.currentPlayer;
+      }
+    }
   }
 });
 ```
 
-!> The `victory` field takes a function that determines if
-   there is a winner. The winner itself is made available
-   at `ctx.winner`.
+!> The `endGameIf` field takes a function that determines if
+   the game is over. If it returns anything other than `undefined`,
+   the game ends, and the return value is available at `ctx.gameover`.
 
 ## Render board
 
@@ -142,20 +150,20 @@ class TicTacToeBoard extends React.Component {
   onClick(id) {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
-      this.props.endTurn();
+      this.props.game.endTurn();
     }
   }
 
   isActive(id) {
-    if (this.props.ctx.winner !== null) return false;
+    if (!this.props.isActive) return false;
     if (this.props.G.cells[id] !== null) return false;
     return true;
   }
 
   render() {
     let winner = '';
-    if (this.props.ctx.winner !== null) {
-      winner = <div>Winner: {this.props.ctx.winner}</div>;
+    if (this.props.ctx.gameover !== null) {
+      winner = <div>Winner: {this.props.ctx.gameover}</div>;
     }
 
     const cellStyle = {
@@ -200,13 +208,17 @@ handler:
 
 ```js
 this.props.moves.clickCell(id);
-this.props.endTurn();
+this.props.game.endTurn();
 ```
 
 `props.moves` is an object passed in by the framework that
 contains functions to dispatch moves. `props.moves.clickCell`
 dispatches the *clickCell* move, and any data passed in is made
 available in the move handler.
+
+`props.game` is an object that contains functions to control
+the flow of the game, including the ability to end the turn,
+pass or end the current game phase (see [Phases](phases.md)).
 
 !> The framework doesn't end the turn until `endTurn` is called.
 This is to facilitate games where a player can take a number

@@ -8,7 +8,6 @@
 
 import * as Actions from './action-types';
 import * as ActionCreators from './action-creators';
-import { createGameFlow } from './flow';
 
 /**
  * createGameReducer
@@ -18,15 +17,6 @@ import { createGameFlow } from './flow';
  * @param {...object} numPlayers - The number of players.
  */
 export function createGameReducer({game, numPlayers}) {
-  if (!game) {
-    game = {
-      setup: () => ({}),
-      names: [],
-      reducer: G => G,
-      victory: () => null
-    };
-  }
-
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -36,7 +26,7 @@ export function createGameReducer({game, numPlayers}) {
     G: game.setup(numPlayers),
 
     // Framework managed state.
-    ctx: undefined,
+    ctx: game.flow.ctx(numPlayers),
 
     // A list of actions performed so far. Used by the
     // GameLog to display a journal of moves.
@@ -52,12 +42,12 @@ export function createGameReducer({game, numPlayers}) {
     _initial: {}
   };
 
-  const GameFlow = createGameFlow({game, numPlayers});
-  initial.ctx = GameFlow(undefined, { type: {} });
+  const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+  initial.G = state.G;
+  initial.ctx = state.ctx;
 
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
-
 
   /**
    * GameReducer
@@ -68,42 +58,54 @@ export function createGameReducer({game, numPlayers}) {
    */
   return (state = initial, action) => {
     switch (action.type) {
-      case Actions.MAKE_MOVE: {
-        const G = game.reducer(state.G, action.move, state.ctx);
+      case Actions.GAME_EVENT: {
+        const { G, ctx } = game.flow.reducer(
+            { G: state.G, ctx: state.ctx }, action.e);
         const log = [...state.log, action];
-        return {...state, G, _id: state._id + 1, log};
+        return {...state, G, ctx, log, _id: state._id + 1};
       }
 
-      case Actions.END_TURN: {
-        const ctx = GameFlow(state.ctx, action, state.G);
+      case Actions.MAKE_MOVE: {
+        // Ignore the move if it isn't valid at this point.
+        if (!game.flow.validator(state.G, state.ctx, action.move)) {
+          return state;
+        }
+
+        // Process the move.
+        const G = game.reducer(state.G, action.move, state.ctx);
         const log = [...state.log, action];
-        return {...state, ctx, _id: state._id + 1, log};
+        state = { ...state, G, log, _id: state._id + 1 };
+
+        // Allow the flow reducer to process any triggers that happen after moves.
+        return game.flow.reducer(state, action);
       }
 
       case Actions.RESTORE: {
         return action.state;
       }
 
-      default:
+      default: {
         return state;
+      }
     }
   };
 }
 
 /**
- * createDispatchers
+ * createMoveDispatchers
  *
  * Creates a set of dispatchers to make moves.
  * @param {Array} moveNames - A list of move names.
  * @param {object} store - The Redux store to create dispatchers for.
  */
-export function createDispatchers(moveNames, store) {
+export function createMoveDispatchers(moveNames, store, playerID) {
   let dispatchers = {};
   for (const name of moveNames) {
     dispatchers[name] = function(...args) {
       store.dispatch(ActionCreators.makeMove({
         type: name,
-        args: args
+        args,
+        playerID,
       }));
     };
   }

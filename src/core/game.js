@@ -6,6 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { FlowWithPhases, SimpleFlow } from './flow';
+
 /**
  * Game
  *
@@ -37,40 +39,49 @@
  *     }
  *   },
  *
- *   // OPTIONAL.
- *   victory: (G, ctx) => { ... },
- *
- *   // OPTIONAL.
  *   playerView: (G, ctx, playerID) => { ... },
  *
- *   // OPTIONAL.
- *   flow: (ctx, action, G) => ctx,
+ *   flow: {
+ *     endGameIf: (G, ctx) => { ... },
+ *     endTurnIf: (G, ctx) => { ... },
+ *
+ *     phases: [
+ *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *       { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *       ...
+ *     ]
+ *   },
  * })
  *
  * @param {...object} setup - Function that returns the initial state of G.
  * @param {...object} moves - A dictionary of move functions.
- * @param {...object} victory - A function that returns the ID of the
- *                              winner (if there is any).
  * @param {...object} playerView - A function that returns a
  *                                 derivative of G tailored for
  *                                 the specified player.
- * @param {...object} flow - A reducer that maintains ctx.
+ * @param {...object} flow - Customize the flow of the game (see flow.js).
+ *                           Must contain the return value of Flow().
+ *                           If it contains any other object, it is presumed to be a
+ *                           configuration object for SimpleFlow() or FlowWithPhases().
  */
-function Game({setup, moves, victory, playerView, flow}) {
+function Game({setup, moves, playerView, flow}) {
   if (!setup)       setup = () => ({});
   if (!moves)       moves = {};
-  if (!victory)     victory = () => null;
   if (!playerView)  playerView = G => G;
+
+  if (!flow) {
+    flow = SimpleFlow({});
+  } else if (flow.reducer === undefined) {
+    flow = flow.phases ? FlowWithPhases(flow) : SimpleFlow(flow);
+  }
 
   return {
     setup,
-    victory,
     playerView,
     flow,
     moveNames: Object.getOwnPropertyNames(moves),
     reducer: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
-        const context = moves[action.type];
+        const context = { playerID: action.playerID };
         const args = [G, ctx].concat(action.args);
         return moves[action.type].apply(context, args);
       }

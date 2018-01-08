@@ -23,12 +23,12 @@ const COL_NAMES = 'abcdefgh';
 
 class Board extends React.Component {
   static propTypes = {
-    G:        PropTypes.any.isRequired,
-    ctx:      PropTypes.any.isRequired,
-    endTurn:  PropTypes.func.isRequired,
-    moves:    PropTypes.any.isRequired,
-    playerID:   PropTypes.string,
-    isActive:   PropTypes.bool
+    G:         PropTypes.any.isRequired,
+    ctx:       PropTypes.any.isRequired,
+    moves:     PropTypes.any.isRequired,
+    game:      PropTypes.any.isRequired,
+    playerID:  PropTypes.string,
+    isActive:  PropTypes.bool
   }
 
   constructor(props) {
@@ -71,7 +71,7 @@ class Board extends React.Component {
                                          move.to == cellCode));
         if (move) {
           this.props.moves.move(move.san);
-          this.props.endTurn();
+          this.props.game.endTurn();
         } else {
           this.setState({ selected: '' });
         }

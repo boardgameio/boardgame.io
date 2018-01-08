@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from 'boardgame.io/game';
+import { Game } from 'boardgame.io/core';
 import Chess from 'chess.js';
 
 const ChessGame = Game({
@@ -24,25 +24,31 @@ const ChessGame = Game({
     }
   },
 
-  victory: (G) => {
-    let chess = new Chess();
-    chess.load_pgn(G.pgn);
-    if (chess.game_over()) {
-      if (chess.in_draw() ||
-          chess.in_threefold_repetition() ||
-          chess.insufficient_material() ||
-          chess.in_stalemate()) {
-        return 'd';
-      }
-      if (chess.in_checkmate()) {
-        if (chess.turn() == 'w') {
-          return 'b';
-        } else {
-          return 'w';
+  flow: {
+    endGameIf: (G) => {
+      let chess = new Chess();
+      chess.load_pgn(G.pgn);
+      if (chess.game_over()) {
+        if (chess.in_draw() ||
+            chess.in_threefold_repetition() ||
+            chess.insufficient_material() ||
+            chess.in_stalemate()) {
+          return 'd';
+        }
+        if (chess.in_checkmate()) {
+          if (chess.turn() == 'w') {
+            return 'b';
+          } else {
+            return 'w';
+          }
         }
       }
-    }
-    return null;
+      return null;
+    },
+
+    phases: [
+      { name: 'default' },
+    ],
   }
 });
 

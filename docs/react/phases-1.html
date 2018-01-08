@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+body {
+  padding: 20px;
+}
+.msg {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+.phases li {
+  list-style: none;
+  width: 200px;
+  border: 1px solid #eee;
+  padding: 5px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+  <div class="msg">interactive (not an image)</div>
+  <div id="app"></div>
+
+  <script type="text/babel">
+const game = BoardgameIO.Game({
+  setup: () => ({ deck: 5, hand: 0 }),
+
+  moves: {
+    drawCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
+    playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),
+  },
+});
+
+class Board extends React.Component {
+  drawCard = () => {
+    this.props.moves.drawCard();
+    this.props.game.endTurn();
+  }
+
+  playCard = () => {
+    this.props.moves.playCard();
+    this.props.game.endTurn();
+  }
+
+  render() {
+    return (
+      <div className="phases">
+        <li>Deck: { this.props.G.deck }</li>
+        <li>Hand: { this.props.G.hand }</li>
+        <li><button id="take" onClick={this.drawCard}>Draw Card</button></li>
+        <li><button id="play" onClick={this.playCard}>Play Card</button></li>
+      </div>
+    );
+  }
+}
+
+const Phases = BoardgameIO.Client({
+  game,
+  numPlayers: 1,
+  board: Board,
+});
+
+ReactDOM.render(<Phases/>, document.getElementById('app'));
+  </script>
+
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="//unpkg.com/react@next/umd/react.development.js"></script>
+  <script src="//unpkg.com/react-dom@next/umd/react-dom.development.js"></script>
+  <script src="boardgameio.min.js"></script>
+</body>
+
+</html>

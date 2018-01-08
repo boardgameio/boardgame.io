@@ -83,7 +83,7 @@ test('sync', () => {
 test('action', () => {
   const server = Server({game});
   const io = server.context.io;
-  const action = ActionCreators.endTurn();
+  const action = ActionCreators.gameEvent({ type: 'endTurn' });
 
   io.socket.receive('action', action);
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
@@ -94,18 +94,22 @@ test('action', () => {
   io.socket.receive('sync', 'gameID');
   io.socket.emit.mockReset();
 
+  // View-only players cannot send actions.
+  io.socket.receive('action', action, 0, 'gameID', null);
+  expect(io.socket.emit).not.toHaveBeenCalled();
+
   // Actions are broadcasted as state updates.
   // The playerID parameter is necessary to account for view-only players.
   io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith(
     'sync', 'gameID', {
     G: {},
-    ctx: {currentPlayer: '1', numPlayers: 2, turn: 1, winner: null},
-    log: [{type: "END_TURN"}],
+    ctx: {currentPlayer: '1', numPlayers: 2, turn: 1},
+    log: [{type: "GAME_EVENT", e: {type: "endTurn"}}],
     _id: 1,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
+      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0},
       log: []
     }
   });
@@ -142,12 +146,12 @@ test('playerView', () => {
   io.socket.receive('sync', 'gameID', 0);
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {player: 0},
-    ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
+    ctx: {currentPlayer: '0', numPlayers: 2, turn: 0},
     log: [],
     _id: 0,
     _initial: {
       G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0, winner: null},
+      ctx: {currentPlayer: '0', numPlayers: 2, turn: 0},
       log: []
     }
   });

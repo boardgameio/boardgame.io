@@ -51,7 +51,7 @@ function IsVictory(cells) {
 
 const TicTacToe = BoardgameIO.Game({
   setup: () => ({ cells: Array(9).fill(null) }),
-  
+
   moves: {
     clickCell(G, ctx, id) {
       const cells = [...G.cells];
@@ -64,8 +64,12 @@ const TicTacToe = BoardgameIO.Game({
     }
   },
 
-  victory: (G, ctx) => {
-    return IsVictory(G.cells) ? ctx.currentPlayer : null;
+  flow: {
+    endGameIf: (G, ctx) => {
+      if (IsVictory(G.cells)) {
+        return ctx.currentPlayer;
+      }
+    }
   }
 });
 
@@ -74,7 +78,7 @@ class TicTacToeBoard extends React.Component {
   onClick(id) {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
-      this.props.endTurn();
+      this.props.game.endTurn();
     }
   }
 
@@ -84,8 +88,8 @@ class TicTacToeBoard extends React.Component {
 
   render() {
     let winner = '';
-    if (this.props.ctx.winner !== null) {
-      winner = <div>Winner: {this.props.ctx.winner}</div>;
+    if (this.props.ctx.gameover !== undefined) {
+      winner = <div>Winner: {this.props.ctx.gameover}</div>;
     }
 
     const cellStyle = {
@@ -139,7 +143,7 @@ ReactDOM.render(<App/>, document.getElementById('app'));
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
   <script src="//unpkg.com/react@next/umd/react.development.js"></script>
   <script src="//unpkg.com/react-dom@next/umd/react-dom.development.js"></script>
-  <script src="//unpkg.com/boardgame.io"></script>
+  <script src="boardgameio.min.js"></script>
 </body>
 
 </html>

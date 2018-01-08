@@ -11,19 +11,18 @@ Game({
     ...
   },
 
-  // Determines the winner.
-  victory: (G, ctx) => {
-    return IsVictory(G) ? ctx.currentPlayer : null;
-  },
+  flow: {
+    // Determines when the game ends.
+    endGameIf: (G, ctx) => {
+      if (IsVictory(G)) {
+        return ctx.currentPlayer;
+      }
+    },
+  }
 
   // Customized view.
   playerView: (G, ctx, player) => {
     return G;
-  },
-
-  // Reducer that manages ctx.
-  flow: (ctx, action, G) => {
-    return ctx;
   },
 }
 ```
@@ -54,13 +53,10 @@ have `action.type` contain the name of the move, and
   - `moves` (*object*): The keys are move names, and the values
     are pure functions that return the new value of `G` once
     the move has been processed.
-  - `victory` (*function*): Function that returns the winner, or null if no winner so far.
   - `playerView` (*function*): Returns a version of `G` that
-    is customized for a given player. See the document on
-    [Secret State](/secret-state) for more information.
-  - `flow` (*function*): Reducer that manages `ctx`. If `undefined`,
-    the default is used, which responds to a `END_TURN` event that
-    increments the `currentPlayer` and also checks for victory.
+    is customized for a given player. See [Secret State](/secret-state) for more information.
+  - `flow` (*object*): Arguments to customize the flow of the game. See
+    [Phases](/phases) for more information.
 
 ### Returns
 
@@ -92,16 +88,16 @@ const game = Game({
     }
   },
 
-  victory: function(G, ctx)  {
-    return IsWinner(G, ctx.currentPlayer) ? ctx.currentPlayer : null;
+  flow: {
+    endGameIf: (G, ctx) => {
+      if (IsWinner(G, ctx.currentPlayer)) {
+        return ctx.currentPlayer;
+      }
+    },
   },
 
   playerView: (G, ctx) => {
     return SecretsRemoved(G, ctx.currentPlayer);
   },
-
-  flow: (ctx, action, G) => {
-    return {...ctx, ...};
-  }
 });
 ```

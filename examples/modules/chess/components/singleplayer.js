@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import Client from 'boardgame.io/client';
+import { Client } from 'boardgame.io/client';
 import ChessGame from '../game';
 import ChessBoard from './board';
 

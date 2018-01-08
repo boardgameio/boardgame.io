@@ -17,14 +17,20 @@ import * as Actions from './action-types';
  */
 export const makeMove = (move) => ({
   type: Actions.MAKE_MOVE,
-  move: move,
+  move,
 });
 
 /**
- * End the current turn and yield to the next player.
+ * Generate a game event to be dispatched to the flow reducer.
+ *
+ * @param {object} e - The event to dispatch.
+ * @param {string} e.type - The event type.
+ * @param {Array}  e.args - Additional arguments.
+ * @param {string}  playerID - The ID of the player making this action.
  */
-export const endTurn = () => ({
-  type: Actions.END_TURN,
+export const gameEvent = (e, playerID) => ({
+  type: Actions.GAME_EVENT,
+  e: { ...e, playerID },
 });
 
 /**
@@ -33,5 +39,5 @@ export const endTurn = () => ({
  */
 export const restore = (state) => ({
   type:  Actions.RESTORE,
-  state: state,
+  state,
 });
