@@ -18,6 +18,10 @@ Game({
         return ctx.currentPlayer;
       }
     },
+    
+    phases: [
+      // TODO
+    ]
   }
 
   // Customized view.
