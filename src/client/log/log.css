@@ -30,8 +30,72 @@
 }
 
 .gamelog .log-move {
-  border-left: 25px solid #ccc;
+  border-left: 25px solid;
   margin-top: 5px;
   background: #fff;
   padding: 5px;
+}
+
+.player0 .log-move {
+  border-left-color: #001f3f;
+}
+
+.player1 .log-move {
+  border-left-color: #0074D9;
+}
+
+.player2 .log-move {
+  border-left-color: #7FDBFF;
+}
+
+.player3 .log-move {
+  border-left-color: #39CCCC;
+}
+
+.player4 .log-move {
+  border-left-color: #3D9970;
+}
+
+.player5 .log-move {
+  border-left-color: #2ECC40;
+}
+
+.player6 .log-move {
+  border-left-color: #01FF70;
+}
+
+.player7 .log-move {
+  border-left-color: #FFDC00;
+}
+
+.player8 .log-move {
+  border-left-color: #FF851B;
+}
+
+.player9 .log-move {
+  border-left-color: #FF4136;
+}
+
+.player10 .log-move {
+  border-left-color: #85144b;
+}
+
+.player11 .log-move {
+  border-left-color: #F012BE;
+}
+
+.player12 .log-move {
+  border-left-color: #B10DC9;
+}
+
+.player13 .log-move {
+  border-left-color: #111111;
+}
+
+.player14 .log-move {
+  border-left-color: #AAAAAA;
+}
+
+.player15 .log-move {
+  border-left-color: #DDDDDD;
 }

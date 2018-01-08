@@ -25,7 +25,7 @@ test('GameLog', () => {
     makeMove({ type: 'moveB' }),
     gameEvent({ type: 'endTurn' }),
   ];
-  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
+  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{'ctx':{'numPlayers':2}}} />);
   const turns = gamelog.find('.id').map(div => div.text());
   expect(turns).toEqual(['Turn #1', 'Turn #2']);
 });
