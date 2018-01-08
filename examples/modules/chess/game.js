@@ -43,7 +43,6 @@ const ChessGame = Game({
           }
         }
       }
-      return null;
     },
 
     phases: [
