@@ -9,9 +9,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Chess from 'chess.js';
-import Grid from '../../../../src/ui/grid';
+import Checkerboard from '../../../../src/ui/checkerboard';
 import Token from '../../../../src/ui/token';
-import Checkerboard from './checkerboard';
 import Bishop from './pieces/bishop';
 import King from './pieces/king';
 import Knight from './pieces/knight';
@@ -20,6 +19,8 @@ import Queen from './pieces/queen';
 import Rook from './pieces/rook';
 
 const COL_NAMES = 'abcdefgh';
+const SELECTED_COLOR = 'green';
+const MOVABLE_COLOR = 'palegreen';
 
 class Board extends React.Component {
   static propTypes = {
@@ -46,50 +47,57 @@ class Board extends React.Component {
   }
 
   render() {
-    let movable = this._getMoves().map((move) => move.to);
     return (<div>
-      <Grid rows={8} cols={8} style={{width: '400px'}}>
-        <Checkerboard movable={movable}
-                      selected={this.state.selected}
-                      onClick={this.click.bind(this)} />
+      <Checkerboard colorMap={this._getColorMap()}
+                    style={{width: '400px'}}
+                    onClick={this.click.bind(this)}>
         {this._getPieces()}
-      </Grid>
+      </Checkerboard>
       {this._getStatus()}
     </div>
     );
   }
 
-  click(cellCode) {
-    return () => {
-      if (!this.state.selected && this._isSelectable(cellCode)) {
-        this.setState({ selected: cellCode });
-      }
+  click({ square }) {
+    if (!this.state.selected && this._isSelectable(square)) {
+      this.setState({ selected: square });
+    }
 
-      if (this.state.selected) {
-        let moves = this._getMoves();
-        let move = moves.find((move) => (move.from == this.state.selected &&
-                                         move.to == cellCode));
-        if (move) {
-          this.props.moves.move(move.san);
-          this.props.game.endTurn();
-        } else {
-          this.setState({ selected: '' });
-        }
+    if (this.state.selected) {
+      let moves = this._getMoves();
+      let move = moves.find((move) => (move.from == this.state.selected &&
+                                       move.to == square));
+      if (move) {
+        this.props.moves.move(move.san);
+        this.props.game.endTurn();
+      } else {
+        this.setState({ selected: '' });
       }
     }
   }
 
+  _getColorMap() {
+    let result = {};
+    if (this.state.selected) {
+      result[this.state.selected] = SELECTED_COLOR;
+    }
+    for (let move of this._getMoves()) {
+      result[move.to] = MOVABLE_COLOR;
+    }
+    return result;
+  }
+
   _getPieces() {
     let result = [];
-    for (let y = 0; y < 8; y++) {
+    for (let y = 1; y <= 8; y++) {
       for (let x = 0; x < 8; x++) {
-        let cellCode = COL_NAMES[x] + (8 - y);
-        let p = this.chess.get(cellCode);
+        let square = COL_NAMES[x] + y;
+        let p = this.chess.get(square);
         if (p) {
           result.push((
-            <Token y={y} x={x} animate={true}
-                   key={this._getInitialCell(cellCode)}
-                   onClick={this.click(cellCode).bind(this)}>
+            <Token square={square} animate={true}
+                   key={this._getInitialCell(square)}
+                   onClick={this.click.bind(this)}>
               {this._getPieceByTypeAndColor(p.type, p.color)}
             </Token>));
         }
@@ -126,9 +134,9 @@ class Board extends React.Component {
     }
   }
 
-  _getInitialCell(cellCode) {
+  _getInitialCell(square) {
     let history = this.chess.history({ verbose: true });
-    let lastSeen = cellCode;
+    let lastSeen = square;
     for (let i = history.length - 1; i >= 0; i--) {
       let move = history[i];
       if (lastSeen == move.to) {
@@ -138,10 +146,10 @@ class Board extends React.Component {
     return lastSeen;
   }
 
-  _isSelectable(cellCode) {
-    let piece = this.chess.get(cellCode);
+  _isSelectable(square) {
+    let piece = this.chess.get(square);
     return (piece && piece.color === this._getCurrentPlayer() &&
-            this.chess.moves({ square: cellCode }).length > 0);
+            this.chess.moves({ square }).length > 0);
   }
 
   _getCurrentPlayer() {
