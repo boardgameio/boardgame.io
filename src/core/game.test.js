@@ -17,13 +17,13 @@ const game = Game({
 
 test('basic', () => {
   expect(game.moveNames).toEqual(['A', 'B']);
-  expect(typeof game.reducer).toEqual('function');
+  expect(typeof game.processMove).toEqual('function');
 });
 
-test('reducer', () => {
+test('processMove', () => {
   const testObj = { test: true };
-  expect(game.reducer(testObj, { type: 'A' })).toEqual(testObj);
-  expect(game.reducer(testObj, { type: 'B' })).toEqual(null);
+  expect(game.processMove(testObj, { type: 'A' })).toEqual(testObj);
+  expect(game.processMove(testObj, { type: 'B' })).toEqual(null);
 });
 
 test('playerID from context', () => {
@@ -35,12 +35,12 @@ test('playerID from context', () => {
     },
   });
 
-  const state = g.reducer({}, { type: 'A', playerID: 'player' });
+  const state = g.processMove({}, { type: 'A', playerID: 'player' });
   expect(state.playerID).toBe('player');
 });
 
 test('flow override', () => {
-  const f = { reducer: () => {} };
+  const f = { processGameEvent: () => {} };
   const game = Game({
     flow: f
   });

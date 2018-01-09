@@ -16,7 +16,7 @@ import { TurnOrder } from './turn-order';
 test('Flow', () => {
   const flow = Flow({});
   const state = {};
-  expect(flow.reducer(state, { type: 'unknown' })).toBe(state);
+  expect(flow.processGameEvent(state, { type: 'unknown' })).toBe(state);
 });
 
 test('SimpleFlow', () => {
@@ -25,7 +25,7 @@ test('SimpleFlow', () => {
   expect(flow.eventNames).toEqual(['endTurn']);
   let state = { ctx: flow.ctx(2) };
   expect(state.ctx.turn).toBe(0);
-  state = flow.reducer(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, { type: 'endTurn' });
   expect(state.ctx.turn).toBe(1);
 });
 
@@ -41,15 +41,15 @@ test('FlowWithPhases', () => {
 
   let state = { ctx: flow.ctx(2) };
   expect(state.ctx.turn).toBe(0);
-  state = flow.reducer(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, { type: 'endTurn' });
   expect(state.ctx.turn).toBe(1);
 
   expect(state.ctx.phase).toBe('A');
-  state = flow.reducer(state, { type: 'endPhase' });
+  state = flow.processGameEvent(state, { type: 'endPhase' });
   expect(state.ctx.phase).toBe('B');
-  state = flow.reducer(state, { type: 'endPhase' });
+  state = flow.processGameEvent(state, { type: 'endPhase' });
   expect(state.ctx.phase).toBe('C');
-  state = flow.reducer(state, { type: 'endPhase', args: ['A'] });
+  state = flow.processGameEvent(state, { type: 'endPhase', args: ['A'] });
   expect(state.ctx.phase).toBe('A');
 });
 
@@ -78,13 +78,13 @@ test('callbacks', () => {
   flow.init(state);
   expect(onPhaseBegin).toHaveBeenCalled();
 
-  flow.reducer(state, { type: 'endTurn' });
+  flow.processGameEvent(state, { type: 'endTurn' });
   expect(onTurnEnd).toHaveBeenCalled();
 
-  flow.reducer(state, { type: 'pass' });
+  flow.processGameEvent(state, { type: 'pass' });
   expect(onPass).toHaveBeenCalled();
 
-  flow.reducer(state, { type: 'endPhase' });
+  flow.processGameEvent(state, { type: 'endPhase' });
   expect(onPhaseEnd).toHaveBeenCalled();
 });
 
@@ -97,7 +97,7 @@ test('init', () => {
 
   const orig = flow.ctx(2);
   let state = { G: {}, ctx: orig };
-  state = flow.reducer(state, { type: 'init' });
+  state = flow.processGameEvent(state, { type: 'init' });
   expect(state).toEqual({ G: {}, ctx: orig });
 
   flow = FlowWithPhases({
@@ -115,9 +115,9 @@ test('pass', () => {
   let flow = FlowWithPhases({ phases: [{ name: 'A', turnOrder: TurnOrder.ANY }] });
   let state = { ctx: flow.ctx(2) };
   expect(state.ctx.allPassed).toBe(false);
-  state = flow.reducer(state, { type: 'pass', playerID: '0' });
+  state = flow.processGameEvent(state, { type: 'pass', playerID: '0' });
   expect(state.ctx.allPassed).toBe(false);
-  state = flow.reducer(state, { type: 'pass', playerID: '1' });
+  state = flow.processGameEvent(state, { type: 'pass', playerID: '1' });
   expect(state.ctx.allPassed).toBe(true);
 });
 
@@ -140,9 +140,9 @@ test('onPhaseBegin / onPhaseEnd', () => {
   let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.init(state);
   expect(state.G).toEqual({ 'setupA': true });
-  state = flow.reducer(state, { type: 'endPhase' });
+  state = flow.processGameEvent(state, { type: 'endPhase' });
   expect(state.G).toEqual({ 'setupA': true, 'cleanupA': true, 'setupB': true });
-  state = flow.reducer(state, { type: 'endPhase' });
+  state = flow.processGameEvent(state, { type: 'endPhase' });
   expect(state.G).toEqual({
     'setupA': true,
     'cleanupA': true,
@@ -160,9 +160,9 @@ test('endPhaseIf', () => {
   });
 
   let state = { ctx: flow.ctx(2) };
-  state = flow.reducer(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, { type: 'endTurn' });
   expect(state.ctx.phase).toBe('A');
-  state = flow.reducer(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, { type: 'endTurn' });
   expect(state.ctx.phase).toBe('B');
 });
 
@@ -171,11 +171,11 @@ test('endGameIf', () => {
     const flow = SimpleFlow({ endGameIf: G => G.win });
 
     let state = { G: {}, ctx: flow.ctx(2) };
-    state = flow.reducer(state, { type: 'endTurn' });
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.gameover).toBe(undefined);
 
     state.G.win = 'A';
-    state = flow.reducer(state, { type: 'endTurn' });
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.gameover).toBe('A');
   }
 
@@ -183,11 +183,11 @@ test('endGameIf', () => {
     const flow = FlowWithPhases({ endGameIf: G => G.win });
 
     let state = { G: {}, ctx: flow.ctx(2) };
-    state = flow.reducer(state, { type: 'endTurn' });
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.gameover).toBe(undefined);
 
     state.G.win = 'A';
-    state = flow.reducer(state, { type: 'endTurn' });
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.gameover).toBe('A');
   }
 
@@ -197,11 +197,11 @@ test('endGameIf', () => {
     ]});
 
     let state = { G: {}, ctx: flow.ctx(2) };
-    state = flow.reducer(state, { type: 'endTurn' });
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.gameover).toBe(undefined);
 
     state.G.win = 'A';
-    state = flow.reducer(state, { type: 'endTurn' });
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.gameover).toBe('A');
   }
 });

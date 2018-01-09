@@ -80,7 +80,7 @@ export function Flow({ctx, events, init, validator, endTurnIf, endGameIf}) {
       return state;
     },
 
-    reducer: (state, action) => dispatch(state, action),
+    processGameEvent: (state, action) => dispatch(state, action),
   };
 }
 
