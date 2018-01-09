@@ -59,7 +59,7 @@ export function createGameReducer({game, numPlayers}) {
   return (state = initial, action) => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
-        const { G, ctx } = game.flow.reducer(
+        const { G, ctx } = game.flow.processGameEvent(
             { G: state.G, ctx: state.ctx }, action.e);
         const log = [...state.log, action];
         return {...state, G, ctx, log, _id: state._id + 1};
@@ -72,7 +72,7 @@ export function createGameReducer({game, numPlayers}) {
         }
 
         // Process the move.
-        const G = game.reducer(state.G, action.move, state.ctx);
+        const G = game.processMove(state.G, action.move, state.ctx);
         const log = [...state.log, action];
         state = { ...state, G, log, _id: state._id + 1 };
 
