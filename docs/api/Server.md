@@ -20,7 +20,7 @@ to the `Client` call.
 ### Usage
 
 ```js
-import Server from 'boardgame.io/server';
+const Server = require('boardgame.io/server');
 
 const app = Server({
   // The return value of Game().
