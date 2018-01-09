@@ -29,7 +29,7 @@ game state and the moves. The moves are converted to a
 (`game`): An object that contains
 1. `setup`: The same `setup` from the input object.
 2. `moveNames`: The names of the moves of the game.
-3. `reducer`: The reducer to maintain `G`.
+3. `processMove`: The reducer to maintain `G`.
 4. `playerView`: The passed in `playerView` function.
 5. `flow`: An object derived from `obj.flow` containing a reducer to maintain `ctx`.
 
