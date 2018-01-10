@@ -19,6 +19,9 @@ import PropTypes from 'prop-types';
  *   rows       - Number of rows (height) of the grid.
  *   cols       - Number of columns (width) of the grid.
  *   style      - CSS style of the Grid HTML element.
+ *   colorMap   - A map from 'x,y' => color.
+ *   onClick    - (x, y) => {}
+ *                Called when a square is clicked.
  *
  * Usage:
  *
@@ -36,21 +39,53 @@ import PropTypes from 'prop-types';
  */
 class Grid extends React.Component {
   static propTypes = {
-    rows: PropTypes.number,
-    cols: PropTypes.number,
+    rows: PropTypes.number.isRequired,
+    cols: PropTypes.number.isRequired,
     style: PropTypes.object,
+    colorMap: PropTypes.object,
+    onClick: PropTypes.func,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.element),
         PropTypes.element
     ]),
   }
 
+  static defaultProps = {
+    colorMap: {}
+  }
+
   cartesianCord = (props) => {
     return {x: props.x, y: props.y};
   }
 
+  _getCellColor(x, y) {
+    const key = `${x},${y}`;
+    let color = 'white';
+    if (key in this.props.colorMap) {
+      color = this.props.colorMap[key];
+    }
+    return color;
+  }
+
+  _getSquares() {
+    let squares = [];
+    for (let x = 0; x < this.props.cols; x++) {
+      for (let y = 0; y < this.props.rows; y++) {
+        squares.push((<rect
+          style={{fill: this._getCellColor(x, y)}}
+          width="1"
+          height="1"
+          x={x}
+          y={y}
+          key={this.props.cols * y + x}
+          onClick={() => this.props.onClick(x, y)} />));
+      }
+    }
+    return squares;
+  }
+
   render() {
-    const childrenWithExtraProp = React.Children.map(this.props.children,
+    const tokens = React.Children.map(this.props.children,
       child => {
         return React.cloneElement(child, {
           _coordinateFn: this.cartesianCord
@@ -60,7 +95,8 @@ class Grid extends React.Component {
 
     return (<svg viewBox={'0 0 ' + this.props.cols + ' ' + this.props.rows}
                  style={this.props.style}>
-              {childrenWithExtraProp}
+              <g>{this._getSquares()}</g>
+              {tokens}
             </svg>);
   }
 }

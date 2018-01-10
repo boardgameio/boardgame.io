@@ -47,18 +47,20 @@ class Board extends React.Component {
   }
 
   render() {
-    return (<div>
-      <Checkerboard colorMap={this._getColorMap()}
-                    style={{width: '400px'}}
-                    onClick={this.click.bind(this)}>
-        {this._getPieces()}
-      </Checkerboard>
-      {this._getStatus()}
-    </div>
+    return (
+      <div>
+        <Checkerboard highlightedSquares={this._getHighlightedSquares()}
+                      style={{width: '400px'}}
+                      onClick={this.click}>
+          {this._getPieces()}
+        </Checkerboard>
+
+        {this._getStatus()}
+      </div>
     );
   }
 
-  click({ square }) {
+  click = ({ square }) => {
     if (!this.state.selected && this._isSelectable(square)) {
       this.setState({ selected: square });
     }
@@ -76,7 +78,7 @@ class Board extends React.Component {
     }
   }
 
-  _getColorMap() {
+  _getHighlightedSquares() {
     let result = {};
     if (this.state.selected) {
       result[this.state.selected] = SELECTED_COLOR;

@@ -43,6 +43,6 @@ test('invalid square', () => {
 });
 
 test('colorMap', () => {
-  const grid = Enzyme.mount(<Checkerboard colorMap={{'a5': 'blue'}}/>);
+  const grid = Enzyme.mount(<Checkerboard highlightedSquares={{'a5': 'blue'}}/>);
   expect(grid.find('rect').at(3).html()).toContain('blue');
 });

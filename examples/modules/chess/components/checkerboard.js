@@ -8,6 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Grid } from 'boardgame.io/ui';
 
 /**
  * Checkerboard
@@ -41,7 +42,7 @@ class Checkerboard extends React.Component {
     onClick: PropTypes.func,
     primaryColor: PropTypes.string,
     secondaryColor: PropTypes.string,
-    colorMap: PropTypes.object,
+    highlightedSquares: PropTypes.object,
     style: PropTypes.object,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.element),
@@ -55,28 +56,53 @@ class Checkerboard extends React.Component {
     onClick: () => {},
     primaryColor: '#d18b47',
     secondaryColor: '#ffce9e',
-    colorMap: {},
+    highlightedSquares: {},
     style: {}
   };
 
-  render() {
-    // Children
-    const childrenWithExtraProp = React.Children.map(this.props.children,
-      child => {
-        return React.cloneElement(child, {
-          _coordinateFn: this.algebraicCord.bind(this)
-        });
-      }
-    );
-    return (<svg viewBox={'0 0 ' + this.props.cols + ' ' + this.props.rows}
-                 style={this.props.style}>
-              <g>{this._getSquares()}</g>
-              {childrenWithExtraProp}
-            </svg>);
+  onClick = (x, y) => {
+    this.props.onClick({ square: this._cartesianToAlgebraic(x, y) })
   }
 
-  algebraicCord(props) {
-    return this._algebraicToCartesian(props.square);
+  render() {
+    // Convert the square="" prop to x and y.
+    const tokens = React.Children.map(this.props.children,
+      child => {
+        const square = child.props.square;
+        const { x, y } = this._algebraicToCartesian(square);
+        return React.cloneElement(child, { x, y });
+      }
+    );
+
+    // Build colorMap with checkerboard pattern.
+    let colorMap = {};
+    for (let x = 0; x < this.props.cols; x++) {
+      for (let y = 0; y < this.props.rows; y++) {
+        const key = `${x},${y}`;
+        let color = this.props.secondaryColor;
+        if ((x + y) % 2 == 0) {
+          color = this.props.primaryColor;
+        }
+        colorMap[key] = color;
+      }
+    }
+
+    // Add highlighted squares.
+    for (const square in this.props.highlightedSquares) {
+      const { x, y } = this._algebraicToCartesian(square);
+      const key = `${x},${y}`;
+      colorMap[key] = this.props.highlightedSquares[square];
+    }
+
+    return (
+      <Grid rows={this.props.rows}
+            cols={this.props.cols}
+            style={this.props.style}
+            onClick={this.onClick}
+            colorMap={colorMap}>
+        {tokens}
+      </Grid>
+    );
   }
 
   _algebraicToCartesian(square) {
@@ -94,41 +120,6 @@ class Checkerboard extends React.Component {
   _cartesianToAlgebraic(x, y) {
     let colSymbol = String.fromCharCode(x + 'a'.charCodeAt(0));
     return colSymbol + (this.props.rows  - y);
-  }
-
-  _getSquares() {
-    let squares = [];
-    for (let x = 0; x < this.props.cols; x++) {
-      for (let y = 0; y < this.props.rows; y++) {
-        squares.push((<rect
-          style={{fill: this._getCellColor(x, y)}}
-          width="1"
-          height="1"
-          x={x}
-          y={y}
-          key={this.props.cols * y + x}
-          onClick={this._onClick(x, y)}/>));
-      }
-    }
-    return squares;
-  }
-
-  _onClick(x, y) {
-    return () => {
-      this.props.onClick({ square: this._cartesianToAlgebraic(x, y) })
-    };
-  }
-
-  _getCellColor(x, y) {
-    let color = this.props.secondaryColor;
-    if ((x + y) % 2 == 0) {
-      color = this.props.primaryColor;
-    }
-    let algebraic = this._cartesianToAlgebraic(x, y);
-    if (algebraic in this.props.colorMap) {
-      color = this.props.colorMap[algebraic];
-    }
-    return color;
   }
 }
 
