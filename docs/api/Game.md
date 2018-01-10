@@ -27,6 +27,8 @@ game state and the moves. The moves are converted to a
      `{ condition: (G, ctx) => boolean, action: (G, ctx) => G }`
      At the end of each move, if `condition` is `true`, then the corresponding
      `action` is executed.
+  - `flow.movesPerTurn` (*number*): Ends the turn automatically if a certain number
+    of moves have been made.
   - `flow.phases` (*array*): Optional list of game phases. See
     [Phases](/phases) for more information.
 
