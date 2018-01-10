@@ -82,6 +82,50 @@ test('callbacks', () => {
   expect(onPhaseEnd).toHaveBeenCalled();
 });
 
+test('movesPerTurn', () => {
+  {
+    let flow = SimpleFlow({ movesPerTurn: 2 });
+    let state = { ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(1);
+  }
+
+  {
+    let flow = FlowWithPhases({ movesPerTurn: 2 });
+    let state = { ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(1);
+  }
+
+  {
+    let flow = FlowWithPhases({
+      movesPerTurn: 2,
+      phases: [
+        { name: 'A' },
+        { name: 'B', movesPerTurn: 1 },
+      ]
+    });
+    let state = { ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(1);
+
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+
+    expect(state.ctx.turn).toBe(1);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(2);
+  }
+});
+
 test('onTurnEnd', () => {
   {
     const onTurnEnd = jest.fn(G => G);
