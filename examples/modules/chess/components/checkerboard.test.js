@@ -8,7 +8,7 @@
 
 import React from 'react';
 import Checkerboard from './checkerboard';
-import Token from './token';
+import Token from '../../../../src/ui/token';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
