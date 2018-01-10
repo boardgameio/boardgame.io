@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as Actions from './action-types';
 import * as ActionCreators from './action-creators';
 import { TurnOrder } from './turn-order';
 
@@ -46,6 +45,15 @@ export function Flow({ctx, events, init, validator, endTurnIf, endGameIf}) {
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
 
+  const dispatch = (state, action) => {
+    if (events.hasOwnProperty(action.type)) {
+      const context = { playerID: action.playerID };
+      const args = [state].concat(action.args);
+      return events[action.type].apply(context, args);
+    }
+    return state;
+  };
+
   return {
     ctx,
     init,
@@ -59,33 +67,20 @@ export function Flow({ctx, events, init, validator, endTurnIf, endGameIf}) {
 
     eventNames: Object.getOwnPropertyNames(events),
 
-    reducer: (state, action) => {
-      const dispatch = (state, action) => {
-        if (events.hasOwnProperty(action.type)) {
-          const context = { playerID: action.playerID };
-          const args = [state].concat(action.args);
-          return events[action.type].apply(context, args);
-        }
-        return state;
-      };
-
-      if (action.type == Actions.MAKE_MOVE) {
-        // End the game automatically if endGameIf is true.
-        const gameover = endGameIf(state.G, state.ctx);
-        if (gameover !== undefined) {
-          return { ...state, ctx: { ...state.ctx, gameover } };
-        }
-
-        // End the turn automatically if endTurnIf is true.
-        if (endTurnIf(state.G, state.ctx)) {
-          return dispatch(state, { type: 'endTurn', playerID: action.move.playerID });
-        }
-
-        return state;
+    processMove: (state, action) => {
+      // End the game automatically if endGameIf is true.
+      const gameover = endGameIf(state.G, state.ctx);
+      if (gameover !== undefined) {
+        return { ...state, ctx: { ...state.ctx, gameover } };
       }
-
-      return dispatch(state, action);
+      // End the turn automatically if endTurnIf is true.
+      if (endTurnIf(state.G, state.ctx)) {
+        return dispatch(state, { type: 'endTurn', playerID: action.move.playerID });
+      }
+      return state;
     },
+
+    processGameEvent: (state, action) => dispatch(state, action),
   };
 }
 

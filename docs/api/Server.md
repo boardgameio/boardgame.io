@@ -1,15 +1,5 @@
 # Server
 
-```js
-Server({
-  // The return value of Game().
-  game: game,
-
-  // The number of players.
-  numPlayers: 2,
-})
-```
-
 Creates a `boardgame.io` server. This is only required when
 `multiplayer` is set to `true` on the client. It creates a
 [Koa](http://koajs.com/) app that keeps track of the game
@@ -22,7 +12,7 @@ Notice that `game` is the same object that you also pass
 to the `Client` call.
 
 ### Arguments
-1. obj(*object*): A config object with the options shown above.
+1. obj(*object*): A config object with the options shown below.
 
 ### Returns
 (`app`): A Koa app.
@@ -33,7 +23,11 @@ to the `Client` call.
 const Server = require('boardgame.io/server');
 
 const app = Server({
-  ...
+  // The return value of Game().
+  game: game,
+
+  // The number of players.
+  numPlayers: 2
 });
 
 app.listen(8000);
