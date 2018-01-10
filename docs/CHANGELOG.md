@@ -1,10 +1,10 @@
 # v0.16.0
 
-###  Features
+####  Features
 
 - [Phases](http://boardgame.io/#/phases)
 
-### Breaking Changes
+#### Breaking Changes
 
 - `boardgame.io/game` is now `boardgame.io/core`, and does not have a default export.
 
