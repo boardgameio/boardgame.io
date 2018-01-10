@@ -97,10 +97,13 @@ export function Flow({ctx, events, init, validator, endTurnIf, endGameIf}) {
  *                                returns anything (checked after each move).
  *                                The return value is available at `ctx.gameover`.
  *                                (G, ctx) => {}
+ * @param {...object} onTurnEnd - Any code to run when a turn ends.
+ *                                (G, ctx) => G
  */
-export function SimpleFlow({ endTurnIf, endGameIf }) {
+export function SimpleFlow({ endTurnIf, endGameIf, onTurnEnd }) {
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
+  if (!onTurnEnd) onTurnEnd = G => G;
 
   /**
    * endTurn (game event)
@@ -109,6 +112,9 @@ export function SimpleFlow({ endTurnIf, endGameIf }) {
    * Passes the turn to the next turn in a round-robin fashion.
    */
   const endTurn = (state) => {
+    const G = onTurnEnd(state.G, state.ctx);
+    state = { ...state, G };
+
     // Update gameover.
     const gameover = endGameIf(state.G, state.ctx);
     if (gameover !== undefined) {
@@ -201,12 +207,16 @@ export function SimpleFlow({ endTurnIf, endGameIf }) {
  *                                The return value is available at ctx.gameover.
  *                                This can be overriden on a per-phase basis.
  *                                (G, ctx) => {}
+ * @param {...object} onTurnEnd - Any code to run when a turn ends.
+ *                                This can be overriden on a per-phase basis.
+ *                                (G, ctx) => G
  */
-export function FlowWithPhases({ phases, endTurnIf, endGameIf }) {
+export function FlowWithPhases({ phases, endTurnIf, endGameIf, onTurnEnd }) {
   // Attach defaults.
   if (!phases)    phases = [{ name: 'default' }];
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
+  if (!onTurnEnd) onTurnEnd = G => G;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -227,9 +237,6 @@ export function FlowWithPhases({ phases, endTurnIf, endGameIf }) {
     if (!conf.onPhaseEnd) {
       conf.onPhaseEnd = G => G;
     }
-    if (!conf.onTurnEnd) {
-      conf.onTurnEnd = G => G;
-    }
     if (!conf.onPass) {
       conf.onPass = G => G;
     }
@@ -249,6 +256,14 @@ export function FlowWithPhases({ phases, endTurnIf, endGameIf }) {
       return conf.endGameIf(G, ctx);
     }
     return endGameIf(G, ctx);
+  };
+
+  const onTurnEndWrap = (G, ctx) => {
+    const conf = phaseMap[ctx.phase];
+    if (conf.onTurnEnd) {
+      return conf.onTurnEnd(G, ctx);
+    }
+    return onTurnEnd(G, ctx);
   };
 
   // Helper to perform start-of-phase initialization.
@@ -302,7 +317,9 @@ export function FlowWithPhases({ phases, endTurnIf, endGameIf }) {
     let ctx = state.ctx;
 
     const conf = phaseMap[ctx.phase];
-    G = conf.onTurnEnd(G, ctx);
+
+    // Run turn-end triggers.
+    G = onTurnEndWrap(G, ctx);
 
     // Update gameover.
     const gameover = endGameIfWrap(G, ctx);

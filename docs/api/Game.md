@@ -21,6 +21,8 @@ game state and the moves. The moves are converted to a
      The return value is available at `ctx.gameover`.
   - `flow.endTurnIf` (*function*): *(G, ctx) => boolean*
      The turn automatically ends if this function returns true (checked after each move).
+  - `flow.onTurnEnd` (*function*): *(G, ctx) => G*
+     Code to run at the end of a turn.
   - `flow.phases` (*array*): Optional list of game phases. See
     [Phases](/phases) for more information.
 
@@ -35,17 +37,17 @@ game state and the moves. The moves are converted to a
 
 ### Usage
 
+#### Simple Game
+
 ```js
-import { Game } from 'boardgame.io/core';
+import { Game } from `boardgame.io/core';
 
 const game = Game({
-  // Initial value of G.
   setup: (numPlayers) => {
     const G = {...};
     return G;
   },
 
-  // Game moves.
   moves: {
     moveWithoutArgs(G, ctx) {
       return {...G, ...};
@@ -54,6 +56,22 @@ const game = Game({
     moveWithArgs(G, ctx, arg0, arg1) {
       return {...G, ...}
     }
+  }
+});
+```
+
+#### With victory condition
+
+```js
+import { Game } from 'boardgame.io/core';
+
+const game = Game({
+  setup: (numPlayers) => {
+    ...
+  },
+
+  moves: {
+    ...
   },
 
   flow: {
@@ -62,12 +80,45 @@ const game = Game({
         return ctx.currentPlayer;
       }
     },
+  }
+});
+```
+
+#### With phases
+
+```js
+import { Game } from 'boardgame.io/core';
+
+const game = Game({
+  setup: (numPlayers) => {
+    ...
   },
 
-  // View of game state which hides private information (e.g. face-down cards).
-  playerView: (G, ctx, player) => {
-    return SecretsRemoved(G, ctx.currentPlayer);
+  moves: {
+    ...
   },
 
+  flow: {
+    phases: [
+      {
+        name: 'A',
+        endGameIf: ...
+        endTurnIf: ...
+        onTurnEnd: ...
+        onPhaseBegin: ...
+        onPhaseEnd: ...
+        ...
+      },
+      {
+        name: 'B',
+        endGameIf: ...
+        endTurnIf: ...
+        onTurnEnd: ...
+        onPhaseBegin: ...
+        onPhaseEnd: ...
+        ...
+      },
+    ]
+  }
 });
 ```
