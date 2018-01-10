@@ -11,6 +11,7 @@ import Chess from 'chess.js';
 
 const ChessGame = Game({
   setup: () => ({ pgn: '' }),
+
   moves: {
     move(G, ctx, san) {
       let chess = new Chess();
@@ -43,11 +44,7 @@ const ChessGame = Game({
           }
         }
       }
-    },
-
-    phases: [
-      { name: 'default' },
-    ],
+    }
   }
 });
 
