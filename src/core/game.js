@@ -70,7 +70,7 @@ function Game({setup, moves, playerView, flow}) {
 
   if (!flow) {
     flow = SimpleFlow({});
-  } else if (flow.reducer === undefined) {
+  } else if (flow.processGameEvent === undefined) {
     flow = flow.phases ? FlowWithPhases(flow) : SimpleFlow(flow);
   }
 
@@ -79,7 +79,7 @@ function Game({setup, moves, playerView, flow}) {
     playerView,
     flow,
     moveNames: Object.getOwnPropertyNames(moves),
-    reducer: (G, action, ctx) => {
+    processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
         const context = { playerID: action.playerID };
         const args = [G, ctx].concat(action.args);
