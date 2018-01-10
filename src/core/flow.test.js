@@ -130,6 +130,37 @@ test('onTurnEnd', () => {
   }
 });
 
+test('triggers', () => {
+  const triggers = [
+    {
+      condition: G => G.milestone,
+      action: G => ({ ...G, action: true }),
+    }
+  ];
+
+  {
+    let flow = SimpleFlow({ triggers });
+    let state = { G: {}, ctx: flow.ctx(2) };
+
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(undefined);
+    state.G.milestone = true;
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(true);
+  }
+
+  {
+    let flow = FlowWithPhases({ triggers });
+    let state = { G: {}, ctx: flow.ctx(2) };
+
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(undefined);
+    state.G.milestone = true;
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(true);
+  }
+});
+
 test('init', () => {
   let flow = FlowWithPhases({
     phases: [
