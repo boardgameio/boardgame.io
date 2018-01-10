@@ -54,14 +54,12 @@ test('FlowWithPhases', () => {
 });
 
 test('callbacks', () => {
-  const onTurnEnd = jest.fn(G => G);
   const onPass = jest.fn(G => G);
   const onPhaseBegin = jest.fn(G => G);
   const onPhaseEnd = jest.fn(G => G);
 
   let flow = FlowWithPhases({
     phases: [{
-      onTurnEnd,
       onPass,
       onPhaseBegin,
       onPhaseEnd,
@@ -70,7 +68,6 @@ test('callbacks', () => {
 
   let state = { ctx: flow.ctx(2) };
 
-  expect(onTurnEnd).not.toHaveBeenCalled();
   expect(onPass).not.toHaveBeenCalled();
   expect(onPhaseBegin).not.toHaveBeenCalled();
   expect(onPhaseEnd).not.toHaveBeenCalled();
@@ -78,14 +75,59 @@ test('callbacks', () => {
   flow.init(state);
   expect(onPhaseBegin).toHaveBeenCalled();
 
-  flow.processGameEvent(state, { type: 'endTurn' });
-  expect(onTurnEnd).toHaveBeenCalled();
-
   flow.processGameEvent(state, { type: 'pass' });
   expect(onPass).toHaveBeenCalled();
 
   flow.processGameEvent(state, { type: 'endPhase' });
   expect(onPhaseEnd).toHaveBeenCalled();
+});
+
+test('onTurnEnd', () => {
+  {
+    const onTurnEnd = jest.fn(G => G);
+    let flow = SimpleFlow({ onTurnEnd });
+    let state = { ctx: flow.ctx(2) };
+    flow.init(state);
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnEnd).toHaveBeenCalled();
+  }
+
+  {
+    const onTurnEnd = jest.fn(G => G);
+    const onTurnEndOverride = jest.fn(G => G);
+
+    let flow = FlowWithPhases({
+      onTurnEnd,
+      phases: [
+        { name: 'A' },
+        {
+          name: 'B',
+          onTurnEnd: onTurnEndOverride,
+        }
+      ],
+    });
+
+    let state = { ctx: flow.ctx(2) };
+
+    expect(onTurnEnd).not.toHaveBeenCalled();
+    expect(onTurnEndOverride).not.toHaveBeenCalled();
+
+    flow.init(state);
+    expect(state.ctx.phase).toBe('A');
+
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnEnd).toHaveBeenCalled();
+    expect(onTurnEndOverride).not.toHaveBeenCalled();
+
+    onTurnEnd.mockReset();
+    onTurnEndOverride.mockReset();
+
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnEnd).not.toHaveBeenCalled();
+    expect(onTurnEndOverride).toHaveBeenCalled();
+  }
 });
 
 test('init', () => {

@@ -112,14 +112,17 @@ phases: [
 
 #### Custom Turn Orders
 
-The `flow` section can also take a `turnOrder` option in order to customize how
-the turn gets passed around between different players.
+The phase can also take a `turnOrder` option in order to customize how
+the turn gets passed around between different players during that phase.
 
 ```js
 import { TurnOrder } from 'boardgame.io/core';
 
 flow: {
-  turnOrder: TurnOrder.DEFAULT
+  phases: [{
+    name: 'A',
+    turnOrder: TurnOrder.DEFAULT,
+  }],
 }
 ```
 
@@ -134,10 +137,6 @@ A `TurnOrder` object has the following structure:
   next: (G, ctx) => nextPlayer
 }
 ```
-
-!> `turnOrder` (and other options like `endGameIf` etc.) can be specified on both a game level or
-   a phase level depending on whether you want it to take effect throughout the
-   game or only during a particular phase.
 
 !> `TurnOrder.ANY` implements a turn order where any player can play during
    the phase, following no particular order.
@@ -155,10 +154,9 @@ where play continues in round-robin order (skipping over players that pass),
 until all players have passed:
 
 ```js
-phases: [
-  {
-    endTurnIf: G => G.allPassed,
-    turnOrder: TurnOrder.SKIP,
-  }
-]
+phases: [{
+  name: 'A',
+  endTurnIf: G => G.allPassed,
+  turnOrder: TurnOrder.SKIP,
+}]
 ```
