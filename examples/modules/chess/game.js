@@ -26,6 +26,8 @@ const ChessGame = Game({
   },
 
   flow: {
+    movesPerTurn: 1,
+
     endGameIf: (G) => {
       let chess = new Chess();
       chess.load_pgn(G.pgn);

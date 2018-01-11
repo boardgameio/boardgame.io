@@ -71,7 +71,6 @@ class Board extends React.Component {
                                        move.to == square));
       if (move) {
         this.props.moves.move(move.san);
-        this.props.game.endTurn();
       } else {
         this.setState({ selected: '' });
       }
