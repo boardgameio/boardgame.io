@@ -54,14 +54,12 @@ test('FlowWithPhases', () => {
 });
 
 test('callbacks', () => {
-  const onTurnEnd = jest.fn(G => G);
   const onPass = jest.fn(G => G);
   const onPhaseBegin = jest.fn(G => G);
   const onPhaseEnd = jest.fn(G => G);
 
   let flow = FlowWithPhases({
     phases: [{
-      onTurnEnd,
       onPass,
       onPhaseBegin,
       onPhaseEnd,
@@ -70,7 +68,6 @@ test('callbacks', () => {
 
   let state = { ctx: flow.ctx(2) };
 
-  expect(onTurnEnd).not.toHaveBeenCalled();
   expect(onPass).not.toHaveBeenCalled();
   expect(onPhaseBegin).not.toHaveBeenCalled();
   expect(onPhaseEnd).not.toHaveBeenCalled();
@@ -78,14 +75,134 @@ test('callbacks', () => {
   flow.init(state);
   expect(onPhaseBegin).toHaveBeenCalled();
 
-  flow.processGameEvent(state, { type: 'endTurn' });
-  expect(onTurnEnd).toHaveBeenCalled();
-
   flow.processGameEvent(state, { type: 'pass' });
   expect(onPass).toHaveBeenCalled();
 
   flow.processGameEvent(state, { type: 'endPhase' });
   expect(onPhaseEnd).toHaveBeenCalled();
+});
+
+test('movesPerTurn', () => {
+  {
+    let flow = SimpleFlow({ movesPerTurn: 2 });
+    let state = { ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(1);
+  }
+
+  {
+    let flow = FlowWithPhases({ movesPerTurn: 2 });
+    let state = { ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(1);
+  }
+
+  {
+    let flow = FlowWithPhases({
+      movesPerTurn: 2,
+      phases: [
+        { name: 'A' },
+        { name: 'B', movesPerTurn: 1 },
+      ]
+    });
+    let state = { ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(1);
+
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+
+    expect(state.ctx.turn).toBe(1);
+    state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(2);
+  }
+});
+
+test('onTurnEnd', () => {
+  {
+    const onTurnEnd = jest.fn(G => G);
+    let flow = SimpleFlow({ onTurnEnd });
+    let state = { ctx: flow.ctx(2) };
+    flow.init(state);
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnEnd).toHaveBeenCalled();
+  }
+
+  {
+    const onTurnEnd = jest.fn(G => G);
+    const onTurnEndOverride = jest.fn(G => G);
+
+    let flow = FlowWithPhases({
+      onTurnEnd,
+      phases: [
+        { name: 'A' },
+        {
+          name: 'B',
+          onTurnEnd: onTurnEndOverride,
+        }
+      ],
+    });
+
+    let state = { ctx: flow.ctx(2) };
+
+    expect(onTurnEnd).not.toHaveBeenCalled();
+    expect(onTurnEndOverride).not.toHaveBeenCalled();
+
+    flow.init(state);
+    expect(state.ctx.phase).toBe('A');
+
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnEnd).toHaveBeenCalled();
+    expect(onTurnEndOverride).not.toHaveBeenCalled();
+
+    onTurnEnd.mockReset();
+    onTurnEndOverride.mockReset();
+
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnEnd).not.toHaveBeenCalled();
+    expect(onTurnEndOverride).toHaveBeenCalled();
+  }
+});
+
+test('triggers', () => {
+  const triggers = [
+    {
+      condition: G => G.milestone,
+      action: G => ({ ...G, action: true }),
+    }
+  ];
+
+  {
+    let flow = SimpleFlow({ triggers });
+    let state = { G: {}, ctx: flow.ctx(2) };
+
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(undefined);
+    state.G.milestone = true;
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(true);
+  }
+
+  {
+    let flow = FlowWithPhases({ triggers });
+    let state = { G: {}, ctx: flow.ctx(2) };
+
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(undefined);
+    state.G.milestone = true;
+    state = flow.processMove(state);
+    expect(state.G.action).toBe(true);
+  }
 });
 
 test('init', () => {

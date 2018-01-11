@@ -34,7 +34,7 @@ test('sanity', () => {
 });
 
 test('makeMove changes the game state', () => {
-  const game = Enzyme.mount(<RoutedApp route='/tic-tac-toe' />);
+  const game = Enzyme.mount(<RoutedApp route='/' />);
   const board = game.find('Board').instance();
 
   expect(board.props.G).toEqual({
@@ -45,7 +45,6 @@ test('makeMove changes the game state', () => {
 
   for (let id of moves) {
     board.props.moves.clickCell(id);
-    board.props.game.endTurn();
   }
 
   expect(board.props.G).toEqual({
@@ -55,7 +54,7 @@ test('makeMove changes the game state', () => {
 });
 
 test('clicked cells are inactive', () => {
-  const game = Enzyme.mount(<RoutedApp route='/tic-tac-toe' />);
+  const game = Enzyme.mount(<RoutedApp route='/' />);
 
   expect(game.find('td').get(0).props.className).toBe('active');
   game.find('td').forEach(node => node.simulate('click'));
@@ -63,7 +62,7 @@ test('clicked cells are inactive', () => {
 });
 
 test('victory', () => {
-  const game = Enzyme.mount(<RoutedApp route='/tic-tac-toe' />);
+  const game = Enzyme.mount(<RoutedApp route='/' />);
   const board = game.find('Board').instance();
   const cells = Array(9).fill(null);
 
@@ -76,7 +75,6 @@ test('victory', () => {
 
   for (let id of moves) {
     board.props.moves.clickCell(id);
-    board.props.game.endTurn();
   }
 
   expect(board.props.G).toEqual({

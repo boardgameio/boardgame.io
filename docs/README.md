@@ -42,16 +42,9 @@ include via a `<script>` tag.
 <script src="//unpkg.com/boardgame.io"></script>
 ```
 
-### New in v0.16
+### Changelog
 
-- [Phases](http://boardgame.io/#/phases)
-
-Breaking changes:
-
-- The `boardgame.io/game` package is now `boardgame.io/core`, and does not have a default export.
-- `victory` is now `endGameIf`, and goes inside a `flow` section.
-- `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
-- `props.endTurn` is now `props.game.endTurn`.
+See [changelog](CHANGELOG.md).
 
 ### Disclaimer
 

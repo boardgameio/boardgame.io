@@ -45,10 +45,6 @@ test('props change', () => {
   token.setProps({x: 0, y: 2});
   expect(token.state('originX')).toEqual(1);
   expect(token.state('originY')).toEqual(2);
-
-  token.setProps({x: 0, y: 2});
-  expect(token.state('originX')).toEqual(1);
-  expect(token.state('originY')).toEqual(2);
 });
 
 test('handlers', () => {

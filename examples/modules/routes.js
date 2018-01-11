@@ -6,16 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import core from './core';
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
 import phases from './phases';
 
 const routes = [
-  {
-    name: 'Boardgame.io',
-    routes: core.routes
-  },
   {
     name: 'Tic-Tac-Toe',
     routes: tic_tac_toe.routes

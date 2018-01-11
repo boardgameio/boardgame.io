@@ -51,20 +51,18 @@ class Token extends React.Component {
   }
 
   /**
-   * If there is a change in x and y, saves old X, Y, and current time. Starts
+   * If there is a change in props, saves old X, Y, and current time. Starts
    * animation.
    */
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.x != this.props.x || nextProps.y != this.props.y) {
-      let svgCoord = this._getSvgCoordinates();
-      this.setState({
-        ...this.state,
-        originTime: Date.now(),
-        originX: svgCoord.x,
-        originY: svgCoord.y,
-      });
-      requestAnimationFrame(this._animate(Date.now()));
-    }
+  componentWillReceiveProps() {
+    let svgCoord = this._getSvgCoordinates();
+    this.setState({
+      ...this.state,
+      originTime: Date.now(),
+      originX: svgCoord.x,
+      originY: svgCoord.y,
+    });
+    requestAnimationFrame(this._animate(Date.now()));
   }
 
   /**
@@ -124,7 +122,7 @@ class Token extends React.Component {
   render() {
     return (
       <g transform={'translate(' + this.state.x + ',' + this.state.y + ')'}
-         onClick={() => { this.props.onClick(this.props.x, this.props.y) }}>
+         onClick={() => { this.props.onClick(this.props) }}>
         {this.props.children}
       </g>
     );
