@@ -34,6 +34,10 @@ test('GameLog rewind', () => {
   const game = Game({
     moves: {
       'A': (G, ctx, arg) => arg,
+    },
+
+    flow: {
+      endTurnIf: G => (G == 42)
     }
   });
   const reducer = createGameReducer({game});
@@ -46,6 +50,12 @@ test('GameLog rewind', () => {
 
   store.dispatch(gameEvent({
     type: 'endTurn',
+  }));
+
+  // Also ends turn automatically.
+  store.dispatch(makeMove({
+    type: 'A',
+    args: [42],
   }));
 
   store.dispatch(makeMove({
@@ -66,6 +76,10 @@ test('GameLog rewind', () => {
   expect(store.getState().G).toEqual(2);
   root.find('.log-turn').at(0).simulate('mouseover');
   expect(store.getState().G).toEqual(1);
+  root.find('.log-turn').at(0).simulate('mouseout');
+  expect(store.getState().G).toEqual(2);
+  root.find('.log-turn').at(1).simulate('mouseover');
+  expect(store.getState().G).toEqual(42);
   root.find('.log-turn').at(0).simulate('mouseout');
   expect(store.getState().G).toEqual(2);
 });

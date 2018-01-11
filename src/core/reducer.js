@@ -77,8 +77,7 @@ export function createGameReducer({game, numPlayers}) {
         state = { ...state, G, log, _id: state._id + 1 };
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        const t = game.flow.processMove({ G: state.G, ctx: state.ctx }, action);
-        return { ...state, G: t.G, ctx: t.ctx };
+        return game.flow.processMove(state, action);
       }
 
       case Actions.RESTORE: {

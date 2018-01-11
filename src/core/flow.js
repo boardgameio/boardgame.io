@@ -58,7 +58,10 @@ export function Flow({ ctx, events, init, validator, endTurnIf, endGameIf, trigg
     if (events.hasOwnProperty(action.type)) {
       const context = { playerID: action.playerID };
       const args = [state].concat(action.args);
-      return events[action.type].apply(context, args);
+      const oldLog = state.log || [];
+      const log = [ ...oldLog, action ];
+      const newState = events[action.type].apply(context, args);
+      return { ...newState, log };
     }
     return state;
   };
@@ -168,7 +171,10 @@ export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, trig
     // Update turn.
     const turn = state.ctx.turn + 1;
     // Return new state.
-    return { G: state.G, ctx: { ...state.ctx, currentPlayer, turn, currentPlayerMoves: 0 } };
+    return {
+      ...state,
+      ctx: { ...state.ctx, currentPlayer, turn, currentPlayerMoves: 0 },
+    };
   };
 
   return Flow({
@@ -345,7 +351,7 @@ export function FlowWithPhases({
     const ctx = { ...state.ctx, passMap: {}, allPassed: false };
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
     ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
-    return { G, ctx };
+    return { ...state, G, ctx };
   };
 
   /**
@@ -377,7 +383,7 @@ export function FlowWithPhases({
     }
 
     // Run any setup code for the new phase.
-    return startPhase({G, ctx}, phaseMap[ctx.phase]);
+    return startPhase({ ...state, G, ctx }, phaseMap[ctx.phase]);
   };
 
   /**
@@ -398,7 +404,7 @@ export function FlowWithPhases({
     // Update gameover.
     const gameover = endGameIfWrap(G, ctx);
     if (gameover !== undefined) {
-      return { G, ctx: { ...ctx, gameover } };
+      return { ...state, G, ctx: { ...ctx, gameover } };
     }
 
     // Update current player.
@@ -411,10 +417,10 @@ export function FlowWithPhases({
     // End phase if condition is met.
     const end = conf.endPhaseIf(G, ctx);
     if (end) {
-      return endPhase({ G, ctx }, end);
+      return endPhase({ ...state, G, ctx }, end);
     }
 
-    return { G, ctx };
+    return { ...state, G, ctx };
   };
 
   /**
@@ -441,7 +447,7 @@ export function FlowWithPhases({
       }
     }
 
-    return endTurn({ G, ctx });
+    return endTurn({ ...state, G, ctx });
   };
 
   const validator = (G, ctx, move) => {
