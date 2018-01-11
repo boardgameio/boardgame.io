@@ -1,3 +1,12 @@
+# v0.16.1
+
+#### Bugfixes
+- [[23d9726](https://github.com/google/boardgame.io/commit/23d972677c6ff43b77d5c30352dd9959b517a93c)]: Fix bug that was causing `log` to be erased after `flow.processMove`.
+
+#### Features
+- [Triggers](https://github.com/google/boardgame.io/commit/774e540b20d7402184a00abdb7c512d7c8e85995)
+- [movesPerTurn](https://github.com/google/boardgame.io/commit/73d5b73d00eaba9aaf73a3576dfcfb25fc2b311d)
+
 # v0.16.0
 
 ####  Features
