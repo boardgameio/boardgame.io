@@ -11,7 +11,7 @@ import singleplayer from './components/singleplayer';
 const routes = [
   {
     path: '/chess',
-    text: 'Singleplayer',
+    text: 'Chess',
     component: singleplayer
   }
 ];
