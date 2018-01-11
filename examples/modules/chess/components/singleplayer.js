@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The boardgame.io Authors.
+ * Copyright 2018 The boardgame.io Authors.
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/client';
-import TicTacToe from '../game';
-import Board from './board';
+import ChessGame from '../game';
+import ChessBoard from './board';
 
 const App = Client({
-  game: TicTacToe,
-  board: Board
+  game: ChessGame,
+  board: ChessBoard
 });
 
 const Singleplayer = () => (

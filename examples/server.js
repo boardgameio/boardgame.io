@@ -12,7 +12,7 @@ import KoaHelmet from 'koa-helmet';
 import KoaWebpack from 'koa-webpack';
 import WebpackConfig from './webpack.dev.js';
 import Server from 'boardgame.io/server';
-import TicTacToe from './game';
+import TicTacToe from './modules/tic-tac-toe/game';
 
 const PORT = process.env.PORT || 8000;
 const DEV = (process.env.NODE_ENV === 'development');
