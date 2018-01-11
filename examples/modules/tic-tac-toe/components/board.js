@@ -23,7 +23,6 @@ class Board extends React.Component {
   onClick = (id) => {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
-      this.props.game.endTurn();
     }
   }
 
