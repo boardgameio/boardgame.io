@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MAKE_MOVE, GAME_EVENT, RESTORE } from '../../core/action-types';
+import { MAKE_MOVE, GAME_EVENT } from '../../core/action-types';
 import * as ActionCreators from '../../core/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import io from 'socket.io-client';
@@ -45,7 +45,6 @@ export class Multiplayer {
     const whiteListedActions = new Set([
       MAKE_MOVE,
       GAME_EVENT,
-      RESTORE
     ]);
 
     // Redux middleware to emit a message on a socket

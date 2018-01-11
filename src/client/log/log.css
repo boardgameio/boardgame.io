@@ -30,8 +30,72 @@
 }
 
 .gamelog .log-move {
-  border-left: 25px solid #ccc;
+  border-left: 25px solid;
   margin-top: 5px;
   background: #fff;
   padding: 5px;
+}
+
+.gamelog div.player0 {
+  border-left-color: #001f3f;
+}
+
+.gamelog div.player1 {
+  border-left-color: #0074D9;
+}
+
+.gamelog div.player2 {
+  border-left-color: #7FDBFF;
+}
+
+.gamelog div.player3 {
+  border-left-color: #39CCCC;
+}
+
+.gamelog div.player4 {
+  border-left-color: #3D9970;
+}
+
+.gamelog div.player5 {
+  border-left-color: #2ECC40;
+}
+
+.gamelog div.player6 {
+  border-left-color: #01FF70;
+}
+
+.gamelog div.player7 {
+  border-left-color: #FFDC00;
+}
+
+.gamelog div.player8 {
+  border-left-color: #FF851B;
+}
+
+.gamelog div.player9 {
+  border-left-color: #FF4136;
+}
+
+.gamelog div.player10 {
+  border-left-color: #85144b;
+}
+
+.gamelog div.player11 {
+  border-left-color: #F012BE;
+}
+
+.gamelog div.player12 {
+  border-left-color: #B10DC9;
+}
+
+.gamelog div.player13 {
+  border-left-color: #111111;
+}
+
+.gamelog div.player14 {
+  border-left-color: #AAAAAA;
+}
+
+.gamelog div.player15 {
+  border-left-color: #DDDDDD;
 }
