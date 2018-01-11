@@ -90,10 +90,6 @@ test('move whitelist', () => {
   expect(mockSocket.emit).toHaveBeenCalled();
   mockSocket.emit.mockReset();
 
-  store.dispatch(ActionCreators.restore());
-  expect(mockSocket.emit).toHaveBeenCalled();
-  mockSocket.emit.mockReset();
-
   store.dispatch({ type: 'unknown' });
   expect(mockSocket.emit).not.toHaveBeenCalled();
   mockSocket.emit.mockReset();
