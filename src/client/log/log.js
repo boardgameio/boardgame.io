@@ -40,8 +40,12 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i <= logIndex; i++) {
       const action = this.props.log[i];
-      action.remote = true;  // don't broadcast action.
-      this.context.store.dispatch(action);
+
+      if (action.type == Actions.GAME_EVENT ||
+          action.type == Actions.MAKE_MOVE) {
+        action.remote = true;  // don't broadcast action.
+        this.context.store.dispatch(action);
+      }
     }
   }
 
@@ -53,7 +57,8 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
-      if (item.type == Actions.GAME_EVENT) {
+      if (item.type == Actions.GAME_EVENT && item.e.type == 'endTurn' ||
+          item.type == 'endTurn') {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
         currentTurn = [];
