@@ -27,6 +27,18 @@ import { Game } from 'boardgame.io/core'
 import Game from 'boardgame.io/game'
 ```
 
+- `boardgame.io/client` no longer has a default export.
+
+```
+// v0.16
+import { Client } from 'boardgame.io/client'
+```
+
+```
+// v0.15
+import Client from 'boardgame.io/client'
+```
+
 - `victory` is now `endGameIf`, and goes inside a `flow` section.
 - The semantics of `endGameIf` are subtly different. The game ends if
   the function returns anything at all.
