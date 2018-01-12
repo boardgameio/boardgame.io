@@ -10,13 +10,16 @@
 ```
 const app = Server({
   games: [ TicTacToe, Chess ]
-}:
+};
 ```
 
 # v0.16.2
 
 #### Bugfixes
 - [[a61ceca](https://github.com/google/boardgame.io/commit/a61ceca8cc8e973d786678e1bcc7ec50739ebeaa)]: Log turn ends correctly (even when triggered automatically by `endTurnIf`)
+
+#### Features
+- [[9ce42b2](https://github.com/google/boardgame.io/commit/9ce42b297372160f3ece4203b4c92000334d85e0)]: Change color in `GameLog` based on the player that made the move.
 
 # v0.16.1
 
