@@ -16,7 +16,7 @@ const app = Server({
 # v0.16.2
 
 #### Bugfixes
-- [[a61ceca]https://github.com/google/boardgame.io/commit/a61ceca8cc8e973d786678e1bcc7ec50739ebeaa]: Log turn ends correctly (even when triggered automatically by `endTurnIf`)
+- [[a61ceca](https://github.com/google/boardgame.io/commit/a61ceca8cc8e973d786678e1bcc7ec50739ebeaa)]: Log turn ends correctly (even when triggered automatically by `endTurnIf`)
 
 # v0.16.1
 
