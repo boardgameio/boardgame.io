@@ -42,8 +42,10 @@ class Board extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.chess.load_pgn(nextProps.G.pgn);
-    this.setState({ selected: '' });
+    if (nextProps.G.pgn) {
+      this.chess.load_pgn(nextProps.G.pgn);
+      this.setState({ selected: '' });
+    }
   }
 
   render() {
@@ -61,6 +63,10 @@ class Board extends React.Component {
   }
 
   click = ({ square }) => {
+    if (!this.props.isActive) {
+      return;
+    }
+
     if (!this.state.selected && this._isSelectable(square)) {
       this.setState({ selected: square });
     }
