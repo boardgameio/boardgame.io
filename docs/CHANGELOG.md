@@ -51,7 +51,6 @@ import { Client } from 'boardgame.io/client'
 // v0.15
 import Game from 'boardgame.io/game'
 import Client from 'boardgame.io/client'
-```rom 'boardgame.io/client'
 ```
 
 - `victory` is now `endGameIf`, and goes inside a `flow` section.
