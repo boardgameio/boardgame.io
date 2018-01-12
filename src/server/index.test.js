@@ -39,11 +39,10 @@ jest.mock('koa-socket', () => {
   }
 
   class MockIO {
-    constructor() {
-      this.socket = new MockSocket();
-    }
-    attach() {}
-    on(type, callback) { callback({ socket: this.socket }); }
+    constructor() { this.socket = new MockSocket() }
+    attach(app) { app.io = app._io = this }
+    of() { return this }
+    on(type, callback) { callback(this.socket) }
   }
 
   return MockIO;
@@ -52,14 +51,14 @@ jest.mock('koa-socket', () => {
 const game = Game({});
 
 test('basic', () => {
-  const server = Server({game});
+  const server = Server({ games: [game] });
   const io = server.context.io;
   expect(server).not.toBe(undefined);
   io.socket.receive('disconnect');
 });
 
 test('sync', () => {
-  const server = Server({game});
+  const server = Server({ games: [game] });
   const io = server.context.io;
   expect(server).not.toBe(undefined);
 
@@ -81,7 +80,7 @@ test('sync', () => {
 });
 
 test('action', () => {
-  const server = Server({game});
+  const server = Server({ games: [game] });
   const io = server.context.io;
   const action = ActionCreators.gameEvent({ type: 'endTurn' });
 
@@ -140,7 +139,7 @@ test('playerView', () => {
     }
   });
 
-  const server = Server({game});
+  const server = Server({ games: [game] });
   const io = server.context.io;
 
   io.socket.receive('sync', 'gameID', 0);

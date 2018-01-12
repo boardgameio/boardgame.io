@@ -8,6 +8,7 @@ game state and the moves. The moves are converted to a
 
 1. `obj` (*object*): An object that contains
 
+  - `name` (*string*): The name of the game.
   - `setup` (*object*): Function that returns the initial value of G.
   - `moves` (*object*): The keys are move names, and the values
     are pure functions that return the new value of `G` once

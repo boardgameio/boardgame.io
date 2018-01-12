@@ -32,8 +32,24 @@ to serve the socket requests coming from the client.
 ```js
 const Server = require('boardgame.io/server');
 const TicTacToe = require('./tic-tac-toe');
-const app = Server({ game: TicTacToe });
+const app = Server({ games: [TicTacToe] });
 app.listen(8000);
+```
+
+You can also serve multiple types of games from the same server:
+
+```js
+const app = Server({ games: [TicTacToe, Chess] });
+```
+
+For this to work correctly, make sure that each game
+implementation specifies a name in the `Game` constructor:
+
+```js
+const TicTacToe = Game({
+  name: 'tic-tac-toe',
+  ...
+})
 ```
 
 In a real app, you might want to also serve your React
@@ -46,7 +62,7 @@ const KoaStatic = require('koa-static');
 const Server = require('boardgame.io/server');
 const TicTacToe = require('./tic-tac-toe');
 
-const app = Server({ game: TicTacToe });
+const app = Server({ games: [TicTacToe] });
 app.use(KoaStatic('path/to/dir'));
 app.listen(8000);
 ```

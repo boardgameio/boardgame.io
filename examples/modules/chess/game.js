@@ -9,13 +9,27 @@
 import { Game } from 'boardgame.io/core';
 import Chess from 'chess.js';
 
+// Helper to instantiate chess.js correctly on
+// both browser and Node.
+function Load(pgn) {
+  let chess = null;
+  if (Chess.Chess) {
+    chess = new Chess.Chess();
+  } else {
+    chess = new Chess();
+  }
+  chess.load_pgn(pgn);
+  return chess;
+}
+
 const ChessGame = Game({
+  name: 'chess',
+
   setup: () => ({ pgn: '' }),
 
   moves: {
     move(G, ctx, san) {
-      let chess = new Chess();
-      chess.load_pgn(G.pgn);
+      const chess = Load(G.pgn);
       if (chess.turn() == 'w' && ctx.currentPlayer == '1' ||
           chess.turn() == 'b' && ctx.currentPlayer == '0') {
         return { ...G };
@@ -29,8 +43,7 @@ const ChessGame = Game({
     movesPerTurn: 1,
 
     endGameIf: (G) => {
-      let chess = new Chess();
-      chess.load_pgn(G.pgn);
+      const chess = Load(G.pgn);
       if (chess.game_over()) {
         if (chess.in_draw() ||
             chess.in_threefold_repetition() ||

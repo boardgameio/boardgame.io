@@ -22,15 +22,18 @@ export class Multiplayer {
    * @param {object} socketImpl - Override for unit tests.
    * @param {string} gameID - The game ID to connect to.
    * @param {string} playerID - The player ID associated with this client.
+   * @param {string} gameName - The game type (the `name` field in `Game`).
+   * @param {string} numPlayers - The number of players.
    */
-  constructor(socketImpl, gameID, playerID) {
+  constructor(socketImpl, gameID, playerID, gameName, numPlayers) {
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;
+    this.numPlayers = numPlayers;
 
     if (socketImpl !== undefined) {
       this.socket = socketImpl;
     } else {
-      this.socket = io();
+      this.socket = io('/' + gameName);
     }
   }
 
@@ -72,7 +75,7 @@ export class Multiplayer {
     });
 
     // Initial sync to get game state.
-    this.socket.emit('sync', this.gameID, this.playerID);
+    this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
 
     return store;
   }

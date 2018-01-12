@@ -13,12 +13,13 @@ import KoaWebpack from 'koa-webpack';
 import WebpackConfig from './webpack.dev.js';
 import Server from 'boardgame.io/server';
 import TicTacToe from './modules/tic-tac-toe/game';
+import Chess from './modules/chess/game';
 
 const PORT = process.env.PORT || 8000;
 const DEV = (process.env.NODE_ENV === 'development');
 const PROD = !DEV;
 
-const app = Server({ game: TicTacToe });
+const app = Server({ games: [ TicTacToe, Chess ] });
 
 if (DEV) {
   app.use(KoaWebpack({
