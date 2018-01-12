@@ -25,6 +25,8 @@ import { FlowWithPhases, SimpleFlow } from './flow';
  * Array.
  *
  * Game({
+ *   name: 'tic-tac-toe',
+ *
  *   setup: (numPlayers) => {
  *     const G = {...};
  *     return G;
@@ -63,7 +65,8 @@ import { FlowWithPhases, SimpleFlow } from './flow';
  *                           If it contains any other object, it is presumed to be a
  *                           configuration object for SimpleFlow() or FlowWithPhases().
  */
-function Game({setup, moves, playerView, flow}) {
+function Game({name, setup, moves, playerView, flow}) {
+  if (!name)        name = 'default';
   if (!setup)       setup = () => ({});
   if (!moves)       moves = {};
   if (!playerView)  playerView = G => G;
@@ -75,6 +78,7 @@ function Game({setup, moves, playerView, flow}) {
   }
 
   return {
+    name,
     setup,
     playerView,
     flow,
