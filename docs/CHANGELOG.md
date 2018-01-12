@@ -1,3 +1,23 @@
+# v0.16.3
+
+#### Features
+- Multiple game types per server!
+
+#### Breaking Changes
+
+- `Server` now accepts an array `games`, and no longer takes `game` and `numPlayers`.
+
+```
+const app = Server({
+  games: [ TicTacToe, Chess ]
+}:
+```
+
+# v0.16.2
+
+#### Bugfixes
+- [[a61ceca]https://github.com/google/boardgame.io/commit/a61ceca8cc8e973d786678e1bcc7ec50739ebeaa]: Log turn ends correctly (even when triggered automatically by `endTurnIf`)
+
 # v0.16.1
 
 #### Bugfixes
@@ -16,27 +36,19 @@
 #### Breaking Changes
 
 - `boardgame.io/game` is now `boardgame.io/core`, and does not have a default export.
-
-```
-// v0.16
-import { Game } from 'boardgame.io/core'
-```
-
-```
-// v0.15
-import Game from 'boardgame.io/game'
-```
-
 - `boardgame.io/client` no longer has a default export.
 
 ```
 // v0.16
+import { Game } from 'boardgame.io/core'
 import { Client } from 'boardgame.io/client'
 ```
 
 ```
 // v0.15
+import Game from 'boardgame.io/game'
 import Client from 'boardgame.io/client'
+```rom 'boardgame.io/client'
 ```
 
 - `victory` is now `endGameIf`, and goes inside a `flow` section.
