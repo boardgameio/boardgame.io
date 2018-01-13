@@ -1,3 +1,8 @@
+# v0.16.5
+
+#### Features
+- `PlayerView.STRIP_SECRETS`
+
 # v0.16.4
 
 #### Bugfixes
