@@ -150,7 +150,7 @@ class TicTacToeBoard extends React.Component {
   onClick(id) {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
-      this.props.game.endTurn();
+      this.props.events.endTurn();
     }
   }
 
@@ -208,7 +208,7 @@ handler:
 
 ```js
 this.props.moves.clickCell(id);
-this.props.game.endTurn();
+this.props.events.endTurn();
 ```
 
 `props.moves` is an object passed in by the framework that

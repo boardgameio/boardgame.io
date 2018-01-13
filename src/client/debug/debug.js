@@ -202,7 +202,7 @@ export class Debug extends React.Component {
     gameID: PropTypes.string.isRequired,
     playerID: PropTypes.string,
     moves: PropTypes.any,
-    game: PropTypes.any,
+    events: PropTypes.any,
     restore: PropTypes.func,
     showLog: PropTypes.bool,
   }
@@ -247,7 +247,7 @@ export class Debug extends React.Component {
     for (let name in this.props.moves) {
       events[name] = name;
     }
-    for (let name in this.props.game) {
+    for (let name in this.props.events) {
       events[name] = name;
     }
 
@@ -329,8 +329,8 @@ export class Debug extends React.Component {
     }
 
     let events = [];
-    for (let name in this.props.game) {
-      const fn = this.props.game[name];
+    for (let name in this.props.events) {
+      const fn = this.props.events[name];
       const shortcut = this.shortcuts[name];
       events.push(
         <KeyboardShortcut key={name} value={shortcut}>
