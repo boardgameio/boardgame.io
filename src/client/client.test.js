@@ -153,18 +153,18 @@ test('update gameID / playerID', () => {
   const spy1 = jest.spyOn(m, 'updateGameID');
   const spy2 = jest.spyOn(m, 'updatePlayerID');
 
-  expect(m.gameID).toBe('a');
+  expect(m.gameID).toBe('default:a');
   expect(m.playerID).toBe('1');
   game.setProps({ gameID: 'a' });
   game.setProps({ playerID: '1' });
-  expect(m.gameID).toBe('a');
+  expect(m.gameID).toBe('default:a');
   expect(m.playerID).toBe('1');
   expect(spy1).not.toHaveBeenCalled();
   expect(spy1).not.toHaveBeenCalled();
 
   game.setProps({ gameID: 'next' });
   game.setProps({ playerID: 'next' });
-  expect(m.gameID).toBe('next');
+  expect(m.gameID).toBe('default:next');
   expect(m.playerID).toBe('next');
   expect(spy1).toHaveBeenCalled();
   expect(spy2).toHaveBeenCalled();

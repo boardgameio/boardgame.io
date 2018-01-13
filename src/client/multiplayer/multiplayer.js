@@ -26,9 +26,12 @@ export class Multiplayer {
    * @param {string} numPlayers - The number of players.
    */
   constructor(socketImpl, gameID, playerID, gameName, numPlayers) {
+    this.gameName = gameName || 'default';
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;
-    this.numPlayers = numPlayers;
+    this.numPlayers = numPlayers || 2;
+
+    this.gameID = this.gameName + ':' + this.gameID;
 
     if (socketImpl !== undefined) {
       this.socket = socketImpl;
@@ -85,10 +88,10 @@ export class Multiplayer {
    * @param {string} id - The new game id.
    */
   updateGameID(id) {
-    this.gameID = id;
+    this.gameID = this.gameName + ':' + id;
 
     if (this.socket) {
-      this.socket.emit('sync', this.gameID, this.playerID);
+      this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
     }
   }
 
@@ -100,7 +103,7 @@ export class Multiplayer {
     this.playerID = id;
 
     if (this.socket) {
-      this.socket.emit('sync', this.gameID, this.playerID);
+      this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
     }
   }
 }
