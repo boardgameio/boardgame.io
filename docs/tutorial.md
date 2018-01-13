@@ -216,7 +216,7 @@ contains functions to dispatch moves. `props.moves.clickCell`
 dispatches the *clickCell* move, and any data passed in is made
 available in the move handler.
 
-`props.game` is an object that contains functions to control
+`props.events` is an object that contains functions to control
 the flow of the game, including the ability to end the turn,
 pass or end the current game phase (see [Phases](phases.md)).
 
