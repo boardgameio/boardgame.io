@@ -22,14 +22,14 @@ const game = Game({
   }
 });
 
-const endTurn = () => gameEvent({ type: 'endTurn' });
+const endTurn = () => gameEvent('endTurn');
 
 test('_id is incremented', () => {
   const reducer = createGameReducer({game});
 
   let state = undefined;
 
-  state = reducer(state, makeMove({ type: 'unknown' }));
+  state = reducer(state, makeMove('unknown'));
   expect(state._id).toBe(1);
   state = reducer(state, endTurn());
   expect(state._id).toBe(2);
@@ -40,13 +40,13 @@ test('makeMove', () => {
 
   let state;
 
-  state = reducer(undefined, makeMove({ type: 'unknown' }));
+  state = reducer(undefined, makeMove('unknown'));
   expect(state.G).toEqual({});
 
-  state = reducer(undefined, makeMove({ type: 'A' }));
+  state = reducer(undefined, makeMove('A'));
   expect(state.G).toEqual({});
 
-  state = reducer(undefined, makeMove({ type: 'B' }));
+  state = reducer(undefined, makeMove('B'));
   expect(state.G).toEqual({ moved: true });
 });
 
@@ -77,13 +77,13 @@ test('move dispatchers', () => {
 test('victory', () => {
   const reducer = createGameReducer({game});
 
-  let state = reducer(undefined, makeMove({ type: 'A' }));
+  let state = reducer(undefined, makeMove('A'));
   state = reducer(state, endTurn());
   expect(state.ctx.gameover).toEqual(undefined);
-  state = reducer(state, makeMove({ type: 'B' }));
+  state = reducer(state, makeMove('B'));
   state = reducer(state, endTurn());
   expect(state.ctx.gameover).toEqual(undefined);
-  state = reducer(state, makeMove({ type: 'C' }));
+  state = reducer(state, makeMove('C'));
   expect(state.ctx.gameover).toEqual('0');
 });
 
@@ -105,8 +105,8 @@ test('log', () => {
 
   let state = undefined;
 
-  const actionA = makeMove({ type: 'moveA' });
-  const actionB = makeMove({ type: 'moveB' });
+  const actionA = makeMove('moveA');
+  const actionB = makeMove('moveB');
   const actionC = endTurn();
 
   state = reducer(state, actionA);

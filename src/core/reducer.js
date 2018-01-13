@@ -60,19 +60,19 @@ export function createGameReducer({game, numPlayers}) {
     switch (action.type) {
       case Actions.GAME_EVENT: {
         const { G, ctx } = game.flow.processGameEvent(
-            { G: state.G, ctx: state.ctx }, action.e);
+            { G: state.G, ctx: state.ctx }, action.payload);
         const log = [...state.log, action];
         return {...state, G, ctx, log, _id: state._id + 1};
       }
 
       case Actions.MAKE_MOVE: {
         // Ignore the move if it isn't valid at this point.
-        if (!game.flow.validator(state.G, state.ctx, action.move)) {
+        if (!game.flow.validator(state.G, state.ctx, action.payload)) {
           return state;
         }
 
         // Process the move.
-        const G = game.processMove(state.G, action.move, state.ctx);
+        const G = game.processMove(state.G, action.payload, state.ctx);
         const log = [...state.log, action];
         state = { ...state, G, log, _id: state._id + 1 };
 
@@ -102,11 +102,7 @@ export function createMoveDispatchers(moveNames, store, playerID) {
   let dispatchers = {};
   for (const name of moveNames) {
     dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.makeMove({
-        type: name,
-        args,
-        playerID,
-      }));
+      store.dispatch(ActionCreators.makeMove(name, args, playerID));
     };
   }
   return dispatchers;

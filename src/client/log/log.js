@@ -58,15 +58,15 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
-      if (item.type == Actions.GAME_EVENT && item.e.type == 'endTurn' ||
+      if (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn' ||
           item.type == 'endTurn') {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
         currentTurn = [];
       } else {
-        const args = item.move.args || [];
+        const args = item.payload.args || [];
 
-        const playerID = item.move.playerID;
+        const playerID = item.payload.playerID;
         if (!playerIDs.has(playerID)) {
           playerIDs.set(playerID, playerIDs.size)
         }
@@ -75,7 +75,7 @@ export class GameLog extends React.Component {
 
         currentTurn.push(
           <div key={i} className={classNames}>
-          {item.move.type}({args.join(',')})
+          {item.payload.type}({args.join(',')})
           </div>
         );
       }

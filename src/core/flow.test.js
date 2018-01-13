@@ -369,9 +369,9 @@ test('endTurnIf', () => {
 
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove({ type: 'B' }));
+    state = reducer(state, makeMove('B'));
     expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove({ type: 'A' }));
+    state = reducer(state, makeMove('A'));
     expect(state.ctx.currentPlayer).toBe('1');
   }
 
@@ -388,9 +388,9 @@ test('endTurnIf', () => {
 
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove({ type: 'B' }));
+    state = reducer(state, makeMove('B'));
     expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove({ type: 'A' }));
+    state = reducer(state, makeMove('A'));
     expect(state.ctx.currentPlayer).toBe('1');
   }
 
@@ -410,9 +410,9 @@ test('endTurnIf', () => {
 
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove({ type: 'B' }));
+    state = reducer(state, makeMove('B'));
     expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove({ type: 'A' }));
+    state = reducer(state, makeMove('A'));
     expect(state.ctx.currentPlayer).toBe('1');
   }
 });
@@ -445,37 +445,37 @@ test('validator', () => {
   expect(flow.validator(state.G, state.ctx)).toBe(false);
 
   // B is disallowed in phase A.
-  state = reducer(state, makeMove({ type: 'B' }));
+  state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({});
-  state = reducer(state, makeMove({ type: 'A' }));
+  state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({ A: true });
 
-  state = reducer(state, gameEvent({ type: 'endPhase' }));
+  state = reducer(state, gameEvent('endPhase'));
   state.G = {};
   expect(state.ctx.phase).toBe('B');
 
   // A is disallowed in phase B.
-  state = reducer(state, makeMove({ type: 'A' }));
+  state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({});
-  state = reducer(state, makeMove({ type: 'B' }));
+  state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
 
-  state = reducer(state, gameEvent({ type: 'endPhase' }));
+  state = reducer(state, gameEvent('endPhase'));
   state.G = {};
   expect(state.ctx.phase).toBe('C');
 
   // All moves are allowed in phase C.
-  state = reducer(state, makeMove({ type: 'A' }));
+  state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({ A: true });
-  state = reducer(state, makeMove({ type: 'B' }));
+  state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
 
   // But not once the game is over.
   state.ctx.gameover = true;
   state.G = {};
-  state = reducer(state, makeMove({ type: 'A' }));
+  state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({});
-  state = reducer(state, makeMove({ type: 'B' }));
+  state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({});
 });
 
