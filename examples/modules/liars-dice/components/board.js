@@ -50,6 +50,11 @@ class Board extends React.Component {
         <button>Challenge</button>
         <hr />
         {this.props.playerID && <div>Player: {this.props.playerID}</div>}
+        <hr />
+        <pre style={{ textAlign: 'left' }}>
+        { JSON.stringify(this.props.G, null, 2) }
+        </pre>
+        <hr />
       </div>
     );
   }
