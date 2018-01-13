@@ -9,7 +9,7 @@
 import Game from '../src/core/game.js';
 import { Flow, SimpleFlow, FlowWithPhases } from '../src/core/flow.js';
 import { TurnOrder } from '../src/core/turn-order.js';
-import { SecretInfo } from '../src/core/secret-info.js';
+import { PlayerView } from '../src/core/player-view.js';
 
 export {
   Game,
@@ -17,5 +17,5 @@ export {
   SimpleFlow,
   FlowWithPhases,
   TurnOrder,
-  SecretInfo,
+  PlayerView,
 };

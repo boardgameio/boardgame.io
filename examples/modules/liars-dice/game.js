@@ -6,8 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from 'boardgame.io/core';
-import { SecretInfo } from 'boardgame.io/core';
+import { Game, PlayerView } from 'boardgame.io/core';
 
 const LiarsDice = Game({
   name: 'liars-dice',
@@ -32,7 +31,7 @@ const LiarsDice = Game({
     }
   },
 
-  playerView: SecretInfo.BASIC,
+  playerView: PlayerView.STRIP_SECRETS,
 });
 
 export default LiarsDice;
