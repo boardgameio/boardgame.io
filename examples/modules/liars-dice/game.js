@@ -33,28 +33,6 @@ const LiarsDice = Game({
   },
 
   playerView: SecretInfo.BASIC,
-
-  playerView2: (G, ctx, playerID) => {
-    console.log('playerviewed');
-    let newG = {
-      ...G,
-      players: Object.assign({},
-        // for each player
-        Object.keys(G.players).map(p => {
-          // if that player matches the player viewing
-          if (p === playerID) {
-            // show that player's dice
-            return G.players[p]
-          } else {
-            // replace dice with null. important: keep the same array size.
-            return G.players[p].map(() => null)
-          }
-        })
-      )
-    }
-    return newG;
-  }
-
 });
 
 export default LiarsDice;
