@@ -1,3 +1,24 @@
+# v0.16.4
+
+#### Bugfixes
+- `endPhaseIf` is called after each move (in addition to at the end of a turn).
+- `gameID` is namespaced on the server so that there are no clashes across game types.
+
+#### Breaking Changes
+- `props.game` is now `props.events` (to avoid confusing it with the `game` object).
+
+```
+// OLD
+onClick() {
+  this.props.game.endTurn();
+}
+
+// NEW
+onClick() {
+  this.props.events.endTurn();
+}
+```
+
 # v0.16.3
 
 #### Features
