@@ -45,9 +45,7 @@ test('multiplayer', () => {
   // Returns a valid store.
   expect(store).not.toBe(undefined);
 
-  const action = ActionCreators.gameEvent({
-    type: 'endTurn',
-  });
+  const action = ActionCreators.gameEvent('endTurn');
 
   // Dispatch a local action.
   mockSocket.emit = jest.fn();
@@ -77,16 +75,13 @@ test('move whitelist', () => {
 
   mockSocket.emit = jest.fn();
 
-  const endTurn = ActionCreators.gameEvent({
-    type: 'endTurn',
-  });
+  const endTurn = ActionCreators.gameEvent('endTurn');
+
   store.dispatch(endTurn);
   expect(mockSocket.emit).toHaveBeenCalled();
   mockSocket.emit.mockReset();
 
-  store.dispatch(ActionCreators.makeMove({
-    type: 'unknown',
-  }));
+  store.dispatch(ActionCreators.makeMove());
   expect(mockSocket.emit).toHaveBeenCalled();
   mockSocket.emit.mockReset();
 

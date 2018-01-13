@@ -20,10 +20,10 @@ Enzyme.configure({ adapter: new Adapter() });
 
 test('GameLog', () => {
   const log = [
-    makeMove({ type: 'moveA' }),
-    gameEvent({ type: 'endTurn' }),
-    makeMove({ type: 'moveB' }),
-    gameEvent({ type: 'endTurn' }),
+    makeMove('moveA'),
+    gameEvent('endTurn'),
+    makeMove('moveB'),
+    gameEvent('endTurn'),
   ];
   const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
   const turns = gamelog.find('.id').map(div => div.text());
@@ -43,29 +43,12 @@ test('GameLog rewind', () => {
   const reducer = createGameReducer({game});
   const store = createStore(reducer);
 
-  store.dispatch(makeMove({
-    type: 'A',
-    args: [1],
-  }));
-
-  store.dispatch(gameEvent({
-    type: 'endTurn',
-  }));
-
+  store.dispatch(makeMove('A', [1]));
+  store.dispatch(gameEvent('endTurn'));
   // Also ends turn automatically.
-  store.dispatch(makeMove({
-    type: 'A',
-    args: [42],
-  }));
-
-  store.dispatch(makeMove({
-    type: 'A',
-    args: [2],
-  }));
-
-  store.dispatch(gameEvent({
-    type: 'endTurn',
-  }));
+  store.dispatch(makeMove('A', [42]));
+  store.dispatch(makeMove('A', [2]));
+  store.dispatch(gameEvent('endTurn'));
 
   const root = Enzyme.mount(
       <Provider store={store}>

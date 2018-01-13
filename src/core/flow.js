@@ -517,11 +517,7 @@ export function createEventDispatchers(eventNames, store, playerID) {
   let dispatchers = {};
   for (const name of eventNames) {
     dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.gameEvent({
-        type: name,
-        args,
-        playerID
-      }));
+      store.dispatch(ActionCreators.gameEvent(name, args, playerID));
     };
   }
   return dispatchers;

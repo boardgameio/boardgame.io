@@ -11,13 +11,13 @@ import * as Actions from './action-types';
 /**
  * Generate a move to be dispatched to the game move reducer.
  *
- * @param {object} move - The move to dispatch.
- * @param {string} move.type - The move type.
- * @param {Array}  move.args - Additional arguments.
+ * @param {string} type - The move type.
+ * @param {Array}  args - Additional arguments.
+ * @param {string}  playerID - The ID of the player making this action.
  */
-export const makeMove = (move) => ({
+export const makeMove = (type, args, playerID) => ({
   type: Actions.MAKE_MOVE,
-  move,
+  payload: { type, args, playerID },
 });
 
 /**
@@ -28,9 +28,9 @@ export const makeMove = (move) => ({
  * @param {Array}  e.args - Additional arguments.
  * @param {string}  playerID - The ID of the player making this action.
  */
-export const gameEvent = (e, playerID) => ({
+export const gameEvent = (type, args, playerID) => ({
   type: Actions.GAME_EVENT,
-  e: { ...e, playerID },
+  payload: { type, args, playerID },
 });
 
 /**
