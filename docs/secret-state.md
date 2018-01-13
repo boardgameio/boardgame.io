@@ -39,3 +39,44 @@ ReactDOM.render(<App gameID="gameid" player="1" />, document.getElementById('roo
 From now on, this client will see state that is customized
 for `player "1"`, which is calculated using the `playerView`
 function above.
+
+#### PlayerView.STRIP_SECRETS
+
+The framework comes bundled with an implementation of `playerView`
+that does the following:
+- It removes a key named `secret` from `G`.
+- If `G` contains a `players` object, it removes all keys except
+  for one that matches `playerID`.
+
+```
+G: {
+  secret: { ... },
+
+  players: {
+    '0': { ... },
+    '1': { ... },
+    '2': { ... },
+  }
+}
+```
+
+becomes the following for player `1`:
+
+```
+G: {
+  players: {
+    '1': { ... },
+  }
+}
+```
+
+Usage:
+
+```js
+import { Game, PlayerView } from 'boardgame.io/core';
+
+const App = Game({
+  ...
+  playerView: PlayerView.STRIP_SECRETS
+});
+```
