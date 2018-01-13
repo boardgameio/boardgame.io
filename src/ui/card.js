@@ -8,12 +8,13 @@
 
 import React from "react";
 import PropTypes from "prop-types";
-import logo from "../../docs/logo.svg";
+import Logo from "./logo";
 import "./card.css";
 
 export class Card extends React.Component {
   static propTypes = {
     card: PropTypes.node,
+    className: PropTypes.any, // feelsbad
     flipped: PropTypes.bool,
     onHover: PropTypes.func,
     onClick: PropTypes.func,
@@ -21,6 +22,7 @@ export class Card extends React.Component {
   };
 
   static defaultProps = {
+    className: "",
     flipped: false
   };
 
@@ -37,13 +39,15 @@ export class Card extends React.Component {
   };
 
   renderCardFront() {
-    return <div>{this.props.card || "Card"}</div>;
+    return <div className="bgio-card__front">{this.props.card || "CARD"}</div>;
   }
 
   renderCardBack() {
     return (
       <div className="bgio-card__back">
-        <img className="bgio-card__back__logo" src={logo} />
+        <div className="bgio-card__back__logo">
+          <Logo />
+        </div>
       </div>
     );
   }

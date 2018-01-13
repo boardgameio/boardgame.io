@@ -43,24 +43,21 @@ export class Deck extends React.Component {
         onMouseOver={this.onHover}
         onClick={this.onClick}
       >
-        {this.props.cards.map((card, i) => {
-          console.log(card, i);
-          return (
-            <Card
-              key={i}
-              onClick={() => ({})}
-              onHover={() => ({})}
-              //   card={card}
-              className={i > 0 && "no-hover"}
-              flipped={i === 0 && this.props.flipped} // Only the top card should ever be flipped
-              style={{
-                position: i ? "absolute" : "inherit",
-                left: i * 2,
-                zIndex: -i
-              }}
-            />
-          );
-        })}
+        {this.props.cards.map((card, i) => (
+          <Card
+            key={i}
+            onClick={() => ({})}
+            onHover={() => ({})}
+            card={card}
+            className={i > 0 && "no-hover"}
+            flipped={i === 0 && this.props.flipped} // Only the top card should ever be flipped
+            style={{
+              position: i ? "absolute" : "inherit",
+              left: i * 3,
+              zIndex: -i
+            }}
+          />
+        ))}
       </div>
     );
   }

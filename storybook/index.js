@@ -48,21 +48,8 @@ class DeckStory extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      flipped: false
-    };
-  }
-
-  onClick = () => {
-    this.setState({
-      flipped: !this.state.flipped
-    });
-    // TODO: storybook action isn't working here?
-    action("onClick");
-  };
-
-  render() {
-    const suits = ["spade", "diamond", "club", "heart"];
+    const deck = [];
+    const suits = ["♠", "♦", "♣", "♥"];
     const values = [
       "A",
       "2",
@@ -78,13 +65,101 @@ class DeckStory extends React.Component {
       "Q",
       "K"
     ];
+
+    suits.forEach(suit => {
+      values.forEach(value => {
+        deck.push({
+          suit,
+          value
+        });
+      });
+    });
+
+    this.state = {
+      deck: deck,
+      flipped: false
+    };
+  }
+
+  onClick = () => {
+    this.setState({
+      flipped: !this.state.flipped
+    });
+    // TODO: storybook action isn't working here?
+    action("onClick");
+  };
+
+  renderCard = card => (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        color: card.suit === "♥" || card.suit === "♦" ? "red" : "black"
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          display: "flex",
+          top: "8px",
+          left: "8px"
+        }}
+      >
+        <div style={{ position: "relative" }}>{card.value}</div>
+        <div style={{ position: "relative" }}>{card.suit}</div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          fontSize: "64px"
+        }}
+      >
+        {card.value}
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          display: "flex",
+          bottom: "8px",
+          right: "8px",
+          transform: "rotate(180deg)"
+        }}
+      >
+        <div style={{ position: "relative" }}>{card.value}</div>
+        <div style={{ position: "relative" }}>{card.suit}</div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          display: "flex"
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            fontSize: "128px",
+            color: "#eee",
+            zIndex: "-1"
+          }}
+        >
+          {card.suit}
+        </div>
+      </div>
+    </div>
+  );
+
+  render() {
     return (
       <div style={{ padding: "50px" }}>
         <Deck
           flipped={this.state.flipped}
           onHover={action("onHover")}
           onClick={this.onClick}
-          cards={values}
+          cards={this.state.deck.map(this.renderCard)}
         />
       </div>
     );
