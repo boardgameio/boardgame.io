@@ -35,26 +35,39 @@ class Board extends React.Component {
 
   render() {
     return (
-      <div className="Board">
-        <hr />
+      <div className="liars-dice">
+        <section>
         {
           Object.keys(this.props.G.players).map(playerID =>
-            <div key={playerID}>Dice: {JSON.stringify(this.props.G.players[playerID])}</div>
+            <div key={playerID}>Dice: {
+              JSON.stringify(this.props.G.players[playerID])
+            }
+            </div>
           )
         }
-        <hr />
-        <input type="number" value={this.state.bidNumber} onChange={this.handleChangeNumber} min="1" max="15" className="Number" /> dice of value
+        </section>
+
+        <section>
+
+        <div>
+        how many
+        <input type="number" value={this.state.bidNumber} onChange={this.handleChangeNumber} min="1" max="15" className="Number" />
+        </div>
+
+        <div>
+        dice value
         <input type="number" value={this.state.bidValue} onChange={this.handleChangeValue} min="1" max="6" className="Value" />
+        </div>
+
         <button>Bid</button>
-        <div>or</div>
         <button>Challenge</button>
-        <hr />
-        {this.props.playerID && <div>Player: {this.props.playerID}</div>}
-        <hr />
-        <pre style={{ textAlign: 'left' }}>
+        </section>
+
+        <section>
+        <pre>
         { JSON.stringify(this.props.G, null, 2) }
         </pre>
-        <hr />
+        </section>
       </div>
     );
   }
