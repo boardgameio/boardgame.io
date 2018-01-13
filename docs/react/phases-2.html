@@ -60,13 +60,13 @@ class Board extends React.Component {
   drawCard = () => {
     if (this.props.ctx.phase != 'draw phase') return;
     this.props.moves.drawCard();
-    this.props.game.endTurn();
+    this.props.events.endTurn();
   }
 
   playCard = () => {
     if (this.props.ctx.phase != 'play phase') return;
     this.props.moves.playCard();
-    this.props.game.endTurn();
+    this.props.events.endTurn();
   }
 
   render() {

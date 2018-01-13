@@ -77,7 +77,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
       this.moveAPI = createMoveDispatchers(
           game.moveNames, this.store, props.playerID);
-      this.gameAPI = createEventDispatchers(
+      this.eventAPI = createEventDispatchers(
           game.flow.eventNames, this.store, props.playerID);
       this.createBoard();
       this.createDebugUI();
@@ -114,7 +114,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
 
         this._board = React.createElement(Board, {
           moves: this.moveAPI,
-          game: this.gameAPI,
+          events: this.eventAPI,
           gameID: this.props.gameID,
           playerID: this.props.playerID,
         });
@@ -128,7 +128,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
                   ActionCreators)(Debug),
           {
             moves: this.moveAPI,
-            game: this.gameAPI,
+            events: this.eventAPI,
             gameID: this.props.gameID,
             playerID: this.props.playerID,
           }
@@ -150,7 +150,7 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
       this.createDebugUI();
       this.moveAPI = createMoveDispatchers(
           game.moveNames, this.store, this.props.playerID);
-      this.gameAPI = createEventDispatchers(
+      this.eventAPI = createEventDispatchers(
           game.flow.eventNames, this.store, this.props.playerID);
     }
 

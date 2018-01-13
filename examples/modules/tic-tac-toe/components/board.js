@@ -15,7 +15,6 @@ class Board extends React.Component {
     G:         PropTypes.any.isRequired,
     ctx:       PropTypes.any.isRequired,
     moves:     PropTypes.any.isRequired,
-    game:      PropTypes.any.isRequired,
     playerID:  PropTypes.string,
     isActive:  PropTypes.bool
   }

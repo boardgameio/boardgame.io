@@ -41,19 +41,19 @@ class Board extends React.Component {
     G: PropTypes.any.isRequired,
     ctx: PropTypes.any.isRequired,
     moves: PropTypes.any,
-    game: PropTypes.any
+    events: PropTypes.any
   }
 
   takeCard = () => {
     if (this.props.ctx.phase != 'take phase') return;
     this.props.moves.takeCard();
-    this.props.game.endTurn();
+    this.props.events.endTurn();
   }
 
   playCard = () => {
     if (this.props.ctx.phase != 'play phase') return;
     this.props.moves.playCard();
-    this.props.game.endTurn();
+    this.props.events.endTurn();
   }
 
   render() {

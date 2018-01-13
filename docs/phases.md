@@ -79,7 +79,7 @@ const game = Game({
 });
 ```
 
-!> Phases can also be terminated manually by calling `props.game.endPhase()` from the
+!> Phases can also be terminated manually by calling `props.events.endPhase()` from the
    board React component (in response to a user action like clicking a button, for example).
 
 Watch our game in action now with phases. Notice that you can only draw cards in the first
