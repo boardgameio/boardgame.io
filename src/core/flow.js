@@ -29,30 +29,15 @@ import { TurnOrder } from './turn-order';
  *                                if a particular type of move is invalid
  *                                at this point in the game.
  *                                (G, ctx, moveName) => boolean
- * @param {...object} endTurnIf - The turn automatically ends if this function
- *                                returns true (checked after each move).
- *                                (G, ctx) => boolean
- * @param {...object} endGameIf - The game automatically ends if this function
- *                                returns anything (checked after each move).
- *                                The return value is available at `ctx.gameover`.
- *                                (G, ctx) => {}
- * @param {...object} triggers - An array of objects with the format:
- *                               {
- *                                 condition: (G, ctx) => boolean,
- *                                 action: (G, ctx) => action,
- *                               }
- *                               Whenever `condition` is true the `action` is run.
- *                               Triggers are processed one after the other in the
- *                               order they are defined at the end of each move.
+ * @param {...object} processMove - A function that's called whenever a move is made.
+ *                                  (state, action, dispatch) => state.
  */
-export function Flow({ ctx, events, init, validator, endTurnIf, endGameIf, triggers }) {
-  if (!ctx)       ctx = () => ({});
-  if (!events)    events = {};
-  if (!init)      init = state => state;
-  if (!validator) validator = () => true;
-  if (!endTurnIf) endTurnIf = () => false;
-  if (!endGameIf) endGameIf = () => undefined;
-  if (!triggers)  triggers = [];
+export function Flow({ ctx, events, init, validator, processMove }) {
+  if (!ctx)         ctx = () => ({});
+  if (!events)      events = {};
+  if (!init)        init = state => state;
+  if (!validator)   validator = () => true;
+  if (!processMove) processMove = state => state;
 
   const dispatch = (state, action) => {
     if (events.hasOwnProperty(action.type)) {
@@ -80,33 +65,12 @@ export function Flow({ ctx, events, init, validator, endTurnIf, endGameIf, trigg
     eventNames: Object.getOwnPropertyNames(events),
 
     processMove: (state, action) => {
-      // Update currentPlayerMoves.
-      const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
-      state = { ...state, ctx: { ...state.ctx, currentPlayerMoves }};
-
-      // Process triggers.
-      for (const trigger of triggers) {
-        if (trigger.condition(state.G, state.ctx)) {
-          const G = trigger.action(state.G, state.ctx);
-          state = { ...state, G };
-        }
-      }
-
-      // End the game automatically if endGameIf is true.
-      const gameover = endGameIf(state.G, state.ctx);
-      if (gameover !== undefined) {
-        return { ...state, ctx: { ...state.ctx, gameover } };
-      }
-
-      // End the turn automatically if endTurnIf is true.
-      if (endTurnIf(state.G, state.ctx)) {
-        return dispatch(state, { type: 'endTurn', playerID: action.move.playerID });
-      }
-
-      return state;
+      return processMove(state, action, dispatch);
     },
 
-    processGameEvent: (state, action) => dispatch(state, action),
+    processGameEvent: (state, action) => {
+      return dispatch(state, action);
+    }
   };
 }
 
@@ -142,6 +106,7 @@ export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, trig
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
   if (!onTurnEnd) onTurnEnd = G => G;
+  if (!triggers)  triggers = [];
 
   const endTurnIfWrap = (G, ctx) => {
     if (movesPerTurn && ctx.currentPlayerMoves >= movesPerTurn) {
@@ -156,7 +121,7 @@ export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, trig
    * Ends the current turn.
    * Passes the turn to the next turn in a round-robin fashion.
    */
-  const endTurn = (state) => {
+  function endTurn(state) {
     const G = onTurnEnd(state.G, state.ctx);
     state = { ...state, G };
 
@@ -175,7 +140,34 @@ export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, trig
       ...state,
       ctx: { ...state.ctx, currentPlayer, turn, currentPlayerMoves: 0 },
     };
-  };
+  }
+
+  function processMove(state, action, dispatch) {
+    // Update currentPlayerMoves.
+    const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
+    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves }};
+
+    // Process triggers.
+    for (const trigger of triggers) {
+      if (trigger.condition(state.G, state.ctx)) {
+        const G = trigger.action(state.G, state.ctx);
+        state = { ...state, G };
+      }
+    }
+
+    // End the game automatically if endGameIf is true.
+    const gameover = endGameIf(state.G, state.ctx);
+    if (gameover !== undefined) {
+      return { ...state, ctx: { ...state.ctx, gameover } };
+    }
+
+    // End the turn automatically if endTurnIf is true.
+    if (endTurnIfWrap(state.G, state.ctx)) {
+      state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
+    }
+
+    return state;
+  }
 
   return Flow({
     ctx: numPlayers => ({
@@ -185,9 +177,7 @@ export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, trig
       currentPlayerMoves: 0,
     }),
     events: { endTurn },
-    endTurnIf: endTurnIfWrap,
-    endGameIf,
-    triggers,
+    processMove,
   });
 }
 
@@ -364,13 +354,18 @@ export function FlowWithPhases({
    * The next phase is chosen in a round-robin fashion, with the
    * option to override that by passing nextPhase.
    */
-  const endPhase = function(state, nextPhase) {
+  function endPhase(state, nextPhase) {
     let G = state.G;
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
     const conf = phaseMap[ctx.phase];
     G = conf.onPhaseEnd(G, ctx);
+
+    const gameover = endGameIfWrap(G, ctx);
+    if (gameover !== undefined) {
+      return { ...state, G, ctx: { ...ctx, gameover } };
+    }
 
     // Update the phase.
     if (nextPhase in phaseMap) {
@@ -384,7 +379,7 @@ export function FlowWithPhases({
 
     // Run any setup code for the new phase.
     return startPhase({ ...state, G, ctx }, phaseMap[ctx.phase]);
-  };
+  }
 
   /**
    * endTurn (game event)
@@ -392,7 +387,7 @@ export function FlowWithPhases({
    * Ends the current turn.
    * Passes the turn to the next turn in a round-robin fashion.
    */
-  const endTurn = function(state) {
+  function endTurn(state) {
     let G = state.G;
     let ctx = state.ctx;
 
@@ -421,14 +416,14 @@ export function FlowWithPhases({
     }
 
     return { ...state, G, ctx };
-  };
+  }
 
   /**
    * pass (game event)
    *
    * The current player passes (and ends the turn).
    */
-  const pass = function(state) {
+  function pass(state) {
     let G = state.G;
     let ctx = state.ctx;
     const conf = phaseMap[state.ctx.phase];
@@ -448,7 +443,41 @@ export function FlowWithPhases({
     }
 
     return endTurn({ ...state, G, ctx });
-  };
+  }
+
+  function processMove(state, action, dispatch) {
+    // Update currentPlayerMoves.
+    const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
+    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves }};
+
+    // Process triggers.
+    for (const trigger of triggers) {
+      if (trigger.condition(state.G, state.ctx)) {
+        const G = trigger.action(state.G, state.ctx);
+        state = { ...state, G };
+      }
+    }
+
+    // End the game automatically if endGameIf is true.
+    const gameover = endGameIfWrap(state.G, state.ctx);
+    if (gameover !== undefined) {
+      return { ...state, ctx: { ...state.ctx, gameover } };
+    }
+
+    // End the phase automatically if endPhaseIf is true.
+    const conf = phaseMap[state.ctx.phase];
+    const end = conf.endPhaseIf(state.G, state.ctx);
+    if (end) {
+      state = dispatch(state, { type: 'endPhase', args: [end], playerID: action.playerID });
+    }
+
+    // End the turn automatically if endTurnIf is true.
+    if (endTurnIfWrap(state.G, state.ctx)) {
+      state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
+    }
+
+    return state;
+  }
 
   const validator = (G, ctx, move) => {
     const conf = phaseMap[ctx.phase];
@@ -472,9 +501,7 @@ export function FlowWithPhases({
     init: state => startPhase(state, phases[0]),
     events: { endTurn, endPhase, pass },
     validator,
-    endTurnIf: endTurnIfWrap,
-    endGameIf: endGameIfWrap,
-    triggers,
+    processMove,
   });
 }
 

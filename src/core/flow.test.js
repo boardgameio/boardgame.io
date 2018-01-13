@@ -271,16 +271,27 @@ test('onPhaseBegin / onPhaseEnd', () => {
 test('endPhaseIf', () => {
   const flow = FlowWithPhases({
     phases: [
-      { name: 'A', endPhaseIf: (G, ctx) => (ctx.turn > 1) },
+      { name: 'A', endPhaseIf: G => G.end },
       { name: 'B' },
     ],
   });
 
-  let state = { ctx: flow.ctx(2) };
-  state = flow.processGameEvent(state, { type: 'endTurn' });
-  expect(state.ctx.phase).toBe('A');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
-  expect(state.ctx.phase).toBe('B');
+  let state = { G: { end: true}, ctx: flow.ctx(2) };
+
+  {
+    const t = flow.processGameEvent(state, { type: 'endPhase' });
+    expect(t.ctx.phase).toBe('B');
+  }
+
+  {
+    const t = flow.processGameEvent(state, { type: 'endTurn' });
+    expect(t.ctx.phase).toBe('B');
+  }
+
+  {
+    const t = flow.processMove(state, { type: 'move' });
+    expect(t.ctx.phase).toBe('B');
+  }
 });
 
 test('endGameIf', () => {
@@ -292,8 +303,16 @@ test('endGameIf', () => {
     expect(state.ctx.gameover).toBe(undefined);
 
     state.G.win = 'A';
-    state = flow.processGameEvent(state, { type: 'endTurn' });
-    expect(state.ctx.gameover).toBe('A');
+
+    {
+      const t = flow.processGameEvent(state, { type: 'endTurn' });
+      expect(t.ctx.gameover).toBe('A');
+    }
+
+    {
+      const t = flow.processMove(state, { type: 'move' });
+      expect(t.ctx.gameover).toBe('A');
+    }
   }
 
   {
@@ -304,8 +323,21 @@ test('endGameIf', () => {
     expect(state.ctx.gameover).toBe(undefined);
 
     state.G.win = 'A';
-    state = flow.processGameEvent(state, { type: 'endTurn' });
-    expect(state.ctx.gameover).toBe('A');
+
+    {
+      const t = flow.processGameEvent(state, { type: 'endTurn' });
+      expect(t.ctx.gameover).toBe('A');
+    }
+
+    {
+      const t = flow.processGameEvent(state, { type: 'endPhase' });
+      expect(t.ctx.gameover).toBe('A');
+    }
+
+    {
+      const t = flow.processMove(state, { type: 'move' });
+      expect(t.ctx.gameover).toBe('A');
+    }
   }
 
   {
