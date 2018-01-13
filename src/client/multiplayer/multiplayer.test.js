@@ -30,7 +30,7 @@ test('update gameID / playerID', () => {
   const m = new Multiplayer(null);
 
   m.updateGameID('test');
-  expect(m.gameID).toBe('test');
+  expect(m.gameID).toBe('default:test');
 
   m.updatePlayerID('player');
   expect(m.playerID).toBe('player');
@@ -53,20 +53,20 @@ test('multiplayer', () => {
   mockSocket.emit = jest.fn();
   store.dispatch(action);
   expect(mockSocket.emit).lastCalledWith(
-      'action', action, 0, 'default', null);
+      'action', action, 0, 'default:default', null);
 
   // sync restores state.
   const restored = { restore: true };
   expect(store.getState()).not.toEqual(restored);
   mockSocket.receive('sync', 'unknown gameID', restored);
   expect(store.getState()).not.toEqual(restored);
-  mockSocket.receive('sync', 'default', restored);
+  mockSocket.receive('sync', 'default:default', restored);
   expect(store.getState()).toEqual(restored);
 
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
   m.updateGameID('id');
-  expect(mockSocket.emit).lastCalledWith('sync', 'id', null);
+  expect(mockSocket.emit).lastCalledWith('sync', 'default:id', null, 2);
 });
 
 test('move whitelist', () => {
