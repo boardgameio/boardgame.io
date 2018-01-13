@@ -23,9 +23,8 @@ export const makeMove = (type, args, playerID) => ({
 /**
  * Generate a game event to be dispatched to the flow reducer.
  *
- * @param {object} e - The event to dispatch.
- * @param {string} e.type - The event type.
- * @param {Array}  e.args - Additional arguments.
+ * @param {string} type - The event type.
+ * @param {Array}  args - Additional arguments.
  * @param {string}  playerID - The ID of the player making this action.
  */
 export const gameEvent = (type, args, playerID) => ({
