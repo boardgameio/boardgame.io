@@ -23,16 +23,13 @@ class Board extends React.Component {
   constructor() {
     super();
     this.state = { bidNumber: 1, bidValue: 1 };
-    this.handleChangeNumber = this.handleChangeNumber.bind(this);
-    this.handleChangeValue = this.handleChangeValue.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChangeNumber(e) {
+  handleChangeNumber = e => {
     this.setState({ bidNumber: e.target.value });
   }
 
-  handleChangeValue(e) {
+  handleChangeValue = e => {
     this.setState({ bidValue: e.target.value });
   }
 
@@ -48,7 +45,7 @@ class Board extends React.Component {
         <hr />
         <input type="number" value={this.state.bidNumber} onChange={this.handleChangeNumber} min="1" max="15" className="Number" /> dice of value
         <input type="number" value={this.state.bidValue} onChange={this.handleChangeValue} min="1" max="6" className="Value" />
-        <button onClick={this.handleSubmit}>Bid</button>
+        <button>Bid</button>
         <div>or</div>
         <button>Challenge</button>
         <hr />
