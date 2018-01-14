@@ -10,7 +10,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Card } from '../src/ui/card';
-import { HexGrid } from '../src/ui/hex';
+import { HexGrid, Hex } from '../src/ui/hex';
 
 storiesOf('Card', module)
   .add('basic', () => (
@@ -21,8 +21,15 @@ storiesOf('Card', module)
   ));
 
 storiesOf('HexGrid', module)
-  .add('HexGrid', () => (
+  .add('outline', () => (
     <div style={{ padding: '50px' }} >
     <HexGrid radius={5} />
+    </div>
+  ))
+  .add('no outline', () => (
+    <div style={{ padding: '50px' }} >
+    <HexGrid radius={5} outline={false}>
+      <Hex x={0} y={0} z={0}/>
+    </HexGrid>
     </div>
   ));

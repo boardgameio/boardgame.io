@@ -25,3 +25,9 @@ test('click', () => {
   hex.simulate('click');
   expect(hex.html()).toContain('fill="#aaa"');
 });
+
+test('outline', () => {
+  const grid = Enzyme.mount(<HexGrid radius={5} outline={false} />);
+  const hex = grid.find('polygon');
+  expect(hex.length).toBe(0);
+});
