@@ -29,7 +29,7 @@ networking or backend code.
 * **Triggers**: Automatic actions when certain game conditions are met.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **UI toolkit**: React components for common game elements (cards etc.).
+* **UI toolkit**: React components for hex grids, cards, tokens etc.
 
 ## Usage
 
