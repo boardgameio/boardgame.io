@@ -20,20 +20,18 @@ import PropTypes from 'prop-types';
  * Props:
  *   radius     - The number of levels around the central hex.
  *   style      - CSS style of the HTML element.
- *   onClick    - (x, y, z) => {}
- *                Called when a hex is clicked.
  *
  * Usage:
  *
  * <HexGrid radius={5}>
- *   <Token x={0} y={0} z={0}/>
- * </Grid>
+ *   <Hex x={0} y={0} z={0}/>
+ * </HexGrid>
  */
 export class HexGrid extends React.Component {
   static propTypes = {
     radius: PropTypes.number.isRequired,
+    outline: PropTypes.bool,
     style: PropTypes.object,
-    onClick: PropTypes.func,
     hexSize: PropTypes.number,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.element),
@@ -43,10 +41,15 @@ export class HexGrid extends React.Component {
 
   static defaultProps = {
     radius: 5,
-    hexSize: 5
+    outline: true,
+    hexSize: 1
   }
 
-  _getHexes() {
+  _getOutline() {
+    if (!this.props.outline) {
+      return null;
+    }
+
     let hexes = [];
     const r = this.props.radius;
     for (let x = -r; x <= r; x++) {
@@ -67,7 +70,7 @@ export class HexGrid extends React.Component {
     return (
       <svg viewBox={-t + ' ' + -t + ' ' + 2 * t + ' ' + 2 * t}
            style={this.props.style}>
-        <g>{this._getHexes()}</g>
+        <g>{this._getOutline()}</g>
         {this.props.children}
       </svg>);
   }
@@ -160,7 +163,7 @@ export class Hex extends React.Component {
   }
 
   onClick = () => {
-    this.setState({ highlight: true });
+    this.setState(old => ({ highlight: !old.highlight }));
   }
 
   render() {
@@ -176,7 +179,7 @@ export class Hex extends React.Component {
                  onClick={this.onClick}
                  fill={fill}
                  stroke="#aaa"
-                 strokeWidth={.1}/>
+                 strokeWidth={.01}/>
       </g>
     );
   }
