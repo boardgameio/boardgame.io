@@ -13,7 +13,9 @@ import PropTypes from 'prop-types';
  * HexGrid
  *
  * Component to display a hex grid.
- * Inspired by https://www.redblobgames.com/grids/hexagons/.
+ * Reference: https://www.redblobgames.com/grids/hexagons/.
+ *
+ * We use cube co-ordinates (see reference).
  *
  * Props:
  *   radius     - The number of levels around the central hex.
