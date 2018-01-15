@@ -4,15 +4,18 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
+    "dev":
+      "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
     "docsify": "docsify serve docs",
     "examples": "npm run dev",
-    "precommit": "npm run lint",
+    "precommit": "lint-staged",
     "prepush": "npm run test:coverage",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
-    "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
+    "test:coverage":
+      "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
+    "test:coveralls":
+      "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
     "storybook": "start-storybook -p 3000 -c storybook",
     "storybook:build": "build-storybook -c storybook -o docs/storybook",
@@ -35,11 +38,7 @@
     "client.js",
     "core.js"
   ],
-  "keywords": [
-    "react",
-    "redux",
-    "boardgames"
-  ],
+  "keywords": ["react", "redux", "boardgames"],
   "engines": {
     "node": ">=7.6.0",
     "npm": ">=5.4"
@@ -80,8 +79,10 @@
     "jest": "^21.2.1",
     "koa-helmet": "^3.2.0",
     "koa-webpack": "^1.0.0",
+    "lint-staged": "^6.0.0",
     "node-sass": "^4.5.3",
     "open-browser-webpack-plugin": "0.0.5",
+    "prettier": "1.10.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",
@@ -132,16 +133,8 @@
       "boardgame.io/server": "<rootDir>/packages/server",
       "\\.(svg)$": "<rootDir>/.empty_module.js"
     },
-    "setupFiles": [
-      "raf/polyfill"
-    ],
-    "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io)/)"
-    ],
-    "testPathIgnorePatterns": [
-      "storybook/",
-      "/node_modules/",
-      ".npm/"
-    ]
+    "setupFiles": ["raf/polyfill"],
+    "transformIgnorePatterns": ["node_modules/(?!(boardgame.io)/)"],
+    "testPathIgnorePatterns": ["storybook/", "/node_modules/", ".npm/"]
   }
 }
