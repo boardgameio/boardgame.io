@@ -16,4 +16,6 @@ storiesOf("Card", module).add("Flippable Card", () => <FlippableStory />);
 storiesOf("Card", module).add("Standard Playing Card", () => (
   <PlayingCardStory />
 ));
-storiesOf("Deck", module).add("basic", () => <DeckStory />);
+storiesOf("Deck", module).add("Standard Deck of Playing Cards", () => (
+  <DeckStory />
+));
