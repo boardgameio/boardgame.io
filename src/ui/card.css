@@ -30,12 +30,6 @@
   transform: scale(1.2);
 }
 
-.bgio-card.flip {
-  transition: all 0.6s;
-  transform: rotateY(180deg);
-  transform-style: preserve-3d;
-}
-
 .bgio-card__front,
 .bgio-card__back {
   width: 100%;
