@@ -17,6 +17,8 @@
     "test:coveralls":
       "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
+    "prettier":
+      "prettier --write \"{examples,packages,scripts,src,storybook}/**/*.{js,json,css,md}\"",
     "storybook": "start-storybook -p 3000 -c storybook",
     "storybook:build": "build-storybook -c storybook -o docs/storybook",
     "clean": "node ./scripts/clean.js",
