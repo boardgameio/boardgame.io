@@ -10,55 +10,30 @@ import React from "react";
 import PropTypes from "prop-types";
 import "./deck.css";
 
-import { Card } from "./card";
+const Deck = ({ cards, ...rest }) => (
+  <div className="bgio-deck" {...rest}>
+    {cards.map((card, i) =>
+      React.cloneElement(card, {
+        key: i,
+        className: i > 0 ? "no-hover" : "",
+        isFaceUp: i === 0, // Only the top card should ever be face up
+        style: {
+          position: i ? "absolute" : "inherit",
+          left: i * 3,
+          zIndex: -i
+        }
+      })
+    )}
+  </div>
+);
 
-export class Deck extends React.Component {
-  static propTypes = {
-    flipped: PropTypes.bool,
-    cards: PropTypes.array,
-    onHover: PropTypes.func,
-    onClick: PropTypes.func
-  };
+Deck.propTypes = {
+  isFaceUp: PropTypes.bool,
+  cards: PropTypes.arrayOf(PropTypes.node)
+};
 
-  static defaultProps = {
-    cards: []
-  };
+Deck.defaultProps = {
+  cards: []
+};
 
-  constructor(props) {
-    super(props);
-  }
-
-  onClick = () => {
-    this.props.onClick();
-  };
-
-  onHover = () => {
-    this.props.onHover();
-  };
-
-  render() {
-    return (
-      <div
-        className="bgio-deck"
-        onMouseOver={this.onHover}
-        onClick={this.onClick}
-      >
-        {this.props.cards.map((card, i) => (
-          <Card
-            key={i}
-            onClick={() => ({})}
-            onHover={() => ({})}
-            card={card}
-            className={i > 0 && "no-hover"}
-            flipped={i === 0 && this.props.flipped} // Only the top card should ever be flipped
-            style={{
-              position: i ? "absolute" : "inherit",
-              left: i * 3,
-              zIndex: -i
-            }}
-          />
-        ))}
-      </div>
-    );
-  }
-}
+export { Deck };

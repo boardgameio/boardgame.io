@@ -11,57 +11,28 @@ import PropTypes from "prop-types";
 import Logo from "./logo";
 import "./card.css";
 
-export class Card extends React.Component {
-  static propTypes = {
-    card: PropTypes.node,
-    className: PropTypes.any, // feelsbad
-    flipped: PropTypes.bool,
-    onHover: PropTypes.func,
-    onClick: PropTypes.func,
-    style: PropTypes.object
-  };
+const Card = ({ back, className, front, isFaceUp, ...rest }) => (
+  <div className={"bgio-card " + className} {...rest}>
+    {isFaceUp ? front : back}
+  </div>
+);
 
-  static defaultProps = {
-    className: "",
-    flipped: false
-  };
+Card.propTypes = {
+  back: PropTypes.node,
+  className: PropTypes.string,
+  front: PropTypes.node,
+  isFaceUp: PropTypes.bool
+};
 
-  constructor(props) {
-    super(props);
-  }
+Card.defaultProps = {
+  back: (
+    <div className="bgio-card__back">
+      <Logo width="48" />
+    </div>
+  ),
+  className: "",
+  front: <div className="bgio-card__front">Card</div>,
+  isFaceUp: false
+};
 
-  onClick = () => {
-    this.props.onClick();
-  };
-
-  onHover = () => {
-    this.props.onHover();
-  };
-
-  renderCardFront() {
-    return <div className="bgio-card__front">{this.props.card || "CARD"}</div>;
-  }
-
-  renderCardBack() {
-    return (
-      <div className="bgio-card__back">
-        <div className="bgio-card__back__logo">
-          <Logo />
-        </div>
-      </div>
-    );
-  }
-
-  render() {
-    return (
-      <div
-        className={"bgio-card" + " " + this.props.className}
-        onMouseOver={this.onHover}
-        onClick={this.onClick}
-        style={this.props.style}
-      >
-        {this.props.flipped ? this.renderCardFront() : this.renderCardBack()}
-      </div>
-    );
-  }
-}
+export { Card };
