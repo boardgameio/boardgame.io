@@ -9,5 +9,6 @@
 import Grid from '../src/ui/grid.js';
 import Token from '../src/ui/token.js';
 import { Card } from '../src/ui/token.js';
+import { HexGrid, Hex } from '../src/ui/hex.js';
 
-export { Grid, Token, Card };
+export { Grid, Token, Card, HexGrid, Hex };

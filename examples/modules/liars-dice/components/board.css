@@ -1,0 +1,32 @@
+/*
+ * Copyright 2018 The boardgame.io Authors
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+.liars-dice .number {
+  width: 30px;
+}
+
+.liars-dice .value {
+  width: 30px;
+}
+
+.liars-dice section {
+  text-align: left;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: #eee;
+}
+
+.liars-dice input {
+  width: 40px;
+  height: 20px;
+  line-height: 20px;
+}
+
+button {
+  font-size: small
+}

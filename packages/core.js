@@ -9,6 +9,7 @@
 import Game from '../src/core/game.js';
 import { Flow, SimpleFlow, FlowWithPhases } from '../src/core/flow.js';
 import { TurnOrder } from '../src/core/turn-order.js';
+import { PlayerView } from '../src/core/player-view.js';
 
 export {
   Game,
@@ -16,4 +17,5 @@ export {
   SimpleFlow,
   FlowWithPhases,
   TurnOrder,
+  PlayerView,
 };

@@ -106,7 +106,10 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
             isActive = false;
           }
 
-          return { ...state, isActive };
+          return { ...state,
+            isActive,
+            G: game.playerView(state.G, state.ctx, this.props.playerID)
+          };
         };
 
         const Board =
