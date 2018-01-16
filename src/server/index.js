@@ -12,13 +12,16 @@ const Redux = require('redux');
 import { InMemory } from './db';
 import { createGameReducer } from '../core/reducer';
 
-function Server({ games }) {
+function Server({ games, db }) {
   const app = new Koa();
   const io = new IO();
   app.context.io = io;
   io.attach(app);
 
-  const db = new InMemory();
+  if (db === undefined) {
+    db = new InMemory();
+  }
+
   const clientInfo = new Map();
   const roomInfo = new Map();
 
