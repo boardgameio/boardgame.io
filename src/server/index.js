@@ -60,10 +60,17 @@ function Server({ games, db }) {
           for (const client of roomClients.values()) {
             const playerID = clientInfo.get(client);
 
-            socket.to(client).emit('sync', gameID, {
-              ...state,
-              G: game.playerView(state.G, state.ctx, playerID)
-            });
+            if (client === socket.id) {
+              socket.emit('sync', gameID, {
+                ...state,
+                G: game.playerView(state.G, state.ctx, playerID)
+              });
+            } else {
+              socket.to(client).emit('sync', gameID, {
+                ...state,
+                G: game.playerView(state.G, state.ctx, playerID)
+              });
+            }
           }
 
           db.set(gameID, store);
