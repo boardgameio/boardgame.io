@@ -9,7 +9,7 @@ that are connected to the same game are kept in sync in
 realtime.
 
 The `games` argument takes a list of game implementations
-(each is the return value of [Game](/#/api/Game)).
+(each is the return value of [Game](/api/Game.md)).
 
 ### Arguments
 1. obj(*object*): A config object with the options shown below.
