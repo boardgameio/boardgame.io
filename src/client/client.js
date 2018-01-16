@@ -36,7 +36,11 @@ function Client({game, numPlayers, board, multiplayer, debug}) {
   if (!multiplayer)        multiplayer = false;
   if (debug === undefined) debug = true;
 
-  const GameReducer = createGameReducer({game, numPlayers});
+  const GameReducer = createGameReducer({
+    game,
+    numPlayers,
+    multiplayer,
+  });
 
   /*
    * WrappedBoard

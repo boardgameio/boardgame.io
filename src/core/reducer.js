@@ -16,7 +16,7 @@ import * as ActionCreators from './action-creators';
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
  */
-export function createGameReducer({game, numPlayers}) {
+export function createGameReducer({game, numPlayers, multiplayer}) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -59,6 +59,14 @@ export function createGameReducer({game, numPlayers}) {
   return (state = initial, action) => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
+        // Process game events only on the server.
+        // These events like `endTurn` typically
+        // contain code that may rely on secret state
+        // and cannot be computed on the client.
+        if (multiplayer) {
+          return state;
+        }
+
         const { G, ctx } = game.flow.processGameEvent(
             { G: state.G, ctx: state.ctx }, action.payload);
         const log = [...state.log, action];
@@ -75,6 +83,14 @@ export function createGameReducer({game, numPlayers}) {
         const G = game.processMove(state.G, action.payload, state.ctx);
         const log = [...state.log, action];
         state = { ...state, G, log, _id: state._id + 1 };
+
+        // If we're on the client, just process the move
+        // and no triggers in multiplayer mode.
+        // These will be processed on the server, which
+        // will send back a state update.
+        if (multiplayer) {
+          return state;
+        }
 
         // Allow the flow reducer to process any triggers that happen after moves.
         return game.flow.processMove(state, action);

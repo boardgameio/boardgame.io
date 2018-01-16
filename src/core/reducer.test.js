@@ -88,9 +88,40 @@ test('victory', () => {
 });
 
 test('endTurn', () => {
-  const reducer = createGameReducer({game});
-  const state = reducer(undefined, endTurn());
-  expect(state.ctx.turn).toBe(1);
+  {
+    const reducer = createGameReducer({game});
+    const state = reducer(undefined, endTurn());
+    expect(state.ctx.turn).toBe(1);
+  }
+
+  {
+    const reducer = createGameReducer({game, multiplayer: true});
+    const state = reducer(undefined, endTurn());
+    expect(state.ctx.turn).toBe(0);
+  }
+});
+
+test('light client when multiplayer=true', () => {
+  const game = Game({
+    moves: { 'A': () => ({ win: true }) },
+    flow: { endGameIf: G => G.win },
+  });
+
+  {
+    const reducer = createGameReducer({game});
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.ctx.gameover).toBe(undefined);
+    state = reducer(state, makeMove('A'));
+    expect(state.ctx.gameover).toBe(true);
+  }
+
+  {
+    const reducer = createGameReducer({game, multiplayer: true});
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.ctx.gameover).toBe(undefined);
+    state = reducer(state, makeMove('A'));
+    expect(state.ctx.gameover).toBe(undefined);
+  }
 });
 
 test('numPlayers', () => {
