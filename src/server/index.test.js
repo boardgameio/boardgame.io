@@ -128,7 +128,7 @@ test('action', () => {
 
   // Another broadcasted action.
   io.socket.receive('action', action, 1, 'gameID', '1');
-  expect(io.socket.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.emit).toHaveBeenCalledTimes(2);
 });
 
 test('playerView', () => {
