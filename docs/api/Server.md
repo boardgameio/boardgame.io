@@ -8,8 +8,8 @@ broadcasts updates to those clients so that all browsers
 that are connected to the same game are kept in sync in
 realtime.
 
-Notice that `game` is the same object that you also pass
-to the `Client` call.
+The `games` argument takes a list of game implementations
+(each is the return value of [Game](Game.md)).
 
 ### Arguments
 1. obj(*object*): A config object with the options shown below.
@@ -23,8 +23,7 @@ to the `Client` call.
 const Server = require('boardgame.io/server');
 
 const app = Server({
-  // The return value of Game().
-  game: game,
+  games: [game1, game2, ...],
 
   // Optional, if you want to hook it up to a
   // custom storage backend not supported by
