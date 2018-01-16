@@ -1,7 +1,14 @@
+# v0.16.7
+
+#### Bugfixes
+- [c65580d] Fix bug introduced in af3a7b5.
+
 # v0.16.6
 
 #### Bugfixes
 - [af3a7b5] Only process move reducers (on the client) and nothing else when in multiplayer mode.
+
+Buggy fix (fixed in 0.16.7).
 
 #### Features
 - [2721ad4] Allow overriding `db` implementation in Server.
