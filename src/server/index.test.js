@@ -155,3 +155,18 @@ test('playerView', () => {
     }
   });
 });
+
+test('custom db implementation', () => {
+  let getId = null;
+  class Custom {
+    get(id) { getId = id }
+    set() {}
+  }
+
+  const game = Game({});
+  const server = Server({ games: [game], db: new Custom() });
+  const io = server.context.io;
+
+  io.socket.receive('sync', 'gameID');
+  expect(getId).toBe('gameID');
+});
