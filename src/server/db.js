@@ -1,3 +1,6 @@
+// solve runtime issue with async fumctions
+import "babel-polyfill";
+
 /*
  * Copyright 2017 The boardgame.io Authors
  *
@@ -14,34 +17,33 @@ export class InMemory {
    * Creates a new InMemory storage.
    */
   constructor() {
-    this.games = new Map();
+    this.games = new Map()
   }
 
   /**
    * Write the game state to the in-memory object.
    * @param {string} id - The game id.
-   * @param {object} store - A Redux store to persist.
+   * @param {object} store - A game state to persist.
    */
-  set(id, store) {
-    this.games.set(id, store);
+  async set(id, state) {
+    return await this.games.set(id, state);
   }
 
   /**
    * Read the game state from the in-memory object.
    * @param {string} id - The game id.
-   * @returns {object} - A Redux store with the game state, or undefined
+   * @returns {object} - A game state, or undefined
    *                     if no game is found with this id.
    */
-  get(id) {
-    return this.games.get(id);
+   async get(id) {
+    return await this.games.get(id)
   }
-
   /**
    * Read the game state from the in-memory object.
    * @param {string} id - The game id.
    * @returns {boolean} - True if a game with this id exists.
    */
-  has(id) {
-    return this.games.has(id)
+  async has(id) {
+    return await this.games.has(id);
   }
 }

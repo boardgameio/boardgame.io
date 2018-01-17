@@ -11,6 +11,7 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 
+
 jest.mock('koa-socket', () => {
   class MockSocket {
     constructor() {
@@ -57,7 +58,7 @@ test('basic', () => {
   io.socket.receive('disconnect');
 });
 
-test('sync', () => {
+test('sync', async () => {
   const server = Server({ games: [game] });
   const io = server.context.io;
   expect(server).not.toBe(undefined);
@@ -67,19 +68,21 @@ test('sync', () => {
   // Sync causes the server to respond.
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
   io.socket.receive('sync', 'gameID');
-  expect(io.socket.emit).toHaveBeenCalledTimes(1);
-  expect(spy).toHaveBeenCalled();
 
+  expect(io.socket.emit).toHaveBeenCalledTimes(1)
+  expect(spy).toHaveBeenCalled();
+  
   // Sync a second time does not create a game.
   spy.mockReset();
   io.socket.receive('sync', 'gameID');
+
   expect(io.socket.emit).toHaveBeenCalledTimes(2);
   expect(spy).not.toHaveBeenCalled();
-
+  
   spy.mockRestore();
 });
 
-test('action', () => {
+test('action', async () => {
   const server = Server({ games: [game] });
   const io = server.context.io;
   const action = ActionCreators.gameEvent('endTurn');
@@ -92,7 +95,7 @@ test('action', () => {
   io.socket.id = 'second';
   io.socket.receive('sync', 'gameID');
   io.socket.emit.mockReset();
-
+  
   // View-only players cannot send actions.
   io.socket.receive('action', action, 0, 'gameID', null);
   expect(io.socket.emit).not.toHaveBeenCalled();
@@ -158,9 +161,18 @@ test('playerView', () => {
 
 test('custom db implementation', () => {
   let getId = null;
+
   class Custom {
-    get(id) { getId = id }
-    set() {}
+    constructor() {
+      this.games = new Map();
+    }
+    async get(id) {
+      getId = id;
+      return await this.games.get(id)
+    }
+    async set(id, state) {
+      return await this.games.set(id, state)
+    }
   }
 
   const game = Game({});
