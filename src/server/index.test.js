@@ -10,6 +10,7 @@ import Server from './index';
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
+import { setTimeout, setImmediate } from 'timers';
 
 jest.mock('koa-socket', () => {
   class MockSocket {
@@ -57,7 +58,7 @@ test('basic', () => {
   io.socket.receive('disconnect');
 });
 
-test('sync', () => {
+test('sync', (done) => {
   const server = Server({ games: [game] });
   const io = server.context.io;
   expect(server).not.toBe(undefined);
@@ -67,8 +68,12 @@ test('sync', () => {
   // Sync causes the server to respond.
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
   io.socket.receive('sync', 'gameID');
-  expect(io.socket.emit).toHaveBeenCalledTimes(1);
-  expect(spy).toHaveBeenCalled();
+  setImmediate(() =>{
+    expect(io.socket.emit).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalled();
+    done()
+  })
+
 
   // Sync a second time does not create a game.
   spy.mockReset();
@@ -158,9 +163,21 @@ test('playerView', () => {
 
 test('custom db implementation', () => {
   let getId = null;
+
   class Custom {
-    get(id) { getId = id }
-    set() {}
+    constructor() {
+      this.games = new Map();
+    }
+    delay (ms, value) {
+     return new Promise(resolve => setTimeout(resolve(value), ms));
+    }
+    get(id) {
+      getId = id;
+      return this.delay(100, this.games.get(id));
+    }
+    set(id, store) {
+      return this.delay(100 , this.games.set(id, store))
+    }
   }
 
   const game = Game({});

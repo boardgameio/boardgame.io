@@ -22,8 +22,11 @@ export class InMemory {
    * @param {string} id - The game id.
    * @param {object} store - A Redux store to persist.
    */
-  set(id, store) {
-    this.games.set(id, store);
+  set(id, state) {
+    return new Promise((resolve) => {
+      const result = this.games.set(id, state);
+      resolve(result);
+    })
   }
 
   /**
@@ -33,7 +36,10 @@ export class InMemory {
    *                     if no game is found with this id.
    */
   get(id) {
-    return this.games.get(id);
+    return new Promise((resolve) => {
+      const state = this.games.get(id);
+      resolve(state)
+    })
   }
 
   /**
@@ -42,6 +48,9 @@ export class InMemory {
    * @returns {boolean} - True if a game with this id exists.
    */
   has(id) {
-    return this.games.has(id)
+    return new Promise((resolve) => {
+      const has = this.games.has(id)
+      resolve(has);
+    })
   }
 }

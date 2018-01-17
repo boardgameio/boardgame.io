@@ -29,57 +29,61 @@ function Server({ games, db }) {
     const nsp = app._io.of(game.name);
 
     nsp.on('connection', socket => {
-      socket.on('action', (action, stateID, gameID, playerID) => {
-        const store = db.get(gameID);
 
-        if (store === undefined) {
-          return { error: 'game not found' };
-        }
+      socket.on('action', (action, stateID, gameID, playerID, numPlayers) => {
+        db.get(gameID).then(state => {
 
-        const state = store.getState();
-
-        // The null player is a view-only player.
-        if (playerID == null) {
-          return;
-        }
-
-        // Bail out if the player making the move is not
-        // the current player.
-        if (state.ctx.currentPlayer != 'any' &&
-            playerID != state.ctx.currentPlayer) {
-          return;
-        }
-
-        if (state._id == stateID) {
-          // Update server's version of the store.
-          store.dispatch(action);
-          const state = store.getState();
-
-          // Get clients connected to this current game.
-          const roomClients = roomInfo.get(gameID);
-          for (const client of roomClients.values()) {
-            const playerID = clientInfo.get(client);
-
-            if (client === socket.id) {
-              socket.emit('sync', gameID, {
-                ...state,
-                G: game.playerView(state.G, state.ctx, playerID)
-              });
-            } else {
-              socket.to(client).emit('sync', gameID, {
-                ...state,
-                G: game.playerView(state.G, state.ctx, playerID)
-              });
-            }
+          if (state === undefined) {
+            return { error: 'game not found' };
           }
 
-          db.set(gameID, store);
-        }
+          const reducer = createGameReducer({game, numPlayers});
+          const store = Redux.createStore(reducer, state);
+          state = store.getState();
+
+          // The null player is a view-only player.
+          if (playerID == null) {
+            return;
+          }
+
+          // Bail out if the player making the move is not
+          // the current player.
+          if (state.ctx.currentPlayer != 'any' &&
+              playerID != state.ctx.currentPlayer) {
+            return;
+          }
+
+          if (state._id == stateID) {
+            // Update server's version of the store.
+            store.dispatch(action);
+            state = store.getState();
+
+            // Get clients connected to this current game.
+            const roomClients = roomInfo.get(gameID);
+            for (const client of roomClients.values()) {
+              const playerID = clientInfo.get(client);
+
+              if (client === socket.id) {
+                socket.emit('sync', gameID, {
+                  ...state,
+                  G: game.playerView(state.G, state.ctx, playerID)
+                });
+              } else {
+                socket.to(client).emit('sync', gameID, {
+                  ...state,
+                  G: game.playerView(state.G, state.ctx, playerID)
+                });
+              }
+            }
+
+            db.set(gameID, store.getState());
+          }
+        })
       });
 
       socket.on('sync', (gameID, playerID, numPlayers) => {
         socket.join(gameID);
-
+        const reducer = createGameReducer({game, numPlayers});
         let roomClients = roomInfo.get(gameID);
         if (roomClients === undefined) {
           roomClients = new Set();
@@ -89,17 +93,21 @@ function Server({ games, db }) {
 
         clientInfo.set(socket.id, { gameID, playerID });
 
-        let store = db.get(gameID);
-        if (store === undefined) {
-          const reducer = createGameReducer({game, numPlayers});
-          store = Redux.createStore(reducer);
-          db.set(gameID, store);
-        }
+        db.get(gameID).then(state => {
 
-        const state = store.getState();
-        socket.emit('sync', gameID, {
-          ...state,
-          G: game.playerView(state.G, state.ctx, playerID)
+          if (state === undefined) {
+
+            const store = Redux.createStore(reducer);
+            state = store.getState();
+
+            return db.set(gameID, {...state}).then(() => {
+
+              socket.emit('sync', gameID, {
+                ...state,
+                G: game.playerView(state.G, state.ctx, playerID)
+              });
+            });
+          }
         });
       });
 

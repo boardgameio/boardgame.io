@@ -9,18 +9,26 @@
 import { InMemory } from './db';
 import * as Redux from 'redux';
 
-test('basic', () => {
+test('basic', async () => {
   const db = new InMemory();
   const reducer = () => {};
   const store = Redux.createStore(reducer);
 
   // Must return undefined when no game exists.
-  expect(db.get('gameID')).toEqual(undefined);
+  db.get('gameID').then(gameStore =>{
+    expect(gameStore).toEqual(undefined);
+  })
+
   // Create game.
-  db.set('gameID', store);
-  // Must return created game.
-  expect(db.get('gameID')).toEqual(store);
+  db.set('gameID', store).then(() => {
+    // Must return created game.
+    db.get('gameID').then(gameStore => {
+      expect(gameStore).toEqual(store);
+    });
+  });
 
   // Must return true if game exists
-  expect(db.has('gameID')).toEqual(true);
+  db.has('gameID').then(result => {
+    expect(result).toEqual(true);
+  })
 });
