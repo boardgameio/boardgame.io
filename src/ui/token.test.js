@@ -47,6 +47,18 @@ test('props change', () => {
   expect(token.state('originY')).toEqual(2);
 });
 
+test('debounce', () => {
+  const token = Enzyme.shallow(
+    <Token x={1} y={2} animate={true}><p>foo</p></Token>);
+  token.setProps({x: 0, y: 2});
+  expect(token.state('originX')).toEqual(1);
+  expect(token.state('originY')).toEqual(2);
+
+  token.setProps({x: 0, y: 2});
+  expect(token.state('originX')).toEqual(1);
+  expect(token.state('originY')).toEqual(2);
+});
+
 test('handlers', () => {
   const onClick = jest.fn();
   const token = Enzyme.mount(
