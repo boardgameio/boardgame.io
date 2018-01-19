@@ -53,14 +53,19 @@ class Token extends React.Component {
   /**
    * If there is a change in props, saves old X, Y, and current time. Starts
    * animation.
+   * @param {Object} nextProps Next props.
    */
-  componentWillReceiveProps() {
-    let svgCoord = this._getSvgCoordinates();
+  componentWillReceiveProps(nextProps) {
+    let oldCoord = this._getSvgCoordinates();
+    let newCoord = this._getSvgCoordinates(nextProps);
+    if (oldCoord. x == newCoord.x && oldCoord.y == newCoord.y) { //Debounce
+      return;
+    }
     this.setState({
       ...this.state,
       originTime: Date.now(),
-      originX: svgCoord.x,
-      originY: svgCoord.y,
+      originX: oldCoord.x,
+      originY: oldCoord.y,
     });
     requestAnimationFrame(this._animate(Date.now()));
   }
@@ -95,13 +100,14 @@ class Token extends React.Component {
   /**
    * Gets SVG coordinates. If a coordinate function is available, it will pass
    * all props to it and receive back X and Y in SVG space
+   * @param {Object} props Props object to get coordinates from.
    * @return {Object} Object with x and y parameter.
    */
-  _getSvgCoordinates() {
-    if (this.props._coordinateFn) {
-      return this.props._coordinateFn(this.props);
+  _getSvgCoordinates(props = this.props) {
+    if (props._coordinateFn) {
+      return this.props._coordinateFn(props);
     } else {
-      return { x: this.props.x, y: this.props.y };
+      return { x: props.x, y: props.y };
     }
   }
 
