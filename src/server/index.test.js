@@ -71,14 +71,14 @@ test('sync', async () => {
 
   expect(io.socket.emit).toHaveBeenCalledTimes(1)
   expect(spy).toHaveBeenCalled();
-  
+
   // Sync a second time does not create a game.
   spy.mockReset();
   io.socket.receive('sync', 'gameID');
 
   expect(io.socket.emit).toHaveBeenCalledTimes(2);
   expect(spy).not.toHaveBeenCalled();
-  
+
   spy.mockRestore();
 });
 
@@ -95,7 +95,7 @@ test('action', async () => {
   io.socket.id = 'second';
   io.socket.receive('sync', 'gameID');
   io.socket.emit.mockReset();
-  
+
   // View-only players cannot send actions.
   io.socket.receive('action', action, 0, 'gameID', null);
   expect(io.socket.emit).not.toHaveBeenCalled();

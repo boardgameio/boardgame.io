@@ -61,9 +61,7 @@ export class Multiplayer {
 
       if (whiteListedActions.has(action.type) &&
           action._remote != true) {
-        this.socket.emit(
-          'action', action, state._id, this.gameID, this.playerID, this.numPlayers
-        );
+        this.socket.emit('action', action, state._id, this.gameID, this.playerID);
       }
 
       return result;

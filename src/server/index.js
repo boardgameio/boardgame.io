@@ -30,16 +30,18 @@ function Server({ games, db }) {
 
     nsp.on('connection', socket => {
 
-      socket.on('action', async (action, stateID, gameID, playerID, numPlayers) => {
+      socket.on('action', async (action, stateID, gameID, playerID) => {
         let state = await db.get(gameID);
 
         if (state === undefined) {
           return { error: 'game not found' };
         }
 
-        const reducer = createGameReducer({game, numPlayers});
+        const reducer = createGameReducer({
+          game,
+          numPlayers: state.ctx.numPlayers,
+        });
         const store = Redux.createStore(reducer, state);
-        state = store.getState();
 
         // The null player is a view-only player.
         if (playerID == null) {
@@ -78,7 +80,6 @@ function Server({ games, db }) {
 
           db.set(gameID, store.getState());
         }
-
       });
 
       socket.on('sync', async (gameID, playerID, numPlayers) => {
