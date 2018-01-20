@@ -12,8 +12,8 @@ const routes = [
   {
     path: '/phases',
     text: 'Phases',
-    component: Phases
-  }
+    component: Phases,
+  },
 ];
 
 export default routes;

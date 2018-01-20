@@ -14,12 +14,12 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 test('render correctly', () => {
-  const grid = Enzyme.mount(<HexGrid radius={5}/>);
+  const grid = Enzyme.mount(<HexGrid radius={5} />);
   expect(grid.html()).toContain('svg');
 });
 
 test('click', () => {
-  const grid = Enzyme.mount(<HexGrid radius={5}/>);
+  const grid = Enzyme.mount(<HexGrid radius={5} />);
   const hex = grid.find('polygon').at(0);
   expect(hex.html()).toContain('fill="#fff"');
   hex.simulate('click');

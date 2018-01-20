@@ -19,7 +19,7 @@ const App = Client({
 });
 
 const Multiplayer = () => (
-  <div style={{padding: 50}}>
+  <div style={{ padding: 50 }}>
     <h1>Multiplayer</h1>
     <div className="runner">
       <div className="run">

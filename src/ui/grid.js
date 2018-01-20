@@ -45,18 +45,18 @@ class Grid extends React.Component {
     colorMap: PropTypes.object,
     onClick: PropTypes.func,
     children: PropTypes.oneOfType([
-        PropTypes.arrayOf(PropTypes.element),
-        PropTypes.element
+      PropTypes.arrayOf(PropTypes.element),
+      PropTypes.element,
     ]),
-  }
+  };
 
   static defaultProps = {
-    colorMap: {}
-  }
+    colorMap: {},
+  };
 
-  cartesianCord = (props) => {
-    return {x: props.x, y: props.y};
-  }
+  cartesianCord = props => {
+    return { x: props.x, y: props.y };
+  };
 
   _getCellColor(x, y) {
     const key = `${x},${y}`;
@@ -71,33 +71,38 @@ class Grid extends React.Component {
     let squares = [];
     for (let x = 0; x < this.props.cols; x++) {
       for (let y = 0; y < this.props.rows; y++) {
-        squares.push((<rect
-          style={{fill: this._getCellColor(x, y)}}
-          width="1"
-          height="1"
-          x={x}
-          y={y}
-          key={this.props.cols * y + x}
-          onClick={() => this.props.onClick(x, y)} />));
+        squares.push(
+          <rect
+            style={{ fill: this._getCellColor(x, y) }}
+            width="1"
+            height="1"
+            x={x}
+            y={y}
+            key={this.props.cols * y + x}
+            onClick={() => this.props.onClick(x, y)}
+          />
+        );
       }
     }
     return squares;
   }
 
   render() {
-    const tokens = React.Children.map(this.props.children,
-      child => {
-        return React.cloneElement(child, {
-          _coordinateFn: this.cartesianCord
-        });
-      }
-    );
+    const tokens = React.Children.map(this.props.children, child => {
+      return React.cloneElement(child, {
+        _coordinateFn: this.cartesianCord,
+      });
+    });
 
-    return (<svg viewBox={'0 0 ' + this.props.cols + ' ' + this.props.rows}
-                 style={this.props.style}>
-              <g>{this._getSquares()}</g>
-              {tokens}
-            </svg>);
+    return (
+      <svg
+        viewBox={'0 0 ' + this.props.cols + ' ' + this.props.rows}
+        style={this.props.style}
+      >
+        <g>{this._getSquares()}</g>
+        {tokens}
+      </svg>
+    );
   }
 }
 

@@ -45,8 +45,10 @@ function Server({ games, db }) {
 
         // Bail out if the player making the move is not
         // the current player.
-        if (state.ctx.currentPlayer != 'any' &&
-            playerID != state.ctx.currentPlayer) {
+        if (
+          state.ctx.currentPlayer != 'any' &&
+          playerID != state.ctx.currentPlayer
+        ) {
           return;
         }
 
@@ -63,12 +65,12 @@ function Server({ games, db }) {
             if (client === socket.id) {
               socket.emit('sync', gameID, {
                 ...state,
-                G: game.playerView(state.G, state.ctx, playerID)
+                G: game.playerView(state.G, state.ctx, playerID),
               });
             } else {
               socket.to(client).emit('sync', gameID, {
                 ...state,
-                G: game.playerView(state.G, state.ctx, playerID)
+                G: game.playerView(state.G, state.ctx, playerID),
               });
             }
           }
@@ -91,7 +93,7 @@ function Server({ games, db }) {
 
         let store = db.get(gameID);
         if (store === undefined) {
-          const reducer = createGameReducer({game, numPlayers});
+          const reducer = createGameReducer({ game, numPlayers });
           store = Redux.createStore(reducer);
           db.set(gameID, store);
         }
@@ -99,7 +101,7 @@ function Server({ games, db }) {
         const state = store.getState();
         socket.emit('sync', gameID, {
           ...state,
-          G: game.playerView(state.G, state.ctx, playerID)
+          G: game.playerView(state.G, state.ctx, playerID),
         });
       });
 

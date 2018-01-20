@@ -45,8 +45,8 @@ class Checkerboard extends React.Component {
     highlightedSquares: PropTypes.object,
     style: PropTypes.object,
     children: PropTypes.oneOfType([
-        PropTypes.arrayOf(PropTypes.element),
-        PropTypes.element
+      PropTypes.arrayOf(PropTypes.element),
+      PropTypes.element,
     ]),
   };
 
@@ -57,22 +57,20 @@ class Checkerboard extends React.Component {
     primaryColor: '#d18b47',
     secondaryColor: '#ffce9e',
     highlightedSquares: {},
-    style: {}
+    style: {},
   };
 
   onClick = (x, y) => {
-    this.props.onClick({ square: this._cartesianToAlgebraic(x, y) })
-  }
+    this.props.onClick({ square: this._cartesianToAlgebraic(x, y) });
+  };
 
   render() {
     // Convert the square="" prop to x and y.
-    const tokens = React.Children.map(this.props.children,
-      child => {
-        const square = child.props.square;
-        const { x, y } = this._algebraicToCartesian(square);
-        return React.cloneElement(child, { x, y });
-      }
-    );
+    const tokens = React.Children.map(this.props.children, child => {
+      const square = child.props.square;
+      const { x, y } = this._algebraicToCartesian(square);
+      return React.cloneElement(child, { x, y });
+    });
 
     // Build colorMap with checkerboard pattern.
     let colorMap = {};
@@ -95,11 +93,13 @@ class Checkerboard extends React.Component {
     }
 
     return (
-      <Grid rows={this.props.rows}
-            cols={this.props.cols}
-            style={this.props.style}
-            onClick={this.onClick}
-            colorMap={colorMap}>
+      <Grid
+        rows={this.props.rows}
+        cols={this.props.cols}
+        style={this.props.style}
+        onClick={this.onClick}
+        colorMap={colorMap}
+      >
         {tokens}
       </Grid>
     );
@@ -119,7 +119,7 @@ class Checkerboard extends React.Component {
 
   _cartesianToAlgebraic(x, y) {
     let colSymbol = String.fromCharCode(x + 'a'.charCodeAt(0));
-    return colSymbol + (this.props.rows  - y);
+    return colSymbol + (this.props.rows - y);
   }
 }
 

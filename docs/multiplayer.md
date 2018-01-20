@@ -14,10 +14,10 @@ import Client from 'boardgame.io/client';
 const App = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
-  multiplayer: true
+  multiplayer: true,
 });
 
-ReactDOM.render(<App/>, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
 Whenever you make a move, the framework sends an update to the

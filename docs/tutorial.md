@@ -44,11 +44,11 @@ const TicTacToe = Game({
 
   moves: {
     clickCell(G, ctx, id) {
-      let cells = [...G.cells];  // don't mutate original state.
+      let cells = [...G.cells]; // don't mutate original state.
       cells[id] = ctx.currentPlayer;
-      return {...G, cells};      // don't mutate original state.
-    }
-  }
+      return { ...G, cells }; // don't mutate original state.
+    },
+  },
 });
 
 const App = Client({ game: TicTacToe });
@@ -63,6 +63,7 @@ a repeatable calculation of state without any side effects.
 arguments that are passed to it from the call-site.
 
 Run the app using:
+
 ```
 npm start
 ```
@@ -116,7 +117,7 @@ const TicTacToe = Game({
       }
 
       return { ...G, cells };
-    }
+    },
   },
 
   flow: {
@@ -124,14 +125,14 @@ const TicTacToe = Game({
       if (IsVictory(G.cells)) {
         return ctx.currentPlayer;
       }
-    }
-  }
+    },
+  },
 });
 ```
 
 !> The `endGameIf` field takes a function that determines if
-   the game is over. If it returns anything other than `undefined`,
-   the game ends, and the return value is available at `ctx.gameover`.
+the game is over. If it returns anything other than `undefined`,
+the game ends, and the return value is available at `ctx.gameover`.
 
 ## Render board
 
@@ -180,9 +181,7 @@ class TicTacToeBoard extends React.Component {
       for (let j = 0; j < 3; j++) {
         const id = 3 * i + j;
         cells.push(
-          <td style={cellStyle}
-              key={id}
-              onClick={() => this.onClick(id)}>
+          <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
             {this.props.G.cells[id]}
           </td>
         );
@@ -193,7 +192,7 @@ class TicTacToeBoard extends React.Component {
     return (
       <div>
         <table id="board">
-        <tbody>{tbody}</tbody>
+          <tbody>{tbody}</tbody>
         </table>
         {winner}
       </div>
@@ -213,7 +212,7 @@ this.props.events.endTurn();
 
 `props.moves` is an object passed in by the framework that
 contains functions to dispatch moves. `props.moves.clickCell`
-dispatches the *clickCell* move, and any data passed in is made
+dispatches the _clickCell_ move, and any data passed in is made
 available in the move handler.
 
 `props.events` is an object that contains functions to control
@@ -229,7 +228,7 @@ Now, we pass this component to our `Client` call.
 ```js
 const App = Client({
   game: TicTacToe,
-  board: TicTacToeBoard
+  board: TicTacToeBoard,
 });
 
 export default App;

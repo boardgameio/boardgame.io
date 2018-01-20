@@ -15,11 +15,11 @@ const App = Client({
   game: TicTacToe,
   board: Board,
   debug: false,
-  multiplayer: true
+  multiplayer: true,
 });
 
 const Spectator = () => (
-  <div style={{padding: 50}}>
+  <div style={{ padding: 50 }}>
     <h1>Spectator</h1>
     <div className="runner">
       <div className="run">

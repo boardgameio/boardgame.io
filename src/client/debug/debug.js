@@ -27,16 +27,16 @@ export class DebugMove extends React.Component {
     fn: PropTypes.func.isRequired,
     active: PropTypes.bool,
     activate: PropTypes.func,
-    deactivate: PropTypes.func
-  }
+    deactivate: PropTypes.func,
+  };
 
   state = {
-    error: ''
-  }
+    error: '',
+  };
 
   onClick = () => {
     this.props.activate();
-  }
+  };
 
   getArg(arg) {
     try {
@@ -51,7 +51,7 @@ export class DebugMove extends React.Component {
     const value = this.span.innerText;
 
     if (value && value.length) {
-      const args = value.split(",");
+      const args = value.split(',');
       for (const arg of args) {
         argArray.push(this.getArg(arg));
       }
@@ -62,7 +62,7 @@ export class DebugMove extends React.Component {
     this.setState({
       error: '',
       focus: false,
-      enterArg: false
+      enterArg: false,
     });
 
     this.span.innerText = '';
@@ -70,9 +70,9 @@ export class DebugMove extends React.Component {
     if (this.props.deactivate) {
       this.props.deactivate();
     }
-  }
+  };
 
-  onKeyDown = (e) => {
+  onKeyDown = e => {
     if (e.key == 'Enter') {
       e.preventDefault();
       this.onSubmit();
@@ -82,7 +82,7 @@ export class DebugMove extends React.Component {
       e.preventDefault();
       this.props.deactivate();
     }
-  }
+  };
 
   componentDidUpdate() {
     if (this.props.active) {
@@ -98,11 +98,15 @@ export class DebugMove extends React.Component {
     return (
       <div className={className} onClick={this.onClick}>
         {this.props.name}
-        (<span ref={r => { this.span = r }}
-               className='arg-field'
-               onBlur={() => this.props.deactivate()}
-               onKeyDown={this.onKeyDown}
-               contentEditable></span>)
+        (<span
+          ref={r => {
+            this.span = r;
+          }}
+          className="arg-field"
+          onBlur={() => this.props.deactivate()}
+          onKeyDown={this.onKeyDown}
+          contentEditable
+        />)
       </div>
     );
   }
@@ -121,16 +125,16 @@ export class KeyboardShortcut extends React.Component {
   static propTypes = {
     value: PropTypes.string.isRequired,
     children: PropTypes.any,
-    onPress: PropTypes.func
-  }
+    onPress: PropTypes.func,
+  };
 
   state = {
-    active: false
-  }
+    active: false,
+  };
 
   deactivate = () => {
     this.setState({ active: false });
-  }
+  };
 
   activate = () => {
     this.setState({ active: true });
@@ -138,10 +142,10 @@ export class KeyboardShortcut extends React.Component {
       this.props.onPress();
       this.setState({ active: false });
     }
-  }
+  };
 
   componentDidMount() {
-    Mousetrap.bind(this.props.value, (e) => {
+    Mousetrap.bind(this.props.value, e => {
       e.preventDefault();
       this.activate();
     });
@@ -154,12 +158,11 @@ export class KeyboardShortcut extends React.Component {
   render() {
     let child = this.props.children;
     if (typeof this.props.children === typeof this) {
-      child = React.cloneElement(
-          this.props.children, {
-            active: this.state.active,
-            deactivate: this.deactivate,
-            activate: this.activate
-          });
+      child = React.cloneElement(this.props.children, {
+        active: this.state.active,
+        deactivate: this.deactivate,
+        activate: this.activate,
+      });
     }
 
     let className = 'key';
@@ -169,12 +172,10 @@ export class KeyboardShortcut extends React.Component {
 
     return (
       <div className={className}>
-        <div className='key-box' onClick={this.activate}>
+        <div className="key-box" onClick={this.activate}>
           {this.props.value}
         </div>
-        <div className='key-child'>
-        {child}
-        </div>
+        <div className="key-child">{child}</div>
       </div>
     );
   }
@@ -190,7 +191,7 @@ export class KeyboardShortcut extends React.Component {
 export class Debug extends React.Component {
   static contextTypes = {
     store: PropTypes.any,
-  }
+  };
 
   static propTypes = {
     gamestate: PropTypes.shape({
@@ -205,7 +206,7 @@ export class Debug extends React.Component {
     events: PropTypes.any,
     restore: PropTypes.func,
     showLog: PropTypes.bool,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -213,12 +214,12 @@ export class Debug extends React.Component {
   }
 
   componentDidMount() {
-    Mousetrap.bind('d', (e) => {
+    Mousetrap.bind('d', e => {
       e.preventDefault();
       this.setState(old => ({ showDebugUI: !old.showDebugUI }));
     });
 
-    Mousetrap.bind('l', (e) => {
+    Mousetrap.bind('l', e => {
       e.preventDefault();
       this.setState(old => ({ showLog: !old.showLog }));
     });
@@ -232,14 +233,14 @@ export class Debug extends React.Component {
   state = {
     showDebugUI: true,
     showLog: false,
-  }
+  };
 
   assignShortcuts() {
     const taken = {
-      's': true,
-      'r': true,
-      'd': true,
-      'l': true,
+      s: true,
+      r: true,
+      d: true,
+      l: true,
     };
     this.shortcuts = null;
 
@@ -293,24 +294,23 @@ export class Debug extends React.Component {
   saveState = () => {
     const json = JSON.stringify(this.props.gamestate);
     window.localStorage.setItem('gamestate', json);
-  }
+  };
 
   restoreState = () => {
-    const gamestateJSON =
-        window.localStorage.getItem('gamestate');
+    const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
       const gamestate = JSON.parse(gamestateJSON);
       this.context.store.dispatch(restore(gamestate));
     }
-  }
+  };
 
   onClickMain = () => {
     this.setState({ showLog: false });
-  }
+  };
 
   onClickLog = () => {
     this.setState({ showLog: true });
-  }
+  };
 
   render() {
     if (!this.state.showDebugUI) {
@@ -353,78 +353,89 @@ export class Debug extends React.Component {
     }
 
     return (
-      <div className='debug-ui'>
-
-      <div className='menu'>
-        <div className={this.state.showLog ? 'item' : 'item active'} onClick={this.onClickMain}>Main</div>
-        <div className={this.state.showLog ? 'item active' : 'item'} onClick={this.onClickLog}>Log</div>
-      </div>
-
-      {this.state.showLog ||
-        <span>
-        <section>
-        <div><strong>Game ID:</strong> {this.props.gameID}</div>
-        </section>
-
-        <section>
-          <div className='key'>
-          <div className='key-box'>d</div> toggle Debug UI
+      <div className="debug-ui">
+        <div className="menu">
+          <div
+            className={this.state.showLog ? 'item' : 'item active'}
+            onClick={this.onClickMain}
+          >
+            Main
           </div>
-
-          <div className='key'>
-          <div className='key-box'>l</div> toggle Log
+          <div
+            className={this.state.showLog ? 'item active' : 'item'}
+            onClick={this.onClickLog}
+          >
+            Log
           </div>
-
-          <KeyboardShortcut value='s' onPress={this.saveState}>
-            save localStorage
-          </KeyboardShortcut>
-
-          <KeyboardShortcut value='r' onPress={this.restoreState}>
-            restore localStorage
-          </KeyboardShortcut>
-        </section>
-
-        <h3>players</h3>
-        <div className='player-box'>
-        {players}
         </div>
 
-        <h3>moves</h3>
+        {this.state.showLog || (
+          <span>
+            <section>
+              <div>
+                <strong>Game ID:</strong> {this.props.gameID}
+              </div>
+            </section>
 
-        <section>
-        {moves}
-        </section>
+            <section>
+              <div className="key">
+                <div className="key-box">d</div> toggle Debug UI
+              </div>
 
-        <h3>events</h3>
+              <div className="key">
+                <div className="key-box">l</div> toggle Log
+              </div>
 
-        <section>
-        {events}
-        </section>
+              <KeyboardShortcut value="s" onPress={this.saveState}>
+                save localStorage
+              </KeyboardShortcut>
 
-        <h3>state</h3>
+              <KeyboardShortcut value="r" onPress={this.restoreState}>
+                restore localStorage
+              </KeyboardShortcut>
+            </section>
 
-        <section>
-        <ReactJson src={this.props.gamestate.G}
-                   name="G"
-                   enableClipboard={false}
-                   displayDataTypes={false} />
-        </section>
+            <h3>players</h3>
+            <div className="player-box">{players}</div>
 
-        <section>
-        <ReactJson src={this.props.gamestate.ctx}
-                   name="ctx"
-                   enableClipboard={false}
-                   displayDataTypes={false} />
-        </section>
-        </span>
-      }
+            <h3>moves</h3>
 
-      {this.state.showLog &&
-        <section>
-        <GameLog log={this.props.gamestate.log} initialState={this.props.gamestate._initial} />
-        </section>
-      }
+            <section>{moves}</section>
 
+            <h3>events</h3>
+
+            <section>{events}</section>
+
+            <h3>state</h3>
+
+            <section>
+              <ReactJson
+                src={this.props.gamestate.G}
+                name="G"
+                enableClipboard={false}
+                displayDataTypes={false}
+              />
+            </section>
+
+            <section>
+              <ReactJson
+                src={this.props.gamestate.ctx}
+                name="ctx"
+                enableClipboard={false}
+                displayDataTypes={false}
+              />
+            </section>
+          </span>
+        )}
+
+        {this.state.showLog && (
+          <section>
+            <GameLog
+              log={this.props.gamestate.log}
+              initialState={this.props.gamestate._initial}
+            />
+          </section>
+        )}
       </div>
     );
   }

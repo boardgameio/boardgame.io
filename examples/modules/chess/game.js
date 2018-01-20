@@ -30,25 +30,29 @@ const ChessGame = Game({
   moves: {
     move(G, ctx, san) {
       const chess = Load(G.pgn);
-      if (chess.turn() == 'w' && ctx.currentPlayer == '1' ||
-          chess.turn() == 'b' && ctx.currentPlayer == '0') {
+      if (
+        (chess.turn() == 'w' && ctx.currentPlayer == '1') ||
+        (chess.turn() == 'b' && ctx.currentPlayer == '0')
+      ) {
         return { ...G };
       }
       chess.move(san);
       return { pgn: chess.pgn() };
-    }
+    },
   },
 
   flow: {
     movesPerTurn: 1,
 
-    endGameIf: (G) => {
+    endGameIf: G => {
       const chess = Load(G.pgn);
       if (chess.game_over()) {
-        if (chess.in_draw() ||
-            chess.in_threefold_repetition() ||
-            chess.insufficient_material() ||
-            chess.in_stalemate()) {
+        if (
+          chess.in_draw() ||
+          chess.in_threefold_repetition() ||
+          chess.insufficient_material() ||
+          chess.in_stalemate()
+        ) {
           return 'd';
         }
         if (chess.in_checkmate()) {
@@ -59,8 +63,8 @@ const ChessGame = Game({
           }
         }
       }
-    }
-  }
+    },
+  },
 });
 
 export default ChessGame;

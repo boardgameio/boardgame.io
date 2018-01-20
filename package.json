@@ -7,7 +7,7 @@
     "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
     "docsify": "docsify serve docs",
     "examples": "npm run dev",
-    "precommit": "npm run lint",
+    "precommit": "lint-staged",
     "prepush": "npm run test:coverage",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",

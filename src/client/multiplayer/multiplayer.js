@@ -48,10 +48,7 @@ export class Multiplayer {
   createStore(reducer) {
     let store = null;
 
-    const whiteListedActions = new Set([
-      MAKE_MOVE,
-      GAME_EVENT,
-    ]);
+    const whiteListedActions = new Set([MAKE_MOVE, GAME_EVENT]);
 
     // Redux middleware to emit a message on a socket
     // whenever an action is dispatched.
@@ -59,13 +56,18 @@ export class Multiplayer {
       const state = getState();
       const result = next(action);
 
-      if (whiteListedActions.has(action.type) &&
-          action._remote != true) {
-        this.socket.emit('action', action, state._id, this.gameID, this.playerID);
+      if (whiteListedActions.has(action.type) && action._remote != true) {
+        this.socket.emit(
+          'action',
+          action,
+          state._id,
+          this.gameID,
+          this.playerID
+        );
       }
 
       return result;
-    }
+    };
 
     store = createStore(reducer, applyMiddleware(SocketUpdate));
 
