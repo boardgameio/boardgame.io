@@ -33,10 +33,10 @@ import { TurnOrder } from './turn-order';
  *                                  (state, action, dispatch) => state.
  */
 export function Flow({ ctx, events, init, validator, processMove }) {
-  if (!ctx)         ctx = () => ({});
-  if (!events)      events = {};
-  if (!init)        init = state => state;
-  if (!validator)   validator = () => true;
+  if (!ctx) ctx = () => ({});
+  if (!events) events = {};
+  if (!init) init = state => state;
+  if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
 
   const dispatch = (state, action) => {
@@ -44,7 +44,7 @@ export function Flow({ ctx, events, init, validator, processMove }) {
       const context = { playerID: action.playerID };
       const args = [state].concat(action.args);
       const oldLog = state.log || [];
-      const log = [ ...oldLog, action ];
+      const log = [...oldLog, action];
       const newState = events[action.type].apply(context, args);
       return { ...newState, log };
     }
@@ -70,7 +70,7 @@ export function Flow({ ctx, events, init, validator, processMove }) {
 
     processGameEvent: (state, action) => {
       return dispatch(state, action);
-    }
+    },
   };
 }
 
@@ -102,11 +102,17 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *                               Triggers are processed one after the other in the
  *                               order they are defined at the end of each move.
  */
-export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, triggers }) {
+export function SimpleFlow({
+  movesPerTurn,
+  endTurnIf,
+  endGameIf,
+  onTurnEnd,
+  triggers,
+}) {
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
   if (!onTurnEnd) onTurnEnd = G => G;
-  if (!triggers)  triggers = [];
+  if (!triggers) triggers = [];
 
   const endTurnIfWrap = (G, ctx) => {
     if (movesPerTurn && ctx.currentPlayerMoves >= movesPerTurn) {
@@ -145,7 +151,7 @@ export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, trig
   function processMove(state, action, dispatch) {
     // Update currentPlayerMoves.
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
-    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves }};
+    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves } };
 
     // Process triggers.
     for (const trigger of triggers) {
@@ -268,19 +274,19 @@ export function SimpleFlow({ movesPerTurn, endTurnIf, endGameIf, onTurnEnd, trig
  *                               order they are defined at the end of each move.
  */
 export function FlowWithPhases({
-    phases,
-    movesPerTurn,
-    endTurnIf,
-    endGameIf,
-    onTurnEnd,
-    triggers,
+  phases,
+  movesPerTurn,
+  endTurnIf,
+  endGameIf,
+  onTurnEnd,
+  triggers,
 }) {
   // Attach defaults.
-  if (!phases)    phases = [{ name: 'default' }];
+  if (!phases) phases = [{ name: 'default' }];
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
   if (!onTurnEnd) onTurnEnd = G => G;
-  if (!triggers)  triggers = [];
+  if (!triggers) triggers = [];
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -430,7 +436,8 @@ export function FlowWithPhases({
     G = conf.onPass(G, ctx);
 
     // Mark that the player has passed.
-    const playerID = ctx.currentPlayer == 'any' ? this.playerID : ctx.currentPlayer;
+    const playerID =
+      ctx.currentPlayer == 'any' ? this.playerID : ctx.currentPlayer;
 
     if (playerID !== undefined) {
       let passMap = { ...ctx.passMap };
@@ -448,7 +455,7 @@ export function FlowWithPhases({
   function processMove(state, action, dispatch) {
     // Update currentPlayerMoves.
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
-    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves }};
+    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves } };
 
     // Process triggers.
     for (const trigger of triggers) {
@@ -468,7 +475,11 @@ export function FlowWithPhases({
     const conf = phaseMap[state.ctx.phase];
     const end = conf.endPhaseIf(state.G, state.ctx);
     if (end) {
-      state = dispatch(state, { type: 'endPhase', args: [end], playerID: action.playerID });
+      state = dispatch(state, {
+        type: 'endPhase',
+        args: [end],
+        playerID: action.playerID,
+      });
     }
 
     // End the turn automatically if endTurnIf is true.

@@ -17,11 +17,7 @@ Enzyme.configure({ adapter: new Adapter() });
 
 class TestBoard extends React.Component {
   render() {
-    return (
-      <div id="board">
-      Board
-      </div>
-    );
+    return <div id="board">Board</div>;
   }
 }
 
@@ -31,7 +27,7 @@ test('board is rendered', () => {
     board: TestBoard,
   });
 
-  const game = Enzyme.mount(<Board/>);
+  const game = Enzyme.mount(<Board />);
   const board = game.find(TestBoard);
 
   expect(board.props().isActive).toBe(true);
@@ -45,7 +41,7 @@ test('board props', () => {
     game: Game({}),
     board: TestBoard,
   });
-  let board = Enzyme.mount(<Board/>).find(TestBoard);
+  let board = Enzyme.mount(<Board />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
 
   Board = Client({
@@ -54,29 +50,27 @@ test('board props', () => {
     multiplayer: true,
   });
 
-  board = Enzyme.mount(<Board/>).find(TestBoard);
+  board = Enzyme.mount(<Board />).find(TestBoard);
   expect(board.props().isActive).toBe(false);
-  board = Enzyme.mount(<Board playerID={"0"}/>).find(TestBoard);
+  board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
-  board = Enzyme.mount(<Board playerID={"1"}/>).find(TestBoard);
+  board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
   expect(board.props().isActive).toBe(false);
 
   Board = Client({
     game: Game({
       flow: {
-        phases: [
-          { name: 'A', turnOrder: TurnOrder.ANY },
-        ],
-      }
+        phases: [{ name: 'A', turnOrder: TurnOrder.ANY }],
+      },
     }),
     board: TestBoard,
     multiplayer: true,
   });
-  board = Enzyme.mount(<Board/>).find(TestBoard);
+  board = Enzyme.mount(<Board />).find(TestBoard);
   expect(board.props().isActive).toBe(false);
-  board = Enzyme.mount(<Board playerID={"0"}/>).find(TestBoard);
+  board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
-  board = Enzyme.mount(<Board playerID={"1"}/>).find(TestBoard);
+  board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
 });
 
@@ -87,7 +81,7 @@ test('debug ui can be turned off', () => {
     debug: false,
   });
 
-  const game = Enzyme.mount(<Board/>);
+  const game = Enzyme.mount(<Board />);
   expect(game.find('.debug-ui').length).toBe(0);
 });
 
@@ -96,7 +90,7 @@ test('can pass empty board', () => {
     game: Game({}),
   });
 
-  const game = Enzyme.mount(<Board/>);
+  const game = Enzyme.mount(<Board />);
   expect(game).not.toBe(undefined);
 });
 
@@ -104,13 +98,13 @@ test('move api', () => {
   const Board = Client({
     game: Game({
       moves: {
-        'A': (G, ctx, arg) => ({ arg }),
-      }
+        A: (G, ctx, arg) => ({ arg }),
+      },
     }),
     board: TestBoard,
   });
 
-  const game = Enzyme.mount(<Board/>);
+  const game = Enzyme.mount(<Board />);
   const board = game.find('TestBoard').instance();
 
   expect(board.props.G).toEqual({});
@@ -127,12 +121,12 @@ test('update gameID / playerID', () => {
   Board = Client({
     game: Game({
       moves: {
-        'A': (G, ctx, arg) => ({ arg }),
-      }
+        A: (G, ctx, arg) => ({ arg }),
+      },
     }),
     board: TestBoard,
   });
-  game = Enzyme.mount(<Board/>);
+  game = Enzyme.mount(<Board />);
   game.setProps({ gameID: 'a' });
   expect(game.instance().multiplayerClient).toBe(undefined);
 
@@ -141,13 +135,13 @@ test('update gameID / playerID', () => {
   Board = Client({
     game: Game({
       moves: {
-        'A': (G, ctx, arg) => ({ arg }),
-      }
+        A: (G, ctx, arg) => ({ arg }),
+      },
     }),
     board: TestBoard,
-    multiplayer: true
+    multiplayer: true,
   });
-  game = Enzyme.mount(<Board gameID='a' playerID='1' />);
+  game = Enzyme.mount(<Board gameID="a" playerID="1" />);
   const m = game.instance().multiplayerClient;
 
   const spy1 = jest.spyOn(m, 'updateGameID');

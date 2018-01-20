@@ -21,13 +21,13 @@ export class GameLog extends React.Component {
   static propTypes = {
     log: PropTypes.array.isRequired,
     initialState: PropTypes.any.isRequired,
-  }
+  };
 
   static contextTypes = {
     store: PropTypes.any,
-  }
+  };
 
-  onRewind = (logIndex) => {
+  onRewind = logIndex => {
     if (logIndex == null) {
       this.context.store.dispatch(restore(this._toRestore));
       return;
@@ -41,13 +41,15 @@ export class GameLog extends React.Component {
     for (let i = 0; i <= logIndex; i++) {
       const action = this.props.log[i];
 
-      if (action.type == Actions.GAME_EVENT ||
-          action.type == Actions.MAKE_MOVE) {
-        action.remote = true;  // don't broadcast action.
+      if (
+        action.type == Actions.GAME_EVENT ||
+        action.type == Actions.MAKE_MOVE
+      ) {
+        action.remote = true; // don't broadcast action.
         this.context.store.dispatch(action);
       }
     }
-  }
+  };
 
   render() {
     let log = [];
@@ -58,8 +60,10 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
-      if (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn' ||
-          item.type == 'endTurn') {
+      if (
+        (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') ||
+        item.type == 'endTurn'
+      ) {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
         currentTurn = [];
@@ -68,14 +72,14 @@ export class GameLog extends React.Component {
 
         const playerID = item.payload.playerID;
         if (!playerIDs.has(playerID)) {
-          playerIDs.set(playerID, playerIDs.size)
+          playerIDs.set(playerID, playerIDs.size);
         }
         const playerNumber = playerIDs.get(playerID);
         const classNames = `log-move player${playerNumber}`;
 
         currentTurn.push(
           <div key={i} className={classNames}>
-          {item.payload.type}({args.join(',')})
+            {item.payload.type}({args.join(',')})
           </div>
         );
       }
@@ -84,21 +88,18 @@ export class GameLog extends React.Component {
     for (let i = 0; i < turns.length; i++) {
       const turn = turns[i];
       log.push(
-        <div key={i}
-             className="log-turn"
-             onMouseOver={() => this.onRewind(turnToLogIndex[i])}
-             onMouseOut={() => this.onRewind(null)}>
-        <div className="id">Turn #{i + 1}</div>
-        {turn}
+        <div
+          key={i}
+          className="log-turn"
+          onMouseOver={() => this.onRewind(turnToLogIndex[i])}
+          onMouseOut={() => this.onRewind(null)}
+        >
+          <div className="id">Turn #{i + 1}</div>
+          {turn}
         </div>
       );
     }
 
-    return (
-      <div className="gamelog">
-      {log}
-      </div>
-    );
+    return <div className="gamelog">{log}</div>;
   }
 }
-

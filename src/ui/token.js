@@ -41,7 +41,7 @@ class Token extends React.Component {
     onClick: PropTypes.func,
     _coordinateFn: PropTypes.func,
     children: PropTypes.element,
-  }
+  };
 
   /**
    * Sets the x and y of the state on creation.
@@ -58,7 +58,8 @@ class Token extends React.Component {
   componentWillReceiveProps(nextProps) {
     let oldCoord = this._getSvgCoordinates();
     let newCoord = this._getSvgCoordinates(nextProps);
-    if (oldCoord. x == newCoord.x && oldCoord.y == newCoord.y) { //Debounce
+    if (oldCoord.x == newCoord.x && oldCoord.y == newCoord.y) {
+      //Debounce
       return;
     }
     this.setState({
@@ -79,19 +80,25 @@ class Token extends React.Component {
       let elapsed = now - this.state.originTime;
       let svgCoord = this._getSvgCoordinates();
       if (elapsed < ANIMATION_DURATION && this.props.animate) {
-        let percentage = this._easeInOutCubic(elapsed, 0, 1,
-                                              ANIMATION_DURATION);
+        let percentage = this._easeInOutCubic(
+          elapsed,
+          0,
+          1,
+          ANIMATION_DURATION
+        );
         this.setState({
           ...this.state,
-          x: (svgCoord.x - this.state.originX) * percentage + this.state.originX,
-          y: (svgCoord.y - this.state.originY) * percentage + this.state.originY,
+          x:
+            (svgCoord.x - this.state.originX) * percentage + this.state.originX,
+          y:
+            (svgCoord.y - this.state.originY) * percentage + this.state.originY,
         });
         requestAnimationFrame(this._animate(Date.now()));
       } else {
         this.setState({
           ...this.state,
           x: svgCoord.x,
-          y: svgCoord.y
+          y: svgCoord.y,
         });
       }
     }).bind(this);
@@ -127,8 +134,12 @@ class Token extends React.Component {
 
   render() {
     return (
-      <g transform={'translate(' + this.state.x + ',' + this.state.y + ')'}
-         onClick={() => { this.props.onClick(this.props) }}>
+      <g
+        transform={'translate(' + this.state.x + ',' + this.state.y + ')'}
+        onClick={() => {
+          this.props.onClick(this.props);
+        }}
+      >
         {this.props.children}
       </g>
     );

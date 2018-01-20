@@ -9,25 +9,25 @@
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
 import phases from './phases';
-import liars_dice from './liars-dice'
+import liars_dice from './liars-dice';
 
 const routes = [
   {
     name: 'Tic-Tac-Toe',
-    routes: tic_tac_toe.routes
+    routes: tic_tac_toe.routes,
   },
   {
     name: 'Chess',
-    routes: chess.routes
+    routes: chess.routes,
   },
   {
     name: 'Phases',
-    routes: phases.routes
+    routes: phases.routes,
   },
   {
     name: 'Liars Dice',
-    routes: liars_dice.routes
-  }
+    routes: liars_dice.routes,
+  },
 ];
 
 export default routes;

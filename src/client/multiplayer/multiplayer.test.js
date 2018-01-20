@@ -40,7 +40,7 @@ test('multiplayer', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer(mockSocket);
   const game = Game({});
-  const store = m.createStore(createGameReducer({game}));
+  const store = m.createStore(createGameReducer({ game }));
 
   // Returns a valid store.
   expect(store).not.toBe(undefined);
@@ -51,7 +51,12 @@ test('multiplayer', () => {
   mockSocket.emit = jest.fn();
   store.dispatch(action);
   expect(mockSocket.emit).lastCalledWith(
-      'action', action, 0, 'default:default', null);
+    'action',
+    action,
+    0,
+    'default:default',
+    null
+  );
 
   // sync restores state.
   const restored = { restore: true };
@@ -71,7 +76,7 @@ test('move whitelist', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer(mockSocket);
   const game = Game({});
-  const store = m.createStore(createGameReducer({game}));
+  const store = m.createStore(createGameReducer({ game }));
 
   mockSocket.emit = jest.fn();
 

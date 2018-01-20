@@ -21,9 +21,7 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('1');
 
   flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: TurnOrder.ANY },
-    ],
+    phases: [{ name: 'A', turnOrder: TurnOrder.ANY }],
   });
 
   state = { ctx: flow.ctx(10) };
@@ -33,9 +31,7 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('any');
 
   flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: { first: () => '10', next: () => '3' } }
-    ],
+    phases: [{ name: 'A', turnOrder: { first: () => '10', next: () => '3' } }],
   });
 
   state = { ctx: flow.ctx(10) };
@@ -45,9 +41,7 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('3');
 
   flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: TurnOrder.SKIP },
-    ],
+    phases: [{ name: 'A', turnOrder: TurnOrder.SKIP }],
   });
 
   state = { ctx: flow.ctx(3) };

@@ -12,9 +12,11 @@ The `games` argument takes a list of game implementations
 (each is the return value of [Game](/api/Game.md)).
 
 ### Arguments
-1. obj(*object*): A config object with the options shown below.
+
+1. obj(_object_): A config object with the options shown below.
 
 ### Returns
+
 (`app`): A Koa app.
 
 ### Usage

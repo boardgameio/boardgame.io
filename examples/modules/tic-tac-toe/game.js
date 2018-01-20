@@ -39,7 +39,7 @@ const TicTacToe = Game({
   name: 'tic-tac-toe',
 
   setup: () => ({
-    cells: Array(9).fill(null)
+    cells: Array(9).fill(null),
   }),
 
   moves: {
@@ -51,7 +51,7 @@ const TicTacToe = Game({
       }
 
       return { ...G, cells };
-    }
+    },
   },
 
   flow: {
@@ -62,7 +62,7 @@ const TicTacToe = Game({
         return ctx.currentPlayer;
       }
     },
-  }
+  },
 });
 
 export default TicTacToe;

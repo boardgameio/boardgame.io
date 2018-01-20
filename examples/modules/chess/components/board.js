@@ -24,12 +24,12 @@ const MOVABLE_COLOR = 'palegreen';
 
 class Board extends React.Component {
   static propTypes = {
-    G:         PropTypes.any.isRequired,
-    ctx:       PropTypes.any.isRequired,
-    moves:     PropTypes.any.isRequired,
-    playerID:  PropTypes.string,
-    isActive:  PropTypes.bool
-  }
+    G: PropTypes.any.isRequired,
+    ctx: PropTypes.any.isRequired,
+    moves: PropTypes.any.isRequired,
+    playerID: PropTypes.string,
+    isActive: PropTypes.bool,
+  };
 
   constructor(props) {
     super(props);
@@ -37,8 +37,8 @@ class Board extends React.Component {
   }
 
   state = {
-    selected: ''
-  }
+    selected: '',
+  };
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.G.pgn) {
@@ -50,9 +50,11 @@ class Board extends React.Component {
   render() {
     return (
       <div>
-        <Checkerboard highlightedSquares={this._getHighlightedSquares()}
-                      style={{width: '400px'}}
-                      onClick={this.click}>
+        <Checkerboard
+          highlightedSquares={this._getHighlightedSquares()}
+          style={{ width: '400px' }}
+          onClick={this.click}
+        >
           {this._getPieces()}
         </Checkerboard>
 
@@ -72,15 +74,16 @@ class Board extends React.Component {
 
     if (this.state.selected) {
       let moves = this._getMoves();
-      let move = moves.find((move) => (move.from == this.state.selected &&
-                                       move.to == square));
+      let move = moves.find(
+        move => move.from == this.state.selected && move.to == square
+      );
       if (move) {
         this.props.moves.move(move.san);
       } else {
         this.setState({ selected: '' });
       }
     }
-  }
+  };
 
   _getHighlightedSquares() {
     let result = {};
@@ -100,12 +103,16 @@ class Board extends React.Component {
         let square = COL_NAMES[x] + y;
         let p = this.chess.get(square);
         if (p) {
-          result.push((
-            <Token square={square} animate={true}
-                   key={this._getInitialCell(square)}
-                   onClick={this.click.bind(this)}>
+          result.push(
+            <Token
+              square={square}
+              animate={true}
+              key={this._getInitialCell(square)}
+              onClick={this.click.bind(this)}
+            >
               {this._getPieceByTypeAndColor(p.type, p.color)}
-            </Token>));
+            </Token>
+          );
         }
       }
     }
@@ -114,12 +121,18 @@ class Board extends React.Component {
 
   _getPieceByTypeAndColor(type, color) {
     switch (type) {
-      case 'b': return <Bishop color={color} />;
-      case 'k': return <King color={color} />;
-      case 'n': return <Knight color={color} />;
-      case 'p': return <Pawn color={color} />;
-      case 'q': return <Queen color={color} />;
-      case 'r': return <Rook color={color} />;
+      case 'b':
+        return <Bishop color={color} />;
+      case 'k':
+        return <King color={color} />;
+      case 'n':
+        return <Knight color={color} />;
+      case 'p':
+        return <Pawn color={color} />;
+      case 'q':
+        return <Queen color={color} />;
+      case 'r':
+        return <Rook color={color} />;
     }
   }
 
@@ -130,13 +143,23 @@ class Board extends React.Component {
     }
     if (this.props.ctx.winner) {
       switch (this.props.ctx.winner) {
-        case 'b': message = 'Black won!'; break;
-        case 'w': message = 'White won!'; break;
-        case 'd': message = 'Draw!'; break;
+        case 'b':
+          message = 'Black won!';
+          break;
+        case 'w':
+          message = 'White won!';
+          break;
+        case 'd':
+          message = 'Draw!';
+          break;
       }
     }
     if (message) {
-      return (<p><strong>{message}</strong></p>);
+      return (
+        <p>
+          <strong>{message}</strong>
+        </p>
+      );
     }
   }
 
@@ -154,8 +177,11 @@ class Board extends React.Component {
 
   _isSelectable(square) {
     let piece = this.chess.get(square);
-    return (piece && piece.color === this._getCurrentPlayer() &&
-            this.chess.moves({ square }).length > 0);
+    return (
+      piece &&
+      piece.color === this._getCurrentPlayer() &&
+      this.chess.moves({ square }).length > 0
+    );
   }
 
   _getCurrentPlayer() {
@@ -172,7 +198,7 @@ class Board extends React.Component {
     }
     return this.chess.moves({
       verbose: true,
-      square: this.state.selected
+      square: this.state.selected,
     });
   }
 }

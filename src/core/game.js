@@ -65,11 +65,11 @@ import { FlowWithPhases, SimpleFlow } from './flow';
  *                           If it contains any other object, it is presumed to be a
  *                           configuration object for SimpleFlow() or FlowWithPhases().
  */
-function Game({name, setup, moves, playerView, flow}) {
-  if (!name)        name = 'default';
-  if (!setup)       setup = () => ({});
-  if (!moves)       moves = {};
-  if (!playerView)  playerView = G => G;
+function Game({ name, setup, moves, playerView, flow }) {
+  if (!name) name = 'default';
+  if (!setup) setup = () => ({});
+  if (!moves) moves = {};
+  if (!playerView) playerView = G => G;
 
   if (!flow) {
     flow = SimpleFlow({});

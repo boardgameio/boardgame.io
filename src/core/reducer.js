@@ -16,7 +16,7 @@ import * as ActionCreators from './action-creators';
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
  */
-export function createGameReducer({game, numPlayers, multiplayer}) {
+export function createGameReducer({ game, numPlayers, multiplayer }) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -39,7 +39,7 @@ export function createGameReducer({game, numPlayers, multiplayer}) {
 
     // A snapshot of this object so that actions can be
     // replayed over it to view old snapshots.
-    _initial: {}
+    _initial: {},
   };
 
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
@@ -68,9 +68,11 @@ export function createGameReducer({game, numPlayers, multiplayer}) {
         }
 
         const { G, ctx } = game.flow.processGameEvent(
-            { G: state.G, ctx: state.ctx }, action.payload);
+          { G: state.G, ctx: state.ctx },
+          action.payload
+        );
         const log = [...state.log, action];
-        return {...state, G, ctx, log, _id: state._id + 1};
+        return { ...state, G, ctx, log, _id: state._id + 1 };
       }
 
       case Actions.MAKE_MOVE: {

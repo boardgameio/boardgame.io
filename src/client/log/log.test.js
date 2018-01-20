@@ -33,14 +33,14 @@ test('GameLog', () => {
 test('GameLog rewind', () => {
   const game = Game({
     moves: {
-      'A': (G, ctx, arg) => arg,
+      A: (G, ctx, arg) => arg,
     },
 
     flow: {
-      endTurnIf: G => (G == 42)
-    }
+      endTurnIf: G => G == 42,
+    },
   });
-  const reducer = createGameReducer({game});
+  const reducer = createGameReducer({ game });
   const store = createStore(reducer);
 
   store.dispatch(makeMove('A', [1]));
@@ -51,18 +51,33 @@ test('GameLog rewind', () => {
   store.dispatch(gameEvent('endTurn'));
 
   const root = Enzyme.mount(
-      <Provider store={store}>
-      <GameLog log={store.getState().log} initialState={store.getState()._initial} />
-      </Provider>
+    <Provider store={store}>
+      <GameLog
+        log={store.getState().log}
+        initialState={store.getState()._initial}
+      />
+    </Provider>
   );
 
   expect(store.getState().G).toEqual(2);
-  root.find('.log-turn').at(0).simulate('mouseover');
+  root
+    .find('.log-turn')
+    .at(0)
+    .simulate('mouseover');
   expect(store.getState().G).toEqual(1);
-  root.find('.log-turn').at(0).simulate('mouseout');
+  root
+    .find('.log-turn')
+    .at(0)
+    .simulate('mouseout');
   expect(store.getState().G).toEqual(2);
-  root.find('.log-turn').at(1).simulate('mouseover');
+  root
+    .find('.log-turn')
+    .at(1)
+    .simulate('mouseover');
   expect(store.getState().G).toEqual(42);
-  root.find('.log-turn').at(0).simulate('mouseout');
+  root
+    .find('.log-turn')
+    .at(0)
+    .simulate('mouseout');
   expect(store.getState().G).toEqual(2);
 });

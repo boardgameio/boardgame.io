@@ -16,15 +16,16 @@ Enzyme.configure({ adapter: new Adapter() });
 
 class MockChild extends React.Component {
   render() {
-    return <rect width="3" height="2" style={{fill: 'red'}}/>;
+    return <rect width="3" height="2" style={{ fill: 'red' }} />;
   }
 }
 
 test('render correctly', () => {
   const grid = Enzyme.mount(
-    <Grid rows={3} cols={4} style={{width: '500px'}}>
+    <Grid rows={3} cols={4} style={{ width: '500px' }}>
       <MockChild />
-    </Grid>);
+    </Grid>
+  );
   expect(grid.html()).toContain('4 3');
   expect(grid.html()).toContain('width: 500px');
   expect(grid.html()).toContain('rect');
@@ -32,18 +33,20 @@ test('render correctly', () => {
 
 test('add coordinateFn correctly', () => {
   const grid = Enzyme.shallow(
-    <Grid rows={3} cols={4} style={{width: '500px'}}>
+    <Grid rows={3} cols={4} style={{ width: '500px' }}>
       <MockChild />
-    </Grid>);
+    </Grid>
+  );
   expect(grid.find(MockChild).prop('_coordinateFn')).not.toEqual(undefined);
 });
 
 test('correct x and y', () => {
   const grid = Enzyme.mount(
-    <Grid rows={3} cols={4} style={{width: '500px'}}>
+    <Grid rows={3} cols={4} style={{ width: '500px' }}>
       <Token x={100} y={200}>
         <MockChild />
       </Token>
-    </Grid>);
+    </Grid>
+  );
   expect(grid.html()).toContain('100,200');
 });

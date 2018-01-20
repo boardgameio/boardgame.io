@@ -17,28 +17,28 @@ import App from './app';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-const Grid = (n) => Array(n).fill(null);
+const Grid = n => Array(n).fill(null);
 
 // This wraps up the App in a MemoryRouter, which let's us set the route how we want
-const RoutedApp = (props) => (
-  <MemoryRouter initialEntries={[ props.route ]}>
-    <App/>
+const RoutedApp = props => (
+  <MemoryRouter initialEntries={[props.route]}>
+    <App />
   </MemoryRouter>
 );
 RoutedApp.propTypes = {
-  route: PropTypes.string
-}
+  route: PropTypes.string,
+};
 
 test('sanity', () => {
-  Enzyme.mount(<RoutedApp route='/' />);
+  Enzyme.mount(<RoutedApp route="/" />);
 });
 
 test('makeMove changes the game state', () => {
-  const game = Enzyme.mount(<RoutedApp route='/' />);
+  const game = Enzyme.mount(<RoutedApp route="/" />);
   const board = game.find('Board').instance();
 
   expect(board.props.G).toEqual({
-    cells: Grid(9)
+    cells: Grid(9),
   });
 
   const moves = [0, 1];
@@ -48,13 +48,13 @@ test('makeMove changes the game state', () => {
   }
 
   expect(board.props.G).toEqual({
-    cells: ['0', '1'].concat(Grid(7))
+    cells: ['0', '1'].concat(Grid(7)),
   });
   expect(board.props.ctx.gameover).toEqual(undefined);
 });
 
 test('clicked cells are inactive', () => {
-  const game = Enzyme.mount(<RoutedApp route='/' />);
+  const game = Enzyme.mount(<RoutedApp route="/" />);
 
   expect(game.find('td').get(0).props.className).toBe('active');
   game.find('td').forEach(node => node.simulate('click'));
@@ -62,12 +62,12 @@ test('clicked cells are inactive', () => {
 });
 
 test('victory', () => {
-  const game = Enzyme.mount(<RoutedApp route='/' />);
+  const game = Enzyme.mount(<RoutedApp route="/" />);
   const board = game.find('Board').instance();
   const cells = Array(9).fill(null);
 
   expect(board.props.G).toEqual({
-    cells: cells
+    cells: cells,
   });
   expect(board.props.ctx.gameover).toEqual(undefined);
 
@@ -78,7 +78,7 @@ test('victory', () => {
   }
 
   expect(board.props.G).toEqual({
-    cells: ['0', '0', '0', '1', '1'].concat(Grid(4))
+    cells: ['0', '0', '0', '1', '1'].concat(Grid(4)),
   });
   expect(board.props.ctx.gameover).toEqual('0');
 });

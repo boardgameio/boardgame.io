@@ -34,16 +34,16 @@ export class HexGrid extends React.Component {
     style: PropTypes.object,
     hexSize: PropTypes.number,
     children: PropTypes.oneOfType([
-        PropTypes.arrayOf(PropTypes.element),
-        PropTypes.element
+      PropTypes.arrayOf(PropTypes.element),
+      PropTypes.element,
     ]),
-  }
+  };
 
   static defaultProps = {
     radius: 5,
     outline: true,
-    hexSize: 1
-  }
+    hexSize: 1,
+  };
 
   _getOutline() {
     if (!this.props.outline) {
@@ -54,12 +54,17 @@ export class HexGrid extends React.Component {
     const r = this.props.radius;
     for (let x = -r; x <= r; x++) {
       for (let y = -r; y <= r; y++) {
-        const z = - x - y;
+        const z = -x - y;
         if (Math.abs(z) > r) continue;
         hexes.push(
-          <Hex key={`${x}:${y}:${z}`}
-               x={x} y={y} z={z}
-               size={this.props.hexSize} />);
+          <Hex
+            key={`${x}:${y}:${z}`}
+            x={x}
+            y={y}
+            z={z}
+            size={this.props.hexSize}
+          />
+        );
       }
     }
     return hexes;
@@ -68,11 +73,14 @@ export class HexGrid extends React.Component {
   render() {
     const t = this.props.hexSize * this.props.radius * 2;
     return (
-      <svg viewBox={-t + ' ' + -t + ' ' + 2 * t + ' ' + 2 * t}
-           style={this.props.style}>
+      <svg
+        viewBox={-t + ' ' + -t + ' ' + 2 * t + ' ' + 2 * t}
+        style={this.props.style}
+      >
         <g>{this._getOutline()}</g>
         {this.props.children}
-      </svg>);
+      </svg>
+    );
   }
 }
 
@@ -86,18 +94,18 @@ export class Hex extends React.Component {
     y: PropTypes.number,
     z: PropTypes.number,
     size: PropTypes.number,
-  }
+  };
 
   static defaultProps = {
     size: 1,
     x: 0,
     y: 0,
     z: 0,
-  }
+  };
 
   state = {
-    highlight: false
-  }
+    highlight: false,
+  };
 
   constructor(props) {
     super(props);
@@ -164,7 +172,7 @@ export class Hex extends React.Component {
 
   onClick = () => {
     this.setState(old => ({ highlight: !old.highlight }));
-  }
+  };
 
   render() {
     const sx = this.center.x;
@@ -173,13 +181,14 @@ export class Hex extends React.Component {
     const fill = this.state.highlight ? '#aaa' : '#fff';
 
     return (
-      <g className="hex"
-         transform={`translate(${sx}, ${sy})`}>
-        <polygon points={this.points}
-                 onClick={this.onClick}
-                 fill={fill}
-                 stroke="#aaa"
-                 strokeWidth={.01}/>
+      <g className="hex" transform={`translate(${sx}, ${sy})`}>
+        <polygon
+          points={this.points}
+          onClick={this.onClick}
+          fill={fill}
+          stroke="#aaa"
+          strokeWidth={0.01}
+        />
       </g>
     );
   }
