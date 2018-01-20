@@ -13,24 +13,22 @@ import { Deck } from "../src/ui/deck";
 
 import { PlayingCard, standardDeck } from "./PlayingCard";
 
-export class DeckStory extends React.Component {
+export class StandardDeckStory extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      deck: standardDeck
+      selectedCard: null
     };
   }
 
-  onClick = () => {
-    const deck = [...this.state.deck];
-    const card = deck.shift();
-
-    this.setState({
-      deck
-    });
-
-    action("onClick")(card.value + card.suit + " removed");
+  onClick = card => {
+    // this.setState({
+    //   selectedCard: card
+    // });
+    const selectedCard = card.props;
+    console.log(selectedCard);
+    action("onClick")("ugh");
   };
 
   renderCard = card => (
@@ -42,7 +40,7 @@ export class DeckStory extends React.Component {
       <div style={{ padding: "50px" }}>
         <Deck
           onClick={this.onClick}
-          cards={this.state.deck.map(this.renderCard)}
+          cards={standardDeck.map(this.renderCard)}
         />
       </div>
     );

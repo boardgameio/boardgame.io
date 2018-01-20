@@ -10,7 +10,7 @@ import React from "react";
 import { storiesOf } from "@storybook/react";
 
 import { FlippableStory, PlayingCardStory } from "./CardStories";
-import { DeckStory } from "./DeckStory";
+import { StandardDeckStory } from "./DeckStories";
 import { HexGrid, Hex } from "../src/ui/hex";
 
 storiesOf("Card", module).add("Flippable Card", () => <FlippableStory />);
@@ -18,7 +18,7 @@ storiesOf("Card", module).add("Standard Playing Card", () => (
   <PlayingCardStory />
 ));
 storiesOf("Deck", module).add("Standard Deck of Playing Cards", () => (
-  <DeckStory />
+  <StandardDeckStory />
 ));
 
 storiesOf("HexGrid", module)

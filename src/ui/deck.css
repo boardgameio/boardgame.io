@@ -9,5 +9,5 @@
 .bgio-deck {
   position: relative;
   display: inline-flex;
-  z-index: 101;
+  z-index: 1;
 }
