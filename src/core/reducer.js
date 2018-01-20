@@ -15,6 +15,7 @@ import * as ActionCreators from './action-creators';
  * Creates the main game state reducer.
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
+ * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
 export function createGameReducer({ game, numPlayers, multiplayer }) {
   if (!numPlayers) {
