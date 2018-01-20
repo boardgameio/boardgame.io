@@ -19,6 +19,7 @@
     "clean": "node ./scripts/clean.js",
     "prepare": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
+    "prettier": "prettier --write \"{examples,docs,src,storybook}/**/*.{js,css,md}\"",
     "postpublish": "node ./scripts/postpublish.js"
   },
   "main": "dist/boardgameio.js",
@@ -80,7 +81,9 @@
     "jest": "^21.2.1",
     "koa-helmet": "^3.2.0",
     "koa-webpack": "^1.0.0",
+    "lint-staged": "^6.0.1",
     "open-browser-webpack-plugin": "0.0.5",
+    "prettier": "^1.10.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",
