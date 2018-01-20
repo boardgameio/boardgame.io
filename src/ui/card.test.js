@@ -16,7 +16,7 @@ Enzyme.configure({ adapter: new Adapter() });
 test("is rendered", () => {
   const card = Enzyme.mount(<Card isFaceUp />);
   expect(card.html()).toBe(
-    '<div class="bgio-card "><div class="bgio-card__front">Card</div></div>'
+    '<div class="bgio-card"><div class="bgio-card__front">Card</div></div>'
   );
 });
 
