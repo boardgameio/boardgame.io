@@ -82,21 +82,3 @@ test('handlers', () => {
 
   expect(onClick).toHaveBeenCalled();
 });
-
-test('other coordinates', () => {
-  let polar = props => {
-    return {
-      x: props.r * Math.cos(props.teta),
-      y: props.r * Math.sin(props.teta),
-    };
-  };
-
-  const token = Enzyme.shallow(
-    <Token r={1} teta={Math.PI / 6} _coordinateFn={polar}>
-      <p>foo</p>
-    </Token>
-  );
-
-  expect(token.state('x')).toBeCloseTo(Math.sqrt(3) / 2, 3);
-  expect(token.state('y')).toBeCloseTo(0.5, 3);
-});

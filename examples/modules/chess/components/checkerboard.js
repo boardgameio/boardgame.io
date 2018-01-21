@@ -60,7 +60,7 @@ class Checkerboard extends React.Component {
     style: {},
   };
 
-  onClick = (x, y) => {
+  onClick = ({ x, y }) => {
     this.props.onClick({ square: this._cartesianToAlgebraic(x, y) });
   };
 

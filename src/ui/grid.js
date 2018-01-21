@@ -12,8 +12,7 @@ import PropTypes from 'prop-types';
 /**
  * Grid
  *
- * Component that will show children on cartesian plane using X and Y
- * coordinates.
+ * Component that will show children on a cartesian regular grid.
  *
  * Props:
  *   rows       - Number of rows (height) of the grid.
@@ -26,23 +25,17 @@ import PropTypes from 'prop-types';
  * Usage:
  *
  * <Grid rows={8} cols={8}>
- *   <Token x={1} y={2}>
- *     <Knight color='dark' />
- *   </Token>
- * </Grid>
- *
- * or
- *
- * <Grid rows={1} cols={1} style={{width: '500px'}}>
- *   <Knight color='dark' />
+ *   <Token x={1} y={2}/>
  * </Grid>
  */
-class Grid extends React.Component {
+export class Grid extends React.Component {
   static propTypes = {
     rows: PropTypes.number.isRequired,
     cols: PropTypes.number.isRequired,
+    outline: PropTypes.bool,
     style: PropTypes.object,
     colorMap: PropTypes.object,
+    cellSize: PropTypes.number,
     onClick: PropTypes.func,
     children: PropTypes.oneOfType([
       PropTypes.arrayOf(PropTypes.element),
@@ -52,10 +45,8 @@ class Grid extends React.Component {
 
   static defaultProps = {
     colorMap: {},
-  };
-
-  cartesianCord = props => {
-    return { x: props.x, y: props.y };
+    outline: true,
+    cellSize: 1,
   };
 
   _getCellColor(x, y) {
@@ -67,19 +58,22 @@ class Grid extends React.Component {
     return color;
   }
 
-  _getSquares() {
+  _getGrid() {
+    if (!this.props.outline) {
+      return null;
+    }
+
     let squares = [];
     for (let x = 0; x < this.props.cols; x++) {
       for (let y = 0; y < this.props.rows; y++) {
         squares.push(
-          <rect
+          <Square
+            key={this.props.cols * y + x}
             style={{ fill: this._getCellColor(x, y) }}
-            width="1"
-            height="1"
             x={x}
             y={y}
-            key={this.props.cols * y + x}
-            onClick={() => this.props.onClick(x, y)}
+            size={this.props.cellSize}
+            onClick={this.onClick}
           />
         );
       }
@@ -87,10 +81,17 @@ class Grid extends React.Component {
     return squares;
   }
 
+  onClick = args => {
+    if (this.props.onClick) {
+      this.props.onClick(args);
+    }
+  };
+
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
-        _coordinateFn: this.cartesianCord,
+        _inGrid: true,
+        onClick: this.onClick,
       });
     });
 
@@ -99,11 +100,76 @@ class Grid extends React.Component {
         viewBox={'0 0 ' + this.props.cols + ' ' + this.props.rows}
         style={this.props.style}
       >
-        <g>{this._getSquares()}</g>
+        <g>{this._getGrid()}</g>
         {tokens}
       </svg>
     );
   }
 }
 
-export default Grid;
+/**
+ * Square
+ *
+ * Component that renders a square inside a Grid.
+ *
+ * Props:
+ *   x       - X coordinate on grid coordinates.
+ *   y       - Y coordinate on grid coordinates.
+ *   size    - Square size.
+ *   style   - Custom styling.
+ *   onClick - Invoked when a Square is clicked.
+ *
+ * Not meant to be used by the end user directly (use Token).
+ * Also not exposed in the NPM.
+ */
+export class Square extends React.Component {
+  static propTypes = {
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+    size: PropTypes.number,
+    style: PropTypes.any,
+    onClick: PropTypes.func,
+    children: PropTypes.element,
+  };
+
+  static defaultProps = {
+    size: 1,
+    x: 0,
+    y: 0,
+    style: { fill: '#fff' },
+  };
+
+  onClick = () => {
+    this.props.onClick({
+      x: this.props.x,
+      y: this.props.y,
+    });
+  };
+
+  render() {
+    const tx = this.props.x * this.props.size;
+    const ty = this.props.y * this.props.size;
+
+    // If a child is passed, render child.
+    if (this.props.children) {
+      return (
+        <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
+          {this.props.children}
+        </g>
+      );
+    }
+
+    // If no child, render a square.
+    return (
+      <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
+        <rect
+          style={this.props.style}
+          width={this.props.size}
+          height={this.props.size}
+          x={0}
+          y={0}
+        />
+      </g>
+    );
+  }
+}
