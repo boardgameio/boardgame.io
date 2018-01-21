@@ -27,7 +27,7 @@ test('position', () => {
       </Token>
     </Checkerboard>
   );
-  expect(grid.html()).toContain('translate(1,3)');
+  expect(grid.html()).toContain('translate(1, 3)');
 });
 
 test('click', () => {

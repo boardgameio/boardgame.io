@@ -1,35 +1,48 @@
 /*
  * Copyright 2018 The boardgame.io Authors
  *
- * Use of this source code is governed by a MIT-style
+ * Use of this source code is governed by a MIT-syle
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
-const ANIMATION_DURATION = 750;
+import { Hex } from './hex';
+import { Square } from './grid';
 
 /**
  * Token
  *
- * Component that handles board game piece behaviors and position on grid.
- * If animate=True, it animates any change in x and y using in out cubic easing.
+ * Component that represents a board game piece (or token).
+ * Can be used by itself or with one of the grid systems
+ * provided (Grid or HexGrid).
+ *
+ * A token renders as a square inside a Grid and a
+ * hexagon inside a HexGrid. Additionally, you can pass
+ * it a child if you want any other custom rendering.
  *
  * Props:
- *   x       - X coordinate on grid coordinates.
- *   y       - Y coordinate on grid coordinates.
- *   animate - Whether it should animate any change in position.
- *   onClick - Callback to be called when clicked, with X and Y parameters.
- *   _coordinateFn - Transform coordinates to SVG space. Function should be
- * given by the grid, no need to specify it manually.
+ *   x       - X coordinate on grid / hex grid.
+ *   y       - Y coordinate on grid / hex grid.
+ *   z       - Z coordinate on hex grid.
+ *   animate - Changes in position are animated if true.
+ *   animationDuration - Length of animation.
+ *   onClick - Called when the token is clicked.
  *
  * Usage:
  *
  * <Grid rows={8} cols={8}>
+ *   <Token x={1} y={2}/>
+ * </Grid>
+ *
+ * <HexGrid>
+ *   <Token x={1} y={2} z={-3}/>
+ * </HexGrid>
+ *
+ * <Grid rows={8} cols={8}>
  *   <Token x={1} y={2}>
- *     <Knight color='dark' />
+ *     <Knight color="white"/>
  *   </Token>
  * </Grid>
  */
@@ -37,85 +50,97 @@ class Token extends React.Component {
   static propTypes = {
     x: PropTypes.number,
     y: PropTypes.number,
+    z: PropTypes.number,
+    style: PropTypes.any,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
-    _coordinateFn: PropTypes.func,
     children: PropTypes.element,
+    animationDuration: PropTypes.number,
+    _inGrid: PropTypes.bool,
+    _inHexGrid: PropTypes.bool,
+  };
+
+  static defaultProps = {
+    animationDuration: 750,
   };
 
   /**
    * Sets the x and y of the state on creation.
    */
   componentWillMount() {
-    this.setState(this._getSvgCoordinates());
+    this.setState(this.getCoords());
   }
 
   /**
-   * If there is a change in props, saves old X, Y, and current time. Starts
-   * animation.
+   * If there is a change in props, saves old x/y,
+   * and current time. Starts animation.
    * @param {Object} nextProps Next props.
    */
   componentWillReceiveProps(nextProps) {
-    let oldCoord = this._getSvgCoordinates();
-    let newCoord = this._getSvgCoordinates(nextProps);
+    let oldCoord = this.getCoords();
+    let newCoord = this.getCoords(nextProps);
+
+    // Debounce.
     if (oldCoord.x == newCoord.x && oldCoord.y == newCoord.y) {
-      //Debounce
       return;
     }
+
     this.setState({
       ...this.state,
       originTime: Date.now(),
       originX: oldCoord.x,
       originY: oldCoord.y,
+      originZ: oldCoord.z,
     });
+
     requestAnimationFrame(this._animate(Date.now()));
   }
 
   /**
-   * Recursively animates state x and y value in a given time.
+   * Recursively animates x and y.
    * @param {number} now Unix timestamp when this was called.
    */
   _animate(now) {
     return (() => {
       let elapsed = now - this.state.originTime;
-      let svgCoord = this._getSvgCoordinates();
-      if (elapsed < ANIMATION_DURATION && this.props.animate) {
-        let percentage = this._easeInOutCubic(
+      let svgCoord = this.getCoords();
+      if (elapsed < this.props.animationDuration && this.props.animate) {
+        const percentage = this._easeInOutCubic(
           elapsed,
           0,
           1,
-          ANIMATION_DURATION
+          this.props.animationDuration
         );
+
         this.setState({
           ...this.state,
           x:
             (svgCoord.x - this.state.originX) * percentage + this.state.originX,
           y:
             (svgCoord.y - this.state.originY) * percentage + this.state.originY,
+          z:
+            (svgCoord.z - this.state.originZ) * percentage + this.state.originZ,
         });
+
         requestAnimationFrame(this._animate(Date.now()));
       } else {
         this.setState({
           ...this.state,
           x: svgCoord.x,
           y: svgCoord.y,
+          z: svgCoord.z,
         });
       }
     }).bind(this);
   }
 
   /**
-   * Gets SVG coordinates. If a coordinate function is available, it will pass
-   * all props to it and receive back X and Y in SVG space
+   * Gets SVG x/y/z coordinates.
    * @param {Object} props Props object to get coordinates from.
-   * @return {Object} Object with x and y parameter.
+   * @return {Object} Object with x, y and z parameters.
    */
-  _getSvgCoordinates(props = this.props) {
-    if (props._coordinateFn) {
-      return this.props._coordinateFn(props);
-    } else {
-      return { x: props.x, y: props.y };
-    }
+  getCoords(props = this.props) {
+    return { x: props.x, y: props.y, z: props.z };
   }
 
   /**
@@ -133,16 +158,38 @@ class Token extends React.Component {
   }
 
   render() {
-    return (
-      <g
-        transform={'translate(' + this.state.x + ',' + this.state.y + ')'}
-        onClick={() => {
-          this.props.onClick(this.props);
-        }}
-      >
-        {this.props.children}
-      </g>
-    );
+    if (this.props._inHexGrid) {
+      return (
+        <Hex
+          x={this.state.x}
+          y={this.state.y}
+          z={this.state.z}
+          style={this.props.style}
+          onClick={this.props.onClick}
+        >
+          {this.props.children}
+        </Hex>
+      );
+    }
+
+    if (this.props._inGrid) {
+      return (
+        <Square
+          x={this.state.x}
+          y={this.state.y}
+          style={this.props.style}
+          onClick={this.props.onClick}
+        >
+          {this.props.children}
+        </Square>
+      );
+    }
+
+    return React.Children.map(this.props.children, child => {
+      return React.cloneElement(child, {
+        onClick: this.props.onClick,
+      });
+    });
   }
 }
 

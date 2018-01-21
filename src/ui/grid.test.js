@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import Grid from './grid';
+import { Grid } from './grid';
 import Token from './token';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -31,22 +31,39 @@ test('render correctly', () => {
   expect(grid.html()).toContain('rect');
 });
 
-test('add coordinateFn correctly', () => {
-  const grid = Enzyme.shallow(
-    <Grid rows={3} cols={4} style={{ width: '500px' }}>
-      <MockChild />
-    </Grid>
-  );
-  expect(grid.find(MockChild).prop('_coordinateFn')).not.toEqual(undefined);
+test('no outline', () => {
+  const grid = Enzyme.mount(<Grid rows={3} cols={4} outline={false} />);
+  expect(grid.html()).not.toContain('rect');
+});
+
+test('click handler', () => {
+  {
+    const onClick = jest.fn();
+    const grid = Enzyme.mount(<Grid rows={3} cols={4} onClick={onClick} />);
+    grid
+      .find('Square')
+      .at(0)
+      .simulate('click');
+    expect(onClick).toHaveBeenCalled();
+  }
+
+  // No crash when onClick is not provided.
+  {
+    const grid = Enzyme.mount(<Grid rows={3} cols={4} />);
+    grid
+      .find('Square')
+      .at(0)
+      .simulate('click');
+  }
 });
 
 test('correct x and y', () => {
   const grid = Enzyme.mount(
     <Grid rows={3} cols={4} style={{ width: '500px' }}>
-      <Token x={100} y={200}>
+      <Token x={1} y={2}>
         <MockChild />
       </Token>
     </Grid>
   );
-  expect(grid.html()).toContain('100,200');
+  expect(grid.html()).toContain('1, 2');
 });
