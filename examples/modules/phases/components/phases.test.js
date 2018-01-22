@@ -14,7 +14,7 @@ import Phases from './phases';
 Enzyme.configure({ adapter: new Adapter() });
 
 test('basic', () => {
-  const game = Enzyme.mount(<Phases/>);
+  const game = Enzyme.mount(<Phases />);
   const board = game.find('Board');
   expect(board.props().G.deck).toBe(5);
 });

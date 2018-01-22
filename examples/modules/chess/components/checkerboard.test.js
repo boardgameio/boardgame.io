@@ -20,29 +20,43 @@ test('render squares correctly', () => {
 });
 
 test('position', () => {
-  const grid = Enzyme.shallow(<Checkerboard>
-    <Token square="b5">
-      <circle r="0.25" fill="red"/>
-    </Token>
-  </Checkerboard>);
-  expect(grid.html()).toContain('translate(1,3)')
+  const grid = Enzyme.shallow(
+    <Checkerboard>
+      <Token square="b5">
+        <circle r="0.25" fill="red" />
+      </Token>
+    </Checkerboard>
+  );
+  expect(grid.html()).toContain('translate(1, 3)');
 });
 
 test('click', () => {
   const onClick = jest.fn();
-  const grid = Enzyme.mount(<Checkerboard onClick={onClick}/>);
-  grid.find('rect').at(5).simulate('click');
+  const grid = Enzyme.mount(<Checkerboard onClick={onClick} />);
+  grid
+    .find('rect')
+    .at(5)
+    .simulate('click');
   expect(onClick).toHaveBeenCalledWith({ square: 'a3' });
 });
 
 test('invalid square', () => {
   let invalidSquare = () => {
-    Enzyme.shallow(<Checkerboard/>).instance().algebraicCord({square: '*1'})
+    Enzyme.shallow(<Checkerboard />)
+      .instance()
+      .algebraicCord({ square: '*1' });
   };
   expect(invalidSquare).toThrow();
 });
 
 test('colorMap', () => {
-  const grid = Enzyme.mount(<Checkerboard highlightedSquares={{'a5': 'blue'}}/>);
-  expect(grid.find('rect').at(3).html()).toContain('blue');
+  const grid = Enzyme.mount(
+    <Checkerboard highlightedSquares={{ a5: 'blue' }} />
+  );
+  expect(
+    grid
+      .find('rect')
+      .at(3)
+      .html()
+  ).toContain('blue');
 });

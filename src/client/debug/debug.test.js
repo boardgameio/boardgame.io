@@ -24,14 +24,14 @@ jest.mock('mousetrap', () => {
     bind: (key, fn) => {
       keys[key] = fn;
     },
-    unbind: (key) => {
+    unbind: key => {
       delete keys[key];
     },
-    simulate: (key) => {
+    simulate: key => {
       keys[key]({
         preventDefault: () => {},
       });
-    }
+    },
   };
 });
 
@@ -48,15 +48,22 @@ const gamestate = {
 
 test('basic', () => {
   const debug = Enzyme.mount(
-      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />);
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
 
   const titles = debug.find('h3').map(title => title.text());
   expect(titles).toEqual(['players', 'moves', 'events', 'state']);
 
   expect(debug.state('showLog')).toEqual(false);
-  debug.find('.menu .item').at(1).simulate('click');
+  debug
+    .find('.menu .item')
+    .at(1)
+    .simulate('click');
   expect(debug.state('showLog')).toEqual(true);
-  debug.find('.menu .item').at(0).simulate('click');
+  debug
+    .find('.menu .item')
+    .at(0)
+    .simulate('click');
   expect(debug.state('showLog')).toEqual(false);
 
   debug.unmount();
@@ -64,9 +71,7 @@ test('basic', () => {
 
 test('parse arguments', () => {
   const spy = jest.fn();
-  const root = Enzyme.mount(
-      <DebugMove name='test' fn={spy} />
-  );
+  const root = Enzyme.mount(<DebugMove name="test" fn={spy} />);
 
   root.instance().span.innerText = '1,2';
   root.instance().onSubmit();
@@ -79,7 +84,7 @@ test('parse arguments', () => {
 
 test('KeyboardShortcut', () => {
   const fn = jest.fn();
-  Enzyme.mount(<KeyboardShortcut value='e' onPress={fn} />);
+  Enzyme.mount(<KeyboardShortcut value="e" onPress={fn} />);
   Mousetrap.simulate('e');
   expect(fn).toHaveBeenCalled();
 });
@@ -87,35 +92,35 @@ test('KeyboardShortcut', () => {
 test('DebugMove', () => {
   const fn = jest.fn();
   const root = Enzyme.mount(
-      <KeyboardShortcut value='e'>
-        <DebugMove fn={fn} name='endTurn' />
-      </KeyboardShortcut>
+    <KeyboardShortcut value="e">
+      <DebugMove fn={fn} name="endTurn" />
+    </KeyboardShortcut>
   );
 
   root.find(DebugMove).simulate('click');
-  root.find('.move span').simulate('keyDown', {key: 'Enter'});
+  root.find('.move span').simulate('keyDown', { key: 'Enter' });
 
   expect(fn.mock.calls.length).toBe(1);
 
   root.find(DebugMove).simulate('click');
-  root.find('.move span').simulate('keydown', {key: '1'});
-  root.find('.move span').simulate('keydown', {key: 'Enter'});
+  root.find('.move span').simulate('keydown', { key: '1' });
+  root.find('.move span').simulate('keydown', { key: 'Enter' });
 
   expect(fn.mock.calls.length).toBe(2);
 });
 
 test('escape blurs DebugMove', () => {
   const root = Enzyme.mount(
-      <KeyboardShortcut value='e'>
-        <DebugMove fn={jest.fn()} name='endTurn' />
-      </KeyboardShortcut>
+    <KeyboardShortcut value="e">
+      <DebugMove fn={jest.fn()} name="endTurn" />
+    </KeyboardShortcut>
   );
 
   expect(root.state().active).toBe(false);
 
   root.find(DebugMove).simulate('click');
   expect(root.state().active).toBe(true);
-  root.find('.move span').simulate('keydown', {key: 'Escape'});
+  root.find('.move span').simulate('keydown', { key: 'Escape' });
   expect(root.state().active).toBe(false);
 
   root.find(DebugMove).simulate('click');
@@ -126,8 +131,8 @@ test('escape blurs DebugMove', () => {
 
 test('shortcuts are unique a-z', () => {
   const moves = {
-    'takeCard': () => {},
-    'takeToken': () => {},
+    takeCard: () => {},
+    takeToken: () => {},
   };
 
   const element = React.createElement(Debug, {
@@ -139,15 +144,15 @@ test('shortcuts are unique a-z', () => {
   const instance = Enzyme.mount(element).instance();
 
   expect(instance.shortcuts).toEqual({
-    'takeCard': 'a',
-    'takeToken': 'b',
+    takeCard: 'a',
+    takeToken: 'b',
   });
 });
 
 test('shortcuts are unique first char', () => {
   const moves = {
-    'clickCell': () => {},
-    'takeCard': () => {},
+    clickCell: () => {},
+    takeCard: () => {},
   };
 
   const element = React.createElement(Debug, {
@@ -159,8 +164,8 @@ test('shortcuts are unique first char', () => {
   const instance = Enzyme.mount(element).instance();
 
   expect(instance.shortcuts).toEqual({
-    'clickCell': 'c',
-    'takeCard': 't',
+    clickCell: 'c',
+    takeCard: 't',
   });
 });
 
@@ -171,9 +176,9 @@ test('save / restore', () => {
   });
 
   const debug = Enzyme.mount(
-      <Provider store={store}>
+    <Provider store={store}>
       <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
-      </Provider>
+    </Provider>
   );
 
   const restoredState = { restore: true };
@@ -182,36 +187,47 @@ test('save / restore', () => {
   const getItem = jest.fn(() => restoredJSON);
   window.localStorage = { setItem, getItem };
 
-  debug.find('.key-box').at(2).simulate('click');
+  debug
+    .find('.key-box')
+    .at(2)
+    .simulate('click');
   expect(setItem).toHaveBeenCalled();
 
-  debug.find('.key-box').at(3).simulate('click');
+  debug
+    .find('.key-box')
+    .at(3)
+    .simulate('click');
   expect(getItem).toHaveBeenCalled();
 
   expect(loggedAction).toEqual(restore(restoredState));
 
   restoredJSON = null;
   loggedAction = null;
-  debug.find('.key-box').at(3).simulate('click');
+  debug
+    .find('.key-box')
+    .at(3)
+    .simulate('click');
   expect(loggedAction).toEqual(null);
 });
 
 test('toggle Debug UI', () => {
   const debug = Enzyme.mount(
-      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />);
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
 
   expect(debug.find('.debug-ui').length).toEqual(1);
   Mousetrap.simulate('d');
-  debug.setProps({});  // https://github.com/airbnb/enzyme/issues/1245
+  debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
   expect(debug.find('.debug-ui').length).toEqual(0);
 });
 
 test('toggle Log', () => {
   const debug = Enzyme.mount(
-      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />);
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
 
   expect(debug.find('GameLog').length).toEqual(0);
   Mousetrap.simulate('l');
-  debug.setProps({});  // https://github.com/airbnb/enzyme/issues/1245
+  debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
   expect(debug.find('GameLog').length).toEqual(1);
 });

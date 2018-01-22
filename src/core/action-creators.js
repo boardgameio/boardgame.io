@@ -36,7 +36,7 @@ export const gameEvent = (type, args, playerID) => ({
  * Used to reset the Redux store's state.
  * @param {object} state - The state to restore.
  */
-export const restore = (state) => ({
-  type:  Actions.RESTORE,
+export const restore = state => ({
+  type: Actions.RESTORE,
   state,
 });

@@ -23,7 +23,7 @@ export const TurnOrder = {
    */
   DEFAULT: {
     first: (G, ctx) => ctx.currentPlayer,
-    next: (G, ctx) => ((+ctx.currentPlayer + 1) % ctx.numPlayers + ""),
+    next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
   },
 
   /**
@@ -47,11 +47,11 @@ export const TurnOrder = {
       if (ctx.allPassed) return;
       let nextPlayer = ctx.currentPlayer;
       for (let i = 0; i < ctx.numPlayers; i++) {
-        nextPlayer = ((+nextPlayer + 1) % ctx.numPlayers + "");
+        nextPlayer = (+nextPlayer + 1) % ctx.numPlayers + '';
         if (!(nextPlayer in ctx.passMap)) {
           return nextPlayer;
         }
       }
-    }
+    },
   },
 };

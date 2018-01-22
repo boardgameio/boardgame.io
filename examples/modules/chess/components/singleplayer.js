@@ -13,11 +13,11 @@ import ChessBoard from './board';
 
 const App = Client({
   game: ChessGame,
-  board: ChessBoard
+  board: ChessBoard,
 });
 
 const Singleplayer = () => (
-  <div style={{padding: 50}}>
+  <div style={{ padding: 50 }}>
     <App gameID="single" />
   </div>
 );

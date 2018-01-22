@@ -1,17 +1,20 @@
-- Getting Started
-  - [Overview](/)
-  - [Concepts](concepts.md)
-  - [Tutorial](tutorial.md)
+* Getting Started
 
-- Guides
-  - [Multiplayer](multiplayer.md)
-  - [Phases](phases.md)
-  - [Secret State](secret-state.md)
+  * [Overview](/)
+  * [Concepts](concepts.md)
+  * [Tutorial](tutorial.md)
 
-- API Reference
-  - [Game](api/Game.md)
-  - [Client](api/Client.md)
-  - [Server](api/Server.md)
+* Guides
 
-- Component Library
-  - [Showcase](storybook.md)
+  * [Multiplayer](multiplayer.md)
+  * [Phases](phases.md)
+  * [Secret State](secret-state.md)
+
+* API Reference
+
+  * [Game](api/Game.md)
+  * [Client](api/Client.md)
+  * [Server](api/Server.md)
+
+* Component Library
+  * [Showcase](storybook.md)

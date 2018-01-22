@@ -14,11 +14,11 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 test('rook white is rendered', () => {
-  const piece = Enzyme.mount(<Rook color='w'/>);
+  const piece = Enzyme.mount(<Rook color="w" />);
   expect(piece.find('path').length).toBeGreaterThan(0);
 });
 
 test('rook black is rendered', () => {
-  const piece = Enzyme.mount(<Rook color='b'/>);
+  const piece = Enzyme.mount(<Rook color="b" />);
   expect(piece.find('path').length).toBeGreaterThan(0);
 });

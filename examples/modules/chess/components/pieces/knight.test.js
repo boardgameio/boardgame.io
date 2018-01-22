@@ -14,11 +14,11 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 test('knight white is rendered', () => {
-  const piece = Enzyme.mount(<Knight color='w'/>);
+  const piece = Enzyme.mount(<Knight color="w" />);
   expect(piece.find('path').length).toBeGreaterThan(0);
 });
 
 test('knight black is rendered', () => {
-  const piece = Enzyme.mount(<Knight color='b'/>);
+  const piece = Enzyme.mount(<Knight color="b" />);
   expect(piece.find('path').length).toBeGreaterThan(0);
 });
