@@ -6,5 +6,5 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import './hex';
-import './card';
+import '@storybook/addon-knobs/register';
+import '@storybook/addon-actions/register';
