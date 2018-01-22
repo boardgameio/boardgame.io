@@ -21,7 +21,7 @@ function Basic() {
     state = { x: 0, y: 0, z: 0 };
     onClick = args => {
       this.setState(args);
-      action('hex-click')('x: ' + args.x + ' y: ' + args.y + ' z: ' + args.z);
+      action('onClick')(args);
     };
     render = () => (
       <HexGrid levels={levels} outline={outline} onClick={this.onClick}>
