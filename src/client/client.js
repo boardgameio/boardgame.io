@@ -33,7 +33,13 @@ import './client.css';
  *   and dispatch actions such as MAKE_MOVE and END_TURN.
  */
 function Client({ game, numPlayers, board, multiplayer, debug }) {
+  let server = undefined;
   if (!multiplayer) multiplayer = false;
+  else {
+    if (multiplayer instanceof Object && 'server' in multiplayer) {
+      server = multiplayer.server;
+    }
+  }
   if (debug === undefined) debug = true;
 
   const GameReducer = createGameReducer({
@@ -77,7 +83,8 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
           props.gameID,
           props.playerID,
           game.name,
-          numPlayers
+          numPlayers,
+          server
         );
         this.store = this.multiplayerClient.createStore(GameReducer);
       } else {
