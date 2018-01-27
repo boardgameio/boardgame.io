@@ -161,15 +161,16 @@ export function SimpleFlow({
       }
     }
 
-    // End the game automatically if endGameIf is true.
     const gameover = endGameIf(state.G, state.ctx);
-    if (gameover !== undefined) {
-      return { ...state, ctx: { ...state.ctx, gameover } };
+
+    // End the turn automatically if endTurnIf is true or if endGameIf returns.
+    if (endTurnIfWrap(state.G, state.ctx) || gameover !== undefined) {
+      state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
     }
 
-    // End the turn automatically if endTurnIf is true.
-    if (endTurnIfWrap(state.G, state.ctx)) {
-      state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
+    // End the game automatically if endGameIf returns.
+    if (gameover !== undefined) {
+      return { ...state, ctx: { ...state.ctx, gameover } };
     }
 
     return state;
@@ -465,8 +466,14 @@ export function FlowWithPhases({
       }
     }
 
-    // End the game automatically if endGameIf is true.
     const gameover = endGameIfWrap(state.G, state.ctx);
+
+    // End the turn automatically if endTurnIf is true  or if endGameIf returns.
+    if (endTurnIfWrap(state.G, state.ctx) || gameover !== undefined) {
+      state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
+    }
+
+    // End the game automatically if endGameIf returns.
     if (gameover !== undefined) {
       return { ...state, ctx: { ...state.ctx, gameover } };
     }
@@ -482,10 +489,6 @@ export function FlowWithPhases({
       });
     }
 
-    // End the turn automatically if endTurnIf is true.
-    if (endTurnIfWrap(state.G, state.ctx)) {
-      state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
-    }
 
     return state;
   }
