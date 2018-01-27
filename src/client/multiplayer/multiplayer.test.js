@@ -94,3 +94,17 @@ test('move whitelist', () => {
   expect(mockSocket.emit).not.toHaveBeenCalled();
   mockSocket.emit.mockReset();
 });
+
+test('game server is set when provided', () => {
+  var hostname = 'host';
+  var port = '1234';
+  var server = hostname + ':' + port;
+
+  const m = new Multiplayer(undefined, 0, 0, 0, 1, server);
+  expect(m.socket.io.engine.hostname).toEqual(hostname);
+  expect(m.socket.io.engine.port).toEqual(port);
+
+  const m2 = new Multiplayer(undefined, 0, 0, 0, 1, undefined);
+  expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
+  expect(m2.socket.io.engine.port).not.toEqual(port);
+});
