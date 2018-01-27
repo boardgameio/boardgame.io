@@ -17,15 +17,18 @@ import { createEventDispatchers } from '../core/flow';
 import { createGameReducer, createMoveDispatchers } from '../core/reducer';
 import './client.css';
 
-/*
- * client
+/**
+ * Client
  *
- * Main function used to a register a game client.
+ * Main function used to a create a game client.
  *
- * Args:
- *   G     - The initial game state.
- *   moves - The game move reducer.
- *   board - React component to render your game.
+ * @param {...object} game - The return value of `Game`.
+ * @param {...object} numPlayers - The number of players.
+ * @param {...object} board - The React component for the game.
+ * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
+ *                                  to make a multiplayer client. The second
+ *                                  syntax specifies a non-default socket server.
+ * @param {...object} debug - Enables the Debug UI.
  *
  * Returns:
  *   A React component that wraps board and provides an
@@ -34,12 +37,11 @@ import './client.css';
  */
 function Client({ game, numPlayers, board, multiplayer, debug }) {
   let server = undefined;
-  if (!multiplayer) multiplayer = false;
-  else {
-    if (multiplayer instanceof Object && 'server' in multiplayer) {
-      server = multiplayer.server;
-    }
+  if (multiplayer instanceof Object && 'server' in multiplayer) {
+    server = multiplayer.server;
+    multiplayer = true;
   }
+
   if (debug === undefined) debug = true;
 
   const GameReducer = createGameReducer({
