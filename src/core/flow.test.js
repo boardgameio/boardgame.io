@@ -347,6 +347,50 @@ test('endGameIf', () => {
     state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.gameover).toBe('A');
   }
+
+  // Test that the turn automatically ended on game over for simple flow.
+  {
+    const flow = SimpleFlow({ endGameIf: G => G.win });
+    const game = Game({
+      moves: {
+        A: () => ({ win: 'A' }),
+        B: G => G,
+      },
+      flow,
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = reducer(state, makeMove('B'));
+    expect(state.ctx.gameover).toBe(undefined);
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = reducer(state, makeMove('A'));
+    expect(state.ctx.gameover).toBe('A');
+    expect(state.log[state.log.length - 1].type).toBe('endTurn');
+  }
+
+  // Test that the turn automatically ended on game over for flow with phases.
+  {
+    const flow = FlowWithPhases({ endGameIf: G => G.win });
+    const game = Game({
+      moves: {
+        A: () => ({ win: 'A' }),
+        B: G => G,
+      },
+      flow,
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = reducer(state, makeMove('B'));
+    expect(state.ctx.gameover).toBe(undefined);
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = reducer(state, makeMove('A'));
+    expect(state.ctx.gameover).toBe('A');
+    expect(state.log[state.log.length - 1].type).toBe('endTurn');
+  }
 });
 
 test('endTurnIf', () => {
