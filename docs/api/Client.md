@@ -55,7 +55,10 @@ const App = Client({
   board: Board,
 
   // Set to true to enable sending move updates to the
-  // server via WebSockets.
+  // server via WebSockets. Can also be set to
+  // { server: 'hostname:port' }
+  // to specify a socket server that's different from
+  // the one that served up the page.
   multiplayer: false,
 
   // Set to false to disable the Debug UI.

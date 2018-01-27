@@ -52,6 +52,21 @@ const TicTacToe = Game({
 })
 ```
 
+By default, all client instances are synced to a game with
+an ID `'default'`. To play a new game instance, just pass
+`gameID` to your client `<App/>`. All clients that use
+this ID will now see the same board (synced in realtime).
+
+```
+ReactDOM.render(<App gameID="gameid"/>, document.getElementById('root'));
+```
+
+The `gameID` could be determined by a URL path, for example,
+so you could have all browsers that connect to a certain
+URL be synced to the same game.
+
+#### Production
+
 In a real app, you might want to also serve your React
 frontend from the same server as well. The returned object
 `app` is a [Koa](http://koajs.com/) app that you can
@@ -67,15 +82,14 @@ app.use(KoaStatic('path/to/dir'));
 app.listen(8000);
 ```
 
-By default, all client instances are synced to a game with
-an ID `'default'`. To play a new game instance, just pass
-`gameID` to your client `<App/>`. All clients that use
-this ID will now see the same board (synced in realtime).
+You might also want to keep them separate (one server to serve the web app
+and another one to serve the socket requests). In this case, you
+can have the client specify a socket server in the `multiplayer` option.
 
+```js
+Client({
+  game: TicTacToe,
+  board: TicTacToeBoard,
+  multiplayer: { server: 'hostname:port' },
+});
 ```
-ReactDOM.render(<App gameID="gameid" />, document.getElementById('root'));
-```
-
-The `gameID` could be determined by a URL path, for example,
-so you could have all browsers that connect to a certain
-URL be synced to the same game.
