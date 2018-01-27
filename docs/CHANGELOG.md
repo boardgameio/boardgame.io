@@ -1,3 +1,13 @@
+# v0.16.8
+
+#### Features
+
+[[a482469](https://github.com/google/boardgame.io/commit/a482469b2f6a317a50fb25f23b7ffc0c2f597c1e)] ability to specify socket server
+
+#### Bugfixes
+
+[[2ab3dfc](https://github.com/google/boardgame.io/commit/2ab3dfc6928eb8f0bfdf1ce319ac53021a2f905b)] end turn automatically when game ends
+
 # v0.16.7
 
 #### Bugfixes
