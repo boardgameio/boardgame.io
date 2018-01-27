@@ -62,6 +62,10 @@ const TicTacToe = Game({
         return ctx.currentPlayer;
       }
     },
+
+    allowEndTurnIf: (G, ctx) => {
+      return ctx.currentPlayerMoves > 0;
+    },
   },
 });
 
