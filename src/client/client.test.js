@@ -163,3 +163,24 @@ test('update gameID / playerID', () => {
   expect(spy1).toHaveBeenCalled();
   expect(spy2).toHaveBeenCalled();
 });
+
+test('multiplayer server set when provided', () => {
+  let Board = null;
+  let game = null;
+
+  let host = 'host';
+  let port = '4321';
+  Board = Client({
+    game: Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    }),
+    board: TestBoard,
+    multiplayer: { server: host + ':' + port },
+  });
+  game = Enzyme.mount(<Board gameID="a" playerID="1" />);
+  const m = game.instance().multiplayerClient;
+  expect(m.socket.io.engine.hostname).toEqual(host);
+  expect(m.socket.io.engine.port).toEqual(port);
+});
