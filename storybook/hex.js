@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { withKnobs, boolean, number } from '@storybook/addon-knobs/react';
 import { HexGrid, Token } from 'boardgame.io/ui';
 
@@ -18,7 +19,10 @@ function Basic() {
 
   class Runner extends React.Component {
     state = { x: 0, y: 0, z: 0 };
-    onClick = args => this.setState(args);
+    onClick = args => {
+      this.setState(args);
+      action('onClick')(args);
+    };
     render = () => (
       <HexGrid levels={levels} outline={outline} onClick={this.onClick}>
         <Token
