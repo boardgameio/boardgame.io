@@ -84,7 +84,7 @@ test('callbacks', () => {
   expect(onPhaseEnd).toHaveBeenCalled();
 });
 
-test('movesPerTurn', () => {
+it('movesPerTurn', () => {
   {
     let flow = SimpleFlow({ movesPerTurn: 2 });
     let state = { ctx: flow.ctx(2) };
@@ -531,4 +531,43 @@ test('dispatchers', () => {
   expect(store.getState().ctx.turn).toBe(0);
   api.endTurn();
   expect(store.getState().ctx.turn).toBe(1);
+});
+
+describe('allowEndTurnIf', () => {
+  const ACCEPTED_VALUE = 'yes you can';
+  const BAD_VALUE = 'you shall not pass';
+
+  const FLOW_CONFIG = {
+    allowEndTurnIf: G => G.thingToCheck === ACCEPTED_VALUE,
+  };
+
+  it('always end turn if allowEndTurnIf is undefined', () => {
+    const flow = SimpleFlow({});
+    let state = { G: { thingToCheck: 'anything' }, ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+
+    state = flow.processGameEvent(state, { type: 'endTurn' });
+
+    expect(state.ctx.turn).toBe(1);
+  });
+
+  it('does not end turn if not allowed', () => {
+    const flow = SimpleFlow(FLOW_CONFIG);
+    let state = { G: { thingToCheck: BAD_VALUE }, ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+
+    state = flow.processGameEvent(state, { type: 'endTurn' });
+
+    expect(state.ctx.turn).toBe(0);
+  });
+
+  it('ends turn if it is allowed', () => {
+    const flow = SimpleFlow(FLOW_CONFIG);
+    let state = { G: { thingToCheck: ACCEPTED_VALUE }, ctx: flow.ctx(2) };
+    expect(state.ctx.turn).toBe(0);
+
+    state = flow.processGameEvent(state, { type: 'endTurn' });
+
+    expect(state.ctx.turn).toBe(1);
+  });
 });

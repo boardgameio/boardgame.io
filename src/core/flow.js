@@ -101,6 +101,8 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *                               Whenever `condition` is true the `action` is run.
  *                               Triggers are processed one after the other in the
  *                               order they are defined at the end of each move.
+ * @param {...object} allowEndTurnIf - Turn not allowed to end if this returns true.
+ *                                     (G, ctx) => boolean
  */
 export function SimpleFlow({
   movesPerTurn,
@@ -108,11 +110,13 @@ export function SimpleFlow({
   endGameIf,
   onTurnEnd,
   triggers,
+  allowEndTurnIf,
 }) {
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!triggers) triggers = [];
+  if (!allowEndTurnIf) allowEndTurnIf = () => true;
 
   const endTurnIfWrap = (G, ctx) => {
     if (movesPerTurn && ctx.currentPlayerMoves >= movesPerTurn) {
@@ -128,6 +132,9 @@ export function SimpleFlow({
    * Passes the turn to the next turn in a round-robin fashion.
    */
   function endTurn(state) {
+    if (!allowEndTurnIf(state.G, state.ctx)) {
+      return state;
+    }
     const G = onTurnEnd(state.G, state.ctx);
     state = { ...state, G };
 
@@ -281,6 +288,7 @@ export function FlowWithPhases({
   endGameIf,
   onTurnEnd,
   triggers,
+  allowEndTurnIf,
 }) {
   // Attach defaults.
   if (!phases) phases = [{ name: 'default' }];
@@ -288,6 +296,7 @@ export function FlowWithPhases({
   if (!endGameIf) endGameIf = () => undefined;
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!triggers) triggers = [];
+  if (!allowEndTurnIf) allowEndTurnIf = () => true;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -397,6 +406,10 @@ export function FlowWithPhases({
   function endTurn(state) {
     let G = state.G;
     let ctx = state.ctx;
+
+    if (!allowEndTurnIf(G, ctx)) {
+      return state;
+    }
 
     const conf = phaseMap[ctx.phase];
 
