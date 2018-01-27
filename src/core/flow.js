@@ -489,7 +489,6 @@ export function FlowWithPhases({
       });
     }
 
-
     return state;
   }
 
