@@ -288,7 +288,7 @@ test('endPhaseIf', () => {
   }
 });
 
-test('endGameIf', () => { // here
+test('endGameIf', () => {
   {
     const flow = SimpleFlow({ endGameIf: G => G.win });
 
@@ -353,8 +353,8 @@ test('endGameIf', () => { // here
     const flow = SimpleFlow({ endGameIf: G => G.win });
     const game = Game({
       moves: {
-        'A': () => ({ win: 'A' }),
-        'B': G => G,
+        A: () => ({ win: 'A' }),
+        B: G => G,
       },
       flow,
     });
@@ -375,8 +375,8 @@ test('endGameIf', () => { // here
     const flow = FlowWithPhases({ endGameIf: G => G.win });
     const game = Game({
       moves: {
-        'A': () => ({ win: 'A' }),
-        'B': G => G,
+        A: () => ({ win: 'A' }),
+        B: G => G,
       },
       flow,
     });
