@@ -84,7 +84,8 @@ function Game({ name, setup, moves, playerView, flow }) {
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
         const context = { playerID: action.playerID };
-        const args = [G, ctx].concat(action.args);
+        const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
+        const args = [G, ctxWithPlayerID].concat(action.args);
         return moves[action.type].apply(context, args);
       }
       return G;
