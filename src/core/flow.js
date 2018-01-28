@@ -103,6 +103,8 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  * @param {...object} onTurnEnd - Any code to run when a turn ends.
  *                                (G, ctx) => G
  *
+ * @param {...object} turnOrder - Customize the turn order (see turn-order.js).
+ *
  * @param {...object} triggers - An array of objects with the format:
  *                               {
  *                                 condition: (G, ctx) => boolean,
@@ -149,15 +151,8 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
  *
- *   // Called when `endTurn` is processed, and returns the next player.
- *   // If not specified, TurnOrder.DEFAULT is used.
- *   turnOrder: {
- *     // The first player.
- *     first: (G, ctx) => playerID,
- *     // Called whenever `endTurn` is processed to determine
- *     // the next player.
- *     next: (G, ctx) => playerID,
- *   },
+ *   // A phase-specific turnOrder.
+ *   turnOrder: TurnOrder.DEFAULT,
  *
  *   // List of moves that are allowed in this phase.
  *   allowedMoves: ['moveA', ...],
@@ -169,6 +164,7 @@ export function FlowWithPhases({
   endTurnIf,
   endGameIf,
   onTurnEnd,
+  turnOrder,
   triggers,
   events,
 }) {
@@ -184,6 +180,7 @@ export function FlowWithPhases({
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
   if (!onTurnEnd) onTurnEnd = G => G;
+  if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
   if (!triggers) triggers = [];
 
   let phaseKeys = [];
@@ -194,7 +191,7 @@ export function FlowWithPhases({
     phaseMap[conf.name] = conf;
 
     if (!conf.turnOrder) {
-      conf.turnOrder = TurnOrder.DEFAULT;
+      conf.turnOrder = turnOrder;
     }
     if (!conf.endPhaseIf) {
       conf.endPhaseIf = () => false;

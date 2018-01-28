@@ -70,3 +70,37 @@ test('turnOrder', () => {
   expect(state.ctx.allPassed).toBe(true);
   expect(state.ctx.currentPlayer).toBe(undefined);
 });
+
+test('override', () => {
+  const even = {
+    first: () => '0',
+    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers + '',
+  };
+
+  const odd = {
+    first: () => '1',
+    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers + '',
+  };
+
+  let flow = FlowWithPhases({
+    turnOrder: even,
+    phases: [{ name: 'A' }, { name: 'B', turnOrder: odd }],
+  });
+
+  let state = { ctx: flow.ctx(10) };
+  state = flow.init(state);
+
+  expect(state.ctx.currentPlayer).toBe('0');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('2');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('4');
+
+  state = flow.processGameEvent(state, { type: 'endPhase' });
+
+  expect(state.ctx.currentPlayer).toBe('1');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('3');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('5');
+});
