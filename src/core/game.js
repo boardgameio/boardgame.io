@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { FlowWithPhases, SimpleFlow } from './flow';
+import { FlowWithPhases } from './flow';
 
 /**
  * Game
@@ -71,10 +71,8 @@ function Game({ name, setup, moves, playerView, flow }) {
   if (!moves) moves = {};
   if (!playerView) playerView = G => G;
 
-  if (!flow) {
-    flow = SimpleFlow({});
-  } else if (flow.processGameEvent === undefined) {
-    flow = flow.phases ? FlowWithPhases(flow) : SimpleFlow(flow);
+  if (!flow || flow.processGameEvent === undefined) {
+    flow = FlowWithPhases(flow || {});
   }
 
   return {

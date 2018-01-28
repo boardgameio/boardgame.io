@@ -110,21 +110,37 @@ test('action', () => {
   io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {},
-    ctx: { currentPlayer: '1', currentPlayerMoves: 0, numPlayers: 2, turn: 1 },
-    log: [{ type: 'GAME_EVENT', payload: { type: 'endTurn' } }],
     _id: 1,
     _initial: {
       G: {},
       _id: 0,
       _initial: {},
       ctx: {
+        allPassed: false,
         currentPlayer: '0',
         currentPlayerMoves: 0,
         numPlayers: 2,
+        passMap: {},
+        phase: 'default',
         turn: 0,
       },
       log: [],
     },
+    ctx: {
+      allPassed: false,
+      currentPlayer: '1',
+      currentPlayerMoves: 0,
+      numPlayers: 2,
+      passMap: {},
+      phase: 'default',
+      turn: 1,
+    },
+    log: [
+      {
+        payload: { args: undefined, playerID: undefined, type: 'endTurn' },
+        type: 'GAME_EVENT',
+      },
+    ],
   });
   io.socket.emit.mockReset();
 
@@ -159,21 +175,32 @@ test('playerView', () => {
   io.socket.receive('sync', 'gameID', 0);
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: { player: 0 },
-    ctx: { currentPlayer: '0', currentPlayerMoves: 0, numPlayers: 2, turn: 0 },
-    log: [],
     _id: 0,
     _initial: {
       G: {},
       _id: 0,
       _initial: {},
       ctx: {
+        allPassed: false,
         currentPlayer: '0',
         currentPlayerMoves: 0,
         numPlayers: 2,
+        passMap: {},
+        phase: 'default',
         turn: 0,
       },
       log: [],
     },
+    ctx: {
+      allPassed: false,
+      currentPlayer: '0',
+      currentPlayerMoves: 0,
+      numPlayers: 2,
+      passMap: {},
+      phase: 'default',
+      turn: 0,
+    },
+    log: [],
   });
 });
 
