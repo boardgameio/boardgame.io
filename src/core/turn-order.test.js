@@ -96,13 +96,18 @@ test('end game after everyone passes', () => {
     flow,
     moves: { pass: Pass },
   });
-  const reducer = createGameReducer({ game, numPlayers: 2 });
+  const reducer = createGameReducer({ game, numPlayers: 3 });
 
   let state = reducer(undefined, { type: 'init' });
   expect(state.ctx.currentPlayer).toBe('any');
+
+  // Passes can be make in any order with TurnOrder.ANY.
+
+  state = reducer(state, makeMove('pass', null, '1'));
+  expect(state.ctx.gameover).toBe(undefined);
   state = reducer(state, makeMove('pass', null, '0'));
   expect(state.ctx.gameover).toBe(undefined);
-  state = reducer(state, makeMove('pass', null, '1'));
+  state = reducer(state, makeMove('pass', null, '2'));
   expect(state.ctx.gameover).toBe(true);
 });
 
