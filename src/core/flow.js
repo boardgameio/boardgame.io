@@ -114,7 +114,7 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *                               Triggers are processed one after the other in the
  *                               order they are defined at the end of each move.
  *
- * @param {...object} events - A list of events in ['endTurn', 'endPhase', 'pass']
+ * @param {...object} events - A list of events in ['endTurn', 'endPhase']
  *                             to enable for this flow. If not passed, all relevant
  *                             events are enabled.
  *
@@ -135,9 +135,6 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *   // to the next one in round-robin order).
  *   // The phase can also end when the `endPhase` game event happens.
  *   endPhaseIf: (G, ctx) => {},
- *
- *   // Any code to run when a player passes in this phase.
- *   onPass: (G, ctx) => G,
  *
  *   Phase-specific options that override their global equivalents:
  *
@@ -175,7 +172,7 @@ export function FlowWithPhases({
     if (!phases) {
       events = ['endTurn'];
     } else {
-      events = ['endTurn', 'endPhase', 'pass'];
+      events = ['endTurn', 'endPhase'];
     }
   }
   if (!phases) phases = [{ name: 'default' }];
@@ -200,9 +197,6 @@ export function FlowWithPhases({
     }
     if (conf.onPhaseEnd === undefined) {
       conf.onPhaseEnd = G => G;
-    }
-    if (conf.onPass === undefined) {
-      conf.onPass = G => G;
     }
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
@@ -231,7 +225,7 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, phaseConfig) {
-    const ctx = { ...state.ctx, passMap: {}, allPassed: false };
+    const ctx = { ...state.ctx };
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
     ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
     return { ...state, G, ctx };
@@ -311,34 +305,6 @@ export function FlowWithPhases({
     return { ...state, G, ctx };
   }
 
-  /**
-   * pass (game event)
-   *
-   * The current player passes (and ends the turn).
-   */
-  function pass(state) {
-    let G = state.G;
-    let ctx = state.ctx;
-    const conf = phaseMap[state.ctx.phase];
-    G = conf.onPass(G, ctx);
-
-    // Mark that the player has passed.
-    const playerID =
-      ctx.currentPlayer == 'any' ? this.playerID : ctx.currentPlayer;
-
-    if (playerID !== undefined) {
-      let passMap = { ...ctx.passMap };
-      passMap[playerID] = true;
-      ctx = { ...ctx, passMap };
-
-      if (Object.keys(passMap).length >= ctx.numPlayers) {
-        ctx.allPassed = true;
-      }
-    }
-
-    return endTurn({ ...state, G, ctx });
-  }
-
   function processMove(state, action, dispatch) {
     // Update currentPlayerMoves.
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
@@ -398,10 +364,6 @@ export function FlowWithPhases({
         enabledEvents[e] = endPhase;
         break;
       }
-      case 'pass': {
-        enabledEvents[e] = pass;
-        break;
-      }
     }
   }
 
@@ -412,8 +374,6 @@ export function FlowWithPhases({
       currentPlayer: '0',
       currentPlayerMoves: 0,
       phase: phases[0].name,
-      passMap: {},
-      allPassed: false,
     }),
     init: state => startPhase(state, phases[0]),
     events: enabledEvents,
