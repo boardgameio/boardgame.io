@@ -9,7 +9,7 @@
 import Client from '../src/client/client.js';
 import Game from '../src/core/game.js';
 import { Flow, FlowWithPhases } from '../src/core/flow.js';
-import { TurnOrder } from '../src/core/turn-order.js';
+import { TurnOrder, Pass } from '../src/core/turn-order.js';
 
 export default {
   Client,
@@ -17,4 +17,5 @@ export default {
   Flow,
   FlowWithPhases,
   TurnOrder,
+  Pass,
 };

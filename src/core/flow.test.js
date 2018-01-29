@@ -11,7 +11,6 @@ import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
 import { Flow, FlowWithPhases, createEventDispatchers } from './flow';
-import { TurnOrder } from './turn-order';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -39,14 +38,12 @@ test('FlowWithPhases', () => {
 });
 
 test('callbacks', () => {
-  const onPass = jest.fn(G => G);
   const onPhaseBegin = jest.fn(G => G);
   const onPhaseEnd = jest.fn(G => G);
 
   let flow = FlowWithPhases({
     phases: [
       {
-        onPass,
         onPhaseBegin,
         onPhaseEnd,
       },
@@ -55,15 +52,11 @@ test('callbacks', () => {
 
   let state = { ctx: flow.ctx(2) };
 
-  expect(onPass).not.toHaveBeenCalled();
   expect(onPhaseBegin).not.toHaveBeenCalled();
   expect(onPhaseEnd).not.toHaveBeenCalled();
 
   flow.init(state);
   expect(onPhaseBegin).toHaveBeenCalled();
-
-  flow.processGameEvent(state, { type: 'pass' });
-  expect(onPass).toHaveBeenCalled();
 
   flow.processGameEvent(state, { type: 'endPhase' });
   expect(onPhaseEnd).toHaveBeenCalled();
@@ -174,18 +167,6 @@ test('init', () => {
   state = { ctx: orig };
   state = flow.init(state);
   expect(state.G).toEqual({ done: true });
-});
-
-test('pass', () => {
-  let flow = FlowWithPhases({
-    phases: [{ name: 'A', turnOrder: TurnOrder.ANY }],
-  });
-  let state = { ctx: flow.ctx(2) };
-  expect(state.ctx.allPassed).toBe(false);
-  state = flow.processGameEvent(state, { type: 'pass', playerID: '0' });
-  expect(state.ctx.allPassed).toBe(false);
-  state = flow.processGameEvent(state, { type: 'pass', playerID: '1' });
-  expect(state.ctx.allPassed).toBe(true);
 });
 
 test('onPhaseBegin / onPhaseEnd', () => {
