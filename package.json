@@ -32,9 +32,11 @@
     "dist/server.js",
     "dist/client.js",
     "dist/core.js",
+    "dist/ui.js",
     "server.js",
     "client.js",
-    "core.js"
+    "core.js",
+    "ui.js"
   ],
   "keywords": [
     "react",
@@ -123,7 +125,8 @@
     "exportAliases": {
       "client": "./dist/client.js",
       "server": "./dist/server.js",
-      "core": "./dist/core.js"
+      "core": "./dist/core.js",
+      "ui": "./dist/ui.js"
     }
   },
   "jest": {

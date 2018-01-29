@@ -6,17 +6,17 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import resolve from 'rollup-plugin-node-resolve'
-import replace from 'rollup-plugin-replace'
-import babel from 'rollup-plugin-babel'
-import commonjs from 'rollup-plugin-commonjs'
-import uglify from 'rollup-plugin-uglify'
-import postcss from 'rollup-plugin-postcss'
-import filesize from 'rollup-plugin-filesize'
-import { minify } from 'uglify-es'
-import pkg from './package.json'
+import resolve from 'rollup-plugin-node-resolve';
+import replace from 'rollup-plugin-replace';
+import babel from 'rollup-plugin-babel';
+import commonjs from 'rollup-plugin-commonjs';
+import uglify from 'rollup-plugin-uglify';
+import postcss from 'rollup-plugin-postcss';
+import filesize from 'rollup-plugin-filesize';
+import { minify } from 'uglify-es';
+import pkg from './package.json';
 
-const env = process.env.NODE_ENV
+const env = process.env.NODE_ENV;
 
 const plugins = [
   postcss(),
@@ -43,8 +43,8 @@ export default [
 
   {
     input: 'packages/client.js',
-    external: [ 'react' ],
-    globals: { 'react': 'React' },
+    external: ['react'],
+    globals: { react: 'React' },
     output: { file: 'dist/client.js', format: 'umd' },
     name: 'Client',
     plugins: plugins,
@@ -57,25 +57,34 @@ export default [
     plugins: plugins,
   },
 
+  {
+    input: 'packages/ui.js',
+    external: ['react'],
+    globals: { react: 'React' },
+    output: { file: 'dist/ui.js', format: 'umd' },
+    name: 'UI',
+    plugins: plugins,
+  },
+
   // UMD and ES versions.
   {
     input: 'packages/main.js',
-    external: [ 'react' ],
-    globals: { 'react': 'React' },
+    external: ['react'],
+    globals: { react: 'React' },
     output: [
-      { file: pkg.main, format: 'umd', name: 'BoardgameIO'},
-      { file: pkg.module, format: 'es' }
+      { file: pkg.main, format: 'umd', name: 'BoardgameIO' },
+      { file: pkg.module, format: 'es' },
     ],
     plugins: plugins.concat([
-      replace({ 'process.env.NODE_ENV': JSON.stringify(env) })
+      replace({ 'process.env.NODE_ENV': JSON.stringify(env) }),
     ]),
   },
 
   // Browser minified version.
   {
     input: 'packages/main.js',
-    external: [ 'react' ],
-    globals: { 'react': 'React' },
+    external: ['react'],
+    globals: { react: 'React' },
     output: [
       { file: pkg.unpkg, format: 'umd' },
       { file: 'docs/react/boardgameio.min.js', format: 'umd' },
@@ -83,16 +92,19 @@ export default [
     name: 'BoardgameIO',
     plugins: plugins.concat([
       replace({
-        'process.env.NODE_ENV': JSON.stringify('production')
+        'process.env.NODE_ENV': JSON.stringify('production'),
       }),
-      uglify({
-        compress: {
-          pure_getters: true,
-          unsafe: true,
-          unsafe_comps: true,
-          warnings: false
-        }
-      }, minify),
+      uglify(
+        {
+          compress: {
+            pure_getters: true,
+            unsafe: true,
+            unsafe_comps: true,
+            warnings: false,
+          },
+        },
+        minify
+      ),
     ]),
-  }
+  },
 ];
