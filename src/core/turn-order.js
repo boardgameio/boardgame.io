@@ -62,7 +62,7 @@ export const TurnOrder = {
    * SKIP
    *
    * Round-robin, but skips over any players that have passed.
-   * Meant to be used with Move.PASS above.
+   * Meant to be used with Pass above.
    */
 
   SKIP: {
