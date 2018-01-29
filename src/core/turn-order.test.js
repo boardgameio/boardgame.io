@@ -7,7 +7,7 @@
  */
 
 import { FlowWithPhases } from './flow';
-import { TurnOrder, pass } from './turn-order';
+import { TurnOrder, Pass } from './turn-order';
 import Game from './game';
 import { makeMove, gameEvent } from './action-creators';
 import { createGameReducer } from './reducer';
@@ -50,7 +50,7 @@ test('passing', () => {
   });
   const game = Game({
     flow,
-    moves: { pass },
+    moves: { pass: Pass },
   });
   const reducer = createGameReducer({ game, numPlayers: 3 });
   let state = reducer(undefined, { type: 'init' });
@@ -94,7 +94,7 @@ test('end game after everyone passes', () => {
   });
   const game = Game({
     flow,
-    moves: { pass },
+    moves: { pass: Pass },
   });
   const reducer = createGameReducer({ game, numPlayers: 2 });
 
