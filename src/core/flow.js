@@ -84,9 +84,6 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  * - Custom phase end conditions.
  * - A move whitelist that disallows other moves during the phase.
  *
- * Global options (not associated with any phase):
- * Most of these can be overriden on a per-phase basis (except triggers).
- *
  * @param {...object} movesPerTurn - End the turn automatically after a certain number
  *                                   of moves (default: undefined, i.e. the turn does
  *                                   not automatically end after a certain number of moves).
@@ -114,11 +111,12 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *                               Triggers are processed one after the other in the
  *                               order they are defined at the end of each move.
  *
- * @param {...object} events - A list of events in ['endTurn', 'endPhase']
- *                             to enable for this flow. If not passed, all relevant
- *                             events are enabled.
+ * @param {...object} endTurn - Set to false to disable the `endTurn` event.
+ *
+ * @param {...object} endPhase - Set to false to disable the `endPhase` event.
  *
  * @param {...object} phases - A list of phases in the game.
+ *
  * Each phase is described by an object:
  * {
  *   name: 'phase_name',
@@ -165,15 +163,15 @@ export function FlowWithPhases({
   onTurnEnd,
   turnOrder,
   triggers,
-  events,
+  endTurn,
+  endPhase,
 }) {
   // Attach defaults.
-  if (!events) {
-    if (!phases) {
-      events = ['endTurn'];
-    } else {
-      events = ['endTurn', 'endPhase'];
-    }
+  if (endPhase === undefined && phases) {
+    endPhase = true;
+  }
+  if (endTurn === undefined) {
+    endTurn = true;
   }
   if (!phases) phases = [{ name: 'default' }];
   if (!endTurnIf) endTurnIf = () => false;
@@ -241,7 +239,7 @@ export function FlowWithPhases({
    * The next phase is chosen in a round-robin fashion, with the
    * option to override that by passing nextPhase.
    */
-  function endPhase(state, nextPhase) {
+  function endPhaseEvent(state, nextPhase) {
     let G = state.G;
     let ctx = state.ctx;
 
@@ -274,7 +272,7 @@ export function FlowWithPhases({
    * Ends the current turn.
    * Passes the turn to the next turn in a round-robin fashion.
    */
-  function endTurn(state) {
+  function endTurnEvent(state) {
     let G = state.G;
     let ctx = state.ctx;
 
@@ -299,7 +297,7 @@ export function FlowWithPhases({
     // End phase if condition is met.
     const end = conf.endPhaseIf(G, ctx);
     if (end) {
-      return endPhase({ ...state, G, ctx }, end);
+      return endPhaseEvent({ ...state, G, ctx }, end);
     }
 
     return { ...state, G, ctx };
@@ -354,18 +352,8 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
-  for (const e of events) {
-    switch (e) {
-      case 'endTurn': {
-        enabledEvents[e] = endTurn;
-        break;
-      }
-      case 'endPhase': {
-        enabledEvents[e] = endPhase;
-        break;
-      }
-    }
-  }
+  if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
+  if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
 
   return Flow({
     ctx: numPlayers => ({
