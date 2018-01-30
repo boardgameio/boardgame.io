@@ -7,12 +7,18 @@
  */
 
 import Phases from './components/phases';
+import { Basic } from './components/diagram';
 
 const routes = [
   {
     path: '/phases',
     text: 'Phases',
     component: Phases,
+  },
+  {
+    path: '/diagram',
+    text: 'Diagram',
+    component: Basic,
   },
 ];
 
