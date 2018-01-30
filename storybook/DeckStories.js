@@ -18,30 +18,54 @@ export class StandardDeckStory extends React.Component {
     super(props);
 
     this.state = {
-      selectedCard: null
+      selectedCard: null,
+      deck: standardDeck
     };
   }
 
+  onDiscard = () => {
+    action("discarded")(this.state.selectedCard);
+    this.setState({ selectedCard: null });
+  };
+
   onClick = card => {
-    // this.setState({
-    //   selectedCard: card
-    // });
     const selectedCard = card.props;
-    console.log(selectedCard);
-    action("onClick")("ugh");
+    action("onClick")(selectedCard);
+    this.setState({ selectedCard });
   };
 
   renderCard = card => (
-    <Card front={<PlayingCard suit={card.suit} value={card.value} />} />
+    <Card
+      front={<PlayingCard suit={card.suit} value={card.value} />}
+      card={card}
+    />
   );
 
   render() {
+    const { selectedCard, deck } = this.state;
+
     return (
-      <div style={{ padding: "50px" }}>
-        <Deck
-          onClick={this.onClick}
-          cards={standardDeck.map(this.renderCard)}
-        />
+      <div style={{ display: "block", padding: "50px" }}>
+        <Deck onClick={this.onClick} cards={deck.map(this.renderCard)} />
+
+        {this.state.selectedCard && (
+          <div style={{ display: "block", padding: "50px" }}>
+            <div>Selected Card:</div>
+            <Card
+              front={
+                <PlayingCard
+                  suit={selectedCard.card.suit}
+                  value={selectedCard.card.value}
+                />
+              }
+              card={selectedCard}
+              isFaceUp
+            />
+            <button onClick={this.onDiscard} style={{ marginTop: "24px" }}>
+              Discard
+            </button>
+          </div>
+        )}
       </div>
     );
   }
