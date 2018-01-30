@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { FlowWithPhases, SimpleFlow } from './flow';
+import { FlowWithPhases } from './flow';
 
 /**
  * Game
@@ -65,16 +65,14 @@ import { FlowWithPhases, SimpleFlow } from './flow';
  *                           If it contains any other object, it is presumed to be a
  *                           configuration object for SimpleFlow() or FlowWithPhases().
  */
-function Game({name, setup, moves, playerView, flow}) {
-  if (!name)        name = 'default';
-  if (!setup)       setup = () => ({});
-  if (!moves)       moves = {};
-  if (!playerView)  playerView = G => G;
+function Game({ name, setup, moves, playerView, flow }) {
+  if (!name) name = 'default';
+  if (!setup) setup = () => ({});
+  if (!moves) moves = {};
+  if (!playerView) playerView = G => G;
 
-  if (!flow) {
-    flow = SimpleFlow({});
-  } else if (flow.processGameEvent === undefined) {
-    flow = flow.phases ? FlowWithPhases(flow) : SimpleFlow(flow);
+  if (!flow || flow.processGameEvent === undefined) {
+    flow = FlowWithPhases(flow || {});
   }
 
   return {
@@ -86,7 +84,8 @@ function Game({name, setup, moves, playerView, flow}) {
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
         const context = { playerID: action.playerID };
-        const args = [G, ctx].concat(action.args);
+        const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
+        const args = [G, ctxWithPlayerID].concat(action.args);
         return moves[action.type].apply(context, args);
       }
       return G;

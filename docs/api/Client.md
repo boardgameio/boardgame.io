@@ -11,23 +11,24 @@ The `Board` component will receive the following as `props`:
 2. `ctx`: The game metadata.
 
 3. `moves`: An object containing functions to dispatch various
-moves that you have defined. The functions are named after the
-moves you created using [Game()](/api/Game.md). Each function
-can take any number of arguments, and they are passed to the
-move function after `G` and `ctx`.
+   moves that you have defined. The functions are named after the
+   moves you created using [Game()](/api/Game.md). Each function
+   can take any number of arguments, and they are passed to the
+   move function after `G` and `ctx`.
 
 4. `endTurn`: A function that ends the turn.
 
 5. `playerID`: The player ID associated with the client.
 
 6. `isActive`: `true` if the client is able to currently make
-a move or interact with the game.
-
+   a move or interact with the game.
 
 ### Arguments
-1. obj(*object*): A config object with the options shown below.
+
+1. obj(_object_): A config object with the options shown below.
 
 ### Returns
+
 (`client`): A React component that runs the app.
 
 The component supports the following `props`:
@@ -54,14 +55,17 @@ const App = Client({
   board: Board,
 
   // Set to true to enable sending move updates to the
-  // server via WebSockets.
+  // server via WebSockets. Can also be set to
+  // { server: 'hostname:port' }
+  // to specify a socket server that's different from
+  // the one that served up the page.
   multiplayer: false,
 
   // Set to false to disable the Debug UI.
-  debug: true
+  debug: true,
 });
 
-ReactDOM.render(<App/>, document.getElementById('app'));
+ReactDOM.render(<App />, document.getElementById('app'));
 ```
 
 The returned element can also take an optional `gameID`

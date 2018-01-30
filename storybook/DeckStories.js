@@ -6,12 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from "react";
-import { action } from "@storybook/addon-actions";
-import { Card } from "../src/ui/card";
-import { Deck } from "../src/ui/deck";
+import React from 'react';
+import { action } from '@storybook/addon-actions';
+import { Card, Deck } from 'boardgame.io/ui';
 
-import { PlayingCard, standardDeck } from "./PlayingCard";
+import { PlayingCard, standardDeck } from './PlayingCard';
 
 export class StandardDeckStory extends React.Component {
   constructor(props) {
@@ -19,18 +18,18 @@ export class StandardDeckStory extends React.Component {
 
     this.state = {
       selectedCard: null,
-      deck: standardDeck
+      deck: standardDeck,
     };
   }
 
   onDiscard = () => {
-    action("discarded")(this.state.selectedCard);
+    action('discarded')(this.state.selectedCard);
     this.setState({ selectedCard: null });
   };
 
   onClick = card => {
     const selectedCard = card.props;
-    action("onClick")(selectedCard);
+    action('onClick')(selectedCard);
     this.setState({ selectedCard });
   };
 
@@ -45,11 +44,11 @@ export class StandardDeckStory extends React.Component {
     const { selectedCard, deck } = this.state;
 
     return (
-      <div style={{ display: "block", padding: "50px" }}>
+      <div style={{ display: 'block', padding: '50px' }}>
         <Deck onClick={this.onClick} cards={deck.map(this.renderCard)} />
 
         {this.state.selectedCard && (
-          <div style={{ display: "block", padding: "50px" }}>
+          <div style={{ display: 'block', padding: '50px' }}>
             <div>Selected Card:</div>
             <Card
               front={
@@ -61,7 +60,7 @@ export class StandardDeckStory extends React.Component {
               card={selectedCard}
               isFaceUp
             />
-            <button onClick={this.onDiscard} style={{ marginTop: "24px" }}>
+            <button onClick={this.onDiscard} style={{ marginTop: '24px' }}>
               Discard
             </button>
           </div>

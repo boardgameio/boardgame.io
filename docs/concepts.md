@@ -25,7 +25,7 @@ incrementally adoptable, meaning that you can manage all the
 state manually in `G` if you so desire.
 
 !> `ctx` contains other fields not shown here that complex games
-   can take advantage of, including support for player passing and game phases.
+can take advantage of, including support for player passing and game phases.
 
 ### Moves
 

@@ -13,10 +13,10 @@ const LiarsDice = Game({
 
   setup: () => ({
     players: {
-      0: [ 4,4,2,6,1 ],
-      1: [ 4,5,6,3,3 ],
-      2: [ 1,1,2,4,3 ]
-    }
+      0: [4, 4, 2, 6, 1],
+      1: [4, 5, 6, 3, 3],
+      2: [1, 1, 2, 4, 3],
+    },
   }),
 
   moves: {
@@ -28,7 +28,7 @@ const LiarsDice = Game({
       }
 
       return { ...G, cells };
-    }
+    },
   },
 
   playerView: PlayerView.STRIP_SECRETS,

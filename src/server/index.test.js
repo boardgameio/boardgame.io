@@ -31,7 +31,7 @@ jest.mock('koa-socket', () => {
     to() {
       return {
         broadcast: this.broadcast,
-        emit: this.emit
+        emit: this.emit,
       };
     }
 
@@ -39,10 +39,18 @@ jest.mock('koa-socket', () => {
   }
 
   class MockIO {
-    constructor() { this.socket = new MockSocket() }
-    attach(app) { app.io = app._io = this }
-    of() { return this }
-    on(type, callback) { callback(this.socket) }
+    constructor() {
+      this.socket = new MockSocket();
+    }
+    attach(app) {
+      app.io = app._io = this;
+    }
+    of() {
+      return this;
+    }
+    on(type, callback) {
+      callback(this.socket);
+    }
   }
 
   return MockIO;
@@ -100,17 +108,35 @@ test('action', () => {
   // Actions are broadcasted as state updates.
   // The playerID parameter is necessary to account for view-only players.
   io.socket.receive('action', action, 0, 'gameID', '0');
-  expect(io.socket.emit).lastCalledWith(
-    'sync', 'gameID', {
+  expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {},
-    ctx: {currentPlayer: '1', currentPlayerMoves: 0, numPlayers: 2, turn: 1},
-    log: [{type: "GAME_EVENT", payload: {type: "endTurn"}}],
     _id: 1,
     _initial: {
-      G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: '0', currentPlayerMoves: 0, numPlayers: 2, turn: 0},
-      log: []
-    }
+      G: {},
+      _id: 0,
+      _initial: {},
+      ctx: {
+        currentPlayer: '0',
+        currentPlayerMoves: 0,
+        numPlayers: 2,
+        phase: 'default',
+        turn: 0,
+      },
+      log: [],
+    },
+    ctx: {
+      currentPlayer: '1',
+      currentPlayerMoves: 0,
+      numPlayers: 2,
+      phase: 'default',
+      turn: 1,
+    },
+    log: [
+      {
+        payload: { args: undefined, playerID: undefined, type: 'endTurn' },
+        type: 'GAME_EVENT',
+      },
+    ],
   });
   io.socket.emit.mockReset();
 
@@ -128,15 +154,15 @@ test('action', () => {
 
   // Another broadcasted action.
   io.socket.receive('action', action, 1, 'gameID', '1');
-  expect(io.socket.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.emit).toHaveBeenCalledTimes(2);
 });
 
 test('playerView', () => {
   // Write the player into G.
   const game = Game({
     playerView: (G, ctx, player) => {
-      return {...G, player};
-    }
+      return { ...G, player };
+    },
   });
 
   const server = Server({ games: [game] });
@@ -144,14 +170,45 @@ test('playerView', () => {
 
   io.socket.receive('sync', 'gameID', 0);
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
-    G: {player: 0},
-    ctx: {currentPlayer: '0', currentPlayerMoves: 0, numPlayers: 2, turn: 0},
-    log: [],
+    G: { player: 0 },
     _id: 0,
     _initial: {
-      G: {}, _id: 0, _initial: {},
-      ctx: {currentPlayer: '0', currentPlayerMoves: 0, numPlayers: 2, turn: 0},
-      log: []
-    }
+      G: {},
+      _id: 0,
+      _initial: {},
+      ctx: {
+        currentPlayer: '0',
+        currentPlayerMoves: 0,
+        numPlayers: 2,
+        phase: 'default',
+        turn: 0,
+      },
+      log: [],
+    },
+    ctx: {
+      currentPlayer: '0',
+      currentPlayerMoves: 0,
+      numPlayers: 2,
+      phase: 'default',
+      turn: 0,
+    },
+    log: [],
   });
+});
+
+test('custom db implementation', () => {
+  let getId = null;
+  class Custom {
+    get(id) {
+      getId = id;
+    }
+    set() {}
+  }
+
+  const game = Game({});
+  const server = Server({ games: [game], db: new Custom() });
+  const io = server.context.io;
+
+  io.socket.receive('sync', 'gameID');
+  expect(getId).toBe('gameID');
 });

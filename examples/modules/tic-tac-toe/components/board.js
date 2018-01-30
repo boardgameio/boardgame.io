@@ -12,18 +12,18 @@ import './board.css';
 
 class Board extends React.Component {
   static propTypes = {
-    G:         PropTypes.any.isRequired,
-    ctx:       PropTypes.any.isRequired,
-    moves:     PropTypes.any.isRequired,
-    playerID:  PropTypes.string,
-    isActive:  PropTypes.bool
-  }
+    G: PropTypes.any.isRequired,
+    ctx: PropTypes.any.isRequired,
+    moves: PropTypes.any.isRequired,
+    playerID: PropTypes.string,
+    isActive: PropTypes.bool,
+  };
 
-  onClick = (id) => {
+  onClick = id => {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
     }
-  }
+  };
 
   isActive(id) {
     if (!this.props.isActive) return false;
@@ -38,9 +38,11 @@ class Board extends React.Component {
       for (let j = 0; j < 3; j++) {
         const id = 3 * i + j;
         cells.push(
-          <td key={id}
-              className={this.isActive(id) ? 'active' : ''}
-              onClick={() => this.onClick(id)}>
+          <td
+            key={id}
+            className={this.isActive(id) ? 'active' : ''}
+            onClick={() => this.onClick(id)}
+          >
             {this.props.G.cells[id]}
           </td>
         );
@@ -50,18 +52,18 @@ class Board extends React.Component {
 
     let winner = null;
     if (this.props.ctx.gameover !== undefined) {
-      winner = <div id='winner'>Winner: {this.props.ctx.gameover}</div>;
+      winner = <div id="winner">Winner: {this.props.ctx.gameover}</div>;
     }
 
     let player = null;
     if (this.props.playerID !== null) {
-      player = <div id='player'>Player: {this.props.playerID}</div>;
+      player = <div id="player">Player: {this.props.playerID}</div>;
     }
 
     return (
       <div>
         <table id="board">
-        <tbody>{tbody}</tbody>
+          <tbody>{tbody}</tbody>
         </table>
         {player}
         {winner}

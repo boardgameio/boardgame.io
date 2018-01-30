@@ -7,6 +7,28 @@
  */
 
 /**
+ * Standard move that simulates passing.
+ *
+ * Creates two objects in G:
+ * passMap - A map from playerID -> boolean capturing passes.
+ * allPassed - Set to true when all players have passed.
+ */
+export const Pass = (G, ctx) => {
+  let passMap = {};
+  if (G.passMap !== undefined) {
+    passMap = { ...G.passMap };
+  }
+  const playerID =
+    ctx.currentPlayer === 'any' ? ctx.playerID : ctx.currentPlayer;
+  passMap[playerID] = true;
+  G = { ...G, passMap };
+  if (Object.keys(passMap).length >= ctx.numPlayers) {
+    G.allPassed = true;
+  }
+  return G;
+};
+
+/**
  * Set of different turn orders possible in a phase.
  * These are meant to be passed to the `turnOrder` setting
  * in the flow objects.
@@ -23,7 +45,7 @@ export const TurnOrder = {
    */
   DEFAULT: {
     first: (G, ctx) => ctx.currentPlayer,
-    next: (G, ctx) => ((+ctx.currentPlayer + 1) % ctx.numPlayers + ""),
+    next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
   },
 
   /**
@@ -40,18 +62,20 @@ export const TurnOrder = {
    * SKIP
    *
    * Round-robin, but skips over any players that have passed.
+   * Meant to be used with Pass above.
    */
+
   SKIP: {
     first: (G, ctx) => ctx.currentPlayer,
     next: (G, ctx) => {
-      if (ctx.allPassed) return;
+      if (G.allPassed) return;
       let nextPlayer = ctx.currentPlayer;
       for (let i = 0; i < ctx.numPlayers; i++) {
-        nextPlayer = ((+nextPlayer + 1) % ctx.numPlayers + "");
-        if (!(nextPlayer in ctx.passMap)) {
+        nextPlayer = (+nextPlayer + 1) % ctx.numPlayers + '';
+        if (!(nextPlayer in G.passMap)) {
           return nextPlayer;
         }
       }
-    }
+    },
   },
 };

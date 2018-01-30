@@ -14,8 +14,9 @@ a phase begins or ends.
 
 Let us start with a contrived example of a single player
 game that has exactly two moves:
-- draw a card from the deck into your hand
-- play a card from your hand onto the deck
+
+* draw a card from the deck into your hand
+* play a card from your hand onto the deck
 
 ```js
 const game = Game({
@@ -24,7 +25,7 @@ const game = Game({
   moves: {
     drawCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
     playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),
-  }
+  },
 });
 ```
 
@@ -39,8 +40,9 @@ We'll ignore the rendering component of this game, but this is how it might look
 #### Phases
 
 Now let's say we want the game to work in two phases:
-- the first phase where the player can only draw cards (until the deck is empty).
-- a second phase where the player can only play cards (until their hand is empty).
+
+* the first phase where the player can only draw cards (until the deck is empty).
+* a second phase where the player can only play cards (until their hand is empty).
 
 In order to do this, we add a `flow` section to the `Game`
 constructor (you should already be familiar with this as the location
@@ -67,20 +69,20 @@ const game = Game({
       {
         name: 'draw phase',
         allowedMoves: ['drawCard'],
-        endPhaseIf: G => (G.deck <= 0),
+        endPhaseIf: G => G.deck <= 0,
       },
       {
         name: 'play phase',
         allowedMoves: ['playCard'],
-        endPhaseIf: G => (G.hand <= 0),
-      }
+        endPhaseIf: G => G.hand <= 0,
+      },
     ],
-  }
+  },
 });
 ```
 
 !> Phases can also be terminated manually by calling `props.events.endPhase()` from the
-   board React component (in response to a user action like clicking a button, for example).
+board React component (in response to a user action like clicking a button, for example).
 
 Watch our game in action now with phases. Notice that you can only draw cards in the first
 phase, and you can only play cards in the second phase.
@@ -103,12 +105,12 @@ phases: [
     name: '...',
     onPhaseBegin: (G, ctx) => G,
     onPhaseEnd: (G, ctx) => G,
-  }
-]
+  },
+];
 ```
 
 ?> The framework takes care of running these board actions locally while prototyping
-   in singleplayer mode, and running it only on the server in multiplayer mode.
+in singleplayer mode, and running it only on the server in multiplayer mode.
 
 #### Custom Turn Orders
 
@@ -139,7 +141,7 @@ A `TurnOrder` object has the following structure:
 ```
 
 !> `TurnOrder.ANY` implements a turn order where any player can play during
-   the phase, following no particular order.
+the phase, following no particular order.
 
 #### Passing
 
@@ -154,9 +156,11 @@ where play continues in round-robin order (skipping over players that pass),
 until all players have passed:
 
 ```js
-phases: [{
-  name: 'A',
-  endTurnIf: G => G.allPassed,
-  turnOrder: TurnOrder.SKIP,
-}]
+phases: [
+  {
+    name: 'A',
+    endTurnIf: G => G.allPassed,
+    turnOrder: TurnOrder.SKIP,
+  },
+];
 ```

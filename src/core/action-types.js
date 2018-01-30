@@ -7,5 +7,5 @@
  */
 
 export const MAKE_MOVE = 'MAKE_MOVE';
-export const GAME_EVENT  = 'GAME_EVENT';
-export const RESTORE   = 'RESTORE';
+export const GAME_EVENT = 'GAME_EVENT';
+export const RESTORE = 'RESTORE';

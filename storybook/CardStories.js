@@ -6,32 +6,32 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from "react";
-import { action } from "@storybook/addon-actions";
-import { Card } from "../src/ui/card";
+import React from 'react';
+import { action } from '@storybook/addon-actions';
+import { Card } from 'boardgame.io/ui';
 
-import { PlayingCard, standardDeck } from "./PlayingCard";
+import { PlayingCard, standardDeck } from './PlayingCard';
 
 export class FlippableStory extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      isFaceUp: false
+      isFaceUp: false,
     };
   }
 
   onClick = () => {
     this.setState({
-      isFaceUp: !this.state.isFaceUp
+      isFaceUp: !this.state.isFaceUp,
     });
 
-    action("onClick")();
+    action('onClick')();
   };
 
   render() {
     return (
-      <div style={{ padding: "50px" }}>
+      <div style={{ padding: '50px' }}>
         <Card isFaceUp={this.state.isFaceUp} onClick={this.onClick} />
       </div>
     );
@@ -43,23 +43,23 @@ export class PlayingCardStory extends React.Component {
     super(props);
 
     this.state = {
-      isFaceUp: false
+      isFaceUp: false,
     };
   }
 
   onClick = () => {
     this.setState({
-      isFaceUp: !this.state.isFaceUp
+      isFaceUp: !this.state.isFaceUp,
     });
 
-    action("onClick")();
+    action('onClick')();
   };
 
   render() {
     const card = standardDeck[0];
 
     return (
-      <div style={{ padding: "50px" }}>
+      <div style={{ padding: '50px' }}>
         <Card
           front={<PlayingCard suit={card.suit} value={card.value} />}
           isFaceUp={this.state.isFaceUp}

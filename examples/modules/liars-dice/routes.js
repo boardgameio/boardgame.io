@@ -12,8 +12,8 @@ const routes = [
   {
     path: '/liars-dice',
     text: 'Secret Info',
-    component: Multiview
-  }
+    component: Multiview,
+  },
 ];
 
 export default routes;

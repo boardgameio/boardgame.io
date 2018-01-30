@@ -15,11 +15,11 @@ const App = Client({
   game: ChessGame,
   board: ChessBoard,
   multiplayer: true,
-  debug: false
+  debug: false,
 });
 
 const Multiplayer = () => (
-  <div style={{padding: 50}}>
+  <div style={{ padding: 50 }}>
     <App gameID="multi" playerID="0" />
     <App gameID="multi" playerID="1" />
   </div>

@@ -15,11 +15,16 @@ Enzyme.configure({ adapter: new Adapter() });
 
 test('animation', () => {
   const token = Enzyme.shallow(
-    <Token x={1} y={2} animate={true}><p>foo</p></Token>);
-  token.setState({ ... token.state(),
-                  'originX': 0,
-                  'originY': 0,
-                  'originTime': 0 });
+    <Token x={1} y={2} animate={true}>
+      <p>foo</p>
+    </Token>
+  );
+  token.setState({
+    ...token.state(),
+    originX: 0,
+    originY: 0,
+    originTime: 0,
+  });
   const inst = token.instance();
 
   inst._animate(150)();
@@ -41,8 +46,26 @@ test('animation', () => {
 
 test('props change', () => {
   const token = Enzyme.shallow(
-    <Token x={1} y={2} animate={true}><p>foo</p></Token>);
-  token.setProps({x: 0, y: 2});
+    <Token x={1} y={2} animate={true}>
+      <p>foo</p>
+    </Token>
+  );
+  token.setProps({ x: 0, y: 2 });
+  expect(token.state('originX')).toEqual(1);
+  expect(token.state('originY')).toEqual(2);
+});
+
+test('debounce', () => {
+  const token = Enzyme.shallow(
+    <Token x={1} y={2} animate={true}>
+      <p>foo</p>
+    </Token>
+  );
+  token.setProps({ x: 0, y: 2 });
+  expect(token.state('originX')).toEqual(1);
+  expect(token.state('originY')).toEqual(2);
+
+  token.setProps({ x: 0, y: 2 });
   expect(token.state('originX')).toEqual(1);
   expect(token.state('originY')).toEqual(2);
 });
@@ -50,22 +73,12 @@ test('props change', () => {
 test('handlers', () => {
   const onClick = jest.fn();
   const token = Enzyme.mount(
-    <Token x={0} y={0} animate={false} onClick={onClick}><p>foo</p></Token>);
+    <Token x={0} y={0} animate={false} onClick={onClick}>
+      <p>foo</p>
+    </Token>
+  );
 
   token.simulate('click');
 
   expect(onClick).toHaveBeenCalled();
-});
-
-test('other coordinates', () => {
-  let polar = (props) => {
-    return {x: props.r * Math.cos(props.teta),
-            y: props.r * Math.sin(props.teta)};
-  };
-
-  const token = Enzyme.shallow(
-    <Token r={1} teta={Math.PI / 6} _coordinateFn={polar}><p>foo</p></Token>);
-
-  expect(token.state('x')).toBeCloseTo(Math.sqrt(3) / 2, 3);
-  expect(token.state('y')).toBeCloseTo(0.5, 3);
 });

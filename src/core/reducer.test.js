@@ -13,19 +13,19 @@ import { makeMove, gameEvent, restore } from './action-creators';
 
 const game = Game({
   moves: {
-    'A': G => G,
-    'B': () => ({ moved: true }),
-    'C': () => ({ victory: true })
+    A: G => G,
+    B: () => ({ moved: true }),
+    C: () => ({ victory: true }),
   },
   flow: {
-    endGameIf: (G, ctx) => G.victory ? ctx.currentPlayer : undefined
-  }
+    endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
+  },
 });
 
 const endTurn = () => gameEvent('endTurn');
 
 test('_id is incremented', () => {
-  const reducer = createGameReducer({game});
+  const reducer = createGameReducer({ game });
 
   let state = undefined;
 
@@ -36,7 +36,7 @@ test('_id is incremented', () => {
 });
 
 test('makeMove', () => {
-  const reducer = createGameReducer({game});
+  const reducer = createGameReducer({ game });
 
   let state;
 
@@ -51,13 +51,13 @@ test('makeMove', () => {
 });
 
 test('restore', () => {
-  const reducer = createGameReducer({game});
+  const reducer = createGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
-  expect(state).toEqual({G: 'restored'});
+  expect(state).toEqual({ G: 'restored' });
 });
 
 test('move dispatchers', () => {
-  const reducer = createGameReducer({game});
+  const reducer = createGameReducer({ game });
   const store = createStore(reducer);
   const api = createMoveDispatchers(game.moveNames, store);
 
@@ -75,7 +75,7 @@ test('move dispatchers', () => {
 });
 
 test('victory', () => {
-  const reducer = createGameReducer({game});
+  const reducer = createGameReducer({ game });
 
   let state = reducer(undefined, makeMove('A'));
   state = reducer(state, endTurn());
@@ -88,20 +88,51 @@ test('victory', () => {
 });
 
 test('endTurn', () => {
-  const reducer = createGameReducer({game});
-  const state = reducer(undefined, endTurn());
-  expect(state.ctx.turn).toBe(1);
+  {
+    const reducer = createGameReducer({ game });
+    const state = reducer(undefined, endTurn());
+    expect(state.ctx.turn).toBe(1);
+  }
+
+  {
+    const reducer = createGameReducer({ game, multiplayer: true });
+    const state = reducer(undefined, endTurn());
+    expect(state.ctx.turn).toBe(0);
+  }
+});
+
+test('light client when multiplayer=true', () => {
+  const game = Game({
+    moves: { A: () => ({ win: true }) },
+    flow: { endGameIf: G => G.win },
+  });
+
+  {
+    const reducer = createGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.ctx.gameover).toBe(undefined);
+    state = reducer(state, makeMove('A'));
+    expect(state.ctx.gameover).toBe(true);
+  }
+
+  {
+    const reducer = createGameReducer({ game, multiplayer: true });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.ctx.gameover).toBe(undefined);
+    state = reducer(state, makeMove('A'));
+    expect(state.ctx.gameover).toBe(undefined);
+  }
 });
 
 test('numPlayers', () => {
   const numPlayers = 4;
-  const reducer = createGameReducer({game, numPlayers});
+  const reducer = createGameReducer({ game, numPlayers });
   const state = reducer(undefined, endTurn());
   expect(state.ctx.numPlayers).toBe(4);
 });
 
 test('log', () => {
-  const reducer = createGameReducer({game});
+  const reducer = createGameReducer({ game });
 
   let state = undefined;
 

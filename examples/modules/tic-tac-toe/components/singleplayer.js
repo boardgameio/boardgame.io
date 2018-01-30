@@ -13,11 +13,11 @@ import Board from './board';
 
 const App = Client({
   game: TicTacToe,
-  board: Board
+  board: Board,
 });
 
 const Singleplayer = () => (
-  <div style={{padding: 50}}>
+  <div style={{ padding: 50 }}>
     <h1>Singleplayer</h1>
     <App gameID="single" />
   </div>

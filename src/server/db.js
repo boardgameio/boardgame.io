@@ -42,6 +42,6 @@ export class InMemory {
    * @returns {boolean} - True if a game with this id exists.
    */
   has(id) {
-    return this.games.has(id)
+    return this.games.has(id);
   }
 }

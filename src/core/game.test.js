@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The boardgame.io Authors
+ * Copyright 2018 The boardgame.io Authors
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -7,12 +7,14 @@
  */
 
 import Game from './game';
+import { createGameReducer } from './reducer';
+import { gameEvent } from './action-creators';
 
 const game = Game({
   moves: {
-    'A': G => G,
-    'B': () => null,
-  }
+    A: G => G,
+    B: () => null,
+  },
 });
 
 test('basic', () => {
@@ -31,7 +33,7 @@ test('playerID from context', () => {
     moves: {
       A() {
         return { playerID: this.playerID };
-      }
+      },
     },
   });
 
@@ -42,7 +44,159 @@ test('playerID from context', () => {
 test('flow override', () => {
   const f = { processGameEvent: () => {} };
   const game = Game({
-    flow: f
+    flow: f,
   });
   expect(game.flow).toBe(f);
+});
+
+// Following turn order is often used in worker placement games like Agricola and Viticulture.
+test('rounds with starting player token', () => {
+  let game = Game({
+    setup: () => ({ startingPlayerToken: 0 }),
+    flow: {
+      phases: [
+        {
+          name: 'main',
+          turnOrder: {
+            first: G => G.startingPlayerToken + '',
+            next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
+          },
+        },
+      ],
+    },
+  });
+
+  const numPlayers = 4;
+  const reducer = createGameReducer({ game, numPlayers: numPlayers });
+  let state = reducer(undefined, { type: 'init' });
+
+  expect(state.ctx.currentPlayer).toBe('0');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('1');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('2');
+  // a player took starting player token
+  state = { ...state, G: { startingPlayerToken: 2 } };
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('3');
+
+  state = reducer(state, gameEvent('endTurn'));
+  state = reducer(state, gameEvent('endPhase'));
+  expect(state.ctx.currentPlayer).toBe('2');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('3');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('0');
+});
+
+// The following pattern is used in Catan, Twilight Imperium, and (sort of) Powergrid.
+test('serpentine setup phases', () => {
+  let game = Game({
+    flow: {
+      phases: [
+        {
+          name: 'first setup round',
+          turnOrder: {
+            first: () => '0',
+            next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
+          },
+        },
+        {
+          name: 'second setup round',
+          turnOrder: {
+            first: (G, ctx) => ctx.numPlayers - 1 + '',
+            next: (G, ctx) => (+ctx.currentPlayer - 1) % ctx.numPlayers + '',
+          },
+        },
+        {
+          name: 'main phase',
+          turnOrder: {
+            first: () => '0',
+            next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
+          },
+        },
+      ],
+    },
+  });
+
+  const numPlayers = 4;
+  const reducer = createGameReducer({ game, numPlayers: numPlayers });
+  let state = reducer(undefined, { type: 'init' });
+
+  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.phase).toBe('first setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('1');
+  expect(state.ctx.phase).toBe('first setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('2');
+  expect(state.ctx.phase).toBe('first setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('3');
+  expect(state.ctx.phase).toBe('first setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  state = reducer(state, gameEvent('endPhase'));
+  expect(state.ctx.currentPlayer).toBe('3');
+  expect(state.ctx.phase).toBe('second setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('2');
+  expect(state.ctx.phase).toBe('second setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('1');
+  expect(state.ctx.phase).toBe('second setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.phase).toBe('second setup round');
+
+  state = reducer(state, gameEvent('endTurn'));
+  state = reducer(state, gameEvent('endPhase'));
+  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('1');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('2');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('3');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('1');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('2');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('3');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.phase).toBe('main phase');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.currentPlayer).toBe('1');
+  expect(state.ctx.phase).toBe('main phase');
 });
