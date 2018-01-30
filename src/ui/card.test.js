@@ -6,29 +6,29 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from "react";
-import { Card } from "./card";
-import Enzyme from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+import React from 'react';
+import { Card } from './card';
+import Enzyme from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-test("is rendered", () => {
+test('is rendered', () => {
   const card = Enzyme.mount(<Card isFaceUp />);
   expect(card.html()).toBe(
     '<div class="bgio-card"><div class="bgio-card__front">Card</div></div>'
   );
 });
 
-test("handlers", () => {
+test('handlers', () => {
   const onMouseOver = jest.fn();
   const onClick = jest.fn();
   const card = Enzyme.mount(
     <Card onMouseOver={onMouseOver} onClick={onClick} />
   );
 
-  card.simulate("mouseover");
-  card.simulate("click");
+  card.simulate('mouseover');
+  card.simulate('click');
 
   expect(onMouseOver).toHaveBeenCalled();
   expect(onClick).toHaveBeenCalled();

@@ -6,18 +6,18 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import Logo from "./logo";
-import "./card.css";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Logo from './logo';
+import './card.css';
 
 const Card = ({ back, canHover, className, front, isFaceUp, ...rest }) => {
-  const classNames = ["bgio-card"];
-  if (!canHover) classNames.push("no-hover");
+  const classNames = ['bgio-card'];
+  if (!canHover) classNames.push('no-hover');
   if (className) classNames.push(className);
 
   return (
-    <div className={classNames.join(" ")} {...rest}>
+    <div className={classNames.join(' ')} {...rest}>
       {isFaceUp ? front : back}
     </div>
   );
@@ -28,7 +28,7 @@ Card.propTypes = {
   canHover: PropTypes.bool,
   className: PropTypes.string,
   front: PropTypes.node,
-  isFaceUp: PropTypes.bool
+  isFaceUp: PropTypes.bool,
 };
 
 Card.defaultProps = {
@@ -39,7 +39,7 @@ Card.defaultProps = {
   ),
   canHover: true,
   front: <div className="bgio-card__front">Card</div>,
-  isFaceUp: false
+  isFaceUp: false,
 };
 
 export { Card };

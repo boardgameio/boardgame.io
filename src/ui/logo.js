@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const Logo = ({ width, height }) => (
   <svg
@@ -37,7 +37,7 @@ const Logo = ({ width, height }) => (
 
 Logo.propTypes = {
   width: PropTypes.string,
-  height: PropTypes.string
+  height: PropTypes.string,
 };
 
 export default Logo;
