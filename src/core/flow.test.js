@@ -417,7 +417,7 @@ test('dispatchers', () => {
   {
     const game = Game({
       flow: {
-        events: ['endTurn', 'endPhase'],
+        endPhase: true,
       },
     });
     const reducer = createGameReducer({ game, numPlayers: 2 });
@@ -427,5 +427,17 @@ test('dispatchers', () => {
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
+  }
+
+  {
+    const game = Game({
+      flow: {
+        endTurn: false,
+      },
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual([]);
   }
 });
