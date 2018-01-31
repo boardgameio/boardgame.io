@@ -23,13 +23,13 @@ export class StandardDeckStory extends React.Component {
   }
 
   onDiscard = () => {
-    action('discarded')(this.state.selectedCard);
+    action('discarded')(JSON.stringify(this.state.selectedCard.card));
     this.setState({ selectedCard: null });
   };
 
   onClick = card => {
     const selectedCard = card.props;
-    action('onClick')(selectedCard);
+    action('onClick')(JSON.stringify(selectedCard.card));
     this.setState({ selectedCard });
   };
 
