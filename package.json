@@ -116,6 +116,7 @@
     "react-json-view": "^1.13.0",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
+    "seedrandom": "^2.4.3",
     "socket.io": "^2.0.3"
   },
   "peerDependencies": {
