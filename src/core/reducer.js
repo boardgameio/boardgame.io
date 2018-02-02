@@ -6,6 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
+// seedrandom is not used, but it adds Math.seedrandom
+/* eslint-disable no-unused-vars */
+import seedrandom from 'seedrandom';
+/* eslint-enable no-unused-vars */
+
 import * as Actions from './action-types';
 import * as ActionCreators from './action-creators';
 
@@ -44,6 +49,13 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
   };
 
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+
+  // either take the provided seed, or use seedrandom to create one.
+  // Math.seedrandom returns an autoseed with local entropy only.
+  const seed =
+    initial.G.seed === undefined ? Math.seedrandom() : initial.G.seed;
+  state.ctx.seed = seed;
+
   initial.G = state.G;
   initial.ctx = state.ctx;
 
