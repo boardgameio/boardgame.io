@@ -12,8 +12,6 @@ const Redux = require('redux');
 import { InMemory } from './db';
 import { createGameReducer } from '../core/reducer';
 
-const deepCopy = obj => JSON.parse(JSON.stringify(obj));
-
 function Server({ games, db }) {
   const app = new Koa();
   const io = new IO();
@@ -64,9 +62,7 @@ function Server({ games, db }) {
           for (const client of roomClients.values()) {
             const playerID = clientInfo.get(client);
 
-            const newctx = deepCopy(state.ctx);
-            Reflect.deleteProperty(newctx, 'seed');
-
+            let newctx = { ...state.ctx, seed: undefined };
             const game_asViewedByThePlayer = game.playerView(
               state.G,
               newctx,
@@ -112,10 +108,7 @@ function Server({ games, db }) {
         }
 
         const state = store.getState();
-
-        const newctx = deepCopy(state.ctx);
-        Reflect.deleteProperty(newctx, 'seed');
-
+        let newctx = { ...state.ctx, seed: undefined };
         socket.emit('sync', gameID, {
           ...state,
           G: game.playerView(state.G, newctx, playerID),

@@ -132,10 +132,7 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
             isActive = false;
           }
 
-          const deepCopy = obj => JSON.parse(JSON.stringify(obj));
-          const newctx = deepCopy(state.ctx);
-          Reflect.deleteProperty(newctx, 'seed');
-
+          let newctx = { ...state.ctx, seed: undefined };
           return {
             ...state,
             isActive,
