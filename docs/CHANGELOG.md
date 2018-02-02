@@ -1,3 +1,15 @@
+# v0.17.0
+
+### Features
+
+0758c7e cascade endPhase
+cc7d44f retire triggers and introduce onMove instead
+17e88ce convert events whitelist to boolean options
+e315b9e add ui to NPM package
+5b34c5d remove pass event and make it a standard move
+f3da742 make playerID available in ctx
+cb09d9a make turnOrder a globally configurable option
+
 # v0.16.8
 
 #### Features

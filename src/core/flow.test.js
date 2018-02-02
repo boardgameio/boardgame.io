@@ -69,6 +69,8 @@ test('movesPerTurn', () => {
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(0);
+    state = flow.processGameEvent(state, { type: 'endTurn' });
+    expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(1);
   }
@@ -81,6 +83,8 @@ test('movesPerTurn', () => {
     let state = { ctx: flow.ctx(2) };
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(1);
@@ -132,22 +136,28 @@ test('onTurnEnd', () => {
   }
 });
 
-test('triggers', () => {
-  const triggers = [
-    {
-      condition: G => G.milestone,
-      action: G => ({ ...G, action: true }),
-    },
-  ];
+test('onMove', () => {
+  const onMove = () => ({ A: true });
 
-  let flow = FlowWithPhases({ triggers });
-  let state = { G: {}, ctx: flow.ctx(2) };
+  {
+    let flow = FlowWithPhases({ onMove });
+    let state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.processMove(state);
+    expect(state.G).toEqual({ A: true });
+  }
 
-  state = flow.processMove(state);
-  expect(state.G.action).toBe(undefined);
-  state.G.milestone = true;
-  state = flow.processMove(state);
-  expect(state.G.action).toBe(true);
+  {
+    let flow = FlowWithPhases({
+      onMove,
+      phases: [{ name: 'A' }, { name: 'B', onMove: () => ({ B: true }) }],
+    });
+    let state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.processMove(state);
+    expect(state.G).toEqual({ A: true });
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+    state = flow.processMove(state);
+    expect(state.G).toEqual({ B: true });
+  }
 });
 
 test('init', () => {
@@ -201,10 +211,10 @@ test('onPhaseBegin / onPhaseEnd', () => {
 
 test('endPhaseIf', () => {
   const flow = FlowWithPhases({
-    phases: [{ name: 'A', endPhaseIf: G => G.end }, { name: 'B' }],
+    phases: [{ name: 'A', endPhaseIf: () => true }, { name: 'B' }],
   });
 
-  let state = { G: { end: true }, ctx: flow.ctx(2) };
+  const state = { ctx: flow.ctx(2) };
 
   {
     const t = flow.processGameEvent(state, { type: 'endPhase' });
@@ -219,6 +229,21 @@ test('endPhaseIf', () => {
   {
     const t = flow.processMove(state, { type: 'move' });
     expect(t.ctx.phase).toBe('B');
+  }
+
+  {
+    const endPhaseIf = () => true;
+    const flow = FlowWithPhases({
+      phases: [
+        { name: 'A', endPhaseIf },
+        { name: 'B', endPhaseIf },
+        { name: 'C', endPhaseIf },
+      ],
+    });
+
+    const state = { ctx: flow.ctx(2) };
+    const t = flow.processGameEvent(state, { type: 'endPhase' });
+    expect(t.ctx.phase).toBe('A');
   }
 });
 
