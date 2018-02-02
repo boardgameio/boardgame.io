@@ -60,7 +60,7 @@ function Server({ games, db }) {
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
-            const playerID = clientInfo.get(client);
+            const playerID = clientInfo.get(client).playerID;
 
             let newctx = { ...state.ctx, seed: undefined };
             const game_asViewedByThePlayer = game.playerView(
