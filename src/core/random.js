@@ -1,5 +1,17 @@
 import seedrandom from 'seedrandom';
 
+function getrandomfn(ctx) {
+  let randomfn;
+  if (ctx.prngstate === undefined) {
+    // no call to a random function has been made.
+    // pre-populate the state info
+    randomfn = new seedrandom.alea(ctx.seed, { state: true });
+  } else {
+    randomfn = new seedrandom.alea('', { state: ctx.prngstate });
+  }
+  return randomfn;
+}
+
 /**
  * random
  *
@@ -9,11 +21,11 @@ import seedrandom from 'seedrandom';
  * @param {...object} ctx - The context object keeping the seed and current state.
  */
 function random(ctx) {
-  if (ctx._randomFn === undefined) {
-    ctx._randomFn = new seedrandom.alea(ctx.seed);
-  }
-
-  return ctx._randomFn();
+  const r = getrandomfn(ctx);
+  const randomnumber = r();
+  // TODO in-place ctx modification - ok?
+  ctx.prngstate = r.state();
+  return randomnumber;
 }
 
 /**
@@ -32,11 +44,6 @@ function random(ctx) {
  * @param {any[]} array - The array to sort.
  */
 function shuffle(ctx, array) {
-  if (ctx._randomFn === undefined) {
-    ctx._randomFn = new seedrandom.alea(ctx.seed);
-  }
-  const randomFn = ctx._randomFn;
-
   let m = array.length,
     t,
     i;
@@ -44,7 +51,7 @@ function shuffle(ctx, array) {
   // While there remain elements to shuffle…
   while (m) {
     // Pick a remaining element…
-    i = Math.floor(randomFn() * m--);
+    i = Math.floor(random(ctx) * m--);
 
     // And swap it with the current element.
     t = array[m];
