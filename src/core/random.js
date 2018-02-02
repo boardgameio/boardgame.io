@@ -24,9 +24,8 @@ function getrandomfn(ctx) {
 function random(ctx) {
   const r = getrandomfn(ctx);
   const randomnumber = r();
-  // TODO in-place ctx modification - ok?
-  ctx.prngstate = r.state();
-  return randomnumber;
+  const ctx2 = { ...ctx, prngstate: r.state() };
+  return { randomnumber, ctx: ctx2 };
 }
 
 /**
@@ -42,17 +41,21 @@ function random(ctx) {
  * https://bost.ocks.org/mike/shuffle/
  *
  * @param {...object} ctx - The context object keeping the seed and current state.
- * @param {any[]} array - The array to sort.
+ * @param {any[]} array - The array to sort. Will be modified in-place.
  */
 function shuffle(ctx, array) {
   let m = array.length,
     t,
     i;
+  let ctx2 = ctx;
 
   // While there remain elements to shuffle…
   while (m) {
+    let { ctx: ctx3, randomnumber } = random(ctx2);
+    ctx2 = ctx3;
+
     // Pick a remaining element…
-    i = Math.floor(random(ctx) * m--);
+    i = Math.floor(randomnumber * m--);
 
     // And swap it with the current element.
     t = array[m];
@@ -60,7 +63,7 @@ function shuffle(ctx, array) {
     array[i] = t;
   }
 
-  return array;
+  return { ctx: ctx2, array };
 }
 
 function rolldie(G, fieldname) {
@@ -77,8 +80,9 @@ function evaluaterandomops(G, ctx) {
     G._randomOps.forEach(r => {
       switch (r.op) {
         case 'D6': {
-          const rn = random(ctx2); // TODO ctx!
-          const d6 = Math.floor(rn * 6) + 1;
+          const { ctx: ctx3, randomnumber } = random(ctx2);
+          ctx2 = ctx3;
+          const d6 = Math.floor(randomnumber * 6) + 1;
           randomresults[r.fieldname] = d6;
           break;
         }

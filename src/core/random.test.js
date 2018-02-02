@@ -4,19 +4,23 @@ test('random', () => {
   let ctx = { seed: 'hi there' };
 
   // make sure that on subsequent calls different numbers are generated.
-  expect(random(ctx)).toBe(0.573445922927931);
-  expect(random(ctx)).toBe(0.4695413049776107);
-  expect(random(ctx)).toBe(0.5943194630090147);
+  let { ctx: ctx2, randomnumber } = random(ctx);
+  expect(randomnumber).toBe(0.573445922927931);
+  let { ctx: ctx3, randomnumber: randomnumber2 } = random(ctx2);
+  expect(randomnumber2).toBe(0.4695413049776107);
+  let { ctx: ctx4, randomnumber: randomnumber3 } = random(ctx3);
+  expect(randomnumber3).toBe(0.5943194630090147);
+  expect(ctx4).not.toMatchObject(ctx3);
 });
 
 test('shuffle', () => {
   let ctx = { seed: 'hi there' };
   let numbers = new Array(10).fill().map((_, idx) => idx);
 
-  shuffle(ctx, numbers);
+  let { ctx: ctx2 } = shuffle(ctx, numbers);
   expect(numbers).toMatchObject([1, 0, 7, 2, 3, 9, 6, 8, 4, 5]);
 
-  shuffle(ctx, numbers);
+  shuffle(ctx2, numbers);
   expect(numbers).toMatchObject([1, 6, 8, 3, 7, 5, 9, 0, 2, 4]);
 });
 
@@ -48,8 +52,8 @@ test('runrandom', () => {
 
   // one random event
   G2 = rolldie(G, 'field1');
-  let { G: G3 /* ctx: ctx3 */ } = runrandom(G2, ctx);
-  //expect(ctx).not.toMatchObject(ctx3);
+  let { G: G3, ctx: ctx3 } = runrandom(G2, ctx);
+  expect(ctx).not.toMatchObject(ctx3);
   expect(G3.field1).toBeDefined();
   expect(G3.field1).toBeGreaterThanOrEqual(1);
   expect(G3.field1).toBeLessThanOrEqual(6);
