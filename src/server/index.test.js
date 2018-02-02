@@ -130,7 +130,6 @@ test('action', () => {
       log: [],
     },
     ctx: {
-      seed: 0,
       currentPlayer: '1',
       currentPlayerMoves: 0,
       numPlayers: 2,
@@ -196,7 +195,6 @@ test('playerView', () => {
       log: [],
     },
     ctx: {
-      seed: 0,
       currentPlayer: '0',
       currentPlayerMoves: 0,
       numPlayers: 2,
