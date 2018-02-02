@@ -5,6 +5,7 @@ function getrandomfn(ctx) {
   if (ctx.prngstate === undefined) {
     // no call to a random function has been made.
     // pre-populate the state info
+    // TODO what if ctx.seed is not defined?
     randomfn = new seedrandom.alea(ctx.seed, { state: true });
   } else {
     randomfn = new seedrandom.alea('', { state: ctx.prngstate });
@@ -62,4 +63,39 @@ function shuffle(ctx, array) {
   return array;
 }
 
-export { random, shuffle };
+function rolldie(G, fieldname) {
+  let newRandomOps = [{ op: 'D6', fieldname }];
+  let _randomOps = [...(G._randomOps || []), ...newRandomOps];
+  return { ...G, _randomOps };
+}
+
+function evaluaterandomops(G, ctx) {
+  let randomresults = {};
+  let ctx2 = ctx;
+
+  if (G._randomOps !== undefined) {
+    G._randomOps.forEach(r => {
+      switch (r.op) {
+        case 'D6': {
+          const rn = random(ctx2); // TODO ctx!
+          const d6 = Math.floor(rn * 6) + 1;
+          randomresults[r.fieldname] = d6;
+          break;
+        }
+        default:
+          // TODO ignore? log?
+          break;
+      }
+    });
+  }
+
+  return { randomresults, ctx: ctx2 };
+}
+
+function runrandom(G, ctx) {
+  let { randomresults, ctx: ctx2 } = evaluaterandomops(G, ctx);
+  const G2 = { ...G, ...randomresults, _randomOps: undefined };
+  return { G: G2, ctx: ctx2 };
+}
+
+export { random, shuffle, rolldie, runrandom };
