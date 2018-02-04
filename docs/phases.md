@@ -145,6 +145,13 @@ flow: {
 
       // Run at the end of a phase.
       onPhaseEnd:   (G, ctx) => G
+
+      // Can override the global-options here for this
+      // specific phase only.
+      endTurnIf: ...
+      endGameIf: ...
+      onTurnEnd: ...
+      onMove:    ...
     }
   ]
 }
