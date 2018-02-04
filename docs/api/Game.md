@@ -24,7 +24,7 @@ game state and the moves. The moves are converted to a
     The turn automatically ends if this function returns true (checked after each move).
   * `flow.onTurnEnd` (_function_): _(G, ctx) => G_
     Code to run at the end of a turn.
-  * `flow.onMove` (_function_): _(G, ctx) => G_
+  * `flow.onMove` (_function_): _(G, ctx, { type: 'moveName', args: [] }) => G_
     Code to run at the end of a move.
   * `flow.movesPerTurn` (_number_): Ends the turn automatically if a certain number
     of moves have been made.
