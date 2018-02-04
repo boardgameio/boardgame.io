@@ -106,6 +106,8 @@ function Server({ games, db }) {
           ...state,
           G: game.playerView(state.G, state.ctx, playerID),
         });
+
+        return;
       });
 
       socket.on('disconnect', () => {
