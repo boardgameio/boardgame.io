@@ -10,9 +10,14 @@ The default turn order (round-robin) is called `TurnOrder.DEFAULT`.
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 Game({
+  moves: {
+    ...
+  },
+
   flow: {
     turnOrder: TurnOrder.DEFAULT,
   }
+}
 ```
 
 A `TurnOrder` object has the following structure:
