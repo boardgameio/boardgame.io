@@ -69,6 +69,8 @@ test('movesPerTurn', () => {
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(0);
+    state = flow.processGameEvent(state, { type: 'endTurn' });
+    expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(1);
   }
@@ -81,6 +83,8 @@ test('movesPerTurn', () => {
     let state = { ctx: flow.ctx(2) };
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
+    expect(state.ctx.turn).toBe(0);
+    state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(1);
