@@ -239,12 +239,12 @@ export function FlowWithPhases({
    * The next phase is chosen in a round-robin fashion, with the
    * option to override that by passing nextPhase.
    */
-  function endPhaseEvent(state, nextPhase) {
+  function endPhaseEvent(state, nextPhase, cascadeDepth) {
     let G = state.G;
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    const conf = phaseMap[ctx.phase];
+    let conf = phaseMap[ctx.phase];
     G = conf.onPhaseEnd(G, ctx);
 
     const gameover = conf.endGameIf(G, ctx);
@@ -263,7 +263,21 @@ export function FlowWithPhases({
     }
 
     // Run any setup code for the new phase.
-    return startPhase({ ...state, G, ctx }, phaseMap[ctx.phase]);
+    state = startPhase({ ...state, G, ctx }, phaseMap[ctx.phase]);
+
+    // End the new phase automatically if necessary.
+    // In order to avoid infinite loops, this is called
+    // a finite number of times.
+    if (!cascadeDepth) cascadeDepth = 0;
+    if (cascadeDepth < phases.length - 1) {
+      conf = phaseMap[state.ctx.phase];
+      const end = conf.endPhaseIf(state.G, state.ctx);
+      if (end) {
+        state = endPhaseEvent(state, end, cascadeDepth + 1);
+      }
+    }
+
+    return state;
   }
 
   /**
