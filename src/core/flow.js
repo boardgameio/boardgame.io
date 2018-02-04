@@ -101,7 +101,7 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *                                (G, ctx) => G
  *
  * @param {...object} onMove - Any code to run at the end of a move.
- *                             (G, ctx) => G
+ *                             (G, ctx, { type: 'moveName', args: [] }) => G
  *
  * @param {...object} turnOrder - Customize the turn order (see turn-order.js).
  *
@@ -310,7 +310,7 @@ export function FlowWithPhases({
 
     const conf = phaseMap[state.ctx.phase];
 
-    const G = conf.onMove(state.G, state.ctx);
+    const G = conf.onMove(state.G, state.ctx, action);
     state = { ...state, G };
 
     const gameover = conf.endGameIf(state.G, state.ctx);
