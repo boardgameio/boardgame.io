@@ -110,9 +110,6 @@ phases: [
 ];
 ```
 
-?> The framework takes care of running these board actions locally while prototyping
-in singleplayer mode, and running it only on the server in multiplayer mode.
-
 #### Triggers / Hooks
 
 The `flow` section can specify a number of automatic behaviors when a move is made
