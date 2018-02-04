@@ -207,10 +207,10 @@ test('onPhaseBegin / onPhaseEnd', () => {
 
 test('endPhaseIf', () => {
   const flow = FlowWithPhases({
-    phases: [{ name: 'A', endPhaseIf: G => G.end }, { name: 'B' }],
+    phases: [{ name: 'A', endPhaseIf: () => true }, { name: 'B' }],
   });
 
-  let state = { G: { end: true }, ctx: flow.ctx(2) };
+  const state = { ctx: flow.ctx(2) };
 
   {
     const t = flow.processGameEvent(state, { type: 'endPhase' });
@@ -225,6 +225,21 @@ test('endPhaseIf', () => {
   {
     const t = flow.processMove(state, { type: 'move' });
     expect(t.ctx.phase).toBe('B');
+  }
+
+  {
+    const endPhaseIf = () => true;
+    const flow = FlowWithPhases({
+      phases: [
+        { name: 'A', endPhaseIf },
+        { name: 'B', endPhaseIf },
+        { name: 'C', endPhaseIf },
+      ],
+    });
+
+    const state = { ctx: flow.ctx(2) };
+    const t = flow.processGameEvent(state, { type: 'endPhase' });
+    expect(t.ctx.phase).toBe('A');
   }
 });
 
