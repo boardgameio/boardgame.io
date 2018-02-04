@@ -142,25 +142,3 @@ A `TurnOrder` object has the following structure:
 
 !> `TurnOrder.ANY` implements a turn order where any player can play during
 the phase, following no particular order.
-
-#### Passing
-
-When you use phases, you will notice that you also have an additional game
-event called `pass` that you can use. This is analogous to `endTurn`, but
-also marks the fact that the played passed when they ended the turn.
-
-When all the players have passed, `ctx.allPassed` is set to `true`.
-
-Putting this all together, you can do the following to implement a phase
-where play continues in round-robin order (skipping over players that pass),
-until all players have passed:
-
-```js
-phases: [
-  {
-    name: 'A',
-    endTurnIf: G => G.allPassed,
-    turnOrder: TurnOrder.SKIP,
-  },
-];
-```
