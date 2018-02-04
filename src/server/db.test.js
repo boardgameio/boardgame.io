@@ -21,7 +21,7 @@ test('basic', async () => {
   // Create game.
   await db.set('gameID', store.getState());
   // Must return created game.
-  state = await db.get('gameID')
+  state = await db.get('gameID');
   expect(state).toEqual(store.getState());
 
   // Must return true if game exists

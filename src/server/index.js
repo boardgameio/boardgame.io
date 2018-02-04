@@ -95,7 +95,7 @@ function Server({ games, db }) {
 
         clientInfo.set(socket.id, { gameID, playerID });
 
-        let state = db.get(gameID);
+        let state = await db.get(gameID);
         if (state === undefined) {
           const store = Redux.createStore(reducer);
           state = store.getState();

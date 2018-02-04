@@ -1,5 +1,5 @@
 // solve runtime issue with async fumctions
-import "babel-polyfill";
+import 'babel-polyfill';
 
 /*
  * Copyright 2017 The boardgame.io Authors
@@ -17,7 +17,7 @@ export class InMemory {
    * Creates a new InMemory storage.
    */
   constructor() {
-    this.games = new Map()
+    this.games = new Map();
   }
 
   /**
@@ -35,8 +35,8 @@ export class InMemory {
    * @returns {object} - A game state, or undefined
    *                     if no game is found with this id.
    */
-   async get(id) {
-    return await this.games.get(id)
+  async get(id) {
+    return await this.games.get(id);
   }
   /**
    * Read the game state from the in-memory object.
