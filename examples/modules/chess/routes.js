@@ -13,13 +13,13 @@ const routes = [
   {
     path: '/chess/singleplayer',
     text: 'Singleplayer',
-    component: Singleplayer
+    component: Singleplayer,
   },
   {
     path: '/chess/multiplayer',
     text: 'Multiplayer',
-    component: Multiplayer
-  }
+    component: Multiplayer,
+  },
 ];
 
 export default routes;

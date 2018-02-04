@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-
 import React from 'react';
 import { Client } from 'boardgame.io/client';
 import Game from '../game';
@@ -17,11 +16,11 @@ const App = Client({
   numPlayers: 3,
   board: Board,
   debug: false,
-  multiplayer: true
+  multiplayer: true,
 });
 
 const Multiview = () => (
-  <div style={{padding: 50}}>
+  <div style={{ padding: 50 }}>
     <h1>Secret Info</h1>
     <div className="runner">
       <div className="run">

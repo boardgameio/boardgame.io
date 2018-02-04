@@ -21,10 +21,12 @@ test('secret', () => {
 });
 
 test('players', () => {
-  const G = { players: {
-    '0': {},
-    '1': {},
-  }};
+  const G = {
+    players: {
+      '0': {},
+      '1': {},
+    },
+  };
 
   {
     const newG = PlayerView.STRIP_SECRETS(G, {}, '0');

@@ -24,16 +24,16 @@ const game = Game({
     phases: [
       {
         name: 'take phase',
-        endPhaseIf: G => (G.deck <= 0),
+        endPhaseIf: G => G.deck <= 0,
         allowedMoves: ['takeCard'],
       },
       {
         name: 'play phase',
         allowedMoves: ['playCard'],
-        endPhaseIf: G => (G.hand <= 0),
-      }
+        endPhaseIf: G => G.hand <= 0,
+      },
     ],
-  }
+  },
 });
 
 class Board extends React.Component {
@@ -41,29 +41,37 @@ class Board extends React.Component {
     G: PropTypes.any.isRequired,
     ctx: PropTypes.any.isRequired,
     moves: PropTypes.any,
-    events: PropTypes.any
-  }
+    events: PropTypes.any,
+  };
 
   takeCard = () => {
     if (this.props.ctx.phase != 'take phase') return;
     this.props.moves.takeCard();
     this.props.events.endTurn();
-  }
+  };
 
   playCard = () => {
     if (this.props.ctx.phase != 'play phase') return;
     this.props.moves.playCard();
     this.props.events.endTurn();
-  }
+  };
 
   render() {
     return (
       <div className="phases">
-        <li style={{ background: '#aaa' }}>{ this.props.ctx.phase }</li>
-        <li>Deck: { this.props.G.deck }</li>
-        <li>Hand: { this.props.G.hand }</li>
-        <li><button id="take" onClick={this.takeCard}>Take Card</button></li>
-        <li><button id="play" onClick={this.playCard}>Play Card</button></li>
+        <li style={{ background: '#aaa' }}>{this.props.ctx.phase}</li>
+        <li>Deck: {this.props.G.deck}</li>
+        <li>Hand: {this.props.G.hand}</li>
+        <li>
+          <button id="take" onClick={this.takeCard}>
+            Take Card
+          </button>
+        </li>
+        <li>
+          <button id="play" onClick={this.playCard}>
+            Play Card
+          </button>
+        </li>
       </div>
     );
   }

@@ -13,8 +13,8 @@ import './card.css';
 export class Card extends React.Component {
   static propTypes = {
     onHover: PropTypes.func,
-    onClick: PropTypes.func
-  }
+    onClick: PropTypes.func,
+  };
 
   constructor(props) {
     super(props);
@@ -22,18 +22,20 @@ export class Card extends React.Component {
 
   onClick = () => {
     this.props.onClick();
-  }
+  };
 
   onHover = () => {
     this.props.onHover();
-  }
+  };
 
   render() {
     return (
-      <div className="bgio-card"
-           onMouseOver={this.onHover}
-           onClick={this.onClick}>
-      Card
+      <div
+        className="bgio-card"
+        onMouseOver={this.onHover}
+        onClick={this.onClick}
+      >
+        Card
       </div>
     );
   }

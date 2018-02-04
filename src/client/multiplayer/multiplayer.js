@@ -24,8 +24,9 @@ export class Multiplayer {
    * @param {string} playerID - The player ID associated with this client.
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
+   * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
    */
-  constructor(socketImpl, gameID, playerID, gameName, numPlayers) {
+  constructor(socketImpl, gameID, playerID, gameName, numPlayers, server) {
     this.gameName = gameName || 'default';
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;
@@ -36,7 +37,11 @@ export class Multiplayer {
     if (socketImpl !== undefined) {
       this.socket = socketImpl;
     } else {
-      this.socket = io('/' + gameName);
+      if (server) {
+        this.socket = io('http://' + server + '/' + gameName);
+      } else {
+        this.socket = io('/' + gameName);
+      }
     }
   }
 
@@ -48,10 +53,7 @@ export class Multiplayer {
   createStore(reducer) {
     let store = null;
 
-    const whiteListedActions = new Set([
-      MAKE_MOVE,
-      GAME_EVENT,
-    ]);
+    const whiteListedActions = new Set([MAKE_MOVE, GAME_EVENT]);
 
     // Redux middleware to emit a message on a socket
     // whenever an action is dispatched.
@@ -59,13 +61,18 @@ export class Multiplayer {
       const state = getState();
       const result = next(action);
 
-      if (whiteListedActions.has(action.type) &&
-          action._remote != true) {
-        this.socket.emit('action', action, state._id, this.gameID, this.playerID);
+      if (whiteListedActions.has(action.type) && action._remote != true) {
+        this.socket.emit(
+          'action',
+          action,
+          state._id,
+          this.gameID,
+          this.playerID
+        );
       }
 
       return result;
-    }
+    };
 
     store = createStore(reducer, applyMiddleware(SocketUpdate));
 

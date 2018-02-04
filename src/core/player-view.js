@@ -26,10 +26,10 @@ export const PlayerView = {
 
     if (r.players) {
       r.players = {
-        [playerID]: r.players[playerID]
+        [playerID]: r.players[playerID],
       };
     }
 
     return r;
-  }
-}
+  },
+};

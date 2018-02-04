@@ -16,15 +16,17 @@ import TicTacToe from './modules/tic-tac-toe/game';
 import Chess from './modules/chess/game';
 
 const PORT = process.env.PORT || 8000;
-const DEV = (process.env.NODE_ENV === 'development');
+const DEV = process.env.NODE_ENV === 'development';
 const PROD = !DEV;
 
-const app = Server({ games: [ TicTacToe, Chess ] });
+const app = Server({ games: [TicTacToe, Chess] });
 
 if (DEV) {
-  app.use(KoaWebpack({
-    config: WebpackConfig,
-  }));
+  app.use(
+    KoaWebpack({
+      config: WebpackConfig,
+    })
+  );
 }
 
 if (PROD) {

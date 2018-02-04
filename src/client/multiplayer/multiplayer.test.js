@@ -40,7 +40,7 @@ test('multiplayer', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer(mockSocket);
   const game = Game({});
-  const store = m.createStore(createGameReducer({game}));
+  const store = m.createStore(createGameReducer({ game }));
 
   // Returns a valid store.
   expect(store).not.toBe(undefined);
@@ -51,7 +51,12 @@ test('multiplayer', () => {
   mockSocket.emit = jest.fn();
   store.dispatch(action);
   expect(mockSocket.emit).lastCalledWith(
-      'action', action, 0, 'default:default', null);
+    'action',
+    action,
+    0,
+    'default:default',
+    null
+  );
 
   // sync restores state.
   const restored = { restore: true };
@@ -71,7 +76,7 @@ test('move whitelist', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer(mockSocket);
   const game = Game({});
-  const store = m.createStore(createGameReducer({game}));
+  const store = m.createStore(createGameReducer({ game }));
 
   mockSocket.emit = jest.fn();
 
@@ -88,4 +93,18 @@ test('move whitelist', () => {
   store.dispatch({ type: 'unknown' });
   expect(mockSocket.emit).not.toHaveBeenCalled();
   mockSocket.emit.mockReset();
+});
+
+test('game server is set when provided', () => {
+  var hostname = 'host';
+  var port = '1234';
+  var server = hostname + ':' + port;
+
+  const m = new Multiplayer(undefined, 0, 0, 0, 1, server);
+  expect(m.socket.io.engine.hostname).toEqual(hostname);
+  expect(m.socket.io.engine.port).toEqual(port);
+
+  const m2 = new Multiplayer(undefined, 0, 0, 0, 1, undefined);
+  expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
+  expect(m2.socket.io.engine.port).not.toEqual(port);
 });

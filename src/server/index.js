@@ -29,7 +29,6 @@ function Server({ games, db }) {
     const nsp = app._io.of(game.name);
 
     nsp.on('connection', socket => {
-
       socket.on('action', async (action, stateID, gameID, playerID) => {
         let state = await db.get(gameID);
 
@@ -50,8 +49,10 @@ function Server({ games, db }) {
 
         // Bail out if the player making the move is not
         // the current player.
-        if (state.ctx.currentPlayer != 'any' &&
-            playerID != state.ctx.currentPlayer) {
+        if (
+          state.ctx.currentPlayer != 'any' &&
+          playerID != state.ctx.currentPlayer
+        ) {
           return;
         }
 
@@ -68,12 +69,12 @@ function Server({ games, db }) {
             if (client === socket.id) {
               socket.emit('sync', gameID, {
                 ...state,
-                G: game.playerView(state.G, state.ctx, playerID)
+                G: game.playerView(state.G, state.ctx, playerID),
               });
             } else {
               socket.to(client).emit('sync', gameID, {
                 ...state,
-                G: game.playerView(state.G, state.ctx, playerID)
+                G: game.playerView(state.G, state.ctx, playerID),
               });
             }
           }
@@ -84,7 +85,7 @@ function Server({ games, db }) {
 
       socket.on('sync', async (gameID, playerID, numPlayers) => {
         socket.join(gameID);
-        const reducer = createGameReducer({game, numPlayers});
+        const reducer = createGameReducer({ game, numPlayers });
         let roomClients = roomInfo.get(gameID);
         if (roomClients === undefined) {
           roomClients = new Set();
@@ -94,20 +95,17 @@ function Server({ games, db }) {
 
         clientInfo.set(socket.id, { gameID, playerID });
 
-        let state = await db.get(gameID);
-
+        let state = db.get(gameID);
         if (state === undefined) {
-
           const store = Redux.createStore(reducer);
           state = store.getState();
-
-          await db.set(gameID, {...state});
-
-          socket.emit('sync', gameID, {
-            ...state,
-            G: game.playerView(state.G, state.ctx, playerID)
-          });
+          await db.set(gameID, state);
         }
+
+        socket.emit('sync', gameID, {
+          ...state,
+          G: game.playerView(state.G, state.ctx, playerID),
+        });
       });
 
       socket.on('disconnect', () => {

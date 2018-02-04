@@ -1,13 +1,13 @@
 {
   "name": "boardgame.io",
-  "version": "0.16.7",
+  "version": "0.17.0",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
     "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
     "docsify": "docsify serve docs",
     "examples": "npm run dev",
-    "precommit": "npm run lint",
+    "precommit": "lint-staged",
     "prepush": "npm run test:coverage",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
@@ -19,6 +19,7 @@
     "clean": "node ./scripts/clean.js",
     "prepare": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
+    "prettier": "prettier --write \"{examples,docs,src,storybook}/**/*.{js,css,md}\"",
     "postpublish": "node ./scripts/postpublish.js"
   },
   "main": "dist/boardgameio.js",
@@ -31,9 +32,11 @@
     "dist/server.js",
     "dist/client.js",
     "dist/core.js",
+    "dist/ui.js",
     "server.js",
     "client.js",
-    "core.js"
+    "core.js",
+    "ui.js"
   ],
   "keywords": [
     "react",
@@ -48,6 +51,7 @@
   "license": "MIT",
   "devDependencies": {
     "@storybook/addon-actions": "^3.2.16",
+    "@storybook/addon-knobs": "^3.3.10",
     "@storybook/addon-options": "^3.2.16",
     "@storybook/react": "^3.2.16",
     "babel-cli": "^6.26.0",
@@ -81,7 +85,9 @@
     "jest": "^21.2.1",
     "koa-helmet": "^3.2.0",
     "koa-webpack": "^1.0.0",
+    "lint-staged": "^6.0.1",
     "open-browser-webpack-plugin": "0.0.5",
+    "prettier": "^1.10.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",
@@ -120,7 +126,8 @@
     "exportAliases": {
       "client": "./dist/client.js",
       "server": "./dist/server.js",
-      "core": "./dist/core.js"
+      "core": "./dist/core.js",
+      "ui": "./dist/ui.js"
     }
   },
   "jest": {

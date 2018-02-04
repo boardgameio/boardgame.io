@@ -1,0 +1,37 @@
+/*
+ * Copyright 2018 The boardgame.io Authors.
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+.diagram {
+  border: none;
+  outline: none;
+}
+
+.diagram th {
+  padding: 10px;
+  background: #aaa;
+  color: #fff;
+  font-weight: bold;
+  font-size: 25px;
+  width: 50px;
+  height: 50px;
+}
+
+.diagram td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 50px;
+}
+
+.diagram td.active {
+  background: #83baff;
+}
+
+.diagram button {
+  margin-right: 10px;
+  margin-top: 10px;
+}
