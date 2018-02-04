@@ -292,6 +292,11 @@ export function FlowWithPhases({
 
     const conf = phaseMap[ctx.phase];
 
+    // Prevent ending the turn if movesPerTurn haven't been made.
+    if (conf.movesPerTurn && ctx.currentPlayerMoves < conf.movesPerTurn) {
+      return state;
+    }
+
     // Run turn-end triggers.
     G = conf.onTurnEnd(G, ctx);
 
