@@ -1,4 +1,4 @@
-# Turn Orders
+# Turn Order
 
 You can customize the order in which the turn gets passed between players
 by using the `turnOrder` option. This is passed inside a `flow` section of
