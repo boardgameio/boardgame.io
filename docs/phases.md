@@ -1,14 +1,15 @@
 # Phases
 
-A round-robin turn order where each player makes
-a number of moves before hitting `endTurn` might suffice
-for simple games, but sometimes you need more structure
-and customization.
+Most games beyond very simple ones tend to have different
+behaviors at various "phases". A game might have a phase
+at the beginning where players are drafting cards before
+playing, for example. Alternatively, an individual player's turn
+might be divided into different phases (an action phase followed by
+a buy phase in Dominion, for example).
 
-A `flow` allows you to define different phases that
-follow their own turn-order rules, with the option to
-specify certain automatic board actions that happen when
-a phase begins or ends.
+Each phase in `boardgame.io` defines a set of options
+that are applied during that phase. This includes the
+ability to restrict moves, use a specific turn order and much more.
 
 #### Card Game
 
@@ -112,33 +113,45 @@ phases: [
 ?> The framework takes care of running these board actions locally while prototyping
 in singleplayer mode, and running it only on the server in multiplayer mode.
 
-#### Custom Turn Orders
+#### Triggers / Hooks
 
-The phase can also take a `turnOrder` option in order to customize how
-the turn gets passed around between different players during that phase.
+The `flow` section can specify a number of automatic behaviors when a move is made
+or when the turn or phase is ended. These can also be overriden at the phase level.
+Let's take a look at some of these:
 
 ```js
-import { TurnOrder } from 'boardgame.io/core';
-
 flow: {
-  phases: [{
-    name: 'A',
-    turnOrder: TurnOrder.DEFAULT,
-  }],
+  // Ends the turn if this returns true.
+  endTurnIf: (G, ctx) => boolean
+
+  // Ends the game if this returns anything other than undefined.
+  endGameIf: (G, ctx) => boolean
+
+  // Run at the end of a turn.
+  onTurnEnd: (G, ctx) => G
+
+  // Run at the end of a move.
+  onMove: (G, ctx) => G
+
+  phase: [
+    {
+      name: 'A',
+
+      // Ends the phase if this returns a truthy value.
+      endPhaseIf: (G, ctx) => {}
+
+      // Run at the beginning of a phase.
+      onPhaseBegin: (G, ctx) => G
+
+      // Run at the end of a phase.
+      onPhaseEnd:   (G, ctx) => G
+    }
+  ]
 }
 ```
 
-A `TurnOrder` object has the following structure:
-
-```js
-{
-  // Get the first player.
-  first: (G, ctx) => startingPlayer,
-
-  // Get the next player when endTurn is called.
-  next: (G, ctx) => nextPlayer
-}
-```
-
-!> `TurnOrder.ANY` implements a turn order where any player can play during
-the phase, following no particular order.
+!> An important point to note is that in a multiplayer game, all of the code under
+`flow` is executed only on the server. The code under `moves`, in contrast, is
+run on both client and server. It is run on the client in order to effect a
+quick state transition without network lag, and run on the server to process
+the authoritative version of the state.
