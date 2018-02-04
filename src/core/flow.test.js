@@ -132,22 +132,28 @@ test('onTurnEnd', () => {
   }
 });
 
-test('triggers', () => {
-  const triggers = [
-    {
-      condition: G => G.milestone,
-      action: G => ({ ...G, action: true }),
-    },
-  ];
+test('onMove', () => {
+  const onMove = () => ({ A: true });
 
-  let flow = FlowWithPhases({ triggers });
-  let state = { G: {}, ctx: flow.ctx(2) };
+  {
+    let flow = FlowWithPhases({ onMove });
+    let state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.processMove(state);
+    expect(state.G).toEqual({ A: true });
+  }
 
-  state = flow.processMove(state);
-  expect(state.G.action).toBe(undefined);
-  state.G.milestone = true;
-  state = flow.processMove(state);
-  expect(state.G.action).toBe(true);
+  {
+    let flow = FlowWithPhases({
+      onMove,
+      phases: [{ name: 'A' }, { name: 'B', onMove: () => ({ B: true }) }],
+    });
+    let state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.processMove(state);
+    expect(state.G).toEqual({ A: true });
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+    state = flow.processMove(state);
+    expect(state.G).toEqual({ B: true });
+  }
 });
 
 test('init', () => {
