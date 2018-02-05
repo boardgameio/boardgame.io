@@ -26,8 +26,8 @@ The `Board` component will receive the following as `props`:
 7. `clientStatus`: Object containing enviroment data, with
    following properties:
 
-* isMultiplayer: `true` if it is a multiplayer game.
-* isConnected: `true` if connection to the server is active.
+* `isMultiplayer`: `true` if it is a multiplayer game.
+* `isConnected`: `true` if connection to the server is active.
 
 ### Arguments
 
