@@ -8,10 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
-if (typeof window !== 'undefined') {
-  require('./card.css');
-}
+import './card.css';
 
 export class Card extends React.Component {
   static propTypes = {

@@ -11,13 +11,11 @@ import PropTypes from 'prop-types';
 import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
 import * as ActionCreators from '../core/action-creators';
+import { Debug } from './debug/debug';
 import { Multiplayer } from './multiplayer/multiplayer';
 import { createEventDispatchers } from '../core/flow';
 import { createGameReducer, createMoveDispatchers } from '../core/reducer';
-
-if (typeof window !== 'undefined') {
-  require('./client.css');
-}
+import './client.css';
 
 /**
  * Client
@@ -153,8 +151,7 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
     }
 
     createDebugUI() {
-      if (debug && this.props.debug && typeof window !== 'undefined') {
-        const Debug = require('./debug/debug').Debug;
+      if (debug && this.props.debug) {
         this._debug = React.createElement(
           connect(state => ({ gamestate: state }), ActionCreators)(Debug),
           {
