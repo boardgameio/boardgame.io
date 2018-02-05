@@ -17,6 +17,7 @@ class Board extends React.Component {
     moves: PropTypes.any.isRequired,
     playerID: PropTypes.string,
     isActive: PropTypes.bool,
+    clientStatus: PropTypes.object,
   };
 
   onClick = id => {
@@ -50,6 +51,14 @@ class Board extends React.Component {
       tbody.push(<tr key={i}>{cells}</tr>);
     }
 
+    let disconnected = null;
+    if (
+      this.props.clientStatus.multiplayer &&
+      !this.props.clientStatus.isConnected
+    ) {
+      disconnected = <div>Disconnected!</div>;
+    }
+
     let winner = null;
     if (this.props.ctx.gameover !== undefined) {
       winner = <div id="winner">Winner: {this.props.ctx.gameover}</div>;
@@ -67,6 +76,7 @@ class Board extends React.Component {
         </table>
         {player}
         {winner}
+        {disconnected}
       </div>
     );
   }

@@ -25,12 +25,23 @@ export class Multiplayer {
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
    * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
+   * @param {function()} onChange - Callback to be called when there is a change in this object's state.
    */
-  constructor(socketImpl, gameID, playerID, gameName, numPlayers, server) {
+  constructor(
+    socketImpl,
+    gameID,
+    playerID,
+    gameName,
+    numPlayers,
+    server,
+    onChange
+  ) {
     this.gameName = gameName || 'default';
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;
     this.numPlayers = numPlayers || 2;
+    this.isConnected = false;
+    this.onChange = onChange || (() => {});
 
     this.gameID = this.gameName + ':' + this.gameID;
 
@@ -84,8 +95,16 @@ export class Multiplayer {
       }
     });
 
-    // Initial sync to get game state.
-    this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
+    this.socket.on('connect', () => {
+      // Initial sync to get game state.
+      this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
+      this.isConnected = true;
+      this.onChange();
+    });
+    this.socket.on('disconnect', () => {
+      this.isConnected = false;
+      this.onChange();
+    });
 
     return store;
   }

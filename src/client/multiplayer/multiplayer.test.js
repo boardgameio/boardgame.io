@@ -36,6 +36,30 @@ test('update gameID / playerID', () => {
   expect(m.playerID).toBe('player');
 });
 
+test('connection status', () => {
+  const onChangeMock = jest.fn();
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer(
+    mockSocket,
+    0,
+    0,
+    'foo',
+    2,
+    undefined,
+    onChangeMock
+  );
+  const game = Game({});
+  m.createStore(createGameReducer({ game }));
+  expect(m.isConnected).toEqual(false);
+  mockSocket.callbacks['connect']();
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toEqual(true);
+  onChangeMock.mockClear();
+  mockSocket.callbacks['disconnect']();
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toEqual(false);
+});
+
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer(mockSocket);

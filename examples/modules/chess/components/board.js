@@ -29,6 +29,7 @@ class Board extends React.Component {
     moves: PropTypes.any.isRequired,
     playerID: PropTypes.string,
     isActive: PropTypes.bool,
+    clientStatus: PropTypes.object,
   };
 
   constructor(props) {
@@ -48,6 +49,13 @@ class Board extends React.Component {
   }
 
   render() {
+    let disconnected = null;
+    if (
+      this.props.clientStatus.multiplayer &&
+      !this.props.clientStatus.isConnected
+    ) {
+      disconnected = <p>Disconnected!</p>;
+    }
     return (
       <div>
         <Checkerboard
@@ -59,6 +67,7 @@ class Board extends React.Component {
         </Checkerboard>
 
         {this._getStatus()}
+        {disconnected}
       </div>
     );
   }

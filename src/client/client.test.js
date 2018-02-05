@@ -36,12 +36,28 @@ test('board is rendered', () => {
   expect(game.find('.debug-ui').length).toBe(1);
 });
 
+test('connect', () => {
+  let Board = Client({
+    game: Game({}),
+    board: TestBoard,
+    multiplayer: true,
+    debug: false,
+  });
+  let game = Enzyme.mount(<Board playerID={'11'} gameID={'foogame'} />);
+  let multiplayerClient = game.instance().multiplayerClient;
+  expect(game.state().clientStatus.isConnected).toEqual(false);
+  multiplayerClient.isConnected = true;
+  multiplayerClient.onChange();
+  expect(game.state().clientStatus.isConnected).toEqual(true);
+});
+
 test('board props', () => {
   let Board = Client({
     game: Game({}),
     board: TestBoard,
   });
   let board = Enzyme.mount(<Board />).find(TestBoard);
+  expect(board.props().clientStatus.multiplayer).toEqual(false);
   expect(board.props().isActive).toBe(true);
 
   Board = Client({
@@ -51,6 +67,8 @@ test('board props', () => {
   });
 
   board = Enzyme.mount(<Board />).find(TestBoard);
+  expect(board.props().clientStatus.multiplayer).toEqual(true);
+  expect(board.props().clientStatus.isConnected).toEqual(false);
   expect(board.props().isActive).toBe(false);
   board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);

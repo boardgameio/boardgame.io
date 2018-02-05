@@ -86,7 +86,11 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
           props.playerID,
           game.name,
           numPlayers,
-          server
+          server,
+          () => {
+            this.createBoard();
+            this.updateState();
+          }
         );
         this.store = this.multiplayerClient.createStore(GameReducer);
       } else {
@@ -106,9 +110,7 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
       this.createBoard();
       this.createDebugUI();
 
-      this.store.subscribe(() => {
-        this.setState(this.store.getState());
-      });
+      this.store.subscribe(this.updateState.bind(this));
     }
 
     createBoard() {
@@ -146,8 +148,16 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
           events: this.eventAPI,
           gameID: this.props.gameID,
           playerID: this.props.playerID,
+          clientStatus: this.getClientStatus(),
         });
       }
+    }
+    getClientStatus() {
+      let result = { multiplayer: multiplayer === true };
+      if (multiplayer) {
+        result.isConnected = this.multiplayerClient.isConnected;
+      }
+      return result;
     }
 
     createDebugUI() {
@@ -159,6 +169,7 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
             events: this.eventAPI,
             gameID: this.props.gameID,
             playerID: this.props.playerID,
+            clientStatus: this.getClientStatus(),
           }
         );
       }
@@ -188,8 +199,15 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
       );
     }
 
+    updateState() {
+      this.setState({
+        store: this.store.getState(),
+        clientStatus: this.getClientStatus(),
+      });
+    }
+
     componentWillMount() {
-      this.setState(this.store.getState());
+      this.updateState();
     }
 
     render() {
