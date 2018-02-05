@@ -10,7 +10,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as Actions from '../../core/action-types';
 import { restore } from '../../core/action-creators';
-import './log.css';
+
+if (typeof window !== 'undefined') {
+  require('./log.css');
+}
 
 /*
  * GameLog
