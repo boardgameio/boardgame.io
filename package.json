@@ -1,11 +1,12 @@
 {
   "name": "boardgame.io",
-  "version": "0.16.8",
+  "version": "0.17.0",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
     "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
     "docsify": "docsify serve docs",
+    "docsify:update": "node ./scripts/docsify-update.js",
     "examples": "npm run dev",
     "precommit": "lint-staged",
     "prepush": "npm run test:coverage",

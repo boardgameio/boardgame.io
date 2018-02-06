@@ -24,10 +24,8 @@ game state and the moves. The moves are converted to a
     The turn automatically ends if this function returns true (checked after each move).
   * `flow.onTurnEnd` (_function_): _(G, ctx) => G_
     Code to run at the end of a turn.
-  * `flow.triggers` (_array_): An array of objects with the format:
-    `{ condition: (G, ctx) => boolean, action: (G, ctx) => G }`
-    At the end of each move, if `condition` is `true`, then the corresponding
-    `action` is executed.
+  * `flow.onMove` (_function_): _(G, ctx, { type: 'moveName', args: [] }) => G_
+    Code to run at the end of a move.
   * `flow.movesPerTurn` (_number_): Ends the turn automatically if a certain number
     of moves have been made.
   * `flow.phases` (_array_): Optional list of game phases. See
@@ -126,31 +124,6 @@ const game = Game({
         onPhaseEnd: ...
         ...
       },
-    ]
-  }
-});
-```
-
-#### With triggers
-
-```js
-import { Game } from 'boardgame.io/core';
-
-const game = Game({
-  setup: (numPlayers) => {
-    ...
-  },
-
-  moves: {
-    ...
-  },
-
-  flow: {
-    triggers: [
-      {
-        condition: G => isMilestone(G),
-        action: G => ({ ...G, milestone: true })
-      }
     ]
   }
 });
