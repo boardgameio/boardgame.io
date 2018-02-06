@@ -23,7 +23,9 @@ class Deck extends React.Component {
     const cards = [...this.state.cards];
     const topCard = cards.shift();
 
-    if (this.props.onClick) this.props.onClick(topCard);
+    if (this.props.onClick) {
+      this.props.onClick(topCard);
+    }
 
     this.setState({
       cards,

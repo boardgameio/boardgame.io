@@ -14,10 +14,19 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 test('is rendered', () => {
-  const card = Enzyme.mount(<Card isFaceUp />);
-  expect(card.html()).toBe(
-    '<div class="bgio-card"><div class="bgio-card__front">Card</div></div>'
-  );
+  {
+    const card = Enzyme.shallow(<Card isFaceUp />);
+    expect(card.html()).toBe(
+      '<div class="bgio-card"><div class="bgio-card__front">Card</div></div>'
+    );
+  }
+
+  {
+    const card = Enzyme.shallow(<Card isFaceUp className="custom" />);
+    expect(card.html()).toBe(
+      '<div class="bgio-card custom"><div class="bgio-card__front">Card</div></div>'
+    );
+  }
 });
 
 test('handlers', () => {
