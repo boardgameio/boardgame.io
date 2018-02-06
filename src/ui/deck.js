@@ -33,7 +33,9 @@ class Deck extends React.Component {
   };
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ cards: nextProps.cards });
+    if (this.props.cards.length !== nextProps.cards.length) {
+      this.setState({ cards: nextProps.cards });
+    }
   }
 
   render() {

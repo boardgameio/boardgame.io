@@ -54,6 +54,8 @@ test('update cards prop', () => {
   expect(deck.state().cards.length).toBe(2);
   deck.setProps({ cards: newCards });
   expect(deck.state().cards.length).toBe(1);
+  deck.setProps({ cards: newCards });
+  expect(deck.state().cards.length).toBe(1);
 });
 
 test('splayWidth', () => {
