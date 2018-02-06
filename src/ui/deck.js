@@ -32,6 +32,10 @@ class Deck extends React.Component {
     });
   };
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({ cards: nextProps.cards });
+  }
+
   render() {
     const { className, splayWidth, ...rest } = this.props;
     const { cards } = this.state;
@@ -58,8 +62,8 @@ class Deck extends React.Component {
 }
 
 Deck.propTypes = {
-  className: PropTypes.string,
   cards: PropTypes.arrayOf(PropTypes.node),
+  className: PropTypes.string,
   onClick: PropTypes.func,
   splayWidth: PropTypes.number,
 };

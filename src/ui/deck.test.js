@@ -46,6 +46,16 @@ test('onClick', () => {
   }
 });
 
+test('update cards prop', () => {
+  const oldCards = [<Card key={0} />, <Card key={1} />];
+  const newCards = [<Card key={0} />];
+
+  const deck = Enzyme.mount(<Deck cards={oldCards} />);
+  expect(deck.state().cards.length).toBe(2);
+  deck.setProps({ cards: newCards });
+  expect(deck.state().cards.length).toBe(1);
+});
+
 test('splayWidth', () => {
   const cards = [
     <Card key={0} />,
