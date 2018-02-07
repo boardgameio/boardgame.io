@@ -64,7 +64,7 @@ function Server({ games, db }) {
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
-            const playerID = clientInfo.get(client);
+            const playerID = clientInfo.get(client).playerID;
             const newState = Object.assign({}, state, {
               G: game.playerView(state.G, state.ctx, playerID),
             });

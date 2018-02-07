@@ -8,35 +8,38 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import Logo from './logo';
 import './card.css';
 
-export class Card extends React.Component {
-  static propTypes = {
-    onHover: PropTypes.func,
-    onClick: PropTypes.func,
-  };
+const Card = ({ back, canHover, className, front, isFaceUp, ...rest }) => {
+  const classNames = ['bgio-card'];
+  if (!canHover) classNames.push('no-hover');
+  if (className) classNames.push(className);
 
-  constructor(props) {
-    super(props);
-  }
+  return (
+    <div className={classNames.join(' ')} {...rest}>
+      {isFaceUp ? front : back}
+    </div>
+  );
+};
 
-  onClick = () => {
-    this.props.onClick();
-  };
+Card.propTypes = {
+  back: PropTypes.node,
+  canHover: PropTypes.bool,
+  className: PropTypes.string,
+  front: PropTypes.node,
+  isFaceUp: PropTypes.bool,
+};
 
-  onHover = () => {
-    this.props.onHover();
-  };
+Card.defaultProps = {
+  back: (
+    <div className="bgio-card__back">
+      <Logo width="48" />
+    </div>
+  ),
+  canHover: true,
+  front: <div className="bgio-card__front">Card</div>,
+  isFaceUp: false,
+};
 
-  render() {
-    return (
-      <div
-        className="bgio-card"
-        onMouseOver={this.onHover}
-        onClick={this.onClick}
-      >
-        Card
-      </div>
-    );
-  }
-}
+export { Card };

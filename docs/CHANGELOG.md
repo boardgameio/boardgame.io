@@ -2,6 +2,17 @@
 
 ### Features
 
+f23c5dd Card and Deck (#74)
+a21c1dd prevent endTurn when movesPerTurn have not been made
+
+### Bugfixes
+
+11e215e fix bug that was using the wrong playerID when calculating playerView
+
+# v0.17.0
+
+### Features
+
 0758c7e cascade endPhase
 cc7d44f retire triggers and introduce onMove instead
 17e88ce convert events whitelist to boolean options
