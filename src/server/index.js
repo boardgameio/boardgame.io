@@ -9,8 +9,8 @@
 const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
-import { InMemory } from './db';
-import { createGameReducer } from '../core/reducer';
+const InMemory = require('./db').InMemory;
+const createGameReducer = require('../core/reducer').createGameReducer;
 
 function Server({ games, db }) {
   const app = new Koa();
@@ -65,17 +65,14 @@ function Server({ games, db }) {
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
             const playerID = clientInfo.get(client);
+            const newState = Object.assign({}, state, {
+              G: game.playerView(state.G, state.ctx, playerID),
+            });
 
             if (client === socket.id) {
-              socket.emit('sync', gameID, {
-                ...state,
-                G: game.playerView(state.G, state.ctx, playerID),
-              });
+              socket.emit('sync', gameID, newState);
             } else {
-              socket.to(client).emit('sync', gameID, {
-                ...state,
-                G: game.playerView(state.G, state.ctx, playerID),
-              });
+              socket.to(client).emit('sync', gameID, newState);
             }
           }
 
@@ -102,10 +99,11 @@ function Server({ games, db }) {
           await db.set(gameID, state);
         }
 
-        socket.emit('sync', gameID, {
-          ...state,
+        const newState = Object.assign({}, state, {
           G: game.playerView(state.G, state.ctx, playerID),
         });
+
+        socket.emit('sync', gameID, newState);
 
         return;
       });
@@ -119,4 +117,4 @@ function Server({ games, db }) {
   return app;
 }
 
-export default Server;
+module.exports = Server;

@@ -164,7 +164,7 @@ test('playerView', async () => {
   // Write the player into G.
   const game = Game({
     playerView: (G, ctx, player) => {
-      return { ...G, player };
+      return Object.assign({}, G, { player });
     },
   });
 

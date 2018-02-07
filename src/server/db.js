@@ -1,6 +1,3 @@
-// solve runtime issue with async fumctions
-import 'babel-polyfill';
-
 /*
  * Copyright 2017 The boardgame.io Authors
  *
@@ -12,7 +9,7 @@ import 'babel-polyfill';
 /**
  * InMemory data storage.
  */
-export class InMemory {
+class InMemory {
   /**
    * Creates a new InMemory storage.
    */
@@ -47,3 +44,5 @@ export class InMemory {
     return await this.games.has(id);
   }
 }
+
+module.exports = { InMemory };
