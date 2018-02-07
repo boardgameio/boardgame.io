@@ -144,16 +144,16 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
         const Board = connect(mapStateToProps, ActionCreators)(board);
 
         this._board = React.createElement(Board, {
+          ...this.getClientStatus(),
           moves: this.moveAPI,
           events: this.eventAPI,
           gameID: this.props.gameID,
           playerID: this.props.playerID,
-          clientStatus: this.getClientStatus(),
         });
       }
     }
     getClientStatus() {
-      let result = { multiplayer: multiplayer === true };
+      let result = { isMultiplayer: multiplayer === true };
       if (multiplayer) {
         result.isConnected = this.multiplayerClient.isConnected;
       }
@@ -165,11 +165,11 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
         this._debug = React.createElement(
           connect(state => ({ gamestate: state }), ActionCreators)(Debug),
           {
+            ...this.getClientStatus(),
             moves: this.moveAPI,
             events: this.eventAPI,
             gameID: this.props.gameID,
             playerID: this.props.playerID,
-            clientStatus: this.getClientStatus(),
           }
         );
       }

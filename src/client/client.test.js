@@ -57,7 +57,7 @@ test('board props', () => {
     board: TestBoard,
   });
   let board = Enzyme.mount(<Board />).find(TestBoard);
-  expect(board.props().clientStatus.multiplayer).toEqual(false);
+  expect(board.props().isMultiplayer).toEqual(false);
   expect(board.props().isActive).toBe(true);
 
   Board = Client({
@@ -67,8 +67,8 @@ test('board props', () => {
   });
 
   board = Enzyme.mount(<Board />).find(TestBoard);
-  expect(board.props().clientStatus.multiplayer).toEqual(true);
-  expect(board.props().clientStatus.isConnected).toEqual(false);
+  expect(board.props().isMultiplayer).toEqual(true);
+  expect(board.props().isConnected).toEqual(false);
   expect(board.props().isActive).toBe(false);
   board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);

@@ -17,7 +17,8 @@ class Board extends React.Component {
     moves: PropTypes.any.isRequired,
     playerID: PropTypes.string,
     isActive: PropTypes.bool,
-    clientStatus: PropTypes.object,
+    isMultiplayer: PropTypes.bool,
+    isConnected: PropTypes.bool,
   };
 
   onClick = id => {
@@ -52,10 +53,7 @@ class Board extends React.Component {
     }
 
     let disconnected = null;
-    if (
-      this.props.clientStatus.multiplayer &&
-      !this.props.clientStatus.isConnected
-    ) {
+    if (this.props.isMultiplayer && !this.props.isConnected) {
       disconnected = <div>Disconnected!</div>;
     }
 
