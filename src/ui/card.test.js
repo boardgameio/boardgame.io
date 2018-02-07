@@ -14,18 +14,31 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 test('is rendered', () => {
-  const game = Enzyme.mount(<Card />);
-  expect(game.text()).toBe('Card');
+  {
+    const card = Enzyme.shallow(<Card isFaceUp />);
+    expect(card.html()).toBe(
+      '<div class="bgio-card"><div class="bgio-card__front">Card</div></div>'
+    );
+  }
+
+  {
+    const card = Enzyme.shallow(<Card isFaceUp className="custom" />);
+    expect(card.html()).toBe(
+      '<div class="bgio-card custom"><div class="bgio-card__front">Card</div></div>'
+    );
+  }
 });
 
 test('handlers', () => {
-  const onHover = jest.fn();
+  const onMouseOver = jest.fn();
   const onClick = jest.fn();
-  const card = Enzyme.mount(<Card onHover={onHover} onClick={onClick} />);
+  const card = Enzyme.mount(
+    <Card onMouseOver={onMouseOver} onClick={onClick} />
+  );
 
   card.simulate('mouseover');
   card.simulate('click');
 
-  expect(onHover).toHaveBeenCalled();
+  expect(onMouseOver).toHaveBeenCalled();
   expect(onClick).toHaveBeenCalled();
 });

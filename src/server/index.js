@@ -76,7 +76,7 @@ function Server({ games, db, authGames, secretKey }) {
             .map(playerID => playerInfo.get(playerID))
             .filter(socketID => socketID !== undefined);
           for (const client of roomClients) {
-            const playerID = clientInfo.get(client);
+            const playerID = clientInfo.get(client).playerID;
 
             if (client === socket.id) {
               socket.emit('sync', gameID, {
