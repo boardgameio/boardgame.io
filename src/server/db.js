@@ -9,7 +9,7 @@
 /**
  * InMemory data storage.
  */
-class InMemory {
+export class InMemory {
   /**
    * Creates a new InMemory storage.
    */
@@ -44,5 +44,3 @@ class InMemory {
     return await this.games.has(id);
   }
 }
-
-module.exports = { InMemory };

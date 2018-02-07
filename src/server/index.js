@@ -9,8 +9,8 @@
 const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
-const InMemory = require('./db').InMemory;
-const createGameReducer = require('../core/reducer').createGameReducer;
+import { InMemory } from './db';
+import { createGameReducer } from '../core/reducer';
 
 function Server({ games, db }) {
   const app = new Koa();
@@ -117,4 +117,4 @@ function Server({ games, db }) {
   return app;
 }
 
-module.exports = Server;
+export default Server;
