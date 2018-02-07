@@ -8,13 +8,16 @@
 
 const Koa = require('koa');
 const IO = require('koa-socket');
+const Router = require('koa-router');
+const koaBody = require('koa-body');
 const Redux = require('redux');
 import { InMemory } from './db';
 import { createGameReducer } from '../core/reducer';
 
-function Server({ games, db }) {
+function Server({ games, db, authGames, secretKey }) {
   const app = new Koa();
   const io = new IO();
+  const router = new Router();
   app.context.io = io;
   io.attach(app);
 
@@ -24,6 +27,17 @@ function Server({ games, db }) {
 
   const clientInfo = new Map();
   const roomInfo = new Map();
+  const playerInfo = new Map();
+
+  function createRoom(gameID, roomClients) {
+    if (roomClients === undefined || roomClients === null) {
+      roomClients = new Set();
+    }
+
+    roomInfo.set(gameID, roomClients);
+
+    return roomClients;
+  }
 
   for (const game of games) {
     const nsp = app._io.of(game.name);
@@ -58,8 +72,10 @@ function Server({ games, db }) {
           const state = store.getState();
 
           // Get clients connected to this current game.
-          const roomClients = roomInfo.get(gameID);
-          for (const client of roomClients.values()) {
+          const roomClients = Array.from(roomInfo.get(gameID))
+            .map(playerID => playerInfo.get(playerID))
+            .filter(socketID => socketID !== undefined);
+          for (const client of roomClients) {
             const playerID = clientInfo.get(client);
 
             if (client === socket.id) {
@@ -80,16 +96,26 @@ function Server({ games, db }) {
       });
 
       socket.on('sync', (gameID, playerID, numPlayers) => {
-        socket.join(gameID);
-
         let roomClients = roomInfo.get(gameID);
-        if (roomClients === undefined) {
-          roomClients = new Set();
-          roomInfo.set(gameID, roomClients);
+
+        //If this is an authenticated game the room must exist and have the player matched to it
+        if (
+          authGames &&
+          (roomClients === undefined || !roomClients.has(playerID))
+        ) {
+          socket.disconnect(true);
+          return;
         }
-        roomClients.add(socket.id);
+
+        if (roomClients === undefined) {
+          roomClients = createRoom(gameID);
+        }
+        roomClients.add(playerID);
 
         clientInfo.set(socket.id, { gameID, playerID });
+        playerInfo.set(playerID, socket.id);
+
+        socket.join(gameID);
 
         let store = db.get(gameID);
         if (store === undefined) {
@@ -110,6 +136,25 @@ function Server({ games, db }) {
       });
     });
   }
+
+  app.use(koaBody());
+  router.post('/api/createGame', ctx => {
+    if (ctx.request.headers['authorization'] !== secretKey) {
+      ctx.body = {
+        status: 'failed',
+        message: 'auth failed',
+      };
+      return;
+    }
+
+    createRoom(ctx.request.body.gameID, new Set(ctx.request.body.roomClients));
+
+    ctx.body = {
+      status: 'success',
+      message: 'game created',
+    };
+  });
+  app.use(router.routes());
 
   return app;
 }
