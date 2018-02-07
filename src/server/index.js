@@ -60,7 +60,7 @@ function Server({ games, db }) {
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
-            const playerID = clientInfo.get(client);
+            const playerID = clientInfo.get(client).playerID;
 
             if (client === socket.id) {
               socket.emit('sync', gameID, {
