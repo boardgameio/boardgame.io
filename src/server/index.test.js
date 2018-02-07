@@ -169,31 +169,8 @@ test('playerView (sync)', () => {
   const io = server.context.io;
 
   io.socket.receive('sync', 'gameID', 0);
-  expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
-    G: { player: 0 },
-    _id: 0,
-    _initial: {
-      G: {},
-      _id: 0,
-      _initial: {},
-      ctx: {
-        currentPlayer: '0',
-        currentPlayerMoves: 0,
-        numPlayers: 2,
-        phase: 'default',
-        turn: 0,
-      },
-      log: [],
-    },
-    ctx: {
-      currentPlayer: '0',
-      currentPlayerMoves: 0,
-      numPlayers: 2,
-      phase: 'default',
-      turn: 0,
-    },
-    log: [],
-  });
+  expect(io.socket.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.emit.mock.calls[0][2].G).toEqual({ player: 0 });
 });
 
 test('playerView (action)', () => {
