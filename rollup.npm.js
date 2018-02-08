@@ -41,7 +41,7 @@ export default [
     output: { file: 'dist/server.js', format: 'cjs' },
     name: 'Server',
     plugins: [
-      babel({ exclude: '**/node_modules/**' }),
+      babel({ exclude: ['**/node_modules/**'] }),
       commonjs({
         exclude: 'node_modules/**',
       }),
