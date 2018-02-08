@@ -96,9 +96,9 @@ test('action', () => {
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
   io.socket.emit.mockReset();
 
-  io.socket.receive('sync', 'gameID');
+  io.socket.receive('sync', 'gameID', '0', 2);
   io.socket.id = 'second';
-  io.socket.receive('sync', 'gameID');
+  io.socket.receive('sync', 'gameID', '1', 2);
   io.socket.emit.mockReset();
 
   // View-only players cannot send actions.

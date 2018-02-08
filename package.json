@@ -109,7 +109,8 @@
   },
   "dependencies": {
     "koa": "^2.3.0",
-    "koa-router": "^7.2.1",
+    "koa-body": "^2.5.0",
+    "koa-router": "^7.4.0",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.1",
     "mousetrap": "^1.6.1",
