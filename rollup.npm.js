@@ -32,6 +32,7 @@ const globals = {
   'react-json-view': 'ReactJson',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
+  seedrandom: 'seedrandom',
 };
 
 export default [
@@ -60,6 +61,8 @@ export default [
 
   {
     input: 'packages/core.js',
+    external: ['seedrandom'],
+    globals: { seedrandom: 'seedrandom' },
     output: { file: 'dist/core.js', format: 'umd' },
     name: 'Core',
     plugins: plugins,
@@ -91,7 +94,7 @@ export default [
   // Browser minified version.
   {
     input: 'packages/main.js',
-    globals: { react: 'React' },
+    globals: { react: 'React', seedrandom: 'seedrandom' },
     external: ['react'],
     output: [{ file: pkg.unpkg, format: 'umd' }],
     name: 'BoardgameIO',
