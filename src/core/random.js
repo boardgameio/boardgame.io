@@ -11,7 +11,7 @@ import { addrandomop } from './randomeval';
  * @param {...object} G - Game instance.
  * @param {*} fieldname - Fieldname to put the random result into.
  */
-function rolldie(G, fieldname) {
+export function rolldie(G, fieldname) {
   return addrandomop(G, fieldname, 'D6');
 }
 
@@ -26,8 +26,6 @@ function rolldie(G, fieldname) {
  * @param {...object} G - Game instance.
  * @param {*} fieldname - Fieldname to put the random result into.
  */
-function random(G, fieldname) {
+export function random(G, fieldname) {
   return addrandomop(G, fieldname, 'R');
 }
-
-export { random, rolldie };

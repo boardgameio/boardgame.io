@@ -12,20 +12,20 @@ function getrandomfn(ctx) {
   return randomfn;
 }
 
-function randomctx(ctx) {
+export function randomctx(ctx) {
   const r = getrandomfn(ctx);
   const randomnumber = r();
   const ctx2 = { ...ctx, prngstate: r.state() };
   return { randomnumber, ctx: ctx2 };
 }
 
-function addrandomop(G, fieldname, op) {
+export function addrandomop(G, fieldname, op) {
   let rop = [{ op, fieldname }];
   let _randomOps = [...(G._randomOps || []), ...rop];
   return { ...G, _randomOps };
 }
 
-function evaluaterandomops(G, ctx) {
+export function evaluaterandomops(G, ctx) {
   let randomresults = {};
   let ctx2 = ctx;
 
@@ -55,10 +55,8 @@ function evaluaterandomops(G, ctx) {
   return { randomresults, ctx: ctx2 };
 }
 
-function runrandom(G, ctx) {
+export function runrandom(G, ctx) {
   let { randomresults, ctx: ctx2 } = evaluaterandomops(G, ctx);
   const G2 = { ...G, ...randomresults, _randomOps: undefined };
   return { G: G2, ctx: ctx2 };
 }
-
-module.exports = { runrandom, evaluaterandomops, addrandomop, randomctx };

@@ -6,11 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-// seedrandom is not used, but it adds Math.seedrandom
-/* eslint-disable no-unused-vars */
-import seedrandom from 'seedrandom';
-/* eslint-enable no-unused-vars */
-
 import * as Actions from './action-types';
 import * as ActionCreators from './action-creators';
 
