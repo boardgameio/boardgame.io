@@ -5,7 +5,6 @@ function getrandomfn(ctx) {
   if (ctx.prngstate === undefined) {
     // no call to a random function has been made.
     // pre-populate the state info
-    // TODO what if ctx.seed is not defined?
     randomfn = new seedrandom.alea(ctx.seed, { state: true });
   } else {
     randomfn = new seedrandom.alea('', { state: ctx.prngstate });
@@ -47,7 +46,6 @@ function evaluaterandomops(G, ctx) {
           break;
         }
         default:
-          // TODO ignore? log?
           break;
       }
     });

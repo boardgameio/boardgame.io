@@ -38,7 +38,6 @@ test('runrandom invalid op', () => {
 
 test('rolldie', () => {
   let G = {};
-  // TODO how to behave when field1 is already defined on G?
   const G2 = rolldie(G, 'field1');
   let expectedOps = [{ op: 'D6', fieldname: 'field1' }];
   expect(G2._randomOps).toMatchObject(expectedOps);
@@ -47,7 +46,6 @@ test('rolldie', () => {
   expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field2' }];
   expect(G3._randomOps).toMatchObject(expectedOps);
 
-  // TODO how to behave when the field already has been used?
   const G4 = rolldie(G3, 'field1');
   expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field1' }];
   expect(G4._randomOps).toMatchObject(expectedOps);
