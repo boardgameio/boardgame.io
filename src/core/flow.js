@@ -8,6 +8,7 @@
 
 import * as ActionCreators from './action-creators';
 import { TurnOrder } from './turn-order';
+import { runrandom } from './randomeval';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -328,6 +329,10 @@ export function FlowWithPhases({
     state = { ...state, ctx: { ...state.ctx, currentPlayerMoves } };
 
     const conf = phaseMap[state.ctx.phase];
+
+    // run random operations
+    let { G: GRandom, ctx: ctxRandom } = runrandom(state.G, state.ctx);
+    state = { ...state, G: GRandom, ctx: ctxRandom };
 
     const G = conf.onMove(state.G, state.ctx, action);
     state = { ...state, G };

@@ -29,7 +29,8 @@ function evaluaterandomops(G, ctx) {
   let randomresults = {};
   let ctx2 = ctx;
 
-  if (G._randomOps !== undefined) {
+  // some flow tests run without a defined G
+  if (G && G._randomOps !== undefined) {
     G._randomOps.forEach(r => {
       switch (r.op) {
         case 'D6': {
