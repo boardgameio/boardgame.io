@@ -82,14 +82,3 @@ test('runrandom R', () => {
   expect(G3.field1).toBeLessThanOrEqual(1);
   expect(G3._randomOps).toBeUndefined();
 });
-
-// test('shuffle', () => {
-//   let ctx = { seed: 'hi there' };
-//   let numbers = new Array(10).fill().map((_, idx) => idx);
-
-//   let { ctx: ctx2 } = shuffle(ctx, numbers);
-//   expect(numbers).toMatchObject([1, 0, 7, 2, 3, 9, 6, 8, 4, 5]);
-
-//   shuffle(ctx2, numbers);
-//   expect(numbers).toMatchObject([1, 6, 8, 3, 7, 5, 9, 0, 2, 4]);
-// });
