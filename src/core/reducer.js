@@ -52,8 +52,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
   // either take the provided seed, or use seedrandom to create one.
   // Math.seedrandom returns an autoseed with local entropy only.
-  const seed =
-    initial.G.seed === undefined ? Math.seedrandom() : initial.G.seed;
+  const seed = game.seed === undefined ? Math.seedrandom() : game.seed;
   state.ctx.seed = seed;
 
   initial.G = state.G;

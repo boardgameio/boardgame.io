@@ -58,9 +58,7 @@ jest.mock('koa-socket', () => {
 });
 
 const game = Game({
-  setup: () => {
-    return { seed: 0 };
-  },
+  seed: 0,
 });
 
 test('basic', () => {
@@ -116,10 +114,10 @@ test('action', async () => {
   // The playerID parameter is necessary to account for view-only players.
   await io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
-    G: { seed: 0 },
+    G: {},
     _id: 1,
     _initial: {
-      G: { seed: 0 },
+      G: {},
       _id: 0,
       _initial: {},
       ctx: {
