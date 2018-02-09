@@ -27,15 +27,15 @@ export class Multiplayer {
    * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
    * @param {function()} onChange - Callback to be called when there is a change in this object's state.
    */
-  constructor(
+  constructor({
     socketImpl,
     gameID,
     playerID,
     gameName,
     numPlayers,
     server,
-    onChange
-  ) {
+    onChange,
+  } = {}) {
     this.gameName = gameName || 'default';
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;

@@ -27,7 +27,7 @@ class MockSocket {
 }
 
 test('update gameID / playerID', () => {
-  const m = new Multiplayer(null);
+  const m = new Multiplayer();
 
   m.updateGameID('test');
   expect(m.gameID).toBe('default:test');
@@ -39,15 +39,14 @@ test('update gameID / playerID', () => {
 test('connection status', () => {
   const onChangeMock = jest.fn();
   const mockSocket = new MockSocket();
-  const m = new Multiplayer(
-    mockSocket,
-    0,
-    0,
-    'foo',
-    2,
-    undefined,
-    onChangeMock
-  );
+  const m = new Multiplayer({
+    socketImpl: mockSocket,
+    gameID: 0,
+    playerID: 0,
+    gameName: 'foo',
+    numPlayers: 2,
+    onChange: onChangeMock,
+  });
   const game = Game({});
   m.createStore(createGameReducer({ game }));
   expect(m.isConnected).toEqual(false);
@@ -62,7 +61,7 @@ test('connection status', () => {
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer(mockSocket);
+  const m = new Multiplayer({ socketImpl: mockSocket });
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -98,7 +97,7 @@ test('multiplayer', () => {
 
 test('move whitelist', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer(mockSocket);
+  const m = new Multiplayer({ socketImpl: mockSocket });
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -124,11 +123,11 @@ test('game server is set when provided', () => {
   var port = '1234';
   var server = hostname + ':' + port;
 
-  const m = new Multiplayer(undefined, 0, 0, 0, 1, server);
+  const m = new Multiplayer({ server });
   expect(m.socket.io.engine.hostname).toEqual(hostname);
   expect(m.socket.io.engine.port).toEqual(port);
 
-  const m2 = new Multiplayer(undefined, 0, 0, 0, 1, undefined);
+  const m2 = new Multiplayer();
   expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
   expect(m2.socket.io.engine.port).not.toEqual(port);
 });

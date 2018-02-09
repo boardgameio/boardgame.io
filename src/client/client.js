@@ -80,18 +80,17 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
       this.store = null;
 
       if (multiplayer) {
-        this.multiplayerClient = new Multiplayer(
-          undefined,
-          props.gameID,
-          props.playerID,
-          game.name,
-          numPlayers,
-          server,
-          () => {
+        this.multiplayerClient = new Multiplayer({
+          gameID: props.gameID,
+          playerID: props.playerID,
+          gameName: game.name,
+          onChange: () => {
             this.createBoard();
             this.updateState();
-          }
-        );
+          },
+          numPlayers,
+          server,
+        });
         this.store = this.multiplayerClient.createStore(GameReducer);
       } else {
         this.store = createStore(GameReducer);
