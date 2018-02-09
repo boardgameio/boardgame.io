@@ -66,10 +66,9 @@ function Server({ games, db }) {
           for (const client of roomClients.values()) {
             const playerID = clientInfo.get(client).playerID;
 
-            let newCtx = { ...state.ctx, seed: undefined };
             const newState = Object.assign({}, state, {
-              G: game.playerView(state.G, newCtx, playerID),
-              ctx: newCtx,
+              G: game.playerView(state.G, state.ctx, playerID),
+              ctx: { ...state.ctx, seed: undefined },
             });
 
             if (client === socket.id) {
@@ -102,10 +101,9 @@ function Server({ games, db }) {
           await db.set(gameID, state);
         }
 
-        let newCtx = { ...state.ctx, seed: undefined };
         const newState = Object.assign({}, state, {
-          G: game.playerView(state.G, newCtx, playerID),
-          ctx: newCtx,
+          G: game.playerView(state.G, state.ctx, playerID),
+          ctx: { ...state.ctx, seed: undefined },
         });
 
         socket.emit('sync', gameID, newState);
