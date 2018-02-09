@@ -3,10 +3,13 @@ import { addrandomop } from './randomeval';
 /**
  * rolldie
  *
- * Roll a D6 die and put the result into the given fieldname.
+ * Add a request to Roll a D6 die.
+ *
+ * The result is put into the given fieldname and is available
+ * on the next move.
  *
  * @param {...object} G - Game instance.
- * @param {*} fieldname - Gieldname to put the random result into.
+ * @param {*} fieldname - Fieldname to put the random result into.
  */
 function rolldie(G, fieldname) {
   return addrandomop(G, fieldname, 'D6');
@@ -15,10 +18,13 @@ function rolldie(G, fieldname) {
 /**
  * random
  *
- * Generates a random number.
- * The seed and current state is kept inside the ctx object.
+ * Add a request to generate a random number between 0 and 1.
  *
- * @param {...object} ctx - The context object keeping the seed and current state.
+ * The result is put into the given fieldname and is available
+ * on the next move.
+ *
+ * @param {...object} G - Game instance.
+ * @param {*} fieldname - Fieldname to put the random result into.
  */
 function random(G, fieldname) {
   return addrandomop(G, fieldname, 'R');
