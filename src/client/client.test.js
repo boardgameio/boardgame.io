@@ -172,7 +172,7 @@ test('update gameID / playerID', () => {
   expect(m.gameID).toBe('default:a');
   expect(m.playerID).toBe('1');
   expect(spy1).not.toHaveBeenCalled();
-  expect(spy1).not.toHaveBeenCalled();
+  expect(spy2).not.toHaveBeenCalled();
 
   game.setProps({ gameID: 'next' });
   game.setProps({ playerID: 'next' });

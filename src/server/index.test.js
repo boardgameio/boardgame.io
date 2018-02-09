@@ -20,8 +20,9 @@ jest.mock('koa-socket', () => {
       this.broadcast = { emit: jest.fn() };
     }
 
-    receive(type, ...args) {
-      this.callbacks[type](args[0], args[1], args[2], args[3], args[4]);
+    async receive(type, ...args) {
+      await this.callbacks[type](args[0], args[1], args[2], args[3], args[4]);
+      return;
     }
 
     on(type, callback) {
@@ -65,7 +66,7 @@ test('basic', () => {
   io.socket.receive('disconnect');
 });
 
-test('sync', () => {
+test('sync', async () => {
   const server = Server({ games: [game] });
   const io = server.context.io;
   expect(server).not.toBe(undefined);
@@ -74,40 +75,42 @@ test('sync', () => {
 
   // Sync causes the server to respond.
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
-  io.socket.receive('sync', 'gameID');
+  await io.socket.receive('sync', 'gameID');
+
   expect(io.socket.emit).toHaveBeenCalledTimes(1);
   expect(spy).toHaveBeenCalled();
 
   // Sync a second time does not create a game.
   spy.mockReset();
-  io.socket.receive('sync', 'gameID');
+  await io.socket.receive('sync', 'gameID');
+
   expect(io.socket.emit).toHaveBeenCalledTimes(2);
   expect(spy).not.toHaveBeenCalled();
 
   spy.mockRestore();
 });
 
-test('action', () => {
+test('action', async () => {
   const server = Server({ games: [game] });
   const io = server.context.io;
   const action = ActionCreators.gameEvent('endTurn');
 
-  io.socket.receive('action', action);
+  await io.socket.receive('action', action);
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
   io.socket.emit.mockReset();
 
-  io.socket.receive('sync', 'gameID');
+  await io.socket.receive('sync', 'gameID');
   io.socket.id = 'second';
-  io.socket.receive('sync', 'gameID');
+  await io.socket.receive('sync', 'gameID');
   io.socket.emit.mockReset();
 
   // View-only players cannot send actions.
-  io.socket.receive('action', action, 0, 'gameID', null);
+  await io.socket.receive('action', action, 0, 'gameID', null);
   expect(io.socket.emit).not.toHaveBeenCalled();
 
   // Actions are broadcasted as state updates.
   // The playerID parameter is necessary to account for view-only players.
-  io.socket.receive('action', action, 0, 'gameID', '0');
+  await io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {},
     _id: 1,
@@ -141,74 +144,84 @@ test('action', () => {
   io.socket.emit.mockReset();
 
   // ... but not if the gameID is not known.
-  io.socket.receive('action', action, 1, 'unknown', '1');
+  await io.socket.receive('action', action, 1, 'unknown', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // ... and not if the _id doesn't match the internal state.
-  io.socket.receive('action', action, 100, 'gameID', '1');
+  await io.socket.receive('action', action, 100, 'gameID', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // ... and not if player != currentPlayer
-  io.socket.receive('action', action, 1, 'gameID', '100');
+  await io.socket.receive('action', action, 1, 'gameID', '100');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // Another broadcasted action.
-  io.socket.receive('action', action, 1, 'gameID', '1');
+  await io.socket.receive('action', action, 1, 'gameID', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(2);
 });
 
-test('playerView', () => {
+test('playerView (sync)', async () => {
   // Write the player into G.
   const game = Game({
     playerView: (G, ctx, player) => {
-      return { ...G, player };
+      return Object.assign({}, G, { player });
     },
   });
 
   const server = Server({ games: [game] });
   const io = server.context.io;
 
-  io.socket.receive('sync', 'gameID', 0);
-  expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
-    G: { player: 0 },
-    _id: 0,
-    _initial: {
-      G: {},
-      _id: 0,
-      _initial: {},
-      ctx: {
-        currentPlayer: '0',
-        currentPlayerMoves: 0,
-        numPlayers: 2,
-        phase: 'default',
-        turn: 0,
-      },
-      log: [],
-    },
-    ctx: {
-      currentPlayer: '0',
-      currentPlayerMoves: 0,
-      numPlayers: 2,
-      phase: 'default',
-      turn: 0,
-    },
-    log: [],
-  });
+  await io.socket.receive('sync', 'gameID', 0);
+  expect(io.socket.emit).toHaveBeenCalledTimes(1);
+  expect(io.socket.emit.mock.calls[0][2].G).toEqual({ player: 0 });
 });
 
-test('custom db implementation', () => {
+test('playerView (action)', async () => {
+  const game = Game({
+    playerView: (G, ctx, player) => {
+      return Object.assign({}, G, { player });
+    },
+  });
+  const server = Server({ games: [game] });
+  const io = server.context.io;
+  const action = ActionCreators.gameEvent('endTurn');
+
+  io.socket.id = 'first';
+  await io.socket.receive('sync', 'gameID', '0', 2);
+  io.socket.id = 'second';
+  await io.socket.receive('sync', 'gameID', '1', 2);
+  io.socket.emit.mockReset();
+
+  await io.socket.receive('action', action, 0, 'gameID', '0');
+  expect(io.socket.emit).toHaveBeenCalledTimes(2);
+
+  const G_player0 = io.socket.emit.mock.calls[0][2].G;
+  const G_player1 = io.socket.emit.mock.calls[1][2].G;
+
+  expect(G_player0.player).toBe('0');
+  expect(G_player1.player).toBe('1');
+});
+
+test('custom db implementation', async () => {
   let getId = null;
+
   class Custom {
-    get(id) {
-      getId = id;
+    constructor() {
+      this.games = new Map();
     }
-    set() {}
+    async get(id) {
+      getId = id;
+      return await this.games.get(id);
+    }
+    async set(id, state) {
+      return await this.games.set(id, state);
+    }
   }
 
   const game = Game({});
   const server = Server({ games: [game], db: new Custom() });
   const io = server.context.io;
 
-  io.socket.receive('sync', 'gameID');
+  await io.socket.receive('sync', 'gameID');
   expect(getId).toBe('gameID');
 });

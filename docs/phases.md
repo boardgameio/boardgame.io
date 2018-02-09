@@ -113,7 +113,7 @@ phases: [
 #### Triggers / Hooks
 
 The `flow` section can specify a number of automatic behaviors when a move is made
-or when the turn or phase is ended. These can also be overriden at the phase level.
+or when the turn or phase is ended. These can also be overridden at the phase level.
 Let's take a look at some of these:
 
 ```js
