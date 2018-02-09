@@ -1,32 +1,19 @@
-import { random2, runrandom, addrandomop } from './random'; // internal
-import { random, rolldie } from './random'; // public
+import { randomctx, runrandom, addrandomop } from './randomeval';
+import { random, rolldie } from './random';
 
-// test('shuffle', () => {
-//   let ctx = { seed: 'hi there' };
-//   let numbers = new Array(10).fill().map((_, idx) => idx);
-
-//   let { ctx: ctx2 } = shuffle(ctx, numbers);
-//   expect(numbers).toMatchObject([1, 0, 7, 2, 3, 9, 6, 8, 4, 5]);
-
-//   shuffle(ctx2, numbers);
-//   expect(numbers).toMatchObject([1, 6, 8, 3, 7, 5, 9, 0, 2, 4]);
-// });
-
-// internal
-test('random2', () => {
+test('randomctx', () => {
   let ctx = { seed: 'hi there' };
 
   // make sure that on subsequent calls different numbers are generated.
-  let { ctx: ctx2, randomnumber } = random2(ctx);
+  let { ctx: ctx2, randomnumber } = randomctx(ctx);
   expect(randomnumber).toBe(0.573445922927931);
-  let { ctx: ctx3, randomnumber: randomnumber2 } = random2(ctx2);
+  let { ctx: ctx3, randomnumber: randomnumber2 } = randomctx(ctx2);
   expect(randomnumber2).toBe(0.4695413049776107);
-  let { ctx: ctx4, randomnumber: randomnumber3 } = random2(ctx3);
+  let { ctx: ctx4, randomnumber: randomnumber3 } = randomctx(ctx3);
   expect(randomnumber3).toBe(0.5943194630090147);
   expect(ctx4).not.toMatchObject(ctx3);
 });
 
-// internal
 test('runrandom nothing to do', () => {
   let ctx = { seed: 0 };
   let G = {};
@@ -37,7 +24,6 @@ test('runrandom nothing to do', () => {
   expect(ctx2).toMatchObject(ctx);
 });
 
-// internal
 test('runrandom invalid op', () => {
   let ctx = { seed: 0 };
   let G = {};
@@ -50,7 +36,6 @@ test('runrandom invalid op', () => {
   expect(ctx2).toMatchObject(ctx);
 });
 
-// public
 test('rolldie', () => {
   let G = {};
   // TODO how to behave when field1 is already defined on G?
@@ -68,7 +53,6 @@ test('rolldie', () => {
   expect(G4._randomOps).toMatchObject(expectedOps);
 });
 
-// public
 test('runrandom D6', () => {
   let ctx = { seed: 0 };
   let G = {};
@@ -84,7 +68,6 @@ test('runrandom D6', () => {
   expect(G3._randomOps).toBeUndefined();
 });
 
-// public
 test('runrandom R', () => {
   let ctx = { seed: 0 };
   let G = {};
@@ -99,3 +82,14 @@ test('runrandom R', () => {
   expect(G3.field1).toBeLessThanOrEqual(1);
   expect(G3._randomOps).toBeUndefined();
 });
+
+// test('shuffle', () => {
+//   let ctx = { seed: 'hi there' };
+//   let numbers = new Array(10).fill().map((_, idx) => idx);
+
+//   let { ctx: ctx2 } = shuffle(ctx, numbers);
+//   expect(numbers).toMatchObject([1, 0, 7, 2, 3, 9, 6, 8, 4, 5]);
+
+//   shuffle(ctx2, numbers);
+//   expect(numbers).toMatchObject([1, 6, 8, 3, 7, 5, 9, 0, 2, 4]);
+// });
