@@ -104,9 +104,7 @@ test('movesPerTurn', () => {
     let state = { ctx: flow.ctx(2), G };
     state.ctx.seed = 'seed';
 
-    console.log('running processMove');
     state = flow.processMove(state, { move: {} });
-    console.log('end processMove');
 
     expect(state.G.field1).toBeDefined();
     expect(state.G.field1).toBeGreaterThanOrEqual(0);
