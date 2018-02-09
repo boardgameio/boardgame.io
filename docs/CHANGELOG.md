@@ -1,53 +1,53 @@
+# v0.17.1
+
+#### Features
+
+* [[f23c5dd](https://github.com/google/boardgame.io/commit/f23c5dd)] Card and Deck (#74)
+* [[a21c1dd](https://github.com/google/boardgame.io/commit/a21c1dd)] prevent endTurn when movesPerTurn have not been made
+
+#### Bugfixes
+
+* [[11e215e](https://github.com/google/boardgame.io/commit/11e215e)] fix bug that was using the wrong playerID when calculating playerView
+
 # v0.17.0
 
-### Features
+#### Features
 
-f23c5dd Card and Deck (#74)
-a21c1dd prevent endTurn when movesPerTurn have not been made
-
-### Bugfixes
-
-11e215e fix bug that was using the wrong playerID when calculating playerView
-
-# v0.17.0
-
-### Features
-
-0758c7e cascade endPhase
-cc7d44f retire triggers and introduce onMove instead
-17e88ce convert events whitelist to boolean options
-e315b9e add ui to NPM package
-5b34c5d remove pass event and make it a standard move
-f3da742 make playerID available in ctx
-cb09d9a make turnOrder a globally configurable option
+* [[0758c7e](https://github.com/google/boardgame.io/commit/0758c7e)] cascade endPhase
+* [[cc7d44f](https://github.com/google/boardgame.io/commit/cc7d44f)] retire triggers and introduce onMove instead
+* [[17e88ce](https://github.com/google/boardgame.io/commit/17e88ce)] convert events whitelist to boolean options
+* [[e315b9e](https://github.com/google/boardgame.io/commit/e315b9e)] add ui to NPM package
+* [[5b34c5d](https://github.com/google/boardgame.io/commit/5b34c5d)] remove pass event and make it a standard move
+* [[f3da742](https://github.com/google/boardgame.io/commit/f3da742)] make playerID available in ctx
+* [[cb09d9a](https://github.com/google/boardgame.io/commit/cb09d9a)] make turnOrder a globally configurable option
 
 # v0.16.8
 
 #### Features
 
-[[a482469](https://github.com/google/boardgame.io/commit/a482469b2f6a317a50fb25f23b7ffc0c2f597c1e)] ability to specify socket server
+* [[a482469](https://github.com/google/boardgame.io/commit/a482469b2f6a317a50fb25f23b7ffc0c2f597c1e)] ability to specify socket server
 
 #### Bugfixes
 
-[[2ab3dfc](https://github.com/google/boardgame.io/commit/2ab3dfc6928eb8f0bfdf1ce319ac53021a2f905b)] end turn automatically when game ends
+* [[2ab3dfc](https://github.com/google/boardgame.io/commit/2ab3dfc6928eb8f0bfdf1ce319ac53021a2f905b)] end turn automatically when game ends
 
 # v0.16.7
 
 #### Bugfixes
 
-* [c65580d] Fix bug introduced in af3a7b5.
+* [[c65580d](https://github.com/google/boardgame.io/commit/c65580d)] Fix bug introduced in af3a7b5.
 
 # v0.16.6
 
 #### Bugfixes
 
-* [af3a7b5] Only process move reducers (on the client) and nothing else when in multiplayer mode.
+* [[af3a7b5](https://github.com/google/boardgame.io/commit/af3a7b5)] Only process move reducers (on the client) and nothing else when in multiplayer mode.
 
 Buggy fix (fixed in 0.16.7).
 
 #### Features
 
-* [2721ad4] Allow overriding `db` implementation in Server.
+* [[2721ad4](https://github.com/google/boardgame.io/commit/2721ad4)] Allow overriding `db` implementation in Server.
 
 # v0.16.5
 
