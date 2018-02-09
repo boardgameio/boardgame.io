@@ -13,62 +13,54 @@ function getrandomfn(ctx) {
   return randomfn;
 }
 
-/**
- * random
- *
- * Generates a random number.
- * The seed and current state is kept inside the ctx object.
- *
- * @param {...object} ctx - The context object keeping the seed and current state.
- */
-function random(ctx) {
+function random2(ctx) {
   const r = getrandomfn(ctx);
   const randomnumber = r();
   const ctx2 = { ...ctx, prngstate: r.state() };
   return { randomnumber, ctx: ctx2 };
 }
 
-/**
- * shuffle
- *
- * Shuffles a given array.
- * The seed and current state is kept inside the ctx object.
- *
- * Please note this is an in-place shuffle. It will modify the given array.
- * If you want to retain the original order, clone the array before.
- *
- * This code is taken directly from Mike Bostock, with a few slight modifications
- * https://bost.ocks.org/mike/shuffle/
- *
- * @param {...object} ctx - The context object keeping the seed and current state.
- * @param {any[]} array - The array to sort. Will be modified in-place.
- */
-function shuffle(ctx, array) {
-  let m = array.length,
-    t,
-    i;
-  let ctx2 = ctx;
+// /**
+//  * shuffle
+//  *
+//  * Shuffles a given array.
+//  * The seed and current state is kept inside the ctx object.
+//  *
+//  * Please note this is an in-place shuffle. It will modify the given array.
+//  * If you want to retain the original order, clone the array before.
+//  *
+//  * This code is taken directly from Mike Bostock, with a few slight modifications
+//  * https://bost.ocks.org/mike/shuffle/
+//  *
+//  * @param {...object} ctx - The context object keeping the seed and current state.
+//  * @param {any[]} array - The array to sort. Will be modified in-place.
+//  */
+// function shuffle(ctx, array) {
+//   let m = array.length,
+//     t,
+//     i;
+//   let ctx2 = ctx;
 
-  // While there remain elements to shuffle…
-  while (m) {
-    let { ctx: ctx3, randomnumber } = random(ctx2);
-    ctx2 = ctx3;
+//   // While there remain elements to shuffle…
+//   while (m) {
+//     let { ctx: ctx3, randomnumber } = random2(ctx2);
+//     ctx2 = ctx3;
 
-    // Pick a remaining element…
-    i = Math.floor(randomnumber * m--);
+//     // Pick a remaining element…
+//     i = Math.floor(randomnumber * m--);
 
-    // And swap it with the current element.
-    t = array[m];
-    array[m] = array[i];
-    array[i] = t;
-  }
+//     // And swap it with the current element.
+//     t = array[m];
+//     array[m] = array[i];
+//     array[i] = t;
+//   }
 
-  return { ctx: ctx2, array };
-}
+//   return { ctx: ctx2, array };
+// }
 
-function rolldie(G, fieldname) {
-  let newRandomOps = [{ op: 'D6', fieldname }];
-  let _randomOps = [...(G._randomOps || []), ...newRandomOps];
+function addrandomop(G, fieldname, op) {
+  let rop = [{ op, fieldname }];
+  let _randomOps = [...(G._randomOps || []), ...rop];
   return { ...G, _randomOps };
 }
 
@@ -80,10 +72,16 @@ function evaluaterandomops(G, ctx) {
     G._randomOps.forEach(r => {
       switch (r.op) {
         case 'D6': {
-          const { ctx: ctx3, randomnumber } = random(ctx2);
+          const { ctx: ctx3, randomnumber } = random2(ctx2);
           ctx2 = ctx3;
           const d6 = Math.floor(randomnumber * 6) + 1;
           randomresults[r.fieldname] = d6;
+          break;
+        }
+        case 'R': {
+          const { ctx: ctx3, randomnumber } = random2(ctx2);
+          ctx2 = ctx3;
+          randomresults[r.fieldname] = randomnumber;
           break;
         }
         default:
@@ -102,4 +100,30 @@ function runrandom(G, ctx) {
   return { G: G2, ctx: ctx2 };
 }
 
-export { random, shuffle, rolldie, runrandom };
+// the following methdos are to be used by games
+
+/**
+ * rolldie
+ *
+ * Roll a D6 die and put the result into the given fieldname.
+ *
+ * @param {...object} G - Game instance.
+ * @param {*} fieldname - Gieldname to put the random result into.
+ */
+function rolldie(G, fieldname) {
+  return addrandomop(G, fieldname, 'D6');
+}
+
+/**
+ * random
+ *
+ * Generates a random number.
+ * The seed and current state is kept inside the ctx object.
+ *
+ * @param {...object} ctx - The context object keeping the seed and current state.
+ */
+function random(G, fieldname) {
+  return addrandomop(G, fieldname, 'R');
+}
+
+export { random, random2, rolldie, runrandom, addrandomop };
