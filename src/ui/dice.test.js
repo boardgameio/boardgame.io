@@ -24,7 +24,7 @@ test('basic', () => {
   }
   {
     const dice = Enzyme.shallow(<Dice dotStyle={false} faceValue={1} />); // renders plain text instead of styled dots
-    expect(dice.html()).toContain(1);
+    expect(dice.text()).toContain(1);
   }
 });
 
