@@ -1,0 +1,27 @@
+.bgio-dice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 40px;
+  padding: 5px;
+
+  background-color: #e7e7e7;
+  width: 208px;
+  height: 208px;
+  object-fit: contain;
+
+  box-shadow: inset 0 5px white, inset 0 -5px #bbb, inset 5px 0 #d7d7d7,
+    inset -5px 0 #d7d7d7;
+
+  border-radius: 10%;
+}
+
+.bgio-dot {
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  margin: 12px;
+  border-radius: 50%;
+  background-color: #ababab;
+}
