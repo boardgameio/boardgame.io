@@ -23,6 +23,10 @@ class Dice extends React.Component {
     let { faceCount } = this.props;
     let faceValue = Math.floor(Math.random() * faceCount) + 1; // can't have a zero face;
 
+    if (this.props.onClick) {
+      this.props.onClick(faceValue);
+    }
+
     this.setState({
       faceValue,
     });
@@ -35,17 +39,19 @@ class Dice extends React.Component {
   }
 
   render() {
-    let { className, dotStyle, faceCount, ...rest } = this.props;
-    let { faceValue } = this.state;
+    let { className, dotStyle, faceValue, faceCount, ...rest } = this.props;
     const classNames = ['bgio-dice'];
     if (className) classNames.push(className);
+
     return (
       <div className={classNames.join(' ')} {...rest} onClick={this.onClick}>
-        {dotStyle && faceCount < 9 // hard to fit mor ethan 9 "dots" on the dice;
-          ? [...Array(faceValue)].map((face, i) => {
-              return <div key={i} className="bgio-dot" />;
-            })
-          : { faceValue }}
+        {dotStyle && faceCount < 9 && faceValue < 9 ? ( // hard to fit mor ethan 9 "dots" on the dice;
+          [...Array(this.state.faceValue)].map((face, i) => {
+            return <div key={i} className="bgio-dot" />;
+          })
+        ) : (
+          <span>{this.state.faceValue}</span>
+        )}
       </div>
     );
   }
@@ -56,12 +62,13 @@ Dice.propTypes = {
   faceValue: PropTypes.number,
   dotStyle: PropTypes.bool,
   className: PropTypes.string,
+  onClick: PropTypes.func,
 };
 
 Dice.defaultProps = {
   faceCount: 6,
-  faceValue: 6,
+  faceValue: 4,
   dotStyle: true,
 };
 
-export default Dice;
+export { Dice };
