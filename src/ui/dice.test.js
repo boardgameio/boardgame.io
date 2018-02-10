@@ -22,14 +22,15 @@ test('basic', () => {
     const dice = Enzyme.shallow(<Dice className="custom" />);
     expect(dice.html()).toContain('custom');
   }
+  {
+    const dice = Enzyme.shallow(<Dice dotStyle={false} faceValue={1} />); // renders plain text instead of styled dots
+    expect(dice.html()).toContain(1);
+  }
 });
 
 test('state change', () => {
   {
-    const dice = Enzyme.mount(<Dice dotStyle={false} faceValue={4} />);
-    expect(dice.state().faceValue).toBe(4);
-    dice.setProps({ faceValue: 3 });
-    expect(dice.state().faceValue).toBe(3);
+    const dice = Enzyme.mount(<Dice faceValue={4} />);
     dice.setProps({ faceValue: 1 });
     expect(dice.state().faceValue).toBe(1);
     dice.setProps({ faceValue: 1 });
