@@ -19,7 +19,7 @@ import io from 'socket.io-client';
 export class Multiplayer {
   /**
    * Creates a new Mutiplayer instance.
-   * @param {object} socketImpl - Override for unit tests.
+   * @param {object} socket - Override for unit tests.
    * @param {string} gameID - The game ID to connect to.
    * @param {string} playerID - The player ID associated with this client.
    * @param {string} gameName - The game type (the `name` field in `Game`).
@@ -28,7 +28,7 @@ export class Multiplayer {
    * @param {function()} onChange - Callback to be called when there is a change in this object's state.
    */
   constructor({
-    socketImpl,
+    socket,
     gameID,
     playerID,
     gameName,
@@ -40,13 +40,12 @@ export class Multiplayer {
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;
     this.numPlayers = numPlayers || 2;
-    this.isConnected = false;
     this.onChange = onChange || (() => {});
 
     this.gameID = this.gameName + ':' + this.gameID;
 
-    if (socketImpl !== undefined) {
-      this.socket = socketImpl;
+    if (socket !== undefined) {
+      this.socket = socket;
     } else {
       if (server) {
         this.socket = io('http://' + server + '/' + gameName);
@@ -95,16 +94,12 @@ export class Multiplayer {
       }
     });
 
-    this.socket.on('connect', () => {
-      // Initial sync to get game state.
-      this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
-      this.isConnected = true;
-      this.onChange();
-    });
-    this.socket.on('disconnect', () => {
-      this.isConnected = false;
-      this.onChange();
-    });
+    // Initial sync to get game state.
+    this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
+
+    // Keep track of connection status.
+    this.socket.on('connect', () => this.onChange(true));
+    this.socket.on('disconnect', () => this.onChange(false));
 
     return store;
   }
@@ -115,10 +110,7 @@ export class Multiplayer {
    */
   updateGameID(id) {
     this.gameID = this.gameName + ':' + id;
-
-    if (this.socket) {
-      this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
-    }
+    this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
   }
 
   /**
@@ -127,9 +119,6 @@ export class Multiplayer {
    */
   updatePlayerID(id) {
     this.playerID = id;
-
-    if (this.socket) {
-      this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
-    }
+    this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
   }
 }

@@ -28,11 +28,9 @@ class MockSocket {
 
 test('update gameID / playerID', () => {
   const m = new Multiplayer();
-
   m.updateGameID('test');
-  expect(m.gameID).toBe('default:test');
-
   m.updatePlayerID('player');
+  expect(m.gameID).toBe('default:test');
   expect(m.playerID).toBe('player');
 });
 
@@ -40,7 +38,7 @@ test('connection status', () => {
   const onChangeMock = jest.fn();
   const mockSocket = new MockSocket();
   const m = new Multiplayer({
-    socketImpl: mockSocket,
+    socket: mockSocket,
     gameID: 0,
     playerID: 0,
     gameName: 'foo',
@@ -49,19 +47,16 @@ test('connection status', () => {
   });
   const game = Game({});
   m.createStore(createGameReducer({ game }));
-  expect(m.isConnected).toEqual(false);
   mockSocket.callbacks['connect']();
-  expect(onChangeMock).toHaveBeenCalled();
-  expect(m.isConnected).toEqual(true);
+  expect(onChangeMock).lastCalledWith(true);
   onChangeMock.mockClear();
   mockSocket.callbacks['disconnect']();
-  expect(onChangeMock).toHaveBeenCalled();
-  expect(m.isConnected).toEqual(false);
+  expect(onChangeMock).lastCalledWith(false);
 });
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer({ socketImpl: mockSocket });
+  const m = new Multiplayer({ socket: mockSocket });
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -97,7 +92,7 @@ test('multiplayer', () => {
 
 test('move whitelist', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer({ socketImpl: mockSocket });
+  const m = new Multiplayer({ socket: mockSocket });
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 

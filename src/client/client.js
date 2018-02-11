@@ -74,6 +74,10 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
       debug: true,
     };
 
+    state = {
+      isConnected: false,
+    };
+
     constructor(props) {
       super(props);
 
@@ -84,9 +88,8 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
           gameID: props.gameID,
           playerID: props.playerID,
           gameName: game.name,
-          onChange: () => {
-            this.createBoard();
-            this.updateState();
+          onChange: isConnected => {
+            this.setState({ isConnected }), this.forceUpdate();
           },
           numPlayers,
           server,
@@ -101,15 +104,15 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
         this.store,
         props.playerID
       );
+
       this.eventAPI = createEventDispatchers(
         game.flow.eventNames,
         this.store,
         props.playerID
       );
+
       this.createBoard();
       this.createDebugUI();
-
-      this.store.subscribe(this.updateState.bind(this));
     }
 
     createBoard() {
@@ -143,7 +146,7 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
         const Board = connect(mapStateToProps, ActionCreators)(board);
 
         this._board = React.createElement(Board, {
-          ...this.getClientStatus(),
+          isMultiplayer: multiplayer === true,
           moves: this.moveAPI,
           events: this.eventAPI,
           gameID: this.props.gameID,
@@ -151,20 +154,13 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
         });
       }
     }
-    getClientStatus() {
-      let result = { isMultiplayer: multiplayer === true };
-      if (multiplayer) {
-        result.isConnected = this.multiplayerClient.isConnected;
-      }
-      return result;
-    }
 
     createDebugUI() {
       if (debug && this.props.debug) {
         this._debug = React.createElement(
           connect(state => ({ gamestate: state }), ActionCreators)(Debug),
           {
-            ...this.getClientStatus(),
+            isMultiplayer: multiplayer === true,
             moves: this.moveAPI,
             events: this.eventAPI,
             gameID: this.props.gameID,
@@ -184,38 +180,41 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
         }
       }
 
-      this.createBoard();
-      this.createDebugUI();
       this.moveAPI = createMoveDispatchers(
         game.moveNames,
         this.store,
         this.props.playerID
       );
+
       this.eventAPI = createEventDispatchers(
         game.flow.eventNames,
         this.store,
         this.props.playerID
       );
-    }
 
-    updateState() {
-      this.setState({
-        store: this.store.getState(),
-        clientStatus: this.getClientStatus(),
-      });
-    }
-
-    componentWillMount() {
-      this.updateState();
+      this.createBoard();
+      this.createDebugUI();
     }
 
     render() {
+      const board =
+        this._board &&
+        React.cloneElement(this._board, {
+          isConnected: this.state.isConnected,
+        });
+
+      const debug =
+        this._debug &&
+        React.cloneElement(this._debug, {
+          isConnected: this.state.isConnected,
+        });
+
       return (
         <div className="client">
           <Provider store={this.store}>
             <span>
-              {this._debug}
-              {this._board}
+              {debug}
+              {board}
             </span>
           </Provider>
         </div>

@@ -45,10 +45,9 @@ test('connect', () => {
   });
   let game = Enzyme.mount(<Board playerID={'11'} gameID={'foogame'} />);
   let multiplayerClient = game.instance().multiplayerClient;
-  expect(game.state().clientStatus.isConnected).toEqual(false);
-  multiplayerClient.isConnected = true;
-  multiplayerClient.onChange();
-  expect(game.state().clientStatus.isConnected).toEqual(true);
+  expect(game.state().isConnected).toEqual(false);
+  multiplayerClient.onChange(true);
+  expect(game.state().isConnected).toEqual(true);
 });
 
 test('board props', () => {
