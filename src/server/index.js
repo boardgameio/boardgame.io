@@ -14,7 +14,7 @@ import { createGameReducer } from '../core/reducer';
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
 
-function Server({ games, db }) {
+function Server({ games, db, _clientInfo, _roomInfo }) {
   const app = new Koa();
   const io = new IO({
     ioOptions: {
@@ -29,8 +29,8 @@ function Server({ games, db }) {
     db = new InMemory();
   }
 
-  const clientInfo = new Map();
-  const roomInfo = new Map();
+  const clientInfo = _clientInfo || new Map();
+  const roomInfo = _roomInfo || new Map();
 
   for (const game of games) {
     const nsp = app._io.of(game.name);
@@ -71,7 +71,7 @@ function Server({ games, db }) {
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
-            const playerID = clientInfo.get(client).playerID;
+            const { playerID } = clientInfo.get(client);
             const newState = Object.assign({}, state, {
               G: game.playerView(state.G, state.ctx, playerID),
             });
@@ -116,7 +116,11 @@ function Server({ games, db }) {
       });
 
       socket.on('disconnect', () => {
-        clientInfo.delete(socket.id);
+        if (clientInfo.has(socket.id)) {
+          const { gameID } = clientInfo.get(socket.id);
+          roomInfo.get(gameID).delete(socket.id);
+          clientInfo.delete(socket.id);
+        }
       });
     });
   }
