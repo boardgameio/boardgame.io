@@ -11,7 +11,6 @@ import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
 import { Flow, FlowWithPhases, createEventDispatchers } from './flow';
-import { setTimeout } from 'timers';
 import { start } from 'repl';
 
 test('Flow', () => {
@@ -99,60 +98,14 @@ test('movesPerTurn', () => {
   }
 });
 
-descrime('secondsPerTurn', ()=>{
-  let flow, state, timer, functionToCallWhenTimeIsOut;
-  jest.useFakeTimers();
-  beforeEach(() => {
-    flow = FlowWithPhases({
-      secondsPerTurn:2
-    });
-    state = {ctx: flow.ctx(2)};
-    timer = function ({
-      timeLeft=0,
-      callback
-    }){
-      let _timeLeft = _timeLeft_;
-      let timeIsOut = false;
-      let timer = setTimeout(() => {
-        if(_timeLeft !== 0){
-          timeIsOut = false;
-          timeLeft--;
-        } else {
-          clearTimeout(timer);
-          callback && callback();
-        }
-      }, 1000)
-      return {
-        timeLeft: _timeLeft,
-        timer,
-        timeIsOut
-      };
-    }
-    functionToCallWhenTimeIsOut = jest.fn();
-    timer({
-      timeLeft: state.ctx.secondsPerTurn,
-      callback:functionToCallWhenTimeIsOut
-    })
-  })
-  test('setTimeoutHaveBeenCalled', () => {
-    expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 1000);
-    // expect(state.ctx.turn).toBe(0);
-  })
-
-  test('callback function have been called when time is out', () => {
-    expect(functionToCallWhenTimeIsOut).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(1000);
-    expect(functionToCallWhenTimeIsOut).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(1000);
-  })
-
-  test('calls the callback after timeLeft', () => {
-    
-  })
-
-
-})
+describe('secondsPerTurn', () => {
+  it('when turn start - start timer', () => {
+    // WIP
+  });
+  it('turn end when time is out', () => {
+    // WIP
+  });
+});
 
 test('onTurnEnd', () => {
   {
