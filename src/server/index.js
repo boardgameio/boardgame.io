@@ -11,10 +11,17 @@ const IO = require('koa-socket');
 const Redux = require('redux');
 import { InMemory } from './db';
 import { createGameReducer } from '../core/reducer';
+const PING_TIMEOUT = 20 * 1e3;
+const PING_INTERVAL = 10 * 1e3;
 
 function Server({ games, db }) {
   const app = new Koa();
-  const io = new IO();
+  const io = new IO({
+    ioOptions: {
+      pingTimeout: PING_TIMEOUT,
+      pingInterval: PING_INTERVAL,
+    },
+  });
   app.context.io = io;
   io.attach(app);
 
