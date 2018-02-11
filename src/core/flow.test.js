@@ -11,7 +11,6 @@ import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
 import { Flow, FlowWithPhases, createEventDispatchers } from './flow';
-import { start } from 'repl';
 
 test('Flow', () => {
   const flow = Flow({});
