@@ -1,5 +1,5 @@
 import { randomctx, runrandom, addrandomop } from './randomeval';
-import { random, rolldie } from './random';
+import { RequestRandom } from './random';
 
 test('randomctx', () => {
   let ctx = { seed: 'hi there' };
@@ -36,17 +36,17 @@ test('runrandom invalid op', () => {
   expect(ctx2).toMatchObject(ctx);
 });
 
-test('rolldie', () => {
+test('RequestRandom', () => {
   let G = {};
-  const G2 = rolldie(G, 'field1');
+  const G2 = RequestRandom.D6(G, 'field1');
   let expectedOps = [{ op: 'D6', fieldname: 'field1' }];
   expect(G2._randomOps).toMatchObject(expectedOps);
 
-  const G3 = rolldie(G2, 'field2');
+  const G3 = RequestRandom.D6(G2, 'field2');
   expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field2' }];
   expect(G3._randomOps).toMatchObject(expectedOps);
 
-  const G4 = rolldie(G3, 'field1');
+  const G4 = RequestRandom.D6(G3, 'field1');
   expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field1' }];
   expect(G4._randomOps).toMatchObject(expectedOps);
 });
@@ -56,7 +56,7 @@ test('runrandom D6', () => {
   let G = {};
 
   // random event - D6
-  const G2 = rolldie(G, 'field1');
+  const G2 = RequestRandom.D6(G, 'field1');
 
   let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
@@ -71,7 +71,7 @@ test('runrandom R', () => {
   let G = {};
 
   // random event - random number
-  const G2 = random(G, 'field1');
+  const G2 = RequestRandom.Number(G, 'field1');
 
   let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);

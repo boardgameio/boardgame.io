@@ -21,13 +21,13 @@ Boardgame.io took a rather unusual approach to randomness: It disallows getting 
 Instead, a game can ask the engine to generate random numbers, and the engine will inject those into the game on the next move.
 
 ```js
-import { rolldie } from 'boardgame.io/core';
+import { RequestRandom } from 'boardgame.io/core';
 
 const SomeGome = Game({
   // ...
   moves: {
     clickCell(G, ctx, id) {
-      const G_withRequest = rolldie(G, 'field1');
+      const G_withRequest = RequestRandom.D6(G, 'field1');
       return { ...G_withRequest };
     },
   },
