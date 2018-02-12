@@ -1,3 +1,15 @@
+# v0.17.2
+
+#### Features
+
+* [[0572210](https://github.com/google/boardgame.io/commit/0572210)] Exposing Client connection status to board. (#97)
+* [[c2ea197](https://github.com/google/boardgame.io/commit/c2ea197)] make db interface async (#86)
+* [[9e507ce](https://github.com/google/boardgame.io/commit/9e507ce)] exclude dependencies from package
+
+#### Bugfixes
+
+* [[a768f1f](https://github.com/google/boardgame.io/commit/a768f1f)] remove entries from clientInfo and roomInfo on disconnect
+
 # v0.17.1
 
 #### Features
