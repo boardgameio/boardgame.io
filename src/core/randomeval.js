@@ -29,20 +29,22 @@ export function evaluaterandomops(G, ctx) {
   let randomresults = {};
   let ctx2 = ctx;
 
+  let spotre = /^D(\d+)$/;
+
   // some flow tests run without a defined G
   if (G && G._randomOps !== undefined) {
     G._randomOps.forEach(r => {
-      switch (r.op) {
-        case 'D6': {
-          const { ctx: ctx3, randomnumber } = randomctx(ctx2);
-          ctx2 = ctx3;
-          const d6 = Math.floor(randomnumber * 6) + 1;
-          randomresults[r.fieldname] = d6;
+      const { ctx: ctx3, randomnumber } = randomctx(ctx2);
+      ctx2 = ctx3;
+      switch (r.op.charAt(0)) {
+        case 'D': {
+          var match = spotre.exec(r.op);
+          // match[0] contains the whole matched string.
+          const dievalue = Math.floor(randomnumber * match[1]) + 1;
+          randomresults[r.fieldname] = dievalue;
           break;
         }
         case 'R': {
-          const { ctx: ctx3, randomnumber } = randomctx(ctx2);
-          ctx2 = ctx3;
           randomresults[r.fieldname] = randomnumber;
           break;
         }
