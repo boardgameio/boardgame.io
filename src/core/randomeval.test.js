@@ -71,6 +71,20 @@ test('runrandom predefined dice values', () => {
   });
 });
 
+test('runrandom - random dice value', () => {
+  let ctx = { seed: 0 };
+  let G = {};
+
+  // random event - die with arbitrary spot count
+  const G2 = RequestRandom.Die(G, 'field1', 123);
+
+  let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
+  expect(ctx).not.toMatchObject(ctx2);
+  expect(G3.field1).toBeDefined();
+  expect(G3.field1).toBe(74);
+  expect(G3._randomOps).toBeUndefined();
+});
+
 test('runrandom R', () => {
   let ctx = { seed: 0 };
   let G = {};

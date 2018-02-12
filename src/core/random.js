@@ -10,9 +10,9 @@ const predefined = Object.keys(SpotValue).reduce((map, obj) => {
 
 export const RequestRandom = {
   ...predefined,
-  // Die: (G, fieldname, spotvalue) => {
-  //   return addrandomop(G, fieldname, `D${spotvalue}`);
-  // },
+  Die: (G, fieldname, spotvalue) => {
+    return addrandomop(G, fieldname, `D${spotvalue}`);
+  },
   Number: (G, fieldname) => {
     return addrandomop(G, fieldname, 'R');
   },
