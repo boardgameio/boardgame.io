@@ -15,6 +15,9 @@ This poses interesting challenges regarding the implementation.
   If a client could predict the next random numbers that are to be generated, the future flow of a game stops being unpredictable.
   The library must not allow such a scenario. The RNG and its state must stay at the server.
 
+* **Purity**. The library is built using Redux. This is important for games since each move is a [reducer](https://redux.js.org/docs/basics/Reducers.html),
+  and thus must be pure. However, randomness typically implies a state change of the used pseudo random number generator (PRNG for short).
+
 ## Using Randomness in Games
 
 Boardgame.io took a rather unusual approach to randomness: It disallows getting random variables directly.
@@ -23,12 +26,19 @@ Instead, a game can ask the engine to generate random numbers, and the engine wi
 ```js
 import { RequestRandom } from 'boardgame.io/core';
 
-const SomeGome = Game({
+const SomeGame = Game({
   // ...
   moves: {
-    clickCell(G, ctx, id) {
-      const G_withRequest = RequestRandom.D6(G, 'field1');
+    rollDie(G, ctx, id) {
+      const G_withRequest = RequestRandom.D6(G, 'diceValue');
       return { ...G_withRequest };
+    },
+  },
+  flow: {
+    onMove: G => {
+      const dice = G.diceValue;
+      // do something...
+      return { ...G };
     },
   },
   // ...
@@ -36,7 +46,7 @@ const SomeGome = Game({
 ```
 
 This will place a request to a D6 dice roll inside `G`.
-While processing the move, the request gets evaluated and the result placed into `field1`, where it can be used for e.g. rendering purposes.
+While processing the move, the request gets evaluated and the result placed into `diceValue`, where it can be used for e.g. rendering purposes.
 
 ## Background
 
