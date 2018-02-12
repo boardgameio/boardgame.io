@@ -74,7 +74,12 @@ function Game({ name, setup, moves, playerView, flow, seed }) {
   if (!playerView) playerView = G => G;
 
   if (!flow || flow.processGameEvent === undefined) {
-    flow = FlowWithPhases(flow || {});
+    // either take the provided seed, or use seedrandom to create one.
+    // Math.seedrandom returns an autoseed with local entropy only.
+    const actualseed = seed === undefined ? Math.seedrandom() : seed;
+
+    let flowconfig = Object.assign({ seed: actualseed }, flow || {});
+    flow = FlowWithPhases(flowconfig);
   }
 
   return {
@@ -82,7 +87,6 @@ function Game({ name, setup, moves, playerView, flow, seed }) {
     setup,
     playerView,
     flow,
-    seed,
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {

@@ -163,6 +163,7 @@ export function FlowWithPhases({
   turnOrder,
   endTurn,
   endPhase,
+  seed,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -377,6 +378,7 @@ export function FlowWithPhases({
 
   return Flow({
     ctx: numPlayers => ({
+      seed,
       numPlayers,
       turn: 0,
       currentPlayer: '0',
