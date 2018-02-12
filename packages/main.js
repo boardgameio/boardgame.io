@@ -14,6 +14,7 @@ import Token from '../src/ui/token.js';
 import { Card } from '../src/ui/card.js';
 import { Grid } from '../src/ui/grid.js';
 import { HexGrid } from '../src/ui/hex.js';
+import { RequestRandom } from '../src/core/random';
 
 export default {
   Client,
@@ -26,4 +27,5 @@ export default {
   Token,
   Grid,
   HexGrid,
+  RequestRandom,
 };
