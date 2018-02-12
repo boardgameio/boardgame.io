@@ -51,19 +51,24 @@ test('RequestRandom', () => {
   expect(G4._randomOps).toMatchObject(expectedOps);
 });
 
-test('runrandom D6', () => {
+test('runrandom predefined dice values', () => {
   let ctx = { seed: 0 };
   let G = {};
 
-  // random event - D6
-  const G2 = RequestRandom.D6(G, 'field1');
+  const rfns = [4, 6, 8, 10, 12, 20].map(v => {
+    return { fn: RequestRandom[`D${v}`], highest: v };
+  });
+  rfns.forEach(pair => {
+    // random event
+    const G2 = pair.fn(G, 'field1');
 
-  let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
-  expect(ctx).not.toMatchObject(ctx2);
-  expect(G3.field1).toBeDefined();
-  expect(G3.field1).toBeGreaterThanOrEqual(1);
-  expect(G3.field1).toBeLessThanOrEqual(6);
-  expect(G3._randomOps).toBeUndefined();
+    let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
+    expect(ctx).not.toMatchObject(ctx2);
+    expect(G3.field1).toBeDefined();
+    expect(G3.field1).toBeGreaterThanOrEqual(1);
+    expect(G3.field1).toBeLessThanOrEqual(pair.highest);
+    expect(G3._randomOps).toBeUndefined();
+  });
 });
 
 test('runrandom R', () => {

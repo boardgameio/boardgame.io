@@ -1,9 +1,18 @@
-import { addrandomop } from './randomeval';
+import { addrandomop, SpotValue } from './randomeval';
+
+// generate functions for predefined dice values D4 - D20
+const predefined = Object.keys(SpotValue).reduce((map, obj) => {
+  map[obj] = (G, fieldname) => {
+    return addrandomop(G, fieldname, obj);
+  };
+  return map;
+}, {});
 
 export const RequestRandom = {
-  D6: (G, fieldname) => {
-    return addrandomop(G, fieldname, 'D6');
-  },
+  ...predefined,
+  // Die: (G, fieldname, spotvalue) => {
+  //   return addrandomop(G, fieldname, `D${spotvalue}`);
+  // },
   Number: (G, fieldname) => {
     return addrandomop(G, fieldname, 'R');
   },

@@ -25,6 +25,15 @@ export function addrandomop(G, fieldname, op) {
   return { ...G, _randomOps };
 }
 
+export const SpotValue = {
+  D4: 'D4',
+  D6: 'D6',
+  D8: 'D8',
+  D10: 'D10',
+  D12: 'D12',
+  D20: 'D20',
+};
+
 export function evaluaterandomops(G, ctx) {
   let randomresults = {};
   let ctx2 = ctx;
