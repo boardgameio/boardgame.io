@@ -124,6 +124,9 @@ flow: {
   // Ends the game if this returns anything other than undefined.
   endGameIf: (G, ctx) => boolean
 
+  // Run at the start of a turn.
+  onTurnBegin: (G, ctx) => G
+
   // Run at the end of a turn.
   onTurnEnd: (G, ctx) => G
 
@@ -147,6 +150,7 @@ flow: {
       // specific phase only.
       endTurnIf: ...
       endGameIf: ...
+      onTurnBegin: ...
       onTurnEnd: ...
       onMove:    ...
     }
