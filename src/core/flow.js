@@ -98,6 +98,9 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *                                The return value is available at ctx.gameover.
  *                                (G, ctx) => {}
  *
+ * @param {...object} onTurnBegin - Any code to run when a turn begins.
+ *                                 (G, ctx) => G
+ *
  * @param {...object} onTurnEnd - Any code to run when a turn ends.
  *                                (G, ctx) => G
  *
@@ -137,6 +140,9 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *   // A phase-specific endGameIf.
  *   endGameIf: (G, ctx) => {},
  *
+ *   // A phase-specific onTurnBegin
+ *   onTurnBegin: (G, ctx) => G,
+ *
  *   // A phase-specific onTurnEnd.
  *   onTurnEnd: (G, ctx) => G,
  *
@@ -158,6 +164,7 @@ export function FlowWithPhases({
   movesPerTurn,
   endTurnIf,
   endGameIf,
+  onTurnBegin,
   onTurnEnd,
   onMove,
   turnOrder,
@@ -175,6 +182,7 @@ export function FlowWithPhases({
   if (!phases) phases = [{ name: 'default' }];
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
+  if (!onTurnBegin) onTurnBegin = G => G;
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
@@ -204,6 +212,9 @@ export function FlowWithPhases({
     if (conf.endGameIf === undefined) {
       conf.endGameIf = endGameIf;
     }
+    if (conf.onTurnBegin === undefined) {
+      conf.onTurnBegin = onTurnBegin;
+    }
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
@@ -229,6 +240,18 @@ export function FlowWithPhases({
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
     ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
     return { ...state, G, ctx };
+  };
+
+  const startTurn = function(state, config) {
+    const ctx = { ...state.ctx };
+    const G = config.onTurnBegin(state.G, ctx);
+    return { ...state, G, ctx };
+  };
+
+  const startGame = function(state, config) {
+    state = startPhase(state, config);
+    state = startTurn(state, config);
+    return state;
   };
 
   /**
@@ -321,7 +344,7 @@ export function FlowWithPhases({
       return endPhaseEvent({ ...state, G, ctx }, end);
     }
 
-    return { ...state, G, ctx };
+    return startTurn({ ...state, G, ctx }, conf);
   }
 
   function processMove(state, action, dispatch) {
@@ -385,7 +408,7 @@ export function FlowWithPhases({
       currentPlayerMoves: 0,
       phase: phases[0].name,
     }),
-    init: state => startPhase(state, phases[0]),
+    init: state => startGame(state, phases[0]),
     events: enabledEvents,
     validator,
     processMove,
