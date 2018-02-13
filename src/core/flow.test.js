@@ -97,6 +97,44 @@ test('movesPerTurn', () => {
   }
 });
 
+test('onTurnBegin', () => {
+  {
+    const onTurnBegin = jest.fn(G => G);
+    const onTurnBeginOverride = jest.fn(G => G);
+
+    let flow = FlowWithPhases({
+      onTurnBegin,
+      phases: [
+        { name: 'A' },
+        {
+          name: 'B',
+          onTurnBegin: onTurnBeginOverride,
+        },
+      ],
+    });
+
+    let state = { ctx: flow.ctx(2) };
+
+    expect(onTurnBegin).not.toHaveBeenCalled();
+
+    flow.init(state);
+
+    expect(onTurnBegin).toHaveBeenCalled();
+    expect(onTurnBeginOverride).not.toHaveBeenCalled();
+
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+    expect(state.ctx.phase).toBe('B');
+    expect(onTurnBeginOverride).not.toHaveBeenCalled();
+
+    onTurnBegin.mockReset();
+    onTurnBeginOverride.mockReset();
+
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnBegin).not.toHaveBeenCalled();
+    expect(onTurnBeginOverride).toHaveBeenCalled();
+  }
+});
+
 describe('secondsPerTurn', () => {
   it('when turn start - start timer', () => {
     // WIP
@@ -104,7 +142,6 @@ describe('secondsPerTurn', () => {
   it('turn end when time is out', () => {
     // WIP
   });
-});
 
 test('onTurnEnd', () => {
   {
