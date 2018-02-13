@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import './hex';
-import './card';
-import './deck';
-import './token';
+import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { Disc3D } from './Disc3D';
+
+storiesOf('Token', module).add('3D Disc', () => <Disc3D />);
