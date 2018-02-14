@@ -135,13 +135,53 @@ test('onTurnBegin', () => {
   }
 });
 
-describe('secondsPerTurn', () => {
-  it('when turn start - start timer', () => {
-    // WIP
+describe('seconds timer', () => {
+  jest.useFakeTimers();
+
+  describe('when game start', () => {
+    it('perTurn and perPhase set', () => {
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test phase with all timers parameters',
+              secondsPerTurn: 10,
+              secondsPerPhase: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(2);
+    });
+
+    it('only perPhase set', () => {
+      // WIP
+    });
+
+    it('only perTurn set', () => {
+      // WIP
+    });
   });
-  it('turn end when time is out', () => {
-    // WIP
+
+  describe('perTurn', () => {
+    it('when turn start - start timer', () => {});
+    it('turn end when time is out', () => {
+      // WIP
+    });
   });
+
+  describe('perPhase', () => {
+    it('when turn start - start timer', () => {
+      // WIP
+    });
+    it('turn end when time is out', () => {
+      // WIP
+    });
+  });
+});
 
 test('onTurnEnd', () => {
   {
