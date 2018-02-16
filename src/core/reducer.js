@@ -44,6 +44,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
   };
 
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+
   initial.G = state.G;
   initial.ctx = state.ctx;
 

@@ -10,6 +10,7 @@
   * [Turn Order](turn-order.md)
   * [Phases](phases.md)
   * [Secret State](secret-state.md)
+  * [Randomness](random.md)
 
 * API Reference
 

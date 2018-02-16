@@ -11,6 +11,7 @@ import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
 import { Flow, FlowWithPhases, createEventDispatchers } from './flow';
+import { Random } from './random';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -94,6 +95,23 @@ test('movesPerTurn', () => {
     expect(state.ctx.turn).toBe(1);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(2);
+  }
+
+  {
+    let flow = FlowWithPhases({ movesPerTurn: 2 });
+    let G = Random.Number({}, 'field1');
+    G = Random.D6(G, 'field2');
+    let state = { ctx: flow.ctx(2), G };
+    state.ctx.seed = 'seed';
+
+    state = flow.processMove(state, { move: {} });
+
+    expect(state.G.field1).toBeDefined();
+    expect(state.G.field1).toBeGreaterThanOrEqual(0);
+    expect(state.G.field1).toBeLessThanOrEqual(1);
+    expect(state.G.field2).toBeDefined();
+    expect(state.G.field2).toBeGreaterThanOrEqual(1);
+    expect(state.G.field2).toBeLessThanOrEqual(6);
   }
 });
 

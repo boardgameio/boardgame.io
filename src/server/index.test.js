@@ -57,7 +57,9 @@ jest.mock('koa-socket', () => {
   return MockIO;
 });
 
-const game = Game({});
+const game = Game({
+  seed: 0,
+});
 
 test('basic', () => {
   const server = Server({ games: [game] });
@@ -166,6 +168,7 @@ test('action', async () => {
       _id: 0,
       _initial: {},
       ctx: {
+        seed: 0,
         currentPlayer: '0',
         currentPlayerMoves: 0,
         numPlayers: 2,
