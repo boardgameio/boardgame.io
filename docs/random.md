@@ -25,13 +25,14 @@ This poses interesting challenges regarding the implementation.
 Instead, a game can ask the engine to generate random numbers, and the engine will inject those into the game on the next move.
 
 ```js
-import { RequestRandom } from 'boardgame.io/core';
+import { Random } from 'boardgame.io/core';
 
 const SomeGame = Game({
   moves: {
-    rollDie(G, ctx, id) {
-      const G_withRequest = RequestRandom.D6(G, 'diceValue');
-      return { ...G_withRequest };
+    rollDie(G, ctx) {
+      // G.diceValue will contain the requested
+      // die value at the end of this move.
+      return Random.D6(G, 'diceValue');
     },
   },
 
@@ -47,7 +48,7 @@ const SomeGame = Game({
 ```
 
 This will place a request to a D6 dice roll inside `G`.
-While processing the move, the request gets evaluated and the result placed into `diceValue`, where it can be used for e.g. rendering purposes.
+While processing the move, the request gets evaluated and the result placed into `diceValue`, where it can be used.
 
 ## Background
 
