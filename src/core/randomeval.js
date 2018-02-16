@@ -8,6 +8,9 @@
 
 import seedrandom from 'seedrandom';
 
+export const DICE = 'DICE';
+export const NUMBER = 'NUMBER';
+
 function getrandomfn(ctx) {
   let randomfn;
   if (ctx.prngstate === undefined) {
@@ -27,8 +30,8 @@ export function randomctx(ctx) {
   return { randomnumber, ctx: ctx2 };
 }
 
-export function addrandomop(G, fieldname, op) {
-  let rop = [{ op, fieldname }];
+export function addrandomop(G, fieldname, op, ...args) {
+  let rop = [{ op, fieldname, args }];
   let _randomOps = [...(G._randomOps || []), ...rop];
   return { ...G, _randomOps };
 }
@@ -37,25 +40,25 @@ export function evaluaterandomops(G, ctx) {
   let randomresults = {};
   let ctx2 = ctx;
 
-  let spotre = /^D(\d+)$/;
-
   // some flow tests run without a defined G
   if (G && G._randomOps !== undefined) {
     G._randomOps.forEach(r => {
       const { ctx: ctx3, randomnumber } = randomctx(ctx2);
       ctx2 = ctx3;
-      switch (r.op.charAt(0)) {
-        case 'D': {
-          var match = spotre.exec(r.op);
-          // match[0] contains the whole matched string.
-          const dievalue = Math.floor(randomnumber * match[1]) + 1;
+
+      switch (r.op) {
+        case DICE: {
+          const spotvalue = r.args[0];
+          const dievalue = Math.floor(randomnumber * spotvalue) + 1;
           randomresults[r.fieldname] = dievalue;
           break;
         }
-        case 'R': {
+
+        case NUMBER: {
           randomresults[r.fieldname] = randomnumber;
           break;
         }
+
         default:
           break;
       }

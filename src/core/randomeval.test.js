@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { randomctx, runrandom, addrandomop } from './randomeval';
+import { randomctx, runrandom, addrandomop, DICE } from './randomeval';
 import { Random } from './random';
 
 test('randomctx', () => {
@@ -47,19 +47,19 @@ test('runrandom invalid op', () => {
 test('Random', () => {
   let G = {};
   const G2 = Random.D6(G, 'field1');
-  let expectedOps = [{ op: 'D6', fieldname: 'field1' }];
+  let expectedOps = [{ op: DICE, args: [6], fieldname: 'field1' }];
   expect(G2._randomOps).toMatchObject(expectedOps);
 
   const G3 = Random.D6(G2, 'field2');
-  expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field2' }];
+  expectedOps = [...expectedOps, { op: DICE, args: [6], fieldname: 'field2' }];
   expect(G3._randomOps).toMatchObject(expectedOps);
 
   const G4 = Random.D6(G3, 'field1');
-  expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field1' }];
+  expectedOps = [...expectedOps, { op: DICE, args: [6], fieldname: 'field1' }];
   expect(G4._randomOps).toMatchObject(expectedOps);
 });
 
-test('runrandom predefined dice values', () => {
+test('predefined dice values', () => {
   let ctx = { seed: 0 };
   let G = {};
 
@@ -79,7 +79,7 @@ test('runrandom predefined dice values', () => {
   });
 });
 
-test('runrandom - random dice value', () => {
+test('Random.Die', () => {
   let ctx = { seed: 0 };
   let G = {};
 
@@ -93,7 +93,7 @@ test('runrandom - random dice value', () => {
   expect(G3._randomOps).toBeUndefined();
 });
 
-test('runrandom R', () => {
+test('Random.Number', () => {
   let ctx = { seed: 0 };
   let G = {};
 
