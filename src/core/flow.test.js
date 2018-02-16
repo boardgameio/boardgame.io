@@ -11,7 +11,7 @@ import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
 import { Flow, FlowWithPhases, createEventDispatchers } from './flow';
-import { RequestRandom } from './random';
+import { Random } from './random';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -99,8 +99,8 @@ test('movesPerTurn', () => {
 
   {
     let flow = FlowWithPhases({ movesPerTurn: 2 });
-    let G = RequestRandom.Number({}, 'field1');
-    G = RequestRandom.D6(G, 'field2');
+    let G = Random.Number({}, 'field1');
+    G = Random.D6(G, 'field2');
     let state = { ctx: flow.ctx(2), G };
     state.ctx.seed = 'seed';
 

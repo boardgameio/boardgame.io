@@ -7,7 +7,7 @@
  */
 
 import { randomctx, runrandom, addrandomop } from './randomeval';
-import { RequestRandom } from './random';
+import { Random } from './random';
 
 test('randomctx', () => {
   let ctx = { seed: 'hi there' };
@@ -44,17 +44,17 @@ test('runrandom invalid op', () => {
   expect(ctx2).toMatchObject(ctx);
 });
 
-test('RequestRandom', () => {
+test('Random', () => {
   let G = {};
-  const G2 = RequestRandom.D6(G, 'field1');
+  const G2 = Random.D6(G, 'field1');
   let expectedOps = [{ op: 'D6', fieldname: 'field1' }];
   expect(G2._randomOps).toMatchObject(expectedOps);
 
-  const G3 = RequestRandom.D6(G2, 'field2');
+  const G3 = Random.D6(G2, 'field2');
   expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field2' }];
   expect(G3._randomOps).toMatchObject(expectedOps);
 
-  const G4 = RequestRandom.D6(G3, 'field1');
+  const G4 = Random.D6(G3, 'field1');
   expectedOps = [...expectedOps, { op: 'D6', fieldname: 'field1' }];
   expect(G4._randomOps).toMatchObject(expectedOps);
 });
@@ -64,7 +64,7 @@ test('runrandom predefined dice values', () => {
   let G = {};
 
   const rfns = [4, 6, 8, 10, 12, 20].map(v => {
-    return { fn: RequestRandom[`D${v}`], highest: v };
+    return { fn: Random[`D${v}`], highest: v };
   });
   rfns.forEach(pair => {
     // random event
@@ -84,7 +84,7 @@ test('runrandom - random dice value', () => {
   let G = {};
 
   // random event - die with arbitrary spot count
-  const G2 = RequestRandom.Die(G, 'field1', 123);
+  const G2 = Random.Die(G, 'field1', 123);
 
   let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
@@ -98,7 +98,7 @@ test('runrandom R', () => {
   let G = {};
 
   // random event - random number
-  const G2 = RequestRandom.Number(G, 'field1');
+  const G2 = Random.Number(G, 'field1');
 
   let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);

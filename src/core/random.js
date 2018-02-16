@@ -6,7 +6,16 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { addrandomop, SpotValue } from './randomeval';
+import { addrandomop } from './randomeval';
+
+const SpotValue = {
+  D4: 'D4',
+  D6: 'D6',
+  D8: 'D8',
+  D10: 'D10',
+  D12: 'D12',
+  D20: 'D20',
+};
 
 // generate functions for predefined dice values D4 - D20
 const predefined = Object.keys(SpotValue).reduce((map, obj) => {
@@ -16,7 +25,7 @@ const predefined = Object.keys(SpotValue).reduce((map, obj) => {
   return map;
 }, {});
 
-export const RequestRandom = {
+export const Random = {
   ...predefined,
   Die: (G, fieldname, spotvalue) => {
     return addrandomop(G, fieldname, `D${spotvalue}`);
