@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { createGameReducer } from './reducer';
-import { gameEvent } from './action-creators';
+import { makeMove, gameEvent } from './action-creators';
 
 const game = Game({
   moves: {
@@ -47,6 +47,19 @@ test('flow override', () => {
     flow: f,
   });
   expect(game.flow).toBe(f);
+});
+
+test('ai override', () => {
+  const a = () => {
+    return {
+      possibleMoves: () => [],
+      score: () => 0,
+    };
+  };
+  const game = Game({
+    ai: a,
+  });
+  expect(game.ai).toBe(a);
 });
 
 // Following turn order is often used in worker placement games like Agricola and Viticulture.
@@ -91,6 +104,63 @@ test('rounds with starting player token', () => {
 
   state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('0');
+});
+
+test('possibleMoves for tic-tac-toe', () => {
+  let game = Game({
+    setup: () => ({
+      cells: Array(9).fill(null),
+    }),
+
+    moves: {
+      clickCell(G, ctx, id) {
+        const cells = [...G.cells];
+        if (cells[id] === null) {
+          cells[id] = ctx.currentPlayer;
+        }
+        return { ...G, cells };
+      },
+    },
+
+    flow: {
+      movesPerTurn: 1,
+    },
+
+    ai: {
+      possibleMoves: {
+        ranges: {
+          clickCell: [{ min: 0, max: 8 }],
+        },
+        isMovePossible: ({ G, args }) => {
+          return G.cells[args[0]] === null;
+        },
+      },
+    },
+  });
+  const reducer = createGameReducer({ game, numPlayers: 2 });
+  let state = reducer(undefined, { type: 'init' });
+  expect(state.ai.possibleMoves).toEqual([
+    { move: 'clickCell', args: [0] },
+    { move: 'clickCell', args: [1] },
+    { move: 'clickCell', args: [2] },
+    { move: 'clickCell', args: [3] },
+    { move: 'clickCell', args: [4] },
+    { move: 'clickCell', args: [5] },
+    { move: 'clickCell', args: [6] },
+    { move: 'clickCell', args: [7] },
+    { move: 'clickCell', args: [8] },
+  ]);
+  state = reducer(state, makeMove('clickCell', [4], 0));
+  expect(state.ai.possibleMoves).toEqual([
+    { move: 'clickCell', args: [0] },
+    { move: 'clickCell', args: [1] },
+    { move: 'clickCell', args: [2] },
+    { move: 'clickCell', args: [3] },
+    { move: 'clickCell', args: [5] },
+    { move: 'clickCell', args: [6] },
+    { move: 'clickCell', args: [7] },
+    { move: 'clickCell', args: [8] },
+  ]);
 });
 
 // The following pattern is used in Catan, Twilight Imperium, and (sort of) Powergrid.

@@ -33,6 +33,10 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     // GameLog to display a journal of moves.
     log: [],
 
+    //Lists possible moves and player's score to allow running
+    //AI algorithms.
+    ai: game.ai(game.setup(numPlayers), game.flow.ctx(numPlayers)),
+
     // A monotonically non-decreasing ID to ensure that
     // state updates are only allowed from clients that
     // are at the same version that the server.
@@ -72,8 +76,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           { G: state.G, ctx: state.ctx },
           action.payload
         );
+        const ai = game.ai(G, ctx);
         const log = [...state.log, action];
-        return { ...state, G, ctx, log, _id: state._id + 1 };
+        return { ...state, G, ctx, log, ai, _id: state._id + 1 };
       }
 
       case Actions.MAKE_MOVE: {
@@ -85,7 +90,8 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         // Process the move.
         const G = game.processMove(state.G, action.payload, state.ctx);
         const log = [...state.log, action];
-        state = { ...state, G, log, _id: state._id + 1 };
+        const ai = game.ai(G, state.ctx);
+        state = { ...state, G, log, ai, _id: state._id + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.

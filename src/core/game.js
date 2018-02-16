@@ -7,6 +7,7 @@
  */
 
 import { FlowWithPhases } from './flow';
+import { Ai } from './ai';
 
 /**
  * Game
@@ -53,6 +54,16 @@ import { FlowWithPhases } from './flow';
  *       ...
  *     ]
  *   },
+ *
+ *   ai: {
+ *     possibleMoves: {
+ *       ranges: {
+ *         moveWithArgs: [{ min: 0, max: 8 }],
+ *       },
+ *       isMovePossible: ({ G, ctx, move, args }) => { ... },
+ *     },
+ *     score: (G, ctx) => { ... },
+ *   }
  * })
  *
  * @param {...object} setup - Function that returns the initial state of G.
@@ -64,13 +75,18 @@ import { FlowWithPhases } from './flow';
  *                           Must contain the return value of Flow().
  *                           If it contains any other object, it is presumed to be a
  *                           configuration object for SimpleFlow() or FlowWithPhases().
+ * @param {...object} ai - Setup playable games by AI bots (see ai.js).
+ *                         Assumed to be configuration for Ai().
  */
-function Game({ name, setup, moves, playerView, flow }) {
+function Game({ name, setup, moves, playerView, flow, ai }) {
   if (!name) name = 'default';
   if (!setup) setup = () => ({});
   if (!moves) moves = {};
   if (!playerView) playerView = G => G;
 
+  if (!ai || typeof ai != 'function') {
+    ai = Ai(ai || {});
+  }
   if (!flow || flow.processGameEvent === undefined) {
     flow = FlowWithPhases(flow || {});
   }
@@ -80,6 +96,7 @@ function Game({ name, setup, moves, playerView, flow }) {
     setup,
     playerView,
     flow,
+    ai,
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
