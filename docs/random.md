@@ -10,30 +10,31 @@ This poses interesting challenges regarding the implementation.
 * **AI**. Randomness makes games interesting since you cannot predict the future, but it
   needs to be controlled in order for allowing games that can be replayed exactly (e.g. for AI purposes).
 
-* **PRNG State**. The library is used both on the server side and on the client side.
-  All code and data on the client can be viewed and used to a players advantage.
+* **PRNG State**. The game runs on both the server and client.
+  All code and data on the client can be viewed and used to a player's advantage.
   If a client could predict the next random numbers that are to be generated, the future flow of a game stops being unpredictable.
   The library must not allow such a scenario. The RNG and its state must stay at the server.
 
-* **Purity**. The library is built using Redux. This is important for games since each move is a [reducer](https://redux.js.org/docs/basics/Reducers.html),
-  and thus must be pure. However, randomness typically implies a state change of the used pseudo random number generator (PRNG for short).
+* **Pure Functions**. The library is built using Redux. This is important for games since each move is a [reducer](https://redux.js.org/docs/basics/Reducers.html),
+  and thus must be pure. Calling `Math.random()` and other functions that
+  maintain external state would make the game logic impure and not idempotent.
 
 ## Using Randomness in Games
 
-Boardgame.io took a rather unusual approach to randomness: It disallows getting random variables directly.
+[boardgame.io]() takes a rather unusual approach to randomness: It disallows getting random variables directly.
 Instead, a game can ask the engine to generate random numbers, and the engine will inject those into the game on the next move.
 
 ```js
 import { RequestRandom } from 'boardgame.io/core';
 
 const SomeGame = Game({
-  // ...
   moves: {
     rollDie(G, ctx, id) {
       const G_withRequest = RequestRandom.D6(G, 'diceValue');
       return { ...G_withRequest };
     },
   },
+
   flow: {
     onMove: G => {
       const dice = G.diceValue;
