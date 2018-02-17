@@ -19,7 +19,7 @@ test('basic', () => {
     expect(dice.html()).toContain('div');
   }
   {
-    const dice = Enzyme.shallow(<Dice dotStyle={false} faceValue={1} />); // renders plain text instead of styled dots
+    const dice = Enzyme.shallow(<Dice dotStyle={false} value={1} />); // renders plain text instead of styled dots
     expect(dice.text()).toContain(1);
   }
 });
@@ -45,33 +45,17 @@ test('className manipulation', () => {
   }
 });
 
-test('state change', () => {
-  {
-    const dice = Enzyme.mount(<Dice faceValue={4} />);
-    expect(dice.state().faceValue).toBe(4);
-  }
-  {
-    const dice = Enzyme.mount(<Dice faceValue={4} />);
-    dice.setProps({ faceValue: 1 });
-    expect(dice.state().faceValue).toBe(1);
-    dice.setProps({ faceValue: 1 });
-    expect(dice.state().faceValue).toBe(1);
-  }
-});
-
 test('onClick', () => {
   {
     const onClick = jest.fn();
-    const dice = Enzyme.mount(<Dice onClick={onClick} faceValue={4} />);
+    const dice = Enzyme.mount(<Dice onClick={onClick} value={4} />);
     dice.simulate('click');
     expect(onClick).toHaveBeenCalled();
-    expect(dice.state().faceValue).not.toBe(0);
   }
   {
     const onClick = jest.fn();
-    const dice = Enzyme.mount(<Dice onClick={null} faceValue={4} />);
+    const dice = Enzyme.mount(<Dice onClick={null} value={4} />);
     dice.simulate('click');
     expect(onClick).not.toHaveBeenCalled();
-    expect(dice.state().faceValue).not.toBe(0);
   }
 });
