@@ -18,7 +18,7 @@ const components = Object.keys(Models).map(modelname => {
   };
 });
 
-const so = storiesOf('Token', module);
+const so = storiesOf('SVG Models', module);
 components.forEach(c =>
   so.add(c.modelname, () => <SvgView component={c.component} />)
 );
