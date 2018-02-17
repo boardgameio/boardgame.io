@@ -8,12 +8,26 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Disc, Wood, Meeple } from 'boardgame.io/ui';
+import { Disc, Wood, Meeple, Wheat } from 'boardgame.io/ui';
 
 storiesOf('Token', module)
   .add('3D Disc', () => <DiscComponent />)
   .add('Wood', () => <WoodComponent />)
+  .add('Wheat', () => <WheatComponent />)
   .add('Meeple', () => <MeepleComponent />);
+
+export class WheatComponent extends React.Component {
+  render() {
+    return (
+      <div style={{ padding: '50px' }}>
+        <svg width={500} height={500} viewBox="0 0 1 1">
+          <rect fill="lightgreen" x="0" y="0" width="500" height="500" />
+          <Wheat />
+        </svg>
+      </div>
+    );
+  }
+}
 
 export class MeepleComponent extends React.Component {
   render() {

@@ -14,5 +14,6 @@ import Token from '../src/ui/token.js';
 import { Disc } from '../src/ui/disc';
 import { Wood } from '../src/ui/wood';
 import { Meeple } from '../src/ui/meeple';
+import { Wheat } from '../src/ui/wheat';
 
-export { Card, Deck, Grid, HexGrid, Token, Disc, Wood, Meeple };
+export { Card, Deck, Grid, HexGrid, Token, Disc, Wood, Meeple, Wheat };
