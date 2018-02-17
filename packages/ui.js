@@ -13,5 +13,6 @@ import { HexGrid } from '../src/ui/hex.js';
 import Token from '../src/ui/token.js';
 import { Disc } from '../src/ui/disc';
 import { Wood } from '../src/ui/wood';
+import { Meeple } from '../src/ui/meeple';
 
-export { Card, Deck, Grid, HexGrid, Token, Disc, Wood };
+export { Card, Deck, Grid, HexGrid, Token, Disc, Wood, Meeple };
