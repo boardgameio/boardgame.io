@@ -94,7 +94,7 @@ export default [
   // Browser minified version.
   {
     input: 'packages/main.js',
-    globals: { react: 'React', seedrandom: 'seedrandom' },
+    globals: { react: 'React' },
     external: ['react'],
     output: [{ file: pkg.unpkg, format: 'umd' }],
     name: 'BoardgameIO',
