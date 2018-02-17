@@ -7,7 +7,13 @@
  */
 
 import React from 'react';
-import Client from './client';
+import { createStore } from 'redux';
+import { createGameReducer } from '../core/reducer';
+import {
+  Client,
+  createEventDispatchers,
+  createMoveDispatchers,
+} from './client';
 import Game from '../core/game';
 import { TurnOrder } from '../core/turn-order';
 import Enzyme from 'enzyme';
@@ -200,4 +206,73 @@ test('multiplayer server set when provided', () => {
   const m = game.instance().multiplayerClient;
   expect(m.socket.io.engine.hostname).toEqual(host);
   expect(m.socket.io.engine.port).toEqual(port);
+});
+
+test('event dispatchers', () => {
+  {
+    const game = Game({});
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
+    expect(store.getState().ctx.turn).toBe(0);
+    api.endTurn();
+    expect(store.getState().ctx.turn).toBe(1);
+  }
+
+  {
+    const game = Game({
+      flow: {
+        endPhase: true,
+      },
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
+    expect(store.getState().ctx.turn).toBe(0);
+    api.endTurn();
+    expect(store.getState().ctx.turn).toBe(1);
+  }
+
+  {
+    const game = Game({
+      flow: {
+        endTurn: false,
+      },
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual([]);
+  }
+});
+
+test('move dispatchers', () => {
+  const game = Game({
+    moves: {
+      A: G => G,
+      B: () => ({ moved: true }),
+      C: () => ({ victory: true }),
+    },
+    flow: {
+      endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
+    },
+  });
+
+  const reducer = createGameReducer({ game });
+  const store = createStore(reducer);
+  const api = createMoveDispatchers(game.moveNames, store);
+
+  expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
+  expect(api.unknown).toBe(undefined);
+
+  api.A();
+  expect(store.getState().G).toEqual({});
+
+  api.B();
+  expect(store.getState().G).toEqual({ moved: true });
+
+  api.C();
+  expect(store.getState().G).toEqual({ victory: true });
 });

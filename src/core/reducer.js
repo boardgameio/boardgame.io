@@ -7,7 +7,6 @@
  */
 
 import * as Actions from './action-types';
-import * as ActionCreators from './action-creators';
 
 /**
  * createGameReducer
@@ -109,21 +108,4 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
       }
     }
   };
-}
-
-/**
- * createMoveDispatchers
- *
- * Creates a set of dispatchers to make moves.
- * @param {Array} moveNames - A list of move names.
- * @param {object} store - The Redux store to create dispatchers for.
- */
-export function createMoveDispatchers(moveNames, store, playerID) {
-  let dispatchers = {};
-  for (const name of moveNames) {
-    dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.makeMove(name, args, playerID));
-    };
-  }
-  return dispatchers;
 }

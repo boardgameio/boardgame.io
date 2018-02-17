@@ -7,10 +7,9 @@
  */
 
 import Game from './game';
-import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
-import { Flow, FlowWithPhases, createEventDispatchers } from './flow';
+import { Flow, FlowWithPhases } from './flow';
 import { Random } from './random';
 
 test('Flow', () => {
@@ -481,44 +480,4 @@ test('validator', () => {
   expect(state.G).toEqual({});
   state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({});
-});
-
-test('dispatchers', () => {
-  {
-    const game = Game({});
-    const reducer = createGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
-
-  {
-    const game = Game({
-      flow: {
-        endPhase: true,
-      },
-    });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
-
-  {
-    const game = Game({
-      flow: {
-        endTurn: false,
-      },
-    });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([]);
-  }
 });
