@@ -93,7 +93,7 @@ for (const key in SpotValue) {
 }
 
 export function GenSeed() {
-  return Math.seedrandom();
+  return (+new Date()).toString(36).slice(-10);
 }
 
 // Public API that's imported like:
