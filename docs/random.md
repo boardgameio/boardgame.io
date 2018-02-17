@@ -50,6 +50,26 @@ const SomeGame = Game({
 This will place a request to a D6 dice roll inside `G`.
 While processing the move, the request gets evaluated and the result placed into `diceValue`, where it can be used.
 
+## Seed
+
+The library uses a `seed` in `ctx` that is stripped before it
+is sent to the client. All the code that needs randomness uses this
+`seed` to generate random numbers.
+
+You can override the initial `seed` in the `flow` section like this:
+
+```js
+Game({
+  ...
+
+  flow: {
+    seed: <somevalue>
+
+    ...
+  }
+})
+```
+
 ## Background
 
 There is an interesting background article by David Bau called [Random Seeds, Coded Hints, and Quintillions](http://davidbau.com/archives/2010/01/30/random_seeds_coded_hints_and_quintillions.html).
