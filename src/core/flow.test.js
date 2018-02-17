@@ -143,7 +143,7 @@ describe('seconds timer', () => {
       let flow = FlowWithPhases({
           phases: [
             {
-              name: 'test phase with all timers parameters',
+              name: 'test',
               secondsPerTurn: 10,
               secondsPerPhase: 10,
             },
@@ -158,18 +158,71 @@ describe('seconds timer', () => {
     });
 
     it('only perPhase set', () => {
-      // WIP
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerPhase: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(1);
     });
 
     it('only perTurn set', () => {
-      // WIP
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerTurn: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('perTurn', () => {
-    it('when turn start - start timer', () => {});
+    let flow, state;
+    beforeEach(() => {
+      flow = FlowWithPhases({
+        phases: [
+          {
+            name: 'test',
+            secondsPerTurn: 10,
+          },
+        ],
+      });
+      state = {
+        ctx: flow.ctx(2),
+      };
+      flow.init(state);
+    });
+    it('when turn start - start timer', () => {
+      setInterval.mockReset();
+      flow.processGameEvent(state, { type: 'endTurn' });
+
+      expect(setInterval).toHaveBeenCalledTimes(2);
+    });
+
     it('turn end when time is out', () => {
-      // WIP
+      flow.processGameEvent = jest.fn();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).toHaveBeenCalledWith(expect.any(Object), {
+        type: 'endTurn',
+      });
     });
   });
 
