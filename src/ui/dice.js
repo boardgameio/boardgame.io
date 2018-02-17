@@ -13,44 +13,30 @@ import './dice.css';
 class Dice extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      faceValue: props.faceValue,
-    };
   }
 
   onClick = () => {
-    let { faceCount } = this.props;
-    let faceValue = Math.floor(Math.random() * faceCount) + 1; // can't have a zero face;
-
     if (this.props.onClick) {
-      this.props.onClick(faceValue);
+      this.props.onClick();
     }
-
-    this.setState({
-      faceValue,
-    });
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.faceValue !== nextProps.faceValue) {
-      this.setState({ faceValue: nextProps.faceValue });
-    }
-  }
-
   render() {
-    let { className, dotStyle, faceValue, faceCount, ...rest } = this.props;
+    // Face values larger than this are not represented with dots.
+    const MAXVALUE = 9;
+
+    let { className, dotStyle, value, ...rest } = this.props;
     const classNames = ['bgio-dice'];
     if (className) classNames.push(className);
 
     return (
       <div className={classNames.join(' ')} {...rest} onClick={this.onClick}>
-        {dotStyle && faceCount < 9 && faceValue < 9 ? ( // hard to fit mor ethan 9 "dots" on the dice;
-          [...Array(this.state.faceValue)].map((face, i) => {
+        {dotStyle && value < MAXVALUE ? (
+          [...Array(value)].map((face, i) => {
             return <div key={i} className="bgio-dot" />;
           })
         ) : (
-          <span>{this.state.faceValue}</span>
+          <span>{value}</span>
         )}
       </div>
     );
@@ -58,16 +44,14 @@ class Dice extends React.Component {
 }
 
 Dice.propTypes = {
-  faceCount: PropTypes.number,
-  faceValue: PropTypes.number,
+  value: PropTypes.number,
   dotStyle: PropTypes.bool,
   className: PropTypes.string,
   onClick: PropTypes.func,
 };
 
 Dice.defaultProps = {
-  faceCount: 6,
-  faceValue: 4,
+  value: 4,
   dotStyle: true,
 };
 

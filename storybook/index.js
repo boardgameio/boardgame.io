@@ -9,3 +9,4 @@
 import './hex';
 import './card';
 import './deck';
+import './dice';
