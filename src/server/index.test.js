@@ -58,7 +58,7 @@ jest.mock('koa-socket', () => {
 });
 
 const game = Game({
-  seed: 0,
+  flow: { seed: 0 },
 });
 
 test('basic', () => {
