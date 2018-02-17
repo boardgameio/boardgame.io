@@ -9,7 +9,7 @@
 import React from 'react';
 import { Disc, Wood } from 'boardgame.io/ui';
 
-export class Disc3D extends React.Component {
+export class DiscComponent extends React.Component {
   render() {
     return (
       <div style={{ padding: '50px' }}>
