@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.17.1",
+  "version": "0.17.2",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
@@ -118,6 +118,7 @@
     "react-json-view": "^1.13.0",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
+    "seedrandom": "^2.4.3",
     "socket.io": "^2.0.3"
   },
   "peerDependencies": {
