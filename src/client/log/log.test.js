@@ -33,11 +33,13 @@ test('GameLog', () => {
 test('GameLog rewind', () => {
   const game = Game({
     moves: {
-      A: (G, ctx, arg) => arg,
+      A: (G, ctx, arg) => {
+        return { arg };
+      },
     },
 
     flow: {
-      endTurnIf: G => G == 42,
+      endTurnIf: G => G && G.arg == 42,
     },
   });
   const reducer = createGameReducer({ game });
@@ -59,25 +61,25 @@ test('GameLog rewind', () => {
     </Provider>
   );
 
-  expect(store.getState().G).toEqual(2);
+  expect(store.getState().G).toMatchObject({ arg: 2 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseover');
-  expect(store.getState().G).toEqual(1);
+  expect(store.getState().G).toEqual({ arg: 1 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseout');
-  expect(store.getState().G).toEqual(2);
+  expect(store.getState().G).toEqual({ arg: 2 });
   root
     .find('.log-turn')
     .at(1)
     .simulate('mouseover');
-  expect(store.getState().G).toEqual(42);
+  expect(store.getState().G).toEqual({ arg: 42 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseout');
-  expect(store.getState().G).toEqual(2);
+  expect(store.getState().G).toEqual({ arg: 2 });
 });
