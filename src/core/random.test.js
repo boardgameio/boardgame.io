@@ -6,8 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { randomctx, runrandom, addrandomop, DICE } from './randomeval';
-import { Random } from './random';
+import { randomctx, RunRandom, addrandomop, DICE, Random } from './random';
 
 test('randomctx', () => {
   let ctx = { seed: 'hi there' };
@@ -22,23 +21,23 @@ test('randomctx', () => {
   expect(ctx4).not.toMatchObject(ctx3);
 });
 
-test('runrandom nothing to do', () => {
+test('RunRandom nothing to do', () => {
   let ctx = { seed: 0 };
   let G = {};
 
-  let { G: G2, ctx: ctx2 } = runrandom(G, ctx);
+  let { G: G2, ctx: ctx2 } = RunRandom(G, ctx);
 
   expect(G2).toMatchObject(G);
   expect(ctx2).toMatchObject(ctx);
 });
 
-test('runrandom invalid op', () => {
+test('RunRandom invalid op', () => {
   let ctx = { seed: 0 };
   let G = {};
 
   // currently, the framework silently ignores the request.
   const G2 = addrandomop(G, 'field1', 'XYZ');
-  let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
+  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
 
   expect(G3).toMatchObject(G);
   expect(ctx2).toMatchObject(ctx);
@@ -70,7 +69,7 @@ test('predefined dice values', () => {
     // random event
     const G2 = pair.fn(G, 'field1');
 
-    let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
+    let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
     expect(ctx).not.toMatchObject(ctx2);
     expect(G3.field1).toBeDefined();
     expect(G3.field1).toBeGreaterThanOrEqual(1);
@@ -86,7 +85,7 @@ test('Random.Die', () => {
   // random event - die with arbitrary spot count
   const G2 = Random.Die(G, 'field1', 123);
 
-  let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
+  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
   expect(G3.field1).toBeDefined();
   expect(G3.field1).toBe(74);
@@ -100,7 +99,7 @@ test('Random.Number', () => {
   // random event - random number
   const G2 = Random.Number(G, 'field1');
 
-  let { G: G3, ctx: ctx2 } = runrandom(G2, ctx);
+  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
   expect(G3.field1).toBeDefined();
   expect(G3.field1).toBeGreaterThanOrEqual(0);
