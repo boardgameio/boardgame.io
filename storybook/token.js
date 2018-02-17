@@ -8,6 +8,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Disc3D } from './Disc3D';
+import { Disc3D, WoodComponent } from './Disc3D';
 
-storiesOf('Token', module).add('3D Disc', () => <Disc3D />);
+storiesOf('Token', module)
+  .add('3D Disc', () => <Disc3D />)
+  .add('Wood', () => <WoodComponent />);

@@ -12,5 +12,6 @@ import { Grid } from '../src/ui/grid.js';
 import { HexGrid } from '../src/ui/hex.js';
 import Token from '../src/ui/token.js';
 import { Disc } from '../src/ui/disc';
+import { Wood } from '../src/ui/wood';
 
-export { Card, Deck, Grid, HexGrid, Token, Disc };
+export { Card, Deck, Grid, HexGrid, Token, Disc, Wood };
