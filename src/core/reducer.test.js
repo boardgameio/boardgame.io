@@ -7,8 +7,7 @@
  */
 
 import Game from './game';
-import { createStore } from 'redux';
-import { createGameReducer, createMoveDispatchers } from './reducer';
+import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
 
 const game = Game({
@@ -54,24 +53,6 @@ test('restore', () => {
   const reducer = createGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
   expect(state).toEqual({ G: 'restored' });
-});
-
-test('move dispatchers', () => {
-  const reducer = createGameReducer({ game });
-  const store = createStore(reducer);
-  const api = createMoveDispatchers(game.moveNames, store);
-
-  expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
-  expect(api.unknown).toBe(undefined);
-
-  api.A();
-  expect(store.getState().G).toEqual({});
-
-  api.B();
-  expect(store.getState().G).toEqual({ moved: true });
-
-  api.C();
-  expect(store.getState().G).toEqual({ victory: true });
 });
 
 test('victory', () => {

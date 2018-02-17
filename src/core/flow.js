@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as ActionCreators from './action-creators';
 import { TurnOrder } from './turn-order';
 import { GenSeed, RunRandom } from './random';
 
@@ -419,22 +418,4 @@ export function FlowWithPhases({
     validator,
     processMove,
   });
-}
-
-/**
- * createEventDispatchers
- *
- * Creates a set of dispatchers to dispatch game flow events.
- * @param {Array} eventNames - A list of event names.
- * @param {object} store - The Redux store to create dispatchers for.
- * @param {string} playerID - The ID of the player dispatching these events.
- */
-export function createEventDispatchers(eventNames, store, playerID) {
-  let dispatchers = {};
-  for (const name of eventNames) {
-    dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.gameEvent(name, args, playerID));
-    };
-  }
-  return dispatchers;
 }
