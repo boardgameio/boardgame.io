@@ -47,7 +47,7 @@ export class Wood extends React.Component {
     // If no child, render a disc.
     return (
       <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
-        <g transform="scale(0.05, 0.05)">
+        <g transform="translate(-1.25, -0.72) scale(0.25, 0.25)">
           <g
             strokeWidth="0.1px"
             strokeLinejoin="miter"

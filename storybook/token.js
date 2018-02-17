@@ -19,6 +19,7 @@ export class DiscComponent extends React.Component {
     return (
       <div style={{ padding: '50px' }}>
         <svg width={500} height={500} viewBox="0 0 1 1">
+          <rect fill="lightgreen" x="0" y="0" width="500" height="500" />
           <Disc r={1} x={2} y={2} />
         </svg>
       </div>
@@ -31,6 +32,7 @@ export class WoodComponent extends React.Component {
     return (
       <div style={{ padding: '50px' }}>
         <svg width={500} height={500} viewBox="0 0 1 1">
+          <rect fill="lightgreen" x="0" y="0" width="500" height="500" />
           <Wood x={0} y={0} />
         </svg>
       </div>
