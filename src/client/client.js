@@ -170,12 +170,10 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
             isActive = false;
           }
 
-          let newctx = { ...state.ctx, seed: undefined };
           return {
             ...state,
             isActive,
-            G: game.playerView(state.G, newctx, this.props.playerID),
-            ctx: newctx,
+            G: game.playerView(state.G, state.ctx, this.props.playerID),
           };
         };
 
