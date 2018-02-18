@@ -6,13 +6,19 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Multiview from './components/multiview';
+import Multiplayer from './components/multiview';
+import Singleplayer from './components/singleview';
 
 const routes = [
   {
-    path: '/liars-dice',
+    path: '/liars-dice/singleplayer',
+    text: 'Random Rolls',
+    component: Singleplayer,
+  },
+  {
+    path: '/liars-dice/multiplayer',
     text: 'Secret Info',
-    component: Multiview,
+    component: Multiplayer,
   },
 ];
 

@@ -6,32 +6,73 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, PlayerView } from 'boardgame.io/core';
+import { Game, Random } from 'boardgame.io/core';
+// import { PlayerView } from 'boardgame.io/core';
 
 const LiarsDice = Game({
   name: 'liars-dice',
 
   setup: () => ({
+    bidValue: 1,
+    bidQuantity: 1,
     players: {
-      0: [4, 4, 2, 6, 1],
-      1: [4, 5, 6, 3, 3],
-      2: [1, 1, 2, 4, 3],
+      0: null,
+      1: null,
+      2: null,
     },
   }),
 
   moves: {
-    bid(G, ctx, id) {
+    bid: (G, ctx, id) => {
       const cells = [...G.cells];
-
       if (cells[id] === null) {
         cells[id] = ctx.currentPlayer;
       }
-
       return { ...G, cells };
+    },
+    challenge: G => G, // TODO
+    roll: G => {
+      let ops = G;
+      ops = Random.D6(ops, 'dieValue1');
+      ops = Random.D6(ops, 'dieValue2');
+      ops = Random.D6(ops, 'dieValue3');
+      ops = Random.D6(ops, 'dieValue4');
+      ops = Random.D6(ops, 'dieValue5');
+      return ops;
     },
   },
 
-  playerView: PlayerView.STRIP_SECRETS,
+  flow: {
+    phases: [
+      {
+        name: 'Rolling',
+        endPhaseIf: G => Object.values(G.players).every(p => p !== null),
+        allowedMoves: ['roll'],
+        onMove: (G, ctx) => {
+          return {
+            bidValue: G.bidValue,
+            bidQuantity: G.bidQuantity,
+            players: {
+              ...G.players,
+              [ctx.currentPlayer]: [
+                G.dieValue1,
+                G.dieValue2,
+                G.dieValue3,
+                G.dieValue4,
+                G.dieValue5,
+              ],
+            },
+          };
+        },
+      },
+      {
+        name: 'Bidding',
+        allowedMoves: ['bid', 'challenge'],
+      },
+    ],
+  },
+
+  // playerView: PlayerView.STRIP_SECRETS,
 });
 
 export default LiarsDice;

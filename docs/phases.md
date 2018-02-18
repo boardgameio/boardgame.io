@@ -133,7 +133,7 @@ flow: {
   // Run at the end of a move.
   onMove: (G, ctx) => G
 
-  phase: [
+  phases: [
     {
       name: 'A',
 
