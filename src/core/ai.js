@@ -6,9 +6,49 @@
  * https://opensource.org/licenses/MIT.
  */
 
+/**
+ * Ai
+ *
+ * Setups the necessary information for running bots in a game.
+ * There are two parts that needs to be described:
+ * - What are the possible moves given a state.
+ * - What are the evaluation function (score) given a state.
+ *
+ * A bot might use this information to maximize its score and minimize
+ * other player's scores (i.e. MiniMax and similar algorithms).
+ * @param {...object} possibleMoves - Function with (G, ctx) => moves signature
+ *                                    that returns possible moves given state,
+ *
+ *                                    OR Object with two keys:
+ *
+ *                                      ranges: Object with key as move names
+ *                                    and values with arguments ranges. Each
+ *                                    range can be an object with {min, max, step}
+ *                                    or a list of possible values. Ex:
+ *                                    { clickCell: [{min: 0, max: 8}] }
+ *
+ *                                      isMovePossible: Function with
+ *                                    (G, ctx, move, args) => bool signature
+ *                                    that should return if given combination of
+ *                                    move and args is possible.
+ * @param {...object} score - Evaluation function with (G, ctx) => score
+ *                            signature that returns an evaluation value for
+ *                            a given state, which will guide the search
+ *                            algorithm.
+ */
+
 export function Ai({ possibleMoves, score }) {
   if (!score) score = () => 0;
 
+  /**
+   * Expand possibleMoves so it returns the list of possible
+   * moves given a state. If a function was provided, just
+   * executes that function. In the case ranges were provided,
+   * expand the ranges and its arguments.
+   * @param {object} G Game state.
+   * @param {object} ctx Game ctx object.
+   * @param {object} possibleMoves Input from Game configuration.
+   */
   function expandPossibleMoves(G, ctx, possibleMoves) {
     if (typeof possibleMoves === 'function') {
       return possibleMoves(G, ctx);
@@ -34,6 +74,12 @@ export function Ai({ possibleMoves, score }) {
     return result;
   }
 
+  /**
+   * Expands the provided ranges of moves arguments. If the
+   * range is an array, there is no need to expand.
+   * @param {object} ranges Ranges object.
+   * @return {object} Expanded ranges object.
+   */
   function expandRanges(ranges) {
     let result = {};
     for (let move in ranges) {
@@ -49,10 +95,18 @@ export function Ai({ possibleMoves, score }) {
     return result;
   }
 
-  function expandRangeObject(range) {
-    let min = range.min || 0;
-    let max = range.max;
-    let step = range.step || 1;
+  /**
+   * Expands a range object to its array equivalent.
+   * @param {...object=} min Minimum value (inclusive),
+   * default value is 0.
+   * @param {...object} max Maximum value (inclusive).
+   * @param {...object=} step Step size to add from min,
+   * default value is 1.
+   * @return {Array<number>} Equivalent values.
+   */
+  function expandRangeObject({ min, max, step }) {
+    if (!min) min = 0;
+    if (!step) step = 1;
     let result = [];
     for (let i = min; i <= max; i += step) {
       result.push(i);
@@ -60,6 +114,15 @@ export function Ai({ possibleMoves, score }) {
     return result;
   }
 
+  /**
+   * Recursive function that gets all combinations of
+   * possible arguments given its ranges. Because
+   * it gets all combiations, the number of possible
+   * arguments grows fast. Avoid passing too broad
+   * ranges.
+   * @param {Array<Array<number>>} argRanges Ranges.
+   * @return {Array<Array<number>>} Possible values.
+   */
   function expandArgs(argsRanges) {
     if (argsRanges.length === 0) {
       return [[]];
