@@ -84,7 +84,6 @@
     "husky": "^0.14.3",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^21.2.1",
-    "jest-cli": "^22.3.0",
     "koa-helmet": "^3.2.0",
     "koa-webpack": "^1.0.0",
     "lint-staged": "^6.0.1",
