@@ -73,10 +73,6 @@ function impl(seed, opts) {
   var xg = new Alea(seed),
     state = opts && opts.state,
     prng = xg.next;
-  // prng.int32 = function() { return (xg.next() * 0x100000000) | 0; }
-  // prng.double = function() {
-  //   return prng() + (prng() * 0x200000 | 0) * 1.1102230246251565e-16; // 2^-53
-  // };
   prng.quick = prng;
   if (state) {
     if (typeof state == 'object') copy(state, xg);
