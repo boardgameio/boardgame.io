@@ -7,7 +7,7 @@
  */
 
 import { alea } from './random.alea';
-import shuffle from 'fisher-yates';
+import shuffle from 'fast-shuffle';
 
 export const DICE = 'DICE';
 export const NUMBER = 'NUMBER';
@@ -69,7 +69,7 @@ export function evaluaterandomops(G, ctx) {
         }
 
         case SHUFFLE: {
-          const rng = seedrandom.alea(randomnumber);
+          const rng = alea(randomnumber);
           G[r.fieldname] = shuffle(G[r.fieldname], rng);
           break;
         }
