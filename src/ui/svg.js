@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Wheat = (
-  <g transform="translate(-1.5, -1.15) scale(0.25, 0.25)">
+  <g transform="translate(-0.5, -0.5) translate(-1.5, -1.15) scale(0.25, 0.25)">
     <g strokeWidth="0.1px" strokeLinejoin="miter" strokeLinecap="round">
       <polygon
         stroke="black"
@@ -13,7 +13,7 @@ const Wheat = (
 );
 
 const Wood = (
-  <g transform="translate(-1.25, -0.72) scale(0.25, 0.25)">
+  <g transform="translate(-0.5, -0.5) translate(-1.25, -0.72) scale(0.25, 0.25)">
     <g
       strokeWidth="0.1px"
       strokeLinejoin="miter"
@@ -29,7 +29,7 @@ const Wood = (
 );
 
 const Disc3D = (
-  <g transform="translate(-0.77, -0.33) scale(0.015, 0.015)">
+  <g transform="translate(-0.5, -0.5) translate(-0.77, -0.33) scale(0.015, 0.015)">
     <g
       strokeWidth="0.3px"
       strokeLinejoin="miter"
@@ -76,7 +76,7 @@ const Disc3D = (
 );
 
 const Meeple = (
-  <g transform="translate(-0.75, -0.62) scale(0.16, 0.16)">
+  <g transform="translate(-0.5, -0.5) translate(-0.75, -0.62) scale(0.16, 0.16)">
     <g
       strokeWidth="0.1px"
       strokeLinejoin="round"
