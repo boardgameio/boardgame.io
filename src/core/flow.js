@@ -406,7 +406,7 @@ export function FlowWithPhases({
 
   return Flow({
     ctx: numPlayers => ({
-      seed,
+      random: { seed },
       numPlayers,
       turn: 0,
       currentPlayer: '0',

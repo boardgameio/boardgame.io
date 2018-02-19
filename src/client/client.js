@@ -153,6 +153,7 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
       if (board) {
         const mapStateToProps = state => {
           let isActive = true;
+          let G = state.G;
 
           if (multiplayer) {
             if (this.props.playerID == null) {
@@ -164,19 +165,23 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
             ) {
               isActive = false;
             }
+          } else {
+            // Secrets are normally stripped on the server,
+            // but we also strip them here in local games so
+            // that game developers can see their effects
+            // while prototyping.
+            let playerID = this.props.playerID;
+            if (!playerID && state.ctx.currentPlayer != 'any') {
+              playerID = state.ctx.currentPlayer;
+            }
+            G = game.playerView(G, state.ctx, playerID);
           }
 
           if (state.ctx.gameover !== undefined) {
             isActive = false;
           }
 
-          let newctx = { ...state.ctx, seed: undefined };
-          return {
-            ...state,
-            isActive,
-            G: game.playerView(state.G, newctx, this.props.playerID),
-            ctx: newctx,
-          };
+          return { ...state, isActive, G };
         };
 
         const Board = connect(mapStateToProps, ActionCreators)(board);
