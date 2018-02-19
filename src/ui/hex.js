@@ -68,10 +68,12 @@ export class HexGrid extends React.Component {
       for (let y = -r; y <= r; y++) {
         const z = -x - y;
         if (Math.abs(z) > r) continue;
+        const sizeProperties = this.cc2graphical(x, y, z, this.props.cellSize);
         hexes.push(
           <Hex
             key={`${x}:${y}:${z}`}
             style={{ fill: this._getCellColor(x, y, z) }}
+            {...sizeProperties}
             x={x}
             y={y}
             z={z}
@@ -90,26 +92,36 @@ export class HexGrid extends React.Component {
     }
   };
 
+  cc2graphical = (x, y, z, cellSize) => {
+    const q = x;
+    const r = z;
+    const xw = cellSize * 3 * q / 2.0;
+    const yw = cellSize * Math.sqrt(3) * (r + q / 2.0);
+    const center = { x: xw, y: yw };
+    const width = cellSize * 2;
+    const height = Math.sqrt(3) / 2 * width;
+    return { center, width, height };
+  };
+
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       const t = child.props.template || Hex;
+      const sizeProperties = this.cc2graphical(
+        child.props.x,
+        child.props.y,
+        child.props.z,
+        this.props.cellSize
+      );
 
-      // calculate graphical parameters for the child element
-      const q = child.props.x;
-      const r = child.props.z;
-      const x = this.props.cellSize * 3 * q / 2.0;
-      const y = this.props.cellSize * Math.sqrt(3) * (r + q / 2.0);
-      const center = { x, y };
-      const width = this.props.cellSize * 2;
-      const height = Math.sqrt(3) / 2 * width;
+      const childprops = Object.assign(
+        {
+          template: t,
+          onClick: this.onClick,
+        },
+        sizeProperties
+      );
 
-      return React.cloneElement(child, {
-        center,
-        width,
-        height,
-        template: t,
-        onClick: this.onClick,
-      });
+      return React.cloneElement(child, childprops);
     });
 
     const t = this.props.cellSize * this.props.levels * 2;
@@ -146,6 +158,9 @@ export class Hex extends React.Component {
     x: PropTypes.number,
     y: PropTypes.number,
     z: PropTypes.number,
+    center: PropTypes.object,
+    width: PropTypes.number,
+    height: PropTypes.number,
     size: PropTypes.number,
     style: PropTypes.any,
     onClick: PropTypes.func,
@@ -164,23 +179,24 @@ export class Hex extends React.Component {
     super(props);
   }
 
+  // ATTENTION: by using the props passed down from HexGrid,
+  // these DO NOT CHANGE during an animation run.
+  //  => need a way to force recalculation of these parameters
+  //  when an animation starts
+
   get width() {
-    return this.props.size * 2;
+    return this.props.width;
   }
 
   get height() {
-    return (Math.sqrt(3) / 2 * this.width).toFixed(3);
+    return this.props.height;
   }
 
   /**
    * Get the co-ordinates of the hex center.
    */
   get center() {
-    const q = this.props.x;
-    const r = this.props.z;
-    const x = this.props.size * 3 * q / 2.0;
-    const y = this.props.size * Math.sqrt(3) * (r + q / 2.0);
-    return { x, y };
+    return this.props.center;
   }
 
   /**
