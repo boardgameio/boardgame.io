@@ -6,8 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, Random } from 'boardgame.io/core';
-// import { PlayerView } from 'boardgame.io/core';
+import { Game, Random, PlayerView } from 'boardgame.io/core';
 
 const LiarsDice = Game({
   name: 'liars-dice',
@@ -72,7 +71,7 @@ const LiarsDice = Game({
     ],
   },
 
-  // playerView: PlayerView.STRIP_SECRETS,
+  playerView: PlayerView.STRIP_SECRETS,
 });
 
 export default LiarsDice;
