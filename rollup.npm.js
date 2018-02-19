@@ -32,7 +32,6 @@ const globals = {
   'react-json-view': 'ReactJson',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
-  seedrandom: 'seedrandom',
 };
 
 export default [
@@ -61,8 +60,6 @@ export default [
 
   {
     input: 'packages/core.js',
-    external: ['seedrandom'],
-    globals: { seedrandom: 'seedrandom' },
     output: { file: 'dist/core.js', format: 'umd' },
     name: 'Core',
     plugins: plugins,
