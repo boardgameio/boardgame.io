@@ -32,6 +32,7 @@ const globals = {
   'react-json-view': 'ReactJson',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
+  'fisher-yates': 'shuffle',
 };
 
 export default [
@@ -60,6 +61,8 @@ export default [
 
   {
     input: 'packages/core.js',
+    external: Object.keys(globals),
+    globals,
     output: { file: 'dist/core.js', format: 'umd' },
     name: 'Core',
     plugins: plugins,

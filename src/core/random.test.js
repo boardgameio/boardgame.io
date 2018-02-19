@@ -106,3 +106,18 @@ test('Random.Number', () => {
   expect(G3.field1).toBeLessThanOrEqual(1);
   expect(G3._randomOps).toBeUndefined();
 });
+
+test('Random.Shuffle', () => {
+  const initialTiles = ['A', 'B', 'C', 'D', 'E'];
+  let ctx = { random: { seed: 'some_predetermined_seed' } };
+  let G = { tiles: initialTiles };
+
+  // random event - shuffle tiles order
+  let G2 = Random.Shuffle(G, 'tiles');
+
+  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
+  expect(G3.tiles.length).toEqual(initialTiles.length);
+  expect(G3.tiles).toEqual(expect.arrayContaining(initialTiles));
+  expect(G3.tiles.sort()).toEqual(initialTiles);
+  expect(ctx).not.toMatchObject(ctx2);
+});
