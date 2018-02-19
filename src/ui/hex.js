@@ -93,7 +93,7 @@ export class HexGrid extends React.Component {
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
-        _inHexGrid: true,
+        template: Hex,
         onClick: this.onClick,
       });
     });

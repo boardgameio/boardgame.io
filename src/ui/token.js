@@ -8,8 +8,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Hex } from './hex';
-import { Square } from './grid';
 
 /**
  * Token
@@ -51,13 +49,12 @@ class Token extends React.Component {
     x: PropTypes.number,
     y: PropTypes.number,
     z: PropTypes.number,
+    template: PropTypes.func,
     style: PropTypes.any,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
     children: PropTypes.element,
     animationDuration: PropTypes.number,
-    _inGrid: PropTypes.bool,
-    _inHexGrid: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -158,30 +155,17 @@ class Token extends React.Component {
   }
 
   render() {
-    if (this.props._inHexGrid) {
-      return (
-        <Hex
-          x={this.state.x}
-          y={this.state.y}
-          z={this.state.z}
-          style={this.props.style}
-          onClick={this.props.onClick}
-        >
-          {this.props.children}
-        </Hex>
-      );
-    }
-
-    if (this.props._inGrid) {
-      return (
-        <Square
-          x={this.state.x}
-          y={this.state.y}
-          style={this.props.style}
-          onClick={this.props.onClick}
-        >
-          {this.props.children}
-        </Square>
+    if (this.props.template) {
+      return React.createElement(
+        this.props.template,
+        {
+          x: this.state.x,
+          y: this.state.y,
+          z: this.state.z,
+          style: this.props.style,
+          onClick: this.props.onClick,
+        },
+        this.props.children
       );
     }
 
