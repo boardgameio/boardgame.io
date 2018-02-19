@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import seedrandom from 'seedrandom';
+import { alea } from './random.alea';
 
 export const DICE = 'DICE';
 export const NUMBER = 'NUMBER';
@@ -16,9 +16,9 @@ function getrandomfn(ctx) {
   if (ctx.random === undefined || ctx.random.prngstate === undefined) {
     // no call to a random function has been made.
     // pre-populate the state info
-    randomfn = new seedrandom.alea(ctx.random.seed, { state: true });
+    randomfn = new alea(ctx.random.seed, { state: true });
   } else {
-    randomfn = new seedrandom.alea('', { state: ctx.random.prngstate });
+    randomfn = new alea('', { state: ctx.random.prngstate });
   }
   return randomfn;
 }
