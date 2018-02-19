@@ -276,3 +276,28 @@ test('move dispatchers', () => {
   api.C();
   expect(store.getState().G).toEqual({ victory: true });
 });
+
+test('local playerView', () => {
+  const Board = Client({
+    game: Game({
+      setup: () => ({ secret: true }),
+      playerView: (G, ctx, playerID) => ({ stripped: playerID }),
+    }),
+    board: TestBoard,
+    numPlayers: 2,
+  });
+
+  {
+    const game = Enzyme.mount(<Board />);
+    const board = game.find('TestBoard').instance();
+    expect(board.props.G).toEqual({ stripped: '0' });
+    board.props.events.endTurn();
+    expect(board.props.G).toEqual({ stripped: '1' });
+  }
+
+  {
+    const game = Enzyme.mount(<Board playerID="1" />);
+    const board = game.find('TestBoard').instance();
+    expect(board.props.G).toEqual({ stripped: '1' });
+  }
+});
