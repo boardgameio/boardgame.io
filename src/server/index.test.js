@@ -168,7 +168,7 @@ test('action', async () => {
       _id: 0,
       _initial: {},
       ctx: {
-        seed: 0,
+        random: { seed: 0 },
         currentPlayer: '0',
         currentPlayerMoves: 0,
         numPlayers: 2,
