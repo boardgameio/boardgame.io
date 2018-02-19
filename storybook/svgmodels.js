@@ -32,7 +32,9 @@ export class SvgView extends React.Component {
       <div style={{ padding: '50px' }}>
         <svg width={500} height={500} viewBox="0 0 1 1">
           <rect fill="lightgreen" x="0" y="0" width="500" height="500" />
-          <SvgComponent component={this.props.component} />
+          <g transform="translate(0.5, 0.5)">
+            <SvgComponent component={this.props.component} />
+          </g>
         </svg>
       </div>
     );

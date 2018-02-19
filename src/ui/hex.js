@@ -92,8 +92,22 @@ export class HexGrid extends React.Component {
 
   render() {
     const tokens = React.Children.map(this.props.children, child => {
+      const t = child.props.template || Hex;
+
+      // calculate graphical parameters for the child element
+      const q = child.props.x;
+      const r = child.props.z;
+      const x = this.props.cellSize * 3 * q / 2.0;
+      const y = this.props.cellSize * Math.sqrt(3) * (r + q / 2.0);
+      const center = { x, y };
+      const width = this.props.cellSize * 2;
+      const height = Math.sqrt(3) / 2 * width;
+
       return React.cloneElement(child, {
-        template: Hex,
+        center,
+        width,
+        height,
+        template: t,
         onClick: this.onClick,
       });
     });

@@ -26,7 +26,7 @@ test('rendering with or without x/y', () => {
   }
   {
     const svgcomponent = Enzyme.mount(
-      <SvgComponent x={1} y={2} component={testcomponent()} />
+      <SvgComponent center={{ x: 1, y: 2 }} component={testcomponent()} />
     );
     expect(svgcomponent.html()).toContain('translate(1, 2)');
   }

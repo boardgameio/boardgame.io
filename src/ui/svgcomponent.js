@@ -12,31 +12,25 @@ import PropTypes from 'prop-types';
 export class SvgComponent extends React.Component {
   static propTypes = {
     component: PropTypes.element.isRequired,
-    x: PropTypes.number,
-    y: PropTypes.number,
+    center: PropTypes.object,
     style: PropTypes.any,
     onClick: PropTypes.func,
   };
 
   static defaultProps = {
-    x: 0,
-    y: 0,
     style: { fill: '#ff0000' },
   };
 
-  onClick = () => {
-    this.props.onClick({
-      x: this.props.x,
-      y: this.props.y,
-    });
-  };
-
   render() {
-    const tx = this.props.x; //* this.props.size;
-    const ty = this.props.y; //* this.props.size;
+    let tx = 0,
+      ty = 0;
+    if (this.props.center !== undefined) {
+      tx = this.props.center.x;
+      ty = this.props.center.y;
+    }
 
     return (
-      <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
+      <g onClick={this.props.onClick} transform={`translate(${tx}, ${ty})`}>
         {this.props.component}
       </g>
     );
