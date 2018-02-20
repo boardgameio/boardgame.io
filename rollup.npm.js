@@ -61,8 +61,8 @@ export default [
 
   {
     input: 'packages/core.js',
-    external: Object.keys(globals),
-    globals,
+    external: ['fast-shuffle'],
+    globals: { 'fast-shuffle': 'shuffle' },
     output: { file: 'dist/core.js', format: 'umd' },
     name: 'Core',
     plugins: plugins,
