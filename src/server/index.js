@@ -74,6 +74,7 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
             const { playerID } = clientInfo.get(client);
             const newState = Object.assign({}, state, {
               G: game.playerView(state.G, state.ctx, playerID),
+              ctx: { ...state.ctx, random: undefined },
             });
 
             if (client === socket.id) {
@@ -108,6 +109,7 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
 
         const newState = Object.assign({}, state, {
           G: game.playerView(state.G, state.ctx, playerID),
+          ctx: { ...state.ctx, random: undefined },
         });
 
         socket.emit('sync', gameID, newState);

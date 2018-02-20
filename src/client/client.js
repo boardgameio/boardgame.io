@@ -13,9 +13,43 @@ import { Provider, connect } from 'react-redux';
 import * as ActionCreators from '../core/action-creators';
 import { Debug } from './debug/debug';
 import { Multiplayer } from './multiplayer/multiplayer';
-import { createEventDispatchers } from '../core/flow';
-import { createGameReducer, createMoveDispatchers } from '../core/reducer';
+import { createGameReducer } from '../core/reducer';
 import './client.css';
+
+/**
+ * createEventDispatchers
+ *
+ * Creates a set of dispatchers to dispatch game flow events.
+ * @param {Array} eventNames - A list of event names.
+ * @param {object} store - The Redux store to create dispatchers for.
+ * @param {string} playerID - The ID of the player dispatching these events.
+ */
+export function createEventDispatchers(eventNames, store, playerID) {
+  let dispatchers = {};
+  for (const name of eventNames) {
+    dispatchers[name] = function(...args) {
+      store.dispatch(ActionCreators.gameEvent(name, args, playerID));
+    };
+  }
+  return dispatchers;
+}
+
+/**
+ * createMoveDispatchers
+ *
+ * Creates a set of dispatchers to make moves.
+ * @param {Array} moveNames - A list of move names.
+ * @param {object} store - The Redux store to create dispatchers for.
+ */
+export function createMoveDispatchers(moveNames, store, playerID) {
+  let dispatchers = {};
+  for (const name of moveNames) {
+    dispatchers[name] = function(...args) {
+      store.dispatch(ActionCreators.makeMove(name, args, playerID));
+    };
+  }
+  return dispatchers;
+}
 
 /**
  * Client
@@ -35,7 +69,7 @@ import './client.css';
  *   API through props for it to interact with the framework
  *   and dispatch actions such as MAKE_MOVE and END_TURN.
  */
-function Client({ game, numPlayers, board, multiplayer, debug }) {
+export function Client({ game, numPlayers, board, multiplayer, debug }) {
   let server = undefined;
   if (multiplayer instanceof Object && 'server' in multiplayer) {
     server = multiplayer.server;
@@ -119,6 +153,7 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
       if (board) {
         const mapStateToProps = state => {
           let isActive = true;
+          let G = state.G;
 
           if (multiplayer) {
             if (this.props.playerID == null) {
@@ -130,17 +165,23 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
             ) {
               isActive = false;
             }
+          } else {
+            // Secrets are normally stripped on the server,
+            // but we also strip them here in local games so
+            // that game developers can see their effects
+            // while prototyping.
+            let playerID = this.props.playerID;
+            if (!playerID && state.ctx.currentPlayer != 'any') {
+              playerID = state.ctx.currentPlayer;
+            }
+            G = game.playerView(G, state.ctx, playerID);
           }
 
           if (state.ctx.gameover !== undefined) {
             isActive = false;
           }
 
-          return {
-            ...state,
-            isActive,
-            G: game.playerView(state.G, state.ctx, this.props.playerID),
-          };
+          return { ...state, isActive, G };
         };
 
         const Board = connect(mapStateToProps, ActionCreators)(board);
@@ -222,5 +263,3 @@ function Client({ game, numPlayers, board, multiplayer, debug }) {
     }
   };
 }
-
-export default Client;
