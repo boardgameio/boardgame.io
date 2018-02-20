@@ -32,6 +32,7 @@ const globals = {
   'react-json-view': 'ReactJson',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
+  'fast-shuffle': 'shuffle',
 };
 
 export default [
@@ -60,6 +61,8 @@ export default [
 
   {
     input: 'packages/core.js',
+    external: ['fast-shuffle'],
+    globals: { 'fast-shuffle': 'shuffle' },
     output: { file: 'dist/core.js', format: 'umd' },
     name: 'Core',
     plugins: plugins,
