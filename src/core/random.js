@@ -70,7 +70,8 @@ export function evaluaterandomops(G, ctx) {
 
         case SHUFFLE: {
           const rng = alea(randomnumber);
-          G[r.fieldname] = shuffle(G[r.fieldname], rng);
+          const field = deep_get(G, r.fieldname);
+          randomresults[r.fieldname] = shuffle(field, rng);
           break;
         }
 
@@ -83,10 +84,34 @@ export function evaluaterandomops(G, ctx) {
   return { randomresults, ctx: ctx2 };
 }
 
+function deep_set(G, structuredname, newvalue) {
+  if (structuredname.indexOf('.') < 0) {
+    return { ...G, [structuredname]: newvalue };
+  }
+  const [car, ...cdr] = structuredname.split('.');
+  let shuffleddata = shuffle(G[car], cdr.join('.'));
+  return { ...G, [car]: shuffleddata };
+}
+
+function deep_get(G, structuredname) {
+  let ctx = G;
+  structuredname.split('.').forEach(name => {
+    ctx = ctx[name];
+  });
+  return ctx;
+}
+
 export function RunRandom(G, ctx) {
   let { randomresults, ctx: ctx2 } = evaluaterandomops(G, ctx);
-  const G2 = { ...G, ...randomresults, _randomOps: undefined };
-  return { G: G2, ctx: ctx2 };
+
+  let G2 = G;
+  Object.keys(randomresults).forEach(fname => {
+    const result = randomresults[fname];
+    G2 = deep_set(G2, fname, result);
+  });
+
+  const G3 = { ...G2, _randomOps: undefined };
+  return { G: G3, ctx: ctx2 };
 }
 
 const SpotValue = {
