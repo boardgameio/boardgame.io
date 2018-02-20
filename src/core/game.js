@@ -7,7 +7,7 @@
  */
 
 import { FlowWithPhases } from './flow';
-import { Ai } from './ai';
+import { AI } from './ai';
 
 /**
  * Game
@@ -75,8 +75,7 @@ import { Ai } from './ai';
  *                           Must contain the return value of Flow().
  *                           If it contains any other object, it is presumed to be a
  *                           configuration object for SimpleFlow() or FlowWithPhases().
- * @param {...object} ai - Setup playable games by AI bots (see ai.js).
- *                         Assumed to be configuration for Ai().
+ * @param {...object} ai - Bot framework configuration (see ai.js).
  */
 function Game({ name, setup, moves, playerView, flow, ai }) {
   if (!name) name = 'default';
@@ -85,7 +84,7 @@ function Game({ name, setup, moves, playerView, flow, ai }) {
   if (!playerView) playerView = G => G;
 
   if (!ai || typeof ai != 'function') {
-    ai = Ai(ai || {});
+    ai = AI(ai || {});
   }
   if (!flow || flow.processGameEvent === undefined) {
     flow = FlowWithPhases(flow || {});

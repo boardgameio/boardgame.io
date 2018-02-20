@@ -6,19 +6,19 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Ai } from './ai';
+import { AI } from './ai';
 
 test('no parameters provided', () => {
   let G = {};
   let ctx = {};
-  let ai = Ai({})(G, ctx);
+  let ai = AI({})(G, ctx);
   expect(ai).toEqual({ isAvailable: false, possibleMoves: [], score: 0 });
 });
 
 test('simple possible moves and score', () => {
   let G = { i: 2 };
   let ctx = { turn: 1 };
-  let ai = Ai({
+  let ai = AI({
     possibleMoves: (G, ctx) => {
       return [
         { move: 'foo', args: [0, 0] },
@@ -42,7 +42,7 @@ test('simple possible moves and score', () => {
 test('args combinations', () => {
   let G = { i: 2 };
   let ctx = { turn: 1 };
-  let ai = Ai({
+  let ai = AI({
     possibleMoves: {
       ranges: {
         foo: [['a', 'b'], ['c'], ['d', 'e']],
@@ -66,7 +66,7 @@ test('args combinations', () => {
 test('args combinations and filtration', () => {
   let G = { i: 2 };
   let ctx = { turn: 1 };
-  let aiFn = Ai({
+  let aiFn = AI({
     possibleMoves: {
       ranges: {
         foo: [[1, 2], [3, 4]],
@@ -93,7 +93,7 @@ test('args combinations and filtration', () => {
 test('range object', () => {
   let G = {};
   let ctx = {};
-  let ai = Ai({
+  let ai = AI({
     possibleMoves: {
       ranges: {
         foo: [['a', 'b', 'c'], { min: 1, max: 10, step: 3 }],

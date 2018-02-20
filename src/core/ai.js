@@ -7,37 +7,45 @@
  */
 
 /**
- * Ai
+ * AI
  *
- * Setups the necessary information for running bots in a game.
- * There are two parts that needs to be described:
- * - What are the possible moves given a state.
- * - What are the evaluation function (score) given a state.
+ * Sets up the necessary information for running bots in a game.
+ *
+ * There are two parts that need to be described:
+ * - What are the next possible moves given a particular game state.
+ * - What is the evaluation function (score) for a particular state.
  *
  * A bot might use this information to maximize its score and minimize
  * other player's scores (i.e. MiniMax and similar algorithms).
- * @param {...object} possibleMoves - Function with (G, ctx) => moves signature
- *                                    that returns possible moves given state,
  *
- *                                    OR Object with two keys:
+ * @param {...object} possibleMoves - Function with signature (G, ctx) => moves
+ *                                    that returns possible moves,
  *
- *                                      ranges: Object with key as move names
- *                                    and values with arguments ranges. Each
- *                                    range can be an object with {min, max, step}
- *                                    or a list of possible values. Ex:
- *                                    { clickCell: [{min: 0, max: 8}] }
+ *                                    OR
  *
- *                                      isMovePossible: Function with
- *                                    (G, ctx, move, args) => bool signature
- *                                    that should return if given combination of
- *                                    move and args is possible.
+ *                                    Object with two keys:
+ *                                    {
+ *                                      ranges:
+ *                                        Object with key as move names
+ *                                        and values with arguments ranges. Each
+ *                                        range can be an object with {min, max, step}
+ *                                        or a list of possible values. Ex:
+ *                                        { clickCell: [{min: 0, max: 8}] }
+ *
+ *                                      isMovePossible:
+ *                                        Function with signature
+ *                                        (G, ctx, move, args) => bool
+ *                                        that should return if a given combination of
+ *                                        move and args is possible.
+ *                                    }
+ *
  * @param {...object} score - Evaluation function with (G, ctx) => score
  *                            signature that returns an evaluation value for
  *                            a given state, which will guide the search
  *                            algorithm.
  */
 
-export function Ai({ possibleMoves, score }) {
+export function AI({ possibleMoves, score }) {
   if (!score) score = () => 0;
 
   /**
