@@ -121,3 +121,21 @@ test('Random.Shuffle', () => {
   expect(G3.tiles.sort()).toEqual(initialTiles);
   expect(ctx).not.toMatchObject(ctx2);
 });
+
+test('Random.Shuffle works on a nested attribute', () => {
+  let ctx = { random: { seed: 'some_predetermined_seed' } };
+  const tiles = ['A', 'B', 'C', 'D', 'E'];
+  let G = {
+    players: {
+      0: tiles,
+      1: tiles,
+    },
+  };
+
+  let G2 = Random.Shuffle(G, 'players.1');
+  let { G: G3 } = RunRandom(G2, ctx);
+  expect(G.players['0']).toMatchObject(tiles);
+  expect(G.players['1']).toMatchObject(tiles); // this was the tricky one :(
+  expect(G3.players['0']).toMatchObject(tiles);
+  expect(G3.players['1']).not.toMatchObject(tiles);
+});

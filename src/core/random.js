@@ -89,8 +89,8 @@ function deep_set(G, structuredname, newvalue) {
     return { ...G, [structuredname]: newvalue };
   }
   const [car, ...cdr] = structuredname.split('.');
-  let shuffleddata = shuffle(G[car], cdr.join('.'));
-  return { ...G, [car]: shuffleddata };
+  let G2 = deep_set(G[car], cdr.join('.'), newvalue);
+  return { ...G, [car]: G2 };
 }
 
 function deep_get(G, structuredname) {
