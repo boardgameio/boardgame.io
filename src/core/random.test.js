@@ -8,6 +8,12 @@
 
 import { randomctx, RunRandom, addrandomop, DICE, Random } from './random';
 
+function checkrandom(value, min, max) {
+  expect(value).toBeDefined();
+  expect(value).toBeGreaterThanOrEqual(min);
+  expect(value).toBeLessThanOrEqual(max);
+}
+
 test('randomctx', () => {
   let ctx = { random: { seed: 'hi there' } };
 
@@ -41,6 +47,7 @@ test('RunRandom invalid op', () => {
 
   expect(G3).toMatchObject(G);
   expect(ctx2).toMatchObject(ctx);
+  expect(G3._randomOps).toBeUndefined();
 });
 
 test('Random', () => {
@@ -71,10 +78,7 @@ test('predefined dice values', () => {
 
     let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
     expect(ctx).not.toMatchObject(ctx2);
-    expect(G3.field1).toBeDefined();
-    expect(G3.field1).toBeGreaterThanOrEqual(1);
-    expect(G3.field1).toBeLessThanOrEqual(pair.highest);
-    expect(G3._randomOps).toBeUndefined();
+    checkrandom(G3.field1, 1, pair.highest);
   });
 });
 
@@ -87,9 +91,7 @@ test('Random.Die', () => {
 
   let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
-  expect(G3.field1).toBeDefined();
-  expect(G3.field1).toBe(74);
-  expect(G3._randomOps).toBeUndefined();
+  checkrandom(G3.field1, 74, 74);
 });
 
 test('Random.Number', () => {
@@ -101,9 +103,7 @@ test('Random.Number', () => {
 
   let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
-  expect(G3.field1).toBeDefined();
-  expect(G3.field1).toBeGreaterThanOrEqual(0);
-  expect(G3.field1).toBeLessThanOrEqual(1);
+  checkrandom(G3.field1, 0, 1);
   expect(G3._randomOps).toBeUndefined();
 });
 
