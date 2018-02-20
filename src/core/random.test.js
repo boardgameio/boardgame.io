@@ -88,10 +88,14 @@ test('Random.Die', () => {
 
   // random event - die with arbitrary spot count
   const G2 = Random.Die(G, 'field1', 123);
-
   let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
   checkrandom(G3.field1, 74, 74);
+  // same with a deep field
+  const G4 = Random.Die({ a: { b: {} } }, 'a.b.c', 123);
+  let { G: G5, ctx: ctx3 } = RunRandom(G4, ctx);
+  expect(ctx).not.toMatchObject(ctx3);
+  checkrandom(G5.a.b.c, 74, 74);
 });
 
 test('Random.Number', () => {
@@ -100,11 +104,14 @@ test('Random.Number', () => {
 
   // random event - random number
   const G2 = Random.Number(G, 'field1');
-
   let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
   checkrandom(G3.field1, 0, 1);
-  expect(G3._randomOps).toBeUndefined();
+  // same with a deep field
+  const G4 = Random.Number({ a: { b: {} } }, 'a.b.c', 123);
+  let { G: G5, ctx: ctx3 } = RunRandom(G4, ctx);
+  expect(ctx).not.toMatchObject(ctx3);
+  checkrandom(G5.a.b.c, 0, 1);
 });
 
 test('Random.Shuffle', () => {
