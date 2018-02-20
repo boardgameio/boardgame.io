@@ -32,8 +32,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     // GameLog to display a journal of moves.
     log: [],
 
-    //Lists possible moves and player's score to allow running
-    //AI algorithms.
+    // Lists possible moves and player's score to allow running bots.
     ai: game.ai(game.setup(numPlayers), game.flow.ctx(numPlayers)),
 
     // A monotonically non-decreasing ID to ensure that

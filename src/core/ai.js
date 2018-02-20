@@ -39,10 +39,9 @@
  *                                        move and args is possible.
  *                                    }
  *
- * @param {...object} score - Evaluation function with (G, ctx) => score
- *                            signature that returns an evaluation value for
- *                            a given state, which will guide the search
- *                            algorithm.
+ * @param {...object} score - Function with signature (G, ctx) => score
+ *                            that returns a score for a given state,
+ *                            which will guide the AI search algorithm.
  */
 
 export function AI({ possibleMoves, score }) {
