@@ -12,7 +12,7 @@
     "prepush": "npm run test:coverage",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
+    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
     "storybook": "start-storybook -p 3000 -c storybook",
@@ -109,6 +109,7 @@
     "webpack": "^3.5.5"
   },
   "dependencies": {
+    "fast-shuffle": "^1.0.4",
     "koa": "^2.3.0",
     "koa-router": "^7.2.1",
     "koa-socket": "^4.4.0",
@@ -118,7 +119,6 @@
     "react-json-view": "^1.13.0",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
-    "seedrandom": "^2.4.3",
     "socket.io": "^2.0.3"
   },
   "peerDependencies": {

@@ -50,6 +50,29 @@ const SomeGame = Game({
 This will place a request to a D6 dice roll inside `G`.
 While processing the move, the request gets evaluated and the result placed into `diceValue`, where it can be used.
 
+### Shuffles
+
+To simulate a shuffled deck of cards, sometimes it might be simplest to draw a card from a random index in an array. This can get confusing if your game moves
+include a move for peeking at the top card which is later rendered moot by
+another move which shuffles the deck. To simplify modeling this, you might want
+to represent your deck as an array. Use `Random.Shuffle` to perform a shallow
+shuffle of the elements.
+
+```js
+import { Random } from 'boardgame.io/core';
+
+const SomeGame = Game({
+  setup: () => ({
+    deck: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+  }),
+  moves: {
+    shuffleDeck(G) {
+      return Random.Shuffle(G, 'deck');
+    },
+  },
+});
+```
+
 ## Seed
 
 The library uses a `seed` in `ctx` that is stripped before it

@@ -9,7 +9,7 @@
 import { randomctx, RunRandom, addrandomop, DICE, Random } from './random';
 
 test('randomctx', () => {
-  let ctx = { seed: 'hi there' };
+  let ctx = { random: { seed: 'hi there' } };
 
   // make sure that on subsequent calls different numbers are generated.
   let { ctx: ctx2, randomnumber } = randomctx(ctx);
@@ -22,7 +22,7 @@ test('randomctx', () => {
 });
 
 test('RunRandom nothing to do', () => {
-  let ctx = { seed: 0 };
+  let ctx = { random: { seed: 0 } };
   let G = {};
 
   let { G: G2, ctx: ctx2 } = RunRandom(G, ctx);
@@ -32,7 +32,7 @@ test('RunRandom nothing to do', () => {
 });
 
 test('RunRandom invalid op', () => {
-  let ctx = { seed: 0 };
+  let ctx = { random: { seed: 0 } };
   let G = {};
 
   // currently, the framework silently ignores the request.
@@ -59,7 +59,7 @@ test('Random', () => {
 });
 
 test('predefined dice values', () => {
-  let ctx = { seed: 0 };
+  let ctx = { random: { seed: 0 } };
   let G = {};
 
   const rfns = [4, 6, 8, 10, 12, 20].map(v => {
@@ -79,7 +79,7 @@ test('predefined dice values', () => {
 });
 
 test('Random.Die', () => {
-  let ctx = { seed: 0 };
+  let ctx = { random: { seed: 0 } };
   let G = {};
 
   // random event - die with arbitrary spot count
@@ -93,7 +93,7 @@ test('Random.Die', () => {
 });
 
 test('Random.Number', () => {
-  let ctx = { seed: 0 };
+  let ctx = { random: { seed: 0 } };
   let G = {};
 
   // random event - random number
@@ -105,4 +105,19 @@ test('Random.Number', () => {
   expect(G3.field1).toBeGreaterThanOrEqual(0);
   expect(G3.field1).toBeLessThanOrEqual(1);
   expect(G3._randomOps).toBeUndefined();
+});
+
+test('Random.Shuffle', () => {
+  const initialTiles = ['A', 'B', 'C', 'D', 'E'];
+  let ctx = { random: { seed: 'some_predetermined_seed' } };
+  let G = { tiles: initialTiles };
+
+  // random event - shuffle tiles order
+  let G2 = Random.Shuffle(G, 'tiles');
+
+  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
+  expect(G3.tiles.length).toEqual(initialTiles.length);
+  expect(G3.tiles).toEqual(expect.arrayContaining(initialTiles));
+  expect(G3.tiles.sort()).toEqual(initialTiles);
+  expect(ctx).not.toMatchObject(ctx2);
 });

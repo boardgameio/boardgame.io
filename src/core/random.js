@@ -6,28 +6,37 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import seedrandom from 'seedrandom';
+import { alea } from './random.alea';
+import shuffle from 'fast-shuffle';
 
 export const DICE = 'DICE';
 export const NUMBER = 'NUMBER';
+export const SHUFFLE = 'SHUFFLE';
 
 function getrandomfn(ctx) {
   let randomfn;
-  if (ctx.prngstate === undefined) {
+  if (ctx.random === undefined || ctx.random.prngstate === undefined) {
     // no call to a random function has been made.
     // pre-populate the state info
-    randomfn = new seedrandom.alea(ctx.seed, { state: true });
+    randomfn = new alea(ctx.random.seed, { state: true });
   } else {
-    randomfn = new seedrandom.alea('', { state: ctx.prngstate });
+    randomfn = new alea('', { state: ctx.random.prngstate });
   }
   return randomfn;
 }
 
 export function randomctx(ctx) {
   const r = getrandomfn(ctx);
-  const randomnumber = r();
-  const ctx2 = { ...ctx, prngstate: r.state() };
-  return { randomnumber, ctx: ctx2 };
+  return {
+    randomnumber: r(),
+    ctx: {
+      ...ctx,
+      random: {
+        ...ctx.random,
+        prngstate: r.state(),
+      },
+    },
+  };
 }
 
 export function addrandomop(G, fieldname, op, ...args) {
@@ -56,6 +65,12 @@ export function evaluaterandomops(G, ctx) {
 
         case NUMBER: {
           randomresults[r.fieldname] = randomnumber;
+          break;
+        }
+
+        case SHUFFLE: {
+          const rng = alea(randomnumber);
+          G[r.fieldname] = shuffle(G[r.fieldname], rng);
           break;
         }
 
@@ -107,5 +122,9 @@ export const Random = {
 
   Number: (G, fieldname) => {
     return addrandomop(G, fieldname, NUMBER);
+  },
+
+  Shuffle: (G, fieldname) => {
+    return addrandomop(G, fieldname, SHUFFLE);
   },
 };

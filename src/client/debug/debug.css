@@ -7,16 +7,16 @@
  */
 
 .debug-ui {
-  float: right;
   min-width: 300px;
   max-width: 400px;
   box-sizing: border-box;
   background: #fefefe;
   border: 3px solid #ddd;
+  position: absolute;
   right: 0;
   top: 0;
   height: 100%;
-  opacity: 0.5;
+  opacity: 0.8;
   font-family: monospace;
   font-size: 14px;
   padding: 20px;
