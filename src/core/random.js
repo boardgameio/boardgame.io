@@ -7,9 +7,11 @@
  */
 
 import { alea } from './random.alea';
+import shuffle from 'fast-shuffle';
 
 export const DICE = 'DICE';
 export const NUMBER = 'NUMBER';
+export const SHUFFLE = 'SHUFFLE';
 
 function getrandomfn(ctx) {
   let randomfn;
@@ -66,6 +68,12 @@ export function evaluaterandomops(G, ctx) {
           break;
         }
 
+        case SHUFFLE: {
+          const rng = alea(randomnumber);
+          G[r.fieldname] = shuffle(G[r.fieldname], rng);
+          break;
+        }
+
         default:
           break;
       }
@@ -114,5 +122,9 @@ export const Random = {
 
   Number: (G, fieldname) => {
     return addrandomop(G, fieldname, NUMBER);
+  },
+
+  Shuffle: (G, fieldname) => {
+    return addrandomop(G, fieldname, SHUFFLE);
   },
 };

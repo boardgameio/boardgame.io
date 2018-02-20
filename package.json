@@ -109,6 +109,7 @@
     "webpack": "^3.5.5"
   },
   "dependencies": {
+    "fast-shuffle": "^1.0.4",
     "koa": "^2.3.0",
     "koa-router": "^7.2.1",
     "koa-socket": "^4.4.0",
