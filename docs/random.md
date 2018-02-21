@@ -19,36 +19,28 @@ This poses interesting challenges regarding the implementation.
   and thus must be pure. Calling `Math.random()` and other functions that
   maintain external state would make the game logic impure and not idempotent.
 
-## Using Randomness in Games
-
-[boardgame.io]() takes a rather unusual approach to randomness: It disallows getting random variables directly.
-Instead, a game can ask the engine to generate random numbers, and the engine will inject those into the game on the next move.
+### Using Randomness in Games
 
 ```js
 import { Random } from 'boardgame.io/core';
 
-const SomeGame = Game({
+Game({
   moves: {
     rollDie(G, ctx) {
-      // G.diceValue will contain the requested
-      // die value at the end of this move.
-      return Random.D6(G, 'diceValue');
-    },
-  },
+      G = Random.D6(G, 'diceValue');
 
-  flow: {
-    onMove: G => {
-      const dice = G.diceValue;
-      // do something...
-      return { ...G };
+      // G.diceValue will contain the value of the roll.
+      // ... Do other stuff with G (always making copies as necessary) ...
+
+      return G;
     },
   },
-  // ...
 });
 ```
 
-This will place a request to a D6 dice roll inside `G`.
-While processing the move, the request gets evaluated and the result placed into `diceValue`, where it can be used.
+!> Make sure you never discard `G` from a `Random` call. It maintains
+the PRNG in an internal field called `_random`. This is stripped
+when sent to the client, but needed on the server.
 
 ### Shuffles
 
@@ -73,7 +65,7 @@ const SomeGame = Game({
 });
 ```
 
-## Seed
+### Seed
 
 The library uses a `seed` in `ctx` that is stripped before it
 is sent to the client. All the code that needs randomness uses this
@@ -93,7 +85,7 @@ Game({
 })
 ```
 
-## Background
+### Background
 
 There is an interesting background article by David Bau called [Random Seeds, Coded Hints, and Quintillions](http://davidbau.com/archives/2010/01/30/random_seeds_coded_hints_and_quintillions.html).
 Despite its age, this article gives insight on topics about randomness, like differentiating _local_ and _network_ entropy.
