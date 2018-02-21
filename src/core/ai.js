@@ -27,10 +27,10 @@
  *                                    {
  *                                      ranges:
  *                                        Object with key as move names
- *                                        and values with arguments ranges. Each
- *                                        range can be an object with {min, max, step}
- *                                        or a list of possible values. Ex:
- *                                        { clickCell: [{min: 0, max: 8}] }
+ *                                        and values with an array of arguments ranges.
+ *                                        Each range entry can be an object with 
+ *                                        {min, max, step} or a list of possible values.
+ *                                        Ex: { clickCell: [{min: 0, max: 8}] }
  *
  *                                      isMovePossible:
  *                                        Function with signature
