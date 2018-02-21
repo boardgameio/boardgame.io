@@ -7,7 +7,7 @@
  */
 
 import { TurnOrder } from './turn-order';
-import { GenSeed, RunRandom } from './random';
+import { GenSeed } from './random';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -32,12 +32,20 @@ import { GenSeed, RunRandom } from './random';
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
  */
-export function Flow({ ctx, events, init, validator, processMove }) {
+export function Flow({
+  ctx,
+  events,
+  init,
+  validator,
+  processMove,
+  disableOptimisticUpdate,
+}) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
   if (!init) init = state => state;
   if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
+  if (!disableOptimisticUpdate) disableOptimisticUpdate = () => false;
 
   const dispatch = (state, action) => {
     if (events.hasOwnProperty(action.type)) {
@@ -71,6 +79,8 @@ export function Flow({ ctx, events, init, validator, processMove }) {
     processGameEvent: (state, action) => {
       return dispatch(state, action);
     },
+
+    disableOptimisticUpdate,
   };
 }
 
@@ -359,10 +369,6 @@ export function FlowWithPhases({
 
     const conf = phaseMap[state.ctx.phase];
 
-    // run random operations
-    let { G: GRandom, ctx: ctxRandom } = RunRandom(state.G, state.ctx);
-    state = { ...state, G: GRandom, ctx: ctxRandom };
-
     const G = conf.onMove(state.G, state.ctx, action);
     state = { ...state, G };
 
@@ -406,14 +412,27 @@ export function FlowWithPhases({
 
   return Flow({
     ctx: numPlayers => ({
-      random: { seed },
       numPlayers,
       turn: 0,
       currentPlayer: '0',
       currentPlayerMoves: 0,
       phase: phases[0].name,
     }),
-    init: state => startGame(state, phases[0]),
+    init: state => {
+      state = startGame(state, phases[0]);
+      return {
+        ...state,
+        G: { ...state.G, _random: { seed } },
+      };
+    },
+    disableOptimisticUpdate: G => {
+      // Some random code was executed.
+      if (G._random !== undefined) {
+        return true;
+      }
+
+      return false;
+    },
     events: enabledEvents,
     validator,
     processMove,

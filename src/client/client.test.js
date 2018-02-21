@@ -268,13 +268,14 @@ test('move dispatchers', () => {
   expect(api.unknown).toBe(undefined);
 
   api.A();
-  expect(store.getState().G).toEqual({});
+  expect(store.getState().G).not.toMatchObject({ moved: true });
+  expect(store.getState().G).not.toMatchObject({ victory: true });
 
   api.B();
-  expect(store.getState().G).toEqual({ moved: true });
+  expect(store.getState().G).toMatchObject({ moved: true });
 
   api.C();
-  expect(store.getState().G).toEqual({ victory: true });
+  expect(store.getState().G).toMatchObject({ victory: true });
 });
 
 test('local playerView', () => {

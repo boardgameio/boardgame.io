@@ -40,13 +40,13 @@ test('makeMove', () => {
   let state;
 
   state = reducer(undefined, makeMove('unknown'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('B'));
-  expect(state.G).toEqual({ moved: true });
+  expect(state.G).toMatchObject({ moved: true });
 });
 
 test('restore', () => {

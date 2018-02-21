@@ -164,11 +164,10 @@ test('action', async () => {
     G: {},
     _id: 1,
     _initial: {
-      G: {},
+      G: { _random: { seed: 0 } },
       _id: 0,
       _initial: {},
       ctx: {
-        random: { seed: 0 },
         currentPlayer: '0',
         currentPlayerMoves: 0,
         numPlayers: 2,

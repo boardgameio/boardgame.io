@@ -78,7 +78,11 @@ function Game({ name, setup, moves, playerView, flow }) {
   return {
     name,
     setup,
-    playerView,
+    playerView: (G, ctx, playerID) => {
+      // Strip _random before sending to the client.
+      const { _random, ...rest } = G; // eslint-disable-line no-unused-vars
+      return playerView(rest, ctx, playerID);
+    },
     flow,
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {

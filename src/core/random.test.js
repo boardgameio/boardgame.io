@@ -6,118 +6,59 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { randomctx, RunRandom, addrandomop, DICE, Random } from './random';
+import { genrandom, Random } from './random';
 
-test('randomctx', () => {
-  let ctx = { random: { seed: 'hi there' } };
+test('genrandom', () => {
+  const G = { _random: { seed: 'hi there' } };
 
   // make sure that on subsequent calls different numbers are generated.
-  let { ctx: ctx2, randomnumber } = randomctx(ctx);
+  let { G: G2, randomnumber } = genrandom(G);
   expect(randomnumber).toBe(0.573445922927931);
-  let { ctx: ctx3, randomnumber: randomnumber2 } = randomctx(ctx2);
+  let { G: G3, randomnumber: randomnumber2 } = genrandom(G2);
   expect(randomnumber2).toBe(0.4695413049776107);
-  let { ctx: ctx4, randomnumber: randomnumber3 } = randomctx(ctx3);
+  let { G: G4, randomnumber: randomnumber3 } = genrandom(G3);
   expect(randomnumber3).toBe(0.5943194630090147);
-  expect(ctx4).not.toMatchObject(ctx3);
-});
-
-test('RunRandom nothing to do', () => {
-  let ctx = { random: { seed: 0 } };
-  let G = {};
-
-  let { G: G2, ctx: ctx2 } = RunRandom(G, ctx);
-
-  expect(G2).toMatchObject(G);
-  expect(ctx2).toMatchObject(ctx);
-});
-
-test('RunRandom invalid op', () => {
-  let ctx = { random: { seed: 0 } };
-  let G = {};
-
-  // currently, the framework silently ignores the request.
-  const G2 = addrandomop(G, 'field1', 'XYZ');
-  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
-
-  expect(G3).toMatchObject(G);
-  expect(ctx2).toMatchObject(ctx);
-});
-
-test('Random', () => {
-  let G = {};
-  const G2 = Random.D6(G, 'field1');
-  let expectedOps = [{ op: DICE, args: [6], fieldname: 'field1' }];
-  expect(G2._randomOps).toMatchObject(expectedOps);
-
-  const G3 = Random.D6(G2, 'field2');
-  expectedOps = [...expectedOps, { op: DICE, args: [6], fieldname: 'field2' }];
-  expect(G3._randomOps).toMatchObject(expectedOps);
-
-  const G4 = Random.D6(G3, 'field1');
-  expectedOps = [...expectedOps, { op: DICE, args: [6], fieldname: 'field1' }];
-  expect(G4._randomOps).toMatchObject(expectedOps);
+  expect(G4).not.toMatchObject(G3);
 });
 
 test('predefined dice values', () => {
-  let ctx = { random: { seed: 0 } };
-  let G = {};
+  let G = { _random: { seed: 0 } };
 
   const rfns = [4, 6, 8, 10, 12, 20].map(v => {
     return { fn: Random[`D${v}`], highest: v };
   });
-  rfns.forEach(pair => {
-    // random event
-    const G2 = pair.fn(G, 'field1');
 
-    let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
-    expect(ctx).not.toMatchObject(ctx2);
-    expect(G3.field1).toBeDefined();
-    expect(G3.field1).toBeGreaterThanOrEqual(1);
-    expect(G3.field1).toBeLessThanOrEqual(pair.highest);
-    expect(G3._randomOps).toBeUndefined();
+  rfns.forEach(pair => {
+    const G2 = pair.fn(G, 'field1');
+    expect(G2.field1).toBeDefined();
+    expect(G2.field1).toBeGreaterThanOrEqual(1);
+    expect(G2.field1).toBeLessThanOrEqual(pair.highest);
   });
 });
 
 test('Random.Die', () => {
-  let ctx = { random: { seed: 0 } };
-  let G = {};
-
-  // random event - die with arbitrary spot count
+  const G = { _random: { seed: 0 } };
   const G2 = Random.Die(G, 'field1', 123);
-
-  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
-  expect(ctx).not.toMatchObject(ctx2);
-  expect(G3.field1).toBeDefined();
-  expect(G3.field1).toBe(74);
-  expect(G3._randomOps).toBeUndefined();
+  expect(G2.field1).toBeDefined();
+  expect(G2.field1).toBe(74);
 });
 
 test('Random.Number', () => {
-  let ctx = { random: { seed: 0 } };
-  let G = {};
-
-  // random event - random number
+  const G = { _random: { seed: 0 } };
   const G2 = Random.Number(G, 'field1');
-
-  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
-  expect(ctx).not.toMatchObject(ctx2);
-  expect(G3.field1).toBeDefined();
-  expect(G3.field1).toBeGreaterThanOrEqual(0);
-  expect(G3.field1).toBeLessThanOrEqual(1);
-  expect(G3._randomOps).toBeUndefined();
+  expect(G2.field1).toBeDefined();
+  expect(G2.field1).toBeGreaterThanOrEqual(0);
+  expect(G2.field1).toBeLessThanOrEqual(1);
 });
 
 test('Random.Shuffle', () => {
   const initialTiles = ['A', 'B', 'C', 'D', 'E'];
-  let ctx = { random: { seed: 'some_predetermined_seed' } };
-  let G = { tiles: initialTiles };
-
-  // random event - shuffle tiles order
-  let G2 = Random.Shuffle(G, 'tiles');
-
-  let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
-  expect(G3.tiles.length).toEqual(initialTiles.length);
-  expect(G3.tiles).toEqual(expect.arrayContaining(initialTiles));
-  expect(G3.tiles.sort()).toEqual(initialTiles);
-  expect(ctx).not.toMatchObject(ctx2);
+  const G = {
+    _random: { seed: 'some_predetermined_seed' },
+    tiles: initialTiles,
+  };
+  const G2 = Random.Shuffle(G, 'tiles');
+  expect(G2.tiles.length).toEqual(initialTiles.length);
+  expect(G2.tiles).toEqual(expect.arrayContaining(initialTiles));
+  expect(G2.tiles.sort()).toEqual(initialTiles);
 });

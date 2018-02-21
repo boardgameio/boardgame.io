@@ -83,7 +83,16 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Process the move.
-        const G = game.processMove(state.G, action.payload, state.ctx);
+        let G = game.processMove(state.G, action.payload, state.ctx);
+
+        // Undo changes to G if the move should not run on the client.
+        if (
+          multiplayer &&
+          game.flow.disableOptimisticUpdate(G, state.ctx, action.payload)
+        ) {
+          G = state.G;
+        }
+
         const log = [...state.log, action];
         state = { ...state, G, log, _id: state._id + 1 };
 
