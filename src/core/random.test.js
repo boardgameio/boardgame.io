@@ -7,6 +7,9 @@
  */
 
 import { genrandom, Random } from './random';
+import Game from './game';
+import { makeMove } from './action-creators';
+import { createGameReducer } from './reducer';
 
 test('genrandom', () => {
   const G = { _random: { seed: 'hi there' } };
@@ -61,4 +64,31 @@ test('Random.Shuffle', () => {
   expect(G2.tiles.length).toEqual(initialTiles.length);
   expect(G2.tiles).toEqual(expect.arrayContaining(initialTiles));
   expect(G2.tiles.sort()).toEqual(initialTiles);
+});
+
+test('Random API is not executed optimisitically', () => {
+  const game = Game({
+    moves: {
+      rollDie(G) {
+        return Random.D6(G, 'die');
+      },
+    },
+    flow: { seed: '0' },
+  });
+
+  {
+    const reducer = createGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G.die).not.toBeDefined();
+    state = reducer(state, makeMove('rollDie'));
+    expect(state.G).toMatchObject({ die: 4 });
+  }
+
+  {
+    const reducer = createGameReducer({ game, multiplayer: true });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G.die).not.toBeDefined();
+    state = reducer(state, makeMove('rollDie'));
+    expect(state.G.die).not.toBeDefined();
+  }
 });

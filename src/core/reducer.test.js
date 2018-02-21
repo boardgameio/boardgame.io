@@ -105,6 +105,29 @@ test('light client when multiplayer=true', () => {
   }
 });
 
+test('optimisticUpdate', () => {
+  const game = Game({
+    moves: { A: () => ({ A: true }) },
+    flow: { optimisticUpdate: () => false },
+  });
+
+  {
+    const reducer = createGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).toMatchObject({ A: true });
+  }
+
+  {
+    const reducer = createGameReducer({ game, multiplayer: true });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).not.toMatchObject({ A: true });
+  }
+});
+
 test('numPlayers', () => {
   const numPlayers = 4;
   const reducer = createGameReducer({ game, numPlayers });

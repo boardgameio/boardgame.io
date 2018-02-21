@@ -88,7 +88,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         // Undo changes to G if the move should not run on the client.
         if (
           multiplayer &&
-          game.flow.disableOptimisticUpdate(G, state.ctx, action.payload)
+          !game.flow.optimisticUpdate(G, state.ctx, action.payload)
         ) {
           G = state.G;
         }
