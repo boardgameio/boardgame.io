@@ -32,26 +32,29 @@ test('predefined dice values', () => {
   });
 
   rfns.forEach(pair => {
-    const G2 = pair.fn(G, 'field1');
-    expect(G2.field1).toBeDefined();
-    expect(G2.field1).toBeGreaterThanOrEqual(1);
-    expect(G2.field1).toBeLessThanOrEqual(pair.highest);
+    const { G: G2, result } = pair.fn(G, 'field1');
+    expect(result).toBeDefined();
+    expect(result).toBeGreaterThanOrEqual(1);
+    expect(result).toBeLessThanOrEqual(pair.highest);
+    expect(G2._random.prngstate).toBeDefined();
   });
 });
 
 test('Random.Die', () => {
   const G = { _random: { seed: 0 } };
-  const G2 = Random.Die(G, 'field1', 123);
-  expect(G2.field1).toBeDefined();
-  expect(G2.field1).toBe(74);
+  const { G: G2, result } = Random.Die(G, 123);
+  expect(result).toBeDefined();
+  expect(result).toBe(74);
+  expect(G2._random.prngstate).toBeDefined();
 });
 
 test('Random.Number', () => {
   const G = { _random: { seed: 0 } };
-  const G2 = Random.Number(G, 'field1');
-  expect(G2.field1).toBeDefined();
-  expect(G2.field1).toBeGreaterThanOrEqual(0);
-  expect(G2.field1).toBeLessThanOrEqual(1);
+  const { G: G2, result } = Random.Number(G);
+  expect(result).toBeDefined();
+  expect(result).toBeGreaterThanOrEqual(0);
+  expect(result).toBeLessThanOrEqual(1);
+  expect(G2._random.prngstate).toBeDefined();
 });
 
 test('Random.Shuffle', () => {
@@ -60,17 +63,19 @@ test('Random.Shuffle', () => {
     _random: { seed: 'some_predetermined_seed' },
     tiles: initialTiles,
   };
-  const G2 = Random.Shuffle(G, 'tiles');
-  expect(G2.tiles.length).toEqual(initialTiles.length);
-  expect(G2.tiles).toEqual(expect.arrayContaining(initialTiles));
-  expect(G2.tiles.sort()).toEqual(initialTiles);
+  const { G: G2, result } = Random.Shuffle(G, G.tiles);
+  expect(result.length).toEqual(initialTiles.length);
+  expect(result).toEqual(expect.arrayContaining(initialTiles));
+  expect(result.sort()).toEqual(initialTiles);
+  expect(G2._random.prngstate).toBeDefined();
 });
 
 test('Random API is not executed optimisitically', () => {
   const game = Game({
     moves: {
       rollDie(G) {
-        return Random.D6(G, 'die');
+        const { G: G2, result } = Random.D6(G);
+        return { ...G2, die: result };
       },
     },
     flow: { seed: '0' },

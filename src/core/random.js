@@ -49,11 +49,10 @@ const SpotValue = {
 const predefined = {};
 for (const key in SpotValue) {
   const spotvalue = SpotValue[key];
-  predefined[key] = (G, fieldname) => {
+  predefined[key] = G => {
     const { randomnumber, G: G2 } = genrandom(G);
-    const dievalue = Math.floor(randomnumber * spotvalue) + 1;
-    G2[fieldname] = dievalue;
-    return G2;
+    const result = Math.floor(randomnumber * spotvalue) + 1;
+    return { G: G2, result };
   };
 }
 
@@ -66,23 +65,21 @@ export function GenSeed() {
 export const Random = {
   ...predefined,
 
-  Die: (G, fieldname, spotvalue) => {
+  Die: (G, spotvalue) => {
     const { randomnumber, G: G2 } = genrandom(G);
-    const dievalue = Math.floor(randomnumber * spotvalue) + 1;
-    G2[fieldname] = dievalue;
-    return G2;
+    const result = Math.floor(randomnumber * spotvalue) + 1;
+    return { G: G2, result };
   },
 
-  Number: (G, fieldname) => {
-    const { randomnumber, G: G2 } = genrandom(G);
-    G2[fieldname] = randomnumber;
-    return G2;
+  Number: G => {
+    const { randomnumber: result, G: G2 } = genrandom(G);
+    return { G: G2, result };
   },
 
-  Shuffle: (G, fieldname) => {
+  Shuffle: (G, array) => {
     const { randomnumber, G: G2 } = genrandom(G);
     const rng = alea(randomnumber);
-    G2[fieldname] = shuffle(G2[fieldname], rng);
-    return G2;
+    const result = shuffle(array, rng);
+    return { G: G2, result };
   },
 };
