@@ -189,13 +189,13 @@ test('save / restore', () => {
 
   debug
     .find('.key-box')
-    .at(2)
+    .at(3)
     .simulate('click');
   expect(setItem).toHaveBeenCalled();
 
   debug
     .find('.key-box')
-    .at(3)
+    .at(4)
     .simulate('click');
   expect(getItem).toHaveBeenCalled();
 
@@ -205,7 +205,7 @@ test('save / restore', () => {
   loggedAction = null;
   debug
     .find('.key-box')
-    .at(3)
+    .at(4)
     .simulate('click');
   expect(loggedAction).toEqual(null);
 });
@@ -230,4 +230,14 @@ test('toggle Log', () => {
   Mousetrap.simulate('l');
   debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
   expect(debug.find('GameLog').length).toEqual(1);
+});
+
+test('toggle help', () => {
+  const debug = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(debug.state()).toMatchObject({ help: false });
+  Mousetrap.simulate('?');
+  expect(debug.state()).toMatchObject({ help: true });
 });
