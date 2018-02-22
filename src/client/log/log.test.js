@@ -66,20 +66,20 @@ test('GameLog rewind', () => {
     .find('.log-turn')
     .at(0)
     .simulate('mouseover');
-  expect(store.getState().G).toEqual({ arg: 1 });
+  expect(store.getState().G).toMatchObject({ arg: 1 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseout');
-  expect(store.getState().G).toEqual({ arg: 2 });
+  expect(store.getState().G).toMatchObject({ arg: 2 });
   root
     .find('.log-turn')
     .at(1)
     .simulate('mouseover');
-  expect(store.getState().G).toEqual({ arg: 42 });
+  expect(store.getState().G).toMatchObject({ arg: 42 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseout');
-  expect(store.getState().G).toEqual({ arg: 2 });
+  expect(store.getState().G).toMatchObject({ arg: 2 });
 });

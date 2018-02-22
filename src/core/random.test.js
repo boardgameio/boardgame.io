@@ -6,79 +6,72 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { genrandom, Random } from './random';
+import { random, Random, PRNGState } from './random';
 import Game from './game';
 import { makeMove } from './action-creators';
 import { createGameReducer } from './reducer';
 
-test('genrandom', () => {
-  const G = { _random: { seed: 'hi there' } };
-
-  // make sure that on subsequent calls different numbers are generated.
-  let { G: G2, randomnumber } = genrandom(G);
-  expect(randomnumber).toBe(0.573445922927931);
-  let { G: G3, randomnumber: randomnumber2 } = genrandom(G2);
-  expect(randomnumber2).toBe(0.4695413049776107);
-  let { G: G4, randomnumber: randomnumber3 } = genrandom(G3);
-  expect(randomnumber3).toBe(0.5943194630090147);
-  expect(G4).not.toMatchObject(G3);
+test('random', () => {
+  PRNGState.set({ seed: 'hi there' });
+  // make sure that subsequent calls are different.
+  expect(random()).toBe(0.573445922927931);
+  expect(random()).toBe(0.4695413049776107);
+  expect(random()).toBe(0.5943194630090147);
 });
 
 test('predefined dice values', () => {
-  let G = { _random: { seed: 0 } };
+  PRNGState.set({ seed: 0 });
 
   const rfns = [4, 6, 8, 10, 12, 20].map(v => {
     return { fn: Random[`D${v}`], highest: v };
   });
 
   rfns.forEach(pair => {
-    const { G: G2, result } = pair.fn(G, 'field1');
+    const result = pair.fn();
     expect(result).toBeDefined();
     expect(result).toBeGreaterThanOrEqual(1);
     expect(result).toBeLessThanOrEqual(pair.highest);
-    expect(G2._random.prngstate).toBeDefined();
+    expect(PRNGState.get().prngstate).toBeDefined();
   });
 });
 
 test('Random.Die', () => {
-  const G = { _random: { seed: 0 } };
-  const { G: G2, result } = Random.Die(G, 123);
+  PRNGState.set({ seed: 0 });
+  const result = Random.Die(123);
   expect(result).toBeDefined();
   expect(result).toBe(74);
-  expect(G2._random.prngstate).toBeDefined();
+  expect(PRNGState.get().prngstate).toBeDefined();
 });
 
 test('Random.Number', () => {
-  const G = { _random: { seed: 0 } };
-  const { G: G2, result } = Random.Number(G);
+  PRNGState.set({ seed: 0 });
+  const result = Random.Number();
   expect(result).toBeDefined();
   expect(result).toBeGreaterThanOrEqual(0);
   expect(result).toBeLessThanOrEqual(1);
-  expect(G2._random.prngstate).toBeDefined();
+  expect(PRNGState.get().prngstate).toBeDefined();
 });
 
 test('Random.Shuffle', () => {
+  PRNGState.set({ seed: 0 });
   const initialTiles = ['A', 'B', 'C', 'D', 'E'];
-  const G = {
-    _random: { seed: 'some_predetermined_seed' },
-    tiles: initialTiles,
-  };
-  const { G: G2, result } = Random.Shuffle(G, G.tiles);
+  const tiles = [...initialTiles];
+  const result = Random.Shuffle(tiles);
   expect(result.length).toEqual(initialTiles.length);
   expect(result).toEqual(expect.arrayContaining(initialTiles));
   expect(result.sort()).toEqual(initialTiles);
-  expect(G2._random.prngstate).toBeDefined();
+  expect(PRNGState.get().prngstate).toBeDefined();
 });
 
 test('Random API is not executed optimisitically', () => {
   const game = Game({
     moves: {
       rollDie(G) {
-        const { G: G2, result } = Random.D6(G);
-        return { ...G2, die: result };
+        const die = Random.D6();
+        return { ...G, die };
       },
     },
-    flow: { seed: '0' },
+    flow: { seed: 0 },
   });
 
   {

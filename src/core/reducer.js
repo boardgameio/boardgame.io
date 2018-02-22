@@ -70,15 +70,15 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Init PRNG state.
-        PRNGState.set(G._random);
+        PRNGState.set(state.G._random);
 
-        const { G, ctx } = game.flow.processGameEvent(
+        let { G, ctx } = game.flow.processGameEvent(
           { G: state.G, ctx: state.ctx },
           action.payload
         );
 
         // Update PRNG state.
-        G._random = PRNGState.get();
+        G = { ...G, _random: PRNGState.get() };
 
         const log = [...state.log, action];
         return { ...state, G, ctx, log, _id: state._id + 1 };
@@ -104,6 +104,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           G = state.G;
         }
 
+        // Update PRNG state.
+        G = { ...G, _random: PRNGState.get() };
+
         const log = [...state.log, action];
         state = { ...state, G, log, _id: state._id + 1 };
 
@@ -112,7 +115,6 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         // These will be processed on the server, which
         // will send back a state update.
         if (multiplayer) {
-          state.G._random = PRNGState.get();
           return state;
         }
 
