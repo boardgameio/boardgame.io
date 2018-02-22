@@ -183,7 +183,7 @@ test('action', async () => {
       numPlayers: 2,
       phase: 'default',
       turn: 1,
-      _random: { seed: 0 },
+      _random: undefined,
     },
     log: [
       {
