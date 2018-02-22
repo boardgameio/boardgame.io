@@ -27,8 +27,7 @@ import { Random } from 'boardgame.io/core';
 Game({
   moves: {
     rollDie(G, ctx) {
-      const result = Random.D6();
-      return { ...G, result };
+      return { ...G, dice: Random.D6() };
     },
   },
 });
@@ -66,17 +65,12 @@ The library uses a `seed` in `ctx._random` that is stripped before it
 is sent to the client. All the code that needs randomness uses this
 `seed` to generate random numbers.
 
-You can override the initial `seed` in the `flow` section like this:
+You can override the initial `seed` like this:
 
 ```js
 Game({
+  seed: <somevalue>
   ...
-
-  flow: {
-    seed: <somevalue>
-
-    ...
-  }
 })
 ```
 
