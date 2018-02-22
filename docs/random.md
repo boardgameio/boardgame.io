@@ -27,19 +27,15 @@ import { Random } from 'boardgame.io/core';
 Game({
   moves: {
     rollDie(G, ctx) {
-      const { G: G2, result } = Random.D6(G);
-      return { ...G2, result };
+      const result = Random.D6();
+      return { ...G, result };
     },
   },
 });
 ```
 
-The PRNG state is maintained inside `G._random` by the `Random`
-package.
-
-!> Make sure you don't discard `G` from a `Random` call. If you do,
-you will notice that you receive the same random numbers on
-subsequent calls.
+!> The PRNG state is maintained inside `ctx._random` by the `Random`
+package automatically.
 
 ### Shuffles
 
@@ -58,8 +54,7 @@ const SomeGame = Game({
   }),
   moves: {
     shuffleDeck(G) {
-      const { G: G2, result: deck } = Random.Shuffle(G, G.deck);
-      return { ...G2, deck };
+      return { ...G, deck: Random.Shuffle(G.deck) };
     },
   },
 });
@@ -67,7 +62,7 @@ const SomeGame = Game({
 
 ### Seed
 
-The library uses a `seed` in `G._random` that is stripped before it
+The library uses a `seed` in `ctx._random` that is stripped before it
 is sent to the client. All the code that needs randomness uses this
 `seed` to generate random numbers.
 
