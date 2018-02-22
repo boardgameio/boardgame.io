@@ -8,6 +8,12 @@
 
 import { randomctx, RunRandom, addrandomop, DICE, Random } from './random';
 
+function checkrandom(value, min, max) {
+  expect(value).toBeDefined();
+  expect(value).toBeGreaterThanOrEqual(min);
+  expect(value).toBeLessThanOrEqual(max);
+}
+
 test('randomctx', () => {
   let ctx = { random: { seed: 'hi there' } };
 
@@ -41,6 +47,7 @@ test('RunRandom invalid op', () => {
 
   expect(G3).toMatchObject(G);
   expect(ctx2).toMatchObject(ctx);
+  expect(G3._randomOps).toBeUndefined();
 });
 
 test('Random', () => {
@@ -71,10 +78,7 @@ test('predefined dice values', () => {
 
     let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
     expect(ctx).not.toMatchObject(ctx2);
-    expect(G3.field1).toBeDefined();
-    expect(G3.field1).toBeGreaterThanOrEqual(1);
-    expect(G3.field1).toBeLessThanOrEqual(pair.highest);
-    expect(G3._randomOps).toBeUndefined();
+    checkrandom(G3.field1, 1, pair.highest);
   });
 });
 
@@ -84,12 +88,14 @@ test('Random.Die', () => {
 
   // random event - die with arbitrary spot count
   const G2 = Random.Die(G, 'field1', 123);
-
   let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
-  expect(G3.field1).toBeDefined();
-  expect(G3.field1).toBe(74);
-  expect(G3._randomOps).toBeUndefined();
+  checkrandom(G3.field1, 74, 74);
+  // same with a deep field
+  const G4 = Random.Die({ a: { b: {} } }, 'a.b.c', 123);
+  let { G: G5, ctx: ctx3 } = RunRandom(G4, ctx);
+  expect(ctx).not.toMatchObject(ctx3);
+  checkrandom(G5.a.b.c, 74, 74);
 });
 
 test('Random.Number', () => {
@@ -98,13 +104,14 @@ test('Random.Number', () => {
 
   // random event - random number
   const G2 = Random.Number(G, 'field1');
-
   let { G: G3, ctx: ctx2 } = RunRandom(G2, ctx);
   expect(ctx).not.toMatchObject(ctx2);
-  expect(G3.field1).toBeDefined();
-  expect(G3.field1).toBeGreaterThanOrEqual(0);
-  expect(G3.field1).toBeLessThanOrEqual(1);
-  expect(G3._randomOps).toBeUndefined();
+  checkrandom(G3.field1, 0, 1);
+  // same with a deep field
+  const G4 = Random.Number({ a: { b: {} } }, 'a.b.c', 123);
+  let { G: G5, ctx: ctx3 } = RunRandom(G4, ctx);
+  expect(ctx).not.toMatchObject(ctx3);
+  checkrandom(G5.a.b.c, 0, 1);
 });
 
 test('Random.Shuffle', () => {
@@ -120,4 +127,22 @@ test('Random.Shuffle', () => {
   expect(G3.tiles).toEqual(expect.arrayContaining(initialTiles));
   expect(G3.tiles.sort()).toEqual(initialTiles);
   expect(ctx).not.toMatchObject(ctx2);
+});
+
+test('Random.Shuffle works on a nested attribute', () => {
+  let ctx = { random: { seed: 'some_predetermined_seed' } };
+  const tiles = ['A', 'B', 'C', 'D', 'E'];
+  let G = {
+    players: {
+      0: tiles,
+      1: tiles,
+    },
+  };
+
+  let G2 = Random.Shuffle(G, 'players.1');
+  let { G: G3 } = RunRandom(G2, ctx);
+  expect(G.players['0']).toMatchObject(tiles);
+  expect(G.players['1']).toMatchObject(tiles); // this was the tricky one :(
+  expect(G3.players['0']).toMatchObject(tiles);
+  expect(G3.players['1']).not.toMatchObject(tiles);
 });
