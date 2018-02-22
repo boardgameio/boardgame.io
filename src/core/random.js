@@ -7,7 +7,6 @@
  */
 
 import { alea } from './random.alea';
-import shuffle from 'fast-shuffle';
 
 class _PRNGState {
   constructor() {
@@ -91,7 +90,18 @@ export const Random = {
     return random();
   },
 
-  Shuffle: array => {
-    return shuffle(array, alea(random()));
+  Shuffle: deck => {
+    let clone = deck.slice(0);
+    let srcIndex = deck.length;
+    let dstIndex = 0;
+    let shuffled = new Array(srcIndex);
+
+    while (srcIndex) {
+      let randIndex = (srcIndex * random()) | 0;
+      shuffled[dstIndex++] = clone[randIndex];
+      clone[randIndex] = clone[--srcIndex];
+    }
+
+    return shuffled;
   },
 };
