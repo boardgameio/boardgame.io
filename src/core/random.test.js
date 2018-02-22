@@ -65,10 +65,10 @@ test('Random.Shuffle', () => {
 
 test('Random API is not executed optimisitically', () => {
   const game = Game({
+    seed: 0,
     moves: {
       rollDie: G => ({ ...G, die: Random.D6() }),
     },
-    flow: { seed: 0 },
   });
 
   {

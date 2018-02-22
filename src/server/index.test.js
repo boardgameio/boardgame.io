@@ -57,9 +57,7 @@ jest.mock('koa-socket', () => {
   return MockIO;
 });
 
-const game = Game({
-  flow: { seed: 0 },
-});
+const game = Game({ seed: 0 });
 
 test('basic', () => {
   const server = Server({ games: [game] });

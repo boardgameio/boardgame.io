@@ -43,6 +43,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
+  // Initialize PRNG seed.
+  initial.ctx._random = { seed: game.seed };
+
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
 
   initial.G = state.G;
