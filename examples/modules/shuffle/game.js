@@ -16,7 +16,7 @@ const Shuffle = Game({
   }),
 
   moves: {
-    shuffle: G => Random.Shuffle(G, 'deck'),
+    shuffle: G => ({ ...G, deck: Random.Shuffle(G.deck) }),
   },
 });
 

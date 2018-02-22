@@ -9,31 +9,51 @@
 import { alea } from './random.alea';
 import shuffle from 'fast-shuffle';
 
-export function genrandom(G) {
-  let randomfn;
-  if (G._random === undefined || G._random.prngstate === undefined) {
+class _PRNGState {
+  constructor() {
+    this.R = undefined;
+  }
+  get() {
+    return this.R;
+  }
+  set(R) {
+    this.R = R;
+  }
+}
+
+// Singleton that contains the PRNG state.
+export const PRNGState = new _PRNGState();
+
+/**
+ * Return a random number.
+ *
+ * Rehydrates the PRNG from PRNGState if possible.
+ */
+export function random() {
+  const R = PRNGState.get();
+
+  let fn;
+  if (R === undefined || R.prngstate === undefined) {
     // If we are on the client, the seed is not present.
     // Just use a temporary seed to execute the move without
     // crashing it. The move state itself is discarded,
     // so the actual value doesn't matter.
-    const seed = (G._random && G._random.seed) || '0';
+    const seed = (R && R.seed) || '0';
 
     // No call to a random function has been made.
-    randomfn = new alea(seed, { state: true });
+    fn = new alea(seed, { state: true });
   } else {
-    randomfn = new alea('', { state: G._random.prngstate });
+    fn = new alea('', { state: R.prngstate });
   }
 
-  return {
-    randomnumber: randomfn(),
-    G: {
-      ...G,
-      _random: {
-        ...G._random,
-        prngstate: randomfn.state(),
-      },
-    },
-  };
+  const number = fn();
+
+  PRNGState.set({
+    ...R,
+    prngstate: fn.state(),
+  });
+
+  return number;
 }
 
 const SpotValue = {
@@ -45,14 +65,12 @@ const SpotValue = {
   D20: 20,
 };
 
-// generate functions for predefined dice values D4 - D20
+// Generate functions for predefined dice values D4 - D20.
 const predefined = {};
 for (const key in SpotValue) {
   const spotvalue = SpotValue[key];
-  predefined[key] = G => {
-    const { randomnumber, G: G2 } = genrandom(G);
-    const result = Math.floor(randomnumber * spotvalue) + 1;
-    return { G: G2, result };
+  predefined[key] = () => {
+    return Math.floor(random() * spotvalue) + 1;
   };
 }
 
@@ -65,21 +83,15 @@ export function GenSeed() {
 export const Random = {
   ...predefined,
 
-  Die: (G, spotvalue) => {
-    const { randomnumber, G: G2 } = genrandom(G);
-    const result = Math.floor(randomnumber * spotvalue) + 1;
-    return { G: G2, result };
+  Die: spotvalue => {
+    return Math.floor(random() * spotvalue) + 1;
   },
 
-  Number: G => {
-    const { randomnumber: result, G: G2 } = genrandom(G);
-    return { G: G2, result };
+  Number: () => {
+    return random();
   },
 
-  Shuffle: (G, array) => {
-    const { randomnumber, G: G2 } = genrandom(G);
-    const rng = alea(randomnumber);
-    const result = shuffle(array, rng);
-    return { G: G2, result };
+  Shuffle: array => {
+    return shuffle(array, alea(random()));
   },
 };

@@ -7,6 +7,7 @@
  */
 
 import * as Actions from './action-types';
+import { PRNGState } from './random';
 
 /**
  * createGameReducer
@@ -68,10 +69,17 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        // Init PRNG state.
+        PRNGState.set(G._random);
+
         const { G, ctx } = game.flow.processGameEvent(
           { G: state.G, ctx: state.ctx },
           action.payload
         );
+
+        // Update PRNG state.
+        G._random = PRNGState.get();
+
         const log = [...state.log, action];
         return { ...state, G, ctx, log, _id: state._id + 1 };
       }
@@ -81,6 +89,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         if (!game.flow.validator(state.G, state.ctx, action.payload)) {
           return state;
         }
+
+        // Init PRNG state.
+        PRNGState.set(state.G._random);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, state.ctx);
@@ -101,11 +112,17 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         // These will be processed on the server, which
         // will send back a state update.
         if (multiplayer) {
+          state.G._random = PRNGState.get();
           return state;
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        return game.flow.processMove(state, action);
+        state = game.flow.processMove(state, action);
+
+        // Update PRNG state.
+        state = { ...state, G: { ...state.G, _random: PRNGState.get() } };
+
+        return state;
       }
 
       case Actions.RESTORE: {
