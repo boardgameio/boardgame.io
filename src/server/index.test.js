@@ -164,7 +164,7 @@ test('action', async () => {
     G: {},
     _id: 1,
     _initial: {
-      G: { _random: { seed: 0 } },
+      G: {},
       _id: 0,
       _initial: {},
       ctx: {
@@ -173,6 +173,7 @@ test('action', async () => {
         numPlayers: 2,
         phase: 'default',
         turn: 0,
+        _random: { seed: 0 },
       },
       log: [],
     },
@@ -182,6 +183,7 @@ test('action', async () => {
       numPlayers: 2,
       phase: 'default',
       turn: 1,
+      _random: { seed: 0 },
     },
     log: [
       {

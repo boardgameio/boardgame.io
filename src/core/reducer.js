@@ -70,7 +70,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Init PRNG state.
-        PRNGState.set(state.G._random);
+        PRNGState.set(state.ctx._random);
 
         let { G, ctx } = game.flow.processGameEvent(
           { G: state.G, ctx: state.ctx },
@@ -78,7 +78,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         );
 
         // Update PRNG state.
-        G = { ...G, _random: PRNGState.get() };
+        ctx = { ...ctx, _random: PRNGState.get() };
 
         const log = [...state.log, action];
         return { ...state, G, ctx, log, _id: state._id + 1 };
@@ -91,24 +91,23 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Init PRNG state.
-        PRNGState.set(state.G._random);
+        PRNGState.set(state.ctx._random);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, state.ctx);
+        // Update PRNG state.
+        const ctx = { ...state.ctx, _random: PRNGState.get() };
 
         // Undo changes to G if the move should not run on the client.
         if (
           multiplayer &&
-          !game.flow.optimisticUpdate(G, state.ctx, action.payload)
+          !game.flow.optimisticUpdate(G, ctx, action.payload)
         ) {
           G = state.G;
         }
 
-        // Update PRNG state.
-        G = { ...G, _random: PRNGState.get() };
-
         const log = [...state.log, action];
-        state = { ...state, G, log, _id: state._id + 1 };
+        state = { ...state, G, ctx, log, _id: state._id + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -122,7 +121,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         state = game.flow.processMove(state, action);
 
         // Update PRNG state.
-        state = { ...state, G: { ...state.G, _random: PRNGState.get() } };
+        state = { ...state, ctx: { ...state.ctx, _random: PRNGState.get() } };
 
         return state;
       }
