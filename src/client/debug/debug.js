@@ -189,10 +189,6 @@ export class KeyboardShortcut extends React.Component {
  * and allows you to save / restore from localStorage.
  */
 export class Debug extends React.Component {
-  static contextTypes = {
-    store: PropTypes.any,
-  };
-
   static propTypes = {
     gamestate: PropTypes.shape({
       G: PropTypes.any.isRequired,
@@ -206,6 +202,7 @@ export class Debug extends React.Component {
     events: PropTypes.any,
     restore: PropTypes.func,
     showLog: PropTypes.bool,
+    store: PropTypes.any,
   };
 
   constructor(props) {
@@ -301,7 +298,7 @@ export class Debug extends React.Component {
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
       const gamestate = JSON.parse(gamestateJSON);
-      this.context.store.dispatch(restore(gamestate));
+      this.props.store.dispatch(restore(gamestate));
     }
   };
 
@@ -449,10 +446,7 @@ export class Debug extends React.Component {
 
         {this.state.showLog && (
           <section>
-            <GameLog
-              log={this.props.gamestate.log}
-              initialState={this.props.gamestate._initial}
-            />
+            <GameLog store={this.props.store} />
           </section>
         )}
       </div>

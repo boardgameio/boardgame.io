@@ -28,7 +28,6 @@ const globals = {
   react: 'React',
   redux: 'Redux',
   'prop-types': 'PropTypes',
-  'react-redux': 'ReactRedux',
   'react-json-view': 'ReactJson',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
