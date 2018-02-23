@@ -73,12 +73,21 @@ for (const key in SpotValue) {
   };
 }
 
+/**
+ * GenSeed
+ *
+ * Generates a new seed that's used in case none is
+ * passed in.
+ */
 export function GenSeed() {
   return (+new Date()).toString(36).slice(-10);
 }
 
-// Public API that's imported like:
-// import { Random } from 'boardgame.io/core';
+/**
+ * Random
+ *
+ * Public API.
+ */
 export const Random = {
   ...predefined,
 

@@ -165,17 +165,16 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
             ) {
               isActive = false;
             }
-          } else {
-            // Secrets are normally stripped on the server,
-            // but we also strip them here in local games so
-            // that game developers can see their effects
-            // while prototyping.
-            let playerID = this.props.playerID;
-            if (!playerID && state.ctx.currentPlayer != 'any') {
-              playerID = state.ctx.currentPlayer;
-            }
-            G = game.playerView(G, state.ctx, playerID);
           }
+
+          // Secrets are normally stripped on the server,
+          // but we also strip them here so that game developers
+          // can see their effects while prototyping.
+          let playerID = this.props.playerID;
+          if (!multiplayer && !playerID && state.ctx.currentPlayer != 'any') {
+            playerID = state.ctx.currentPlayer;
+          }
+          G = game.playerView(G, state.ctx, playerID);
 
           if (state.ctx.gameover !== undefined) {
             isActive = false;
