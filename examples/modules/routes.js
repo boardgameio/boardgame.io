@@ -10,7 +10,7 @@ import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
 import phases from './phases';
 import liars_dice from './liars-dice';
-import shuffle from './shuffle';
+import random from './random';
 
 const routes = [
   {
@@ -30,8 +30,8 @@ const routes = [
     routes: liars_dice.routes,
   },
   {
-    name: 'Shuffle',
-    routes: shuffle.routes,
+    name: 'Random API',
+    routes: random.routes,
   },
 ];
 
