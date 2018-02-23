@@ -89,16 +89,44 @@ export function GenSeed() {
  * Public API.
  */
 export const Random = {
+  /**
+   * Similar to Die below, but with fixed spot values.
+   *
+   * D4: () => value
+   * D6: () => value
+   * D8: () => value
+   * D10: () => value
+   * D12: () => value
+   * D20: () => value
+   */
   ...predefined,
 
+  /**
+   * Roll a die of specified spot value.
+   *
+   * @param {number} spotvalue - The die dimension (default: 6).
+   */
   Die: spotvalue => {
+    if (spotvalue === undefined) {
+      spotvalue = 6;
+    }
+
     return Math.floor(random() * spotvalue) + 1;
   },
 
+  /**
+   * Generate a random number between 0 and 1.
+   */
   Number: () => {
     return random();
   },
 
+  /**
+   * Shuffle an array.
+   *
+   * @param {Array} deck - The array to shuffle. Does not mutate
+   *                       the input, but returns the shuffled array.
+   */
   Shuffle: deck => {
     let clone = deck.slice(0);
     let srcIndex = deck.length;

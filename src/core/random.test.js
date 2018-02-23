@@ -37,10 +37,20 @@ test('predefined dice values', () => {
 
 test('Random.Die', () => {
   PRNGState.set({ seed: 0 });
-  const result = Random.Die(123);
-  expect(result).toBeDefined();
-  expect(result).toBe(74);
-  expect(PRNGState.get().prngstate).toBeDefined();
+
+  {
+    const result = Random.Die(123);
+    expect(result).toBeDefined();
+    expect(result).toBe(74);
+    expect(PRNGState.get().prngstate).toBeDefined();
+  }
+
+  {
+    const result = Random.Die();
+    expect(result).toBeDefined();
+    expect(result).toBeLessThanOrEqual(6);
+    expect(PRNGState.get().prngstate).toBeDefined();
+  }
 });
 
 test('Random.Number', () => {
