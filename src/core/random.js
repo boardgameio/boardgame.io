@@ -7,86 +7,52 @@
  */
 
 import { alea } from './random.alea';
-import shuffle from 'fast-shuffle';
 
-export const DICE = 'DICE';
-export const NUMBER = 'NUMBER';
-export const SHUFFLE = 'SHUFFLE';
+class _PRNGState {
+  constructor() {
+    this.R = undefined;
+  }
+  get() {
+    return this.R;
+  }
+  set(R) {
+    this.R = R;
+  }
+}
 
-function getrandomfn(ctx) {
-  let randomfn;
-  if (ctx.random === undefined || ctx.random.prngstate === undefined) {
-    // no call to a random function has been made.
-    // pre-populate the state info
-    randomfn = new alea(ctx.random.seed, { state: true });
+// Singleton that contains the PRNG state.
+export const PRNGState = new _PRNGState();
+
+/**
+ * Return a random number.
+ *
+ * Rehydrates the PRNG from PRNGState if possible.
+ */
+export function random() {
+  const R = PRNGState.get();
+
+  let fn;
+  if (R === undefined || R.prngstate === undefined) {
+    // If we are on the client, the seed is not present.
+    // Just use a temporary seed to execute the move without
+    // crashing it. The move state itself is discarded,
+    // so the actual value doesn't matter.
+    const seed = (R && R.seed) || '0';
+
+    // No call to a random function has been made.
+    fn = new alea(seed, { state: true });
   } else {
-    randomfn = new alea('', { state: ctx.random.prngstate });
-  }
-  return randomfn;
-}
-
-export function randomctx(ctx) {
-  const r = getrandomfn(ctx);
-  return {
-    randomnumber: r(),
-    ctx: {
-      ...ctx,
-      random: {
-        ...ctx.random,
-        prngstate: r.state(),
-      },
-    },
-  };
-}
-
-export function addrandomop(G, fieldname, op, ...args) {
-  let rop = [{ op, fieldname, args }];
-  let _randomOps = [...(G._randomOps || []), ...rop];
-  return { ...G, _randomOps };
-}
-
-export function evaluaterandomops(G, ctx) {
-  let randomresults = {};
-  let ctx2 = ctx;
-
-  // some flow tests run without a defined G
-  if (G && G._randomOps !== undefined) {
-    G._randomOps.forEach(r => {
-      const { ctx: ctx3, randomnumber } = randomctx(ctx2);
-      ctx2 = ctx3;
-
-      switch (r.op) {
-        case DICE: {
-          const spotvalue = r.args[0];
-          const dievalue = Math.floor(randomnumber * spotvalue) + 1;
-          randomresults[r.fieldname] = dievalue;
-          break;
-        }
-
-        case NUMBER: {
-          randomresults[r.fieldname] = randomnumber;
-          break;
-        }
-
-        case SHUFFLE: {
-          const rng = alea(randomnumber);
-          G[r.fieldname] = shuffle(G[r.fieldname], rng);
-          break;
-        }
-
-        default:
-          break;
-      }
-    });
+    fn = new alea('', { state: R.prngstate });
   }
 
-  return { randomresults, ctx: ctx2 };
-}
+  const number = fn();
 
-export function RunRandom(G, ctx) {
-  let { randomresults, ctx: ctx2 } = evaluaterandomops(G, ctx);
-  const G2 = { ...G, ...randomresults, _randomOps: undefined };
-  return { G: G2, ctx: ctx2 };
+  PRNGState.set({
+    ...R,
+    prngstate: fn.state(),
+  });
+
+  return number;
 }
 
 const SpotValue = {
@@ -98,33 +64,81 @@ const SpotValue = {
   D20: 20,
 };
 
-// generate functions for predefined dice values D4 - D20
+// Generate functions for predefined dice values D4 - D20.
 const predefined = {};
 for (const key in SpotValue) {
-  const value = SpotValue[key];
-  predefined[key] = (G, fieldname) => {
-    return addrandomop(G, fieldname, DICE, value);
+  const spotvalue = SpotValue[key];
+  predefined[key] = () => {
+    return Math.floor(random() * spotvalue) + 1;
   };
 }
 
+/**
+ * GenSeed
+ *
+ * Generates a new seed that's used in case none is
+ * passed in.
+ */
 export function GenSeed() {
   return (+new Date()).toString(36).slice(-10);
 }
 
-// Public API that's imported like:
-// import { Random } from 'boardgame.io/core';
+/**
+ * Random
+ *
+ * Public API.
+ */
 export const Random = {
+  /**
+   * Similar to Die below, but with fixed spot values.
+   *
+   * D4: () => value
+   * D6: () => value
+   * D8: () => value
+   * D10: () => value
+   * D12: () => value
+   * D20: () => value
+   */
   ...predefined,
 
-  Die: (G, fieldname, spotvalue) => {
-    return addrandomop(G, fieldname, DICE, spotvalue);
+  /**
+   * Roll a die of specified spot value.
+   *
+   * @param {number} spotvalue - The die dimension (default: 6).
+   */
+  Die: spotvalue => {
+    if (spotvalue === undefined) {
+      spotvalue = 6;
+    }
+
+    return Math.floor(random() * spotvalue) + 1;
   },
 
-  Number: (G, fieldname) => {
-    return addrandomop(G, fieldname, NUMBER);
+  /**
+   * Generate a random number between 0 and 1.
+   */
+  Number: () => {
+    return random();
   },
 
-  Shuffle: (G, fieldname) => {
-    return addrandomop(G, fieldname, SHUFFLE);
+  /**
+   * Shuffle an array.
+   *
+   * @param {Array} deck - The array to shuffle. Does not mutate
+   *                       the input, but returns the shuffled array.
+   */
+  Shuffle: deck => {
+    let clone = deck.slice(0);
+    let srcIndex = deck.length;
+    let dstIndex = 0;
+    let shuffled = new Array(srcIndex);
+
+    while (srcIndex) {
+      let randIndex = (srcIndex * random()) | 0;
+      shuffled[dstIndex++] = clone[randIndex];
+      clone[randIndex] = clone[--srcIndex];
+    }
+
+    return shuffled;
   },
 };

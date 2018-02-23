@@ -40,13 +40,13 @@ test('makeMove', () => {
   let state;
 
   state = reducer(undefined, makeMove('unknown'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('B'));
-  expect(state.G).toEqual({ moved: true });
+  expect(state.G).toMatchObject({ moved: true });
 });
 
 test('restore', () => {
@@ -102,6 +102,29 @@ test('light client when multiplayer=true', () => {
     expect(state.ctx.gameover).toBe(undefined);
     state = reducer(state, makeMove('A'));
     expect(state.ctx.gameover).toBe(undefined);
+  }
+});
+
+test('optimisticUpdate', () => {
+  const game = Game({
+    moves: { A: () => ({ A: true }) },
+    flow: { optimisticUpdate: () => false },
+  });
+
+  {
+    const reducer = createGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).toMatchObject({ A: true });
+  }
+
+  {
+    const reducer = createGameReducer({ game, multiplayer: true });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).not.toMatchObject({ A: true });
   }
 });
 
