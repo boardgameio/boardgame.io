@@ -12,7 +12,6 @@ import Game from '../../core/game';
 import { GameLog } from './log';
 import { createGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
-import { Provider } from 'react-redux';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -25,7 +24,12 @@ test('GameLog', () => {
     makeMove('moveB'),
     gameEvent('endTurn'),
   ];
-  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
+
+  const store = {
+    getState: () => ({ log }),
+  };
+
+  const gamelog = Enzyme.mount(<GameLog store={store} />);
   const turns = gamelog.find('.id').map(div => div.text());
   expect(turns).toEqual(['Turn #1', 'Turn #2']);
 });
@@ -52,14 +56,7 @@ test('GameLog rewind', () => {
   store.dispatch(makeMove('A', [2]));
   store.dispatch(gameEvent('endTurn'));
 
-  const root = Enzyme.mount(
-    <Provider store={store}>
-      <GameLog
-        log={store.getState().log}
-        initialState={store.getState()._initial}
-      />
-    </Provider>
-  );
+  const root = Enzyme.mount(<GameLog store={store} />);
 
   expect(store.getState().G).toMatchObject({ arg: 2 });
   root

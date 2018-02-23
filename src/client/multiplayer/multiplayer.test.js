@@ -43,20 +43,24 @@ test('connection status', () => {
     playerID: 0,
     gameName: 'foo',
     numPlayers: 2,
-    onChange: onChangeMock,
   });
-  const game = Game({});
-  m.createStore(createGameReducer({ game }));
+  m.subscribe(onChangeMock);
+  m.connect();
+
   mockSocket.callbacks['connect']();
-  expect(onChangeMock).lastCalledWith(true);
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toBe(true);
+
   onChangeMock.mockClear();
   mockSocket.callbacks['disconnect']();
-  expect(onChangeMock).lastCalledWith(false);
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toBe(false);
 });
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer({ socket: mockSocket });
+  m.connect();
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -119,10 +123,12 @@ test('game server is set when provided', () => {
   var server = hostname + ':' + port;
 
   const m = new Multiplayer({ server });
+  m.connect();
   expect(m.socket.io.engine.hostname).toEqual(hostname);
   expect(m.socket.io.engine.port).toEqual(port);
 
   const m2 = new Multiplayer();
+  m2.connect();
   expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
   expect(m2.socket.io.engine.port).not.toEqual(port);
 });
