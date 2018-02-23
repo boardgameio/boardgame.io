@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, Random, PlayerView } from 'boardgame.io/core';
+import { Game, Random } from 'boardgame.io/core';
 
 const LiarsDice = Game({
   name: 'liars-dice',
@@ -22,27 +22,25 @@ const LiarsDice = Game({
   }),
 
   moves: {
-    bid: (G, ctx, id) => {
-      const cells = [...G.cells];
-      if (cells[id] === null) {
-        cells[id] = ctx.currentPlayer;
-      }
-      return { ...G, cells };
-    },
+    bid: G => G,
     challenge: G => G, // TODO
-    roll: (G, ctx) => ({
-      ...G,
-      players: {
-        ...G.players,
-        [ctx.currentPlayer]: [
-          Random.D6(),
-          Random.D6(),
-          Random.D6(),
-          Random.D6(),
-          Random.D6(),
-        ],
-      },
-    }),
+    roll: (G, ctx) => {
+      const newG = {
+        ...G,
+        players: {
+          ...G.players,
+          [ctx.currentPlayer]: [
+            Random.D6(),
+            Random.D6(),
+            Random.D6(),
+            Random.D6(),
+            Random.D6(),
+          ],
+        },
+      };
+      console.log(newG);
+      return newG;
+    },
   },
 
   flow: {
@@ -59,11 +57,13 @@ const LiarsDice = Game({
     ],
   },
 
-  playerView: (g, ctx, pid) => {
-    if (pid === null) {
-      return g;
-    }
-    return PlayerView.STRIP_SECRETS(g, ctx, pid);
+  playerView: (G, ctx, pid) => {
+    console.log(G, ctx, pid);
+    // if (pid === null) {
+    //   return G;
+    // }
+    return G;
+    // return PlayerView.STRIP_SECRETS(G, ctx, pid);
   },
 });
 

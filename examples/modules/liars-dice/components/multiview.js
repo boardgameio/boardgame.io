@@ -13,9 +13,8 @@ import Board from './board';
 
 const App = Client({
   game: Game,
-  numPlayers: 3,
   board: Board,
-  debug: false,
+  debug: true,
   multiplayer: true,
 });
 
@@ -30,10 +29,6 @@ const Multiview = () => (
       <div className="run">
         &lt;App playerID=&quot;1&quot;/&gt;
         <App gameID="liarsDice" playerID="1" />
-      </div>
-      <div className="run">
-        &lt;App playerID=&quot;2&quot;/&gt;
-        <App gameID="liarsDice" playerID="2" />
       </div>
       <div className="run">
         Spectator View
