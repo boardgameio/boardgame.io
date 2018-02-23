@@ -32,10 +32,12 @@
     "dist/boardgameio.es.js",
     "dist/server.js",
     "dist/client.js",
+    "dist/react.js",
     "dist/core.js",
     "dist/ui.js",
     "server.js",
     "client.js",
+    "react.js",
     "core.js",
     "ui.js"
   ],
@@ -116,7 +118,6 @@
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
     "react-json-view": "^1.13.0",
-    "react-redux": "^5.0.6",
     "redux": "^3.7.2",
     "socket.io": "^2.0.3"
   },
@@ -126,6 +127,7 @@
   "config": {
     "exportAliases": {
       "client": "./dist/client.js",
+      "react": "./dist/react.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
       "ui": "./dist/ui.js"

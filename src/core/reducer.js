@@ -7,6 +7,7 @@
  */
 
 import * as Actions from './action-types';
+import { PRNGState } from './random';
 
 /**
  * createGameReducer
@@ -42,6 +43,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
+  // Initialize PRNG seed.
+  initial.ctx._random = { seed: game.seed };
+
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
 
   initial.G = state.G;
@@ -68,10 +72,17 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        const { G, ctx } = game.flow.processGameEvent(
+        // Init PRNG state.
+        PRNGState.set(state.ctx._random);
+
+        let { G, ctx } = game.flow.processGameEvent(
           { G: state.G, ctx: state.ctx },
           action.payload
         );
+
+        // Update PRNG state.
+        ctx = { ...ctx, _random: PRNGState.get() };
+
         const log = [...state.log, action];
         return { ...state, G, ctx, log, _id: state._id + 1 };
       }
@@ -82,10 +93,24 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        // Init PRNG state.
+        PRNGState.set(state.ctx._random);
+
         // Process the move.
-        const G = game.processMove(state.G, action.payload, state.ctx);
+        let G = game.processMove(state.G, action.payload, state.ctx);
+        // Update PRNG state.
+        const ctx = { ...state.ctx, _random: PRNGState.get() };
+
+        // Undo changes to G if the move should not run on the client.
+        if (
+          multiplayer &&
+          !game.flow.optimisticUpdate(G, ctx, action.payload)
+        ) {
+          G = state.G;
+        }
+
         const log = [...state.log, action];
-        state = { ...state, G, log, _id: state._id + 1 };
+        state = { ...state, G, ctx, log, _id: state._id + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -96,7 +121,12 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        return game.flow.processMove(state, action);
+        state = game.flow.processMove(state, action);
+
+        // Update PRNG state.
+        state = { ...state, ctx: { ...state.ctx, _random: PRNGState.get() } };
+
+        return state;
       }
 
       case Actions.RESTORE: {
