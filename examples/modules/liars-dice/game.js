@@ -59,7 +59,12 @@ const LiarsDice = Game({
     ],
   },
 
-  playerView: PlayerView.STRIP_SECRETS,
+  playerView: (g, ctx, pid) => {
+    if (pid === null) {
+      return g;
+    }
+    return PlayerView.STRIP_SECRETS(g, ctx, pid);
+  },
 });
 
 export default LiarsDice;
