@@ -8,7 +8,7 @@
 
 import { Game, Random } from 'boardgame.io/core';
 
-const Shuffle = Game({
+const RandomExample = Game({
   name: 'shuffle',
 
   setup: () => ({
@@ -17,7 +17,9 @@ const Shuffle = Game({
 
   moves: {
     shuffle: G => ({ ...G, deck: Random.Shuffle(G.deck) }),
+    rollDie: (G, ctx, value) => ({ ...G, dice: Random.Die(value) }),
+    rollD6: G => ({ ...G, dice: Random.D6() }),
   },
 });
 
-export default Shuffle;
+export default RandomExample;
