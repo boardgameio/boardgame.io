@@ -30,15 +30,19 @@ const LiarsDice = Game({
       return { ...G, cells };
     },
     challenge: G => G, // TODO
-    roll: G => {
-      let ops = G;
-      ops = Random.D6(ops, 'dieValue1');
-      ops = Random.D6(ops, 'dieValue2');
-      ops = Random.D6(ops, 'dieValue3');
-      ops = Random.D6(ops, 'dieValue4');
-      ops = Random.D6(ops, 'dieValue5');
-      return ops;
-    },
+    roll: (G, ctx) => ({
+      ...G,
+      players: {
+        ...G.players,
+        [ctx.currentPlayer]: [
+          Random.D6(),
+          Random.D6(),
+          Random.D6(),
+          Random.D6(),
+          Random.D6(),
+        ],
+      },
+    }),
   },
 
   flow: {
@@ -47,22 +51,6 @@ const LiarsDice = Game({
         name: 'Rolling',
         endPhaseIf: G => Object.values(G.players).every(p => p !== null),
         allowedMoves: ['roll'],
-        onMove: (G, ctx) => {
-          return {
-            bidValue: G.bidValue,
-            bidQuantity: G.bidQuantity,
-            players: {
-              ...G.players,
-              [ctx.currentPlayer]: [
-                G.dieValue1,
-                G.dieValue2,
-                G.dieValue3,
-                G.dieValue4,
-                G.dieValue5,
-              ],
-            },
-          };
-        },
       },
       {
         name: 'Bidding',
