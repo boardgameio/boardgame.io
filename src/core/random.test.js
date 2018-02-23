@@ -32,6 +32,14 @@ test('predefined dice values', () => {
     expect(result).toBeGreaterThanOrEqual(1);
     expect(result).toBeLessThanOrEqual(pair.highest);
     expect(PRNGState.get().prngstate).toBeDefined();
+
+    const multiple = pair.fn(5);
+    expect(multiple).toBeDefined();
+    expect(multiple.length).toBe(5);
+    multiple.forEach(m => {
+      expect(m).toBeGreaterThanOrEqual(1);
+      expect(m).toBeLessThanOrEqual(pair.highest);
+    });
   });
 });
 
@@ -49,6 +57,17 @@ test('Random.Die', () => {
     const result = Random.Die();
     expect(result).toBeDefined();
     expect(result).toBeLessThanOrEqual(6);
+    expect(PRNGState.get().prngstate).toBeDefined();
+  }
+
+  {
+    const multiple = Random.Die(6, 3);
+    expect(multiple).toBeDefined();
+    expect(multiple.length).toBe(3);
+    multiple.forEach(m => {
+      expect(m).toBeGreaterThanOrEqual(1);
+      expect(m).toBeLessThanOrEqual(6);
+    });
     expect(PRNGState.get().prngstate).toBeDefined();
   }
 });

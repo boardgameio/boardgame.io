@@ -68,8 +68,14 @@ const SpotValue = {
 const predefined = {};
 for (const key in SpotValue) {
   const spotvalue = SpotValue[key];
-  predefined[key] = () => {
-    return Math.floor(random() * spotvalue) + 1;
+  predefined[key] = diceCount => {
+    if (diceCount === undefined) {
+      return Math.floor(random() * spotvalue) + 1;
+    } else {
+      return [...Array(diceCount).keys()].map(
+        () => Math.floor(random() * spotvalue) + 1
+      );
+    }
   };
 }
 
@@ -91,13 +97,16 @@ export function GenSeed() {
 export const Random = {
   /**
    * Similar to Die below, but with fixed spot values.
+   * Supports passing a diceCount
+   *    if not defined, defaults to 1 and returns the value directly.
+   *    if defined, returns an array containing the random dice values.
    *
-   * D4: () => value
-   * D6: () => value
-   * D8: () => value
-   * D10: () => value
-   * D12: () => value
-   * D20: () => value
+   * D4: (diceCount) => value
+   * D6: (diceCount) => value
+   * D8: (diceCount) => value
+   * D10: (diceCount) => value
+   * D12: (diceCount) => value
+   * D20: (diceCount) => value
    */
   ...predefined,
 
@@ -105,13 +114,22 @@ export const Random = {
    * Roll a die of specified spot value.
    *
    * @param {number} spotvalue - The die dimension (default: 6).
+   * @param {number} diceCount - number of dice to throw.
+   *                             if not defined, defaults to 1 and returns the value directly.
+   *                             if defined, returns an array containing the random dice values.
    */
-  Die: spotvalue => {
+  Die: (spotvalue, diceCount) => {
     if (spotvalue === undefined) {
       spotvalue = 6;
     }
 
-    return Math.floor(random() * spotvalue) + 1;
+    if (diceCount === undefined) {
+      return Math.floor(random() * spotvalue) + 1;
+    } else {
+      return [...Array(diceCount).keys()].map(
+        () => Math.floor(random() * spotvalue) + 1
+      );
+    }
   },
 
   /**
