@@ -8,9 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Debug } from './debug/debug';
 import { Client as RawClient } from './client';
-import './client.css';
 
 /**
  * Client
@@ -31,7 +29,11 @@ import './client.css';
  *   and dispatch actions such as MAKE_MOVE and END_TURN.
  */
 export function Client({ game, numPlayers, board, multiplayer, debug }) {
-  if (debug === undefined) debug = true;
+  if (debug) {
+    console.log(
+      'Sorry, the Debug UI is not currently implemented in the React-Native Client'
+    );
+  }
 
   /*
    * WrappedBoard
@@ -54,7 +56,7 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
     static defaultProps = {
       gameID: 'default',
       playerID: null,
-      debug: true,
+      debug: false,
     };
 
     constructor(props) {
@@ -86,7 +88,6 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
 
     render() {
       let _board = null;
-      let _debug = null;
 
       const state = this.client.getState();
 
@@ -101,26 +102,7 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
         });
       }
 
-      if (debug && this.props.debug) {
-        _debug = React.createElement(Debug, {
-          gamestate: state,
-          store: this.client.store,
-          isMultiplayer: multiplayer === true,
-          moves: this.client.moves,
-          events: this.client.events,
-          gameID: this.props.gameID,
-          playerID: this.props.playerID,
-        });
-      }
-
-      return (
-        <div className="client">
-          <span>
-            {_debug}
-            {_board}
-          </span>
-        </div>
-      );
+      return _board;
     }
   };
 }
