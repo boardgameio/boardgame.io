@@ -21,10 +21,17 @@ const env = process.env.NODE_ENV;
 const plugins = [
   postcss(),
   babel({ exclude: '**/node_modules/**' }),
-  commonjs(),
-  resolve({ browser: true }),
   filesize(),
 ];
+
+const globals = {
+  react: 'React',
+  redux: 'Redux',
+  'prop-types': 'PropTypes',
+  'react-json-view': 'ReactJson',
+  mousetrap: 'Mousetrap',
+  'socket.io-client': 'io',
+};
 
 export default [
   // Sub-packages.
@@ -33,7 +40,7 @@ export default [
     output: { file: 'dist/server.js', format: 'cjs' },
     name: 'Server',
     plugins: [
-      babel({ exclude: '**/node_modules/**' }),
+      babel({ exclude: ['**/node_modules/**'] }),
       commonjs({
         exclude: 'node_modules/**',
       }),
@@ -43,8 +50,8 @@ export default [
 
   {
     input: 'packages/client.js',
-    external: ['react'],
-    globals: { react: 'React' },
+    external: Object.keys(globals),
+    globals,
     output: { file: 'dist/client.js', format: 'umd' },
     name: 'Client',
     plugins: plugins,
@@ -59,8 +66,8 @@ export default [
 
   {
     input: 'packages/ui.js',
-    external: ['react'],
-    globals: { react: 'React' },
+    external: Object.keys(globals),
+    globals,
     output: { file: 'dist/ui.js', format: 'umd' },
     name: 'UI',
     plugins: plugins,
@@ -69,8 +76,8 @@ export default [
   // UMD and ES versions.
   {
     input: 'packages/main.js',
-    external: ['react'],
-    globals: { react: 'React' },
+    external: Object.keys(globals),
+    globals,
     output: [
       { file: pkg.main, format: 'umd', name: 'BoardgameIO' },
       { file: pkg.module, format: 'es' },
@@ -83,11 +90,13 @@ export default [
   // Browser minified version.
   {
     input: 'packages/main.js',
-    external: ['react'],
     globals: { react: 'React' },
+    external: ['react'],
     output: [{ file: pkg.unpkg, format: 'umd' }],
     name: 'BoardgameIO',
     plugins: plugins.concat([
+      commonjs(),
+      resolve({ browser: true }),
       replace({
         'process.env.NODE_ENV': JSON.stringify('production'),
       }),

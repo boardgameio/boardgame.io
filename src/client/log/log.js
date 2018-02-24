@@ -19,34 +19,29 @@ import './log.css';
  */
 export class GameLog extends React.Component {
   static propTypes = {
-    log: PropTypes.array.isRequired,
-    initialState: PropTypes.any.isRequired,
-  };
-
-  static contextTypes = {
-    store: PropTypes.any,
+    store: PropTypes.any.isRequired,
   };
 
   onRewind = logIndex => {
     if (logIndex == null) {
-      this.context.store.dispatch(restore(this._toRestore));
+      this.props.store.dispatch(restore(this._toRestore));
       return;
     }
 
-    this._toRestore = this.context.store.getState();
-
-    const initial = this.props.initialState;
-    this.context.store.dispatch(restore(initial));
+    const state = this.props.store.getState();
+    this._toRestore = state;
+    const initial = state._initial;
+    this.props.store.dispatch(restore(initial));
 
     for (let i = 0; i <= logIndex; i++) {
-      const action = this.props.log[i];
+      const action = state.log[i];
 
       if (
         action.type == Actions.GAME_EVENT ||
         action.type == Actions.MAKE_MOVE
       ) {
         action.remote = true; // don't broadcast action.
-        this.context.store.dispatch(action);
+        this.props.store.dispatch(action);
       }
     }
   };
@@ -57,9 +52,10 @@ export class GameLog extends React.Component {
     let currentTurn = [];
     let turnToLogIndex = {};
     const playerIDs = new Map();
+    const state = this.props.store.getState();
 
-    for (let i = 0; i < this.props.log.length; i++) {
-      const item = this.props.log[i];
+    for (let i = 0; i < state.log.length; i++) {
+      const item = state.log[i];
       if (
         (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') ||
         item.type == 'endTurn'

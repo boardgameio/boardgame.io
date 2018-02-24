@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Client from '../src/client/client.js';
+import { Client } from '../src/client/client.js';
+import { Client as ReactClient } from '../src/client/react.js';
 import Game from '../src/core/game.js';
 import { Flow, FlowWithPhases } from '../src/core/flow.js';
 import { TurnOrder, Pass } from '../src/core/turn-order.js';
@@ -14,9 +15,11 @@ import Token from '../src/ui/token.js';
 import { Card } from '../src/ui/card.js';
 import { Grid } from '../src/ui/grid.js';
 import { HexGrid } from '../src/ui/hex.js';
+import { Random } from '../src/core/random';
 
 export default {
   Client,
+  ReactClient,
   Game,
   Flow,
   FlowWithPhases,
@@ -26,4 +29,5 @@ export default {
   Token,
   Grid,
   HexGrid,
+  Random,
 };

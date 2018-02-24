@@ -7,10 +7,9 @@
  */
 
 import Game from './game';
-import { createStore } from 'redux';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
-import { Flow, FlowWithPhases, createEventDispatchers } from './flow';
+import { Flow, FlowWithPhases } from './flow';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -97,6 +96,44 @@ test('movesPerTurn', () => {
   }
 });
 
+test('onTurnBegin', () => {
+  {
+    const onTurnBegin = jest.fn(G => G);
+    const onTurnBeginOverride = jest.fn(G => G);
+
+    let flow = FlowWithPhases({
+      onTurnBegin,
+      phases: [
+        { name: 'A' },
+        {
+          name: 'B',
+          onTurnBegin: onTurnBeginOverride,
+        },
+      ],
+    });
+
+    let state = { ctx: flow.ctx(2) };
+
+    expect(onTurnBegin).not.toHaveBeenCalled();
+
+    flow.init(state);
+
+    expect(onTurnBegin).toHaveBeenCalled();
+    expect(onTurnBeginOverride).not.toHaveBeenCalled();
+
+    state = flow.processGameEvent(state, { type: 'endPhase' });
+    expect(state.ctx.phase).toBe('B');
+    expect(onTurnBeginOverride).not.toHaveBeenCalled();
+
+    onTurnBegin.mockReset();
+    onTurnBeginOverride.mockReset();
+
+    flow.processGameEvent(state, { type: 'endTurn' });
+    expect(onTurnBegin).not.toHaveBeenCalled();
+    expect(onTurnBeginOverride).toHaveBeenCalled();
+  }
+});
+
 test('onTurnEnd', () => {
   {
     const onTurnEnd = jest.fn(G => G);
@@ -176,7 +213,7 @@ test('init', () => {
 
   state = { ctx: orig };
   state = flow.init(state);
-  expect(state.G).toEqual({ done: true });
+  expect(state.G).toMatchObject({ done: true });
 });
 
 test('onPhaseBegin / onPhaseEnd', () => {
@@ -197,11 +234,11 @@ test('onPhaseBegin / onPhaseEnd', () => {
 
   let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.init(state);
-  expect(state.G).toEqual({ setupA: true });
+  expect(state.G).toMatchObject({ setupA: true });
   state = flow.processGameEvent(state, { type: 'endPhase' });
-  expect(state.G).toEqual({ setupA: true, cleanupA: true, setupB: true });
+  expect(state.G).toMatchObject({ setupA: true, cleanupA: true, setupB: true });
   state = flow.processGameEvent(state, { type: 'endPhase' });
-  expect(state.G).toEqual({
+  expect(state.G).toMatchObject({
     setupA: true,
     cleanupA: true,
     setupB: true,
@@ -394,9 +431,9 @@ test('validator', () => {
 
   // B is disallowed in phase A.
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ A: true });
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
 
   state = reducer(state, gameEvent('endPhase'));
   state.G = {};
@@ -404,9 +441,9 @@ test('validator', () => {
 
   // A is disallowed in phase B.
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ B: true });
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({ B: true });
+  expect(state.G).toMatchObject({ B: true });
 
   state = reducer(state, gameEvent('endPhase'));
   state.G = {};
@@ -414,55 +451,15 @@ test('validator', () => {
 
   // All moves are allowed in phase C.
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({ B: true });
+  expect(state.G).toMatchObject({ B: true });
 
   // But not once the game is over.
   state.ctx.gameover = true;
   state.G = {};
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({});
-});
-
-test('dispatchers', () => {
-  {
-    const game = Game({});
-    const reducer = createGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
-
-  {
-    const game = Game({
-      flow: {
-        endPhase: true,
-      },
-    });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
-
-  {
-    const game = Game({
-      flow: {
-        endTurn: false,
-      },
-    });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([]);
-  }
+  expect(state.G).not.toMatchObject({ B: true });
 });

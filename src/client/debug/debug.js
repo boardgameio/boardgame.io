@@ -189,10 +189,6 @@ export class KeyboardShortcut extends React.Component {
  * and allows you to save / restore from localStorage.
  */
 export class Debug extends React.Component {
-  static contextTypes = {
-    store: PropTypes.any,
-  };
-
   static propTypes = {
     gamestate: PropTypes.shape({
       G: PropTypes.any.isRequired,
@@ -206,6 +202,7 @@ export class Debug extends React.Component {
     events: PropTypes.any,
     restore: PropTypes.func,
     showLog: PropTypes.bool,
+    store: PropTypes.any,
   };
 
   constructor(props) {
@@ -233,6 +230,7 @@ export class Debug extends React.Component {
   state = {
     showDebugUI: true,
     showLog: false,
+    help: false,
   };
 
   assignShortcuts() {
@@ -300,7 +298,7 @@ export class Debug extends React.Component {
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
       const gamestate = JSON.parse(gamestateJSON);
-      this.context.store.dispatch(restore(gamestate));
+      this.props.store.dispatch(restore(gamestate));
     }
   };
 
@@ -311,6 +309,40 @@ export class Debug extends React.Component {
   onClickLog = () => {
     this.setState({ showLog: true });
   };
+
+  toggleHelp = () => {
+    this.setState(oldstate => ({ help: !oldstate.help }));
+  };
+
+  renderHelp() {
+    const display = this.state.help ? 'block' : 'none';
+
+    return (
+      <section>
+        <KeyboardShortcut value="?" onPress={this.toggleHelp}>
+          help
+        </KeyboardShortcut>
+
+        <span style={{ display }}>
+          <div className="key">
+            <div className="key-box">d</div> toggle Debug UI
+          </div>
+
+          <div className="key">
+            <div className="key-box">l</div> toggle Log
+          </div>
+
+          <KeyboardShortcut value="s" onPress={this.saveState}>
+            save localStorage
+          </KeyboardShortcut>
+
+          <KeyboardShortcut value="r" onPress={this.restoreState}>
+            restore localStorage
+          </KeyboardShortcut>
+        </span>
+      </section>
+    );
+  }
 
   render() {
     if (!this.state.showDebugUI) {
@@ -377,23 +409,7 @@ export class Debug extends React.Component {
               </div>
             </section>
 
-            <section>
-              <div className="key">
-                <div className="key-box">d</div> toggle Debug UI
-              </div>
-
-              <div className="key">
-                <div className="key-box">l</div> toggle Log
-              </div>
-
-              <KeyboardShortcut value="s" onPress={this.saveState}>
-                save localStorage
-              </KeyboardShortcut>
-
-              <KeyboardShortcut value="r" onPress={this.restoreState}>
-                restore localStorage
-              </KeyboardShortcut>
-            </section>
+            {this.renderHelp()}
 
             <h3>players</h3>
             <div className="player-box">{players}</div>
@@ -430,10 +446,7 @@ export class Debug extends React.Component {
 
         {this.state.showLog && (
           <section>
-            <GameLog
-              log={this.props.gamestate.log}
-              initialState={this.props.gamestate._initial}
-            />
+            <GameLog store={this.props.store} />
           </section>
         )}
       </div>

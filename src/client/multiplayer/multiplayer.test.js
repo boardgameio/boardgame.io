@@ -27,18 +27,40 @@ class MockSocket {
 }
 
 test('update gameID / playerID', () => {
-  const m = new Multiplayer(null);
-
+  const m = new Multiplayer();
   m.updateGameID('test');
-  expect(m.gameID).toBe('default:test');
-
   m.updatePlayerID('player');
+  expect(m.gameID).toBe('default:test');
   expect(m.playerID).toBe('player');
+});
+
+test('connection status', () => {
+  const onChangeMock = jest.fn();
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer({
+    socket: mockSocket,
+    gameID: 0,
+    playerID: 0,
+    gameName: 'foo',
+    numPlayers: 2,
+  });
+  m.subscribe(onChangeMock);
+  m.connect();
+
+  mockSocket.callbacks['connect']();
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toBe(true);
+
+  onChangeMock.mockClear();
+  mockSocket.callbacks['disconnect']();
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toBe(false);
 });
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer(mockSocket);
+  const m = new Multiplayer({ socket: mockSocket });
+  m.connect();
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -74,7 +96,7 @@ test('multiplayer', () => {
 
 test('move whitelist', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer(mockSocket);
+  const m = new Multiplayer({ socket: mockSocket });
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -100,11 +122,13 @@ test('game server is set when provided', () => {
   var port = '1234';
   var server = hostname + ':' + port;
 
-  const m = new Multiplayer(undefined, 0, 0, 0, 1, server);
+  const m = new Multiplayer({ server });
+  m.connect();
   expect(m.socket.io.engine.hostname).toEqual(hostname);
   expect(m.socket.io.engine.port).toEqual(port);
 
-  const m2 = new Multiplayer(undefined, 0, 0, 0, 1, undefined);
+  const m2 = new Multiplayer();
+  m2.connect();
   expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
   expect(m2.socket.io.engine.port).not.toEqual(port);
 });

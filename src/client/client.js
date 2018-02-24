@@ -6,205 +6,195 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { createStore } from 'redux';
-import { Provider, connect } from 'react-redux';
 import * as ActionCreators from '../core/action-creators';
-import { Debug } from './debug/debug';
 import { Multiplayer } from './multiplayer/multiplayer';
-import { createEventDispatchers } from '../core/flow';
-import { createGameReducer, createMoveDispatchers } from '../core/reducer';
+import { createGameReducer } from '../core/reducer';
 import './client.css';
+
+/**
+ * createEventDispatchers
+ *
+ * Creates a set of dispatchers to dispatch game flow events.
+ * @param {Array} eventNames - A list of event names.
+ * @param {object} store - The Redux store to create dispatchers for.
+ * @param {string} playerID - The ID of the player dispatching these events.
+ */
+export function createEventDispatchers(eventNames, store, playerID) {
+  let dispatchers = {};
+  for (const name of eventNames) {
+    dispatchers[name] = function(...args) {
+      store.dispatch(ActionCreators.gameEvent(name, args, playerID));
+    };
+  }
+  return dispatchers;
+}
+
+/**
+ * createMoveDispatchers
+ *
+ * Creates a set of dispatchers to make moves.
+ * @param {Array} moveNames - A list of move names.
+ * @param {object} store - The Redux store to create dispatchers for.
+ */
+export function createMoveDispatchers(moveNames, store, playerID) {
+  let dispatchers = {};
+  for (const name of moveNames) {
+    dispatchers[name] = function(...args) {
+      store.dispatch(ActionCreators.makeMove(name, args, playerID));
+    };
+  }
+  return dispatchers;
+}
+
+/**
+ * Implementation of Client (see below).
+ */
+class _ClientImpl {
+  constructor({ game, numPlayers, multiplayer, gameID, playerID }) {
+    this.game = game;
+    this.playerID = playerID;
+    this.gameID = gameID;
+
+    let server = undefined;
+    if (multiplayer instanceof Object && 'server' in multiplayer) {
+      server = multiplayer.server;
+      multiplayer = true;
+    }
+
+    this.multiplayer = multiplayer;
+
+    const GameReducer = createGameReducer({
+      game,
+      numPlayers,
+      multiplayer,
+    });
+
+    this.store = null;
+
+    if (multiplayer) {
+      this.multiplayerClient = new Multiplayer({
+        gameID: gameID,
+        playerID: playerID,
+        gameName: game.name,
+        numPlayers,
+        server,
+      });
+      this.store = this.multiplayerClient.createStore(GameReducer);
+    } else {
+      this.store = createStore(GameReducer);
+    }
+
+    this.createDispatchers();
+  }
+
+  subscribe(fn) {
+    this.store.subscribe(fn);
+
+    if (this.multiplayerClient) {
+      this.multiplayerClient.subscribe(fn);
+    }
+  }
+
+  getState() {
+    const state = this.store.getState();
+
+    // isActive.
+
+    let isActive = true;
+    if (this.multiplayer) {
+      if (this.playerID == null) {
+        isActive = false;
+      }
+      if (
+        state.ctx.currentPlayer != 'any' &&
+        this.playerID != state.ctx.currentPlayer
+      ) {
+        isActive = false;
+      }
+    }
+
+    // Secrets are normally stripped on the server,
+    // but we also strip them here so that game developers
+    // can see their effects while prototyping.
+    let playerID = this.playerID;
+    if (!this.multiplayer && !playerID && state.ctx.currentPlayer != 'any') {
+      playerID = state.ctx.currentPlayer;
+    }
+    const G = this.game.playerView(state.G, state.ctx, playerID);
+
+    if (state.ctx.gameover !== undefined) {
+      isActive = false;
+    }
+
+    // Combine into return value.
+
+    let ret = { ...state, isActive, G };
+
+    if (this.multiplayerClient) {
+      const isConnected = this.multiplayerClient.isConnected;
+      ret = { ...ret, isConnected };
+    }
+
+    return ret;
+  }
+
+  connect() {
+    if (this.multiplayerClient) {
+      this.multiplayerClient.connect();
+    }
+  }
+
+  createDispatchers() {
+    this.moves = createMoveDispatchers(
+      this.game.moveNames,
+      this.store,
+      this.playerID
+    );
+
+    this.events = createEventDispatchers(
+      this.game.flow.eventNames,
+      this.store,
+      this.playerID
+    );
+  }
+
+  updatePlayerID(playerID) {
+    this.playerID = playerID;
+    this.createDispatchers();
+
+    if (this.multiplayerClient) {
+      this.multiplayerClient.updatePlayerID(playerID);
+    }
+  }
+
+  updateGameID(gameID) {
+    this.gameID = gameID;
+    this.createDispatchers();
+
+    if (this.multiplayerClient) {
+      this.multiplayerClient.updateGameID(gameID);
+    }
+  }
+}
 
 /**
  * Client
  *
- * Main function used to a create a game client.
+ * boardgame.io JS client.
  *
  * @param {...object} game - The return value of `Game`.
  * @param {...object} numPlayers - The number of players.
- * @param {...object} board - The React component for the game.
  * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
- * @param {...object} debug - Enables the Debug UI.
+ * @param {...object} gameID - The gameID that you want to connect to.
+ * @param {...object} playerID - The playerID associated with this client.
  *
  * Returns:
- *   A React component that wraps board and provides an
- *   API through props for it to interact with the framework
- *   and dispatch actions such as MAKE_MOVE and END_TURN.
+ *   A JS object that provides an API to interact with the
+ *   game by dispatching moves and events.
  */
-function Client({ game, numPlayers, board, multiplayer, debug }) {
-  let server = undefined;
-  if (multiplayer instanceof Object && 'server' in multiplayer) {
-    server = multiplayer.server;
-    multiplayer = true;
-  }
-
-  if (debug === undefined) debug = true;
-
-  const GameReducer = createGameReducer({
-    game,
-    numPlayers,
-    multiplayer,
-  });
-
-  /*
-   * WrappedBoard
-   *
-   * The main React component that wraps the passed in
-   * board component and adds the API to its props.
-   */
-  return class WrappedBoard extends React.Component {
-    static propTypes = {
-      // The ID of a game to connect to.
-      // Only relevant in multiplayer.
-      gameID: PropTypes.string,
-      // The ID of the player associated with this client.
-      // Only relevant in multiplayer.
-      playerID: PropTypes.string,
-      // Enable / disable the Debug UI.
-      debug: PropTypes.bool,
-    };
-
-    static defaultProps = {
-      gameID: 'default',
-      playerID: null,
-      debug: true,
-    };
-
-    constructor(props) {
-      super(props);
-
-      this.store = null;
-
-      if (multiplayer) {
-        this.multiplayerClient = new Multiplayer(
-          undefined,
-          props.gameID,
-          props.playerID,
-          game.name,
-          numPlayers,
-          server
-        );
-        this.store = this.multiplayerClient.createStore(GameReducer);
-      } else {
-        this.store = createStore(GameReducer);
-      }
-
-      this.moveAPI = createMoveDispatchers(
-        game.moveNames,
-        this.store,
-        props.playerID
-      );
-      this.eventAPI = createEventDispatchers(
-        game.flow.eventNames,
-        this.store,
-        props.playerID
-      );
-      this.createBoard();
-      this.createDebugUI();
-
-      this.store.subscribe(() => {
-        this.setState(this.store.getState());
-      });
-    }
-
-    createBoard() {
-      if (board) {
-        const mapStateToProps = state => {
-          let isActive = true;
-
-          if (multiplayer) {
-            if (this.props.playerID == null) {
-              isActive = false;
-            }
-            if (
-              state.ctx.currentPlayer != 'any' &&
-              this.props.playerID != state.ctx.currentPlayer
-            ) {
-              isActive = false;
-            }
-          }
-
-          if (state.ctx.gameover !== undefined) {
-            isActive = false;
-          }
-
-          return {
-            ...state,
-            isActive,
-            G: game.playerView(state.G, state.ctx, this.props.playerID),
-          };
-        };
-
-        const Board = connect(mapStateToProps, ActionCreators)(board);
-
-        this._board = React.createElement(Board, {
-          moves: this.moveAPI,
-          events: this.eventAPI,
-          gameID: this.props.gameID,
-          playerID: this.props.playerID,
-        });
-      }
-    }
-
-    createDebugUI() {
-      if (debug && this.props.debug) {
-        this._debug = React.createElement(
-          connect(state => ({ gamestate: state }), ActionCreators)(Debug),
-          {
-            moves: this.moveAPI,
-            events: this.eventAPI,
-            gameID: this.props.gameID,
-            playerID: this.props.playerID,
-          }
-        );
-      }
-    }
-
-    componentWillReceiveProps(nextProps) {
-      if (this.multiplayerClient) {
-        if (nextProps.gameID != this.props.gameID) {
-          this.multiplayerClient.updateGameID(nextProps.gameID);
-        }
-        if (nextProps.playerID != this.props.playerID) {
-          this.multiplayerClient.updatePlayerID(nextProps.playerID);
-        }
-      }
-
-      this.createBoard();
-      this.createDebugUI();
-      this.moveAPI = createMoveDispatchers(
-        game.moveNames,
-        this.store,
-        this.props.playerID
-      );
-      this.eventAPI = createEventDispatchers(
-        game.flow.eventNames,
-        this.store,
-        this.props.playerID
-      );
-    }
-
-    componentWillMount() {
-      this.setState(this.store.getState());
-    }
-
-    render() {
-      return (
-        <div className="client">
-          <Provider store={this.store}>
-            <span>
-              {this._debug}
-              {this._board}
-            </span>
-          </Provider>
-        </div>
-      );
-    }
-  };
+export function Client(opts) {
+  return new _ClientImpl(opts);
 }
-
-export default Client;

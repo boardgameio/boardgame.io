@@ -113,7 +113,7 @@ phases: [
 #### Triggers / Hooks
 
 The `flow` section can specify a number of automatic behaviors when a move is made
-or when the turn or phase is ended. These can also be overriden at the phase level.
+or when the turn or phase is ended. These can also be overridden at the phase level.
 Let's take a look at some of these:
 
 ```js
@@ -123,6 +123,9 @@ flow: {
 
   // Ends the game if this returns anything other than undefined.
   endGameIf: (G, ctx) => boolean
+
+  // Run at the start of a turn.
+  onTurnBegin: (G, ctx) => G
 
   // Run at the end of a turn.
   onTurnEnd: (G, ctx) => G
@@ -147,6 +150,7 @@ flow: {
       // specific phase only.
       endTurnIf: ...
       endGameIf: ...
+      onTurnBegin: ...
       onTurnEnd: ...
       onMove:    ...
     }

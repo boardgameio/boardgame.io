@@ -6,6 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Client } from '../src/client/client.js';
+import { Client } from '../src/client/react.js';
 
 export { Client };

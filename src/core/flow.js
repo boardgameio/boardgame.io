@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as ActionCreators from './action-creators';
 import { TurnOrder } from './turn-order';
 
 /**
@@ -17,9 +16,9 @@ import { TurnOrder } from './turn-order';
  * need to use this directly if you are creating a very customized
  * game flow that it cannot handle.
  *
- * @param {...object} setup - Function with the signature
- *                            numPlayers => ctx
- *                            that determines the initial value of ctx.
+ * @param {...object} ctx - Function with the signature
+ *                          numPlayers => ctx
+ *                          that determines the initial value of ctx.
  * @param {...object} events - Object containing functions
  *                             named after events that this
  *                             reducer will handle. Each function
@@ -31,13 +30,30 @@ import { TurnOrder } from './turn-order';
  *                                (G, ctx, moveName) => boolean
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
+ * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
+ *                                       Control whether a move should
+ *                                       be executed optimistically on
+ *                                       the client while waiting for
+ *                                       the result of execution from
+ *                                       the server.
  */
-export function Flow({ ctx, events, init, validator, processMove }) {
+export function Flow({
+  ctx,
+  events,
+  init,
+  validator,
+  processMove,
+  optimisticUpdate,
+}) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
   if (!init) init = state => state;
   if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
+
+  if (optimisticUpdate === undefined) {
+    optimisticUpdate = () => true;
+  }
 
   const dispatch = (state, action) => {
     if (events.hasOwnProperty(action.type)) {
@@ -71,6 +87,8 @@ export function Flow({ ctx, events, init, validator, processMove }) {
     processGameEvent: (state, action) => {
       return dispatch(state, action);
     },
+
+    optimisticUpdate,
   };
 }
 
@@ -97,6 +115,9 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *                                The return value is available at ctx.gameover.
  *                                (G, ctx) => {}
  *
+ * @param {...object} onTurnBegin - Any code to run when a turn begins.
+ *                                 (G, ctx) => G
+ *
  * @param {...object} onTurnEnd - Any code to run when a turn ends.
  *                                (G, ctx) => G
  *
@@ -108,6 +129,13 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  * @param {...object} endTurn - Set to false to disable the `endTurn` event.
  *
  * @param {...object} endPhase - Set to false to disable the `endPhase` event.
+ *
+ * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
+ *                                       Control whether a move should
+ *                                       be executed optimistically on
+ *                                       the client while waiting for
+ *                                       the result of execution from
+ *                                       the server.
  *
  * @param {...object} phases - A list of phases in the game.
  *
@@ -136,6 +164,9 @@ export function Flow({ ctx, events, init, validator, processMove }) {
  *   // A phase-specific endGameIf.
  *   endGameIf: (G, ctx) => {},
  *
+ *   // A phase-specific onTurnBegin
+ *   onTurnBegin: (G, ctx) => G,
+ *
  *   // A phase-specific onTurnEnd.
  *   onTurnEnd: (G, ctx) => G,
  *
@@ -157,11 +188,13 @@ export function FlowWithPhases({
   movesPerTurn,
   endTurnIf,
   endGameIf,
+  onTurnBegin,
   onTurnEnd,
   onMove,
   turnOrder,
   endTurn,
   endPhase,
+  optimisticUpdate,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -170,9 +203,13 @@ export function FlowWithPhases({
   if (endTurn === undefined) {
     endTurn = true;
   }
+  if (optimisticUpdate === undefined) {
+    optimisticUpdate = () => true;
+  }
   if (!phases) phases = [{ name: 'default' }];
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
+  if (!onTurnBegin) onTurnBegin = G => G;
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
@@ -202,6 +239,9 @@ export function FlowWithPhases({
     if (conf.endGameIf === undefined) {
       conf.endGameIf = endGameIf;
     }
+    if (conf.onTurnBegin === undefined) {
+      conf.onTurnBegin = onTurnBegin;
+    }
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
@@ -227,6 +267,18 @@ export function FlowWithPhases({
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
     ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
     return { ...state, G, ctx };
+  };
+
+  const startTurn = function(state, config) {
+    const ctx = { ...state.ctx };
+    const G = config.onTurnBegin(state.G, ctx);
+    return { ...state, G, ctx };
+  };
+
+  const startGame = function(state, config) {
+    state = startPhase(state, config);
+    state = startTurn(state, config);
+    return state;
   };
 
   /**
@@ -319,7 +371,7 @@ export function FlowWithPhases({
       return endPhaseEvent({ ...state, G, ctx }, end);
     }
 
-    return { ...state, G, ctx };
+    return startTurn({ ...state, G, ctx }, conf);
   }
 
   function processMove(state, action, dispatch) {
@@ -378,27 +430,18 @@ export function FlowWithPhases({
       currentPlayerMoves: 0,
       phase: phases[0].name,
     }),
-    init: state => startPhase(state, phases[0]),
+    init: state => {
+      return startGame(state, phases[0]);
+    },
+    optimisticUpdate: (G, ctx, action) => {
+      // Some random code was executed.
+      if (ctx._random !== undefined && ctx._random.prngstate !== undefined) {
+        return false;
+      }
+      return optimisticUpdate(G, ctx, action);
+    },
     events: enabledEvents,
     validator,
     processMove,
   });
-}
-
-/**
- * createEventDispatchers
- *
- * Creates a set of dispatchers to dispatch game flow events.
- * @param {Array} eventNames - A list of event names.
- * @param {object} store - The Redux store to create dispatchers for.
- * @param {string} playerID - The ID of the player dispatching these events.
- */
-export function createEventDispatchers(eventNames, store, playerID) {
-  let dispatchers = {};
-  for (const name of eventNames) {
-    dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.gameEvent(name, args, playerID));
-    };
-  }
-  return dispatchers;
 }

@@ -12,7 +12,6 @@ import Game from '../../core/game';
 import { GameLog } from './log';
 import { createGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
-import { Provider } from 'react-redux';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -25,7 +24,12 @@ test('GameLog', () => {
     makeMove('moveB'),
     gameEvent('endTurn'),
   ];
-  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
+
+  const store = {
+    getState: () => ({ log }),
+  };
+
+  const gamelog = Enzyme.mount(<GameLog store={store} />);
   const turns = gamelog.find('.id').map(div => div.text());
   expect(turns).toEqual(['Turn #1', 'Turn #2']);
 });
@@ -33,11 +37,13 @@ test('GameLog', () => {
 test('GameLog rewind', () => {
   const game = Game({
     moves: {
-      A: (G, ctx, arg) => arg,
+      A: (G, ctx, arg) => {
+        return { arg };
+      },
     },
 
     flow: {
-      endTurnIf: G => G == 42,
+      endTurnIf: G => G && G.arg == 42,
     },
   });
   const reducer = createGameReducer({ game });
@@ -50,34 +56,27 @@ test('GameLog rewind', () => {
   store.dispatch(makeMove('A', [2]));
   store.dispatch(gameEvent('endTurn'));
 
-  const root = Enzyme.mount(
-    <Provider store={store}>
-      <GameLog
-        log={store.getState().log}
-        initialState={store.getState()._initial}
-      />
-    </Provider>
-  );
+  const root = Enzyme.mount(<GameLog store={store} />);
 
-  expect(store.getState().G).toEqual(2);
+  expect(store.getState().G).toMatchObject({ arg: 2 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseover');
-  expect(store.getState().G).toEqual(1);
+  expect(store.getState().G).toMatchObject({ arg: 1 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseout');
-  expect(store.getState().G).toEqual(2);
+  expect(store.getState().G).toMatchObject({ arg: 2 });
   root
     .find('.log-turn')
     .at(1)
     .simulate('mouseover');
-  expect(store.getState().G).toEqual(42);
+  expect(store.getState().G).toMatchObject({ arg: 42 });
   root
     .find('.log-turn')
     .at(0)
     .simulate('mouseout');
-  expect(store.getState().G).toEqual(2);
+  expect(store.getState().G).toMatchObject({ arg: 2 });
 });

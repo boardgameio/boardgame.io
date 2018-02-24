@@ -7,8 +7,7 @@
  */
 
 import Game from './game';
-import { createStore } from 'redux';
-import { createGameReducer, createMoveDispatchers } from './reducer';
+import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
 
 const game = Game({
@@ -41,37 +40,19 @@ test('makeMove', () => {
   let state;
 
   state = reducer(undefined, makeMove('unknown'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('B'));
-  expect(state.G).toEqual({ moved: true });
+  expect(state.G).toMatchObject({ moved: true });
 });
 
 test('restore', () => {
   const reducer = createGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
   expect(state).toEqual({ G: 'restored' });
-});
-
-test('move dispatchers', () => {
-  const reducer = createGameReducer({ game });
-  const store = createStore(reducer);
-  const api = createMoveDispatchers(game.moveNames, store);
-
-  expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
-  expect(api.unknown).toBe(undefined);
-
-  api.A();
-  expect(store.getState().G).toEqual({});
-
-  api.B();
-  expect(store.getState().G).toEqual({ moved: true });
-
-  api.C();
-  expect(store.getState().G).toEqual({ victory: true });
 });
 
 test('victory', () => {
@@ -121,6 +102,29 @@ test('light client when multiplayer=true', () => {
     expect(state.ctx.gameover).toBe(undefined);
     state = reducer(state, makeMove('A'));
     expect(state.ctx.gameover).toBe(undefined);
+  }
+});
+
+test('optimisticUpdate', () => {
+  const game = Game({
+    moves: { A: () => ({ A: true }) },
+    flow: { optimisticUpdate: () => false },
+  });
+
+  {
+    const reducer = createGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).toMatchObject({ A: true });
+  }
+
+  {
+    const reducer = createGameReducer({ game, multiplayer: true });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).not.toMatchObject({ A: true });
   }
 });
 

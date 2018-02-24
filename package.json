@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.17.0",
+  "version": "0.17.2",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
@@ -12,7 +12,7 @@
     "prepush": "npm run test:coverage",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
+    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
     "storybook": "start-storybook -p 3000 -c storybook",
@@ -32,10 +32,12 @@
     "dist/boardgameio.es.js",
     "dist/server.js",
     "dist/client.js",
+    "dist/react.js",
     "dist/core.js",
     "dist/ui.js",
     "server.js",
     "client.js",
+    "react.js",
     "core.js",
     "ui.js"
   ],
@@ -62,10 +64,11 @@
     "babel-loader": "^7.1.2",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-module-resolver": "^3.0.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
     "babel-watch": "^2.0.7",
     "chess.js": "^0.10.2",
     "coveralls": "^3.0.0",
@@ -115,7 +118,6 @@
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
     "react-json-view": "^1.13.0",
-    "react-redux": "^5.0.6",
     "redux": "^3.7.2",
     "socket.io": "^2.0.3"
   },
@@ -125,6 +127,7 @@
   "config": {
     "exportAliases": {
       "client": "./dist/client.js",
+      "react": "./dist/react.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
       "ui": "./dist/ui.js"
