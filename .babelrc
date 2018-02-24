@@ -1,8 +1,5 @@
 {
-  "presets": [
-    ["es2015", { "modules": false }],
-    "react",
-  ],
+  "presets": [["es2015", { "modules": false }], "react"],
   "env": {
     "targets": {
       "node": "current"
@@ -15,11 +12,14 @@
     }
   },
   "plugins": [
-    ["module-resolver", {
-      "alias": {
-        "boardgame.io": "./packages",
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "boardgame.io": "./packages"
+        }
       }
-    }],
+    ],
     "transform-object-rest-spread",
     "transform-class-properties"
   ]

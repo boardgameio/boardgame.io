@@ -33,11 +33,13 @@
     "dist/server.js",
     "dist/client.js",
     "dist/react.js",
+    "dist/react-native.js",
     "dist/core.js",
     "dist/ui.js",
     "server.js",
     "client.js",
     "react.js",
+    "react-native.js",
     "core.js",
     "ui.js"
   ],
@@ -128,6 +130,7 @@
     "exportAliases": {
       "client": "./dist/client.js",
       "react": "./dist/react.js",
+      "react-native": "./dist/react-native.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
       "ui": "./dist/ui.js"

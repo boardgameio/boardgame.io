@@ -10,7 +10,6 @@ import { createStore } from 'redux';
 import * as ActionCreators from '../core/action-creators';
 import { Multiplayer } from './multiplayer/multiplayer';
 import { createGameReducer } from '../core/reducer';
-import './client.css';
 
 /**
  * createEventDispatchers

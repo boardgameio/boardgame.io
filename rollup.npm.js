@@ -58,6 +58,15 @@ export default [
   },
 
   {
+    input: 'packages/react-native.js',
+    external: Object.keys(globals),
+    globals,
+    output: { file: 'dist/react-native.js', format: 'umd' },
+    name: 'ReactNativeClient',
+    plugins: plugins,
+  },
+
+  {
     input: 'packages/core.js',
     output: { file: 'dist/core.js', format: 'umd' },
     name: 'Core',
