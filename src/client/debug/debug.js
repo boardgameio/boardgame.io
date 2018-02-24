@@ -38,29 +38,19 @@ export class DebugMove extends React.Component {
     this.props.activate();
   };
 
-  getArg(arg) {
-    try {
-      return new Function('return ' + arg)();
-    } catch (e) {
-      return undefined;
-    }
-  }
-
   onSubmit = () => {
-    let argArray = [];
     const value = this.span.innerText;
+    let error = '';
 
-    if (value && value.length) {
-      const args = value.split(',');
-      for (const arg of args) {
-        argArray.push(this.getArg(arg));
-      }
+    try {
+      let argArray = new Function(`return [${value}]`)();
+      this.props.fn.apply(this, argArray);
+    } catch (e) {
+      error = '' + e;
     }
-
-    this.props.fn.apply(this, argArray);
 
     this.setState({
-      error: '',
+      error,
       focus: false,
       enterArg: false,
     });

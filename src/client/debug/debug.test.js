@@ -84,7 +84,8 @@ test('parse arguments', () => {
 
   root.instance().span.innerText = '3, unknown, 4';
   root.instance().onSubmit();
-  expect(spy.mock.calls[1]).toEqual([3, undefined, 4]);
+  expect(spy.mock.calls.length).toEqual(1);
+  expect(root.state().error).toEqual('ReferenceError: unknown is not defined');
 });
 
 test('KeyboardShortcut', () => {
