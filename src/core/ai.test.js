@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { AI } from './ai';
+import { AI, MoveRange } from './ai';
 
 test('no parameters provided', () => {
   let G = {};
@@ -39,17 +39,35 @@ test('simple possible moves and score', () => {
   expect(ai.score).toEqual(5);
 });
 
+test('MoveRange', () => {
+  let G = { i: 2 };
+  let ctx = { turn: 1 };
+  expect(
+    MoveRange({
+      foo: [['a', 'b'], ['c'], ['d', 'e']],
+      bar: [],
+      baz: [[0, 1]],
+    })(G, ctx)
+  ).toEqual([
+    { move: 'foo', args: ['a', 'c', 'd'] },
+    { move: 'foo', args: ['a', 'c', 'e'] },
+    { move: 'foo', args: ['b', 'c', 'd'] },
+    { move: 'foo', args: ['b', 'c', 'e'] },
+    { move: 'bar', args: [] },
+    { move: 'baz', args: [0] },
+    { move: 'baz', args: [1] },
+  ]);
+});
+
 test('args combinations', () => {
   let G = { i: 2 };
   let ctx = { turn: 1 };
   let ai = AI({
-    possibleMoves: {
-      ranges: {
-        foo: [['a', 'b'], ['c'], ['d', 'e']],
-        bar: [],
-        baz: [[0, 1]],
-      },
-    },
+    possibleMoves: MoveRange({
+      foo: [['a', 'b'], ['c'], ['d', 'e']],
+      bar: [],
+      baz: [[0, 1]],
+    }),
   })(G, ctx);
   expect(ai.isAvailable).toEqual(true);
   expect(ai.possibleMoves).toEqual([
@@ -67,14 +85,14 @@ test('args combinations and filtration', () => {
   let G = { i: 2 };
   let ctx = { turn: 1 };
   let aiFn = AI({
-    possibleMoves: {
-      ranges: {
+    possibleMoves: MoveRange(
+      {
         foo: [[1, 2], [3, 4]],
       },
-      isMovePossible: ({ G, args }) => {
+      ({ G, args }) => {
         return args[0] == G.i;
-      },
-    },
+      }
+    ),
   });
   expect(aiFn(G, ctx).isAvailable).toEqual(true);
   expect(aiFn(G, ctx).possibleMoves).toEqual([
@@ -94,11 +112,9 @@ test('range object', () => {
   let G = {};
   let ctx = {};
   let ai = AI({
-    possibleMoves: {
-      ranges: {
-        foo: [['a', 'b', 'c'], { min: 1, max: 10, step: 3 }],
-      },
-    },
+    possibleMoves: MoveRange({
+      foo: [['a', 'b', 'c'], { min: 1, max: 10, step: 3 }],
+    }),
   })(G, ctx);
   expect(ai.isAvailable).toEqual(true);
   expect(ai.possibleMoves).toEqual([

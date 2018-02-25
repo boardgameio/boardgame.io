@@ -9,6 +9,7 @@
 import Game from './game';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
+import { MoveRange } from './ai';
 
 const game = Game({
   moves: {
@@ -127,14 +128,14 @@ test('possibleMoves for tic-tac-toe', () => {
     },
 
     ai: {
-      possibleMoves: {
-        ranges: {
+      possibleMoves: MoveRange(
+        {
           clickCell: [{ min: 0, max: 8 }],
         },
-        isMovePossible: ({ G, args }) => {
+        ({ G, args }) => {
           return G.cells[args[0]] === null;
-        },
-      },
+        }
+      ),
     },
   });
   const reducer = createGameReducer({ game, numPlayers: 2 });
