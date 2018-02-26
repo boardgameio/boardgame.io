@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Client } from 'boardgame.io/client';
+import { Client } from 'boardgame.io/react';
 import Game from '../game';
 import Board from './board';
 
@@ -19,7 +19,7 @@ const App = Client({
 
 const SingleView = () => (
   <div style={{ padding: 50 }}>
-    <App gameID="Shuffle" />
+    <App gameID="Random" />
   </div>
 );
 

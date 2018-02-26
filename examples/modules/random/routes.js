@@ -10,8 +10,8 @@ import View from './components/view';
 
 const routes = [
   {
-    path: '/shuffle/cards',
-    text: 'Shuffle Cards',
+    path: '/random/main',
+    text: 'Examples',
     component: View,
   },
 ];

@@ -10,7 +10,6 @@ import Game from './game';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
-import { Random } from './random';
 
 test('Flow', () => {
   const flow = Flow({});
@@ -94,23 +93,6 @@ test('movesPerTurn', () => {
     expect(state.ctx.turn).toBe(1);
     state = flow.processMove(state, { move: {} });
     expect(state.ctx.turn).toBe(2);
-  }
-
-  {
-    let flow = FlowWithPhases({ movesPerTurn: 2 });
-    let G = Random.Number({}, 'field1');
-    G = Random.D6(G, 'field2');
-    let state = { ctx: flow.ctx(2), G };
-    state.ctx.seed = 'seed';
-
-    state = flow.processMove(state, { move: {} });
-
-    expect(state.G.field1).toBeDefined();
-    expect(state.G.field1).toBeGreaterThanOrEqual(0);
-    expect(state.G.field1).toBeLessThanOrEqual(1);
-    expect(state.G.field2).toBeDefined();
-    expect(state.G.field2).toBeGreaterThanOrEqual(1);
-    expect(state.G.field2).toBeLessThanOrEqual(6);
   }
 });
 
@@ -332,7 +314,7 @@ test('init', () => {
 
   state = { ctx: orig };
   state = flow.init(state);
-  expect(state.G).toEqual({ done: true });
+  expect(state.G).toMatchObject({ done: true });
 });
 
 test('onPhaseBegin / onPhaseEnd', () => {
@@ -353,11 +335,11 @@ test('onPhaseBegin / onPhaseEnd', () => {
 
   let state = { G: {}, ctx: flow.ctx(2) };
   state = flow.init(state);
-  expect(state.G).toEqual({ setupA: true });
+  expect(state.G).toMatchObject({ setupA: true });
   state = flow.processGameEvent(state, { type: 'endPhase' });
-  expect(state.G).toEqual({ setupA: true, cleanupA: true, setupB: true });
+  expect(state.G).toMatchObject({ setupA: true, cleanupA: true, setupB: true });
   state = flow.processGameEvent(state, { type: 'endPhase' });
-  expect(state.G).toEqual({
+  expect(state.G).toMatchObject({
     setupA: true,
     cleanupA: true,
     setupB: true,
@@ -550,9 +532,9 @@ test('validator', () => {
 
   // B is disallowed in phase A.
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ A: true });
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
 
   state = reducer(state, gameEvent('endPhase'));
   state.G = {};
@@ -560,9 +542,9 @@ test('validator', () => {
 
   // A is disallowed in phase B.
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ B: true });
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({ B: true });
+  expect(state.G).toMatchObject({ B: true });
 
   state = reducer(state, gameEvent('endPhase'));
   state.G = {};
@@ -570,15 +552,15 @@ test('validator', () => {
 
   // All moves are allowed in phase C.
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({ B: true });
+  expect(state.G).toMatchObject({ B: true });
 
   // But not once the game is over.
   state.ctx.gameover = true;
   state.G = {};
   state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ B: true });
 });

@@ -9,6 +9,7 @@
 .debug-ui {
   min-width: 300px;
   max-width: 400px;
+  overflow: hidden;
   box-sizing: border-box;
   background: #fefefe;
   border: 3px solid #ddd;
