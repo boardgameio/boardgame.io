@@ -134,6 +134,107 @@ test('onTurnBegin', () => {
   }
 });
 
+describe('seconds timer', () => {
+  jest.useFakeTimers();
+
+  describe('when game start', () => {
+    it('perTurn and perPhase set', () => {
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerTurn: 10,
+              secondsPerPhase: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(2);
+    });
+
+    it('only perPhase set', () => {
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerPhase: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(1);
+    });
+
+    it('only perTurn set', () => {
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerTurn: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('perTurn', () => {
+    let flow, state;
+    beforeEach(() => {
+      flow = FlowWithPhases({
+        phases: [
+          {
+            name: 'test',
+            secondsPerTurn: 10,
+          },
+        ],
+      });
+      state = {
+        ctx: flow.ctx(2),
+      };
+      flow.init(state);
+    });
+    it('when turn start - start timer', () => {
+      setInterval.mockReset();
+      flow.processGameEvent(state, { type: 'endTurn' });
+
+      expect(setInterval).toHaveBeenCalledTimes(2);
+    });
+
+    it('turn end when time is out', () => {
+      flow.processGameEvent = jest.fn();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).toHaveBeenCalledWith(expect.any(Object), {
+        type: 'endTurn',
+      });
+    });
+  });
+
+  describe('perPhase', () => {
+    it('when turn start - start timer', () => {
+      // WIP
+    });
+    it('turn end when time is out', () => {
+      // WIP
+    });
+  });
+});
+
 test('onTurnEnd', () => {
   {
     const onTurnEnd = jest.fn(G => G);

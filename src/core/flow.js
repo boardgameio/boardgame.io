@@ -7,6 +7,7 @@
  */
 
 import { TurnOrder } from './turn-order';
+import { timer } from './timer';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -186,6 +187,8 @@ export function Flow({
 export function FlowWithPhases({
   phases,
   movesPerTurn,
+  secondsPerTurn,
+  secondsPerPhase,
   endTurnIf,
   endGameIf,
   onTurnBegin,
@@ -233,6 +236,12 @@ export function FlowWithPhases({
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
+    if (conf.secondsPerTurn === undefined) {
+      conf.secondsPerTurn = secondsPerTurn;
+    }
+    if (conf.secondsPerPhase === undefined) {
+      conf.secondsPerPhase = secondsPerPhase;
+    }
     if (conf.endTurnIf === undefined) {
       conf.endTurnIf = endTurnIf;
     }
@@ -261,10 +270,22 @@ export function FlowWithPhases({
     return conf.endTurnIf(G, ctx);
   };
 
+  const onPhaseBeginWrap = (state, phaseConfig) => {
+    if (phaseConfig.secondsPerPhase) {
+      timer(phaseConfig.secondsPerPhase, () => {
+        const end = phaseConfig.endPhaseIf(state.G, state.ctx);
+        if (end) {
+          endPhaseEvent(state, end);
+        }
+      });
+    }
+    return phaseConfig.onPhaseBegin(state.G, state.ctx);
+  };
+
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, phaseConfig) {
     const ctx = { ...state.ctx };
-    const G = phaseConfig.onPhaseBegin(state.G, ctx);
+    const G = onPhaseBeginWrap(state, phaseConfig);
     ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
     return { ...state, G, ctx };
   };
