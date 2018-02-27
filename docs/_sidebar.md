@@ -17,6 +17,7 @@
   * [Game](api/Game.md)
   * [Client](api/Client.md)
   * [Server](api/Server.md)
+  * [Random](api/Random.md)
 
 * Component Library
   * [Showcase](storybook.md)
