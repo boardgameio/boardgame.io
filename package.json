@@ -4,7 +4,7 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development babel-watch --presets env examples/server.js",
+    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
     "docsify": "docsify serve docs",
     "docsify:update": "node ./scripts/docsify-update.js",
     "examples": "npm run dev",
@@ -67,7 +67,7 @@
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-watch": "^2.0.7",
     "chess.js": "^0.10.2",
