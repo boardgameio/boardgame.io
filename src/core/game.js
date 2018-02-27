@@ -78,7 +78,7 @@ import { GenSeed } from './random';
  * @param {...object} flow - Customize the flow of the game (see flow.js).
  *                           Must contain the return value of Flow().
  *                           If it contains any other object, it is presumed to be a
- *                           configuration object for SimpleFlow() or FlowWithPhases().
+ *                           configuration object for FlowWithPhases().
  *
  * @param {...object} ai - Bot framework configuration (see ai.js).
  *

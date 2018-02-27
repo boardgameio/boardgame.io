@@ -22,19 +22,25 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     numPlayers = 2;
   }
 
+  const initialG = game.setup(numPlayers);
+  let initialCtx = game.flow.ctx(numPlayers);
+
+  // Initialize PRNG seed.
+  initialCtx._random = { seed: game.seed };
+
   const initial = {
     // User managed state.
-    G: game.setup(numPlayers),
+    G: initialG,
 
     // Framework managed state.
-    ctx: game.flow.ctx(numPlayers),
+    ctx: initialCtx,
 
     // A list of actions performed so far. Used by the
     // GameLog to display a journal of moves.
     log: [],
 
     // Lists possible moves and player's score to allow running bots.
-    ai: game.ai(game.setup(numPlayers), game.flow.ctx(numPlayers)),
+    ai: game.ai(initialG, initialCtx),
 
     // A monotonically non-decreasing ID to ensure that
     // state updates are only allowed from clients that
@@ -45,9 +51,6 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     // replayed over it to view old snapshots.
     _initial: {},
   };
-
-  // Initialize PRNG seed.
-  initial.ctx._random = { seed: game.seed };
 
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
 
