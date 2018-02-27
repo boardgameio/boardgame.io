@@ -9,7 +9,7 @@ game board is synced in realtime across all of them
 ```js
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Client from 'boardgame.io/client';
+import Client from 'boardgame.io/react';
 
 const App = Client({
   game: TicTacToe,
