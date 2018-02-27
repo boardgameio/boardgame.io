@@ -58,7 +58,7 @@ export class Multiplayer {
         this.socket.emit(
           'action',
           action,
-          state._id,
+          state._stateID,
           this.gameID,
           this.playerID
         );

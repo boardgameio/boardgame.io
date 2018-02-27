@@ -160,10 +160,10 @@ test('action', async () => {
   await io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {},
-    _id: 1,
+    _stateID: 1,
     _initial: {
       G: {},
-      _id: 0,
+      _stateID: 0,
       _initial: {},
       ctx: {
         currentPlayer: '0',
@@ -196,7 +196,7 @@ test('action', async () => {
   await io.socket.receive('action', action, 1, 'unknown', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
-  // ... and not if the _id doesn't match the internal state.
+  // ... and not if the _stateID doesn't match the internal state.
   await io.socket.receive('action', action, 100, 'gameID', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
@@ -257,6 +257,9 @@ test('custom db implementation', async () => {
   class Custom {
     constructor() {
       this.games = new Map();
+    }
+    async connect() {
+      return;
     }
     async get(id) {
       getId = id;

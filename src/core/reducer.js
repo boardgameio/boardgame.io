@@ -36,7 +36,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     // A monotonically non-decreasing ID to ensure that
     // state updates are only allowed from clients that
     // are at the same version that the server.
-    _id: 0,
+    _stateID: 0,
 
     // A snapshot of this object so that actions can be
     // replayed over it to view old snapshots.
@@ -84,7 +84,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         ctx = { ...ctx, _random: PRNGState.get() };
 
         const log = [...state.log, action];
-        return { ...state, G, ctx, log, _id: state._id + 1 };
+        return { ...state, G, ctx, log, _stateID: state._stateID + 1 };
       }
 
       case Actions.MAKE_MOVE: {
@@ -110,7 +110,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         const log = [...state.log, action];
-        state = { ...state, G, ctx, log, _id: state._id + 1 };
+        state = { ...state, G, ctx, log, _stateID: state._stateID + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
