@@ -19,58 +19,62 @@ This poses interesting challenges regarding the implementation.
   and thus must be pure. Calling `Math.random()` and other functions that
   maintain external state would make the game logic impure and not idempotent.
 
-## Using Randomness in Games
+### Using Randomness in Games
 
-[boardgame.io]() takes a rather unusual approach to randomness: It disallows getting random variables directly.
-Instead, a game can ask the engine to generate random numbers, and the engine will inject those into the game on the next move.
+```js
+import { Random } from 'boardgame.io/core';
+
+Game({
+  moves: {
+    rollDie(G, ctx) {
+      return { ...G, dice: Random.D6() };
+    },
+  },
+});
+```
+
+!> The PRNG state is maintained inside `ctx._random` by the `Random`
+package automatically.
+
+### Shuffles
+
+To simulate a shuffled deck of cards, sometimes it might be simplest to draw a card from a random index in an array. This can get confusing if your game moves
+include a move for peeking at the top card which is later rendered moot by
+another move which shuffles the deck. To simplify modeling this, you might want
+to represent your deck as an array. Use `Random.Shuffle` to perform a shallow
+shuffle of the elements.
 
 ```js
 import { Random } from 'boardgame.io/core';
 
 const SomeGame = Game({
+  setup: () => ({
+    deck: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+  }),
   moves: {
-    rollDie(G, ctx) {
-      // G.diceValue will contain the requested
-      // die value at the end of this move.
-      return Random.D6(G, 'diceValue');
+    shuffleDeck(G) {
+      return { ...G, deck: Random.Shuffle(G.deck) };
     },
   },
-
-  flow: {
-    onMove: G => {
-      const dice = G.diceValue;
-      // do something...
-      return { ...G };
-    },
-  },
-  // ...
 });
 ```
 
-This will place a request to a D6 dice roll inside `G`.
-While processing the move, the request gets evaluated and the result placed into `diceValue`, where it can be used.
+### Seed
 
-## Seed
-
-The library uses a `seed` in `ctx` that is stripped before it
+The library uses a `seed` in `ctx._random` that is stripped before it
 is sent to the client. All the code that needs randomness uses this
 `seed` to generate random numbers.
 
-You can override the initial `seed` in the `flow` section like this:
+You can override the initial `seed` like this:
 
 ```js
 Game({
+  seed: <somevalue>
   ...
-
-  flow: {
-    seed: <somevalue>
-
-    ...
-  }
 })
 ```
 
-## Background
+### Background
 
 There is an interesting background article by David Bau called [Random Seeds, Coded Hints, and Quintillions](http://davidbau.com/archives/2010/01/30/random_seeds_coded_hints_and_quintillions.html).
 Despite its age, this article gives insight on topics about randomness, like differentiating _local_ and _network_ entropy.

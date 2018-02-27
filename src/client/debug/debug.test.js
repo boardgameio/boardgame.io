@@ -9,7 +9,6 @@
 import React from 'react';
 import { restore } from '../../core/action-creators';
 import { createStore } from 'redux';
-import { Provider } from 'react-redux';
 import { Debug, DebugMove, KeyboardShortcut } from './debug.js';
 import Mousetrap from 'mousetrap';
 import Enzyme from 'enzyme';
@@ -47,8 +46,14 @@ const gamestate = {
 };
 
 test('basic', () => {
+  const store = { getState: () => ({ log: [] }) };
   const debug = Enzyme.mount(
-    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+    <Debug
+      gamestate={gamestate}
+      store={store}
+      endTurn={() => {}}
+      gameID="default"
+    />
   );
 
   const titles = debug.find('h3').map(title => title.text());
@@ -176,9 +181,12 @@ test('save / restore', () => {
   });
 
   const debug = Enzyme.mount(
-    <Provider store={store}>
-      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
-    </Provider>
+    <Debug
+      store={store}
+      gamestate={gamestate}
+      endTurn={() => {}}
+      gameID="default"
+    />
   );
 
   const restoredState = { restore: true };
@@ -189,13 +197,13 @@ test('save / restore', () => {
 
   debug
     .find('.key-box')
-    .at(2)
+    .at(3)
     .simulate('click');
   expect(setItem).toHaveBeenCalled();
 
   debug
     .find('.key-box')
-    .at(3)
+    .at(4)
     .simulate('click');
   expect(getItem).toHaveBeenCalled();
 
@@ -205,7 +213,7 @@ test('save / restore', () => {
   loggedAction = null;
   debug
     .find('.key-box')
-    .at(3)
+    .at(4)
     .simulate('click');
   expect(loggedAction).toEqual(null);
 });
@@ -222,12 +230,28 @@ test('toggle Debug UI', () => {
 });
 
 test('toggle Log', () => {
+  const store = { getState: () => ({ log: [] }) };
   const debug = Enzyme.mount(
-    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+    <Debug
+      store={store}
+      gamestate={gamestate}
+      endTurn={() => {}}
+      gameID="default"
+    />
   );
 
   expect(debug.find('GameLog').length).toEqual(0);
   Mousetrap.simulate('l');
   debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
   expect(debug.find('GameLog').length).toEqual(1);
+});
+
+test('toggle help', () => {
+  const debug = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(debug.state()).toMatchObject({ help: false });
+  Mousetrap.simulate('?');
+  expect(debug.state()).toMatchObject({ help: true });
 });

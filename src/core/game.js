@@ -8,6 +8,7 @@
 
 import { FlowWithPhases } from './flow';
 import { AI } from './ai';
+import { GenSeed } from './random';
 
 /**
  * Game
@@ -67,21 +68,28 @@ import { AI } from './ai';
  * })
  *
  * @param {...object} setup - Function that returns the initial state of G.
+ *
  * @param {...object} moves - A dictionary of move functions.
+ *
  * @param {...object} playerView - A function that returns a
  *                                 derivative of G tailored for
  *                                 the specified player.
+ *
  * @param {...object} flow - Customize the flow of the game (see flow.js).
  *                           Must contain the return value of Flow().
  *                           If it contains any other object, it is presumed to be a
  *                           configuration object for SimpleFlow() or FlowWithPhases().
+ *
  * @param {...object} ai - Bot framework configuration (see ai.js).
+ *
+ * @param {...object} seed - Seed for the PRNG.
  */
-function Game({ name, setup, moves, playerView, flow, ai }) {
-  if (!name) name = 'default';
-  if (!setup) setup = () => ({});
-  if (!moves) moves = {};
-  if (!playerView) playerView = G => G;
+function Game({ name, setup, moves, playerView, flow, seed, ai }) {
+  if (name === undefined) name = 'default';
+  if (setup === undefined) setup = () => ({});
+  if (moves === undefined) moves = {};
+  if (playerView === undefined) playerView = G => G;
+  if (seed === undefined) seed = GenSeed();
 
   if (!ai || typeof ai != 'function') {
     ai = AI(ai || {});
@@ -96,6 +104,7 @@ function Game({ name, setup, moves, playerView, flow, ai }) {
     playerView,
     flow,
     ai,
+    seed,
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
