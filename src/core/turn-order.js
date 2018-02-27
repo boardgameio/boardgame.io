@@ -55,13 +55,7 @@ export const TurnOrder = {
    */
   DEFAULT_REVERSE: {
     first: (G, ctx) => ctx.numPlayers -1 + '',
-    next: (G, ctx) => {
-      if ((ctx.currentPlayer == 0)) {
-        return ctx.numPlayers -1 + '';
-      } else {
-        return (+ctx.currentPlayer - 1 + '');
-      }
-    },
+    next: (G, ctx) => (+ctx.currentPlayer + ctx.numPlayers - 1) % ctx.numPlayers + '',
   },
 
   /**
