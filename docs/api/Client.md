@@ -1,8 +1,7 @@
 # Client
 
 Creates a `boardgame.io` client. This is the entry point for
-the client application, and is the only call necessary on the
-client-side if you choose to roll your own move reducer.
+the client application.
 
 The `Board` component will receive the following as `props`:
 
@@ -16,7 +15,8 @@ The `Board` component will receive the following as `props`:
    can take any number of arguments, and they are passed to the
    move function after `G` and `ctx`.
 
-4. `endTurn`: A function that ends the turn.
+4. `events`: An object containing functions to dispatch various
+   game events like `endTurn` and `endPhase`.
 
 5. `playerID`: The player ID associated with the client.
 
@@ -24,6 +24,7 @@ The `Board` component will receive the following as `props`:
    a move or interact with the game.
 
 7. `isMultiplayer`: `true` if it is a multiplayer game.
+
 8. `isConnected`: `true` if connection to the server is active.
 
 ### Arguments
