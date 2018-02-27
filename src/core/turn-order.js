@@ -48,6 +48,22 @@ export const TurnOrder = {
     next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
   },
 
+    /**
+   * DEFAULT-REVERSE
+   *
+   * The default round-robin turn order starting from the last player.
+   */
+  DEFAULT_REVERSE: {
+    first: (G, ctx) => ctx.numPlayers -1 + '',
+    next: (G, ctx) => {
+      if ((ctx.currentPlayer == 0)) {
+        return ctx.numPlayers -1 + '';
+      } else {
+        return (+ctx.currentPlayer - 1 + '');
+      }
+    },
+  },
+
   /**
    * ANY
    *
