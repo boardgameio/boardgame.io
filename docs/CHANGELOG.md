@@ -1,3 +1,9 @@
+# v0.18.1
+
+#### Bugfixes
+
+[[0c894bd](https://github.com/google/boardgame.io/commit/0c894bd)] add react.js to rollup config
+
 # v0.18
 
 #### Features
