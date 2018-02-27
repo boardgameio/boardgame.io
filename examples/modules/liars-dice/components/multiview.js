@@ -31,6 +31,10 @@ const Multiview = () => (
         <App gameID="liarsDice" playerID="1" />
       </div>
       <div className="run">
+        &lt;App playerID=&quot;2&quot;/&gt;
+        <App gameID="liarsDice" playerID="2" />
+      </div>
+      <div className="run">
         Spectator View
         <App gameID="liarsDice" />
       </div>
