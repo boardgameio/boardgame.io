@@ -1,7 +1,6 @@
 {
   "presets": [
     ["env", { "modules": false }],
-    ["es2015", { "modules": false }],
     "react",
   ],
   "env": {
