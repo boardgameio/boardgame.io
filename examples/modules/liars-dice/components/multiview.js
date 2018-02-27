@@ -32,7 +32,7 @@ const Multiview = () => (
         <App gameID="liarsDice" playerID="1" />
       </div>
       <div className="run">
-        &lt;App playerID=&quot;1&quot;/&gt;
+        &lt;App playerID=&quot;2&quot;/&gt;
         <App gameID="liarsDice" playerID="2" />
       </div>
       <div className="run">
