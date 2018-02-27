@@ -49,6 +49,15 @@ export default [
   },
 
   {
+    input: 'packages/react.js',
+    external: Object.keys(globals),
+    globals,
+    output: { file: 'dist/react.js', format: 'umd' },
+    name: 'Client',
+    plugins: plugins,
+  },
+
+  {
     input: 'packages/client.js',
     external: Object.keys(globals),
     globals,
