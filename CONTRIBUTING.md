@@ -3,8 +3,7 @@
 ## Issue tracker
 
 Please use the [Issue Tracker](https://github.com/google/boardgame.io/issues) to discuss potential improvements you want to make
-before sending a Pull Request. Do not send unsolicited
-Pull Requests unless they are small bugfixes.
+before sending a Pull Request.
 
 The Issue Tracker may contain items labelled **help wanted** or **good first issue**
 from time to time. This is a good place to look if you want to contribute but aren't sure where to start.
@@ -22,6 +21,8 @@ is ready to be merged. Name your branch something like
 
 Once you are ready, you can create a Pull Request for it to be
 merged into the `master` branch in this repo.
+
+#### Testing
 
 The following commands must pass for a Pull Request to be considered:
 
@@ -43,6 +44,15 @@ Use the following command to preview them:
 ```
 $ npm run docsify
 ```
+
+#### `ptal` label
+
+Mark your Pull Requests with a label `ptal` (Please Take A Look).
+This label is available in the "Labels" dropdown on the right.
+This label will be removed by an admin when they request changes,
+and you should re-add it again when it ready to be reviewed again.
+This avoids miscommunication about who is waiting for who,
+and also allows easy filtering of PR's that need attention right now.
 
 ## Contributor License Agreement
 
