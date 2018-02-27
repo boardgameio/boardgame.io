@@ -45,7 +45,7 @@ The component supports the following `props`:
 ### Usage
 
 ```js
-import { Client } from 'boardgame.io/client';
+import { Client } from 'boardgame.io/react';
 
 const App = Client({
   // The return value of Game().
