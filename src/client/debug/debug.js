@@ -26,9 +26,6 @@ export class DebugMove extends React.Component {
     name: PropTypes.string.isRequired,
     shortcut: PropTypes.string.isRequired,
     fn: PropTypes.func.isRequired,
-    active: PropTypes.bool,
-    activate: PropTypes.func,
-    deactivate: PropTypes.func,
   };
 
   state = {
