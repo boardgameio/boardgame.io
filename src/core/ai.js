@@ -19,9 +19,10 @@
  * other player's scores (i.e. MiniMax and similar algorithms).
  *
  * @param {...object} possibleMoves - Function with signature (G, ctx) => moves
- *                                    that returns possible moves. Each possible
- *                                    move must be in this format:
- *                                    { move: string, args:  }
+ *                                    that returns an array of possible moves.
+ *                                    Each move must be of this format:
+ *                                    { move: string, args: [] }
+ *
  * @param {...object} score - Function with signature (G, ctx) => score
  *                            that returns a score for a given state,
  *                            which will guide the AI search algorithm.
