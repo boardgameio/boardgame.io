@@ -34,7 +34,7 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('any');
 
   flow = FlowWithPhases({
-    phases: [{ name: 'A', turnOrder: TurnOrder.DEFAULT_REVERSE }],
+    phases: [{ name: 'A', turnOrder: TurnOrder.REVERSE }],
   });
 
   state = { ctx: flow.ctx(2) };
