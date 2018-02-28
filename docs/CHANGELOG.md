@@ -1,3 +1,44 @@
+# v0.18.1
+
+#### Bugfixes
+
+[[0c894bd](https://github.com/google/boardgame.io/commit/0c894bd)] add react.js to rollup config
+
+# v0.18
+
+#### Features
+
+* [[4b90e84](https://github.com/google/boardgame.io/commit/4b90e84)] decouple client from React
+
+This adds a new package `boardgame.io/react`. Migrate all your
+calls from:
+
+```
+import { Client } from 'boardgame.io/client'
+```
+
+to:
+
+```
+import { Client } from 'boardgame.io/react'
+```
+
+`boardgame.io/client` exposes a raw JS client that isn't tied
+to any particular UI framework.
+
+* Random API:
+
+  * [[ebe7758](https://github.com/google/boardgame.io/commit/ebe7758)] allow to throw multiple dice (#120)
+  * [[8c88b70](https://github.com/google/boardgame.io/commit/8c88b70)] Simplify Random API (#119)
+  * [[45599e5](https://github.com/google/boardgame.io/commit/45599e5)] Server-side array shuffling. (#116)
+  * [[d296b36](https://github.com/google/boardgame.io/commit/d296b36)] Random API (#103)
+
+* [[f510b69](https://github.com/google/boardgame.io/commit/f510b69)] onTurnBegin (#109)
+
+#### Bugfixes
+
+* [[6a010c8](https://github.com/google/boardgame.io/commit/6a010c8)] Debug UI: fixes related to errors in arguments (#123)
+
 # v0.17.2
 
 #### Features

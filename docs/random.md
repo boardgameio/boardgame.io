@@ -36,29 +36,6 @@ Game({
 !> The PRNG state is maintained inside `ctx._random` by the `Random`
 package automatically.
 
-### Shuffles
-
-To simulate a shuffled deck of cards, sometimes it might be simplest to draw a card from a random index in an array. This can get confusing if your game moves
-include a move for peeking at the top card which is later rendered moot by
-another move which shuffles the deck. To simplify modeling this, you might want
-to represent your deck as an array. Use `Random.Shuffle` to perform a shallow
-shuffle of the elements.
-
-```js
-import { Random } from 'boardgame.io/core';
-
-const SomeGame = Game({
-  setup: () => ({
-    deck: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
-  }),
-  moves: {
-    shuffleDeck(G) {
-      return { ...G, deck: Random.Shuffle(G.deck) };
-    },
-  },
-});
-```
-
 ### Seed
 
 The library uses a `seed` in `ctx._random` that is stripped before it
@@ -78,3 +55,7 @@ Game({
 
 There is an interesting background article by David Bau called [Random Seeds, Coded Hints, and Quintillions](http://davidbau.com/archives/2010/01/30/random_seeds_coded_hints_and_quintillions.html).
 Despite its age, this article gives insight on topics about randomness, like differentiating _local_ and _network_ entropy.
+
+### API Reference
+
+[link](api/Random.md)

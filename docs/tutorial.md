@@ -36,7 +36,7 @@ call-site of this move.
 ```js
 // src/App.js
 
-import { Client } from 'boardgame.io/client';
+import { Client } from 'boardgame.io/react';
 import { Game } from 'boardgame.io/core';
 
 const TicTacToe = Game({

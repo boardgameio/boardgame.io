@@ -23,15 +23,15 @@ const game = Game({
 
 const endTurn = () => gameEvent('endTurn');
 
-test('_id is incremented', () => {
+test('_stateID is incremented', () => {
   const reducer = createGameReducer({ game });
 
   let state = undefined;
 
   state = reducer(state, makeMove('unknown'));
-  expect(state._id).toBe(1);
+  expect(state._stateID).toBe(1);
   state = reducer(state, endTurn());
-  expect(state._id).toBe(2);
+  expect(state._stateID).toBe(2);
 });
 
 test('makeMove', () => {

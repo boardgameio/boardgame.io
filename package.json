@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.17.2",
+  "version": "0.18.1",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
@@ -87,6 +87,7 @@
     "koa-helmet": "^3.2.0",
     "koa-webpack": "^1.0.0",
     "lint-staged": "^6.0.1",
+    "mongo-mock": "^3.1.0",
     "open-browser-webpack-plugin": "0.0.5",
     "prettier": "^1.10.2",
     "react": "^16.0.0",
@@ -113,6 +114,8 @@
     "koa-router": "^7.2.1",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.1",
+    "lru-native": "^0.4.0",
+    "mongodb": "^3.0.3",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
     "react-json-view": "^1.13.0",

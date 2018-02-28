@@ -28,6 +28,7 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
   if (db === undefined) {
     db = new InMemory();
   }
+  db.connect();
 
   const clientInfo = _clientInfo || new Map();
   const roomInfo = _roomInfo || new Map();
@@ -63,7 +64,7 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
           return;
         }
 
-        if (state._id == stateID) {
+        if (state._stateID == stateID) {
           // Update server's version of the store.
           store.dispatch(action);
           state = store.getState();
