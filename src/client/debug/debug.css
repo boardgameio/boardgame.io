@@ -47,6 +47,11 @@
   font-weight: bold;
 }
 
+.debug-ui .move-error {
+  color: #a00;
+  font-weight: bold;
+}
+
 .debug-ui .arg-field {
   outline: none;
   font-family: monospace;

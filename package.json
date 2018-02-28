@@ -8,8 +8,6 @@
     "docsify": "docsify serve docs",
     "docsify:update": "node ./scripts/docsify-update.js",
     "examples": "npm run dev",
-    "precommit": "lint-staged",
-    "prepush": "npm run test:coverage",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --forceExit",
@@ -83,7 +81,7 @@
     "eslint-plugin-react": "^7.3.0",
     "generate-export-aliases": "^1.0.0",
     "html-webpack-plugin": "^2.30.1",
-    "husky": "^0.14.3",
+    "husky": "^0.15.0-rc.8",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^21.2.1",
     "koa-helmet": "^3.2.0",
@@ -152,5 +150,11 @@
       "/node_modules/",
       ".npm/"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test:coverage"
+    }
   }
 }
