@@ -66,6 +66,7 @@ export class Mongo {
    */
   constructor({ url, dbname, cacheSize, mockClient }) {
     if (cacheSize === undefined) cacheSize = 1000;
+    if (dbname === undefined) dbname = 'bgio';
 
     this.client = mockClient || MongoClient;
     this.url = url;

@@ -76,7 +76,8 @@ test('Mongo', async () => {
   }
 
   {
-    const db = new Mongo({ url: 'a' });
+    const db = new Mongo({ url: 'a', dbname: 'test' });
     expect(db.client).toBeDefined();
+    expect(db.dbname).toBe('test');
   }
 });
