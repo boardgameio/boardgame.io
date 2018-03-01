@@ -149,5 +149,5 @@ test('log', () => {
   state = reducer(state, actionB);
   expect(state.log).toEqual([actionA, actionB]);
   state = reducer(state, actionC);
-  expect(state.log).toEqual([actionA, actionB, actionC]);
+  expect(state.log).toEqual([actionA, actionB, actionC.payload]);
 });

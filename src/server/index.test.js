@@ -165,35 +165,58 @@ test('action', async () => {
   await io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {},
-    _stateID: 1,
     _initial: {
       G: {},
-      _stateID: 0,
       _initial: {},
+      _redo: [],
+      _stateID: 0,
+      _undo: [
+        {
+          G: {},
+          ctx: {
+            _random: { seed: 0 },
+            currentPlayer: '0',
+            currentPlayerMoves: 0,
+            numPlayers: 2,
+            phase: 'default',
+            turn: 0,
+          },
+        },
+      ],
       ctx: {
+        _random: { seed: 0 },
         currentPlayer: '0',
         currentPlayerMoves: 0,
         numPlayers: 2,
         phase: 'default',
         turn: 0,
-        _random: { seed: 0 },
       },
       log: [],
     },
+    _redo: [],
+    _stateID: 1,
+    _undo: [
+      {
+        G: {},
+        ctx: {
+          _random: { seed: 0 },
+          currentPlayer: '1',
+          currentPlayerMoves: 0,
+          numPlayers: 2,
+          phase: 'default',
+          turn: 1,
+        },
+      },
+    ],
     ctx: {
+      _random: undefined,
       currentPlayer: '1',
       currentPlayerMoves: 0,
       numPlayers: 2,
       phase: 'default',
       turn: 1,
-      _random: undefined,
     },
-    log: [
-      {
-        payload: { args: undefined, playerID: undefined, type: 'endTurn' },
-        type: 'GAME_EVENT',
-      },
-    ],
+    log: [{ args: undefined, playerID: undefined, type: 'endTurn' }],
   });
   io.socket.emit.mockReset();
 
