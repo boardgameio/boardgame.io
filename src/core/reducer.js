@@ -33,6 +33,12 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     // GameLog to display a journal of moves.
     log: [],
 
+    // List of {G, ctx} pairs that can be undone.
+    _undo: [],
+
+    // List of {G, ctx} pairs that can be redone.
+    _redo: [],
+
     // A monotonically non-decreasing ID to ensure that
     // state updates are only allowed from clients that
     // are at the same version that the server.
@@ -50,6 +56,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
   initial.G = state.G;
   initial.ctx = state.ctx;
+  initial._undo = state._undo;
 
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
@@ -74,17 +81,12 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
         // Init PRNG state.
         PRNGState.set(state.ctx._random);
-
-        let { G, ctx } = game.flow.processGameEvent(
-          { G: state.G, ctx: state.ctx },
-          action.payload
-        );
-
+        // Update state.
+        const newState = game.flow.processGameEvent(state, action.payload);
         // Update PRNG state.
-        ctx = { ...ctx, _random: PRNGState.get() };
+        const ctx = { ...newState.ctx, _random: PRNGState.get() };
 
-        const log = [...state.log, action];
-        return { ...state, G, ctx, log, _stateID: state._stateID + 1 };
+        return { ...newState, ctx, _stateID: state._stateID + 1 };
       }
 
       case Actions.MAKE_MOVE: {

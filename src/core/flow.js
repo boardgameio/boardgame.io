@@ -130,6 +130,8 @@ export function Flow({
  *
  * @param {...object} endPhase - Set to false to disable the `endPhase` event.
  *
+ * @param {...object} undo - Set to true to enable the undo/redo events.
+ *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
  *                                       be executed optimistically on
@@ -194,6 +196,7 @@ export function FlowWithPhases({
   turnOrder,
   endTurn,
   endPhase,
+  undo,
   optimisticUpdate,
 }) {
   // Attach defaults.
@@ -202,6 +205,9 @@ export function FlowWithPhases({
   }
   if (endTurn === undefined) {
     endTurn = true;
+  }
+  if (undo === undefined) {
+    undo = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -272,7 +278,8 @@ export function FlowWithPhases({
   const startTurn = function(state, config) {
     const ctx = { ...state.ctx };
     const G = config.onTurnBegin(state.G, ctx);
-    return { ...state, G, ctx };
+    const _undo = [{ G, ctx }];
+    return { ...state, G, ctx, _undo, _redo: [] };
   };
 
   const startGame = function(state, config) {
@@ -339,8 +346,7 @@ export function FlowWithPhases({
    * Passes the turn to the next turn in a round-robin fashion.
    */
   function endTurnEvent(state) {
-    let G = state.G;
-    let ctx = state.ctx;
+    let { G, ctx } = state;
 
     const conf = phaseMap[ctx.phase];
 
@@ -374,6 +380,43 @@ export function FlowWithPhases({
     return startTurn({ ...state, G, ctx }, conf);
   }
 
+  function undoEvent(state) {
+    const { _undo, _redo } = state;
+
+    if (_undo.length < 2) {
+      return state;
+    }
+
+    const last = _undo[_undo.length - 1];
+    const restore = _undo[_undo.length - 2];
+
+    return {
+      ...state,
+      G: restore.G,
+      ctx: restore.ctx,
+      _undo: _undo.slice(0, _undo.length - 1),
+      _redo: [last, ..._redo],
+    };
+  }
+
+  function redoEvent(state) {
+    const { _undo, _redo } = state;
+
+    if (_redo.length == 0) {
+      return state;
+    }
+
+    const first = _redo[0];
+
+    return {
+      ...state,
+      G: first.G,
+      ctx: first.ctx,
+      _undo: [..._undo, first],
+      _redo: _redo.slice(1),
+    };
+  }
+
   function processMove(state, action, dispatch) {
     // Update currentPlayerMoves.
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
@@ -387,7 +430,8 @@ export function FlowWithPhases({
     const gameover = conf.endGameIf(state.G, state.ctx);
 
     // End the turn automatically if endTurnIf is true  or if endGameIf returns.
-    if (endTurnIfWrap(state.G, state.ctx) || gameover !== undefined) {
+    const endTurn = endTurnIfWrap(state.G, state.ctx);
+    if (endTurn || gameover !== undefined) {
       state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
     }
 
@@ -406,6 +450,16 @@ export function FlowWithPhases({
       });
     }
 
+    // Update undo / redo state.
+    if (!endTurn) {
+      const undo = state._undo || [];
+      state = {
+        ...state,
+        _undo: [...undo, { G: state.G, ctx: state.ctx }],
+        _redo: [],
+      };
+    }
+
     return state;
   }
 
@@ -419,6 +473,10 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
+  if (undo) {
+    enabledEvents['undo'] = undoEvent;
+    enabledEvents['redo'] = redoEvent;
+  }
   if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
 
