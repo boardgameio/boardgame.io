@@ -114,7 +114,7 @@
     "koa-router": "^7.2.1",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.1",
-    "lru-native": "^0.4.0",
+    "lru-cache": "^4.1.1",
     "mongodb": "^3.0.3",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",

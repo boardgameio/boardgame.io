@@ -7,7 +7,7 @@
  */
 
 const MongoClient = require('mongodb').MongoClient;
-const LRUCache = require('lru-native');
+const LRU = require('lru-cache');
 
 /**
  * InMemory data storage.
@@ -70,7 +70,7 @@ export class Mongo {
     this.client = mockClient || MongoClient;
     this.url = url;
     this.dbname = dbname;
-    this.cache = new LRUCache({ maxElements: cacheSize });
+    this.cache = new LRU({ max: cacheSize });
   }
 
   /**
