@@ -11,6 +11,10 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 
+beforeEach(() => {
+  jest.resetModules();
+});
+
 jest.mock('koa-socket', () => {
   class MockSocket {
     constructor() {
@@ -277,4 +281,11 @@ test('custom db implementation', async () => {
 
   await io.socket.receive('sync', 'gameID');
   expect(getId).toBe('gameID');
+});
+
+test('MONGO_URI', () => {
+  process.env.MONGO_URI = 'test';
+  const server = Server({ games: [game] });
+  expect(server.db.url).toBe('test');
+  delete process.env.MONGO_URI;
 });

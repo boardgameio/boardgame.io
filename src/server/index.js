@@ -9,7 +9,7 @@
 const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
-import { InMemory } from './db';
+import { InMemory, Mongo } from './db';
 import { createGameReducer } from '../core/reducer';
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -26,7 +26,11 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
   io.attach(app);
 
   if (db === undefined) {
-    db = new InMemory();
+    if (process.env.MONGO_URI) {
+      db = new Mongo({ url: process.env.MONGO_URI });
+    } else {
+      db = new InMemory();
+    }
   }
 
   const clientInfo = _clientInfo || new Map();
@@ -131,6 +135,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
 
   return {
     app,
+    db,
     run: async (port, callback) => {
       await db.connect();
       app.listen(port, callback);
