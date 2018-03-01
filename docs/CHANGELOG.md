@@ -1,3 +1,9 @@
+# v0.20
+
+#### Features
+
+* [[eec8896](https://github.com/google/boardgame.io/commit/eec8896)] undo/redo
+
 # v0.19
 
 #### Features
@@ -9,6 +15,21 @@
   * [[557b66c](https://github.com/google/boardgame.io/commit/557b66c)] add run() to Server
   * [[2a85b40](https://github.com/google/boardgame.io/commit/2a85b40)] replace lru-native with lru-cache
   * [[003fe46](https://github.com/google/boardgame.io/commit/003fe46)] MongoDB connector
+
+#### Breaking Changes
+
+* `boardgame.io/server` no longer has a default export, but returns
+  `Server` and `Mongo`.
+
+```
+// v0.19
+const Server = require('boardgame.io/server').Server;
+```
+
+```
+// v0.18
+const Server = require('boardgame.io/server');
+```
 
 # v0.18.1
 
