@@ -82,11 +82,15 @@ test('multiplayer', () => {
 
   // sync restores state.
   const restored = { restore: true };
-  expect(store.getState()).not.toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
   mockSocket.receive('sync', 'unknown gameID', restored);
-  expect(store.getState()).not.toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
   mockSocket.receive('sync', 'default:default', restored);
-  expect(store.getState()).toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
+  // Only if the stateID is not stale.
+  restored._stateID = 1;
+  mockSocket.receive('sync', 'default:default', restored);
+  expect(store.getState()).toMatchObject(restored);
 
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
