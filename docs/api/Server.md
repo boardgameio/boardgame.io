@@ -22,6 +22,7 @@ An object that contains:
 1. run (_function_): A function to run the server.
    Signature: (port, callback) => {}
 2. app (_object_): The Koa app.
+3. db (_object_): The `db` implementation.
 
 ### Usage
 

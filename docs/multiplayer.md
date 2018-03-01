@@ -74,7 +74,7 @@ you can use to attach other handlers etc.
 
 ```js
 const KoaStatic = require('koa-static');
-const Server = require('boardgame.io/server');
+const Server = require('boardgame.io/server').Server;
 const TicTacToe = require('./tic-tac-toe');
 
 const server = Server({ games: [TicTacToe] });
@@ -93,3 +93,26 @@ Client({
   multiplayer: { server: 'hostname:port' },
 });
 ```
+
+#### Database
+
+The default storage implementation is an in-memory map. However,
+you can provide your own adapter to connect to any backend, or
+use the bundled MongoDB connector.
+
+```js
+const { Server, Mongo } = require('boardgame.io/server');
+const TicTacToe = require('./tic-tac-toe');
+
+const server = Server({
+  games: [TicTacToe],
+  db: new Mongo({
+    url: 'mongodb://...',
+    dbname: 'bgio',
+  }),
+});
+
+server.run(8000);
+```
+
+!> You can get a free MongoDB instance at places like mlab.com.

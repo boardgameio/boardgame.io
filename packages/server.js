@@ -7,5 +7,6 @@
  */
 
 import { Server } from '../src/server/index.js';
+import { Mongo } from '../src/server/db.js';
 
-export { Server };
+export { Server, Mongo };
