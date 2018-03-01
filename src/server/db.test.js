@@ -54,12 +54,12 @@ test('Mongo', async () => {
   // Cache misses.
   {
     // Must return created game.
-    db.cache.clear();
+    db.cache.reset();
     state = await db.get('gameID');
     expect(state).toMatchObject({ a: 1 });
 
     // Must return true if game exists
-    db.cache.clear();
+    db.cache.reset();
     const has = await db.has('gameID');
     expect(has).toBe(true);
   }
