@@ -30,10 +30,10 @@ are playing. Here is a snippet showing how to set it up
 to serve the socket requests coming from the client.
 
 ```js
-const Server = require('boardgame.io/server');
+const Server = require('boardgame.io/server').Server;
 const TicTacToe = require('./tic-tac-toe');
-const app = Server({ games: [TicTacToe] });
-app.listen(8000);
+const server = Server({ games: [TicTacToe] });
+server.run(8000);
 ```
 
 You can also serve multiple types of games from the same server:
@@ -69,17 +69,17 @@ URL be synced to the same game.
 
 In a real app, you might want to also serve your React
 frontend from the same server as well. The returned object
-`app` is a [Koa](http://koajs.com/) app that you can
-use to attach other handlers etc.
+contains `app`, which is a [Koa](http://koajs.com/) app that
+you can use to attach other handlers etc.
 
 ```js
 const KoaStatic = require('koa-static');
 const Server = require('boardgame.io/server');
 const TicTacToe = require('./tic-tac-toe');
 
-const app = Server({ games: [TicTacToe] });
-app.use(KoaStatic('path/to/dir'));
-app.listen(8000);
+const server = Server({ games: [TicTacToe] });
+server.app.use(KoaStatic('path/to/dir'));
+server.run(8000);
 ```
 
 You might also want to keep them separate (one server to serve the web app

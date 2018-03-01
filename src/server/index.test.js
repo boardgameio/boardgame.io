@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Server from './index';
+import { Server } from './index';
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
@@ -61,6 +61,7 @@ const game = Game({ seed: 0 });
 
 test('basic', () => {
   const server = Server({ games: [game] });
+  server.run();
   expect(server).not.toBe(undefined);
 });
 
@@ -77,7 +78,7 @@ test('connect / disconnect', async () => {
   const _roomInfo = new Map();
 
   const server = Server({ games: [game], _clientInfo, _roomInfo });
-  const io = server.context.io;
+  const io = server.app.context.io;
 
   io.socket.id = '0';
   await io.socket.receive('sync', 'gameID', '0', 2);
@@ -115,7 +116,7 @@ test('connect / disconnect', async () => {
 
 test('sync', async () => {
   const server = Server({ games: [game] });
-  const io = server.context.io;
+  const io = server.app.context.io;
   expect(server).not.toBe(undefined);
 
   const spy = jest.spyOn(Redux, 'createStore');
@@ -139,7 +140,7 @@ test('sync', async () => {
 
 test('action', async () => {
   const server = Server({ games: [game] });
-  const io = server.context.io;
+  const io = server.app.context.io;
   const action = ActionCreators.gameEvent('endTurn');
 
   await io.socket.receive('action', action);
@@ -218,7 +219,7 @@ test('playerView (sync)', async () => {
   });
 
   const server = Server({ games: [game] });
-  const io = server.context.io;
+  const io = server.app.context.io;
 
   await io.socket.receive('sync', 'gameID', 0);
   expect(io.socket.emit).toHaveBeenCalledTimes(1);
@@ -232,7 +233,7 @@ test('playerView (action)', async () => {
     },
   });
   const server = Server({ games: [game] });
-  const io = server.context.io;
+  const io = server.app.context.io;
   const action = ActionCreators.gameEvent('endTurn');
 
   io.socket.id = 'first';
@@ -272,7 +273,7 @@ test('custom db implementation', async () => {
 
   const game = Game({});
   const server = Server({ games: [game], db: new Custom() });
-  const io = server.context.io;
+  const io = server.app.context.io;
 
   await io.socket.receive('sync', 'gameID');
   expect(getId).toBe('gameID');

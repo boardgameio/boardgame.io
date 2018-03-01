@@ -14,7 +14,7 @@ import { createGameReducer } from '../core/reducer';
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
 
-function Server({ games, db, _clientInfo, _roomInfo }) {
+export function Server({ games, db, _clientInfo, _roomInfo }) {
   const app = new Koa();
   const io = new IO({
     ioOptions: {
@@ -28,7 +28,6 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
   if (db === undefined) {
     db = new InMemory();
   }
-  db.connect();
 
   const clientInfo = _clientInfo || new Map();
   const roomInfo = _roomInfo || new Map();
@@ -130,7 +129,11 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
     });
   }
 
-  return app;
+  return {
+    app,
+    run: async (port, callback) => {
+      await db.connect();
+      app.listen(port, callback);
+    },
+  };
 }
-
-export default Server;
