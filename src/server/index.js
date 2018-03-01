@@ -89,8 +89,10 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
             }
           }
 
-          db.set(gameID, store.getState());
+          await db.set(gameID, store.getState());
         }
+
+        return;
       });
 
       socket.on('sync', async (gameID, playerID, numPlayers) => {
@@ -106,6 +108,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         clientInfo.set(socket.id, { gameID, playerID });
 
         let state = await db.get(gameID);
+
         if (state === undefined) {
           const store = Redux.createStore(reducer);
           state = store.getState();

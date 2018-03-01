@@ -85,7 +85,10 @@ export class Multiplayer {
     }
 
     this.socket.on('sync', (gameID, state) => {
-      if (gameID == this.gameID) {
+      if (
+        gameID == this.gameID &&
+        state._stateID >= this.store.getState()._stateID
+      ) {
         const action = ActionCreators.restore(state);
         action._remote = true;
         this.store.dispatch(action);
