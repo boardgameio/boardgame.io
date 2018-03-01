@@ -48,6 +48,18 @@ export class HexGrid extends React.Component {
     cellSize: 1,
   };
 
+  static cc2graphical = (x, y, z, cellSize) => {
+    const q = x;
+    const r = z;
+    const xw = cellSize * 3 * q / 2.0;
+    const yw = cellSize * Math.sqrt(3) * (r + q / 2.0);
+    // NOTE: _center is used as internal prop name
+    const _center = { x: xw, y: yw };
+    const width = cellSize * 2;
+    const height = Math.sqrt(3) / 2 * width;
+    return { _center, width, height, cellSize };
+  };
+
   _getCellColor(x, y, z) {
     const key = `${x},${y},${z}`;
     let color = 'white';
@@ -68,13 +80,12 @@ export class HexGrid extends React.Component {
       for (let y = -r; y <= r; y++) {
         const z = -x - y;
         if (Math.abs(z) > r) continue;
+        const dims = HexGrid.cc2graphical(x, y, z, this.props.cellSize);
         hexes.push(
           <Hex
+            _center={dims._center}
             key={`${x}:${y}:${z}`}
             style={{ fill: this._getCellColor(x, y, z) }}
-            x={x}
-            y={y}
-            z={z}
             size={this.props.cellSize}
             onClick={this.onClick}
           />
@@ -93,21 +104,18 @@ export class HexGrid extends React.Component {
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       const t = child.props.template || Hex;
-
-      // calculate graphical parameters for the child element
-      const q = child.props.x;
-      const r = child.props.z;
-      const x = this.props.cellSize * 3 * q / 2.0;
-      const y = this.props.cellSize * Math.sqrt(3) * (r + q / 2.0);
-      const center = { x, y };
-      const width = this.props.cellSize * 2;
-      const height = Math.sqrt(3) / 2 * width;
+      const dims = HexGrid.cc2graphical(
+        child.props.x,
+        child.props.y,
+        0,
+        this.props.cellSize
+      );
 
       return React.cloneElement(child, {
-        center,
-        width,
-        height,
+        ...dims,
         template: t,
+        // _center: HexGrid.cc2graphical,
+        _center: dims._center,
         onClick: this.onClick,
       });
     });
@@ -143,10 +151,8 @@ export class HexGrid extends React.Component {
  */
 export class Hex extends React.Component {
   static propTypes = {
-    x: PropTypes.number,
-    y: PropTypes.number,
-    z: PropTypes.number,
     size: PropTypes.number,
+    _center: PropTypes.number,
     style: PropTypes.any,
     onClick: PropTypes.func,
     children: PropTypes.element,
@@ -154,9 +160,6 @@ export class Hex extends React.Component {
 
   static defaultProps = {
     size: 1,
-    x: 0,
-    y: 0,
-    z: 0,
     style: { fill: '#fff' },
   };
 
@@ -176,11 +179,7 @@ export class Hex extends React.Component {
    * Get the co-ordinates of the hex center.
    */
   get center() {
-    const q = this.props.x;
-    const r = this.props.z;
-    const x = this.props.size * 3 * q / 2.0;
-    const y = this.props.size * Math.sqrt(3) * (r + q / 2.0);
-    return { x, y };
+    return this.props._center;
   }
 
   /**
@@ -224,11 +223,7 @@ export class Hex extends React.Component {
   }
 
   onClick = () => {
-    this.props.onClick({
-      x: this.props.x,
-      y: this.props.y,
-      z: this.props.z,
-    });
+    this.props.onClick();
   };
 
   render() {

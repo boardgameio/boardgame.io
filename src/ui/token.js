@@ -50,9 +50,9 @@ class Token extends React.Component {
     y: PropTypes.number,
     z: PropTypes.number,
     template: PropTypes.func,
-    center: PropTypes.object,
     width: PropTypes.number,
     height: PropTypes.number,
+    _center: PropTypes.number,
     style: PropTypes.any,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
@@ -162,10 +162,7 @@ class Token extends React.Component {
       return React.createElement(
         this.props.template,
         {
-          x: this.state.x,
-          y: this.state.y,
-          z: this.state.z,
-          center: this.props.center,
+          _center: this.props._center,
           width: this.props.width,
           height: this.props.height,
           style: this.props.style,
