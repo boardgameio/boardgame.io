@@ -84,6 +84,9 @@ export class HexGrid extends React.Component {
         hexes.push(
           <Hex
             _center={dims._center}
+            x={x}
+            y={y}
+            z={z}
             key={`${x}:${y}:${z}`}
             style={{ fill: this._getCellColor(x, y, z) }}
             size={this.props.cellSize}
@@ -114,7 +117,7 @@ export class HexGrid extends React.Component {
       return React.cloneElement(child, {
         ...dims,
         template: t,
-        _center: dims._center,
+        _centerfn: HexGrid.cc2graphical,
         onClick: this.onClick,
       });
     });
@@ -150,8 +153,12 @@ export class HexGrid extends React.Component {
  */
 export class Hex extends React.Component {
   static propTypes = {
+    x: PropTypes.number,
+    y: PropTypes.number,
+    z: PropTypes.number,
+
     size: PropTypes.number,
-    _center: PropTypes.number,
+    _center: PropTypes.object,
     style: PropTypes.any,
     onClick: PropTypes.func,
     children: PropTypes.element,
@@ -215,12 +222,20 @@ export class Hex extends React.Component {
   }
 
   onClick = () => {
-    this.props.onClick();
+    this.props.onClick({
+      x: this.props.x,
+      y: this.props.y,
+      z: this.props.z,
+    });
   };
 
   render() {
     const tx = this.props._center.x;
     const ty = this.props._center.y;
+
+    if (tx === undefined) {
+      throw Error('undef');
+    }
 
     // If a child is passed, render child.
     if (this.props.children) {

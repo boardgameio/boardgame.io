@@ -52,7 +52,8 @@ class Token extends React.Component {
     template: PropTypes.func,
     width: PropTypes.number,
     height: PropTypes.number,
-    _center: PropTypes.number,
+    _centerfn: PropTypes.func,
+    cellSize: PropTypes.number,
     style: PropTypes.any,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
@@ -157,16 +158,28 @@ class Token extends React.Component {
     return c / 2 * (t * t * t + 2) + b;
   }
 
+  onClick(args) {
+    this.props.onClick(args);
+  }
+
   render() {
     if (this.props.template) {
       return React.createElement(
         this.props.template,
         {
-          _center: this.props._center,
+          x: this.state.x,
+          y: this.state.y,
+          z: this.state.z,
+          _center: this.props._centerfn(
+            this.state.x,
+            this.state.y,
+            this.state.z,
+            this.props.cellSize
+          )._center,
           width: this.props.width,
           height: this.props.height,
           style: this.props.style,
-          onClick: this.props.onClick,
+          onClick: this.onClick,
         },
         this.props.children
       );
@@ -174,7 +187,7 @@ class Token extends React.Component {
 
     return React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
-        onClick: this.props.onClick,
+        onClick: this.onClick,
       });
     });
   }
