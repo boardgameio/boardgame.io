@@ -17,14 +17,18 @@ The `games` argument takes a list of game implementations
 
 ### Returns
 
-(`app`): A Koa app.
+An object that contains:
+
+1. run (_function_): A function to run the server.
+   Signature: (port, callback) => {}
+2. app (_object_): The Koa app.
 
 ### Usage
 
 ```js
 const Server = require('boardgame.io/server');
 
-const app = Server({
+const server = Server({
   games: [game1, game2, ...],
 
   // Optional, if you want to hook it up to a
@@ -35,5 +39,5 @@ const app = Server({
   db: new DbImpl(),
 });
 
-app.listen(8000);
+server.run(8000);
 ```

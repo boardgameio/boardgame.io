@@ -6,6 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Server from '../src/server/index.js';
+import { Server } from '../src/server/index.js';
 
-export default Server;
+export { Server };
