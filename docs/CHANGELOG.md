@@ -1,3 +1,15 @@
+# v0.19
+
+#### Features
+
+* MongoDB connector
+  * [[eaa372f](https://github.com/google/boardgame.io/commit/eaa372f)] add Mongo to package
+  * [[63c3cdf](https://github.com/google/boardgame.io/commit/63c3cdf)] mongo race condition checks
+  * [[65cefdf](https://github.com/google/boardgame.io/commit/65cefdf)] allow setting Mongo location using MONGO_URI
+  * [[557b66c](https://github.com/google/boardgame.io/commit/557b66c)] add run() to Server
+  * [[2a85b40](https://github.com/google/boardgame.io/commit/2a85b40)] replace lru-native with lru-cache
+  * [[003fe46](https://github.com/google/boardgame.io/commit/003fe46)] MongoDB connector
+
 # v0.18.1
 
 #### Bugfixes
