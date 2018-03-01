@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 export class SvgComponent extends React.Component {
   static propTypes = {
     component: PropTypes.element.isRequired,
-    center: PropTypes.object,
+    _center: PropTypes.object,
     style: PropTypes.any,
     onClick: PropTypes.func,
   };
@@ -24,9 +24,9 @@ export class SvgComponent extends React.Component {
   render() {
     let tx = 0,
       ty = 0;
-    if (this.props.center !== undefined) {
-      tx = this.props.center.x;
-      ty = this.props.center.y;
+    if (this.props._center !== undefined) {
+      tx = this.props._center.x;
+      ty = this.props._center.y;
     }
 
     return (

@@ -107,14 +107,13 @@ export class HexGrid extends React.Component {
       const dims = HexGrid.cc2graphical(
         child.props.x,
         child.props.y,
-        0,
+        child.props.z,
         this.props.cellSize
       );
 
       return React.cloneElement(child, {
         ...dims,
         template: t,
-        // _center: HexGrid.cc2graphical,
         _center: dims._center,
         onClick: this.onClick,
       });
@@ -176,13 +175,6 @@ export class Hex extends React.Component {
   }
 
   /**
-   * Get the co-ordinates of the hex center.
-   */
-  get center() {
-    return this.props._center;
-  }
-
-  /**
    * Get the points of the vertices.
    */
   get points() {
@@ -227,8 +219,8 @@ export class Hex extends React.Component {
   };
 
   render() {
-    const tx = this.center.x;
-    const ty = this.center.y;
+    const tx = this.props._center.x;
+    const ty = this.props._center.y;
 
     // If a child is passed, render child.
     if (this.props.children) {
