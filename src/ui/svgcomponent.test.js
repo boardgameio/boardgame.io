@@ -9,34 +9,32 @@
 import React from 'react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { SvgComponent } from './svgcomponent';
+import { WheatSVG, WoodSVG, MeepleSVG, Disc3DSVG } from './svgcomponent';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-const testcomponent = () => {
-  return <div />;
-};
+[
+  <WheatSVG key={1} />,
+  <WoodSVG key={2} />,
+  <MeepleSVG key={3} />,
+  <Disc3DSVG key={4} />,
+].forEach(component => {
+  test('rendering with or without x/y', () => {
+    {
+      const svgcomponent = Enzyme.mount(component);
+      expect(svgcomponent.html()).toContain('translate(0, 0)');
+    }
+  });
+});
 
 test('rendering with or without x/y', () => {
-  {
-    const svgcomponent = Enzyme.mount(
-      <SvgComponent component={testcomponent()} />
-    );
-    expect(svgcomponent.html()).toContain('translate(0, 0)');
-  }
-  {
-    const svgcomponent = Enzyme.mount(
-      <SvgComponent _center={{ x: 1, y: 2 }} component={testcomponent()} />
-    );
-    expect(svgcomponent.html()).toContain('translate(1, 2)');
-  }
+  const svgcomponent = Enzyme.mount(<WheatSVG _center={{ x: 1, y: 2 }} />);
+  expect(svgcomponent.html()).toContain('translate(1, 2)');
 });
 
 test('onclick', () => {
   const onClick = jest.fn();
-  const svgcomponent = Enzyme.mount(
-    <SvgComponent component={testcomponent()} onClick={onClick} />
-  );
+  const svgcomponent = Enzyme.mount(<WheatSVG onClick={onClick} />);
 
   svgcomponent.simulate('click');
 
