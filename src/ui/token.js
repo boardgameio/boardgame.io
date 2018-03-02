@@ -157,7 +157,9 @@ class Token extends React.Component {
   }
 
   onClick(args) {
-    this.props.onClick(args);
+    if (this.props.onClick !== undefined) {
+      this.props.onClick(args);
+    }
   }
 
   render() {
@@ -175,7 +177,7 @@ class Token extends React.Component {
             this.props.cellSize
           )._center,
           style: this.props.style,
-          onClick: this.onClick,
+          onClick: this.onClick.bind(this),
         },
         this.props.children
       );
@@ -183,7 +185,7 @@ class Token extends React.Component {
 
     return React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
-        onClick: this.onClick,
+        onClick: this.onClick.bind(this),
       });
     });
   }
