@@ -175,7 +175,7 @@ class Token extends React.Component {
             this.state.y,
             this.state.z,
             this.props.cellSize
-          )._center,
+          ),
           style: this.props.style,
           onClick: this.onClick.bind(this),
         },

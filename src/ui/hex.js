@@ -48,7 +48,7 @@ export class HexGrid extends React.Component {
     cellSize: 1,
   };
 
-  static cc2graphical = (x, y, z, cellSize) => {
+  static coords2graphical = (x, y, z, cellSize) => {
     const q = x;
     const r = z;
     const xw = cellSize * 3 * q / 2.0;
@@ -80,7 +80,7 @@ export class HexGrid extends React.Component {
       for (let y = -r; y <= r; y++) {
         const z = -x - y;
         if (Math.abs(z) > r) continue;
-        const dims = HexGrid.cc2graphical(x, y, z, this.props.cellSize);
+        const dims = HexGrid.coords2graphical(x, y, z, this.props.cellSize);
         hexes.push(
           <Hex
             _center={dims._center}
@@ -107,7 +107,7 @@ export class HexGrid extends React.Component {
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       const t = child.props.template || Hex;
-      const dims = HexGrid.cc2graphical(
+      const dims = HexGrid.coords2graphical(
         child.props.x,
         child.props.y,
         child.props.z,
@@ -117,7 +117,8 @@ export class HexGrid extends React.Component {
       return React.cloneElement(child, {
         ...dims,
         template: t,
-        _centerfn: HexGrid.cc2graphical,
+        _centerfn: (x, y, z, cellSize) =>
+          HexGrid.coords2graphical(x, y, z, cellSize)._center,
         onClick: this.onClick,
       });
     });
