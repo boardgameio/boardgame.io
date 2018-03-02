@@ -76,7 +76,31 @@ test('Mongo', async () => {
   }
 
   {
-    const db = new Mongo({ url: 'a' });
+    const db = new Mongo({ url: 'a', dbname: 'test' });
     expect(db.client).toBeDefined();
+    expect(db.dbname).toBe('test');
   }
+});
+
+test('Mongo - race conditions', async () => {
+  const mockClient = MongoDB.MongoClient;
+  const db = new Mongo({ mockClient, url: 'a' });
+  await db.connect();
+
+  // Out of order set()'s.
+  await db.set('gameID', { _stateID: 1 });
+  await db.set('gameID', { _stateID: 0 });
+  expect(await db.get('gameID')).toEqual({ _stateID: 1 });
+
+  // Do not override cache on get() if it is fresher than Mongo.
+  await db.set('gameID', { _stateID: 0 });
+  db.cache.set('gameID', { _stateID: 1 });
+  await db.get('gameID');
+  expect(db.cache.get('gameID')).toEqual({ _stateID: 1 });
+
+  // Override if it is staler than Mongo.
+  await db.set('gameID', { _stateID: 1 });
+  db.cache.reset();
+  expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
+  expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
 });

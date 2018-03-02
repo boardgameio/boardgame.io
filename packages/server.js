@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Server from '../src/server/index.js';
+import { Server } from '../src/server/index.js';
+import { Mongo } from '../src/server/db.js';
 
-export default Server;
+export { Server, Mongo };
