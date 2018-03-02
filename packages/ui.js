@@ -12,6 +12,22 @@ import { Grid } from '../src/ui/grid.js';
 import { HexGrid } from '../src/ui/hex.js';
 import Token from '../src/ui/token.js';
 import { Models } from '../src/ui/svg';
-import { SvgComponent } from '../src/ui/svgcomponent';
+import {
+  WheatSVG,
+  WoodSVG,
+  Disc3DSVG,
+  MeepleSVG,
+} from '../src/ui/svgcomponent';
 
-export { Card, Deck, Grid, HexGrid, Token, SvgComponent, Models };
+export {
+  Card,
+  Deck,
+  Grid,
+  HexGrid,
+  Token,
+  Models,
+  WheatSVG,
+  WoodSVG,
+  Disc3DSVG,
+  MeepleSVG,
+};

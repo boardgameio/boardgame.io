@@ -11,7 +11,7 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, boolean, number } from '@storybook/addon-knobs/react';
 import { HexGrid, Token } from 'boardgame.io/ui';
-import { Models, SvgComponent } from 'boardgame.io/ui';
+import { MeepleSVG, WheatSVG, WoodSVG, Disc3DSVG } from 'boardgame.io/ui';
 
 function Basic() {
   const levels = number('levels', 5);
@@ -60,32 +60,11 @@ function BasicTokens() {
     };
     render = () => {
       const meepleParade = ['blue', 'green', 'yellow', 'red'].map(
-        (color, i) => (
-          <Token
-            x={i}
-            y={0}
-            z={-1}
-            key={i}
-            template={props => (
-              <SvgComponent
-                {...props}
-                component={Models.Meeple({ color: color })}
-              />
-            )}
-          />
-        )
+        (color, i) => <Token x={i} y={0} z={-1} key={i} template={MeepleSVG} />
       );
 
-      const otherTokens = ['Wood', 'Wheat', 'Disc3D'].map((modelname, i) => (
-        <Token
-          x={i}
-          y={0}
-          z={1}
-          key={i + 1000}
-          template={props => (
-            <SvgComponent {...props} component={Models[modelname]} />
-          )}
-        />
+      const otherTokens = [WoodSVG, WheatSVG, Disc3DSVG].map((template, i) => (
+        <Token x={i} y={0} z={1} key={i + 1000} template={template} />
       ));
 
       return (

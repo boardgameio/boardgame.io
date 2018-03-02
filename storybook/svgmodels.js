@@ -9,14 +9,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { storiesOf } from '@storybook/react';
-import { Models, SvgComponent } from 'boardgame.io/ui';
+import { MeepleSVG, WheatSVG, WoodSVG, Disc3DSVG } from 'boardgame.io/ui';
 
-const components = Object.keys(Models).map(modelname => {
-  return {
-    modelname: modelname,
-    component: Models[modelname],
-  };
-});
+const components = [
+  { modelname: 'Meeple', component: <MeepleSVG color="green" /> },
+  { modelname: 'Wheat', component: <WheatSVG /> },
+  { modelname: 'Wood', component: <WoodSVG /> },
+  { modelname: 'Disc3D', component: <Disc3DSVG /> },
+];
 
 const so = storiesOf('SVG Models', module);
 components.forEach(c =>
@@ -32,9 +32,7 @@ export class SvgView extends React.Component {
       <div style={{ padding: '50px' }}>
         <svg width={500} height={500} viewBox="0 0 1 1">
           <rect fill="lightgreen" x="0" y="0" width="500" height="500" />
-          <g transform="translate(0.5, 0.5)">
-            <SvgComponent component={this.props.component} />
-          </g>
+          <g transform="translate(0.5, 0.5)">{this.props.component}</g>
         </svg>
       </div>
     );

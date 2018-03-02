@@ -8,8 +8,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Models } from './svg';
 
-export class SvgComponent extends React.Component {
+class SvgComponent extends React.Component {
   static propTypes = {
     component: PropTypes.element.isRequired,
     _center: PropTypes.object,
@@ -36,3 +37,19 @@ export class SvgComponent extends React.Component {
     );
   }
 }
+
+export const WheatSVG = props => (
+  <SvgComponent component={Models.Wheat} {...props} />
+);
+export const WoodSVG = props => (
+  <SvgComponent component={Models.Wood} {...props} />
+);
+export const Disc3DSVG = props => (
+  <SvgComponent component={Models.Disc3D} {...props} />
+);
+export const MeepleSVG = props => (
+  <SvgComponent component={Models.Meeple({ color: props.color })} {...props} />
+);
+MeepleSVG.propTypes = {
+  color: PropTypes.string,
+};
