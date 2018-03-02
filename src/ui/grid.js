@@ -58,6 +58,10 @@ export class Grid extends React.Component {
     return color;
   }
 
+  static coords2graphical(x, y, size) {
+    return { x: x * size, y: y * size };
+  }
+
   _getGrid() {
     if (!this.props.outline) {
       return null;
@@ -91,6 +95,7 @@ export class Grid extends React.Component {
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
         template: Square,
+        _centerfn: Grid.coords2graphical,
         onClick: this.onClick,
       });
     });
