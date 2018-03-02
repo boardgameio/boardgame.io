@@ -50,8 +50,6 @@ class Token extends React.Component {
     y: PropTypes.number,
     z: PropTypes.number,
     template: PropTypes.func,
-    width: PropTypes.number,
-    height: PropTypes.number,
     _centerfn: PropTypes.func,
     cellSize: PropTypes.number,
     style: PropTypes.any,
@@ -176,8 +174,6 @@ class Token extends React.Component {
             this.state.z,
             this.props.cellSize
           )._center,
-          width: this.props.width,
-          height: this.props.height,
           style: this.props.style,
           onClick: this.onClick,
         },
