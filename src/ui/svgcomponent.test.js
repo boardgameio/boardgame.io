@@ -13,22 +13,15 @@ import { WheatSVG, WoodSVG, MeepleSVG, Disc3DSVG } from './svgcomponent';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-[
-  <WheatSVG key={1} />,
-  <WoodSVG key={2} />,
-  <MeepleSVG key={3} />,
-  <Disc3DSVG key={4} />,
-].forEach(component => {
-  test('rendering with or without x/y', () => {
-    {
-      const svgcomponent = Enzyme.mount(component);
-      expect(svgcomponent.html()).toContain('translate(0, 0)');
-    }
+test('can render all models', () => {
+  [WheatSVG, WoodSVG, MeepleSVG, Disc3DSVG].forEach(component => {
+    const svgcomponent = Enzyme.mount(component());
+    expect(svgcomponent.html()).toContain('translate(0, 0)');
   });
 });
 
-test('rendering with or without x/y', () => {
-  const svgcomponent = Enzyme.mount(<WheatSVG _center={{ x: 1, y: 2 }} />);
+test('rendering with a center', () => {
+  const svgcomponent = Enzyme.mount(WheatSVG({ _center: { x: 1, y: 2 } }));
   expect(svgcomponent.html()).toContain('translate(1, 2)');
 });
 

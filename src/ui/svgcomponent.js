@@ -48,7 +48,10 @@ export const Disc3DSVG = props => (
   <SvgComponent component={Models.Disc3D} {...props} />
 );
 export const MeepleSVG = props => (
-  <SvgComponent component={Models.Meeple({ color: props.color })} {...props} />
+  <SvgComponent
+    component={Models.Meeple({ color: (props || {}).color })}
+    {...props}
+  />
 );
 MeepleSVG.propTypes = {
   color: PropTypes.string,
