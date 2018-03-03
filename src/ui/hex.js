@@ -234,10 +234,6 @@ export class Hex extends React.Component {
     const tx = this.props._center.x;
     const ty = this.props._center.y;
 
-    if (tx === undefined) {
-      throw Error('undef');
-    }
-
     // If a child is passed, render child.
     if (this.props.children) {
       return (
