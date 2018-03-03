@@ -59,8 +59,20 @@ function BasicTokens() {
       action('onClick')(args);
     };
     render = () => {
+      const withColorProp = (color, component) => {
+        return props => component(Object.assign({ color }, props));
+      };
+
       const meepleParade = ['blue', 'green', 'yellow', 'red'].map(
-        (color, i) => <Token x={i} y={0} z={-1} key={i} template={MeepleSVG} />
+        (color, i) => (
+          <Token
+            x={i}
+            y={0}
+            z={-1}
+            key={i}
+            template={withColorProp(color, MeepleSVG)}
+          />
+        )
       );
 
       const otherTokens = [WoodSVG, WheatSVG, Disc3DSVG].map((template, i) => (
