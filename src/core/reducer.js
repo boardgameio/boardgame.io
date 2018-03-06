@@ -22,6 +22,12 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     numPlayers = 2;
   }
 
+  // need to init PRNGState here, otherwise calls to
+  // Random inside setup() are using undefined
+  if (game !== undefined) {
+    PRNGState.set(game.seed);
+  }
+
   const initial = {
     // User managed state.
     G: game.setup(numPlayers),
@@ -50,7 +56,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
   };
 
   // Initialize PRNG seed.
-  initial.ctx._random = { seed: game.seed };
+  initial.ctx._random = { seed: PRNGState.get() };
 
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
 

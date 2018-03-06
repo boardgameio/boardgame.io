@@ -9,6 +9,7 @@
 import Game from './game';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
+import { Random } from './random';
 
 const game = Game({
   moves: {
@@ -150,4 +151,15 @@ test('log', () => {
   expect(state.log).toEqual([actionA, actionB]);
   state = reducer(state, actionC);
   expect(state.log).toEqual([actionA, actionB, actionC.payload]);
+});
+
+test('using Random inside setup()', () => {
+  const game = Game({
+    setup: () => Random.Shuffle([...Array(5).keys()]),
+  });
+  const reducer = createGameReducer({ game });
+
+  const state = reducer(undefined, makeMove('moveA'));
+  console.log(JSON.stringify(state, null, 3));
+  expect(state.G).toMatchObject([2, 3, 0, 1, 4]);
 });
