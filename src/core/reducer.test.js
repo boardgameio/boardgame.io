@@ -157,9 +157,9 @@ test('using Random inside setup()', () => {
   const game = Game({
     setup: () => Random.Shuffle([...Array(5).keys()]),
   });
+
   const reducer = createGameReducer({ game });
 
   const state = reducer(undefined, makeMove('moveA'));
-  console.log(JSON.stringify(state, null, 3));
   expect(state.G).toMatchObject([2, 3, 0, 1, 4]);
 });
