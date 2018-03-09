@@ -154,12 +154,30 @@ test('log', () => {
 });
 
 test('using Random inside setup()', () => {
-  const game = Game({
-    setup: () => Random.Shuffle([...Array(5).keys()]),
+  const game1 = Game({
+    seed: 'seed1',
+    setup: () => ({ n: Random.D6() }),
   });
 
-  const reducer = createGameReducer({ game });
+  const game2 = Game({
+    seed: 'seed2',
+    setup: () => ({ n: Random.D6() }),
+  });
 
-  const state = reducer(undefined, makeMove('moveA'));
-  expect(state.G).toMatchObject([2, 3, 0, 1, 4]);
+  const game3 = Game({
+    seed: 'seed2',
+    setup: () => ({ n: Random.D6() }),
+  });
+
+  const reducer1 = createGameReducer({ game: game1 });
+  const state1 = reducer1(undefined, makeMove());
+
+  const reducer2 = createGameReducer({ game: game2 });
+  const state2 = reducer2(undefined, makeMove());
+
+  const reducer3 = createGameReducer({ game: game3 });
+  const state3 = reducer3(undefined, makeMove());
+
+  expect(state1.G.n).not.toBe(state2.G.n);
+  expect(state2.G.n).toBe(state3.G.n);
 });
