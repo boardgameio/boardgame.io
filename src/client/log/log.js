@@ -58,7 +58,7 @@ export class GameLog extends React.Component {
       const item = state.log[i];
       if (
         (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') ||
-        item.type == 'endTurn'
+        ['endTurn', 'endPhase'].includes(item.type)
       ) {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
