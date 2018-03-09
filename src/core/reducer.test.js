@@ -9,6 +9,7 @@
 import Game from './game';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
+import { Random } from './random';
 
 const game = Game({
   moves: {
@@ -150,4 +151,33 @@ test('log', () => {
   expect(state.log).toEqual([actionA, actionB]);
   state = reducer(state, actionC);
   expect(state.log).toEqual([actionA, actionB, actionC.payload]);
+});
+
+test('using Random inside setup()', () => {
+  const game1 = Game({
+    seed: 'seed1',
+    setup: () => ({ n: Random.D6() }),
+  });
+
+  const game2 = Game({
+    seed: 'seed2',
+    setup: () => ({ n: Random.D6() }),
+  });
+
+  const game3 = Game({
+    seed: 'seed2',
+    setup: () => ({ n: Random.D6() }),
+  });
+
+  const reducer1 = createGameReducer({ game: game1 });
+  const state1 = reducer1(undefined, makeMove());
+
+  const reducer2 = createGameReducer({ game: game2 });
+  const state2 = reducer2(undefined, makeMove());
+
+  const reducer3 = createGameReducer({ game: game3 });
+  const state3 = reducer3(undefined, makeMove());
+
+  expect(state1.G.n).not.toBe(state2.G.n);
+  expect(state2.G.n).toBe(state3.G.n);
 });
