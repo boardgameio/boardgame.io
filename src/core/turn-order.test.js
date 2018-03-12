@@ -59,10 +59,12 @@ test('passing', () => {
   state = reducer(state, makeMove('pass'));
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
+  expect(state.G.passMap).toEqual(['0']);
 
   expect(state.ctx.currentPlayer).toBe('1');
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
+  expect(state.G.passMap).toEqual(['0']);
 
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, gameEvent('endTurn'));
@@ -72,6 +74,7 @@ test('passing', () => {
   state = reducer(state, makeMove('pass'));
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
+  expect(state.G.passMap).toEqual(['0', '1']);
 
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, gameEvent('endTurn'));
@@ -80,10 +83,10 @@ test('passing', () => {
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, makeMove('pass'));
   expect(state.G.allPassed).toBe(true);
-
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(true);
+  expect(state.G.passMap).toEqual(['0', '1', '2']);
 });
 
 test('end game after everyone passes', () => {
@@ -143,4 +146,30 @@ test('override', () => {
   expect(state.ctx.currentPlayer).toBe('3');
   state = flow.processGameEvent(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('5');
+});
+
+test('custom order', () => {
+  const flow = FlowWithPhases({
+    phases: [
+      {
+        name: 'A',
+        turnOrder: TurnOrder.CUSTOM,
+        onPhaseBegin: G => ({ ...G, playerOrder: [2, 0, 1] }),
+      },
+    ],
+  });
+  const game = Game({
+    flow,
+    moves: { pass: Pass },
+  });
+  const reducer = createGameReducer({ game, numPlayers: 3 });
+
+  let state = reducer(undefined, { type: 'init' });
+  expect(state.ctx.currentPlayer).toBe('2');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('0');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('1');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('2');
 });

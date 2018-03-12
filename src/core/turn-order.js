@@ -14,15 +14,15 @@
  * allPassed - Set to true when all players have passed.
  */
 export const Pass = (G, ctx) => {
-  let passMap = {};
+  let passMap = [];
   if (G.passMap !== undefined) {
-    passMap = { ...G.passMap };
+    passMap = G.passMap;
   }
   const playerID =
     ctx.currentPlayer === 'any' ? ctx.playerID : ctx.currentPlayer;
-  passMap[playerID] = true;
+  passMap.push(playerID);
   G = { ...G, passMap };
-  if (Object.keys(passMap).length >= ctx.numPlayers) {
+  if (passMap.length >= ctx.numPlayers) {
     G.allPassed = true;
   }
   return G;
@@ -44,7 +44,17 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G, ctx) => ctx.currentPlayer,
+    first: (G, ctx) => {
+      if (
+        G !== undefined &&
+        G.playOrder !== undefined &&
+        G.playOrder.length > 0
+      ) {
+        return G.playerOrder[0] + '';
+      } else {
+        return ctx.currentPlayer;
+      }
+    },
     next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
   },
 
@@ -76,6 +86,25 @@ export const TurnOrder = {
           return nextPlayer;
         }
       }
+    },
+  },
+
+  CUSTOM: {
+    //  order: (G, ctx) => {
+    // -      if (G === undefined || G.playOrder === undefined) {
+    // -        let playOrder = [];
+    // -        for (let i = 0; i < ctx.numPlayers; i++) {
+    // -          playOrder.push(i);
+    // -        }
+    // -        G = { ...G, playOrder };
+    // -      }
+    // -      return G;
+    first: G => G.playerOrder[0] + '',
+    next: (G, ctx) => {
+      let playerOrderPos = G.playerOrder.findIndex(
+        nextPlayer => nextPlayer == ctx.currentPlayer
+      );
+      return G.playerOrder[(playerOrderPos + 1) % ctx.numPlayers] + '';
     },
   },
 };
