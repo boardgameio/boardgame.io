@@ -34,6 +34,18 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('any');
 
   flow = FlowWithPhases({
+    phases: [{ name: 'A', turnOrder: TurnOrder.REVERSE }],
+  });
+
+  state = { ctx: flow.ctx(2) };
+  state = flow.init(state);
+  expect(state.ctx.currentPlayer).toBe('1');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('0');
+  state = flow.processGameEvent(state, { type: 'endTurn' });
+  expect(state.ctx.currentPlayer).toBe('1');
+
+  flow = FlowWithPhases({
     phases: [{ name: 'A', turnOrder: { first: () => '10', next: () => '3' } }],
   });
 
