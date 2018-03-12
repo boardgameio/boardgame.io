@@ -424,14 +424,14 @@ export class Debug extends React.Component {
 
             <section>
               <pre>
-                &ldquo;G&rdquo;:{' '}
+                <strong>G</strong>:{' '}
                 {JSON.stringify(this.props.gamestate.G, null, 2)}
               </pre>
             </section>
 
             <section>
               <pre>
-                &ldquo;ctx&rdquo;:{' '}
+                <strong>ctx</strong>:{' '}
                 {JSON.stringify(this.props.gamestate.ctx, null, 2)}
               </pre>
             </section>
