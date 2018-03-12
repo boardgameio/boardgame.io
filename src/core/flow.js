@@ -54,9 +54,16 @@ export function Flow({
   if (!init) init = state => state;
   if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
-  if (!canMakeMove)
-    canMakeMove = (G, ctx, playerID) =>
-      ctx.currentPlayer === 'any' || playerID === ctx.currentPlayer;
+  if (!canMakeMove) {
+    canMakeMove = (G, ctx, playerID) => {
+      const actionPlayers = ctx.actionPlayers || [];
+      return (
+        playerID === ctx.currentPlayer ||
+        actionPlayers.includes(playerID) ||
+        actionPlayers.includes('any')
+      );
+    };
+  }
 
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
