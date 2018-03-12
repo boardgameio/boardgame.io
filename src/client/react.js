@@ -80,7 +80,9 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
     }
 
     componentWillMount() {
-      this.client.connect();
+      if (typeof window !== 'undefined') {
+        this.client.connect();
+      }
     }
 
     render() {
