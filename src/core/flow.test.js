@@ -528,6 +528,8 @@ test('canMakeMove', () => {
   expect(flow.canMakeMove({}, {}, 0)).toBe(false);
   expect(flow.canMakeMove({}, { currentPlayer: 0 }, 0)).toBe(true);
   expect(flow.canMakeMove({}, { actionPlayers: ['any'] }, 0)).toBe(true);
+  expect(flow.canMakeMove({}, { actionPlayers: [0] }, 0)).toBe(true);
+  expect(flow.canMakeMove({}, { actionPlayers: [1, 2, 3] }, 0)).toBe(false);
 
   // no one can make a move
   flow = Flow({ canMakeMove: () => false });
