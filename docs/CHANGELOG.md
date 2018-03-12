@@ -1,3 +1,11 @@
+# v0.20.1
+
+#### Bugfixes
+
+* [[06d78e2](https://github.com/google/boardgame.io/commit/06d78e2)] Enable SSR
+* [[ed09f51](https://github.com/google/boardgame.io/commit/ed09f51)] Allow calling Random during setup
+* [[c50d5ea](https://github.com/google/boardgame.io/commit/c50d5ea)] fix log rendering of phases
+
 # v0.20
 
 #### Features
