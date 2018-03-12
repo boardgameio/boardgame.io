@@ -150,24 +150,24 @@ test('active players', () => {
   let flow = FlowWithPhases({ turnOrder: TurnOrder.ANY });
   let state = { ctx: flow.ctx(2) };
   state = flow.processMove(state, { move: {} });
-  expect(state.ctx.activePlayers).toMatchObject(['any']);
+  expect(state.ctx.actionPlayers).toMatchObject(['any']);
 
   // default
   flow = FlowWithPhases({ turnOrder: TurnOrder.DEFAULT });
   state = { ctx: flow.ctx(2) };
   state = flow.processMove(state, { move: {} });
-  expect(state.ctx.activePlayers).toMatchObject(['0']);
+  expect(state.ctx.actionPlayers).toMatchObject(['0']);
   state = flow.processGameEvent(state, { type: 'endTurn' });
-  expect(state.ctx.activePlayers).toMatchObject(['1']);
+  expect(state.ctx.actionPlayers).toMatchObject(['1']);
 
   // custom
   const CUSTOM = {
     first: (G, ctx) => ctx.currentPlayer,
     next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
-    activePlayers: (G, ctx) => [ctx.currentPlayer, CUSTOM.next(G, ctx)],
+    actionPlayers: (G, ctx) => [ctx.currentPlayer, CUSTOM.next(G, ctx)],
   };
   flow = FlowWithPhases({ turnOrder: CUSTOM });
   state = { ctx: flow.ctx(2) };
   state = flow.processMove(state, { move: {} });
-  expect(state.ctx.activePlayers).toMatchObject(['0', '1']);
+  expect(state.ctx.actionPlayers).toMatchObject(['0', '1']);
 });
