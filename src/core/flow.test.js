@@ -521,3 +521,23 @@ test('undo / redo', () => {
   state = reducer(state, gameEvent('undo'));
   expect(state.G).toEqual({ A: true });
 });
+
+test('canMakeMove', () => {
+  // default behaviour
+  let flow = Flow({});
+  expect(flow.canMakeMove({}, {}, 0)).toBe(false);
+  expect(flow.canMakeMove({}, { currentPlayer: 0 }, 0)).toBe(true);
+  expect(flow.canMakeMove({}, { currentPlayer: 'any' }, 0)).toBe(true);
+
+  // no one can make a move
+  flow = Flow({ canMakeMove: () => false });
+  expect(flow.canMakeMove({}, {}, 0)).toBe(false);
+  expect(flow.canMakeMove({}, { currentPlayer: 0 }, 0)).toBe(false);
+  expect(flow.canMakeMove({}, {}, 'any')).toBe(false);
+
+  // flow with phases passes canMakeMove
+  flow = FlowWithPhases({ canMakeMove: () => false });
+  expect(flow.canMakeMove({}, {}, 0)).toBe(false);
+  expect(flow.canMakeMove({}, { currentPlayer: 0 }, 0)).toBe(false);
+  expect(flow.canMakeMove({}, {}, 'any')).toBe(false);
+});

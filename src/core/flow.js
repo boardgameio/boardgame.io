@@ -36,6 +36,9 @@ import { TurnOrder } from './turn-order';
  *                                       the client while waiting for
  *                                       the result of execution from
  *                                       the server.
+ * @param {...object} canMakeMove - (G, ctx, playerID) => boolean
+ *                                  Predicate to determine whether the player
+ *                                  identified by playerID is allowed to make a move.
  */
 export function Flow({
   ctx,
@@ -44,12 +47,16 @@ export function Flow({
   validator,
   processMove,
   optimisticUpdate,
+  canMakeMove,
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
   if (!init) init = state => state;
   if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
+  if (!canMakeMove)
+    canMakeMove = (G, ctx, playerID) =>
+      ctx.currentPlayer === 'any' || playerID === ctx.currentPlayer;
 
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -89,6 +96,8 @@ export function Flow({
     },
 
     optimisticUpdate,
+
+    canMakeMove,
   };
 }
 
@@ -198,6 +207,7 @@ export function FlowWithPhases({
   endPhase,
   undo,
   optimisticUpdate,
+  canMakeMove,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -506,5 +516,6 @@ export function FlowWithPhases({
     events: enabledEvents,
     validator,
     processMove,
+    canMakeMove,
   });
 }
