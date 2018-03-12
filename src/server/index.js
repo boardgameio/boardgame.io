@@ -58,12 +58,8 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           return;
         }
 
-        // Bail out if the player making the move is not
-        // the current player.
-        if (
-          state.ctx.currentPlayer != 'any' &&
-          playerID != state.ctx.currentPlayer
-        ) {
+        // Check whether the player is allowed to make the move
+        if (!game.flow.canMakeMove(game, state.ctx, playerID)) {
           return;
         }
 
