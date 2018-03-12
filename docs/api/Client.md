@@ -27,6 +27,9 @@ The `Board` component will receive the following as `props`:
 
 8. `isConnected`: `true` if connection to the server is active.
 
+9. `enhancer`: An optional Redux store enhancer, passed along to
+   the internals store.
+
 ### Arguments
 
 1. obj(_object_): A config object with the options shown below.
