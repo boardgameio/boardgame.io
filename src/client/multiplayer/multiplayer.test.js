@@ -28,6 +28,7 @@ class MockSocket {
 
 test('Multiplayer defaults', () => {
   const m = new Multiplayer();
+  expect(typeof m.callback).toBe('function');
   m.callback();
 });
 
