@@ -278,7 +278,8 @@ export function FlowWithPhases({
   const startTurn = function(state, config) {
     const ctx = { ...state.ctx };
     const G = config.onTurnBegin(state.G, ctx);
-    const _undo = [{ G, ctx }];
+    const { random, ...ctxWithoutAPI } = ctx; // eslint-disable-line no-unused-vars
+    const _undo = [{ G, ctx: ctxWithoutAPI }];
     return { ...state, G, ctx, _undo, _redo: [] };
   };
 

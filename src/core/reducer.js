@@ -7,7 +7,7 @@
  */
 
 import * as Actions from './action-types';
-import { PRNGState } from './random';
+import { Random } from './random';
 
 /**
  * createGameReducer
@@ -22,16 +22,18 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     numPlayers = 2;
   }
 
-  // Need to init PRNGState here, otherwise calls to
-  // Random inside setup() are using undefined.
-  PRNGState.set({ seed: game.seed });
+  let ctx = game.flow.ctx(numPlayers);
+  ctx._random = { seed: game.seed };
+
+  const random = new Random(ctx);
+  const ctxWithAPI = random.ctxWithAPI(ctx);
 
   const initial = {
     // User managed state.
-    G: game.setup(numPlayers),
+    G: game.setup(ctxWithAPI),
 
     // Framework managed state.
-    ctx: game.flow.ctx(numPlayers),
+    ctx: ctx,
 
     // A list of actions performed so far. Used by the
     // GameLog to display a journal of moves.
@@ -54,7 +56,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
   };
 
   // Initialize PRNG seed.
-  initial.ctx._random = PRNGState.get();
+  initial.ctx = random.ctxWithoutAPI(initial.ctx);
 
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
 
@@ -84,11 +86,12 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Init PRNG state.
-        PRNGState.set(state.ctx._random);
+        const random = new Random(state.ctx);
+        state = { ...state, ctx: random.ctxWithAPI(state.ctx) };
         // Update state.
         const newState = game.flow.processGameEvent(state, action.payload);
         // Update PRNG state.
-        const ctx = { ...newState.ctx, _random: PRNGState.get() };
+        const ctx = random.ctxWithoutAPI(newState.ctx);
 
         return { ...newState, ctx, _stateID: state._stateID + 1 };
       }
@@ -100,12 +103,13 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Init PRNG state.
-        PRNGState.set(state.ctx._random);
+        const random = new Random(state.ctx);
+        const ctxWithAPI = random.ctxWithAPI(state.ctx);
 
         // Process the move.
-        let G = game.processMove(state.G, action.payload, state.ctx);
+        let G = game.processMove(state.G, action.payload, ctxWithAPI);
         // Update PRNG state.
-        const ctx = { ...state.ctx, _random: PRNGState.get() };
+        const ctx = random.ctxWithoutAPI(state.ctx);
 
         // Undo changes to G if the move should not run on the client.
         if (
@@ -127,10 +131,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
+        state = { ...state, ctx: random.ctxWithAPI(state.ctx) };
         state = game.flow.processMove(state, action);
-
-        // Update PRNG state.
-        state = { ...state, ctx: { ...state.ctx, _random: PRNGState.get() } };
+        state = { ...state, ctx: random.ctxWithoutAPI(state.ctx) };
 
         return state;
       }
