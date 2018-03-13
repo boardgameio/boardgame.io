@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
@@ -118,7 +118,6 @@
     "mongodb": "^3.0.3",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
-    "react-json-view": "^1.13.0",
     "redux": "^3.7.2",
     "socket.io": "^2.0.3"
   },

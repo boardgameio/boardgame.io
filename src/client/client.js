@@ -51,7 +51,7 @@ export function createMoveDispatchers(moveNames, store, playerID) {
  * Implementation of Client (see below).
  */
 class _ClientImpl {
-  constructor({ game, numPlayers, multiplayer, gameID, playerID }) {
+  constructor({ game, numPlayers, multiplayer, gameID, playerID, enhancer }) {
     this.game = game;
     this.playerID = playerID;
     this.gameID = gameID;
@@ -80,9 +80,9 @@ class _ClientImpl {
         numPlayers,
         server,
       });
-      this.store = this.multiplayerClient.createStore(GameReducer);
+      this.store = this.multiplayerClient.createStore(GameReducer, enhancer);
     } else {
-      this.store = createStore(GameReducer);
+      this.store = createStore(GameReducer, enhancer);
     }
 
     this.createDispatchers();
