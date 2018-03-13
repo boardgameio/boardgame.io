@@ -8,6 +8,7 @@
 
 import { Multiplayer } from './multiplayer';
 import Game from '../../core/game';
+import { makeMove } from '../../core/action-creators';
 import { createGameReducer } from '../../core/reducer';
 import * as ActionCreators from '../../core/action-creators';
 
@@ -141,4 +142,29 @@ test('game server is set when provided', () => {
   m2.connect();
   expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
   expect(m2.socket.io.engine.port).not.toEqual(port);
+});
+
+test('game server accepts enhanced store', () => {
+  let spyDispatcher;
+  const spyEnhancer = vanillaCreateStore => (...args) => {
+    const vanillaStore = vanillaCreateStore(...args);
+    return {
+      ...vanillaStore,
+      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+    };
+  };
+
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer({ socket: mockSocket });
+  m.connect();
+  const game = Game({
+    moves: {
+      A: (G, ctx, arg) => ({ arg }),
+    },
+  });
+  const store = m.createStore(createGameReducer({ game }), spyEnhancer);
+  // console.log(spyDispatcher.mock);
+  expect(spyDispatcher.mock.calls.length).toBe(0);
+  store.dispatch(makeMove('A', {}));
+  expect(spyDispatcher.mock.calls.length).toBe(1);
 });
