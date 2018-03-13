@@ -59,12 +59,12 @@ test('passing', () => {
   state = reducer(state, makeMove('pass'));
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
-  expect(state.G.passMap).toEqual(['0']);
+  expect(state.G.passOrder).toEqual(['0']);
 
   expect(state.ctx.currentPlayer).toBe('1');
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
-  expect(state.G.passMap).toEqual(['0']);
+  expect(state.G.passOrder).toEqual(['0']);
 
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, gameEvent('endTurn'));
@@ -74,7 +74,7 @@ test('passing', () => {
   state = reducer(state, makeMove('pass'));
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
-  expect(state.G.passMap).toEqual(['0', '1']);
+  expect(state.G.passOrder).toEqual(['0', '1']);
 
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, gameEvent('endTurn'));
@@ -86,7 +86,7 @@ test('passing', () => {
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(true);
-  expect(state.G.passMap).toEqual(['0', '1', '2']);
+  expect(state.G.passOrder).toEqual(['0', '1', '2']);
 });
 
 test('end game after everyone passes', () => {
@@ -153,8 +153,8 @@ test('custom order', () => {
     phases: [
       {
         name: 'A',
-        turnOrder: TurnOrder.CUSTOM,
-        onPhaseBegin: G => ({ ...G, playerOrder: [2, 0, 1] }),
+        turnOrder: TurnOrder.DEFAULT,
+        onPhaseBegin: (G, ctx) => (ctx.playerOrder = [2, 0, 1]),
       },
     ],
   });

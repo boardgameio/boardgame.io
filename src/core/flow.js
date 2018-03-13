@@ -486,6 +486,7 @@ export function FlowWithPhases({
       turn: 0,
       currentPlayer: '0',
       currentPlayerMoves: 0,
+      playerOrder: Array.from(Array(numPlayers), (d, i) => i),
       phase: phases[0].name,
     }),
     init: state => {

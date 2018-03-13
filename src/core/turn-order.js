@@ -10,19 +10,19 @@
  * Standard move that simulates passing.
  *
  * Creates two objects in G:
- * passMap - A map from playerID -> boolean capturing passes.
+ * passOrder - An array of playerIDs capturing passes in the pass order.
  * allPassed - Set to true when all players have passed.
  */
 export const Pass = (G, ctx) => {
-  let passMap = [];
-  if (G.passMap !== undefined) {
-    passMap = G.passMap;
+  let passOrder = [];
+  if (G.passOrder !== undefined) {
+    passOrder = G.passOrder;
   }
   const playerID =
     ctx.currentPlayer === 'any' ? ctx.playerID : ctx.currentPlayer;
-  passMap.push(playerID);
-  G = { ...G, passMap };
-  if (passMap.length >= ctx.numPlayers) {
+  passOrder.push(playerID);
+  G = { ...G, passOrder };
+  if (passOrder.length >= ctx.numPlayers) {
     G.allPassed = true;
   }
   return G;
@@ -44,18 +44,11 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G, ctx) => {
-      if (
-        G !== undefined &&
-        G.playOrder !== undefined &&
-        G.playOrder.length > 0
-      ) {
-        return G.playerOrder[0] + '';
-      } else {
-        return ctx.currentPlayer;
-      }
+    first: (G, ctx) => ctx.playerOrder[0] + '',
+    next: (G, ctx) => {
+      let playerPos = ctx.playerOrder.findIndex(x => x == ctx.currentPlayer);
+      return ctx.playerOrder[(playerPos + 1) % ctx.numPlayers] + '';
     },
-    next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
   },
 
   /**
@@ -76,35 +69,17 @@ export const TurnOrder = {
    */
 
   SKIP: {
-    first: (G, ctx) => ctx.currentPlayer,
+    first: (G, ctx) => ctx.playerOrder[0] + '',
     next: (G, ctx) => {
       if (G.allPassed) return;
-      let nextPlayer = ctx.currentPlayer;
+      let player = ctx.currentPlayer;
       for (let i = 0; i < ctx.numPlayers; i++) {
-        nextPlayer = (+nextPlayer + 1) % ctx.numPlayers + '';
-        if (!(nextPlayer in G.passMap)) {
-          return nextPlayer;
+        let playerPos = ctx.playerOrder.findIndex(x => x == player);
+        player = ctx.playerOrder[(playerPos + 1) % ctx.numPlayers] + '';
+        if (!G.passOrder.includes(player)) {
+          return player;
         }
       }
-    },
-  },
-
-  CUSTOM: {
-    //  order: (G, ctx) => {
-    // -      if (G === undefined || G.playOrder === undefined) {
-    // -        let playOrder = [];
-    // -        for (let i = 0; i < ctx.numPlayers; i++) {
-    // -          playOrder.push(i);
-    // -        }
-    // -        G = { ...G, playOrder };
-    // -      }
-    // -      return G;
-    first: G => G.playerOrder[0] + '',
-    next: (G, ctx) => {
-      let playerOrderPos = G.playerOrder.findIndex(
-        nextPlayer => nextPlayer == ctx.currentPlayer
-      );
-      return G.playerOrder[(playerOrderPos + 1) % ctx.numPlayers] + '';
     },
   },
 };
