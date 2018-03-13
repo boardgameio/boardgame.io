@@ -11,6 +11,7 @@ import * as ActionCreators from '../../core/action-creators';
 import { createStore, applyMiddleware, compose } from 'redux';
 import io from 'socket.io-client';
 
+// The actions that are sent across the network.
 const whiteListedActions = new Set([MAKE_MOVE, GAME_EVENT]);
 
 /**

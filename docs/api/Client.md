@@ -28,7 +28,8 @@ The `Board` component will receive the following as `props`:
 8. `isConnected`: `true` if connection to the server is active.
 
 9. `enhancer`: An optional Redux store enhancer, passed along to
-   the internals store.
+   the internals store. See the [Debugging](debugging.md) section
+   for more details.
 
 ### Arguments
 
