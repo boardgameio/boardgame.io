@@ -165,10 +165,10 @@ The `gameID` could be determined by a URL path, for example,
 so you could have all browsers that connect to a certain
 URL be synced to the same game.
 
-#### Production
+#### Single server
 
-In a real app, you might want to serve both your web app and
-the socket server from the same server.
+You might want to serve both your web app and the socket
+server from the same server.
 The returned object from `Server()` contains `app`,
 which is a [Koa](http://koajs.com/) app that
 you can use to attach other handlers etc.
@@ -192,19 +192,6 @@ $ npm run build
 $ npx babel-node --presets zero src/server.js
 
 Navigate to http://localhost:8000/
-```
-
-You might also want to keep them separate (one server to serve the web app
-and another one to serve the socket requests). In this case, you
-can have the client specify the socket server location in the
-`multiplayer` option.
-
-```js
-Client({
-  game: TicTacToe,
-  board: TicTacToeBoard,
-  multiplayer: { server: 'hostname:port' },
-});
 ```
 
 #### Database
