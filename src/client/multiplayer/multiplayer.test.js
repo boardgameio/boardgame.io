@@ -27,6 +27,12 @@ class MockSocket {
   }
 }
 
+test('Multiplayer defaults', () => {
+  const m = new Multiplayer();
+  expect(typeof m.callback).toBe('function');
+  m.callback();
+});
+
 test('update gameID / playerID', () => {
   const m = new Multiplayer();
   m.updateGameID('test');
