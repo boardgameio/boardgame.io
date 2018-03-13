@@ -15,6 +15,14 @@ test('Flow', () => {
   const flow = Flow({});
   const state = {};
   expect(flow.processGameEvent(state, { type: 'unknown' })).toBe(state);
+
+  // Check defaults of all arguments
+  expect(flow.ctx()).toMatchObject({});
+  expect(flow.eventNames.length).toBe(0);
+  expect(flow.init({ a: 5 })).toMatchObject({ a: 5 });
+  expect(flow.validator({}, {}, undefined)).toBe(true);
+  expect(flow.processMove({ b: 6 })).toMatchObject({ b: 6 });
+  expect(flow.optimisticUpdate()).toBe(true);
 });
 
 test('FlowWithPhases', () => {
