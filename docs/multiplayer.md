@@ -7,6 +7,8 @@ the game state, and also keep all clients connected to it in
 sync in realtime (without any browser refreshes needed).
 
 ```js
+// src/App.js
+
 import Client from 'boardgame.io/react';
 import { TicTacToe } from './game';
 import { TicTacToeBoard } from './board';
@@ -20,8 +22,20 @@ const App = Client({
 export default App;
 ```
 
-!> Note that we moved our game implementation to `src/game.js` and
+Note that we moved our game implementation to `src/game.js` and
 board implementation to `src/board.js`.
+
+```js
+// src/game.js
+import { Game } from 'boardgame.io/core';
+export const TicTacToe = Game({ ... });
+```
+
+```js
+// src/board.js
+import React from 'react';
+export class TicTacToeBoard extends React.Component { ... };
+```
 
 #### Setting up the server
 
@@ -53,14 +67,13 @@ if you followed the tutorial), then you need to pipe the code through
 [Babel](https://babeljs.io/) like so:
 
 ```
-$ npm install -D babel-preset-zero
+$ npm install -D babel-preset-zero babel-cli
 $ npx babel-node --presets zero src/server.js
 ```
 
 !> `npx` allows you to run binaries like `babel-node` from the
-NPM repository easily by installing them locally if they aren't available.
-This is just one development setup, and you may choose one of many
-other Babel setups during deployment.
+NPM repository easily. This is just one development setup,
+and you may choose one of many other Babel setups during deployment.
 
 This just brings up a server that's capable of servicing the socket
 communication (not to be confused with the server that's serving
@@ -160,20 +173,25 @@ The returned object from `Server()` contains `app`,
 which is a [Koa](http://koajs.com/) app that
 you can use to attach other handlers etc.
 
-```
-$ npm run build
-```
-
 ```js
 // src/server.js
 
+const path = require('path');
 const KoaStatic = require('koa-static');
 const Server = require('boardgame.io/server').Server;
 const TicTacToe = require('./game').TicTacToe;
 
 const server = Server({ games: [TicTacToe] });
-server.app.use(KoaStatic('../build'));
+const buildPath = path.join(__dirname, '../build');
+server.app.use(KoaStatic(buildPath));
 server.run(8000);
+```
+
+```
+$ npm run build
+$ npx babel-node --presets zero src/server.js
+
+Navigate to http://localhost:8000/
 ```
 
 You might also want to keep them separate (one server to serve the web app
