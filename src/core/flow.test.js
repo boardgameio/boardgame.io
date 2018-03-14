@@ -540,7 +540,9 @@ test('canMakeMove', () => {
 
   let flow = Flow({});
   expect(flow.canMakeMove({}, {}, pid)).toBe(false);
-  expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(true);
+  // NOTE: currentPlayer is not allowed to make a move by default.
+  // his playerID must be included in the actionPlayers array.
+  expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
   expect(flow.canMakeMove({}, { actionPlayers: ['any'] }, pid)).toBe(true);
   expect(flow.canMakeMove({}, { actionPlayers: [0] }, pid)).toBe(true);
   expect(flow.canMakeMove({}, { actionPlayers: [1, 2, 3] }, pid)).toBe(false);

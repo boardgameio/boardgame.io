@@ -22,11 +22,11 @@ function canMakeMoveDefault(G, ctx, opts) {
   if (playerID === undefined) return true;
 
   const actionPlayers = ctx.actionPlayers || [];
-  return (
-    playerID === ctx.currentPlayer ||
-    actionPlayers.includes(playerID) ||
-    actionPlayers.includes('any')
-  );
+
+  // Explicitly do not allow the current player
+  // When he is allowed to make a move, his playerID
+  // must be included in actionPlayers.
+  return actionPlayers.includes(playerID) || actionPlayers.includes('any');
 }
 
 /**
