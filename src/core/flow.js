@@ -9,6 +9,27 @@
 import { TurnOrder } from './turn-order';
 
 /**
+ * This function checks whether a player is allowed to make a move.
+ *
+ * @param {...object} G     - The Game instance
+ * @param {...object} ctx   - The ctx instance
+ * @param {...object} opts  - Options - used here to transport the playerID.
+ */
+function canMakeMoveDefault(G, ctx, opts) {
+  opts = opts || {};
+  const playerID = opts.playerID;
+
+  if (playerID === undefined) return true;
+
+  const actionPlayers = ctx.actionPlayers || [];
+  return (
+    playerID === ctx.currentPlayer ||
+    actionPlayers.includes(playerID) ||
+    actionPlayers.includes('any')
+  );
+}
+
+/**
  * Helper to create a reducer that manages ctx (with the
  * ability to also update G).
  *
@@ -24,10 +45,6 @@ import { TurnOrder } from './turn-order';
  *                             reducer will handle. Each function
  *                             has the following signature:
  *                             ({G, ctx}) => {G, ctx}
- * @param {...object} validator - A move validator that returns false
- *                                if a particular type of move is invalid
- *                                at this point in the game.
- *                                (G, ctx, moveName) => boolean
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
@@ -44,7 +61,6 @@ export function Flow({
   ctx,
   events,
   init,
-  validator,
   processMove,
   optimisticUpdate,
   canMakeMove,
@@ -52,18 +68,8 @@ export function Flow({
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
   if (!init) init = state => state;
-  if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
-  if (!canMakeMove) {
-    canMakeMove = (G, ctx, { playerID }) => {
-      const actionPlayers = ctx.actionPlayers || [];
-      return (
-        playerID === ctx.currentPlayer ||
-        actionPlayers.includes(playerID) ||
-        actionPlayers.includes('any')
-      );
-    };
-  }
+  if (!canMakeMove) canMakeMove = canMakeMoveDefault;
 
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -85,13 +91,6 @@ export function Flow({
     ctx,
     init,
 
-    // Disallow moves once the game is over.
-    // Also call any provided additional validation.
-    validator: (G, ctx, move) => {
-      if (ctx.gameover !== undefined) return false;
-      return validator(G, ctx, move);
-    },
-
     eventNames: Object.getOwnPropertyNames(events),
 
     processMove: (state, action) => {
@@ -104,7 +103,12 @@ export function Flow({
 
     optimisticUpdate,
 
-    canMakeMove,
+    // Disallow moves once the game is over.
+    // Also call any provided additional validation.
+    canMakeMove: (G, ctx, opts) => {
+      if (ctx.gameover !== undefined) return false;
+      return canMakeMove(G, ctx, opts);
+    },
   };
 }
 
@@ -485,13 +489,22 @@ export function FlowWithPhases({
     return state;
   }
 
-  const validator = (G, ctx, move) => {
-    const conf = phaseMap[ctx.phase];
+  const canMakeMoveWrap = (G, ctx, opts) => {
+    const conf = phaseMap[ctx.phase] || {};
     if (conf.allowedMoves) {
       const set = new Set(conf.allowedMoves);
-      return set.has(move.type);
+      const move = opts.move;
+      if (!set.has(move.type)) {
+        return false;
+      }
     }
-    return true;
+
+    // run user-provided validation
+    if (canMakeMove !== undefined && !canMakeMove(G, ctx, opts)) {
+      return false;
+    }
+
+    return canMakeMoveDefault(G, ctx, opts);
   };
 
   let enabledEvents = {};
@@ -521,8 +534,7 @@ export function FlowWithPhases({
       return optimisticUpdate(G, ctx, action);
     },
     events: enabledEvents,
-    validator,
     processMove,
-    canMakeMove,
+    canMakeMove: canMakeMoveWrap,
   });
 }
