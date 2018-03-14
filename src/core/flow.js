@@ -55,7 +55,7 @@ export function Flow({
   if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
   if (!canMakeMove) {
-    canMakeMove = (G, ctx, playerID) => {
+    canMakeMove = (G, ctx, { playerID }) => {
       const actionPlayers = ctx.actionPlayers || [];
       return (
         playerID === ctx.currentPlayer ||
