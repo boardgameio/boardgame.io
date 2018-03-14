@@ -457,19 +457,19 @@ export function FlowWithPhases({
       state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
     }
 
-    // End the game automatically if endGameIf returns.
-    if (gameover !== undefined) {
-      return { ...state, ctx: { ...state.ctx, gameover } };
-    }
-
     // End the phase automatically if endPhaseIf is true.
     const end = conf.endPhaseIf(state.G, state.ctx);
-    if (end) {
+    if (end || gameover !== undefined) {
       state = dispatch(state, {
         type: 'endPhase',
         args: [end],
         playerID: action.playerID,
       });
+    }
+
+    // End the game automatically if endGameIf returns.
+    if (gameover !== undefined) {
+      return { ...state, ctx: { ...state.ctx, gameover } };
     }
 
     // Update undo / redo state.
