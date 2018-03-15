@@ -115,6 +115,27 @@ test('event dispatchers', () => {
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual([]);
   }
+
+  {
+    const game = Game({
+      flow: {
+        endPhase: true,
+        undoableMoves: ['A'],
+      },
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual([
+      'undo',
+      'redo',
+      'endTurn',
+      'endPhase',
+    ]);
+    expect(store.getState().ctx.turn).toBe(0);
+    api.endTurn();
+    expect(store.getState().ctx.turn).toBe(1);
+  }
 });
 
 test('move dispatchers', () => {
