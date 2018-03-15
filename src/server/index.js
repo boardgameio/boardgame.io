@@ -59,7 +59,12 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         }
 
         // Check whether the player is allowed to make the move
-        if (!game.flow.canMakeMove(state.G, state.ctx, { playerID })) {
+        if (
+          !game.flow.canMakeMove(state.G, state.ctx, {
+            ...action.payload,
+            playerID,
+          })
+        ) {
           return;
         }
 
