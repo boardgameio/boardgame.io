@@ -7,16 +7,17 @@
  */
 
 .debug-ui {
-  float: right;
   min-width: 300px;
   max-width: 400px;
+  overflow: hidden;
   box-sizing: border-box;
   background: #fefefe;
   border: 3px solid #ddd;
+  position: absolute;
   right: 0;
   top: 0;
   height: 100%;
-  opacity: 0.5;
+  opacity: 0.8;
   font-family: monospace;
   font-size: 14px;
   padding: 20px;
@@ -43,6 +44,11 @@
 
 .debug-ui .move.active {
   color: #111;
+  font-weight: bold;
+}
+
+.debug-ui .move-error {
+  color: #a00;
   font-weight: bold;
 }
 

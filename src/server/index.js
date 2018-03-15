@@ -9,21 +9,32 @@
 const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
-import { InMemory } from './db';
+import { InMemory, Mongo } from './db';
 import { createGameReducer } from '../core/reducer';
+const PING_TIMEOUT = 20 * 1e3;
+const PING_INTERVAL = 10 * 1e3;
 
-function Server({ games, db }) {
+export function Server({ games, db, _clientInfo, _roomInfo }) {
   const app = new Koa();
-  const io = new IO();
+  const io = new IO({
+    ioOptions: {
+      pingTimeout: PING_TIMEOUT,
+      pingInterval: PING_INTERVAL,
+    },
+  });
   app.context.io = io;
   io.attach(app);
 
   if (db === undefined) {
-    db = new InMemory();
+    if (process.env.MONGO_URI) {
+      db = new Mongo({ url: process.env.MONGO_URI });
+    } else {
+      db = new InMemory();
+    }
   }
 
-  const clientInfo = new Map();
-  const roomInfo = new Map();
+  const clientInfo = _clientInfo || new Map();
+  const roomInfo = _roomInfo || new Map();
 
   for (const game of games) {
     const nsp = app._io.of(game.name);
@@ -56,7 +67,7 @@ function Server({ games, db }) {
           return;
         }
 
-        if (state._id == stateID) {
+        if (state._stateID == stateID) {
           // Update server's version of the store.
           store.dispatch(action);
           state = store.getState();
@@ -64,9 +75,11 @@ function Server({ games, db }) {
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
-            const playerID = clientInfo.get(client).playerID;
+            const { playerID } = clientInfo.get(client);
+            const ctx = Object.assign({}, state.ctx, { _random: undefined });
             const newState = Object.assign({}, state, {
-              G: game.playerView(state.G, state.ctx, playerID),
+              G: game.playerView(state.G, ctx, playerID),
+              ctx: ctx,
             });
 
             if (client === socket.id) {
@@ -76,8 +89,10 @@ function Server({ games, db }) {
             }
           }
 
-          db.set(gameID, store.getState());
+          await db.set(gameID, store.getState());
         }
+
+        return;
       });
 
       socket.on('sync', async (gameID, playerID, numPlayers) => {
@@ -93,14 +108,17 @@ function Server({ games, db }) {
         clientInfo.set(socket.id, { gameID, playerID });
 
         let state = await db.get(gameID);
+
         if (state === undefined) {
           const store = Redux.createStore(reducer);
           state = store.getState();
           await db.set(gameID, state);
         }
 
+        const ctx = Object.assign({}, state.ctx, { _random: undefined });
         const newState = Object.assign({}, state, {
-          G: game.playerView(state.G, state.ctx, playerID),
+          G: game.playerView(state.G, ctx, playerID),
+          ctx,
         });
 
         socket.emit('sync', gameID, newState);
@@ -109,12 +127,21 @@ function Server({ games, db }) {
       });
 
       socket.on('disconnect', () => {
-        clientInfo.delete(socket.id);
+        if (clientInfo.has(socket.id)) {
+          const { gameID } = clientInfo.get(socket.id);
+          roomInfo.get(gameID).delete(socket.id);
+          clientInfo.delete(socket.id);
+        }
       });
     });
   }
 
-  return app;
+  return {
+    app,
+    db,
+    run: async (port, callback) => {
+      await db.connect();
+      app.listen(port, callback);
+    },
+  };
 }
-
-export default Server;

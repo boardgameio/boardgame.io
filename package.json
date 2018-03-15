@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.17.1",
+  "version": "0.20.2",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
@@ -8,11 +8,9 @@
     "docsify": "docsify serve docs",
     "docsify:update": "node ./scripts/docsify-update.js",
     "examples": "npm run dev",
-    "precommit": "lint-staged",
-    "prepush": "npm run test:coverage",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
+    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "lint": "eslint .",
     "storybook": "start-storybook -p 3000 -c storybook",
@@ -32,10 +30,12 @@
     "dist/boardgameio.es.js",
     "dist/server.js",
     "dist/client.js",
+    "dist/react.js",
     "dist/core.js",
     "dist/ui.js",
     "server.js",
     "client.js",
+    "react.js",
     "core.js",
     "ui.js"
   ],
@@ -81,12 +81,13 @@
     "eslint-plugin-react": "^7.3.0",
     "generate-export-aliases": "^1.0.0",
     "html-webpack-plugin": "^2.30.1",
-    "husky": "^0.14.3",
+    "husky": "^0.15.0-rc.8",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^21.2.1",
     "koa-helmet": "^3.2.0",
     "koa-webpack": "^1.0.0",
     "lint-staged": "^6.0.1",
+    "mongo-mock": "^3.1.0",
     "open-browser-webpack-plugin": "0.0.5",
     "prettier": "^1.10.2",
     "react": "^16.0.0",
@@ -113,10 +114,10 @@
     "koa-router": "^7.2.1",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.1",
+    "lru-cache": "^4.1.1",
+    "mongodb": "^3.0.3",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
-    "react-json-view": "^1.13.0",
-    "react-redux": "^5.0.6",
     "redux": "^3.7.2",
     "socket.io": "^2.0.3"
   },
@@ -126,6 +127,7 @@
   "config": {
     "exportAliases": {
       "client": "./dist/client.js",
+      "react": "./dist/react.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
       "ui": "./dist/ui.js"
@@ -150,5 +152,11 @@
       "/node_modules/",
       ".npm/"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test:coverage"
+    }
   }
 }

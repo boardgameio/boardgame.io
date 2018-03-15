@@ -15,6 +15,7 @@ game state and the moves. The moves are converted to a
     the move has been processed.
   * `playerView` (_function_): Returns a version of `G` that
     is customized for a given player. See [Secret State](/secret-state) for more information.
+ * `seed` (_string_) - Seed for the PRNG.
   * `flow` (_object_): Arguments to customize the flow of the game. See
     [Phases](/phases) for more information.
   * `flow.endGameIf` (_function_): _(G, ctx) => {}_
@@ -22,6 +23,8 @@ game state and the moves. The moves are converted to a
     The return value is available at `ctx.gameover`.
   * `flow.endTurnIf` (_function_): _(G, ctx) => boolean_
     The turn automatically ends if this function returns true (checked after each move).
+  * `flow.onTurnBegin` (_function_): _(G, ctx) => G_
+    Code to run at the start of a turn.
   * `flow.onTurnEnd` (_function_): _(G, ctx) => G_
     Code to run at the end of a turn.
   * `flow.onMove` (_function_): _(G, ctx, { type: 'moveName', args: [] }) => G_
@@ -49,7 +52,7 @@ game state and the moves. The moves are converted to a
 import { Game } from `boardgame.io/core';
 
 const game = Game({
-  setup: (numPlayers) => {
+  setup: (ctx) => {
     const G = {...};
     return G;
   },
@@ -72,7 +75,7 @@ const game = Game({
 import { Game } from 'boardgame.io/core';
 
 const game = Game({
-  setup: (numPlayers) => {
+  setup: (ctx) => {
     ...
   },
 
@@ -96,7 +99,7 @@ const game = Game({
 import { Game } from 'boardgame.io/core';
 
 const game = Game({
-  setup: (numPlayers) => {
+  setup: (ctx) => {
     ...
   },
 
@@ -110,6 +113,7 @@ const game = Game({
         name: 'A',
         endGameIf: ...
         endTurnIf: ...
+        onTurnBegin: ...
         onTurnEnd: ...
         onPhaseBegin: ...
         onPhaseEnd: ...
@@ -119,6 +123,7 @@ const game = Game({
         name: 'B',
         endGameIf: ...
         endTurnIf: ...
+        onTurnBegin: ...
         onTurnEnd: ...
         onPhaseBegin: ...
         onPhaseEnd: ...

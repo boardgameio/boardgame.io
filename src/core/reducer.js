@@ -7,7 +7,7 @@
  */
 
 import * as Actions from './action-types';
-import * as ActionCreators from './action-creators';
+import { Random } from './random';
 
 /**
  * createGameReducer
@@ -22,30 +22,47 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     numPlayers = 2;
   }
 
+  let ctx = game.flow.ctx(numPlayers);
+  ctx._random = { seed: game.seed };
+
+  const random = new Random(ctx);
+  const ctxWithAPI = random.attach(ctx);
+
   const initial = {
     // User managed state.
-    G: game.setup(numPlayers),
+    G: game.setup(ctxWithAPI),
 
     // Framework managed state.
-    ctx: game.flow.ctx(numPlayers),
+    ctx: ctx,
 
     // A list of actions performed so far. Used by the
     // GameLog to display a journal of moves.
     log: [],
 
+    // List of {G, ctx} pairs that can be undone.
+    _undo: [],
+
+    // List of {G, ctx} pairs that can be redone.
+    _redo: [],
+
     // A monotonically non-decreasing ID to ensure that
     // state updates are only allowed from clients that
     // are at the same version that the server.
-    _id: 0,
+    _stateID: 0,
 
     // A snapshot of this object so that actions can be
     // replayed over it to view old snapshots.
     _initial: {},
   };
 
+  // Initialize PRNG state.
+  initial.ctx = random.update(initial.ctx);
+
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+
   initial.G = state.G;
   initial.ctx = state.ctx;
+  initial._undo = state._undo;
 
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
@@ -68,12 +85,16 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        const { G, ctx } = game.flow.processGameEvent(
-          { G: state.G, ctx: state.ctx },
-          action.payload
-        );
-        const log = [...state.log, action];
-        return { ...state, G, ctx, log, _id: state._id + 1 };
+        // Initialize PRNG from ctx.
+        const random = new Random(state.ctx);
+        state = { ...state, ctx: random.attach(state.ctx) };
+
+        // Update state.
+        const newState = game.flow.processGameEvent(state, action.payload);
+        // Update ctx with PRNG state.
+        const ctx = random.update(newState.ctx);
+
+        return { ...newState, ctx, _stateID: state._stateID + 1 };
       }
 
       case Actions.MAKE_MOVE: {
@@ -82,10 +103,25 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        // Initialize PRNG from ctx.
+        const random = new Random(state.ctx);
+        const ctxWithAPI = random.attach(state.ctx);
+
         // Process the move.
-        const G = game.processMove(state.G, action.payload, state.ctx);
+        let G = game.processMove(state.G, action.payload, ctxWithAPI);
+        // Update ctx with PRNG state.
+        const ctx = random.update(state.ctx);
+
+        // Undo changes to G if the move should not run on the client.
+        if (
+          multiplayer &&
+          !game.flow.optimisticUpdate(G, ctx, action.payload)
+        ) {
+          G = state.G;
+        }
+
         const log = [...state.log, action];
-        state = { ...state, G, log, _id: state._id + 1 };
+        state = { ...state, G, ctx, log, _stateID: state._stateID + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -96,7 +132,11 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        return game.flow.processMove(state, action);
+        state = { ...state, ctx: random.attach(state.ctx) };
+        state = game.flow.processMove(state, action);
+        state = { ...state, ctx: random.update(state.ctx) };
+
+        return state;
       }
 
       case Actions.RESTORE: {
@@ -108,21 +148,4 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
       }
     }
   };
-}
-
-/**
- * createMoveDispatchers
- *
- * Creates a set of dispatchers to make moves.
- * @param {Array} moveNames - A list of move names.
- * @param {object} store - The Redux store to create dispatchers for.
- */
-export function createMoveDispatchers(moveNames, store, playerID) {
-  let dispatchers = {};
-  for (const name of moveNames) {
-    dispatchers[name] = function(...args) {
-      store.dispatch(ActionCreators.makeMove(name, args, playerID));
-    };
-  }
-  return dispatchers;
 }

@@ -8,6 +8,7 @@
 
 import { Multiplayer } from './multiplayer';
 import Game from '../../core/game';
+import { makeMove } from '../../core/action-creators';
 import { createGameReducer } from '../../core/reducer';
 import * as ActionCreators from '../../core/action-creators';
 
@@ -26,19 +27,47 @@ class MockSocket {
   }
 }
 
+test('Multiplayer defaults', () => {
+  const m = new Multiplayer();
+  expect(typeof m.callback).toBe('function');
+  m.callback();
+});
+
 test('update gameID / playerID', () => {
-  const m = new Multiplayer(null);
-
+  const m = new Multiplayer();
   m.updateGameID('test');
-  expect(m.gameID).toBe('default:test');
-
   m.updatePlayerID('player');
+  expect(m.gameID).toBe('default:test');
   expect(m.playerID).toBe('player');
+});
+
+test('connection status', () => {
+  const onChangeMock = jest.fn();
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer({
+    socket: mockSocket,
+    gameID: 0,
+    playerID: 0,
+    gameName: 'foo',
+    numPlayers: 2,
+  });
+  m.subscribe(onChangeMock);
+  m.connect();
+
+  mockSocket.callbacks['connect']();
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toBe(true);
+
+  onChangeMock.mockClear();
+  mockSocket.callbacks['disconnect']();
+  expect(onChangeMock).toHaveBeenCalled();
+  expect(m.isConnected).toBe(false);
 });
 
 test('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer(mockSocket);
+  const m = new Multiplayer({ socket: mockSocket });
+  m.connect();
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -60,11 +89,15 @@ test('multiplayer', () => {
 
   // sync restores state.
   const restored = { restore: true };
-  expect(store.getState()).not.toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
   mockSocket.receive('sync', 'unknown gameID', restored);
-  expect(store.getState()).not.toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
   mockSocket.receive('sync', 'default:default', restored);
-  expect(store.getState()).toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
+  // Only if the stateID is not stale.
+  restored._stateID = 1;
+  mockSocket.receive('sync', 'default:default', restored);
+  expect(store.getState()).toMatchObject(restored);
 
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
@@ -74,7 +107,7 @@ test('multiplayer', () => {
 
 test('move whitelist', () => {
   const mockSocket = new MockSocket();
-  const m = new Multiplayer(mockSocket);
+  const m = new Multiplayer({ socket: mockSocket });
   const game = Game({});
   const store = m.createStore(createGameReducer({ game }));
 
@@ -100,11 +133,38 @@ test('game server is set when provided', () => {
   var port = '1234';
   var server = hostname + ':' + port;
 
-  const m = new Multiplayer(undefined, 0, 0, 0, 1, server);
+  const m = new Multiplayer({ server });
+  m.connect();
   expect(m.socket.io.engine.hostname).toEqual(hostname);
   expect(m.socket.io.engine.port).toEqual(port);
 
-  const m2 = new Multiplayer(undefined, 0, 0, 0, 1, undefined);
+  const m2 = new Multiplayer();
+  m2.connect();
   expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
   expect(m2.socket.io.engine.port).not.toEqual(port);
+});
+
+test('game server accepts enhanced store', () => {
+  let spyDispatcher;
+  const spyEnhancer = vanillaCreateStore => (...args) => {
+    const vanillaStore = vanillaCreateStore(...args);
+    return {
+      ...vanillaStore,
+      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+    };
+  };
+
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer({ socket: mockSocket });
+  m.connect();
+  const game = Game({
+    moves: {
+      A: (G, ctx, arg) => ({ arg }),
+    },
+  });
+  const store = m.createStore(createGameReducer({ game }), spyEnhancer);
+  // console.log(spyDispatcher.mock);
+  expect(spyDispatcher.mock.calls.length).toBe(0);
+  store.dispatch(makeMove('A', {}));
+  expect(spyDispatcher.mock.calls.length).toBe(1);
 });

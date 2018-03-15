@@ -9,8 +9,12 @@
 import React from 'react';
 import { restore } from '../../core/action-creators';
 import { createStore } from 'redux';
-import { Provider } from 'react-redux';
-import { Debug, DebugMove, KeyboardShortcut } from './debug.js';
+import {
+  Debug,
+  DebugMove,
+  DebugMoveArgField,
+  KeyboardShortcut,
+} from './debug.js';
 import Mousetrap from 'mousetrap';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -47,8 +51,14 @@ const gamestate = {
 };
 
 test('basic', () => {
+  const store = { getState: () => ({ log: [] }) };
   const debug = Enzyme.mount(
-    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+    <Debug
+      gamestate={gamestate}
+      store={store}
+      endTurn={() => {}}
+      gameID="default"
+    />
   );
 
   const titles = debug.find('h3').map(title => title.text());
@@ -71,15 +81,17 @@ test('basic', () => {
 
 test('parse arguments', () => {
   const spy = jest.fn();
-  const root = Enzyme.mount(<DebugMove name="test" fn={spy} />);
+  const root = Enzyme.mount(<DebugMove name="test" fn={spy} shortcut="e" />);
 
-  root.instance().span.innerText = '1,2';
-  root.instance().onSubmit();
+  root.instance().onSubmit('1,2');
   expect(spy.mock.calls[0]).toEqual([1, 2]);
 
-  root.instance().span.innerText = '3, unknown, 4';
-  root.instance().onSubmit();
-  expect(spy.mock.calls[1]).toEqual([3, undefined, 4]);
+  root.instance().onSubmit('["a", "b"], ","');
+  expect(spy.mock.calls[1]).toEqual([['a', 'b'], ',']);
+
+  root.instance().onSubmit('3, unknown, 4');
+  expect(spy.mock.calls.length).toEqual(2);
+  expect(root.state().error).toEqual('ReferenceError: unknown is not defined');
 });
 
 test('KeyboardShortcut', () => {
@@ -91,18 +103,14 @@ test('KeyboardShortcut', () => {
 
 test('DebugMove', () => {
   const fn = jest.fn();
-  const root = Enzyme.mount(
-    <KeyboardShortcut value="e">
-      <DebugMove fn={fn} name="endTurn" />
-    </KeyboardShortcut>
-  );
+  const root = Enzyme.mount(<DebugMove fn={fn} name="endTurn" shortcut="e" />);
 
-  root.find(DebugMove).simulate('click');
+  root.simulate('click');
   root.find('.move span').simulate('keyDown', { key: 'Enter' });
 
   expect(fn.mock.calls.length).toBe(1);
 
-  root.find(DebugMove).simulate('click');
+  root.simulate('click');
   root.find('.move span').simulate('keydown', { key: '1' });
   root.find('.move span').simulate('keydown', { key: 'Enter' });
 
@@ -112,18 +120,18 @@ test('DebugMove', () => {
 test('escape blurs DebugMove', () => {
   const root = Enzyme.mount(
     <KeyboardShortcut value="e">
-      <DebugMove fn={jest.fn()} name="endTurn" />
+      <DebugMoveArgField onSubmit={jest.fn()} name="endTurn" />
     </KeyboardShortcut>
   );
 
   expect(root.state().active).toBe(false);
 
-  root.find(DebugMove).simulate('click');
+  root.find(DebugMoveArgField).simulate('click');
   expect(root.state().active).toBe(true);
   root.find('.move span').simulate('keydown', { key: 'Escape' });
   expect(root.state().active).toBe(false);
 
-  root.find(DebugMove).simulate('click');
+  root.find(DebugMoveArgField).simulate('click');
   expect(root.state().active).toBe(true);
   root.find('.move span').simulate('blur');
   expect(root.state().active).toBe(false);
@@ -176,9 +184,12 @@ test('save / restore', () => {
   });
 
   const debug = Enzyme.mount(
-    <Provider store={store}>
-      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
-    </Provider>
+    <Debug
+      store={store}
+      gamestate={gamestate}
+      endTurn={() => {}}
+      gameID="default"
+    />
   );
 
   const restoredState = { restore: true };
@@ -189,13 +200,13 @@ test('save / restore', () => {
 
   debug
     .find('.key-box')
-    .at(2)
+    .at(3)
     .simulate('click');
   expect(setItem).toHaveBeenCalled();
 
   debug
     .find('.key-box')
-    .at(3)
+    .at(4)
     .simulate('click');
   expect(getItem).toHaveBeenCalled();
 
@@ -205,7 +216,7 @@ test('save / restore', () => {
   loggedAction = null;
   debug
     .find('.key-box')
-    .at(3)
+    .at(4)
     .simulate('click');
   expect(loggedAction).toEqual(null);
 });
@@ -222,12 +233,28 @@ test('toggle Debug UI', () => {
 });
 
 test('toggle Log', () => {
+  const store = { getState: () => ({ log: [] }) };
   const debug = Enzyme.mount(
-    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+    <Debug
+      store={store}
+      gamestate={gamestate}
+      endTurn={() => {}}
+      gameID="default"
+    />
   );
 
   expect(debug.find('GameLog').length).toEqual(0);
   Mousetrap.simulate('l');
   debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
   expect(debug.find('GameLog').length).toEqual(1);
+});
+
+test('toggle help', () => {
+  const debug = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(debug.state()).toMatchObject({ help: false });
+  Mousetrap.simulate('?');
+  expect(debug.state()).toMatchObject({ help: true });
 });

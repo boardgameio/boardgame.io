@@ -7,8 +7,7 @@
  */
 
 import Game from './game';
-import { createStore } from 'redux';
-import { createGameReducer, createMoveDispatchers } from './reducer';
+import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
 
 const game = Game({
@@ -24,15 +23,15 @@ const game = Game({
 
 const endTurn = () => gameEvent('endTurn');
 
-test('_id is incremented', () => {
+test('_stateID is incremented', () => {
   const reducer = createGameReducer({ game });
 
   let state = undefined;
 
   state = reducer(state, makeMove('unknown'));
-  expect(state._id).toBe(1);
+  expect(state._stateID).toBe(1);
   state = reducer(state, endTurn());
-  expect(state._id).toBe(2);
+  expect(state._stateID).toBe(2);
 });
 
 test('makeMove', () => {
@@ -41,37 +40,19 @@ test('makeMove', () => {
   let state;
 
   state = reducer(undefined, makeMove('unknown'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('A'));
-  expect(state.G).toEqual({});
+  expect(state.G).not.toMatchObject({ moved: true });
 
   state = reducer(undefined, makeMove('B'));
-  expect(state.G).toEqual({ moved: true });
+  expect(state.G).toMatchObject({ moved: true });
 });
 
 test('restore', () => {
   const reducer = createGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
   expect(state).toEqual({ G: 'restored' });
-});
-
-test('move dispatchers', () => {
-  const reducer = createGameReducer({ game });
-  const store = createStore(reducer);
-  const api = createMoveDispatchers(game.moveNames, store);
-
-  expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
-  expect(api.unknown).toBe(undefined);
-
-  api.A();
-  expect(store.getState().G).toEqual({});
-
-  api.B();
-  expect(store.getState().G).toEqual({ moved: true });
-
-  api.C();
-  expect(store.getState().G).toEqual({ victory: true });
 });
 
 test('victory', () => {
@@ -124,6 +105,29 @@ test('light client when multiplayer=true', () => {
   }
 });
 
+test('optimisticUpdate', () => {
+  const game = Game({
+    moves: { A: () => ({ A: true }) },
+    flow: { optimisticUpdate: () => false },
+  });
+
+  {
+    const reducer = createGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).toMatchObject({ A: true });
+  }
+
+  {
+    const reducer = createGameReducer({ game, multiplayer: true });
+    let state = reducer(undefined, { type: 'init' });
+    expect(state.G).not.toMatchObject({ A: true });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).not.toMatchObject({ A: true });
+  }
+});
+
 test('numPlayers', () => {
   const numPlayers = 4;
   const reducer = createGameReducer({ game, numPlayers });
@@ -145,5 +149,34 @@ test('log', () => {
   state = reducer(state, actionB);
   expect(state.log).toEqual([actionA, actionB]);
   state = reducer(state, actionC);
-  expect(state.log).toEqual([actionA, actionB, actionC]);
+  expect(state.log).toEqual([actionA, actionB, actionC.payload]);
+});
+
+test('using Random inside setup()', () => {
+  const game1 = Game({
+    seed: 'seed1',
+    setup: ctx => ({ n: ctx.random.D6() }),
+  });
+
+  const game2 = Game({
+    seed: 'seed2',
+    setup: ctx => ({ n: ctx.random.D6() }),
+  });
+
+  const game3 = Game({
+    seed: 'seed2',
+    setup: ctx => ({ n: ctx.random.D6() }),
+  });
+
+  const reducer1 = createGameReducer({ game: game1 });
+  const state1 = reducer1(undefined, makeMove());
+
+  const reducer2 = createGameReducer({ game: game2 });
+  const state2 = reducer2(undefined, makeMove());
+
+  const reducer3 = createGameReducer({ game: game3 });
+  const state3 = reducer3(undefined, makeMove());
+
+  expect(state1.G.n).not.toBe(state2.G.n);
+  expect(state2.G.n).toBe(state3.G.n);
 });

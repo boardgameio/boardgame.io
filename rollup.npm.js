@@ -28,7 +28,6 @@ const globals = {
   react: 'React',
   redux: 'Redux',
   'prop-types': 'PropTypes',
-  'react-redux': 'ReactRedux',
   'react-json-view': 'ReactJson',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
@@ -47,6 +46,15 @@ export default [
       }),
       resolve(),
     ],
+  },
+
+  {
+    input: 'packages/react.js',
+    external: Object.keys(globals),
+    globals,
+    output: { file: 'dist/react.js', format: 'umd' },
+    name: 'Client',
+    plugins: plugins,
   },
 
   {

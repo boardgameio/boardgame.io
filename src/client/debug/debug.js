@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import ReactJson from 'react-json-view';
 import PropTypes from 'prop-types';
 import Mousetrap from 'mousetrap';
 import { GameLog } from '../log/log';
@@ -24,64 +23,52 @@ import './debug.css';
 export class DebugMove extends React.Component {
   static propTypes = {
     name: PropTypes.string.isRequired,
+    shortcut: PropTypes.string.isRequired,
     fn: PropTypes.func.isRequired,
-    active: PropTypes.bool,
-    activate: PropTypes.func,
-    deactivate: PropTypes.func,
   };
 
   state = {
     error: '',
   };
 
-  onClick = () => {
-    this.props.activate();
-  };
+  onSubmit = value => {
+    let error = '';
 
-  getArg(arg) {
     try {
-      return new Function('return ' + arg)();
+      let argArray = new Function(`return [${value}]`)();
+      this.props.fn.apply(this, argArray);
     } catch (e) {
-      return undefined;
+      error = '' + e;
     }
-  }
-
-  onSubmit = () => {
-    let argArray = [];
-    const value = this.span.innerText;
-
-    if (value && value.length) {
-      const args = value.split(',');
-      for (const arg of args) {
-        argArray.push(this.getArg(arg));
-      }
-    }
-
-    this.props.fn.apply(this, argArray);
 
     this.setState({
-      error: '',
+      error,
       focus: false,
       enterArg: false,
     });
-
-    this.span.innerText = '';
-
-    if (this.props.deactivate) {
-      this.props.deactivate();
-    }
   };
 
-  onKeyDown = e => {
-    if (e.key == 'Enter') {
-      e.preventDefault();
-      this.onSubmit();
-    }
+  render() {
+    return (
+      <div>
+        <KeyboardShortcut value={this.props.shortcut}>
+          <DebugMoveArgField name={this.props.name} onSubmit={this.onSubmit} />
+        </KeyboardShortcut>
+        {this.state.error ? (
+          <span className="move-error">{this.state.error}</span>
+        ) : null}
+      </div>
+    );
+  }
+}
 
-    if (e.key == 'Escape') {
-      e.preventDefault();
-      this.props.deactivate();
-    }
+export class DebugMoveArgField extends React.Component {
+  static propTypes = {
+    name: PropTypes.string.isRequired,
+    onSubmit: PropTypes.func.isRequired,
+    active: PropTypes.bool,
+    activate: PropTypes.func,
+    deactivate: PropTypes.func,
   };
 
   componentDidUpdate() {
@@ -92,18 +79,33 @@ export class DebugMove extends React.Component {
     }
   }
 
+  onKeyDown = e => {
+    if (e.key == 'Enter') {
+      e.preventDefault();
+      const value = this.span.innerText;
+      this.props.onSubmit(value);
+      this.span.innerText = '';
+      this.props.deactivate();
+    }
+
+    if (e.key == 'Escape') {
+      e.preventDefault();
+      this.props.deactivate();
+    }
+  };
+
   render() {
     let className = 'move';
     if (this.props.active) className += ' active';
     return (
-      <div className={className} onClick={this.onClick}>
+      <div className={className} onClick={this.props.activate}>
         {this.props.name}
         (<span
           ref={r => {
             this.span = r;
           }}
           className="arg-field"
-          onBlur={() => this.props.deactivate()}
+          onBlur={this.props.deactivate}
           onKeyDown={this.onKeyDown}
           contentEditable
         />)
@@ -189,10 +191,6 @@ export class KeyboardShortcut extends React.Component {
  * and allows you to save / restore from localStorage.
  */
 export class Debug extends React.Component {
-  static contextTypes = {
-    store: PropTypes.any,
-  };
-
   static propTypes = {
     gamestate: PropTypes.shape({
       G: PropTypes.any.isRequired,
@@ -206,6 +204,7 @@ export class Debug extends React.Component {
     events: PropTypes.any,
     restore: PropTypes.func,
     showLog: PropTypes.bool,
+    store: PropTypes.any,
   };
 
   constructor(props) {
@@ -233,6 +232,7 @@ export class Debug extends React.Component {
   state = {
     showDebugUI: true,
     showLog: false,
+    help: false,
   };
 
   assignShortcuts() {
@@ -300,7 +300,7 @@ export class Debug extends React.Component {
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
       const gamestate = JSON.parse(gamestateJSON);
-      this.context.store.dispatch(restore(gamestate));
+      this.props.store.dispatch(restore(gamestate));
     }
   };
 
@@ -312,6 +312,40 @@ export class Debug extends React.Component {
     this.setState({ showLog: true });
   };
 
+  toggleHelp = () => {
+    this.setState(oldstate => ({ help: !oldstate.help }));
+  };
+
+  renderHelp() {
+    const display = this.state.help ? 'block' : 'none';
+
+    return (
+      <section>
+        <KeyboardShortcut value="?" onPress={this.toggleHelp}>
+          help
+        </KeyboardShortcut>
+
+        <span style={{ display }}>
+          <div className="key">
+            <div className="key-box">d</div> toggle Debug UI
+          </div>
+
+          <div className="key">
+            <div className="key-box">l</div> toggle Log
+          </div>
+
+          <KeyboardShortcut value="s" onPress={this.saveState}>
+            save localStorage
+          </KeyboardShortcut>
+
+          <KeyboardShortcut value="r" onPress={this.restoreState}>
+            restore localStorage
+          </KeyboardShortcut>
+        </span>
+      </section>
+    );
+  }
+
   render() {
     if (!this.state.showDebugUI) {
       return null;
@@ -322,9 +356,7 @@ export class Debug extends React.Component {
       const fn = this.props.moves[name];
       const shortcut = this.shortcuts[name];
       moves.push(
-        <KeyboardShortcut key={name} value={shortcut}>
-          <DebugMove name={name} fn={fn} />
-        </KeyboardShortcut>
+        <DebugMove key={name} name={name} fn={fn} shortcut={shortcut} />
       );
     }
 
@@ -333,9 +365,7 @@ export class Debug extends React.Component {
       const fn = this.props.events[name];
       const shortcut = this.shortcuts[name];
       events.push(
-        <KeyboardShortcut key={name} value={shortcut}>
-          <DebugMove name={name} fn={fn} />
-        </KeyboardShortcut>
+        <DebugMove key={name} name={name} fn={fn} shortcut={shortcut} />
       );
     }
 
@@ -377,23 +407,7 @@ export class Debug extends React.Component {
               </div>
             </section>
 
-            <section>
-              <div className="key">
-                <div className="key-box">d</div> toggle Debug UI
-              </div>
-
-              <div className="key">
-                <div className="key-box">l</div> toggle Log
-              </div>
-
-              <KeyboardShortcut value="s" onPress={this.saveState}>
-                save localStorage
-              </KeyboardShortcut>
-
-              <KeyboardShortcut value="r" onPress={this.restoreState}>
-                restore localStorage
-              </KeyboardShortcut>
-            </section>
+            {this.renderHelp()}
 
             <h3>players</h3>
             <div className="player-box">{players}</div>
@@ -409,31 +423,24 @@ export class Debug extends React.Component {
             <h3>state</h3>
 
             <section>
-              <ReactJson
-                src={this.props.gamestate.G}
-                name="G"
-                enableClipboard={false}
-                displayDataTypes={false}
-              />
+              <pre>
+                <strong>G</strong>:{' '}
+                {JSON.stringify(this.props.gamestate.G, null, 2)}
+              </pre>
             </section>
 
             <section>
-              <ReactJson
-                src={this.props.gamestate.ctx}
-                name="ctx"
-                enableClipboard={false}
-                displayDataTypes={false}
-              />
+              <pre>
+                <strong>ctx</strong>:{' '}
+                {JSON.stringify(this.props.gamestate.ctx, null, 2)}
+              </pre>
             </section>
           </span>
         )}
 
         {this.state.showLog && (
           <section>
-            <GameLog
-              log={this.props.gamestate.log}
-              initialState={this.props.gamestate._initial}
-            />
+            <GameLog store={this.props.store} />
           </section>
         )}
       </div>

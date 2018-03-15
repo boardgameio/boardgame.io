@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Game } from 'boardgame.io/core';
-import { Client } from 'boardgame.io/client';
+import { Client } from 'boardgame.io/react';
 import './phases.css';
 
 const game = Game({

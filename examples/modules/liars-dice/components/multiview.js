@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Client } from 'boardgame.io/client';
+import { Client } from 'boardgame.io/react';
 import Game from '../game';
 import Board from './board';
 
@@ -32,7 +32,7 @@ const Multiview = () => (
         <App gameID="liarsDice" playerID="1" />
       </div>
       <div className="run">
-        &lt;App playerID=&quot;1&quot;/&gt;
+        &lt;App playerID=&quot;2&quot;/&gt;
         <App gameID="liarsDice" playerID="2" />
       </div>
       <div className="run">

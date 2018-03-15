@@ -1,3 +1,115 @@
+# v0.20.2
+
+#### Features
+
+* [[43ba0ff](https://github.com/google/boardgame.io/commit/43ba0ff)] allow optional redux enhancer (#139)
+* [[dd6c110](https://github.com/google/boardgame.io/commit/dd6c110)] Run endPhase event (analogue to endTurn) when game ends (#144)
+
+#### Bugfixes
+
+* [[8969433](https://github.com/google/boardgame.io/commit/8969433)] Fix bug that was causing Random code to return the same numbers.
+
+#### Breaking Changes
+
+* The `Random` API is different. There is no longer a `Random` package
+  that you need to import. The API is attached to the `ctx` parameter that
+  is passed to the moves. Take a look at http://boardgame.io/#/random for
+  more details.
+
+# v0.20.1
+
+#### Bugfixes
+
+* [[06d78e2](https://github.com/google/boardgame.io/commit/06d78e2)] Enable SSR
+* [[ed09f51](https://github.com/google/boardgame.io/commit/ed09f51)] Allow calling Random during setup
+* [[c50d5ea](https://github.com/google/boardgame.io/commit/c50d5ea)] fix log rendering of phases
+
+# v0.20
+
+#### Features
+
+* [[eec8896](https://github.com/google/boardgame.io/commit/eec8896)] undo/redo
+
+# v0.19
+
+#### Features
+
+* MongoDB connector
+  * [[eaa372f](https://github.com/google/boardgame.io/commit/eaa372f)] add Mongo to package
+  * [[63c3cdf](https://github.com/google/boardgame.io/commit/63c3cdf)] mongo race condition checks
+  * [[65cefdf](https://github.com/google/boardgame.io/commit/65cefdf)] allow setting Mongo location using MONGO_URI
+  * [[557b66c](https://github.com/google/boardgame.io/commit/557b66c)] add run() to Server
+  * [[2a85b40](https://github.com/google/boardgame.io/commit/2a85b40)] replace lru-native with lru-cache
+  * [[003fe46](https://github.com/google/boardgame.io/commit/003fe46)] MongoDB connector
+
+#### Breaking Changes
+
+* `boardgame.io/server` no longer has a default export, but returns
+  `Server` and `Mongo`.
+
+```
+// v0.19
+const Server = require('boardgame.io/server').Server;
+```
+
+```
+// v0.18
+const Server = require('boardgame.io/server');
+```
+
+# v0.18.1
+
+#### Bugfixes
+
+[[0c894bd](https://github.com/google/boardgame.io/commit/0c894bd)] add react.js to rollup config
+
+# v0.18
+
+#### Features
+
+* [[4b90e84](https://github.com/google/boardgame.io/commit/4b90e84)] decouple client from React
+
+This adds a new package `boardgame.io/react`. Migrate all your
+calls from:
+
+```
+import { Client } from 'boardgame.io/client'
+```
+
+to:
+
+```
+import { Client } from 'boardgame.io/react'
+```
+
+`boardgame.io/client` exposes a raw JS client that isn't tied
+to any particular UI framework.
+
+* Random API:
+
+  * [[ebe7758](https://github.com/google/boardgame.io/commit/ebe7758)] allow to throw multiple dice (#120)
+  * [[8c88b70](https://github.com/google/boardgame.io/commit/8c88b70)] Simplify Random API (#119)
+  * [[45599e5](https://github.com/google/boardgame.io/commit/45599e5)] Server-side array shuffling. (#116)
+  * [[d296b36](https://github.com/google/boardgame.io/commit/d296b36)] Random API (#103)
+
+* [[f510b69](https://github.com/google/boardgame.io/commit/f510b69)] onTurnBegin (#109)
+
+#### Bugfixes
+
+* [[6a010c8](https://github.com/google/boardgame.io/commit/6a010c8)] Debug UI: fixes related to errors in arguments (#123)
+
+# v0.17.2
+
+#### Features
+
+* [[0572210](https://github.com/google/boardgame.io/commit/0572210)] Exposing Client connection status to board. (#97)
+* [[c2ea197](https://github.com/google/boardgame.io/commit/c2ea197)] make db interface async (#86)
+* [[9e507ce](https://github.com/google/boardgame.io/commit/9e507ce)] exclude dependencies from package
+
+#### Bugfixes
+
+* [[a768f1f](https://github.com/google/boardgame.io/commit/a768f1f)] remove entries from clientInfo and roomInfo on disconnect
+
 # v0.17.1
 
 #### Features
