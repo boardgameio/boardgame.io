@@ -9,23 +9,8 @@ before committing to one.
 
 #### Usage
 
-In order to activate this feature, all you need to do is
-add `undo: true` to your `flow` section:
-
-```js
-Game({
-  moves: {
-    ...
-  },
-
-  flow: {
-    undo: true
-  }
-});
-```
-
-This will enable two new events `undo` and `redo` that you
-can dispatch in a manner similar to that used for `endTurn`.
+You can dispatch the `undo` and `redo` events in a similar
+manner like `endTurn`:
 
 ```
 onClickUndoButton() {
@@ -33,11 +18,16 @@ onClickUndoButton() {
 }
 
 onClickRedoButton() {
-  this.props.events.undo();
+  this.props.events.redo();
 }
 ```
 
-In case you just want specific moves to be undoable, for example to prevent peeking at cards or reroll of dices, you can instead add `undoableMoves` to your `flow` section (similar to `allowedMoves` in `phases`):
+##### Restricting Undoable Moves
+
+In case you just want specific moves to be undoable,
+for example to prevent peeking at cards or rerolling of
+dices, you can instead add `undoableMoves` to your `flow`
+section similar to `allowedMoves` in `phases`:
 
 ```js
 Game({
@@ -53,3 +43,19 @@ Game({
 ```
 
 This way only `playCard` will be undoable, but not `rollDice`.
+
+##### Deactivating Undo / Redo Functionality
+
+In order to deactivate this feature completely initialize
+`undoableMoves` with an empty array and the `undo` and `redo`
+events will not be available in the game.
+
+```js
+Game({
+  ...
+
+  flow: {
+    undoableMoves: [],
+  }
+});
+```
