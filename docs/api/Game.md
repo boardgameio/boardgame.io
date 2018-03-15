@@ -31,6 +31,8 @@ game state and the moves. The moves are converted to a
     Code to run at the end of a move.
   * `flow.movesPerTurn` (_number_): Ends the turn automatically if a certain number
     of moves have been made.
+  * `flow.undo` (_boolean_): Enables undo and redo of moves
+  * `flow.undoableMoves` (_array_): Enables undo and redo of listed moves
   * `flow.phases` (_array_): Optional list of game phases. See
     [Phases](/phases) for more information.
 

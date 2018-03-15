@@ -36,3 +36,20 @@ onClickRedoButton() {
   this.props.events.undo();
 }
 ```
+
+In case you just want specific moves to be undoable, for example to prevent peeking at cards or reroll of dices, you can instead add `undoableMoves` to your `flow` section (similar to `allowedMoves` in `phases`):
+
+```js
+Game({
+  moves: {
+    rollDice: (G, ctx) => ...
+    playCard: (G, ctx) => ...
+  },
+
+  flow: {
+    undoableMoves: ['playCard'],
+  }
+});
+```
+
+This way only `playCard` will be undoable, but not `rollDice`.
