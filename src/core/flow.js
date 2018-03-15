@@ -12,15 +12,16 @@ import { Random } from './random';
 /**
  * This function checks whether a player is allowed to make a move.
  *
- * @param {...object} G     - The Game instance
- * @param {...object} ctx   - The ctx instance
- * @param {...object} opts  - Options - used here to transport the playerID.
+ * @param {object} G     - The Game instance
+ * @param {object} ctx   - The ctx instance
+ * @param {object} opts  - Options - used here to transport the playerID.
  */
 function canMakeMoveDefault(G, ctx, opts) {
-  opts = opts || {};
-  const playerID = opts.playerID;
+  const { playerID } = opts || {};
 
-  if (playerID === undefined) return true;
+  if (playerID === undefined) {
+    return true;
+  }
 
   const actionPlayers = ctx.actionPlayers || [];
 
