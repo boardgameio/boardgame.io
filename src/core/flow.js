@@ -19,12 +19,14 @@ import { Random } from './random';
 function canMakeMoveDefault(G, ctx, opts) {
   const { playerID } = opts || {};
 
-  // Null players are spectators and can't make moves.
+  // In multiplayer mode, the default playerID is null, which corresponds
+  // to a spectator that can't make moves.
   if (playerID === null) {
     return true;
   }
 
-  // In single-player mode (and most unit tests), the playerID is undefined.
+  // In singleplayer mode (and most unit tests), the default playerID
+  // is undefined, and can always make moves.
   if (playerID === undefined) {
     return true;
   }
@@ -61,9 +63,11 @@ function canMakeMoveDefault(G, ctx, opts) {
  *                                       the client while waiting for
  *                                       the result of execution from
  *                                       the server.
- * @param {...object} canMakeMove - (G, ctx, playerID) => boolean
+ * @param {...object} canMakeMove - (G, ctx, opts) => boolean
  *                                  Predicate to determine whether the player
  *                                  identified by playerID is allowed to make a move.
+ *                                  opts contains an object { type, args, playerID },
+ *                                  which is the payload of makeMove().
  */
 export function Flow({
   ctx,
