@@ -21,6 +21,26 @@ test('constructor', () => {
   expect(r.state).toEqual({ seed: '0' });
 });
 
+test('attach / detach / update', () => {
+  const r = new Random({});
+  const ctx = r.attach({});
+
+  expect(ctx._random).not.toBeDefined();
+  expect(ctx.random).toBeDefined();
+
+  {
+    const t = Random.detach(ctx);
+    expect(t._random).not.toBeDefined();
+    expect(t.random).not.toBeDefined();
+  }
+
+  {
+    const t = r.update(ctx);
+    expect(t._random).toBeDefined();
+    expect(t.random).not.toBeDefined();
+  }
+});
+
 test('random', () => {
   const r = Init('hi there');
   // make sure that subsequent calls are different.

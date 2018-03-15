@@ -25,18 +25,18 @@ export class Random {
   }
 
   /**
-   * Attaches the PRNG state and strips the API.
+   * Updates ctx with the PRNG state.
+   * Also removes the Random API.
    */
-  ctxWithoutAPI(ctx) {
-    const { random, ...rest } = ctx; // eslint-disable-line no-unused-vars
-    return { ...rest, _random: this.state };
+  update(ctx) {
+    return Random.detach({ ...ctx, _random: this.state });
   }
 
   /**
-   * Attaches the PRNG state and API.
+   * Attaches the Random API to ctx.
    */
-  ctxWithAPI(ctx) {
-    return { ...ctx, _random: this.state, random: this._api() };
+  attach(ctx) {
+    return { ...ctx, random: this._api() };
   }
 
   /**
@@ -160,11 +160,19 @@ export class Random {
 }
 
 /**
- * GenSeed
+ * Removes the attached Random api from ctx.
  *
- * Generates a new seed that's used in case none is
- * passed in.
+ * @param {object} ctx - The ctx object with the Random API attached.
+ * @returns {object} A plain ctx object without the Random API.
  */
-export function GenSeed() {
+Random.detach = function(ctx) {
+  const { random, ...rest } = ctx; // eslint-disable-line no-unused-vars
+  return rest;
+};
+
+/**
+ * Generates a new seed from the current date / time.
+ */
+Random.seed = function() {
   return (+new Date()).toString(36).slice(-10);
-}
+};

@@ -26,7 +26,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
   ctx._random = { seed: game.seed };
 
   const random = new Random(ctx);
-  const ctxWithAPI = random.ctxWithAPI(ctx);
+  const ctxWithAPI = random.attach(ctx);
 
   const initial = {
     // User managed state.
@@ -55,8 +55,8 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  // Initialize PRNG seed.
-  initial.ctx = random.ctxWithoutAPI(initial.ctx);
+  // Initialize PRNG state.
+  initial.ctx = random.update(initial.ctx);
 
   const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
 
@@ -85,13 +85,14 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // Init PRNG state.
+        // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
-        state = { ...state, ctx: random.ctxWithAPI(state.ctx) };
+        state = { ...state, ctx: random.attach(state.ctx) };
+
         // Update state.
         const newState = game.flow.processGameEvent(state, action.payload);
-        // Update PRNG state.
-        const ctx = random.ctxWithoutAPI(newState.ctx);
+        // Update ctx with PRNG state.
+        const ctx = random.update(newState.ctx);
 
         return { ...newState, ctx, _stateID: state._stateID + 1 };
       }
@@ -102,14 +103,14 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // Init PRNG state.
+        // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
-        const ctxWithAPI = random.ctxWithAPI(state.ctx);
+        const ctxWithAPI = random.attach(state.ctx);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
-        // Update PRNG state.
-        const ctx = random.ctxWithoutAPI(state.ctx);
+        // Update ctx with PRNG state.
+        const ctx = random.update(state.ctx);
 
         // Undo changes to G if the move should not run on the client.
         if (
@@ -131,9 +132,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        state = { ...state, ctx: random.ctxWithAPI(state.ctx) };
+        state = { ...state, ctx: random.attach(state.ctx) };
         state = game.flow.processMove(state, action);
-        state = { ...state, ctx: random.ctxWithoutAPI(state.ctx) };
+        state = { ...state, ctx: random.update(state.ctx) };
 
         return state;
       }
