@@ -107,8 +107,9 @@ class _ClientImpl {
         isActive = false;
       }
       if (
-        state.ctx.currentPlayer != 'any' &&
-        this.playerID != state.ctx.currentPlayer
+        !this.game.flow.canMakeMove(state.G, state.ctx, {
+          playerID: this.playerID,
+        })
       ) {
         isActive = false;
       }
