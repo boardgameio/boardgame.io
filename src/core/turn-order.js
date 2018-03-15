@@ -46,7 +46,6 @@ export const TurnOrder = {
   DEFAULT: {
     first: (G, ctx) => ctx.currentPlayer,
     next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
-    actionPlayers: (G, ctx) => [ctx.currentPlayer],
   },
 
   /**
@@ -57,7 +56,6 @@ export const TurnOrder = {
   ANY: {
     first: () => 'any',
     next: () => 'any',
-    actionPlayers: (G, ctx) => ['any'], // eslint-disable-line no-unused-vars
   },
 
   /**
@@ -79,6 +77,5 @@ export const TurnOrder = {
         }
       }
     },
-    actionPlayers: (G, ctx) => [ctx.currentPlayer],
   },
 };

@@ -453,10 +453,9 @@ export function FlowWithPhases({
     const conf = phaseMap[state.ctx.phase];
 
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
-    const actionPlayers = conf.turnOrder.actionPlayers(G, state.ctx);
     state = {
       ...state,
-      ctx: { ...state.ctx, currentPlayerMoves, actionPlayers },
+      ctx: { ...state.ctx, currentPlayerMoves },
     };
 
     const G = conf.onMove(state.G, state.ctx, action);
