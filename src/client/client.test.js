@@ -73,7 +73,11 @@ test('event dispatchers', () => {
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
+    expect(Object.getOwnPropertyNames(api)).toEqual([
+      'undo',
+      'redo',
+      'endTurn',
+    ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
@@ -82,7 +86,6 @@ test('event dispatchers', () => {
   {
     const game = Game({
       flow: {
-        undo: true,
         endPhase: true,
       },
     });
@@ -105,7 +108,7 @@ test('event dispatchers', () => {
       flow: {
         endPhase: false,
         endTurn: false,
-        undo: false,
+        undoableMoves: [],
       },
 
       phases: [{ name: 'default' }],

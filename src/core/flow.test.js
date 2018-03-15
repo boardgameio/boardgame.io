@@ -481,10 +481,6 @@ test('undo / redo', () => {
     moves: {
       move: (G, ctx, arg) => ({ ...G, [arg]: true }),
     },
-
-    flow: {
-      undo: true,
-    },
   });
 
   const reducer = createGameReducer({ game, numPlayers: 2 });
@@ -534,7 +530,7 @@ test('undo / redo', () => {
   expect(state.G).toEqual({ A: true });
 });
 
-test('undo / redo using undoableMoves', () => {
+test('undo / redo restricted by undoableMoves', () => {
   let game = Game({
     moves: {
       undoableMove: (G, ctx, arg) => ({ ...G, [arg]: true }),
@@ -580,7 +576,7 @@ test('undo / redo using undoableMoves', () => {
   state = reducer(state, gameEvent('redo'));
   expect(state.G).toEqual({ A: true, C: true });
 });
-  
+
 test('canMakeMove', () => {
   // default behaviour
   const pid = { playerID: 0 };
