@@ -9,7 +9,6 @@
 import Game from './game';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
-import { Random } from './random';
 
 const game = Game({
   moves: {
@@ -156,17 +155,17 @@ test('log', () => {
 test('using Random inside setup()', () => {
   const game1 = Game({
     seed: 'seed1',
-    setup: () => ({ n: Random.D6() }),
+    setup: ctx => ({ n: ctx.random.D6() }),
   });
 
   const game2 = Game({
     seed: 'seed2',
-    setup: () => ({ n: Random.D6() }),
+    setup: ctx => ({ n: ctx.random.D6() }),
   });
 
   const game3 = Game({
     seed: 'seed2',
-    setup: () => ({ n: Random.D6() }),
+    setup: ctx => ({ n: ctx.random.D6() }),
   });
 
   const reducer1 = createGameReducer({ game: game1 });
