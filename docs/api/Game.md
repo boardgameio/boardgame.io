@@ -52,7 +52,7 @@ game state and the moves. The moves are converted to a
 import { Game } from `boardgame.io/core';
 
 const game = Game({
-  setup: (numPlayers) => {
+  setup: (ctx) => {
     const G = {...};
     return G;
   },
@@ -75,7 +75,7 @@ const game = Game({
 import { Game } from 'boardgame.io/core';
 
 const game = Game({
-  setup: (numPlayers) => {
+  setup: (ctx) => {
     ...
   },
 
@@ -99,7 +99,7 @@ const game = Game({
 import { Game } from 'boardgame.io/core';
 
 const game = Game({
-  setup: (numPlayers) => {
+  setup: (ctx) => {
     ...
   },
 
