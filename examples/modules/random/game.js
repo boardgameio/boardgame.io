@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, Random } from 'boardgame.io/core';
+import { Game } from 'boardgame.io/core';
 
 const RandomExample = Game({
   name: 'shuffle',
@@ -16,9 +16,9 @@ const RandomExample = Game({
   }),
 
   moves: {
-    shuffle: G => ({ ...G, deck: Random.Shuffle(G.deck) }),
-    rollDie: (G, ctx, value) => ({ ...G, dice: Random.Die(value) }),
-    rollD6: G => ({ ...G, dice: Random.D6() }),
+    shuffle: (G, ctx) => ({ ...G, deck: ctx.random.Shuffle(G.deck) }),
+    rollDie: (G, ctx, value) => ({ ...G, dice: ctx.random.Die(value) }),
+    rollD6: (G, ctx) => ({ ...G, dice: ctx.random.D6() }),
   },
 });
 
