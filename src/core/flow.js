@@ -10,6 +10,36 @@ import { TurnOrder } from './turn-order';
 import { Random } from './random';
 
 /**
+ * This function checks whether a player is allowed to make a move.
+ *
+ * @param {object} G     - The Game instance
+ * @param {object} ctx   - The ctx instance
+ * @param {object} opts  - Options - used here to transport the playerID.
+ */
+function canMakeMoveDefault(G, ctx, opts) {
+  const { playerID } = opts || {};
+
+  // In multiplayer mode, the default playerID is null, which corresponds
+  // to a spectator that can't make moves.
+  if (playerID === null) {
+    return true;
+  }
+
+  // In singleplayer mode (and most unit tests), the default playerID
+  // is undefined, and can always make moves.
+  if (playerID === undefined) {
+    return true;
+  }
+
+  const actionPlayers = ctx.actionPlayers || [];
+
+  // Explicitly do not allow the current player
+  // When he is allowed to make a move, his playerID
+  // must be included in actionPlayers.
+  return actionPlayers.includes(playerID) || actionPlayers.includes('any');
+}
+
+/**
  * Helper to create a reducer that manages ctx (with the
  * ability to also update G).
  *
@@ -25,10 +55,6 @@ import { Random } from './random';
  *                             reducer will handle. Each function
  *                             has the following signature:
  *                             ({G, ctx}) => {G, ctx}
- * @param {...object} validator - A move validator that returns false
- *                                if a particular type of move is invalid
- *                                at this point in the game.
- *                                (G, ctx, moveName) => boolean
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
@@ -37,20 +63,25 @@ import { Random } from './random';
  *                                       the client while waiting for
  *                                       the result of execution from
  *                                       the server.
+ * @param {...object} canMakeMove - (G, ctx, opts) => boolean
+ *                                  Predicate to determine whether the player
+ *                                  identified by playerID is allowed to make a move.
+ *                                  opts contains an object { type, args, playerID },
+ *                                  which is the payload of makeMove().
  */
 export function Flow({
   ctx,
   events,
   init,
-  validator,
   processMove,
   optimisticUpdate,
+  canMakeMove,
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
   if (!init) init = state => state;
-  if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
+  if (!canMakeMove) canMakeMove = canMakeMoveDefault;
 
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -72,13 +103,6 @@ export function Flow({
     ctx,
     init,
 
-    // Disallow moves once the game is over.
-    // Also call any provided additional validation.
-    validator: (G, ctx, move) => {
-      if (ctx.gameover !== undefined) return false;
-      return validator(G, ctx, move);
-    },
-
     eventNames: Object.getOwnPropertyNames(events),
 
     processMove: (state, action) => {
@@ -90,6 +114,13 @@ export function Flow({
     },
 
     optimisticUpdate,
+
+    // Disallow moves once the game is over.
+    // Also call any provided additional validation.
+    canMakeMove: (G, ctx, opts) => {
+      if (ctx.gameover !== undefined) return false;
+      return canMakeMove(G, ctx, opts);
+    },
   };
 }
 
@@ -202,6 +233,7 @@ export function FlowWithPhases({
   undo,
   undoableMoves,
   optimisticUpdate,
+  canMakeMove,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -279,6 +311,7 @@ export function FlowWithPhases({
     const ctx = { ...state.ctx };
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
     ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
+    ctx.actionPlayers = [ctx.currentPlayer];
     return { ...state, G, ctx };
   };
 
@@ -374,10 +407,11 @@ export function FlowWithPhases({
 
     // Update current player.
     const currentPlayer = conf.turnOrder.next(G, ctx);
+    const actionPlayers = [currentPlayer];
     // Update turn.
     const turn = ctx.turn + 1;
     // Update state.
-    ctx = { ...ctx, currentPlayer, turn, currentPlayerMoves: 0 };
+    ctx = { ...ctx, currentPlayer, actionPlayers, turn, currentPlayerMoves: 0 };
 
     // End phase if condition is met.
     const end = conf.endPhaseIf(G, ctx);
@@ -431,11 +465,13 @@ export function FlowWithPhases({
   }
 
   function processMove(state, action, dispatch) {
-    // Update currentPlayerMoves.
-    const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
-    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves } };
-
     const conf = phaseMap[state.ctx.phase];
+
+    const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
+    state = {
+      ...state,
+      ctx: { ...state.ctx, currentPlayerMoves },
+    };
 
     const G = conf.onMove(state.G, state.ctx, action);
     state = { ...state, G };
@@ -480,13 +516,21 @@ export function FlowWithPhases({
     return state;
   }
 
-  const validator = (G, ctx, move) => {
-    const conf = phaseMap[ctx.phase];
+  const canMakeMoveWrap = (G, ctx, opts) => {
+    const conf = phaseMap[ctx.phase] || {};
     if (conf.allowedMoves) {
       const set = new Set(conf.allowedMoves);
-      return set.has(move.type);
+      if (!set.has(opts.type)) {
+        return false;
+      }
     }
-    return true;
+
+    // run user-provided validation
+    if (canMakeMove !== undefined && !canMakeMove(G, ctx, opts)) {
+      return false;
+    }
+
+    return canMakeMoveDefault(G, ctx, opts);
   };
 
   let enabledEvents = {};
@@ -516,7 +560,7 @@ export function FlowWithPhases({
       return optimisticUpdate(G, ctx, action);
     },
     events: enabledEvents,
-    validator,
     processMove,
+    canMakeMove: canMakeMoveWrap,
   });
 }

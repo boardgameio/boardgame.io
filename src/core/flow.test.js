@@ -20,7 +20,7 @@ test('Flow', () => {
   expect(flow.ctx()).toMatchObject({});
   expect(flow.eventNames.length).toBe(0);
   expect(flow.init({ a: 5 })).toMatchObject({ a: 5 });
-  expect(flow.validator({}, {}, undefined)).toBe(true);
+  expect(flow.canMakeMove({}, {}, undefined)).toBe(true);
   expect(flow.processMove({ b: 6 })).toMatchObject({ b: 6 });
   expect(flow.optimisticUpdate()).toBe(true);
 });
@@ -410,7 +410,7 @@ test('endTurnIf', () => {
   }
 });
 
-test('validator', () => {
+test('canMakeMove', () => {
   let game = Game({
     moves: {
       A: () => ({ A: true }),
@@ -433,9 +433,9 @@ test('validator', () => {
   // Basic.
   let flow;
   flow = Flow({});
-  expect(flow.validator(state.G, state.ctx)).toBe(true);
-  flow = Flow({ validator: () => false });
-  expect(flow.validator(state.G, state.ctx)).toBe(false);
+  expect(flow.canMakeMove(state.G, state.ctx)).toBe(true);
+  flow = Flow({ canMakeMove: () => false });
+  expect(flow.canMakeMove(state.G, state.ctx)).toBe(false);
 
   // B is disallowed in phase A.
   state = reducer(state, makeMove('B'));
@@ -470,6 +470,10 @@ test('validator', () => {
   expect(state.G).not.toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
   expect(state.G).not.toMatchObject({ B: true });
+
+  // the flow runs a user-provided validation
+  flow = FlowWithPhases({ canMakeMove: () => true });
+  expect(flow.canMakeMove(state.G, state.ctx)).toBe(false);
 });
 
 test('undo / redo', () => {
@@ -575,4 +579,30 @@ test('undo / redo using undoableMoves', () => {
 
   state = reducer(state, gameEvent('redo'));
   expect(state.G).toEqual({ A: true, C: true });
+});
+  
+test('canMakeMove', () => {
+  // default behaviour
+  const pid = { playerID: 0 };
+
+  let flow = Flow({});
+  expect(flow.canMakeMove({}, {}, pid)).toBe(false);
+  // NOTE: currentPlayer is not allowed to make a move by default.
+  // his playerID must be included in the actionPlayers array.
+  expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
+  expect(flow.canMakeMove({}, { actionPlayers: ['any'] }, pid)).toBe(true);
+  expect(flow.canMakeMove({}, { actionPlayers: [0] }, pid)).toBe(true);
+  expect(flow.canMakeMove({}, { actionPlayers: [1, 2, 3] }, pid)).toBe(false);
+
+  // no one can make a move
+  flow = Flow({ canMakeMove: () => false });
+  expect(flow.canMakeMove({}, {}, pid)).toBe(false);
+  expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
+  expect(flow.canMakeMove({}, {}, 'any')).toBe(false);
+
+  // flow with phases passes canMakeMove
+  flow = FlowWithPhases({ canMakeMove: () => false });
+  expect(flow.canMakeMove({}, {}, pid)).toBe(false);
+  expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
+  expect(flow.canMakeMove({}, {}, 'any')).toBe(false);
 });

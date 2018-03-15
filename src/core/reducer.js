@@ -99,7 +99,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
       case Actions.MAKE_MOVE: {
         // Ignore the move if it isn't valid at this point.
-        if (!game.flow.validator(state.G, state.ctx, action.payload)) {
+        if (!game.flow.canMakeMove(state.G, state.ctx, action.payload)) {
           return state;
         }
 
