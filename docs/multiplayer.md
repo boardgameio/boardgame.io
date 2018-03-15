@@ -9,7 +9,7 @@ sync in realtime (without any browser refreshes needed).
 ```js
 // src/App.js
 
-import Client from 'boardgame.io/react';
+import { Client } from 'boardgame.io/react';
 import { TicTacToe } from './game';
 import { TicTacToeBoard } from './board';
 
