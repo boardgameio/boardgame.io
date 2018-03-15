@@ -19,6 +19,12 @@ import { Random } from './random';
 function canMakeMoveDefault(G, ctx, opts) {
   const { playerID } = opts || {};
 
+  // Null players are spectators and can't make moves.
+  if (playerID === null) {
+    return true;
+  }
+
+  // In single-player mode (and most unit tests), the playerID is undefined.
   if (playerID === undefined) {
     return true;
   }
@@ -496,8 +502,7 @@ export function FlowWithPhases({
     const conf = phaseMap[ctx.phase] || {};
     if (conf.allowedMoves) {
       const set = new Set(conf.allowedMoves);
-      const move = opts.move;
-      if (!set.has(move.type)) {
+      if (!set.has(opts.type)) {
         return false;
       }
     }

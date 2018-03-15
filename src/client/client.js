@@ -83,6 +83,11 @@ class _ClientImpl {
       this.store = this.multiplayerClient.createStore(GameReducer, enhancer);
     } else {
       this.store = createStore(GameReducer, enhancer);
+
+      // If no playerID was provided, set it to undefined.
+      if (this.playerID === null) {
+        this.playerID = undefined;
+      }
     }
 
     this.createDispatchers();
