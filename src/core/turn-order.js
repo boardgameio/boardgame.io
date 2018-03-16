@@ -44,11 +44,8 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G, ctx) => ctx.playerOrder[0] + '',
-    next: (G, ctx) => {
-      let playerPos = ctx.playerOrder.findIndex(x => x == ctx.currentPlayer);
-      return ctx.playerOrder[(playerPos + 1) % ctx.numPlayers] + '';
-    },
+    first: () => 0,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -57,8 +54,8 @@ export const TurnOrder = {
    * Any player can play and there isn't a currentPlayer really.
    */
   ANY: {
-    first: () => 'any',
-    next: () => 'any',
+    first: () => undefined,
+    next: () => undefined,
   },
 
   /**
@@ -69,15 +66,14 @@ export const TurnOrder = {
    */
 
   SKIP: {
-    first: (G, ctx) => ctx.playerOrder[0] + '',
+    first: () => 0,
     next: (G, ctx) => {
       if (G.allPassed) return;
-      let player = ctx.currentPlayer;
-      for (let i = 0; i < ctx.numPlayers; i++) {
-        let playerPos = ctx.playerOrder.findIndex(x => x == player);
-        player = ctx.playerOrder[(playerPos + 1) % ctx.numPlayers] + '';
-        if (!G.passOrder.includes(player)) {
-          return player;
+      let playOrderPos = ctx.playOrderPos;
+      for (let i = 0; i < ctx.playOrder.length; i++) {
+        playOrderPos = (playOrderPos + 1) % ctx.playOrder.length;
+        if (!G.passOrder.includes(ctx.playOrder[playOrderPos] + '')) {
+          return playOrderPos;
         }
       }
     },

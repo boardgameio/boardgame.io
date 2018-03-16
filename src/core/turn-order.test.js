@@ -34,12 +34,12 @@ test('turnOrder', () => {
   expect(state.ctx.currentPlayer).toBe('any');
 
   flow = FlowWithPhases({
-    phases: [{ name: 'A', turnOrder: { first: () => '10', next: () => '3' } }],
+    phases: [{ name: 'A', turnOrder: { first: () => 9, next: () => 3 } }],
   });
 
   state = { ctx: flow.ctx(10) };
   state = flow.init(state);
-  expect(state.ctx.currentPlayer).toBe('10');
+  expect(state.ctx.currentPlayer).toBe('9');
   state = flow.processGameEvent(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('3');
 });
@@ -154,7 +154,7 @@ test('custom order', () => {
       {
         name: 'A',
         turnOrder: TurnOrder.DEFAULT,
-        onPhaseBegin: (G, ctx) => (ctx.playerOrder = [2, 0, 1]),
+        onPhaseBegin: (G, ctx) => (ctx.playOrder = [2, 0, 1]),
       },
     ],
   });

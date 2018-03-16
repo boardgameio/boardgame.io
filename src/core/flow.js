@@ -304,7 +304,11 @@ export function FlowWithPhases({
   const startPhase = function(state, phaseConfig) {
     const ctx = { ...state.ctx };
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
-    ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
+    ctx.playOrderPos = phaseConfig.turnOrder.first(G, ctx);
+    ctx.currentPlayer =
+      ctx.playOrderPos === undefined
+        ? 'any'
+        : ctx.playOrder[ctx.playOrderPos] + '';
     ctx.actionPlayers = [ctx.currentPlayer];
     return { ...state, G, ctx };
   };
@@ -400,12 +404,21 @@ export function FlowWithPhases({
     }
 
     // Update current player.
-    const currentPlayer = conf.turnOrder.next(G, ctx);
+    const playOrderPos = conf.turnOrder.next(G, ctx);
+    const currentPlayer =
+      playOrderPos === undefined ? 'any' : ctx.playOrder[playOrderPos] + '';
     const actionPlayers = [currentPlayer];
     // Update turn.
     const turn = ctx.turn + 1;
     // Update state.
-    ctx = { ...ctx, currentPlayer, actionPlayers, turn, currentPlayerMoves: 0 };
+    ctx = {
+      ...ctx,
+      playOrderPos,
+      currentPlayer,
+      actionPlayers,
+      turn,
+      currentPlayerMoves: 0,
+    };
 
     // End phase if condition is met.
     const end = conf.endPhaseIf(G, ctx);
@@ -532,7 +545,8 @@ export function FlowWithPhases({
       turn: 0,
       currentPlayer: '0',
       currentPlayerMoves: 0,
-      playerOrder: Array.from(Array(numPlayers), (d, i) => i),
+      playOrder: Array.from(Array(numPlayers), (d, i) => i),
+      playOrderPos: 0,
       phase: phases[0].name,
     }),
     init: state => {
