@@ -44,6 +44,29 @@ test('multiplayer server set when provided', () => {
   expect(client.multiplayerClient.socket.io.engine.port).toEqual(port);
 });
 
+test('accepts enhancer for store', () => {
+  let spyDispatcher;
+  const spyEnhancer = vanillaCreateStore => (...args) => {
+    const vanillaStore = vanillaCreateStore(...args);
+    return {
+      ...vanillaStore,
+      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+    };
+  };
+  const client = Client({
+    game: Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    }),
+    enhancer: spyEnhancer,
+  });
+
+  expect(spyDispatcher.mock.calls.length).toBe(0);
+  client.moves.A(42);
+  expect(spyDispatcher.mock.calls.length).toBe(1);
+});
+
 test('event dispatchers', () => {
   {
     const game = Game({});
