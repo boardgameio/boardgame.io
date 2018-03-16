@@ -34,6 +34,19 @@ test('_stateID is incremented', () => {
   expect(state._stateID).toBe(2);
 });
 
+test('when a move returns undef => treat as illegal move', () => {
+  const game = Game({
+    moves: {
+      A: G => undefined, // eslint-disable-line no-unused-vars
+    },
+  });
+  const reducer = createGameReducer({ game });
+
+  let state = reducer(state, makeMove('A'));
+
+  expect(state._stateID).toBe(0);
+});
+
 test('makeMove', () => {
   const reducer = createGameReducer({ game });
 

@@ -109,6 +109,11 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
+        if (G === undefined) {
+          // the game declared the move as invalid.
+          return state;
+        }
+
         // Update ctx with PRNG state.
         const ctx = random.update(state.ctx);
 
