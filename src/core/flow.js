@@ -494,10 +494,7 @@ export function FlowWithPhases({
     // Update undo / redo state.
     if (!endTurn) {
       const undo = state._undo || [];
-      const moveType =
-        action !== undefined && action.payload !== undefined
-          ? action.payload.type
-          : undefined;
+      const moveType = action.payload.type;
       state = {
         ...state,
         _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],

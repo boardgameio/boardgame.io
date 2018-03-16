@@ -74,11 +74,11 @@ test('movesPerTurn', () => {
     let flow = FlowWithPhases({ movesPerTurn: 2 });
     let state = { ctx: flow.ctx(2) };
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, { move: {} });
+    state = flow.processMove(state, { move: {}, payload: {} });
     expect(state.ctx.turn).toBe(0);
     state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, { move: {} });
+    state = flow.processMove(state, { move: {}, payload: {} });
     expect(state.ctx.turn).toBe(1);
   }
 
@@ -89,17 +89,17 @@ test('movesPerTurn', () => {
     });
     let state = { ctx: flow.ctx(2) };
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, { move: {} });
+    state = flow.processMove(state, { move: {}, payload: {} });
     expect(state.ctx.turn).toBe(0);
     state = flow.processGameEvent(state, { type: 'endTurn' });
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, { move: {} });
+    state = flow.processMove(state, { move: {}, payload: {} });
     expect(state.ctx.turn).toBe(1);
 
     state = flow.processGameEvent(state, { type: 'endPhase' });
 
     expect(state.ctx.turn).toBe(1);
-    state = flow.processMove(state, { move: {} });
+    state = flow.processMove(state, { move: {}, payload: {} });
     expect(state.ctx.turn).toBe(2);
   }
 });
@@ -187,7 +187,7 @@ test('onMove', () => {
   {
     let flow = FlowWithPhases({ onMove });
     let state = { G: {}, ctx: flow.ctx(2) };
-    state = flow.processMove(state);
+    state = flow.processMove(state, { payload: {} });
     expect(state.G).toEqual({ A: true });
   }
 
@@ -197,10 +197,10 @@ test('onMove', () => {
       phases: [{ name: 'A' }, { name: 'B', onMove: () => ({ B: true }) }],
     });
     let state = { G: {}, ctx: flow.ctx(2) };
-    state = flow.processMove(state);
+    state = flow.processMove(state, { payload: {} });
     expect(state.G).toEqual({ A: true });
     state = flow.processGameEvent(state, { type: 'endPhase' });
-    state = flow.processMove(state);
+    state = flow.processMove(state, { payload: {} });
     expect(state.G).toEqual({ B: true });
   }
 });
@@ -272,7 +272,7 @@ test('endPhaseIf', () => {
   }
 
   {
-    const t = flow.processMove(state, { type: 'move' });
+    const t = flow.processMove(state, { type: 'move', payload: {} });
     expect(t.ctx.phase).toBe('B');
   }
 
