@@ -25,6 +25,7 @@ test('basic', () => {
 test('processMove', () => {
   const testObj = { test: true };
   expect(game.processMove(testObj, { type: 'A' })).toEqual(testObj);
+  expect(game.processMove(testObj, { type: 'C' })).toEqual(testObj);
   expect(game.processMove(testObj, { type: 'B' })).toEqual(null);
 });
 

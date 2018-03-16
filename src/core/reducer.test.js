@@ -28,7 +28,7 @@ test('_stateID is incremented', () => {
 
   let state = undefined;
 
-  state = reducer(state, makeMove('unknown'));
+  state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(1);
   state = reducer(state, endTurn());
   expect(state._stateID).toBe(2);
@@ -153,8 +153,8 @@ test('log', () => {
 
   let state = undefined;
 
-  const actionA = makeMove('moveA');
-  const actionB = makeMove('moveB');
+  const actionA = makeMove('A');
+  const actionB = makeMove('B');
   const actionC = endTurn();
 
   state = reducer(state, actionA);

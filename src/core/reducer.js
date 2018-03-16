@@ -98,6 +98,11 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
       }
 
       case Actions.MAKE_MOVE: {
+        // check whether the game knows the move at all
+        if (!game.moveNames.includes(action.payload.type)) {
+          return state;
+        }
+
         // Ignore the move if it isn't valid at this point.
         if (!game.flow.canMakeMove(state.G, state.ctx, action.payload)) {
           return state;
