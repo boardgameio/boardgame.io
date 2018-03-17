@@ -29,6 +29,8 @@ import { Square } from './grid';
  *   animate - Changes in position are animated if true.
  *   animationDuration - Length of animation.
  *   onClick - Called when the token is clicked.
+ *   onMouseOver - Called when the token is mouse over.
+ *   onMouseOut - Called when the token is mouse out.
  *
  * Usage:
  *
@@ -54,6 +56,8 @@ class Token extends React.Component {
     style: PropTypes.any,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
+    onMouseOver: PropTypes.func,
+    onMouseOut: PropTypes.func,
     children: PropTypes.element,
     animationDuration: PropTypes.number,
     _inGrid: PropTypes.bool,
@@ -166,6 +170,8 @@ class Token extends React.Component {
           z={this.state.z}
           style={this.props.style}
           onClick={this.props.onClick}
+          onMouseOver={this.props.onMouseOver}
+          onMouseOut={this.props.onMouseOut}
         >
           {this.props.children}
         </Hex>
@@ -179,6 +185,8 @@ class Token extends React.Component {
           y={this.state.y}
           style={this.props.style}
           onClick={this.props.onClick}
+          onMouseOver={this.props.onMouseOver}
+          onMouseOut={this.props.onMouseOut}
         >
           {this.props.children}
         </Square>
@@ -188,6 +196,8 @@ class Token extends React.Component {
     return React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
         onClick: this.props.onClick,
+        onMouseOver: this.props.onMouseOver,
+        onMouseOut: this.props.onMouseOut,
       });
     });
   }
