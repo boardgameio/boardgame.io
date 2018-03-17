@@ -35,6 +35,8 @@ export class HexGrid extends React.Component {
     colorMap: PropTypes.object,
     cellSize: PropTypes.number,
     onClick: PropTypes.func,
+    onMouseOver: PropTypes.func,
+    onMouseOut: PropTypes.func,
     children: PropTypes.oneOfType([
       PropTypes.arrayOf(PropTypes.element),
       PropTypes.element,
@@ -77,6 +79,8 @@ export class HexGrid extends React.Component {
             z={z}
             size={this.props.cellSize}
             onClick={this.onClick}
+            onMouseOver={this.onMouseOver}
+            onMouseOut={this.onMouseOut}
           />
         );
       }
@@ -90,11 +94,25 @@ export class HexGrid extends React.Component {
     }
   };
 
+  onMouseOver = args => {
+    if (this.props.onMouseOver) {
+      this.props.onMouseOver(args);
+    }
+  };
+
+  onMouseOut = args => {
+    if (this.props.onMouseOut) {
+      this.props.onMouseOut(args);
+    }
+  };
+
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
         _inHexGrid: true,
         onClick: this.onClick,
+        onMouseOver: this.onMouseOver,
+        onMouseOut: this.onMouseOut,
       });
     });
 
@@ -123,6 +141,8 @@ export class HexGrid extends React.Component {
  *   size    - Hex size.
  *   style   - Custom styling.
  *   onClick - Invoked when a Hex is clicked.
+ *   onMouseOver - Invoked when a Hex is mouse over.
+ *   onMouseOut - Invoked when a Hex is mouse out.
  *
  * Not meant to be used by the end user directly (use Token).
  * Also not exposed in the NPM.
@@ -135,6 +155,8 @@ export class Hex extends React.Component {
     size: PropTypes.number,
     style: PropTypes.any,
     onClick: PropTypes.func,
+    onMouseOver: PropTypes.func,
+    onMouseOut: PropTypes.func,
     children: PropTypes.element,
   };
 
@@ -217,6 +239,22 @@ export class Hex extends React.Component {
     });
   };
 
+  onMouseOver = () => {
+    this.props.onMouseOver({
+      x: this.props.x,
+      y: this.props.y,
+      z: this.props.z,
+    });
+  };
+
+  onMouseOut = () => {
+    this.props.onMouseOut({
+      x: this.props.x,
+      y: this.props.y,
+      z: this.props.z,
+    });
+  };
+
   render() {
     const tx = this.center.x;
     const ty = this.center.y;
@@ -224,7 +262,12 @@ export class Hex extends React.Component {
     // If a child is passed, render child.
     if (this.props.children) {
       return (
-        <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
+        <g
+          onClick={this.onClick}
+          onMouseOver={this.onMouseOver}
+          onMouseOut={this.onMouseOut}
+          transform={`translate(${tx}, ${ty})`}
+        >
           {this.props.children}
         </g>
       );
@@ -232,7 +275,12 @@ export class Hex extends React.Component {
 
     // If no child, render a hex.
     return (
-      <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
+      <g
+        onClick={this.onClick}
+        onMouseOver={this.onMouseOver}
+        onMouseOut={this.onMouseOut}
+        transform={`translate(${tx}, ${ty})`}
+      >
         <polygon
           style={this.props.style}
           points={this.points}
