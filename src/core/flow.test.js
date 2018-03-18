@@ -617,3 +617,29 @@ test('endGame', () => {
     expect(t.ctx.gameover).toBe(42);
   }
 });
+
+test('resetGame', () => {
+  let game = Game({
+    moves: {
+      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+    },
+  });
+
+  const reducer = createGameReducer({ game, numPlayers: 2 });
+
+  let state = reducer(undefined, { type: 'init' });
+
+  const originalState = state;
+
+  state = reducer(state, makeMove('move', 'A'));
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, makeMove('move', 'B'));
+  expect(state.G).toEqual({ A: true, B: true });
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.turn).toEqual(1);
+
+  state = reducer(state, gameEvent('resetGame'));
+  expect(state).toEqual(originalState);
+});

@@ -77,6 +77,7 @@ test('event dispatchers', () => {
       'undo',
       'redo',
       'endTurn',
+      'resetGame',
     ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
@@ -99,6 +100,7 @@ test('event dispatchers', () => {
       'endTurn',
       'endPhase',
       'endGame',
+      'resetGame',
     ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
@@ -111,6 +113,7 @@ test('event dispatchers', () => {
         endPhase: false,
         endTurn: false,
         undoableMoves: [],
+        resetGame: false,
       },
 
       phases: [{ name: 'default' }],
@@ -136,6 +139,7 @@ test('event dispatchers', () => {
       'redo',
       'endTurn',
       'endPhase',
+      'resetGame',
     ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
