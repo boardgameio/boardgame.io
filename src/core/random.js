@@ -16,6 +16,10 @@ import { alea } from './random.alea';
  * state in ctx so that moves can stay pure.
  */
 export class Random {
+  /**
+   * constructor
+   * @param {object} ctx - The ctx object to initialize from.
+   */
   constructor(ctx) {
     // If we are on the client, the seed is not present.
     // Just use a temporary seed to execute the move without
@@ -26,14 +30,15 @@ export class Random {
 
   /**
    * Updates ctx with the PRNG state.
-   * Also removes the Random API.
+   * @param {object} ctx - The ctx object to update.
    */
   update(ctx) {
-    return Random.detach({ ...ctx, _random: this.state });
+    return { ...ctx, _random: this.state };
   }
 
   /**
    * Attaches the Random API to ctx.
+   * @param {object} ctx - The ctx object to attach to.
    */
   attach(ctx) {
     return { ...ctx, random: this._api() };

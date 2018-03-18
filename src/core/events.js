@@ -20,6 +20,7 @@ export class Events {
 
   /**
    * Attaches the Events API to ctx.
+   * @param {object} ctx - The ctx object to attach to.
    */
   attach(ctx) {
     const events = {};
@@ -34,7 +35,8 @@ export class Events {
   }
 
   /**
-   * Updates
+   * Updates ctx with the triggered events.
+   * @param {object} state - The state object { G, ctx }.
    */
   update(state) {
     for (const item of this.dispatch) {
@@ -46,7 +48,8 @@ export class Events {
 }
 
 /**
- * Class method version of the above.
+ * Detaches the Events API from ctx.
+ * @param {object} ctx - The ctx object to strip.
  */
 Events.detach = ctx => {
   const { events, ...rest } = ctx; // eslint-disable-line no-unused-vars
