@@ -154,7 +154,6 @@ test('custom order', () => {
       {
         name: 'A',
         turnOrder: TurnOrder.DEFAULT,
-        onPhaseBegin: (G, ctx) => (ctx.playOrder = [2, 0, 1]),
       },
     ],
   });
@@ -165,7 +164,13 @@ test('custom order', () => {
   const reducer = createGameReducer({ game, numPlayers: 3 });
 
   let state = reducer(undefined, { type: 'init' });
-  expect(state.ctx.currentPlayer).toBe('2');
+
+  state.ctx = {
+    ...state.ctx,
+    currentPlayer: '2',
+    playOrder: [2, 0, 1],
+  };
+
   state = flow.processGameEvent(state, { type: 'endTurn' });
   expect(state.ctx.currentPlayer).toBe('0');
   state = flow.processGameEvent(state, { type: 'endTurn' });
