@@ -149,18 +149,7 @@ test('override', () => {
 });
 
 test('custom order', () => {
-  const flow = FlowWithPhases({
-    phases: [
-      {
-        name: 'A',
-        turnOrder: TurnOrder.DEFAULT,
-      },
-    ],
-  });
-  const game = Game({
-    flow,
-    moves: { pass: Pass },
-  });
+  const game = Game({});
   const reducer = createGameReducer({ game, numPlayers: 3 });
 
   let state = reducer(undefined, { type: 'init' });
@@ -171,10 +160,10 @@ test('custom order', () => {
     playOrder: [2, 0, 1],
   };
 
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('0');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('1');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('2');
 });
