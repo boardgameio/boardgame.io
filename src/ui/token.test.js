@@ -70,7 +70,7 @@ test('debounce', () => {
   expect(token.state('originY')).toEqual(2);
 });
 
-test('handlers', () => {
+test('click handler', () => {
   const onClick = jest.fn();
   const token = Enzyme.mount(
     <Token x={0} y={0} animate={false} onClick={onClick}>
@@ -81,4 +81,30 @@ test('handlers', () => {
   token.simulate('click');
 
   expect(onClick).toHaveBeenCalled();
+});
+
+test('mouse over handler', () => {
+  const onMouseOver = jest.fn();
+  const token = Enzyme.mount(
+    <Token x={0} y={0} animate={false} onMouseOver={onMouseOver}>
+      <p>foo</p>
+    </Token>
+  );
+
+  token.simulate('mouseOver');
+
+  expect(onMouseOver).toHaveBeenCalled();
+});
+
+test('mouse out handler', () => {
+  const onMouseOut = jest.fn();
+  const token = Enzyme.mount(
+    <Token x={0} y={0} animate={false} onMouseOut={onMouseOut}>
+      <p>foo</p>
+    </Token>
+  );
+
+  token.simulate('mouseOut');
+
+  expect(onMouseOut).toHaveBeenCalled();
 });

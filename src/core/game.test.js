@@ -59,8 +59,8 @@ test('rounds with starting player token', () => {
         {
           name: 'main',
           turnOrder: {
-            first: G => G.startingPlayerToken + '',
-            next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
+            first: G => G.startingPlayerToken,
+            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
       ],
@@ -102,22 +102,22 @@ test('serpentine setup phases', () => {
         {
           name: 'first setup round',
           turnOrder: {
-            first: () => '0',
-            next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
+            first: () => 0,
+            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
         {
           name: 'second setup round',
           turnOrder: {
-            first: (G, ctx) => ctx.numPlayers - 1 + '',
-            next: (G, ctx) => (+ctx.currentPlayer - 1) % ctx.numPlayers + '',
+            first: (G, ctx) => ctx.playOrder.length - 1,
+            next: (G, ctx) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
           },
         },
         {
           name: 'main phase',
           turnOrder: {
-            first: () => '0',
-            next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
+            first: () => 0,
+            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
       ],
