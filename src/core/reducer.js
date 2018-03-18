@@ -8,6 +8,7 @@
 
 import * as Actions from './action-types';
 import { Random } from './random';
+import { Events } from './events';
 
 /**
  * createGameReducer
@@ -87,17 +88,33 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
         // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
+        // Initialize Events API.
+        const events = new Events(game.flow, action.payload.playerID);
+        // Attach Random API to ctx.
         state = { ...state, ctx: random.attach(state.ctx) };
+        // Attach Events API to ctx.
+        state = { ...state, ctx: events.attach(state.ctx) };
 
         // Update state.
-        const newState = game.flow.processGameEvent(state, action.payload);
+        let newState = game.flow.processGameEvent(state, action.payload);
+        // Trigger any events that were called via the Events API.
+        newState = events.update(newState);
         // Update ctx with PRNG state.
-        const ctx = random.update(newState.ctx);
+        let ctx = random.update(newState.ctx);
+        // Detach Random API from ctx.
+        ctx = Random.detach(ctx);
+        // Detach Events API from ctx.
+        ctx = Events.detach(ctx);
 
         return { ...newState, ctx, _stateID: state._stateID + 1 };
       }
 
       case Actions.MAKE_MOVE: {
+        // check whether the game knows the move at all
+        if (!game.moveNames.includes(action.payload.type)) {
+          return state;
+        }
+
         // Ignore the move if it isn't valid at this point.
         if (!game.flow.canMakeMove(state.G, state.ctx, action.payload)) {
           return state;
@@ -105,12 +122,26 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
         // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
-        const ctxWithAPI = random.attach(state.ctx);
+        // Initialize Events API.
+        const events = new Events(game.flow, action.payload.playerID);
+        // Attach Random API to ctx.
+        let ctxWithAPI = random.attach(state.ctx);
+        // Attach Events API to ctx.
+        ctxWithAPI = events.attach(ctxWithAPI);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
+        if (G === undefined) {
+          // the game declared the move as invalid.
+          return state;
+        }
+
         // Update ctx with PRNG state.
-        const ctx = random.update(state.ctx);
+        let ctx = random.update(state.ctx);
+        // Detach Random API from ctx.
+        ctx = Random.detach(ctx);
+        // Detach Events API from ctx.
+        ctx = Events.detach(ctx);
 
         // Undo changes to G if the move should not run on the client.
         if (
@@ -133,8 +164,12 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = { ...state, ctx: random.attach(state.ctx) };
+        state = { ...state, ctx: events.attach(state.ctx) };
         state = game.flow.processMove(state, action);
+        state = { ...state, ctx: Random.detach(state.ctx) };
+        state = { ...state, ctx: Events.detach(state.ctx) };
         state = { ...state, ctx: random.update(state.ctx) };
+        state = events.update(state);
 
         return state;
       }

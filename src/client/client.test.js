@@ -73,7 +73,11 @@ test('event dispatchers', () => {
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
+    expect(Object.getOwnPropertyNames(api)).toEqual([
+      'undo',
+      'redo',
+      'endTurn',
+    ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
@@ -82,8 +86,46 @@ test('event dispatchers', () => {
   {
     const game = Game({
       flow: {
-        undo: true,
         endPhase: true,
+        endGame: true,
+      },
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual([
+      'undo',
+      'redo',
+      'endTurn',
+      'endPhase',
+      'endGame',
+    ]);
+    expect(store.getState().ctx.turn).toBe(0);
+    api.endTurn();
+    expect(store.getState().ctx.turn).toBe(1);
+  }
+
+  {
+    const game = Game({
+      flow: {
+        endPhase: false,
+        endTurn: false,
+        undoableMoves: [],
+      },
+
+      phases: [{ name: 'default' }],
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual([]);
+  }
+
+  {
+    const game = Game({
+      flow: {
+        endPhase: true,
+        undoableMoves: ['A'],
       },
     });
     const reducer = createGameReducer({ game, numPlayers: 2 });
@@ -98,22 +140,6 @@ test('event dispatchers', () => {
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
-  }
-
-  {
-    const game = Game({
-      flow: {
-        endPhase: false,
-        endTurn: false,
-        undo: false,
-      },
-
-      phases: [{ name: 'default' }],
-    });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([]);
   }
 });
 

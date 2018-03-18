@@ -8,6 +8,7 @@
 
 import { TurnOrder } from './turn-order';
 import { Random } from './random';
+import { Events } from './events';
 
 /**
  * This function checks whether a player is allowed to make a move.
@@ -162,7 +163,10 @@ export function Flow({
  *
  * @param {...object} endPhase - Set to false to disable the `endPhase` event.
  *
- * @param {...object} undo - Set to true to enable the undo/redo events.
+ * @param {...object} endGame - Set to true to enable the `endGame` event.
+ *
+ * @param {...object} undoableMoves - List of moves that are undoable,
+ *                                   (default: undefined, i.e. all moves are undoable).
  *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
@@ -228,7 +232,8 @@ export function FlowWithPhases({
   turnOrder,
   endTurn,
   endPhase,
-  undo,
+  endGame,
+  undoableMoves,
   optimisticUpdate,
   canMakeMove,
 }) {
@@ -239,8 +244,8 @@ export function FlowWithPhases({
   if (endTurn === undefined) {
     endTurn = true;
   }
-  if (undo === undefined) {
-    undo = false;
+  if (endGame === undefined) {
+    endGame = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -300,11 +305,19 @@ export function FlowWithPhases({
     return conf.endTurnIf(G, ctx);
   };
 
+  const getCurrentPlayer = (playOrder, playOrderPos) => {
+    if (playOrderPos === undefined) {
+      return 'any';
+    }
+    return playOrder[playOrderPos] + '';
+  };
+
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, phaseConfig) {
     const ctx = { ...state.ctx };
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
-    ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
+    ctx.playOrderPos = phaseConfig.turnOrder.first(G, ctx);
+    ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
     ctx.actionPlayers = [ctx.currentPlayer];
     return { ...state, G, ctx };
   };
@@ -313,6 +326,7 @@ export function FlowWithPhases({
     let ctx = { ...state.ctx };
     const G = config.onTurnBegin(state.G, ctx);
     ctx = Random.detach(ctx);
+    ctx = Events.detach(ctx);
     const _undo = [{ G, ctx }];
     return { ...state, G, ctx, _undo, _redo: [] };
   };
@@ -400,12 +414,20 @@ export function FlowWithPhases({
     }
 
     // Update current player.
-    const currentPlayer = conf.turnOrder.next(G, ctx);
+    const playOrderPos = conf.turnOrder.next(G, ctx);
+    const currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
     const actionPlayers = [currentPlayer];
     // Update turn.
     const turn = ctx.turn + 1;
     // Update state.
-    ctx = { ...ctx, currentPlayer, actionPlayers, turn, currentPlayerMoves: 0 };
+    ctx = {
+      ...ctx,
+      playOrderPos,
+      currentPlayer,
+      actionPlayers,
+      turn,
+      currentPlayerMoves: 0,
+    };
 
     // End phase if condition is met.
     const end = conf.endPhaseIf(G, ctx);
@@ -425,6 +447,11 @@ export function FlowWithPhases({
 
     const last = _undo[_undo.length - 1];
     const restore = _undo[_undo.length - 2];
+
+    // only allow undoableMoves to be undoable
+    if (undoableMoves && !undoableMoves.includes(last.moveType)) {
+      return state;
+    }
 
     return {
       ...state,
@@ -451,6 +478,14 @@ export function FlowWithPhases({
       _undo: [..._undo, first],
       _redo: _redo.slice(1),
     };
+  }
+
+  function endGameEvent(state, arg) {
+    if (arg === undefined) {
+      arg = true;
+    }
+
+    return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
   function processMove(state, action, dispatch) {
@@ -491,9 +526,10 @@ export function FlowWithPhases({
     // Update undo / redo state.
     if (!endTurn) {
       const undo = state._undo || [];
+      const moveType = action.payload.type;
       state = {
         ...state,
-        _undo: [...undo, { G: state.G, ctx: state.ctx }],
+        _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],
         _redo: [],
       };
     }
@@ -519,12 +555,13 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
-  if (undo) {
+  if (undoableMoves === undefined || undoableMoves.length > 0) {
     enabledEvents['undo'] = undoEvent;
     enabledEvents['redo'] = redoEvent;
   }
   if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
+  if (endGame) enabledEvents['endGame'] = endGameEvent;
 
   return Flow({
     ctx: numPlayers => ({
@@ -532,6 +569,8 @@ export function FlowWithPhases({
       turn: 0,
       currentPlayer: '0',
       currentPlayerMoves: 0,
+      playOrder: Array.from(Array(numPlayers), (d, i) => i),
+      playOrderPos: 0,
       phase: phases[0].name,
     }),
     init: state => {
