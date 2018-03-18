@@ -300,15 +300,19 @@ export function FlowWithPhases({
     return conf.endTurnIf(G, ctx);
   };
 
+  const getCurrentPlayer = (playOrder, playOrderPos) => {
+    if (playOrderPos === undefined) {
+      return 'any';
+    }
+    return playOrder[playOrderPos] + '';
+  };
+
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, phaseConfig) {
     const ctx = { ...state.ctx };
     const G = phaseConfig.onPhaseBegin(state.G, ctx);
     ctx.playOrderPos = phaseConfig.turnOrder.first(G, ctx);
-    ctx.currentPlayer =
-      ctx.playOrderPos === undefined
-        ? 'any'
-        : ctx.playOrder[ctx.playOrderPos] + '';
+    ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
     ctx.actionPlayers = [ctx.currentPlayer];
     return { ...state, G, ctx };
   };
@@ -405,8 +409,7 @@ export function FlowWithPhases({
 
     // Update current player.
     const playOrderPos = conf.turnOrder.next(G, ctx);
-    const currentPlayer =
-      playOrderPos === undefined ? 'any' : ctx.playOrder[playOrderPos] + '';
+    const currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
     const actionPlayers = [currentPlayer];
     // Update turn.
     const turn = ctx.turn + 1;
