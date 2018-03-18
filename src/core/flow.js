@@ -8,6 +8,7 @@
 
 import { TurnOrder } from './turn-order';
 import { Random } from './random';
+import { Events } from './events';
 
 /**
  * This function checks whether a player is allowed to make a move.
@@ -319,6 +320,7 @@ export function FlowWithPhases({
     let ctx = { ...state.ctx };
     const G = config.onTurnBegin(state.G, ctx);
     ctx = Random.detach(ctx);
+    ctx = Events.detach(ctx);
     const _undo = [{ G, ctx }];
     return { ...state, G, ctx, _undo, _redo: [] };
   };
