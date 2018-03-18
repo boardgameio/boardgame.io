@@ -44,7 +44,7 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: () => 0,
+    first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
@@ -66,7 +66,7 @@ export const TurnOrder = {
    */
 
   SKIP: {
-    first: () => 0,
+    first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => {
       if (G.allPassed) return;
       let playOrderPos = ctx.playOrderPos;
