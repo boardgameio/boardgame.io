@@ -162,7 +162,8 @@ export function Flow({
  *
  * @param {...object} endPhase - Set to false to disable the `endPhase` event.
  *
- * @param {...object} undo - Set to true to enable the undo/redo events.
+ * @param {...object} undoableMoves - List of moves that are undoable,
+ *                                   (default: undefined, i.e. all moves are undoable).
  *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
@@ -228,7 +229,7 @@ export function FlowWithPhases({
   turnOrder,
   endTurn,
   endPhase,
-  undo,
+  undoableMoves,
   optimisticUpdate,
   canMakeMove,
 }) {
@@ -238,9 +239,6 @@ export function FlowWithPhases({
   }
   if (endTurn === undefined) {
     endTurn = true;
-  }
-  if (undo === undefined) {
-    undo = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -442,6 +440,11 @@ export function FlowWithPhases({
     const last = _undo[_undo.length - 1];
     const restore = _undo[_undo.length - 2];
 
+    // only allow undoableMoves to be undoable
+    if (undoableMoves && !undoableMoves.includes(last.moveType)) {
+      return state;
+    }
+
     return {
       ...state,
       G: restore.G,
@@ -507,9 +510,10 @@ export function FlowWithPhases({
     // Update undo / redo state.
     if (!endTurn) {
       const undo = state._undo || [];
+      const moveType = action.payload.type;
       state = {
         ...state,
-        _undo: [...undo, { G: state.G, ctx: state.ctx }],
+        _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],
         _redo: [],
       };
     }
@@ -535,7 +539,7 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
-  if (undo) {
+  if (undoableMoves === undefined || undoableMoves.length > 0) {
     enabledEvents['undo'] = undoEvent;
     enabledEvents['redo'] = redoEvent;
   }
