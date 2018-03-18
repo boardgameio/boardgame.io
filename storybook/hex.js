@@ -43,6 +43,47 @@ function Basic() {
   );
 }
 
+function TokenTrail() {
+  const levels = number('levels', 5);
+  const outline = boolean('outline', true);
+  const animate = boolean('animate', true);
+
+  class Runner extends React.Component {
+    state = { tokens: [] };
+    onMouseOver = args => {
+      if (!this.state.tokens.includes(JSON.stringify(args))) {
+        const tokenCollection = this.state.tokens.concat(JSON.stringify(args));
+        this.setState({ tokens: tokenCollection });
+      }
+      action('onMouseOver')(args);
+    };
+    render = () => (
+      <HexGrid levels={levels} outline={outline} onMouseOver={this.onMouseOver}>
+        {this.state.tokens.map((token, index) => {
+          const t = JSON.parse(token);
+          return (
+            <Token
+              key={index}
+              x={t.x}
+              y={t.y}
+              z={t.z}
+              animate={animate}
+              style={{ fill: '#555' }}
+            />
+          );
+        })}
+      </HexGrid>
+    );
+  }
+
+  return (
+    <div style={{ padding: '50px' }}>
+      <Runner />
+    </div>
+  );
+}
+
 storiesOf('HexGrid', module)
   .addDecorator(withKnobs)
-  .add('basic', Basic);
+  .add('basic', Basic)
+  .add('Tokens placed on hover', TokenTrail);
