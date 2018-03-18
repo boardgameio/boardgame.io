@@ -602,3 +602,18 @@ test('canMakeMove', () => {
   expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
   expect(flow.canMakeMove({}, {}, 'any')).toBe(false);
 });
+
+test('endGame', () => {
+  const flow = FlowWithPhases({ endGame: true });
+  const state = { ctx: {} };
+
+  {
+    const t = flow.processGameEvent(state, gameEvent('endGame').payload);
+    expect(t.ctx.gameover).toBe(true);
+  }
+
+  {
+    const t = flow.processGameEvent(state, gameEvent('endGame', 42).payload);
+    expect(t.ctx.gameover).toBe(42);
+  }
+});
