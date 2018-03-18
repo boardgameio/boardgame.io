@@ -98,6 +98,11 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
       }
 
       case Actions.MAKE_MOVE: {
+        // check whether the game knows the move at all
+        if (!game.moveNames.includes(action.payload.type)) {
+          return state;
+        }
+
         // Ignore the move if it isn't valid at this point.
         if (!game.flow.canMakeMove(state.G, state.ctx, action.payload)) {
           return state;
@@ -109,6 +114,11 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
+        if (G === undefined) {
+          // the game declared the move as invalid.
+          return state;
+        }
+
         // Update ctx with PRNG state.
         const ctx = random.update(state.ctx);
 
