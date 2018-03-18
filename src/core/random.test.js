@@ -37,7 +37,7 @@ test('attach / detach / update', () => {
   {
     const t = r.update(ctx);
     expect(t._random).toBeDefined();
-    expect(t.random).not.toBeDefined();
+    expect(t.random).toBeDefined();
   }
 });
 
