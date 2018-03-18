@@ -163,6 +163,8 @@ export function Flow({
  *
  * @param {...object} endPhase - Set to false to disable the `endPhase` event.
  *
+ * @param {...object} endGame - Set to true to enable the `endGame` event.
+ *
  * @param {...object} undoableMoves - List of moves that are undoable,
  *                                   (default: undefined, i.e. all moves are undoable).
  *
@@ -230,6 +232,7 @@ export function FlowWithPhases({
   turnOrder,
   endTurn,
   endPhase,
+  endGame,
   undoableMoves,
   optimisticUpdate,
   canMakeMove,
@@ -240,6 +243,9 @@ export function FlowWithPhases({
   }
   if (endTurn === undefined) {
     endTurn = true;
+  }
+  if (endGame === undefined) {
+    endGame = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -474,6 +480,14 @@ export function FlowWithPhases({
     };
   }
 
+  function endGameEvent(state, arg) {
+    if (arg === undefined) {
+      arg = true;
+    }
+
+    return { ...state, ctx: { ...state.ctx, gameover: arg } };
+  }
+
   function processMove(state, action, dispatch) {
     const conf = phaseMap[state.ctx.phase];
 
@@ -547,6 +561,7 @@ export function FlowWithPhases({
   }
   if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
+  if (endGame) enabledEvents['endGame'] = endGameEvent;
 
   return Flow({
     ctx: numPlayers => ({
