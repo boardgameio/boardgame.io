@@ -642,4 +642,16 @@ test('resetGame', () => {
 
   state = reducer(state, gameEvent('resetGame'));
   expect(state).toEqual(originalState);
+
+  state = reducer(state, makeMove('move', 'C'));
+  expect(state.G).toEqual({ C: true });
+
+  state = reducer(state, gameEvent('undo'));
+  expect(state.G).toEqual({});
+
+  state = reducer(state, gameEvent('redo'));
+  expect(state.G).toEqual({ C: true });
+
+  state = reducer(state, gameEvent('resetGame'));
+  expect(state).toEqual(originalState);
 });
