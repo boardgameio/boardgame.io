@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { createGameReducer } from './reducer';
-import { makeMove, gameEvent } from './action-creators';
+import { makeMove, gameEvent, reset } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 
 test('Flow', () => {
@@ -640,7 +640,7 @@ test('resetGame', () => {
   state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.turn).toEqual(1);
 
-  state = reducer(state, gameEvent('resetGame'));
+  state = reducer(state, reset());
   expect(state).toEqual(originalState);
 
   state = reducer(state, makeMove('move', 'C'));
@@ -652,6 +652,6 @@ test('resetGame', () => {
   state = reducer(state, gameEvent('redo'));
   expect(state.G).toEqual({ C: true });
 
-  state = reducer(state, gameEvent('resetGame'));
+  state = reducer(state, reset());
   expect(state).toEqual(originalState);
 });
