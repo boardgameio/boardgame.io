@@ -233,7 +233,6 @@ export function FlowWithPhases({
   endTurn,
   endPhase,
   endGame,
-  resetGame,
   undoableMoves,
   optimisticUpdate,
   canMakeMove,
@@ -247,9 +246,6 @@ export function FlowWithPhases({
   }
   if (endGame === undefined) {
     endGame = false;
-  }
-  if (resetGame === undefined) {
-    resetGame = true;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -492,12 +488,6 @@ export function FlowWithPhases({
     return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
-  function resetGameEvent(state) {
-    const { _initial } = state;
-
-    return { ..._initial, _initial };
-  }
-
   function processMove(state, action, dispatch) {
     const conf = phaseMap[state.ctx.phase];
 
@@ -572,7 +562,6 @@ export function FlowWithPhases({
   if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
   if (endGame) enabledEvents['endGame'] = endGameEvent;
-  if (resetGame) enabledEvents['resetGame'] = resetGameEvent;
 
   return Flow({
     ctx: numPlayers => ({
