@@ -106,10 +106,6 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         // Detach Events API from ctx.
         ctx = Events.detach(ctx);
 
-        if (action.payload.type === 'resetGame') {
-          return { ...newState, ctx, _stateID: 0, log: [] };
-        }
-
         return { ...newState, ctx, _stateID: state._stateID + 1 };
       }
 
