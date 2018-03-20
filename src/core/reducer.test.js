@@ -9,7 +9,6 @@
 import Game from './game';
 import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, restore } from './action-creators';
-import { Random } from './random';
 
 const game = Game({
   moves: {
@@ -29,10 +28,23 @@ test('_stateID is incremented', () => {
 
   let state = undefined;
 
-  state = reducer(state, makeMove('unknown'));
+  state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(1);
   state = reducer(state, endTurn());
   expect(state._stateID).toBe(2);
+});
+
+test('when a move returns undef => treat as illegal move', () => {
+  const game = Game({
+    moves: {
+      A: G => undefined, // eslint-disable-line no-unused-vars
+    },
+  });
+  const reducer = createGameReducer({ game });
+
+  let state = reducer(state, makeMove('A'));
+
+  expect(state._stateID).toBe(0);
 });
 
 test('makeMove', () => {
@@ -141,8 +153,8 @@ test('log', () => {
 
   let state = undefined;
 
-  const actionA = makeMove('moveA');
-  const actionB = makeMove('moveB');
+  const actionA = makeMove('A');
+  const actionB = makeMove('B');
   const actionC = endTurn();
 
   state = reducer(state, actionA);
@@ -156,17 +168,17 @@ test('log', () => {
 test('using Random inside setup()', () => {
   const game1 = Game({
     seed: 'seed1',
-    setup: () => ({ n: Random.D6() }),
+    setup: ctx => ({ n: ctx.random.D6() }),
   });
 
   const game2 = Game({
     seed: 'seed2',
-    setup: () => ({ n: Random.D6() }),
+    setup: ctx => ({ n: ctx.random.D6() }),
   });
 
   const game3 = Game({
     seed: 'seed2',
-    setup: () => ({ n: Random.D6() }),
+    setup: ctx => ({ n: ctx.random.D6() }),
   });
 
   const reducer1 = createGameReducer({ game: game1 });

@@ -8,8 +8,11 @@
 
 import { MAKE_MOVE, GAME_EVENT } from '../../core/action-types';
 import * as ActionCreators from '../../core/action-creators';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import io from 'socket.io-client';
+
+// The actions that are sent across the network.
+const whiteListedActions = new Set([MAKE_MOVE, GAME_EVENT]);
 
 /**
  * Multiplayer
@@ -42,15 +45,14 @@ export class Multiplayer {
    * Creates a Redux store with some middleware that sends actions
    * to the server whenever they are dispatched.
    * @param {function} reducer - The game reducer.
+   * @param {function} enhancer - optional enhancer to apply to Redux store
    */
-  createStore(reducer) {
+  createStore(reducer, enhancer) {
     this.store = null;
-
-    const whiteListedActions = new Set([MAKE_MOVE, GAME_EVENT]);
 
     // Redux middleware to emit a message on a socket
     // whenever an action is dispatched.
-    const SocketUpdate = ({ getState }) => next => action => {
+    const SocketEnhancer = applyMiddleware(({ getState }) => next => action => {
       const state = getState();
       const result = next(action);
 
@@ -65,9 +67,10 @@ export class Multiplayer {
       }
 
       return result;
-    };
+    });
 
-    this.store = createStore(reducer, applyMiddleware(SocketUpdate));
+    enhancer = enhancer ? compose(enhancer, SocketEnhancer) : SocketEnhancer;
+    this.store = createStore(reducer, enhancer);
 
     return this.store;
   }

@@ -10,6 +10,5 @@ import Game from '../src/core/game.js';
 import { Flow, FlowWithPhases } from '../src/core/flow.js';
 import { TurnOrder, Pass } from '../src/core/turn-order.js';
 import { PlayerView } from '../src/core/player-view.js';
-import { Random } from '../src/core/random';
 
-export { Game, Flow, FlowWithPhases, TurnOrder, Pass, PlayerView, Random };
+export { Game, Flow, FlowWithPhases, TurnOrder, Pass, PlayerView };

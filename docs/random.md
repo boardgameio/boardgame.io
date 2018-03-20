@@ -22,12 +22,10 @@ This poses interesting challenges regarding the implementation.
 ### Using Randomness in Games
 
 ```js
-import { Random } from 'boardgame.io/core';
-
 Game({
   moves: {
     rollDie(G, ctx) {
-      return { ...G, dice: Random.D6() };
+      return { ...G, dice: ctx.random.D6() };
     },
   },
 });
