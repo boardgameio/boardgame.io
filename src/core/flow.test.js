@@ -141,7 +141,130 @@ test('onTurnBegin', () => {
     expect(onTurnBeginOverride).toHaveBeenCalled();
   }
 });
+describe('seconds timer', () => {
+  jest.useFakeTimers();
 
+  describe('when game start', () => {
+    it('perTurn and perPhase set', () => {
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerTurn: 10,
+              secondsPerPhase: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(2);
+    });
+
+    it('only perPhase set', () => {
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerPhase: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(3);
+    });
+
+    it('only perTurn set', () => {
+      let flow = FlowWithPhases({
+          phases: [
+            {
+              name: 'test',
+              secondsPerTurn: 10,
+            },
+          ],
+        }),
+        state = {
+          ctx: flow.ctx(2),
+        };
+      flow.init(state);
+
+      expect(setInterval).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe('perTurn', () => {
+    let flow, state;
+    beforeEach(() => {
+      flow = FlowWithPhases({
+        phases: [
+          {
+            name: 'test',
+            secondsPerTurn: 2,
+          },
+        ],
+      });
+      state = {
+        ctx: flow.ctx(2),
+      };
+      flow.init(state);
+    });
+    it('when turn start - start timer', () => {
+      setInterval.mockReset();
+      flow.processGameEvent(state, { type: 'endTurn' });
+
+      expect(setInterval).toHaveBeenCalledTimes(1);
+    });
+
+    it('turn end when time is out', () => {
+      flow.processGameEvent = jest.fn();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).toHaveBeenCalledWith(expect.any(Object), {
+        type: 'endTurn',
+      });
+    });
+  });
+
+  describe('perPhase', () => {
+    let flow, state;
+    beforeEach(() => {
+      flow = FlowWithPhases({
+        phases: [
+          {
+            name: 'test',
+            secondsPerPhase: 2,
+          },
+        ],
+      });
+      state = {
+        ctx: flow.ctx(2),
+      };
+      flow.init(state);
+    });
+    it('when phase start - start timer', () => {
+      setInterval.mockReset();
+      flow.processGameEvent(state, { type: 'endPhase' });
+
+      expect(setInterval).toHaveBeenCalledTimes(1);
+    });
+    it('phase end when time is out', () => {
+      flow.processGameEvent = jest.fn();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1000);
+      expect(flow.processGameEvent).toHaveBeenCalledWith(expect.any(Object), {
+        type: 'endPhase',
+      });
+    });
+  });
+});
 test('onTurnEnd', () => {
   {
     const onTurnEnd = jest.fn(G => G);
