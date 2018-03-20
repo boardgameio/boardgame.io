@@ -40,3 +40,10 @@ export const restore = state => ({
   type: Actions.RESTORE,
   state,
 });
+
+/**
+ * Used to reset the game state.
+ */
+export const reset = () => ({
+  type: Actions.RESET,
+});
