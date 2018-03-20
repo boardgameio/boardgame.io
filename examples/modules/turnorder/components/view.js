@@ -15,12 +15,33 @@ const App = Client({
   game: TurnExample,
   numPlayers: 4,
   board: Board,
+  multiplayer: true,
 });
 
-const SingleView = () => (
-  <div style={{ padding: 50 }}>
-    <App gameID="TurnExample" />
+const Multiplayer = () => (
+  <div>
+    <h1>Multiplayer</h1>
+    <div className="runner" style={{ justifyContent: 'flex-start' }}>
+      <div className="run">
+        <App gameID="TurnExample" playerID="0" />
+        &lt;App playerID=&quot;0&quot;/&gt;
+      </div>
+      <div className="run">
+        <App gameID="TurnExample" playerID="1" />
+        &lt;App playerID=&quot;1&quot;/&gt;
+      </div>
+    </div>
+    <div className="runner" style={{ justifyContent: 'flex-start' }}>
+      <div className="run">
+        <App gameID="TurnExample" playerID="2" />
+        &lt;App playerID=&quot;2&quot;/&gt;
+      </div>
+      <div className="run">
+        <App gameID="TurnExample" playerID="3" />
+        &lt;App playerID=&quot;3&quot;/&gt;
+      </div>
+    </div>
   </div>
 );
 
-export default SingleView;
+export default Multiplayer;
