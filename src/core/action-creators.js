@@ -43,10 +43,7 @@ export const restore = state => ({
 
 /**
  * Used to reset the game state.
- * @param {object} state - The state of the game from which
- *                       the initial state will be restored.
  */
-export const reset = state => ({
+export const reset = () => ({
   type: Actions.RESET,
-  state,
 });

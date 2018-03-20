@@ -28,7 +28,7 @@ import { Client as RawClient } from './client';
  * Returns:
  *   A React component that wraps board and provides an
  *   API through props for it to interact with the framework
- *   and dispatch actions such as MAKE_MOVE, END_TURN and RESET.
+ *   and dispatch actions such as MAKE_MOVE, GAME_EVENT and RESET.
  */
 export function Client({
   game,
