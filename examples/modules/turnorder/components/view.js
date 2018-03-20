@@ -13,14 +13,13 @@ import Board from './board';
 
 const App = Client({
   game: TurnExample,
-  numPlayers: 4,
+  numPlayers: 3,
   board: Board,
   multiplayer: true,
 });
 
 const Multiplayer = () => (
   <div>
-    <h1>Multiplayer</h1>
     <div className="runner" style={{ justifyContent: 'flex-start' }}>
       <div className="run">
         <App gameID="TurnExample" playerID="0" />
@@ -30,15 +29,9 @@ const Multiplayer = () => (
         <App gameID="TurnExample" playerID="1" />
         &lt;App playerID=&quot;1&quot;/&gt;
       </div>
-    </div>
-    <div className="runner" style={{ justifyContent: 'flex-start' }}>
       <div className="run">
         <App gameID="TurnExample" playerID="2" />
         &lt;App playerID=&quot;2&quot;/&gt;
-      </div>
-      <div className="run">
-        <App gameID="TurnExample" playerID="3" />
-        &lt;App playerID=&quot;3&quot;/&gt;
       </div>
     </div>
   </div>
