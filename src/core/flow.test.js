@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { createGameReducer } from './reducer';
-import { makeMove, gameEvent } from './action-creators';
+import { makeMove, gameEvent, reset } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 
 test('Flow', () => {
@@ -616,4 +616,100 @@ test('endGame', () => {
     const t = flow.processGameEvent(state, gameEvent('endGame', 42).payload);
     expect(t.ctx.gameover).toBe(42);
   }
+});
+
+test('resetGame', () => {
+  let game = Game({
+    moves: {
+      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+    },
+  });
+
+  const reducer = createGameReducer({ game, numPlayers: 2 });
+
+  let state = reducer(undefined, { type: 'init' });
+
+  const originalState = state;
+
+  state = reducer(state, makeMove('move', 'A'));
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, makeMove('move', 'B'));
+  expect(state.G).toEqual({ A: true, B: true });
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.turn).toEqual(1);
+
+  state = reducer(state, reset());
+  expect(state).toEqual(originalState);
+
+  state = reducer(state, makeMove('move', 'C'));
+  expect(state.G).toEqual({ C: true });
+
+  state = reducer(state, gameEvent('undo'));
+  expect(state.G).toEqual({});
+
+  state = reducer(state, gameEvent('redo'));
+  expect(state.G).toEqual({ C: true });
+
+  state = reducer(state, reset());
+  expect(state).toEqual(originalState);
+});
+
+test('change action players', () => {
+  const flow = FlowWithPhases({});
+  const state = { ctx: {} };
+  const newState = flow.processGameEvent(state, {
+    type: 'changeActionPlayers',
+    args: [[1, 2]],
+  });
+  expect(newState.ctx.actionPlayers).toMatchObject([1, 2]);
+});
+
+test('change action players - reducer', () => {
+  let game = Game({
+    moves: {
+      playMilitia: (G, ctx) => {
+        // change which players need to act
+        ctx.events.changeActionPlayers([1, 2, 3]);
+        return { ...G, playedCard: 'Militia' };
+      },
+      dropCards: (G, ctx) => {
+        if (G.playedCard === 'Militia') {
+          let actedOnMilitia = G.actedOnMilitia || [];
+          actedOnMilitia.push(ctx.playerID);
+
+          // this player did drop and must not take another action.
+          var newActionPlayers = [...ctx.actionPlayers].filter(
+            pn => pn !== ctx.playerID
+          );
+          ctx.events.changeActionPlayers(newActionPlayers);
+
+          let playedCard = G.playedCard;
+          if (actedOnMilitia.length === 3) {
+            ctx.events.changeActionPlayers([0]);
+            actedOnMilitia = undefined;
+            playedCard = undefined;
+          }
+          return { ...G, actedOnMilitia, playedCard };
+        } else {
+          return G;
+        }
+      },
+    },
+  });
+
+  const reducer = createGameReducer({ game, numPlayers: 4 });
+
+  let state = reducer(undefined, { type: 'init' });
+  state = reducer(state, makeMove('playMilitia'));
+  expect(state.ctx.actionPlayers).toMatchObject([1, 2, 3]);
+
+  state = reducer(state, makeMove('dropCards', undefined, 1));
+  expect(state.ctx.actionPlayers).toMatchObject([2, 3]);
+  state = reducer(state, makeMove('dropCards', undefined, 3));
+  expect(state.ctx.actionPlayers).toMatchObject([2]);
+  state = reducer(state, makeMove('dropCards', undefined, 2));
+  expect(state.ctx.actionPlayers).toMatchObject([0]);
+  expect(state.G).toMatchObject({});
 });

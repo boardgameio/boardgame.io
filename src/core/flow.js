@@ -563,6 +563,10 @@ export function FlowWithPhases({
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
   if (endGame) enabledEvents['endGame'] = endGameEvent;
 
+  enabledEvents['changeActionPlayers'] = (state, actionPlayers) => {
+    return { G: state.G, ctx: { ...state.ctx, actionPlayers } };
+  };
+
   return Flow({
     ctx: numPlayers => ({
       numPlayers,
