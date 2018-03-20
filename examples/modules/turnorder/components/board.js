@@ -41,10 +41,18 @@ const Board = ({ ctx, events, playerID }) => (
     </table>
     <div className="buttons">
       <button
-        {...{ disabled: playerID !== ctx.currentPlayer }}
+        {...{ disabled: !ctx.actionPlayers.includes(playerID) }}
         onClick={() => events.endTurn()}
       >
         endTurn
+      </button>
+      <button
+        {...{ disabled: !ctx.actionPlayers.includes(playerID) }}
+        onClick={() => {
+          document.events.changeActionPlayers(['2', '1', '0']);
+        }}
+      >
+        set action players
       </button>
     </div>
   </div>
