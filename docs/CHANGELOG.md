@@ -1,3 +1,29 @@
+# v0.20.2
+
+#### Features
+
+* [[43ba0ff](https://github.com/google/boardgame.io/commit/43ba0ff)] allow optional redux enhancer (#139)
+* [[dd6c110](https://github.com/google/boardgame.io/commit/dd6c110)] Run endPhase event (analogue to endTurn) when game ends (#144)
+
+#### Bugfixes
+
+* [[8969433](https://github.com/google/boardgame.io/commit/8969433)] Fix bug that was causing Random code to return the same numbers.
+
+#### Breaking Changes
+
+* The `Random` API is different. There is no longer a `Random` package
+  that you need to import. The API is attached to the `ctx` parameter that
+  is passed to the moves. Take a look at http://boardgame.io/#/random for
+  more details.
+
+# v0.20.1
+
+#### Bugfixes
+
+* [[06d78e2](https://github.com/google/boardgame.io/commit/06d78e2)] Enable SSR
+* [[ed09f51](https://github.com/google/boardgame.io/commit/ed09f51)] Allow calling Random during setup
+* [[c50d5ea](https://github.com/google/boardgame.io/commit/c50d5ea)] fix log rendering of phases
+
 # v0.20
 
 #### Features

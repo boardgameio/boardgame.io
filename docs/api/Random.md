@@ -2,7 +2,7 @@
 
 API for code that requires randomness. See the guide [here](random.md).
 
-## 1. Random.Die
+## 1. Die
 
 ### Arguments
 
@@ -16,32 +16,28 @@ The die roll value (or an array of values if `diceCount` is greater than `1`).
 #### Usage
 
 ```js
-import { Random } from `boardgame.io/core';
-
 const game = Game({
   moves: {
     move(G, ctx) {
-      const die = Random.Die(6);      // die = 1-6
-      const dice = Random.Die(6, 3);  // dice = [1-6, 1-6, 1-6]
+      const die = ctx.random.Die(6);      // die = 1-6
+      const dice = ctx.random.Die(6, 3);  // dice = [1-6, 1-6, 1-6]
       ...
     },
   }
 });
 ```
 
-## 2. Random.Number
+## 2. Number
 
 Returns a random number between `0` and `1`.
 
 #### Usage
 
 ```js
-import { Random } from `boardgame.io/core';
-
 const game = Game({
   moves: {
     move(G, ctx) {
-      const n = Random.Number();
+      const n = ctx.random.Number();
       ...
     },
   }
@@ -61,15 +57,13 @@ The shuffled array.
 #### Usage
 
 ```js
-import { Random } from `boardgame.io/core';
-
 const game = Game({
   moves: {
     move(G, ctx) {
-      const deck = Random.Shuffle(G.deck);
+      const deck = ctx.random.Shuffle(G.deck);
       return { ...G, deck };
     },
-  }
+  },
 });
 ```
 
@@ -85,12 +79,10 @@ const game = Game({
 ### Usage
 
 ```js
-import { Random } from `boardgame.io/core';
-
 const game = Game({
   moves: {
     move(G, ctx) {
-      const die = Random.D6();
+      const die = ctx.random.D6();
       ...
     },
   }

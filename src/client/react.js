@@ -23,13 +23,21 @@ import { Client as RawClient } from './client';
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
  * @param {...object} debug - Enables the Debug UI.
+ * @param {...object} enhancer - Optional enhancer to send to the Redux store
  *
  * Returns:
  *   A React component that wraps board and provides an
  *   API through props for it to interact with the framework
  *   and dispatch actions such as MAKE_MOVE and END_TURN.
  */
-export function Client({ game, numPlayers, board, multiplayer, debug }) {
+export function Client({
+  game,
+  numPlayers,
+  board,
+  multiplayer,
+  debug,
+  enhancer,
+}) {
   if (debug === undefined) debug = true;
 
   /*
@@ -65,6 +73,7 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
         multiplayer,
         gameID: props.gameID,
         playerID: props.playerID,
+        enhancer,
       });
 
       this.client.subscribe(() => this.forceUpdate());
@@ -80,7 +89,9 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
     }
 
     componentWillMount() {
-      this.client.connect();
+      if (typeof window !== 'undefined') {
+        this.client.connect();
+      }
     }
 
     render() {

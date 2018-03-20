@@ -10,19 +10,19 @@
  * Standard move that simulates passing.
  *
  * Creates two objects in G:
- * passMap - A map from playerID -> boolean capturing passes.
+ * passOrder - An array of playerIDs capturing passes in the pass order.
  * allPassed - Set to true when all players have passed.
  */
 export const Pass = (G, ctx) => {
-  let passMap = {};
-  if (G.passMap !== undefined) {
-    passMap = { ...G.passMap };
+  let passOrder = [];
+  if (G.passOrder !== undefined) {
+    passOrder = G.passOrder;
   }
   const playerID =
     ctx.currentPlayer === 'any' ? ctx.playerID : ctx.currentPlayer;
-  passMap[playerID] = true;
-  G = { ...G, passMap };
-  if (Object.keys(passMap).length >= ctx.numPlayers) {
+  passOrder.push(playerID);
+  G = { ...G, passOrder };
+  if (passOrder.length >= ctx.numPlayers) {
     G.allPassed = true;
   }
   return G;
@@ -44,8 +44,8 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G, ctx) => ctx.currentPlayer,
-    next: (G, ctx) => (+ctx.currentPlayer + 1) % ctx.numPlayers + '',
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -54,8 +54,8 @@ export const TurnOrder = {
    * Any player can play and there isn't a currentPlayer really.
    */
   ANY: {
-    first: () => 'any',
-    next: () => 'any',
+    first: () => undefined,
+    next: () => undefined,
   },
 
   /**
@@ -66,14 +66,14 @@ export const TurnOrder = {
    */
 
   SKIP: {
-    first: (G, ctx) => ctx.currentPlayer,
+    first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => {
       if (G.allPassed) return;
-      let nextPlayer = ctx.currentPlayer;
-      for (let i = 0; i < ctx.numPlayers; i++) {
-        nextPlayer = (+nextPlayer + 1) % ctx.numPlayers + '';
-        if (!(nextPlayer in G.passMap)) {
-          return nextPlayer;
+      let playOrderPos = ctx.playOrderPos;
+      for (let i = 0; i < ctx.playOrder.length; i++) {
+        playOrderPos = (playOrderPos + 1) % ctx.playOrder.length;
+        if (!G.passOrder.includes(ctx.playOrder[playOrderPos] + '')) {
+          return playOrderPos;
         }
       }
     },

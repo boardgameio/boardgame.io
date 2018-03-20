@@ -21,6 +21,10 @@ import PropTypes from 'prop-types';
  *   colorMap   - A map from 'x,y' => color.
  *   onClick    - (x, y) => {}
  *                Called when a square is clicked.
+ *   onMouseOver    - (x, y) => {}
+ *                Called when a square is mouse over.
+ *   onMouseOut    - (x, y) => {}
+ *                Called when a square is mouse out.
  *
  * Usage:
  *
@@ -37,6 +41,8 @@ export class Grid extends React.Component {
     colorMap: PropTypes.object,
     cellSize: PropTypes.number,
     onClick: PropTypes.func,
+    onMouseOver: PropTypes.func,
+    onMouseOut: PropTypes.func,
     children: PropTypes.oneOfType([
       PropTypes.arrayOf(PropTypes.element),
       PropTypes.element,
@@ -74,6 +80,8 @@ export class Grid extends React.Component {
             y={y}
             size={this.props.cellSize}
             onClick={this.onClick}
+            onMouseOver={this.onMouseOver}
+            onMouseOut={this.onMouseOut}
           />
         );
       }
@@ -87,11 +95,25 @@ export class Grid extends React.Component {
     }
   };
 
+  onMouseOver = args => {
+    if (this.props.onMouseOver) {
+      this.props.onMouseOver(args);
+    }
+  };
+
+  onMouseOut = args => {
+    if (this.props.onMouseOut) {
+      this.props.onMouseOut(args);
+    }
+  };
+
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
         _inGrid: true,
         onClick: this.onClick,
+        onMouseOver: this.onMouseOver,
+        onMouseOut: this.onMouseOut,
       });
     });
 
@@ -118,6 +140,8 @@ export class Grid extends React.Component {
  *   size    - Square size.
  *   style   - Custom styling.
  *   onClick - Invoked when a Square is clicked.
+ *   onMouseOver - Invoked when a Square is mouse over.
+ *   onMouseOut - Invoked when a Square is mouse out.
  *
  * Not meant to be used by the end user directly (use Token).
  * Also not exposed in the NPM.
@@ -129,6 +153,8 @@ export class Square extends React.Component {
     size: PropTypes.number,
     style: PropTypes.any,
     onClick: PropTypes.func,
+    onMouseOver: PropTypes.func,
+    onMouseOut: PropTypes.func,
     children: PropTypes.element,
   };
 
@@ -146,6 +172,20 @@ export class Square extends React.Component {
     });
   };
 
+  onMouseOver = () => {
+    this.props.onMouseOver({
+      x: this.props.x,
+      y: this.props.y,
+    });
+  };
+
+  onMouseOut = () => {
+    this.props.onMouseOut({
+      x: this.props.x,
+      y: this.props.y,
+    });
+  };
+
   render() {
     const tx = this.props.x * this.props.size;
     const ty = this.props.y * this.props.size;
@@ -153,7 +193,12 @@ export class Square extends React.Component {
     // If a child is passed, render child.
     if (this.props.children) {
       return (
-        <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
+        <g
+          onClick={this.onClick}
+          onMouseOver={this.onMouseOver}
+          onMouseOut={this.onMouseOut}
+          transform={`translate(${tx}, ${ty})`}
+        >
           {this.props.children}
         </g>
       );
@@ -161,7 +206,12 @@ export class Square extends React.Component {
 
     // If no child, render a square.
     return (
-      <g onClick={this.onClick} transform={`translate(${tx}, ${ty})`}>
+      <g
+        onClick={this.onClick}
+        onMouseOver={this.onMouseOver}
+        onMouseOut={this.onMouseOut}
+        transform={`translate(${tx}, ${ty})`}
+      >
         <rect
           style={this.props.style}
           width={this.props.size}

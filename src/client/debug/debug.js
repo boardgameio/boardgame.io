@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import ReactJson from 'react-json-view';
 import PropTypes from 'prop-types';
 import Mousetrap from 'mousetrap';
 import { GameLog } from '../log/log';
@@ -424,21 +423,17 @@ export class Debug extends React.Component {
             <h3>state</h3>
 
             <section>
-              <ReactJson
-                src={this.props.gamestate.G}
-                name="G"
-                enableClipboard={false}
-                displayDataTypes={false}
-              />
+              <pre>
+                <strong>G</strong>:{' '}
+                {JSON.stringify(this.props.gamestate.G, null, 2)}
+              </pre>
             </section>
 
             <section>
-              <ReactJson
-                src={this.props.gamestate.ctx}
-                name="ctx"
-                enableClipboard={false}
-                displayDataTypes={false}
-              />
+              <pre>
+                <strong>ctx</strong>:{' '}
+                {JSON.stringify(this.props.gamestate.ctx, null, 2)}
+              </pre>
             </section>
           </span>
         )}

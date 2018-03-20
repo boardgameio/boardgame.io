@@ -46,6 +46,48 @@ test('click handler', () => {
   }
 });
 
+test('mouse over handler', () => {
+  {
+    const onMouseOver = jest.fn();
+    const grid = Enzyme.mount(<HexGrid layers={4} onMouseOver={onMouseOver} />);
+    grid
+      .find('Hex')
+      .at(0)
+      .simulate('mouseOver');
+    expect(onMouseOver).toHaveBeenCalled();
+  }
+
+  // No crash when onMouseOver is not provided.
+  {
+    const grid = Enzyme.mount(<HexGrid layers={4} />);
+    grid
+      .find('Hex')
+      .at(0)
+      .simulate('mouseOver');
+  }
+});
+
+test('mouse out handler', () => {
+  {
+    const onMouseOut = jest.fn();
+    const grid = Enzyme.mount(<HexGrid layers={4} onMouseOut={onMouseOut} />);
+    grid
+      .find('Hex')
+      .at(0)
+      .simulate('mouseOut');
+    expect(onMouseOut).toHaveBeenCalled();
+  }
+
+  // No crash when onMouseOut is not provided.
+  {
+    const grid = Enzyme.mount(<HexGrid layers={4} />);
+    grid
+      .find('Hex')
+      .at(0)
+      .simulate('mouseOut');
+  }
+});
+
 test('child', () => {
   {
     const grid = Enzyme.mount(
