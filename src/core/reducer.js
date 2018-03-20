@@ -178,6 +178,10 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         return action.state;
       }
 
+      case Actions.RESET: {
+        return initial;
+      }
+
       default: {
         return state;
       }
