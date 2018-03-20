@@ -14,7 +14,8 @@ Although in both cases, how you access them is slightly different.
 
 * endTurn() - Provided by default, to disable add `endTurn: false` to a custom flow config.
 * endPhase(nextPhase) - Provided by default when using phases,  
-  to disable add `endPhase: false` to a custom flow config. \* nextPhase - optional phase to transition to, if not provided defaults to next phase defined in config
+  to disable add `endPhase: false` to a custom flow config.
+  * nextPhase - optional phase to transition to, if not provided defaults to next phase defined in config
 * endGame(arg) - This is only provided when setting `endGame: true` in a custom flow config.
   * arg - This optional argument when provided will be available as ctx.gameOver.
 * undo() - Provided when given a list of `undoableMoves` in flow config of game.
