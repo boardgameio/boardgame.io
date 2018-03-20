@@ -11,15 +11,9 @@ import { Game } from 'boardgame.io/core';
 const TurnExample = Game({
   name: 'turnorder',
 
-  setup: () => ({
-    deck: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
-  }),
+  setup: () => ({}),
 
-  moves: {
-    shuffle: (G, ctx) => ({ ...G, deck: ctx.random.Shuffle(G.deck) }),
-    rollDie: (G, ctx, value) => ({ ...G, dice: ctx.random.Die(value) }),
-    rollD6: (G, ctx) => ({ ...G, dice: ctx.random.D6() }),
-  },
+  moves: {},
 });
 
 export default TurnExample;
