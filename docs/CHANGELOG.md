@@ -1,3 +1,15 @@
+# v0.21.2
+
+#### Bugfixes
+
+* [[27705d5](https://github.com/google/boardgame.io/commit/27705d5) pass Events API correctly inside events.update
+
+# v0.21.1
+
+#### Bugfixes
+
+* [[87e77c1](https://github.com/google/boardgame.io/commit/87e77c1)correctly detach APIs from ctx in startTurn
+
 # v0.21
 
 #### Features
