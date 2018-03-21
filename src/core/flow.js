@@ -330,12 +330,15 @@ export function FlowWithPhases({
   };
 
   // Helper to perform start-of-phase initialization.
-  const startPhase = function(state, phaseConfig) {
+  const startPhase = function(state, config) {
+    const G = config.onPhaseBegin(state.G, ctx);
+
     const ctx = { ...state.ctx };
-    const G = phaseConfig.onPhaseBegin(state.G, ctx);
-    ctx.playOrderPos = phaseConfig.turnOrder.first(G, ctx);
+    ctx.playOrderPos = config.turnOrder.first(G, ctx);
     ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
     ctx.actionPlayers = [ctx.currentPlayer];
+    ctx.allowedMoves = config.allowedMoves(G, ctx);
+
     return { ...state, G, ctx };
   };
 
@@ -347,7 +350,10 @@ export function FlowWithPhases({
     plainCtx = Events.detach(plainCtx);
     const _undo = [{ G, ctx: plainCtx }];
 
-    return { ...state, G, _undo, _redo: [] };
+    const ctx = { ...state.ctx };
+    ctx.allowedMoves = config.allowedMoves(G, ctx);
+
+    return { ...state, G, ctx, _undo, _redo: [] };
   };
 
   const startGame = function(state, config) {
@@ -541,6 +547,10 @@ export function FlowWithPhases({
     if (gameover !== undefined) {
       return { ...state, ctx: { ...state.ctx, gameover } };
     }
+
+    // Update allowedMoves.
+    const allowedMoves = conf.allowedMoves(state.G, state.ctx);
+    state = { ...state, ctx: { ...state.ctx, allowedMoves } };
 
     // Update undo / redo state.
     if (!endTurn) {
