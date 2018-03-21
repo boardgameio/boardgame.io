@@ -217,8 +217,9 @@ export function Flow({
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
  *
- *   // List of moves that are allowed in this phase.
- *   allowedMoves: ['moveA', ...],
+ *   // List of moves or a function that returns a list of moves
+ *   // that are allowed in this phase.
+ *   allowedMoves: (G, ctx) => ['moveA', ...],
  * }
  */
 export function FlowWithPhases({
@@ -294,6 +295,10 @@ export function FlowWithPhases({
     }
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
+    }
+    if (conf.allowedMoves && typeof conf.allowedMoves != 'function') {
+      const { allowedMoves } = conf;
+      conf.allowedMoves = () => allowedMoves;
     }
   }
 
@@ -542,7 +547,7 @@ export function FlowWithPhases({
   const canMakeMoveWrap = (G, ctx, opts) => {
     const conf = phaseMap[ctx.phase] || {};
     if (conf.allowedMoves) {
-      const set = new Set(conf.allowedMoves);
+      const set = new Set(conf.allowedMoves({ G, ctx }));
       if (!set.has(opts.type)) {
         return false;
       }
