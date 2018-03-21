@@ -218,8 +218,9 @@ export function Flow({
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
  *
- *   // List of moves that are allowed in this phase.
- *   allowedMoves: ['moveA', ...],
+ *   // List of moves or a function that returns a list of moves
+ *   // that are allowed in this phase.
+ *   allowedMoves: (G, ctx) => ['moveA', ...],
  * }
  */
 export function FlowWithPhases({
@@ -307,6 +308,10 @@ export function FlowWithPhases({
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
+    if (conf.allowedMoves && typeof conf.allowedMoves != 'function') {
+      const { allowedMoves } = conf;
+      conf.allowedMoves = () => allowedMoves;
+    }
   }
 
   const endTurnIfWrap = (G, ctx) => {
@@ -360,12 +365,13 @@ export function FlowWithPhases({
   };
 
   const startTurn = function(state, config) {
-    let ctx = { ...state.ctx };
-    const G = onTurnBeginWrap(state, config, ctx);
-    ctx = Random.detach(ctx);
-    ctx = Events.detach(ctx);
-    const _undo = [{ G, ctx }];
-    return { ...state, G, ctx, _undo, _redo: [] };
+    const G = onTurnBeginWrap(state, config, state.ctx);
+    let plainCtx = state.ctx;
+    plainCtx = Random.detach(plainCtx);
+    plainCtx = Events.detach(plainCtx);
+    const _undo = [{ G, ctx: plainCtx }];
+
+    return { ...state, G, _undo, _redo: [] };
   };
 
   const startGame = function(state, config) {
@@ -589,7 +595,7 @@ export function FlowWithPhases({
   const canMakeMoveWrap = (G, ctx, opts) => {
     const conf = phaseMap[ctx.phase] || {};
     if (conf.allowedMoves) {
-      const set = new Set(conf.allowedMoves);
+      const set = new Set(conf.allowedMoves({ G, ctx }));
       if (!set.has(opts.type)) {
         return false;
       }
