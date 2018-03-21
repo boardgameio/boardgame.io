@@ -295,6 +295,10 @@ export function FlowWithPhases({
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
+    if (conf.allowedMoves && typeof conf.allowedMoves != 'function') {
+      const { allowedMoves } = conf;
+      conf.allowedMoves = () => allowedMoves;
+    }
   }
 
   const endTurnIfWrap = (G, ctx) => {
@@ -540,7 +544,7 @@ export function FlowWithPhases({
   const canMakeMoveWrap = (G, ctx, opts) => {
     const conf = phaseMap[ctx.phase] || {};
     if (conf.allowedMoves) {
-      const set = new Set(conf.allowedMoves);
+      const set = new Set(conf.allowedMoves({ G, ctx }));
       if (!set.has(opts.type)) {
         return false;
       }
