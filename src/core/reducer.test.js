@@ -8,7 +8,14 @@
 
 import Game from './game';
 import { createGameReducer } from './reducer';
-import { makeMove, gameEvent, restore, reset } from './action-creators';
+import {
+  makeMove,
+  gameEvent,
+  restore,
+  reset,
+  undo,
+  redo,
+} from './action-creators';
 
 const game = Game({
   moves: {
@@ -202,4 +209,19 @@ test('using Random inside setup()', () => {
 
   expect(state1.G.n).not.toBe(state2.G.n);
   expect(state2.G.n).toBe(state3.G.n);
+});
+
+test('undo / redo', () => {
+  const reducer = createGameReducer({ game });
+
+  let state;
+
+  state = reducer(state, makeMove('B'));
+  expect(state.G).toEqual({ moved: true });
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({});
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ moved: true });
 });
