@@ -415,20 +415,22 @@ test('canMakeMove', () => {
     moves: {
       A: () => ({ A: true }),
       B: () => ({ B: true }),
+      C: () => ({ C: true }),
     },
 
     flow: {
+      allowedMoves: ['A', 'B'],
       phases: [
         { name: 'A', allowedMoves: () => ['A'] },
-        { name: 'B', allowedMoves: 'B' },
+        { name: 'B', allowedMoves: ['B'] },
         { name: 'C' },
+        { name: 'D', allowedMoves: null },
       ],
     },
   });
 
   const reducer = createGameReducer({ game, numPlayers: 2 });
   let state = reducer(undefined, { type: 'init' });
-  expect(state.ctx.phase).toBe('A');
 
   // Basic.
   let flow;
@@ -437,31 +439,51 @@ test('canMakeMove', () => {
   flow = Flow({ canMakeMove: () => false });
   expect(flow.canMakeMove(state.G, state.ctx)).toBe(false);
 
-  // B is disallowed in phase A.
-  state = reducer(state, makeMove('B'));
-  expect(state.G).not.toMatchObject({ A: true });
+  // Phase A (A is allowed).
+  expect(state.ctx.phase).toBe('A');
+
   state = reducer(state, makeMove('A'));
   expect(state.G).toMatchObject({ A: true });
+  state = reducer(state, makeMove('B'));
+  expect(state.G).not.toMatchObject({ B: true });
+  state = reducer(state, makeMove('C'));
+  expect(state.G).not.toMatchObject({ C: true });
 
+  // Phase B (B is allowed).
   state = reducer(state, gameEvent('endPhase'));
   state.G = {};
   expect(state.ctx.phase).toBe('B');
 
-  // A is disallowed in phase B.
   state = reducer(state, makeMove('A'));
-  expect(state.G).not.toMatchObject({ B: true });
+  expect(state.G).not.toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
   expect(state.G).toMatchObject({ B: true });
+  state = reducer(state, makeMove('C'));
+  expect(state.G).not.toMatchObject({ C: true });
 
+  // Phase C (A and B allowed).
   state = reducer(state, gameEvent('endPhase'));
   state.G = {};
   expect(state.ctx.phase).toBe('C');
 
-  // All moves are allowed in phase C.
   state = reducer(state, makeMove('A'));
   expect(state.G).toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
   expect(state.G).toMatchObject({ B: true });
+  state = reducer(state, makeMove('C'));
+  expect(state.G).not.toMatchObject({ C: true });
+
+  // Phase D (A, B and C allowed).
+  state = reducer(state, gameEvent('endPhase'));
+  state.G = {};
+  expect(state.ctx.phase).toBe('D');
+
+  state = reducer(state, makeMove('A'));
+  expect(state.G).toMatchObject({ A: true });
+  state = reducer(state, makeMove('B'));
+  expect(state.G).toMatchObject({ B: true });
+  state = reducer(state, makeMove('C'));
+  expect(state.G).toMatchObject({ C: true });
 
   // But not once the game is over.
   state.ctx.gameover = true;
@@ -470,10 +492,6 @@ test('canMakeMove', () => {
   expect(state.G).not.toMatchObject({ A: true });
   state = reducer(state, makeMove('B'));
   expect(state.G).not.toMatchObject({ B: true });
-
-  // the flow runs a user-provided validation
-  flow = FlowWithPhases({ canMakeMove: () => true });
-  expect(flow.canMakeMove(state.G, state.ctx)).toBe(false);
 });
 
 test('undo / redo', () => {

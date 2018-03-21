@@ -168,6 +168,14 @@ export function Flow({
  * @param {...object} undoableMoves - List of moves that are undoable,
  *                                   (default: undefined, i.e. all moves are undoable).
  *
+ * @param {...object} allowedMoves - List of moves that are allowed.
+ *                                   This can be either an array of
+ *                                   move names or a function with the
+ *                                   signature (G, ctx) => [].
+ *                                   null (or a function returning
+ *                                   null) indicates that all moves
+ *                                   are allowed (this is the default).
+ *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
  *                                       be executed optimistically on
@@ -235,6 +243,7 @@ export function FlowWithPhases({
   endPhase,
   endGame,
   undoableMoves,
+  allowedMoves,
   optimisticUpdate,
 }) {
   // Attach defaults.
@@ -257,6 +266,7 @@ export function FlowWithPhases({
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
+  if (allowedMoves === undefined) allowedMoves = null;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -295,9 +305,12 @@ export function FlowWithPhases({
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
-    if (conf.allowedMoves && typeof conf.allowedMoves != 'function') {
-      const { allowedMoves } = conf;
-      conf.allowedMoves = () => allowedMoves;
+    if (conf.allowedMoves === undefined) {
+      conf.allowedMoves = allowedMoves;
+    }
+    if (typeof conf.allowedMoves !== 'function') {
+      const t = conf.allowedMoves;
+      conf.allowedMoves = () => t;
     }
   }
 
@@ -545,8 +558,10 @@ export function FlowWithPhases({
 
   const canMakeMoveWrap = (G, ctx, opts) => {
     const conf = phaseMap[ctx.phase];
-    if (conf.allowedMoves) {
-      const set = new Set(conf.allowedMoves({ G, ctx }));
+    const t = conf.allowedMoves(G, ctx);
+
+    if (Array.isArray(t)) {
+      const set = new Set(t);
       if (!set.has(opts.type)) {
         return false;
       }
