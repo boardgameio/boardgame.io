@@ -236,7 +236,6 @@ export function FlowWithPhases({
   endGame,
   undoableMoves,
   optimisticUpdate,
-  canMakeMove,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -545,17 +544,12 @@ export function FlowWithPhases({
   }
 
   const canMakeMoveWrap = (G, ctx, opts) => {
-    const conf = phaseMap[ctx.phase] || {};
+    const conf = phaseMap[ctx.phase];
     if (conf.allowedMoves) {
       const set = new Set(conf.allowedMoves({ G, ctx }));
       if (!set.has(opts.type)) {
         return false;
       }
-    }
-
-    // run user-provided validation
-    if (canMakeMove !== undefined && !canMakeMove(G, ctx, opts)) {
-      return false;
     }
 
     return canMakeMoveDefault(G, ctx, opts);

@@ -595,12 +595,6 @@ test('canMakeMove', () => {
   expect(flow.canMakeMove({}, {}, pid)).toBe(false);
   expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
   expect(flow.canMakeMove({}, {}, 'any')).toBe(false);
-
-  // flow with phases passes canMakeMove
-  flow = FlowWithPhases({ canMakeMove: () => false });
-  expect(flow.canMakeMove({}, {}, pid)).toBe(false);
-  expect(flow.canMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
-  expect(flow.canMakeMove({}, {}, 'any')).toBe(false);
 });
 
 test('endGame', () => {
