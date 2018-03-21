@@ -70,6 +70,10 @@ class _ClientImpl {
       multiplayer,
     });
 
+    this.reset = () => {
+      this.store.dispatch(ActionCreators.reset());
+    };
+
     this.store = null;
 
     if (multiplayer) {

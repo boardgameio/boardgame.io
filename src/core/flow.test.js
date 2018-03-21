@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { createGameReducer } from './reducer';
-import { makeMove, gameEvent } from './action-creators';
+import { makeMove, gameEvent, reset } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 
 test('Flow', () => {
@@ -616,6 +616,44 @@ test('endGame', () => {
     const t = flow.processGameEvent(state, gameEvent('endGame', 42).payload);
     expect(t.ctx.gameover).toBe(42);
   }
+});
+
+test('resetGame', () => {
+  let game = Game({
+    moves: {
+      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+    },
+  });
+
+  const reducer = createGameReducer({ game, numPlayers: 2 });
+
+  let state = reducer(undefined, { type: 'init' });
+
+  const originalState = state;
+
+  state = reducer(state, makeMove('move', 'A'));
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, makeMove('move', 'B'));
+  expect(state.G).toEqual({ A: true, B: true });
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state.ctx.turn).toEqual(1);
+
+  state = reducer(state, reset());
+  expect(state).toEqual(originalState);
+
+  state = reducer(state, makeMove('move', 'C'));
+  expect(state.G).toEqual({ C: true });
+
+  state = reducer(state, gameEvent('undo'));
+  expect(state.G).toEqual({});
+
+  state = reducer(state, gameEvent('redo'));
+  expect(state.G).toEqual({ C: true });
+
+  state = reducer(state, reset());
+  expect(state).toEqual(originalState);
 });
 
 test('change action players', () => {

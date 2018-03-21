@@ -1,3 +1,17 @@
+# v0.21
+
+#### Features
+
+* [[2ee244e](https://github.com/google/boardgame.io/commit/2ee244e)] Reset Game (#155)
+* [[9cd3fdf](https://github.com/google/boardgame.io/commit/9cd3fdf)] allow to modify actionPlayers via Events (#157)
+* [[767362f](https://github.com/google/boardgame.io/commit/767362f)] endGame event
+* [[78634ee](https://github.com/google/boardgame.io/commit/78634ee)] Events API
+* [[a240e45](https://github.com/google/boardgame.io/commit/a240e45)] undoableMoves implementation (#149)
+* [[c12e911](https://github.com/google/boardgame.io/commit/c12e911)] Process only known moves (#151)
+* [[7fcdbfe](https://github.com/google/boardgame.io/commit/7fcdbfe)] Custom turn order (#130)
+* [[748f36f](https://github.com/google/boardgame.io/commit/748f36f)] UI: add mouse hover action props to grid, hex, and token (#153)
+* [[f664237](https://github.com/google/boardgame.io/commit/f664237)] Add notion of actionPlayers (#145)
+
 # v0.20.2
 
 #### Features
