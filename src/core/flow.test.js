@@ -11,6 +11,8 @@ import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, reset } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 
+jest.useFakeTimers();
+
 test('Flow', () => {
   const flow = Flow({});
   const state = {};
@@ -729,7 +731,6 @@ test('Turn timer', () => {
 });
 
 test('Phase timer', () => {
-  jest.useFakeTimers();
   const onPhaseEnd = jest.fn(G => G);
   let flow = FlowWithPhases({
     phases: [
