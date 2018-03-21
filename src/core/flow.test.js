@@ -686,7 +686,8 @@ test('Turn timer', () => {
   jest.advanceTimersByTime(1000);
   expect(onTurnEnd).not.toHaveBeenCalled();
   jest.advanceTimersByTime(1000);
-  // expect(onTurnEnd).toHaveBeenCalled(); WIP
+  // WIP
+  // expect(onTurnEnd).toHaveBeenCalled();
 });
 
 test('Phase timer', () => {
@@ -707,5 +708,6 @@ test('Phase timer', () => {
   jest.advanceTimersByTime(1000);
   expect(onPhaseEnd).not.toHaveBeenCalled();
   jest.advanceTimersByTime(1000);
-  // expect(onPhaseEnd).toHaveBeenCalled(); WIP
+  // WIP
+  // expect(onPhaseEnd).toHaveBeenCalled();
 });
