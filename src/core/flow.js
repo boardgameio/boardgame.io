@@ -328,12 +328,14 @@ export function FlowWithPhases({
   };
 
   const startTurn = function(state, config) {
-    let ctx = { ...state.ctx };
-    const G = config.onTurnBegin(state.G, ctx);
-    ctx = Random.detach(ctx);
-    ctx = Events.detach(ctx);
-    const _undo = [{ G, ctx }];
-    return { ...state, G, ctx, _undo, _redo: [] };
+    const G = config.onTurnBegin(state.G, state.ctx);
+
+    let plainCtx = state.ctx;
+    plainCtx = Random.detach(plainCtx);
+    plainCtx = Events.detach(plainCtx);
+    const _undo = [{ G, ctx: plainCtx }];
+
+    return { ...state, G, _undo, _redo: [] };
   };
 
   const startGame = function(state, config) {
