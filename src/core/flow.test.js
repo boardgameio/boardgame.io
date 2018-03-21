@@ -419,7 +419,7 @@ test('canMakeMove', () => {
 
     flow: {
       phases: [
-        { name: 'A', allowedMoves: 'A' },
+        { name: 'A', allowedMoves: () => ['A'] },
         { name: 'B', allowedMoves: 'B' },
         { name: 'C' },
       ],
