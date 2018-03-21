@@ -24,20 +24,16 @@ const Multiplayer = () => (
   <div>
     <div className="runner" style={{ justifyContent: 'flex-start' }}>
       <div className="run">
-        Spectator
         <App gameID="TurnExample" />
       </div>
       <div className="runner-vert">
         <div className="run" style={style}>
-          &lt;App playerID=&quot;0&quot;/&gt;
           <App gameID="TurnExample" playerID="0" />
         </div>
         <div className="run" style={style}>
-          &lt; App playerID=&quot;1&quot;/&gt;
           <App gameID="TurnExample" playerID="1" />
         </div>
         <div className="run" style={style}>
-          &lt;App playerID=&quot;2&quot;/&gt;
           <App gameID="TurnExample" playerID="2" />
         </div>
       </div>

@@ -38,6 +38,21 @@ const Board = ({ ctx, events, playerID }) => {
       <span />
     );
 
+  let currentPlayer =
+    playerID === ctx.currentPlayer ? (
+      <div style={{ color: 'red' }}>CurrentPlayer</div>
+    ) : (
+      <div style={{ color: 'lightgray' }}>CurrentPlayer</div>
+    );
+  let actionPlayer = ctx.actionPlayers.includes(playerID) ? (
+    <div style={{ color: 'red' }}>ActionPlayer</div>
+  ) : (
+    <div style={{ color: 'lightgray' }}>ActionPlayer</div>
+  );
+  if (playerID === null) {
+    currentPlayer = actionPlayer = undefined;
+  }
+
   const buttons =
     playerID !== null ? (
       <div>
@@ -50,7 +65,7 @@ const Board = ({ ctx, events, playerID }) => {
         <button
           {...{ disabled: !ctx.actionPlayers.includes(playerID) }}
           onClick={() => {
-            document.events.changeActionPlayers(['2', '1', '0']);
+            events.changeActionPlayers(['2', '1', '0']);
           }}
         >
           set action players
@@ -60,10 +75,22 @@ const Board = ({ ctx, events, playerID }) => {
       ''
     );
 
+  const playerOrSpectator =
+    playerID !== null ? (
+      <span style={{ fontWeight: 'bold', fontSize: 24 }}>
+        Player {playerID}
+      </span>
+    ) : (
+      <span style={{ fontWeight: 'bold', fontSize: 24 }}>Spectator</span>
+    );
+
   return (
     <div>
+      {playerOrSpectator}
       {spectatorPlayer}
       {buttons}
+      {currentPlayer}
+      {actionPlayer}
     </div>
   );
 };
