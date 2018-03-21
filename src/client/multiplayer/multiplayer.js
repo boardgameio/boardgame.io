@@ -81,9 +81,9 @@ export class Multiplayer {
   connect() {
     if (!this.socket) {
       if (this.server) {
-        this.socket = io('http://' + this.server + '/' + this.gameName);
+        this.socket = io(`http://${this.server}/${this.gameName}`);
       } else {
-        this.socket = io('/' + this.gameName);
+        this.socket = io(`/${this.gameName}`);
       }
     }
 
@@ -124,7 +124,7 @@ export class Multiplayer {
    * @param {string} id - The new game id.
    */
   updateGameID(id) {
-    this.gameID = this.gameName + ':' + id;
+    this.gameID = `${this.gameName}:${id}`;
 
     if (this.socket) {
       this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
