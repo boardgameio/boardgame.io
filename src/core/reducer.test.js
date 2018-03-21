@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { createGameReducer } from './reducer';
-import { makeMove, gameEvent, restore } from './action-creators';
+import { makeMove, gameEvent, restore, reset } from './action-creators';
 
 const game = Game({
   moves: {
@@ -66,6 +66,16 @@ test('restore', () => {
   const reducer = createGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
   expect(state).toEqual({ G: 'restored' });
+});
+
+test('reset', () => {
+  const reducer = createGameReducer({ game });
+  let state = reducer(undefined, makeMove('A'));
+  const initialState = { ...state._initial, _initial: { ...state._initial } };
+
+  expect(state).not.toEqual(initialState);
+  state = reducer(state, reset());
+  expect(state).toEqual(initialState);
 });
 
 test('victory', () => {

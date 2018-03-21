@@ -175,6 +175,7 @@ test('action', async () => {
           G: {},
           ctx: {
             _random: { seed: 0 },
+            allowedMoves: null,
             currentPlayer: '0',
             actionPlayers: ['0'],
             currentPlayerMoves: 0,
@@ -188,6 +189,7 @@ test('action', async () => {
       ],
       ctx: {
         _random: { seed: 0 },
+        allowedMoves: null,
         currentPlayer: '0',
         actionPlayers: ['0'],
         currentPlayerMoves: 0,
@@ -206,6 +208,7 @@ test('action', async () => {
         G: {},
         ctx: {
           _random: { seed: 0 },
+          allowedMoves: null,
           currentPlayer: '1',
           actionPlayers: ['1'],
           currentPlayerMoves: 0,
@@ -219,6 +222,7 @@ test('action', async () => {
     ],
     ctx: {
       _random: undefined,
+      allowedMoves: null,
       currentPlayer: '1',
       actionPlayers: ['1'],
       currentPlayerMoves: 0,
