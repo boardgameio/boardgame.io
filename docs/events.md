@@ -12,16 +12,25 @@ Although in both cases, how you access them is slightly different.
 
 ### Provided Events
 
-* endTurn() - Provided by default, to disable add `endTurn: false` to a custom flow config.
-* endPhase(nextPhase) - Provided by default when using phases,  
-  to disable add `endPhase: false` to a custom flow config.
-  * nextPhase - optional phase to transition to, if not provided defaults to next phase defined in config
-* endGame(arg) - This is only provided when setting `endGame: true` in a custom flow config.
-  * arg - This optional argument when provided will be available as ctx.gameOver.
-* undo() - Provided when given a list of `undoableMoves` in flow config of game.
-* redo() - Provided when given a list of `undoableMoves` in flow config of game.
-* changeActionPlayers(actionPlayers) - Provided by default when more than one player available to change players who can currently make a move.
-  * actionPlayers - Array of players that are currently allowed to make moves.
+* `endTurn()` - Provided by default.
+
+  * To disable add `endTurn: false` to a custom flow config.
+
+* `endPhase(nextPhase)` - Provided by default when using phases.
+
+  * To disable add `endPhase: false` to a custom flow config.
+  * (arguments) `nextPhase` - optional phase to transition to, if not provided defaults to next phase defined in config
+
+* `endGame(arg)` - This is only provided when setting `endGame: true` in a custom flow config.
+
+  * (arguments) `arg` - This optional argument when provided will be available as ctx.gameOver. (same as the return value from `endGameIf`)
+
+* `undo()` - Provided by default or if given a list of `undoableMoves` in flow config of game, event will be only be usable in a move listed in `undoableMoves`.
+  * To disable completley, pass an empty Array as `undoableMoves`. See [undo/redo](undo.md) docs for more info.
+* `redo()` - Provided by default or if given a list of `undoableMoves` in flow config of game, event will be only be usable in a move listed in `undoableMoves`.
+  * To disable completley, pass an empty Array as `undoableMoves`. See [undo/redo](undo.md) docs for more info.
+* `changeActionPlayers(actionPlayers)` - Provided by default when more than one player available to change players who can currently make a move.
+  * (arguments) `actionPlayers` - Array of players that are currently allowed to make moves.
 
 ### Triggering events during gameplay
 
