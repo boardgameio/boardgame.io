@@ -685,6 +685,7 @@ test('Turn timer', () => {
   });
   let state = { ctx: flow.ctx(2) };
   flow.init(state);
+  onTurnEnd.mockReset();
   jest.advanceTimersByTime(1000);
   expect(onTurnEnd).not.toHaveBeenCalled();
   jest.advanceTimersByTime(1000);
