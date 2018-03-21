@@ -166,10 +166,10 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: random.attach(state.ctx) };
         state = { ...state, ctx: events.attach(state.ctx) };
         state = game.flow.processMove(state, action);
+        state = events.update(state);
+        state = { ...state, ctx: random.update(state.ctx) };
         state = { ...state, ctx: Random.detach(state.ctx) };
         state = { ...state, ctx: Events.detach(state.ctx) };
-        state = { ...state, ctx: random.update(state.ctx) };
-        state = events.update(state);
 
         return state;
       }
