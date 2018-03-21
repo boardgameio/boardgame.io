@@ -11,6 +11,8 @@ import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, reset } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 
+jest.useFakeTimers();
+
 test('Flow', () => {
   const flow = Flow({});
   const state = {};
@@ -141,7 +143,6 @@ test('onTurnBegin', () => {
     expect(onTurnBeginOverride).toHaveBeenCalled();
   }
 });
-
 test('onTurnEnd', () => {
   {
     const onTurnEnd = jest.fn(G => G);
@@ -712,4 +713,40 @@ test('change action players - reducer', () => {
   state = reducer(state, makeMove('dropCards', undefined, 2));
   expect(state.ctx.actionPlayers).toMatchObject([0]);
   expect(state.G).toMatchObject({});
+});
+
+test('Turn timer', () => {
+  const onTurnEnd = jest.fn(G => G);
+  let flow = FlowWithPhases({
+    secondsPerTurn: 2,
+    onTurnEnd,
+  });
+  let state = { ctx: flow.ctx(2) };
+  flow.init(state);
+  jest.advanceTimersByTime(1000);
+  expect(onTurnEnd).not.toHaveBeenCalled();
+  jest.advanceTimersByTime(1000);
+  // WIP
+  // expect(onTurnEnd).toHaveBeenCalled();
+});
+
+test('Phase timer', () => {
+  const onPhaseEnd = jest.fn(G => G);
+  let flow = FlowWithPhases({
+    phases: [
+      {
+        name: 'test',
+        secondsPerPhase: 1,
+        onPhaseEnd,
+      },
+    ],
+  });
+  let state = { G: {}, ctx: flow.ctx(2) };
+  flow.init(state);
+  onPhaseEnd.mockReset();
+  jest.advanceTimersByTime(1000);
+  expect(onPhaseEnd).not.toHaveBeenCalled();
+  jest.advanceTimersByTime(1000);
+  // WIP
+  // expect(onPhaseEnd).toHaveBeenCalled();
 });
