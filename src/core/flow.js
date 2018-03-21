@@ -170,6 +170,14 @@ export function Flow({
  * @param {...object} undoableMoves - List of moves that are undoable,
  *                                   (default: undefined, i.e. all moves are undoable).
  *
+ * @param {...object} allowedMoves - List of moves that are allowed.
+ *                                   This can be either an array of
+ *                                   move names or a function with the
+ *                                   signature (G, ctx) => [].
+ *                                   null (or a function returning
+ *                                   null) indicates that all moves
+ *                                   are allowed (this is the default).
+ *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
  *                                       be executed optimistically on
@@ -219,8 +227,9 @@ export function Flow({
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
  *
- *   // List of moves that are allowed in this phase.
- *   allowedMoves: ['moveA', ...],
+ *   // List of moves or a function that returns a list of moves
+ *   // that are allowed in this phase.
+ *   allowedMoves: (G, ctx) => ['moveA', ...],
  * }
  */
 export function FlowWithPhases({
@@ -236,8 +245,8 @@ export function FlowWithPhases({
   endPhase,
   endGame,
   undoableMoves,
+  allowedMoves,
   optimisticUpdate,
-  canMakeMove,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -259,6 +268,7 @@ export function FlowWithPhases({
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
+  if (allowedMoves === undefined) allowedMoves = null;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -297,6 +307,13 @@ export function FlowWithPhases({
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
+    if (conf.allowedMoves === undefined) {
+      conf.allowedMoves = allowedMoves;
+    }
+    if (typeof conf.allowedMoves !== 'function') {
+      const t = conf.allowedMoves;
+      conf.allowedMoves = () => t;
+    }
   }
 
   const endTurnIfWrap = (G, ctx) => {
@@ -315,12 +332,15 @@ export function FlowWithPhases({
   };
 
   // Helper to perform start-of-phase initialization.
-  const startPhase = function(state, phaseConfig) {
+  const startPhase = function(state, config) {
+    const G = config.onPhaseBegin(state.G, ctx);
+
     const ctx = { ...state.ctx };
-    const G = phaseConfig.onPhaseBegin(state.G, ctx);
-    ctx.playOrderPos = phaseConfig.turnOrder.first(G, ctx);
+    ctx.playOrderPos = config.turnOrder.first(G, ctx);
     ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
     ctx.actionPlayers = [ctx.currentPlayer];
+    ctx.allowedMoves = config.allowedMoves(G, ctx);
+
     return { ...state, G, ctx };
   };
 
@@ -332,7 +352,10 @@ export function FlowWithPhases({
     plainCtx = Events.detach(plainCtx);
     const _undo = [{ G, ctx: plainCtx }];
 
-    return { ...state, G, _undo, _redo: [] };
+    const ctx = { ...state.ctx };
+    ctx.allowedMoves = config.allowedMoves(G, ctx);
+
+    return { ...state, G, ctx, _undo, _redo: [] };
   };
 
   const startGame = function(state, config) {
@@ -485,6 +508,10 @@ export function FlowWithPhases({
       return { ...state, ctx: { ...state.ctx, gameover } };
     }
 
+    // Update allowedMoves.
+    const allowedMoves = conf.allowedMoves(state.G, state.ctx);
+    state = { ...state, ctx: { ...state.ctx, allowedMoves } };
+
     // Update undo / redo state.
     if (!endTurn) {
       const undo = state._undo || [];
@@ -500,17 +527,14 @@ export function FlowWithPhases({
   }
 
   const canMakeMoveWrap = (G, ctx, opts) => {
-    const conf = phaseMap[ctx.phase] || {};
-    if (conf.allowedMoves) {
-      const set = new Set(conf.allowedMoves);
+    const conf = phaseMap[ctx.phase];
+    const t = conf.allowedMoves(G, ctx);
+
+    if (Array.isArray(t)) {
+      const set = new Set(t);
       if (!set.has(opts.type)) {
         return false;
       }
-    }
-
-    // run user-provided validation
-    if (canMakeMove !== undefined && !canMakeMove(G, ctx, opts)) {
-      return false;
     }
 
     return canMakeMoveDefault(G, ctx, opts);
