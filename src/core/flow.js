@@ -9,6 +9,7 @@
 import { TurnOrder } from './turn-order';
 import { Random } from './random';
 import { Events } from './events';
+import { Timer } from './timer';
 
 /**
  * This function checks whether a player is allowed to make a move.
@@ -224,6 +225,8 @@ export function Flow({
 export function FlowWithPhases({
   phases,
   movesPerTurn,
+  secondsPerTurn,
+  secondsPerPhase,
   endTurnIf,
   endGameIf,
   onTurnBegin,
@@ -261,6 +264,9 @@ export function FlowWithPhases({
   let phaseKeys = [];
   let phaseMap = {};
 
+  const turnTimer = new Timer();
+  const phaseTimer = new Timer();
+
   for (let conf of phases) {
     phaseKeys.push(conf.name);
     phaseMap[conf.name] = conf;
@@ -276,6 +282,12 @@ export function FlowWithPhases({
     }
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
+    }
+    if (conf.secondsPerTurn === undefined) {
+      conf.secondsPerTurn = secondsPerTurn;
+    }
+    if (conf.secondsPerPhase === undefined) {
+      conf.secondsPerPhase = secondsPerPhase;
     }
     if (conf.endTurnIf === undefined) {
       conf.endTurnIf = endTurnIf;
@@ -312,19 +324,45 @@ export function FlowWithPhases({
     return playOrder[playOrderPos] + '';
   };
 
+  const onPhaseBeginWrap = (state, phaseConfig) => {
+    if (phaseConfig.secondsPerPhase) {
+      phaseTimer.pause();
+      phaseTimer.reset();
+      phaseTimer.Routine = () => {
+        const end = phaseConfig.endPhaseIf(state.G, state.ctx);
+        if (end) {
+          state = endPhaseEvent(state, end);
+        }
+      };
+      phaseTimer.start();
+    }
+    return phaseConfig.onPhaseBegin(state.G, state.ctx);
+  };
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, phaseConfig) {
     const ctx = { ...state.ctx };
-    const G = phaseConfig.onPhaseBegin(state.G, ctx);
+    const G = onPhaseBeginWrap(state, phaseConfig);
     ctx.playOrderPos = phaseConfig.turnOrder.first(G, ctx);
     ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
     ctx.actionPlayers = [ctx.currentPlayer];
     return { ...state, G, ctx };
   };
 
+  const onTurnBeginWrap = (state, config, ctx) => {
+    if (config.secondsPerTurn) {
+      turnTimer.pause();
+      turnTimer.reset();
+      turnTimer.Routine = () => {
+        endTurnEvent(state);
+      };
+      turnTimer.start();
+    }
+    return config.onTurnBegin(state.G, ctx);
+  };
+
   const startTurn = function(state, config) {
     let ctx = { ...state.ctx };
-    const G = config.onTurnBegin(state.G, ctx);
+    const G = onTurnBeginWrap(state, config, ctx);
     ctx = Random.detach(ctx);
     ctx = Events.detach(ctx);
     const _undo = [{ G, ctx }];
