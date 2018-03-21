@@ -50,3 +50,33 @@ describe('timer not initialized', () => {
     expect(functionToCallWhenTimeIsOut).toHaveBeenCalled();
   });
 });
+
+describe('two timers', () => {
+  const timer1 = new Timer();
+  const timer2 = new Timer();
+  let functionToCallWhenTimeIsOut1 = jest.fn();
+  let functionToCallWhenTimeIsOut2 = jest.fn();
+  it("different configuration won' conflict", () => {
+    timer1.Duration = 2;
+    timer2.Duration = 3;
+    timer1.Routine = functionToCallWhenTimeIsOut1;
+    timer2.Routine = functionToCallWhenTimeIsOut2;
+    timer1.start();
+    jest.advanceTimersByTime(1000);
+    timer2.start();
+    expect(timer1.secondsLeft()).toBe(1);
+    expect(timer2.secondsLeft()).toBe(3);
+    jest.advanceTimersByTime(1000);
+    expect(functionToCallWhenTimeIsOut1).toHaveBeenCalled();
+    timer1.reset();
+    timer1.start();
+    expect(functionToCallWhenTimeIsOut2).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1000);
+    expect(timer1.secondsLeft()).toBe(1);
+    expect(timer2.secondsLeft()).toBe(1);
+    expect(functionToCallWhenTimeIsOut2).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1000);
+    expect(functionToCallWhenTimeIsOut2).toHaveBeenCalled();
+    expect(functionToCallWhenTimeIsOut1).toHaveBeenCalledTimes(2);
+  });
+});
