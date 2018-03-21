@@ -10,6 +10,7 @@ import React from 'react';
 import { Client } from 'boardgame.io/react';
 import TurnExample from '../game';
 import Board from './board';
+import './view.css';
 
 const App = Client({
   game: TurnExample,
@@ -18,20 +19,27 @@ const App = Client({
   multiplayer: true,
 });
 
+const style = { border: '1px solid black' };
 const Multiplayer = () => (
   <div>
     <div className="runner" style={{ justifyContent: 'flex-start' }}>
       <div className="run">
-        <App gameID="TurnExample" playerID="0" />
-        &lt;App playerID=&quot;0&quot;/&gt;
+        Spectator
+        <App gameID="TurnExample" />
       </div>
-      <div className="run">
-        <App gameID="TurnExample" playerID="1" />
-        &lt;App playerID=&quot;1&quot;/&gt;
-      </div>
-      <div className="run">
-        <App gameID="TurnExample" playerID="2" />
-        &lt;App playerID=&quot;2&quot;/&gt;
+      <div className="runner-vert">
+        <div className="run" style={style}>
+          &lt;App playerID=&quot;0&quot;/&gt;
+          <App gameID="TurnExample" playerID="0" />
+        </div>
+        <div className="run" style={style}>
+          &lt; App playerID=&quot;1&quot;/&gt;
+          <App gameID="TurnExample" playerID="1" />
+        </div>
+        <div className="run" style={style}>
+          &lt;App playerID=&quot;2&quot;/&gt;
+          <App gameID="TurnExample" playerID="2" />
+        </div>
       </div>
     </div>
   </div>
