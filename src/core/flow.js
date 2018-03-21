@@ -217,8 +217,9 @@ export function Flow({
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
  *
- *   // List of moves that are allowed in this phase.
- *   allowedMoves: ['moveA', ...],
+ *   // List of moves or a function that returns a list of moves
+ *   // that are allowed in this phase.
+ *   allowedMoves: (G, ctx) => ['moveA', ...],
  * }
  */
 export function FlowWithPhases({
