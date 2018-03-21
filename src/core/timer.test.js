@@ -15,10 +15,12 @@ describe('timer initialized', () => {
 });
 
 describe('timer not initialized', () => {
-  let timer = new Timer();
+  let timer = null;
   let functionToCallWhenTimeIsOut = jest.fn();
-  it('Start - Pause - Status - Routine', () => {
-    // setInterval.mockReset();
+  beforeEach(() => {
+    timer = new Timer();
+  });
+  it('all methods', () => {
     timer.Duration = 2;
     timer.Routine = () => {
       functionToCallWhenTimeIsOut();
@@ -33,18 +35,16 @@ describe('timer not initialized', () => {
     timer.start();
     jest.advanceTimersByTime(1000);
     expect(functionToCallWhenTimeIsOut).toHaveBeenCalled();
-  });
-  it('Reset - timeLeft - secondsLeft', () => {
     functionToCallWhenTimeIsOut.mockReset();
     timer.pause();
     timer.reset();
     timer.start();
     jest.advanceTimersByTime(1000);
     expect(timer.secondsLeft()).toBe(1);
-    const timeleft = timer.timeLeft();
-    expect(timeleft.h).toBe(0);
-    expect(timeleft.m).toBe(0);
-    expect(timeleft.s).toBe(1);
+    const timeLeft = timer.timeLeft();
+    expect(timeLeft.h).toBe(0);
+    expect(timeLeft.m).toBe(0);
+    expect(timeLeft.s).toBe(1);
     expect(functionToCallWhenTimeIsOut).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
     expect(functionToCallWhenTimeIsOut).toHaveBeenCalled();
