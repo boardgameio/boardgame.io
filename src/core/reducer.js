@@ -182,6 +182,48 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         return initial;
       }
 
+      case Actions.UNDO: {
+        const { _undo, _redo } = state;
+
+        if (_undo.length < 2) {
+          return state;
+        }
+
+        const last = _undo[_undo.length - 1];
+        const restore = _undo[_undo.length - 2];
+
+        // Only allow undoable moves to be undone.
+        if (!game.flow.canUndoMove(state.G, state.ctx, last.moveType)) {
+          return state;
+        }
+
+        return {
+          ...state,
+          G: restore.G,
+          ctx: restore.ctx,
+          _undo: _undo.slice(0, _undo.length - 1),
+          _redo: [last, ..._redo],
+        };
+      }
+
+      case Actions.REDO: {
+        const { _undo, _redo } = state;
+
+        if (_redo.length == 0) {
+          return state;
+        }
+
+        const first = _redo[0];
+
+        return {
+          ...state,
+          G: first.G,
+          ctx: first.ctx,
+          _undo: [..._undo, first],
+          _redo: _redo.slice(1),
+        };
+      }
+
       default: {
         return state;
       }

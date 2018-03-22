@@ -74,8 +74,6 @@ test('event dispatchers', () => {
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual([
-      'undo',
-      'redo',
       'endTurn',
       'changeActionPlayers',
     ]);
@@ -95,8 +93,6 @@ test('event dispatchers', () => {
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual([
-      'undo',
-      'redo',
       'endTurn',
       'endPhase',
       'endGame',
@@ -112,7 +108,6 @@ test('event dispatchers', () => {
       flow: {
         endPhase: false,
         endTurn: false,
-        undoableMoves: [],
       },
 
       phases: [{ name: 'default' }],
@@ -134,8 +129,6 @@ test('event dispatchers', () => {
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual([
-      'undo',
-      'redo',
       'endTurn',
       'endPhase',
       'changeActionPlayers',

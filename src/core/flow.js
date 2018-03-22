@@ -17,7 +17,7 @@ import { Events } from './events';
  * @param {object} ctx   - The ctx instance
  * @param {object} opts  - Options - used here to transport the playerID.
  */
-function canMakeMoveDefault(G, ctx, opts) {
+function canPlayerMakeMove(G, ctx, opts) {
   const { playerID } = opts || {};
 
   // In multiplayer mode, the default playerID is null, which corresponds
@@ -64,11 +64,16 @@ function canMakeMoveDefault(G, ctx, opts) {
  *                                       the client while waiting for
  *                                       the result of execution from
  *                                       the server.
- * @param {...object} canMakeMove - (G, ctx, opts) => boolean
- *                                  Predicate to determine whether the player
- *                                  identified by playerID is allowed to make a move.
- *                                  opts contains an object { type, args, playerID },
- *                                  which is the payload of makeMove().
+ * @param {...object} canMakeMove - (G, ctx, {type, playerID, args}) => boolean
+ *                                  Predicate to determine whether a
+ *                                  particular move is playable at
+ *                                  this time for a given set of args
+ *                                  and playerID.
+ *
+ * @param {...object} canUndoMove - (G, ctx, moveName) => boolean
+ *                                  Predicate to determine whether a
+ *                                  particular move is undoable at this
+ *                                  time.
  */
 export function Flow({
   ctx,
@@ -77,12 +82,14 @@ export function Flow({
   processMove,
   optimisticUpdate,
   canMakeMove,
+  canUndoMove,
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
   if (!init) init = state => state;
   if (!processMove) processMove = state => state;
-  if (!canMakeMove) canMakeMove = canMakeMoveDefault;
+  if (!canMakeMove) canMakeMove = () => true;
+  if (!canUndoMove) canUndoMove = () => true;
 
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -103,6 +110,7 @@ export function Flow({
   return {
     ctx,
     init,
+    canUndoMove,
 
     eventNames: Object.getOwnPropertyNames(events),
 
@@ -116,10 +124,12 @@ export function Flow({
 
     optimisticUpdate,
 
-    // Disallow moves once the game is over.
-    // Also call any provided additional validation.
     canMakeMove: (G, ctx, opts) => {
+      // Disallow moves once the game is over.
       if (ctx.gameover !== undefined) return false;
+      // Disallow moves if the current player cannot play.
+      if (!canPlayerMakeMove(G, ctx, opts)) return false;
+      // User-provided move validation.
       return canMakeMove(G, ctx, opts);
     },
   };
@@ -165,16 +175,15 @@ export function Flow({
  *
  * @param {...object} endGame - Set to true to enable the `endGame` event.
  *
- * @param {...object} undoableMoves - List of moves that are undoable,
- *                                   (default: undefined, i.e. all moves are undoable).
- *
  * @param {...object} allowedMoves - List of moves that are allowed.
- *                                   This can be either an array of
+ *                                   This can be either a list of
  *                                   move names or a function with the
  *                                   signature (G, ctx) => [].
- *                                   null (or a function returning
- *                                   null) indicates that all moves
- *                                   are allowed (this is the default).
+ *                                   (default: null, i.e. all moves are allowed).
+ *
+ * @param {...object} undoableMoves - List of moves that are undoable,
+ *                                   (default: null, i.e. all moves are undoable).
+ *
  *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
@@ -186,6 +195,11 @@ export function Flow({
  * @param {...object} phases - A list of phases in the game.
  *
  * Each phase is described by an object:
+ *
+ * All the properties below override their global equivalents
+ * above whenever they are defined (i.e. the global setting
+ * is used if a phase-specific setting is absent).
+ *
  * {
  *   name: 'phase_name',
  *
@@ -228,6 +242,9 @@ export function Flow({
  *   // List of moves or a function that returns a list of moves
  *   // that are allowed in this phase.
  *   allowedMoves: (G, ctx) => ['moveA', ...],
+ *
+ *   // List of moves that are undoable.
+ *   undoableMoves: ['moveA', ...],
  * }
  */
 export function FlowWithPhases({
@@ -269,6 +286,7 @@ export function FlowWithPhases({
   if (!onMove) onMove = G => G;
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
   if (allowedMoves === undefined) allowedMoves = null;
+  if (undoableMoves === undefined) undoableMoves = null;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -312,6 +330,9 @@ export function FlowWithPhases({
     }
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
+    }
+    if (conf.undoableMoves === undefined) {
+      conf.undoableMoves = undoableMoves;
     }
     if (conf.allowedMoves === undefined) {
       conf.allowedMoves = allowedMoves;
@@ -481,48 +502,6 @@ export function FlowWithPhases({
     return startTurn({ ...state, G, ctx }, conf);
   }
 
-  function undoEvent(state) {
-    const { _undo, _redo } = state;
-
-    if (_undo.length < 2) {
-      return state;
-    }
-
-    const last = _undo[_undo.length - 1];
-    const restore = _undo[_undo.length - 2];
-
-    // only allow undoableMoves to be undoable
-    if (undoableMoves && !undoableMoves.includes(last.moveType)) {
-      return state;
-    }
-
-    return {
-      ...state,
-      G: restore.G,
-      ctx: restore.ctx,
-      _undo: _undo.slice(0, _undo.length - 1),
-      _redo: [last, ..._redo],
-    };
-  }
-
-  function redoEvent(state) {
-    const { _undo, _redo } = state;
-
-    if (_redo.length == 0) {
-      return state;
-    }
-
-    const first = _redo[0];
-
-    return {
-      ...state,
-      G: first.G,
-      ctx: first.ctx,
-      _undo: [..._undo, first],
-      _redo: _redo.slice(1),
-    };
-  }
-
   function endGameEvent(state, arg) {
     if (arg === undefined) {
       arg = true;
@@ -574,9 +553,14 @@ export function FlowWithPhases({
     if (!endTurn) {
       const undo = state._undo || [];
       const moveType = action.payload.type;
+
+      let plainCtx = state.ctx;
+      plainCtx = Random.detach(plainCtx);
+      plainCtx = Events.detach(plainCtx);
+
       state = {
         ...state,
-        _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],
+        _undo: [...undo, { G: state.G, ctx: plainCtx, moveType }],
         _redo: [],
       };
     }
@@ -584,25 +568,20 @@ export function FlowWithPhases({
     return state;
   }
 
-  const canMakeMoveWrap = (G, ctx, opts) => {
+  const canMakeMove = (G, ctx, opts) => {
     const conf = phaseMap[ctx.phase];
-    const t = conf.allowedMoves(G, ctx);
+    const moves = conf.allowedMoves(G, ctx);
+    if (!moves) return true;
+    return moves.includes(opts.type);
+  };
 
-    if (Array.isArray(t)) {
-      const set = new Set(t);
-      if (!set.has(opts.type)) {
-        return false;
-      }
-    }
-
-    return canMakeMoveDefault(G, ctx, opts);
+  const canUndoMove = (G, ctx, moveName) => {
+    const conf = phaseMap[ctx.phase];
+    if (!conf.undoableMoves) return true;
+    return conf.undoableMoves.includes(moveName);
   };
 
   let enabledEvents = {};
-  if (undoableMoves === undefined || undoableMoves.length > 0) {
-    enabledEvents['undo'] = undoEvent;
-    enabledEvents['redo'] = redoEvent;
-  }
   if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
   if (endGame) enabledEvents['endGame'] = endGameEvent;
@@ -633,6 +612,7 @@ export function FlowWithPhases({
     },
     events: enabledEvents,
     processMove,
-    canMakeMove: canMakeMoveWrap,
+    canMakeMove,
+    canUndoMove,
   });
 }
