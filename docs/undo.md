@@ -9,16 +9,16 @@ before committing to one.
 
 #### Usage
 
-You can dispatch the `undo` and `redo` events in a similar
-manner like `endTurn`:
+You can use the `undo` and `redo` functions in a similar
+manner like `reset`:
 
 ```
 onClickUndoButton() {
-  this.props.events.undo();
+  this.props.undo();
 }
 
 onClickRedoButton() {
-  this.props.events.redo();
+  this.props.redo();
 }
 ```
 
@@ -48,7 +48,7 @@ This way only `playCard` will be undoable, but not `rollDice`.
 
 In order to deactivate this feature completely initialize
 `undoableMoves` with an empty array and the `undo` and `redo`
-events will not be available in the game.
+functions will not be available in the game.
 
 ```js
 Game({

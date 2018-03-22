@@ -28,7 +28,8 @@ import { Client as RawClient } from './client';
  * Returns:
  *   A React component that wraps board and provides an
  *   API through props for it to interact with the framework
- *   and dispatch actions such as MAKE_MOVE, GAME_EVENT and RESET.
+ *   and dispatch actions such as MAKE_MOVE, GAME_EVENT, RESET,
+ *   UNDO and REDO.
  */
 export function Client({
   game,
@@ -109,6 +110,8 @@ export function Client({
           gameID: this.props.gameID,
           playerID: this.props.playerID,
           reset: this.client.reset,
+          undo: this.client.undo,
+          redo: this.client.redo,
         });
       }
 
@@ -122,6 +125,8 @@ export function Client({
           gameID: this.props.gameID,
           playerID: this.props.playerID,
           reset: this.client.reset,
+          undo: this.client.undo,
+          redo: this.client.redo,
         });
       }
 

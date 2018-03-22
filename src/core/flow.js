@@ -77,6 +77,7 @@ export function Flow({
   processMove,
   optimisticUpdate,
   canMakeMove,
+  undoableMoves,
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
@@ -105,6 +106,7 @@ export function Flow({
     init,
 
     eventNames: Object.getOwnPropertyNames(events),
+    undoableMoves: undoableMoves,
 
     processMove: (state, action) => {
       return processMove(state, action, dispatch);
@@ -463,48 +465,6 @@ export function FlowWithPhases({
     return startTurn({ ...state, G, ctx }, conf);
   }
 
-  function undoEvent(state) {
-    const { _undo, _redo } = state;
-
-    if (_undo.length < 2) {
-      return state;
-    }
-
-    const last = _undo[_undo.length - 1];
-    const restore = _undo[_undo.length - 2];
-
-    // only allow undoableMoves to be undoable
-    if (undoableMoves && !undoableMoves.includes(last.moveType)) {
-      return state;
-    }
-
-    return {
-      ...state,
-      G: restore.G,
-      ctx: restore.ctx,
-      _undo: _undo.slice(0, _undo.length - 1),
-      _redo: [last, ..._redo],
-    };
-  }
-
-  function redoEvent(state) {
-    const { _undo, _redo } = state;
-
-    if (_redo.length == 0) {
-      return state;
-    }
-
-    const first = _redo[0];
-
-    return {
-      ...state,
-      G: first.G,
-      ctx: first.ctx,
-      _undo: [..._undo, first],
-      _redo: _redo.slice(1),
-    };
-  }
-
   function endGameEvent(state, arg) {
     if (arg === undefined) {
       arg = true;
@@ -556,9 +516,14 @@ export function FlowWithPhases({
     if (!endTurn) {
       const undo = state._undo || [];
       const moveType = action.payload.type;
+
+      let plainCtx = state.ctx;
+      plainCtx = Random.detach(plainCtx);
+      plainCtx = Events.detach(plainCtx);
+
       state = {
         ...state,
-        _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],
+        _undo: [...undo, { G: state.G, ctx: plainCtx, moveType }],
         _redo: [],
       };
     }
@@ -581,10 +546,6 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
-  if (undoableMoves === undefined || undoableMoves.length > 0) {
-    enabledEvents['undo'] = undoEvent;
-    enabledEvents['redo'] = redoEvent;
-  }
   if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
   if (endGame) enabledEvents['endGame'] = endGameEvent;
@@ -616,5 +577,6 @@ export function FlowWithPhases({
     events: enabledEvents,
     processMove,
     canMakeMove: canMakeMoveWrap,
+    undoableMoves: undoableMoves,
   });
 }

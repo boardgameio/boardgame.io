@@ -47,3 +47,17 @@ export const restore = state => ({
 export const reset = () => ({
   type: Actions.RESET,
 });
+
+/**
+ * Used to undo the last move.
+ */
+export const undo = () => ({
+  type: Actions.UNDO,
+});
+
+/**
+ * Used to redo the last undone move.
+ */
+export const redo = () => ({
+  type: Actions.REDO,
+});

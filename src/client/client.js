@@ -73,6 +73,17 @@ class _ClientImpl {
     this.reset = () => {
       this.store.dispatch(ActionCreators.reset());
     };
+    if (
+      game.flow.undoableMoves === undefined ||
+      game.flow.undoableMoves.length > 0
+    ) {
+      this.undo = () => {
+        this.store.dispatch(ActionCreators.undo());
+      };
+      this.redo = () => {
+        this.store.dispatch(ActionCreators.redo());
+      };
+    }
 
     this.store = null;
 
