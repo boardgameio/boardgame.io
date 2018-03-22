@@ -9,7 +9,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Board = ({ ctx, events, playerID }) => {
+const Board = ({ ctx, G, events, playerID }) => {
+  const playerData = G.players[playerID];
+
   const spectatorPlayer =
     playerID === null ? (
       <table>
@@ -53,22 +55,48 @@ const Board = ({ ctx, events, playerID }) => {
     currentPlayer = actionPlayer = undefined;
   }
 
+  const deepEquals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
   const buttons =
     playerID !== null ? (
       <div>
         <button
-          {...{ disabled: !ctx.actionPlayers.includes(playerID) }}
+          {...{
+            disabled:
+              playerID !== ctx.currentPlayer ||
+              !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]),
+          }}
           onClick={() => events.endTurn()}
         >
           endTurn
         </button>
         <button
-          {...{ disabled: !ctx.actionPlayers.includes(playerID) }}
+          {...{
+            disabled:
+              !ctx.actionPlayers.includes(playerID) ||
+              playerID === ctx.currentPlayer,
+          }}
           onClick={() => {
-            events.changeActionPlayers(['2', '1', '0']);
+            let ap = ctx.actionPlayers.filter(nr => nr !== playerID);
+            events.changeActionPlayers(ap);
           }}
         >
-          set action players
+          Drop Cards
+        </button>
+        <button
+          {...{
+            disabled:
+              ctx.currentPlayer !== playerID ||
+              !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]) ||
+              playerData.actions === 0,
+          }}
+          onClick={() => {
+            // Need to keep the currentPlayer inside actionPlayers - otherwise
+            // he will not be able to make any move anymore.
+            events.changeActionPlayers(['0', '1', '2']);
+          }}
+        >
+          Play Militia
         </button>
       </div>
     ) : (
@@ -78,7 +106,7 @@ const Board = ({ ctx, events, playerID }) => {
   const playerOrSpectator =
     playerID !== null ? (
       <span style={{ fontWeight: 'bold', fontSize: 24 }}>
-        Player {playerID}
+        {playerData.name}
       </span>
     ) : (
       <span style={{ fontWeight: 'bold', fontSize: 24 }}>Spectator</span>
@@ -98,6 +126,7 @@ const Board = ({ ctx, events, playerID }) => {
 Board.propTypes = {
   ctx: PropTypes.any,
   events: PropTypes.any,
+  G: PropTypes.any,
   playerID: PropTypes.any,
 };
 
