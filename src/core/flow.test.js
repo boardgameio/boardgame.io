@@ -727,38 +727,43 @@ test('change action players - reducer', () => {
   expect(state.ctx.actionPlayers).toMatchObject([0]);
   expect(state.G).toMatchObject({});
 });
+
 test('Turn timer', () => {
-  // WIP
-  // const onTurnEnd = jest.fn(G => G);
-  // let flow = FlowWithPhases({
-  //   secondsPerTurn: 2,
-  //   onTurnEnd,
-  // });
-  // let state = { ctx: flow.ctx(2) };
-  // flow.init(state);
-  // jest.advanceTimersByTime(1000);
-  // expect(onTurnEnd).not.toHaveBeenCalled();
-  // jest.advanceTimersByTime(1000);
-  // expect(onTurnEnd).toHaveBeenCalled();
+  const onTurnEnd = jest.fn(G => G);
+
+  let flow = FlowWithPhases({
+    secondsPerTurn: 2,
+    onTurnEnd,
+  });
+
+  let state = { ctx: flow.ctx(2) };
+
+  expect(onTurnEnd).not.toHaveBeenCalled();
+
+  flow.init(state);
+  expect(onTurnEnd).not.toHaveBeenCalled();
+  jest.advanceTimersByTime(2000);
+  expect(onTurnEnd).toHaveBeenCalled();
 });
 
 test('Phase timer', () => {
   const onPhaseEnd = jest.fn(G => G);
-  let flow = FlowWithPhases({
+  const flow = FlowWithPhases({
     phases: [
       {
-        name: 'test',
-        secondsPerPhase: 1,
+        name: 'TimerTest',
+        secondsPerPhase: 2,
         onPhaseEnd,
       },
     ],
   });
-  let state = { G: {}, ctx: flow.ctx(2) };
-  flow.init(state);
-  onPhaseEnd.mockReset();
-  jest.advanceTimersByTime(1000);
+
+  let state = { ctx: flow.ctx(2) };
+
   expect(onPhaseEnd).not.toHaveBeenCalled();
-  jest.advanceTimersByTime(1000);
-  // WIP
-  // expect(onPhaseEnd).toHaveBeenCalled();
+
+  flow.init(state);
+  expect(onPhaseEnd).not.toHaveBeenCalled();
+  jest.advanceTimersByTime(2000);
+  expect(onPhaseEnd).toHaveBeenCalled();
 });

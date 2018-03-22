@@ -9,7 +9,6 @@
 import { TurnOrder } from './turn-order';
 import { Random } from './random';
 import { Events } from './events';
-import { Timer } from './timer';
 
 /**
  * This function checks whether a player is allowed to make a move.
@@ -274,9 +273,6 @@ export function FlowWithPhases({
   let phaseKeys = [];
   let phaseMap = {};
 
-  const turnTimer = new Timer();
-  const phaseTimer = new Timer();
-
   for (let conf of phases) {
     phaseKeys.push(conf.name);
     phaseMap[conf.name] = conf;
@@ -341,23 +337,14 @@ export function FlowWithPhases({
     return playOrder[playOrderPos] + '';
   };
 
-  const onPhaseBeginWrap = (state, phaseConfig) => {
-    if (phaseConfig.secondsPerPhase) {
-      phaseTimer.pause();
-      phaseTimer.reset();
-      phaseTimer.Routine = () => {
-        const end = phaseConfig.endPhaseIf(state.G, state.ctx);
-        if (end) {
-          state = endPhaseEvent(state, end);
-        }
-      };
-      phaseTimer.start();
-    }
-    return phaseConfig.onPhaseBegin(state.G, state.ctx);
-  };
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
-    const G = onPhaseBeginWrap(state, config);
+    if (config.secondsPerPhase) {
+      setTimeout(() => {
+        state = endPhaseEvent(state);
+      }, config.secondsPerPhase * 1000);
+    }
+    const G = config.onPhaseBegin(state.G, state.ctx); // onPhaseBeginWrap();
 
     const ctx = { ...state.ctx };
     ctx.playOrderPos = config.turnOrder.first(G, ctx);
@@ -368,20 +355,13 @@ export function FlowWithPhases({
     return { ...state, G, ctx };
   };
 
-  const onTurnBeginWrap = (state, config) => {
-    if (config.secondsPerTurn) {
-      turnTimer.pause();
-      turnTimer.reset();
-      turnTimer.Routine = () => {
-        endTurnEvent(state);
-      };
-      turnTimer.start();
-    }
-    return config.onTurnBegin(state.G, state.ctx);
-  };
-
   const startTurn = function(state, config) {
-    const G = onTurnBeginWrap(state, config);
+    if (config.secondsPerTurn) {
+      setTimeout(() => {
+        endTurnEvent(state);
+      }, config.secondsPerTurn * 1000);
+    }
+    const G = config.onTurnBegin(state.G, state.ctx); // onTurnBeginWrap();
 
     let plainCtx = state.ctx;
     plainCtx = Random.detach(plainCtx);
