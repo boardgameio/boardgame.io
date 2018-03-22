@@ -379,7 +379,7 @@ export function FlowWithPhases({
   const startTurn = function(state, config) {
     if (config.secondsPerTurn) {
       setTimeout(() => {
-        endTurnEvent(state);
+        state = endTurnEvent(state);
       }, config.secondsPerTurn * 1000);
     }
     const G = config.onTurnBegin(state.G, state.ctx); // onTurnBeginWrap();
