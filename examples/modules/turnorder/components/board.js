@@ -9,7 +9,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Board = ({ ctx, G, events, playerID }) => {
+const Board = ({ ctx, G, playerID, events /*, moves*/ }) => {
+  console.log(`Board.render, G=${JSON.stringify(G)}`);
+
   const playerData = G.players[playerID];
 
   const spectatorPlayer =
@@ -91,9 +93,9 @@ const Board = ({ ctx, G, events, playerID }) => {
               playerData.actions === 0,
           }}
           onClick={() => {
-            // Need to keep the currentPlayer inside actionPlayers - otherwise
-            // he will not be able to make any move anymore.
+            // TODO does not work when done inside the move
             events.changeActionPlayers(['0', '1', '2']);
+            // moves.playMilitia();
           }}
         >
           Play Militia
@@ -106,7 +108,7 @@ const Board = ({ ctx, G, events, playerID }) => {
   const playerOrSpectator =
     playerID !== null ? (
       <span style={{ fontWeight: 'bold', fontSize: 24 }}>
-        {playerData.name}
+        {playerData.name}, Actions: {playerData.actions}
       </span>
     ) : (
       <span style={{ fontWeight: 'bold', fontSize: 24 }}>Spectator</span>
@@ -126,6 +128,7 @@ const Board = ({ ctx, G, events, playerID }) => {
 Board.propTypes = {
   ctx: PropTypes.any,
   events: PropTypes.any,
+  /* moves: PropTypes.any, */
   G: PropTypes.any,
   playerID: PropTypes.any,
 };
