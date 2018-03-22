@@ -510,6 +510,8 @@ test('undo / redo', () => {
 
   state = reducer(state, makeMove('move', 'B'));
   expect(state.G).toEqual({ A: true, B: true });
+  expect(state._undo[1].ctx.events).toBeUndefined();
+  expect(state._undo[1].ctx.random).toBeUndefined();
 
   state = reducer(state, undo());
   expect(state.G).toEqual({ A: true });

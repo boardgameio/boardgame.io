@@ -516,9 +516,14 @@ export function FlowWithPhases({
     if (!endTurn) {
       const undo = state._undo || [];
       const moveType = action.payload.type;
+
+      let plainCtx = state.ctx;
+      plainCtx = Random.detach(plainCtx);
+      plainCtx = Events.detach(plainCtx);
+
       state = {
         ...state,
-        _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],
+        _undo: [...undo, { G: state.G, ctx: plainCtx, moveType }],
         _redo: [],
       };
     }
