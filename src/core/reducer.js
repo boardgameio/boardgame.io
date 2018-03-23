@@ -191,10 +191,9 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
         const last = _undo[_undo.length - 1];
         const restore = _undo[_undo.length - 2];
-        const undoableMoves = game.flow.undoableMoves;
 
-        // only allow undoableMoves to be undoable
-        if (undoableMoves && !undoableMoves.includes(last.moveType)) {
+        // Only allow undoable moves to be undone.
+        if (!game.flow.canUndoMove(state.G, state.ctx, last.moveType)) {
           return state;
         }
 
