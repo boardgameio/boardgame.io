@@ -9,14 +9,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Board = ({ ctx, G, playerID, events /*, moves*/ }) => {
-  console.log(`Board.render, G=${JSON.stringify(G)}`);
-
+const Board = ({ ctx, G, playerID, events, moves }) => {
   const playerData = G.players[playerID];
 
   const spectatorPlayer =
     playerID === null ? (
-      <table>
+      <table style={{ width: '500px' }}>
         <tbody>
           <tr>
             <td>currentPlayer</td>
@@ -93,9 +91,7 @@ const Board = ({ ctx, G, playerID, events /*, moves*/ }) => {
               playerData.actions === 0,
           }}
           onClick={() => {
-            // TODO does not work when done inside the move
-            events.changeActionPlayers(['0', '1', '2']);
-            // moves.playMilitia();
+            moves.playMilitia();
           }}
         >
           Play Militia
@@ -128,7 +124,7 @@ const Board = ({ ctx, G, playerID, events /*, moves*/ }) => {
 Board.propTypes = {
   ctx: PropTypes.any,
   events: PropTypes.any,
-  /* moves: PropTypes.any, */
+  moves: PropTypes.any,
   G: PropTypes.any,
   playerID: PropTypes.any,
 };

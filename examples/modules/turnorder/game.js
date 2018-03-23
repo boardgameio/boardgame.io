@@ -15,7 +15,7 @@ const TurnExample = Game({
     players: [
       {
         name: 'Player 1',
-        actions: 1,
+        actions: 0,
       },
       {
         name: 'Player 2',
@@ -30,22 +30,24 @@ const TurnExample = Game({
 
   moves: {
     playMilitia: (G, ctx) => {
-      console.log(`MOVE: playMilitia`);
-      console.log(`BEFORE: G=${JSON.stringify(G, null, 4)}`);
-
       // Need to keep the currentPlayer inside actionPlayers - otherwise
       // he will not be able to make any move anymore.
-      // TODO does not work.
-      // ctx.events.changeActionPlayers(['0', '1', '2']);
+      ctx.events.changeActionPlayers(['0', '1', '2']);
 
       const currentPlayer = ctx.currentPlayer;
-
       const playersNext = [...G.players];
       playersNext[currentPlayer] = { ...G.players[currentPlayer], actions: 0 };
 
       const nextG = { players: playersNext };
-      console.log(`AFTER: G=${JSON.stringify(nextG, null, 4)}`);
       return nextG;
+    },
+  },
+  flow: {
+    onTurnBegin: (G, ctx) => {
+      const currentPlayer = ctx.currentPlayer;
+      const playersNext = [...G.players];
+      playersNext[currentPlayer] = { ...G.players[currentPlayer], actions: 1 };
+      return { players: playersNext };
     },
   },
 });
