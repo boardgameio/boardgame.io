@@ -587,7 +587,7 @@ export function FlowWithPhases({
   if (endGame) enabledEvents['endGame'] = endGameEvent;
 
   enabledEvents['changeActionPlayers'] = (state, actionPlayers) => {
-    return { G: state.G, ctx: { ...state.ctx, actionPlayers } };
+    return { ...state, ctx: { ...state.ctx, actionPlayers } };
   };
 
   return Flow({

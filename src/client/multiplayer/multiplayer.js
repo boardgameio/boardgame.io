@@ -6,13 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MAKE_MOVE, GAME_EVENT } from '../../core/action-types';
+import { RESTORE } from '../../core/action-types';
 import * as ActionCreators from '../../core/action-creators';
 import { createStore, applyMiddleware, compose } from 'redux';
 import io from 'socket.io-client';
 
 // The actions that are sent across the network.
-const whiteListedActions = new Set([MAKE_MOVE, GAME_EVENT]);
+const blacklistedActions = new Set([RESTORE]);
 
 /**
  * Multiplayer
@@ -56,7 +56,7 @@ export class Multiplayer {
       const state = getState();
       const result = next(action);
 
-      if (whiteListedActions.has(action.type) && action._remote != true) {
+      if (!blacklistedActions.has(action.type) && action._remote != true) {
         this.socket.emit(
           'action',
           action,

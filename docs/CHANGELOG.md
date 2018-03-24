@@ -1,14 +1,26 @@
+# v0.21.3
+
+#### Features
+
+* [[dc31a66](https://github.com/google/boardgame.io/commit/dc31a66)] expose allowedMoves in ctx
+* [[da4711a](https://github.com/google/boardgame.io/commit/da4711a)] make allowedMoves both global and phase-specific
+* [[9324c58](https://github.com/google/boardgame.io/commit/9324c58)] Allowed moves as function (#164)
+
+#### Bugfixes
+
+* [[5e49448](https://github.com/google/boardgame.io/commit/5e49448)] convert multiplayer move whitelist to blacklist
+
 # v0.21.2
 
 #### Bugfixes
 
-* [[27705d5](https://github.com/google/boardgame.io/commit/27705d5) pass Events API correctly inside events.update
+* [[27705d5](https://github.com/google/boardgame.io/commit/27705d5)] pass Events API correctly inside events.update
 
 # v0.21.1
 
 #### Bugfixes
 
-* [[87e77c1](https://github.com/google/boardgame.io/commit/87e77c1)correctly detach APIs from ctx in startTurn
+* [[87e77c1](https://github.com/google/boardgame.io/commit/87e77c1)] correctly detach APIs from ctx in startTurn
 
 # v0.21
 
