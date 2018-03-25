@@ -360,14 +360,18 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
-    if (config.secondsPerPhase) {
-      setTimeout(() => {
-        state = endPhaseEvent(state);
-      }, config.secondsPerPhase * 1000);
-    }
-    const G = config.onPhaseBegin(state.G, state.ctx); // onPhaseBeginWrap();
-
     const ctx = { ...state.ctx };
+    if (config.secondsPerPhase) {
+      ctx.phaseElapsedTime = 0;
+      const interval = setInterval(() => {
+        if (++ctx.phaseElapsedTime >= config.secondsPerPhase) {
+          clearInterval(interval);
+          state = endPhaseEvent(state);
+        }
+      }, 1000);
+    }
+    const G = config.onPhaseBegin(state.G, state.ctx);
+
     ctx.playOrderPos = config.turnOrder.first(G, ctx);
     ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
     ctx.actionPlayers = [ctx.currentPlayer];
@@ -377,10 +381,15 @@ export function FlowWithPhases({
   };
 
   const startTurn = function(state, config) {
+    const ctx = { ...state.ctx };
     if (config.secondsPerTurn) {
-      setTimeout(() => {
-        state = endTurnEvent(state);
-      }, config.secondsPerTurn * 1000);
+      ctx.turnElapsedTime = 0;
+      const interval = setInterval(() => {
+        if (++ctx.turnElapsedTime >= config.secondsPerTurn) {
+          clearInterval(interval);
+          state = endTurnEvent(state);
+        }
+      }, 1000);
     }
     const G = config.onTurnBegin(state.G, state.ctx); // onTurnBeginWrap();
 
@@ -389,7 +398,6 @@ export function FlowWithPhases({
     plainCtx = Events.detach(plainCtx);
     const _undo = [{ G, ctx: plainCtx }];
 
-    const ctx = { ...state.ctx };
     ctx.allowedMoves = config.allowedMoves(G, ctx);
 
     return { ...state, G, ctx, _undo, _redo: [] };
