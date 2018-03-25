@@ -38,6 +38,7 @@ export function Client({
   multiplayer,
   debug,
   enhancer,
+  ...props
 }) {
   if (debug === undefined) debug = true;
 
@@ -112,6 +113,7 @@ export function Client({
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
+          ...props,
         });
       }
 

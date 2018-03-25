@@ -75,6 +75,16 @@ test('board props', () => {
   expect(board.props().isActive).toBe(true);
   board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
+  // test passing extra props
+  Board = Client({
+    game: Game({}),
+    board: TestBoard,
+    doStuff: () => true,
+    extraValue: 55,
+  });
+  board = Enzyme.mount(<Board />).find(TestBoard);
+  expect(board.props().doStuff()).toBe(true);
+  expect(board.props().extraValue).toBe(55);
 });
 
 test('debug ui can be turned off', () => {
