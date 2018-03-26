@@ -104,7 +104,7 @@ export function Client({
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          isMultiplayer: multiplayer === true,
+          isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
           gameID: this.props.gameID,
@@ -119,7 +119,7 @@ export function Client({
         _debug = React.createElement(Debug, {
           gamestate: state,
           store: this.client.store,
-          isMultiplayer: multiplayer === true,
+          isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
           gameID: this.props.gameID,
