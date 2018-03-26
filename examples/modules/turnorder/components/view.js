@@ -19,21 +19,20 @@ const App = Client({
   multiplayer: true,
 });
 
-const style = { border: '1px solid black' };
 const Multiplayer = () => (
-  <div>
+  <div id="turn-order">
     <div className="runner" style={{ justifyContent: 'flex-start' }}>
       <div className="run">
         <App gameID="TurnExample" />
       </div>
       <div className="runner-vert">
-        <div className="run" style={style}>
+        <div className="run">
           <App gameID="TurnExample" playerID="0" />
         </div>
-        <div className="run" style={style}>
+        <div className="run">
           <App gameID="TurnExample" playerID="1" />
         </div>
-        <div className="run" style={style}>
+        <div className="run">
           <App gameID="TurnExample" playerID="2" />
         </div>
       </div>
