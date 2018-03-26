@@ -21,10 +21,9 @@ const App = Client({
 
 const Multiplayer = () => (
   <div id="turn-order">
-    <div className="runner" style={{ justifyContent: 'flex-start' }}>
-      <div className="run">
-        <App gameID="TurnExample" />
-      </div>
+    <div>
+      <App gameID="TurnExample" />
+
       <div className="runner-vert">
         <div className="run">
           <App gameID="TurnExample" playerID="0" />

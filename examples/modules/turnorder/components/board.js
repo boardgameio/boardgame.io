@@ -45,41 +45,29 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
     return <Spectator {...{ ctx }} />;
   }
 
-  let currentPlayer =
-    playerID === ctx.currentPlayer ? (
-      <div style={{ color: 'red' }}>CurrentPlayer</div>
-    ) : (
-      <div style={{ color: 'lightgray' }}>CurrentPlayer</div>
-    );
-  let actionPlayer = ctx.actionPlayers.includes(playerID) ? (
-    <div style={{ color: 'red' }}>ActionPlayer</div>
-  ) : (
-    <div style={{ color: 'lightgray' }}>ActionPlayer</div>
+  const currentPlayer = playerID === ctx.currentPlayer && (
+    <div className="badge">CurrentPlayer</div>
   );
-  if (playerID === null) {
-    currentPlayer = actionPlayer = undefined;
-  }
+
+  const actionPlayer = ctx.actionPlayers.includes(playerID) && (
+    <div className="badge">ActionPlayer</div>
+  );
 
   const deepEquals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+  const canEndTurn = deepEquals(ctx.actionPlayers, [playerID]);
+  const canDrop =
+    ctx.actionPlayers.includes(playerID) && ctx.currentPlayer != playerID;
+  const canPlay = canEndTurn && playerData.actions > 0;
+
   const buttons = (
     <div>
-      <button
-        {...{
-          disabled:
-            playerID !== ctx.currentPlayer ||
-            !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]),
-        }}
-        onClick={() => events.endTurn()}
-      >
+      <button disabled={!canEndTurn} onClick={() => events.endTurn()}>
         endTurn
       </button>
+
       <button
-        {...{
-          disabled:
-            !ctx.actionPlayers.includes(playerID) ||
-            playerID === ctx.currentPlayer,
-        }}
+        disabled={!canDrop}
         onClick={() => {
           let ap = ctx.actionPlayers.filter(nr => nr !== playerID);
           events.changeActionPlayers(ap);
@@ -87,13 +75,9 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
       >
         Drop Cards
       </button>
+
       <button
-        {...{
-          disabled:
-            ctx.currentPlayer !== playerID ||
-            !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]) ||
-            playerData.actions === 0,
-        }}
+        disabled={!canPlay}
         onClick={() => {
           moves.playMilitia();
         }}
@@ -106,7 +90,8 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
   return (
     <div>
       <span>
-        {playerData.name}, Actions: {playerData.actions}
+        <div>{playerData.name}</div>
+        <div>Actions: {playerData.actions}</div>
       </span>
       {buttons}
       {currentPlayer}

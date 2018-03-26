@@ -14,3 +14,21 @@
   font-size: 20px;
   line-height: 20px;
 }
+
+#turn-order .runner-vert {
+  margin-left: 50px;
+}
+
+#turn-order .run {
+  background: #fafafa;
+  border-bottom: 1px dashed #aaa;
+  width: 400px;
+  height: 200px;
+  text-align: center;
+  padding: 0;
+}
+
+#turn-order .badge {
+  color: #faa;
+  font-weight: bold;
+}
