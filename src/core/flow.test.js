@@ -11,8 +11,6 @@ import { createGameReducer } from './reducer';
 import { makeMove, gameEvent, reset, undo, redo } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 
-jest.useFakeTimers();
-
 test('Flow', () => {
   const flow = Flow({});
   const state = {};
@@ -642,8 +640,9 @@ test('Turn timer', () => {
 
   flow.init(state);
   expect(onTurnEnd).not.toHaveBeenCalled();
-  jest.advanceTimersByTime(2000);
-  expect(onTurnEnd).toHaveBeenCalled();
+  setTimeout(() => {
+    expect(onTurnEnd).toHaveBeenCalled();
+  }, 2000);
 });
 
 test('Phase timer', () => {
@@ -664,8 +663,9 @@ test('Phase timer', () => {
 
   flow.init(state);
   expect(onPhaseEnd).not.toHaveBeenCalled();
-  jest.advanceTimersByTime(2000);
-  expect(onPhaseEnd).toHaveBeenCalled();
+  setTimeout(() => {
+    expect(onPhaseEnd).toHaveBeenCalled();
+  }, 2000);
 });
 
 test('undo / redo restricted by undoableMoves', () => {
