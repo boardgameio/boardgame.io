@@ -3,3 +3,14 @@
   flex-direction: column;
   justify-content: space-around;
 }
+
+#turn-order table {
+  width: 400px;
+  border-collapse: collapse;
+}
+
+#turn-order td {
+  border: 1px solid #aaa;
+  font-size: 20px;
+  line-height: 20px;
+}

@@ -9,36 +9,41 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+const Spectator = ({ ctx }) => (
+  <table>
+    <tbody>
+      <tr>
+        <td>currentPlayer</td>
+        <td>
+          <pre>{JSON.stringify(ctx.currentPlayer)}</pre>
+        </td>
+      </tr>
+      <tr>
+        <td>PlayOrder</td>
+        <td>
+          <pre>{JSON.stringify(ctx.playOrder)}</pre>
+        </td>
+      </tr>
+      <tr>
+        <td>actionPlayers</td>
+        <td>
+          <pre>{JSON.stringify(ctx.actionPlayers)}</pre>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+);
+
+Spectator.propTypes = {
+  ctx: PropTypes.any,
+};
+
 const Board = ({ ctx, G, playerID, events, moves }) => {
   const playerData = G.players[playerID];
 
-  const spectatorPlayer =
-    playerID === null ? (
-      <table style={{ width: '500px' }}>
-        <tbody>
-          <tr>
-            <td>currentPlayer</td>
-            <td>
-              <pre>{JSON.stringify(ctx.currentPlayer)}</pre>
-            </td>
-          </tr>
-          <tr>
-            <td>PlayOrder</td>
-            <td>
-              <pre>{JSON.stringify(ctx.playOrder)}</pre>
-            </td>
-          </tr>
-          <tr>
-            <td>actionPlayers</td>
-            <td>
-              <pre>{JSON.stringify(ctx.actionPlayers)}</pre>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    ) : (
-      <span />
-    );
+  if (playerID === null) {
+    return <Spectator {...{ ctx }} />;
+  }
 
   let currentPlayer =
     playerID === ctx.currentPlayer ? (
@@ -57,63 +62,52 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
 
   const deepEquals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-  const buttons =
-    playerID !== null ? (
-      <div>
-        <button
-          {...{
-            disabled:
-              playerID !== ctx.currentPlayer ||
-              !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]),
-          }}
-          onClick={() => events.endTurn()}
-        >
-          endTurn
-        </button>
-        <button
-          {...{
-            disabled:
-              !ctx.actionPlayers.includes(playerID) ||
-              playerID === ctx.currentPlayer,
-          }}
-          onClick={() => {
-            let ap = ctx.actionPlayers.filter(nr => nr !== playerID);
-            events.changeActionPlayers(ap);
-          }}
-        >
-          Drop Cards
-        </button>
-        <button
-          {...{
-            disabled:
-              ctx.currentPlayer !== playerID ||
-              !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]) ||
-              playerData.actions === 0,
-          }}
-          onClick={() => {
-            moves.playMilitia();
-          }}
-        >
-          Play Militia
-        </button>
-      </div>
-    ) : (
-      ''
-    );
-
-  const playerOrSpectator =
-    playerID !== null ? (
-      <span style={{ fontWeight: 'bold', fontSize: 24 }}>
-        {playerData.name}, Actions: {playerData.actions}
-      </span>
-    ) : (
-      <span style={{ fontWeight: 'bold', fontSize: 24 }}>Spectator</span>
-    );
+  const buttons = (
+    <div>
+      <button
+        {...{
+          disabled:
+            playerID !== ctx.currentPlayer ||
+            !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]),
+        }}
+        onClick={() => events.endTurn()}
+      >
+        endTurn
+      </button>
+      <button
+        {...{
+          disabled:
+            !ctx.actionPlayers.includes(playerID) ||
+            playerID === ctx.currentPlayer,
+        }}
+        onClick={() => {
+          let ap = ctx.actionPlayers.filter(nr => nr !== playerID);
+          events.changeActionPlayers(ap);
+        }}
+      >
+        Drop Cards
+      </button>
+      <button
+        {...{
+          disabled:
+            ctx.currentPlayer !== playerID ||
+            !deepEquals(ctx.actionPlayers, [ctx.currentPlayer]) ||
+            playerData.actions === 0,
+        }}
+        onClick={() => {
+          moves.playMilitia();
+        }}
+      >
+        Play Militia
+      </button>
+    </div>
+  );
 
   return (
     <div>
-      {playerOrSpectator}
-      {spectatorPlayer}
+      <span>
+        {playerData.name}, Actions: {playerData.actions}
+      </span>
       {buttons}
       {currentPlayer}
       {actionPlayer}
