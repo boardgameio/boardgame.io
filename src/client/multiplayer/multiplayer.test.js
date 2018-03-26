@@ -105,7 +105,7 @@ test('multiplayer', () => {
   expect(mockSocket.emit).lastCalledWith('sync', 'default:id', null, 2);
 });
 
-test('move whitelist', () => {
+test('move blacklist', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer({ socket: mockSocket });
   const game = Game({});
@@ -123,7 +123,7 @@ test('move whitelist', () => {
   expect(mockSocket.emit).toHaveBeenCalled();
   mockSocket.emit.mockReset();
 
-  store.dispatch({ type: 'unknown' });
+  store.dispatch(ActionCreators.restore());
   expect(mockSocket.emit).not.toHaveBeenCalled();
   mockSocket.emit.mockReset();
 });
