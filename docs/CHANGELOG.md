@@ -1,3 +1,16 @@
+# v0.21.4
+
+#### Features
+
+* [[387d413](https://github.com/google/boardgame.io/commit/387d413)] Debug UI CSS improvements
+* [[2105f46](https://github.com/google/boardgame.io/commit/2105f46)] call endTurnIf inside endPhase
+* [[9b0324c](https://github.com/google/boardgame.io/commit/9b0324c)] allow setting the next player via endTurn
+* [[f76f97e](https://github.com/google/boardgame.io/commit/f76f97e)] correct isMultiplayer
+
+#### Bugfixes
+
+* [[278b369](https://github.com/google/boardgame.io/commit/278b369)] Fix bug that was ending phase incorrectly (#176)
+
 # v0.21.3
 
 #### Features
