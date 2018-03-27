@@ -1,5 +1,11 @@
 # v0.21.4
 
+#### Bugfixes
+
+* [[55715c9](https://github.com/google/boardgame.io/commit/55715c9)] Fix undefined ctx in onPhaseBegin
+
+# v0.21.4
+
 #### Features
 
 * [[387d413](https://github.com/google/boardgame.io/commit/387d413)] Debug UI CSS improvements
