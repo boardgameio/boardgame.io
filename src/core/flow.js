@@ -7,6 +7,38 @@
  */
 
 import { TurnOrder } from './turn-order';
+import { Random } from './random';
+import { Events } from './events';
+
+/**
+ * This function checks whether a player is allowed to make a move.
+ *
+ * @param {object} G     - The Game instance
+ * @param {object} ctx   - The ctx instance
+ * @param {object} opts  - Options - used here to transport the playerID.
+ */
+function canPlayerMakeMove(G, ctx, opts) {
+  const { playerID } = opts || {};
+
+  // In multiplayer mode, the default playerID is null, which corresponds
+  // to a spectator that can't make moves.
+  if (playerID === null) {
+    return true;
+  }
+
+  // In singleplayer mode (and most unit tests), the default playerID
+  // is undefined, and can always make moves.
+  if (playerID === undefined) {
+    return true;
+  }
+
+  const actionPlayers = ctx.actionPlayers || [];
+
+  // Explicitly do not allow the current player
+  // When he is allowed to make a move, his playerID
+  // must be included in actionPlayers.
+  return actionPlayers.includes(playerID) || actionPlayers.includes('any');
+}
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -24,10 +56,6 @@ import { TurnOrder } from './turn-order';
  *                             reducer will handle. Each function
  *                             has the following signature:
  *                             ({G, ctx}) => {G, ctx}
- * @param {...object} validator - A move validator that returns false
- *                                if a particular type of move is invalid
- *                                at this point in the game.
- *                                (G, ctx, moveName) => boolean
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
@@ -36,20 +64,32 @@ import { TurnOrder } from './turn-order';
  *                                       the client while waiting for
  *                                       the result of execution from
  *                                       the server.
+ * @param {...object} canMakeMove - (G, ctx, {type, playerID, args}) => boolean
+ *                                  Predicate to determine whether a
+ *                                  particular move is playable at
+ *                                  this time for a given set of args
+ *                                  and playerID.
+ *
+ * @param {...object} canUndoMove - (G, ctx, moveName) => boolean
+ *                                  Predicate to determine whether a
+ *                                  particular move is undoable at this
+ *                                  time.
  */
 export function Flow({
   ctx,
   events,
   init,
-  validator,
   processMove,
   optimisticUpdate,
+  canMakeMove,
+  canUndoMove,
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
   if (!init) init = state => state;
-  if (!validator) validator = () => true;
   if (!processMove) processMove = state => state;
+  if (!canMakeMove) canMakeMove = () => true;
+  if (!canUndoMove) canUndoMove = () => true;
 
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -70,13 +110,7 @@ export function Flow({
   return {
     ctx,
     init,
-
-    // Disallow moves once the game is over.
-    // Also call any provided additional validation.
-    validator: (G, ctx, move) => {
-      if (ctx.gameover !== undefined) return false;
-      return validator(G, ctx, move);
-    },
+    canUndoMove,
 
     eventNames: Object.getOwnPropertyNames(events),
 
@@ -89,6 +123,15 @@ export function Flow({
     },
 
     optimisticUpdate,
+
+    canMakeMove: (G, ctx, opts) => {
+      // Disallow moves once the game is over.
+      if (ctx.gameover !== undefined) return false;
+      // Disallow moves if the current player cannot play.
+      if (!canPlayerMakeMove(G, ctx, opts)) return false;
+      // User-provided move validation.
+      return canMakeMove(G, ctx, opts);
+    },
   };
 }
 
@@ -130,6 +173,18 @@ export function Flow({
  *
  * @param {...object} endPhase - Set to false to disable the `endPhase` event.
  *
+ * @param {...object} endGame - Set to true to enable the `endGame` event.
+ *
+ * @param {...object} allowedMoves - List of moves that are allowed.
+ *                                   This can be either a list of
+ *                                   move names or a function with the
+ *                                   signature (G, ctx) => [].
+ *                                   (default: null, i.e. all moves are allowed).
+ *
+ * @param {...object} undoableMoves - List of moves that are undoable,
+ *                                   (default: null, i.e. all moves are undoable).
+ *
+ *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
  *                                       be executed optimistically on
@@ -140,6 +195,11 @@ export function Flow({
  * @param {...object} phases - A list of phases in the game.
  *
  * Each phase is described by an object:
+ *
+ * All the properties below override their global equivalents
+ * above whenever they are defined (i.e. the global setting
+ * is used if a phase-specific setting is absent).
+ *
  * {
  *   name: 'phase_name',
  *
@@ -179,8 +239,12 @@ export function Flow({
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
  *
- *   // List of moves that are allowed in this phase.
- *   allowedMoves: ['moveA', ...],
+ *   // List of moves or a function that returns a list of moves
+ *   // that are allowed in this phase.
+ *   allowedMoves: (G, ctx) => ['moveA', ...],
+ *
+ *   // List of moves that are undoable.
+ *   undoableMoves: ['moveA', ...],
  * }
  */
 export function FlowWithPhases({
@@ -194,6 +258,9 @@ export function FlowWithPhases({
   turnOrder,
   endTurn,
   endPhase,
+  endGame,
+  undoableMoves,
+  allowedMoves,
   optimisticUpdate,
 }) {
   // Attach defaults.
@@ -202,6 +269,9 @@ export function FlowWithPhases({
   }
   if (endTurn === undefined) {
     endTurn = true;
+  }
+  if (endGame === undefined) {
+    endGame = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -213,6 +283,8 @@ export function FlowWithPhases({
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
+  if (allowedMoves === undefined) allowedMoves = null;
+  if (undoableMoves === undefined) undoableMoves = null;
 
   let phaseKeys = [];
   let phaseMap = {};
@@ -252,6 +324,16 @@ export function FlowWithPhases({
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
+    if (conf.undoableMoves === undefined) {
+      conf.undoableMoves = undoableMoves;
+    }
+    if (conf.allowedMoves === undefined) {
+      conf.allowedMoves = allowedMoves;
+    }
+    if (typeof conf.allowedMoves !== 'function') {
+      const t = conf.allowedMoves;
+      conf.allowedMoves = () => t;
+    }
   }
 
   const endTurnIfWrap = (G, ctx) => {
@@ -262,18 +344,38 @@ export function FlowWithPhases({
     return conf.endTurnIf(G, ctx);
   };
 
+  const getCurrentPlayer = (playOrder, playOrderPos) => {
+    if (playOrderPos === undefined) {
+      return 'any';
+    }
+    return playOrder[playOrderPos] + '';
+  };
+
   // Helper to perform start-of-phase initialization.
-  const startPhase = function(state, phaseConfig) {
+  const startPhase = function(state, config) {
+    const G = config.onPhaseBegin(state.G, ctx);
+
     const ctx = { ...state.ctx };
-    const G = phaseConfig.onPhaseBegin(state.G, ctx);
-    ctx.currentPlayer = phaseConfig.turnOrder.first(G, ctx);
+    ctx.playOrderPos = config.turnOrder.first(G, ctx);
+    ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
+    ctx.actionPlayers = [ctx.currentPlayer];
+    ctx.allowedMoves = config.allowedMoves(G, ctx);
+
     return { ...state, G, ctx };
   };
 
   const startTurn = function(state, config) {
+    const G = config.onTurnBegin(state.G, state.ctx);
+
+    let plainCtx = state.ctx;
+    plainCtx = Random.detach(plainCtx);
+    plainCtx = Events.detach(plainCtx);
+    const _undo = [{ G, ctx: plainCtx }];
+
     const ctx = { ...state.ctx };
-    const G = config.onTurnBegin(state.G, ctx);
-    return { ...state, G, ctx };
+    ctx.allowedMoves = config.allowedMoves(G, ctx);
+
+    return { ...state, G, ctx, _undo, _redo: [] };
   };
 
   const startGame = function(state, config) {
@@ -340,8 +442,7 @@ export function FlowWithPhases({
    * Passes the turn to the next turn in a round-robin fashion.
    */
   function endTurnEvent(state) {
-    let G = state.G;
-    let ctx = state.ctx;
+    let { G, ctx } = state;
 
     const conf = phaseMap[ctx.phase];
 
@@ -360,11 +461,20 @@ export function FlowWithPhases({
     }
 
     // Update current player.
-    const currentPlayer = conf.turnOrder.next(G, ctx);
+    const playOrderPos = conf.turnOrder.next(G, ctx);
+    const currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
+    const actionPlayers = [currentPlayer];
     // Update turn.
     const turn = ctx.turn + 1;
     // Update state.
-    ctx = { ...ctx, currentPlayer, turn, currentPlayerMoves: 0 };
+    ctx = {
+      ...ctx,
+      playOrderPos,
+      currentPlayer,
+      actionPlayers,
+      turn,
+      currentPlayerMoves: 0,
+    };
 
     // End phase if condition is met.
     const end = conf.endPhaseIf(G, ctx);
@@ -375,12 +485,22 @@ export function FlowWithPhases({
     return startTurn({ ...state, G, ctx }, conf);
   }
 
-  function processMove(state, action, dispatch) {
-    // Update currentPlayerMoves.
-    const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
-    state = { ...state, ctx: { ...state.ctx, currentPlayerMoves } };
+  function endGameEvent(state, arg) {
+    if (arg === undefined) {
+      arg = true;
+    }
 
+    return { ...state, ctx: { ...state.ctx, gameover: arg } };
+  }
+
+  function processMove(state, action, dispatch) {
     const conf = phaseMap[state.ctx.phase];
+
+    const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
+    state = {
+      ...state,
+      ctx: { ...state.ctx, currentPlayerMoves },
+    };
 
     const G = conf.onMove(state.G, state.ctx, action);
     state = { ...state, G };
@@ -388,18 +508,14 @@ export function FlowWithPhases({
     const gameover = conf.endGameIf(state.G, state.ctx);
 
     // End the turn automatically if endTurnIf is true  or if endGameIf returns.
-    if (endTurnIfWrap(state.G, state.ctx) || gameover !== undefined) {
+    const endTurn = endTurnIfWrap(state.G, state.ctx);
+    if (endTurn || gameover !== undefined) {
       state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
-    }
-
-    // End the game automatically if endGameIf returns.
-    if (gameover !== undefined) {
-      return { ...state, ctx: { ...state.ctx, gameover } };
     }
 
     // End the phase automatically if endPhaseIf is true.
     const end = conf.endPhaseIf(state.G, state.ctx);
-    if (end) {
+    if (end || gameover !== undefined) {
       state = dispatch(state, {
         type: 'endPhase',
         args: [end],
@@ -407,21 +523,55 @@ export function FlowWithPhases({
       });
     }
 
+    // End the game automatically if endGameIf returns.
+    if (gameover !== undefined) {
+      return { ...state, ctx: { ...state.ctx, gameover } };
+    }
+
+    // Update allowedMoves.
+    const allowedMoves = conf.allowedMoves(state.G, state.ctx);
+    state = { ...state, ctx: { ...state.ctx, allowedMoves } };
+
+    // Update undo / redo state.
+    if (!endTurn) {
+      const undo = state._undo || [];
+      const moveType = action.payload.type;
+
+      let plainCtx = state.ctx;
+      plainCtx = Random.detach(plainCtx);
+      plainCtx = Events.detach(plainCtx);
+
+      state = {
+        ...state,
+        _undo: [...undo, { G: state.G, ctx: plainCtx, moveType }],
+        _redo: [],
+      };
+    }
+
     return state;
   }
 
-  const validator = (G, ctx, move) => {
+  const canMakeMove = (G, ctx, opts) => {
     const conf = phaseMap[ctx.phase];
-    if (conf.allowedMoves) {
-      const set = new Set(conf.allowedMoves);
-      return set.has(move.type);
-    }
-    return true;
+    const moves = conf.allowedMoves(G, ctx);
+    if (!moves) return true;
+    return moves.includes(opts.type);
+  };
+
+  const canUndoMove = (G, ctx, moveName) => {
+    const conf = phaseMap[ctx.phase];
+    if (!conf.undoableMoves) return true;
+    return conf.undoableMoves.includes(moveName);
   };
 
   let enabledEvents = {};
   if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
   if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
+  if (endGame) enabledEvents['endGame'] = endGameEvent;
+
+  enabledEvents['changeActionPlayers'] = (state, actionPlayers) => {
+    return { ...state, ctx: { ...state.ctx, actionPlayers } };
+  };
 
   return Flow({
     ctx: numPlayers => ({
@@ -429,6 +579,8 @@ export function FlowWithPhases({
       turn: 0,
       currentPlayer: '0',
       currentPlayerMoves: 0,
+      playOrder: Array.from(Array(numPlayers), (d, i) => i),
+      playOrderPos: 0,
       phase: phases[0].name,
     }),
     init: state => {
@@ -442,7 +594,8 @@ export function FlowWithPhases({
       return optimisticUpdate(G, ctx, action);
     },
     events: enabledEvents,
-    validator,
     processMove,
+    canMakeMove,
+    canUndoMove,
   });
 }

@@ -52,7 +52,7 @@ export function createMoveDispatchers(moveNames, store, playerID) {
  * Implementation of Client (see below).
  */
 class _ClientImpl {
-  constructor({ game, numPlayers, multiplayer, gameID, playerID }) {
+  constructor({ game, numPlayers, multiplayer, gameID, playerID, enhancer }) {
     this.game = game;
     this.playerID = playerID;
     this.gameID = gameID;
@@ -71,6 +71,16 @@ class _ClientImpl {
       multiplayer,
     });
 
+    this.reset = () => {
+      this.store.dispatch(ActionCreators.reset());
+    };
+    this.undo = () => {
+      this.store.dispatch(ActionCreators.undo());
+    };
+    this.redo = () => {
+      this.store.dispatch(ActionCreators.redo());
+    };
+
     this.store = null;
 
     if (multiplayer) {
@@ -81,9 +91,14 @@ class _ClientImpl {
         numPlayers,
         server,
       });
-      this.store = this.multiplayerClient.createStore(GameReducer);
+      this.store = this.multiplayerClient.createStore(GameReducer, enhancer);
     } else {
-      this.store = createStore(GameReducer);
+      this.store = createStore(GameReducer, enhancer);
+
+      // If no playerID was provided, set it to undefined.
+      if (this.playerID === null) {
+        this.playerID = undefined;
+      }
     }
 
     this.createDispatchers();
@@ -108,8 +123,9 @@ class _ClientImpl {
         isActive = false;
       }
       if (
-        state.ctx.currentPlayer != 'any' &&
-        this.playerID != state.ctx.currentPlayer
+        !this.game.flow.canMakeMove(state.G, state.ctx, {
+          playerID: this.playerID,
+        })
       ) {
         isActive = false;
       }

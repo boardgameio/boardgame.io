@@ -44,13 +44,39 @@ test('multiplayer server set when provided', () => {
   expect(client.multiplayerClient.socket.io.engine.port).toEqual(port);
 });
 
+test('accepts enhancer for store', () => {
+  let spyDispatcher;
+  const spyEnhancer = vanillaCreateStore => (...args) => {
+    const vanillaStore = vanillaCreateStore(...args);
+    return {
+      ...vanillaStore,
+      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+    };
+  };
+  const client = Client({
+    game: Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    }),
+    enhancer: spyEnhancer,
+  });
+
+  expect(spyDispatcher.mock.calls.length).toBe(0);
+  client.moves.A(42);
+  expect(spyDispatcher.mock.calls.length).toBe(1);
+});
+
 test('event dispatchers', () => {
   {
     const game = Game({});
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
+    expect(Object.getOwnPropertyNames(api)).toEqual([
+      'endTurn',
+      'changeActionPlayers',
+    ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
@@ -60,12 +86,18 @@ test('event dispatchers', () => {
     const game = Game({
       flow: {
         endPhase: true,
+        endGame: true,
       },
     });
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
+    expect(Object.getOwnPropertyNames(api)).toEqual([
+      'endTurn',
+      'endPhase',
+      'endGame',
+      'changeActionPlayers',
+    ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
@@ -74,13 +106,36 @@ test('event dispatchers', () => {
   {
     const game = Game({
       flow: {
+        endPhase: false,
         endTurn: false,
+      },
+
+      phases: [{ name: 'default' }],
+    });
+    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const store = createStore(reducer);
+    const api = createEventDispatchers(game.flow.eventNames, store);
+    expect(Object.getOwnPropertyNames(api)).toEqual(['changeActionPlayers']);
+  }
+
+  {
+    const game = Game({
+      flow: {
+        endPhase: true,
+        undoableMoves: ['A'],
       },
     });
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([]);
+    expect(Object.getOwnPropertyNames(api)).toEqual([
+      'endTurn',
+      'endPhase',
+      'changeActionPlayers',
+    ]);
+    expect(store.getState().ctx.turn).toBe(0);
+    api.endTurn();
+    expect(store.getState().ctx.turn).toBe(1);
   }
 });
 

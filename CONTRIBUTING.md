@@ -45,15 +45,6 @@ Use the following command to preview them:
 $ npm run docsify
 ```
 
-#### `ptal` label
-
-Mark your Pull Requests with a label `ptal` (Please Take A Look).
-This label is available in the "Labels" dropdown on the right.
-This label will be removed by an admin when they request changes,
-and you should re-add it again when it is ready to be reviewed again.
-This avoids miscommunication about who is waiting for whom,
-and also allows easy filtering of PR's that need attention right now.
-
 ## Contributor License Agreement
 
 Contributions to this project must be accompanied by a Contributor License

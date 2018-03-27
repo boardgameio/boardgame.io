@@ -9,12 +9,12 @@
 const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
-import { InMemory } from './db';
+import { InMemory, Mongo } from './db';
 import { createGameReducer } from '../core/reducer';
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
 
-function Server({ games, db, _clientInfo, _roomInfo }) {
+export function Server({ games, db, _clientInfo, _roomInfo }) {
   const app = new Koa();
   const io = new IO({
     ioOptions: {
@@ -26,7 +26,11 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
   io.attach(app);
 
   if (db === undefined) {
-    db = new InMemory();
+    if (process.env.MONGO_URI) {
+      db = new Mongo({ url: process.env.MONGO_URI });
+    } else {
+      db = new InMemory();
+    }
   }
 
   const clientInfo = _clientInfo || new Map();
@@ -54,16 +58,17 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
           return;
         }
 
-        // Bail out if the player making the move is not
-        // the current player.
+        // Check whether the player is allowed to make the move
         if (
-          state.ctx.currentPlayer != 'any' &&
-          playerID != state.ctx.currentPlayer
+          !game.flow.canMakeMove(state.G, state.ctx, {
+            ...action.payload,
+            playerID,
+          })
         ) {
           return;
         }
 
-        if (state._id == stateID) {
+        if (state._stateID == stateID) {
           // Update server's version of the store.
           store.dispatch(action);
           state = store.getState();
@@ -85,8 +90,10 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
             }
           }
 
-          db.set(gameID, store.getState());
+          await db.set(gameID, store.getState());
         }
+
+        return;
       });
 
       socket.on('sync', async (gameID, playerID, numPlayers) => {
@@ -102,6 +109,7 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
         clientInfo.set(socket.id, { gameID, playerID });
 
         let state = await db.get(gameID);
+
         if (state === undefined) {
           const store = Redux.createStore(reducer);
           state = store.getState();
@@ -129,7 +137,12 @@ function Server({ games, db, _clientInfo, _roomInfo }) {
     });
   }
 
-  return app;
+  return {
+    app,
+    db,
+    run: async (port, callback) => {
+      await db.connect();
+      app.listen(port, callback);
+    },
+  };
 }
-
-export default Server;

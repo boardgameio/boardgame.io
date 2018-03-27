@@ -40,7 +40,7 @@ export class GameLog extends React.Component {
         action.type == Actions.GAME_EVENT ||
         action.type == Actions.MAKE_MOVE
       ) {
-        action.remote = true; // don't broadcast action.
+        action._remote = true; // don't broadcast action.
         this.props.store.dispatch(action);
       }
     }
@@ -58,7 +58,7 @@ export class GameLog extends React.Component {
       const item = state.log[i];
       if (
         (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') ||
-        item.type == 'endTurn'
+        ['endTurn', 'endPhase'].includes(item.type)
       ) {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);

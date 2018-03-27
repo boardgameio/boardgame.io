@@ -6,10 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MAKE_MOVE, GAME_EVENT } from '../../core/action-types';
+import { RESTORE } from '../../core/action-types';
 import * as ActionCreators from '../../core/action-creators';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import io from 'socket.io-client';
+
+// The actions that are sent across the network.
+const blacklistedActions = new Set([RESTORE]);
 
 /**
  * Multiplayer
@@ -42,32 +45,32 @@ export class Multiplayer {
    * Creates a Redux store with some middleware that sends actions
    * to the server whenever they are dispatched.
    * @param {function} reducer - The game reducer.
+   * @param {function} enhancer - optional enhancer to apply to Redux store
    */
-  createStore(reducer) {
+  createStore(reducer, enhancer) {
     this.store = null;
-
-    const whiteListedActions = new Set([MAKE_MOVE, GAME_EVENT]);
 
     // Redux middleware to emit a message on a socket
     // whenever an action is dispatched.
-    const SocketUpdate = ({ getState }) => next => action => {
+    const SocketEnhancer = applyMiddleware(({ getState }) => next => action => {
       const state = getState();
       const result = next(action);
 
-      if (whiteListedActions.has(action.type) && action._remote != true) {
+      if (!blacklistedActions.has(action.type) && action._remote != true) {
         this.socket.emit(
           'action',
           action,
-          state._id,
+          state._stateID,
           this.gameID,
           this.playerID
         );
       }
 
       return result;
-    };
+    });
 
-    this.store = createStore(reducer, applyMiddleware(SocketUpdate));
+    enhancer = enhancer ? compose(enhancer, SocketEnhancer) : SocketEnhancer;
+    this.store = createStore(reducer, enhancer);
 
     return this.store;
   }
@@ -85,7 +88,10 @@ export class Multiplayer {
     }
 
     this.socket.on('sync', (gameID, state) => {
-      if (gameID == this.gameID) {
+      if (
+        gameID == this.gameID &&
+        state._stateID >= this.store.getState()._stateID
+      ) {
         const action = ActionCreators.restore(state);
         action._remote = true;
         this.store.dispatch(action);

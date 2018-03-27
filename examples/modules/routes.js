@@ -11,6 +11,7 @@ import chess from './chess';
 import phases from './phases';
 import liars_dice from './liars-dice';
 import random from './random';
+import turnorder from './turnorder';
 
 const routes = [
   {
@@ -32,6 +33,10 @@ const routes = [
   {
     name: 'Random API',
     routes: random.routes,
+  },
+  {
+    name: 'Events API',
+    routes: turnorder.routes,
   },
 ];
 

@@ -1,3 +1,100 @@
+# v0.21.3
+
+#### Features
+
+* [[dc31a66](https://github.com/google/boardgame.io/commit/dc31a66)] expose allowedMoves in ctx
+* [[da4711a](https://github.com/google/boardgame.io/commit/da4711a)] make allowedMoves both global and phase-specific
+* [[9324c58](https://github.com/google/boardgame.io/commit/9324c58)] Allowed moves as function (#164)
+
+#### Bugfixes
+
+* [[5e49448](https://github.com/google/boardgame.io/commit/5e49448)] convert multiplayer move whitelist to blacklist
+
+# v0.21.2
+
+#### Bugfixes
+
+* [[27705d5](https://github.com/google/boardgame.io/commit/27705d5)] pass Events API correctly inside events.update
+
+# v0.21.1
+
+#### Bugfixes
+
+* [[87e77c1](https://github.com/google/boardgame.io/commit/87e77c1)] correctly detach APIs from ctx in startTurn
+
+# v0.21
+
+#### Features
+
+* [[2ee244e](https://github.com/google/boardgame.io/commit/2ee244e)] Reset Game (#155)
+* [[9cd3fdf](https://github.com/google/boardgame.io/commit/9cd3fdf)] allow to modify actionPlayers via Events (#157)
+* [[767362f](https://github.com/google/boardgame.io/commit/767362f)] endGame event
+* [[78634ee](https://github.com/google/boardgame.io/commit/78634ee)] Events API
+* [[a240e45](https://github.com/google/boardgame.io/commit/a240e45)] undoableMoves implementation (#149)
+* [[c12e911](https://github.com/google/boardgame.io/commit/c12e911)] Process only known moves (#151)
+* [[7fcdbfe](https://github.com/google/boardgame.io/commit/7fcdbfe)] Custom turn order (#130)
+* [[748f36f](https://github.com/google/boardgame.io/commit/748f36f)] UI: add mouse hover action props to grid, hex, and token (#153)
+* [[f664237](https://github.com/google/boardgame.io/commit/f664237)] Add notion of actionPlayers (#145)
+
+# v0.20.2
+
+#### Features
+
+* [[43ba0ff](https://github.com/google/boardgame.io/commit/43ba0ff)] allow optional redux enhancer (#139)
+* [[dd6c110](https://github.com/google/boardgame.io/commit/dd6c110)] Run endPhase event (analogue to endTurn) when game ends (#144)
+
+#### Bugfixes
+
+* [[8969433](https://github.com/google/boardgame.io/commit/8969433)] Fix bug that was causing Random code to return the same numbers.
+
+#### Breaking Changes
+
+* The `Random` API is different. There is no longer a `Random` package
+  that you need to import. The API is attached to the `ctx` parameter that
+  is passed to the moves. Take a look at http://boardgame.io/#/random for
+  more details.
+
+# v0.20.1
+
+#### Bugfixes
+
+* [[06d78e2](https://github.com/google/boardgame.io/commit/06d78e2)] Enable SSR
+* [[ed09f51](https://github.com/google/boardgame.io/commit/ed09f51)] Allow calling Random during setup
+* [[c50d5ea](https://github.com/google/boardgame.io/commit/c50d5ea)] fix log rendering of phases
+
+# v0.20
+
+#### Features
+
+* [[eec8896](https://github.com/google/boardgame.io/commit/eec8896)] undo/redo
+
+# v0.19
+
+#### Features
+
+* MongoDB connector
+  * [[eaa372f](https://github.com/google/boardgame.io/commit/eaa372f)] add Mongo to package
+  * [[63c3cdf](https://github.com/google/boardgame.io/commit/63c3cdf)] mongo race condition checks
+  * [[65cefdf](https://github.com/google/boardgame.io/commit/65cefdf)] allow setting Mongo location using MONGO_URI
+  * [[557b66c](https://github.com/google/boardgame.io/commit/557b66c)] add run() to Server
+  * [[2a85b40](https://github.com/google/boardgame.io/commit/2a85b40)] replace lru-native with lru-cache
+  * [[003fe46](https://github.com/google/boardgame.io/commit/003fe46)] MongoDB connector
+
+#### Breaking Changes
+
+* `boardgame.io/server` no longer has a default export, but returns
+  `Server` and `Mongo`.
+
+```
+// v0.19
+const Server = require('boardgame.io/server').Server;
+```
+
+```
+// v0.18
+const Server = require('boardgame.io/server');
+```
+
 # v0.18.1
 
 #### Bugfixes

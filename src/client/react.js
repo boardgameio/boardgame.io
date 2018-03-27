@@ -24,13 +24,22 @@ import './client.css';
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
  * @param {...object} debug - Enables the Debug UI.
+ * @param {...object} enhancer - Optional enhancer to send to the Redux store
  *
  * Returns:
  *   A React component that wraps board and provides an
  *   API through props for it to interact with the framework
- *   and dispatch actions such as MAKE_MOVE and END_TURN.
+ *   and dispatch actions such as MAKE_MOVE, GAME_EVENT, RESET,
+ *   UNDO and REDO.
  */
-export function Client({ game, numPlayers, board, multiplayer, debug }) {
+export function Client({
+  game,
+  numPlayers,
+  board,
+  multiplayer,
+  debug,
+  enhancer,
+}) {
   if (debug === undefined) debug = true;
 
   /*
@@ -66,6 +75,7 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
         multiplayer,
         gameID: props.gameID,
         playerID: props.playerID,
+        enhancer,
       });
 
       this.client.subscribe(() => this.forceUpdate());
@@ -81,7 +91,9 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
     }
 
     componentWillMount() {
-      this.client.connect();
+      if (typeof window !== 'undefined') {
+        this.client.connect();
+      }
     }
 
     render() {
@@ -93,11 +105,14 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          isMultiplayer: multiplayer === true,
+          isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
           gameID: this.props.gameID,
           playerID: this.props.playerID,
+          reset: this.client.reset,
+          undo: this.client.undo,
+          redo: this.client.redo,
         });
       }
 
@@ -105,11 +120,14 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
         _debug = React.createElement(Debug, {
           gamestate: state,
           store: this.client.store,
-          isMultiplayer: multiplayer === true,
+          isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
           gameID: this.props.gameID,
           playerID: this.props.playerID,
+          reset: this.client.reset,
+          undo: this.client.undo,
+          redo: this.client.redo,
         });
       }
 

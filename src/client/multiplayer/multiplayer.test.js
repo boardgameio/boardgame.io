@@ -8,6 +8,7 @@
 
 import { Multiplayer } from './multiplayer';
 import Game from '../../core/game';
+import { makeMove } from '../../core/action-creators';
 import { createGameReducer } from '../../core/reducer';
 import * as ActionCreators from '../../core/action-creators';
 
@@ -25,6 +26,12 @@ class MockSocket {
     this.callbacks[type] = callback;
   }
 }
+
+test('Multiplayer defaults', () => {
+  const m = new Multiplayer();
+  expect(typeof m.callback).toBe('function');
+  m.callback();
+});
 
 test('update gameID / playerID', () => {
   const m = new Multiplayer();
@@ -82,11 +89,15 @@ test('multiplayer', () => {
 
   // sync restores state.
   const restored = { restore: true };
-  expect(store.getState()).not.toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
   mockSocket.receive('sync', 'unknown gameID', restored);
-  expect(store.getState()).not.toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
   mockSocket.receive('sync', 'default:default', restored);
-  expect(store.getState()).toEqual(restored);
+  expect(store.getState()).not.toMatchObject(restored);
+  // Only if the stateID is not stale.
+  restored._stateID = 1;
+  mockSocket.receive('sync', 'default:default', restored);
+  expect(store.getState()).toMatchObject(restored);
 
   // updateGameID causes a sync.
   mockSocket.emit = jest.fn();
@@ -94,7 +105,7 @@ test('multiplayer', () => {
   expect(mockSocket.emit).lastCalledWith('sync', 'default:id', null, 2);
 });
 
-test('move whitelist', () => {
+test('move blacklist', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer({ socket: mockSocket });
   const game = Game({});
@@ -112,7 +123,7 @@ test('move whitelist', () => {
   expect(mockSocket.emit).toHaveBeenCalled();
   mockSocket.emit.mockReset();
 
-  store.dispatch({ type: 'unknown' });
+  store.dispatch(ActionCreators.restore());
   expect(mockSocket.emit).not.toHaveBeenCalled();
   mockSocket.emit.mockReset();
 });
@@ -131,4 +142,29 @@ test('game server is set when provided', () => {
   m2.connect();
   expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
   expect(m2.socket.io.engine.port).not.toEqual(port);
+});
+
+test('game server accepts enhanced store', () => {
+  let spyDispatcher;
+  const spyEnhancer = vanillaCreateStore => (...args) => {
+    const vanillaStore = vanillaCreateStore(...args);
+    return {
+      ...vanillaStore,
+      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+    };
+  };
+
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer({ socket: mockSocket });
+  m.connect();
+  const game = Game({
+    moves: {
+      A: (G, ctx, arg) => ({ arg }),
+    },
+  });
+  const store = m.createStore(createGameReducer({ game }), spyEnhancer);
+  // console.log(spyDispatcher.mock);
+  expect(spyDispatcher.mock.calls.length).toBe(0);
+  store.dispatch(makeMove('A', {}));
+  expect(spyDispatcher.mock.calls.length).toBe(1);
 });
