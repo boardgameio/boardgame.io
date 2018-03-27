@@ -740,8 +740,12 @@ test('endPhaseOnMove', () => {
       },
     ],
   });
-  const state = { G: {}, ctx: flow.ctx(2) };
-  flow.processMove(state, { payload: {} });
+  let state = { G: {}, ctx: flow.ctx(2) };
+
+  expect(state.ctx.phase).toBe('A');
+  state = flow.processMove(state, { payload: {} });
+  expect(state.ctx.phase).toBe('B');
+
   expect(endPhaseACount).toEqual(1);
   expect(endPhaseBCount).toEqual(0);
 });
