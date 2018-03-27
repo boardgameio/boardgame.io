@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Client as RawClient } from './client';
+import { Client } from './client';
 
 /**
  * Client
@@ -28,7 +28,13 @@ import { Client as RawClient } from './client';
  *   API through props for it to interact with the framework
  *   and dispatch actions such as MAKE_MOVE and END_TURN.
  */
-export function Client({ game, numPlayers, board, multiplayer, debug }) {
+export function ReactNativeClient({
+  game,
+  numPlayers,
+  board,
+  multiplayer,
+  debug,
+}) {
   if (debug) {
     console.log(
       'Sorry, the Debug UI is not currently implemented in the React-Native Client'
@@ -62,7 +68,7 @@ export function Client({ game, numPlayers, board, multiplayer, debug }) {
     constructor(props) {
       super(props);
 
-      this.client = RawClient({
+      this.client = Client({
         game,
         numPlayers,
         multiplayer,

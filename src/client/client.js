@@ -21,7 +21,8 @@ import { createGameReducer } from '../core/reducer';
  */
 export function createEventDispatchers(eventNames, store, playerID) {
   let dispatchers = {};
-  for (const name of eventNames) {
+  for (let i = 0; i < eventNames.length; i++) {
+    const name = eventNames[i];
     dispatchers[name] = function(...args) {
       store.dispatch(ActionCreators.gameEvent(name, args, playerID));
     };
@@ -38,7 +39,8 @@ export function createEventDispatchers(eventNames, store, playerID) {
  */
 export function createMoveDispatchers(moveNames, store, playerID) {
   let dispatchers = {};
-  for (const name of moveNames) {
+  for (let i = 0; i < moveNames.length; i++) {
+    const name = moveNames[i];
     dispatchers[name] = function(...args) {
       store.dispatch(ActionCreators.makeMove(name, args, playerID));
     };

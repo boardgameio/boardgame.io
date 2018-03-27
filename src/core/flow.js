@@ -217,7 +217,8 @@ export function FlowWithPhases({
   let phaseKeys = [];
   let phaseMap = {};
 
-  for (let conf of phases) {
+  for (let i = 0; i < phases.length; i++) {
+    let conf = phases[i];
     phaseKeys.push(conf.name);
     phaseMap[conf.name] = conf;
 
