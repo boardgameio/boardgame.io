@@ -75,14 +75,16 @@ test('board props', () => {
   expect(board.props().isActive).toBe(true);
   board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
-  // test passing extra props
-  Board = Client({
+});
+
+test('can pass extra props to Client', () => {
+  const Board = Client({
     game: Game({}),
     board: TestBoard,
-    doStuff: () => true,
-    extraValue: 55,
   });
-  board = Enzyme.mount(<Board />).find(TestBoard);
+  const board = Enzyme.mount(
+    <Board doStuff={() => true} extraValue={55} />
+  ).find(TestBoard);
   expect(board.props().doStuff()).toBe(true);
   expect(board.props().extraValue).toBe(55);
 });
