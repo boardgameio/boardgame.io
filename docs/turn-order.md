@@ -15,11 +15,14 @@ is updated is determined by a particular `TurnOrder`. The default
 behavior is to just increment it in a round-robin fashion.
 `currentPlayer` is just `playerOrder[playOrderPos]`.
 
-If you need something different, you can customize this behavior
-by using the `turnOrder` option. This is passed inside a `flow`
-section of the `Game` configuration. The framework comes bundled
-with a few turn orders in the `TurnOrder` object, and you can
-even provide your own implementation.
+If you need something different, you have a few options:
+
+#### turnOrder
+
+You can customize this behavior by using the `turnOrder` option.
+This is passed inside a `flow` section of the `Game` configuration.
+The framework comes bundled with a few turn orders in the `TurnOrder`
+object, and you can even provide your own implementation.
 
 ```js
 import { Game, TurnOrder } from 'boardgame.io/core';
@@ -74,3 +77,25 @@ Game({
 
 !> If you would like any player to play, then return `undefined` from
 these functions. `TurnOrder.ANY` implements this.
+
+#### endTurn / endTurnIf
+
+You can also specify the next player during the `endTurn` event.
+The `endTurn` event takes an additional argument specifying
+the next player. If `endTurnIf` returns a string that is a playerID,
+that player is made the next player (instead of following the turn
+order).
+
+Player '3' is made the new player in both the following examples:
+
+```js
+onClickEndTurn() {
+  this.props.endTurn('3');
+}
+```
+
+```js
+flow: {
+  endTurnIf: (G, ctx) => '3',
+}
+```

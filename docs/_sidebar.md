@@ -12,6 +12,7 @@
   * [Secret State](secret-state.md)
   * [Randomness](random.md)
   * [Undo / Redo](undo.md)
+  * [Immutability](immutability.md)
   * [Debugging](debugging.md)
 
 * API Reference
