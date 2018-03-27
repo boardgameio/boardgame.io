@@ -150,7 +150,7 @@ export function Flow({
  *                                   not automatically end after a certain number of moves).
  *
  * @param {...object} endTurnIf - The turn automatically ends if this
- *                                returns anything other than undefined
+ *                                returns a truthy value
  *                                (checked after each move).
  *                                If the return value is a playerID,
  *                                that player is the next player
@@ -213,8 +213,8 @@ export function Flow({
  *   // Any cleanup code to run after the phase ends.
  *   onPhaseEnd: (G, ctx) => G,
  *
- *   // The phase ends if this function returns anything other than
- *   // undefined. If the return value is the name of another phase,
+ *   // The phase ends if this function returns a truthy value.
+ *   // If the return value is the name of another phase,
  *   // that will be chosen as the next phase (as opposed
  *   // to the next one in round-robin order).
  *   endPhaseIf: (G, ctx) => boolean|string,
@@ -436,6 +436,12 @@ export function FlowWithPhases({
       if (end) {
         state = endPhaseEvent(state, end, cascadeDepth + 1);
       }
+    }
+
+    // End turn if endTurnIf returns something.
+    const endTurn = shouldEndTurn(state);
+    if (endTurn) {
+      state = endTurnEvent(state, endTurn);
     }
 
     return state;

@@ -542,6 +542,13 @@ test('endTurn / endPhase args', () => {
     expect(t.ctx.playOrderPos).toBe(undefined);
     expect(t.ctx.currentPlayer).toBe('any');
   }
+
+  {
+    let t = state;
+    t = flow.processGameEvent(t, gameEvent('endTurn', '0').payload);
+    expect(t.ctx.playOrderPos).toBe(0);
+    expect(t.ctx.currentPlayer).toBe('0');
+  }
 });
 
 test('resetGame', () => {
@@ -762,4 +769,26 @@ test('endPhaseOnMove', () => {
 
   expect(endPhaseACount).toEqual(1);
   expect(endPhaseBCount).toEqual(0);
+});
+
+test('end turn when final phase is reached', () => {
+  let flow = FlowWithPhases({
+    endTurnIf: (G, ctx) => ctx.phase === 'C',
+    phases: [{ name: 'A' }, { name: 'B' }, { name: 'C' }],
+  });
+
+  let state = { G: {}, ctx: flow.ctx(2) };
+
+  expect(state.ctx.phase).toBe('A');
+  expect(state.ctx.currentPlayer).toBe('0');
+
+  state = flow.processGameEvent(state, gameEvent('endPhase').payload);
+
+  expect(state.ctx.phase).toBe('B');
+  expect(state.ctx.currentPlayer).toBe('0');
+
+  state = flow.processGameEvent(state, gameEvent('endPhase').payload);
+
+  expect(state.ctx.phase).toBe('C');
+  expect(state.ctx.currentPlayer).toBe('1');
 });
