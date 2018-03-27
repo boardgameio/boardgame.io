@@ -97,7 +97,7 @@ export function Flow({
 
   const dispatch = (state, action) => {
     if (events.hasOwnProperty(action.type)) {
-      const context = { playerID: action.playerID };
+      const context = { playerID: action.playerID, dispatch };
       const args = [state].concat(action.args);
       const oldLog = state.log || [];
       const log = [...oldLog, action];
@@ -119,7 +119,7 @@ export function Flow({
     },
 
     processGameEvent: (state, action) => {
-      return dispatch(state, action);
+      return dispatch(state, action, dispatch);
     },
 
     optimisticUpdate,
@@ -434,14 +434,22 @@ export function FlowWithPhases({
     if (cascadeDepth < phases.length - 1) {
       const end = shouldEndPhase(state);
       if (end) {
-        state = endPhaseEvent(state, end, cascadeDepth + 1);
+        state = this.dispatch(state, {
+          type: 'endPhase',
+          args: [end, cascadeDepth + 1],
+          playerID: this.playerID,
+        });
       }
     }
 
     // End turn if endTurnIf returns something.
     const endTurn = shouldEndTurn(state);
     if (endTurn) {
-      state = endTurnEvent(state, endTurn);
+      state = this.dispatch(state, {
+        type: 'endTurn',
+        args: [endTurn],
+        playerID: this.playerID,
+      });
     }
 
     return state;
@@ -502,7 +510,14 @@ export function FlowWithPhases({
     // End phase if condition is met.
     const end = shouldEndPhase(state);
     if (end) {
-      return endPhaseEvent({ ...state, G, ctx }, end);
+      return this.dispatch(
+        { ...state, G, ctx },
+        {
+          type: 'endPhase',
+          args: [end],
+          playerID: this.playerID,
+        }
+      );
     }
 
     return startTurn({ ...state, G, ctx }, conf);
