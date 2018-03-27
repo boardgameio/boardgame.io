@@ -335,7 +335,12 @@ export function FlowWithPhases({
     }
   }
 
-  const endTurnIfWrap = (G, ctx) => {
+  const shouldEndPhase = ({ G, ctx }) => {
+    const conf = phaseMap[ctx.phase];
+    return conf.endPhaseIf(G, ctx);
+  };
+
+  const shouldEndTurn = ({ G, ctx }) => {
     const conf = phaseMap[ctx.phase];
     if (conf.movesPerTurn && ctx.currentPlayerMoves >= conf.movesPerTurn) {
       return true;
@@ -398,7 +403,7 @@ export function FlowWithPhases({
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    let conf = phaseMap[ctx.phase];
+    const conf = phaseMap[ctx.phase];
     G = conf.onPhaseEnd(G, ctx);
 
     const gameover = conf.endGameIf(G, ctx);
@@ -424,8 +429,7 @@ export function FlowWithPhases({
     // a finite number of times.
     if (!cascadeDepth) cascadeDepth = 0;
     if (cascadeDepth < phases.length - 1) {
-      conf = phaseMap[state.ctx.phase];
-      const end = conf.endPhaseIf(state.G, state.ctx);
+      const end = shouldEndPhase(state);
       if (end) {
         state = endPhaseEvent(state, end, cascadeDepth + 1);
       }
@@ -476,7 +480,7 @@ export function FlowWithPhases({
     };
 
     // End phase if condition is met.
-    const end = conf.endPhaseIf(G, ctx);
+    const end = shouldEndPhase(state);
     if (end) {
       return endPhaseEvent({ ...state, G, ctx }, end);
     }
@@ -507,17 +511,17 @@ export function FlowWithPhases({
     const gameover = conf.endGameIf(state.G, state.ctx);
 
     // End the turn automatically if endTurnIf is true  or if endGameIf returns.
-    const endTurn = endTurnIfWrap(state.G, state.ctx);
+    const endTurn = shouldEndTurn(state);
     if (endTurn || gameover !== undefined) {
       state = dispatch(state, { type: 'endTurn', playerID: action.playerID });
     }
 
     // End the phase automatically if endPhaseIf is true.
-    const end = conf.endPhaseIf(state.G, state.ctx);
-    if (end || gameover !== undefined) {
+    const endPhase = shouldEndPhase(state);
+    if (endPhase || gameover !== undefined) {
       state = dispatch(state, {
         type: 'endPhase',
-        args: [end],
+        args: [endPhase],
         playerID: action.playerID,
       });
     }

@@ -717,3 +717,35 @@ test('undo / redo restricted by undoableMoves', () => {
   state = reducer(state, undo());
   expect(state.G).toEqual({});
 });
+
+test('endPhaseOnMove', () => {
+  let endPhaseACount = 0;
+  let endPhaseBCount = 0;
+  const onMove = () => ({ A: true });
+
+  let flow = FlowWithPhases({
+    onMove,
+    phases: [
+      {
+        name: 'A',
+        endTurnIf: () => true,
+        endPhaseIf: () => true,
+        onPhaseEnd: () => ++endPhaseACount,
+      },
+      {
+        name: 'B',
+        endTurnIf: () => false,
+        endPhaseIf: () => false,
+        onPhaseEnd: () => ++endPhaseBCount,
+      },
+    ],
+  });
+  let state = { G: {}, ctx: flow.ctx(2) };
+
+  expect(state.ctx.phase).toBe('A');
+  state = flow.processMove(state, { payload: {} });
+  expect(state.ctx.phase).toBe('B');
+
+  expect(endPhaseACount).toEqual(1);
+  expect(endPhaseBCount).toEqual(0);
+});
