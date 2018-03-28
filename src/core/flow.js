@@ -368,6 +368,7 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
+
     if (config.secondsPerPhase) {
       setTimeout(() => {
         state = endPhaseEvent(state);
