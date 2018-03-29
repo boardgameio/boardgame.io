@@ -16,7 +16,7 @@ $ cd game
 $ npm install --save boardgame.io
 ```
 
-## Define moves
+## Define Moves
 
 We create the game by providing the initial value of the
 game state `G` (through the `setup` function), and the moves
