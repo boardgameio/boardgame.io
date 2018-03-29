@@ -100,7 +100,7 @@ export function ReactNativeClient({
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          isMultiplayer: multiplayer === true,
+          isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
           gameID: this.props.gameID,
