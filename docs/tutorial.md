@@ -89,7 +89,7 @@ can end the turn using `endTurn` and the next call to
 !> The Debug UI can be turned off by passing `debug: false`
 in the `Client` config.
 
-## Add victory condition
+## Add Victory Condition
 
 The Tic-Tac-Toe game we have so far doesn't really terminate.
 Let's keep track of a winner in case one player wins the game.
@@ -134,7 +134,7 @@ const TicTacToe = Game({
 the game is over. If it returns anything other than `undefined`,
 the game ends, and the return value is available at `ctx.gameover`.
 
-## Render board
+## Render Board
 
 **React** is a great fit for board games because
 it provides a declarative API to translate objects
