@@ -139,9 +139,6 @@
   "jest": {
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
-      "boardgame.io/client": "<rootDir>/packages/client",
-      "boardgame.io/game": "<rootDir>/packages/game",
-      "boardgame.io/server": "<rootDir>/packages/server",
       "\\.(svg)$": "<rootDir>/.empty_module.js"
     },
     "setupFiles": [
@@ -151,6 +148,7 @@
       "node_modules/(?!(boardgame.io)/)"
     ],
     "testPathIgnorePatterns": [
+      "/react-native/",
       "storybook/",
       "/node_modules/",
       ".npm/"

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "babel-plugin-module-resolver": "^3.1.1",
     "jest-expo": "25.0.0",
     "react-native-scripts": "1.11.1",
     "react-test-renderer": "16.2.0"
@@ -19,7 +20,6 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "boardgame.io": "file:../../dist",
     "expo": "^25.0.0",
     "react": "16.2.0",
     "react-native": "0.52.0"

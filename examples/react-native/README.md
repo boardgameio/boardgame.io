@@ -1,10 +1,8 @@
 # Setup
 
-1.  From the root directory of the boardgame.io repo, run `yarn run prepare && yarn run prepublishOnly`
-1.  After the packages have built, run `yarn link` to register the `boardgame.io` module
-1.  From the `examples/react-native` directory, run `yarn link "boardgame.io"` to install the registered module locally for the example app
-1.  Also run `yarn install` to install package.json dependencies
-1.  Everything should be working and linked together– run `yarn start` to start the native packager!
+1. Go to `examples/react-native`.
+1. Run `npm install`.
+1. Run `npm start`.
 
 ---
 

@@ -4,5 +4,12 @@
     "development": {
       "plugins": ["transform-react-jsx-source"]
     }
-  }
+  },
+  "plugins": [
+    ["module-resolver", {
+      "alias": {
+        "boardgame.io": "../../packages"
+      }
+    }]
+  ]
 }
