@@ -71,7 +71,7 @@ const game = Game({
 });
 ```
 
-#### With victory condition
+#### With Victory Condition
 
 ```js
 import { Game } from 'boardgame.io/core';
@@ -95,7 +95,7 @@ const game = Game({
 });
 ```
 
-#### With phases
+#### With Phases
 
 ```js
 import { Game } from 'boardgame.io/core';
@@ -119,6 +119,7 @@ const game = Game({
         onTurnEnd: ...
         onPhaseBegin: ...
         onPhaseEnd: ...
+        allowedMoves: ...
         ...
       },
       {
@@ -129,6 +130,7 @@ const game = Game({
         onTurnEnd: ...
         onPhaseBegin: ...
         onPhaseEnd: ...
+        allowedMoves: ...
         ...
       },
     ]

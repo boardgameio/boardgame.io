@@ -70,6 +70,16 @@ class _ClientImpl {
       multiplayer,
     });
 
+    this.reset = () => {
+      this.store.dispatch(ActionCreators.reset());
+    };
+    this.undo = () => {
+      this.store.dispatch(ActionCreators.undo());
+    };
+    this.redo = () => {
+      this.store.dispatch(ActionCreators.redo());
+    };
+
     this.store = null;
 
     if (multiplayer) {

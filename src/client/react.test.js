@@ -77,6 +77,18 @@ test('board props', () => {
   expect(board.props().isActive).toBe(true);
 });
 
+test('can pass extra props to Client', () => {
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+  });
+  const board = Enzyme.mount(
+    <Board doStuff={() => true} extraValue={55} />
+  ).find(TestBoard);
+  expect(board.props().doStuff()).toBe(true);
+  expect(board.props().extraValue).toBe(55);
+});
+
 test('debug ui can be turned off', () => {
   const Board = Client({
     game: Game({}),
@@ -191,4 +203,54 @@ test('local playerView', () => {
     const board = game.find('TestBoard').instance();
     expect(board.props.G).toEqual({ stripped: '1' });
   }
+});
+
+test('reset Game', () => {
+  const Board = Client({
+    game: Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    }),
+    board: TestBoard,
+  });
+
+  const game = Enzyme.mount(<Board />);
+  const board = game.find('TestBoard').instance();
+
+  const initial = { G: { ...board.props.G }, ctx: { ...board.props.ctx } };
+
+  expect(board.props.G).toEqual({});
+  board.props.moves.A(42);
+  expect(board.props.G).toEqual({ arg: 42 });
+  board.props.reset();
+  expect(board.props.G).toEqual(initial.G);
+  expect(board.props.ctx).toEqual(initial.ctx);
+});
+
+test('undo/redo', () => {
+  const Board = Client({
+    game: Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    }),
+    board: TestBoard,
+  });
+
+  const game = Enzyme.mount(<Board />);
+  const board = game.find('TestBoard').instance();
+
+  const initial = { G: { ...board.props.G }, ctx: { ...board.props.ctx } };
+
+  expect(board.props.G).toEqual({});
+  board.props.moves.A(42);
+  expect(board.props.G).toEqual({ arg: 42 });
+
+  board.props.undo();
+  expect(board.props.G).toEqual(initial.G);
+  expect(board.props.ctx).toEqual(initial.ctx);
+
+  board.props.redo();
+  expect(board.props.G).toEqual({ arg: 42 });
 });

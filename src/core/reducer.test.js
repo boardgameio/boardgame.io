@@ -8,7 +8,14 @@
 
 import Game from './game';
 import { createGameReducer } from './reducer';
-import { makeMove, gameEvent, restore } from './action-creators';
+import {
+  makeMove,
+  gameEvent,
+  restore,
+  reset,
+  undo,
+  redo,
+} from './action-creators';
 
 const game = Game({
   moves: {
@@ -66,6 +73,16 @@ test('restore', () => {
   const reducer = createGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
   expect(state).toEqual({ G: 'restored' });
+});
+
+test('reset', () => {
+  const reducer = createGameReducer({ game });
+  let state = reducer(undefined, makeMove('A'));
+  const initialState = { ...state._initial, _initial: { ...state._initial } };
+
+  expect(state).not.toEqual(initialState);
+  state = reducer(state, reset());
+  expect(state).toEqual(initialState);
 });
 
 test('victory', () => {
@@ -192,4 +209,60 @@ test('using Random inside setup()', () => {
 
   expect(state1.G.n).not.toBe(state2.G.n);
   expect(state2.G.n).toBe(state3.G.n);
+});
+
+test('undo / redo', () => {
+  let game = Game({
+    moves: {
+      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+    },
+  });
+
+  const reducer = createGameReducer({ game, numPlayers: 2 });
+
+  let state = reducer(undefined, { type: 'init' });
+
+  state = reducer(state, makeMove('move', 'A'));
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, makeMove('move', 'B'));
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state._undo[1].ctx.events).toBeUndefined();
+  expect(state._undo[1].ctx.random).toBeUndefined();
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ A: true, B: true });
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ A: true, B: true });
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, undo());
+  state = reducer(state, undo());
+  state = reducer(state, undo());
+  expect(state.G).toEqual({});
+
+  state = reducer(state, redo());
+  state = reducer(state, makeMove('move', 'C'));
+  expect(state.G).toEqual({ A: true, C: true });
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ A: true, C: true });
+
+  state = reducer(state, undo());
+  state = reducer(state, undo());
+  state = reducer(state, makeMove('move', 'A'));
+  expect(state.G).toEqual({ A: true });
+
+  state = reducer(state, gameEvent('endTurn'));
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true });
 });

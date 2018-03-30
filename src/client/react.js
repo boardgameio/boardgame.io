@@ -28,7 +28,8 @@ import { Client as RawClient } from './client';
  * Returns:
  *   A React component that wraps board and provides an
  *   API through props for it to interact with the framework
- *   and dispatch actions such as MAKE_MOVE and END_TURN.
+ *   and dispatch actions such as MAKE_MOVE, GAME_EVENT, RESET,
+ *   UNDO and REDO.
  */
 export function Client({
   game,
@@ -99,27 +100,35 @@ export function Client({
       let _debug = null;
 
       const state = this.client.getState();
+      const { gameID, playerID, debug: debugProp, ...rest } = this.props;
 
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          isMultiplayer: multiplayer === true,
+          isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.props.gameID,
-          playerID: this.props.playerID,
+          gameID: gameID,
+          playerID: playerID,
+          reset: this.client.reset,
+          undo: this.client.undo,
+          redo: this.client.redo,
+          ...rest,
         });
       }
 
-      if (debug && this.props.debug) {
+      if (debug && debugProp) {
         _debug = React.createElement(Debug, {
           gamestate: state,
           store: this.client.store,
-          isMultiplayer: multiplayer === true,
+          isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.props.gameID,
-          playerID: this.props.playerID,
+          gameID: gameID,
+          playerID: playerID,
+          reset: this.client.reset,
+          undo: this.client.undo,
+          redo: this.client.redo,
         });
       }
 

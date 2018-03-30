@@ -7,12 +7,14 @@
  */
 
 .debug-ui {
+  text-align: left;
   min-width: 300px;
   max-width: 400px;
-  overflow: hidden;
+  overflow-y: scroll;
   box-sizing: border-box;
   background: #fefefe;
-  border: 3px solid #ddd;
+  border-left: 1px solid #ddd;
+  box-shadow: -1px 0 10px #aaa;
   position: absolute;
   right: 0;
   top: 0;
@@ -21,7 +23,7 @@
   font-family: monospace;
   font-size: 14px;
   padding: 20px;
-  box-sizing: content-box;
+  box-sizing: border-box;
 }
 
 .debug-ui section {

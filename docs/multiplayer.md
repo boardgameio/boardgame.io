@@ -37,7 +37,7 @@ import React from 'react';
 export class TicTacToeBoard extends React.Component { ... };
 ```
 
-#### Setting up the server
+#### Setting Up the Server
 
 Behind the scenes, the client is now sending updates to a server
 via a WebSocket, and the server updates its version of the game
@@ -95,7 +95,7 @@ const App = Client({
 });
 ```
 
-#### Associating clients with players
+#### Associating Clients with Players
 
 Clients needs to be associated with a particular player in order
 to make moves (clients that aren't are just spectators that can
@@ -132,7 +132,7 @@ running) and watch as your moves in one board are reflected in the other.
 You can also open different browser tabs and you will see that everything is
 in sync as you play (state is not lost even if you refresh the page).
 
-#### Multiple game types
+#### Multiple Game Types
 
 You can also serve multiple types of games from the same socket server:
 
@@ -150,7 +150,7 @@ const TicTacToe = Game({
 })
 ```
 
-#### Game instances
+#### Game Instances
 
 By default, all client instances are synced to a game with
 an ID `'default'`. To play a new game instance, just pass
@@ -165,7 +165,7 @@ The `gameID` could be determined by a URL path, for example,
 so you could have all browsers that connect to a certain
 URL be synced to the same game.
 
-#### Single server
+#### Single Server
 
 You might want to serve both your web app and the socket
 server from the same server.
