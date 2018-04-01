@@ -8,7 +8,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Hex } from './hex';
 import { Square } from './grid';
 
 /**
@@ -53,6 +52,7 @@ class Token extends React.Component {
     x: PropTypes.number,
     y: PropTypes.number,
     z: PropTypes.number,
+    template: PropTypes.any,
     style: PropTypes.any,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
@@ -60,12 +60,11 @@ class Token extends React.Component {
     onMouseOut: PropTypes.func,
     children: PropTypes.element,
     animationDuration: PropTypes.number,
-    _inGrid: PropTypes.bool,
-    _inHexGrid: PropTypes.bool,
   };
 
   static defaultProps = {
     animationDuration: 750,
+    template: Square,
   };
 
   /**
@@ -162,44 +161,21 @@ class Token extends React.Component {
   }
 
   render() {
-    if (this.props._inHexGrid) {
-      return (
-        <Hex
-          x={this.state.x}
-          y={this.state.y}
-          z={this.state.z}
-          style={this.props.style}
-          onClick={this.props.onClick}
-          onMouseOver={this.props.onMouseOver}
-          onMouseOut={this.props.onMouseOut}
-        >
-          {this.props.children}
-        </Hex>
-      );
-    }
+    const Component = this.props.template;
 
-    if (this.props._inGrid) {
-      return (
-        <Square
-          x={this.state.x}
-          y={this.state.y}
-          style={this.props.style}
-          onClick={this.props.onClick}
-          onMouseOver={this.props.onMouseOver}
-          onMouseOut={this.props.onMouseOut}
-        >
-          {this.props.children}
-        </Square>
-      );
-    }
-
-    return React.Children.map(this.props.children, child => {
-      return React.cloneElement(child, {
-        onClick: this.props.onClick,
-        onMouseOver: this.props.onMouseOver,
-        onMouseOut: this.props.onMouseOut,
-      });
-    });
+    return (
+      <Component
+        x={this.state.x}
+        y={this.state.y}
+        z={this.state.z}
+        style={this.props.style}
+        onClick={this.props.onClick}
+        onMouseOver={this.props.onMouseOver}
+        onMouseOut={this.props.onMouseOut}
+      >
+        {this.props.children}
+      </Component>
+    );
   }
 }
 
