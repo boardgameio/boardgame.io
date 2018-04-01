@@ -1,5 +1,5 @@
 {
-  "name": "bgio-rn-test",
+  "name": "bgio-react-native-tic-tac-toe",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
