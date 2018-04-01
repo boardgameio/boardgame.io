@@ -94,7 +94,7 @@ phase, and you can only play cards in the second phase.
 
 !> Note the additional fields in `ctx` like `phase`.
 
-#### Automatic setup and cleanup
+#### Automatic Setup and Cleanup
 
 Phases can also specify automatic "board actions" that occur at the beginning or
 end of a phase. These are specified just like normal moves in `onPhaseBegin` and

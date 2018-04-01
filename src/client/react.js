@@ -101,6 +101,7 @@ export function Client({
       let _debug = null;
 
       const state = this.client.getState();
+      const { gameID, playerID, debug: debugProp, ...rest } = this.props;
 
       if (board) {
         _board = React.createElement(board, {
@@ -108,23 +109,24 @@ export function Client({
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.props.gameID,
-          playerID: this.props.playerID,
+          gameID: gameID,
+          playerID: playerID,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
+          ...rest,
         });
       }
 
-      if (debug && this.props.debug) {
+      if (debug && debugProp) {
         _debug = React.createElement(Debug, {
           gamestate: state,
           store: this.client.store,
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.props.gameID,
-          playerID: this.props.playerID,
+          gameID: gameID,
+          playerID: playerID,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
