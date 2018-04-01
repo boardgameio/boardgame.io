@@ -34,18 +34,23 @@ class Board extends React.Component {
   }
 
   render() {
-    let tbody = [];
+    const tbody = [];
+    const marker = {
+      '0': 'X',
+      '1': 'O',
+    };
     for (let i = 0; i < 3; i++) {
-      let cells = [];
+      const cells = [];
       for (let j = 0; j < 3; j++) {
         const id = 3 * i + j;
         cells.push(
           <TouchableHighlight
             key={id}
             onPress={() => this.onClick(id)}
-            style={styles.cell}
+            style={[styles.cell, styles[`cell${id}`]]}
+            underlayColor="transparent"
           >
-            <Text>{this.props.G.cells[id]}</Text>
+            <Text style={styles.value}>{marker[this.props.G.cells[id]]}</Text>
           </TouchableHighlight>
         );
       }
@@ -58,25 +63,39 @@ class Board extends React.Component {
 
     let disconnected = null;
     if (this.props.isMultiplayer && !this.props.isConnected) {
-      disconnected = <Text id="disconnected">Disconnected!</Text>;
+      disconnected = (
+        <Text id="disconnected" style={styles.infoText}>
+          Disconnected!
+        </Text>
+      );
     }
 
     let winner = null;
     if (this.props.ctx.gameover !== undefined) {
-      winner = <Text id="winner">Winner: {this.props.ctx.gameover}</Text>;
+      winner = (
+        <Text id="winner" style={styles.infoText}>
+          Winner: {marker[this.props.ctx.gameover]}
+        </Text>
+      );
     }
 
     let player = null;
     if (this.props.playerID !== null) {
-      player = <Text id="player">Player: {this.props.playerID}</Text>;
+      player = (
+        <Text id="player" style={styles.infoText}>
+          Player: {this.props.playerID}
+        </Text>
+      );
     }
 
     return (
       <View>
         <View id="board">{tbody}</View>
-        {player}
-        {winner}
-        {disconnected}
+        <View style={styles.info}>
+          {player}
+          {winner}
+          {disconnected}
+        </View>
       </View>
     );
   }
@@ -89,10 +108,58 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cell: {
-    width: 50,
-    height: 50,
-    borderWidth: 1,
-    borderColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 96,
+    height: 96,
+    borderWidth: 4,
+    borderColor: '#666',
+    borderStyle: 'solid',
+  },
+  value: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: '#373748',
+  },
+  cell0: {
+    borderLeftColor: 'transparent',
+    borderTopColor: 'transparent',
+  },
+  cell1: {
+    borderTopColor: 'transparent',
+  },
+  cell2: {
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+  },
+  cell3: {
+    borderLeftColor: 'transparent',
+  },
+  cell5: {
+    borderRightColor: 'transparent',
+  },
+  cell6: {
+    borderLeftColor: 'transparent',
+    borderBottomColor: 'transparent',
+  },
+  cell7: {
+    borderBottomColor: 'transparent',
+  },
+  cell8: {
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderStyle: 'solid',
+  },
+  info: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 60,
+    marginTop: 24,
+  },
+  infoText: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#373748',
   },
 });
 

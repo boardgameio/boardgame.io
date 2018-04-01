@@ -7,8 +7,9 @@
  */
 
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { ReactNativeClient } from 'boardgame.io/react-native';
+import logo from './logo.png';
 
 import TicTacToe from './game';
 import Board from './board';
@@ -20,7 +21,7 @@ const App = ReactNativeClient({
 
 const Singleplayer = () => (
   <View style={styles.container}>
-    <Text>Singleplayer</Text>
+    <Image source={logo} style={styles.logo} />
     <App gameID="single" />
   </View>
 );
@@ -33,5 +34,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logo: {
+    width: 300,
+    height: 90,
+    marginBottom: 24,
   },
 });
