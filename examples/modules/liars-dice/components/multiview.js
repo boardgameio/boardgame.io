@@ -13,9 +13,8 @@ import Board from './board';
 
 const App = Client({
   game: Game,
-  numPlayers: 3,
   board: Board,
-  debug: false,
+  debug: true,
   multiplayer: true,
 });
 

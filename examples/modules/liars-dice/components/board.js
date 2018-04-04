@@ -15,6 +15,7 @@ class Board extends React.Component {
     G: PropTypes.any.isRequired,
     ctx: PropTypes.any.isRequired,
     moves: PropTypes.any.isRequired,
+    events: PropTypes.any.isRequired,
     endTurn: PropTypes.any,
     playerID: PropTypes.string,
     isActive: PropTypes.bool,
@@ -23,6 +24,7 @@ class Board extends React.Component {
   constructor() {
     super();
     this.state = { bidNumber: 1, bidValue: 1 };
+    this.handleRoll = this.handleRoll.bind(this);
   }
 
   handleChangeNumber = e => {
@@ -32,6 +34,11 @@ class Board extends React.Component {
   handleChangeValue = e => {
     this.setState({ bidValue: e.target.value });
   };
+
+  handleRoll() {
+    this.props.moves.roll();
+    this.props.events.endTurn();
+  }
 
   render() {
     return (
@@ -45,6 +52,12 @@ class Board extends React.Component {
         </section>
 
         <section>
+          <button
+            onClick={this.handleRoll}
+            disabled={this.props.ctx.phase !== 'Rolling'}
+          >
+            Roll
+          </button>
           <div>
             how many
             <input
@@ -69,13 +82,21 @@ class Board extends React.Component {
             />
           </div>
 
-          <button>Bid</button>
-          <button>Challenge</button>
+          <button disabled={this.props.ctx.phase !== 'Bidding'}>Bid</button>
+          <button disabled={this.props.ctx.phase !== 'Bidding'}>
+            Challenge
+          </button>
         </section>
 
         <section>
           <pre>{JSON.stringify(this.props.G, null, 2)}</pre>
         </section>
+
+        {Object.keys(this.props.G.players) == 'null' && (
+          <section>
+            <pre>{JSON.stringify(this.props.ctx, null, 2)}</pre>
+          </section>
+        )}
       </div>
     );
   }
