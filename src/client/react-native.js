@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Client } from './client';
+import { Client as RawClient } from './client';
 
 /**
  * Client
@@ -27,7 +27,7 @@ import { Client } from './client';
  *   API through props for it to interact with the framework
  *   and dispatch actions such as MAKE_MOVE.
  */
-export function ReactNativeClient({ game, numPlayers, board, multiplayer }) {
+export function Client({ game, numPlayers, board, multiplayer }) {
   /*
    * WrappedBoard
    *
@@ -52,7 +52,7 @@ export function ReactNativeClient({ game, numPlayers, board, multiplayer }) {
     constructor(props) {
       super(props);
 
-      this.client = Client({
+      this.client = RawClient({
         game,
         numPlayers,
         multiplayer,

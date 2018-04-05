@@ -8,7 +8,7 @@
 
 import { Client } from '../src/client/client.js';
 import { Client as ReactClient } from '../src/client/react.js';
-import { ReactNativeClient } from '../src/client/react-native.js';
+import { Client as ReactNativeClient } from '../src/client/react-native.js';
 import Game from '../src/core/game.js';
 import { Flow, FlowWithPhases } from '../src/core/flow.js';
 import { TurnOrder, Pass } from '../src/core/turn-order.js';

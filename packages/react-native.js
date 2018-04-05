@@ -6,6 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { ReactNativeClient } from '../src/client/react-native.js';
+import { Client } from '../src/client/react-native.js';
 
-export { ReactNativeClient };
+export { Client };
