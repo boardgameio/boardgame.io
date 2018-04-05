@@ -80,15 +80,20 @@ export function Client({ game, numPlayers, board, multiplayer }) {
       let _board = null;
 
       const state = this.client.getState();
+      const { gameID, playerID, ...rest } = this.props;
 
       if (board) {
         _board = React.createElement(board, {
           ...state,
+          gameID,
+          playerID,
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.props.gameID,
-          playerID: this.props.playerID,
+          reset: this.client.reset,
+          undo: this.client.undo,
+          redo: this.client.redo,
+          ...rest,
         });
       }
 
