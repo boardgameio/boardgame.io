@@ -13,7 +13,7 @@ import { Client } from './client';
 /**
  * Client
  *
- * boardgame.io React client.
+ * boardgame.io React Native client.
  *
  * @param {...object} game - The return value of `Game`.
  * @param {...object} numPlayers - The number of players.
@@ -21,26 +21,13 @@ import { Client } from './client';
  * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
- * @param {...object} debug - Enables the Debug UI.
  *
  * Returns:
- *   A React component that wraps board and provides an
+ *   A React Native component that wraps board and provides an
  *   API through props for it to interact with the framework
- *   and dispatch actions such as MAKE_MOVE and END_TURN.
+ *   and dispatch actions such as MAKE_MOVE.
  */
-export function ReactNativeClient({
-  game,
-  numPlayers,
-  board,
-  multiplayer,
-  debug,
-}) {
-  if (debug) {
-    console.log(
-      'Sorry, the Debug UI is not currently implemented in the React-Native Client'
-    );
-  }
-
+export function ReactNativeClient({ game, numPlayers, board, multiplayer }) {
   /*
    * WrappedBoard
    *
@@ -55,14 +42,11 @@ export function ReactNativeClient({
       // The ID of the player associated with this client.
       // Only relevant in multiplayer.
       playerID: PropTypes.string,
-      // Enable / disable the Debug UI.
-      debug: PropTypes.bool,
     };
 
     static defaultProps = {
       gameID: 'default',
       playerID: null,
-      debug: false,
     };
 
     constructor(props) {
