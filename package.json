@@ -4,7 +4,7 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
+    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples-react/server.js",
     "docsify": "docsify serve docs",
     "docsify:update": "node ./scripts/docsify-update.js",
     "examples": "npm run dev",
@@ -18,7 +18,7 @@
     "clean": "node ./scripts/clean.js",
     "prepare": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
-    "prettier": "prettier --write \"{examples,docs,src,storybook}/**/*.{js,css,md}\"",
+    "prettier": "prettier --write \"{examples-react,examples-react-native,docs,src,storybook}/**/*.{js,css,md}\"",
     "postpublish": "node ./scripts/postpublish.js"
   },
   "main": "dist/boardgameio.js",
@@ -148,7 +148,7 @@
       "node_modules/(?!(boardgame.io)/)"
     ],
     "testPathIgnorePatterns": [
-      "/react-native/",
+      "/examples-react-native/",
       "storybook/",
       "/node_modules/",
       ".npm/"
