@@ -4,8 +4,17 @@
 1. Run `npm install`.
 1. Run `npm start`.
 
----
+### Platform specific issues and how to fix them
 
-This project was bootstrapped with [Create React Native App](https://github.com/react-community/create-react-native-app).
+#### Linux
 
-Below you'll find information about performing common tasks. The most recent version of this guide is available [here](https://github.com/react-community/create-react-native-app/blob/master/react-native-scripts/template/README.md).
+You may have to run the following to get it to work on Linux:
+
+```
+$ sudo sysctl -w fs.inotify.max_user_instances=1024
+$ sudo sysctl -w fs.inotify.max_user_watches=12288
+```
+
+#### MacOS
+
+Install `watchman` from HomeBrew on Mac.
