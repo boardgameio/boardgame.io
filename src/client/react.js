@@ -10,7 +10,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Debug } from './debug/debug';
 import { Client as RawClient } from './client';
-import './client.css';
 
 /**
  * Client
