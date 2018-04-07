@@ -52,7 +52,15 @@ export function createMoveDispatchers(moveNames, store, playerID) {
  * Implementation of Client (see below).
  */
 class _ClientImpl {
-  constructor({ game, numPlayers, multiplayer, gameID, playerID, enhancer }) {
+  constructor({
+    game,
+    numPlayers,
+    multiplayer,
+    socketOpts,
+    gameID,
+    playerID,
+    enhancer,
+  }) {
     this.game = game;
     this.playerID = playerID;
     this.gameID = gameID;
@@ -90,6 +98,7 @@ class _ClientImpl {
         gameName: game.name,
         numPlayers,
         server,
+        socketOpts,
       });
       this.store = this.multiplayerClient.createStore(GameReducer, enhancer);
     } else {
@@ -205,6 +214,7 @@ class _ClientImpl {
  * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
+ * @param {...object} socketOpts - Options to pass to socket.io.
  * @param {...object} gameID - The gameID that you want to connect to.
  * @param {...object} playerID - The playerID associated with this client.
  *

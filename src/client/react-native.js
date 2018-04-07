@@ -58,6 +58,9 @@ export function Client({ game, numPlayers, board, multiplayer }) {
         multiplayer,
         gameID: props.gameID,
         playerID: props.playerID,
+        socketOpts: {
+          transports: ['websocket'],
+        },
       });
 
       this.client.subscribe(() => this.forceUpdate());
