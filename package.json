@@ -4,7 +4,7 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
+    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples-react/server.js",
     "docsify": "docsify serve docs",
     "docsify:update": "node ./scripts/docsify-update.js",
     "examples": "npm run dev",
@@ -18,7 +18,7 @@
     "clean": "node ./scripts/clean.js",
     "prepare": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
-    "prettier": "prettier --write \"{examples,docs,src,storybook}/**/*.{js,css,md}\"",
+    "prettier": "prettier --write \"{examples-react,examples-react-native,docs,src,storybook}/**/*.{js,css,md}\"",
     "postpublish": "node ./scripts/postpublish.js"
   },
   "main": "dist/boardgameio.js",
@@ -31,11 +31,13 @@
     "dist/server.js",
     "dist/client.js",
     "dist/react.js",
+    "dist/react-native.js",
     "dist/core.js",
     "dist/ui.js",
     "server.js",
     "client.js",
     "react.js",
+    "react-native.js",
     "core.js",
     "ui.js"
   ],
@@ -128,6 +130,7 @@
     "exportAliases": {
       "client": "./dist/client.js",
       "react": "./dist/react.js",
+      "react-native": "./dist/react-native.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
       "ui": "./dist/ui.js"
@@ -136,9 +139,6 @@
   "jest": {
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
-      "boardgame.io/client": "<rootDir>/packages/client",
-      "boardgame.io/game": "<rootDir>/packages/game",
-      "boardgame.io/server": "<rootDir>/packages/server",
       "\\.(svg)$": "<rootDir>/.empty_module.js"
     },
     "setupFiles": [
@@ -148,6 +148,7 @@
       "node_modules/(?!(boardgame.io)/)"
     ],
     "testPathIgnorePatterns": [
+      "/examples-react-native/",
       "storybook/",
       "/node_modules/",
       ".npm/"

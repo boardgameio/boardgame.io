@@ -23,15 +23,25 @@ export class Multiplayer {
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socket - Override for unit tests.
+   * @param {object} socketOpts - Options to pass to socket.io.
    * @param {string} gameID - The game ID to connect to.
    * @param {string} playerID - The player ID associated with this client.
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
    * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
    */
-  constructor({ socket, gameID, playerID, gameName, numPlayers, server } = {}) {
+  constructor({
+    socket,
+    socketOpts,
+    gameID,
+    playerID,
+    gameName,
+    numPlayers,
+    server,
+  } = {}) {
     this.server = server;
     this.socket = socket;
+    this.socketOpts = socketOpts;
     this.gameName = gameName || 'default';
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;
@@ -81,9 +91,12 @@ export class Multiplayer {
   connect() {
     if (!this.socket) {
       if (this.server) {
-        this.socket = io('http://' + this.server + '/' + this.gameName);
+        this.socket = io(
+          'http://' + this.server + '/' + this.gameName,
+          this.socketOpts
+        );
       } else {
-        this.socket = io('/' + this.gameName);
+        this.socket = io('/' + this.gameName, this.socketOpts);
       }
     }
 
