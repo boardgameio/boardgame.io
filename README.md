@@ -25,7 +25,7 @@ networking or backend code.
 * **State Management**: Game state is managed seamlessly across browser, apps, server and storage automatically.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Multiplayer**: All clients connected to the same game are synced in real time.
-* **UI agnostic**: Code clients in React, React Native or plain JS.
+* **UI Agnostic**: Code clients in React, React Native or plain JS.
 * **Web and Mobile**: Web and mobile clients can play in the same game.
 * **Game Phases**: with different game rules (including custom turn orders) per phase.
 * **Triggers**: Automatic actions when certain game conditions are met.
