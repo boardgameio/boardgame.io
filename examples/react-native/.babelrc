@@ -8,7 +8,7 @@
   "plugins": [
     ["module-resolver", {
       "alias": {
-        "boardgame.io": "../packages"
+        "boardgame.io": "../../packages"
       }
     }]
   ]
