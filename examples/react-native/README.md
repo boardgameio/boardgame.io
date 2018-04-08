@@ -1,8 +1,8 @@
 # Setup
 
-1. Go to `examples/react-native`.
-1. Run `npm install`.
-1. Run `npm start`.
+1.  Go to `examples/react-native`.
+1.  Run `npm install`.
+1.  Run `npm start`.
 
 ### Platform specific issues and how to fix them
 

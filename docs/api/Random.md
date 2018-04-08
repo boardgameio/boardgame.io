@@ -6,8 +6,8 @@ API for code that requires randomness. See the guide [here](random.md).
 
 ### Arguments
 
-1. `spotvalue` (_number_): The die dimension (_default: 6_).
-2. `diceCount` (_number_): The number of dice to throw.
+1.  `spotvalue` (_number_): The die dimension (_default: 6_).
+2.  `diceCount` (_number_): The number of dice to throw.
 
 ### Returns
 
@@ -48,7 +48,7 @@ const game = Game({
 
 ### Arguments
 
-1. `deck` (_array_): An array to shuffle.
+1.  `deck` (_array_): An array to shuffle.
 
 ### Returns
 
@@ -74,7 +74,7 @@ const game = Game({
 
 ### Arguments
 
-1. `diceCount` (_number_): The number of dice to throw.
+1.  `diceCount` (_number_): The number of dice to throw.
 
 ### Usage
 
