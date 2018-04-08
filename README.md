@@ -22,14 +22,16 @@ networking or backend code.
 
 ## Features
 
-* **State Management**: Game state is managed seamlessly across browser, server and storage automatically.
+* **State Management**: Game state is managed seamlessly across browser, apps, server and storage automatically.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
-* **Multiplayer**: All browsers connected to the same game are synced in real time with no refreshes required.
+* **Multiplayer**: All clients connected to the same game are synced in real time.
+* **UI agnostic**: Code clients in React, React Native or plain JS.
+* **Web and Mobile**: Web and mobile clients can play in the same game.
 * **Game Phases**: with different game rules (including custom turn orders) per phase.
 * **Triggers**: Automatic actions when certain game conditions are met.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **UI toolkit**: React components for hex grids, cards, tokens etc.
+* **Component Toolkit**: Components for hex grids, cards, tokens (React only at the moment).
 
 ## Usage
 
