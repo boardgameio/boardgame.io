@@ -22,12 +22,12 @@ networking or backend code.
 
 ## Features
 
-* **State Management**: Game state is managed seamlessly across browser, apps, server and storage automatically.
-* **Prototyping**: Debugging interface to simulate moves even before you render the game.
-* **UI Agnostic**: Client API for React, React Native or plain JS.
+* **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
 * **Cross-platform Multiplayer**: All clients (Web / Android / iOS) connected to the same game are synced in real time.
+* **UI Agnostic**: Client API for React, React Native or plain JS.
 * **Game Phases**: with different game rules (including custom turn orders) per phase.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
+* **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
 * **Component Toolkit**: Components for hex grids, cards, tokens (React only at the moment).
 
