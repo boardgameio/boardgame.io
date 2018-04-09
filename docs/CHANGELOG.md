@@ -1,3 +1,10 @@
+# v0.22.0
+
+#### Features
+
+* [[5362955](https://github.com/google/boardgame.io/commit/5362955)] React Native Client (#128)
+* [[b329df2](https://github.com/google/boardgame.io/commit/b329df2)] Pass through props (#173)
+
 # v0.21.5
 
 #### Bugfixes

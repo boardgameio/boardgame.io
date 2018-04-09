@@ -116,6 +116,9 @@ The `flow` section can specify a number of automatic behaviors when a move is ma
 or when the turn or phase is ended. These can also be overridden at the phase level.
 Let's take a look at some of these:
 
+!> For a more complete set of options, take a look
+[here](https://github.com/google/boardgame.io/blob/master/src/core/flow.js#L139).
+
 ```js
 flow: {
   // Ends the turn if this returns true.
