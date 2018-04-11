@@ -4,11 +4,21 @@ The framework maintains the turn order using the following fields:
 
 ```
 ctx: {
+  actionPlayers: ['0'],
   currentPlayer: '0',
   playOrder: ['0', '1', '2', ...],
   playOrderPos: 0,
 }
 ```
+
+`currentPlayer` is basically the owner of the current turn.
+
+`actionPlayers` are the set of players that can currently
+make a move. It defaults to a list containing just the
+`currentPlayer`, but you might want to change it in order
+to support actions from other players during the currrent turn
+(for example, if you play a card that forces everyone else
+to discard a card).
 
 `playOrderPos` is an index into `playOrder` and the way in which it
 is updated is determined by a particular `TurnOrder`. The default
