@@ -3,7 +3,12 @@
 It is important that all your move functions are pure
 and don't mutate the passed in arguments. Always return
 a new copy of `G`, unless nothing has changed, in which
-case you can return the same object that was passed in.
+case you may return the same object that was passed in.
+
+!> A move can also return `undefined` (or not return),
+which indicates that the move (or its combination of arguments)
+is invalid at this point in the game and shouldn't update the
+game state.
 
 Here are some patterns for immutable updates:
 

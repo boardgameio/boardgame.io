@@ -38,10 +38,10 @@ Moves({
     // Clone G.
     const Gcopy = Object.assign({}, G);
 
-    // mutate Gcopy in response to move.
+    // Update copy.
     // ...
 
-    // Return copy of G.
+    // Return copy.
     return Gcopy;
   },
 
@@ -49,10 +49,10 @@ Moves({
     // Clone G.
     const Gcopy = Object.assign({}, G);
 
-    // mutate Gcopy in response to move.
+    // Update copy.
     // ...
 
-    // Return copy of G.
+    // Return copy.
     return Gcopy;
   },
 
@@ -69,3 +69,8 @@ onClick() {
   this.props.moves.moveA();
 }
 ```
+
+!> A move can also return `undefined` (or not return),
+which indicates that the move (or its combination of arguments)
+is invalid at this point in the game and shouldn't update the
+game state.
