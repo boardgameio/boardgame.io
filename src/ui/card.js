@@ -8,27 +8,33 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import Draggable from 'react-draggable';
 import Logo from './logo';
 import './card.css';
 
-const Card = ({ back, canHover, className, front, isFaceUp, ...rest }) => {
+const Card = ({ back, isDraggable, className, front, isFaceUp, ...rest }) => {
   const classNames = ['bgio-card'];
-  if (!canHover) classNames.push('no-hover');
   if (className) classNames.push(className);
 
-  return (
+  const body = (
     <div className={classNames.join(' ')} {...rest}>
       {isFaceUp ? front : back}
     </div>
   );
+
+  if (!isDraggable) {
+    return body;
+  }
+
+  return <Draggable>{body}</Draggable>;
 };
 
 Card.propTypes = {
   back: PropTypes.node,
-  canHover: PropTypes.bool,
   className: PropTypes.string,
   front: PropTypes.node,
   isFaceUp: PropTypes.bool,
+  isDraggable: PropTypes.bool,
 };
 
 Card.defaultProps = {
@@ -37,9 +43,9 @@ Card.defaultProps = {
       <Logo width="48" />
     </div>
   ),
-  canHover: true,
   front: <div className="bgio-card__front">Card</div>,
   isFaceUp: false,
+  isDraggable: false,
 };
 
 export { Card };

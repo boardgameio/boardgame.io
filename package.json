@@ -120,6 +120,7 @@
     "mongodb": "^3.0.3",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
+    "react-draggable": "^3.0.5",
     "redux": "^3.7.2",
     "socket.io": "^2.0.3"
   },
