@@ -21,6 +21,7 @@ import { Client as RawClient } from './client';
  * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
+ * @param {...object} enhancer - Optional enhancer to send to the Redux store
  *
  * Returns:
  *   A React Native component that wraps board and provides an
