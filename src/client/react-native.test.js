@@ -242,3 +242,15 @@ test('undo/redo', () => {
   board.props.redo();
   expect(board.props.G).toEqual({ arg: 42 });
 });
+
+test('can receive enhancer', () => {
+  const enhancer = jest.fn().mockImplementation(next => next);
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+    enhancer,
+  });
+
+  const game = Enzyme.mount(<Board />); // eslint-disable-line no-unused-vars
+  expect(enhancer).toBeCalled();
+});

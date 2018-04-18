@@ -27,7 +27,7 @@ import { Client as RawClient } from './client';
  *   API through props for it to interact with the framework
  *   and dispatch actions such as MAKE_MOVE.
  */
-export function Client({ game, numPlayers, board, multiplayer }) {
+export function Client({ game, numPlayers, board, multiplayer, enhancer }) {
   /*
    * WrappedBoard
    *
@@ -61,6 +61,7 @@ export function Client({ game, numPlayers, board, multiplayer }) {
         socketOpts: {
           transports: ['websocket'],
         },
+        enhancer,
       });
 
       this.client.subscribe(() => this.forceUpdate());
