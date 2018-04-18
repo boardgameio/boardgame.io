@@ -21,13 +21,14 @@ import { Client as RawClient } from './client';
  * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
+ * @param {...object} enhancer - Optional enhancer to send to the Redux store
  *
  * Returns:
  *   A React Native component that wraps board and provides an
  *   API through props for it to interact with the framework
  *   and dispatch actions such as MAKE_MOVE.
  */
-export function Client({ game, numPlayers, board, multiplayer }) {
+export function Client({ game, numPlayers, board, multiplayer, enhancer }) {
   /*
    * WrappedBoard
    *
@@ -61,6 +62,7 @@ export function Client({ game, numPlayers, board, multiplayer }) {
         socketOpts: {
           transports: ['websocket'],
         },
+        enhancer,
       });
 
       this.client.subscribe(() => this.forceUpdate());
