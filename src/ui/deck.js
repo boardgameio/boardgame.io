@@ -49,6 +49,7 @@ class Deck extends React.Component {
         {cards.map((card, i) =>
           React.cloneElement(card, {
             key: i,
+            canHover: i === 0, // Only the top card should apply a css hover effect
             isFaceUp: i === 0, // Only the top card should ever be face up
             style: {
               position: i ? 'absolute' : 'inherit',

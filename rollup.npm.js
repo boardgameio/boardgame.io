@@ -30,7 +30,6 @@ const globals = {
   'prop-types': 'PropTypes',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
-  'react-draggable': 'ReactDraggable',
 };
 
 export default [

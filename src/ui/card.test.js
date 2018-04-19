@@ -22,11 +22,6 @@ test('is rendered', () => {
   }
 
   {
-    const card = Enzyme.shallow(<Card isDraggable />);
-    expect(card.html()).toContain('react-draggable');
-  }
-
-  {
     const card = Enzyme.shallow(<Card isFaceUp className="custom" />);
     expect(card.html()).toBe(
       '<div class="bgio-card custom"><div class="bgio-card__front">Card</div></div>'

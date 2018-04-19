@@ -38,23 +38,34 @@ export class FlippableStory extends React.Component {
   }
 }
 
-export const DraggableStory = () => {
-  return (
-    <div style={{ padding: '50px' }}>
-      <Card isDraggable />
-    </div>
-  );
-};
+export class PlayingCardStory extends React.Component {
+  constructor(props) {
+    super(props);
 
-export const PlayingCardStory = () => {
-  const card = standardDeck[0];
+    this.state = {
+      isFaceUp: false,
+    };
+  }
 
-  return (
-    <div style={{ padding: '50px' }}>
-      <Card
-        front={<PlayingCard suit={card.suit} value={card.value} />}
-        isFaceUp={true}
-      />
-    </div>
-  );
-};
+  onClick = () => {
+    this.setState({
+      isFaceUp: !this.state.isFaceUp,
+    });
+
+    action('onClick')();
+  };
+
+  render() {
+    const card = standardDeck[0];
+
+    return (
+      <div style={{ padding: '50px' }}>
+        <Card
+          front={<PlayingCard suit={card.suit} value={card.value} />}
+          isFaceUp={this.state.isFaceUp}
+          onClick={this.onClick}
+        />
+      </div>
+    );
+  }
+}
