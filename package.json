@@ -113,6 +113,7 @@
   },
   "dependencies": {
     "koa": "^2.3.0",
+    "koa-body": "^2.5.0",
     "koa-router": "^7.2.1",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.1",
@@ -121,7 +122,9 @@
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
     "redux": "^3.7.2",
-    "socket.io": "^2.0.3"
+    "socket.io": "^2.0.3",
+    "supertest": "^3.1.0",
+    "uuid": "3.2.1"
   },
   "peerDependencies": {
     "react": "^16.0.0"

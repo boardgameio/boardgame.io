@@ -9,8 +9,11 @@
 const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
+
 import { InMemory, Mongo } from './db';
 import { createGameReducer } from '../core/reducer';
+import { createApiServer, isActionFromAuthenticPlayer } from './api-server';
+
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
 
@@ -32,6 +35,8 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
       db = new InMemory();
     }
   }
+
+  const apiApp = createApiServer({ db, games });
 
   const clientInfo = _clientInfo || new Map();
   const roomInfo = _roomInfo || new Map();
@@ -56,6 +61,16 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         // The null player is a view-only player.
         if (playerID == null) {
           return;
+        }
+
+        const isActionAuthentic = await isActionFromAuthenticPlayer({
+          action,
+          db,
+          gameID,
+          playerID,
+        });
+        if (!isActionAuthentic) {
+          return { error: 'unauthorized action' };
         }
 
         // Check whether the player is allowed to make the move
@@ -139,9 +154,11 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
 
   return {
     app,
+    apiApp,
     db,
     run: async (port, callback) => {
       await db.connect();
+      await apiApp.listen(port + 1);
       app.listen(port, callback);
     },
   };
