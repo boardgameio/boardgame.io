@@ -14,10 +14,11 @@ import * as Actions from './action-types';
  * @param {string} type - The move type.
  * @param {Array}  args - Additional arguments.
  * @param {string}  playerID - The ID of the player making this action.
+ * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const makeMove = (type, args, playerID) => ({
+export const makeMove = (type, args, playerID, credentials) => ({
   type: Actions.MAKE_MOVE,
-  payload: { type, args, playerID },
+  payload: { type, args, playerID, credentials },
 });
 
 /**
@@ -26,10 +27,11 @@ export const makeMove = (type, args, playerID) => ({
  * @param {string} type - The event type.
  * @param {Array}  args - Additional arguments.
  * @param {string}  playerID - The ID of the player making this action.
+ * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const gameEvent = (type, args, playerID) => ({
+export const gameEvent = (type, args, playerID, credentials) => ({
   type: Actions.GAME_EVENT,
-  payload: { type, args, playerID },
+  payload: { type, args, playerID, credentials },
 });
 
 /**

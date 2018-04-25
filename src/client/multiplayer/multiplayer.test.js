@@ -11,6 +11,7 @@ import Game from '../../core/game';
 import { makeMove } from '../../core/action-creators';
 import { createGameReducer } from '../../core/reducer';
 import * as ActionCreators from '../../core/action-creators';
+import * as Actions from '../../core/action-types';
 
 class MockSocket {
   constructor() {
@@ -35,6 +36,9 @@ test('Multiplayer defaults', () => {
 
 test('update gameID / playerID', () => {
   const m = new Multiplayer();
+  const game = Game({});
+  m.createStore(createGameReducer({ game }));
+
   m.updateGameID('test');
   m.updatePlayerID('player');
   expect(m.gameID).toBe('default:test');
@@ -167,4 +171,36 @@ test('game server accepts enhanced store', () => {
   expect(spyDispatcher.mock.calls.length).toBe(0);
   store.dispatch(makeMove('A', {}));
   expect(spyDispatcher.mock.calls.length).toBe(1);
+});
+
+test('changing a gameID resets the state before resync', () => {
+  const m = new Multiplayer();
+  const game = Game({});
+  const store = m.createStore(createGameReducer({ game }));
+  const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+  m.updateGameID('foo');
+
+  expect(dispatchSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: Actions.RESET,
+      _remote: true,
+    })
+  );
+});
+
+test('changing a playerID resets the state before resync', () => {
+  const m = new Multiplayer();
+  const game = Game({});
+  const store = m.createStore(createGameReducer({ game }));
+  const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+  m.updatePlayerID('foo');
+
+  expect(dispatchSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: Actions.RESET,
+      _remote: true,
+    })
+  );
 });

@@ -9,6 +9,7 @@
 import Singleplayer from './components/singleplayer';
 import Multiplayer from './components/multiplayer';
 import Spectator from './components/spectator';
+import Authenticated from './components/authenticated';
 
 const routes = [
   {
@@ -20,6 +21,11 @@ const routes = [
     path: '/multiplayer',
     text: 'Multiplayer',
     component: Multiplayer,
+  },
+  {
+    path: '/authenticated',
+    text: 'Authenticated',
+    component: Authenticated,
   },
   {
     path: '/spectator',

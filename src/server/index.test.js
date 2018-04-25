@@ -6,13 +6,21 @@
  * https://opensource.org/licenses/MIT.
  */
 
+jest.mock('./api-server');
+
 import { Server } from './index';
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
+import { createApiServer, isActionFromAuthenticPlayer } from './api-server';
 
 beforeEach(() => {
   jest.resetModules();
+  jest.resetAllMocks();
+  createApiServer.mockReturnValue({
+    listen() {},
+  });
+  isActionFromAuthenticPlayer.mockReturnValue(true);
 });
 
 jest.mock('koa-socket', () => {
@@ -327,4 +335,18 @@ test('MONGO_URI', () => {
   const server = Server({ games: [game] });
   expect(server.db.url).toBe('test');
   delete process.env.MONGO_URI;
+});
+
+test('auth failure', async () => {
+  isActionFromAuthenticPlayer.mockReturnValue(false);
+
+  const server = Server({ games: [game] });
+  const io = server.app.context.io;
+  const action = ActionCreators.gameEvent('endTurn');
+
+  await io.socket.receive('sync', 'gameID');
+  io.socket.emit.mockReset();
+
+  await io.socket.receive('action', action, 0, 'gameID', '0');
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
 });
