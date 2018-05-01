@@ -23,7 +23,7 @@ function canPlayerMakeMove(G, ctx, opts) {
   // In multiplayer mode, the default playerID is null, which corresponds
   // to a spectator that can't make moves.
   if (playerID === null) {
-    return true;
+    return false;
   }
 
   // In singleplayer mode (and most unit tests), the default playerID
