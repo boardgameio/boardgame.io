@@ -797,3 +797,33 @@ test('end turn when final phase is reached', () => {
   expect(state.ctx.phase).toBe('C');
   expect(state.ctx.currentPlayer).toBe('1');
 });
+
+test('endTurn is not called twice in one move', () => {
+  let flow = FlowWithPhases({
+    endTurnIf: () => true,
+    phases: [{ name: 'A', endPhaseIf: G => G.endPhase }, { name: 'B' }],
+  });
+
+  let state = { G: {}, ctx: flow.ctx(2) };
+
+  expect(state.ctx.phase).toBe('A');
+  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.turn).toBe(0);
+
+  state = flow.processMove(state, makeMove().payload);
+
+  expect(state.ctx.phase).toBe('A');
+  expect(state.ctx.currentPlayer).toBe('1');
+  expect(state.ctx.turn).toBe(1);
+
+  state.G.endPhase = true;
+
+  // endPhaseIf and endTurnIf both return true here,
+  // but the turn should only advance once, despite
+  // endTurnIf being checked in endPhaseIf as well as processMove.
+  state = flow.processMove(state, makeMove().payload);
+
+  expect(state.ctx.phase).toBe('B');
+  expect(state.ctx.currentPlayer).toBe('0');
+  expect(state.ctx.turn).toBe(2);
+});

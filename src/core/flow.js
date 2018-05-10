@@ -428,6 +428,8 @@ export function FlowWithPhases({
     // Run any setup code for the new phase.
     state = startPhase({ ...state, G, ctx }, phaseMap[ctx.phase]);
 
+    const origTurn = state.ctx.turn;
+
     // End the new phase automatically if necessary.
     // In order to avoid infinite loops, this is called
     // a finite number of times.
@@ -443,9 +445,10 @@ export function FlowWithPhases({
       }
     }
 
-    // End turn if endTurnIf returns something.
+    // End turn if endTurnIf returns something
+    // (and the turn has not already been ended by a nested endPhase call).
     const endTurn = shouldEndTurn(state);
-    if (endTurn) {
+    if (endTurn && state.ctx.turn == origTurn) {
       state = this.dispatch(state, {
         type: 'endTurn',
         args: [endTurn],
@@ -544,24 +547,26 @@ export function FlowWithPhases({
     const G = conf.onMove(state.G, state.ctx, action);
     state = { ...state, G };
 
+    const origTurn = state.ctx.turn;
     const gameover = conf.endGameIf(state.G, state.ctx);
 
-    // End the turn automatically if endTurnIf is true or if endGameIf returns.
-    const endTurn = shouldEndTurn(state);
-    if (endTurn || gameover !== undefined) {
-      state = dispatch(state, {
-        type: 'endTurn',
-        args: [endTurn],
-        playerID: action.playerID,
-      });
-    }
-
-    // End the phase automatically if endPhaseIf is true.
+    // End the phase automatically if endPhaseIf is true or if endGameIf returns.
     const endPhase = shouldEndPhase(state);
     if (endPhase || gameover !== undefined) {
       state = dispatch(state, {
         type: 'endPhase',
         args: [endPhase],
+        playerID: action.playerID,
+      });
+    }
+
+    // End the turn automatically if endTurnIf is true or if endGameIf returns.
+    // (but not if endPhase above already ends the turn).
+    const endTurn = shouldEndTurn(state);
+    if (state.ctx.turn == origTurn && (endTurn || gameover !== undefined)) {
+      state = dispatch(state, {
+        type: 'endTurn',
+        args: [endTurn],
         playerID: action.playerID,
       });
     }
