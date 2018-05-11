@@ -56,4 +56,6 @@ See the contributing [guidelines](CONTRIBUTING.md).
 
 ## Disclaimer
 
-This is not an official Google product.
+This is not an official Google product. It's a Googler's
+hobby project that's supported by contributions from the
+community.
