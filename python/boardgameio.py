@@ -35,7 +35,6 @@ class Namespace(io.BaseNamespace):
         state = args[1]
         state_id = state['_stateID']
         ctx = state['ctx']
-        player = ctx['actionPlayers'][0]
 
         # is it my game and my turn to play?
         if game_id == self.bot.game_id:
@@ -49,7 +48,7 @@ class Namespace(io.BaseNamespace):
                     # game over
                     self.bot.gameover(G, ctx)
                     
-                elif player == self.bot.player_id:
+                elif self.bot.player_id in ctx['actionPlayers']:
                     self.log.info('phase is %s' % (ctx['phase']))
                     if not self.actions:
                         # plan next actions
