@@ -1,21 +1,22 @@
-# Tutorial: React Client
+# Tutorial: React Native Client
 
-This tutorial walks through a simple game of Tic-Tac-Toe, built with React.
+This tutorial walks through a simple game of Tic-Tac-Toe, built with React-Native.
 
 ## Setup
 
-We shall use [create-react-app](https://github.com/facebookincubator/create-react-app) to create a **React** app and add
+We shall use [create-react-native-app](https://github.com/react-community/create-react-native-app) to create a **React Native** app and add
 **boardgame.io** features. The code uses ES2015 features,
 including [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import), and
 the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator) syntax.
 
 ```
-$ npm install -g create-react-app
-$ create-react-app game
+$ npm install -g create-react-native-app
+$ create-react-native-app game
 $ cd game
 $ npm install --save boardgame.io
 ```
 
+<!-- 
 ## Define Moves
 
 We create the game by providing the initial value of the
@@ -240,4 +241,4 @@ And there you have it. A basic tic-tac-toe game!
 <iframe class='react' src='react/example-2.html' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
-Editable version on CodePen: [link](https://codepen.io/nicolodavis/full/MEvrjq/)
+Editable version on CodePen: [link](https://codepen.io/nicolodavis/full/MEvrjq/) -->

@@ -13,16 +13,16 @@ The `games` argument takes a list of game implementations
 
 ### Arguments
 
-1. obj(_object_): A config object with the options shown below.
+1.  obj(_object_): A config object with the options shown below.
 
 ### Returns
 
 An object that contains:
 
-1. run (_function_): A function to run the server.
-   Signature: (port, callback) => {}
-2. app (_object_): The Koa app.
-3. db (_object_): The `db` implementation.
+1.  run (_function_): A function to run the server.
+    Signature: (port, callback) => {}
+2.  app (_object_): The Koa app.
+3.  db (_object_): The `db` implementation.
 
 ### Usage
 

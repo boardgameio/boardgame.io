@@ -5,35 +5,35 @@ the client application.
 
 The `Board` component will receive the following as `props`:
 
-1. `G`: The game state.
+1.  `G`: The game state.
 
-2. `ctx`: The game metadata.
+2.  `ctx`: The game metadata.
 
-3. `moves`: An object containing functions to dispatch various
-   moves that you have defined. The functions are named after the
-   moves you created using [Game()](/api/Game.md). Each function
-   can take any number of arguments, and they are passed to the
-   move function after `G` and `ctx`.
+3.  `moves`: An object containing functions to dispatch various
+    moves that you have defined. The functions are named after the
+    moves you created using [Game()](/api/Game.md). Each function
+    can take any number of arguments, and they are passed to the
+    move function after `G` and `ctx`.
 
-4. `events`: An object containing functions to dispatch various
-   game events like `endTurn` and `endPhase`.
+4.  `events`: An object containing functions to dispatch various
+    game events like `endTurn` and `endPhase`.
 
-5. `playerID`: The player ID associated with the client.
+5.  `playerID`: The player ID associated with the client.
 
-6. `isActive`: `true` if the client is able to currently make
-   a move or interact with the game.
+6.  `isActive`: `true` if the client is able to currently make
+    a move or interact with the game.
 
-7. `isMultiplayer`: `true` if it is a multiplayer game.
+7.  `isMultiplayer`: `true` if it is a multiplayer game.
 
-8. `isConnected`: `true` if connection to the server is active.
+8.  `isConnected`: `true` if connection to the server is active.
 
-9. `enhancer`: An optional Redux store enhancer, passed along to
-   the internals store. See the [Debugging](debugging.md) section
-   for more details.
+9.  `enhancer`: An optional Redux store enhancer, passed along to
+    the internals store. See the [Debugging](debugging.md) section
+    for more details.
 
 ### Arguments
 
-1. obj(_object_): A config object with the options shown below.
+1.  obj(_object_): A config object with the options shown below.
 
 ### Returns
 
@@ -41,11 +41,11 @@ The `Board` component will receive the following as `props`:
 
 The component supports the following `props`:
 
-1. `gameID`: Connect to a particular game (multiplayer).
+1.  `gameID`: Connect to a particular game (multiplayer).
 
-2. `playerID`: Associate the client with a player (multiplayer).
+2.  `playerID`: Associate the client with a player (multiplayer).
 
-3. `debug`: Set to `false` to disable the Debug UI.
+3.  `debug`: Set to `false` to disable the Debug UI.
 
 ### Usage
 
