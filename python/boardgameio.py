@@ -22,6 +22,7 @@ class Namespace(io.BaseNamespace):
 
     def set_bot_info(self, bot):
         self.bot = bot
+        return self
     
     def on_connect(self):
         self.log.info('connected') # to game <%s>' % self.bot.game_id)
@@ -35,7 +36,7 @@ class Namespace(io.BaseNamespace):
         state = args[1]
         state_id = state['_stateID']
         ctx = state['ctx']
-
+        
         # is it my game and my turn to play?
         if game_id == self.bot.game_id:
             if not self.previous_state_id or state_id>=self.previous_state_id:
@@ -85,27 +86,23 @@ class Bot(object):
         # request initial sync
         self.io_namespace.emit('sync', self.game_id, player_id, self.num_players)
 
-    def make_move(self, type, args=[]):
-        """ Create MAKE_MOVE action. """
+    def _create_action(self, action, type, args=[]):
         return {
-            'type': 'MAKE_MOVE',
+            'type': action,
             'payload': {
                 'type': type,
                 'args': args,
                 'playerID': self.player_id
             }
         }
+        
+    def make_move(self, type, *args):
+        """ Create MAKE_MOVE action. """
+        return self._create_action('MAKE_MOVE',type,list(args))
 
     def game_event(self, type):
         """ Create GAME_EVENT action. """
-        return {
-            'type': 'GAME_EVENT',
-            'payload': {
-                'type': type,
-                'args': [],
-                'playerID': self.player_id
-            }
-        }
+        return self._create_action('GAME_EVENT',type)
 
     def listen(self, timeout=1):
         """
