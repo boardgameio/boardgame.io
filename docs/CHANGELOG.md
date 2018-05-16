@@ -1,3 +1,9 @@
+# v0.22.1
+
+* [[bb39ca7](https://github.com/google/boardgame.io/commit/bb39ca7)] fix bug that was causing isActive to return false
+* [[81ed088](https://github.com/google/boardgame.io/commit/81ed088)] ensure endTurn is called only once after a move
+* [[ca9f6ca](https://github.com/google/boardgame.io/commit/ca9f6ca)] disable move if playerID is null
+
 # v0.22.0
 
 #### Features
