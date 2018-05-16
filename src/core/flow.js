@@ -124,6 +124,8 @@ export function Flow({
 
     optimisticUpdate,
 
+    canPlayerMakeMove,
+
     canMakeMove: (G, ctx, opts) => {
       // Disallow moves once the game is over.
       if (ctx.gameover !== undefined) return false;
