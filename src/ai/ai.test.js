@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from './game';
-import { createGameReducer } from './reducer';
-import { makeMove } from './action-creators';
+import Game from '../core/game';
+import { createGameReducer } from '../core/reducer';
+import { makeMove } from '../core/action-creators';
 import { Simulate } from './ai';
 
 test('next', () => {

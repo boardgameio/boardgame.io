@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { createGameReducer } from './reducer';
-import { makeMove } from './action-creators';
+import { createGameReducer } from '../core/reducer';
+import { makeMove } from '../core/action-creators';
 
 // Initial implementation that just takes the first move
 // and simulates till the end of the game.
