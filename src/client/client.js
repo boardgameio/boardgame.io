@@ -132,7 +132,7 @@ class _ClientImpl {
         isActive = false;
       }
       if (
-        !this.game.flow.canMakeMove(state.G, state.ctx, {
+        !this.game.flow.canPlayerMakeMove(state.G, state.ctx, {
           playerID: this.playerID,
         })
       ) {
