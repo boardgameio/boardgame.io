@@ -68,7 +68,9 @@ class Bot(object):
 
     log = logging.getLogger('client.bot')
     
-    def __init__(self, server='localhost', port='8000', game_name='default', game_id='default', player_id='1', num_players=2):
+    def __init__(self, server='localhost', port='8000',
+                 game_name='default', game_id='default',
+                 player_id='1', num_players=2):
         """
         Connect to server with given game name, id and player id.
         Request initial synchronization.

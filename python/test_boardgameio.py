@@ -6,8 +6,11 @@
 # https://opensource.org/licenses/MIT.
 #
 
-# unit-tests may be run with:
-# $ $ python -m unittest discover
+# To run unit-tests:
+# $ python -m unittest discover
+# For coverage report:
+# $ coverage run --source=boardgameio.py test_boardgameio.py
+# $ coverage report
 
 import unittest, logging, mock
 import socketIO_client as io
@@ -101,3 +104,7 @@ class TestBot(unittest.TestCase):
                                 'playerID': self.sut.player_id
                             }
                         })
+
+
+if __name__ == '__main__':
+    unittest.main()
