@@ -652,6 +652,48 @@ test('change action players - reducer', () => {
   expect(state.G).toMatchObject({});
 });
 
+test('Turn timer', () => {
+  const onTurnEnd = jest.fn(G => G);
+
+  let flow = FlowWithPhases({
+    secondsPerTurn: 2,
+    onTurnEnd,
+  });
+
+  let state = { ctx: flow.ctx(2) };
+
+  expect(onTurnEnd).not.toHaveBeenCalled();
+
+  flow.init(state);
+  expect(onTurnEnd).not.toHaveBeenCalled();
+  setTimeout(() => {
+    expect(onTurnEnd).toHaveBeenCalled();
+  }, 2000);
+});
+
+test('Phase timer', () => {
+  const onPhaseEnd = jest.fn(G => G);
+  const flow = FlowWithPhases({
+    phases: [
+      {
+        name: 'TimerTest',
+        secondsPerPhase: 2,
+        onPhaseEnd,
+      },
+    ],
+  });
+
+  let state = { ctx: flow.ctx(2) };
+
+  expect(onPhaseEnd).not.toHaveBeenCalled();
+
+  flow.init(state);
+  expect(onPhaseEnd).not.toHaveBeenCalled();
+  setTimeout(() => {
+    expect(onPhaseEnd).toHaveBeenCalled();
+  }, 2000);
+});
+
 test('undo / redo restricted by undoableMoves', () => {
   let game = Game({
     moves: {

@@ -255,6 +255,8 @@ export function Flow({
 export function FlowWithPhases({
   phases,
   movesPerTurn,
+  secondsPerTurn,
+  secondsPerPhase,
   endTurnIf,
   endGameIf,
   onTurnBegin,
@@ -311,6 +313,12 @@ export function FlowWithPhases({
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
+    if (conf.secondsPerTurn === undefined) {
+      conf.secondsPerTurn = secondsPerTurn;
+    }
+    if (conf.secondsPerPhase === undefined) {
+      conf.secondsPerPhase = secondsPerPhase;
+    }
     if (conf.endTurnIf === undefined) {
       conf.endTurnIf = endTurnIf;
     }
@@ -363,8 +371,12 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
+    if (config.secondsPerPhase) {
+      setTimeout(() => {
+        state = endPhaseEvent(state);
+      }, config.secondsPerPhase * 1000);
+    }
     const G = config.onPhaseBegin(state.G, state.ctx);
-
     const ctx = { ...state.ctx };
     ctx.playOrderPos = config.turnOrder.first(G, ctx);
     ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
@@ -375,13 +387,17 @@ export function FlowWithPhases({
   };
 
   const startTurn = function(state, config) {
-    const G = config.onTurnBegin(state.G, state.ctx);
+    if (config.secondsPerTurn) {
+      setTimeout(() => {
+        endTurnEvent(state);
+      }, config.secondsPerTurn * 1000);
+    }
+    const G = config.onTurnBegin(state.G, state.ctx); // onTurnBeginWrap();
 
     let plainCtx = state.ctx;
     plainCtx = Random.detach(plainCtx);
     plainCtx = Events.detach(plainCtx);
     const _undo = [{ G, ctx: plainCtx }];
-
     const ctx = { ...state.ctx };
     ctx.allowedMoves = config.allowedMoves(G, ctx);
 
