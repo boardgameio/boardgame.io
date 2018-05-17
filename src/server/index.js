@@ -58,11 +58,6 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         });
         const store = Redux.createStore(reducer, state);
 
-        // The null player is a view-only player.
-        if (playerID == null) {
-          return;
-        }
-
         const isActionAuthentic = await isActionFromAuthenticPlayer({
           action,
           db,
@@ -74,12 +69,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         }
 
         // Check whether the player is allowed to make the move
-        if (
-          !game.flow.canMakeMove(state.G, state.ctx, {
-            ...action.payload,
-            playerID,
-          })
-        ) {
+        if (!game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)) {
           return;
         }
 
