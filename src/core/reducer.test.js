@@ -44,13 +44,11 @@ test('_stateID is incremented', () => {
 test('when a move returns undef => treat as illegal move', () => {
   const game = Game({
     moves: {
-      A: G => undefined, // eslint-disable-line no-unused-vars
+      A: () => undefined,
     },
   });
   const reducer = createGameReducer({ game });
-
   let state = reducer(state, makeMove('A'));
-
   expect(state._stateID).toBe(0);
 });
 
@@ -59,13 +57,19 @@ test('makeMove', () => {
 
   let state;
 
-  state = reducer(undefined, makeMove('unknown'));
+  state = reducer(undefined, { type: 'init' });
+  expect(state._stateID).toBe(0);
+
+  state = reducer(state, makeMove('unknown'));
+  expect(state._stateID).toBe(0);
   expect(state.G).not.toMatchObject({ moved: true });
 
-  state = reducer(undefined, makeMove('A'));
+  state = reducer(state, makeMove('A'));
+  expect(state._stateID).toBe(1);
   expect(state.G).not.toMatchObject({ moved: true });
 
-  state = reducer(undefined, makeMove('B'));
+  state = reducer(state, makeMove('B'));
+  expect(state._stateID).toBe(2);
   expect(state.G).toMatchObject({ moved: true });
 });
 
