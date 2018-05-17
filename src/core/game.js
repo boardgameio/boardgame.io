@@ -70,10 +70,8 @@ import { Random } from './random';
  *                           configuration object for FlowWithPhases().
  *
  * @param {...object} seed - Seed for the PRNG.
- *
- * @param {...object} ai - AI section (experimental).
  */
-function Game({ name, setup, moves, playerView, flow, seed, ai }) {
+function Game({ name, setup, moves, playerView, flow, seed }) {
   if (name === undefined) name = 'default';
   if (setup === undefined) setup = () => ({});
   if (moves === undefined) moves = {};
@@ -89,7 +87,6 @@ function Game({ name, setup, moves, playerView, flow, seed, ai }) {
     setup,
     playerView,
     flow,
-    ai,
     seed,
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {

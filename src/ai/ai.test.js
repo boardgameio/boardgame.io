@@ -12,16 +12,16 @@ import { makeMove } from '../core/action-creators';
 import { Simulate } from './ai';
 
 test('next', () => {
-  let game = Game({
+  const game = Game({
     moves: {
       A: () => ({ next: 'A' }),
       B: () => ({ next: 'B' }),
     },
-
-    ai: {
-      next: G => [{ move: G.next, args: [] }],
-    },
   });
+
+  const ai = {
+    next: G => [{ move: G.next, args: [] }],
+  };
 
   const reducer = createGameReducer({ game, numPlayers: 2 });
 
@@ -29,7 +29,7 @@ test('next', () => {
 
   {
     state = reducer(state, makeMove('A'));
-    const moves = game.ai.next(state.G, state.ctx);
+    const moves = ai.next(state.G, state.ctx);
     expect(moves.length).toBe(1);
     expect(moves[0].move).toBe('A');
     expect(moves[0].args).toEqual([]);
@@ -37,7 +37,7 @@ test('next', () => {
 
   {
     state = reducer(state, makeMove('B'));
-    const moves = game.ai.next(state.G, state.ctx);
+    const moves = ai.next(state.G, state.ctx);
     expect(moves.length).toBe(1);
     expect(moves[0].move).toBe('B');
     expect(moves[0].args).toEqual([]);
@@ -96,24 +96,24 @@ test('Simulate', () => {
         }
       },
     },
-
-    ai: {
-      next: G => {
-        let r = [];
-        for (let i = 0; i < 9; i++) {
-          if (G.cells[i] === null) {
-            r.push({ move: 'clickCell', args: [i] });
-          }
-        }
-        return r;
-      },
-    },
   });
+
+  const ai = {
+    next: G => {
+      let r = [];
+      for (let i = 0; i < 9; i++) {
+        if (G.cells[i] === null) {
+          r.push({ move: 'clickCell', args: [i] });
+        }
+      }
+      return r;
+    },
+  };
 
   const numPlayers = 2;
   const reducer = createGameReducer({ game: TicTacToe, numPlayers });
   const state = reducer(undefined, { type: 'init' });
-  const endState = Simulate({ game: TicTacToe, numPlayers, state });
+  const endState = Simulate({ game: TicTacToe, ai, numPlayers, state });
 
   expect(endState.G.cells).toEqual([
     '0',
