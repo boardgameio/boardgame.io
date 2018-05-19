@@ -218,51 +218,78 @@ describe('.createApiServer', () => {
 
   describe('joining a game', () => {
     let response;
-    let setSpy;
-    const credentials = 'SECRET';
+    let db;
+    let games;
+    let credentials;
 
-    beforeEach(async () => {
-      setSpy = jest.fn();
-      const db = {
-        get: () => {
-          return {
-            players: {
-              '0': {
-                credentials,
+    beforeEach(() => {
+      credentials = 'SECRET';
+      games = [Game({ name: 'foo' })];
+    });
+
+    describe('when the game does not exist', () => {
+      beforeEach(async () => {
+        db = {
+          get: async () => null,
+        };
+
+        const app = createApiServer({ db, games });
+
+        response = await request(app.callback())
+          .patch('/game_instances/1/join')
+          .send('gameName=foo&playerID=0&playerName=alice');
+      });
+
+      test('is not successful', async () => {
+        expect(response.status).not.toEqual(200);
+      });
+    });
+
+    describe('when the game does exist', () => {
+      let setSpy;
+
+      beforeEach(async () => {
+        setSpy = jest.fn();
+        db = {
+          get: async () => {
+            return {
+              players: {
+                '0': {
+                  credentials,
+                },
               },
-            },
-          };
-        },
-        set: async (id, state) => setSpy(id, state),
-      };
-      const games = [Game({ name: 'foo' })];
+            };
+          },
+          set: async (id, state) => setSpy(id, state),
+        };
 
-      const app = createApiServer({ db, games });
+        const app = createApiServer({ db, games });
 
-      response = await request(app.callback())
-        .patch('/game_instances/1/join')
-        .send('gameName=foo&playerID=0&playerName=alice');
-    });
+        response = await request(app.callback())
+          .patch('/game_instances/1/join')
+          .send('gameName=foo&playerID=0&playerName=alice');
+      });
 
-    test('is successful', () => {
-      expect(response.status).toEqual(200);
-    });
+      test('is successful', async () => {
+        expect(response.status).toEqual(200);
+      });
 
-    test('returns the player credentials', () => {
-      expect(response.body.playerCredentials).toEqual(credentials);
-    });
+      test('returns the player credentials', async () => {
+        expect(response.body.playerCredentials).toEqual(credentials);
+      });
 
-    test('updates the player name', () => {
-      expect(setSpy).toHaveBeenCalledWith(
-        expect.stringMatching(':metadata'),
-        expect.objectContaining({
-          players: expect.objectContaining({
-            '0': expect.objectContaining({
-              name: 'alice',
+      test('updates the player name', async () => {
+        expect(setSpy).toHaveBeenCalledWith(
+          expect.stringMatching(':metadata'),
+          expect.objectContaining({
+            players: expect.objectContaining({
+              '0': expect.objectContaining({
+                name: 'alice',
+              }),
             }),
-          }),
-        })
-      );
+          })
+        );
+      });
     });
   });
 });
