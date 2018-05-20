@@ -158,6 +158,8 @@ export function Flow({
  *
  * @param {...object} endGame - Set to true to enable the `endGame` event.
  *
+ * @param {...object} changeActionPlayers - Set to true to enable the `changeActionPlayers` event.
+ *
  * @param {...object} allowedMoves - List of moves that are allowed.
  *                                   This can be either a list of
  *                                   move names or a function with the
@@ -241,6 +243,7 @@ export function FlowWithPhases({
   endTurn,
   endPhase,
   endGame,
+  changeActionPlayers,
   undoableMoves,
   allowedMoves,
   optimisticUpdate,
@@ -254,6 +257,9 @@ export function FlowWithPhases({
   }
   if (endGame === undefined) {
     endGame = false;
+  }
+  if (changeActionPlayers === undefined) {
+    changeActionPlayers = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -514,6 +520,13 @@ export function FlowWithPhases({
     return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
+  function changeActionPlayersEvent(state, actionPlayers) {
+    if (actionPlayers && actionPlayers.length) {
+      return { ...state, ctx: { ...state.ctx, actionPlayers } };
+    }
+    return state;
+  }
+
   function processMove(state, action, dispatch) {
     const conf = phaseMap[state.ctx.phase];
 
@@ -592,13 +605,18 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
-  if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
-  if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
-  if (endGame) enabledEvents['endGame'] = endGameEvent;
-
-  enabledEvents['changeActionPlayers'] = (state, actionPlayers) => {
-    return { ...state, ctx: { ...state.ctx, actionPlayers } };
-  };
+  if (endTurn) {
+    enabledEvents['endTurn'] = endTurnEvent;
+  }
+  if (endPhase) {
+    enabledEvents['endPhase'] = endPhaseEvent;
+  }
+  if (endGame) {
+    enabledEvents['endGame'] = endGameEvent;
+  }
+  if (changeActionPlayers) {
+    enabledEvents['changeActionPlayers'] = changeActionPlayersEvent;
+  }
 
   return Flow({
     ctx: numPlayers => ({

@@ -599,7 +599,7 @@ test('resetGame', () => {
 });
 
 test('change action players', () => {
-  const flow = FlowWithPhases({});
+  const flow = FlowWithPhases({ changeActionPlayers: true });
   const state = { ctx: {} };
   const newState = flow.processGameEvent(state, {
     type: 'changeActionPlayers',
@@ -610,6 +610,8 @@ test('change action players', () => {
 
 test('change action players - reducer', () => {
   let game = Game({
+    flow: { changeActionPlayers: true },
+
     moves: {
       playMilitia: (G, ctx) => {
         // change which players need to act

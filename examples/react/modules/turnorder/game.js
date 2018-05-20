@@ -42,7 +42,10 @@ const TurnExample = Game({
       return nextG;
     },
   },
+
   flow: {
+    changeActionPlayers: true,
+
     onTurnBegin: (G, ctx) => {
       const currentPlayer = ctx.currentPlayer;
       const playersNext = [...G.players];

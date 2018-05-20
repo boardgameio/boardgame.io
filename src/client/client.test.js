@@ -73,10 +73,7 @@ test('event dispatchers', () => {
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([
-      'endTurn',
-      'changeActionPlayers',
-    ]);
+    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
@@ -87,6 +84,7 @@ test('event dispatchers', () => {
       flow: {
         endPhase: true,
         endGame: true,
+        changeActionPlayers: true,
       },
     });
     const reducer = createGameReducer({ game, numPlayers: 2 });
@@ -115,7 +113,7 @@ test('event dispatchers', () => {
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['changeActionPlayers']);
+    expect(Object.getOwnPropertyNames(api)).toEqual([]);
   }
 
   {
@@ -128,11 +126,7 @@ test('event dispatchers', () => {
     const reducer = createGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([
-      'endTurn',
-      'endPhase',
-      'changeActionPlayers',
-    ]);
+    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
     expect(store.getState().ctx.turn).toBe(1);
