@@ -10,6 +10,8 @@ import path from 'path';
 import KoaStatic from 'koa-static';
 import KoaHelmet from 'koa-helmet';
 import KoaWebpack from 'koa-webpack';
+import request from 'superagent';
+
 import WebpackConfig from './webpack.dev.js';
 import { Server } from 'boardgame.io/server';
 import TicTacToe from './modules/tic-tac-toe/game';
@@ -35,6 +37,36 @@ if (PROD) {
   server.app.use(KoaHelmet());
 }
 
-server.run(PORT, () => {
+server.run(PORT, async () => {
   console.log(`Serving at: http://localhost:${PORT}/`);
+
+  const newGame = await request
+    .post(`http://localhost:${PORT + 1}/games/tic-tac-toe/create`)
+    .send({ numPlayers: 2 });
+
+  console.log(`Created authenticated gameID: ${newGame.body.gameID}`);
+
+  const playerZero = await request
+    .patch(
+      `http://localhost:${PORT + 1}/game_instances/${newGame.body.gameID}/join`
+    )
+    .send({
+      gameName: 'tic-tac-toe',
+      playerID: 0,
+      playerName: 'zero',
+    });
+
+  console.log(`Player 0 credentials: ${playerZero.body.playerCredentials}`);
+
+  const playerOne = await request
+    .patch(
+      `http://localhost:${PORT + 1}/game_instances/${newGame.body.gameID}/join`
+    )
+    .send({
+      gameName: 'tic-tac-toe',
+      playerID: 1,
+      playerName: 'one',
+    });
+
+  console.log(`Player 1 credentials: ${playerOne.body.playerCredentials}`);
 });
