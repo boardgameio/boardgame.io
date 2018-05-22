@@ -40,33 +40,26 @@ if (PROD) {
 server.run(PORT, async () => {
   console.log(`Serving at: http://localhost:${PORT}/`);
 
+  const gameName = 'tic-tac-toe';
+
   const newGame = await request
-    .post(`http://localhost:${PORT + 1}/games/tic-tac-toe/create`)
+    .post(`http://localhost:${PORT + 1}/games/${gameName}/create`)
     .send({ numPlayers: 2 });
 
-  console.log(`Created authenticated gameID: ${newGame.body.gameID}`);
+  const gameID = newGame.body.gameID;
+  console.log(`Created authenticated gameID: ${gameID}`);
 
-  const playerZero = await request
-    .patch(
-      `http://localhost:${PORT + 1}/game_instances/${newGame.body.gameID}/join`
-    )
-    .send({
-      gameName: 'tic-tac-toe',
-      playerID: 0,
-      playerName: 'zero',
-    });
+  for (let playerID of [0, 1]) {
+    const player = await request
+      .patch(`http://localhost:${PORT + 1}/game_instances/${gameID}/join`)
+      .send({
+        gameName,
+        playerID,
+        playerName: playerID.toString(),
+      });
 
-  console.log(`Player 0 credentials: ${playerZero.body.playerCredentials}`);
-
-  const playerOne = await request
-    .patch(
-      `http://localhost:${PORT + 1}/game_instances/${newGame.body.gameID}/join`
-    )
-    .send({
-      gameName: 'tic-tac-toe',
-      playerID: 1,
-      playerName: 'one',
-    });
-
-  console.log(`Player 1 credentials: ${playerOne.body.playerCredentials}`);
+    console.log(
+      `Player ${playerID} credentials: ${player.body.playerCredentials}`
+    );
+  }
 });
