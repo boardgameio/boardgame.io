@@ -57,15 +57,15 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           numPlayers: state.ctx.numPlayers,
         });
         const store = Redux.createStore(reducer, state);
-                
+
         const isActionAuthentic = await isActionFromAuthenticPlayer({
-            action,
-            db,
-            gameID,
-            playerID,
+          action,
+          db,
+          gameID,
+          playerID,
         });
         if (!isActionAuthentic) {
-            return { error: 'unauthorized action' };
+          return { error: 'unauthorized action' };
         }
 
         // Check whether the player is allowed to make the move
