@@ -96,6 +96,10 @@ export const createApiServer = ({ db, games }) => {
     const namespacedGameID = `${gameName}:${gameID}`;
     const gameMetadata = await db.get(getGameMetadataKey(namespacedGameID));
 
+    if (gameMetadata === null) {
+      ctx.throw(404, 'Game not found');
+    }
+
     gameMetadata.players[playerID].name = playerName;
     const playerCredentials = gameMetadata.players[playerID].credentials;
 

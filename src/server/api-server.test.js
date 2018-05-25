@@ -240,8 +240,8 @@ describe('.createApiServer', () => {
           .send('gameName=foo&playerID=0&playerName=alice');
       });
 
-      test('is not successful', async () => {
-        expect(response.status).not.toEqual(200);
+      test('throws a "not found" error', async () => {
+        expect(response.status).toEqual(404);
       });
     });
 
