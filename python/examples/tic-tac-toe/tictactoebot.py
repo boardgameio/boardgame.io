@@ -6,6 +6,7 @@
 # license that can be found in the LICENSE file or at
 # https://opensource.org/licenses/MIT.
 #
+# pylint: disable=invalid-name
 
 # To play against this bot, start the tictactoe server from http://boardgame.io/#/multiplayer
 # and start the bot with:

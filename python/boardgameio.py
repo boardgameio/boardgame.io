@@ -5,6 +5,7 @@
 # license that can be found in the LICENSE file or at
 # https://opensource.org/licenses/MIT.
 #
+# pylint: disable=invalid-name
 
 import logging, time
 import socketIO_client as io
