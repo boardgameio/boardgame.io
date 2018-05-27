@@ -6,13 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-jest.mock('./api-server');
+jest.mock('./api');
 
 import { Server } from './index';
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
-import { createApiServer, isActionFromAuthenticPlayer } from './api-server';
+import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
 beforeEach(() => {
   jest.resetModules();

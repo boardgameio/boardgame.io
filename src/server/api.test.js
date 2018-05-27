@@ -8,7 +8,7 @@
 
 import request from 'supertest';
 
-import { isActionFromAuthenticPlayer, createApiServer } from './api-server';
+import { isActionFromAuthenticPlayer, createApiServer } from './api';
 import Game from '../core/game';
 
 describe('.isActionFromAuthenticPlayer', () => {

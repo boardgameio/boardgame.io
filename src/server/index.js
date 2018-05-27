@@ -12,7 +12,7 @@ const Redux = require('redux');
 
 import { InMemory, Mongo } from './db';
 import { createGameReducer } from '../core/reducer';
-import { createApiServer, isActionFromAuthenticPlayer } from './api-server';
+import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
