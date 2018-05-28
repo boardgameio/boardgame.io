@@ -79,16 +79,6 @@ class _ClientImpl {
       multiplayer,
     });
 
-    this.reset = () => {
-      this.store.dispatch(ActionCreators.reset());
-    };
-    this.undo = () => {
-      this.store.dispatch(ActionCreators.undo());
-    };
-    this.redo = () => {
-      this.store.dispatch(ActionCreators.redo());
-    };
-
     this.store = null;
 
     if (multiplayer) {
@@ -111,6 +101,18 @@ class _ClientImpl {
     }
 
     this.createDispatchers();
+  }
+
+  reset() {
+    this.store.dispatch(ActionCreators.reset());
+  }
+
+  undo() {
+    this.store.dispatch(ActionCreators.undo());
+  }
+
+  redo() {
+    this.store.dispatch(ActionCreators.redo());
   }
 
   subscribe(fn) {
