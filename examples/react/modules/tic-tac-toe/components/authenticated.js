@@ -11,6 +11,7 @@ import { Client } from 'boardgame.io/react';
 import TicTacToe from '../game';
 import Board from './board';
 import PropTypes from 'prop-types';
+import request from 'superagent';
 
 const App = Client({
   game: TicTacToe,
@@ -33,6 +34,43 @@ class AuthenticatedClient extends React.Component {
         },
       },
     };
+  }
+
+  async componentDidMount() {
+    const gameName = 'tic-tac-toe';
+    const PORT = 8000;
+
+    const newGame = await request
+      .post(`http://localhost:${PORT + 1}/games/${gameName}/create`)
+      .send({ numPlayers: 2 });
+
+    const gameID = newGame.body.gameID;
+
+    let playerCredentials = [];
+
+    for (let playerID of [0, 1]) {
+      const player = await request
+        .patch(`http://localhost:${PORT + 1}/game_instances/${gameID}/join`)
+        .send({
+          gameName,
+          playerID,
+          playerName: playerID.toString(),
+        });
+
+      playerCredentials.push(player.body.playerCredentials);
+    }
+
+    this.setState({
+      gameID,
+      players: {
+        '0': {
+          credentials: playerCredentials[0],
+        },
+        '1': {
+          credentials: playerCredentials[1],
+        },
+      },
+    });
   }
 
   onGameIDChange(gameID) {
@@ -83,7 +121,7 @@ class AuthenticatedExample extends React.Component {
         <div className="runner">
           <input
             type="text"
-            defaultValue={this.props.gameID}
+            value={this.props.gameID}
             onChange={event => this.props.onGameIDChange(event.target.value)}
           />
           <div className="run">
@@ -94,7 +132,7 @@ class AuthenticatedExample extends React.Component {
             />
             <input
               type="text"
-              defaultValue={this.props.players['0'].credentials}
+              value={this.props.players['0'].credentials}
               onChange={event =>
                 this.props.onPlayerCredentialsChange('0', event.target.value)
               }
@@ -108,7 +146,7 @@ class AuthenticatedExample extends React.Component {
             />
             <input
               type="text"
-              defaultValue={this.props.players['1'].credentials}
+              value={this.props.players['1'].credentials}
               onChange={event =>
                 this.props.onPlayerCredentialsChange('1', event.target.value)
               }

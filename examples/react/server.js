@@ -10,7 +10,6 @@ import path from 'path';
 import KoaStatic from 'koa-static';
 import KoaHelmet from 'koa-helmet';
 import KoaWebpack from 'koa-webpack';
-import request from 'superagent';
 
 import WebpackConfig from './webpack.dev.js';
 import { Server } from 'boardgame.io/server';
@@ -37,29 +36,6 @@ if (PROD) {
   server.app.use(KoaHelmet());
 }
 
-server.run(PORT, async () => {
+server.run(PORT, () => {
   console.log(`Serving at: http://localhost:${PORT}/`);
-
-  const gameName = 'tic-tac-toe';
-
-  const newGame = await request
-    .post(`http://localhost:${PORT + 1}/games/${gameName}/create`)
-    .send({ numPlayers: 2 });
-
-  const gameID = newGame.body.gameID;
-  console.log(`Created authenticated gameID: ${gameID}`);
-
-  for (let playerID of [0, 1]) {
-    const player = await request
-      .patch(`http://localhost:${PORT + 1}/game_instances/${gameID}/join`)
-      .send({
-        gameName,
-        playerID,
-        playerName: playerID.toString(),
-      });
-
-    console.log(
-      `Player ${playerID} credentials: ${player.body.playerCredentials}`
-    );
-  }
 });
