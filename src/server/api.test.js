@@ -160,66 +160,103 @@ describe('.createApiServer', () => {
     let response;
     let setSpy;
     let app;
+    let db;
+    let games;
 
     beforeEach(async () => {
       setSpy = jest.fn();
-      const db = {
+      db = {
         set: async (id, state) => setSpy(id, state),
       };
-      const games = [Game({ name: 'foo' })];
-
-      app = createApiServer({ db, games });
-
-      response = await request(app.callback())
-        .post('/games/foo/create')
-        .send('numPlayers=3');
+      games = [Game({ name: 'foo' })];
     });
 
-    test('is successful', () => {
-      expect(response.status).toEqual(200);
-    });
-
-    test('creates game data', () => {
-      expect(setSpy).toHaveBeenCalledWith(
-        expect.stringMatching('foo:'),
-        expect.objectContaining({
-          ctx: expect.objectContaining({
-            numPlayers: 3,
-          }),
-        })
-      );
-    });
-
-    test('creates game metadata', () => {
-      expect(setSpy).toHaveBeenCalledWith(
-        expect.stringMatching(':metadata'),
-        expect.objectContaining({
-          players: expect.objectContaining({
-            '0': expect.objectContaining({}),
-            '1': expect.objectContaining({}),
-          }),
-        })
-      );
-    });
-
-    test('returns game id', () => {
-      expect(response.body.gameID).not.toBeNull();
-    });
-
-    describe('without numPlayers', () => {
+    describe('for an unprotected lobby server', () => {
       beforeEach(async () => {
-        response = await request(app.callback()).post('/games/foo/create');
+        delete process.env.LOBBY_SECRET;
+
+        app = createApiServer({ db, games });
+
+        response = await request(app.callback())
+          .post('/games/foo/create')
+          .send('numPlayers=3');
       });
 
-      test('uses default numPlayers', () => {
+      test('is successful', () => {
+        expect(response.status).toEqual(200);
+      });
+
+      test('creates game data', () => {
         expect(setSpy).toHaveBeenCalledWith(
           expect.stringMatching('foo:'),
           expect.objectContaining({
             ctx: expect.objectContaining({
-              numPlayers: 2,
+              numPlayers: 3,
             }),
           })
         );
+      });
+
+      test('creates game metadata', () => {
+        expect(setSpy).toHaveBeenCalledWith(
+          expect.stringMatching(':metadata'),
+          expect.objectContaining({
+            players: expect.objectContaining({
+              '0': expect.objectContaining({}),
+              '1': expect.objectContaining({}),
+            }),
+          })
+        );
+      });
+
+      test('returns game id', () => {
+        expect(response.body.gameID).not.toBeNull();
+      });
+
+      describe('without numPlayers', () => {
+        beforeEach(async () => {
+          response = await request(app.callback()).post('/games/foo/create');
+        });
+
+        test('uses default numPlayers', () => {
+          expect(setSpy).toHaveBeenCalledWith(
+            expect.stringMatching('foo:'),
+            expect.objectContaining({
+              ctx: expect.objectContaining({
+                numPlayers: 2,
+              }),
+            })
+          );
+        });
+      });
+    });
+
+    describe('for a protected lobby', () => {
+      beforeEach(() => {
+        process.env.LOBBY_SECRET = 'protected';
+        app = createApiServer({ db, games });
+      });
+
+      describe('without the lobby token', () => {
+        beforeEach(async () => {
+          response = await request(app.callback()).post('/games/foo/create');
+        });
+
+        test('fails', () => {
+          expect(response.status).toEqual(403);
+        });
+      });
+
+      describe('with the lobby token', () => {
+        beforeEach(async () => {
+          response = await request(app.callback())
+            .post('/games/foo/create')
+            .set('Lobby-Secret', 'protected');
+        });
+
+        test('succeeds', () => {
+          expect(response.status).toEqual(200);
+        });
       });
     });
   });
@@ -235,68 +272,122 @@ describe('.createApiServer', () => {
       games = [Game({ name: 'foo' })];
     });
 
-    describe('when the game does not exist', () => {
-      beforeEach(async () => {
-        db = {
-          get: async () => null,
-        };
-
-        const app = createApiServer({ db, games });
-
-        response = await request(app.callback())
-          .patch('/game_instances/1/join')
-          .send('gameName=foo&playerID=0&playerName=alice');
+    describe('for an unprotected lobby', () => {
+      beforeEach(() => {
+        delete process.env.LOBBY_SECRET;
       });
 
-      test('throws a "not found" error', async () => {
-        expect(response.status).toEqual(404);
+      describe('when the game does not exist', () => {
+        beforeEach(async () => {
+          db = {
+            get: async () => null,
+          };
+
+          const app = createApiServer({ db, games });
+
+          response = await request(app.callback())
+            .patch('/game_instances/1/join')
+            .send('gameName=foo&playerID=0&playerName=alice');
+        });
+
+        test('throws a "not found" error', async () => {
+          expect(response.status).toEqual(404);
+        });
+      });
+
+      describe('when the game does exist', () => {
+        let setSpy;
+
+        beforeEach(async () => {
+          setSpy = jest.fn();
+          db = {
+            get: async () => {
+              return {
+                players: {
+                  '0': {
+                    credentials,
+                  },
+                },
+              };
+            },
+            set: async (id, state) => setSpy(id, state),
+          };
+
+          const app = createApiServer({ db, games });
+
+          response = await request(app.callback())
+            .patch('/game_instances/1/join')
+            .send('gameName=foo&playerID=0&playerName=alice');
+        });
+
+        test('is successful', async () => {
+          expect(response.status).toEqual(200);
+        });
+
+        test('returns the player credentials', async () => {
+          expect(response.body.playerCredentials).toEqual(credentials);
+        });
+
+        test('updates the player name', async () => {
+          expect(setSpy).toHaveBeenCalledWith(
+            expect.stringMatching(':metadata'),
+            expect.objectContaining({
+              players: expect.objectContaining({
+                '0': expect.objectContaining({
+                  name: 'alice',
+                }),
+              }),
+            })
+          );
+        });
       });
     });
 
-    describe('when the game does exist', () => {
-      let setSpy;
+    describe('for an protected lobby', () => {
+      beforeEach(() => {
+        process.env.LOBBY_SECRET = 'protected';
+      });
 
-      beforeEach(async () => {
-        setSpy = jest.fn();
-        db = {
-          get: async () => {
-            return {
-              players: {
-                '0': {
-                  credentials,
+      describe('without the lobby token', () => {
+        beforeEach(async () => {
+          const app = createApiServer({ db, games });
+
+          response = await request(app.callback())
+            .patch('/game_instances/1/join')
+            .send('gameName=foo&playerID=0&playerName=alice');
+        });
+
+        test('fails', () => {
+          expect(response.status).toEqual(403);
+        });
+      });
+
+      describe('with the lobby token', () => {
+        beforeEach(async () => {
+          db = {
+            get: async () => {
+              return {
+                players: {
+                  '0': {
+                    credentials,
+                  },
                 },
-              },
-            };
-          },
-          set: async (id, state) => setSpy(id, state),
-        };
+              };
+            },
+            set: async () => {},
+          };
 
-        const app = createApiServer({ db, games });
+          const app = createApiServer({ db, games });
 
-        response = await request(app.callback())
-          .patch('/game_instances/1/join')
-          .send('gameName=foo&playerID=0&playerName=alice');
-      });
+          response = await request(app.callback())
+            .patch('/game_instances/1/join')
+            .set('Lobby-Secret', 'protected')
+            .send('gameName=foo&playerID=0&playerName=alice');
+        });
 
-      test('is successful', async () => {
-        expect(response.status).toEqual(200);
-      });
-
-      test('returns the player credentials', async () => {
-        expect(response.body.playerCredentials).toEqual(credentials);
-      });
-
-      test('updates the player name', async () => {
-        expect(setSpy).toHaveBeenCalledWith(
-          expect.stringMatching(':metadata'),
-          expect.objectContaining({
-            players: expect.objectContaining({
-              '0': expect.objectContaining({
-                name: 'alice',
-              }),
-            }),
-          })
-        );
+        test('succeeds', () => {
+          expect(response.status).toEqual(200);
+        });
       });
     });
   });

@@ -120,6 +120,18 @@ export const createApiServer = ({ db, games }) => {
   });
 
   app.use(cors());
+
+  app.use(async (ctx, next) => {
+    await next();
+
+    if (
+      !!process.env.LOBBY_SECRET &&
+      ctx.request.headers['lobby-secret'] !== process.env.LOBBY_SECRET
+    ) {
+      ctx.throw(403, 'Invalid lobby secret');
+    }
+  });
+
   app.use(router.routes()).use(router.allowedMethods());
 
   return app;
