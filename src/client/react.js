@@ -89,7 +89,7 @@ export function Client({
       }
     }
 
-    componentWillMount() {
+    componentDidMount() {
       if (typeof window !== 'undefined') {
         this.client.connect();
       }
