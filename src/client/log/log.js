@@ -9,7 +9,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as Actions from '../../core/action-types';
-import { restore } from '../../core/action-creators';
 import './log.css';
 
 /*
@@ -19,31 +18,28 @@ import './log.css';
  */
 export class GameLog extends React.Component {
   static propTypes = {
-    store: PropTypes.any.isRequired,
+    onHover: PropTypes.func,
+    reducer: PropTypes.func,
+    initialState: PropTypes.any.isRequired,
+    log: PropTypes.array.isRequired,
   };
 
   onRewind = logIndex => {
     if (logIndex == null) {
-      this.props.store.dispatch(restore(this._toRestore));
+      this.props.onHover({ logIndex, state: null });
       return;
     }
 
-    const state = this.props.store.getState();
-    this._toRestore = state;
-    const initial = state._initial;
-    this.props.store.dispatch(restore(initial));
+    let state = this.props.initialState;
 
     for (let i = 0; i <= logIndex; i++) {
-      const action = state.log[i];
-
-      if (
-        action.type == Actions.GAME_EVENT ||
-        action.type == Actions.MAKE_MOVE
-      ) {
-        action._remote = true; // don't broadcast action.
-        this.props.store.dispatch(action);
-      }
+      const action = this.props.log[i];
+      state = this.props.reducer(state, action);
     }
+
+    state = { G: state.G, ctx: state.ctx };
+
+    this.props.onHover({ logIndex, state });
   };
 
   render() {
@@ -52,14 +48,10 @@ export class GameLog extends React.Component {
     let currentTurn = [];
     let turnToLogIndex = {};
     const playerIDs = new Map();
-    const state = this.props.store.getState();
 
-    for (let i = 0; i < state.log.length; i++) {
-      const item = state.log[i];
-      if (
-        (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') ||
-        ['endTurn', 'endPhase'].includes(item.type)
-      ) {
+    for (let i = 0; i < this.props.log.length; i++) {
+      const item = this.props.log[i];
+      if (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
         currentTurn = [];
@@ -87,8 +79,8 @@ export class GameLog extends React.Component {
         <div
           key={i}
           className="log-turn"
-          onMouseOver={() => this.onRewind(turnToLogIndex[i])}
-          onMouseOut={() => this.onRewind(null)}
+          onMouseEnter={() => this.onRewind(turnToLogIndex[i])}
+          onMouseLeave={() => this.onRewind(null)}
         >
           <div className="id">Turn #{i + 1}</div>
           {turn}

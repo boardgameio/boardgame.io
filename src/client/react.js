@@ -69,6 +69,10 @@ export function Client({
       debug: true,
     };
 
+    state = {
+      gameStateOverride: null,
+    };
+
     constructor(props) {
       super(props);
 
@@ -97,18 +101,24 @@ export function Client({
       }
     }
 
-    componentWillMount() {
-      if (typeof window !== 'undefined') {
-        this.client.connect();
-      }
+    componentDidMount() {
+      this.client.connect();
     }
+
+    overrideGameState = state => {
+      this.setState({ gameStateOverride: state });
+    };
 
     render() {
       let _board = null;
       let _debug = null;
 
-      const state = this.client.getState();
+      let state = this.client.getState();
       const { gameID, playerID, debug: debugProp, ...rest } = this.props;
+
+      if (this.state.gameStateOverride) {
+        state = { ...state, ...this.state.gameStateOverride };
+      }
 
       if (board) {
         _board = React.createElement(board, {
@@ -128,6 +138,7 @@ export function Client({
       if (debug && debugProp) {
         _debug = React.createElement(Debug, {
           gamestate: state,
+          reducer: this.client.reducer,
           store: this.client.store,
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
@@ -137,6 +148,7 @@ export function Client({
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
+          overrideGameState: this.overrideGameState,
         });
       }
 

@@ -28,8 +28,6 @@ const game = Game({
   },
 });
 
-const endTurn = () => gameEvent('endTurn');
-
 test('_stateID is incremented', () => {
   const reducer = createGameReducer({ game });
 
@@ -37,7 +35,7 @@ test('_stateID is incremented', () => {
 
   state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(1);
-  state = reducer(state, endTurn());
+  state = reducer(state, gameEvent('endTurn'));
   expect(state._stateID).toBe(2);
 });
 
@@ -93,10 +91,10 @@ test('victory', () => {
   const reducer = createGameReducer({ game });
 
   let state = reducer(undefined, makeMove('A'));
-  state = reducer(state, endTurn());
+  state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.gameover).toEqual(undefined);
   state = reducer(state, makeMove('B'));
-  state = reducer(state, endTurn());
+  state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.gameover).toEqual(undefined);
   state = reducer(state, makeMove('C'));
   expect(state.ctx.gameover).toEqual('0');
@@ -105,13 +103,13 @@ test('victory', () => {
 test('endTurn', () => {
   {
     const reducer = createGameReducer({ game });
-    const state = reducer(undefined, endTurn());
+    const state = reducer(undefined, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(1);
   }
 
   {
     const reducer = createGameReducer({ game, multiplayer: true });
-    const state = reducer(undefined, endTurn());
+    const state = reducer(undefined, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(0);
   }
 });
@@ -165,7 +163,7 @@ test('optimisticUpdate', () => {
 test('numPlayers', () => {
   const numPlayers = 4;
   const reducer = createGameReducer({ game, numPlayers });
-  const state = reducer(undefined, endTurn());
+  const state = reducer(undefined, gameEvent('endTurn'));
   expect(state.ctx.numPlayers).toBe(4);
 });
 
@@ -176,14 +174,14 @@ test('log', () => {
 
   const actionA = makeMove('A');
   const actionB = makeMove('B');
-  const actionC = endTurn();
+  const actionC = gameEvent('endTurn');
 
   state = reducer(state, actionA);
   expect(state.log).toEqual([actionA]);
   state = reducer(state, actionB);
   expect(state.log).toEqual([actionA, actionB]);
   state = reducer(state, actionC);
-  expect(state.log).toEqual([actionA, actionB, actionC.payload]);
+  expect(state.log).toEqual([actionA, actionB, actionC]);
 });
 
 test('using Random inside setup()', () => {

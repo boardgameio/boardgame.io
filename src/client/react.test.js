@@ -263,3 +263,20 @@ test('undo/redo', () => {
   board.props.redo();
   expect(board.props.G).toEqual({ arg: 42 });
 });
+
+test('overrideGameState', () => {
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+  });
+
+  const game = Enzyme.mount(<Board />);
+  const board = game.find('TestBoard').instance();
+
+  expect(board.props.G).toEqual({});
+  game
+    .find('Debug')
+    .props()
+    .overrideGameState({ G: 1 });
+  expect(board.props.G).toBe(1);
+});

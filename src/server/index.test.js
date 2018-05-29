@@ -240,7 +240,7 @@ test('action', async () => {
       playOrderPos: 1,
       turn: 1,
     },
-    log: [{ args: undefined, playerID: undefined, type: 'endTurn' }],
+    log: [ActionCreators.gameEvent('endTurn')],
   });
   io.socket.emit.mockReset();
 

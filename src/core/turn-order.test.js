@@ -20,7 +20,7 @@ test('turnOrder', () => {
   let state = { ctx: flow.ctx(10) };
   state = flow.init(state);
   expect(state.ctx.currentPlayer).toBe('0');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('1');
 
   flow = FlowWithPhases({
@@ -30,7 +30,7 @@ test('turnOrder', () => {
   state = { ctx: flow.ctx(10) };
   state = flow.init(state);
   expect(state.ctx.currentPlayer).toBe('any');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('any');
 
   flow = FlowWithPhases({
@@ -40,7 +40,7 @@ test('turnOrder', () => {
   state = { ctx: flow.ctx(10) };
   state = flow.init(state);
   expect(state.ctx.currentPlayer).toBe('9');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('3');
 });
 
@@ -134,17 +134,17 @@ test('override', () => {
   state = flow.init(state);
 
   expect(state.ctx.currentPlayer).toBe('0');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('2');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('4');
 
-  state = flow.processGameEvent(state, { type: 'endPhase' });
+  state = flow.processGameEvent(state, gameEvent('endPhase'));
 
   expect(state.ctx.currentPlayer).toBe('1');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('3');
-  state = flow.processGameEvent(state, { type: 'endTurn' });
+  state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('5');
 });
 
