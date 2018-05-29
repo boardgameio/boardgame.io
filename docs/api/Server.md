@@ -57,9 +57,9 @@ Authentication APIs are available by default on `WebSocket port` + 1.
 
 ### Creating a game
 
-#### `/games/:id/create`
+#### `/games/:name/create`
 
-Creates a new authenticated game for a game named `id`.
+Creates a new authenticated game for a game named `name`.
 
 Accepts one parameter: `numPlayers`, which is required & indicates how many credentials to create.
 
