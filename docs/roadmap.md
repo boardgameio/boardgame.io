@@ -39,6 +39,7 @@ are marked with **[N]**.
 ### Core
 
 * [ ] turn order customizations ([link](https://github.com/google/boardgame.io/issues/154)) **[help needed]**
+* [ ] log improvements ([link](https://github.com/google/boardgame.io/issues/206))
 
 ### Documentation
 
