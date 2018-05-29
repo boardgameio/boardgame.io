@@ -1,12 +1,14 @@
 # How to Contribute
 
-## Issue tracker
+## Finding things to contribute to
 
-Please use the [Issue Tracker](https://github.com/google/boardgame.io/issues) to discuss potential improvements you want to make
-before sending a Pull Request.
+Please use the [Issue Tracker](https://github.com/google/boardgame.io/issues) to discuss
+potential improvements you want to make before sending a Pull Request.
+The [roadmap](docs/roadmap.md) is probably the best place to find areas where help would
+most be appreciated.
 
 The Issue Tracker may contain items labelled **help wanted** or **good first issue**
-from time to time. This is a good place to look if you want to contribute but aren't sure where to start.
+from time to time.
 
 ## Pull Requests
 

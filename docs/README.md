@@ -27,7 +27,7 @@ networking or backend code.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **Component Toolkit**: Components for hex grids, cards, tokens (React only at the moment).
+* **Component Toolkit**: Components for hex grids, cards, tokens.
 
 ### Installation
 
