@@ -73,7 +73,7 @@ class _ClientImpl {
 
     this.multiplayer = multiplayer;
 
-    const GameReducer = createGameReducer({
+    this.reducer = createGameReducer({
       game,
       numPlayers,
       multiplayer,
@@ -100,9 +100,9 @@ class _ClientImpl {
         server,
         socketOpts,
       });
-      this.store = this.multiplayerClient.createStore(GameReducer, enhancer);
+      this.store = this.multiplayerClient.createStore(this.reducer, enhancer);
     } else {
-      this.store = createStore(GameReducer, enhancer);
+      this.store = createStore(this.reducer, enhancer);
 
       // If no playerID was provided, set it to undefined.
       if (this.playerID === null) {

@@ -7,7 +7,9 @@
  */
 
 import React from 'react';
-import { restore } from '../../core/action-creators';
+import { restore, makeMove, gameEvent } from '../../core/action-creators';
+import Game from '../../core/game';
+import { createGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
 import {
   Debug,
@@ -232,21 +234,51 @@ test('toggle Debug UI', () => {
   expect(debug.find('.debug-ui').length).toEqual(0);
 });
 
-test('toggle Log', () => {
-  const store = { getState: () => ({ log: [] }) };
-  const debug = Enzyme.mount(
-    <Debug
-      store={store}
-      gamestate={gamestate}
-      endTurn={() => {}}
-      gameID="default"
-    />
-  );
+describe('log', () => {
+  test('toggle', () => {
+    const debug = Enzyme.mount(
+      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+    );
 
-  expect(debug.find('GameLog').length).toEqual(0);
-  Mousetrap.simulate('l');
-  debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
-  expect(debug.find('GameLog').length).toEqual(1);
+    expect(debug.find('GameLog').length).toEqual(0);
+    Mousetrap.simulate('l');
+    debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
+    expect(debug.find('GameLog').length).toEqual(1);
+  });
+
+  test('hover', () => {
+    const overrideGameState = jest.fn();
+    const game = Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    });
+    const reducer = createGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    state = reducer(state, makeMove('A', [42]));
+    state = reducer(state, gameEvent('endTurn'));
+
+    const debug = Enzyme.mount(
+      <Debug
+        overrideGameState={overrideGameState}
+        reducer={reducer}
+        gamestate={state}
+        endTurn={() => {}}
+        gameID="default"
+      />
+    );
+
+    expect(debug.find('GameLog').length).toEqual(0);
+    Mousetrap.simulate('l');
+    debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
+    expect(debug.find('GameLog').length).toEqual(1);
+
+    debug
+      .find('GameLog')
+      .find('.log-turn')
+      .simulate('mouseenter');
+    expect(overrideGameState).toHaveBeenCalled();
+  });
 });
 
 test('toggle help', () => {
