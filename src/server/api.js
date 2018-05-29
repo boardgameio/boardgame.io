@@ -10,6 +10,7 @@ const Koa = require('koa');
 const Router = require('koa-router');
 const koaBody = require('koa-body');
 const uuid = require('uuid/v4');
+const cors = require('@koa/cors');
 const Redux = require('redux');
 
 import { createGameReducer } from '../core/reducer';
@@ -118,6 +119,7 @@ export const createApiServer = ({ db, games }) => {
     };
   });
 
+  app.use(cors());
   app.use(router.routes()).use(router.allowedMethods());
 
   return app;

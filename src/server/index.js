@@ -36,7 +36,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
     }
   }
 
-  const apiApp = createApiServer({ db, games });
+  const api = createApiServer({ db, games });
 
   const clientInfo = _clientInfo || new Map();
   const roomInfo = _roomInfo || new Map();
@@ -144,12 +144,12 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
 
   return {
     app,
-    apiApp,
+    api,
     db,
     run: async (port, callback) => {
       await db.connect();
-      await apiApp.listen(port + 1);
-      app.listen(port, callback);
+      await api.listen(port + 1);
+      await app.listen(port, callback);
     },
   };
 }
