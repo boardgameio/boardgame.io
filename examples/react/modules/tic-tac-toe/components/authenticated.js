@@ -73,15 +73,6 @@ class AuthenticatedClient extends React.Component {
     });
   }
 
-  onGameIDChange(gameID) {
-    this.setState({
-      gameID,
-      players: {
-        ...this.state.players,
-      },
-    });
-  }
-
   onPlayerCredentialsChange(playerID, credentials) {
     this.setState({
       gameID: this.state.gameID,
@@ -99,7 +90,6 @@ class AuthenticatedClient extends React.Component {
       <AuthenticatedExample
         gameID={this.state.gameID}
         players={this.state.players}
-        onGameIDChange={this.onGameIDChange.bind(this)}
         onPlayerCredentialsChange={this.onPlayerCredentialsChange.bind(this)}
       />
     );
@@ -110,7 +100,6 @@ class AuthenticatedExample extends React.Component {
   static propTypes = {
     gameID: PropTypes.string,
     players: PropTypes.any,
-    onGameIDChange: PropTypes.any,
     onPlayerCredentialsChange: PropTypes.func,
   };
 
@@ -118,12 +107,13 @@ class AuthenticatedExample extends React.Component {
     return (
       <div style={{ padding: 50 }}>
         <h1>Authenticated</h1>
+
+        <p>
+          Change the credentials of a player, and you will notice that the
+          server no longer accepts moves from that client.
+        </p>
+
         <div className="runner">
-          <input
-            type="text"
-            value={this.props.gameID}
-            onChange={event => this.props.onGameIDChange(event.target.value)}
-          />
           <div className="run">
             <App
               gameID={this.props.gameID}
