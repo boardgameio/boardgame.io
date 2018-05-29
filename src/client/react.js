@@ -55,6 +55,9 @@ export function Client({
       // The ID of the player associated with this client.
       // Only relevant in multiplayer.
       playerID: PropTypes.string,
+      // This client's authentication credentials.
+      // Only relevant in multiplayer.
+      credentials: PropTypes.string,
       // Enable / disable the Debug UI.
       debug: PropTypes.bool,
     };
@@ -62,6 +65,7 @@ export function Client({
     static defaultProps = {
       gameID: 'default',
       playerID: null,
+      credentials: null,
       debug: true,
     };
 
@@ -78,6 +82,7 @@ export function Client({
         multiplayer,
         gameID: props.gameID,
         playerID: props.playerID,
+        credentials: props.credentials,
         enhancer,
       });
 
@@ -90,6 +95,9 @@ export function Client({
       }
       if (nextProps.playerID != this.props.playerID) {
         this.client.updatePlayerID(nextProps.playerID);
+      }
+      if (nextProps.credentials != this.props.credentials) {
+        this.client.updateCredentials(nextProps.credentials);
       }
     }
 
