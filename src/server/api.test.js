@@ -173,7 +173,7 @@ describe('.createApiServer', () => {
 
     describe('for an unprotected lobby server', () => {
       beforeEach(async () => {
-        delete process.env.LOBBY_SECRET;
+        delete process.env.API_SECRET;
 
         app = createApiServer({ db, games });
 
@@ -233,7 +233,7 @@ describe('.createApiServer', () => {
 
     describe('for a protected lobby', () => {
       beforeEach(() => {
-        process.env.LOBBY_SECRET = 'protected';
+        process.env.API_SECRET = 'protected';
         app = createApiServer({ db, games });
       });
 
@@ -251,7 +251,7 @@ describe('.createApiServer', () => {
         beforeEach(async () => {
           response = await request(app.callback())
             .post('/games/foo/create')
-            .set('Lobby-Secret', 'protected');
+            .set('API-Secret', 'protected');
         });
 
         test('succeeds', () => {
@@ -274,7 +274,7 @@ describe('.createApiServer', () => {
 
     describe('for an unprotected lobby', () => {
       beforeEach(() => {
-        delete process.env.LOBBY_SECRET;
+        delete process.env.API_SECRET;
       });
 
       describe('when the game does not exist', () => {
@@ -345,7 +345,7 @@ describe('.createApiServer', () => {
 
     describe('for an protected lobby', () => {
       beforeEach(() => {
-        process.env.LOBBY_SECRET = 'protected';
+        process.env.API_SECRET = 'protected';
       });
 
       describe('without the lobby token', () => {
@@ -381,7 +381,7 @@ describe('.createApiServer', () => {
 
           response = await request(app.callback())
             .patch('/game_instances/1/join')
-            .set('Lobby-Secret', 'protected')
+            .set('API-Secret', 'protected')
             .send('gameName=foo&playerID=0&playerName=alice');
         });
 

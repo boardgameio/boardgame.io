@@ -121,14 +121,16 @@ export const createApiServer = ({ db, games }) => {
 
   app.use(cors());
 
+  // If API_SECRET is set, then require that requests set an
+  // api-secret header that is set to the same value.
   app.use(async (ctx, next) => {
     await next();
 
     if (
-      !!process.env.LOBBY_SECRET &&
-      ctx.request.headers['lobby-secret'] !== process.env.LOBBY_SECRET
+      !!process.env.API_SECRET &&
+      ctx.request.headers['api-secret'] !== process.env.API_SECRET
     ) {
-      ctx.throw(403, 'Invalid lobby secret');
+      ctx.throw(403, 'Invalid API secret');
     }
   });
 
