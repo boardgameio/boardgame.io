@@ -34,13 +34,7 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i <= logIndex; i++) {
       const action = this.props.log[i];
-
-      if (
-        action.type == Actions.GAME_EVENT ||
-        action.type == Actions.MAKE_MOVE
-      ) {
-        state = this.props.reducer(state, action);
-      }
+      state = this.props.reducer(state, action);
     }
 
     state = { G: state.G, ctx: state.ctx };
@@ -57,10 +51,7 @@ export class GameLog extends React.Component {
 
     for (let i = 0; i < this.props.log.length; i++) {
       const item = this.props.log[i];
-      if (
-        (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') ||
-        ['endTurn', 'endPhase'].includes(item.type)
-      ) {
+      if (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') {
         turnToLogIndex[turns.length] = i;
         turns.push(currentTurn);
         currentTurn = [];
