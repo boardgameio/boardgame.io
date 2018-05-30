@@ -7,7 +7,7 @@
  */
 
 import { createStore } from 'redux';
-import { createGameReducer } from '../core/reducer';
+import { CreateGameReducer } from '../core/reducer';
 import {
   Client,
   createEventDispatchers,
@@ -70,7 +70,7 @@ test('accepts enhancer for store', () => {
 test('event dispatchers', () => {
   {
     const game = Game({});
-    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
@@ -87,7 +87,7 @@ test('event dispatchers', () => {
         changeActionPlayers: true,
       },
     });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual([
@@ -110,7 +110,7 @@ test('event dispatchers', () => {
 
       phases: [{ name: 'default' }],
     });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual([]);
@@ -123,7 +123,7 @@ test('event dispatchers', () => {
         undoableMoves: ['A'],
       },
     });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
     const api = createEventDispatchers(game.flow.eventNames, store);
     expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
@@ -145,7 +145,7 @@ test('move dispatchers', () => {
     },
   });
 
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
   const store = createStore(reducer);
   const api = createMoveDispatchers(game.moveNames, store);
 

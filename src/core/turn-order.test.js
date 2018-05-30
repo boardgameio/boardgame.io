@@ -10,7 +10,7 @@ import { FlowWithPhases } from './flow';
 import { TurnOrder, Pass } from './turn-order';
 import Game from './game';
 import { makeMove, gameEvent } from './action-creators';
-import { createGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
 
 test('turnOrder', () => {
   let flow = FlowWithPhases({
@@ -52,7 +52,7 @@ test('passing', () => {
     flow,
     moves: { pass: Pass },
   });
-  const reducer = createGameReducer({ game, numPlayers: 3 });
+  const reducer = CreateGameReducer({ game, numPlayers: 3 });
   let state = reducer(undefined, { type: 'init' });
 
   expect(state.ctx.currentPlayer).toBe('0');
@@ -99,7 +99,7 @@ test('end game after everyone passes', () => {
     flow,
     moves: { pass: Pass },
   });
-  const reducer = createGameReducer({ game, numPlayers: 3 });
+  const reducer = CreateGameReducer({ game, numPlayers: 3 });
 
   let state = reducer(undefined, { type: 'init' });
   expect(state.ctx.currentPlayer).toBe('any');
@@ -150,7 +150,7 @@ test('override', () => {
 
 test('custom order', () => {
   const game = Game({});
-  const reducer = createGameReducer({ game, numPlayers: 3 });
+  const reducer = CreateGameReducer({ game, numPlayers: 3 });
 
   let state = reducer(undefined, { type: 'init' });
 

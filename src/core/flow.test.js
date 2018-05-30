@@ -7,7 +7,7 @@
  */
 
 import Game from './game';
-import { createGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
 import { makeMove, gameEvent, reset, undo, redo } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 
@@ -332,7 +332,7 @@ test('endGameIf', () => {
       },
       flow,
     });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.currentPlayer).toBe('0');
@@ -355,7 +355,7 @@ test('endTurnIf', () => {
       },
       flow,
     });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.currentPlayer).toBe('0');
@@ -381,7 +381,7 @@ test('endTurnIf', () => {
       },
       flow,
     });
-    const reducer = createGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.currentPlayer).toBe('0');
@@ -411,7 +411,7 @@ test('canMakeMove', () => {
     },
   });
 
-  const reducer = createGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
   let state = reducer(undefined, { type: 'init' });
 
   // Basic.
@@ -567,7 +567,7 @@ test('resetGame', () => {
     },
   });
 
-  const reducer = createGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
   let state = reducer(undefined, { type: 'init' });
 
@@ -643,7 +643,7 @@ test('change action players - reducer', () => {
     },
   });
 
-  const reducer = createGameReducer({ game, numPlayers: 4 });
+  const reducer = CreateGameReducer({ game, numPlayers: 4 });
 
   let state = reducer(undefined, { type: 'init' });
   state = reducer(state, makeMove('playMilitia'));
@@ -678,7 +678,7 @@ test('undo / redo restricted by undoableMoves', () => {
     },
   });
 
-  const reducer = createGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
   let state = reducer(undefined, { type: 'init' });
 

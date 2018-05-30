@@ -9,7 +9,7 @@
 import { createStore } from 'redux';
 import * as ActionCreators from '../core/action-creators';
 import { Multiplayer } from './multiplayer/multiplayer';
-import { createGameReducer } from '../core/reducer';
+import { CreateGameReducer } from '../core/reducer';
 
 /**
  * createEventDispatchers
@@ -84,7 +84,7 @@ class _ClientImpl {
 
     this.multiplayer = multiplayer;
 
-    this.reducer = createGameReducer({
+    this.reducer = CreateGameReducer({
       game,
       numPlayers,
       multiplayer,

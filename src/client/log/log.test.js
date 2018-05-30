@@ -10,7 +10,7 @@ import React from 'react';
 import { makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { GameLog } from './log';
-import { createGameReducer } from '../../core/reducer';
+import { CreateGameReducer } from '../../core/reducer';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -42,7 +42,7 @@ test('GameLog rewind', () => {
     },
   });
 
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
   let state = reducer(undefined, { type: 'init' });
   const initialState = state;
 

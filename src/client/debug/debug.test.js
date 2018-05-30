@@ -9,7 +9,7 @@
 import React from 'react';
 import { restore, makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
-import { createGameReducer } from '../../core/reducer';
+import { CreateGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
 import {
   Debug,
@@ -253,7 +253,7 @@ describe('log', () => {
         A: (G, ctx, arg) => ({ arg }),
       },
     });
-    const reducer = createGameReducer({ game });
+    const reducer = CreateGameReducer({ game });
     let state = reducer(undefined, { type: 'init' });
     state = reducer(state, makeMove('A', [42]));
     state = reducer(state, gameEvent('endTurn'));
