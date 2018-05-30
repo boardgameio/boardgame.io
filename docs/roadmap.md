@@ -1,9 +1,11 @@
 # Roadmap to v1.0
 
 This is a living document capturing the current areas of focus, and what needs to
-get done before we are ready for a v1 release. Areas that need help are marked with
-**[help needed]**. Stuff that [nicolodavis@](https://github.com/nicolodavis) is working on
-is marked with **[N]**.
+get done before we are ready for a v1 release.
+
+Legend:
+* Areas that need help are marked with **[help needed]**.
+* Stuff that [nicolodavis@](https://github.com/nicolodavis) is working on is marked with **[N]**.
 
 ### AI framework
 
