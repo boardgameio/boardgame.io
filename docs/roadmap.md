@@ -35,7 +35,7 @@ get done before we are ready for a v1 release.
   * [ ] add error handling **[help needed]**
 
 * ##### Firebase
-  * [ ] add Firebase support **[help needed]**
+  * [ ] add support for one more backend (Firebase?) **[help needed]**
 
 ### Core
 
