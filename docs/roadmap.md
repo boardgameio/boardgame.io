@@ -34,7 +34,7 @@ get done before we are ready for a v1 release.
   * [x] add Mongo support
   * [ ] add error handling **[help needed]**
 
-* ##### Firebase
+* ##### Firebase / Other
   * [ ] add support for one more backend (Firebase?) **[help needed]**
 
 ### Core
