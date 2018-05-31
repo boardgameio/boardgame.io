@@ -27,7 +27,7 @@ An object that contains:
 ### Usage
 
 ```js
-const Server = require('boardgame.io/server');
+const Server = require('boardgame.io/server').Server;
 
 const server = Server({
   games: [game1, game2, ...],
