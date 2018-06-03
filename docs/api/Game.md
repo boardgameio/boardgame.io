@@ -51,7 +51,7 @@ game state and the moves. The moves are converted to a
 #### Simple Game
 
 ```js
-import { Game } from `boardgame.io/core';
+import { Game } from 'boardgame.io/core';
 
 const game = Game({
   setup: (ctx) => {

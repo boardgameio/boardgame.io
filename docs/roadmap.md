@@ -36,6 +36,13 @@ get done before we are ready for a v1 release.
 
 * ##### Firebase / Other
   * [ ] add support for one more backend (Firebase?) **[help needed]**
+  
+### Clients
+
+* ##### Vue
+
+  * [ ] add basic Vue support  **[help needed]**
+  * [ ] debug UI implementation in Vue  **[help needed]**
 
 ### Core
 
