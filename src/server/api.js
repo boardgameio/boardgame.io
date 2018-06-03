@@ -13,7 +13,7 @@ const uuid = require('uuid/v4');
 const cors = require('@koa/cors');
 const Redux = require('redux');
 
-import { createGameReducer } from '../core/reducer';
+import { CreateGameReducer } from '../core/reducer';
 
 const createCredentials = () => uuid();
 const getGameMetadataKey = gameID => `${gameID}:metadata`;
@@ -73,7 +73,7 @@ export const createApiServer = ({ db, games }) => {
     const gameMetadata = createGameMetadata();
 
     const game = games.find(g => g.name === gameName);
-    const reducer = createGameReducer({
+    const reducer = CreateGameReducer({
       game,
       numPlayers,
     });

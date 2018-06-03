@@ -7,7 +7,7 @@
  */
 
 import Game from './game';
-import { createGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
 import { gameEvent } from './action-creators';
 
 const game = Game({
@@ -68,7 +68,7 @@ test('rounds with starting player token', () => {
   });
 
   const numPlayers = 4;
-  const reducer = createGameReducer({ game, numPlayers: numPlayers });
+  const reducer = CreateGameReducer({ game, numPlayers: numPlayers });
   let state = reducer(undefined, { type: 'init' });
 
   expect(state.ctx.currentPlayer).toBe('0');
@@ -125,7 +125,7 @@ test('serpentine setup phases', () => {
   });
 
   const numPlayers = 4;
-  const reducer = createGameReducer({ game, numPlayers: numPlayers });
+  const reducer = CreateGameReducer({ game, numPlayers: numPlayers });
   let state = reducer(undefined, { type: 'init' });
 
   expect(state.ctx.currentPlayer).toBe('0');

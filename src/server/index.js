@@ -11,7 +11,7 @@ const IO = require('koa-socket');
 const Redux = require('redux');
 
 import { InMemory, Mongo } from './db';
-import { createGameReducer } from '../core/reducer';
+import { CreateGameReducer } from '../core/reducer';
 import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
 const PING_TIMEOUT = 20 * 1e3;
@@ -52,7 +52,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           return { error: 'game not found' };
         }
 
-        const reducer = createGameReducer({
+        const reducer = CreateGameReducer({
           game,
           numPlayers: state.ctx.numPlayers,
         });
@@ -103,7 +103,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
 
       socket.on('sync', async (gameID, playerID, numPlayers) => {
         socket.join(gameID);
-        const reducer = createGameReducer({ game, numPlayers });
+        const reducer = CreateGameReducer({ game, numPlayers });
         let roomClients = roomInfo.get(gameID);
         if (roomClients === undefined) {
           roomClients = new Set();

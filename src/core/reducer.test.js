@@ -7,7 +7,7 @@
  */
 
 import Game from './game';
-import { createGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
 import {
   makeMove,
   gameEvent,
@@ -29,7 +29,7 @@ const game = Game({
 });
 
 test('_stateID is incremented', () => {
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
 
   let state = undefined;
 
@@ -45,13 +45,13 @@ test('when a move returns undef => treat as illegal move', () => {
       A: () => undefined,
     },
   });
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
   let state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(0);
 });
 
 test('makeMove', () => {
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
 
   let state;
 
@@ -72,13 +72,13 @@ test('makeMove', () => {
 });
 
 test('restore', () => {
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
   expect(state).toEqual({ G: 'restored' });
 });
 
 test('reset', () => {
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
   let state = reducer(undefined, makeMove('A'));
   const initialState = { ...state._initial, _initial: { ...state._initial } };
 
@@ -88,7 +88,7 @@ test('reset', () => {
 });
 
 test('victory', () => {
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
 
   let state = reducer(undefined, makeMove('A'));
   state = reducer(state, gameEvent('endTurn'));
@@ -102,13 +102,13 @@ test('victory', () => {
 
 test('endTurn', () => {
   {
-    const reducer = createGameReducer({ game });
+    const reducer = CreateGameReducer({ game });
     const state = reducer(undefined, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(1);
   }
 
   {
-    const reducer = createGameReducer({ game, multiplayer: true });
+    const reducer = CreateGameReducer({ game, multiplayer: true });
     const state = reducer(undefined, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(0);
   }
@@ -121,7 +121,7 @@ test('light client when multiplayer=true', () => {
   });
 
   {
-    const reducer = createGameReducer({ game });
+    const reducer = CreateGameReducer({ game });
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.gameover).toBe(undefined);
     state = reducer(state, makeMove('A'));
@@ -129,7 +129,7 @@ test('light client when multiplayer=true', () => {
   }
 
   {
-    const reducer = createGameReducer({ game, multiplayer: true });
+    const reducer = CreateGameReducer({ game, multiplayer: true });
     let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.gameover).toBe(undefined);
     state = reducer(state, makeMove('A'));
@@ -144,7 +144,7 @@ test('optimisticUpdate', () => {
   });
 
   {
-    const reducer = createGameReducer({ game });
+    const reducer = CreateGameReducer({ game });
     let state = reducer(undefined, { type: 'init' });
     expect(state.G).not.toMatchObject({ A: true });
     state = reducer(state, makeMove('A'));
@@ -152,7 +152,7 @@ test('optimisticUpdate', () => {
   }
 
   {
-    const reducer = createGameReducer({ game, multiplayer: true });
+    const reducer = CreateGameReducer({ game, multiplayer: true });
     let state = reducer(undefined, { type: 'init' });
     expect(state.G).not.toMatchObject({ A: true });
     state = reducer(state, makeMove('A'));
@@ -162,13 +162,13 @@ test('optimisticUpdate', () => {
 
 test('numPlayers', () => {
   const numPlayers = 4;
-  const reducer = createGameReducer({ game, numPlayers });
+  const reducer = CreateGameReducer({ game, numPlayers });
   const state = reducer(undefined, gameEvent('endTurn'));
   expect(state.ctx.numPlayers).toBe(4);
 });
 
 test('log', () => {
-  const reducer = createGameReducer({ game });
+  const reducer = CreateGameReducer({ game });
 
   let state = undefined;
 
@@ -200,13 +200,13 @@ test('using Random inside setup()', () => {
     setup: ctx => ({ n: ctx.random.D6() }),
   });
 
-  const reducer1 = createGameReducer({ game: game1 });
+  const reducer1 = CreateGameReducer({ game: game1 });
   const state1 = reducer1(undefined, makeMove());
 
-  const reducer2 = createGameReducer({ game: game2 });
+  const reducer2 = CreateGameReducer({ game: game2 });
   const state2 = reducer2(undefined, makeMove());
 
-  const reducer3 = createGameReducer({ game: game3 });
+  const reducer3 = CreateGameReducer({ game: game3 });
   const state3 = reducer3(undefined, makeMove());
 
   expect(state1.G.n).not.toBe(state2.G.n);
@@ -220,7 +220,7 @@ test('undo / redo', () => {
     },
   });
 
-  const reducer = createGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
   let state = reducer(undefined, { type: 'init' });
 

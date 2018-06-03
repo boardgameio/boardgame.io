@@ -7,7 +7,7 @@
  */
 
 import Game from '../core/game';
-import { createGameReducer } from '../core/reducer';
+import { CreateGameReducer } from '../core/reducer';
 import { makeMove } from '../core/action-creators';
 import { Simulate } from './ai';
 
@@ -23,7 +23,7 @@ test('next', () => {
     next: G => [{ move: G.next, args: [] }],
   };
 
-  const reducer = createGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
   let state = reducer(undefined, { type: 'init' });
 
@@ -111,7 +111,7 @@ test('Simulate', () => {
   };
 
   const numPlayers = 2;
-  const reducer = createGameReducer({ game: TicTacToe, numPlayers });
+  const reducer = CreateGameReducer({ game: TicTacToe, numPlayers });
   const state = reducer(undefined, { type: 'init' });
   const endState = Simulate({ game: TicTacToe, ai, numPlayers, state });
 
