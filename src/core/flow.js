@@ -524,7 +524,7 @@ export function FlowWithPhases({
   }
 
   function processMove(state, action, dispatch) {
-    const conf = phaseMap[state.ctx.phase];
+    let conf = phaseMap[state.ctx.phase];
 
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
     state = {
@@ -545,6 +545,8 @@ export function FlowWithPhases({
         state,
         gameEvent('endPhase', [endPhase], action.playerID)
       );
+      // Update to the new phase configuration
+      conf = phaseMap[state.ctx.phase];
     }
 
     // End the turn automatically if endTurnIf is true or if endGameIf returns.
