@@ -1,3 +1,15 @@
+# v0.23
+
+#### Features
+
+* [[dda540a](https://github.com/google/boardgame.io/commit/dda540a)] AI framework
+* [[8e2f8c4](https://github.com/google/boardgame.io/commit/8e2f8c4)] lobby API support (#189)
+
+#### Bugfixes
+
+* [[7a80f66](https://github.com/google/boardgame.io/commit/7a80f66)] make changeActionPlayers an opt-in event
+* [[40cd4b8](https://github.com/google/boardgame.io/commit/40cd4b8)] Add config update on phase change Fixes #211 (#212)
+
 # v0.22.1
 
 #### Bugfixes
