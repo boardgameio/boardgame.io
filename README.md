@@ -24,7 +24,7 @@ networking or backend code.
 
 * **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
 * **Cross-platform Multiplayer**: All clients (Web / Android / iOS) connected to the game are synced in real time.
-* **AI**: Create bots that are highly customizable and debuggable.
+* **AI Framework**: Create bots that are highly customizable and debuggable.
 * **Game Phases**: with different game rules (including custom turn orders) per phase.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
