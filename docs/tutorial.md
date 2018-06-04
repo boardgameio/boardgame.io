@@ -317,7 +317,9 @@ the bot makes a block, for example.
 ```
 
 !> The bot uses [MCTS](http://www.baeldung.com/java-monte-carlo-tree-search) under the
-hood to explore the game tree and find good moves.
+hood to explore the game tree and find good moves. The default uses 1000 iterations per
+move, which isn't sufficient to create a bullet-proof tic-tac-toe player. This can be
+configured to adjust the bot strength.
 
 The framework will come bundled with a few different bot algorithms, and an advanced
 version of MCTS that will allow you to specify a set of objectives to optimize for.
