@@ -1,3 +1,9 @@
+# v0.23.1
+
+#### Bugfixes
+
+* [[f26328c](https://github.com/google/boardgame.io/commit/f26328c)] add ai.js to rollup config
+
 # v0.23
 
 #### Features
