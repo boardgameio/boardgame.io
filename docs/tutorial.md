@@ -330,4 +330,4 @@ and it will figure out the right combination of moves to make it happen!
 Detailed documentation about all this is coming soon. Adding bots to games for actual
 networked play (as opposed to merely simulating moves) is also in the works.
 
-?> Editable version of the code in this tutorial is available here: [CodePen](https://codepen.io/nicolodavis/full/MEvrjq/)
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/jvxzj7rk9w)
