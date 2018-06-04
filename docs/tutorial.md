@@ -263,9 +263,9 @@ capable of playing your game. All you need to do is just tell the
 bot how to find legal moves in the game, and it will do the rest.
 
 We shall first modify our flow section by adding a useful option
-called `movesPerTurn` to automatically end the turn after one
-move has been made. That way, the bot doesn't have to worry about
-issuing `endTurn` calls (which, while possible, make the game tree
+called `movesPerTurn` to automatically end the player's turn after
+a single move has been made. That way the bot doesn't have to worry about
+issuing `endTurn` calls (which, while possible, makes the game tree
 a bit messier to search).
 
 ```js
@@ -326,6 +326,6 @@ in the short term and wage wars in the late stages. You just tell the bot what t
 and it will figure out the right combination of moves to make it happen!
 
 Detailed documentation about all this is coming soon. Adding bots to games for actual
-play (as opposed to merely simulating moves) is also in the works.
+networked play (as opposed to merely simulating moves) is also in the works.
 
 ?> Editable version of the code in this tutorial is available here: [CodePen](https://codepen.io/nicolodavis/full/MEvrjq/)
