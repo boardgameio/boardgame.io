@@ -5,6 +5,7 @@ shell.rm('-f', [
   'client.js',
   'core.js',
   'ui.js',
+  'ai.js',
   'react.js',
   'react-native.js',
 ]);

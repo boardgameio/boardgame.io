@@ -34,12 +34,14 @@
     "dist/react-native.js",
     "dist/core.js",
     "dist/ui.js",
+    "dist/ai.js",
     "server.js",
     "client.js",
     "react.js",
     "react-native.js",
     "core.js",
-    "ui.js"
+    "ui.js",
+    "ai.js"
   ],
   "keywords": [
     "react",
@@ -138,7 +140,8 @@
       "react-native": "./dist/react-native.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
-      "ui": "./dist/ui.js"
+      "ui": "./dist/ui.js",
+      "ai": "./dist/ai.js"
     }
   },
   "jest": {
