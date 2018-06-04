@@ -256,7 +256,7 @@ And there you have it. A basic tic-tac-toe game!
 !> You can press `1` (or click on the button next to `reset`) to reset the
 state of the game and start over.
 
-## Add AI
+## Adding AI
 
 In this section we will show you how easy it is to add a bot that is
 capable of playing your game. All you need to do is just tell the
