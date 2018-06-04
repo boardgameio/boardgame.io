@@ -25,11 +25,11 @@ test('GameLog', () => {
   ];
 
   const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
-  const turns = gamelog.find('.id').map(div => div.text());
+  const turns = gamelog.find('.turn-marker').map(div => div.text());
   expect(turns).toEqual(['Turn #1', 'Turn #2']);
 });
 
-test('GameLog rewind', () => {
+describe('time travel', () => {
   const game = Game({
     moves: {
       A: (G, ctx, arg) => {
@@ -53,37 +53,124 @@ test('GameLog rewind', () => {
   state = reducer(state, makeMove('A', [2]));
   state = reducer(state, gameEvent('endTurn'));
 
-  const root = Enzyme.mount(
-    <GameLog
-      log={state.log}
-      initialState={initialState}
-      onHover={({ state: t }) => {
-        state = t;
-      }}
-      reducer={reducer}
-    />
-  );
+  test('basic', () => {
+    const root = Enzyme.mount(
+      <GameLog
+        log={state.log}
+        initialState={initialState}
+        onHover={({ state: t }) => {
+          state = t;
+        }}
+        reducer={reducer}
+      />
+    );
 
-  expect(state.G).toMatchObject({ arg: 2 });
+    expect(state.G).toMatchObject({ arg: 2 });
 
-  root
-    .find('.log-turn')
-    .at(0)
-    .simulate('mouseenter');
+    root
+      .find('.log-event')
+      .at(0)
+      .simulate('mouseenter');
 
-  expect(state.G).toMatchObject({ arg: 1 });
+    expect(state.G).toMatchObject({ arg: 1 });
 
-  root
-    .find('.log-turn')
-    .at(1)
-    .simulate('mouseenter');
+    root
+      .find('.log-event')
+      .at(2)
+      .simulate('mouseenter');
 
-  expect(state.G).toMatchObject({ arg: 42 });
+    expect(state.G).toMatchObject({ arg: 42 });
 
-  root
-    .find('.log-turn')
-    .at(0)
-    .simulate('mouseleave');
+    root
+      .find('.log-event')
+      .at(0)
+      .simulate('mouseleave');
 
-  expect(state).toBe(null);
+    expect(state).toBe(null);
+  });
+});
+
+describe('pinning', () => {
+  const game = Game({
+    moves: {
+      A: () => ({ A: true }),
+      B: () => ({ B: true }),
+    },
+  });
+
+  const reducer = CreateGameReducer({ game });
+  let state = reducer(undefined, { type: 'init' });
+  const initialState = state;
+  const log = [
+    makeMove('A'),
+    gameEvent('endTurn'),
+    makeMove('B'),
+    gameEvent('endTurn'),
+  ];
+
+  test('pin', () => {
+    const gamelog = Enzyme.mount(
+      <GameLog log={log} initialState={initialState} reducer={reducer} />
+    );
+    gamelog
+      .find('.log-event')
+      .at(0)
+      .simulate('click');
+    expect(gamelog.state().pinned).not.toBe(null);
+  });
+
+  test('unpin', () => {
+    const gamelog = Enzyme.mount(
+      <GameLog log={log} initialState={initialState} reducer={reducer} />
+    );
+    gamelog
+      .find('.log-event')
+      .at(0)
+      .simulate('click');
+    gamelog
+      .find('.log-event')
+      .at(0)
+      .simulate('click');
+    expect(gamelog.state().pinned).toBe(null);
+  });
+
+  test('hover does not trigger', () => {
+    const onHover = jest.fn();
+    const gamelog = Enzyme.mount(
+      <GameLog
+        log={log}
+        initialState={initialState}
+        onHover={onHover}
+        reducer={reducer}
+      />
+    );
+
+    gamelog
+      .find('.log-event')
+      .at(0)
+      .simulate('mouseenter');
+    gamelog
+      .find('.log-event')
+      .at(0)
+      .simulate('mouseleave');
+    expect(onHover).toHaveBeenCalledTimes(2);
+
+    expect(gamelog.state().pinned).toBe(null);
+    gamelog
+      .find('.log-event')
+      .at(2)
+      .simulate('click');
+    expect(gamelog.state().pinned).not.toBe(null);
+
+    onHover.mockReset();
+    gamelog
+      .find('.log-event')
+      .at(0)
+      .simulate('mouseenter');
+    gamelog
+      .find('.log-event')
+      .at(0)
+      .simulate('mouseleave');
+    expect(onHover).not.toHaveBeenCalled();
+  });
 });

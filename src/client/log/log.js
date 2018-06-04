@@ -8,10 +8,53 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as Actions from '../../core/action-types';
 import './log.css';
 
-/*
+/**
+ * LogEvent
+ *
+ * Logs a single action in the game.
+ */
+const LogEvent = props => {
+  const action = props.action;
+  const args = action.payload.args || [];
+  const playerID = action.payload.playerID;
+  let classNames = `log-event player${playerID}`;
+
+  if (props.pinned) {
+    classNames += ' pinned';
+  }
+
+  return (
+    <div
+      className={classNames}
+      onClick={() => props.onLogClick(props.logIndex)}
+      onMouseEnter={() => props.onMouseEnter(props.logIndex)}
+      onMouseLeave={() => props.onMouseLeave()}
+    >
+      {action.payload.type}({args.join(',')})
+    </div>
+  );
+};
+
+LogEvent.propTypes = {
+  action: PropTypes.any.isRequired,
+  logIndex: PropTypes.number.isRequired,
+  onLogClick: PropTypes.func.isRequired,
+  onMouseEnter: PropTypes.func.isRequired,
+  onMouseLeave: PropTypes.func.isRequired,
+  pinned: PropTypes.bool,
+};
+
+const TurnMarker = props => (
+  <div className="turn-marker">Turn #{props.turn}</div>
+);
+
+TurnMarker.propTypes = {
+  turn: PropTypes.number.isRequired,
+};
+
+/**
  * GameLog
  *
  * Component to log the actions in the game.
@@ -24,70 +67,85 @@ export class GameLog extends React.Component {
     log: PropTypes.array.isRequired,
   };
 
-  onRewind = logIndex => {
-    if (logIndex == null) {
-      this.props.onHover({ logIndex, state: null });
-      return;
-    }
+  static defaultProps = {
+    onHover: () => {},
+  };
 
+  state = {
+    pinned: null,
+  };
+
+  rewind = logIndex => {
     let state = this.props.initialState;
-
     for (let i = 0; i <= logIndex; i++) {
       const action = this.props.log[i];
       state = this.props.reducer(state, action);
     }
+    return { G: state.G, ctx: state.ctx };
+  };
 
-    state = { G: state.G, ctx: state.ctx };
+  onLogClick = logIndex => {
+    this.setState(o => {
+      const state = this.rewind(logIndex);
+      const metadata = this.props.log[logIndex].payload.metadata;
 
-    this.props.onHover({ logIndex, state });
+      if (o.pinned === logIndex) {
+        this.props.onHover({ logIndex, state, metadata: undefined });
+        return { pinned: null };
+      }
+
+      this.props.onHover({ logIndex, state, metadata });
+      return { pinned: logIndex };
+    });
+  };
+
+  onMouseEnter = logIndex => {
+    if (this.state.pinned === null) {
+      const state = this.rewind(logIndex);
+      this.props.onHover({ logIndex, state });
+    }
+  };
+
+  onMouseLeave = () => {
+    if (this.state.pinned === null) {
+      this.props.onHover({ state: null });
+    }
   };
 
   render() {
     let log = [];
-    let turns = [];
-    let currentTurn = [];
-    let turnToLogIndex = {};
-    const playerIDs = new Map();
+    let turn = 1;
+    let turnDelimiter = true;
 
     for (let i = 0; i < this.props.log.length; i++) {
-      const item = this.props.log[i];
-      if (item.type == Actions.GAME_EVENT && item.payload.type == 'endTurn') {
-        turnToLogIndex[turns.length] = i;
-        turns.push(currentTurn);
-        currentTurn = [];
-      } else {
-        const args = item.payload.args || [];
+      if (turnDelimiter) {
+        turnDelimiter = false;
+        log.push(<TurnMarker key={'turn' + turn} turn={turn} />);
+      }
 
-        const playerID = item.payload.playerID;
-        if (!playerIDs.has(playerID)) {
-          playerIDs.set(playerID, playerIDs.size);
-        }
-        const playerNumber = playerIDs.get(playerID);
-        const classNames = `log-move player${playerNumber}`;
+      const action = this.props.log[i];
+      log.push(
+        <LogEvent
+          key={i}
+          pinned={i === this.state.pinned}
+          logIndex={i}
+          onLogClick={this.onLogClick}
+          onMouseEnter={this.onMouseEnter}
+          onMouseLeave={this.onMouseLeave}
+          action={action}
+        />
+      );
 
-        currentTurn.push(
-          <div key={i} className={classNames}>
-            {item.payload.type}({args.join(',')})
-          </div>
-        );
+      if (action.payload.type == 'endTurn') {
+        turn++;
+        turnDelimiter = true;
       }
     }
 
-    for (let i = 0; i < turns.length; i++) {
-      const turn = turns[i];
-      log.push(
-        <div
-          key={i}
-          className="log-turn"
-          onMouseEnter={() => this.onRewind(turnToLogIndex[i])}
-          onMouseLeave={() => this.onRewind(null)}
-        >
-          <div className="id">Turn #{i + 1}</div>
-          {turn}
-        </div>
-      );
+    let className = 'gamelog';
+    if (this.state.pinned !== null) {
+      className += ' pinned';
     }
-
-    return <div className="gamelog">{log}</div>;
+    return <div className={className}>{log}</div>;
   }
 }

@@ -63,6 +63,7 @@ export function createMoveDispatchers(moveNames, store, playerID, credentials) {
 class _ClientImpl {
   constructor({
     game,
+    ai,
     numPlayers,
     multiplayer,
     socketOpts,
@@ -89,6 +90,23 @@ class _ClientImpl {
       numPlayers,
       multiplayer,
     });
+
+    if (ai !== undefined && multiplayer === undefined) {
+      this.bot = new ai.bot({ game, ...ai });
+
+      this.step = () => {
+        const state = this.store.getState();
+        const playerID = state.ctx.actionPlayers[0];
+        const { action, metadata } = this.bot.play(state, playerID);
+
+        if (action) {
+          action.payload.metadata = metadata;
+          this.store.dispatch(action);
+        }
+
+        return action;
+      };
+    }
 
     this.reset = () => {
       this.store.dispatch(ActionCreators.reset());
@@ -149,6 +167,10 @@ class _ClientImpl {
       }
     }
 
+    if (state.ctx.gameover !== undefined) {
+      isActive = false;
+    }
+
     // Secrets are normally stripped on the server,
     // but we also strip them here so that game developers
     // can see their effects while prototyping.
@@ -158,12 +180,7 @@ class _ClientImpl {
     }
     const G = this.game.playerView(state.G, state.ctx, playerID);
 
-    if (state.ctx.gameover !== undefined) {
-      isActive = false;
-    }
-
     // Combine into return value.
-
     let ret = { ...state, isActive, G };
 
     if (this.multiplayerClient) {

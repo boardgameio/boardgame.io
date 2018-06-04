@@ -3,8 +3,8 @@
 This is a living document capturing the current areas of focus, and what needs to
 get done before we are ready for a v1 release.
 
-* *Areas that need help are marked with **[help needed]**.*
-* *Stuff that [nicolodavis@](https://github.com/nicolodavis) is working on is marked with **[N]**.*
+* _Areas that need help are marked with **[help needed]**._
+* _Stuff that [nicolodavis@](https://github.com/nicolodavis) is working on is marked with **[N]**._
 
 ### AI framework
 
@@ -35,14 +35,15 @@ get done before we are ready for a v1 release.
   * [ ] add error handling **[help needed]**
 
 * ##### Firebase / Other
+
   * [ ] add support for one more backend (Firebase?) **[help needed]**
-  
+
 ### Clients
 
 * ##### Vue
 
-  * [ ] add basic Vue support  **[help needed]**
-  * [ ] debug UI implementation in Vue  **[help needed]**
+  * [ ] add basic Vue support **[help needed]**
+  * [ ] debug UI implementation in Vue **[help needed]**
 
 ### Core
 

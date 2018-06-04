@@ -14,6 +14,7 @@ import {
   createMoveDispatchers,
 } from './client';
 import Game from '../core/game';
+import { RandomBot } from '../ai/bot';
 
 test('move api', () => {
   const client = Client({
@@ -24,9 +25,72 @@ test('move api', () => {
     }),
   });
 
-  expect(client.store.getState().G).toEqual({});
+  expect(client.getState().G).toEqual({});
   client.moves.A(42);
-  expect(client.store.getState().G).toEqual({ arg: 42 });
+  expect(client.getState().G).toEqual({ arg: 42 });
+});
+
+test('isActive', () => {
+  const client = Client({
+    game: Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+
+      flow: {
+        endGameIf: G => G.arg == 42,
+      },
+    }),
+  });
+
+  expect(client.getState().G).toEqual({});
+  expect(client.getState().isActive).toBe(true);
+  client.moves.A(42);
+  expect(client.getState().G).toEqual({ arg: 42 });
+  expect(client.getState().isActive).toBe(false);
+});
+
+describe('step', () => {
+  const client = Client({
+    game: Game({
+      setup: () => ({ moved: false }),
+
+      moves: {
+        clickCell(G) {
+          return { moved: !G.moved };
+        },
+      },
+
+      flow: {
+        endGameIf(G) {
+          if (G.moved) return true;
+        },
+      },
+    }),
+
+    ai: {
+      bot: RandomBot,
+      enumerate: () => [{ move: 'clickCell' }],
+    },
+  });
+
+  test('advances game state', () => {
+    expect(client.getState().G).toEqual({ moved: false });
+    client.step();
+    expect(client.getState().G).toEqual({ moved: true });
+  });
+
+  test('does not crash on empty action', () => {
+    const client = Client({
+      game: Game({}),
+
+      ai: {
+        bot: RandomBot,
+        enumerate: () => [],
+      },
+    });
+    client.step();
+  });
 });
 
 test('multiplayer server set when provided', () => {

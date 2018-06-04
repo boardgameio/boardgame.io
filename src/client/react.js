@@ -36,6 +36,7 @@ export function Client({
   numPlayers,
   board,
   multiplayer,
+  ai,
   debug,
   enhancer,
 }) {
@@ -78,6 +79,7 @@ export function Client({
 
       this.client = RawClient({
         game,
+        ai,
         numPlayers,
         multiplayer,
         gameID: props.gameID,
@@ -145,9 +147,11 @@ export function Client({
           events: this.client.events,
           gameID: gameID,
           playerID: playerID,
+          step: this.client.step,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
+          renderAI: ai && ai.renderAI,
           overrideGameState: this.overrideGameState,
         });
       }

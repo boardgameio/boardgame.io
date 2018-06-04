@@ -59,7 +59,10 @@ const TicTacToe = Game({
 
     endGameIf: (G, ctx) => {
       if (IsVictory(G.cells)) {
-        return ctx.currentPlayer;
+        return { winner: ctx.currentPlayer };
+      }
+      if (G.cells.filter(c => c === null).length == 0) {
+        return { draw: true };
       }
     },
   },

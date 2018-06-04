@@ -65,6 +65,8 @@ const TicTacToe = BoardgameIO.Game({
   },
 
   flow: {
+    movesPerTurn: 1,
+
     endGameIf: (G, ctx) => {
       if (IsVictory(G.cells)) {
         return { winner: ctx.currentPlayer };
@@ -139,6 +141,17 @@ class TicTacToeBoard extends React.Component {
 var App = BoardgameIO.ReactClient({
   board: TicTacToeBoard,
   game: TicTacToe,
+  ai: BoardgameIO.AI({
+    enumerate: (G, ctx) => {
+      let moves = [];
+      for (let i = 0; i < 9; i++) {
+        if (G.cells[i] === null) {
+          moves.push({ move: 'clickCell', args: [i] });
+        }
+      }
+      return moves;
+    }
+  })
 });
 
 

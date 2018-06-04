@@ -80,5 +80,5 @@ test('victory', () => {
   expect(board.props.G).toEqual({
     cells: ['0', '0', '0', '1', '1'].concat(Grid(4)),
   });
-  expect(board.props.ctx.gameover).toEqual('0');
+  expect(board.props.ctx.gameover).toEqual({ winner: '0' });
 });
