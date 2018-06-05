@@ -11,14 +11,14 @@ import { Random } from './random';
 import { Events } from './events';
 
 /**
- * createGameReducer
+ * CreateGameReducer
  *
  * Creates the main game state reducer.
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function createGameReducer({ game, numPlayers, multiplayer }) {
+export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -96,7 +96,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: events.attach(state.ctx) };
 
         // Update state.
-        let newState = game.flow.processGameEvent(state, action.payload);
+        let newState = game.flow.processGameEvent(state, action);
         // Trigger any events that were called via the Events API.
         newState = events.update(newState);
         // Update ctx with PRNG state.

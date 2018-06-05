@@ -10,6 +10,7 @@ import path from 'path';
 import KoaStatic from 'koa-static';
 import KoaHelmet from 'koa-helmet';
 import KoaWebpack from 'koa-webpack';
+
 import WebpackConfig from './webpack.dev.js';
 import { Server } from 'boardgame.io/server';
 import TicTacToe from './modules/tic-tac-toe/game';

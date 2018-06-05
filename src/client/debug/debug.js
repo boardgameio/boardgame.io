@@ -205,6 +205,11 @@ export class Debug extends React.Component {
     restore: PropTypes.func,
     showLog: PropTypes.bool,
     store: PropTypes.any,
+    step: PropTypes.func,
+    reset: PropTypes.func,
+    reducer: PropTypes.func,
+    overrideGameState: PropTypes.func,
+    renderAI: PropTypes.func,
   };
 
   constructor(props) {
@@ -233,14 +238,17 @@ export class Debug extends React.Component {
     showDebugUI: true,
     showLog: false,
     help: false,
+    AIDebug: null,
   };
 
   assignShortcuts() {
     const taken = {
+      n: true,
       s: true,
       r: true,
       d: true,
       l: true,
+      t: true,
     };
     this.shortcuts = null;
 
@@ -316,6 +324,11 @@ export class Debug extends React.Component {
     this.setState(oldstate => ({ help: !oldstate.help }));
   };
 
+  onLogHover = ({ state, metadata }) => {
+    this.setState({ AIDebug: metadata });
+    this.props.overrideGameState(state);
+  };
+
   renderHelp() {
     const display = this.state.help ? 'block' : 'none';
 
@@ -333,15 +346,55 @@ export class Debug extends React.Component {
           <div className="key">
             <div className="key-box">l</div> toggle Log
           </div>
-
-          <KeyboardShortcut value="s" onPress={this.saveState}>
-            save localStorage
-          </KeyboardShortcut>
-
-          <KeyboardShortcut value="r" onPress={this.restoreState}>
-            restore localStorage
-          </KeyboardShortcut>
         </span>
+      </section>
+    );
+  }
+
+  simulate = async (iterations = 10000, sleepTimeout = 100) => {
+    function sleep() {
+      return new Promise(resolve => setTimeout(resolve, sleepTimeout));
+    }
+
+    for (let i = 0; i < iterations; i++) {
+      const action = this.props.step();
+      if (!action) break;
+      await sleep(100);
+    }
+  };
+
+  renderControls() {
+    let ai = null;
+
+    if (this.props.step) {
+      ai = [
+        <KeyboardShortcut key="4" value="4" onPress={this.props.step}>
+          step
+        </KeyboardShortcut>,
+
+        <KeyboardShortcut key="5" value="5" onPress={this.simulate}>
+          simulate
+        </KeyboardShortcut>,
+      ];
+    }
+
+    return (
+      <section className="controls">
+        <h3>Controls</h3>
+
+        <KeyboardShortcut value="1" onPress={this.props.reset}>
+          reset
+        </KeyboardShortcut>
+
+        <KeyboardShortcut value="2" onPress={this.saveState}>
+          save
+        </KeyboardShortcut>
+
+        <KeyboardShortcut value="3" onPress={this.restoreState}>
+          restore
+        </KeyboardShortcut>
+
+        {ai}
       </section>
     );
   }
@@ -384,65 +437,79 @@ export class Debug extends React.Component {
 
     return (
       <div className="debug-ui">
-        <div className="menu">
-          <div
-            className={this.state.showLog ? 'item' : 'item active'}
-            onClick={this.onClickMain}
-          >
-            Main
+        {this.state.AIDebug && (
+          <div className="pane" style={{ maxWidth: '3000px' }}>
+            {this.props.renderAI(this.state.AIDebug)}
           </div>
-          <div
-            className={this.state.showLog ? 'item active' : 'item'}
-            onClick={this.onClickLog}
-          >
-            Log
+        )}
+
+        <div className="pane">
+          <div className="menu">
+            <div
+              className={this.state.showLog ? 'item' : 'item active'}
+              onClick={this.onClickMain}
+            >
+              Main
+            </div>
+            <div
+              className={this.state.showLog ? 'item active' : 'item'}
+              onClick={this.onClickLog}
+            >
+              Log
+            </div>
           </div>
+
+          {this.state.showLog || (
+            <span>
+              <section>
+                <div>
+                  <strong>Game ID:</strong> {this.props.gameID}
+                </div>
+              </section>
+
+              {this.renderHelp()}
+              {this.renderControls()}
+
+              <h3>Players</h3>
+              <div className="player-box">{players}</div>
+
+              <h3>Moves</h3>
+
+              <section>{moves}</section>
+
+              <h3>Events</h3>
+
+              <section>{events}</section>
+
+              <h3>State</h3>
+
+              <section>
+                <pre className="json">
+                  <strong>ctx</strong>:{' '}
+                  {JSON.stringify(this.props.gamestate.ctx, null, 2)}
+                </pre>
+              </section>
+
+              <section>
+                <pre className="json">
+                  <strong>G</strong>:{' '}
+                  {JSON.stringify(this.props.gamestate.G, null, 2)}
+                </pre>
+              </section>
+            </span>
+          )}
+
+          {this.state.showLog && (
+            <section>
+              <GameLog
+                onHover={this.onLogHover}
+                reducer={this.props.reducer}
+                log={this.props.gamestate.log}
+                initialState={this.props.gamestate._initial}
+              />
+            </section>
+          )}
         </div>
-
-        {this.state.showLog || (
-          <span>
-            <section>
-              <div>
-                <strong>Game ID:</strong> {this.props.gameID}
-              </div>
-            </section>
-
-            {this.renderHelp()}
-
-            <h3>players</h3>
-            <div className="player-box">{players}</div>
-
-            <h3>moves</h3>
-
-            <section>{moves}</section>
-
-            <h3>events</h3>
-
-            <section>{events}</section>
-
-            <h3>state</h3>
-
-            <section>
-              <pre className="json">
-                <strong>ctx</strong>:{' '}
-                {JSON.stringify(this.props.gamestate.ctx, null, 2)}
-              </pre>
-            </section>
-
-            <section>
-              <pre className="json">
-                <strong>G</strong>:{' '}
-                {JSON.stringify(this.props.gamestate.G, null, 2)}
-              </pre>
-            </section>
-          </span>
-        )}
-
-        {this.state.showLog && (
-          <section>
-            <GameLog store={this.props.store} />
-          </section>
-        )}
       </div>
     );
   }

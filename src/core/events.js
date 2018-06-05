@@ -43,7 +43,7 @@ export class Events {
       const action = gameEvent(item.key, item.args, this.playerID);
       state = {
         ...state,
-        ...this.flow.processGameEvent(state, action.payload),
+        ...this.flow.processGameEvent(state, action),
       };
     }
     return state;

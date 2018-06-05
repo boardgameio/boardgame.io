@@ -73,8 +73,7 @@ npm start
 ```
 
 Notice that we have a fully playable game that we can
-interact with via the Debug UI with just
-this little piece of code!
+interact with via the Debug UI with just this little piece of code!
 
 ?> You can make a move by clicking on `clickCell` on the
 Debug UI (or pressing the keyboard shortcut `c`),
@@ -100,8 +99,14 @@ In order to do this, we add a `flow` section to control the
 condition to it.
 
 ```js
+// Return true if `cells` is in a winning configuration.
 function IsVictory(cells) {
-  // Return true if `cells` is in a winning configuration.
+  ...
+}
+
+// Return true if all `cells` are occupied.
+function IsDraw(cells) {
+  return G.cells.filter(c => c === null).length == 0;
 }
 
 const TicTacToe = Game({
@@ -109,7 +114,7 @@ const TicTacToe = Game({
 
   moves: {
     clickCell(G, ctx, id) {
-      const cells = [...G.cells];
+      const cells = [ ...G.cells ];
 
       // Ensure we can't overwrite cells.
       if (cells[id] === null) {
@@ -123,7 +128,10 @@ const TicTacToe = Game({
   flow: {
     endGameIf: (G, ctx) => {
       if (IsVictory(G.cells)) {
-        return ctx.currentPlayer;
+        return { winner: ctx.currentPlayer };
+      }
+      if (IsDraw(G.cells)) {
+        return { draw: true };
       }
     },
   },
@@ -131,8 +139,8 @@ const TicTacToe = Game({
 ```
 
 !> The `endGameIf` field takes a function that determines if
-the game is over. If it returns anything other than `undefined`,
-the game ends, and the return value is available at `ctx.gameover`.
+the game is over. If it returns anything at all, the game ends and
+the return value is available at `ctx.gameover`.
 
 ## Render Board
 
@@ -163,8 +171,13 @@ class TicTacToeBoard extends React.Component {
 
   render() {
     let winner = '';
-    if (this.props.ctx.gameover !== null) {
-      winner = <div>Winner: {this.props.ctx.gameover}</div>;
+    if (this.props.ctx.gameover) {
+      winner =
+        this.props.ctx.gameover.winner !== undefined ? (
+          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
+        ) : (
+          <div id="winner">Draw!</div>
+        );
     }
 
     const cellStyle = {
@@ -240,4 +253,81 @@ And there you have it. A basic tic-tac-toe game!
 <iframe class='react' src='react/example-2.html' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
-Editable version on CodePen: [link](https://codepen.io/nicolodavis/full/MEvrjq/)
+!> You can press `1` (or click on the button next to `reset`) to reset the
+state of the game and start over.
+
+## Adding AI
+
+In this section we will show you how easy it is to add a bot that is
+capable of playing your game. All you need to do is just tell the
+bot how to find legal moves in the game, and it will do the rest.
+
+We shall first modify our flow section by adding a useful option
+called `movesPerTurn` to automatically end the player's turn after
+a single move has been made. That way the bot doesn't have to worry about
+issuing `endTurn` calls (which, while possible, makes the game tree
+a bit messier to search).
+
+```js
+flow: {
+  movesPerTurn: 1,
+  ...
+}
+```
+
+After that, add an AI section to our `Client` call that returns a list
+of moves (one per empty cell).
+
+```js
+import { AI } from 'boardgame.io';
+
+const App = Client({
+  game: TicTacToe,
+  board: TicTacToeBoard,
+
+  ai: AI({
+    enumerate: (G, ctx) => {
+      let moves = [];
+      for (let i = 0; i < 9; i++) {
+        if (G.cells[i] === null) {
+          moves.push({ move: 'clickCell', args: [i] });
+        }
+      }
+      return moves;
+    },
+  }),
+});
+
+export default App;
+```
+
+That's it! You will notice that you now have two more options in
+the **Controls** section (`step` and `simulate`). You can use the
+keyboard shortcuts `4` and `5` to trigger them.
+
+Press `5` and just watch your game play by itself!
+
+You can also use a combination of moves that you make yourself
+and bot moves (press `4` to have the bot make a move). You can make
+some manual moves to get two in a row and then verify that
+the bot makes a block, for example.
+
+```react
+<iframe class='react' src='react/example-3.html' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+```
+
+!> The bot uses [MCTS](http://www.baeldung.com/java-monte-carlo-tree-search) under the
+hood to explore the game tree and find good moves. The default uses 1000 iterations per
+move, which isn't sufficient to create a bullet-proof tic-tac-toe player. This can be
+configured to adjust the bot strength.
+
+The framework will come bundled with a few different bot algorithms, and an advanced
+version of MCTS that will allow you to specify a set of objectives to optimize for.
+For example, at any given point in the game you can tell the bot to gather resources
+in the short term and wage wars in the late stages. You just tell the bot what to do
+and it will figure out the right combination of moves to make it happen!
+
+Detailed documentation about all this is coming soon. Adding bots to games for actual
+networked play (as opposed to merely simulating moves) is also in the works.
+
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/jvxzj7rk9w)

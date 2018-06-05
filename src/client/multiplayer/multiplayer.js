@@ -139,6 +139,10 @@ export class Multiplayer {
   updateGameID(id) {
     this.gameID = this.gameName + ':' + id;
 
+    const action = ActionCreators.reset();
+    action._remote = true;
+    this.store.dispatch(action);
+
     if (this.socket) {
       this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
     }
@@ -150,6 +154,10 @@ export class Multiplayer {
    */
   updatePlayerID(id) {
     this.playerID = id;
+
+    const action = ActionCreators.reset();
+    action._remote = true;
+    this.store.dispatch(action);
 
     if (this.socket) {
       this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);

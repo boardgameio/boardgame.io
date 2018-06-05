@@ -6,20 +6,21 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { createGameReducer } from '../core/reducer';
-import { makeMove } from '../core/action-creators';
+import React from 'react';
+import { MCTSDebug } from './mcts-debug';
+import { MCTSBot } from './bot';
 
-// Initial implementation that just takes the first move
-// and simulates till the end of the game.
-export function Simulate({ game, ai, state, numPlayers }) {
-  const reducer = createGameReducer({ game, numPlayers });
-
-  let t = state;
-  while (t.ctx.gameover === undefined) {
-    const next = ai.next(t.G, t.ctx);
-    const { move, args } = next[0];
-    t = reducer(t, makeMove(move, args));
+export function AI({ bot, enumerate, renderAI, renderGameTreeCell }) {
+  if (!bot) {
+    bot = MCTSBot;
   }
 
-  return t;
+  if (!renderAI) {
+    // eslint-disable-next-line react/display-name
+    renderAI = metadata => (
+      <MCTSDebug root={metadata} renderState={renderGameTreeCell} />
+    );
+  }
+
+  return { bot, enumerate, renderAI };
 }

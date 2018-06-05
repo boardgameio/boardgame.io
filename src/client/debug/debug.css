@@ -8,10 +8,7 @@
 
 .debug-ui {
   text-align: left;
-  min-width: 300px;
-  max-width: 400px;
   overflow-y: scroll;
-  box-sizing: border-box;
   background: #fefefe;
   border-left: 1px solid #ddd;
   box-shadow: -1px 0 10px #aaa;
@@ -22,8 +19,14 @@
   opacity: 0.8;
   font-family: monospace;
   font-size: 14px;
+}
+
+.debug-ui .pane {
+  float: left;
   padding: 20px;
   box-sizing: border-box;
+  min-width: 300px;
+  max-width: 400px;
 }
 
 .debug-ui section {

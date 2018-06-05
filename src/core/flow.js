@@ -9,6 +9,7 @@
 import { TurnOrder } from './turn-order';
 import { Random } from './random';
 import { Events } from './events';
+import { gameEvent } from './action-creators';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -65,12 +66,13 @@ export function Flow({
   }
 
   const dispatch = (state, action) => {
-    if (events.hasOwnProperty(action.type)) {
-      const context = { playerID: action.playerID, dispatch };
-      const args = [state].concat(action.args);
+    const { payload } = action;
+    if (events.hasOwnProperty(payload.type)) {
+      const context = { playerID: payload.playerID, dispatch };
+      const args = [state].concat(payload.args);
       const oldLog = state.log || [];
       const log = [...oldLog, action];
-      const newState = events[action.type].apply(context, args);
+      const newState = events[payload.type].apply(context, args);
       return { ...newState, log };
     }
     return state;
@@ -158,6 +160,8 @@ export function Flow({
  *
  * @param {...object} endGame - Set to true to enable the `endGame` event.
  *
+ * @param {...object} changeActionPlayers - Set to true to enable the `changeActionPlayers` event.
+ *
  * @param {...object} allowedMoves - List of moves that are allowed.
  *                                   This can be either a list of
  *                                   move names or a function with the
@@ -241,6 +245,7 @@ export function FlowWithPhases({
   endTurn,
   endPhase,
   endGame,
+  changeActionPlayers,
   undoableMoves,
   allowedMoves,
   optimisticUpdate,
@@ -254,6 +259,9 @@ export function FlowWithPhases({
   }
   if (endGame === undefined) {
     endGame = false;
+  }
+  if (changeActionPlayers === undefined) {
+    changeActionPlayers = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -416,11 +424,10 @@ export function FlowWithPhases({
     if (cascadeDepth < phases.length - 1) {
       const end = shouldEndPhase(state);
       if (end) {
-        state = this.dispatch(state, {
-          type: 'endPhase',
-          args: [end, cascadeDepth + 1],
-          playerID: this.playerID,
-        });
+        state = this.dispatch(
+          state,
+          gameEvent('endPhase', [end, cascadeDepth + 1], this.playerID)
+        );
       }
     }
 
@@ -428,11 +435,10 @@ export function FlowWithPhases({
     // (and the turn has not already been ended by a nested endPhase call).
     const endTurn = shouldEndTurn(state);
     if (endTurn && state.ctx.turn == origTurn) {
-      state = this.dispatch(state, {
-        type: 'endTurn',
-        args: [endTurn],
-        playerID: this.playerID,
-      });
+      state = this.dispatch(
+        state,
+        gameEvent('endTurn', [endTurn], this.playerID)
+      );
     }
 
     return state;
@@ -495,11 +501,7 @@ export function FlowWithPhases({
     if (end) {
       return this.dispatch(
         { ...state, G, ctx },
-        {
-          type: 'endPhase',
-          args: [end],
-          playerID: this.playerID,
-        }
+        gameEvent('endPhase', [end], this.playerID)
       );
     }
 
@@ -514,8 +516,15 @@ export function FlowWithPhases({
     return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
+  function changeActionPlayersEvent(state, actionPlayers) {
+    if (actionPlayers && actionPlayers.length) {
+      return { ...state, ctx: { ...state.ctx, actionPlayers } };
+    }
+    return state;
+  }
+
   function processMove(state, action, dispatch) {
-    const conf = phaseMap[state.ctx.phase];
+    let conf = phaseMap[state.ctx.phase];
 
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
     state = {
@@ -532,22 +541,19 @@ export function FlowWithPhases({
     // End the phase automatically if endPhaseIf is true or if endGameIf returns.
     const endPhase = shouldEndPhase(state);
     if (endPhase || gameover !== undefined) {
-      state = dispatch(state, {
-        type: 'endPhase',
-        args: [endPhase],
-        playerID: action.playerID,
-      });
+      state = dispatch(
+        state,
+        gameEvent('endPhase', [endPhase], action.playerID)
+      );
+      // Update to the new phase configuration
+      conf = phaseMap[state.ctx.phase];
     }
 
     // End the turn automatically if endTurnIf is true or if endGameIf returns.
     // (but not if endPhase above already ends the turn).
     const endTurn = shouldEndTurn(state);
     if (state.ctx.turn == origTurn && (endTurn || gameover !== undefined)) {
-      state = dispatch(state, {
-        type: 'endTurn',
-        args: [endTurn],
-        playerID: action.playerID,
-      });
+      state = dispatch(state, gameEvent('endTurn', [endTurn], action.playerID));
     }
 
     // End the game automatically if endGameIf returns.
@@ -592,13 +598,18 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
-  if (endTurn) enabledEvents['endTurn'] = endTurnEvent;
-  if (endPhase) enabledEvents['endPhase'] = endPhaseEvent;
-  if (endGame) enabledEvents['endGame'] = endGameEvent;
-
-  enabledEvents['changeActionPlayers'] = (state, actionPlayers) => {
-    return { ...state, ctx: { ...state.ctx, actionPlayers } };
-  };
+  if (endTurn) {
+    enabledEvents['endTurn'] = endTurnEvent;
+  }
+  if (endPhase) {
+    enabledEvents['endPhase'] = endPhaseEvent;
+  }
+  if (endGame) {
+    enabledEvents['endGame'] = endGameEvent;
+  }
+  if (changeActionPlayers) {
+    enabledEvents['changeActionPlayers'] = changeActionPlayersEvent;
+  }
 
   return Flow({
     ctx: numPlayers => ({
