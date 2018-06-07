@@ -391,4 +391,29 @@ describe('.createApiServer', () => {
       });
     });
   });
+
+  describe('gets game list', () => {
+    let db;
+    beforeEach(() => {
+      delete process.env.API_SECRET;
+      db = {
+        get: async () => {},
+        set: async () => {},
+      };
+    });
+    describe('when given 2 games', async () => {
+      let response;
+      beforeEach(async () => {
+        let app;
+        let games;
+        games = [Game({ name: 'foo' }), Game({ name: 'bar' })];
+        app = createApiServer({ db, games });
+
+        response = await request(app.callback()).get('/games');
+      });
+      test('should get 2 games', async () => {
+        expect(Object.keys(JSON.parse(response.text)).length).toEqual(2);
+      });
+    });
+  });
 });
