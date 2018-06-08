@@ -288,8 +288,8 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .post('/game_instances/1/join')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .post('/games/foo/1/join')
+            .send('playerID=0&playerName=alice');
         });
 
         test('throws a "not found" error', async () => {
@@ -318,8 +318,8 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .post('/game_instances/1/join')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .post('/games/foo/1/join')
+            .send('playerID=0&playerName=alice');
         });
 
         test('is successful', async () => {
@@ -355,8 +355,8 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .post('/game_instances/1/join')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .post('/games/foo/1/join')
+            .send('playerID=0&playerName=alice');
         });
 
         test('fails', () => {
@@ -382,9 +382,9 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .post('/game_instances/1/join')
+            .post('/games/foo/1/join')
             .set('API-Secret', 'protected')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .send('playerID=0&playerName=alice');
         });
 
         test('succeeds', () => {
