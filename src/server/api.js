@@ -63,6 +63,10 @@ export const createApiServer = ({ db, games }) => {
   const app = new Koa();
   const router = new Router();
 
+  router.get('/games', async ctx => {
+    ctx.body = games.map(game => game.name);
+  });
+
   router.post('/games/:name/create', koaBody(), async ctx => {
     const gameName = ctx.params.name;
     let numPlayers = parseInt(ctx.request.body.numPlayers);
