@@ -172,7 +172,7 @@ describe('.createApiServer', () => {
     });
 
     describe('for an unprotected lobby server', () => {
-      beforeEach(async () => {
+      beforeEach(async done => {
         delete process.env.API_SECRET;
 
         app = createApiServer({ db, games });
@@ -180,6 +180,8 @@ describe('.createApiServer', () => {
         response = await request(app.callback())
           .post('/games/foo/create')
           .send('numPlayers=3');
+
+        done();
       });
 
       test('is successful', () => {
@@ -286,7 +288,7 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
+            .post('/game_instances/1/join')
             .send('gameName=foo&playerID=0&playerName=alice');
         });
 
@@ -316,7 +318,7 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
+            .post('/game_instances/1/join')
             .send('gameName=foo&playerID=0&playerName=alice');
         });
 
@@ -353,7 +355,7 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
+            .post('/game_instances/1/join')
             .send('gameName=foo&playerID=0&playerName=alice');
         });
 
@@ -380,7 +382,7 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
+            .post('/game_instances/1/join')
             .set('API-Secret', 'protected')
             .send('gameName=foo&playerID=0&playerName=alice');
         });
@@ -401,6 +403,7 @@ describe('.createApiServer', () => {
         set: async () => {},
       };
     });
+
     describe('when given 2 games', async () => {
       let response;
       beforeEach(async () => {
@@ -411,6 +414,7 @@ describe('.createApiServer', () => {
 
         response = await request(app.callback()).get('/games');
       });
+
       test('should get 2 games', async () => {
         expect(Object.keys(JSON.parse(response.text)).length).toEqual(2);
       });

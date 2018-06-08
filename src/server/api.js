@@ -100,7 +100,7 @@ export const createApiServer = ({ db, games }) => {
     };
   });
 
-  router.patch('/game_instances/:id/join', koaBody(), async ctx => {
+  router.post('/game_instances/:id/join', koaBody(), async ctx => {
     const gameID = ctx.params.id;
     const gameName = ctx.request.body.gameName;
     const playerID = ctx.request.body.playerID;
