@@ -416,7 +416,7 @@ describe('.createApiServer', () => {
       });
 
       test('should get 2 games', async () => {
-        expect(Object.keys(JSON.parse(response.text)).length).toEqual(2);
+        expect(JSON.parse(response.text)).toEqual(['foo', 'bar']);
       });
     });
   });
