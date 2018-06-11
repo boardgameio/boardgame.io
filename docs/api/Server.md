@@ -67,13 +67,11 @@ Returns `gameID`, which is the ID of the newly created game instance.
 
 ### Joining a game
 
-#### `/game_instances/:id/join`
+#### `/games/:name/:id/join`
 
-Allows a player to join the given game instance `id`.
+Allows a player to join a particular game instance `id` of a game named `name`.
 
 Accepts three parameters, all required:
-
-`gameName`: the name of the game being joined
 
 `playerID`: the ordinal player in the game that is being joined (0, 1...)
 
