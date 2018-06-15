@@ -1,4 +1,4 @@
-# v0.23.2
+## v0.23.2
 
 #### Bugfixes
 
@@ -9,7 +9,7 @@
 * [[99b9844](https://github.com/google/boardgame.io/commit/99b9844)] Python Bots
 * [[a7134a5](https://github.com/google/boardgame.io/commit/a7134a5)] List available games API
 
-# v0.23.1
+## v0.23.1
 
 #### Bugfixes
 
@@ -27,7 +27,7 @@
 * [[7a80f66](https://github.com/google/boardgame.io/commit/7a80f66)] make changeActionPlayers an opt-in event
 * [[40cd4b8](https://github.com/google/boardgame.io/commit/40cd4b8)] Add config update on phase change Fixes #211 (#212)
 
-# v0.22.1
+## v0.22.1
 
 #### Bugfixes
 
@@ -42,13 +42,13 @@
 * [[5362955](https://github.com/google/boardgame.io/commit/5362955)] React Native Client (#128)
 * [[b329df2](https://github.com/google/boardgame.io/commit/b329df2)] Pass through props (#173)
 
-# v0.21.5
+## v0.21.5
 
 #### Bugfixes
 
 * [[55715c9](https://github.com/google/boardgame.io/commit/55715c9)] Fix undefined ctx in onPhaseBegin
 
-# v0.21.4
+## v0.21.4
 
 #### Features
 
@@ -61,7 +61,7 @@
 
 * [[278b369](https://github.com/google/boardgame.io/commit/278b369)] Fix bug that was ending phase incorrectly (#176)
 
-# v0.21.3
+## v0.21.3
 
 #### Features
 
@@ -73,13 +73,13 @@
 
 * [[5e49448](https://github.com/google/boardgame.io/commit/5e49448)] convert multiplayer move whitelist to blacklist
 
-# v0.21.2
+## v0.21.2
 
 #### Bugfixes
 
 * [[27705d5](https://github.com/google/boardgame.io/commit/27705d5)] pass Events API correctly inside events.update
 
-# v0.21.1
+## v0.21.1
 
 #### Bugfixes
 
@@ -99,7 +99,7 @@
 * [[748f36f](https://github.com/google/boardgame.io/commit/748f36f)] UI: add mouse hover action props to grid, hex, and token (#153)
 * [[f664237](https://github.com/google/boardgame.io/commit/f664237)] Add notion of actionPlayers (#145)
 
-# v0.20.2
+## v0.20.2
 
 #### Features
 
@@ -117,7 +117,7 @@
   is passed to the moves. Take a look at http://boardgame.io/#/random for
   more details.
 
-# v0.20.1
+## v0.20.1
 
 #### Bugfixes
 
@@ -158,7 +158,7 @@ const Server = require('boardgame.io/server').Server;
 const Server = require('boardgame.io/server');
 ```
 
-# v0.18.1
+## v0.18.1
 
 #### Bugfixes
 
@@ -199,7 +199,7 @@ to any particular UI framework.
 
 * [[6a010c8](https://github.com/google/boardgame.io/commit/6a010c8)] Debug UI: fixes related to errors in arguments (#123)
 
-# v0.17.2
+## v0.17.2
 
 #### Features
 
@@ -211,7 +211,7 @@ to any particular UI framework.
 
 * [[a768f1f](https://github.com/google/boardgame.io/commit/a768f1f)] remove entries from clientInfo and roomInfo on disconnect
 
-# v0.17.1
+## v0.17.1
 
 #### Features
 
@@ -234,7 +234,7 @@ to any particular UI framework.
 * [[f3da742](https://github.com/google/boardgame.io/commit/f3da742)] make playerID available in ctx
 * [[cb09d9a](https://github.com/google/boardgame.io/commit/cb09d9a)] make turnOrder a globally configurable option
 
-# v0.16.8
+## v0.16.8
 
 #### Features
 
@@ -244,13 +244,13 @@ to any particular UI framework.
 
 * [[2ab3dfc](https://github.com/google/boardgame.io/commit/2ab3dfc6928eb8f0bfdf1ce319ac53021a2f905b)] end turn automatically when game ends
 
-# v0.16.7
+## v0.16.7
 
 #### Bugfixes
 
 * [[c65580d](https://github.com/google/boardgame.io/commit/c65580d)] Fix bug introduced in af3a7b5.
 
-# v0.16.6
+## v0.16.6
 
 #### Bugfixes
 
@@ -262,13 +262,13 @@ Buggy fix (fixed in 0.16.7).
 
 * [[2721ad4](https://github.com/google/boardgame.io/commit/2721ad4)] Allow overriding `db` implementation in Server.
 
-# v0.16.5
+## v0.16.5
 
 #### Features
 
 * `PlayerView.STRIP_SECRETS`
 
-# v0.16.4
+## v0.16.4
 
 #### Bugfixes
 
@@ -291,7 +291,7 @@ onClick() {
 }
 ```
 
-# v0.16.3
+## v0.16.3
 
 #### Features
 
@@ -307,7 +307,7 @@ const app = Server({
 };
 ```
 
-# v0.16.2
+## v0.16.2
 
 #### Bugfixes
 
@@ -317,7 +317,7 @@ const app = Server({
 
 * [[9ce42b2](https://github.com/google/boardgame.io/commit/9ce42b297372160f3ece4203b4c92000334d85e0)]: Change color in `GameLog` based on the player that made the move.
 
-# v0.16.1
+## v0.16.1
 
 #### Bugfixes
 
