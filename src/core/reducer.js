@@ -56,14 +56,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  // Initialize PRNG state.
-  initial.ctx = random.update(initial.ctx);
-
-  const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+  const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
   initial.G = state.G;
-  initial.ctx = state.ctx;
   initial._undo = state._undo;
+  initial.ctx = random.update(state.ctx);
+  initial.ctx = Random.detach(initial.ctx);
 
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);

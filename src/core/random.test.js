@@ -147,3 +147,17 @@ test('Random API is not executed optimisitically', () => {
     expect(state.G.die).not.toBeDefined();
   }
 });
+
+test('onTurnBegin has the Random API at the beginning of the game', () => {
+  let random;
+  const game = Game({
+    flow: {
+      onTurnBegin: (G, ctx) => {
+        random = ctx.random;
+      },
+    },
+  });
+  const reducer = CreateGameReducer({ game });
+  reducer(undefined, { type: 'init' });
+  expect(random).toBeDefined();
+});

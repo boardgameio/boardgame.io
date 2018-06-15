@@ -246,7 +246,6 @@ test('undo/redo', () => {
 
   board.props.undo();
   expect(board.props.G).toEqual(initial.G);
-  expect(board.props.ctx).toEqual(initial.ctx);
 
   board.props.redo();
   expect(board.props.G).toEqual({ arg: 42 });
