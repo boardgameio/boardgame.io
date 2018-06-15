@@ -1,3 +1,14 @@
+# v0.23.2
+
+#### Bugfixes
+
+* [[7a61f09](https://github.com/google/boardgame.io/commit/7a61f09)] make Random API present in first onTurnBegin and onPhaseBegin
+
+#### Features
+
+* [[99b9844](https://github.com/google/boardgame.io/commit/99b9844)] Python Bots
+* [[a7134a5](https://github.com/google/boardgame.io/commit/a7134a5)] List available games API
+
 # v0.23.1
 
 #### Bugfixes
