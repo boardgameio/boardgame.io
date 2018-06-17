@@ -195,8 +195,7 @@ export class Firebase {
     if (cacheSize === undefined) cacheSize = 1000;
     if (dbname === undefined) dbname = 'bgio';
     // TODO: better handling for possible errors
-    if (config === undefined)
-      config = { apiKey: '', authDomain: '', databaseURL: '', projectId: '' };
+    if (config === undefined) config = {};
 
     this.mockFirebase = mockFirebase;
     this.client = firebase;
