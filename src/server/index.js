@@ -10,7 +10,7 @@ const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
 
-import { InMemory, Mongo } from './db';
+import { InMemory, Mongo, Firebase } from './db';
 import { CreateGameReducer } from '../core/reducer';
 import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
@@ -31,6 +31,20 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
   if (db === undefined) {
     if (process.env.MONGO_URI) {
       db = new Mongo({ url: process.env.MONGO_URI });
+    } else if (
+      process.env.FIREBASE_APIKEY &&
+      process.env.FIREBASE_AUTHDOMAIN &&
+      process.env.FIREBASE_DATABASEURL &&
+      process.env.FIREBASE_PROJECTID
+    ) {
+      const config = {
+        apiKey: process.env.FIREBASE_APIKEY,
+        authDomain: process.env.FIREBASE_AUTHDOMAIN,
+        databaseURL: process.env.FIREBASE_DATABASEURL,
+        projectId: process.env.FIREBASE_PROJECTID,
+        engine: process.env.FIREBASE_ENGINE, // RTDB or Firestore
+      };
+      db = new Firebase({ config });
     } else {
       db = new InMemory();
     }
