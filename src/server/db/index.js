@@ -1,3 +1,3 @@
-import { InMemory } from './inmemory';
+import { InMemory, Mongo, Firebase } from './inmemory';
 
-export { InMemory };
+export { InMemory, Mongo, Firebase };
