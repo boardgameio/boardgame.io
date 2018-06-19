@@ -16,18 +16,16 @@ export class Firebase {
   /**
    * Creates a new Firebase connector object.
    */
-  constructor({ config, dbname, cacheSize, mockFirebase }) {
+  constructor({ config, dbname, engine, cacheSize, mockFirebase }) {
     if (cacheSize === undefined) cacheSize = 1000;
     if (dbname === undefined) dbname = 'bgio';
-    // TODO: better handling for possible errors
+    // // TODO: better handling for possible errors
     if (config === undefined) config = {};
 
-    this.mockFirebase = mockFirebase;
-    this.client = firebase;
+    this.client = mockFirebase || firebase;
     // Default engine is Firestore
-    this.engine = config.engine === 'RTDB' ? config.engine : 'Firestore';
-    const { apiKey, authDomain, databaseURL, projectId } = config;
-    this.config = { apiKey, authDomain, databaseURL, projectId };
+    this.engine = engine === 'RTDB' ? engine : 'Firestore';
+    this.config = config;
     this.dbname = dbname;
     this.cache = new LRU({ max: cacheSize });
   }
@@ -35,15 +33,11 @@ export class Firebase {
    * Connect to the instance.
    */
   async connect() {
-    if (this.mockFirebase) {
-      this.db = this.mockFirebase;
-    } else {
-      this.client.initializeApp(this.config);
-      this.db =
-        this.engine === 'Firestore'
-          ? this.client.firestore()
-          : this.client.database().ref();
-    }
+    this.client.initializeApp(this.config);
+    this.db =
+      this.engine === 'Firestore'
+        ? this.client.firestore()
+        : this.client.database().ref();
     return;
   }
   /**
