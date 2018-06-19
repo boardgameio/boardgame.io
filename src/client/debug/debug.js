@@ -351,16 +351,16 @@ export class Debug extends React.Component {
     );
   }
 
-  simulate = async (iterations = 10000, sleepTimeout = 100) => {
-    function sleep() {
-      return new Promise(resolve => setTimeout(resolve, sleepTimeout));
-    }
-
-    for (let i = 0; i < iterations; i++) {
+  simulate = (iterations = 10000, sleepTimeout = 100) => {
+    const step = () => {
       const action = this.props.step();
-      if (!action) break;
-      await sleep(100);
-    }
+      if (action && iterations > 1) {
+        iterations--;
+        setTimeout(step, sleepTimeout);
+      }
+    };
+
+    step();
   };
 
   renderControls() {
