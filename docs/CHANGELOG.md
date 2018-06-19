@@ -1,3 +1,9 @@
+## v0.23.3
+
+#### Bugfixes
+
+* [[6194986](https://github.com/google/boardgame.io/commit/6194986)] remove async/await from client code
+
 ## v0.23.2
 
 #### Bugfixes
