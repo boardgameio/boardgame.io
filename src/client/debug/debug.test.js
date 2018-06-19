@@ -307,6 +307,8 @@ test('toggle AIDebug', () => {
 });
 
 describe('simulate', () => {
+  jest.useFakeTimers();
+
   test('basic', () => {
     const step = jest.fn(() => true);
     Enzyme.mount(
@@ -319,7 +321,8 @@ describe('simulate', () => {
     );
     expect(step).not.toHaveBeenCalled();
     Mousetrap.simulate('5');
-    expect(step).toHaveBeenCalled();
+    jest.runAllTimers();
+    expect(step).toHaveBeenCalledTimes(10000);
   });
 
   test('break out if no action is returned', () => {
@@ -335,6 +338,7 @@ describe('simulate', () => {
 
     expect(step).not.toHaveBeenCalled();
     Mousetrap.simulate('5');
-    expect(step).toHaveBeenCalled();
+    jest.runAllTimers();
+    expect(step).toHaveBeenCalledTimes(1);
   });
 });
