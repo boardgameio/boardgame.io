@@ -1,10 +1,10 @@
 {
   "name": "boardgame.io",
-  "version": "0.21.0",
+  "version": "0.23.3",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/server.js",
+    "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/react/server.js",
     "docsify": "docsify serve docs",
     "docsify:update": "node ./scripts/docsify-update.js",
     "examples": "npm run dev",
@@ -31,13 +31,17 @@
     "dist/server.js",
     "dist/client.js",
     "dist/react.js",
+    "dist/react-native.js",
     "dist/core.js",
     "dist/ui.js",
+    "dist/ai.js",
     "server.js",
     "client.js",
     "react.js",
+    "react-native.js",
     "core.js",
-    "ui.js"
+    "ui.js",
+    "ai.js"
   ],
   "keywords": [
     "react",
@@ -78,7 +82,7 @@
     "eslint": "^4.7.2",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jest": "^21.1.0",
-    "eslint-plugin-react": "^7.3.0",
+    "eslint-plugin-react": "7.3.0",
     "generate-export-aliases": "^1.0.0",
     "html-webpack-plugin": "^2.30.1",
     "husky": "^0.15.0-rc.8",
@@ -106,11 +110,15 @@
     "rollup-plugin-uglify": "^2.0.1",
     "shelljs": "^0.7.8",
     "style-loader": "^0.18.2",
+    "superagent": "^3.8.3",
+    "supertest": "^3.1.0",
     "uglify-es": "^3.1.3",
     "webpack": "^3.5.5"
   },
   "dependencies": {
+    "@koa/cors": "^2.2.1",
     "koa": "^2.3.0",
+    "koa-body": "^2.5.0",
     "koa-router": "^7.2.1",
     "koa-socket": "^4.4.0",
     "koa-static": "^4.0.1",
@@ -119,7 +127,8 @@
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
     "redux": "^3.7.2",
-    "socket.io": "^2.0.3"
+    "socket.io": "^2.0.3",
+    "uuid": "3.2.1"
   },
   "peerDependencies": {
     "react": "^16.0.0"
@@ -128,17 +137,16 @@
     "exportAliases": {
       "client": "./dist/client.js",
       "react": "./dist/react.js",
+      "react-native": "./dist/react-native.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
-      "ui": "./dist/ui.js"
+      "ui": "./dist/ui.js",
+      "ai": "./dist/ai.js"
     }
   },
   "jest": {
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
-      "boardgame.io/client": "<rootDir>/packages/client",
-      "boardgame.io/game": "<rootDir>/packages/game",
-      "boardgame.io/server": "<rootDir>/packages/server",
       "\\.(svg)$": "<rootDir>/.empty_module.js"
     },
     "setupFiles": [
@@ -148,6 +156,7 @@
       "node_modules/(?!(boardgame.io)/)"
     ],
     "testPathIgnorePatterns": [
+      "/examples/react-native/",
       "storybook/",
       "/node_modules/",
       ".npm/"

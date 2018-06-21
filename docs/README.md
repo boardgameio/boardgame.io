@@ -20,14 +20,15 @@ networking or backend code.
 
 ### Features
 
-* **State Management**: Game state is managed seamlessly across browser, server and storage automatically.
-* **Prototyping**: Debugging interface to simulate moves even before you render the game.
-* **Multiplayer**: All browsers connected to the same game are synced in real time with no refreshes required.
+* **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
+* **Cross-platform Multiplayer**: All clients (Web / Android / iOS) connected to the game are synced in real time.
+* **AI Framework**: Create bots that are highly customizable and debuggable.
 * **Game Phases**: with different game rules (including custom turn orders) per phase.
-* **Triggers**: Automatic actions when certain game conditions are met.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
+* **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **UI toolkit**: React components for hex grids, cards, tokens etc.
+* **UI Agnostic**: Client API for React, React Native or plain JS.
+* **Component Toolkit**: Components for hex grids, cards, tokens.
 
 ### Installation
 
@@ -45,10 +46,6 @@ include via a `<script>` tag.
 ### Changelog
 
 See [changelog](CHANGELOG.md).
-
-### Disclaimer
-
-This is not an official Google product.
 
 ### License
 

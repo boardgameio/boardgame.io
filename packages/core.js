@@ -7,8 +7,17 @@
  */
 
 import Game from '../src/core/game.js';
+import { CreateGameReducer } from '../src/core/reducer.js';
 import { Flow, FlowWithPhases } from '../src/core/flow.js';
-import { TurnOrder, Pass } from '../src/core/turn-order.js';
+import { Pass, TurnOrder } from '../src/core/turn-order.js';
 import { PlayerView } from '../src/core/player-view.js';
 
-export { Game, Flow, FlowWithPhases, TurnOrder, Pass, PlayerView };
+export {
+  Game,
+  CreateGameReducer,
+  Flow,
+  FlowWithPhases,
+  TurnOrder,
+  Pass,
+  PlayerView,
+};

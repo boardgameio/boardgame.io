@@ -1,0 +1,27 @@
+{
+  "name": "bgio-react-native-tic-tac-toe",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "babel-plugin-module-resolver": "^3.1.1",
+    "jest-expo": "25.0.0",
+    "react-native-scripts": "1.11.1",
+    "react-test-renderer": "16.2.0"
+  },
+  "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
+  "scripts": {
+    "start": "react-native-scripts start",
+    "eject": "react-native-scripts eject",
+    "android": "react-native-scripts android",
+    "ios": "react-native-scripts ios",
+    "test": "node node_modules/jest/bin/jest.js"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "expo": "^25.0.0",
+    "react": "16.2.0",
+    "react-native": "0.52.0"
+  }
+}

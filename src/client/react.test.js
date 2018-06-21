@@ -77,6 +77,18 @@ test('board props', () => {
   expect(board.props().isActive).toBe(true);
 });
 
+test('can pass extra props to Client', () => {
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+  });
+  const board = Enzyme.mount(
+    <Board doStuff={() => true} extraValue={55} />
+  ).find(TestBoard);
+  expect(board.props().doStuff()).toBe(true);
+  expect(board.props().extraValue).toBe(55);
+});
+
 test('debug ui can be turned off', () => {
   const Board = Client({
     game: Game({}),
@@ -145,27 +157,36 @@ test('update gameID / playerID', () => {
     board: TestBoard,
     multiplayer: true,
   });
-  game = Enzyme.mount(<Board gameID="a" playerID="1" />);
+  game = Enzyme.mount(<Board gameID="a" playerID="1" credentials="foo" />);
   const m = game.instance().client.multiplayerClient;
+  const g = game.instance().client;
 
   const spy1 = jest.spyOn(m, 'updateGameID');
   const spy2 = jest.spyOn(m, 'updatePlayerID');
+  const spy3 = jest.spyOn(g, 'updateCredentials');
 
   expect(m.gameID).toBe('default:a');
   expect(m.playerID).toBe('1');
+
   game.setProps({ gameID: 'a' });
   game.setProps({ playerID: '1' });
+  game.setProps({ credentials: 'foo' });
+
   expect(m.gameID).toBe('default:a');
   expect(m.playerID).toBe('1');
   expect(spy1).not.toHaveBeenCalled();
   expect(spy2).not.toHaveBeenCalled();
+  expect(spy3).not.toHaveBeenCalled();
 
   game.setProps({ gameID: 'next' });
   game.setProps({ playerID: 'next' });
+  game.setProps({ credentials: 'bar' });
+
   expect(m.gameID).toBe('default:next');
   expect(m.playerID).toBe('next');
   expect(spy1).toHaveBeenCalled();
   expect(spy2).toHaveBeenCalled();
+  expect(spy3).toHaveBeenCalled();
 });
 
 test('local playerView', () => {
@@ -214,4 +235,47 @@ test('reset Game', () => {
   board.props.reset();
   expect(board.props.G).toEqual(initial.G);
   expect(board.props.ctx).toEqual(initial.ctx);
+});
+
+test('undo/redo', () => {
+  const Board = Client({
+    game: Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    }),
+    board: TestBoard,
+  });
+
+  const game = Enzyme.mount(<Board />);
+  const board = game.find('TestBoard').instance();
+
+  const initial = { G: { ...board.props.G }, ctx: { ...board.props.ctx } };
+
+  expect(board.props.G).toEqual({});
+  board.props.moves.A(42);
+  expect(board.props.G).toEqual({ arg: 42 });
+
+  board.props.undo();
+  expect(board.props.G).toEqual(initial.G);
+
+  board.props.redo();
+  expect(board.props.G).toEqual({ arg: 42 });
+});
+
+test('overrideGameState', () => {
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+  });
+
+  const game = Enzyme.mount(<Board />);
+  const board = game.find('TestBoard').instance();
+
+  expect(board.props.G).toEqual({});
+  game
+    .find('Debug')
+    .props()
+    .overrideGameState({ G: 1 });
+  expect(board.props.G).toBe(1);
 });

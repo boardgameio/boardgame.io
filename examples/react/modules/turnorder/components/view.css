@@ -1,0 +1,34 @@
+.runner-vert {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+#turn-order table {
+  width: 400px;
+  border-collapse: collapse;
+}
+
+#turn-order td {
+  border: 1px solid #aaa;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+#turn-order .runner-vert {
+  margin-left: 50px;
+}
+
+#turn-order .run {
+  background: #fafafa;
+  border-bottom: 1px dashed #aaa;
+  width: 400px;
+  height: 200px;
+  text-align: center;
+  padding: 0;
+}
+
+#turn-order .badge {
+  color: #faa;
+  font-weight: bold;
+}

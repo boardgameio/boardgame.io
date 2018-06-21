@@ -6,13 +6,21 @@
  * https://opensource.org/licenses/MIT.
  */
 
+jest.mock('./api');
+
 import { Server } from './index';
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
+import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
 beforeEach(() => {
   jest.resetModules();
+  jest.resetAllMocks();
+  createApiServer.mockReturnValue({
+    listen() {},
+  });
+  isActionFromAuthenticPlayer.mockReturnValue(true);
 });
 
 jest.mock('koa-socket', () => {
@@ -175,26 +183,28 @@ test('action', async () => {
           G: {},
           ctx: {
             _random: { seed: 0 },
+            allowedMoves: null,
             currentPlayer: '0',
             actionPlayers: ['0'],
             currentPlayerMoves: 0,
             numPlayers: 2,
             phase: 'default',
             turn: 0,
-            playOrder: [0, 1],
+            playOrder: ['0', '1'],
             playOrderPos: 0,
           },
         },
       ],
       ctx: {
         _random: { seed: 0 },
+        allowedMoves: null,
         currentPlayer: '0',
         actionPlayers: ['0'],
         currentPlayerMoves: 0,
         numPlayers: 2,
         phase: 'default',
         turn: 0,
-        playOrder: [0, 1],
+        playOrder: ['0', '1'],
         playOrderPos: 0,
       },
       log: [],
@@ -206,29 +216,31 @@ test('action', async () => {
         G: {},
         ctx: {
           _random: { seed: 0 },
+          allowedMoves: null,
           currentPlayer: '1',
           actionPlayers: ['1'],
           currentPlayerMoves: 0,
           numPlayers: 2,
           phase: 'default',
           turn: 1,
-          playOrder: [0, 1],
+          playOrder: ['0', '1'],
           playOrderPos: 1,
         },
       },
     ],
     ctx: {
       _random: undefined,
+      allowedMoves: null,
       currentPlayer: '1',
       actionPlayers: ['1'],
       currentPlayerMoves: 0,
       numPlayers: 2,
       phase: 'default',
-      playOrder: [0, 1],
+      playOrder: ['0', '1'],
       playOrderPos: 1,
       turn: 1,
     },
-    log: [{ args: undefined, playerID: undefined, type: 'endTurn' }],
+    log: [ActionCreators.gameEvent('endTurn')],
   });
   io.socket.emit.mockReset();
 
@@ -323,4 +335,18 @@ test('MONGO_URI', () => {
   const server = Server({ games: [game] });
   expect(server.db.url).toBe('test');
   delete process.env.MONGO_URI;
+});
+
+test('auth failure', async () => {
+  isActionFromAuthenticPlayer.mockReturnValue(false);
+
+  const server = Server({ games: [game] });
+  const io = server.app.context.io;
+  const action = ActionCreators.gameEvent('endTurn');
+
+  await io.socket.receive('sync', 'gameID');
+  io.socket.emit.mockReset();
+
+  await io.socket.receive('action', action, 0, 'gameID', '0');
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
 });

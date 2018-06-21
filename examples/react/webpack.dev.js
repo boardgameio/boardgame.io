@@ -14,7 +14,11 @@ const OpenBrowserPlugin = require('open-browser-webpack-plugin');
 const port = process.env.PORT || 8000;
 
 module.exports = {
-  entry: ['webpack-hot-middleware/client', path.resolve(__dirname, 'index.js')],
+  entry: [
+    'babel-polyfill',
+    'webpack-hot-middleware/client',
+    path.resolve(__dirname, 'index.js'),
+  ],
 
   output: {
     publicPath: '/',

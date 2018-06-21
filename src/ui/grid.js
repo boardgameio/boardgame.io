@@ -110,7 +110,7 @@ export class Grid extends React.Component {
   render() {
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
-        _inGrid: true,
+        template: Square,
         onClick: this.onClick,
         onMouseOver: this.onMouseOver,
         onMouseOut: this.onMouseOut,

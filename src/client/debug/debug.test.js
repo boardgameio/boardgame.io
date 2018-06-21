@@ -7,7 +7,9 @@
  */
 
 import React from 'react';
-import { restore } from '../../core/action-creators';
+import { restore, makeMove, gameEvent } from '../../core/action-creators';
+import Game from '../../core/game';
+import { CreateGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
 import {
   Debug,
@@ -56,13 +58,14 @@ test('basic', () => {
     <Debug
       gamestate={gamestate}
       store={store}
+      step={() => {}}
       endTurn={() => {}}
       gameID="default"
     />
   );
 
   const titles = debug.find('h3').map(title => title.text());
-  expect(titles).toEqual(['players', 'moves', 'events', 'state']);
+  expect(titles).toEqual(['Controls', 'Players', 'Moves', 'Events', 'State']);
 
   expect(debug.state('showLog')).toEqual(false);
   debug
@@ -160,7 +163,7 @@ test('shortcuts are unique a-z', () => {
 test('shortcuts are unique first char', () => {
   const moves = {
     clickCell: () => {},
-    takeCard: () => {},
+    playCard: () => {},
   };
 
   const element = React.createElement(Debug, {
@@ -173,52 +176,51 @@ test('shortcuts are unique first char', () => {
 
   expect(instance.shortcuts).toEqual({
     clickCell: 'c',
-    takeCard: 't',
+    playCard: 'p',
   });
 });
 
-test('save / restore', () => {
+describe('save / restore', () => {
   let loggedAction = null;
   const store = createStore((state, action) => {
     loggedAction = action;
   });
 
-  const debug = Enzyme.mount(
-    <Debug
-      store={store}
-      gamestate={gamestate}
-      endTurn={() => {}}
-      gameID="default"
-    />
-  );
-
   const restoredState = { restore: true };
   let restoredJSON = JSON.stringify(restoredState);
   const setItem = jest.fn();
   const getItem = jest.fn(() => restoredJSON);
-  window.localStorage = { setItem, getItem };
 
-  debug
-    .find('.key-box')
-    .at(3)
-    .simulate('click');
-  expect(setItem).toHaveBeenCalled();
+  beforeEach(() => {
+    window.localStorage = { setItem, getItem };
 
-  debug
-    .find('.key-box')
-    .at(4)
-    .simulate('click');
-  expect(getItem).toHaveBeenCalled();
+    Enzyme.mount(
+      <Debug
+        store={store}
+        gamestate={gamestate}
+        endTurn={() => {}}
+        gameID="default"
+      />
+    );
+  });
 
-  expect(loggedAction).toEqual(restore(restoredState));
+  test('save', () => {
+    Mousetrap.simulate('2');
+    expect(setItem).toHaveBeenCalled();
+  });
 
-  restoredJSON = null;
-  loggedAction = null;
-  debug
-    .find('.key-box')
-    .at(4)
-    .simulate('click');
-  expect(loggedAction).toEqual(null);
+  test('restore', () => {
+    Mousetrap.simulate('3');
+    expect(getItem).toHaveBeenCalled();
+    expect(loggedAction).toEqual(restore(restoredState));
+  });
+
+  test('restore from nothing does nothing', () => {
+    restoredJSON = null;
+    loggedAction = null;
+    Mousetrap.simulate('3');
+    expect(loggedAction).toEqual(null);
+  });
 });
 
 test('toggle Debug UI', () => {
@@ -232,21 +234,51 @@ test('toggle Debug UI', () => {
   expect(debug.find('.debug-ui').length).toEqual(0);
 });
 
-test('toggle Log', () => {
-  const store = { getState: () => ({ log: [] }) };
-  const debug = Enzyme.mount(
-    <Debug
-      store={store}
-      gamestate={gamestate}
-      endTurn={() => {}}
-      gameID="default"
-    />
-  );
+describe('log', () => {
+  test('toggle', () => {
+    const debug = Enzyme.mount(
+      <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+    );
 
-  expect(debug.find('GameLog').length).toEqual(0);
-  Mousetrap.simulate('l');
-  debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
-  expect(debug.find('GameLog').length).toEqual(1);
+    expect(debug.find('GameLog').length).toEqual(0);
+    Mousetrap.simulate('l');
+    debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
+    expect(debug.find('GameLog').length).toEqual(1);
+  });
+
+  test('hover', () => {
+    const overrideGameState = jest.fn();
+    const game = Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    });
+    const reducer = CreateGameReducer({ game });
+    let state = reducer(undefined, { type: 'init' });
+    state = reducer(state, makeMove('A', [42]));
+    state = reducer(state, gameEvent('endTurn'));
+
+    const debug = Enzyme.mount(
+      <Debug
+        overrideGameState={overrideGameState}
+        reducer={reducer}
+        gamestate={state}
+        endTurn={() => {}}
+        gameID="default"
+      />
+    );
+
+    expect(debug.find('GameLog').length).toEqual(0);
+    Mousetrap.simulate('l');
+    debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
+    expect(debug.find('GameLog').length).toEqual(1);
+
+    debug
+      .find('GameLog .log-event')
+      .at(0)
+      .simulate('mouseenter');
+    expect(overrideGameState).toHaveBeenCalled();
+  });
 });
 
 test('toggle help', () => {
@@ -257,4 +289,56 @@ test('toggle help', () => {
   expect(debug.state()).toMatchObject({ help: false });
   Mousetrap.simulate('?');
   expect(debug.state()).toMatchObject({ help: true });
+});
+
+test('toggle AIDebug', () => {
+  const debug = Enzyme.mount(
+    <Debug
+      gamestate={gamestate}
+      renderAI={jest.fn()}
+      endTurn={() => {}}
+      gameID="default"
+    />
+  );
+
+  expect(debug.find('.pane').length).toBe(1);
+  debug.setState({ AIDebug: {} });
+  expect(debug.find('.pane').length).toBe(2);
+});
+
+describe('simulate', () => {
+  jest.useFakeTimers();
+
+  test('basic', () => {
+    const step = jest.fn(() => true);
+    Enzyme.mount(
+      <Debug
+        step={step}
+        gamestate={gamestate}
+        endTurn={() => {}}
+        gameID="default"
+      />
+    );
+    expect(step).not.toHaveBeenCalled();
+    Mousetrap.simulate('5');
+    jest.runAllTimers();
+    expect(step).toHaveBeenCalledTimes(10000);
+  });
+
+  test('break out if no action is returned', () => {
+    const step = jest.fn(() => undefined);
+    Enzyme.mount(
+      <Debug
+        step={step}
+        gamestate={gamestate}
+        endTurn={() => {}}
+        gameID="default"
+      />
+    );
+
+    expect(step).not.toHaveBeenCalled();
+    Mousetrap.simulate('5');
+    jest.runAllTimers();
+    expect(step).toHaveBeenCalledTimes(1);
+  });
 });

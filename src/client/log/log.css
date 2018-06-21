@@ -6,34 +6,51 @@
  * https://opensource.org/licenses/MIT.
  */
 
-.gamelog .log-turn {
+.gamelog .log-event {
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   background: #fff;
-  border: 1px solid #ccc;
+  border: 1px dotted #ccc;
   border-left: 5px solid #ccc;
+  margin-bottom: 5px;
   padding: 5px;
   text-align: center;
-  color: #555;
+  color: #888;
+  font-size: 14px;
+  height: 25px;
+  line-height: 25px;
 }
 
-.gamelog .log-turn:hover {
-  border-left: 5px solid #555;
+.gamelog.pinned .log-event {
+  opacity: 0.2;
+}
+.gamelog.pinned .turn-marker {
+  opacity: 0.2;
 }
 
-.gamelog .log-turn .id {
-  padding: 5px;
+.gamelog .log-event:hover {
+  border-style: solid;
+  background: #ddffdd;
+  color: #222;
+}
+
+.gamelog .log-event.pinned {
+  border-style: solid;
+  background: #ddffdd;
+  color: #222;
+  opacity: 1;
+}
+
+.gamelog .turn-marker {
+  text-align: center;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
-.gamelog .log-move {
-  border-left: 25px solid;
-  margin-top: 5px;
-  background: #fff;
-  padding: 5px;
+.gamelog .turn-marker:not(:first-child) {
+  margin-top: 20px;
 }
 
 .gamelog div.player0 {

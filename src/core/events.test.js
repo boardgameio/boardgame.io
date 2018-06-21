@@ -9,7 +9,7 @@
 import { Events } from './events';
 import { makeMove } from './action-creators';
 import Game from './game';
-import { createGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
 
 test('constructor', () => {
   const flow = {};
@@ -52,7 +52,7 @@ test('update ctx', () => {
       },
     },
   });
-  const reducer = createGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
   let state = reducer(undefined, { type: 'init' });
   expect(state.ctx.turn).toBe(0);

@@ -8,12 +8,33 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
+import { AI } from 'boardgame.io/ai';
 import TicTacToe from '../game';
 import Board from './board';
 
 const App = Client({
   game: TicTacToe,
   board: Board,
+  ai: AI({
+    // eslint-disable-next-line react/display-name
+    renderGameTreeCell: state => {
+      return (
+        <div style={{ transform: 'scale(0.7)' }}>
+          <Board {...state} isPreview={true} moves={{}} />
+        </div>
+      );
+    },
+
+    enumerate: G => {
+      let r = [];
+      for (let i = 0; i < 9; i++) {
+        if (G.cells[i] === null) {
+          r.push({ move: 'clickCell', args: [i] });
+        }
+      }
+      return r;
+    },
+  }),
 });
 
 const Singleplayer = () => (

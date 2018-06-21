@@ -7,12 +7,11 @@
  */
 
 .debug-ui {
-  min-width: 300px;
-  max-width: 400px;
-  overflow: hidden;
-  box-sizing: border-box;
+  text-align: left;
+  overflow-y: scroll;
   background: #fefefe;
-  border: 3px solid #ddd;
+  border-left: 1px solid #ddd;
+  box-shadow: -1px 0 10px #aaa;
   position: absolute;
   right: 0;
   top: 0;
@@ -20,8 +19,14 @@
   opacity: 0.8;
   font-family: monospace;
   font-size: 14px;
+}
+
+.debug-ui .pane {
+  float: left;
   padding: 20px;
-  box-sizing: content-box;
+  box-sizing: border-box;
+  min-width: 300px;
+  max-width: 400px;
 }
 
 .debug-ui section {

@@ -41,7 +41,10 @@ export class Events {
   update(state) {
     for (const item of this.dispatch) {
       const action = gameEvent(item.key, item.args, this.playerID);
-      state = this.flow.processGameEvent(state, action.payload);
+      state = {
+        ...state,
+        ...this.flow.processGameEvent(state, action),
+      };
     }
     return state;
   }

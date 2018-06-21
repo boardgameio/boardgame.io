@@ -9,7 +9,7 @@
 import { Random } from './random';
 import Game from './game';
 import { makeMove } from './action-creators';
-import { createGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
 
 function Init(seed) {
   const ctx = { _random: { seed } };
@@ -132,7 +132,7 @@ test('Random API is not executed optimisitically', () => {
   });
 
   {
-    const reducer = createGameReducer({ game });
+    const reducer = CreateGameReducer({ game });
     let state = reducer(undefined, { type: 'init' });
     expect(state.G.die).not.toBeDefined();
     state = reducer(state, makeMove('rollDie'));
@@ -140,10 +140,24 @@ test('Random API is not executed optimisitically', () => {
   }
 
   {
-    const reducer = createGameReducer({ game, multiplayer: true });
+    const reducer = CreateGameReducer({ game, multiplayer: true });
     let state = reducer(undefined, { type: 'init' });
     expect(state.G.die).not.toBeDefined();
     state = reducer(state, makeMove('rollDie'));
     expect(state.G.die).not.toBeDefined();
   }
+});
+
+test('onTurnBegin has the Random API at the beginning of the game', () => {
+  let random;
+  const game = Game({
+    flow: {
+      onTurnBegin: (G, ctx) => {
+        random = ctx.random;
+      },
+    },
+  });
+  const reducer = CreateGameReducer({ game });
+  reducer(undefined, { type: 'init' });
+  expect(random).toBeDefined();
 });

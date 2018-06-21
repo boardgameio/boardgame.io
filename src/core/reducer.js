@@ -11,14 +11,14 @@ import { Random } from './random';
 import { Events } from './events';
 
 /**
- * createGameReducer
+ * CreateGameReducer
  *
  * Creates the main game state reducer.
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function createGameReducer({ game, numPlayers, multiplayer }) {
+export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -56,14 +56,12 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  // Initialize PRNG state.
-  initial.ctx = random.update(initial.ctx);
-
-  const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+  const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
   initial.G = state.G;
-  initial.ctx = state.ctx;
   initial._undo = state._undo;
+  initial.ctx = random.update(state.ctx);
+  initial.ctx = Random.detach(initial.ctx);
 
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
@@ -96,7 +94,7 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: events.attach(state.ctx) };
 
         // Update state.
-        let newState = game.flow.processGameEvent(state, action.payload);
+        let newState = game.flow.processGameEvent(state, action);
         // Trigger any events that were called via the Events API.
         newState = events.update(newState);
         // Update ctx with PRNG state.
@@ -110,13 +108,24 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
       }
 
       case Actions.MAKE_MOVE: {
-        // check whether the game knows the move at all
+        // Check whether the game knows the move at all.
         if (!game.moveNames.includes(action.payload.type)) {
           return state;
         }
 
-        // Ignore the move if it isn't valid at this point.
-        if (!game.flow.canMakeMove(state.G, state.ctx, action.payload)) {
+        // Ignore the move if it isn't allowed at this point.
+        if (!game.flow.canMakeMove(state.G, state.ctx, action.payload.type)) {
+          return state;
+        }
+
+        // Ignore the move if the player cannot make it at this point.
+        if (
+          !game.flow.canPlayerMakeMove(
+            state.G,
+            state.ctx,
+            action.payload.playerID
+          )
+        ) {
           return state;
         }
 
@@ -166,10 +175,10 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: random.attach(state.ctx) };
         state = { ...state, ctx: events.attach(state.ctx) };
         state = game.flow.processMove(state, action);
+        state = events.update(state);
+        state = { ...state, ctx: random.update(state.ctx) };
         state = { ...state, ctx: Random.detach(state.ctx) };
         state = { ...state, ctx: Events.detach(state.ctx) };
-        state = { ...state, ctx: random.update(state.ctx) };
-        state = events.update(state);
 
         return state;
       }
@@ -180,6 +189,48 @@ export function createGameReducer({ game, numPlayers, multiplayer }) {
 
       case Actions.RESET: {
         return initial;
+      }
+
+      case Actions.UNDO: {
+        const { _undo, _redo } = state;
+
+        if (_undo.length < 2) {
+          return state;
+        }
+
+        const last = _undo[_undo.length - 1];
+        const restore = _undo[_undo.length - 2];
+
+        // Only allow undoable moves to be undone.
+        if (!game.flow.canUndoMove(state.G, state.ctx, last.moveType)) {
+          return state;
+        }
+
+        return {
+          ...state,
+          G: restore.G,
+          ctx: restore.ctx,
+          _undo: _undo.slice(0, _undo.length - 1),
+          _redo: [last, ..._redo],
+        };
+      }
+
+      case Actions.REDO: {
+        const { _undo, _redo } = state;
+
+        if (_redo.length == 0) {
+          return state;
+        }
+
+        const first = _redo[0];
+
+        return {
+          ...state,
+          G: first.G,
+          ctx: first.ctx,
+          _undo: [..._undo, first],
+          _redo: _redo.slice(1),
+        };
       }
 
       default: {
