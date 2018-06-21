@@ -1,6 +1,6 @@
 # Events
 
-The framework provides a number of events to help move along your games progess.
+The framework comes with a number of events to help move along your game.
 
 Some come by default, and can be turned off if you dont want them.  
 Others need to be explicity turned on in order to be available.
@@ -10,7 +10,7 @@ or inside of the config object you pass to `Game`.
 
 Although in both cases, how you access them is slightly different.
 
-### Provided Events
+### Available Events
 
 * `endTurn()` - Provided by default.
 
@@ -25,10 +25,6 @@ Although in both cases, how you access them is slightly different.
 
   * (arguments) `arg` - This optional argument when provided will be available as ctx.gameOver. (same as the return value from `endGameIf`)
 
-* `undo()` - Provided by default or if given a list of `undoableMoves` in flow config of game, event will be only be usable in a move listed in `undoableMoves`.
-  * To disable completley, pass an empty Array as `undoableMoves`. See [undo/redo](undo.md) docs for more info.
-* `redo()` - Provided by default or if given a list of `undoableMoves` in flow config of game, event will be only be usable in a move listed in `undoableMoves`.
-  * To disable completley, pass an empty Array as `undoableMoves`. See [undo/redo](undo.md) docs for more info.
 * `changeActionPlayers(actionPlayers)` - Provided by default when more than one player available to change players who can currently make a move.
   * (arguments) `actionPlayers` - Array of players that are currently allowed to make moves.
 
