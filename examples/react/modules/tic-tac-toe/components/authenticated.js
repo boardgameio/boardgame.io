@@ -50,7 +50,7 @@ class AuthenticatedClient extends React.Component {
 
     for (let playerID of [0, 1]) {
       const player = await request
-        .patch(`http://localhost:${PORT + 1}/game_instances/${gameID}/join`)
+        .post(`http://localhost:${PORT + 1}/games/${gameName}/${gameID}/join`)
         .send({
           gameName,
           playerID,
