@@ -9,226 +9,194 @@
 import { Firebase } from './firebase';
 import firebasemock from 'firebase-mock';
 
-const mockdatabase = new firebasemock.MockFirebase();
-const mockfirestore = new firebasemock.MockFirestore();
-var mocksdk = new firebasemock.MockFirebaseSdk(
-  // use null if your code does not use RTDB
-  () => mockdatabase,
-  // use null if your code does not use AUTHENTICATION
-  () => null,
-  // use null if your code does not use FIRESTORE
-  () => mockfirestore,
-  // use null if your code does not use STORAGE
-  () => null,
-  // use null if your code does not use MESSAGING
-  () => null
-);
+function NewFirebase(args) {
+  const mockDatabase = new firebasemock.MockFirebase();
+  const mockFirestore = new firebasemock.MockFirestore();
 
-test('construction', () => {
-  const db = new Firebase({
-    mockFirebase: mocksdk,
-    dbname: 'a',
-    engine: 'Firestore',
-  });
-  expect(db.dbname).toBe('a');
-  expect(db.config).toMatchObject({});
-});
-
-test('Firestore', async () => {
-  const mockConfig = {
+  const config = {
     apiKey: 'apikey',
     authDomain: 'authDomain',
     databaseURL: 'databaseURL',
     projectId: 'projectId',
   };
-  const db = new Firebase({
-    config: mockConfig,
-    mockFirebase: mocksdk,
-    engine: 'Firestore',
+
+  var mockSDK = new firebasemock.MockFirebaseSdk(
+    // use null if your code does not use RTDB
+    () => mockDatabase,
+    // use null if your code does not use AUTHENTICATION
+    () => null,
+    // use null if your code does not use FIRESTORE
+    () => mockFirestore,
+    // use null if your code does not use STORAGE
+    () => null,
+    // use null if your code does not use MESSAGING
+    () => null
+  );
+
+  const db = new Firebase({ ...args, config });
+  db.client = mockSDK;
+  return db;
+}
+
+test('construction', () => {
+  const dbname = 'a';
+  const db = new Firebase({ dbname });
+  expect(db.dbname).toBe(dbname);
+  expect(db.config).toEqual({});
+});
+
+describe('Firestore', async () => {
+  let db = null;
+
+  beforeEach(async () => {
+    db = NewFirebase({
+      engine: 'Firestore',
+    });
+    await db.connect();
+    db.db.autoFlush();
   });
-  await db.connect();
-  db.db.autoFlush();
 
-  // Must return undefined when no game exists.
-  let state = await db.get('gameID');
-  expect(state).toEqual(null);
+  test('must return undefined when no game exists', async () => {
+    const state = await db.get('gameID');
+    expect(state).toEqual(null);
+  });
 
-  // Create game.
-  await db.set('gameID', { a: 1 });
+  test('cache hit', async () => {
+    // Create game.
+    await db.set('gameID', { a: 1 });
 
-  // Cache hits.
-  {
     // Must return created game.
-    state = await db.get('gameID');
+    const state = await db.get('gameID');
     expect(state).toMatchObject({ a: 1 });
 
     // Must return true if game exists
     const has = await db.has('gameID');
     expect(has).toBe(true);
-  }
+  });
 
-  // Cache misses.
-  {
+  test('cache miss', async () => {
+    // Create game.
+    await db.set('gameID', { a: 1 });
+
     // Must return created game.
     db.cache.reset();
-    state = await db.get('gameID');
+    const state = await db.get('gameID');
     expect(state).toMatchObject({ a: 1 });
 
     // Must return true if game exists
     db.cache.reset();
     const has = await db.has('gameID');
     expect(has).toBe(true);
-  }
+  });
 
-  // Cache size.
-  {
-    const db = new Firebase({
-      config: mockConfig,
-      mockFirebase: mocksdk,
+  test('cache size', async () => {
+    const db = NewFirebase({
       cacheSize: 1,
       engine: 'Firestore',
     });
     await db.connect();
+    db.db.autoFlush();
     await db.set('gameID', { a: 1 });
     await db.set('another', { b: 1 });
-    state = await db.get('gameID');
-    // Check that it came from Mongo and not the cache.
+    const state = await db.get('gameID');
+    // Check that it came from Firebase and not the cache.
     expect(state._id).toBeDefined();
-  }
+  });
+
+  test('race conditions', async () => {
+    // Out of order set()'s.
+    await db.set('gameID', { _stateID: 1 });
+    await db.set('gameID', { _stateID: 0 });
+    expect(await db.get('gameID')).toEqual({ _stateID: 1 });
+
+    // Do not override cache on get() if it is fresher than Firebase.
+    await db.set('gameID', { _stateID: 0 });
+    db.cache.set('gameID', { _stateID: 1 });
+    await db.get('gameID');
+    expect(db.cache.get('gameID')).toEqual({ _stateID: 1 });
+
+    // Override if it is staler than Firebase.
+    await db.set('gameID', { _stateID: 1 });
+    db.cache.reset();
+    expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
+    expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
+  });
 });
 
-test('RTDB', async () => {
-  const mockConfig = {
-    apiKey: 'apikey',
-    authDomain: 'authDomain',
-    databaseURL: 'databaseURL',
-    projectId: 'projectId',
-  };
-  // mocksdk.initializeApp();
-  // const mockFirebase = mocksdk.database();
-  // mockFirebase.ref().autoFlush();
-  const db = new Firebase({
-    config: mockConfig,
-    mockFirebase: mocksdk,
-    engine: 'RTDB',
-  });
-  await db.connect();
-  db.db.autoFlush();
+describe('RTDB', async () => {
+  let db = null;
 
-  // Must return undefined when no game exists.
-  let state = await db.get('gameID');
-  expect(state).toEqual(null);
-
-  // Create game.
-  await db.set('gameID', { a: 1 });
-
-  // Cache hits.
-  {
-    // Must return created game.
-    state = await db.get('gameID');
-    expect(state).toMatchObject({ a: 1 });
-
-    // Must return true if game exists
-    const has = await db.has('gameID');
-    expect(has).toBe(true);
-  }
-
-  // Cache misses.
-  {
-    // Must return created game.
-    db.cache.reset();
-    state = await db.get('gameID');
-    expect(state).toMatchObject({ a: 1 });
-
-    // Must return true if game exists
-    db.cache.reset();
-    const has = await db.has('gameID');
-    expect(has).toBe(true);
-  }
-
-  // Cache size.
-  {
-    const db = new Firebase({
-      config: mockConfig,
-      mockFirebase: mocksdk,
-      cacheSize: 1,
+  beforeEach(async () => {
+    db = NewFirebase({
       engine: 'RTDB',
     });
     await db.connect();
+    db.db.autoFlush();
+  });
+
+  test('must return undefined when no game exists', async () => {
+    const state = await db.get('gameID');
+    expect(state).toEqual(null);
+  });
+
+  test('cache hit', async () => {
+    // Create game.
+    await db.set('gameID', { a: 1 });
+
+    // Must return created game.
+    const state = await db.get('gameID');
+    expect(state).toMatchObject({ a: 1 });
+
+    // Must return true if game exists
+    const has = await db.has('gameID');
+    expect(has).toBe(true);
+  });
+
+  test('cache miss', async () => {
+    // Create game.
+    await db.set('gameID', { a: 1 });
+
+    // Must return created game.
+    db.cache.reset();
+    const state = await db.get('gameID');
+    expect(state).toMatchObject({ a: 1 });
+
+    // Must return true if game exists
+    db.cache.reset();
+    const has = await db.has('gameID');
+    expect(has).toBe(true);
+  });
+
+  test('cache size', async () => {
+    const db = NewFirebase({
+      cacheSize: 1,
+      engine: 'Firestore',
+    });
+    await db.connect();
+    db.db.autoFlush();
     await db.set('gameID', { a: 1 });
     await db.set('another', { b: 1 });
-    state = await db.get('gameID');
-    // Check that it came from Mongo and not the cache.
+    const state = await db.get('gameID');
+    // Check that it came from Firebase and not the cache.
     expect(state._id).toBeDefined();
-  }
-});
-
-test('Firestore - race conditions', async () => {
-  const mockConfig = {
-    apiKey: 'apikey',
-    authDomain: 'authDomain',
-    databaseURL: 'databaseURL',
-    projectId: 'projectId',
-  };
-  // mocksdk.initializeApp();
-  // const mockFirebase = mocksdk.firestore();
-  // mockFirebase.autoFlush();
-  const db = new Firebase({
-    config: mockConfig,
-    mockFirebase: mocksdk,
-    engine: 'Firestore',
   });
-  await db.connect();
-  db.db.autoFlush();
-  // Out of order set()'s.
-  await db.set('gameID', { _stateID: 1 });
-  await db.set('gameID', { _stateID: 0 });
-  expect(await db.get('gameID')).toEqual({ _stateID: 1 });
 
-  // Do not override cache on get() if it is fresher than Mongo.
-  await db.set('gameID', { _stateID: 0 });
-  db.cache.set('gameID', { _stateID: 1 });
-  await db.get('gameID');
-  expect(db.cache.get('gameID')).toEqual({ _stateID: 1 });
+  test('race conditions', async () => {
+    // Out of order set()'s.
+    await db.set('gameID', { _stateID: 1 });
+    await db.set('gameID', { _stateID: 0 });
+    expect(await db.get('gameID')).toEqual({ _stateID: 1 });
 
-  // Override if it is staler than Mongo.
-  await db.set('gameID', { _stateID: 1 });
-  db.cache.reset();
-  expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
-  expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
-});
+    // Do not override cache on get() if it is fresher than Firebase.
+    await db.set('gameID', { _stateID: 0 });
+    db.cache.set('gameID', { _stateID: 1 });
+    await db.get('gameID');
+    expect(db.cache.get('gameID')).toEqual({ _stateID: 1 });
 
-test('RTDB - race conditions', async () => {
-  const mockConfig = {
-    apiKey: 'apikey',
-    authDomain: 'authDomain',
-    databaseURL: 'databaseURL',
-    projectId: 'projectId',
-  };
-  // mocksdk.initializeApp();
-  // const mockFirebase = mocksdk.database();
-  // mockFirebase.ref().autoFlush();
-  const db = new Firebase({
-    config: mockConfig,
-    mockFirebase: mocksdk,
-    engine: 'RTDB',
+    // Override if it is staler than Firebase.
+    await db.set('gameID', { _stateID: 1 });
+    db.cache.reset();
+    expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
+    expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
   });
-  await db.connect();
-  db.db.autoFlush();
-  // Out of order set()'s.
-  await db.set('gameID', { _stateID: 1 });
-  await db.set('gameID', { _stateID: 0 });
-  expect(await db.get('gameID')).toEqual({ _stateID: 1 });
-
-  // Do not override cache on get() if it is fresher than Mongo.
-  await db.set('gameID', { _stateID: 0 });
-  db.cache.set('gameID', { _stateID: 1 });
-  await db.get('gameID');
-  expect(db.cache.get('gameID')).toEqual({ _stateID: 1 });
-
-  // Override if it is staler than Mongo.
-  await db.set('gameID', { _stateID: 1 });
-  db.cache.reset();
-  expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
-  expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
 });

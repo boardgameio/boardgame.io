@@ -17,13 +17,13 @@ export class Firebase {
    * Creates a new Firebase connector object.
    * @constructor
    */
-  constructor({ config, dbname, engine, cacheSize, mockFirebase }) {
+  constructor({ config, dbname, engine, cacheSize }) {
     if (cacheSize === undefined) cacheSize = 1000;
     if (dbname === undefined) dbname = 'bgio';
     // // TODO: better handling for possible errors
     if (config === undefined) config = {};
 
-    this.client = mockFirebase || firebase;
+    this.client = firebase;
     // Default engine is Firestore
     this.engine = engine === 'RTDB' ? engine : 'Firestore';
     this.config = config;
