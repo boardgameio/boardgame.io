@@ -15,6 +15,7 @@ const firebase = require('firebase');
 export class Firebase {
   /**
    * Creates a new Firebase connector object.
+   * @constructor
    */
   constructor({ config, dbname, engine, cacheSize, mockFirebase }) {
     if (cacheSize === undefined) cacheSize = 1000;
@@ -29,6 +30,7 @@ export class Firebase {
     this.dbname = dbname;
     this.cache = new LRU({ max: cacheSize });
   }
+
   /**
    * Connect to the instance.
    */
@@ -40,6 +42,7 @@ export class Firebase {
         : this.client.database().ref();
     return;
   }
+
   /**
    * Write the game state.
    * @param {string} id - The game id.
