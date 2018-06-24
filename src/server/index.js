@@ -28,7 +28,9 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
   app.context.io = io;
   io.attach(app);
 
-  if (db === undefined) db = DBFromEnv();
+  if (db === undefined) {
+    db = DBFromEnv();
+  }
 
   const api = createApiServer({ db, games });
 

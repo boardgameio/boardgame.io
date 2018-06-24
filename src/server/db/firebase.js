@@ -9,23 +9,34 @@
 const LRU = require('lru-cache');
 const firebase = require('firebase');
 
+const ENGINE_FIRESTORE = 'Firestore';
+const ENGINE_RTDB = 'RTDB';
+
 /**
  * Firebase RTDB/Firestore connector.
  */
 export class Firebase {
   /**
    * Creates a new Firebase connector object.
+   * The default engine is Firestore.
    * @constructor
    */
   constructor({ config, dbname, engine, cacheSize }) {
-    if (cacheSize === undefined) cacheSize = 1000;
-    if (dbname === undefined) dbname = 'bgio';
+    if (cacheSize === undefined) {
+      cacheSize = 1000;
+    }
+
+    if (dbname === undefined) {
+      dbname = 'bgio';
+    }
+
     // // TODO: better handling for possible errors
-    if (config === undefined) config = {};
+    if (config === undefined) {
+      config = {};
+    }
 
     this.client = firebase;
-    // Default engine is Firestore
-    this.engine = engine === 'RTDB' ? engine : 'Firestore';
+    this.engine = engine === ENGINE_RTDB ? engine : ENGINE_FIRESTORE;
     this.config = config;
     this.dbname = dbname;
     this.cache = new LRU({ max: cacheSize });
@@ -37,7 +48,7 @@ export class Firebase {
   async connect() {
     this.client.initializeApp(this.config);
     this.db =
-      this.engine === 'Firestore'
+      this.engine === ENGINE_FIRESTORE
         ? this.client.firestore()
         : this.client.database().ref();
     return;
@@ -57,7 +68,7 @@ export class Firebase {
     this.cache.set(id, state);
 
     const col =
-      this.engine === 'RTDB'
+      this.engine === ENGINE_RTDB
         ? this.db.child(id)
         : this.db.collection(this.dbname).doc(id);
     delete state._id;
@@ -79,7 +90,7 @@ export class Firebase {
     }
 
     let col, doc, data;
-    if (this.engine === 'RTDB') {
+    if (this.engine === ENGINE_RTDB) {
       col = this.db.child(id);
       data = await col.once('value');
       doc = data.val()
@@ -129,7 +140,7 @@ export class Firebase {
     }
 
     let col, data, exists;
-    if (this.engine === 'RTDB') {
+    if (this.engine === ENGINE_RTDB) {
       col = this.db.child(id);
       data = await col.once('value');
       exists = data.exists();
