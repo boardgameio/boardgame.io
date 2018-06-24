@@ -330,13 +330,6 @@ test('custom db implementation', async () => {
   expect(getId).toBe('gameID');
 });
 
-test('MONGO_URI', () => {
-  process.env.MONGO_URI = 'test';
-  const server = Server({ games: [game] });
-  expect(server.db.url).toBe('test');
-  delete process.env.MONGO_URI;
-});
-
 test('auth failure', async () => {
   isActionFromAuthenticPlayer.mockReturnValue(false);
 

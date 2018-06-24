@@ -10,7 +10,7 @@ const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
 
-import { InMemory, Mongo } from './db';
+import { DBFromEnv } from './db';
 import { CreateGameReducer } from '../core/reducer';
 import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
@@ -29,11 +29,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
   io.attach(app);
 
   if (db === undefined) {
-    if (process.env.MONGO_URI) {
-      db = new Mongo({ url: process.env.MONGO_URI });
-    } else {
-      db = new InMemory();
-    }
+    db = DBFromEnv();
   }
 
   const api = createApiServer({ db, games });
