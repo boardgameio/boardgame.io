@@ -170,7 +170,7 @@ describe('RTDB', async () => {
   test('cache size', async () => {
     const db = NewFirebase({
       cacheSize: 1,
-      engine: 'Firestore',
+      engine: 'RTDB',
     });
     await db.connect();
     db.db.autoFlush();
