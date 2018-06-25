@@ -22,7 +22,7 @@ test('SQL', async () => {
       unique: true,
       primaryKey: true,
     },
-    ctx: { type: Sequelize.JSON },
+    state: { type: Sequelize.JSON },
   });
   await db.connect();
 
@@ -71,7 +71,7 @@ test('SQL', async () => {
         unique: true,
         primaryKey: true,
       },
-      ctx: { type: Sequelize.JSON },
+      state: { type: Sequelize.JSON },
     });
     await db.connect();
     await db.set('gameID', { a: 1 });
@@ -105,7 +105,7 @@ test('SQL - race conditions', async () => {
       unique: true,
       primaryKey: true,
     },
-    ctx: { type: Sequelize.JSON },
+    state: { type: Sequelize.JSON },
   });
   await db.connect();
 

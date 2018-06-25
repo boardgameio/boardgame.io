@@ -15,7 +15,7 @@ const GameModel = {
     unique: true,
     primaryKey: true,
   },
-  ctx: {
+  state: {
     // can be JSONB for PostgreSQL
     // but I'm not sure if this simple usage would benefit
     type: Sequelize.JSON,

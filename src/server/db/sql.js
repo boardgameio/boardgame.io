@@ -60,7 +60,7 @@ export class SQL {
     this.cache.set(id, state);
 
     // delete state._id;
-    await this.game.upsert({ id, ctx: { _id: id, ...state } });
+    await this.game.upsert({ id, state: { _id: id, ...state } });
 
     return;
   }
@@ -89,7 +89,7 @@ export class SQL {
 
     let newStateID = -1;
     if (doc) {
-      newStateID = doc.ctx._stateID;
+      newStateID = doc.state._stateID;
     }
 
     // Update the cache, but only if the read
@@ -97,10 +97,10 @@ export class SQL {
     // A race condition might overwrite the
     // cache with an older value, so we need this.
     if (newStateID >= oldStateID) {
-      this.cache.set(id, { ...doc.ctx });
+      this.cache.set(id, { ...doc.state });
     }
 
-    return doc ? { ...doc.ctx } : null;
+    return doc ? { ...doc.state } : null;
   }
 
   /**
