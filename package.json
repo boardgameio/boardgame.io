@@ -127,9 +127,14 @@
     "lru-cache": "^4.1.1",
     "mongodb": "^3.0.3",
     "mousetrap": "^1.6.1",
+    "mysql2": "^1.5.3",
+    "pg": "^7.4.3",
+    "pg-hstore": "^2.3.2",
     "prop-types": "^15.5.10",
     "redux": "^3.7.2",
+    "sequelize": "^4.38.0",
     "socket.io": "^2.0.3",
+    "sqlite3": "^4.0.1",
     "uuid": "3.2.1"
   },
   "peerDependencies": {

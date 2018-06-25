@@ -1,3 +1,4 @@
+const Sequelize = require('sequelize');
 import { DBFromEnv } from './index';
 
 test('MONGO_URI', () => {
@@ -26,4 +27,25 @@ test('FIREBASE_CONFIG', () => {
   delete process.env.FIREBASE_DATABASEURL;
   delete process.env.FIREBASE_PROJECTID;
   delete process.env.FIREBASE_ENGINE;
+});
+
+test('MYSQL_URL', () => {
+  process.env.MYSQL_URL = 'mysql://test';
+  const db = DBFromEnv();
+  expect(db.db).toBeInstanceOf(Sequelize);
+  delete process.env.MYSQL_URL;
+});
+
+test('SQLITE_PATH', () => {
+  process.env.SQLITE_PATH = 'sqlite://test';
+  const db = DBFromEnv();
+  expect(db.db).toBeInstanceOf(Sequelize);
+  delete process.env.SQLITE_PATH;
+});
+
+test('POSTGRES_URL', () => {
+  process.env.POSTGRES_URL = 'postgres://test';
+  const db = DBFromEnv();
+  expect(db.db).toBeInstanceOf(Sequelize);
+  delete process.env.POSTGRES_URL;
 });
