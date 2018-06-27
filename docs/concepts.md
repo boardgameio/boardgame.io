@@ -96,3 +96,5 @@ onClick() {
   this.props.events.endTurn();
 }
 ```
+
+For more details, see the guide on [Events](events.md).

@@ -11,6 +11,7 @@
   * [Phases](phases.md)
   * [Secret State](secret-state.md)
   * [Randomness](random.md)
+  * [Events](events.md)
   * [Undo / Redo](undo.md)
   * [Immutability](immutability.md)
   * [Debugging](debugging.md)
