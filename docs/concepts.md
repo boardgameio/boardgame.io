@@ -110,11 +110,11 @@ this is less common. See the guide on
 
 ### Phase
 
-A phase is a game state that is associated with a particular
-game configuration. A phase can come with a custom turn order,
-enable a certain subset of moves and much more.
-The game can transition between different phases just like the
-turn can be passed between different players. These happen
-independently (i.e. you can design your game to have multiple
-phases per turn or multiple turns per phase). See the guide
-on [Phases](phases.md) for more details.
+A phase is a label that is associated with a particular
+game configuration. A phase can be configured with a
+custom turn order, enable a certain subset of moves and
+much more. The game can transition between different phases
+just like the turn can be passed between different players.
+These happen independently (i.e. you can design your game
+to have multiple phases per turn or multiple turns per phase).
+See the guide on [Phases](phases.md) for more details.
