@@ -5,7 +5,7 @@
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT.
  */
-
+const Sequelize = require('sequelize');
 const LRU = require('lru-cache');
 
 /**
@@ -77,7 +77,9 @@ export class SQL {
       return cacheValue;
     }
 
-    const doc = await this.game.findOne({ where: { id } });
+    const doc = await this.game.findOne({
+      where: { id: { [Sequelize.Op.eq]: id } },
+    });
 
     let oldStateID = 0;
     cacheValue = this.cache.get(id);
@@ -114,7 +116,9 @@ export class SQL {
       return true;
     }
 
-    const doc = await this.game.findOne({ where: { id } });
+    const doc = await this.game.findOne({
+      where: { id: { [Sequelize.Op.eq]: id } },
+    });
     return doc !== null;
   }
 }

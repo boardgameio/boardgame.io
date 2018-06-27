@@ -40,6 +40,7 @@ export class SQLite extends SQL {
         dialect: 'sqlite',
         pool: Object.assign({ max: 5, idle: 10000, acquire: 30000 }, pool),
         storage,
+        operatorsAliases: Sequelize.Op,
       });
     }
     this.game = this.db.define('game', GameModel);

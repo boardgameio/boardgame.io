@@ -36,6 +36,7 @@ export class MySQL extends SQL {
         port,
         dialect: 'mysql',
         pool: Object.assign({ max: 5, idle: 10000, acquire: 30000 }, pool),
+        operatorsAliases: Sequelize.Op,
       });
     }
     this.game = this.db.define('game', GameModel);
