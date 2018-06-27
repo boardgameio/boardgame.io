@@ -96,3 +96,25 @@ onClick() {
   this.props.events.endTurn();
 }
 ```
+
+For more details, see the guide on [Events](events.md).
+
+### Turn
+
+A turn is a period of the game that is associated with a single
+player. It typically consists of a set of moves made by
+that player before it passes on to another player. You can
+also allow other players to play during your turn, although
+this is less common. See the guide on
+[Turn Orders](turn-order.md) for more details.
+
+### Phase
+
+A phase is a label that is associated with a particular
+game configuration. A phase can be configured with a
+custom turn order, enable a certain subset of moves and
+much more. The game can transition between different phases
+just like the turn can be passed between different players.
+These happen independently (i.e. you can design your game
+to have multiple phases per turn or multiple turns per phase).
+See the guide on [Phases](phases.md) for more details.

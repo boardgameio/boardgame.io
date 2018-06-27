@@ -1,4 +1,4 @@
-# Randomness and its Use in Games
+# Randomness
 
 Many games allow moves whose outcome depends on shuffled cards or rolled dice.
 Take e.g. the game [Yahtzee](https://en.wikipedia.org/wiki/Yahtzee).
@@ -48,11 +48,6 @@ Game({
   ...
 })
 ```
-
-### Background
-
-There is an interesting background article by David Bau called [Random Seeds, Coded Hints, and Quintillions](http://davidbau.com/archives/2010/01/30/random_seeds_coded_hints_and_quintillions.html).
-Despite its age, this article gives insight on topics about randomness, like differentiating _local_ and _network_ entropy.
 
 ### API Reference
 
