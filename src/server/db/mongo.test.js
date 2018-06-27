@@ -6,27 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { InMemory, Mongo } from './db';
+import { Mongo } from './mongo';
 import * as MongoDB from 'mongo-mock';
-
-test('basic', async () => {
-  const db = new InMemory();
-  await db.connect();
-
-  // Must return undefined when no game exists.
-  let state = await db.get('gameID');
-  expect(state).toEqual(undefined);
-
-  // Create game.
-  await db.set('gameID', { a: 1 });
-  // Must return created game.
-  state = await db.get('gameID');
-  expect(state).toEqual({ a: 1 });
-
-  // Must return true if game exists
-  const has = await db.has('gameID');
-  expect(has).toEqual(true);
-});
 
 test('Mongo', async () => {
   const mockClient = MongoDB.MongoClient;
