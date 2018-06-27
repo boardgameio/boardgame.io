@@ -1,64 +1,88 @@
 # Events
 
-The framework comes with a number of events to help move along your game.
+An event is used to advance the game state. It is somewhat
+analogous to a move, except that while a move changes
+`G`, an event changes `ctx`. Also, events are provided by the
+framework (as opposed to moves, which are written by you).
 
-Some come by default, and can be turned off if you dont want them.  
-Others need to be explicity turned on in order to be available.
+Some events are enabled by default, and can be turned off if you dont want them. Others need to be explicity turned on in order to use them.
 
-When provided by the framework, you can call them during gameplay,
-or inside of the config object you pass to `Game`.
+##### endTurn
 
-Although in both cases, how you access them is slightly different.
+This event just ends the current player's turn.
+The default behavior is to increment `ctx.turn` by `1`
+and advance `currentPlayer` to the next player according
+to the configured turn order (the default being a round-robin).
 
-### Available Events
+This event is enabled by default. To disable this event,
+pass `endTurn: false` inside your `flow` section. Note that
+turns can still end if you use `endTurnIf` or `movesPerTurn`.
+Disabling the event merely prevents you from explicitly
+triggering it.
 
-* `endTurn()` - Provided by default.
+`endTurn` also accepts an argument, which (if provided)
+switches the turn to the specified player.
 
-  * To disable add `endTurn: false` to a custom flow config.
+##### endPhase
 
-* `endPhase(nextPhase)` - Provided by default when using phases.
+This event just ends the current phase, and sets `ctx.phase`
+to the next phase in round-robin fashion. Note that this
+is orthogonal to a player turn (i.e. you can end the phase
+many times within a single turn, or you can have many
+turns within a single phase).
 
-  * To disable add `endPhase: false` to a custom flow config.
-  * (arguments) `nextPhase` - optional phase to transition to, if not provided defaults to next phase defined in config
+To disable this event, pass `endPhase: false` inside your
+`flow` section. Note that phases can still end if you use
+`endPhaseIf`.
 
-* `endGame(arg)` - This is only provided when setting `endGame: true` in a custom flow config.
+`endPhase` also accepts an argument, which (if provided)
+switches the phase to the phase specified.
 
-  * (arguments) `arg` - This optional argument when provided will be available as ctx.gameOver. (same as the return value from `endGameIf`)
+##### endGame
 
-* `changeActionPlayers(actionPlayers)` - Provided by default when more than one player available to change players who can currently make a move.
-  * (arguments) `actionPlayers` - Array of players that are currently allowed to make moves.
+This event ends the game. If you pass an argument to it,
+then that argument is made available in `ctx.gameover`.
+After the game is over, further state changes to the game
+(via a move or event) are not possible.
 
-### Triggering events during gameplay
+##### changeActionPlayers
 
-To trigger game events from inside of your game,  
-your Board component is passed an object of event  
-functions as a prop called events.
+This changes `ctx.actionPlayers` to the provided argument.
+See the guide on [Turn Orders](turn-order.md) for more
+details about `actionPlayers`.
 
-To use them you just need to call the event function you want to trigger:
+### Triggering an event from a React client.
+
+Events are available through `props` inside the
+`events` object. For example:
 
 ```js
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
-export default class Board extends Component {
-  onPressEndTurnButton = () => {
+class Board extends React.Component {
+  static propTypes = {
+    events: PropTypes.any.isRequired,
+  };
+
+  onClick = () => {
     this.props.events.endTurn();
   };
-  render = () => (
-    <div>
-      <button onClick={this.onPressEndTurnButton}>End Turn</button>
-    </div>
-  );
+
+  render = () => <button onClick={this.onClick}>End Turn</button>;
 }
 ```
 
-### Triggering events inside of Game config
+### Triggering an event from inside game logic.
 
-If you need to trigger an event from inside of the Game config object, you can do it using ctx:
+You can also trigger events from within a move or any
+code inside the `flow` section. This is done through
+the `ctx.events` object:
 
 ```js
-const game = Game({
-  onMove: (G, ctx, action) => {
+moves: {
+  drawCard: (G, ctx) => {
     ctx.events.endPhase();
-  },
-});
+  };
+}
 ```
