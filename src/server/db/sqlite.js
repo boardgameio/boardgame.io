@@ -29,7 +29,7 @@ export class SQLite extends SQL {
   constructor({ path, config, cacheSize }) {
     super({ cacheSize });
     if (path) {
-      this.db = new Sequelize(`sqlite://${path}`);
+      this.db = new Sequelize(`sqlite://${path}`, { operatorsAliases: false });
     } else {
       const { database, username, password, host, port, pool } = config;
       let storage = ':memory:';
@@ -40,7 +40,7 @@ export class SQLite extends SQL {
         dialect: 'sqlite',
         pool: Object.assign({ max: 5, idle: 10000, acquire: 30000 }, pool),
         storage,
-        operatorsAliases: Sequelize.Op,
+        operatorsAliases: false,
       });
     }
     this.game = this.db.define('game', GameModel);

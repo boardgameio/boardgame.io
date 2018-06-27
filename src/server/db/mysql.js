@@ -28,7 +28,7 @@ export class MySQL extends SQL {
    */
   constructor({ url, config, cacheSize }) {
     super({ cacheSize });
-    if (url) this.db = new Sequelize(url);
+    if (url) this.db = new Sequelize(url, { operatorsAliases: false });
     else {
       const { database, username, password, host, port, pool } = config;
       this.db = new Sequelize(database, username, password, {
@@ -36,7 +36,7 @@ export class MySQL extends SQL {
         port,
         dialect: 'mysql',
         pool: Object.assign({ max: 5, idle: 10000, acquire: 30000 }, pool),
-        operatorsAliases: Sequelize.Op,
+        operatorsAliases: false,
       });
     }
     this.game = this.db.define('game', GameModel);
