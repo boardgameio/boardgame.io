@@ -7,7 +7,7 @@
 * Guides
 
   * [Multiplayer](multiplayer.md)
-  * [Turn Order](turn-order.md)
+  * [Turn Orders](turn-order.md)
   * [Phases](phases.md)
   * [Secret State](secret-state.md)
   * [Randomness](random.md)

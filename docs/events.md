@@ -51,6 +51,10 @@ This changes `ctx.actionPlayers` to the provided argument.
 See the guide on [Turn Orders](turn-order.md) for more
 details about `actionPlayers`.
 
+This event is not enabled by default and must be enabled
+by setting `changeActionPlayers: true` in the `flow` section
+of your game.
+
 ### Triggering an event from a React client.
 
 Events are available through `props` inside the
