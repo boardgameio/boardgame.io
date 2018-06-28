@@ -38,7 +38,7 @@ export class SQLite extends SQL {
         host,
         port,
         dialect: 'sqlite',
-        pool: Object.assign({ max: 5, idle: 10000, acquire: 30000 }, pool),
+        pool: Object.assign({ max: 5, idle: 10000, acquire: 5000 }, pool),
         storage,
         operatorsAliases: false,
       });

@@ -35,7 +35,7 @@ export class MySQL extends SQL {
         host,
         port,
         dialect: 'mysql',
-        pool: Object.assign({ max: 5, idle: 10000, acquire: 30000 }, pool),
+        pool: Object.assign({ max: 5, idle: 10000, acquire: 5000 }, pool),
         operatorsAliases: false,
       });
     }
