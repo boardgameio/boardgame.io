@@ -7,20 +7,28 @@
  */
 
 import React from 'react';
-import { MCTSDebug, MCTSNode } from './mcts-debug.js';
+import { MCTSVisualizer, MCTSRoot, MCTSNode } from './mcts-visualizer.js';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-describe('MCTSDebug', () => {
+describe('MCTSVisualizer', () => {
+  test('returns a function', () => {
+    const r = MCTSVisualizer();
+    expect(r).toBeDefined();
+    expect(r({})).toBeDefined();
+  });
+});
+
+describe('MCTSRoot', () => {
   test('basic', () => {
     const root = {
       value: 1,
       visits: 2,
       children: [],
     };
-    const m = Enzyme.mount(<MCTSDebug root={root} />);
+    const m = Enzyme.mount(<MCTSRoot root={root} />);
     expect(m.find('.mcts-tree').text()).toContain('value 1');
     expect(m.find('.mcts-tree').text()).toContain('visits 2');
     expect(m.find('.mcts-tree').text()).toContain('ratio 50');
@@ -41,7 +49,7 @@ describe('MCTSDebug', () => {
     const node = { value: 10, children: [] };
     root.children = [node, node];
 
-    const m = Enzyme.mount(<MCTSDebug root={root} />);
+    const m = Enzyme.mount(<MCTSRoot root={root} />);
     expect(m.find('.mcts-root').text()).toContain('value 1');
     expect(m.find('.mcts-root').text()).toContain('visits 2');
     expect(m.find('.mcts-root').text()).toContain('ratio 50');
@@ -58,7 +66,7 @@ describe('MCTSDebug', () => {
     const node = { parent: root, value: 10, children: [] };
     root.children = [node, node];
 
-    const m = Enzyme.mount(<MCTSDebug root={root} />);
+    const m = Enzyme.mount(<MCTSRoot root={root} />);
 
     m
       .find('.mcts-node')

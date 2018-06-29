@@ -1,8 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './mcts-debug.css';
+import './mcts-visualizer.css';
 
-export class MCTSDebug extends React.Component {
+// eslint-disable-next-line react/display-name
+export const MCTSVisualizer = renderState => metadata => (
+  <MCTSRoot root={metadata} renderState={renderState} />
+);
+
+export class MCTSRoot extends React.Component {
   constructor(props) {
     super(props);
     this.state = { root: props.root };

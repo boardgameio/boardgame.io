@@ -12,21 +12,17 @@ describe('AI', () => {
   test('defaults', () => {
     const ai = AI({});
     expect(ai.bot).toBeDefined();
-    expect(ai.renderAI).toBeDefined();
-
-    const t = ai.renderAI({});
-    expect(t).toBeDefined();
   });
 
   test('basic', () => {
     const bot = { bot: true };
-    const renderAI = jest.fn();
+    const visualize = jest.fn();
     const enumerate = jest.fn();
 
-    const ai = AI({ bot, renderAI, enumerate });
+    const ai = AI({ bot, visualize, enumerate });
 
     expect(ai.bot).toEqual(bot);
-    expect(ai.renderAI).toEqual(renderAI);
+    expect(ai.visualize).toEqual(visualize);
     expect(ai.enumerate).toEqual(enumerate);
   });
 });
