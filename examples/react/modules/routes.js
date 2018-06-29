@@ -35,7 +35,7 @@ const routes = [
     routes: random.routes,
   },
   {
-    name: 'Events API',
+    name: 'Turn Orders',
     routes: turnorder.routes,
   },
 ];
