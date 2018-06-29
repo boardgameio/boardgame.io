@@ -69,7 +69,7 @@ const game = Game({
 
 ## 4. Wrappers
 
-`D4`, `D6`, `D6`, `D8`, `D10`, `D12` and `D20` are wrappers around
+`D4`, `D6`, `D8`, `D10`, `D12` and `D20` are wrappers around
 `Random.Die(n)`.
 
 ### Arguments
