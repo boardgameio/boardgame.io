@@ -13,10 +13,6 @@ get done before we are ready for a v1 release.
   * [x] MCTS bot ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032))
   * [ ] ability to add priorities and objectives ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032)) **[N]**
 
-* ##### Simulations
-  * [ ] ability to log events in the game and get aggregate stats after many simulations
-  * [ ] automatically report popular / unpopular moves
-
 ### UI framework
 
 * [ ] Drag and Drop **[N]**
@@ -36,19 +32,12 @@ get done before we are ready for a v1 release.
 
 * ##### Firebase / Other
 
-  * [ ] add support for one more backend (Firebase?) **[help needed]**
-
-### Clients
-
-* ##### Vue
-
-  * [ ] add basic Vue support **[help needed]**
-  * [ ] debug UI implementation in Vue **[help needed]**
+  * [x] add support for one more backend (Firebase?)
 
 ### Core
 
 * [ ] turn order customizations ([issue](https://github.com/google/boardgame.io/issues/154)) **[help needed]**
-* [ ] log improvements ([issue](https://github.com/google/boardgame.io/issues/206))
+* [ ] log improvements ([issue](https://github.com/google/boardgame.io/issues/227))
 
 ### Documentation
 
