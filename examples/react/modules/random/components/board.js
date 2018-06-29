@@ -9,10 +9,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Board = ({ G }) => <pre>{JSON.stringify(G, null, 2)}</pre>;
+const Board = ({ G, moves }) => (
+  <div>
+    <pre>{JSON.stringify(G, null, 2)}</pre>
+    <button onClick={() => moves.shuffle()}>shuffle</button>
+    <button onClick={() => moves.rollD6()}>roll</button>
+  </div>
+);
 
 Board.propTypes = {
   G: PropTypes.any.isRequired,
+  moves: PropTypes.any.isRequired,
 };
 
 export default Board;

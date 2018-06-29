@@ -11,7 +11,7 @@ import Multiview from './components/multiview';
 const routes = [
   {
     path: '/liars-dice',
-    text: 'Secret Info',
+    text: 'Examples',
     component: Multiview,
   },
 ];
