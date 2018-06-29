@@ -151,7 +151,7 @@ export function Client({
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
-          renderAI: ai && ai.renderAI,
+          visualizeAI: ai && ai.visualize,
           overrideGameState: this.overrideGameState,
         });
       }

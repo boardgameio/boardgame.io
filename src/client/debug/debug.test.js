@@ -291,18 +291,18 @@ test('toggle help', () => {
   expect(debug.state()).toMatchObject({ help: true });
 });
 
-test('toggle AIDebug', () => {
+test('toggle AI visualizer', () => {
   const debug = Enzyme.mount(
     <Debug
       gamestate={gamestate}
-      renderAI={jest.fn()}
+      visualizeAI={jest.fn()}
       endTurn={() => {}}
       gameID="default"
     />
   );
 
   expect(debug.find('.pane').length).toBe(1);
-  debug.setState({ AIDebug: {} });
+  debug.setState({ AIMetadata: {} });
   expect(debug.find('.pane').length).toBe(2);
 });
 

@@ -209,7 +209,7 @@ export class Debug extends React.Component {
     reset: PropTypes.func,
     reducer: PropTypes.func,
     overrideGameState: PropTypes.func,
-    renderAI: PropTypes.func,
+    visualizeAI: PropTypes.func,
   };
 
   constructor(props) {
@@ -238,7 +238,7 @@ export class Debug extends React.Component {
     showDebugUI: true,
     showLog: false,
     help: false,
-    AIDebug: null,
+    AIMetadata: null,
   };
 
   assignShortcuts() {
@@ -325,7 +325,7 @@ export class Debug extends React.Component {
   };
 
   onLogHover = ({ state, metadata }) => {
-    this.setState({ AIDebug: metadata });
+    this.setState({ AIMetadata: metadata });
     this.props.overrideGameState(state);
   };
 
@@ -437,9 +437,9 @@ export class Debug extends React.Component {
 
     return (
       <div className="debug-ui">
-        {this.state.AIDebug && (
+        {this.state.AIMetadata && (
           <div className="pane" style={{ maxWidth: '3000px' }}>
-            {this.props.renderAI(this.state.AIDebug)}
+            {this.props.visualizeAI(this.state.AIMetadata)}
           </div>
         )}
 
