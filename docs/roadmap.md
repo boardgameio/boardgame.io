@@ -8,10 +8,8 @@ get done before we are ready for a v1 release.
 
 ### AI framework
 
-* ##### Bots
-
-  * [x] MCTS bot ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032))
-  * [ ] ability to add priorities and objectives ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032)) **[N]**
+* [x] MCTS bot ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032))
+* [ ] ability to add priorities and objectives ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032)) **[N]**
 
 ### UI framework
 
