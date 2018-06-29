@@ -60,7 +60,7 @@ test('basic', () => {
   );
 
   const titles = debug.find('h3').map(title => title.text());
-  expect(titles).toEqual(['Controls', 'Players', 'Moves', 'Events', 'State']);
+  expect(titles).toEqual(['Players', 'Moves', 'Events']);
 
   expect(debug.state('showLog')).toEqual(false);
   debug
@@ -278,4 +278,25 @@ describe('simulate', () => {
     jest.runAllTimers();
     expect(step).toHaveBeenCalledTimes(1);
   });
+});
+
+test('controls docking', () => {
+  const root = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(root.state()).toMatchObject({ dockControls: false });
+  Mousetrap.simulate('t');
+  expect(root.state()).toMatchObject({ dockControls: true });
+  expect(root.find('Controls').html()).toContain('docktop');
+});
+
+test('show/hide game info', () => {
+  const root = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(root.state()).toMatchObject({ showGameInfo: true });
+  Mousetrap.simulate('i');
+  expect(root.state()).toMatchObject({ showGameInfo: false });
 });
