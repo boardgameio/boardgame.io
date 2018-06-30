@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The boardgame.io Authors.
+ * Copyright 2017 The boardgame.io Authors.
  *
  * Use of this source code is governed by a MIT-style
  * license that can be found in the LICENSE file or at
@@ -8,18 +8,18 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import './board.css';
 
-const Board = ({ G, moves }) => (
-  <div>
-    <pre>{JSON.stringify(G, null, 2)}</pre>
-    <button onClick={() => moves.shuffle()}>shuffle</button>
-    <button onClick={() => moves.rollD6()}>roll</button>
+const Board = ({ G }) => (
+  <div className="secret-state">
+    <section>
+      <pre>{JSON.stringify(G, null, 2)}</pre>
+    </section>
   </div>
 );
 
 Board.propTypes = {
   G: PropTypes.any.isRequired,
-  moves: PropTypes.any.isRequired,
 };
 
 export default Board;

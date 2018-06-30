@@ -6,6 +6,7 @@ shell.rm('-f', [
   'core.js',
   'ui.js',
   'ai.js',
+  'ai-visualize.js',
   'react.js',
   'react-native.js',
 ]);

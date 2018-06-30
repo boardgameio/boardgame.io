@@ -9,6 +9,7 @@
 import React from 'react';
 import { Client } from 'boardgame.io/react';
 import { AI } from 'boardgame.io/ai';
+import { MCTSVisualizer } from 'boardgame.io/ai-visualize';
 import TicTacToe from '../game';
 import Board from './board';
 
@@ -16,15 +17,6 @@ const App = Client({
   game: TicTacToe,
   board: Board,
   ai: AI({
-    // eslint-disable-next-line react/display-name
-    renderGameTreeCell: state => {
-      return (
-        <div style={{ transform: 'scale(0.7)' }}>
-          <Board {...state} isPreview={true} moves={{}} />
-        </div>
-      );
-    },
-
     enumerate: G => {
       let r = [];
       for (let i = 0; i < 9; i++) {
@@ -34,6 +26,12 @@ const App = Client({
       }
       return r;
     },
+
+    visualize: MCTSVisualizer(state => (
+      <div style={{ transform: 'scale(0.7)' }}>
+        <Board {...state} isPreview={true} moves={{}} />
+      </div>
+    )),
   }),
 });
 

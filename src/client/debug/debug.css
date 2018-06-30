@@ -21,6 +21,12 @@
   font-size: 14px;
 }
 
+@media only screen and (max-device-width: 750px) {
+  .debug-ui {
+    display: none;
+  }
+}
+
 .debug-ui .pane {
   float: left;
   padding: 20px;
