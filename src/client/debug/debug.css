@@ -8,11 +8,13 @@
 
 .debug-ui {
   text-align: left;
+  overflow-x: hidden;
   overflow-y: scroll;
   background: #fefefe;
   border-left: 1px solid #ddd;
   box-shadow: -1px 0 10px #aaa;
   position: absolute;
+  width: 300px;
   right: 0;
   top: 0;
   height: 100%;
@@ -21,10 +23,36 @@
   font-size: 14px;
 }
 
+#debug-controls.docktop {
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 1000px;
+  max-width: 100%;
+  top: 0;
+  right: 300px;
+  height: 50px;
+  background: #fff;
+  margin-left: 1px solid #ccc;
+  box-shadow: -3px 3px 3px #ccc;
+}
+
 @media only screen and (max-device-width: 750px) {
   .debug-ui {
     display: none;
   }
+}
+
+.debug-ui .gameinfo {
+  background: #ddd;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  margin-left: -20px;
+  margin-bottom: 0;
+  padding: 10px;
 }
 
 .debug-ui .pane {

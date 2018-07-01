@@ -9,8 +9,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Mousetrap from 'mousetrap';
+import { AssignShortcuts } from './assign-shortcuts';
+import { GameInfo } from './gameinfo';
+import { Controls } from './controls';
 import { DebugMove } from './debug-move';
-import { KeyboardShortcut } from './keyboard-shortcut';
 import { GameLog } from '../log/log';
 import { restore } from '../../core/action-creators';
 import './debug.css';
@@ -28,10 +30,13 @@ export class Debug extends React.Component {
       G: PropTypes.any.isRequired,
       ctx: PropTypes.any.isRequired,
       log: PropTypes.array.isRequired,
+      isActive: PropTypes.bool,
       _initial: PropTypes.any.isRequired,
     }),
     gameID: PropTypes.string.isRequired,
     playerID: PropTypes.string,
+    isConnected: PropTypes.bool,
+    isMultiplayer: PropTypes.bool,
     moves: PropTypes.any,
     events: PropTypes.any,
     restore: PropTypes.func,
@@ -46,7 +51,7 @@ export class Debug extends React.Component {
 
   constructor(props) {
     super(props);
-    this.assignShortcuts();
+    this.shortcuts = AssignShortcuts(props.moves, props.events, 'dlit');
   }
 
   componentDidMount() {
@@ -59,6 +64,16 @@ export class Debug extends React.Component {
       e.preventDefault();
       this.setState(old => ({ showLog: !old.showLog }));
     });
+
+    Mousetrap.bind('i', e => {
+      e.preventDefault();
+      this.setState(old => ({ showGameInfo: !old.showGameInfo }));
+    });
+
+    Mousetrap.bind('t', e => {
+      e.preventDefault();
+      this.setState(old => ({ dockControls: !old.dockControls }));
+    });
   }
 
   componentWillUnmount() {
@@ -69,67 +84,11 @@ export class Debug extends React.Component {
   state = {
     showDebugUI: true,
     showLog: false,
+    showGameInfo: true,
+    dockControls: false,
     help: false,
     AIMetadata: null,
   };
-
-  assignShortcuts() {
-    const taken = {
-      n: true,
-      s: true,
-      r: true,
-      d: true,
-      l: true,
-      t: true,
-    };
-    this.shortcuts = null;
-
-    const events = {};
-    for (let name in this.props.moves) {
-      events[name] = name;
-    }
-    for (let name in this.props.events) {
-      events[name] = name;
-    }
-
-    // Try assigning the first char of each move as the shortcut.
-    let t = taken;
-    let shortcuts = {};
-    let canUseFirstChar = true;
-    for (let name in events) {
-      let shortcut = name[0];
-      if (t[shortcut]) {
-        canUseFirstChar = false;
-        break;
-      }
-
-      t[shortcut] = true;
-      shortcuts[name] = shortcut;
-    }
-    if (canUseFirstChar) {
-      this.shortcuts = shortcuts;
-    }
-
-    // If those aren't unique, use a-z.
-    if (this.shortcuts == null) {
-      let t = taken;
-      let next = 97;
-      let shortcuts = {};
-      for (let name in events) {
-        let shortcut = String.fromCharCode(next);
-
-        while (t[shortcut]) {
-          next++;
-          shortcut = String.fromCharCode(next);
-        }
-
-        t[shortcut] = true;
-        shortcuts[name] = shortcut;
-      }
-
-      this.shortcuts = shortcuts;
-    }
-  }
 
   saveState = () => {
     const json = JSON.stringify(this.props.gamestate);
@@ -161,28 +120,6 @@ export class Debug extends React.Component {
     this.props.overrideGameState(state);
   };
 
-  renderHelp() {
-    const display = this.state.help ? 'block' : 'none';
-
-    return (
-      <section>
-        <KeyboardShortcut value="?" onPress={this.toggleHelp}>
-          help
-        </KeyboardShortcut>
-
-        <span style={{ display }}>
-          <div className="key">
-            <div className="key-box">d</div> toggle Debug UI
-          </div>
-
-          <div className="key">
-            <div className="key-box">l</div> toggle Log
-          </div>
-        </span>
-      </section>
-    );
-  }
-
   simulate = (iterations = 10000, sleepTimeout = 100) => {
     const step = () => {
       const action = this.props.step();
@@ -194,42 +131,6 @@ export class Debug extends React.Component {
 
     step();
   };
-
-  renderControls() {
-    let ai = null;
-
-    if (this.props.step) {
-      ai = [
-        <KeyboardShortcut key="4" value="4" onPress={this.props.step}>
-          step
-        </KeyboardShortcut>,
-
-        <KeyboardShortcut key="5" value="5" onPress={this.simulate}>
-          simulate
-        </KeyboardShortcut>,
-      ];
-    }
-
-    return (
-      <section className="controls">
-        <h3>Controls</h3>
-
-        <KeyboardShortcut value="1" onPress={this.props.reset}>
-          reset
-        </KeyboardShortcut>
-
-        <KeyboardShortcut value="2" onPress={this.saveState}>
-          save
-        </KeyboardShortcut>
-
-        <KeyboardShortcut value="3" onPress={this.restoreState}>
-          restore
-        </KeyboardShortcut>
-
-        {ai}
-      </section>
-    );
-  }
 
   render() {
     if (!this.state.showDebugUI) {
@@ -267,8 +168,13 @@ export class Debug extends React.Component {
       );
     }
 
+    let className = 'debug-ui';
+    if (this.state.dockControls) {
+      className += ' docktop';
+    }
+
     return (
-      <div className="debug-ui">
+      <div className={className}>
         {this.state.AIMetadata && (
           <div className="pane" style={{ maxWidth: '3000px' }}>
             {this.props.visualizeAI(this.state.AIMetadata)}
@@ -293,14 +199,26 @@ export class Debug extends React.Component {
 
           {this.state.showLog || (
             <span>
-              <section>
-                <div>
-                  <strong>Game ID:</strong> {this.props.gameID}
-                </div>
-              </section>
+              {this.state.showGameInfo && (
+                <GameInfo
+                  gameID={this.props.gameID}
+                  playerID={this.props.playerID}
+                  isActive={this.props.gamestate.isActive}
+                  isConnected={this.props.isConnected}
+                  isMultiplayer={this.props.isMultiplayer}
+                />
+              )}
 
-              {this.renderHelp()}
-              {this.renderControls()}
+              <Controls
+                dockTop={this.state.dockControls}
+                help={this.state.help}
+                toggleHelp={this.toggleHelp}
+                step={this.props.step}
+                simulate={this.simulate}
+                reset={this.props.reset}
+                save={this.saveState}
+                restore={this.restoreState}
+              />
 
               <h3>Players</h3>
               <div className="player-box">{players}</div>
@@ -312,8 +230,6 @@ export class Debug extends React.Component {
               <h3>Events</h3>
 
               <section>{events}</section>
-
-              <h3>State</h3>
 
               <section>
                 <pre className="json">

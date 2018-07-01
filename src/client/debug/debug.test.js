@@ -60,7 +60,7 @@ test('basic', () => {
   );
 
   const titles = debug.find('h3').map(title => title.text());
-  expect(titles).toEqual(['Controls', 'Players', 'Moves', 'Events', 'State']);
+  expect(titles).toEqual(['Players', 'Moves', 'Events']);
 
   expect(debug.state('showLog')).toEqual(false);
   debug
@@ -75,46 +75,6 @@ test('basic', () => {
   expect(debug.state('showLog')).toEqual(false);
 
   debug.unmount();
-});
-
-test('shortcuts are unique a-z', () => {
-  const moves = {
-    takeCard: () => {},
-    takeToken: () => {},
-  };
-
-  const element = React.createElement(Debug, {
-    gamestate,
-    moves,
-    gameID: 'default',
-  });
-
-  const instance = Enzyme.mount(element).instance();
-
-  expect(instance.shortcuts).toEqual({
-    takeCard: 'a',
-    takeToken: 'b',
-  });
-});
-
-test('shortcuts are unique first char', () => {
-  const moves = {
-    clickCell: () => {},
-    playCard: () => {},
-  };
-
-  const element = React.createElement(Debug, {
-    gamestate,
-    moves,
-    gameID: 'default',
-  });
-
-  const instance = Enzyme.mount(element).instance();
-
-  expect(instance.shortcuts).toEqual({
-    clickCell: 'c',
-    playCard: 'p',
-  });
 });
 
 describe('save / restore', () => {
@@ -278,4 +238,25 @@ describe('simulate', () => {
     jest.runAllTimers();
     expect(step).toHaveBeenCalledTimes(1);
   });
+});
+
+test('controls docking', () => {
+  const root = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(root.state()).toMatchObject({ dockControls: false });
+  Mousetrap.simulate('t');
+  expect(root.state()).toMatchObject({ dockControls: true });
+  expect(root.find('Controls').html()).toContain('docktop');
+});
+
+test('show/hide game info', () => {
+  const root = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(root.state()).toMatchObject({ showGameInfo: true });
+  Mousetrap.simulate('i');
+  expect(root.state()).toMatchObject({ showGameInfo: false });
 });
