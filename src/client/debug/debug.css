@@ -49,10 +49,16 @@
   background: #ddd;
   position: fixed;
   bottom: 0;
-  width: 100%;
+  box-sizing: border-box;
+  width: 285px;
   margin-left: -20px;
   margin-bottom: 0;
   padding: 10px;
+}
+
+.debug-ui .gameinfo-item div {
+  float: right;
+  text-align: right;
 }
 
 .debug-ui .pane {
@@ -163,11 +169,17 @@
   width: 30px;
   height: 30px;
   line-height: 30px;
-  border: 3px solid #eee;
+  background: #eee;
+  border: 3px solid #fff;
   box-sizing: content-box;
 }
 
+.debug-ui .player.current {
+  background: #555;
+  color: #eee;
+  font-weight: bold;
+}
+
 .debug-ui .player.active {
-  background: #ccc;
-  border: 3px solid #555;
+  border: 3px solid #ff7f50;
 }
