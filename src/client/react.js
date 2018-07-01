@@ -91,15 +91,15 @@ export function Client({
       this.client.subscribe(() => this.forceUpdate());
     }
 
-    componentWillReceiveProps(nextProps) {
-      if (nextProps.gameID != this.props.gameID) {
-        this.client.updateGameID(nextProps.gameID);
+    componentDidUpdate(prevProps) {
+      if (this.props.gameID != prevProps.gameID) {
+        this.client.updateGameID(this.props.gameID);
       }
-      if (nextProps.playerID != this.props.playerID) {
-        this.client.updatePlayerID(nextProps.playerID);
+      if (this.props.playerID != prevProps.playerID) {
+        this.client.updatePlayerID(this.props.playerID);
       }
-      if (nextProps.credentials != this.props.credentials) {
-        this.client.updateCredentials(nextProps.credentials);
+      if (this.props.credentials != prevProps.credentials) {
+        this.client.updateCredentials(this.props.credentials);
       }
     }
 
