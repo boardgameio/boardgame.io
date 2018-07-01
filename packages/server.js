@@ -7,6 +7,12 @@
  */
 
 import { Server } from '../src/server/index.js';
-import { Mongo, Firebase } from '../src/server/db/index.js';
+import {
+  Mongo,
+  Firebase,
+  MySQL,
+  SQLite,
+  PostgreSQL,
+} from '../src/server/db/index.js';
 
-export { Server, Mongo, Firebase };
+export { Server, Mongo, Firebase, MySQL, SQLite, PostgreSQL };
