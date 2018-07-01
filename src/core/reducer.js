@@ -120,6 +120,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         // Ignore the move if the player cannot make it at this point.
         if (
+          action.payload.playerID !== null &&
+          action.payload.playerID !== undefined &&
           !game.flow.canPlayerMakeMove(
             state.G,
             state.ctx,
