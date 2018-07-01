@@ -9,6 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Mousetrap from 'mousetrap';
+import { AssignShortcuts } from './assign-shortcuts';
 import { GameInfo } from './gameinfo';
 import { Controls } from './controls';
 import { DebugMove } from './debug-move';
@@ -50,7 +51,7 @@ export class Debug extends React.Component {
 
   constructor(props) {
     super(props);
-    this.assignShortcuts();
+    this.shortcuts = AssignShortcuts(props.moves, props.events, 'dlit');
   }
 
   componentDidMount() {
@@ -88,62 +89,6 @@ export class Debug extends React.Component {
     help: false,
     AIMetadata: null,
   };
-
-  assignShortcuts() {
-    const taken = {
-      d: true,
-      l: true,
-      i: true,
-      t: true,
-    };
-    this.shortcuts = null;
-
-    const events = {};
-    for (let name in this.props.moves) {
-      events[name] = name;
-    }
-    for (let name in this.props.events) {
-      events[name] = name;
-    }
-
-    // Try assigning the first char of each move as the shortcut.
-    let t = taken;
-    let shortcuts = {};
-    let canUseFirstChar = true;
-    for (let name in events) {
-      let shortcut = name[0];
-      if (t[shortcut]) {
-        canUseFirstChar = false;
-        break;
-      }
-
-      t[shortcut] = true;
-      shortcuts[name] = shortcut;
-    }
-    if (canUseFirstChar) {
-      this.shortcuts = shortcuts;
-    }
-
-    // If those aren't unique, use a-z.
-    if (this.shortcuts == null) {
-      let t = taken;
-      let next = 97;
-      let shortcuts = {};
-      for (let name in events) {
-        let shortcut = String.fromCharCode(next);
-
-        while (t[shortcut]) {
-          next++;
-          shortcut = String.fromCharCode(next);
-        }
-
-        t[shortcut] = true;
-        shortcuts[name] = shortcut;
-      }
-
-      this.shortcuts = shortcuts;
-    }
-  }
 
   saveState = () => {
     const json = JSON.stringify(this.props.gamestate);

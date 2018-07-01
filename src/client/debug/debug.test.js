@@ -77,46 +77,6 @@ test('basic', () => {
   debug.unmount();
 });
 
-test('shortcuts are unique a-z', () => {
-  const moves = {
-    takeCard: () => {},
-    takeToken: () => {},
-  };
-
-  const element = React.createElement(Debug, {
-    gamestate,
-    moves,
-    gameID: 'default',
-  });
-
-  const instance = Enzyme.mount(element).instance();
-
-  expect(instance.shortcuts).toEqual({
-    takeCard: 'a',
-    takeToken: 'b',
-  });
-});
-
-test('shortcuts are unique first char', () => {
-  const moves = {
-    clickCell: () => {},
-    playCard: () => {},
-  };
-
-  const element = React.createElement(Debug, {
-    gamestate,
-    moves,
-    gameID: 'default',
-  });
-
-  const instance = Enzyme.mount(element).instance();
-
-  expect(instance.shortcuts).toEqual({
-    clickCell: 'c',
-    playCard: 'p',
-  });
-});
-
 describe('save / restore', () => {
   let loggedAction = null;
   const store = createStore((state, action) => {
