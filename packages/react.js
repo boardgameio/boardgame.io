@@ -7,5 +7,6 @@
  */
 
 import { Client } from '../src/client/react.js';
+import { Debug } from '../src/client/debug/debug.js';
 
-export { Client };
+export { Client, Debug };
