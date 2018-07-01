@@ -467,11 +467,6 @@ test('canMakeMove', () => {
   state = reducer(state, makeMove('C'));
   expect(state.G).toMatchObject({ C: true });
 
-  // But not if the playerID is null (spectator).
-  state.G = {};
-  state = reducer(state, makeMove('A', null, null));
-  expect(state.G).not.toMatchObject({ A: true });
-
   // But not once the game is over.
   state.ctx.gameover = true;
   state.G = {};

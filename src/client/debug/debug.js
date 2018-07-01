@@ -12,6 +12,7 @@ import Mousetrap from 'mousetrap';
 import { AssignShortcuts } from './assign-shortcuts';
 import { GameInfo } from './gameinfo';
 import { Controls } from './controls';
+import { PlayerInfo } from './playerinfo';
 import { DebugMove } from './debug-move';
 import { GameLog } from '../log/log';
 import { restore } from '../../core/action-creators';
@@ -31,11 +32,11 @@ export class Debug extends React.Component {
       ctx: PropTypes.any.isRequired,
       log: PropTypes.array.isRequired,
       isActive: PropTypes.bool,
+      isConnected: PropTypes.bool,
       _initial: PropTypes.any.isRequired,
     }),
     gameID: PropTypes.string.isRequired,
     playerID: PropTypes.string,
-    isConnected: PropTypes.bool,
     isMultiplayer: PropTypes.bool,
     moves: PropTypes.any,
     events: PropTypes.any,
@@ -47,6 +48,9 @@ export class Debug extends React.Component {
     reducer: PropTypes.func,
     overrideGameState: PropTypes.func,
     visualizeAI: PropTypes.func,
+    updateGameID: PropTypes.func,
+    updatePlayerID: PropTypes.func,
+    updateCredentials: PropTypes.func,
   };
 
   constructor(props) {
@@ -155,19 +159,6 @@ export class Debug extends React.Component {
       );
     }
 
-    let players = [];
-    for (let i = 0; i < this.props.gamestate.ctx.numPlayers; i++) {
-      let className = 'player active';
-      if (i != this.props.gamestate.ctx.currentPlayer) {
-        className = 'player';
-      }
-      players.push(
-        <div className={className} key={i}>
-          {i}
-        </div>
-      );
-    }
-
     let className = 'debug-ui';
     if (this.state.dockControls) {
       className += ' docktop';
@@ -204,7 +195,7 @@ export class Debug extends React.Component {
                   gameID={this.props.gameID}
                   playerID={this.props.playerID}
                   isActive={this.props.gamestate.isActive}
-                  isConnected={this.props.isConnected}
+                  isConnected={this.props.gamestate.isConnected}
                   isMultiplayer={this.props.isMultiplayer}
                 />
               )}
@@ -221,7 +212,11 @@ export class Debug extends React.Component {
               />
 
               <h3>Players</h3>
-              <div className="player-box">{players}</div>
+              <PlayerInfo
+                ctx={this.props.gamestate.ctx}
+                playerID={this.props.playerID}
+                onClick={this.props.updatePlayerID}
+              />
 
               <h3>Moves</h3>
 
