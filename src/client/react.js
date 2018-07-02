@@ -60,7 +60,7 @@ export function Client({
       // Only relevant in multiplayer.
       credentials: PropTypes.string,
       // Enable / disable the Debug UI.
-      debug: PropTypes.bool,
+      debug: PropTypes.any,
     };
 
     static defaultProps = {
@@ -159,7 +159,9 @@ export function Client({
         });
       }
 
-      if (debug && debugProp) {
+      if (debug !== false && debugProp) {
+        const showGameInfo = typeof debug === 'object' && debug.showGameInfo;
+        const dockControls = typeof debug === 'object' && debug.dockControls;
         _debug = React.createElement(Debug, {
           gamestate: state,
           reducer: this.client.reducer,
@@ -179,6 +181,8 @@ export function Client({
           updateGameID: this.updateGameID,
           updatePlayerID: this.updatePlayerID,
           updateCredentials: this.updateCredentials,
+          showGameInfo,
+          dockControls,
         });
       }
 

@@ -51,11 +51,27 @@ export class Debug extends React.Component {
     updateGameID: PropTypes.func,
     updatePlayerID: PropTypes.func,
     updateCredentials: PropTypes.func,
+    showGameInfo: PropTypes.bool,
+    dockControls: PropTypes.bool,
+  };
+
+  static defaultProps = {
+    showGameInfo: true,
+    dockControls: false,
   };
 
   constructor(props) {
     super(props);
     this.shortcuts = AssignShortcuts(props.moves, props.events, 'dlit');
+
+    this.state = {
+      showDebugUI: true,
+      showLog: false,
+      showGameInfo: props.showGameInfo,
+      dockControls: props.dockControls,
+      help: false,
+      AIMetadata: null,
+    };
   }
 
   componentDidMount() {
@@ -84,15 +100,6 @@ export class Debug extends React.Component {
     Mousetrap.unbind('d');
     Mousetrap.unbind('l');
   }
-
-  state = {
-    showDebugUI: true,
-    showLog: false,
-    showGameInfo: true,
-    dockControls: false,
-    help: false,
-    AIMetadata: null,
-  };
 
   saveState = () => {
     const json = JSON.stringify(this.props.gamestate);
