@@ -70,7 +70,7 @@ test('board props', () => {
     multiplayer: true,
   });
   board = Enzyme.mount(<Board />).find(TestBoard);
-  expect(board.props().isActive).toBe(true);
+  expect(board.props().isActive).toBe(false);
   board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
   board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);

@@ -156,24 +156,15 @@ class _ClientImpl {
     // isActive.
 
     let isActive = true;
-
-    const canPlayerMakeMove = this.game.flow.canPlayerMakeMove(
-      state.G,
-      state.ctx,
-      this.playerID
-    );
-
-    if (this.multiplayer && !canPlayerMakeMove) {
-      isActive = false;
-    }
-
-    if (
-      !this.multiplayer &&
-      this.playerID !== null &&
-      this.playerID !== undefined &&
-      !canPlayerMakeMove
-    ) {
-      isActive = false;
+    if (this.multiplayer) {
+      if (this.playerID == null) {
+        isActive = false;
+      }
+      if (
+        !this.game.flow.canPlayerMakeMove(state.G, state.ctx, this.playerID)
+      ) {
+        isActive = false;
+      }
     }
 
     if (state.ctx.gameover !== undefined) {

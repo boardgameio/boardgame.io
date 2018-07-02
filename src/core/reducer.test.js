@@ -71,27 +71,6 @@ test('makeMove', () => {
   expect(state.G).toMatchObject({ moved: true });
 });
 
-test('disable move by invalid playerIDs', () => {
-  const reducer = CreateGameReducer({ game });
-
-  let state;
-
-  state = reducer(undefined, { type: 'init' });
-  expect(state._stateID).toBe(0);
-
-  // playerID="1" cannot move right now.
-  state = reducer(state, makeMove('A', null, '1'));
-  expect(state._stateID).toBe(0);
-
-  // playerID="0" can move.
-  state = reducer(state, makeMove('A', null, '0'));
-  expect(state._stateID).toBe(1);
-
-  // playerID=undefined can always move.
-  state = reducer(state, makeMove('A'));
-  expect(state._stateID).toBe(2);
-});
-
 test('restore', () => {
   const reducer = CreateGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
