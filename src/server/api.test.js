@@ -178,7 +178,7 @@ describe('.createApiServer', () => {
         app = createApiServer({ db, games });
 
         response = await request(app.callback())
-          .post('/games/foo/create')
+          .post('/games/foo')
           .send('numPlayers=3');
 
         done();
@@ -217,7 +217,7 @@ describe('.createApiServer', () => {
 
       describe('without numPlayers', () => {
         beforeEach(async () => {
-          response = await request(app.callback()).post('/games/foo/create');
+          response = await request(app.callback()).post('/games/foo');
         });
 
         test('uses default numPlayers', () => {
@@ -241,7 +241,7 @@ describe('.createApiServer', () => {
 
       describe('without the lobby token', () => {
         beforeEach(async () => {
-          response = await request(app.callback()).post('/games/foo/create');
+          response = await request(app.callback()).post('/games/foo');
         });
 
         test('fails', () => {
@@ -252,7 +252,7 @@ describe('.createApiServer', () => {
       describe('with the lobby token', () => {
         beforeEach(async () => {
           response = await request(app.callback())
-            .post('/games/foo/create')
+            .post('/games/foo')
             .set('API-Secret', 'protected');
         });
 

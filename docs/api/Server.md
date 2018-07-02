@@ -47,7 +47,7 @@ server.run(8000);
 
 You can optionally choose to require clients to use credential tokens to prove they have the right to send actions on behalf of a player.
 
-Authenticated games are created with server-side tokens for each player. You can create a game with the `games/create` API call, and join a player to a game with the `gameInstances/join` API call.
+Authenticated games are created with server-side tokens for each player. You can create a game with the `POST games/:name` API call, and join a player to a game with the `POST games/:name/:id/join` API call.
 
 A game that is authenticated will not accept moves from a client on behalf of a player without the appropriate credential token.
 
@@ -57,7 +57,7 @@ Authentication APIs are available by default on `WebSocket port` + 1.
 
 ### Creating a game
 
-#### `/games/:name/create`
+#### `POST /games/:name`
 
 Creates a new authenticated game for a game named `name`.
 
@@ -67,7 +67,7 @@ Returns `gameID`, which is the ID of the newly created game instance.
 
 ### Joining a game
 
-#### `/games/:name/:id/join`
+#### `POST /games/:name/:id/join`
 
 Allows a player to join a particular game instance `id` of a game named `name`.
 

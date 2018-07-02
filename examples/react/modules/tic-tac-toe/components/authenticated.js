@@ -41,7 +41,7 @@ class AuthenticatedClient extends React.Component {
     const PORT = 8000;
 
     const newGame = await request
-      .post(`http://localhost:${PORT + 1}/games/${gameName}/create`)
+      .post(`http://localhost:${PORT + 1}/games/${gameName}`)
       .send({ numPlayers: 2 });
 
     const gameID = newGame.body.gameID;
