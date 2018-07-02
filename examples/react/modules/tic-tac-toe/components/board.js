@@ -67,7 +67,7 @@ class Board extends React.Component {
     }
 
     let player = null;
-    if (this.props.playerID) {
+    if (this.props.playerID !== null) {
       player = <div id="player">Player: {this.props.playerID}</div>;
     }
 
