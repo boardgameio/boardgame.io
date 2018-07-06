@@ -1,3 +1,10 @@
+## v0.24.0
+
+#### Features
+
+* [[b28ee74](https://github.com/google/boardgame.io/commit/b28ee74)] ability to change playerID from Debug UI
+* [[fe1230e](https://github.com/google/boardgame.io/commit/fe1230e)] Firebase integration (#223)
+
 ## v0.23.3
 
 #### Bugfixes

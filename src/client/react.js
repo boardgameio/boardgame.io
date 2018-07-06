@@ -60,7 +60,7 @@ export function Client({
       // Only relevant in multiplayer.
       credentials: PropTypes.string,
       // Enable / disable the Debug UI.
-      debug: PropTypes.bool,
+      debug: PropTypes.any,
     };
 
     static defaultProps = {
@@ -88,20 +88,42 @@ export function Client({
         enhancer,
       });
 
+      this.gameID = props.gameID;
+      this.playerID = props.playerID;
+      this.credentials = props.credentials;
+
       this.client.subscribe(() => this.forceUpdate());
     }
 
-    componentWillReceiveProps(nextProps) {
-      if (nextProps.gameID != this.props.gameID) {
-        this.client.updateGameID(nextProps.gameID);
+    componentDidUpdate(prevProps) {
+      if (this.props.gameID != prevProps.gameID) {
+        this.updateGameID(this.props.gameID);
       }
-      if (nextProps.playerID != this.props.playerID) {
-        this.client.updatePlayerID(nextProps.playerID);
+      if (this.props.playerID != prevProps.playerID) {
+        this.updatePlayerID(this.props.playerID);
       }
-      if (nextProps.credentials != this.props.credentials) {
-        this.client.updateCredentials(nextProps.credentials);
+      if (this.props.credentials != prevProps.credentials) {
+        this.updateCredentials(this.props.credentials);
       }
     }
+
+    updateGameID = gameID => {
+      this.client.updateGameID(gameID);
+      this.gameID = gameID;
+      this.forceUpdate();
+    };
+
+    updatePlayerID = playerID => {
+      this.client.updatePlayerID(playerID);
+      this.playerID = playerID;
+      this.forceUpdate();
+    };
+
+    updateCredentials = credentials => {
+      this.client.updateCredentials(credentials);
+      this.credentials = credentials;
+      this.forceUpdate();
+    };
 
     componentDidMount() {
       this.client.connect();
@@ -116,7 +138,7 @@ export function Client({
       let _debug = null;
 
       let state = this.client.getState();
-      const { gameID, playerID, debug: debugProp, ...rest } = this.props;
+      const { debug: debugProp, ...rest } = this.props;
 
       if (this.state.gameStateOverride) {
         state = { ...state, ...this.state.gameStateOverride };
@@ -128,8 +150,8 @@ export function Client({
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: gameID,
-          playerID: playerID,
+          gameID: this.gameID,
+          playerID: this.playerID,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
@@ -137,7 +159,9 @@ export function Client({
         });
       }
 
-      if (debug && debugProp) {
+      if (debug !== false && debugProp) {
+        const showGameInfo = typeof debug === 'object' && debug.showGameInfo;
+        const dockControls = typeof debug === 'object' && debug.dockControls;
         _debug = React.createElement(Debug, {
           gamestate: state,
           reducer: this.client.reducer,
@@ -145,14 +169,20 @@ export function Client({
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: gameID,
-          playerID: playerID,
+          gameID: this.gameID,
+          playerID: this.playerID,
+          credentials: this.credentials,
           step: this.client.step,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
           visualizeAI: ai && ai.visualize,
           overrideGameState: this.overrideGameState,
+          updateGameID: this.updateGameID,
+          updatePlayerID: this.updatePlayerID,
+          updateCredentials: this.updateCredentials,
+          showGameInfo,
+          dockControls,
         });
       }
 

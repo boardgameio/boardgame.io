@@ -96,13 +96,6 @@ export function Flow({
     optimisticUpdate,
 
     canPlayerMakeMove: (G, ctx, playerID) => {
-      // In multiplayer mode, the default playerID is null, which corresponds
-      // to a spectator that can't make moves.
-      if (playerID === null) return false;
-      // In singleplayer mode (and most unit tests), the default playerID
-      // is undefined, and can always make moves.
-      if (playerID === undefined) return true;
-      // playerID must be in actionPlayers.
       const actionPlayers = ctx.actionPlayers || [];
       return actionPlayers.includes(playerID) || actionPlayers.includes('any');
     },

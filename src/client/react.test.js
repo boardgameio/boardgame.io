@@ -70,7 +70,7 @@ test('board props', () => {
     multiplayer: true,
   });
   board = Enzyme.mount(<Board />).find(TestBoard);
-  expect(board.props().isActive).toBe(false);
+  expect(board.props().isActive).toBe(true);
   board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
   board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
@@ -278,4 +278,20 @@ test('overrideGameState', () => {
     .props()
     .overrideGameState({ G: 1 });
   expect(board.props.G).toBe(1);
+});
+
+test('debug settings', () => {
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+    debug: {
+      showGameInfo: false,
+      dockControls: true,
+    },
+  });
+
+  const game = Enzyme.mount(<Board />);
+
+  expect(game.find('GameInfo').length).toBe(0);
+  expect(game.find('Controls').html()).toContain('docktop');
 });

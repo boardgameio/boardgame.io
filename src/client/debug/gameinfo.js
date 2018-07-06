@@ -10,8 +10,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const Item = props => (
-  <div>
-    <strong>{props.name}</strong> {JSON.stringify(props.value)}
+  <div className="gameinfo-item">
+    <strong>{props.name} </strong>
+    <div>{JSON.stringify(props.value)}</div>
   </div>
 );
 
