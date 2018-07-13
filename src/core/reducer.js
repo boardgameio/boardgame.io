@@ -27,7 +27,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   ctx._random = { seed: game.seed };
 
   const random = new Random(ctx);
-  const ctxWithAPI = random.attach(ctx);
+  let ctxWithAPI = random.attach(ctx);
 
   const initial = {
     // User managed state.
@@ -56,12 +56,16 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
+  const events = new Events(game.flow, ctx.currentPlayer);
+  ctxWithAPI = events.attach(ctxWithAPI);
+
   const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
   initial.G = state.G;
   initial._undo = state._undo;
   initial.ctx = random.update(state.ctx);
   initial.ctx = Random.detach(initial.ctx);
+  initial.ctx = Events.detach(initial.ctx);
 
   const deepCopy = obj => JSON.parse(JSON.stringify(obj));
   initial._initial = deepCopy(initial);
