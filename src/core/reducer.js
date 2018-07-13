@@ -24,7 +24,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
 
   let ctx = game.flow.ctx(numPlayers);
-  ctx._random = { seed: game.seed };
+
+  let seed = game.seed;
+  if (seed === undefined) {
+    seed = Random.seed();
+  }
+  ctx._random = { seed };
 
   const random = new Random(ctx);
   let ctxWithAPI = random.attach(ctx);
