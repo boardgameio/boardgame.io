@@ -92,7 +92,7 @@ export class Multiplayer {
     if (!this.socket) {
       if (this.server) {
         this.socket = io(
-          'http://' + this.server + '/' + this.gameName,
+          '//' + this.server + '/' + this.gameName,
           this.socketOpts
         );
       } else {
