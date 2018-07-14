@@ -7,7 +7,6 @@
  */
 
 import { FlowWithPhases } from './flow';
-import { Random } from './random';
 
 /**
  * Game
@@ -76,7 +75,6 @@ function Game({ name, setup, moves, playerView, flow, seed }) {
   if (setup === undefined) setup = () => ({});
   if (moves === undefined) moves = {};
   if (playerView === undefined) playerView = G => G;
-  if (seed === undefined) seed = Random.seed();
 
   if (!flow || flow.processGameEvent === undefined) {
     flow = FlowWithPhases(flow || {});
