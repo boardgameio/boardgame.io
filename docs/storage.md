@@ -144,7 +144,6 @@ const server = Server({
   games: [TicTacToe],
 
   db: new SQLite({
-    url: '...',
     config: {
       database: '...',
       host: '...',
