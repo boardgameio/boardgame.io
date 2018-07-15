@@ -12,6 +12,7 @@
   * [Events](events.md)
   * [Undo / Redo](undo.md)
   * [Randomness](random.md)
+  * [Storage](storage.md)
   * [Secret State](secret-state.md)
   * [Immutability](immutability.md)
   * [Debugging](debugging.md)
