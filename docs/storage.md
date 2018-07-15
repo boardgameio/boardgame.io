@@ -80,7 +80,6 @@ const server = Server({
   games: [TicTacToe],
 
   db: new MySQL({
-    url: '...',
     config: {
       database: '...',
       host: '...',
@@ -112,7 +111,6 @@ const server = Server({
   games: [TicTacToe],
 
   db: new PostgreSQL({
-    url: '...',
     config: {
       database: '...',
       host: '...',
