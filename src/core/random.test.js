@@ -148,16 +148,21 @@ test('Random API is not executed optimisitically', () => {
   }
 });
 
-test('onTurnBegin has the Random API at the beginning of the game', () => {
-  let random;
+test('onTurnBegin has ctx APIs at the beginning of the game', () => {
+  let random = null;
+  let events = null;
+
   const game = Game({
     flow: {
       onTurnBegin: (G, ctx) => {
         random = ctx.random;
+        events = ctx.events;
       },
     },
   });
+
   const reducer = CreateGameReducer({ game });
   reducer(undefined, { type: 'init' });
-  expect(random).toBeDefined();
+  expect(random).not.toBe(null);
+  expect(events).not.toBe(null);
 });
