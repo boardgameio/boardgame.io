@@ -174,9 +174,9 @@ class TicTacToeBoard extends React.Component {
     if (this.props.ctx.gameover) {
       winner =
         this.props.ctx.gameover.draw  ? (
-          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
-        ) : (
           <div id="winner">Draw!</div>
+        ) : (
+          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
         );
     }
 
