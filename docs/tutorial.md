@@ -279,7 +279,7 @@ After that, add an AI section to our `Client` call that returns a list
 of moves (one per empty cell).
 
 ```js
-import { AI } from 'boardgame.io';
+import { AI } from 'boardgame.io/ai';
 
 const App = Client({
   game: TicTacToe,
