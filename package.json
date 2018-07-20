@@ -129,7 +129,7 @@
     "mongodb": "^3.0.3",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
-    "redux": "^3.7.2",
+    "redux": "3.7.2 - 4",
     "socket.io": "^2.0.3",
     "uuid": "3.2.1"
   },
