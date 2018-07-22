@@ -39,3 +39,7 @@
 .mcts-node:hover {
   background: #ddd;
 }
+
+.mcts-node li {
+  list-style: none;
+}

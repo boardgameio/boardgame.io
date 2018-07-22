@@ -39,22 +39,30 @@ export class MCTSRoot extends React.Component {
     });
 
     const parent = root.parent && (
-      <MCTSNode
-        isParent={true}
-        onClick={() => this.setState({ root: root.parent })}
-        renderState={this.props.renderState}
-        {...root.parent}
-      />
+      <section>
+        <h2>Parent</h2>
+        <MCTSNode
+          isParent={true}
+          onClick={() => this.setState({ root: root.parent })}
+          renderState={this.props.renderState}
+          {...root.parent}
+        />
+      </section>
     );
 
     return (
       <div className="mcts-tree" style={this.props.style}>
         {parent}
-        <MCTSNode
-          {...root}
-          isRoot={true}
-          renderState={this.props.renderState}
-        />
+
+        <section>
+          <h2>Current Node</h2>
+          <MCTSNode
+            {...root}
+            isRoot={true}
+            renderState={this.props.renderState}
+          />
+        </section>
+
         <div className="children">{children}</div>
       </div>
     );
