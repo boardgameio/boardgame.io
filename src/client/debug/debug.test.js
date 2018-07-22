@@ -198,9 +198,9 @@ test('toggle AI visualizer', () => {
     />
   );
 
-  expect(debug.find('.pane').length).toBe(1);
+  expect(debug.find('.ai-visualization').length).toBe(0);
   debug.setState({ AIMetadata: {} });
-  expect(debug.find('.pane').length).toBe(2);
+  expect(debug.find('.ai-visualization').length).toBe(1);
 });
 
 describe('simulate', () => {

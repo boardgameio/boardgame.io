@@ -175,7 +175,7 @@ export class Debug extends React.Component {
       <div className={className}>
         {this.state.AIMetadata &&
           this.props.visualizeAI && (
-            <div className="pane" style={{ maxWidth: '3000px' }}>
+            <div className="ai-visualization">
               {this.props.visualizeAI(this.state.AIMetadata)}
             </div>
           )}

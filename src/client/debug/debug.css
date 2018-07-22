@@ -61,6 +61,15 @@
   text-align: right;
 }
 
+.debug-ui .ai-visualization {
+  position: fixed;
+  right: 300px;
+  height: 100%;
+  max-width: 3000px;
+  background: #fafafa;
+  box-shadow: -1px 0 10px #aaa;
+}
+
 .debug-ui .pane {
   float: left;
   padding: 20px;
