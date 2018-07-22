@@ -173,11 +173,12 @@ export class Debug extends React.Component {
 
     return (
       <div className={className}>
-        {this.state.AIMetadata && (
-          <div className="pane" style={{ maxWidth: '3000px' }}>
-            {this.props.visualizeAI(this.state.AIMetadata)}
-          </div>
-        )}
+        {this.state.AIMetadata &&
+          this.props.visualizeAI && (
+            <div className="pane" style={{ maxWidth: '3000px' }}>
+              {this.props.visualizeAI(this.state.AIMetadata)}
+            </div>
+          )}
 
         <div className="pane">
           <div className="menu">
