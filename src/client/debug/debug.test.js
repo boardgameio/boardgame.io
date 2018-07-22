@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { stringify } from 'flatted/cjs';
 import { restore, makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { CreateGameReducer } from '../../core/reducer';
@@ -84,7 +85,7 @@ describe('save / restore', () => {
   });
 
   const restoredState = { restore: true };
-  let restoredJSON = JSON.stringify(restoredState);
+  let restoredJSON = stringify(restoredState);
   const setItem = jest.fn();
   const getItem = jest.fn(() => restoredJSON);
 
