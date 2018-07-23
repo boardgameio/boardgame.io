@@ -31,6 +31,7 @@ const globals = {
   'prop-types': 'PropTypes',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
+  'flatted/esm': 'Flatted',
 };
 
 export default [
@@ -77,6 +78,8 @@ export default [
 
   {
     input: 'packages/core.js',
+    external: Object.keys(globals),
+    globals,
     output: { file: 'dist/core.js', format: 'umd' },
     name: 'Core',
     plugins,
@@ -84,6 +87,8 @@ export default [
 
   {
     input: 'packages/ai.js',
+    external: Object.keys(globals),
+    globals,
     output: { file: 'dist/ai.js', format: 'umd' },
     name: 'AI',
     plugins,

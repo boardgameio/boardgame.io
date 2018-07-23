@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { parse, stringify } from 'flatted/cjs';
+import { parse, stringify } from 'flatted/esm';
 import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
