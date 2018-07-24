@@ -35,6 +35,19 @@ export const gameEvent = (type, args, playerID, credentials) => ({
 });
 
 /**
+ * Generate an automatic game event that is a side-effect of a move.
+ * @param {string} type - The event type.
+ * @param {Array}  args - Additional arguments.
+ * @param {string}  playerID - The ID of the player making this action.
+ * @param {string}  credentials - (optional) The credentials for the player making this action.
+ */
+export const automaticGameEvent = (type, args, playerID, credentials) => ({
+  type: Actions.GAME_EVENT,
+  payload: { type, args, playerID, credentials },
+  automatic: true,
+});
+
+/**
  * Used to reset the Redux store's state.
  * @param {object} state - The state to restore.
  */
