@@ -157,7 +157,7 @@
       "raf/polyfill"
     ],
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io)/)"
+      "node_modules/(?!(boardgame.io|flatted)/)"
     ],
     "testPathIgnorePatterns": [
       "/examples/react-native/",
