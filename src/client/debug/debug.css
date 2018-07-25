@@ -23,6 +23,10 @@
   font-size: 14px;
 }
 
+.debug-ui.opacity-100 {
+  opacity: 1;
+}
+
 #debug-controls.docktop {
   position: fixed;
   display: flex;
@@ -63,11 +67,13 @@
 
 .debug-ui .ai-visualization {
   position: fixed;
+  opacity: 100%;
   right: 300px;
   height: 100%;
+  width: 100%;
   max-width: 3000px;
   background: #fafafa;
-  box-shadow: -1px 0 10px #aaa;
+  border-right: 1px solid #ddd;
 }
 
 .debug-ui .pane {

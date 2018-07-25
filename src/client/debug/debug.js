@@ -167,19 +167,24 @@ export class Debug extends React.Component {
       );
     }
 
+    const visualizeAI = this.state.AIMetadata && this.props.visualizeAI;
     let className = 'debug-ui';
+
     if (this.state.dockControls) {
       className += ' docktop';
     }
 
+    if (visualizeAI) {
+      className += ' opacity-100';
+    }
+
     return (
       <div className={className}>
-        {this.state.AIMetadata &&
-          this.props.visualizeAI && (
-            <div className="ai-visualization">
-              {this.props.visualizeAI(this.state.AIMetadata)}
-            </div>
-          )}
+        {visualizeAI && (
+          <div className="ai-visualization">
+            {this.props.visualizeAI(this.state.AIMetadata)}
+          </div>
+        )}
 
         <div className="pane">
           <div className="menu">
