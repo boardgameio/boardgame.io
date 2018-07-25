@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { parse, stringify } from 'flatted';
 import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
@@ -72,7 +73,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   initial.ctx = Random.detach(initial.ctx);
   initial.ctx = Events.detach(initial.ctx);
 
-  const deepCopy = obj => JSON.parse(JSON.stringify(obj));
+  const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
 
   /**

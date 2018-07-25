@@ -8,11 +8,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { stringify } from 'flatted';
 
 const Item = props => (
   <div className="gameinfo-item">
     <strong>{props.name} </strong>
-    <div>{JSON.stringify(props.value)}</div>
+    <div>{stringify(props.value)}</div>
   </div>
 );
 

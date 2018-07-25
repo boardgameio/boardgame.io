@@ -16,6 +16,7 @@ import { PlayerInfo } from './playerinfo';
 import { DebugMove } from './debug-move';
 import { GameLog } from '../log/log';
 import { restore } from '../../core/action-creators';
+import { parse, stringify } from 'flatted';
 import './debug.css';
 
 /**
@@ -102,14 +103,14 @@ export class Debug extends React.Component {
   }
 
   saveState = () => {
-    const json = JSON.stringify(this.props.gamestate);
+    const json = stringify(this.props.gamestate);
     window.localStorage.setItem('gamestate', json);
   };
 
   restoreState = () => {
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
-      const gamestate = JSON.parse(gamestateJSON);
+      const gamestate = parse(gamestateJSON);
       this.props.store.dispatch(restore(gamestate));
     }
   };
@@ -237,14 +238,14 @@ export class Debug extends React.Component {
               <section>
                 <pre className="json">
                   <strong>ctx</strong>:{' '}
-                  {JSON.stringify(this.props.gamestate.ctx, null, 2)}
+                  {stringify(this.props.gamestate.ctx, null, 2)}
                 </pre>
               </section>
 
               <section>
                 <pre className="json">
                   <strong>G</strong>:{' '}
-                  {JSON.stringify(this.props.gamestate.G, null, 2)}
+                  {stringify(this.props.gamestate.G, null, 2)}
                 </pre>
               </section>
             </span>

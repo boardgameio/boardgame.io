@@ -120,6 +120,7 @@
   "dependencies": {
     "@koa/cors": "^2.2.1",
     "firebase": "^5.0.4",
+    "flatted": "^0.2.3",
     "koa": "^2.3.0",
     "koa-body": "^2.5.0",
     "koa-router": "^7.2.1",
@@ -156,7 +157,7 @@
       "raf/polyfill"
     ],
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io)/)"
+      "node_modules/(?!(boardgame.io|flatted)/)"
     ],
     "testPathIgnorePatterns": [
       "/examples/react-native/",
