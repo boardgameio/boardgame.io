@@ -31,7 +31,7 @@ const globals = {
   'prop-types': 'PropTypes',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
-  'flatted/esm': 'Flatted',
+  flatted: 'Flatted',
 };
 
 export default [

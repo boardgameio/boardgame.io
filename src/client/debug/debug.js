@@ -16,7 +16,7 @@ import { PlayerInfo } from './playerinfo';
 import { DebugMove } from './debug-move';
 import { GameLog } from '../log/log';
 import { restore } from '../../core/action-creators';
-import { parse, stringify } from 'flatted/esm';
+import { parse, stringify } from 'flatted';
 import './debug.css';
 
 /**

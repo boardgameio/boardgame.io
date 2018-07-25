@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { stringify } from 'flatted/esm';
+import { stringify } from 'flatted';
 
 const Item = props => (
   <div className="gameinfo-item">

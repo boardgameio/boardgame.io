@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { stringify } from 'flatted/esm';
+import { stringify } from 'flatted';
 import { restore, makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { CreateGameReducer } from '../../core/reducer';
