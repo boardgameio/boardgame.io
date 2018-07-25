@@ -365,7 +365,7 @@ describe('.createApiServer', () => {
       });
 
       describe('with the lobby token', () => {
-        beforeEach(async () => {
+        beforeEach(async done => {
           db = {
             get: async () => {
               return {
@@ -385,6 +385,8 @@ describe('.createApiServer', () => {
             .post('/games/foo/1/join')
             .set('API-Secret', 'protected')
             .send('playerID=0&playerName=alice');
+
+          done();
         });
 
         test('succeeds', () => {
