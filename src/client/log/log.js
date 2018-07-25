@@ -20,15 +20,12 @@ const LogEvent = props => {
   const args = action.payload.args || [];
   const playerID = action.payload.playerID;
 
-  let classNames = `log-event`;
+  let classNames = `log-event phase${props.phase}`;
   if (playerID !== undefined) {
     classNames += ` player${playerID}`;
   }
   if (props.pinned) {
     classNames += ' pinned';
-  }
-  if (props.phase !== undefined) {
-    classNames += ` phase${props.phase}`;
   }
 
   return (
@@ -50,7 +47,7 @@ LogEvent.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
   pinned: PropTypes.bool,
-  phase: PropTypes.string,
+  phase: PropTypes.string.isRequired,
 };
 
 const TurnMarker = props => (
