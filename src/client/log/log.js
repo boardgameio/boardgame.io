@@ -152,7 +152,7 @@ export class GameLog extends React.Component {
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
           action={action}
-          phase={phase}
+          phase={`${phase}`}
         />
       );
 
