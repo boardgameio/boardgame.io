@@ -53,34 +53,62 @@ describe('time travel', () => {
   state = reducer(state, makeMove('A', [2]));
   state = reducer(state, gameEvent('endTurn'));
 
-  test('basic', () => {
-    const root = Enzyme.mount(
-      <GameLog
-        log={state.log}
-        initialState={initialState}
-        onHover={({ state: t }) => {
-          state = t;
-        }}
-        reducer={reducer}
-      />
-    );
+  const root = Enzyme.mount(
+    <GameLog
+      log={state.log}
+      initialState={initialState}
+      onHover={({ state: t }) => {
+        state = t;
+      }}
+      reducer={reducer}
+    />
+  );
 
+  test('before rewind', () => {
     expect(state.G).toMatchObject({ arg: 2 });
+  });
 
+  test('0 - regular move', () => {
     root
       .find('.log-event')
       .at(0)
       .simulate('mouseenter');
 
     expect(state.G).toMatchObject({ arg: 1 });
+    expect(state.ctx.currentPlayer).toBe('0');
+  });
 
+  test('1 - regular event', () => {
+    root
+      .find('.log-event')
+      .at(1)
+      .simulate('mouseenter');
+
+    expect(state.G).toMatchObject({ arg: 1 });
+    expect(state.ctx.currentPlayer).toBe('1');
+  });
+
+  test('2 - move with automatic event', () => {
     root
       .find('.log-event')
       .at(2)
       .simulate('mouseenter');
 
     expect(state.G).toMatchObject({ arg: 42 });
+    expect(state.ctx.currentPlayer).toBe('0');
+  });
 
+  test('3 - no replaying automatic event', () => {
+    root
+      .find('.log-event')
+      .at(3)
+      .simulate('mouseenter');
+
+    expect(state.G).toMatchObject({ arg: 42 });
+    expect(state.ctx.currentPlayer).toBe('0');
+  });
+
+  test('mouseleave', () => {
     root
       .find('.log-event')
       .at(0)

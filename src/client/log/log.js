@@ -79,7 +79,9 @@ export class GameLog extends React.Component {
     let state = this.props.initialState;
     for (let i = 0; i <= logIndex; i++) {
       const action = this.props.log[i];
-      state = this.props.reducer(state, action);
+      if (!action.automatic) {
+        state = this.props.reducer(state, action);
+      }
     }
     return { G: state.G, ctx: state.ctx };
   };
