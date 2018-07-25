@@ -19,8 +19,11 @@ const LogEvent = props => {
   const action = props.action;
   const args = action.payload.args || [];
   const playerID = action.payload.playerID;
-  let classNames = `log-event player${playerID}`;
 
+  let classNames = `log-event phase${props.phase}`;
+  if (playerID !== undefined) {
+    classNames += ` player${playerID}`;
+  }
   if (props.pinned) {
     classNames += ' pinned';
   }
@@ -44,6 +47,7 @@ LogEvent.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
   pinned: PropTypes.bool,
+  phase: PropTypes.string.isRequired,
 };
 
 const TurnMarker = props => (
@@ -119,6 +123,8 @@ export class GameLog extends React.Component {
     let turn = 1;
     let turnDelimiter = true;
 
+    let currentPhase = 0;
+
     for (let i = 0; i < this.props.log.length; i++) {
       if (turnDelimiter) {
         turnDelimiter = false;
@@ -126,6 +132,14 @@ export class GameLog extends React.Component {
       }
 
       const action = this.props.log[i];
+
+      let phase = currentPhase;
+      if (action.payload.type == 'endPhase') {
+        const oldPhase = currentPhase;
+        currentPhase = (currentPhase + 1) % 4;
+        phase = `${oldPhase}to${currentPhase}`;
+      }
+
       log.push(
         <LogEvent
           key={i}
@@ -135,6 +149,7 @@ export class GameLog extends React.Component {
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
           action={action}
+          phase={`${phase}`}
         />
       );
 

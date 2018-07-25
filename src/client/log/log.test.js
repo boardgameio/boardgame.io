@@ -202,3 +202,30 @@ describe('pinning', () => {
     expect(onHover).not.toHaveBeenCalled();
   });
 });
+
+test('playerID', () => {
+  const log = [makeMove('moveA', [], '1')];
+
+  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
+
+  const text = gamelog.find('.player1').map(div => div.text());
+  expect(text).toEqual(['moveA()']);
+});
+
+test('phase change', () => {
+  const log = [
+    makeMove('moveA'),
+    gameEvent('endPhase'),
+    makeMove('moveB'),
+    gameEvent('endPhase'),
+  ];
+
+  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
+
+  const phase0 = gamelog.find('.phase0').map(div => div.text());
+  expect(phase0).toEqual(['moveA()']);
+  const phase01 = gamelog.find('.phase0to1').map(div => div.text());
+  expect(phase01).toEqual(['endPhase()']);
+  const phase1 = gamelog.find('.phase1').map(div => div.text());
+  expect(phase1).toEqual(['moveB()']);
+});
