@@ -19,7 +19,11 @@ const LogEvent = props => {
   const action = props.action;
   const args = action.payload.args || [];
   const playerID = action.payload.playerID;
-  let classNames = `log-event player${playerID}`;
+
+  let classNames = `log-event`;
+  if (playerID !== undefined) {
+    classNames += ` player${playerID}`;
+  }
 
   if (props.pinned) {
     classNames += ' pinned';
