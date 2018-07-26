@@ -16,17 +16,48 @@ import Adapter from 'enzyme-adapter-react-16';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-test('GameLog', () => {
-  const log = [
-    makeMove('moveA'),
-    gameEvent('endTurn'),
-    makeMove('moveB'),
-    gameEvent('endTurn'),
-  ];
+describe('layout', () => {
+  const game = Game({ flow: { phases: [{ name: 'A' }, { name: 'B' }] } });
+  const reducer = CreateGameReducer({ game });
+  const state = reducer(undefined, { type: 'init' });
 
-  const gamelog = Enzyme.mount(<GameLog log={log} initialState={{}} />);
-  const turns = gamelog.find('.turn-marker').map(div => div.text());
-  expect(turns).toEqual(['Turn #1', 'Turn #2']);
+  test('sanity', () => {
+    const log = [
+      makeMove('moveA'),
+      gameEvent('endTurn'),
+      makeMove('moveB'),
+      gameEvent('endTurn'),
+    ];
+
+    const root = Enzyme.mount(
+      <GameLog log={log} initialState={state} reducer={reducer} />
+    );
+    const turns = root.find('.turn-marker').map(div => div.text());
+    expect(turns).toEqual(['0', '1']);
+  });
+
+  test('multiple moves per turn / phase', () => {
+    const log = [
+      makeMove('moveA'),
+      makeMove('moveB'),
+      gameEvent('endPhase'),
+      makeMove('moveC'),
+      gameEvent('endTurn'),
+    ];
+
+    const root = Enzyme.mount(
+      <GameLog log={log} initialState={state} reducer={reducer} />
+    );
+
+    const turns = root.find('TurnMarker');
+    expect(turns.length).toBe(1);
+    expect(turns.at(0).props()).toMatchObject({ numEvents: 3 });
+
+    const phases = root.find('PhaseMarker');
+    expect(phases.length).toBe(2);
+    expect(phases.at(0).props()).toMatchObject({ numEvents: 2 });
+    expect(phases.at(1).props()).toMatchObject({ numEvents: 1 });
+  });
 });
 
 describe('time travel', () => {
@@ -53,12 +84,14 @@ describe('time travel', () => {
   state = reducer(state, makeMove('A', [2]));
   state = reducer(state, gameEvent('endTurn'));
 
+  let hoverState = null;
+
   const root = Enzyme.mount(
     <GameLog
       log={state.log}
       initialState={initialState}
-      onHover={({ state: t }) => {
-        state = t;
+      onHover={({ state }) => {
+        hoverState = state;
       }}
       reducer={reducer}
     />
@@ -68,44 +101,37 @@ describe('time travel', () => {
     expect(state.G).toMatchObject({ arg: 2 });
   });
 
-  test('0 - regular move', () => {
+  test('regular move', () => {
     root
       .find('.log-event')
       .at(0)
       .simulate('mouseenter');
 
-    expect(state.G).toMatchObject({ arg: 1 });
-    expect(state.ctx.currentPlayer).toBe('0');
+    expect(hoverState.G).toMatchObject({ arg: 1 });
+    expect(hoverState.ctx.turn).toBe(0);
+    expect(hoverState.ctx.currentPlayer).toBe('0');
   });
 
-  test('1 - regular event', () => {
+  test('move with automatic event', () => {
     root
       .find('.log-event')
       .at(1)
       .simulate('mouseenter');
 
-    expect(state.G).toMatchObject({ arg: 1 });
-    expect(state.ctx.currentPlayer).toBe('1');
+    expect(hoverState.G).toMatchObject({ arg: 42 });
+    expect(hoverState.ctx.turn).toBe(2);
+    expect(hoverState.ctx.currentPlayer).toBe('0');
   });
 
-  test('2 - move with automatic event', () => {
+  test('no replaying automatic event', () => {
     root
       .find('.log-event')
       .at(2)
       .simulate('mouseenter');
 
-    expect(state.G).toMatchObject({ arg: 42 });
-    expect(state.ctx.currentPlayer).toBe('0');
-  });
-
-  test('3 - no replaying automatic event', () => {
-    root
-      .find('.log-event')
-      .at(3)
-      .simulate('mouseenter');
-
-    expect(state.G).toMatchObject({ arg: 42 });
-    expect(state.ctx.currentPlayer).toBe('0');
+    expect(hoverState.G).toMatchObject({ arg: 2 });
+    expect(hoverState.ctx.turn).toBe(2);
+    expect(hoverState.ctx.currentPlayer).toBe('0');
   });
 
   test('mouseleave', () => {
@@ -114,7 +140,7 @@ describe('time travel', () => {
       .at(0)
       .simulate('mouseleave');
 
-    expect(state).toBe(null);
+    expect(hoverState).toBe(null);
   });
 });
 
@@ -186,7 +212,7 @@ describe('pinning', () => {
     expect(gamelog.state().pinned).toBe(null);
     gamelog
       .find('.log-event')
-      .at(2)
+      .at(1)
       .simulate('click');
     expect(gamelog.state().pinned).not.toBe(null);
 

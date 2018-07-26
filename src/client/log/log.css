@@ -6,15 +6,35 @@
  * https://opensource.org/licenses/MIT.
  */
 
+.gamelog {
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  :grid-auto-rows: auto;
+  grid-auto-flow: column;
+}
+
+.gamelog .turn-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-column: 1;
+  background: #555;
+  color: #eee;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #888;
+}
+
 .gamelog .log-event {
+  grid-column: 2;
   cursor: pointer;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   background: #fff;
   border: 1px dotted #ccc;
   border-left: 5px solid #ccc;
-  margin-bottom: 5px;
   padding: 5px;
   text-align: center;
   color: #888;
@@ -23,46 +43,45 @@
   line-height: 25px;
 }
 
-.gamelog.pinned .log-event {
-  opacity: 0.2;
+.gamelog .phase-marker {
+  grid-column: 3;
+  background: #555;
+  border: 1px solid #888;
+  color: #eee;
+  text-align: center;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-orientation: sideways;
+  writing-mode: vertical-rl;
+  line-height: 30px;
 }
-.gamelog.pinned .turn-marker {
+
+.gamelog.pinned .log-event {
   opacity: 0.2;
 }
 
 .gamelog .log-event:hover {
   border-style: solid;
-  background: #ddffdd;
-  color: #222;
+  background: #eee;
 }
 
 .gamelog .log-event.pinned {
   border-style: solid;
-  background: #ddffdd;
-  color: #222;
+  background: #eee;
   opacity: 1;
 }
 
-.gamelog .turn-marker {
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.gamelog .turn-marker:not(:first-child) {
-  margin-top: 20px;
-}
-
 .gamelog div.player0 {
-  border-left-color: #001f3f;
+  border-left-color: #ff851b;
 }
 
 .gamelog div.player1 {
-  border-left-color: #0074d9;
+  border-left-color: #7fdbff;
 }
 
 .gamelog div.player2 {
-  border-left-color: #7fdbff;
+  border-left-color: #0074d9;
 }
 
 .gamelog div.player3 {
@@ -86,7 +105,7 @@
 }
 
 .gamelog div.player8 {
-  border-left-color: #ff851b;
+  border-left-color: #001f3f;
 }
 
 .gamelog div.player9 {
