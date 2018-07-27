@@ -12,6 +12,28 @@ import { Multiplayer } from './multiplayer/multiplayer';
 import { CreateGameReducer } from '../core/reducer';
 
 /**
+ * createDispatchers
+ *
+ * Create action dispatcher wrappers with bound playerID and credentials
+ */
+function createDispatchers(
+  storeActionType,
+  innerActionNames,
+  store,
+  playerID,
+  credentials
+) {
+  return innerActionNames.reduce((dispatchers, name) => {
+    dispatchers[name] = function(...args) {
+      store.dispatch(
+        ActionCreators[storeActionType](name, args, playerID, credentials)
+      );
+    };
+    return dispatchers;
+  }, {});
+}
+
+/**
  * createEventDispatchers
  *
  * Creates a set of dispatchers to dispatch game flow events.
@@ -19,23 +41,7 @@ import { CreateGameReducer } from '../core/reducer';
  * @param {object} store - The Redux store to create dispatchers for.
  * @param {string} playerID - The ID of the player dispatching these events.
  */
-export function createEventDispatchers(
-  eventNames,
-  store,
-  playerID,
-  credentials
-) {
-  let dispatchers = {};
-  for (let i = 0; i < eventNames.length; i++) {
-    const name = eventNames[i];
-    dispatchers[name] = function(...args) {
-      store.dispatch(
-        ActionCreators.gameEvent(name, args, playerID, credentials)
-      );
-    };
-  }
-  return dispatchers;
-}
+export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
 
 /**
  * createMoveDispatchers
@@ -44,18 +50,7 @@ export function createEventDispatchers(
  * @param {Array} moveNames - A list of move names.
  * @param {object} store - The Redux store to create dispatchers for.
  */
-export function createMoveDispatchers(moveNames, store, playerID, credentials) {
-  let dispatchers = {};
-  for (let i = 0; i < moveNames.length; i++) {
-    const name = moveNames[i];
-    dispatchers[name] = function(...args) {
-      store.dispatch(
-        ActionCreators.makeMove(name, args, playerID, credentials)
-      );
-    };
-  }
-  return dispatchers;
-}
+export const createMoveDispatchers = createDispatchers.bind(null, 'makeMove');
 
 /**
  * Implementation of Client (see below).
