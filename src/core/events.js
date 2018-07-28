@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { gameEvent } from './action-creators';
+import { automaticGameEvent } from './action-creators';
 
 /**
  * Events
@@ -40,7 +40,7 @@ export class Events {
    */
   update(state) {
     for (const item of this.dispatch) {
-      const action = gameEvent(item.key, item.args, this.playerID);
+      const action = automaticGameEvent(item.key, item.args, this.playerID);
       state = {
         ...state,
         ...this.flow.processGameEvent(state, action),

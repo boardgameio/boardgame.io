@@ -16,6 +16,7 @@ import { PlayerInfo } from './playerinfo';
 import { DebugMove } from './debug-move';
 import { GameLog } from '../log/log';
 import { restore } from '../../core/action-creators';
+import { parse, stringify } from 'flatted';
 import './debug.css';
 
 /**
@@ -102,14 +103,14 @@ export class Debug extends React.Component {
   }
 
   saveState = () => {
-    const json = JSON.stringify(this.props.gamestate);
+    const json = stringify(this.props.gamestate);
     window.localStorage.setItem('gamestate', json);
   };
 
   restoreState = () => {
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
-      const gamestate = JSON.parse(gamestateJSON);
+      const gamestate = parse(gamestateJSON);
       this.props.store.dispatch(restore(gamestate));
     }
   };
@@ -166,15 +167,21 @@ export class Debug extends React.Component {
       );
     }
 
+    const visualizeAI = this.state.AIMetadata && this.props.visualizeAI;
     let className = 'debug-ui';
+
     if (this.state.dockControls) {
       className += ' docktop';
     }
 
+    if (visualizeAI) {
+      className += ' opacity-100';
+    }
+
     return (
       <div className={className}>
-        {this.state.AIMetadata && (
-          <div className="pane" style={{ maxWidth: '3000px' }}>
+        {visualizeAI && (
+          <div className="ai-visualization">
             {this.props.visualizeAI(this.state.AIMetadata)}
           </div>
         )}

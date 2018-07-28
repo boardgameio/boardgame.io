@@ -7,7 +7,12 @@
  */
 
 import React from 'react';
-import { MCTSVisualizer, MCTSRoot, MCTSNode } from './mcts-visualizer.js';
+import { makeMove } from '../core/action-creators';
+import {
+  MCTSVisualizer,
+  MCTSRoot,
+  MCTSNodeDetails,
+} from './mcts-visualizer.js';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -29,15 +34,8 @@ describe('MCTSRoot', () => {
       children: [],
     };
     const m = Enzyme.mount(<MCTSRoot root={root} />);
-    expect(m.find('.mcts-tree').text()).toContain('value 1');
-    expect(m.find('.mcts-tree').text()).toContain('visits 2');
-    expect(m.find('.mcts-tree').text()).toContain('ratio 50');
-    expect(m.find('.mcts-root').length).toBe(1);
-    expect(m.find('.mcts-node').length).toBe(1);
-
-    root.value = 3;
-    m.setProps({ root });
-    expect(m.find('.mcts-tree').text()).toContain('value 3');
+    expect(m.find('.parents').children().length).toBe(0);
+    expect(m.find('.children').children().length).toBe(0);
   });
 
   test('with children', () => {
@@ -46,52 +44,125 @@ describe('MCTSRoot', () => {
       visits: 2,
       children: [],
     };
-    const node = { value: 10, children: [] };
+    const node = { parentAction: makeMove(), value: 10, children: [] };
     root.children = [node, node];
 
     const m = Enzyme.mount(<MCTSRoot root={root} />);
-    expect(m.find('.mcts-root').text()).toContain('value 1');
-    expect(m.find('.mcts-root').text()).toContain('visits 2');
-    expect(m.find('.mcts-root').text()).toContain('ratio 50');
-    expect(m.find('.mcts-root').length).toBe(1);
-    expect(m.find('.mcts-node').length).toBe(3);
+    expect(m.find('.parents').children().length).toBe(0);
+    expect(m.find('.children').children().length).toBe(2);
   });
 
   test('clicks', () => {
     const root = {
-      value: 1,
-      visits: 2,
+      visits: 1,
       children: [],
     };
-    const node = { parent: root, value: 10, children: [] };
+    const node = { parent: root, parentAction: makeMove(), visits: 2 };
+    node.children = [node];
     root.children = [node, node];
 
     const m = Enzyme.mount(<MCTSRoot root={root} />);
 
     m
-      .find('.mcts-node')
-      .at(1)
+      .find('.children MCTSNode')
+      .at(0)
       .simulate('click');
-    expect(m.find('.mcts-root').text()).toContain('value 10');
 
-    m.find('.mcts-parent').simulate('click');
-    expect(m.find('.mcts-root').text()).toContain('value 1');
+    expect(m.find('.root MCTSNode').text()).toContain('2');
+
+    m.find('.parents MCTSNode').simulate('click');
+    expect(m.find('.root MCTSNode').text()).toContain('1');
+  });
+
+  test('trigger preview of root', () => {
+    const root = {
+      visits: 1,
+      children: [],
+    };
+
+    const m = Enzyme.mount(<MCTSRoot root={root} />);
+
+    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    m
+      .find('MCTSNode')
+      .at(0)
+      .simulate('mouseover');
+    expect(m.find('MCTSNodeDetails').length).toBe(1);
+    m
+      .find('MCTSNode')
+      .at(0)
+      .simulate('mouseout');
+    m.setProps({});
+    expect(m.find('MCTSNodeDetails').length).toBe(0);
+  });
+
+  test('trigger preview of child', () => {
+    const root = {
+      visits: 1,
+      children: [],
+    };
+    const node = { parent: root, parentAction: makeMove(), visits: 2 };
+    node.children = [node];
+    root.children = [node];
+
+    const m = Enzyme.mount(<MCTSRoot root={root} />);
+
+    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    m
+      .find('.children MCTSNode')
+      .at(0)
+      .simulate('mouseover');
+    expect(m.find('MCTSNodeDetails').length).toBe(1);
+    m
+      .find('.children MCTSNode')
+      .at(0)
+      .simulate('mouseout');
+    m.setProps({});
+    expect(m.find('MCTSNodeDetails').length).toBe(0);
+  });
+
+  test('trigger preview of parent', () => {
+    const root = {
+      visits: 1,
+      children: [],
+    };
+    const node = { parent: root, parentAction: makeMove(), visits: 2 };
+    node.children = [node];
+    root.children = [node];
+
+    const m = Enzyme.mount(<MCTSRoot root={node} />);
+
+    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    m
+      .find('.parents MCTSNode')
+      .at(0)
+      .simulate('mouseover');
+    expect(m.find('MCTSNodeDetails').length).toBe(1);
+    m
+      .find('.parents MCTSNode')
+      .at(0)
+      .simulate('mouseout');
+    m.setProps({});
+    expect(m.find('MCTSNodeDetails').length).toBe(0);
   });
 });
 
-describe('MCTSNode', () => {
+describe('MCTSNodeDetails', () => {
   test('basic', () => {
     const node = {
       value: 1,
       visits: 2,
+      isRoot: true,
       parentVisits: 2,
+      children: [],
       renderState: () => 'blah',
     };
-    const m = Enzyme.mount(<MCTSNode {...node} />);
-    expect(m.find('.mcts-node').text()).toContain('value 1');
-    expect(m.find('.mcts-node').text()).toContain('visits 2');
-    expect(m.find('.mcts-node').text()).toContain('ratio 50');
-    expect(m.find('.mcts-node').text()).toContain('uct');
-    expect(m.find('.mcts-node').text()).toContain('blah');
+    const m = Enzyme.mount(<MCTSNodeDetails {...node} />);
+    expect(m.text()).toContain('value 1');
+    expect(m.text()).toContain('visits 2');
+    expect(m.text()).toContain('ratio 50');
+    expect(m.text()).toContain('uct');
+    expect(m.text()).toContain('blah');
+    expect(m.html()).toContain('mcts-root');
   });
 });

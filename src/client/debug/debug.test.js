@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { stringify } from 'flatted';
 import { restore, makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { CreateGameReducer } from '../../core/reducer';
@@ -84,7 +85,7 @@ describe('save / restore', () => {
   });
 
   const restoredState = { restore: true };
-  let restoredJSON = JSON.stringify(restoredState);
+  let restoredJSON = stringify(restoredState);
   const setItem = jest.fn();
   const getItem = jest.fn(() => restoredJSON);
 
@@ -198,9 +199,9 @@ test('toggle AI visualizer', () => {
     />
   );
 
-  expect(debug.find('.pane').length).toBe(1);
+  expect(debug.find('.ai-visualization').length).toBe(0);
   debug.setState({ AIMetadata: {} });
-  expect(debug.find('.pane').length).toBe(2);
+  expect(debug.find('.ai-visualization').length).toBe(1);
 });
 
 describe('simulate', () => {

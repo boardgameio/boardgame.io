@@ -126,6 +126,7 @@
   },
   "dependencies": {
     "@koa/cors": "^2.2.1",
+    "flatted": "^0.2.3",
     "koa": "^2.3.0",
     "koa-body": "^2.5.0",
     "koa-router": "^7.2.1",
@@ -134,7 +135,7 @@
     "lru-cache": "^4.1.1",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
-    "redux": "^3.7.2",
+    "redux": "^4.0.0",
     "socket.io": "^2.0.3",
     "uuid": "3.2.1"
   },
@@ -161,7 +162,7 @@
       "raf/polyfill"
     ],
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io)/)"
+      "node_modules/(?!(boardgame.io|flatted)/)"
     ],
     "testPathIgnorePatterns": [
       "/examples/react-native/",
