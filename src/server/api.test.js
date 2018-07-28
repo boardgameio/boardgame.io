@@ -11,6 +11,8 @@ import request from 'supertest';
 import { isActionFromAuthenticPlayer, createApiServer } from './api';
 import Game from '../core/game';
 
+jest.setTimeout(2000000000);
+
 describe('.isActionFromAuthenticPlayer', () => {
   let action;
   let db;
@@ -172,7 +174,7 @@ describe('.createApiServer', () => {
     });
 
     describe('for an unprotected lobby server', () => {
-      beforeEach(async done => {
+      beforeEach(async () => {
         delete process.env.API_SECRET;
 
         app = createApiServer({ db, games });
@@ -180,8 +182,6 @@ describe('.createApiServer', () => {
         response = await request(app.callback())
           .post('/games/foo/create')
           .send('numPlayers=3');
-
-        done();
       });
 
       test('is successful', () => {
@@ -365,7 +365,7 @@ describe('.createApiServer', () => {
       });
 
       describe('with the lobby token', () => {
-        beforeEach(async done => {
+        beforeEach(async () => {
           db = {
             get: async () => {
               return {
@@ -385,8 +385,6 @@ describe('.createApiServer', () => {
             .post('/games/foo/1/join')
             .set('API-Secret', 'protected')
             .send('playerID=0&playerName=alice');
-
-          done();
         });
 
         test('succeeds', () => {
