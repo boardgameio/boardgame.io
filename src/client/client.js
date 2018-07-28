@@ -40,6 +40,7 @@ function createDispatchers(
  * @param {Array} eventNames - A list of event names.
  * @param {object} store - The Redux store to create dispatchers for.
  * @param {string} playerID - The ID of the player dispatching these events.
+ * @param {string} credentials - A key indicating that the player is authorized to play.
  */
 export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
 
@@ -49,6 +50,8 @@ export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
  * Creates a set of dispatchers to make moves.
  * @param {Array} moveNames - A list of move names.
  * @param {object} store - The Redux store to create dispatchers for.
+ * @param {string} playerID - The ID of the player dispatching these events.
+ * @param {string} credentials - A key indicating that the player is authorized to play.
  */
 export const createMoveDispatchers = createDispatchers.bind(null, 'makeMove');
 
