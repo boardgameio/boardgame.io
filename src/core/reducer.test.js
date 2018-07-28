@@ -83,6 +83,10 @@ test('disable move by invalid playerIDs', () => {
   state = reducer(state, makeMove('A', null, '1'));
   expect(state._stateID).toBe(0);
 
+  // playerID="1" cannot call events right now.
+  state = reducer(state, gameEvent('endTurn', null, '1'));
+  expect(state._stateID).toBe(0);
+
   // playerID="0" can move.
   state = reducer(state, makeMove('A', null, '0'));
   expect(state._stateID).toBe(1);

@@ -94,6 +94,19 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        // Ignore the event if the player isn't allowed to make it.
+        if (
+          action.payload.playerID !== null &&
+          action.payload.playerID !== undefined &&
+          !game.flow.canPlayerCallEvent(
+            state.G,
+            state.ctx,
+            action.payload.playerID
+          )
+        ) {
+          return state;
+        }
+
         // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
         // Initialize Events API.
@@ -128,7 +141,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // Ignore the move if the player cannot make it at this point.
+        // Ignore the move if the player isn't allowed to make it.
         if (
           action.payload.playerID !== null &&
           action.payload.playerID !== undefined &&

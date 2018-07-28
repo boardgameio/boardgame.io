@@ -12,6 +12,7 @@ const Redux = require('redux');
 
 import { DBFromEnv } from './db';
 import { CreateGameReducer } from '../core/reducer';
+import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
 const PING_TIMEOUT = 20 * 1e3;
@@ -64,8 +65,19 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           return { error: 'unauthorized action' };
         }
 
-        // Check whether the player is allowed to make the move
-        if (!game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)) {
+        // Check whether the player is allowed to make the move.
+        if (
+          action.type == MAKE_MOVE &&
+          !game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)
+        ) {
+          return;
+        }
+
+        // Check whether the player is allowed to call the event.
+        if (
+          action.type == GAME_EVENT &&
+          !game.flow.canPlayerCallEvent(state.G, state.ctx, playerID)
+        ) {
           return;
         }
 

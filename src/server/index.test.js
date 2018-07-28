@@ -255,52 +255,62 @@ test('action', async () => {
   // ... and not if player != currentPlayer
   await io.socket.receive('action', action, 1, 'gameID', '100');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
+  await io.socket.receive(
+    'action',
+    ActionCreators.makeMove(),
+    1,
+    'gameID',
+    '100'
+  );
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // Another broadcasted action.
   await io.socket.receive('action', action, 1, 'gameID', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(2);
 });
 
-test('playerView (sync)', async () => {
-  // Write the player into G.
-  const game = Game({
-    playerView: (G, ctx, player) => {
-      return Object.assign({}, G, { player });
-    },
+describe('playerView', () => {
+  test('sync', async () => {
+    // Write the player into G.
+    const game = Game({
+      playerView: (G, ctx, player) => {
+        return Object.assign({}, G, { player });
+      },
+    });
+
+    const server = Server({ games: [game] });
+    const io = server.app.context.io;
+
+    await io.socket.receive('sync', 'gameID', 0);
+    expect(io.socket.emit).toHaveBeenCalledTimes(1);
+    expect(io.socket.emit.mock.calls[0][2].G).toEqual({ player: 0 });
   });
 
-  const server = Server({ games: [game] });
-  const io = server.app.context.io;
+  test('action', async () => {
+    const game = Game({
+      playerView: (G, ctx, player) => {
+        return Object.assign({}, G, { player });
+      },
+    });
+    const server = Server({ games: [game] });
+    const io = server.app.context.io;
+    const action = ActionCreators.gameEvent('endTurn');
 
-  await io.socket.receive('sync', 'gameID', 0);
-  expect(io.socket.emit).toHaveBeenCalledTimes(1);
-  expect(io.socket.emit.mock.calls[0][2].G).toEqual({ player: 0 });
-});
+    io.socket.id = 'first';
+    await io.socket.receive('sync', 'gameID', '0', 2);
+    io.socket.id = 'second';
+    await io.socket.receive('sync', 'gameID', '1', 2);
+    io.socket.emit.mockReset();
 
-test('playerView (action)', async () => {
-  const game = Game({
-    playerView: (G, ctx, player) => {
-      return Object.assign({}, G, { player });
-    },
+    await io.socket.receive('action', action, 0, 'gameID', '0');
+    expect(io.socket.emit).toHaveBeenCalledTimes(2);
+
+    const G_player0 = io.socket.emit.mock.calls[0][2].G;
+    const G_player1 = io.socket.emit.mock.calls[1][2].G;
+
+    expect(G_player0.player).toBe('0');
+    expect(G_player1.player).toBe('1');
   });
-  const server = Server({ games: [game] });
-  const io = server.app.context.io;
-  const action = ActionCreators.gameEvent('endTurn');
-
-  io.socket.id = 'first';
-  await io.socket.receive('sync', 'gameID', '0', 2);
-  io.socket.id = 'second';
-  await io.socket.receive('sync', 'gameID', '1', 2);
-  io.socket.emit.mockReset();
-
-  await io.socket.receive('action', action, 0, 'gameID', '0');
-  expect(io.socket.emit).toHaveBeenCalledTimes(2);
-
-  const G_player0 = io.socket.emit.mock.calls[0][2].G;
-  const G_player1 = io.socket.emit.mock.calls[1][2].G;
-
-  expect(G_player0.player).toBe('0');
-  expect(G_player1.player).toBe('1');
 });
 
 test('custom db implementation', async () => {

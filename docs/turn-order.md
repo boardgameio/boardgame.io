@@ -17,7 +17,9 @@ ctx: {
 }
 ```
 
-`currentPlayer` is basically the owner of the current turn.
+`currentPlayer` is basically the owner of the current turn,
+and the only player that can call events like `endTurn` and
+`endPhase`.
 
 `actionPlayers` are the set of players that can currently
 make a move. It defaults to a list containing just the
