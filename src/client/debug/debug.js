@@ -174,10 +174,6 @@ export class Debug extends React.Component {
       className += ' docktop';
     }
 
-    if (visualizeAI) {
-      className += ' opacity-100';
-    }
-
     return (
       <div className={className}>
         {visualizeAI && (
