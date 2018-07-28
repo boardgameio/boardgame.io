@@ -194,11 +194,13 @@ $ npx babel-node --presets zero src/server.js
 Navigate to http://localhost:8000/
 ```
 
-#### Database
+#### Storage
 
-The default storage implementation is an in-memory map. However,
-you can provide your own adapter to connect to any backend, or
-use the bundled MongoDB connector.
+The default storage implementation is an in-memory map.
+If you want something that's more persistent, you can use one
+of the bundled connectors for various backends, or even implement
+your own connector. For example, here is how you can keep your
+game state in a MongoDB.
 
 ```js
 const { Server, Mongo } = require('boardgame.io/server');
@@ -215,4 +217,4 @@ const server = Server({
 server.run(8000);
 ```
 
-!> You can get a free MongoDB instance at places like mlab.com.
+See [here](storage.md) for more details about how to customize storage.
