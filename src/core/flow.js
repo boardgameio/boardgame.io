@@ -6,7 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { GetCurrentPlayer, TurnOrder } from './turn-order';
+import {
+  InitTurnOrderState,
+  UpdateTurnOrderState,
+  TurnOrder,
+} from './turn-order';
 import { Random } from './random';
 import { Events } from './events';
 import { automaticGameEvent } from './action-creators';
@@ -339,14 +343,9 @@ export function FlowWithPhases({
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
     const G = config.onPhaseBegin(state.G, state.ctx);
-
-    const ctx = { ...state.ctx };
-    ctx.playOrderPos = config.turnOrder.first(G, ctx);
-    ctx.currentPlayer = GetCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
-    ctx.actionPlayers = [ctx.currentPlayer];
-    ctx.allowedMoves = config.allowedMoves(G, ctx);
-
-    return { ...state, G, ctx };
+    const ctx = InitTurnOrderState(state.G, state.ctx, config.turnOrder);
+    const allowedMoves = config.allowedMoves(G, ctx);
+    return { ...state, G, ctx: { ...ctx, allowedMoves } };
   };
 
   const startTurn = function(state, config) {
@@ -459,29 +458,15 @@ export function FlowWithPhases({
       return { ...state, G, ctx: { ...ctx, gameover } };
     }
 
-    // Update current player.
-    let playOrderPos = ctx.playOrderPos;
-    let currentPlayer = ctx.currentPlayer;
-    if (nextPlayer === 'any') {
-      playOrderPos = undefined;
-      currentPlayer = nextPlayer;
-    } else if (ctx.playOrder.includes(nextPlayer)) {
-      playOrderPos = ctx.playOrder.indexOf(nextPlayer);
-      currentPlayer = nextPlayer;
-    } else {
-      playOrderPos = conf.turnOrder.next(G, ctx);
-      currentPlayer = GetCurrentPlayer(ctx.playOrder, playOrderPos);
-    }
+    // Update turn order state.
+    ctx = UpdateTurnOrderState(G, ctx, conf.turnOrder, nextPlayer);
 
-    const actionPlayers = [currentPlayer];
     // Update turn.
     const turn = ctx.turn + 1;
+
     // Update state.
     ctx = {
       ...ctx,
-      playOrderPos,
-      currentPlayer,
-      actionPlayers,
       turn,
       currentPlayerMoves: 0,
     };

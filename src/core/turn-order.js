@@ -29,15 +29,61 @@ export const Pass = (G, ctx) => {
 };
 
 /**
- * Converts a playOrderPos into its value in playOrder.
+ * Converts a playOrderPos index into its value in playOrder.
  * @param {Array} playOrder - An array of player ID's.
  * @param {number} playOrderPos - An index into the above.
  */
-export function GetCurrentPlayer(playOrder, playOrderPos) {
+function getCurrentPlayer(playOrder, playOrderPos) {
   if (playOrderPos === undefined) {
     return 'any';
   }
   return playOrder[playOrderPos] + '';
+}
+
+/**
+ * Called at the start of a phase to initialize turn order state.
+ * @param {object} G - The game object G.
+ * @param {object} ctx - The game object ctx.
+ * @param {object} turnOrder - A turn order object for this phase.
+ */
+export function InitTurnOrderState(G, ctx, turnOrder) {
+  const playOrderPos = turnOrder.first(G, ctx);
+  const currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
+  const actionPlayers = [currentPlayer];
+  return { ...ctx, currentPlayer, playOrderPos, actionPlayers };
+}
+
+/**
+ * Called at the end of each turn to update the turn order state.
+ * @param {object} G - The game object G.
+ * @param {object} ctx - The game object ctx.
+ * @param {object} turnOrder - A turn order object for this phase.
+ * @param {string} nextPlayer - An optional argument to endTurn that
+                                may specify the next player.
+ */
+export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
+  let playOrderPos = ctx.playOrderPos;
+  let currentPlayer = ctx.currentPlayer;
+
+  if (nextPlayer === 'any') {
+    playOrderPos = undefined;
+    currentPlayer = nextPlayer;
+  } else if (ctx.playOrder.includes(nextPlayer)) {
+    playOrderPos = ctx.playOrder.indexOf(nextPlayer);
+    currentPlayer = nextPlayer;
+  } else {
+    playOrderPos = turnOrder.next(G, ctx);
+    currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
+  }
+
+  const actionPlayers = [currentPlayer];
+
+  return {
+    ...ctx,
+    playOrderPos,
+    currentPlayer,
+    actionPlayers,
+  };
 }
 
 /**
