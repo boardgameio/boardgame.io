@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { TurnOrder } from './turn-order';
+import { GetCurrentPlayer, TurnOrder } from './turn-order';
 import { Random } from './random';
 import { Events } from './events';
 import { automaticGameEvent } from './action-creators';
@@ -336,20 +336,13 @@ export function FlowWithPhases({
     return conf.endTurnIf(G, ctx);
   };
 
-  const getCurrentPlayer = (playOrder, playOrderPos) => {
-    if (playOrderPos === undefined) {
-      return 'any';
-    }
-    return playOrder[playOrderPos] + '';
-  };
-
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
     const G = config.onPhaseBegin(state.G, state.ctx);
 
     const ctx = { ...state.ctx };
     ctx.playOrderPos = config.turnOrder.first(G, ctx);
-    ctx.currentPlayer = getCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
+    ctx.currentPlayer = GetCurrentPlayer(ctx.playOrder, ctx.playOrderPos);
     ctx.actionPlayers = [ctx.currentPlayer];
     ctx.allowedMoves = config.allowedMoves(G, ctx);
 
@@ -477,7 +470,7 @@ export function FlowWithPhases({
       currentPlayer = nextPlayer;
     } else {
       playOrderPos = conf.turnOrder.next(G, ctx);
-      currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
+      currentPlayer = GetCurrentPlayer(ctx.playOrder, playOrderPos);
     }
 
     const actionPlayers = [currentPlayer];

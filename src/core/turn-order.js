@@ -29,6 +29,18 @@ export const Pass = (G, ctx) => {
 };
 
 /**
+ * Converts a playOrderPos into its value in playOrder.
+ * @param {Array} playOrder - An array of player ID's.
+ * @param {number} playOrderPos - An index into the above.
+ */
+export function GetCurrentPlayer(playOrder, playOrderPos) {
+  if (playOrderPos === undefined) {
+    return 'any';
+  }
+  return playOrder[playOrderPos] + '';
+}
+
+/**
  * Set of different turn orders possible in a phase.
  * These are meant to be passed to the `turnOrder` setting
  * in the flow objects.
