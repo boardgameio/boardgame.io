@@ -30,6 +30,9 @@ export const Pass = (G, ctx) => {
 
 /**
  * Event to change the actionPlayers array.
+ * @param {object} state - The game state.
+ * @param {object} actionPlayers - An array of playerID's or
+ *                                 TurnOrder.ALL.
  */
 export function ChangeActionPlayers(state, actionPlayers) {
   if (actionPlayers == TurnOrder.ALL) {
@@ -102,16 +105,24 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
   };
 }
 
-/**
- * Set of different turn orders possible in a phase.
- * These are meant to be passed to the `turnOrder` setting
- * in the flow objects.
- *
- * Each object defines the first player when the phase / game
- * begins, and also a function `next` to determine who the
- * next player is when the turn ends.
- */
 export const TurnOrder = {
+  /**
+   * Constant that can be used as an argument to
+   * changeActionPlayers to make it set actionPlayers
+   * to all the players in the game.
+   */
+  ALL: 'all',
+
+  /**
+   * Set of different turn orders possible in a phase.
+   * These are meant to be passed to the `turnOrder` setting
+   * in the flow objects.
+   *
+   * Each object defines the first player when the phase / game
+   * begins, and also a function `next` to determine who the
+   * next player is when the turn ends.
+   */
+
   /**
    * DEFAULT
    *
@@ -131,8 +142,6 @@ export const TurnOrder = {
     first: () => undefined,
     next: () => undefined,
   },
-
-  ALL: 'all',
 
   /**
    * SKIP
