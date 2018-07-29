@@ -29,6 +29,22 @@ export const Pass = (G, ctx) => {
 };
 
 /**
+ * Event to change the actionPlayers array.
+ */
+export function ChangeActionPlayers(state, actionPlayers) {
+  if (actionPlayers == TurnOrder.ALL) {
+    actionPlayers = [...state.ctx.playOrder];
+    return { ...state, ctx: { ...state.ctx, actionPlayers } };
+  }
+
+  if (actionPlayers && actionPlayers.length) {
+    return { ...state, ctx: { ...state.ctx, actionPlayers } };
+  }
+
+  return state;
+}
+
+/**
  * Converts a playOrderPos index into its value in playOrder.
  * @param {Array} playOrder - An array of player ID's.
  * @param {number} playOrderPos - An index into the above.
@@ -115,6 +131,8 @@ export const TurnOrder = {
     first: () => undefined,
     next: () => undefined,
   },
+
+  ALL: 'all',
 
   /**
    * SKIP

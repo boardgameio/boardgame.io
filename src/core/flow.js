@@ -7,6 +7,7 @@
  */
 
 import {
+  ChangeActionPlayers,
   InitTurnOrderState,
   UpdateTurnOrderState,
   TurnOrder,
@@ -491,13 +492,6 @@ export function FlowWithPhases({
     return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
-  function changeActionPlayersEvent(state, actionPlayers) {
-    if (actionPlayers && actionPlayers.length) {
-      return { ...state, ctx: { ...state.ctx, actionPlayers } };
-    }
-    return state;
-  }
-
   function processMove(state, action, dispatch) {
     let conf = phaseMap[state.ctx.phase];
 
@@ -586,7 +580,7 @@ export function FlowWithPhases({
     enabledEvents['endGame'] = endGameEvent;
   }
   if (changeActionPlayers) {
-    enabledEvents['changeActionPlayers'] = changeActionPlayersEvent;
+    enabledEvents['changeActionPlayers'] = ChangeActionPlayers;
   }
 
   return Flow({
