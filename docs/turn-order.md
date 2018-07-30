@@ -26,7 +26,8 @@ make a move. It defaults to a list containing just the
 `currentPlayer`, but you might want to change it in order
 to support actions from other players during the currrent turn
 (for example, if you play a card that forces everyone else
-to discard a card).
+to discard a card). See the [Events](events.md) page for
+documentation on how to do this.
 
 `playOrderPos` is an index into `playOrder` and the way in which it
 is updated is determined by a particular `TurnOrder`. The default
@@ -94,8 +95,24 @@ Game({
 }
 ```
 
-!> If you would like any player to play, then return `undefined` from
-these functions. `TurnOrder.ANY` implements this.
+You may also set `actionPlayers` from a `TurnOrder` object by
+returning an object of type `{ playOrderPos, actionPlayers }`.
+
+```js
+{
+  // Get the initial value of playOrderPos,
+  first: (G, ctx) => { playOrderPos: 0, actionPlayers: ['0'] }
+
+  // Get the next value of playOrderPos when endTurn is called.
+  next: (G, ctx) => {
+    const playOrderPos = (ctx.playOrderPos + 1) % ctx.numPlayers;
+    const actionPlayers = ['0', '1'];
+    return { playOrderPos, actionPlayers };
+}
+```
+
+!> If you would like any player to play, use `TurnOrder.ANY`. It
+sets `actionPlayers` to every player in the game.
 
 #### endTurn / endTurnIf
 
