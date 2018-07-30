@@ -20,6 +20,19 @@ import { parse, stringify } from 'flatted';
 import './debug.css';
 
 /**
+ * Removes all the keys in ctx that begin with a _.
+ */
+function SanitizeCtx(ctx) {
+  let r = {};
+  for (const key in ctx) {
+    if (!key.startsWith('_')) {
+      r[key] = ctx[key];
+    }
+  }
+  return r;
+}
+
+/**
  * Debug
  *
  * Debug pane that displays the game state objects,
@@ -239,7 +252,11 @@ export class Debug extends React.Component {
               <section>
                 <pre className="json">
                   <strong>ctx</strong>:{' '}
-                  {JSON.stringify(this.props.gamestate.ctx, null, 2)}
+                  {JSON.stringify(
+                    SanitizeCtx(this.props.gamestate.ctx),
+                    null,
+                    2
+                  )}
                 </pre>
               </section>
 
