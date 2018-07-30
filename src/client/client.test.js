@@ -148,7 +148,7 @@ test('event dispatchers', () => {
       flow: {
         endPhase: true,
         endGame: true,
-        changeActionPlayers: true,
+        setActionPlayers: true,
       },
     });
     const reducer = CreateGameReducer({ game, numPlayers: 2 });
@@ -158,7 +158,7 @@ test('event dispatchers', () => {
       'endTurn',
       'endPhase',
       'endGame',
-      'changeActionPlayers',
+      'setActionPlayers',
     ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();

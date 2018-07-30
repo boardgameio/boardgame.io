@@ -7,7 +7,7 @@
  */
 
 import {
-  ChangeActionPlayers,
+  SetActionPlayers,
   InitTurnOrderState,
   UpdateTurnOrderState,
   TurnOrder,
@@ -162,7 +162,7 @@ export function Flow({
  *
  * @param {...object} endGame - Set to true to enable the `endGame` event.
  *
- * @param {...object} changeActionPlayers - Set to true to enable the `changeActionPlayers` event.
+ * @param {...object} setActionPlayers - Set to true to enable the `setActionPlayers` event.
  *
  * @param {...object} allowedMoves - List of moves that are allowed.
  *                                   This can be either a list of
@@ -247,7 +247,7 @@ export function FlowWithPhases({
   endTurn,
   endPhase,
   endGame,
-  changeActionPlayers,
+  setActionPlayers,
   undoableMoves,
   allowedMoves,
   optimisticUpdate,
@@ -262,8 +262,8 @@ export function FlowWithPhases({
   if (endGame === undefined) {
     endGame = false;
   }
-  if (changeActionPlayers === undefined) {
-    changeActionPlayers = false;
+  if (setActionPlayers === undefined) {
+    setActionPlayers = false;
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
@@ -600,8 +600,8 @@ export function FlowWithPhases({
   if (endGame) {
     enabledEvents['endGame'] = endGameEvent;
   }
-  if (changeActionPlayers) {
-    enabledEvents['changeActionPlayers'] = ChangeActionPlayers;
+  if (setActionPlayers) {
+    enabledEvents['setActionPlayers'] = SetActionPlayers;
   }
 
   return Flow({

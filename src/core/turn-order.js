@@ -33,7 +33,7 @@ export const Pass = (G, ctx) => {
  * @param {object} actionPlayers - An array of playerID's or
  *                                 TurnOrder.ALL.
  */
-export function ChangeActionPlayers(state, actionPlayers) {
+export function SetActionPlayers(state, actionPlayers) {
   if (actionPlayers == TurnOrder.ALL) {
     actionPlayers = [...state.ctx.playOrder];
     return { ...state, ctx: { ...state.ctx, actionPlayers } };
@@ -137,7 +137,7 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
 export const TurnOrder = {
   /**
    * Constant that can be used as an argument to
-   * changeActionPlayers to make it set actionPlayers
+   * setActionPlayers to make it set actionPlayers
    * to all the players in the game.
    */
   ALL: 'all',

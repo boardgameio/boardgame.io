@@ -32,7 +32,7 @@ const TurnExample = Game({
     playMilitia: (G, ctx) => {
       // Need to keep the currentPlayer inside actionPlayers - otherwise
       // he will not be able to make any move anymore.
-      ctx.events.changeActionPlayers(['0', '1', '2']);
+      ctx.events.setActionPlayers(['0', '1', '2']);
 
       const currentPlayer = ctx.currentPlayer;
       const playersNext = [...G.players];
@@ -44,7 +44,7 @@ const TurnExample = Game({
   },
 
   flow: {
-    changeActionPlayers: true,
+    setActionPlayers: true,
 
     onTurnBegin: (G, ctx) => {
       const currentPlayer = ctx.currentPlayer;

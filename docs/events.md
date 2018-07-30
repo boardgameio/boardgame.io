@@ -45,14 +45,17 @@ then that argument is made available in `ctx.gameover`.
 After the game is over, further state changes to the game
 (via a move or event) are not possible.
 
-##### changeActionPlayers
+##### setActionPlayers
 
 This changes `ctx.actionPlayers` to the provided argument.
 See the guide on [Turn Orders](turn-order.md) for more
 details about `actionPlayers`.
 
+You may pass `TurnOrder.ALL` as an argument to set
+`actionPlayers` to all the players in the game.
+
 This event is not enabled by default and must be enabled
-by setting `changeActionPlayers: true` in the `flow` section
+by setting `setActionPlayers: true` in the `flow` section
 of your game.
 
 ### Triggering an event from a React client.

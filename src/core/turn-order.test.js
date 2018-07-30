@@ -190,13 +190,13 @@ test('playOrder', () => {
 });
 
 describe('change action players', () => {
-  const flow = FlowWithPhases({ changeActionPlayers: true });
+  const flow = FlowWithPhases({ setActionPlayers: true });
   const state = { ctx: flow.ctx(2) };
 
   test('basic', () => {
     const newState = flow.processGameEvent(
       state,
-      gameEvent('changeActionPlayers', [['1']])
+      gameEvent('setActionPlayers', [['1']])
     );
     expect(newState.ctx.actionPlayers).toMatchObject(['1']);
   });
@@ -204,19 +204,19 @@ describe('change action players', () => {
   test('all', () => {
     const newState = flow.processGameEvent(
       state,
-      gameEvent('changeActionPlayers', [TurnOrder.ALL])
+      gameEvent('setActionPlayers', [TurnOrder.ALL])
     );
     expect(newState.ctx.actionPlayers).toMatchObject(['0', '1']);
   });
 
   test('militia', () => {
     const game = Game({
-      flow: { changeActionPlayers: true },
+      flow: { setActionPlayers: true },
 
       moves: {
         playMilitia: (G, ctx) => {
           // change which players need to act
-          ctx.events.changeActionPlayers([1, 2, 3]);
+          ctx.events.setActionPlayers([1, 2, 3]);
           return { ...G, playedCard: 'Militia' };
         },
         dropCards: (G, ctx) => {
@@ -228,11 +228,11 @@ describe('change action players', () => {
             var newActionPlayers = [...ctx.actionPlayers].filter(
               pn => pn !== ctx.playerID
             );
-            ctx.events.changeActionPlayers(newActionPlayers);
+            ctx.events.setActionPlayers(newActionPlayers);
 
             let playedCard = G.playedCard;
             if (actedOnMilitia.length === 3) {
-              ctx.events.changeActionPlayers([0]);
+              ctx.events.setActionPlayers([0]);
               actedOnMilitia = undefined;
               playedCard = undefined;
             }
