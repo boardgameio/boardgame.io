@@ -755,3 +755,22 @@ test('endTurn is not called twice in one move', () => {
   expect(state.ctx.currentPlayer).toBe('0');
   expect(state.ctx.turn).toBe(2);
 });
+
+test('played / allPlayed', () => {
+  let game = Game({
+    moves: { A: () => ({ A: true }) },
+  });
+
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
+
+  let state = reducer(undefined, { type: 'init' });
+
+  state = reducer(state, makeMove('A', null, '0'));
+  state = reducer(state, gameEvent('endTurn', null, '0'));
+  expect(state.ctx.allPlayed).toBe(false);
+  expect(state.ctx._played).toEqual(['0']);
+  state = reducer(state, makeMove('A', null, '1'));
+  state = reducer(state, gameEvent('endTurn', null, '1'));
+  expect(state.ctx.allPlayed).toBe(true);
+  expect(state.ctx._played).toEqual(['0', '1']);
+});

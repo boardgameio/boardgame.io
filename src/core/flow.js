@@ -346,7 +346,7 @@ export function FlowWithPhases({
     const G = config.onPhaseBegin(state.G, state.ctx);
     const ctx = InitTurnOrderState(state.G, state.ctx, config.turnOrder);
     const allowedMoves = config.allowedMoves(G, ctx);
-    return { ...state, G, ctx: { ...ctx, allowedMoves } };
+    return { ...state, G, ctx: { ...ctx, allowedMoves, _played: [] } };
   };
 
   const startTurn = function(state, config) {
@@ -511,9 +511,15 @@ export function FlowWithPhases({
     let conf = phaseMap[state.ctx.phase];
 
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
+    let _played = state.ctx._played;
+    if (action.payload && !_played.includes(action.payload.playerID)) {
+      _played = [..._played, action.payload.playerID];
+    }
+    const allPlayed = _played.length == state.ctx.numPlayers;
+
     state = {
       ...state,
-      ctx: { ...state.ctx, currentPlayerMoves },
+      ctx: { ...state.ctx, currentPlayerMoves, _played, allPlayed },
     };
 
     const G = conf.onMove(state.G, state.ctx, action);
@@ -606,6 +612,8 @@ export function FlowWithPhases({
       currentPlayerMoves: 0,
       playOrder: Array.from(Array(numPlayers), (d, i) => i + ''),
       playOrderPos: 0,
+      _played: [],
+      allPlayed: false,
       phase: phases[0].name,
     }),
     init: state => {
