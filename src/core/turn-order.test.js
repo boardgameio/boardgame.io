@@ -189,7 +189,7 @@ test('playOrder', () => {
   expect(state.ctx.currentPlayer).toBe('2');
 });
 
-describe('change action players', () => {
+describe('SetActionPlayers', () => {
   const flow = FlowWithPhases({ setActionPlayers: true });
   const state = { ctx: flow.ctx(2) };
 
@@ -207,6 +207,32 @@ describe('change action players', () => {
       gameEvent('setActionPlayers', [TurnOrder.ALL])
     );
     expect(newState.ctx.actionPlayers).toMatchObject(['0', '1']);
+  });
+
+  test('once', () => {
+    const game = Game({
+      flow: {
+        setActionPlayers: true,
+      },
+
+      moves: {
+        B: (G, ctx) => {
+          ctx.events.setActionPlayers(['0', '1'], { once: true });
+          return G;
+        },
+        A: G => G,
+      },
+    });
+
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
+
+    let state = reducer(undefined, { type: 'init' });
+    state = reducer(state, makeMove('B', null, '0'));
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+    state = reducer(state, makeMove('A', null, '0'));
+    expect(state.ctx.actionPlayers).toEqual(['1']);
+    state = reducer(state, makeMove('A', null, '1'));
+    expect(state.ctx.actionPlayers).toEqual([]);
   });
 
   test('militia', () => {

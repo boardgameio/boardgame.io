@@ -517,9 +517,22 @@ export function FlowWithPhases({
     }
     const allPlayed = _played.length == state.ctx.numPlayers;
 
+    // Update actionPlayers if _actionPlayersOnce is set.
+    let actionPlayers = state.ctx.actionPlayers;
+    if (state.ctx._actionPlayersOnce == true) {
+      const playerID = action.payload.playerID;
+      actionPlayers = actionPlayers.filter(id => id !== playerID);
+    }
+
     state = {
       ...state,
-      ctx: { ...state.ctx, currentPlayerMoves, _played, allPlayed },
+      ctx: {
+        ...state.ctx,
+        actionPlayers,
+        currentPlayerMoves,
+        _played,
+        allPlayed,
+      },
     };
 
     const G = conf.onMove(state.G, state.ctx, action);

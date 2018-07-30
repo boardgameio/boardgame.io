@@ -33,14 +33,25 @@ export const Pass = (G, ctx) => {
  * @param {object} actionPlayers - An array of playerID's or
  *                                 TurnOrder.ALL.
  */
-export function SetActionPlayers(state, actionPlayers) {
+export function SetActionPlayers(state, actionPlayers, opts) {
+  let _actionPlayersOnce = false;
+  if (opts && opts.once) {
+    _actionPlayersOnce = true;
+  }
+
   if (actionPlayers == TurnOrder.ALL) {
     actionPlayers = [...state.ctx.playOrder];
-    return { ...state, ctx: { ...state.ctx, actionPlayers } };
+    return {
+      ...state,
+      ctx: { ...state.ctx, actionPlayers, _actionPlayersOnce },
+    };
   }
 
   if (actionPlayers && actionPlayers.length) {
-    return { ...state, ctx: { ...state.ctx, actionPlayers } };
+    return {
+      ...state,
+      ctx: { ...state.ctx, actionPlayers, _actionPlayersOnce },
+    };
   }
 
   return state;
