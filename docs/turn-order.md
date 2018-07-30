@@ -74,9 +74,10 @@ A `TurnOrder` object has the following structure:
 }
 ```
 
-The implementation above shows the default round-robin order.
-If you want to skip over every other player (for example), do
-something like this:
+!> The phase ends if `next()` returns `undefined`.
+
+The implementation above shows the default round-robin order that
+repeats indefinitely. If you want to skip over every other player (for example), do something like this:
 
 ```js
 import { Game } from 'boardgame.io/core';
@@ -95,7 +96,7 @@ Game({
 }
 ```
 
-You may also set `actionPlayers` from a `TurnOrder` object by
+!> You may also set `actionPlayers` from a `TurnOrder` object by
 returning an object of type `{ playOrderPos, actionPlayers }`.
 
 ```js

@@ -15,16 +15,39 @@ import { CreateGameReducer } from './reducer';
 describe('turnOrder', () => {
   test('default', () => {
     const flow = FlowWithPhases({
-      phases: [{ name: 'A' }],
+      phases: [{ name: 'A' }, { name: 'B' }],
     });
 
-    let state = { ctx: flow.ctx(10) };
+    let state = { ctx: flow.ctx(2) };
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0']);
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.actionPlayers).toEqual(['1']);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0']);
+    expect(state.ctx.phase).toBe('A');
+  });
+
+  test('once', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.ONCE,
+      phases: [{ name: 'A' }, { name: 'B' }],
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0']);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.actionPlayers).toEqual(['1']);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0']);
+    expect(state.ctx.phase).toBe('B');
   });
 
   test('custom', () => {
@@ -247,17 +270,17 @@ describe('UpdateTurnOrderState', () => {
   };
 
   test('without nextPlayer', () => {
-    const t = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT);
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT);
     expect(t).toMatchObject({ currentPlayer: '1' });
   });
 
   test('with nextPlayer', () => {
-    const t = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, '2');
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, '2');
     expect(t).toMatchObject({ currentPlayer: '2' });
   });
 
   test('with actionPlayers', () => {
-    const t = UpdateTurnOrderState(G, ctx, TurnOrder.ANY);
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.ANY);
     expect(t).toMatchObject({
       currentPlayer: '1',
       actionPlayers: ['0', '1', '2'],

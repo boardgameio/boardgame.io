@@ -459,8 +459,19 @@ export function FlowWithPhases({
       return { ...state, G, ctx: { ...ctx, gameover } };
     }
 
+    let endPhase = false;
+
     // Update turn order state.
-    ctx = UpdateTurnOrderState(G, ctx, conf.turnOrder, nextPlayer);
+    {
+      const { endPhase: a, ctx: b } = UpdateTurnOrderState(
+        G,
+        ctx,
+        conf.turnOrder,
+        nextPlayer
+      );
+      endPhase = a;
+      ctx = b;
+    }
 
     // Update turn.
     const turn = ctx.turn + 1;
@@ -473,11 +484,15 @@ export function FlowWithPhases({
     };
 
     // End phase if condition is met.
-    const end = shouldEndPhase(state);
-    if (end) {
+    const endPhaseArg = shouldEndPhase(state);
+    if (endPhaseArg) {
+      endPhase = true;
+    }
+
+    if (endPhase) {
       return this.dispatch(
         { ...state, G, ctx },
-        automaticGameEvent('endPhase', [end], this.playerID)
+        automaticGameEvent('endPhase', [endPhaseArg], this.playerID)
       );
     }
 

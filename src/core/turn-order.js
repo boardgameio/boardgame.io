@@ -95,7 +95,8 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
 export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
-  let actionPlayers;
+  let actionPlayers = ctx.actionPlayers;
+  let endPhase = false;
 
   if (ctx.playOrder.includes(nextPlayer)) {
     playOrderPos = ctx.playOrder.indexOf(nextPlayer);
@@ -104,27 +105,33 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
   } else {
     const t = turnOrder.next(G, ctx);
 
-    if (t && t.playOrderPos !== undefined) {
-      playOrderPos = t.playOrderPos;
+    if (t == undefined) {
+      endPhase = true;
     } else {
-      playOrderPos = t;
-    }
+      if (t.playOrderPos !== undefined) {
+        playOrderPos = t.playOrderPos;
+      } else {
+        playOrderPos = t;
+      }
 
-    currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
+      currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
 
-    if (t && t.actionPlayers !== undefined) {
-      actionPlayers = t.actionPlayers;
-    } else {
-      actionPlayers = [currentPlayer];
+      if (t.actionPlayers !== undefined) {
+        actionPlayers = t.actionPlayers;
+      } else {
+        actionPlayers = [currentPlayer];
+      }
     }
   }
 
-  return {
+  ctx = {
     ...ctx,
     playOrderPos,
     currentPlayer,
     actionPlayers,
   };
+
+  return { endPhase, ctx };
 }
 
 export const TurnOrder = {
@@ -147,6 +154,8 @@ export const TurnOrder = {
    * first / next can also return an object of type
    * { playOrderPos, actionPlayers }
    * in which case they can also set actionPlayers simultaneously.
+   *
+   * The phase ends if next() returns undefined.
    */
 
   /**
@@ -157,6 +166,21 @@ export const TurnOrder = {
   DEFAULT: {
     first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+  },
+
+  /**
+   * ONCE
+   *
+   * Another round-robin turn order, but goes around just once.
+   * The phase ends after all players have played.
+   */
+  ONCE: {
+    first: () => 0,
+    next: (G, ctx) => {
+      if (ctx.playOrderPos < ctx.playOrder.length - 1) {
+        return ctx.playOrderPos + 1;
+      }
+    },
   },
 
   /**
