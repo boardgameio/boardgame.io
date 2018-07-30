@@ -182,7 +182,7 @@ class _ClientImpl {
     // but we also strip them here so that game developers
     // can see their effects while prototyping.
     let playerID = this.playerID;
-    if (!this.multiplayer && !playerID && state.ctx.currentPlayer != 'any') {
+    if (!this.multiplayer && !playerID) {
       playerID = state.ctx.currentPlayer;
     }
     const G = this.game.playerView(state.G, state.ctx, playerID);

@@ -18,8 +18,7 @@ export const Pass = (G, ctx) => {
   if (G.passOrder !== undefined) {
     passOrder = G.passOrder;
   }
-  const playerID =
-    ctx.currentPlayer === 'any' ? ctx.playerID : ctx.currentPlayer;
+  const playerID = ctx.playerID;
   passOrder.push(playerID);
   G = { ...G, passOrder };
   if (passOrder.length >= ctx.numPlayers) {
@@ -53,9 +52,6 @@ export function ChangeActionPlayers(state, actionPlayers) {
  * @param {number} playOrderPos - An index into the above.
  */
 function getCurrentPlayer(playOrder, playOrderPos) {
-  if (playOrderPos === undefined) {
-    return 'any';
-  }
   return playOrder[playOrderPos] + '';
 }
 
@@ -66,9 +62,25 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * @param {object} turnOrder - A turn order object for this phase.
  */
 export function InitTurnOrderState(G, ctx, turnOrder) {
-  const playOrderPos = turnOrder.first(G, ctx);
+  let playOrderPos;
+  let actionPlayers;
+
+  const t = turnOrder.first(G, ctx);
+
+  if (t.playOrderPos !== undefined) {
+    playOrderPos = t.playOrderPos;
+  } else {
+    playOrderPos = t;
+  }
+
   const currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
-  const actionPlayers = [currentPlayer];
+
+  if (t.actionPlayers !== undefined) {
+    actionPlayers = t.actionPlayers;
+  } else {
+    actionPlayers = [currentPlayer];
+  }
+
   return { ...ctx, currentPlayer, playOrderPos, actionPlayers };
 }
 
@@ -83,19 +95,29 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
 export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
+  let actionPlayers;
 
-  if (nextPlayer === 'any') {
-    playOrderPos = undefined;
-    currentPlayer = nextPlayer;
-  } else if (ctx.playOrder.includes(nextPlayer)) {
+  if (ctx.playOrder.includes(nextPlayer)) {
     playOrderPos = ctx.playOrder.indexOf(nextPlayer);
     currentPlayer = nextPlayer;
+    actionPlayers = [currentPlayer];
   } else {
-    playOrderPos = turnOrder.next(G, ctx);
-    currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
-  }
+    const t = turnOrder.next(G, ctx);
 
-  const actionPlayers = [currentPlayer];
+    if (t && t.playOrderPos !== undefined) {
+      playOrderPos = t.playOrderPos;
+    } else {
+      playOrderPos = t;
+    }
+
+    currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
+
+    if (t && t.actionPlayers !== undefined) {
+      actionPlayers = t.actionPlayers;
+    } else {
+      actionPlayers = [currentPlayer];
+    }
+  }
 
   return {
     ...ctx,
@@ -121,6 +143,10 @@ export const TurnOrder = {
    * Each object defines the first player when the phase / game
    * begins, and also a function `next` to determine who the
    * next player is when the turn ends.
+   *
+   * first / next can also return an object of type
+   * { playOrderPos, actionPlayers }
+   * in which case they can also set actionPlayers simultaneously.
    */
 
   /**
@@ -136,11 +162,19 @@ export const TurnOrder = {
   /**
    * ANY
    *
-   * Any player can play and there isn't a currentPlayer really.
+   * currentPlayer switches around in round-robin fashion, but any player can play on each turn.
    */
   ANY: {
-    first: () => undefined,
-    next: () => undefined,
+    first: (G, ctx) => {
+      return {
+        actionPlayers: [...ctx.playOrder],
+        playOrderPos: ctx.playOrderPos,
+      };
+    },
+    next: (G, ctx) => {
+      const playOrderPos = (ctx.playOrderPos + 1) % ctx.playOrder.length;
+      return { actionPlayers: [...ctx.playOrder], playOrderPos };
+    },
   },
 
   /**

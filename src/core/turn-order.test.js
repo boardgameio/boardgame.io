@@ -7,7 +7,7 @@
  */
 
 import { FlowWithPhases } from './flow';
-import { TurnOrder, Pass } from './turn-order';
+import { UpdateTurnOrderState, TurnOrder, Pass } from './turn-order';
 import Game from './game';
 import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
@@ -25,20 +25,6 @@ describe('turnOrder', () => {
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.actionPlayers).toEqual(['1']);
-  });
-
-  test('any', () => {
-    const flow = FlowWithPhases({
-      phases: [{ name: 'A', turnOrder: TurnOrder.ANY }],
-    });
-
-    let state = { ctx: flow.ctx(10) };
-    state = flow.init(state);
-    expect(state.ctx.currentPlayer).toBe('any');
-    expect(state.ctx.actionPlayers).toEqual(['any']);
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
-    expect(state.ctx.currentPlayer).toBe('any');
-    expect(state.ctx.actionPlayers).toEqual(['any']);
   });
 
   test('custom', () => {
@@ -68,7 +54,7 @@ test('passing', () => {
   let state = reducer(undefined, { type: 'init' });
 
   expect(state.ctx.currentPlayer).toBe('0');
-  state = reducer(state, makeMove('pass'));
+  state = reducer(state, makeMove('pass', null, '0'));
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
   expect(state.G.passOrder).toEqual(['0']);
@@ -83,7 +69,7 @@ test('passing', () => {
   expect(state.G.allPassed).toBe(undefined);
 
   expect(state.ctx.currentPlayer).toBe('1');
-  state = reducer(state, makeMove('pass'));
+  state = reducer(state, makeMove('pass', null, '1'));
   state = reducer(state, gameEvent('endTurn'));
   expect(state.G.allPassed).toBe(undefined);
   expect(state.G.passOrder).toEqual(['0', '1']);
@@ -93,7 +79,7 @@ test('passing', () => {
   expect(state.G.allPassed).toBe(undefined);
 
   expect(state.ctx.currentPlayer).toBe('2');
-  state = reducer(state, makeMove('pass'));
+  state = reducer(state, makeMove('pass', null, '2'));
   expect(state.G.allPassed).toBe(true);
   expect(state.ctx.currentPlayer).toBe('2');
   state = reducer(state, gameEvent('endTurn'));
@@ -114,7 +100,7 @@ test('end game after everyone passes', () => {
   const reducer = CreateGameReducer({ game, numPlayers: 3 });
 
   let state = reducer(undefined, { type: 'init' });
-  expect(state.ctx.currentPlayer).toBe('any');
+  expect(state.ctx.actionPlayers).toEqual(['0', '1', '2']);
 
   // Passes can be make in any order with TurnOrder.ANY.
 
@@ -248,5 +234,33 @@ describe('change action players', () => {
     state = reducer(state, makeMove('dropCards', undefined, 2));
     expect(state.ctx.actionPlayers).toMatchObject([0]);
     expect(state.G).toMatchObject({});
+  });
+});
+
+describe('UpdateTurnOrderState', () => {
+  const G = {};
+  const ctx = {
+    currentPlayer: '0',
+    playOrder: ['0', '1', '2'],
+    playOrderPos: 0,
+    actionPlayers: ['0'],
+  };
+
+  test('without nextPlayer', () => {
+    const t = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT);
+    expect(t).toMatchObject({ currentPlayer: '1' });
+  });
+
+  test('with nextPlayer', () => {
+    const t = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, '2');
+    expect(t).toMatchObject({ currentPlayer: '2' });
+  });
+
+  test('with actionPlayers', () => {
+    const t = UpdateTurnOrderState(G, ctx, TurnOrder.ANY);
+    expect(t).toMatchObject({
+      currentPlayer: '1',
+      actionPlayers: ['0', '1', '2'],
+    });
   });
 });

@@ -106,7 +106,7 @@ export function Flow({
 
     canPlayerMakeMove: (G, ctx, playerID) => {
       const actionPlayers = ctx.actionPlayers || [];
-      return actionPlayers.includes(playerID) || actionPlayers.includes('any');
+      return actionPlayers.includes(playerID);
     },
 
     canMakeMove: (G, ctx, moveName) => {

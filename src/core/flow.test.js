@@ -478,26 +478,20 @@ test('canMakeMove', () => {
 
 test('canPlayerMakeMove', () => {
   // default behaviour
-  const pid = 0;
+  const pid = '0';
 
   let flow = Flow({});
   expect(flow.canPlayerMakeMove({}, {}, pid)).toBe(false);
   // NOTE: currentPlayer is not allowed to make a move by default.
-  // his playerID must be included in the actionPlayers array.
-  expect(flow.canPlayerMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['any'] }, pid)).toBe(
-    true
-  );
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: [0] }, pid)).toBe(true);
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: [1, 2, 3] }, pid)).toBe(
-    false
-  );
+  // Their playerID must be included in the actionPlayers array.
+  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['1'] }, pid)).toBe(false);
+  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['0'] }, pid)).toBe(true);
 
   // no one can make a move
   flow = Flow({ canPlayerMakeMove: () => false });
   expect(flow.canPlayerMakeMove({}, {}, pid)).toBe(false);
-  expect(flow.canPlayerMakeMove({}, { currentPlayer: 0 }, pid)).toBe(false);
-  expect(flow.canPlayerMakeMove({}, {}, 'any')).toBe(false);
+  expect(flow.canPlayerMakeMove({}, { actionPlayers: [] }, pid)).toBe(false);
+  expect(flow.canPlayerMakeMove({}, {}, '5')).toBe(false);
 });
 
 test('endGame', () => {
@@ -538,13 +532,6 @@ test('endTurn / endPhase args', () => {
     expect(t.ctx.playOrderPos).toBe(2);
     expect(t.ctx.currentPlayer).toBe('2');
     expect(t.ctx.phase).toBe('C');
-  }
-
-  {
-    let t = state;
-    t = flow.processGameEvent(t, gameEvent('endTurn', 'any'));
-    expect(t.ctx.playOrderPos).toBe(undefined);
-    expect(t.ctx.currentPlayer).toBe('any');
   }
 
   {
