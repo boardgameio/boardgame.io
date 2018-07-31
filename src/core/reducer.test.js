@@ -250,6 +250,22 @@ describe('Random inside setup()', () => {
   });
 });
 
+test('events API inside first onTurnBegin', () => {
+  const game = Game({
+    flow: {
+      setActionPlayers: true,
+      onTurnBegin: (G, ctx) => {
+        ctx.events.setActionPlayers(['0', '1']);
+      },
+    },
+  });
+
+  const reducer = CreateGameReducer({ game });
+  const state = reducer(undefined, { type: 'init' });
+
+  expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+});
+
 test('undo / redo', () => {
   let game = Game({
     moves: {

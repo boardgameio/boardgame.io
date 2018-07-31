@@ -67,9 +67,11 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
   const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
+  const { ctx: ctxWithEvents } = events.update(state);
   initial.G = state.G;
   initial._undo = state._undo;
-  initial.ctx = random.update(state.ctx);
+  initial.ctx = ctxWithEvents;
+  initial.ctx = random.update(initial.ctx);
   initial.ctx = Random.detach(initial.ctx);
   initial.ctx = Events.detach(initial.ctx);
 
