@@ -196,11 +196,7 @@ class _ClientImpl {
     // Secrets are normally stripped on the server,
     // but we also strip them here so that game developers
     // can see their effects while prototyping.
-    let playerID = this.playerID;
-    if (!this.multiplayer && !playerID) {
-      playerID = state.ctx.currentPlayer;
-    }
-    const G = this.game.playerView(state.G, state.ctx, playerID);
+    const G = this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
     let ret = { ...state, isActive, G };
