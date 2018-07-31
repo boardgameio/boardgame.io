@@ -512,15 +512,15 @@ export function FlowWithPhases({
 
     const currentPlayerMoves = state.ctx.currentPlayerMoves + 1;
     let _played = state.ctx._played;
-    if (action.payload && !_played.includes(action.payload.playerID)) {
-      _played = [..._played, action.payload.playerID];
+    if (!_played.includes(action.playerID)) {
+      _played = [..._played, action.playerID];
     }
     const allPlayed = _played.length == state.ctx.numPlayers;
 
     // Update actionPlayers if _actionPlayersOnce is set.
     let actionPlayers = state.ctx.actionPlayers;
     if (state.ctx._actionPlayersOnce == true) {
-      const playerID = action.payload.playerID;
+      const playerID = action.playerID;
       actionPlayers = actionPlayers.filter(id => id !== playerID);
     }
 
@@ -574,7 +574,7 @@ export function FlowWithPhases({
     // Update undo / redo state.
     if (!endTurn) {
       const undo = state._undo || [];
-      const moveType = action.payload.type;
+      const moveType = action.type;
 
       let plainCtx = state.ctx;
       plainCtx = Random.detach(plainCtx);

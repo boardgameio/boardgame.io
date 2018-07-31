@@ -21,12 +21,27 @@ function createDispatchers(
   innerActionNames,
   store,
   playerID,
-  credentials
+  credentials,
+  multiplayer
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
     dispatchers[name] = function(...args) {
+      let assumedPlayerID = playerID;
+
+      // In singleplayer mode, if the client does not have a playerID
+      // associated with it, we attach the currentPlayer as playerID.
+      if (!multiplayer && (playerID === null || playerID === undefined)) {
+        const state = store.getState();
+        assumedPlayerID = state.ctx.currentPlayer;
+      }
+
       store.dispatch(
-        ActionCreators[storeActionType](name, args, playerID, credentials)
+        ActionCreators[storeActionType](
+          name,
+          args,
+          assumedPlayerID,
+          credentials
+        )
       );
     };
     return dispatchers;
@@ -209,14 +224,16 @@ class _ClientImpl {
       this.game.moveNames,
       this.store,
       this.playerID,
-      this.credentials
+      this.credentials,
+      this.multiplayer
     );
 
     this.events = createEventDispatchers(
       this.game.flow.eventNames,
       this.store,
       this.playerID,
-      this.credentials
+      this.credentials,
+      this.multiplayer
     );
   }
 

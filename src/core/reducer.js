@@ -201,7 +201,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         // Allow the flow reducer to process any triggers that happen after moves.
         state = { ...state, ctx: random.attach(state.ctx) };
         state = { ...state, ctx: events.attach(state.ctx) };
-        state = game.flow.processMove(state, action);
+        state = game.flow.processMove(state, action.payload);
         state = events.update(state);
         state = { ...state, ctx: random.update(state.ctx) };
         state = { ...state, ctx: Random.detach(state.ctx) };
