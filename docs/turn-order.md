@@ -47,7 +47,7 @@ The default value is `['0', '1', ... ]`. It provides a level
 of indirection so that you can modify the turn order from
 within your game logic.
 
-#### Available turn orders
+### Available turn orders
 
 ##### DEFAULT
 
@@ -72,12 +72,10 @@ this are to create phases where you want to elicit a response
 from all players in the game. The round-robin feature of this
 turn order is not useful in such cases.
 
-#### Specifying a turn order
+### Specifying a turn order
 
-You can customize this behavior by using the `turnOrder` option.
-This is passed inside a `flow` section of the `Game` configuration.
-The framework comes bundled with a few turn orders in the `TurnOrder`
-object, and you can even provide your own implementation.
+You can change the turn order by using the `turnOrder` option.
+This is passed inside a `flow` section of the `Game` configuration:
 
 ```js
 import { Game, TurnOrder } from 'boardgame.io/core';
@@ -118,7 +116,7 @@ Game({
 }
 ```
 
-#### Implementing a custom turn order
+### Implementing a custom turn order
 
 A `TurnOrder` object has the following structure:
 
@@ -154,8 +152,14 @@ Game({
 }
 ```
 
-!> You may also set `actionPlayers` from a `TurnOrder` object by
-returning an object of type `{ playOrderPos, actionPlayers }`.
+You may also set `actionPlayers` from a `TurnOrder` object by
+returning an object of type:
+
+```js
+{
+  playOrderPos, actionPlayers;
+}
+```
 
 ```js
 {
@@ -170,7 +174,7 @@ returning an object of type `{ playOrderPos, actionPlayers }`.
 }
 ```
 
-#### endTurn / endTurnIf
+### endTurn / endTurnIf
 
 You can also specify the next player during the `endTurn` event.
 The `endTurn` event takes an additional argument specifying
