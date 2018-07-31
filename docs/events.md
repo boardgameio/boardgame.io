@@ -51,10 +51,27 @@ This changes `ctx.actionPlayers` to the provided argument.
 See the guide on [Turn Orders](turn-order.md) for more
 details about `actionPlayers`.
 
-You may pass `TurnOrder.ALL` as an argument to set
-`actionPlayers` to all the players in the game.
+You may use an alternative form for the argument to set
+more advanced options:
 
-This event is not enabled by default and must be enabled
+```
+const opts = {
+  // The array of playerID's.
+  value: [...],
+
+  // Each playerID can play once (after which
+  // their entry is removed from actionPlayers)
+  once: true,
+
+  // Use this instead of value if you want to set
+  // actionPlayers to all the players in the game.
+  all: true,
+};
+
+setActionPlayers(opts);
+```
+
+!> This event is not enabled by default and must be enabled
 by setting `setActionPlayers: true` in the `flow` section
 of your game.
 
