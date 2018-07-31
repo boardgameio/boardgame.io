@@ -56,11 +56,11 @@ test('movesPerTurn', () => {
     let flow = FlowWithPhases({ movesPerTurn: 2 });
     let state = { ctx: flow.ctx(2) };
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(0);
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(1);
   }
 
@@ -71,17 +71,17 @@ test('movesPerTurn', () => {
     });
     let state = { ctx: flow.ctx(2) };
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(0);
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(0);
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(1);
 
     state = flow.processGameEvent(state, gameEvent('endPhase'));
 
     expect(state.ctx.turn).toBe(1);
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('move', null, '1').payload);
     expect(state.ctx.turn).toBe(2);
   }
 });
@@ -756,7 +756,7 @@ test('endTurn is not called twice in one move', () => {
   expect(state.ctx.turn).toBe(2);
 });
 
-test('played / allPlayed', () => {
+test('allPlayed', () => {
   let game = Game({
     moves: { A: () => ({ A: true }) },
   });
@@ -767,10 +767,8 @@ test('played / allPlayed', () => {
 
   state = reducer(state, makeMove('A', null, '0'));
   state = reducer(state, gameEvent('endTurn', null, '0'));
-  expect(state.ctx.allPlayed).toBe(false);
-  expect(state.ctx._played).toEqual(['0']);
+  expect(state.ctx.stats.phase.allPlayed).toBe(false);
   state = reducer(state, makeMove('A', null, '1'));
   state = reducer(state, gameEvent('endTurn', null, '1'));
-  expect(state.ctx.allPlayed).toBe(true);
-  expect(state.ctx._played).toEqual(['0', '1']);
+  expect(state.ctx.stats.phase.allPlayed).toBe(true);
 });
