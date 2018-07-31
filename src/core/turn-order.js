@@ -30,31 +30,37 @@ export const Pass = (G, ctx) => {
 /**
  * Event to change the actionPlayers array.
  * @param {object} state - The game state.
- * @param {object} actionPlayers - An array of playerID's or
- *                                 TurnOrder.ALL.
+ * @param {object} arg - An array of playerID's or <object> of:
+ *   {
+ *     value: [],   // array of playerID's (optional if all is set).
+ *     all: true,   // set value to all playerID's
+ *     once: true,  // players have one move.
+ *   }
  */
-export function SetActionPlayers(state, actionPlayers, opts) {
+export function SetActionPlayers(state, arg) {
   let _actionPlayersOnce = false;
-  if (opts && opts.once) {
+  let actionPlayers = [];
+
+  if (arg.once) {
     _actionPlayersOnce = true;
   }
 
-  if (actionPlayers == TurnOrder.ALL) {
+  if (arg.value) {
+    actionPlayers = arg.value;
+  }
+
+  if (arg.all) {
     actionPlayers = [...state.ctx.playOrder];
-    return {
-      ...state,
-      ctx: { ...state.ctx, actionPlayers, _actionPlayersOnce },
-    };
   }
 
-  if (actionPlayers && actionPlayers.length) {
-    return {
-      ...state,
-      ctx: { ...state.ctx, actionPlayers, _actionPlayersOnce },
-    };
+  if (Array.isArray(arg)) {
+    actionPlayers = arg;
   }
 
-  return state;
+  return {
+    ...state,
+    ctx: { ...state.ctx, actionPlayers, _actionPlayersOnce },
+  };
 }
 
 /**
@@ -145,30 +151,22 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
   return { endPhase, ctx };
 }
 
+/**
+ * Set of different turn orders possible in a phase.
+ * These are meant to be passed to the `turnOrder` setting
+ * in the flow objects.
+ *
+ * Each object defines the first player when the phase / game
+ * begins, and also a function `next` to determine who the
+ * next player is when the turn ends.
+ *
+ * first / next can also return an object of type
+ * { playOrderPos, actionPlayers }
+ * in which case they can also set actionPlayers simultaneously.
+ *
+ * The phase ends if next() returns undefined.
+ */
 export const TurnOrder = {
-  /**
-   * Constant that can be used as an argument to
-   * setActionPlayers to make it set actionPlayers
-   * to all the players in the game.
-   */
-  ALL: 'all',
-
-  /**
-   * Set of different turn orders possible in a phase.
-   * These are meant to be passed to the `turnOrder` setting
-   * in the flow objects.
-   *
-   * Each object defines the first player when the phase / game
-   * begins, and also a function `next` to determine who the
-   * next player is when the turn ends.
-   *
-   * first / next can also return an object of type
-   * { playOrderPos, actionPlayers }
-   * in which case they can also set actionPlayers simultaneously.
-   *
-   * The phase ends if next() returns undefined.
-   */
-
   /**
    * DEFAULT
    *

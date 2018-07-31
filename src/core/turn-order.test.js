@@ -204,7 +204,7 @@ describe('SetActionPlayers', () => {
   test('all', () => {
     const newState = flow.processGameEvent(
       state,
-      gameEvent('setActionPlayers', [TurnOrder.ALL])
+      gameEvent('setActionPlayers', [{ all: true }])
     );
     expect(newState.ctx.actionPlayers).toMatchObject(['0', '1']);
   });
@@ -217,7 +217,7 @@ describe('SetActionPlayers', () => {
 
       moves: {
         B: (G, ctx) => {
-          ctx.events.setActionPlayers(['0', '1'], { once: true });
+          ctx.events.setActionPlayers({ value: ['0', '1'], once: true });
           return G;
         },
         A: G => G,
