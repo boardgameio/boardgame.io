@@ -92,7 +92,7 @@ export class Multiplayer {
     if (!this.socket) {
       if (this.server) {
         var server = this.server;
-        if (server.search(/https?/) === -1) {
+        if (server.search(/https?/) !== 0) {
           server = 'http://' + this.server;
         }
 
