@@ -136,16 +136,24 @@ test('game server is set when provided', () => {
   var hostname = 'host';
   var port = '1234';
   var server = hostname + ':' + port;
+  var serverWithProtocol = 'https://' + hostname + ':' + port;
 
   const m = new Multiplayer({ server });
   m.connect();
   expect(m.socket.io.engine.hostname).toEqual(hostname);
   expect(m.socket.io.engine.port).toEqual(port);
+  expect(m.socket.io.engine.secure).toEqual(false);
 
-  const m2 = new Multiplayer();
+  const m2 = new Multiplayer({ server: serverWithProtocol });
   m2.connect();
-  expect(m2.socket.io.engine.hostname).not.toEqual(hostname);
-  expect(m2.socket.io.engine.port).not.toEqual(port);
+  expect(m2.socket.io.engine.hostname).toEqual(hostname);
+  expect(m2.socket.io.engine.port).toEqual(port);
+  expect(m2.socket.io.engine.secure).toEqual(true);
+
+  const m3 = new Multiplayer();
+  m3.connect();
+  expect(m3.socket.io.engine.hostname).not.toEqual(hostname);
+  expect(m3.socket.io.engine.port).not.toEqual(port);
 });
 
 test('game server accepts enhanced store', () => {
