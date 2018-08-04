@@ -95,6 +95,16 @@ const App = Client({
 });
 ```
 
+You may also specify a protocol here (if you want to use SSL, for example):
+
+```js
+const App = Client({
+  game: TicTacToe,
+  board: TicTacToeBoard,
+  multiplayer: { server: 'https://localhost:8000/' },
+});
+```
+
 #### Associating Clients with Players
 
 Clients needs to be associated with a particular player in order
