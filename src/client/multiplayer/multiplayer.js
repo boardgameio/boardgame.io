@@ -91,10 +91,12 @@ export class Multiplayer {
   connect() {
     if (!this.socket) {
       if (this.server) {
-        this.socket = io(
-          'http://' + this.server + '/' + this.gameName,
-          this.socketOpts
-        );
+        let server = this.server;
+        if (server.search(/^https?:\/\//) == -1) {
+          server = 'http://' + this.server;
+        }
+
+        this.socket = io(server + '/' + this.gameName, this.socketOpts);
       } else {
         this.socket = io('/' + this.gameName, this.socketOpts);
       }
