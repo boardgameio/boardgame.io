@@ -132,28 +132,43 @@ test('move blacklist', () => {
   mockSocket.emit.mockReset();
 });
 
-test('game server is set when provided', () => {
-  var hostname = 'host';
-  var port = '1234';
-  var server = hostname + ':' + port;
-  var serverWithProtocol = 'https://' + hostname + ':' + port;
+describe('server option', () => {
+  const hostname = 'host';
+  const port = '1234';
 
-  const m = new Multiplayer({ server });
-  m.connect();
-  expect(m.socket.io.engine.hostname).toEqual(hostname);
-  expect(m.socket.io.engine.port).toEqual(port);
-  expect(m.socket.io.engine.secure).toEqual(false);
+  test('without protocol', () => {
+    const server = hostname + ':' + port;
+    const m = new Multiplayer({ server });
+    m.connect();
+    expect(m.socket.io.engine.hostname).toEqual(hostname);
+    expect(m.socket.io.engine.port).toEqual(port);
+    expect(m.socket.io.engine.secure).toEqual(false);
+  });
 
-  const m2 = new Multiplayer({ server: serverWithProtocol });
-  m2.connect();
-  expect(m2.socket.io.engine.hostname).toEqual(hostname);
-  expect(m2.socket.io.engine.port).toEqual(port);
-  expect(m2.socket.io.engine.secure).toEqual(true);
+  test('https', () => {
+    const serverWithProtocol = 'https://' + hostname + ':' + port + '/';
+    const m = new Multiplayer({ server: serverWithProtocol });
+    m.connect();
+    expect(m.socket.io.engine.hostname).toEqual(hostname);
+    expect(m.socket.io.engine.port).toEqual(port);
+    expect(m.socket.io.engine.secure).toEqual(true);
+  });
 
-  const m3 = new Multiplayer();
-  m3.connect();
-  expect(m3.socket.io.engine.hostname).not.toEqual(hostname);
-  expect(m3.socket.io.engine.port).not.toEqual(port);
+  test('http', () => {
+    const serverWithProtocol = 'http://' + hostname + ':' + port + '/';
+    const m = new Multiplayer({ server: serverWithProtocol });
+    m.connect();
+    expect(m.socket.io.engine.hostname).toEqual(hostname);
+    expect(m.socket.io.engine.port).toEqual(port);
+    expect(m.socket.io.engine.secure).toEqual(false);
+  });
+
+  test('no server set', () => {
+    const m = new Multiplayer();
+    m.connect();
+    expect(m.socket.io.engine.hostname).not.toEqual(hostname);
+    expect(m.socket.io.engine.port).not.toEqual(port);
+  });
 });
 
 test('game server accepts enhanced store', () => {
