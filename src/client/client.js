@@ -91,8 +91,14 @@ class _ClientImpl {
     this.credentials = credentials;
 
     let server = undefined;
-    if (multiplayer instanceof Object && 'server' in multiplayer) {
-      server = multiplayer.server;
+    let MultiplayerClientImpl = Multiplayer;
+    if (multiplayer instanceof Object) {
+      if ('server' in multiplayer) {
+        server = multiplayer.server;
+      }
+      if ('clientImpl' in multiplayer) {
+        MultiplayerClientImpl = multiplayer.clientImpl;
+      }
       multiplayer = true;
     }
 
@@ -134,7 +140,7 @@ class _ClientImpl {
     this.store = null;
 
     if (multiplayer) {
-      this.multiplayerClient = new Multiplayer({
+      this.multiplayerClient = new MultiplayerClientImpl({
         gameID: gameID,
         playerID: playerID,
         gameName: game.name,
@@ -264,7 +270,7 @@ class _ClientImpl {
  *
  * @param {...object} game - The return value of `Game`.
  * @param {...object} numPlayers - The number of players.
- * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
+ * @param {...object} multiplayer - Set to true or { server: '<host>:<port>', clientImpl?: Multiplayer client class }
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
  * @param {...object} socketOpts - Options to pass to socket.io.
