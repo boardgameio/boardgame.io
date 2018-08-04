@@ -1,3 +1,39 @@
+## v0.25.0
+
+#### Features
+
+* [[fe8a9d0](https://github.com/google/boardgame.io/commit/fe8a9d0)] Added ability to specify server protocol (#247)
+* [[43dcaac](https://github.com/google/boardgame.io/commit/43dcaac)] write turn / phase stats in ctx.stats
+* [[bd8208a](https://github.com/google/boardgame.io/commit/bd8208a)] fabricate playerID in singleplayer mode
+* [[b4e3e09](https://github.com/google/boardgame.io/commit/b4e3e09)] { all: true } option for setActionPlayers
+* [[5d3a34d](https://github.com/google/boardgame.io/commit/5d3a34d)] { once: true } option for setActionPlayers
+* [[75a274c](https://github.com/google/boardgame.io/commit/75a274c)] rename changeActionPlayers to setActionPlayers
+* [[4ec3a61](https://github.com/google/boardgame.io/commit/4ec3a61)] end phase when a turn order runs out
+* [[cb6111b](https://github.com/google/boardgame.io/commit/cb6111b)] retire the string constant 'any'
+* [[36fc47f](https://github.com/google/boardgame.io/commit/36fc47f)] basic support for objective-based AI
+* [[d1f0a3e](https://github.com/google/boardgame.io/commit/d1f0a3e)] improved rendering of turns and phases in the log
+* [[0bc31d6](https://github.com/google/boardgame.io/commit/0bc31d6)] better MCTS visualization
+* [[14a5ad7](https://github.com/google/boardgame.io/commit/14a5ad7)] update redux to 4.0.0
+
+#### Bugfixes
+
+* [[84f07c6](https://github.com/google/boardgame.io/commit/84f07c6)] Do not fabricate playerID for playerView
+* [[c4a11a7](https://github.com/google/boardgame.io/commit/c4a11a7)] ignore events from all but currentPlayer
+* [[6a8b657](https://github.com/google/boardgame.io/commit/6a8b657)] move mongodb and firebase deps to devDependencies
+* [[239f8dd](https://github.com/google/boardgame.io/commit/239f8dd)] Use parse/stringify from flatted lib to support circular structures (fixes #222) (#240)
+* [[edd1df0](https://github.com/google/boardgame.io/commit/edd1df0)] Differentiate automatic game events in the log
+* [[570f40e](https://github.com/google/boardgame.io/commit/570f40e)] don't render AI metadata if visualize is not specified
+* [[a8431c7](https://github.com/google/boardgame.io/commit/a8431c7)] set default RNG seed once per game, not game type
+* [[5090429](https://github.com/google/boardgame.io/commit/5090429)] API: check secret _before_ handling the request (#231)
+* [[1a24791](https://github.com/google/boardgame.io/commit/1a24791)] attach events API early so that it can be used on the first onTurnBegin
+* [[acb9d8c](https://github.com/google/boardgame.io/commit/acb9d8c)] enable events API in initial onTurnBegin/onPhaseBegin
+
+#### Breaking Changes
+
+* `changeActionPlayers` is now `setActionPlayers`. It also supports more advanced [options](http://boardgame.io/#/events?id=setactionplayers).
+* Returning `undefined` from a `TurnOrder` results in the phase ending, not setting `currentPlayer` to `any`.
+* Only the `currentPlayer` can call events (`endTurn`, `endPhase` etc.).
+
 ## v0.24.0
 
 #### Features
