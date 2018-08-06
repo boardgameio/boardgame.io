@@ -1,3 +1,10 @@
+## v0.25.2
+
+#### Bugfixes
+
+* [[a42e07b](https://github.com/google/boardgame.io/commit/a42e07b)] npm audit fix --only=prod
+* [[cfe7296](https://github.com/google/boardgame.io/commit/cfe7296)] update koa and socket.io
+
 ## v0.25.1
 
 #### Bugfixes
