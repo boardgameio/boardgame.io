@@ -98,6 +98,7 @@ export function Client({ game, numPlayers, board, multiplayer, enhancer }) {
       if (board) {
         _board = React.createElement(board, {
           ...state,
+          ...rest,
           gameID,
           playerID,
           isMultiplayer: multiplayer !== undefined,
@@ -106,7 +107,6 @@ export function Client({ game, numPlayers, board, multiplayer, enhancer }) {
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
-          ...rest,
         });
       }
 

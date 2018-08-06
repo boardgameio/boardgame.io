@@ -147,6 +147,7 @@ export function Client({
       if (board) {
         _board = React.createElement(board, {
           ...state,
+          ...rest,
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
@@ -155,7 +156,6 @@ export function Client({
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
-          ...rest,
         });
       }
 

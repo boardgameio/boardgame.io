@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-const MongoClient = require('mongodb').MongoClient;
 const LRU = require('lru-cache');
 
 /**
@@ -20,7 +19,7 @@ export class Mongo {
     if (cacheSize === undefined) cacheSize = 1000;
     if (dbname === undefined) dbname = 'bgio';
 
-    this.client = mockClient || MongoClient;
+    this.client = mockClient || require('mongodb').MongoClient;
     this.url = url;
     this.dbname = dbname;
     this.cache = new LRU({ max: cacheSize });

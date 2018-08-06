@@ -7,7 +7,6 @@
  */
 
 const LRU = require('lru-cache');
-const firebase = require('firebase');
 
 const ENGINE_FIRESTORE = 'Firestore';
 const ENGINE_RTDB = 'RTDB';
@@ -35,7 +34,7 @@ export class Firebase {
       config = {};
     }
 
-    this.client = firebase;
+    this.client = require('firebase');
     this.engine = engine === ENGINE_RTDB ? engine : ENGINE_FIRESTORE;
     this.config = config;
     this.dbname = dbname;
