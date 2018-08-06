@@ -1,3 +1,9 @@
+## v0.25.1
+
+#### Bugfixes
+
+* [[09b523e](https://github.com/google/boardgame.io/commit/09b523e)] require mongo and firebase only if used
+
 ## v0.25.0
 
 #### Features
