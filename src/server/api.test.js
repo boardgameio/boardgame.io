@@ -394,7 +394,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('gets game list', () => {
+  describe('requesting game list', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
@@ -417,6 +417,61 @@ describe('.createApiServer', () => {
 
       test('should get 2 games', async () => {
         expect(JSON.parse(response.text)).toEqual(['foo', 'bar']);
+      });
+    });
+  });
+
+  describe('requesting game instances list', () => {
+    let db;
+    beforeEach(() => {
+      delete process.env.API_SECRET;
+      db = {
+        get: async () => {
+          return {
+            players: {
+              '0': {
+                id: 0,
+                credentials: '15ad3d1b-9a6a-407e-97dd-7c80f43aa826',
+              },
+              '1': {
+                id: 1,
+                credentials: '6e7bf0a0-d9d8-4681-a11c-b53a84e583a1',
+              },
+            },
+          };
+        },
+        set: async () => {},
+        list: async () => {
+          return [
+            ['bar:bar-0', {}],
+            ['bar:bar-0:metadata', { players: { '0': {} } }],
+            ['foo:foo-0', {}],
+            ['foo:foo-0:metadata', { players: { '0': {} } }],
+            ['bar:bar-1', {}],
+            ['bar:bar-1:metadata', { players: { '1': {} } }],
+          ];
+        },
+      };
+    });
+    describe('when given 2 games', async () => {
+      let response;
+      let instances;
+      beforeEach(async () => {
+        let games = [Game({ name: 'foo' }), Game({ name: 'bar' })];
+        let app = createApiServer({ db, games });
+        response = await request(app.callback()).get('/games/bar');
+        instances = JSON.parse(response.text).game_instances;
+      });
+      test('returns instances of the selected game', async () => {
+        expect(instances.length).toEqual(2);
+      });
+      test('returns game ids', async () => {
+        expect(instances[0].game_id).toEqual('bar-0');
+        expect(instances[1].game_id).toEqual('bar-1');
+      });
+      test('returns player names', async () => {
+        expect(instances[0].players).toEqual(['0']);
+        expect(instances[1].players).toEqual(['1']);
       });
     });
   });
