@@ -37,6 +37,10 @@ get done before we are ready for a v1 release.
 * [ ] turn order customizations ([issue](https://github.com/google/boardgame.io/issues/154)) **[help needed]**
 * [ ] log improvements ([issue](https://github.com/google/boardgame.io/issues/227))
 
+### Server
+
+* [ ] abstract away server component ([issue](https://github.com/google/boardgame.io/issues/251))
+
 ### Documentation
 
 * [ ] code organization best practices
