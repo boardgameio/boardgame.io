@@ -173,52 +173,6 @@ test('action', async () => {
   await io.socket.receive('action', action, 0, 'gameID', '0');
   expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
     G: {},
-    _initial: {
-      G: {},
-      _initial: {},
-      _redo: [],
-      _stateID: 0,
-      _undo: [
-        {
-          G: {},
-          ctx: {
-            _random: { seed: 0 },
-            actionPlayers: ['0'],
-            allPlayed: false,
-            allowedMoves: null,
-            currentPlayer: '0',
-            currentPlayerMoves: 0,
-            numPlayers: 2,
-            phase: 'default',
-            playOrder: ['0', '1'],
-            playOrderPos: 0,
-            stats: {
-              phase: { allPlayed: false, numMoves: {} },
-              turn: { numMoves: {} },
-            },
-            turn: 0,
-          },
-        },
-      ],
-      ctx: {
-        _random: { seed: 0 },
-        actionPlayers: ['0'],
-        allPlayed: false,
-        allowedMoves: null,
-        currentPlayer: '0',
-        currentPlayerMoves: 0,
-        numPlayers: 2,
-        phase: 'default',
-        playOrder: ['0', '1'],
-        playOrderPos: 0,
-        stats: {
-          phase: { allPlayed: false, numMoves: {} },
-          turn: { allPlayed: false, numMoves: {} },
-        },
-        turn: 0,
-      },
-      log: [],
-    },
     _redo: [],
     _stateID: 1,
     _undo: [

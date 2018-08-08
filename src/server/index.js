@@ -94,6 +94,8 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
             const newState = Object.assign({}, state, {
               G: game.playerView(state.G, ctx, playerID),
               ctx: ctx,
+              // _initial is sent during "sync" already, no need to send it again
+              _initial: undefined,
             });
 
             if (client === socket.id) {
