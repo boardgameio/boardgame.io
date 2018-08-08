@@ -34,7 +34,7 @@ get done before we are ready for a v1 release.
 
 ### Core
 
-* [ ] turn order customizations ([issue](https://github.com/google/boardgame.io/issues/154)) **[help needed]**
+* [ ] turn order customizations ([issue](https://github.com/google/boardgame.io/issues/154))
 * [ ] log improvements ([issue](https://github.com/google/boardgame.io/issues/227))
 
 ### Server
