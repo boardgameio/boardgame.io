@@ -84,28 +84,41 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         if (state._stateID == stateID) {
           // Update server's version of the store.
           store.dispatch(action);
-          state = store.getState();
+          const newState = store.getState();
+
+          // get new log entries that were attached during execution of the action.
+          // slice called with negative index extracts last N elements
+          const deltalog = newState.log.slice(
+            -(newState.log.length - state.log.length)
+          );
 
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
             const { playerID } = clientInfo.get(client);
-            const ctx = Object.assign({}, state.ctx, { _random: undefined });
-            const newState = Object.assign({}, state, {
-              G: game.playerView(state.G, ctx, playerID),
+
+            const ctx = Object.assign({}, newState.ctx, { _random: undefined });
+            const transferState = Object.assign({}, newState, {
+              G: game.playerView(newState.G, ctx, playerID),
               ctx: ctx,
+            });
+
+            const minifiedState = Object.assign({}, transferState, {
+              // undefined the log and just transfer the delta
+              log: undefined,
+              deltalog: deltalog,
               // _initial is sent during "sync" already, no need to send it again
               _initial: undefined,
             });
 
             if (client === socket.id) {
-              socket.emit('sync', gameID, newState);
+              socket.emit('sync', gameID, minifiedState);
             } else {
-              socket.to(client).emit('sync', gameID, newState);
+              socket.to(client).emit('sync', gameID, minifiedState);
             }
           }
 
-          await db.set(gameID, store.getState());
+          await db.set(gameID, newState);
         }
 
         return;

@@ -227,3 +227,40 @@ test('changing a playerID resets the state before resync', () => {
     })
   );
 });
+
+test('deltalog', () => {
+  const mockSocket = new MockSocket();
+  const m = new Multiplayer({ socket: mockSocket });
+  m.connect();
+  const game = Game({});
+  const store = m.createStore(CreateGameReducer({ game }));
+
+  // receive a sync message with one deltalog entry
+  mockSocket.receive('sync', 'default:default', {
+    _stateID: 1,
+    deltalog: [{ msg: 'dl1' }],
+  });
+  let statelog = store.getState().log;
+  expect(statelog).toMatchObject([{ msg: 'dl1' }]);
+
+  // receive another sync message with one deltalog entry
+  mockSocket.receive('sync', 'default:default', {
+    _stateID: 2,
+    deltalog: [{ msg: 'dl2' }],
+  });
+  statelog = store.getState().log;
+  expect(statelog).toMatchObject([{ msg: 'dl1' }, { msg: 'dl2' }]);
+
+  // more than one entry in deltalog
+  mockSocket.receive('sync', 'default:default', {
+    _stateID: 3,
+    deltalog: [{ msg: 'dl3' }, { msg: 'dl4' }],
+  });
+  statelog = store.getState().log;
+  expect(statelog).toMatchObject([
+    { msg: 'dl1' },
+    { msg: 'dl2' },
+    { msg: 'dl3' },
+    { msg: 'dl4' },
+  ]);
+});

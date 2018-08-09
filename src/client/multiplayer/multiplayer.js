@@ -104,9 +104,16 @@ export class Multiplayer {
 
     this.socket.on('sync', (gameID, state) => {
       const currentState = this.store.getState();
+
       if (gameID == this.gameID && state._stateID >= currentState._stateID) {
-        // restore _initial that was stripped server-side
-        state._initial = currentState._initial;
+        state = Object.assign({}, state, {
+          // re-apply the deltalog
+          log: [...currentState.log, ...(state.deltalog || [])],
+          // drop deltalog
+          deltalog: undefined,
+          // restore _initial that was stripped server-side
+          _initial: currentState._initial,
+        });
 
         const action = ActionCreators.restore(state);
         action._remote = true;
