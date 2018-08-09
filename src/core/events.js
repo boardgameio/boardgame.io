@@ -41,11 +41,11 @@ export class Events {
   update(state) {
     for (const item of this.dispatch) {
       const action = automaticGameEvent(item.key, item.args, this.playerID);
-      const adsf = this.flow.processGameEvent(state, action);
-      const deltalog = [...(state.deltalog || []), ...(adsf.deltalog || [])];
+      const newState = this.flow.processGameEvent(state, action);
+      const deltalog = [...(state.deltalog || []), ...newState.deltalog];
       state = {
         ...state,
-        ...adsf,
+        ...newState,
         deltalog,
       };
     }

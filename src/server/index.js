@@ -111,7 +111,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           }
 
           // reconstruct the whole log from deltalogs
-          const log = [...(state.deltalog || []), ...(newState.deltalog || [])];
+          const log = [...(state.deltalog || []), ...newState.deltalog];
           const storeState = { ...newState, log };
 
           await db.set(gameID, storeState);
