@@ -202,11 +202,11 @@ test('log', () => {
   const actionC = gameEvent('endTurn');
 
   state = reducer(state, actionA);
-  expect(state.log).toEqual([actionA]);
+  expect(state.deltalog).toEqual([actionA]);
   state = reducer(state, actionB);
-  expect(state.log).toEqual([actionA, actionB]);
+  expect(state.deltalog).toEqual([actionB]);
   state = reducer(state, actionC);
-  expect(state.log).toEqual([actionA, actionB, actionC]);
+  expect(state.deltalog).toEqual([actionC]);
 });
 
 describe('Random inside setup()', () => {

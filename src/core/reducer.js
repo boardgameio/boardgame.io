@@ -118,6 +118,9 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         // Attach Events API to ctx.
         state = { ...state, ctx: events.attach(state.ctx) };
 
+        // delete deltalog from previous move/event
+        state = { ...state, deltalog: undefined };
+
         // Update state.
         let newState = game.flow.processGameEvent(state, action);
         // Trigger any events that were called via the Events API.
@@ -187,8 +190,13 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           G = state.G;
         }
 
-        const log = [...state.log, action];
-        state = { ...state, G, ctx, log, _stateID: state._stateID + 1 };
+        state = {
+          ...state,
+          deltalog: undefined,
+          G,
+          ctx,
+          _stateID: state._stateID + 1,
+        };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -203,6 +211,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: events.attach(state.ctx) };
         state = game.flow.processMove(state, action.payload);
         state = events.update(state);
+        state.deltalog = [action, ...(state.deltalog || [])];
         state = { ...state, ctx: random.update(state.ctx) };
         state = { ...state, ctx: Random.detach(state.ctx) };
         state = { ...state, ctx: Events.detach(state.ctx) };

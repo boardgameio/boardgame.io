@@ -154,13 +154,15 @@ describe('log', () => {
     const reducer = CreateGameReducer({ game });
     let state = reducer(undefined, { type: 'init' });
     state = reducer(state, makeMove('A', [42]));
+    let log = [...(state.deltalog || [])];
     state = reducer(state, gameEvent('endTurn'));
+    log = [...log, ...(state.deltalog || [])];
 
     const debug = Enzyme.mount(
       <Debug
         overrideGameState={overrideGameState}
         reducer={reducer}
-        gamestate={state}
+        gamestate={{ ...state, log }}
         endTurn={() => {}}
         gameID="default"
       />

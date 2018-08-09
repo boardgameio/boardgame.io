@@ -86,12 +86,6 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           store.dispatch(action);
           const newState = store.getState();
 
-          // get new log entries that were attached during execution of the action.
-          // slice called with negative index extracts last N elements
-          const deltalog = newState.log.slice(
-            -(newState.log.length - state.log.length)
-          );
-
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
@@ -104,11 +98,9 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
             });
 
             const minifiedState = Object.assign({}, transferState, {
-              // undefined the log and just transfer the delta
-              log: undefined,
-              deltalog: deltalog,
               // _initial is sent during "sync" already, no need to send it again
               _initial: undefined,
+              log: undefined, // TODO maybe a leftover from initial state?
             });
 
             if (client === socket.id) {
@@ -118,7 +110,11 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
             }
           }
 
-          await db.set(gameID, newState);
+          // reconstruct the whole log from deltalogs
+          const log = [...(state.deltalog || []), ...(newState.deltalog || [])];
+          const storeState = { ...newState, log };
+
+          await db.set(gameID, storeState);
         }
 
         return;

@@ -73,22 +73,31 @@ describe('time travel', () => {
     },
   });
 
+  let log = [];
   const reducer = CreateGameReducer({ game });
   let state = reducer(undefined, { type: 'init' });
   const initialState = state;
+  log = [...log, ...(state.deltalog || [])];
 
   state = reducer(state, makeMove('A', [1]));
+  log = [...log, ...(state.deltalog || [])];
+
   state = reducer(state, gameEvent('endTurn'));
+  log = [...log, ...(state.deltalog || [])];
+
   // Also ends turn automatically.
   state = reducer(state, makeMove('A', [42]));
+  log = [...log, ...(state.deltalog || [])];
   state = reducer(state, makeMove('A', [2]));
+  log = [...log, ...(state.deltalog || [])];
   state = reducer(state, gameEvent('endTurn'));
+  log = [...log, ...(state.deltalog || [])];
 
   let hoverState = null;
 
   const root = Enzyme.mount(
     <GameLog
-      log={state.log}
+      log={log}
       initialState={initialState}
       onHover={({ state }) => {
         hoverState = state;
