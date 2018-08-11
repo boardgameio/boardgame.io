@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { Client } from '../client';
 import { makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { GameLog } from './log';
@@ -73,41 +74,31 @@ describe('time travel', () => {
     },
   });
 
-  let log = [];
-  const reducer = CreateGameReducer({ game });
-  let state = reducer(undefined, { type: 'init' });
-  const initialState = state;
-  log = [...log, ...(state.deltalog || [])];
+  const client = Client({ game });
+  const initialState = client.getState()._initial;
 
-  state = reducer(state, makeMove('A', [1]));
-  log = [...log, ...(state.deltalog || [])];
-
-  state = reducer(state, gameEvent('endTurn'));
-  log = [...log, ...(state.deltalog || [])];
-
-  // Also ends turn automatically.
-  state = reducer(state, makeMove('A', [42]));
-  log = [...log, ...(state.deltalog || [])];
-  state = reducer(state, makeMove('A', [2]));
-  log = [...log, ...(state.deltalog || [])];
-  state = reducer(state, gameEvent('endTurn'));
-  log = [...log, ...(state.deltalog || [])];
+  client.moves.A(1);
+  client.events.endTurn();
+  // Also ends the turn automatically.
+  client.moves.A(42);
+  client.moves.A(2);
+  client.events.endTurn();
 
   let hoverState = null;
 
   const root = Enzyme.mount(
     <GameLog
-      log={log}
+      log={client.log}
       initialState={initialState}
       onHover={({ state }) => {
         hoverState = state;
       }}
-      reducer={reducer}
+      reducer={client.reducer}
     />
   );
 
   test('before rewind', () => {
-    expect(state.G).toMatchObject({ arg: 2 });
+    expect(client.getState().G).toMatchObject({ arg: 2 });
   });
 
   test('regular move', () => {

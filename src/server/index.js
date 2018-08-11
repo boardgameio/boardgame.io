@@ -42,7 +42,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
     const nsp = app._io.of(game.name);
 
     nsp.on('connection', socket => {
-      socket.on('action', async (action, stateID, gameID, playerID) => {
+      socket.on('update', async (action, stateID, gameID, playerID) => {
         let state = await db.get(gameID);
 
         if (state === undefined) {
@@ -82,39 +82,40 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         }
 
         if (state._stateID == stateID) {
+          let log = store.getState().log;
+
           // Update server's version of the store.
           store.dispatch(action);
-          const newState = store.getState();
+          state = store.getState();
 
           // Get clients connected to this current game.
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
             const { playerID } = clientInfo.get(client);
-
-            const ctx = Object.assign({}, newState.ctx, { _random: undefined });
-            const transferState = Object.assign({}, newState, {
-              G: game.playerView(newState.G, ctx, playerID),
+            const ctx = Object.assign({}, state.ctx, { _random: undefined });
+            const filteredState = Object.assign({}, state, {
+              G: game.playerView(state.G, ctx, playerID),
               ctx: ctx,
-            });
-
-            const minifiedState = Object.assign({}, transferState, {
-              // _initial is sent during "sync" already, no need to send it again
-              _initial: undefined,
-              log: undefined, // TODO maybe a leftover from initial state?
+              log: undefined,
+              deltalog: undefined,
             });
 
             if (client === socket.id) {
-              socket.emit('sync', gameID, minifiedState);
+              socket.emit('update', gameID, filteredState, state.deltalog);
             } else {
-              socket.to(client).emit('sync', gameID, minifiedState);
+              socket
+                .to(client)
+                .emit('update', gameID, filteredState, state.deltalog);
             }
           }
 
-          // reconstruct the whole log from deltalogs
-          const log = [...(state.deltalog || []), ...newState.deltalog];
-          const storeState = { ...newState, log };
+          // TODO: We currently attach the log back into the state
+          // object before storing it, but this should probably
+          // sit in a different part of the database eventually.
+          log = [...log, ...state.deltalog];
+          const stateWithLog = Object.assign({}, state, log);
 
-          await db.set(gameID, storeState);
+          await db.set(gameID, stateWithLog);
         }
 
         return;
@@ -137,16 +138,19 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         if (state === undefined) {
           const store = Redux.createStore(reducer);
           state = store.getState();
+          state.log = [];
           await db.set(gameID, state);
         }
 
         const ctx = Object.assign({}, state.ctx, { _random: undefined });
-        const newState = Object.assign({}, state, {
+        const filteredState = Object.assign({}, state, {
           G: game.playerView(state.G, ctx, playerID),
-          ctx,
+          ctx: ctx,
+          log: undefined,
+          deltalog: undefined,
         });
 
-        socket.emit('sync', gameID, newState);
+        socket.emit('sync', gameID, filteredState, state.log);
 
         return;
       });

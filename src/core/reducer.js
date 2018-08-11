@@ -42,10 +42,6 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     // Framework managed state.
     ctx: ctx,
 
-    // A list of actions performed so far. Used by the
-    // GameLog to display a journal of moves.
-    log: [],
-
     // List of {G, ctx} pairs that can be undone.
     _undo: [],
 
@@ -109,6 +105,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        state = { ...state, deltalog: undefined };
+
         // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
         // Initialize Events API.
@@ -117,9 +115,6 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: random.attach(state.ctx) };
         // Attach Events API to ctx.
         state = { ...state, ctx: events.attach(state.ctx) };
-
-        // delete deltalog from previous move/event
-        state = { ...state, deltalog: undefined };
 
         // Update state.
         let newState = game.flow.processGameEvent(state, action);
@@ -159,6 +154,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        state = { ...state, deltalog: undefined };
+
         // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
         // Initialize Events API.
@@ -190,13 +187,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           G = state.G;
         }
 
-        state = {
-          ...state,
-          deltalog: undefined,
-          G,
-          ctx,
-          _stateID: state._stateID + 1,
-        };
+        const deltalog = [action];
+        state = { ...state, G, ctx, deltalog, _stateID: state._stateID + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -211,7 +203,6 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: events.attach(state.ctx) };
         state = game.flow.processMove(state, action.payload);
         state = events.update(state);
-        state.deltalog = [action, ...(state.deltalog || [])];
         state = { ...state, ctx: random.update(state.ctx) };
         state = { ...state, ctx: Random.detach(state.ctx) };
         state = { ...state, ctx: Events.detach(state.ctx) };
@@ -219,7 +210,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         return state;
       }
 
-      case Actions.RESTORE: {
+      case Actions.UPDATE:
+      case Actions.SYNC: {
         return action.state;
       }
 

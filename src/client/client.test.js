@@ -13,7 +13,7 @@ import {
   createEventDispatchers,
   createMoveDispatchers,
 } from './client';
-import { gameEvent } from '../core/action-creators';
+import { update, sync, makeMove, gameEvent } from '../core/action-creators';
 import Game from '../core/game';
 import { RandomBot } from '../ai/bot';
 
@@ -266,5 +266,63 @@ describe('move dispatchers', () => {
     const api = createMoveDispatchers(game.moveNames, store, null, null, true);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: null });
+  });
+});
+
+describe('log handling', () => {
+  let client = null;
+
+  beforeEach(() => {
+    client = Client({
+      game: Game({
+        moves: {
+          A: () => ({}),
+        },
+      }),
+    });
+  });
+
+  test('regular', () => {
+    client.moves.A();
+    client.moves.A();
+
+    expect(client.log).toEqual([
+      makeMove('A', [], '0'),
+      makeMove('A', [], '0'),
+    ]);
+  });
+
+  test('update', () => {
+    const state = { restore: true };
+    const deltalog = ['0', '1'];
+    const action = update(state, deltalog);
+
+    client.store.dispatch(action);
+    client.store.dispatch(action);
+
+    expect(client.log).toEqual([...deltalog, ...deltalog]);
+  });
+
+  test('sync', () => {
+    const state = { restore: true };
+    const log = ['0', '1'];
+    const action = sync(state, log);
+
+    client.store.dispatch(action);
+    client.store.dispatch(action);
+
+    expect(client.log).toEqual(log);
+  });
+
+  test('update - log missing', () => {
+    const action = update();
+    client.store.dispatch(action);
+    expect(client.log).toEqual([]);
+  });
+
+  test('sync - log missing', () => {
+    const action = sync();
+    client.store.dispatch(action);
+    expect(client.log).toEqual([]);
   });
 });

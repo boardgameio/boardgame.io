@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { createStore } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux';
+import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { Multiplayer } from './multiplayer/multiplayer';
 import { CreateGameReducer } from '../core/reducer';
@@ -132,6 +133,54 @@ class _ClientImpl {
     };
 
     this.store = null;
+    this.log = [];
+
+    /**
+     * Middleware that manages the log object.
+     * Reducers generate deltalogs, which are log events
+     * that are the result of application of a single action.
+     * The server may also send back a deltalog or the entire
+     * log depending on the type of socket request.
+     * The middleware below takes care of all these cases while
+     * managing the log object.
+     */
+    const LogMiddleware = store => next => action => {
+      const result = next(action);
+      const state = store.getState();
+
+      switch (action.type) {
+        case Actions.MAKE_MOVE:
+        case Actions.GAME_EVENT: {
+          const deltalog = state.deltalog;
+          this.log = [...this.log, ...deltalog];
+          break;
+        }
+
+        case Actions.RESET: {
+          this.log = [];
+          break;
+        }
+
+        case Actions.UPDATE: {
+          const deltalog = action.deltalog || [];
+          this.log = [...this.log, ...deltalog];
+          break;
+        }
+
+        case Actions.SYNC: {
+          this.log = action.log || [];
+          break;
+        }
+      }
+
+      return result;
+    };
+
+    if (enhancer !== undefined) {
+      enhancer = compose(applyMiddleware(LogMiddleware), enhancer);
+    } else {
+      enhancer = applyMiddleware(LogMiddleware);
+    }
 
     if (multiplayer) {
       this.multiplayerClient = new Multiplayer({
@@ -199,7 +248,7 @@ class _ClientImpl {
     const G = this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
-    let ret = { ...state, isActive, G };
+    let ret = { ...state, isActive, G, log: this.log };
 
     if (this.multiplayerClient) {
       const isConnected = this.multiplayerClient.isConnected;
