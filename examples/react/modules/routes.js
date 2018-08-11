@@ -13,6 +13,7 @@ import secret_state from './secret-state';
 import random from './random';
 import turnorder from './turnorder';
 import threejs from './threejs';
+import lobby from './lobby';
 
 const routes = [
   {
@@ -42,6 +43,10 @@ const routes = [
   {
     name: 'Other Frameworks',
     routes: threejs.routes,
+  },
+	{
+    name: 'Lobby API',
+    routes: lobby.routes,
   },
 ];
 
