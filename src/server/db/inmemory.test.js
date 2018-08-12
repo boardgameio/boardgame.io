@@ -25,4 +25,8 @@ test('inmemory db', async () => {
   // Must return true if game exists
   const has = await db.has('gameID');
   expect(has).toEqual(true);
+
+  // Must return all keys
+  const keys = await db.list();
+  expect(keys).toEqual(['gameID']);
 });

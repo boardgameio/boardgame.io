@@ -52,4 +52,12 @@ export class InMemory {
   async has(id) {
     return await this.games.has(id);
   }
+
+  /**
+   * Return all keys.
+   * @returns {array} - Array of keys (strings)
+   */
+  async list() {
+    return Array.from(await this.games.keys());
+  }
 }

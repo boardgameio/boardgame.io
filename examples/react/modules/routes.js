@@ -12,6 +12,7 @@ import phases from './phases';
 import secret_state from './secret-state';
 import random from './random';
 import turnorder from './turnorder';
+import lobby from './lobby';
 
 const routes = [
   {
@@ -37,6 +38,10 @@ const routes = [
   {
     name: 'Secret State',
     routes: secret_state.routes,
+  },
+  {
+    name: 'Lobby API',
+    routes: lobby.routes,
   },
 ];
 
