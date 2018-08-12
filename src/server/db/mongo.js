@@ -9,54 +9,6 @@
 const LRU = require('lru-cache');
 
 /**
- * InMemory data storage.
- */
-export class InMemory {
-  /**
-   * Creates a new InMemory storage.
-   */
-  constructor() {
-    this.games = new Map();
-  }
-
-  /**
-   * Connect.
-   * No-op for the InMemory instance.
-   */
-  async connect() {
-    return;
-  }
-
-  /**
-   * Write the game state to the in-memory object.
-   * @param {string} id - The game id.
-   * @param {object} store - A game state to persist.
-   */
-  async set(id, state) {
-    return await this.games.set(id, state);
-  }
-
-  /**
-   * Read the game state from the in-memory object.
-   * @param {string} id - The game id.
-   * @returns {object} - A game state, or undefined
-   *                     if no game is found with this id.
-   */
-  async get(id) {
-    return await this.games.get(id);
-  }
-
-  /**
-   * Check if a particular game id exists.
-   * @param {string} id - The game id.
-   * @returns {boolean} - True if a game with this id exists.
-   */
-  async has(id) {
-    return await this.games.has(id);
-  }
-}
-
-/**
  * MongoDB connector.
  */
 export class Mongo {
