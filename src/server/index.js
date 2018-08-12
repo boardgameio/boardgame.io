@@ -82,7 +82,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         }
 
         if (state._stateID == stateID) {
-          let log = store.getState().log;
+          let log = store.getState().log || [];
 
           // Update server's version of the store.
           store.dispatch(action);
@@ -138,7 +138,6 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         if (state === undefined) {
           const store = Redux.createStore(reducer);
           state = store.getState();
-          state.log = [];
           await db.set(gameID, state);
         }
 
