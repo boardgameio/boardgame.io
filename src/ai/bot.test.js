@@ -200,4 +200,30 @@ describe('MCTSBot', () => {
       expect(endState.ctx.gameover).toEqual({ draw: true });
     }
   });
+
+  test('objectives', () => {
+    const objectives = () => ({
+      'play-on-square-0': {
+        checker: G => G.cells[0] !== null,
+        weight: 10.0,
+      },
+    });
+
+    const reducer = CreateGameReducer({ game: TicTacToe });
+    const state = reducer(undefined, { type: 'init' });
+
+    for (let i = 0; i < 10; i++) {
+      const bot = new MCTSBot({
+        iterations: 200,
+        seed: i,
+        game: TicTacToe,
+        enumerate,
+        objectives,
+        playerID: '0',
+      });
+
+      const { action } = bot.play(state, '0');
+      expect(action.payload.args).toEqual([0]);
+    }
+  });
 });

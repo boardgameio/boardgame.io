@@ -7,16 +7,12 @@
  */
 
 import React from 'react';
+import { stringify } from 'flatted';
 import { restore, makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { CreateGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
-import {
-  Debug,
-  DebugMove,
-  DebugMoveArgField,
-  KeyboardShortcut,
-} from './debug.js';
+import { Debug } from './debug';
 import Mousetrap from 'mousetrap';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -65,7 +61,7 @@ test('basic', () => {
   );
 
   const titles = debug.find('h3').map(title => title.text());
-  expect(titles).toEqual(['Controls', 'Players', 'Moves', 'Events', 'State']);
+  expect(titles).toEqual(['Players', 'Moves', 'Events']);
 
   expect(debug.state('showLog')).toEqual(false);
   debug
@@ -82,104 +78,6 @@ test('basic', () => {
   debug.unmount();
 });
 
-test('parse arguments', () => {
-  const spy = jest.fn();
-  const root = Enzyme.mount(<DebugMove name="test" fn={spy} shortcut="e" />);
-
-  root.instance().onSubmit('1,2');
-  expect(spy.mock.calls[0]).toEqual([1, 2]);
-
-  root.instance().onSubmit('["a", "b"], ","');
-  expect(spy.mock.calls[1]).toEqual([['a', 'b'], ',']);
-
-  root.instance().onSubmit('3, unknown, 4');
-  expect(spy.mock.calls.length).toEqual(2);
-  expect(root.state().error).toEqual('ReferenceError: unknown is not defined');
-});
-
-test('KeyboardShortcut', () => {
-  const fn = jest.fn();
-  Enzyme.mount(<KeyboardShortcut value="e" onPress={fn} />);
-  Mousetrap.simulate('e');
-  expect(fn).toHaveBeenCalled();
-});
-
-test('DebugMove', () => {
-  const fn = jest.fn();
-  const root = Enzyme.mount(<DebugMove fn={fn} name="endTurn" shortcut="e" />);
-
-  root.simulate('click');
-  root.find('.move span').simulate('keyDown', { key: 'Enter' });
-
-  expect(fn.mock.calls.length).toBe(1);
-
-  root.simulate('click');
-  root.find('.move span').simulate('keydown', { key: '1' });
-  root.find('.move span').simulate('keydown', { key: 'Enter' });
-
-  expect(fn.mock.calls.length).toBe(2);
-});
-
-test('escape blurs DebugMove', () => {
-  const root = Enzyme.mount(
-    <KeyboardShortcut value="e">
-      <DebugMoveArgField onSubmit={jest.fn()} name="endTurn" />
-    </KeyboardShortcut>
-  );
-
-  expect(root.state().active).toBe(false);
-
-  root.find(DebugMoveArgField).simulate('click');
-  expect(root.state().active).toBe(true);
-  root.find('.move span').simulate('keydown', { key: 'Escape' });
-  expect(root.state().active).toBe(false);
-
-  root.find(DebugMoveArgField).simulate('click');
-  expect(root.state().active).toBe(true);
-  root.find('.move span').simulate('blur');
-  expect(root.state().active).toBe(false);
-});
-
-test('shortcuts are unique a-z', () => {
-  const moves = {
-    takeCard: () => {},
-    takeToken: () => {},
-  };
-
-  const element = React.createElement(Debug, {
-    gamestate,
-    moves,
-    gameID: 'default',
-  });
-
-  const instance = Enzyme.mount(element).instance();
-
-  expect(instance.shortcuts).toEqual({
-    takeCard: 'a',
-    takeToken: 'b',
-  });
-});
-
-test('shortcuts are unique first char', () => {
-  const moves = {
-    clickCell: () => {},
-    playCard: () => {},
-  };
-
-  const element = React.createElement(Debug, {
-    gamestate,
-    moves,
-    gameID: 'default',
-  });
-
-  const instance = Enzyme.mount(element).instance();
-
-  expect(instance.shortcuts).toEqual({
-    clickCell: 'c',
-    playCard: 'p',
-  });
-});
-
 describe('save / restore', () => {
   let loggedAction = null;
   const store = createStore((state, action) => {
@@ -187,7 +85,7 @@ describe('save / restore', () => {
   });
 
   const restoredState = { restore: true };
-  let restoredJSON = JSON.stringify(restoredState);
+  let restoredJSON = stringify(restoredState);
   const setItem = jest.fn();
   const getItem = jest.fn(() => restoredJSON);
 
@@ -291,22 +189,24 @@ test('toggle help', () => {
   expect(debug.state()).toMatchObject({ help: true });
 });
 
-test('toggle AIDebug', () => {
+test('toggle AI visualizer', () => {
   const debug = Enzyme.mount(
     <Debug
       gamestate={gamestate}
-      renderAI={jest.fn()}
+      visualizeAI={jest.fn()}
       endTurn={() => {}}
       gameID="default"
     />
   );
 
-  expect(debug.find('.pane').length).toBe(1);
-  debug.setState({ AIDebug: {} });
-  expect(debug.find('.pane').length).toBe(2);
+  expect(debug.find('.ai-visualization').length).toBe(0);
+  debug.setState({ AIMetadata: {} });
+  expect(debug.find('.ai-visualization').length).toBe(1);
 });
 
 describe('simulate', () => {
+  jest.useFakeTimers();
+
   test('basic', () => {
     const step = jest.fn(() => true);
     Enzyme.mount(
@@ -319,7 +219,8 @@ describe('simulate', () => {
     );
     expect(step).not.toHaveBeenCalled();
     Mousetrap.simulate('5');
-    expect(step).toHaveBeenCalled();
+    jest.runAllTimers();
+    expect(step).toHaveBeenCalledTimes(10000);
   });
 
   test('break out if no action is returned', () => {
@@ -335,6 +236,28 @@ describe('simulate', () => {
 
     expect(step).not.toHaveBeenCalled();
     Mousetrap.simulate('5');
-    expect(step).toHaveBeenCalled();
+    jest.runAllTimers();
+    expect(step).toHaveBeenCalledTimes(1);
   });
+});
+
+test('controls docking', () => {
+  const root = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(root.state()).toMatchObject({ dockControls: false });
+  Mousetrap.simulate('t');
+  expect(root.state()).toMatchObject({ dockControls: true });
+  expect(root.find('Controls').html()).toContain('docktop');
+});
+
+test('show/hide game info', () => {
+  const root = Enzyme.mount(
+    <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
+  );
+
+  expect(root.state()).toMatchObject({ showGameInfo: true });
+  Mousetrap.simulate('i');
+  expect(root.state()).toMatchObject({ showGameInfo: false });
 });

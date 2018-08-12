@@ -106,7 +106,7 @@ function IsVictory(cells) {
 
 // Return true if all `cells` are occupied.
 function IsDraw(cells) {
-  return G.cells.filter(c => c === null).length == 0;
+  return cells.filter(c => c === null).length == 0;
 }
 
 const TicTacToe = Game({
@@ -279,7 +279,7 @@ After that, add an AI section to our `Client` call that returns a list
 of moves (one per empty cell).
 
 ```js
-import { AI } from 'boardgame.io';
+import { AI } from 'boardgame.io/ai';
 
 const App = Client({
   game: TicTacToe,
@@ -330,4 +330,4 @@ and it will figure out the right combination of moves to make it happen!
 Detailed documentation about all this is coming soon. Adding bots to games for actual
 networked play (as opposed to merely simulating moves) is also in the works.
 
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/jvxzj7rk9w)
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/3q09kkzr71)

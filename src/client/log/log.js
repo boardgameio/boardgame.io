@@ -8,6 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { MAKE_MOVE } from '../../core/action-types';
 import './log.css';
 
 /**
@@ -46,12 +47,45 @@ LogEvent.propTypes = {
   pinned: PropTypes.bool,
 };
 
-const TurnMarker = props => (
-  <div className="turn-marker">Turn #{props.turn}</div>
-);
+/**
+ * TurnMarker
+ *
+ * The markers on the left of the log events that indicate
+ * which turn the event belongs to.
+ */
+const TurnMarker = props => {
+  return (
+    <div className="turn-marker" style={{ gridRow: 'span ' + props.numEvents }}>
+      {props.turn}
+    </div>
+  );
+};
 
 TurnMarker.propTypes = {
   turn: PropTypes.number.isRequired,
+  numEvents: PropTypes.number.isRequired,
+};
+
+/**
+ * PhaseMarker
+ *
+ * The markers on the right of the log events that indicate
+ * which phase the event belongs to.
+ */
+const PhaseMarker = props => {
+  return (
+    <div
+      className="phase-marker"
+      style={{ gridRow: 'span ' + props.numEvents }}
+    >
+      {props.phase}
+    </div>
+  );
+};
+
+PhaseMarker.propTypes = {
+  phase: PropTypes.string.isRequired,
+  numEvents: PropTypes.number.isRequired,
 };
 
 /**
@@ -79,7 +113,9 @@ export class GameLog extends React.Component {
     let state = this.props.initialState;
     for (let i = 0; i <= logIndex; i++) {
       const action = this.props.log[i];
-      state = this.props.reducer(state, action);
+      if (!action.automatic) {
+        state = this.props.reducer(state, action);
+      }
     }
     return { G: state.G, ctx: state.ctx };
   };
@@ -114,31 +150,74 @@ export class GameLog extends React.Component {
 
   render() {
     let log = [];
-    let turn = 1;
-    let turnDelimiter = true;
+    let turns = [];
+    let phases = [];
+    let eventsInCurrentPhase = 0;
+    let eventsInCurrentTurn = 0;
+    let state = this.props.initialState;
+
+    let lastAction = 0;
+    for (let i = 0; i < this.props.log.length; i++) {
+      const action = this.props.log[i];
+      if (action.type == MAKE_MOVE || !action.automatic) {
+        lastAction = i;
+      }
+    }
 
     for (let i = 0; i < this.props.log.length; i++) {
-      if (turnDelimiter) {
-        turnDelimiter = false;
-        log.push(<TurnMarker key={'turn' + turn} turn={turn} />);
+      const action = this.props.log[i];
+      const oldTurn = state.ctx.turn;
+      const oldPhase = state.ctx.phase;
+
+      if (action.type == MAKE_MOVE) {
+        log.push(
+          <LogEvent
+            key={i}
+            pinned={i === this.state.pinned}
+            logIndex={i}
+            onLogClick={this.onLogClick}
+            onMouseEnter={this.onMouseEnter}
+            onMouseLeave={this.onMouseLeave}
+            action={action}
+          />
+        );
+
+        eventsInCurrentTurn++;
+        eventsInCurrentPhase++;
       }
 
-      const action = this.props.log[i];
-      log.push(
-        <LogEvent
-          key={i}
-          pinned={i === this.state.pinned}
-          logIndex={i}
-          onLogClick={this.onLogClick}
-          onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}
-          action={action}
-        />
-      );
+      if (!action.automatic) {
+        state = this.props.reducer(state, action);
 
-      if (action.payload.type == 'endTurn') {
-        turn++;
-        turnDelimiter = true;
+        if (
+          state.ctx.turn != oldTurn ||
+          state.ctx.gameover !== undefined ||
+          i == lastAction
+        ) {
+          turns.push(
+            <TurnMarker
+              key={turns.length}
+              turn={oldTurn}
+              numEvents={eventsInCurrentTurn}
+            />
+          );
+          eventsInCurrentTurn = 0;
+        }
+
+        if (
+          state.ctx.phase != oldPhase ||
+          state.ctx.gameover !== undefined ||
+          i == lastAction
+        ) {
+          phases.push(
+            <PhaseMarker
+              key={phases.length}
+              phase={oldPhase}
+              numEvents={eventsInCurrentPhase}
+            />
+          );
+          eventsInCurrentPhase = 0;
+        }
       }
     }
 
@@ -146,6 +225,13 @@ export class GameLog extends React.Component {
     if (this.state.pinned !== null) {
       className += ' pinned';
     }
-    return <div className={className}>{log}</div>;
+
+    return (
+      <div className={className}>
+        {turns}
+        {log}
+        {phases}
+      </div>
+    );
   }
 }

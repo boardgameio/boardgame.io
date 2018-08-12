@@ -9,7 +9,7 @@
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
 import phases from './phases';
-import liars_dice from './liars-dice';
+import secret_state from './secret-state';
 import random from './random';
 import turnorder from './turnorder';
 
@@ -27,16 +27,16 @@ const routes = [
     routes: phases.routes,
   },
   {
-    name: 'Liars Dice',
-    routes: liars_dice.routes,
+    name: 'Turn Orders',
+    routes: turnorder.routes,
   },
   {
     name: 'Random API',
     routes: random.routes,
   },
   {
-    name: 'Events API',
-    routes: turnorder.routes,
+    name: 'Secret State',
+    routes: secret_state.routes,
   },
 ];
 

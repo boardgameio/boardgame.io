@@ -1,4 +1,91 @@
-# v0.23.1
+## v0.25.4
+
+#### Bugfixes
+
+* Fixed babelHelpers error in npm.
+
+## v0.25.3
+
+Broken, do not use (complains about babelHelpers missing).
+
+#### Bugfixes
+
+* [[ebf7e73](https://github.com/google/boardgame.io/commit/ebf7e73)] fix bug that was preventing playerID from being overriden by the debug ui
+
+## v0.25.2
+
+#### Bugfixes
+
+* [[a42e07b](https://github.com/google/boardgame.io/commit/a42e07b)] npm audit fix --only=prod
+* [[cfe7296](https://github.com/google/boardgame.io/commit/cfe7296)] update koa and socket.io
+
+## v0.25.1
+
+#### Bugfixes
+
+* [[09b523e](https://github.com/google/boardgame.io/commit/09b523e)] require mongo and firebase only if used
+
+## v0.25.0
+
+#### Features
+
+* [[fe8a9d0](https://github.com/google/boardgame.io/commit/fe8a9d0)] Added ability to specify server protocol (#247)
+* [[43dcaac](https://github.com/google/boardgame.io/commit/43dcaac)] write turn / phase stats in ctx.stats
+* [[bd8208a](https://github.com/google/boardgame.io/commit/bd8208a)] fabricate playerID in singleplayer mode
+* [[b4e3e09](https://github.com/google/boardgame.io/commit/b4e3e09)] { all: true } option for setActionPlayers
+* [[5d3a34d](https://github.com/google/boardgame.io/commit/5d3a34d)] { once: true } option for setActionPlayers
+* [[75a274c](https://github.com/google/boardgame.io/commit/75a274c)] rename changeActionPlayers to setActionPlayers
+* [[4ec3a61](https://github.com/google/boardgame.io/commit/4ec3a61)] end phase when a turn order runs out
+* [[cb6111b](https://github.com/google/boardgame.io/commit/cb6111b)] retire the string constant 'any'
+* [[36fc47f](https://github.com/google/boardgame.io/commit/36fc47f)] basic support for objective-based AI
+* [[d1f0a3e](https://github.com/google/boardgame.io/commit/d1f0a3e)] improved rendering of turns and phases in the log
+* [[0bc31d6](https://github.com/google/boardgame.io/commit/0bc31d6)] better MCTS visualization
+* [[14a5ad7](https://github.com/google/boardgame.io/commit/14a5ad7)] update redux to 4.0.0
+
+#### Bugfixes
+
+* [[84f07c6](https://github.com/google/boardgame.io/commit/84f07c6)] Do not fabricate playerID for playerView
+* [[c4a11a7](https://github.com/google/boardgame.io/commit/c4a11a7)] ignore events from all but currentPlayer
+* [[6a8b657](https://github.com/google/boardgame.io/commit/6a8b657)] move mongodb and firebase deps to devDependencies
+* [[239f8dd](https://github.com/google/boardgame.io/commit/239f8dd)] Use parse/stringify from flatted lib to support circular structures (fixes #222) (#240)
+* [[edd1df0](https://github.com/google/boardgame.io/commit/edd1df0)] Differentiate automatic game events in the log
+* [[570f40e](https://github.com/google/boardgame.io/commit/570f40e)] don't render AI metadata if visualize is not specified
+* [[a8431c7](https://github.com/google/boardgame.io/commit/a8431c7)] set default RNG seed once per game, not game type
+* [[5090429](https://github.com/google/boardgame.io/commit/5090429)] API: check secret _before_ handling the request (#231)
+* [[1a24791](https://github.com/google/boardgame.io/commit/1a24791)] attach events API early so that it can be used on the first onTurnBegin
+* [[acb9d8c](https://github.com/google/boardgame.io/commit/acb9d8c)] enable events API in initial onTurnBegin/onPhaseBegin
+
+#### Breaking Changes
+
+* `changeActionPlayers` is now `setActionPlayers`. It also supports more advanced [options](http://boardgame.io/#/events?id=setactionplayers).
+* Returning `undefined` from a `TurnOrder` results in the phase ending, not setting `currentPlayer` to `any`.
+* Only the `currentPlayer` can call events (`endTurn`, `endPhase` etc.).
+
+## v0.24.0
+
+#### Features
+
+* [[b28ee74](https://github.com/google/boardgame.io/commit/b28ee74)] ability to change playerID from Debug UI
+* [[fe1230e](https://github.com/google/boardgame.io/commit/fe1230e)] Firebase integration (#223)
+
+## v0.23.3
+
+#### Bugfixes
+
+* [[6194986](https://github.com/google/boardgame.io/commit/6194986)] remove async/await from client code
+
+## v0.23.2
+
+#### Bugfixes
+
+* [[7a61f09](https://github.com/google/boardgame.io/commit/7a61f09)] make Random API present in first onTurnBegin and onPhaseBegin
+
+#### Features
+
+* [[99b9844](https://github.com/google/boardgame.io/commit/99b9844)] Python Bots
+* [[a7134a5](https://github.com/google/boardgame.io/commit/a7134a5)] List available games API
+
+## v0.23.1
 
 #### Bugfixes
 
@@ -16,7 +103,7 @@
 * [[7a80f66](https://github.com/google/boardgame.io/commit/7a80f66)] make changeActionPlayers an opt-in event
 * [[40cd4b8](https://github.com/google/boardgame.io/commit/40cd4b8)] Add config update on phase change Fixes #211 (#212)
 
-# v0.22.1
+## v0.22.1
 
 #### Bugfixes
 
@@ -31,13 +118,13 @@
 * [[5362955](https://github.com/google/boardgame.io/commit/5362955)] React Native Client (#128)
 * [[b329df2](https://github.com/google/boardgame.io/commit/b329df2)] Pass through props (#173)
 
-# v0.21.5
+## v0.21.5
 
 #### Bugfixes
 
 * [[55715c9](https://github.com/google/boardgame.io/commit/55715c9)] Fix undefined ctx in onPhaseBegin
 
-# v0.21.4
+## v0.21.4
 
 #### Features
 
@@ -50,7 +137,7 @@
 
 * [[278b369](https://github.com/google/boardgame.io/commit/278b369)] Fix bug that was ending phase incorrectly (#176)
 
-# v0.21.3
+## v0.21.3
 
 #### Features
 
@@ -62,13 +149,13 @@
 
 * [[5e49448](https://github.com/google/boardgame.io/commit/5e49448)] convert multiplayer move whitelist to blacklist
 
-# v0.21.2
+## v0.21.2
 
 #### Bugfixes
 
 * [[27705d5](https://github.com/google/boardgame.io/commit/27705d5)] pass Events API correctly inside events.update
 
-# v0.21.1
+## v0.21.1
 
 #### Bugfixes
 
@@ -88,7 +175,7 @@
 * [[748f36f](https://github.com/google/boardgame.io/commit/748f36f)] UI: add mouse hover action props to grid, hex, and token (#153)
 * [[f664237](https://github.com/google/boardgame.io/commit/f664237)] Add notion of actionPlayers (#145)
 
-# v0.20.2
+## v0.20.2
 
 #### Features
 
@@ -106,7 +193,7 @@
   is passed to the moves. Take a look at http://boardgame.io/#/random for
   more details.
 
-# v0.20.1
+## v0.20.1
 
 #### Bugfixes
 
@@ -147,7 +234,7 @@ const Server = require('boardgame.io/server').Server;
 const Server = require('boardgame.io/server');
 ```
 
-# v0.18.1
+## v0.18.1
 
 #### Bugfixes
 
@@ -188,7 +275,7 @@ to any particular UI framework.
 
 * [[6a010c8](https://github.com/google/boardgame.io/commit/6a010c8)] Debug UI: fixes related to errors in arguments (#123)
 
-# v0.17.2
+## v0.17.2
 
 #### Features
 
@@ -200,7 +287,7 @@ to any particular UI framework.
 
 * [[a768f1f](https://github.com/google/boardgame.io/commit/a768f1f)] remove entries from clientInfo and roomInfo on disconnect
 
-# v0.17.1
+## v0.17.1
 
 #### Features
 
@@ -223,7 +310,7 @@ to any particular UI framework.
 * [[f3da742](https://github.com/google/boardgame.io/commit/f3da742)] make playerID available in ctx
 * [[cb09d9a](https://github.com/google/boardgame.io/commit/cb09d9a)] make turnOrder a globally configurable option
 
-# v0.16.8
+## v0.16.8
 
 #### Features
 
@@ -233,13 +320,13 @@ to any particular UI framework.
 
 * [[2ab3dfc](https://github.com/google/boardgame.io/commit/2ab3dfc6928eb8f0bfdf1ce319ac53021a2f905b)] end turn automatically when game ends
 
-# v0.16.7
+## v0.16.7
 
 #### Bugfixes
 
 * [[c65580d](https://github.com/google/boardgame.io/commit/c65580d)] Fix bug introduced in af3a7b5.
 
-# v0.16.6
+## v0.16.6
 
 #### Bugfixes
 
@@ -251,13 +338,13 @@ Buggy fix (fixed in 0.16.7).
 
 * [[2721ad4](https://github.com/google/boardgame.io/commit/2721ad4)] Allow overriding `db` implementation in Server.
 
-# v0.16.5
+## v0.16.5
 
 #### Features
 
 * `PlayerView.STRIP_SECRETS`
 
-# v0.16.4
+## v0.16.4
 
 #### Bugfixes
 
@@ -280,7 +367,7 @@ onClick() {
 }
 ```
 
-# v0.16.3
+## v0.16.3
 
 #### Features
 
@@ -296,7 +383,7 @@ const app = Server({
 };
 ```
 
-# v0.16.2
+## v0.16.2
 
 #### Bugfixes
 
@@ -306,7 +393,7 @@ const app = Server({
 
 * [[9ce42b2](https://github.com/google/boardgame.io/commit/9ce42b297372160f3ece4203b4c92000334d85e0)]: Change color in `GameLog` based on the player that made the move.
 
-# v0.16.1
+## v0.16.1
 
 #### Bugfixes
 

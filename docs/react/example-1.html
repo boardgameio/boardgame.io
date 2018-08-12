@@ -34,7 +34,7 @@ body {
     }
   });
 
-  var App = BoardgameIO.ReactClient({ game: TicTacToe });
+  var App = BoardgameIO.ReactClient({ game: TicTacToe, debug: { showGameInfo: false }});
   ReactDOM.render(<App/>, document.getElementById('app'));
   </script>
 

@@ -7,6 +7,6 @@
  */
 
 import { Server } from '../src/server/index.js';
-import { Mongo } from '../src/server/db.js';
+import { Mongo, Firebase } from '../src/server/db/index.js';
 
-export { Server, Mongo };
+export { Server, Mongo, Firebase };

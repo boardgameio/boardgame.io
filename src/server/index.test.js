@@ -183,29 +183,39 @@ test('action', async () => {
           G: {},
           ctx: {
             _random: { seed: 0 },
+            actionPlayers: ['0'],
+            allPlayed: false,
             allowedMoves: null,
             currentPlayer: '0',
-            actionPlayers: ['0'],
             currentPlayerMoves: 0,
             numPlayers: 2,
             phase: 'default',
-            turn: 0,
             playOrder: ['0', '1'],
             playOrderPos: 0,
+            stats: {
+              phase: { allPlayed: false, numMoves: {} },
+              turn: { numMoves: {} },
+            },
+            turn: 0,
           },
         },
       ],
       ctx: {
         _random: { seed: 0 },
+        actionPlayers: ['0'],
+        allPlayed: false,
         allowedMoves: null,
         currentPlayer: '0',
-        actionPlayers: ['0'],
         currentPlayerMoves: 0,
         numPlayers: 2,
         phase: 'default',
-        turn: 0,
         playOrder: ['0', '1'],
         playOrderPos: 0,
+        stats: {
+          phase: { allPlayed: false, numMoves: {} },
+          turn: { allPlayed: false, numMoves: {} },
+        },
+        turn: 0,
       },
       log: [],
     },
@@ -216,31 +226,51 @@ test('action', async () => {
         G: {},
         ctx: {
           _random: { seed: 0 },
+          actionPlayers: ['1'],
+          allPlayed: false,
           allowedMoves: null,
           currentPlayer: '1',
-          actionPlayers: ['1'],
           currentPlayerMoves: 0,
           numPlayers: 2,
           phase: 'default',
-          turn: 1,
           playOrder: ['0', '1'],
           playOrderPos: 1,
+          stats: {
+            phase: { allPlayed: false, numMoves: {} },
+            turn: { allPlayed: false, numMoves: {} },
+          },
+          turn: 1,
         },
       },
     ],
     ctx: {
       _random: undefined,
+      actionPlayers: ['1'],
+      allPlayed: false,
       allowedMoves: null,
       currentPlayer: '1',
-      actionPlayers: ['1'],
       currentPlayerMoves: 0,
       numPlayers: 2,
       phase: 'default',
       playOrder: ['0', '1'],
       playOrderPos: 1,
+      stats: {
+        phase: { allPlayed: false, numMoves: {} },
+        turn: { allPlayed: false, numMoves: {} },
+      },
       turn: 1,
     },
-    log: [ActionCreators.gameEvent('endTurn')],
+    log: [
+      {
+        payload: {
+          args: undefined,
+          credentials: undefined,
+          playerID: undefined,
+          type: 'endTurn',
+        },
+        type: 'GAME_EVENT',
+      },
+    ],
   });
   io.socket.emit.mockReset();
 
@@ -255,52 +285,62 @@ test('action', async () => {
   // ... and not if player != currentPlayer
   await io.socket.receive('action', action, 1, 'gameID', '100');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
+  await io.socket.receive(
+    'action',
+    ActionCreators.makeMove(),
+    1,
+    'gameID',
+    '100'
+  );
+  expect(io.socket.emit).toHaveBeenCalledTimes(0);
 
   // Another broadcasted action.
   await io.socket.receive('action', action, 1, 'gameID', '1');
   expect(io.socket.emit).toHaveBeenCalledTimes(2);
 });
 
-test('playerView (sync)', async () => {
-  // Write the player into G.
-  const game = Game({
-    playerView: (G, ctx, player) => {
-      return Object.assign({}, G, { player });
-    },
+describe('playerView', () => {
+  test('sync', async () => {
+    // Write the player into G.
+    const game = Game({
+      playerView: (G, ctx, player) => {
+        return Object.assign({}, G, { player });
+      },
+    });
+
+    const server = Server({ games: [game] });
+    const io = server.app.context.io;
+
+    await io.socket.receive('sync', 'gameID', 0);
+    expect(io.socket.emit).toHaveBeenCalledTimes(1);
+    expect(io.socket.emit.mock.calls[0][2].G).toEqual({ player: 0 });
   });
 
-  const server = Server({ games: [game] });
-  const io = server.app.context.io;
+  test('action', async () => {
+    const game = Game({
+      playerView: (G, ctx, player) => {
+        return Object.assign({}, G, { player });
+      },
+    });
+    const server = Server({ games: [game] });
+    const io = server.app.context.io;
+    const action = ActionCreators.gameEvent('endTurn');
 
-  await io.socket.receive('sync', 'gameID', 0);
-  expect(io.socket.emit).toHaveBeenCalledTimes(1);
-  expect(io.socket.emit.mock.calls[0][2].G).toEqual({ player: 0 });
-});
+    io.socket.id = 'first';
+    await io.socket.receive('sync', 'gameID', '0', 2);
+    io.socket.id = 'second';
+    await io.socket.receive('sync', 'gameID', '1', 2);
+    io.socket.emit.mockReset();
 
-test('playerView (action)', async () => {
-  const game = Game({
-    playerView: (G, ctx, player) => {
-      return Object.assign({}, G, { player });
-    },
+    await io.socket.receive('action', action, 0, 'gameID', '0');
+    expect(io.socket.emit).toHaveBeenCalledTimes(2);
+
+    const G_player0 = io.socket.emit.mock.calls[0][2].G;
+    const G_player1 = io.socket.emit.mock.calls[1][2].G;
+
+    expect(G_player0.player).toBe('0');
+    expect(G_player1.player).toBe('1');
   });
-  const server = Server({ games: [game] });
-  const io = server.app.context.io;
-  const action = ActionCreators.gameEvent('endTurn');
-
-  io.socket.id = 'first';
-  await io.socket.receive('sync', 'gameID', '0', 2);
-  io.socket.id = 'second';
-  await io.socket.receive('sync', 'gameID', '1', 2);
-  io.socket.emit.mockReset();
-
-  await io.socket.receive('action', action, 0, 'gameID', '0');
-  expect(io.socket.emit).toHaveBeenCalledTimes(2);
-
-  const G_player0 = io.socket.emit.mock.calls[0][2].G;
-  const G_player1 = io.socket.emit.mock.calls[1][2].G;
-
-  expect(G_player0.player).toBe('0');
-  expect(G_player1.player).toBe('1');
 });
 
 test('custom db implementation', async () => {
@@ -328,13 +368,6 @@ test('custom db implementation', async () => {
 
   await io.socket.receive('sync', 'gameID');
   expect(getId).toBe('gameID');
-});
-
-test('MONGO_URI', () => {
-  process.env.MONGO_URI = 'test';
-  const server = Server({ games: [game] });
-  expect(server.db.url).toBe('test');
-  delete process.env.MONGO_URI;
 });
 
 test('auth failure', async () => {

@@ -69,8 +69,6 @@ test('board props', () => {
     board: TestBoard,
     multiplayer: true,
   });
-  board = Enzyme.mount(<Board />).find(TestBoard);
-  expect(board.props().isActive).toBe(false);
   board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
   expect(board.props().isActive).toBe(true);
   board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
@@ -199,19 +197,9 @@ test('local playerView', () => {
     numPlayers: 2,
   });
 
-  {
-    const game = Enzyme.mount(<Board />);
-    const board = game.find('TestBoard').instance();
-    expect(board.props.G).toEqual({ stripped: '0' });
-    board.props.events.endTurn();
-    expect(board.props.G).toEqual({ stripped: '1' });
-  }
-
-  {
-    const game = Enzyme.mount(<Board playerID="1" />);
-    const board = game.find('TestBoard').instance();
-    expect(board.props.G).toEqual({ stripped: '1' });
-  }
+  const game = Enzyme.mount(<Board playerID="1" />);
+  const board = game.find('TestBoard').instance();
+  expect(board.props.G).toEqual({ stripped: '1' });
 });
 
 test('reset Game', () => {
@@ -258,7 +246,6 @@ test('undo/redo', () => {
 
   board.props.undo();
   expect(board.props.G).toEqual(initial.G);
-  expect(board.props.ctx).toEqual(initial.ctx);
 
   board.props.redo();
   expect(board.props.G).toEqual({ arg: 42 });
@@ -279,4 +266,20 @@ test('overrideGameState', () => {
     .props()
     .overrideGameState({ G: 1 });
   expect(board.props.G).toBe(1);
+});
+
+test('debug settings', () => {
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+    debug: {
+      showGameInfo: false,
+      dockControls: true,
+    },
+  });
+
+  const game = Enzyme.mount(<Board />);
+
+  expect(game.find('GameInfo').length).toBe(0);
+  expect(game.find('Controls').html()).toContain('docktop');
 });

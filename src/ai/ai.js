@@ -6,21 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from 'react';
-import { MCTSDebug } from './mcts-debug';
 import { MCTSBot } from './bot';
 
-export function AI({ bot, enumerate, renderAI, renderGameTreeCell }) {
+export function AI({ bot, enumerate, visualize }) {
   if (!bot) {
     bot = MCTSBot;
   }
 
-  if (!renderAI) {
-    // eslint-disable-next-line react/display-name
-    renderAI = metadata => (
-      <MCTSDebug root={metadata} renderState={renderGameTreeCell} />
-    );
-  }
-
-  return { bot, enumerate, renderAI };
+  return { bot, enumerate, visualize };
 }

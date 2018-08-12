@@ -11,7 +11,7 @@ import View from './components/view';
 const routes = [
   {
     path: '/turnorder/main',
-    text: 'Examples',
+    text: 'Simultaneous Moves',
     component: View,
   },
 ];

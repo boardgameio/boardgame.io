@@ -10,8 +10,9 @@ const Koa = require('koa');
 const IO = require('koa-socket');
 const Redux = require('redux');
 
-import { InMemory, Mongo } from './db';
+import { DBFromEnv } from './db';
 import { CreateGameReducer } from '../core/reducer';
+import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createApiServer, isActionFromAuthenticPlayer } from './api';
 
 const PING_TIMEOUT = 20 * 1e3;
@@ -29,11 +30,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
   io.attach(app);
 
   if (db === undefined) {
-    if (process.env.MONGO_URI) {
-      db = new Mongo({ url: process.env.MONGO_URI });
-    } else {
-      db = new InMemory();
-    }
+    db = DBFromEnv();
   }
 
   const api = createApiServer({ db, games });
@@ -68,8 +65,19 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           return { error: 'unauthorized action' };
         }
 
-        // Check whether the player is allowed to make the move
-        if (!game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)) {
+        // Check whether the player is allowed to make the move.
+        if (
+          action.type == MAKE_MOVE &&
+          !game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)
+        ) {
+          return;
+        }
+
+        // Check whether the player is allowed to call the event.
+        if (
+          action.type == GAME_EVENT &&
+          !game.flow.canPlayerCallEvent(state.G, state.ctx, playerID)
+        ) {
           return;
         }
 

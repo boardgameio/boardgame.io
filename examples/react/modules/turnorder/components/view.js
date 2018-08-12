@@ -21,7 +21,19 @@ const App = Client({
 
 const Multiplayer = () => (
   <div id="turn-order">
-    <div>
+    <div style={{ padding: 50 }}>
+      <p>
+        The following example demonstrates how to use
+        <strong> changeActionPlayers </strong>
+        to allow multiple players to play in a single turn.
+      </p>
+
+      <p>
+        Click on <strong> Play Militia</strong>, and the other players will have
+        to each click on <strong> Drop Cards </strong> before the current player
+        can end their turn.
+      </p>
+
       <App gameID="TurnExample" />
 
       <div className="runner-vert">

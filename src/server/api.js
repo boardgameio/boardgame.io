@@ -100,9 +100,9 @@ export const createApiServer = ({ db, games }) => {
     };
   });
 
-  router.patch('/game_instances/:id/join', koaBody(), async ctx => {
+  router.post('/games/:name/:id/join', koaBody(), async ctx => {
+    const gameName = ctx.params.name;
     const gameID = ctx.params.id;
-    const gameName = ctx.request.body.gameName;
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
 
@@ -128,14 +128,14 @@ export const createApiServer = ({ db, games }) => {
   // If API_SECRET is set, then require that requests set an
   // api-secret header that is set to the same value.
   app.use(async (ctx, next) => {
-    await next();
-
     if (
       !!process.env.API_SECRET &&
       ctx.request.headers['api-secret'] !== process.env.API_SECRET
     ) {
       ctx.throw(403, 'Invalid API secret');
     }
+
+    await next();
   });
 
   app.use(router.routes()).use(router.allowedMethods());

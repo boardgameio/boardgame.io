@@ -8,30 +8,19 @@
 
 import { Game, PlayerView } from 'boardgame.io/core';
 
-const LiarsDice = Game({
-  name: 'liars-dice',
+const SecretState = Game({
+  name: 'secret-state',
 
   setup: () => ({
+    other: {},
     players: {
-      0: [4, 4, 2, 6, 1],
-      1: [4, 5, 6, 3, 3],
-      2: [1, 1, 2, 4, 3],
+      0: 'player 0 state',
+      1: 'player 1 state',
+      2: 'player 2 state',
     },
   }),
-
-  moves: {
-    bid(G, ctx, id) {
-      const cells = [...G.cells];
-
-      if (cells[id] === null) {
-        cells[id] = ctx.currentPlayer;
-      }
-
-      return { ...G, cells };
-    },
-  },
 
   playerView: PlayerView.STRIP_SECRETS,
 });
 
-export default LiarsDice;
+export default SecretState;

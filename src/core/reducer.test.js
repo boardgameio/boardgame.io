@@ -71,6 +71,31 @@ test('makeMove', () => {
   expect(state.G).toMatchObject({ moved: true });
 });
 
+test('disable move by invalid playerIDs', () => {
+  const reducer = CreateGameReducer({ game });
+
+  let state;
+
+  state = reducer(undefined, { type: 'init' });
+  expect(state._stateID).toBe(0);
+
+  // playerID="1" cannot move right now.
+  state = reducer(state, makeMove('A', null, '1'));
+  expect(state._stateID).toBe(0);
+
+  // playerID="1" cannot call events right now.
+  state = reducer(state, gameEvent('endTurn', null, '1'));
+  expect(state._stateID).toBe(0);
+
+  // playerID="0" can move.
+  state = reducer(state, makeMove('A', null, '0'));
+  expect(state._stateID).toBe(1);
+
+  // playerID=undefined can always move.
+  state = reducer(state, makeMove('A'));
+  expect(state._stateID).toBe(2);
+});
+
 test('restore', () => {
   const reducer = CreateGameReducer({ game });
   const state = reducer(undefined, restore({ G: 'restored' }));
@@ -184,7 +209,7 @@ test('log', () => {
   expect(state.log).toEqual([actionA, actionB, actionC]);
 });
 
-test('using Random inside setup()', () => {
+describe('Random inside setup()', () => {
   const game1 = Game({
     seed: 'seed1',
     setup: ctx => ({ n: ctx.random.D6() }),
@@ -200,17 +225,45 @@ test('using Random inside setup()', () => {
     setup: ctx => ({ n: ctx.random.D6() }),
   });
 
-  const reducer1 = CreateGameReducer({ game: game1 });
-  const state1 = reducer1(undefined, makeMove());
+  const game4 = Game({
+    setup: ctx => ({ n: ctx.random.D6() }),
+  });
 
-  const reducer2 = CreateGameReducer({ game: game2 });
-  const state2 = reducer2(undefined, makeMove());
+  test('setting seed', () => {
+    const reducer1 = CreateGameReducer({ game: game1 });
+    const state1 = reducer1(undefined, makeMove());
 
-  const reducer3 = CreateGameReducer({ game: game3 });
-  const state3 = reducer3(undefined, makeMove());
+    const reducer2 = CreateGameReducer({ game: game2 });
+    const state2 = reducer2(undefined, makeMove());
 
-  expect(state1.G.n).not.toBe(state2.G.n);
-  expect(state2.G.n).toBe(state3.G.n);
+    const reducer3 = CreateGameReducer({ game: game3 });
+    const state3 = reducer3(undefined, makeMove());
+
+    expect(state1.G.n).not.toBe(state2.G.n);
+    expect(state2.G.n).toBe(state3.G.n);
+  });
+
+  test('not setting seed sets a default', () => {
+    const reducer = CreateGameReducer({ game: game4 });
+    const state = reducer(undefined, makeMove());
+    expect(state.ctx._random.seed).toBeDefined();
+  });
+});
+
+test('events API inside first onTurnBegin', () => {
+  const game = Game({
+    flow: {
+      setActionPlayers: true,
+      onTurnBegin: (G, ctx) => {
+        ctx.events.setActionPlayers(['0', '1']);
+      },
+    },
+  });
+
+  const reducer = CreateGameReducer({ game });
+  const state = reducer(undefined, { type: 'init' });
+
+  expect(state.ctx.actionPlayers).toEqual(['0', '1']);
 });
 
 test('undo / redo', () => {

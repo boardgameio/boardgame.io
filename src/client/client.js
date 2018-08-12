@@ -12,30 +12,52 @@ import { Multiplayer } from './multiplayer/multiplayer';
 import { CreateGameReducer } from '../core/reducer';
 
 /**
+ * createDispatchers
+ *
+ * Create action dispatcher wrappers with bound playerID and credentials
+ */
+function createDispatchers(
+  storeActionType,
+  innerActionNames,
+  store,
+  playerID,
+  credentials,
+  multiplayer
+) {
+  return innerActionNames.reduce((dispatchers, name) => {
+    dispatchers[name] = function(...args) {
+      let assumedPlayerID = playerID;
+
+      // In singleplayer mode, if the client does not have a playerID
+      // associated with it, we attach the currentPlayer as playerID.
+      if (!multiplayer && (playerID === null || playerID === undefined)) {
+        const state = store.getState();
+        assumedPlayerID = state.ctx.currentPlayer;
+      }
+
+      store.dispatch(
+        ActionCreators[storeActionType](
+          name,
+          args,
+          assumedPlayerID,
+          credentials
+        )
+      );
+    };
+    return dispatchers;
+  }, {});
+}
+
+/**
  * createEventDispatchers
  *
  * Creates a set of dispatchers to dispatch game flow events.
  * @param {Array} eventNames - A list of event names.
  * @param {object} store - The Redux store to create dispatchers for.
  * @param {string} playerID - The ID of the player dispatching these events.
+ * @param {string} credentials - A key indicating that the player is authorized to play.
  */
-export function createEventDispatchers(
-  eventNames,
-  store,
-  playerID,
-  credentials
-) {
-  let dispatchers = {};
-  for (let i = 0; i < eventNames.length; i++) {
-    const name = eventNames[i];
-    dispatchers[name] = function(...args) {
-      store.dispatch(
-        ActionCreators.gameEvent(name, args, playerID, credentials)
-      );
-    };
-  }
-  return dispatchers;
-}
+export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
 
 /**
  * createMoveDispatchers
@@ -43,19 +65,10 @@ export function createEventDispatchers(
  * Creates a set of dispatchers to make moves.
  * @param {Array} moveNames - A list of move names.
  * @param {object} store - The Redux store to create dispatchers for.
+ * @param {string} playerID - The ID of the player dispatching these events.
+ * @param {string} credentials - A key indicating that the player is authorized to play.
  */
-export function createMoveDispatchers(moveNames, store, playerID, credentials) {
-  let dispatchers = {};
-  for (let i = 0; i < moveNames.length; i++) {
-    const name = moveNames[i];
-    dispatchers[name] = function(...args) {
-      store.dispatch(
-        ActionCreators.makeMove(name, args, playerID, credentials)
-      );
-    };
-  }
-  return dispatchers;
-}
+export const createMoveDispatchers = createDispatchers.bind(null, 'makeMove');
 
 /**
  * Implementation of Client (see below).
@@ -92,12 +105,12 @@ class _ClientImpl {
     });
 
     if (ai !== undefined && multiplayer === undefined) {
-      this.bot = new ai.bot({ game, ...ai });
+      const bot = new ai.bot({ game, enumerate: ai.enumerate });
 
       this.step = () => {
         const state = this.store.getState();
         const playerID = state.ctx.actionPlayers[0];
-        const { action, metadata } = this.bot.play(state, playerID);
+        const { action, metadata } = bot.play(state, playerID);
 
         if (action) {
           action.payload.metadata = metadata;
@@ -156,15 +169,24 @@ class _ClientImpl {
     // isActive.
 
     let isActive = true;
-    if (this.multiplayer) {
-      if (this.playerID == null) {
-        isActive = false;
-      }
-      if (
-        !this.game.flow.canPlayerMakeMove(state.G, state.ctx, this.playerID)
-      ) {
-        isActive = false;
-      }
+
+    const canPlayerMakeMove = this.game.flow.canPlayerMakeMove(
+      state.G,
+      state.ctx,
+      this.playerID
+    );
+
+    if (this.multiplayer && !canPlayerMakeMove) {
+      isActive = false;
+    }
+
+    if (
+      !this.multiplayer &&
+      this.playerID !== null &&
+      this.playerID !== undefined &&
+      !canPlayerMakeMove
+    ) {
+      isActive = false;
     }
 
     if (state.ctx.gameover !== undefined) {
@@ -174,11 +196,7 @@ class _ClientImpl {
     // Secrets are normally stripped on the server,
     // but we also strip them here so that game developers
     // can see their effects while prototyping.
-    let playerID = this.playerID;
-    if (!this.multiplayer && !playerID && state.ctx.currentPlayer != 'any') {
-      playerID = state.ctx.currentPlayer;
-    }
-    const G = this.game.playerView(state.G, state.ctx, playerID);
+    const G = this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
     let ret = { ...state, isActive, G };
@@ -202,14 +220,16 @@ class _ClientImpl {
       this.game.moveNames,
       this.store,
       this.playerID,
-      this.credentials
+      this.credentials,
+      this.multiplayer
     );
 
     this.events = createEventDispatchers(
       this.game.flow.eventNames,
       this.store,
       this.playerID,
-      this.credentials
+      this.credentials,
+      this.multiplayer
     );
   }
 

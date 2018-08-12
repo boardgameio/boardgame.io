@@ -13,6 +13,7 @@ import {
   createEventDispatchers,
   createMoveDispatchers,
 } from './client';
+import { gameEvent } from '../core/action-creators';
 import Game from '../core/game';
 import { RandomBot } from '../ai/bot';
 
@@ -148,7 +149,7 @@ test('event dispatchers', () => {
       flow: {
         endPhase: true,
         endGame: true,
-        changeActionPlayers: true,
+        setActionPlayers: true,
       },
     });
     const reducer = CreateGameReducer({ game, numPlayers: 2 });
@@ -158,7 +159,7 @@ test('event dispatchers', () => {
       'endTurn',
       'endPhase',
       'endGame',
-      'changeActionPlayers',
+      'setActionPlayers',
     ]);
     expect(store.getState().ctx.turn).toBe(0);
     api.endTurn();
@@ -197,32 +198,73 @@ test('event dispatchers', () => {
   }
 });
 
-test('move dispatchers', () => {
+describe('move dispatchers', () => {
   const game = Game({
     moves: {
       A: G => G,
-      B: () => ({ moved: true }),
+      B: (G, ctx) => ({ moved: ctx.playerID }),
       C: () => ({ victory: true }),
     },
     flow: {
       endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
     },
   });
-
   const reducer = CreateGameReducer({ game });
-  const store = createStore(reducer);
-  const api = createMoveDispatchers(game.moveNames, store);
 
-  expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
-  expect(api.unknown).toBe(undefined);
+  test('basic', () => {
+    const store = createStore(reducer);
+    const api = createMoveDispatchers(game.moveNames, store);
 
-  api.A();
-  expect(store.getState().G).not.toMatchObject({ moved: true });
-  expect(store.getState().G).not.toMatchObject({ victory: true });
+    expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
+    expect(api.unknown).toBe(undefined);
 
-  api.B();
-  expect(store.getState().G).toMatchObject({ moved: true });
+    api.A();
+    expect(store.getState().G).not.toMatchObject({ moved: true });
+    expect(store.getState().G).not.toMatchObject({ victory: true });
 
-  api.C();
-  expect(store.getState().G).toMatchObject({ victory: true });
+    api.B();
+    expect(store.getState().G).toMatchObject({ moved: '0' });
+
+    store.dispatch(gameEvent('endTurn', null, '0'));
+
+    api.B();
+    expect(store.getState().G).toMatchObject({ moved: '1' });
+
+    api.C();
+    expect(store.getState().G).toMatchObject({ victory: true });
+  });
+
+  test('with undefined playerID - singleplayer mode', () => {
+    const store = createStore(reducer);
+    const api = createMoveDispatchers(game.moveNames, store);
+    api.B();
+    expect(store.getState().G).toMatchObject({ moved: '0' });
+  });
+
+  test('with undefined playerID - multiplayer mode', () => {
+    const store = createStore(reducer);
+    const api = createMoveDispatchers(
+      game.moveNames,
+      store,
+      undefined,
+      null,
+      true
+    );
+    api.B();
+    expect(store.getState().G).toMatchObject({ moved: undefined });
+  });
+
+  test('with null playerID - singleplayer mode', () => {
+    const store = createStore(reducer);
+    const api = createMoveDispatchers(game.moveNames, store, null);
+    api.B();
+    expect(store.getState().G).toMatchObject({ moved: '0' });
+  });
+
+  test('with null playerID - multiplayer mode', () => {
+    const store = createStore(reducer);
+    const api = createMoveDispatchers(game.moveNames, store, null, null, true);
+    api.B();
+    expect(store.getState().G).toMatchObject({ moved: null });
+  });
 });

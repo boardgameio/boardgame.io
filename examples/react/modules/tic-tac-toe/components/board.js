@@ -29,9 +29,7 @@ class Board extends React.Component {
   };
 
   isActive(id) {
-    if (!this.props.isActive) return false;
-    if (this.props.G.cells[id] !== null) return false;
-    return true;
+    return this.props.isActive && this.props.G.cells[id] === null;
   }
 
   render() {
@@ -69,7 +67,7 @@ class Board extends React.Component {
     }
 
     let player = null;
-    if (this.props.playerID !== null) {
+    if (this.props.playerID) {
       player = <div id="player">Player: {this.props.playerID}</div>;
     }
 

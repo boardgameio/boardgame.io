@@ -11,6 +11,8 @@ import request from 'supertest';
 import { isActionFromAuthenticPlayer, createApiServer } from './api';
 import Game from '../core/game';
 
+jest.setTimeout(2000000000);
+
 describe('.isActionFromAuthenticPlayer', () => {
   let action;
   let db;
@@ -286,8 +288,8 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .post('/games/foo/1/join')
+            .send('playerID=0&playerName=alice');
         });
 
         test('throws a "not found" error', async () => {
@@ -316,8 +318,8 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .post('/games/foo/1/join')
+            .send('playerID=0&playerName=alice');
         });
 
         test('is successful', async () => {
@@ -353,8 +355,8 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .post('/games/foo/1/join')
+            .send('playerID=0&playerName=alice');
         });
 
         test('fails', () => {
@@ -380,9 +382,9 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
-            .patch('/game_instances/1/join')
+            .post('/games/foo/1/join')
             .set('API-Secret', 'protected')
-            .send('gameName=foo&playerID=0&playerName=alice');
+            .send('playerID=0&playerName=alice');
         });
 
         test('succeeds', () => {
@@ -401,6 +403,7 @@ describe('.createApiServer', () => {
         set: async () => {},
       };
     });
+
     describe('when given 2 games', async () => {
       let response;
       beforeEach(async () => {
@@ -411,8 +414,9 @@ describe('.createApiServer', () => {
 
         response = await request(app.callback()).get('/games');
       });
+
       test('should get 2 games', async () => {
-        expect(Object.keys(JSON.parse(response.text)).length).toEqual(2);
+        expect(JSON.parse(response.text)).toEqual(['foo', 'bar']);
       });
     });
   });

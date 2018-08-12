@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { parse, stringify } from 'flatted';
 import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
@@ -24,10 +25,15 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
 
   let ctx = game.flow.ctx(numPlayers);
-  ctx._random = { seed: game.seed };
+
+  let seed = game.seed;
+  if (seed === undefined) {
+    seed = Random.seed();
+  }
+  ctx._random = { seed };
 
   const random = new Random(ctx);
-  const ctxWithAPI = random.attach(ctx);
+  let ctxWithAPI = random.attach(ctx);
 
   const initial = {
     // User managed state.
@@ -56,16 +62,20 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  // Initialize PRNG state.
-  initial.ctx = random.update(initial.ctx);
+  const events = new Events(game.flow, ctx.currentPlayer);
+  ctxWithAPI = events.attach(ctxWithAPI);
 
-  const state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+  const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
+  const { ctx: ctxWithEvents } = events.update(state);
   initial.G = state.G;
-  initial.ctx = state.ctx;
   initial._undo = state._undo;
+  initial.ctx = ctxWithEvents;
+  initial.ctx = random.update(initial.ctx);
+  initial.ctx = Random.detach(initial.ctx);
+  initial.ctx = Events.detach(initial.ctx);
 
-  const deepCopy = obj => JSON.parse(JSON.stringify(obj));
+  const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
 
   /**
@@ -83,6 +93,19 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         // contain code that may rely on secret state
         // and cannot be computed on the client.
         if (multiplayer) {
+          return state;
+        }
+
+        // Ignore the event if the player isn't allowed to make it.
+        if (
+          action.payload.playerID !== null &&
+          action.payload.playerID !== undefined &&
+          !game.flow.canPlayerCallEvent(
+            state.G,
+            state.ctx,
+            action.payload.playerID
+          )
+        ) {
           return state;
         }
 
@@ -120,8 +143,10 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // Ignore the move if the player cannot make it at this point.
+        // Ignore the move if the player isn't allowed to make it.
         if (
+          action.payload.playerID !== null &&
+          action.payload.playerID !== undefined &&
           !game.flow.canPlayerMakeMove(
             state.G,
             state.ctx,
@@ -176,7 +201,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         // Allow the flow reducer to process any triggers that happen after moves.
         state = { ...state, ctx: random.attach(state.ctx) };
         state = { ...state, ctx: events.attach(state.ctx) };
-        state = game.flow.processMove(state, action);
+        state = game.flow.processMove(state, action.payload);
         state = events.update(state);
         state = { ...state, ctx: random.update(state.ctx) };
         state = { ...state, ctx: Random.detach(state.ctx) };

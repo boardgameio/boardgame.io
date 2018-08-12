@@ -1,0 +1,110 @@
+/*
+ * Copyright 2018 The boardgame.io Authors
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+.mcts {
+  display: flex;
+  flex-direction: column;
+}
+
+.mcts .description {
+  text-align: right;
+  padding: 50px;
+}
+
+.mcts-tree {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.mcts-tree .preview {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  height: 300px;
+  width: 300px;
+  padding: 10px;
+}
+
+.mcts-node-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  list-style: none;
+  text-align: left;
+  font-size: 12px;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.mcts-tree .parents {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.mcts-tree .children {
+  display: grid;
+  font-weight: bold;
+  grid-template-columns: repeat(1, 1fr);
+  grid-gap: 10px;
+}
+
+.mcts-action-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.mcts-action {
+  color: #888;
+  font-size: 11px;
+  font-weight: normal;
+  background: #ddd;
+  height: 25px;
+  line-height: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.arrow-right {
+  width: 0;
+  height: 0;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+  border-left: 20px solid #ddd;
+  margin-right: 30px;
+}
+
+.mcts-node {
+  cursor: pointer;
+  overflow: hidden;
+  font-size: 14px;
+  border-radius: 100%;
+  margin-right: 30px;
+  border: 1px solid #ccc;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  padding: 10px;
+  color: #bbb;
+  background: #444;
+  text-align: center;
+}
+
+.mcts-node.clickable {
+  color: #777;
+  background: #eee;
+}
+
+.mcts-node.clickable:hover {
+  background: #ddd;
+}

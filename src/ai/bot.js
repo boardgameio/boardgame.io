@@ -105,8 +105,14 @@ export class RandomBot extends Bot {
 }
 
 export class MCTSBot extends Bot {
-  constructor({ enumerate, seed, game, iterations, playoutDepth }) {
+  constructor({ enumerate, seed, objectives, game, iterations, playoutDepth }) {
     super({ enumerate, seed });
+
+    if (objectives === undefined) {
+      objectives = () => ({});
+    }
+
+    this.objectives = objectives;
     this.reducer = CreateGameReducer({ game });
     this.iterations = iterations || 1000;
     this.playoutDepth = playoutDepth || 50;
@@ -116,12 +122,15 @@ export class MCTSBot extends Bot {
     const { G, ctx } = state;
 
     let actions = [];
+    let objectives = [];
 
     if (playerID !== undefined) {
       actions = this.enumerate(G, ctx, playerID);
+      objectives = this.objectives(G, ctx, playerID);
     } else {
       for (let playerID of ctx.actionPlayers) {
         actions = actions.concat(this.enumerate(G, ctx, playerID));
+        objectives = objectives.concat(this.objectives(G, ctx, playerID));
       }
     }
 
@@ -134,6 +143,8 @@ export class MCTSBot extends Bot {
       parentAction,
       // Unexplored actions.
       actions,
+      // Current objectives.
+      objectives,
       // Children of the node.
       children: [],
       // Number of simulations that pass through this node.
@@ -202,6 +213,21 @@ export class MCTSBot extends Bot {
       const { G, ctx } = state;
       const moves = this.enumerate(G, ctx, ctx.actionPlayers[0]);
 
+      // Check if any objectives are met.
+      const objectives = this.objectives(G, ctx);
+      const score = Object.keys(objectives).reduce((score, key) => {
+        const objective = objectives[key];
+        if (objective.checker(G, ctx)) {
+          return score + objective.weight;
+        }
+        return score;
+      }, 0.0);
+
+      // If so, stop and return the score.
+      if (score > 0) {
+        return { score };
+      }
+
       if (!moves || moves.length == 0) {
         return undefined;
       }
@@ -216,6 +242,10 @@ export class MCTSBot extends Bot {
 
   backpropagate(node, result = {}) {
     node.visits++;
+
+    if (result.score !== undefined) {
+      node.value += result.score;
+    }
 
     if (result.draw === true) {
       node.value += 0.5;
