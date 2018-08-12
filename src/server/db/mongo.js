@@ -54,10 +54,6 @@ export class InMemory {
   async has(id) {
     return await this.games.has(id);
   }
-
-  async list() {
-    return await this.games.entries();
-  }
 }
 
 /**

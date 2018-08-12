@@ -107,16 +107,16 @@ export const createApiServer = ({ db, games }) => {
     const gameName = ctx.params.name;
     const gameList = await db.list();
     let gameInstances = [];
-    for (let kv of Array.from(gameList)) {
-      if (isGameMetadataKey(kv[0], gameName)) {
-        const gameID = kv[0].slice(
+    for (let key of Array.from(gameList)) {
+      if (isGameMetadataKey(key, gameName)) {
+        const gameID = key.slice(
           gameName.length + 1,
-          kv[0].lastIndexOf(':metadata')
+          key.lastIndexOf(':metadata')
         );
-
+        const metadata = await db.get(key);
         gameInstances.push({
           game_id: gameID,
-          players: Object.keys(kv[1].players),
+          players: Object.keys(metadata.players),
         });
       }
     }
