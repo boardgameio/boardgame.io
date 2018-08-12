@@ -443,12 +443,12 @@ describe('.createApiServer', () => {
         set: async () => {},
         list: async () => {
           return [
-            ['bar:bar-0', {}],
-            ['bar:bar-0:metadata', { players: { '0': {} } }],
-            ['foo:foo-0', {}],
-            ['foo:foo-0:metadata', { players: { '0': {} } }],
-            ['bar:bar-1', {}],
-            ['bar:bar-1:metadata', { players: { '1': {} } }],
+            'bar:bar-0',
+            'bar:bar-0:metadata',
+            'foo:foo-0',
+            'foo:foo-0:metadata',
+            'bar:bar-1',
+            'bar:bar-1:metadata',
           ];
         },
       };
@@ -470,8 +470,8 @@ describe('.createApiServer', () => {
         expect(instances[1].game_id).toEqual('bar-1');
       });
       test('returns player names', async () => {
-        expect(instances[0].players).toEqual(['0']);
-        expect(instances[1].players).toEqual(['1']);
+        expect(instances[0].players).toEqual(['0', '1']);
+        expect(instances[1].players).toEqual(['0', '1']);
       });
     });
   });
