@@ -92,13 +92,13 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
             const { playerID } = clientInfo.get(client);
-            const ctx = Object.assign({}, state.ctx, { _random: undefined });
-            const filteredState = Object.assign({}, state, {
-              G: game.playerView(state.G, ctx, playerID),
-              ctx: ctx,
+            const filteredState = {
+              ...state,
+              G: game.playerView(state.G, state.ctx, playerID),
+              ctx: { ...state.ctx, _random: undefined },
               log: undefined,
               deltalog: undefined,
-            });
+            };
 
             if (client === socket.id) {
               socket.emit('update', gameID, filteredState, state.deltalog);
@@ -113,7 +113,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           // object before storing it, but this should probably
           // sit in a different part of the database eventually.
           log = [...log, ...state.deltalog];
-          const stateWithLog = Object.assign({}, state, log);
+          const stateWithLog = { ...state, log };
 
           await db.set(gameID, stateWithLog);
         }
@@ -142,13 +142,13 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           await db.set(gameID, state);
         }
 
-        const ctx = Object.assign({}, state.ctx, { _random: undefined });
-        const filteredState = Object.assign({}, state, {
-          G: game.playerView(state.G, ctx, playerID),
-          ctx: ctx,
+        const filteredState = {
+          ...state,
+          G: game.playerView(state.G, state.ctx, playerID),
+          ctx: { ...state.ctx, _random: undefined },
           log: undefined,
           deltalog: undefined,
-        });
+        };
 
         socket.emit('sync', gameID, filteredState, state.log);
 
