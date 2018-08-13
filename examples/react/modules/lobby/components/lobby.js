@@ -18,29 +18,22 @@ class Lobby extends React.Component {
   };
 
   state = {
+    phase: 'enter', // may be 'enter','join','play'
+    playerName: '',
+    nameErrorMsg: 'empty player name',
     games: [],
-    instances: [],
     selectedGame: null,
+    gamesErrorMsg: 'no game selected',
+    instances: [],
     selectedInstance: null,
+    instancesErrorMsg: ' ',
   };
 
   baseUrl() {
     return 'http://' + this.props.server + ':' + this.props.port + '/games';
   }
 
-  componentDidMount() {
-    // fetch list of games
-    fetch(this.baseUrl())
-      .then(resp => {
-        return resp.json();
-      })
-      .then(json => {
-        this.setState({ games: json });
-      })
-      .catch(ex => {
-        console.log('error', ex);
-      });
-  }
+  componentDidMount() {}
 
   render() {
     // list of games
@@ -80,33 +73,98 @@ class Lobby extends React.Component {
         </tr>
       );
     }
+
+    const getPhaseVisibility = phase => {
+      return this.state.phase !== phase ? 'hidden' : 'phase';
+    };
     return (
-      <div style={{ padding: 50 }}>
-        <h1>Select a game and create a new instance:</h1>
-        <div id="lists">
-          <div id="games">
-            <table>
-              <tbody>{game_rows}</tbody>
-            </table>
-            <div className="buttons">
-              <button onClick={() => this.onClickCreate()}>Create</button>
-            </div>
-          </div>
-          <div id="instances">
+      <div id="lobby-view" style={{ padding: 50 }}>
+        <h1>Lobby</h1>
+        <div id="name" className={getPhaseVisibility('enter')}>
+          <p className="phase-title">Choose a player name:</p>
+          <input
+            type="Text"
+            value={this.state.playerName}
+            onChange={evt => this.onChangePlayerName(evt)}
+            onKeyPress={evt => this.onKeyPress(evt)}
+          />
+          <span className="buttons">
+            <button className="buttons" onClick={() => this.onClickEnter()}>
+              Enter
+            </button>
+          </span>
+          <p id="name-error" className="error-msg">
+            {this.state.nameErrorMsg}
+          </p>
+        </div>
+        <div id="games" className={getPhaseVisibility('join')}>
+          <p className="phase-title">Select a game:</p>
+          <table>
+            <tbody>{game_rows}</tbody>
+          </table>
+          <p id="games-error" className="error-msg">
+            {this.state.gamesErrorMsg}
+          </p>
+        </div>
+        <div id="instances" className={getPhaseVisibility('join')}>
+          <p className="phase-title">Select or create an instance:</p>
+          <div id="instances-table">
             <table>
               <tbody>{inst_rows}</tbody>
             </table>
-            <div className="buttons">
-              <button onClick={() => this.onClickJoin()}>Join</button>
-            </div>
           </div>
+          <div className="buttons">
+            <button onClick={() => this.onClickJoin()}>Join</button>
+            <button onClick={() => this.onClickCreate()}>Create</button>
+          </div>
+          <p id="instances-error" className="error-msg">
+            {this.state.instancesErrorMsg}
+          </p>
         </div>
+        <div id="board" className={getPhaseVisibility('play')} />
       </div>
     );
   }
 
+  onKeyPress(event) {
+    if (this.state.phase === 'enter' && event.key === 'Enter') {
+      this.onClickEnter();
+    }
+  }
+
+  onChangePlayerName(event) {
+    const name = event.target.value.trim();
+    this.setState({
+      ...this.state,
+      playerName: name,
+      nameErrorMsg: name.length ? ' ' : 'empty name',
+    });
+  }
+
+  onClickEnter() {
+    if (this.state.playerName === '') return;
+    // fetch list of games
+    fetch(this.baseUrl())
+      .then(resp => {
+        return resp.json();
+      })
+      .then(json => {
+        this.setState({
+          ...this.state,
+          games: json,
+          phase: 'join',
+        });
+      })
+      .catch(ex => {
+        console.log('error', ex);
+        this.setState({
+          ...this.state,
+          nameErrorMsg: 'failed to retrieve list of games (' + ex + ')',
+        });
+      });
+  }
+
   onClickGame(selected) {
-    if (selected == this.state.selectedGame) return;
     // request list of game instances
     fetch(this.baseUrl() + '/' + this.state.games[selected])
       .then(resp => {
@@ -116,12 +174,20 @@ class Lobby extends React.Component {
         this.setState({
           ...this.state,
           selectedGame: selected,
+          gamesErrorMsg: selected === null ? 'no game selected' : ' ',
           selectedInstance: null,
           instances: json.game_instances,
+          instancesErrorMsg: json.game_instances.length
+            ? ' '
+            : 'no instance for this game',
         });
       })
       .catch(ex => {
         console.log('error', ex);
+        this.setState({
+          ...this.state,
+          gamesErrorMsg: 'failed to retrieve instances (' + ex + ')',
+        });
       });
   }
 
@@ -175,7 +241,7 @@ class Lobby extends React.Component {
         method: 'POST',
         body: JSON.stringify({
           playerID: '0',
-          playerName: 'Toto',
+          playerName: this.state.playerName,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -191,6 +257,10 @@ class Lobby extends React.Component {
       })
       .catch(ex => {
         console.log('error', ex);
+        this.setState({
+          ...this.state,
+          instancesErrorMsg: 'failed to join game (' + ex + ')',
+        });
       });
   }
 }

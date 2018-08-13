@@ -6,17 +6,30 @@
  * https://opensource.org/licenses/MIT.
  */
 
-#lists {
+#lobby-view {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
 }
 
-#games,
-#instances {
+.error-msg {
+  font-size: 12px;
+  color: red;
+}
+
+.hidden {
+  display: none;
+}
+
+.phase {
   border: none;
   outline: none;
   margin-left: 50px;
+}
+
+.phase-title {
+  font-weight: bold;
+  margin-left: -50px;
 }
 
 #games td,
@@ -44,6 +57,13 @@
 }
 
 .buttons button {
-  margin-left: 60px;
+  margin-left: 10px;
   margin-top: 10px;
+  width: 70px;
+}
+
+#instances-table {
+  height: 180px;
+  overflow-y: auto;
+  width: 400px;
 }
