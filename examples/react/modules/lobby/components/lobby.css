@@ -38,7 +38,8 @@
   width: 350px;
 }
 
-#games td.active {
+#games td.active,
+#instances td.active {
   background: #83baff;
 }
 

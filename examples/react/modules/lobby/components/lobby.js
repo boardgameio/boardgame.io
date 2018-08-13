@@ -19,8 +19,9 @@ class Lobby extends React.Component {
 
   state = {
     games: [],
-    selected: null,
     instances: [],
+    selectedGame: null,
+    selectedInstance: null,
   };
 
   baseUrl() {
@@ -46,7 +47,7 @@ class Lobby extends React.Component {
     let game_rows = [];
     for (let i = 0; i < this.state.games.length; i++) {
       let className = '';
-      if (this.state.selected === i) {
+      if (this.state.selectedGame === i) {
         className = 'active';
       }
       game_rows.push(
@@ -54,7 +55,7 @@ class Lobby extends React.Component {
           <td
             key={'gcell-' + i}
             className={className}
-            onClick={() => this.onSelectGame(i)}
+            onClick={() => this.onClickGame(i)}
           >
             {this.state.games[i]}
           </td>
@@ -64,9 +65,18 @@ class Lobby extends React.Component {
     // list of game instances
     let inst_rows = [];
     for (let i = 0; i < this.state.instances.length; i++) {
+      let className = '';
+      if (this.state.selectedInstance === i) {
+        className = 'active';
+      }
+      const inst = this.state.instances[i];
       inst_rows.push(
         <tr key={'iline-' + i}>
-          <td key={'icell-' + i}>{this.state.instances[i]}</td>
+          <td
+            key={'icell-' + i}
+            className={className}
+            onClick={() => this.onClickInstance(i)}
+          >{`[${inst.game_id}] ${inst.players.length} players`}</td>
         </tr>
       );
     }
@@ -79,20 +89,24 @@ class Lobby extends React.Component {
               <tbody>{game_rows}</tbody>
             </table>
             <div className="buttons">
-              <button onClick={() => this.onCreateGame()}>Create</button>
+              <button onClick={() => this.onClickCreate()}>Create</button>
             </div>
           </div>
           <div id="instances">
             <table>
               <tbody>{inst_rows}</tbody>
             </table>
+            <div className="buttons">
+              <button onClick={() => this.onClickJoin()}>Join</button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  onSelectGame(selected) {
+  onClickGame(selected) {
+    if (selected == this.state.selectedGame) return;
     // request list of game instances
     fetch(this.baseUrl() + '/' + this.state.games[selected])
       .then(resp => {
@@ -101,10 +115,9 @@ class Lobby extends React.Component {
       .then(json => {
         this.setState({
           ...this.state,
-          selected: selected,
-          instances: json.game_instances.map(i => {
-            return i.game_id + ':' + i.players.length + ' players';
-          }),
+          selectedGame: selected,
+          selectedInstance: null,
+          instances: json.game_instances,
         });
       })
       .catch(ex => {
@@ -112,14 +125,28 @@ class Lobby extends React.Component {
       });
   }
 
-  onCreateGame() {
-    if (this.state.selected == null) return;
+  onClickInstance(selected) {
+    if (selected == this.state.selectedInstance) return;
+    this.setState({
+      ...this.state,
+      selectedInstance: selected,
+    });
+  }
+
+  onClickCreate() {
+    if (this.state.selectedGame == null) return;
     // request new game instance
     fetch(
-      this.baseUrl() + '/' + this.state.games[this.state.selected] + '/create',
+      this.baseUrl() +
+        '/' +
+        this.state.games[this.state.selectedGame] +
+        '/create',
       {
         method: 'POST',
-        body: { numPlayers: 2 },
+        body: JSON.stringify({ numPlayers: 2 }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }
     )
       .then(resp => {
@@ -127,7 +154,40 @@ class Lobby extends React.Component {
       })
       .then(() => {
         // update list of instances
-        this.onSelectGame(this.state.selected);
+        this.onClickGame(this.state.selectedGame);
+      })
+      .catch(ex => {
+        console.log('error', ex);
+      });
+  }
+
+  onClickJoin() {
+    if (this.state.selectedInstance == null) return;
+    // join game instance
+    fetch(
+      this.baseUrl() +
+        '/' +
+        this.state.games[this.state.selectedGame] +
+        '/' +
+        this.state.instances[this.state.selectedInstance].game_id +
+        '/join',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          playerID: '0',
+          playerName: 'Toto',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then(resp => {
+        return resp.json();
+      })
+      .then(json => {
+        // credentials
+        console.log(json.credentials);
       })
       .catch(ex => {
         console.log('error', ex);
