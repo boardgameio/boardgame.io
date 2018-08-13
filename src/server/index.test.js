@@ -150,153 +150,171 @@ test('sync', async () => {
   spy.mockRestore();
 });
 
-test('action', async () => {
+describe('update', async () => {
   const server = Server({ games: [game] });
   const io = server.app.context.io;
   const action = ActionCreators.gameEvent('endTurn');
 
-  await io.socket.receive('action', action);
-  expect(io.socket.emit).toHaveBeenCalledTimes(0);
-  io.socket.emit.mockReset();
+  beforeEach(() => {
+    io.socket.emit.mockReset();
+  });
 
-  await io.socket.receive('sync', 'gameID');
-  io.socket.id = 'second';
-  await io.socket.receive('sync', 'gameID');
-  io.socket.emit.mockReset();
+  describe('without clients connected', () => {
+    test('no updates sent', async () => {
+      await io.socket.receive('update', action);
+      expect(io.socket.emit).toHaveBeenCalledTimes(0);
+    });
+  });
 
-  // View-only players cannot send actions.
-  await io.socket.receive('action', action, 0, 'gameID', null);
-  expect(io.socket.emit).not.toHaveBeenCalled();
+  describe('with clients connected', () => {
+    beforeAll(async () => {
+      await io.socket.receive('sync', 'gameID');
+      io.socket.id = 'second';
+      await io.socket.receive('sync', 'gameID');
+      io.socket.emit.mockReset();
+    });
 
-  // Actions are broadcasted as state updates.
-  // The playerID parameter is necessary to account for view-only players.
-  await io.socket.receive('action', action, 0, 'gameID', '0');
-  expect(io.socket.emit).lastCalledWith('sync', 'gameID', {
-    G: {},
-    _initial: {
-      G: {},
-      _initial: {},
-      _redo: [],
-      _stateID: 0,
-      _undo: [
+    test('basic', async () => {
+      await io.socket.receive('update', action, 0, 'gameID', '0');
+      expect(io.socket.emit).lastCalledWith(
+        'update',
+        'gameID',
         {
           G: {},
+          deltalog: undefined,
+          log: undefined,
+          _initial: {
+            G: {},
+            _initial: {},
+            _redo: [],
+            _stateID: 0,
+            _undo: [
+              {
+                G: {},
+                ctx: {
+                  _random: { seed: 0 },
+                  actionPlayers: ['0'],
+                  allPlayed: false,
+                  allowedMoves: null,
+                  currentPlayer: '0',
+                  currentPlayerMoves: 0,
+                  numPlayers: 2,
+                  phase: 'default',
+                  playOrder: ['0', '1'],
+                  playOrderPos: 0,
+                  stats: {
+                    phase: { allPlayed: false, numMoves: {} },
+                    turn: { numMoves: {} },
+                  },
+                  turn: 0,
+                },
+              },
+            ],
+            ctx: {
+              _random: { seed: 0 },
+              actionPlayers: ['0'],
+              allPlayed: false,
+              allowedMoves: null,
+              currentPlayer: '0',
+              currentPlayerMoves: 0,
+              numPlayers: 2,
+              phase: 'default',
+              playOrder: ['0', '1'],
+              playOrderPos: 0,
+              stats: {
+                phase: { allPlayed: false, numMoves: {} },
+                turn: { allPlayed: false, numMoves: {} },
+              },
+              turn: 0,
+            },
+          },
+          _redo: [],
+          _stateID: 1,
+          _undo: [
+            {
+              G: {},
+              ctx: {
+                _random: { seed: 0 },
+                actionPlayers: ['1'],
+                allPlayed: false,
+                allowedMoves: null,
+                currentPlayer: '1',
+                currentPlayerMoves: 0,
+                numPlayers: 2,
+                phase: 'default',
+                playOrder: ['0', '1'],
+                playOrderPos: 1,
+                stats: {
+                  phase: { allPlayed: false, numMoves: {} },
+                  turn: { allPlayed: false, numMoves: {} },
+                },
+                turn: 1,
+              },
+            },
+          ],
           ctx: {
-            _random: { seed: 0 },
-            actionPlayers: ['0'],
+            _random: undefined,
+            actionPlayers: ['1'],
             allPlayed: false,
             allowedMoves: null,
-            currentPlayer: '0',
+            currentPlayer: '1',
             currentPlayerMoves: 0,
             numPlayers: 2,
             phase: 'default',
             playOrder: ['0', '1'],
-            playOrderPos: 0,
+            playOrderPos: 1,
             stats: {
               phase: { allPlayed: false, numMoves: {} },
-              turn: { numMoves: {} },
+              turn: { allPlayed: false, numMoves: {} },
             },
-            turn: 0,
+            turn: 1,
           },
         },
-      ],
-      ctx: {
-        _random: { seed: 0 },
-        actionPlayers: ['0'],
-        allPlayed: false,
-        allowedMoves: null,
-        currentPlayer: '0',
-        currentPlayerMoves: 0,
-        numPlayers: 2,
-        phase: 'default',
-        playOrder: ['0', '1'],
-        playOrderPos: 0,
-        stats: {
-          phase: { allPlayed: false, numMoves: {} },
-          turn: { allPlayed: false, numMoves: {} },
-        },
-        turn: 0,
-      },
-      log: [],
-    },
-    _redo: [],
-    _stateID: 1,
-    _undo: [
-      {
-        G: {},
-        ctx: {
-          _random: { seed: 0 },
-          actionPlayers: ['1'],
-          allPlayed: false,
-          allowedMoves: null,
-          currentPlayer: '1',
-          currentPlayerMoves: 0,
-          numPlayers: 2,
-          phase: 'default',
-          playOrder: ['0', '1'],
-          playOrderPos: 1,
-          stats: {
-            phase: { allPlayed: false, numMoves: {} },
-            turn: { allPlayed: false, numMoves: {} },
+
+        // deltalog
+        [
+          {
+            payload: {
+              args: undefined,
+              credentials: undefined,
+              playerID: undefined,
+              type: 'endTurn',
+            },
+            type: 'GAME_EVENT',
           },
-          turn: 1,
-        },
-      },
-    ],
-    ctx: {
-      _random: undefined,
-      actionPlayers: ['1'],
-      allPlayed: false,
-      allowedMoves: null,
-      currentPlayer: '1',
-      currentPlayerMoves: 0,
-      numPlayers: 2,
-      phase: 'default',
-      playOrder: ['0', '1'],
-      playOrderPos: 1,
-      stats: {
-        phase: { allPlayed: false, numMoves: {} },
-        turn: { allPlayed: false, numMoves: {} },
-      },
-      turn: 1,
-    },
-    log: [
-      {
-        payload: {
-          args: undefined,
-          credentials: undefined,
-          playerID: undefined,
-          type: 'endTurn',
-        },
-        type: 'GAME_EVENT',
-      },
-    ],
+        ]
+      );
+      io.socket.emit.mockReset();
+    });
+
+    test('invalid gameID', async () => {
+      await io.socket.receive('update', action, 1, 'unknown', '1');
+      expect(io.socket.emit).toHaveBeenCalledTimes(0);
+    });
+
+    test('invalid stateID', async () => {
+      await io.socket.receive('update', action, 100, 'gameID', '1');
+      expect(io.socket.emit).toHaveBeenCalledTimes(0);
+    });
+
+    test('invalid playerID', async () => {
+      await io.socket.receive('update', action, 1, 'gameID', '100');
+      expect(io.socket.emit).toHaveBeenCalledTimes(0);
+      await io.socket.receive(
+        'update',
+        ActionCreators.makeMove(),
+        1,
+        'gameID',
+        '100'
+      );
+      expect(io.socket.emit).toHaveBeenCalledTimes(0);
+    });
+
+    test('valid gameID / stateID / playerID', async () => {
+      await io.socket.receive('update', action, 1, 'gameID', '1');
+      expect(io.socket.emit).toHaveBeenCalledTimes(2);
+    });
   });
-  io.socket.emit.mockReset();
-
-  // ... but not if the gameID is not known.
-  await io.socket.receive('action', action, 1, 'unknown', '1');
-  expect(io.socket.emit).toHaveBeenCalledTimes(0);
-
-  // ... and not if the _stateID doesn't match the internal state.
-  await io.socket.receive('action', action, 100, 'gameID', '1');
-  expect(io.socket.emit).toHaveBeenCalledTimes(0);
-
-  // ... and not if player != currentPlayer
-  await io.socket.receive('action', action, 1, 'gameID', '100');
-  expect(io.socket.emit).toHaveBeenCalledTimes(0);
-  await io.socket.receive(
-    'action',
-    ActionCreators.makeMove(),
-    1,
-    'gameID',
-    '100'
-  );
-  expect(io.socket.emit).toHaveBeenCalledTimes(0);
-
-  // Another broadcasted action.
-  await io.socket.receive('action', action, 1, 'gameID', '1');
-  expect(io.socket.emit).toHaveBeenCalledTimes(2);
 });
 
 describe('playerView', () => {
@@ -316,7 +334,7 @@ describe('playerView', () => {
     expect(io.socket.emit.mock.calls[0][2].G).toEqual({ player: 0 });
   });
 
-  test('action', async () => {
+  test('update', async () => {
     const game = Game({
       playerView: (G, ctx, player) => {
         return Object.assign({}, G, { player });
@@ -332,7 +350,7 @@ describe('playerView', () => {
     await io.socket.receive('sync', 'gameID', '1', 2);
     io.socket.emit.mockReset();
 
-    await io.socket.receive('action', action, 0, 'gameID', '0');
+    await io.socket.receive('update', action, 0, 'gameID', '0');
     expect(io.socket.emit).toHaveBeenCalledTimes(2);
 
     const G_player0 = io.socket.emit.mock.calls[0][2].G;
@@ -380,6 +398,6 @@ test('auth failure', async () => {
   await io.socket.receive('sync', 'gameID');
   io.socket.emit.mockReset();
 
-  await io.socket.receive('action', action, 0, 'gameID', '0');
+  await io.socket.receive('update', action, 0, 'gameID', '0');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 });

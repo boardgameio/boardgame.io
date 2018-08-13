@@ -15,7 +15,7 @@ import { Controls } from './controls';
 import { PlayerInfo } from './playerinfo';
 import { DebugMove } from './debug-move';
 import { GameLog } from '../log/log';
-import { restore } from '../../core/action-creators';
+import { sync } from '../../core/action-creators';
 import { parse, stringify } from 'flatted';
 import './debug.css';
 
@@ -124,7 +124,7 @@ export class Debug extends React.Component {
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
       const gamestate = parse(gamestateJSON);
-      this.props.store.dispatch(restore(gamestate));
+      this.props.store.dispatch(sync(gamestate));
     }
   };
 

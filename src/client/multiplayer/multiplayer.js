@@ -6,13 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { RESTORE } from '../../core/action-types';
 import * as ActionCreators from '../../core/action-creators';
 import { createStore, applyMiddleware, compose } from 'redux';
 import io from 'socket.io-client';
-
-// The actions that are sent across the network.
-const blacklistedActions = new Set([RESTORE]);
 
 /**
  * Multiplayer
@@ -66,9 +62,9 @@ export class Multiplayer {
       const state = getState();
       const result = next(action);
 
-      if (!blacklistedActions.has(action.type) && action._remote != true) {
+      if (action.clientOnly != true) {
         this.socket.emit(
-          'action',
+          'update',
           action,
           state._stateID,
           this.gameID,
@@ -102,13 +98,18 @@ export class Multiplayer {
       }
     }
 
-    this.socket.on('sync', (gameID, state) => {
-      if (
-        gameID == this.gameID &&
-        state._stateID >= this.store.getState()._stateID
-      ) {
-        const action = ActionCreators.restore(state);
-        action._remote = true;
+    this.socket.on('update', (gameID, state, deltalog) => {
+      const currentState = this.store.getState();
+
+      if (gameID == this.gameID && state._stateID >= currentState._stateID) {
+        const action = ActionCreators.update(state, deltalog);
+        this.store.dispatch(action);
+      }
+    });
+
+    this.socket.on('sync', (gameID, state, log) => {
+      if (gameID == this.gameID) {
+        const action = ActionCreators.sync(state, log);
         this.store.dispatch(action);
       }
     });
@@ -142,7 +143,6 @@ export class Multiplayer {
     this.gameID = this.gameName + ':' + id;
 
     const action = ActionCreators.reset();
-    action._remote = true;
     this.store.dispatch(action);
 
     if (this.socket) {
@@ -158,7 +158,6 @@ export class Multiplayer {
     this.playerID = id;
 
     const action = ActionCreators.reset();
-    action._remote = true;
     this.store.dispatch(action);
 
     if (this.socket) {

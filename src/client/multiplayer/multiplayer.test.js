@@ -34,15 +34,25 @@ test('Multiplayer defaults', () => {
   m.callback();
 });
 
-test('update gameID / playerID', () => {
-  const m = new Multiplayer();
+describe('update gameID / playerID', () => {
+  const socket = new MockSocket();
+  const m = new Multiplayer({ socket });
   const game = Game({});
   m.createStore(CreateGameReducer({ game }));
 
-  m.updateGameID('test');
-  m.updatePlayerID('player');
-  expect(m.gameID).toBe('default:test');
-  expect(m.playerID).toBe('player');
+  beforeEach(() => (socket.emit = jest.fn()));
+
+  test('gameID', () => {
+    m.updateGameID('test');
+    expect(m.gameID).toBe('default:test');
+    expect(socket.emit).lastCalledWith('sync', 'default:test', null, 2);
+  });
+
+  test('playerID', () => {
+    m.updatePlayerID('player');
+    expect(m.playerID).toBe('player');
+    expect(socket.emit).lastCalledWith('sync', 'default:test', 'player', 2);
+  });
 });
 
 test('connection status', () => {
@@ -68,48 +78,59 @@ test('connection status', () => {
   expect(m.isConnected).toBe(false);
 });
 
-test('multiplayer', () => {
+describe('multiplayer', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer({ socket: mockSocket });
   m.connect();
   const game = Game({});
-  const store = m.createStore(CreateGameReducer({ game }));
+  let store = null;
 
-  // Returns a valid store.
-  expect(store).not.toBe(undefined);
+  beforeEach(() => {
+    store = m.createStore(CreateGameReducer({ game }));
+  });
 
-  const action = ActionCreators.gameEvent('endTurn');
+  test('returns a valid store', () => {
+    expect(store).not.toBe(undefined);
+  });
 
-  // Dispatch a local action.
-  mockSocket.emit = jest.fn();
-  store.dispatch(action);
-  expect(mockSocket.emit).lastCalledWith(
-    'action',
-    action,
-    0,
-    'default:default',
-    null
-  );
+  test('client sends update after action', () => {
+    const action = ActionCreators.gameEvent('endTurn');
+    mockSocket.emit = jest.fn();
+    store.dispatch(action);
+    expect(mockSocket.emit).lastCalledWith(
+      'update',
+      action,
+      0,
+      'default:default',
+      null
+    );
+  });
 
-  // sync restores state.
-  const restored = { restore: true };
-  expect(store.getState()).not.toMatchObject(restored);
-  mockSocket.receive('sync', 'unknown gameID', restored);
-  expect(store.getState()).not.toMatchObject(restored);
-  mockSocket.receive('sync', 'default:default', restored);
-  expect(store.getState()).not.toMatchObject(restored);
-  // Only if the stateID is not stale.
-  restored._stateID = 1;
-  mockSocket.receive('sync', 'default:default', restored);
-  expect(store.getState()).toMatchObject(restored);
+  test('receive update', () => {
+    const restored = { restore: true };
+    expect(store.getState()).not.toMatchObject(restored);
+    mockSocket.receive('update', 'unknown gameID', restored);
+    expect(store.getState()).not.toMatchObject(restored);
+    mockSocket.receive('update', 'default:default', restored);
+    expect(store.getState()).not.toMatchObject(restored);
 
-  // updateGameID causes a sync.
-  mockSocket.emit = jest.fn();
-  m.updateGameID('id');
-  expect(mockSocket.emit).lastCalledWith('sync', 'default:id', null, 2);
+    // Only if the stateID is not stale.
+    restored._stateID = 1;
+    mockSocket.receive('update', 'default:default', restored);
+    expect(store.getState()).toMatchObject(restored);
+  });
+
+  test('receive sync', () => {
+    const restored = { restore: true };
+    expect(store.getState()).not.toMatchObject(restored);
+    mockSocket.receive('sync', 'unknown gameID', restored);
+    expect(store.getState()).not.toMatchObject(restored);
+    mockSocket.receive('sync', 'default:default', restored);
+    expect(store.getState()).toMatchObject(restored);
+  });
 });
 
-test('move blacklist', () => {
+describe('move blacklist', () => {
   const mockSocket = new MockSocket();
   const m = new Multiplayer({ socket: mockSocket });
   const game = Game({});
@@ -117,19 +138,28 @@ test('move blacklist', () => {
 
   mockSocket.emit = jest.fn();
 
-  const endTurn = ActionCreators.gameEvent('endTurn');
+  beforeEach(() => mockSocket.emit.mockReset());
 
-  store.dispatch(endTurn);
-  expect(mockSocket.emit).toHaveBeenCalled();
-  mockSocket.emit.mockReset();
+  test('should emit', () => {
+    const endTurn = ActionCreators.gameEvent('endTurn');
+    store.dispatch(endTurn);
+    expect(mockSocket.emit).toHaveBeenCalled();
+  });
 
-  store.dispatch(ActionCreators.makeMove());
-  expect(mockSocket.emit).toHaveBeenCalled();
-  mockSocket.emit.mockReset();
+  test('should emit', () => {
+    store.dispatch(ActionCreators.makeMove());
+    expect(mockSocket.emit).toHaveBeenCalled();
+  });
 
-  store.dispatch(ActionCreators.restore());
-  expect(mockSocket.emit).not.toHaveBeenCalled();
-  mockSocket.emit.mockReset();
+  test('should not emit', () => {
+    store.dispatch(ActionCreators.sync());
+    expect(mockSocket.emit).not.toHaveBeenCalled();
+  });
+
+  test('should not emit', () => {
+    store.dispatch(ActionCreators.update());
+    expect(mockSocket.emit).not.toHaveBeenCalled();
+  });
 });
 
 describe('server option', () => {
@@ -207,7 +237,7 @@ test('changing a gameID resets the state before resync', () => {
   expect(dispatchSpy).toHaveBeenCalledWith(
     expect.objectContaining({
       type: Actions.RESET,
-      _remote: true,
+      clientOnly: true,
     })
   );
 });
@@ -223,7 +253,7 @@ test('changing a playerID resets the state before resync', () => {
   expect(dispatchSpy).toHaveBeenCalledWith(
     expect.objectContaining({
       type: Actions.RESET,
-      _remote: true,
+      clientOnly: true,
     })
   );
 });

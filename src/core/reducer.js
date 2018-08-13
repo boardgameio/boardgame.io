@@ -42,10 +42,6 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     // Framework managed state.
     ctx: ctx,
 
-    // A list of actions performed so far. Used by the
-    // GameLog to display a journal of moves.
-    log: [],
-
     // List of {G, ctx} pairs that can be undone.
     _undo: [],
 
@@ -109,6 +105,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        state = { ...state, deltalog: undefined };
+
         // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
         // Initialize Events API.
@@ -156,6 +154,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
+        state = { ...state, deltalog: undefined };
+
         // Initialize PRNG from ctx.
         const random = new Random(state.ctx);
         // Initialize Events API.
@@ -187,8 +187,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           G = state.G;
         }
 
-        const log = [...state.log, action];
-        state = { ...state, G, ctx, log, _stateID: state._stateID + 1 };
+        const deltalog = [action];
+        state = { ...state, G, ctx, deltalog, _stateID: state._stateID + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -210,7 +210,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         return state;
       }
 
-      case Actions.RESTORE: {
+      case Actions.UPDATE:
+      case Actions.SYNC: {
         return action.state;
       }
 

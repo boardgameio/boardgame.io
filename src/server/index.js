@@ -42,7 +42,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
     const nsp = app._io.of(game.name);
 
     nsp.on('connection', socket => {
-      socket.on('action', async (action, stateID, gameID, playerID) => {
+      socket.on('update', async (action, stateID, gameID, playerID) => {
         let state = await db.get(gameID);
 
         if (state === undefined) {
@@ -82,6 +82,8 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         }
 
         if (state._stateID == stateID) {
+          let log = store.getState().log || [];
+
           // Update server's version of the store.
           store.dispatch(action);
           state = store.getState();
@@ -90,20 +92,30 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           const roomClients = roomInfo.get(gameID);
           for (const client of roomClients.values()) {
             const { playerID } = clientInfo.get(client);
-            const ctx = Object.assign({}, state.ctx, { _random: undefined });
-            const newState = Object.assign({}, state, {
-              G: game.playerView(state.G, ctx, playerID),
-              ctx: ctx,
-            });
+            const filteredState = {
+              ...state,
+              G: game.playerView(state.G, state.ctx, playerID),
+              ctx: { ...state.ctx, _random: undefined },
+              log: undefined,
+              deltalog: undefined,
+            };
 
             if (client === socket.id) {
-              socket.emit('sync', gameID, newState);
+              socket.emit('update', gameID, filteredState, state.deltalog);
             } else {
-              socket.to(client).emit('sync', gameID, newState);
+              socket
+                .to(client)
+                .emit('update', gameID, filteredState, state.deltalog);
             }
           }
 
-          await db.set(gameID, store.getState());
+          // TODO: We currently attach the log back into the state
+          // object before storing it, but this should probably
+          // sit in a different part of the database eventually.
+          log = [...log, ...state.deltalog];
+          const stateWithLog = { ...state, log };
+
+          await db.set(gameID, stateWithLog);
         }
 
         return;
@@ -129,13 +141,15 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
           await db.set(gameID, state);
         }
 
-        const ctx = Object.assign({}, state.ctx, { _random: undefined });
-        const newState = Object.assign({}, state, {
-          G: game.playerView(state.G, ctx, playerID),
-          ctx,
-        });
+        const filteredState = {
+          ...state,
+          G: game.playerView(state.G, state.ctx, playerID),
+          ctx: { ...state.ctx, _random: undefined },
+          log: undefined,
+          deltalog: undefined,
+        };
 
-        socket.emit('sync', gameID, newState);
+        socket.emit('sync', gameID, filteredState, state.log);
 
         return;
       });
