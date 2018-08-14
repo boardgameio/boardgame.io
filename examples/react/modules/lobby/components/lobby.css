@@ -15,6 +15,8 @@
 .error-msg {
   font-size: 12px;
   color: red;
+  margin-top: 10px;
+  display: block;
 }
 
 .hidden {

@@ -18,7 +18,7 @@ import { CreateGameReducer } from '../core/reducer';
 const createCredentials = () => uuid();
 const getGameMetadataKey = gameID => `${gameID}:metadata`;
 const isGameMetadataKey = (key, gameName) =>
-  key.match(gameName + '.*:metadata');
+  key.match(gameName + ':.*:metadata');
 const getNamespacedGameID = (gameID, gameName) => `${gameName}:${gameID}`;
 const getNewGameInstanceID = () => uuid();
 const createGameMetadata = () => ({

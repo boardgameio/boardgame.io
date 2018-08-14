@@ -9,6 +9,13 @@
 import 'whatwg-fetch';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Client } from 'boardgame.io/react';
+import { default as BoardTicTacToe } from './board-tic-tac-toe';
+import { default as BoardChess } from './board-chess';
+import { default as BoardTurnOrder } from './board-turnorder';
+import { default as GameTicTacToe } from './game-tic-tac-toe';
+import { default as GameChess } from './game-chess';
+import { default as GameTurnOrder } from './game-turnorder';
 import './lobby.css';
 
 class Lobby extends React.Component {
@@ -26,7 +33,14 @@ class Lobby extends React.Component {
     gamesErrorMsg: 'no game selected',
     instances: [],
     selectedInstance: null,
-    instancesErrorMsg: ' ',
+    instancesErrorMsg: '',
+    game: null,
+  };
+
+  games = {
+    'tic-tac-toe': { game: GameTicTacToe, board: BoardTicTacToe },
+    chess: { game: GameChess, board: BoardChess },
+    turnorder: { game: GameTurnOrder, board: BoardTurnOrder },
   };
 
   baseUrl() {
@@ -80,7 +94,7 @@ class Lobby extends React.Component {
     return (
       <div id="lobby-view" style={{ padding: 50 }}>
         <h1>Lobby</h1>
-        <div id="name" className={getPhaseVisibility('enter')}>
+        <div id="phase-enter" className={getPhaseVisibility('enter')}>
           <p className="phase-title">Choose a player name:</p>
           <input
             type="Text"
@@ -93,35 +107,55 @@ class Lobby extends React.Component {
               Enter
             </button>
           </span>
-          <p id="name-error" className="error-msg">
+          <br />
+          <span id="name-error" className="error-msg">
             {this.state.nameErrorMsg}
-          </p>
+            <br />
+          </span>
         </div>
-        <div id="games" className={getPhaseVisibility('join')}>
-          <p className="phase-title">Select a game:</p>
-          <table>
-            <tbody>{game_rows}</tbody>
-          </table>
-          <p id="games-error" className="error-msg">
-            {this.state.gamesErrorMsg}
-          </p>
-        </div>
-        <div id="instances" className={getPhaseVisibility('join')}>
-          <p className="phase-title">Select or create an instance:</p>
-          <div id="instances-table">
+        <div id="phase-join" className={getPhaseVisibility('join')}>
+          <div id="games">
+            <p className="phase-title">Select a game:</p>
             <table>
-              <tbody>{inst_rows}</tbody>
+              <tbody>{game_rows}</tbody>
             </table>
+            <span id="games-error" className="error-msg">
+              {this.state.gamesErrorMsg}
+              <br />
+            </span>
           </div>
-          <div className="buttons">
-            <button onClick={() => this.onClickJoin()}>Join</button>
-            <button onClick={() => this.onClickCreate()}>Create</button>
+          <div id="instances">
+            <p className="phase-title">Select or create an instance:</p>
+            <div id="instances-table">
+              <table>
+                <tbody>{inst_rows}</tbody>
+              </table>
+            </div>
+            <div className="buttons">
+              <button onClick={() => this.onClickJoin()}>Join</button>
+              <button onClick={() => this.onClickCreate()}>Create</button>
+              <button onClick={() => this.onClickExitLobby()}>Exit</button>
+            </div>
+            <span id="instances-error" className="error-msg">
+              {this.state.instancesErrorMsg}
+              <br />
+            </span>
           </div>
-          <p id="instances-error" className="error-msg">
-            {this.state.instancesErrorMsg}
-          </p>
         </div>
-        <div id="board" className={getPhaseVisibility('play')} />
+        <div id="phase-play" className={getPhaseVisibility('play')}>
+          {this.state.game ? (
+            <this.state.game.app
+              gameID={this.state.game.gameID}
+              playerID={this.state.game.playerID}
+              credentials={this.state.game.playerCredentials}
+            />
+          ) : (
+            ''
+          )}
+          <div className="buttons">
+            <button onClick={() => this.onClickExitGame()}>Exit</button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -137,7 +171,7 @@ class Lobby extends React.Component {
     this.setState({
       ...this.state,
       playerName: name,
-      nameErrorMsg: name.length ? ' ' : 'empty name',
+      nameErrorMsg: name.length ? '' : 'empty name',
     });
   }
 
@@ -174,11 +208,11 @@ class Lobby extends React.Component {
         this.setState({
           ...this.state,
           selectedGame: selected,
-          gamesErrorMsg: selected === null ? 'no game selected' : ' ',
+          gamesErrorMsg: selected === null ? 'no game selected' : '',
           selectedInstance: null,
           instances: json.game_instances,
           instancesErrorMsg: json.game_instances.length
-            ? ' '
+            ? ''
             : 'no instance for this game',
         });
       })
@@ -252,8 +286,25 @@ class Lobby extends React.Component {
         return resp.json();
       })
       .then(json => {
-        // credentials
-        console.log(json.credentials);
+        const gameName = this.state.games[this.state.selectedGame];
+        const gameID = this.state.instances[this.state.selectedInstance]
+          .game_id;
+        const app = Client({
+          game: this.games[gameName].game,
+          board: this.games[gameName].board,
+          debug: false,
+          multiplayer: true,
+        });
+        this.setState({
+          ...this.state,
+          phase: 'play',
+          game: {
+            app: app,
+            gameID: gameID,
+            playerID: '0',
+            credentials: json.playerCredentials,
+          },
+        });
       })
       .catch(ex => {
         console.log('error', ex);
@@ -262,6 +313,20 @@ class Lobby extends React.Component {
           instancesErrorMsg: 'failed to join game (' + ex + ')',
         });
       });
+  }
+
+  onClickExitLobby() {
+    this.setState({
+      ...this.state,
+      phase: 'enter',
+    });
+  }
+
+  onClickExitGame() {
+    this.setState({
+      ...this.state,
+      phase: 'join',
+    });
   }
 }
 
