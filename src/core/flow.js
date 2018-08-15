@@ -74,11 +74,10 @@ export function Flow({
     const { payload } = action;
     if (events.hasOwnProperty(payload.type)) {
       const context = { playerID: payload.playerID, dispatch };
+      const deltalog = [...(state.deltalog || []), action];
+      state = { ...state, deltalog };
       const args = [state].concat(payload.args);
-      const oldLog = state.log || [];
-      const log = [...oldLog, action];
-      const newState = events[payload.type].apply(context, args);
-      return { ...newState, log };
+      return events[payload.type].apply(context, args);
     }
     return state;
   };

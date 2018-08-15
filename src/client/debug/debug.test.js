@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { stringify } from 'flatted';
-import { restore, makeMove, gameEvent } from '../../core/action-creators';
+import { Client } from '../client';
+import { sync } from '../../core/action-creators';
 import Game from '../../core/game';
-import { CreateGameReducer } from '../../core/reducer';
 import { createStore } from 'redux';
 import { Debug } from './debug';
 import Mousetrap from 'mousetrap';
@@ -110,7 +110,7 @@ describe('save / restore', () => {
   test('restore', () => {
     Mousetrap.simulate('3');
     expect(getItem).toHaveBeenCalled();
-    expect(loggedAction).toEqual(restore(restoredState));
+    expect(loggedAction).toEqual(sync(restoredState));
   });
 
   test('restore from nothing does nothing', () => {
@@ -151,16 +151,16 @@ describe('log', () => {
         A: (G, ctx, arg) => ({ arg }),
       },
     });
-    const reducer = CreateGameReducer({ game });
-    let state = reducer(undefined, { type: 'init' });
-    state = reducer(state, makeMove('A', [42]));
-    state = reducer(state, gameEvent('endTurn'));
+
+    const client = Client({ game });
+    client.moves.A(42);
+    client.events.endTurn();
 
     const debug = Enzyme.mount(
       <Debug
         overrideGameState={overrideGameState}
-        reducer={reducer}
-        gamestate={state}
+        reducer={client.reducer}
+        gamestate={client.getState()}
         endTurn={() => {}}
         gameID="default"
       />

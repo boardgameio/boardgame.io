@@ -48,12 +48,28 @@ export const automaticGameEvent = (type, args, playerID, credentials) => ({
 });
 
 /**
- * Used to reset the Redux store's state.
+ * Used to reset the Redux store's state on a sync.
  * @param {object} state - The state to restore.
+ * @param {Array} log - The log to restore.
  */
-export const restore = state => ({
-  type: Actions.RESTORE,
+export const sync = (state, log) => ({
+  type: Actions.SYNC,
   state,
+  log,
+  clientOnly: true,
+});
+
+/**
+ * Used to update the Redux store's state in response to
+ * an action coming from another player.
+ * @param {object} state - The state to restore.
+ * @param {Array} deltalog - A log delta.
+ */
+export const update = (state, deltalog) => ({
+  type: Actions.UPDATE,
+  state,
+  deltalog,
+  clientOnly: true,
 });
 
 /**
@@ -61,6 +77,7 @@ export const restore = state => ({
  */
 export const reset = () => ({
   type: Actions.RESET,
+  clientOnly: true,
 });
 
 /**

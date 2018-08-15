@@ -11,7 +11,8 @@ import { CreateGameReducer } from './reducer';
 import {
   makeMove,
   gameEvent,
-  restore,
+  sync,
+  update,
   reset,
   undo,
   redo,
@@ -96,9 +97,15 @@ test('disable move by invalid playerIDs', () => {
   expect(state._stateID).toBe(2);
 });
 
-test('restore', () => {
+test('sync', () => {
   const reducer = CreateGameReducer({ game });
-  const state = reducer(undefined, restore({ G: 'restored' }));
+  const state = reducer(undefined, sync({ G: 'restored' }));
+  expect(state).toEqual({ G: 'restored' });
+});
+
+test('update', () => {
+  const reducer = CreateGameReducer({ game });
+  const state = reducer(undefined, update({ G: 'restored' }));
   expect(state).toEqual({ G: 'restored' });
 });
 
@@ -192,7 +199,7 @@ test('numPlayers', () => {
   expect(state.ctx.numPlayers).toBe(4);
 });
 
-test('log', () => {
+test('deltalog', () => {
   const reducer = CreateGameReducer({ game });
 
   let state = undefined;
@@ -202,11 +209,11 @@ test('log', () => {
   const actionC = gameEvent('endTurn');
 
   state = reducer(state, actionA);
-  expect(state.log).toEqual([actionA]);
+  expect(state.deltalog).toEqual([actionA]);
   state = reducer(state, actionB);
-  expect(state.log).toEqual([actionA, actionB]);
+  expect(state.deltalog).toEqual([actionB]);
   state = reducer(state, actionC);
-  expect(state.log).toEqual([actionA, actionB, actionC]);
+  expect(state.deltalog).toEqual([actionC]);
 });
 
 describe('Random inside setup()', () => {
