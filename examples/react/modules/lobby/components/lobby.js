@@ -21,7 +21,13 @@ import './lobby.css';
 class Lobby extends React.Component {
   static propTypes = {
     server: PropTypes.string.isRequired,
-    port: PropTypes.string.isRequired,
+    port: PropTypes.number.isRequired,
+    gameComponents: PropTypes.arrayOf(
+      PropTypes.shape({
+        game: PropTypes.object,
+        board: PropTypes.function,
+      })
+    ).isRequired,
   };
 
   state = {
@@ -37,17 +43,19 @@ class Lobby extends React.Component {
     game: null,
   };
 
-  games = {
-    'tic-tac-toe': { game: GameTicTacToe, board: BoardTicTacToe },
-    chess: { game: GameChess, board: BoardChess },
-    turnorder: { game: GameTurnOrder, board: BoardTurnOrder },
-  };
-
   baseUrl() {
     return 'http://' + this.props.server + ':' + this.props.port + '/games';
   }
 
-  componentDidMount() {}
+  _getGameComponents(gameName) {
+    let gameIndex = this.props.gameComponents.length;
+    while (gameIndex > 0) {
+      if (this.props.gameComponents[gameIndex - 1].game.name == gameName)
+        return this.props.gameComponents[gameIndex - 1];
+      gameIndex--;
+    }
+    return null;
+  }
 
   render() {
     // list of games
@@ -169,7 +177,6 @@ class Lobby extends React.Component {
   onChangePlayerName(event) {
     const name = event.target.value.trim();
     this.setState({
-      ...this.state,
       playerName: name,
       nameErrorMsg: name.length ? '' : 'empty name',
     });
@@ -184,7 +191,6 @@ class Lobby extends React.Component {
       })
       .then(json => {
         this.setState({
-          ...this.state,
           games: json,
           phase: 'join',
         });
@@ -192,7 +198,6 @@ class Lobby extends React.Component {
       .catch(ex => {
         console.log('error', ex);
         this.setState({
-          ...this.state,
           nameErrorMsg: 'failed to retrieve list of games (' + ex + ')',
         });
       });
@@ -206,7 +211,6 @@ class Lobby extends React.Component {
       })
       .then(json => {
         this.setState({
-          ...this.state,
           selectedGame: selected,
           gamesErrorMsg: selected === null ? 'no game selected' : '',
           selectedInstance: null,
@@ -219,7 +223,6 @@ class Lobby extends React.Component {
       .catch(ex => {
         console.log('error', ex);
         this.setState({
-          ...this.state,
           gamesErrorMsg: 'failed to retrieve instances (' + ex + ')',
         });
       });
@@ -228,7 +231,6 @@ class Lobby extends React.Component {
   onClickInstance(selected) {
     if (selected == this.state.selectedInstance) return;
     this.setState({
-      ...this.state,
       selectedInstance: selected,
     });
   }
@@ -289,14 +291,20 @@ class Lobby extends React.Component {
         const gameName = this.state.games[this.state.selectedGame];
         const gameID = this.state.instances[this.state.selectedInstance]
           .game_id;
+        const gameCode = this._getGameComponents(gameName);
+        if (!gameCode) {
+          this.setState({
+            instancesErrorMsg: 'game ' + gameName + ' not supported',
+          });
+          return;
+        }
         const app = Client({
-          game: this.games[gameName].game,
-          board: this.games[gameName].board,
+          game: gameCode.game,
+          board: gameCode.board,
           debug: false,
           multiplayer: true,
         });
         this.setState({
-          ...this.state,
           phase: 'play',
           game: {
             app: app,
@@ -309,7 +317,6 @@ class Lobby extends React.Component {
       .catch(ex => {
         console.log('error', ex);
         this.setState({
-          ...this.state,
           instancesErrorMsg: 'failed to join game (' + ex + ')',
         });
       });
@@ -317,22 +324,26 @@ class Lobby extends React.Component {
 
   onClickExitLobby() {
     this.setState({
-      ...this.state,
       phase: 'enter',
     });
   }
 
   onClickExitGame() {
     this.setState({
-      ...this.state,
       phase: 'join',
     });
   }
 }
 
+const gameMap = [
+  { game: GameTicTacToe, board: BoardTicTacToe },
+  { game: GameChess, board: BoardChess },
+  { game: GameTurnOrder, board: BoardTurnOrder },
+];
+
 const LobbyView = () => (
   <div style={{ padding: 50 }}>
-    <Lobby server="localhost" port="8001" />
+    <Lobby server="localhost" port={8001} gameComponents={gameMap} />
   </div>
 );
 
