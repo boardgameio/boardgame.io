@@ -67,7 +67,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   initial.G = state.G;
   initial._undo = state._undo;
   initial.ctx = ctxWithEvents;
-  initial.ctx = random.update(initial.ctx);
+  initial.ctx = random.update(initial).ctx;
   initial.ctx = Random.detach(initial.ctx);
   initial.ctx = Events.detach(initial.ctx);
 
@@ -121,7 +121,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         // Trigger any events that were called via the Events API.
         newState = events.update(newState);
         // Update ctx with PRNG state.
-        let ctx = random.update(newState.ctx);
+        let ctx = random.update(newState).ctx;
         // Detach Random API from ctx.
         ctx = Random.detach(ctx);
         // Detach Events API from ctx.
@@ -173,7 +173,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Update ctx with PRNG state.
-        let ctx = random.update(state.ctx);
+        let ctx = random.update(state).ctx;
         // Detach Random API from ctx.
         ctx = Random.detach(ctx);
         // Detach Events API from ctx.
@@ -203,7 +203,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         state = { ...state, ctx: events.attach(state.ctx) };
         state = game.flow.processMove(state, action.payload);
         state = events.update(state);
-        state = { ...state, ctx: random.update(state.ctx) };
+        state = random.update(state);
         state = { ...state, ctx: Random.detach(state.ctx) };
         state = { ...state, ctx: Events.detach(state.ctx) };
 
