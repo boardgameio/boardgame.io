@@ -115,13 +115,16 @@ export const createApiServer = ({ db, games }) => {
         );
         const metadata = await db.get(key);
         gameInstances.push({
-          game_id: gameID,
-          players: Object.keys(metadata.players),
+          gameID: gameID,
+          players: Object.values(metadata.players).map(player => {
+            // strip away credentials
+            return { id: player.id, name: player.name };
+          }),
         });
       }
     }
     ctx.body = {
-      game_instances: gameInstances,
+      gameInstances: gameInstances,
     };
   });
 
@@ -130,12 +133,17 @@ export const createApiServer = ({ db, games }) => {
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
-
     const namespacedGameID = getNamespacedGameID(gameID, gameName);
     const gameMetadata = await db.get(getGameMetadataKey(namespacedGameID));
 
-    if (gameMetadata === null) {
-      ctx.throw(404, 'Game not found');
+    if (!gameMetadata) {
+      ctx.throw(404, 'Game ' + gameID + ' not found');
+    }
+    if (!gameMetadata.players[playerID]) {
+      ctx.throw(404, 'Player ' + playerID + ' not found');
+    }
+    if (gameMetadata.players[playerID].name) {
+      ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 
     gameMetadata.players[playerID].name = playerName;
@@ -146,6 +154,37 @@ export const createApiServer = ({ db, games }) => {
     ctx.body = {
       playerCredentials,
     };
+  });
+
+  router.post('/games/:name/:id/leave', koaBody(), async ctx => {
+    const gameName = ctx.params.name;
+    const gameID = ctx.params.id;
+    const playerID = ctx.request.body.playerID;
+    const playerCredentials = ctx.request.body.playerCredentials;
+    const namespacedGameID = getNamespacedGameID(gameID, gameName);
+    const gameMetadata = await db.get(getGameMetadataKey(namespacedGameID));
+
+    if (!gameMetadata) {
+      ctx.throw(404, 'Game ' + gameID + ' not found');
+    }
+    if (!gameMetadata.players[playerID]) {
+      ctx.throw(404, 'Player ' + playerID + ' not found');
+    }
+    if (
+      playerCredentials !== gameMetadata.players[playerID].playerCredentials
+    ) {
+      ctx.throw(403, 'Invalid credentials ' + playerCredentials);
+    }
+
+    delete gameMetadata.players[playerID].name;
+    if (Object.values(gameMetadata.players).some(val => val.name)) {
+      await db.set(getGameMetadataKey(namespacedGameID), gameMetadata);
+    } else {
+      // remove game
+      await db.remove(gameID);
+      await db.remove(getGameMetadataKey(namespacedGameID));
+    }
+    ctx.body = {};
   });
 
   app.use(cors());

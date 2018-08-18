@@ -26,36 +26,35 @@
 .phase {
   border: none;
   outline: none;
-  margin-left: 50px;
+  /*  margin-left: 50px;*/
 }
 
 .phase-title {
-  font-weight: bold;
-  margin-left: -50px;
+  /*  margin-left: -50px;*/
+  margin-top: 20px;
 }
 
-#games td,
 #instances td {
   list-style: none;
-  width: 200px;
-  border: 1px solid #eee;
+  border: 0px solid #eee;
   border-top: none;
-  padding: 5px;
   height: 30px;
   line-height: 30px;
-  text-align: center;
-  font-size: 20px;
-}
-
-#instances td {
   text-align: left;
   font-size: 14px;
-  width: 350px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#games td.active,
-#instances td.active {
-  background: #83baff;
+#instances table {
+  height: 100%;
+  /*  max-width: 100%;*/
+  width: 500px;
+  white-space: nowrap;
+}
+
+#instances button {
+  font-size: 12px;
 }
 
 .buttons button {
@@ -64,8 +63,10 @@
   width: 70px;
 }
 
-#instances-table {
-  height: 180px;
-  overflow-y: auto;
-  width: 400px;
+#game-creation select {
+  font-size: 14px;
+  margin-right: 10px;
+}
+#game-creation span {
+  margin-right: 10px;
 }

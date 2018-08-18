@@ -11,7 +11,7 @@ import LobbyView from './components/lobby';
 const routes = [
   {
     path: '/lobby/main',
-    text: 'Examples',
+    text: 'Example',
     component: LobbyView,
   },
 ];

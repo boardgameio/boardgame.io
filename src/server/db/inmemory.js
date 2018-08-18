@@ -45,6 +45,19 @@ export class InMemory {
   }
 
   /**
+   * Remove the game state from the in-memory object.
+   * @param {string} id - The game id.
+   * @returns {object} - The removed game state, or undefined
+   *                     if no game was found with this id.
+   */
+  async remove(id) {
+    if (!await this.games.has(id)) return;
+    const game = await this.games.get(id);
+    this.games.delete(id);
+    return game;
+  }
+
+  /**
    * Check if a particular game id exists.
    * @param {string} id - The game id.
    * @returns {boolean} - True if a game with this id exists.

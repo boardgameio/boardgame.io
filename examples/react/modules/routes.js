@@ -44,7 +44,7 @@ const routes = [
     name: 'Other Frameworks',
     routes: threejs.routes,
   },
-	{
+  {
     name: 'Lobby API',
     routes: lobby.routes,
   },
