@@ -23,7 +23,7 @@ beforeEach(() => {
   isActionFromAuthenticPlayer.mockReturnValue(true);
 });
 
-jest.mock('koa-socket', () => {
+jest.mock('koa-socket-2', () => {
   class MockSocket {
     constructor() {
       this.id = 'id';
