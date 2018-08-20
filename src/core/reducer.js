@@ -173,14 +173,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         state = { ...state, deltalog: undefined };
 
-        // Initialize PRNG from ctx.
-        const random = new Random(state.ctx);
-        // Initialize Events API.
-        const events = new Events(game.flow, action.payload.playerID);
-        // Attach Random API to ctx.
-        let ctxWithAPI = random.attach(state.ctx);
-        // Attach Events API to ctx.
-        ctxWithAPI = events.attach(ctxWithAPI);
+        const apiCtx = new ApiContext(state.ctx, game, action.payload.playerID);
+        let ctxWithAPI = apiCtx.attachToContext(state.ctx);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
@@ -189,12 +183,9 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // Update ctx with PRNG state.
-        let ctx = random.update(state).ctx;
-        // Detach Random API from ctx.
-        ctx = Random.detach(ctx);
-        // Detach Events API from ctx.
-        ctx = Events.detach(ctx);
+        // don't call into update here, just update the random state.
+        let ctx = apiCtx.random.update(state).ctx;
+        ctx = apiCtx.detachFromContext(ctx);
 
         // Undo changes to G if the move should not run on the client.
         if (
@@ -216,13 +207,13 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        state = { ...state, ctx: random.attach(state.ctx) };
-        state = { ...state, ctx: events.attach(state.ctx) };
-        state = game.flow.processMove(state, action.payload);
-        state = events.update(state);
-        state = random.update(state);
-        state = { ...state, ctx: Random.detach(state.ctx) };
-        state = { ...state, ctx: Events.detach(state.ctx) };
+        ctxWithAPI = apiCtx.attachToContext(state.ctx);
+        state = game.flow.processMove(
+          { ...state, ctx: ctxWithAPI },
+          action.payload
+        );
+        state = apiCtx.update2(state);
+        state.ctx = apiCtx.detachFromContext(state.ctx);
 
         return state;
       }
