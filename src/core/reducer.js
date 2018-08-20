@@ -11,6 +11,35 @@ import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
 
+class ApiContext {
+  constructor(ctx, game) {
+    this.random = new Random(ctx);
+    this.events = new Events(game.flow, ctx.currentPlayer);
+  }
+
+  attachToContext(ctx) {
+    let ctxWithAPI = this.random.attach(ctx);
+    ctxWithAPI = this.events.attach(ctxWithAPI);
+    return ctxWithAPI;
+  }
+
+  detachFromContext(ctx) {
+    let ctxWithoutAPI = Random.detach(ctx);
+    ctxWithoutAPI = Events.detach(ctxWithoutAPI);
+    return ctxWithoutAPI;
+  }
+
+  update(state) {
+    const { ctx: ctxWithEvents } = this.events.update(state);
+    let initial = {};
+    initial.G = state.G;
+    initial._undo = state._undo;
+    initial.ctx = ctxWithEvents;
+    initial.ctx = this.random.update(initial).ctx;
+    return initial;
+  }
+}
+
 /**
  * CreateGameReducer
  *
@@ -32,8 +61,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
   ctx._random = { seed };
 
-  const random = new Random(ctx);
-  let ctxWithAPI = random.attach(ctx);
+  var apiCtx = new ApiContext(ctx, game);
+  let ctxWithAPI = apiCtx.attachToContext(ctx);
 
   const initial = {
     // User managed state.
@@ -58,18 +87,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  const events = new Events(game.flow, ctx.currentPlayer);
-  ctxWithAPI = events.attach(ctxWithAPI);
-
   const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
-  const { ctx: ctxWithEvents } = events.update(state);
   initial.G = state.G;
   initial._undo = state._undo;
-  initial.ctx = ctxWithEvents;
-  initial.ctx = random.update(initial).ctx;
-  initial.ctx = Random.detach(initial.ctx);
-  initial.ctx = Events.detach(initial.ctx);
+  initial.ctx = apiCtx.update(state).ctx;
+  initial.ctx = apiCtx.detachFromContext(initial.ctx);
 
   const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
