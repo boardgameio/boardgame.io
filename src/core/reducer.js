@@ -12,9 +12,9 @@ import { Random } from './random';
 import { Events } from './events';
 
 class ApiContext {
-  constructor(ctx, game) {
+  constructor(ctx, game, player) {
     this.random = new Random(ctx);
-    this.events = new Events(game.flow, ctx.currentPlayer);
+    this.events = new Events(game.flow, player);
   }
 
   attachToContext(ctx) {
@@ -37,6 +37,12 @@ class ApiContext {
     initial.ctx = ctxWithEvents;
     initial.ctx = this.random.update(initial).ctx;
     return initial;
+  }
+
+  update2(state) {
+    let newState = this.events.update(state);
+    newState = this.random.update(newState);
+    return newState;
   }
 }
 
@@ -61,7 +67,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
   ctx._random = { seed };
 
-  var apiCtx = new ApiContext(ctx, game);
+  const apiCtx = new ApiContext(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
   const initial = {
@@ -130,27 +136,15 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         state = { ...state, deltalog: undefined };
 
-        // Initialize PRNG from ctx.
-        const random = new Random(state.ctx);
-        // Initialize Events API.
-        const events = new Events(game.flow, action.payload.playerID);
-        // Attach Random API to ctx.
-        state = { ...state, ctx: random.attach(state.ctx) };
-        // Attach Events API to ctx.
-        state = { ...state, ctx: events.attach(state.ctx) };
+        const apiCtx = new ApiContext(state.ctx, game, action.payload.playerID);
+        apiCtx.attachToContext(state.ctx);
 
-        // Update state.
         let newState = game.flow.processGameEvent(state, action);
-        // Trigger any events that were called via the Events API.
-        newState = events.update(newState);
-        // Update ctx with PRNG state.
-        let ctx = random.update(newState).ctx;
-        // Detach Random API from ctx.
-        ctx = Random.detach(ctx);
-        // Detach Events API from ctx.
-        ctx = Events.detach(ctx);
 
-        return { ...newState, ctx, _stateID: state._stateID + 1 };
+        newState = apiCtx.update2(newState);
+        apiCtx.detachFromContext(newState.ctx);
+
+        return { ...newState, _stateID: state._stateID + 1 };
       }
 
       case Actions.MAKE_MOVE: {
