@@ -7,7 +7,7 @@
  */
 
 const Koa = require('koa');
-const IO = require('koa-socket');
+const IO = require('koa-socket-2');
 const Redux = require('redux');
 
 import { DBFromEnv } from './db';

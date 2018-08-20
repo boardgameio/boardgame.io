@@ -126,7 +126,7 @@
     "koa": "^2.5.2",
     "koa-body": "^2.5.0",
     "koa-router": "^7.2.1",
-    "koa-socket": "^4.4.0",
+    "koa-socket-2": "^1.0.17",
     "koa-static": "^4.0.1",
     "lru-cache": "^4.1.1",
     "mousetrap": "^1.6.1",
