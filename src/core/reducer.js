@@ -11,7 +11,12 @@ import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
 
-class ApiContext {
+/**
+ * This class is used to attach/detach various utility objects
+ * onto a ctx, without having to manually attach/detach them
+ * all separately.
+ */
+class ContextEnhancer {
   constructor(ctx, game, player) {
     this.random = new Random(ctx);
     this.events = new Events(game.flow, player);
@@ -30,16 +35,6 @@ class ApiContext {
   }
 
   update(state) {
-    const { ctx: ctxWithEvents } = this.events.update(state);
-    let initial = {};
-    initial.G = state.G;
-    initial._undo = state._undo;
-    initial.ctx = ctxWithEvents;
-    initial.ctx = this.random.update(initial).ctx;
-    return initial;
-  }
-
-  update2(state) {
     let newState = this.events.update(state);
     newState = this.random.update(newState);
     return newState;
@@ -67,7 +62,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
   ctx._random = { seed };
 
-  const apiCtx = new ApiContext(ctx, game, ctx.currentPlayer);
+  const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
   const initial = {
@@ -97,7 +92,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
   initial.G = state.G;
   initial._undo = state._undo;
-  initial.ctx = apiCtx.update(state).ctx;
+
+  // TODO liked to use apiCtx.update() here also, albeit
+  // this code is more intricate than it looks.
+  const { ctx: ctxWithEvents } = apiCtx.events.update(state);
+  initial.ctx = ctxWithEvents;
+  initial.ctx = apiCtx.random.update(initial).ctx;
   initial.ctx = apiCtx.detachFromContext(initial.ctx);
 
   const deepCopy = obj => parse(stringify(obj));
@@ -136,12 +136,16 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         state = { ...state, deltalog: undefined };
 
-        const apiCtx = new ApiContext(state.ctx, game, action.payload.playerID);
+        const apiCtx = new ContextEnhancer(
+          state.ctx,
+          game,
+          action.payload.playerID
+        );
         apiCtx.attachToContext(state.ctx);
 
         let newState = game.flow.processGameEvent(state, action);
 
-        newState = apiCtx.update2(newState);
+        newState = apiCtx.update(newState);
         apiCtx.detachFromContext(newState.ctx);
 
         return { ...newState, _stateID: state._stateID + 1 };
@@ -173,7 +177,11 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         state = { ...state, deltalog: undefined };
 
-        const apiCtx = new ApiContext(state.ctx, game, action.payload.playerID);
+        const apiCtx = new ContextEnhancer(
+          state.ctx,
+          game,
+          action.payload.playerID
+        );
         let ctxWithAPI = apiCtx.attachToContext(state.ctx);
 
         // Process the move.
@@ -212,7 +220,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           { ...state, ctx: ctxWithAPI },
           action.payload
         );
-        state = apiCtx.update2(state);
+        state = apiCtx.update(state);
         state.ctx = apiCtx.detachFromContext(state.ctx);
 
         return state;
