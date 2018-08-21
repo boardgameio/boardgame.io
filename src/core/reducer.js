@@ -34,13 +34,13 @@ class ContextEnhancer {
     return ctxWithoutAPI;
   }
 
-  update(state, updateEvents = true) {
+  update(state, updateEvents) {
     let newState = updateEvents ? this.events.update(state) : state;
     newState = this.random.update(newState);
     return newState;
   }
 
-  updateAndDetach(state, updateEvents = true) {
+  updateAndDetach(state, updateEvents) {
     const newState = this.update(state, updateEvents);
     newState.ctx = this.detachFromContext(newState.ctx);
     return newState;
@@ -98,7 +98,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
   initial.G = state.G;
   initial._undo = state._undo;
-  state = apiCtx.updateAndDetach(state);
+  state = apiCtx.updateAndDetach(state, true);
   initial.ctx = state.ctx;
 
   const deepCopy = obj => parse(stringify(obj));
@@ -146,7 +146,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         let newState = game.flow.processGameEvent(state, action);
 
-        newState = apiCtx.updateAndDetach(newState);
+        newState = apiCtx.updateAndDetach(newState, true);
 
         return { ...newState, _stateID: state._stateID + 1 };
       }
@@ -219,7 +219,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           { ...state, ctx: ctxWithAPI },
           action.payload
         );
-        state = apiCtx.updateAndDetach(state);
+        state = apiCtx.updateAndDetach(state, true);
 
         return state;
       }
