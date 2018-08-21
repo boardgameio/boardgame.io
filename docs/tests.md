@@ -2,7 +2,7 @@
 
 
 #### Unit Tests
-Test the move function logic independently from the game. Because the move functions are You are the one who implements the move function so you are aware of which values you need to pass it in order to have it work properly. In our case `G` should have the `cells` property and `ctx` should have the `currentPlayer` property.
+Test the move function logic independently from the game. Since we implement the move functions ourselves, we are aware which data they require. In our case `G` should have the `cells` property and `ctx` should have the `currentPlayer` property.
 
 
 `App.js`
@@ -40,10 +40,10 @@ it ('should place the correct value in the cell', () => {
 ```
 
 #### Scenario Tests
-Test a flow of the game decoupled from the UI layer. Even if you use the `react` or `reactNative` client in your actual application code, you can initialize a vanilla javascript `Client` with your game definition for your tests.
+Test a flow of the game decoupled from the UI layer. Even if you use the React or React Native client in your actual application code, you can initialize a vanilla Javascript `Client` with your game definition for your tests.
 
 ```js
-// import vanilla javascript client
+// import vanilla Javascript client
 import { Client } from 'boardgame.io/client';
 // import game
 import { TicTacToe } from './App';
