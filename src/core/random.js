@@ -33,9 +33,8 @@ export class Random {
    * @param {object} ctx - The ctx object to update.
    */
   update(state) {
-    var newCtx = { ...state.ctx, _random: this.state };
-    var newState = { ...state, ctx: newCtx };
-    return newState;
+    const ctx = { ...state.ctx, _random: this.state };
+    return { ...state, ctx };
   }
 
   /**

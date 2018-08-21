@@ -88,17 +88,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
+  let state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
   initial.G = state.G;
   initial._undo = state._undo;
-
-  // TODO liked to use apiCtx.update() here also, albeit
-  // this code is more intricate than it looks.
-  const { ctx: ctxWithEvents } = apiCtx.events.update(state);
-  initial.ctx = ctxWithEvents;
-  initial.ctx = apiCtx.random.update(initial).ctx;
-  initial.ctx = apiCtx.detachFromContext(initial.ctx);
+  state = apiCtx.update(state);
+  initial.ctx = apiCtx.detachFromContext(state.ctx);
 
   const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
