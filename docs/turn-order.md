@@ -34,6 +34,10 @@ documentation on how to do this. Note that if this list
 contains multiple playerID's, they can make a move in any
 order.
 
+!> The player that just made a move is available at
+`ctx.playerID` in case you need to differentiate between
+multiple players that could simultaneously move.
+
 ##### playOrderPos
 
 An index into `playOrder`. It is the value that is updated
