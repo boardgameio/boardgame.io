@@ -18,7 +18,7 @@ import { createApiServer, isActionFromAuthenticPlayer } from './api';
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
 
-export function Server({ games, db, _clientInfo, _roomInfo }) {
+export function Server({ games, db, _clientInfo, _roomInfo, log }) {
   const app = new Koa();
   const io = new IO({
     ioOptions: {
@@ -28,6 +28,9 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
   });
   app.context.io = io;
   io.attach(app);
+
+  // have a default log fn that does not do anything
+  log = log || (() => {});
 
   if (db === undefined) {
     db = DBFromEnv();
@@ -46,6 +49,7 @@ export function Server({ games, db, _clientInfo, _roomInfo }) {
         let state = await db.get(gameID);
 
         if (state === undefined) {
+          log(`game not found, gameID=[${gameID}]`);
           return { error: 'game not found' };
         }
 

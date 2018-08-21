@@ -401,3 +401,20 @@ test('auth failure', async () => {
   await io.socket.receive('update', action, 0, 'gameID', '0');
   expect(io.socket.emit).toHaveBeenCalledTimes(0);
 });
+
+describe('error log', () => {
+  const log = jest.fn();
+
+  const server = Server({ games: [game], log });
+  const io = server.app.context.io;
+  const action = ActionCreators.gameEvent('endTurn');
+
+  beforeEach(() => {
+    io.socket.emit.mockReset();
+  });
+
+  test('writes log when gameID not found', async () => {
+    await io.socket.receive('update', action, 1, 'unknown', '1');
+    expect(log).toHaveBeenCalled();
+  });
+});
