@@ -34,14 +34,14 @@ class ContextEnhancer {
     return ctxWithoutAPI;
   }
 
-  update(state) {
-    let newState = this.events.update(state);
+  update(state, updateEvents = true) {
+    let newState = updateEvents ? this.events.update(state) : state;
     newState = this.random.update(newState);
     return newState;
   }
 
-  updateAndDetach(state) {
-    const newState = this.update(state);
+  updateAndDetach(state, updateEvents = true) {
+    const newState = this.update(state, updateEvents);
     newState.ctx = this.detachFromContext(newState.ctx);
     return newState;
   }
@@ -191,9 +191,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // don't call into update here, just update the random state.
-        let ctx = apiCtx.random.update(state).ctx;
-        ctx = apiCtx.detachFromContext(ctx);
+        // don't call into events here
+        let ctx = apiCtx.updateAndDetach(state, false).ctx;
 
         // Undo changes to G if the move should not run on the client.
         if (
