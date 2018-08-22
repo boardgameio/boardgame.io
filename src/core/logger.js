@@ -1,11 +1,16 @@
+// evaluation of DEV needs to be done inside the functions
+// otherwise console.log cannot be changed to a spy function anymore.
+
 export function info(msg) {
-  // const utcnow = new Date().toUTCString();
-  // console.log(`${utcnow} INFO: ${msg}`);
-  console.log(`INFO: ${msg}`);
+  const DEV =
+    process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+  const logfn = DEV ? console.log : () => {};
+  logfn(`INFO: ${msg}`);
 }
 
 export function error(msg) {
-  // const utcnow = new Date().toUTCString();
-  // console.log(`${utcnow} ERROR: ${msg}`);
-  console.log(`ERROR: ${msg}`);
+  const DEV =
+    process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+  const logfn = DEV ? console.log : () => {};
+  logfn(`ERROR: ${msg}`);
 }
