@@ -22,9 +22,6 @@ import { SocketIO } from './transport/socketio';
 export function Server({ games, db, transport }) {
   const app = new Koa();
 
-  // have a default log fn that does not do anything
-  log = log || (() => {});
-
   if (db === undefined) {
     db = DBFromEnv();
   }
