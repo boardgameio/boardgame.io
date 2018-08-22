@@ -12,6 +12,13 @@ import { DBFromEnv } from './db';
 import { createApiServer } from './api';
 import { SocketIO } from './transport/socketio';
 
+/**
+ * Instantiate a game server.
+ *
+ * @param {Array} games - The games that this server will handle.
+ * @param {object} db - The interface with the database.
+ * @param {object} transport - The interface with the clients.
+ */
 export function Server({ games, db, transport }) {
   const app = new Koa();
 
