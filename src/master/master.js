@@ -10,6 +10,13 @@ import { CreateGameReducer } from '../core/reducer';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 
+/**
+ * GameMaster
+ *
+ * Class that runs the game and maintains the authoritative state.
+ * It uses the transportAPI to communicate with clients and the
+ * storageAPI to communicate with the database.
+ */
 export class GameMaster {
   constructor(game, storageAPI, transportAPI, isActionFromAuthenticPlayer) {
     this.game = game;
@@ -22,6 +29,11 @@ export class GameMaster {
     }
   }
 
+  /**
+   * Called on each move / event made by the client.
+   * Computes the new value of the game state and returns it
+   * along with a deltalog.
+   */
   async onUpdate(action, stateID, gameID, playerID) {
     let state = await this.storageAPI.get(gameID);
 
@@ -95,6 +107,10 @@ export class GameMaster {
     return;
   }
 
+  /**
+   * Called when the client connects / reconnects.
+   * Returns the latest game state and the entire log.
+   */
   async onSync(gameID, playerID, numPlayers) {
     const reducer = CreateGameReducer({ game: this.game, numPlayers });
     let state = await this.storageAPI.get(gameID);
