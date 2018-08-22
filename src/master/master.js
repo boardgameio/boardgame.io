@@ -49,7 +49,7 @@ export class GameMaster {
 
     const isActionAuthentic = await this.isActionFromAuthenticPlayer({
       action,
-      storageAPI: this.storageAPI,
+      db: this.storageAPI,
       gameID,
       playerID,
     });
