@@ -66,6 +66,8 @@ export function Server({ games, db, _clientInfo, _roomInfo, log }) {
           playerID,
         });
         if (!isActionAuthentic) {
+          // TODO log missing - it is currently hard to satisfy isActionFromAuthenticPlayer
+          // and would result in a hard coupling of the test.
           return { error: 'unauthorized action' };
         }
 
@@ -74,6 +76,9 @@ export function Server({ games, db, _clientInfo, _roomInfo, log }) {
           action.type == MAKE_MOVE &&
           !game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)
         ) {
+          log(
+            `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`
+          );
           return;
         }
 
@@ -82,6 +87,7 @@ export function Server({ games, db, _clientInfo, _roomInfo, log }) {
           action.type == GAME_EVENT &&
           !game.flow.canPlayerCallEvent(state.G, state.ctx, playerID)
         ) {
+          log(`event not processed - invalid playerID=[${playerID}]`);
           return;
         }
 
@@ -116,10 +122,14 @@ export function Server({ games, db, _clientInfo, _roomInfo, log }) {
           // TODO: We currently attach the log back into the state
           // object before storing it, but this should probably
           // sit in a different part of the database eventually.
-          log = [...log, ...state.deltalog];
+          log = []; //[...log, ...state.deltalog];
           const stateWithLog = { ...state, log };
 
           await db.set(gameID, stateWithLog);
+        } else {
+          log(
+            `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
+          );
         }
 
         return;

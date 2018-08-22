@@ -13,6 +13,7 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 import { createApiServer, isActionFromAuthenticPlayer } from './api';
+import { FlowWithPhases } from '../core/flow';
 
 beforeEach(() => {
   jest.resetModules();
@@ -403,18 +404,54 @@ test('auth failure', async () => {
 });
 
 describe('error log', () => {
+  const game2 = Game({
+    seed: 0,
+    flow: FlowWithPhases({ setActionPlayers: true }),
+  });
   const log = jest.fn();
-
-  const server = Server({ games: [game], log });
+  const server = Server({ games: [game2], log });
   const io = server.app.context.io;
-  const action = ActionCreators.gameEvent('endTurn');
+  const endTurnEvent = ActionCreators.gameEvent('endTurn');
+
+  beforeAll(async () => {
+    // create game called "gameID"
+    await io.socket.receive('sync', 'gameID');
+  });
 
   beforeEach(() => {
     io.socket.emit.mockReset();
+    log.mockReset();
   });
 
   test('writes log when gameID not found', async () => {
-    await io.socket.receive('update', action, 1, 'unknown', '1');
-    expect(log).toHaveBeenCalled();
+    await io.socket.receive('update', endTurnEvent, 1, 'unknown', '0');
+    expect(log).toHaveBeenCalledWith(`game not found, gameID=[unknown]`);
+  });
+
+  test('writes log on an invalid stateID', async () => {
+    await io.socket.receive('update', endTurnEvent, 100, 'gameID', '0');
+    expect(log).toHaveBeenCalledWith(
+      `invalid stateID, was=[100], expected=[0]`
+    );
+  });
+
+  test('writes log when a player is not on turn', async () => {
+    await io.socket.receive('update', endTurnEvent, 0, 'gameID', '100');
+    expect(log).toHaveBeenCalledWith(
+      `event not processed - invalid playerID=[100]`
+    );
+  });
+
+  test('writes log when player is not an action player', async () => {
+    const setActionPlayersEvent = ActionCreators.gameEvent('setActionPlayers', [
+      '1',
+    ]);
+    await io.socket.receive('update', setActionPlayersEvent, 0, 'gameID', '0');
+
+    const move = ActionCreators.makeMove('move');
+    await io.socket.receive('update', move, 1, 'gameID', '0');
+    expect(log).toHaveBeenCalledWith(
+      `move not processed - canPlayerMakeMove=false, playerID=[0]`
+    );
   });
 });
