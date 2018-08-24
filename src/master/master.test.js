@@ -10,7 +10,10 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 import { InMemory } from '../server/db/inmemory';
-import { GameMaster } from './master';
+
+// silence log output during these tests
+console.log = () => {};
+const { GameMaster } = require('./master');
 
 const game = Game({ seed: 0 });
 
