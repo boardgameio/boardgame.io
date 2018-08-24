@@ -12,6 +12,42 @@ import { Random } from './random';
 import { Events } from './events';
 
 /**
+ * This class is used to attach/detach various utility objects
+ * onto a ctx, without having to manually attach/detach them
+ * all separately.
+ */
+class ContextEnhancer {
+  constructor(ctx, game, player) {
+    this.random = new Random(ctx);
+    this.events = new Events(game.flow, player);
+  }
+
+  attachToContext(ctx) {
+    let ctxWithAPI = this.random.attach(ctx);
+    ctxWithAPI = this.events.attach(ctxWithAPI);
+    return ctxWithAPI;
+  }
+
+  detachFromContext(ctx) {
+    let ctxWithoutAPI = Random.detach(ctx);
+    ctxWithoutAPI = Events.detach(ctxWithoutAPI);
+    return ctxWithoutAPI;
+  }
+
+  update(state, updateEvents) {
+    let newState = updateEvents ? this.events.update(state) : state;
+    newState = this.random.update(newState);
+    return newState;
+  }
+
+  updateAndDetach(state, updateEvents) {
+    const newState = this.update(state, updateEvents);
+    newState.ctx = this.detachFromContext(newState.ctx);
+    return newState;
+  }
+}
+
+/**
  * CreateGameReducer
  *
  * Creates the main game state reducer.
@@ -32,8 +68,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
   ctx._random = { seed };
 
-  const random = new Random(ctx);
-  let ctxWithAPI = random.attach(ctx);
+  const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
+  let ctxWithAPI = apiCtx.attachToContext(ctx);
 
   const initial = {
     // User managed state.
@@ -58,18 +94,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  const events = new Events(game.flow, ctx.currentPlayer);
-  ctxWithAPI = events.attach(ctxWithAPI);
+  let state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
-  const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
-
-  const { ctx: ctxWithEvents } = events.update(state);
   initial.G = state.G;
   initial._undo = state._undo;
-  initial.ctx = ctxWithEvents;
-  initial.ctx = random.update(initial.ctx);
-  initial.ctx = Random.detach(initial.ctx);
-  initial.ctx = Events.detach(initial.ctx);
+  state = apiCtx.updateAndDetach(state, true);
+  initial.ctx = state.ctx;
 
   const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
@@ -107,27 +137,18 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         state = { ...state, deltalog: undefined };
 
-        // Initialize PRNG from ctx.
-        const random = new Random(state.ctx);
-        // Initialize Events API.
-        const events = new Events(game.flow, action.payload.playerID);
-        // Attach Random API to ctx.
-        state = { ...state, ctx: random.attach(state.ctx) };
-        // Attach Events API to ctx.
-        state = { ...state, ctx: events.attach(state.ctx) };
+        const apiCtx = new ContextEnhancer(
+          state.ctx,
+          game,
+          action.payload.playerID
+        );
+        apiCtx.attachToContext(state.ctx);
 
-        // Update state.
         let newState = game.flow.processGameEvent(state, action);
-        // Trigger any events that were called via the Events API.
-        newState = events.update(newState);
-        // Update ctx with PRNG state.
-        let ctx = random.update(newState.ctx);
-        // Detach Random API from ctx.
-        ctx = Random.detach(ctx);
-        // Detach Events API from ctx.
-        ctx = Events.detach(ctx);
 
-        return { ...newState, ctx, _stateID: state._stateID + 1 };
+        newState = apiCtx.updateAndDetach(newState, true);
+
+        return { ...newState, _stateID: state._stateID + 1 };
       }
 
       case Actions.MAKE_MOVE: {
@@ -156,14 +177,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         state = { ...state, deltalog: undefined };
 
-        // Initialize PRNG from ctx.
-        const random = new Random(state.ctx);
-        // Initialize Events API.
-        const events = new Events(game.flow, action.payload.playerID);
-        // Attach Random API to ctx.
-        let ctxWithAPI = random.attach(state.ctx);
-        // Attach Events API to ctx.
-        ctxWithAPI = events.attach(ctxWithAPI);
+        const apiCtx = new ContextEnhancer(
+          state.ctx,
+          game,
+          action.payload.playerID
+        );
+        let ctxWithAPI = apiCtx.attachToContext(state.ctx);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
@@ -172,12 +191,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // Update ctx with PRNG state.
-        let ctx = random.update(state.ctx);
-        // Detach Random API from ctx.
-        ctx = Random.detach(ctx);
-        // Detach Events API from ctx.
-        ctx = Events.detach(ctx);
+        // don't call into events here
+        let ctx = apiCtx.updateAndDetach(state, false).ctx;
 
         // Undo changes to G if the move should not run on the client.
         if (
@@ -199,13 +214,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        state = { ...state, ctx: random.attach(state.ctx) };
-        state = { ...state, ctx: events.attach(state.ctx) };
-        state = game.flow.processMove(state, action.payload);
-        state = events.update(state);
-        state = { ...state, ctx: random.update(state.ctx) };
-        state = { ...state, ctx: Random.detach(state.ctx) };
-        state = { ...state, ctx: Events.detach(state.ctx) };
+        ctxWithAPI = apiCtx.attachToContext(state.ctx);
+        state = game.flow.processMove(
+          { ...state, ctx: ctxWithAPI },
+          action.payload
+        );
+        state = apiCtx.updateAndDetach(state, true);
 
         return state;
       }

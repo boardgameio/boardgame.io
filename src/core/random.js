@@ -32,8 +32,9 @@ export class Random {
    * Updates ctx with the PRNG state.
    * @param {object} ctx - The ctx object to update.
    */
-  update(ctx) {
-    return { ...ctx, _random: this.state };
+  update(state) {
+    const ctx = { ...state.ctx, _random: this.state };
+    return { ...state, ctx };
   }
 
   /**
