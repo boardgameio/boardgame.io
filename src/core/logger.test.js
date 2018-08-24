@@ -1,5 +1,3 @@
-import * as logging from './logger';
-
 describe('logging', () => {
   // spy on console.log
   const oldConsoleLog = console.log;
@@ -15,25 +13,42 @@ describe('logging', () => {
 
   console.log = jest.fn();
 
-  test('error', () => {
-    logging.error('msg1');
-    expect(console.log).toHaveBeenCalledWith('ERROR: msg1');
+  describe('dev', () => {
+    const logging = require('./logger');
+
+    test('error', () => {
+      logging.error('msg1');
+      expect(console.log).toHaveBeenCalledWith('ERROR: msg1');
+    });
+
+    test('info', () => {
+      logging.info('msg2');
+      expect(console.log).toHaveBeenCalledWith('INFO: msg2');
+    });
   });
 
-  test('info', () => {
-    logging.info('msg2');
-    expect(console.log).toHaveBeenCalledWith('INFO: msg2');
-  });
-
-  test('error stripped in production', () => {
+  describe('production', () => {
+    // first, set NODE_ENV
+    const prevNodeEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = 'production';
-    logging.error('msg1');
-    expect(console.log).not.toHaveBeenCalled();
-  });
+    afterAll(() => {
+      process.env.NODE_ENV = prevNodeEnv;
+    });
 
-  test('info stripped in production', () => {
-    process.env.NODE_ENV = 'production';
-    logging.info('msg2');
-    expect(console.log).not.toHaveBeenCalled();
+    // then, re-import logger
+    jest.resetModules();
+    const logging = require('./logger');
+
+    test('error stripped', () => {
+      process.env.NODE_ENV = 'production';
+      logging.error('msg1');
+      expect(console.log).not.toHaveBeenCalled();
+    });
+
+    test('info stripped', () => {
+      process.env.NODE_ENV = 'production';
+      logging.info('msg2');
+      expect(console.log).not.toHaveBeenCalled();
+    });
   });
 });
