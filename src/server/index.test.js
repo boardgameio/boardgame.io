@@ -11,6 +11,11 @@ import Game from '../core/game';
 
 const game = Game({ seed: 0 });
 
+jest.mock('../core/logger', () => ({
+  info: () => {},
+  error: () => {},
+}));
+
 jest.mock('./api', () => ({
   createApiServer: () => ({
     listen: async () => {},
