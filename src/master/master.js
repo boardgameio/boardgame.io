@@ -9,6 +9,7 @@
 import { CreateGameReducer } from '../core/reducer';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
+import * as logging from '../core/logger';
 
 /**
  * GameMaster
@@ -38,6 +39,7 @@ export class GameMaster {
     let state = await this.storageAPI.get(gameID);
 
     if (state === undefined) {
+      logging.error(`game not found, gameID=[${gameID}]`);
       return { error: 'game not found' };
     }
 
@@ -62,6 +64,9 @@ export class GameMaster {
       action.type == MAKE_MOVE &&
       !this.game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)
     ) {
+      logging.error(
+        `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`
+      );
       return;
     }
 
@@ -70,41 +75,45 @@ export class GameMaster {
       action.type == GAME_EVENT &&
       !this.game.flow.canPlayerCallEvent(state.G, state.ctx, playerID)
     ) {
+      logging.error(`event not processed - invalid playerID=[${playerID}]`);
       return;
     }
 
-    if (state._stateID == stateID) {
-      let log = store.getState().log || [];
-
-      // Update server's version of the store.
-      store.dispatch(action);
-      state = store.getState();
-
-      this.transportAPI.sendAll(playerID => {
-        const filteredState = {
-          ...state,
-          G: this.game.playerView(state.G, state.ctx, playerID),
-          ctx: { ...state.ctx, _random: undefined },
-          log: undefined,
-          deltalog: undefined,
-        };
-
-        return {
-          type: 'update',
-          args: [gameID, filteredState, state.deltalog],
-        };
-      });
-
-      // TODO: We currently attach the log back into the state
-      // object before storing it, but this should probably
-      // sit in a different part of the database eventually.
-      log = [...log, ...state.deltalog];
-      const stateWithLog = { ...state, log };
-
-      await this.storageAPI.set(gameID, stateWithLog);
+    if (state._stateID !== stateID) {
+      logging.error(
+        `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
+      );
+      return;
     }
 
-    return;
+    let log = store.getState().log || [];
+
+    // Update server's version of the store.
+    store.dispatch(action);
+    state = store.getState();
+
+    this.transportAPI.sendAll(playerID => {
+      const filteredState = {
+        ...state,
+        G: this.game.playerView(state.G, state.ctx, playerID),
+        ctx: { ...state.ctx, _random: undefined },
+        log: undefined,
+        deltalog: undefined,
+      };
+
+      return {
+        type: 'update',
+        args: [gameID, filteredState, state.deltalog],
+      };
+    });
+
+    // TODO: We currently attach the log back into the state
+    // object before storing it, but this should probably
+    // sit in a different part of the database eventually.
+    log = [...log, ...state.deltalog];
+    const stateWithLog = { ...state, log };
+
+    await this.storageAPI.set(gameID, stateWithLog);
   }
 
   /**
