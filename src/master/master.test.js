@@ -10,9 +10,13 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 import { InMemory } from '../server/db/inmemory';
+import { GameMaster } from './master';
+import { error } from '../core/logger';
 
-console.log = jest.fn();
-const { GameMaster } = require('./master');
+jest.mock('../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 const game = Game({ seed: 0, flow: { setActionPlayers: true } });
 
@@ -189,16 +193,14 @@ describe('update', async () => {
   test('invalid gameID', async () => {
     await master.onUpdate(action, 1, 'unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(console.log).toHaveBeenCalledWith(
-      `ERROR: game not found, gameID=[unknown]`
-    );
+    expect(error).toHaveBeenCalledWith(`game not found, gameID=[unknown]`);
   });
 
   test('invalid stateID', async () => {
     await master.onUpdate(action, 100, 'gameID', '1');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(console.log).toHaveBeenCalledWith(
-      `ERROR: invalid stateID, was=[100], expected=[1]`
+    expect(error).toHaveBeenCalledWith(
+      `invalid stateID, was=[100], expected=[1]`
     );
   });
 
@@ -206,8 +208,8 @@ describe('update', async () => {
     await master.onUpdate(action, 1, 'gameID', '100');
     await master.onUpdate(ActionCreators.makeMove(), 1, 'gameID', '100');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(console.log).toHaveBeenCalledWith(
-      `ERROR: event not processed - invalid playerID=[100]`
+    expect(error).toHaveBeenCalledWith(
+      `event not processed - invalid playerID=[100]`
     );
   });
 
@@ -224,8 +226,8 @@ describe('update', async () => {
 
     const move = ActionCreators.makeMove('move');
     await master.onUpdate(move, 3, 'gameID', '0');
-    expect(console.log).toHaveBeenCalledWith(
-      `ERROR: move not processed - canPlayerMakeMove=false, playerID=[0]`
+    expect(error).toHaveBeenCalledWith(
+      `move not processed - canPlayerMakeMove=false, playerID=[0]`
     );
   });
 });
