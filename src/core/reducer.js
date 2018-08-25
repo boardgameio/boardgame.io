@@ -114,6 +114,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   return (state = initial, action) => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
+        state = { ...state, deltalog: [] };
+
         // Process game events only on the server.
         // These events like `endTurn` typically
         // contain code that may rely on secret state
@@ -135,8 +137,6 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        state = { ...state, deltalog: undefined };
-
         const apiCtx = new ContextEnhancer(
           state.ctx,
           game,
@@ -152,6 +152,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
       }
 
       case Actions.MAKE_MOVE: {
+        state = { ...state, deltalog: [] };
+
         // Check whether the game knows the move at all.
         if (!game.moveNames.includes(action.payload.type)) {
           return state;
@@ -174,8 +176,6 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         ) {
           return state;
         }
-
-        state = { ...state, deltalog: undefined };
 
         const apiCtx = new ContextEnhancer(
           state.ctx,
