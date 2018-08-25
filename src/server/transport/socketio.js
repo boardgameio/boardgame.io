@@ -92,6 +92,12 @@ export function SocketIO(_clientInfo, _roomInfo) {
           socket.on('sync', async (gameID, playerID, numPlayers) => {
             socket.join(gameID);
 
+            // Remove client from any previous game that it was a part of.
+            if (clientInfo.has(socket.id)) {
+              const { gameID: oldGameID } = clientInfo.get(socket.id);
+              roomInfo.get(oldGameID).delete(socket.id);
+            }
+
             let roomClients = roomInfo.get(gameID);
             if (roomClients === undefined) {
               roomClients = new Set();
