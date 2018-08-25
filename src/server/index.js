@@ -10,6 +10,7 @@ const Koa = require('koa');
 
 import { DBFromEnv } from './db';
 import { createApiServer } from './api';
+import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
 
 /**
@@ -42,6 +43,7 @@ export function Server({ games, db, transport }) {
       await db.connect();
       await api.listen(port + 1);
       await app.listen(port, callback);
+      logger.info('listening...');
     },
   };
 }
