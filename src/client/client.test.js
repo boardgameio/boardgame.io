@@ -287,8 +287,8 @@ describe('log handling', () => {
     client.moves.A();
 
     expect(client.log).toEqual([
-      makeMove('A', [], '0'),
-      makeMove('A', [], '0'),
+      { action: makeMove('A', [], '0') },
+      { action: makeMove('A', [], '0') },
     ]);
   });
 

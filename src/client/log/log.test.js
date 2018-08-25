@@ -24,10 +24,10 @@ describe('layout', () => {
 
   test('sanity', () => {
     const log = [
-      makeMove('moveA'),
-      gameEvent('endTurn'),
-      makeMove('moveB'),
-      gameEvent('endTurn'),
+      { action: makeMove('moveA') },
+      { action: gameEvent('endTurn') },
+      { action: makeMove('moveB') },
+      { action: gameEvent('endTurn') },
     ];
 
     const root = Enzyme.mount(
@@ -39,11 +39,11 @@ describe('layout', () => {
 
   test('multiple moves per turn / phase', () => {
     const log = [
-      makeMove('moveA'),
-      makeMove('moveB'),
-      gameEvent('endPhase'),
-      makeMove('moveC'),
-      gameEvent('endTurn'),
+      { action: makeMove('moveA') },
+      { action: makeMove('moveB') },
+      { action: gameEvent('endPhase') },
+      { action: makeMove('moveC') },
+      { action: gameEvent('endTurn') },
     ];
 
     const root = Enzyme.mount(
@@ -156,10 +156,10 @@ describe('pinning', () => {
   let state = reducer(undefined, { type: 'init' });
   const initialState = state;
   const log = [
-    makeMove('A'),
-    gameEvent('endTurn'),
-    makeMove('B'),
-    gameEvent('endTurn'),
+    { action: makeMove('A') },
+    { action: gameEvent('endTurn') },
+    { action: makeMove('B') },
+    { action: gameEvent('endTurn') },
   ];
 
   test('pin', () => {

@@ -202,7 +202,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           G = state.G;
         }
 
-        const deltalog = [action];
+        const deltalog = [{ action }];
         state = { ...state, G, ctx, deltalog, _stateID: state._stateID + 1 };
 
         // If we're on the client, just process the move

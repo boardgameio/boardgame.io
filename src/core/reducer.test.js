@@ -209,11 +209,11 @@ test('deltalog', () => {
   const actionC = gameEvent('endTurn');
 
   state = reducer(state, actionA);
-  expect(state.deltalog).toEqual([actionA]);
+  expect(state.deltalog).toEqual([{ action: actionA }]);
   state = reducer(state, actionB);
-  expect(state.deltalog).toEqual([actionB]);
+  expect(state.deltalog).toEqual([{ action: actionB }]);
   state = reducer(state, actionC);
-  expect(state.deltalog).toEqual([actionC]);
+  expect(state.deltalog).toEqual([{ action: actionC }]);
 });
 
 describe('Random inside setup()', () => {
