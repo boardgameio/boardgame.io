@@ -10,11 +10,11 @@ import * as ActionCreators from '../../core/action-creators';
 import io from 'socket.io-client';
 
 /**
- * Multiplayer
+ * SocketIO
  *
- * Handles all the multiplayer interactions on the client-side.
+ * Transport interface that interacts with the GameMaster via socket.io.
  */
-export class Multiplayer {
+export class SocketIO {
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socket - Override for unit tests.
