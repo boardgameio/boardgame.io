@@ -6,11 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { createStore } from 'redux';
 import { Multiplayer } from './multiplayer';
 import Game from '../../core/game';
 import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
-import * as ActionCreators from '../../core/action-creators';
 import * as Actions from '../../core/action-types';
 
 class MockSocket {
@@ -37,8 +37,7 @@ test('Multiplayer defaults', () => {
 describe('update gameID / playerID', () => {
   const socket = new MockSocket();
   const m = new Multiplayer({ socket });
-  const game = Game({});
-  m.createStore(CreateGameReducer({ game }));
+  m.store = { dispatch: () => {} };
 
   beforeEach(() => (socket.emit = jest.fn()));
 
@@ -86,24 +85,11 @@ describe('multiplayer', () => {
   let store = null;
 
   beforeEach(() => {
-    store = m.createStore(CreateGameReducer({ game }));
+    m.store = store = createStore(CreateGameReducer({ game }));
   });
 
   test('returns a valid store', () => {
     expect(store).not.toBe(undefined);
-  });
-
-  test('client sends update after action', () => {
-    const action = ActionCreators.gameEvent('endTurn');
-    mockSocket.emit = jest.fn();
-    store.dispatch(action);
-    expect(mockSocket.emit).lastCalledWith(
-      'update',
-      action,
-      0,
-      'default:default',
-      null
-    );
   });
 
   test('receive update', () => {
@@ -128,37 +114,18 @@ describe('multiplayer', () => {
     mockSocket.receive('sync', 'default:default', restored);
     expect(store.getState()).toMatchObject(restored);
   });
-});
 
-describe('move blacklist', () => {
-  const mockSocket = new MockSocket();
-  const m = new Multiplayer({ socket: mockSocket });
-  const game = Game({});
-  const store = m.createStore(CreateGameReducer({ game }));
-
-  mockSocket.emit = jest.fn();
-
-  beforeEach(() => mockSocket.emit.mockReset());
-
-  test('should emit', () => {
-    const endTurn = ActionCreators.gameEvent('endTurn');
-    store.dispatch(endTurn);
-    expect(mockSocket.emit).toHaveBeenCalled();
-  });
-
-  test('should emit', () => {
-    store.dispatch(ActionCreators.makeMove());
-    expect(mockSocket.emit).toHaveBeenCalled();
-  });
-
-  test('should not emit', () => {
-    store.dispatch(ActionCreators.sync());
-    expect(mockSocket.emit).not.toHaveBeenCalled();
-  });
-
-  test('should not emit', () => {
-    store.dispatch(ActionCreators.update());
-    expect(mockSocket.emit).not.toHaveBeenCalled();
+  test('send update', () => {
+    const action = makeMove();
+    const state = { _stateID: 0 };
+    m.onAction(state, action);
+    expect(mockSocket.emit).lastCalledWith(
+      'update',
+      action,
+      state._stateID,
+      'default:default',
+      null
+    );
   });
 });
 
@@ -201,35 +168,11 @@ describe('server option', () => {
   });
 });
 
-test('game server accepts enhanced store', () => {
-  let spyDispatcher;
-  const spyEnhancer = vanillaCreateStore => (...args) => {
-    const vanillaStore = vanillaCreateStore(...args);
-    return {
-      ...vanillaStore,
-      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
-    };
-  };
-
-  const mockSocket = new MockSocket();
-  const m = new Multiplayer({ socket: mockSocket });
-  m.connect();
-  const game = Game({
-    moves: {
-      A: (G, ctx, arg) => ({ arg }),
-    },
-  });
-  const store = m.createStore(CreateGameReducer({ game }), spyEnhancer);
-  // console.log(spyDispatcher.mock);
-  expect(spyDispatcher.mock.calls.length).toBe(0);
-  store.dispatch(makeMove('A', {}));
-  expect(spyDispatcher.mock.calls.length).toBe(1);
-});
-
 test('changing a gameID resets the state before resync', () => {
   const m = new Multiplayer();
   const game = Game({});
-  const store = m.createStore(CreateGameReducer({ game }));
+  const store = createStore(CreateGameReducer({ game }));
+  m.store = store;
   const dispatchSpy = jest.spyOn(store, 'dispatch');
 
   m.updateGameID('foo');
@@ -245,7 +188,8 @@ test('changing a gameID resets the state before resync', () => {
 test('changing a playerID resets the state before resync', () => {
   const m = new Multiplayer();
   const game = Game({});
-  const store = m.createStore(CreateGameReducer({ game }));
+  const store = createStore(CreateGameReducer({ game }));
+  m.store = store;
   const dispatchSpy = jest.spyOn(store, 'dispatch');
 
   m.updatePlayerID('foo');

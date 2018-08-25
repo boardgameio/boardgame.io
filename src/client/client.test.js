@@ -94,19 +94,33 @@ describe('step', () => {
   });
 });
 
-test('multiplayer server set when provided', () => {
+describe('multiplayer', () => {
   let host = 'host';
   let port = '4321';
+  let client;
 
-  const client = Client({
-    game: Game({}),
-    multiplayer: { server: host + ':' + port },
+  beforeAll(() => {
+    client = Client({
+      game: Game({ moves: { A: () => {} } }),
+      multiplayer: { server: host + ':' + port },
+    });
+    client.connect();
   });
 
-  client.connect();
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
-  expect(client.multiplayerClient.socket.io.engine.hostname).toEqual(host);
-  expect(client.multiplayerClient.socket.io.engine.port).toEqual(port);
+  test('server set when provided', () => {
+    expect(client.transport.socket.io.engine.hostname).toEqual(host);
+    expect(client.transport.socket.io.engine.port).toEqual(port);
+  });
+
+  test('onAction called', () => {
+    jest.spyOn(client.transport, 'onAction');
+    client.moves.A();
+    expect(client.transport.onAction).toHaveBeenCalled();
+  });
 });
 
 test('accepts enhancer for store', () => {

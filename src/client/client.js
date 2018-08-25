@@ -176,14 +176,25 @@ class _ClientImpl {
       return result;
     };
 
-    if (enhancer !== undefined) {
-      enhancer = compose(applyMiddleware(LogMiddleware), enhancer);
-    } else {
-      enhancer = applyMiddleware(LogMiddleware);
-    }
+    /**
+     * Middleware that intercepts actions and sends them to the GameMaster.
+     */
+    const TransportMiddleware = callback => store => next => action => {
+      const state = store.getState();
+      const result = next(action);
+
+      if (action.clientOnly != true) {
+        callback(state, action);
+      }
+
+      return result;
+    };
+
+    let onAction = () => {};
+    let onStoreCreate = () => {};
 
     if (multiplayer) {
-      this.multiplayerClient = new Multiplayer({
+      this.transport = new Multiplayer({
         gameID: gameID,
         playerID: playerID,
         gameName: game.name,
@@ -191,24 +202,40 @@ class _ClientImpl {
         server,
         socketOpts,
       });
-      this.store = this.multiplayerClient.createStore(this.reducer, enhancer);
-    } else {
-      this.store = createStore(this.reducer, enhancer);
 
+      onStoreCreate = store => {
+        this.transport.store = store;
+      };
+
+      onAction = (state, action) => {
+        this.transport.onAction(state, action);
+      };
+    } else {
       // If no playerID was provided, set it to undefined.
       if (this.playerID === null) {
         this.playerID = undefined;
       }
     }
 
+    if (enhancer !== undefined) {
+      enhancer = compose(
+        applyMiddleware(LogMiddleware, TransportMiddleware(onAction)),
+        enhancer
+      );
+    } else {
+      enhancer = applyMiddleware(LogMiddleware, TransportMiddleware(onAction));
+    }
+
+    this.store = createStore(this.reducer, enhancer);
+    onStoreCreate(this.store);
     this.createDispatchers();
   }
 
   subscribe(fn) {
     this.store.subscribe(fn);
 
-    if (this.multiplayerClient) {
-      this.multiplayerClient.subscribe(fn);
+    if (this.transport) {
+      this.transport.subscribe(fn);
     }
   }
 
@@ -250,8 +277,8 @@ class _ClientImpl {
     // Combine into return value.
     let ret = { ...state, isActive, G, log: this.log };
 
-    if (this.multiplayerClient) {
-      const isConnected = this.multiplayerClient.isConnected;
+    if (this.transport) {
+      const isConnected = this.transport.isConnected;
       ret = { ...ret, isConnected };
     }
 
@@ -259,8 +286,8 @@ class _ClientImpl {
   }
 
   connect() {
-    if (this.multiplayerClient) {
-      this.multiplayerClient.connect();
+    if (this.transport) {
+      this.transport.connect();
     }
   }
 
@@ -286,8 +313,8 @@ class _ClientImpl {
     this.playerID = playerID;
     this.createDispatchers();
 
-    if (this.multiplayerClient) {
-      this.multiplayerClient.updatePlayerID(playerID);
+    if (this.transport) {
+      this.transport.updatePlayerID(playerID);
     }
   }
 
@@ -295,8 +322,8 @@ class _ClientImpl {
     this.gameID = gameID;
     this.createDispatchers();
 
-    if (this.multiplayerClient) {
-      this.multiplayerClient.updateGameID(gameID);
+    if (this.transport) {
+      this.transport.updateGameID(gameID);
     }
   }
 
