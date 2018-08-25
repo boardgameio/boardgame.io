@@ -139,8 +139,8 @@ class _ClientImpl {
      * Middleware that manages the log object.
      * Reducers generate deltalogs, which are log events
      * that are the result of application of a single action.
-     * The server may also send back a deltalog or the entire
-     * log depending on the type of socket request.
+     * The master may also send back a deltalog or the entire
+     * log depending on the type of request.
      * The middleware below takes care of all these cases while
      * managing the log object.
      */
@@ -177,7 +177,8 @@ class _ClientImpl {
     };
 
     /**
-     * Middleware that intercepts actions and sends them to the GameMaster.
+     * Middleware that intercepts actions and sends them to the master,
+     * which keeps the authoritative version of the state.
      */
     const TransportMiddleware = store => next => action => {
       const state = store.getState();
