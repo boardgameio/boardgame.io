@@ -28,6 +28,7 @@ export class Multiplayer {
   constructor({
     socket,
     socketOpts,
+    store,
     gameID,
     playerID,
     gameName,
@@ -36,6 +37,7 @@ export class Multiplayer {
   } = {}) {
     this.server = server;
     this.socket = socket;
+    this.store = store;
     this.socketOpts = socketOpts;
     this.gameName = gameName || 'default';
     this.gameID = gameID || 'default';

@@ -179,22 +179,31 @@ class _ClientImpl {
     /**
      * Middleware that intercepts actions and sends them to the GameMaster.
      */
-    const TransportMiddleware = callback => store => next => action => {
+    const TransportMiddleware = store => next => action => {
       const state = store.getState();
       const result = next(action);
 
       if (action.clientOnly != true) {
-        callback(state, action);
+        this.transport.onAction(state, action);
       }
 
       return result;
     };
 
-    let onAction = () => {};
-    let onStoreCreate = () => {};
+    if (enhancer !== undefined) {
+      enhancer = compose(
+        applyMiddleware(LogMiddleware, TransportMiddleware),
+        enhancer
+      );
+    } else {
+      enhancer = applyMiddleware(LogMiddleware, TransportMiddleware);
+    }
+
+    this.store = createStore(this.reducer, enhancer);
 
     if (multiplayer) {
       this.transport = new Multiplayer({
+        store: this.store,
         gameID: gameID,
         playerID: playerID,
         gameName: game.name,
@@ -202,41 +211,23 @@ class _ClientImpl {
         server,
         socketOpts,
       });
-
-      onStoreCreate = store => {
-        this.transport.store = store;
-      };
-
-      onAction = (state, action) => {
-        this.transport.onAction(state, action);
-      };
     } else {
-      // If no playerID was provided, set it to undefined.
-      if (this.playerID === null) {
-        this.playerID = undefined;
-      }
+      this.transport = {
+        isConnected: true,
+        onAction: () => {},
+        subscribe: () => {},
+        connect: () => {},
+        updateGameID: () => {},
+        updatePlayerID: () => {},
+      };
     }
 
-    if (enhancer !== undefined) {
-      enhancer = compose(
-        applyMiddleware(LogMiddleware, TransportMiddleware(onAction)),
-        enhancer
-      );
-    } else {
-      enhancer = applyMiddleware(LogMiddleware, TransportMiddleware(onAction));
-    }
-
-    this.store = createStore(this.reducer, enhancer);
-    onStoreCreate(this.store);
     this.createDispatchers();
   }
 
   subscribe(fn) {
     this.store.subscribe(fn);
-
-    if (this.transport) {
-      this.transport.subscribe(fn);
-    }
+    this.transport.subscribe(fn);
   }
 
   getState() {
@@ -277,18 +268,14 @@ class _ClientImpl {
     // Combine into return value.
     let ret = { ...state, isActive, G, log: this.log };
 
-    if (this.transport) {
-      const isConnected = this.transport.isConnected;
-      ret = { ...ret, isConnected };
-    }
+    const isConnected = this.transport.isConnected;
+    ret = { ...ret, isConnected };
 
     return ret;
   }
 
   connect() {
-    if (this.transport) {
-      this.transport.connect();
-    }
+    this.transport.connect();
   }
 
   createDispatchers() {
@@ -312,19 +299,13 @@ class _ClientImpl {
   updatePlayerID(playerID) {
     this.playerID = playerID;
     this.createDispatchers();
-
-    if (this.transport) {
-      this.transport.updatePlayerID(playerID);
-    }
+    this.transport.updatePlayerID(playerID);
   }
 
   updateGameID(gameID) {
     this.gameID = gameID;
     this.createDispatchers();
-
-    if (this.transport) {
-      this.transport.updateGameID(gameID);
-    }
+    this.transport.updateGameID(gameID);
   }
 
   updateCredentials(credentials) {
