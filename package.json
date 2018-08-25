@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.25.4",
+  "version": "0.25.5",
   "description": "library for turn-based games",
   "repository": "https://github.com/google/boardgame.io",
   "scripts": {
