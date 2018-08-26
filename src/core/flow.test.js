@@ -341,7 +341,7 @@ test('endGameIf', () => {
     expect(state.ctx.currentPlayer).toBe('0');
     state = reducer(state, makeMove('A'));
     expect(state.ctx.gameover).toBe('A');
-    expect(state.deltalog[state.deltalog.length - 1].payload.type).toBe(
+    expect(state.deltalog[state.deltalog.length - 1].action.payload.type).toBe(
       'endTurn'
     );
   }

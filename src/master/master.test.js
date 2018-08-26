@@ -179,13 +179,15 @@ describe('update', async () => {
 
     expect(value.args[2]).toMatchObject([
       {
-        payload: {
-          args: undefined,
-          credentials: undefined,
-          playerID: undefined,
-          type: 'endTurn',
+        action: {
+          payload: {
+            args: undefined,
+            credentials: undefined,
+            playerID: undefined,
+            type: 'endTurn',
+          },
+          type: 'GAME_EVENT',
         },
-        type: 'GAME_EVENT',
       },
     ]);
   });
