@@ -112,7 +112,7 @@ export class GameLog extends React.Component {
   rewind = logIndex => {
     let state = this.props.initialState;
     for (let i = 0; i <= logIndex; i++) {
-      const action = this.props.log[i].action;
+      const { action } = this.props.log[i];
       if (!action.automatic) {
         state = this.props.reducer(state, action);
       }
@@ -158,14 +158,14 @@ export class GameLog extends React.Component {
 
     let lastAction = 0;
     for (let i = 0; i < this.props.log.length; i++) {
-      const action = this.props.log[i].action;
+      const { action } = this.props.log[i];
       if (action.type == MAKE_MOVE || !action.automatic) {
         lastAction = i;
       }
     }
 
     for (let i = 0; i < this.props.log.length; i++) {
-      const action = this.props.log[i].action;
+      const { action } = this.props.log[i];
       const oldTurn = state.ctx.turn;
       const oldPhase = state.ctx.phase;
 
