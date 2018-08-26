@@ -10,6 +10,7 @@ import { Card } from '../src/ui/card.js';
 import { Deck } from '../src/ui/deck.js';
 import { Grid } from '../src/ui/grid.js';
 import { HexGrid } from '../src/ui/hex.js';
+import { hexUtils } from '../src/ui/hexUtils.js';
 import Token from '../src/ui/token.js';
 
-export { Card, Deck, Grid, HexGrid, Token };
+export { Card, Deck, Grid, HexGrid, Token, hexUtils };
