@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { getAllNeighbors } from './hexUtils';
+import { getAllNeighbors, getDistance } from './hexUtils';
 
 const createCoordinate = ([x, y, z]) => ({ x, y, z });
 
@@ -36,4 +36,18 @@ test('neighbors of (1, 0, -1)', () => {
     [0, 0, 0],
   ].map(createCoordinate);
   expect(result).toEqual(expectedNeighbors);
+});
+
+test('distance between neighbors', () => {
+  const origo = createCoordinate([0, 0, 0]);
+  const neighbor = createCoordinate([1, 0, -1]);
+  const result = getDistance(origo, neighbor);
+  expect(result).toEqual(1);
+});
+
+test('distance between non-neighbors', () => {
+  const origo = createCoordinate([0, 0, 0]);
+  const nonNeighbor = createCoordinate([3, 3, -6]);
+  const result = getDistance(origo, nonNeighbor);
+  expect(result).toEqual(6);
 });

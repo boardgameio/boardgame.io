@@ -24,4 +24,20 @@ export const getAllNeighbors = ({ x, y, z }) =>
     .map(([dx, dy, dz]) => [x + dx, y + dy, z + dz])
     .map(([x, y, z]) => ({ x, y, z }));
 
-export const hexUtils = { getAllNeighbors };
+/**
+ * Get distance
+ *
+ * A utility function which calculates the distance between two
+ * points expressed in cube coordinates
+ *
+ * Arguments:
+ *   Two objects with:
+ *   x       - X coordinate (cube coordinates)
+ *   y       - Y coordinate (cube coordinates)
+ *   z       - Z coordinate (cube coordinates)
+ *
+ */
+export const getDistance = (a, b) =>
+  (Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z)) / 2;
+
+export const hexUtils = { getAllNeighbors, getDistance };
