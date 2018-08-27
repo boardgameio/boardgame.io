@@ -10,6 +10,7 @@ import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { SocketIO } from './transport/socketio';
+import { Local, LocalMaster } from './transport/local';
 import { CreateGameReducer } from '../core/reducer';
 
 /**
@@ -90,13 +91,6 @@ class _ClientImpl {
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;
-
-    let server = undefined;
-    if (multiplayer instanceof Object && 'server' in multiplayer) {
-      server = multiplayer.server;
-      multiplayer = true;
-    }
-
     this.multiplayer = multiplayer;
 
     this.reducer = CreateGameReducer({
@@ -202,14 +196,23 @@ class _ClientImpl {
 
     this.store = createStore(this.reducer, enhancer);
 
-    if (multiplayer) {
+    if (multiplayer && multiplayer.master_ !== undefined) {
+      this.transport = new Local({
+        master: multiplayer.master_,
+        store: this.store,
+        gameID: gameID,
+        playerID: playerID,
+        gameName: game.name,
+        numPlayers,
+      });
+    } else if (multiplayer && multiplayer.server !== undefined) {
       this.transport = new SocketIO({
         store: this.store,
         gameID: gameID,
         playerID: playerID,
         gameName: game.name,
         numPlayers,
-        server,
+        server: multiplayer.server,
         socketOpts,
       });
     } else {
@@ -313,6 +316,26 @@ class _ClientImpl {
     this.credentials = credentials;
     this.createDispatchers();
   }
+}
+
+/**
+ * Pre-process the opts object in the client.
+ * Call this on the argument to your client implementation.
+ */
+export function GetOpts(opts) {
+  let { game, multiplayer } = opts;
+
+  if (multiplayer) {
+    if (multiplayer == true) {
+      multiplayer = { server: '' };
+    }
+
+    if (multiplayer.local == true) {
+      multiplayer.master_ = LocalMaster(game);
+    }
+  }
+
+  return { ...opts, multiplayer };
 }
 
 /**

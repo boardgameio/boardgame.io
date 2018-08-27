@@ -10,9 +10,12 @@ import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
 import {
   Client,
+  GetOpts,
   createEventDispatchers,
   createMoveDispatchers,
 } from './client';
+import { Local } from './transport/local';
+import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
 import Game from '../core/game';
 import { RandomBot } from '../ai/bot';
@@ -95,31 +98,57 @@ describe('step', () => {
 });
 
 describe('multiplayer', () => {
-  let host = 'host';
-  let port = '4321';
-  let client;
+  describe('socket.io master', () => {
+    let host = 'host';
+    let port = '4321';
+    let client;
 
-  beforeAll(() => {
-    client = Client({
-      game: Game({ moves: { A: () => {} } }),
-      multiplayer: { server: host + ':' + port },
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({ moves: { A: () => {} } }),
+          multiplayer: { server: host + ':' + port },
+        })
+      );
+      client.connect();
     });
-    client.connect();
+
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport instanceof SocketIO).toBe(true);
+    });
+
+    test('server set when provided', () => {
+      expect(client.transport.socket.io.engine.hostname).toEqual(host);
+      expect(client.transport.socket.io.engine.port).toEqual(port);
+    });
+
+    test('onAction called', () => {
+      jest.spyOn(client.transport, 'onAction');
+      client.moves.A();
+      expect(client.transport.onAction).toHaveBeenCalled();
+    });
   });
 
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
+  describe('local master', () => {
+    let client;
 
-  test('server set when provided', () => {
-    expect(client.transport.socket.io.engine.hostname).toEqual(host);
-    expect(client.transport.socket.io.engine.port).toEqual(port);
-  });
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({ moves: { A: () => {} } }),
+          multiplayer: { local: true },
+        })
+      );
+      client.connect();
+    });
 
-  test('onAction called', () => {
-    jest.spyOn(client.transport, 'onAction');
-    client.moves.A();
-    expect(client.transport.onAction).toHaveBeenCalled();
+    test('correct transport used', () => {
+      expect(client.transport instanceof Local).toBe(true);
+    });
   });
 });
 
