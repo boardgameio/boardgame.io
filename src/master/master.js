@@ -12,13 +12,13 @@ import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
 /**
- * GameMaster
+ * Master
  *
  * Class that runs the game and maintains the authoritative state.
  * It uses the transportAPI to communicate with clients and the
  * storageAPI to communicate with the database.
  */
-export class GameMaster {
+export class Master {
   constructor(game, storageAPI, transportAPI, isActionFromAuthenticPlayer) {
     this.game = game;
     this.storageAPI = storageAPI;
