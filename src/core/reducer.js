@@ -16,22 +16,35 @@ import { Events } from './events';
  */
 export class GameLoggerCtxApi {
   constructor() {
-    this._cargo = undefined;
+    this._payload = undefined;
   }
 
-  api() {
+  _api() {
     return {
-      setPayload: cargo => {
-        this._cargo = cargo;
+      setPayload: payload => {
+        this._payload = payload;
       },
     };
   }
 
   attach(ctx) {
-    return { ...ctx, log: this.api() };
+    return { ...ctx, log: this._api() };
   }
   update(state) {
-    return state;
+    if (this._payload === undefined) {
+      return state;
+    }
+
+    // attach the payload to the last log event
+    let deltalog = state.deltalog;
+    deltalog[deltalog.length - 1] = {
+      ...deltalog[deltalog.length - 1],
+      payload: this._payload,
+    };
+    this._payload = undefined;
+
+    const newState = { ...state, deltalog };
+    return newState;
   }
   static detach(ctx) {
     const { log, ...ctxWithoutLog } = ctx; // eslint-disable-line no-unused-vars
@@ -224,7 +237,11 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // don't call into events here
-        let ctx = apiCtx.updateAndDetach(state, false).ctx;
+        const newState = apiCtx.updateAndDetach(
+          { ...state, deltalog: [{ action }] },
+          false
+        );
+        let ctx = newState.ctx;
 
         // Undo changes to G if the move should not run on the client.
         if (
@@ -234,8 +251,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           G = state.G;
         }
 
-        const deltalog = [{ action }];
-        state = { ...state, G, ctx, deltalog, _stateID: state._stateID + 1 };
+        state = { ...newState, G, ctx, _stateID: state._stateID + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
