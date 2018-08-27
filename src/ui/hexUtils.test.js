@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { getAllNeighbors, getDistance } from './hexUtils';
+import { getAllNeighbors, getDistance, getRange } from './hexUtils';
 
 const createCoordinate = ([x, y, z]) => ({ x, y, z });
 
@@ -50,4 +50,48 @@ test('distance between non-neighbors', () => {
   const nonNeighbor = createCoordinate([3, 3, -6]);
   const result = getDistance(origo, nonNeighbor);
   expect(result).toEqual(6);
+});
+
+test('range from origo', () => {
+  const origo = createCoordinate([0, 0, 0]);
+  const result = getRange(origo, 1);
+  expect(result).toEqual(
+    [
+      [-1, 0, 1],
+      [-1, 1, 0],
+      [0, -1, 1],
+      [0, 0, 0],
+      [0, 1, -1],
+      [1, -1, 0],
+      [1, 0, -1],
+    ].map(createCoordinate)
+  );
+});
+
+test('range not from origo', () => {
+  const origo = createCoordinate([2, -3, 1]);
+  const result = getRange(origo, 2);
+  expect(result).toEqual(
+    [
+      [0, -3, 3],
+      [0, -2, 2],
+      [0, -1, 1],
+      [1, -4, 3],
+      [1, -3, 2],
+      [1, -2, 1],
+      [1, -1, 0],
+      [2, -5, 3],
+      [2, -4, 2],
+      [2, -3, 1],
+      [2, -2, 0],
+      [2, -1, -1],
+      [3, -5, 2],
+      [3, -4, 1],
+      [3, -3, 0],
+      [3, -2, -1],
+      [4, -5, 1],
+      [4, -4, 0],
+      [4, -3, -1],
+    ].map(createCoordinate)
+  );
 });
