@@ -12,37 +12,69 @@ import { Random } from './random';
 import { Events } from './events';
 
 /**
+ * Context API to allow writing custom logs in games.
+ */
+export class GameLoggerCtxApi {
+  constructor() {
+    this._cargo = undefined;
+  }
+
+  api() {
+    return {
+      setPayload: cargo => {
+        this._cargo = cargo;
+      },
+    };
+  }
+
+  attach(ctx) {
+    return { ...ctx, log: this.api() };
+  }
+  update(state) {
+    return state;
+  }
+  static detach(ctx) {
+    const { log, ...ctxWithoutLog } = ctx; // eslint-disable-line no-unused-vars
+    return ctxWithoutLog;
+  }
+}
+
+/**
  * This class is used to attach/detach various utility objects
  * onto a ctx, without having to manually attach/detach them
  * all separately.
  */
-class ContextEnhancer {
+export class ContextEnhancer {
   constructor(ctx, game, player) {
     this.random = new Random(ctx);
     this.events = new Events(game.flow, player);
+    this.log = new GameLoggerCtxApi();
   }
 
   attachToContext(ctx) {
     let ctxWithAPI = this.random.attach(ctx);
     ctxWithAPI = this.events.attach(ctxWithAPI);
+    ctxWithAPI = this.log.attach(ctxWithAPI);
     return ctxWithAPI;
   }
 
-  detachFromContext(ctx) {
+  static detachAllFromContext(ctx) {
     let ctxWithoutAPI = Random.detach(ctx);
     ctxWithoutAPI = Events.detach(ctxWithoutAPI);
+    ctxWithoutAPI = GameLoggerCtxApi.detach(ctxWithoutAPI);
     return ctxWithoutAPI;
   }
 
   update(state, updateEvents) {
     let newState = updateEvents ? this.events.update(state) : state;
     newState = this.random.update(newState);
+    newState = this.log.update(newState);
     return newState;
   }
 
   updateAndDetach(state, updateEvents) {
     const newState = this.update(state, updateEvents);
-    newState.ctx = this.detachFromContext(newState.ctx);
+    newState.ctx = ContextEnhancer.detachAllFromContext(newState.ctx);
     return newState;
   }
 }
