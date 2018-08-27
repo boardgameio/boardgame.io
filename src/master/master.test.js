@@ -10,7 +10,7 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 import { InMemory } from '../server/db/inmemory';
-import { GameMaster } from './master';
+import { Master } from './master';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -26,7 +26,7 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 
 describe('sync', async () => {
   const send = jest.fn();
-  const master = new GameMaster(game, new InMemory(), TransportAPI(send));
+  const master = new Master(game, new InMemory(), TransportAPI(send));
   const spy = jest.spyOn(Redux, 'createStore');
 
   beforeEach(() => {
@@ -61,11 +61,7 @@ describe('update', async () => {
   const sendAll = jest.fn(arg => {
     sendAllReturn = arg;
   });
-  const master = new GameMaster(
-    game,
-    new InMemory(),
-    TransportAPI(send, sendAll)
-  );
+  const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
   const action = ActionCreators.gameEvent('endTurn');
 
   beforeAll(async () => {
@@ -249,11 +245,7 @@ describe('playerView', () => {
       return { ...G, player };
     },
   });
-  const master = new GameMaster(
-    game,
-    new InMemory(),
-    TransportAPI(send, sendAll)
-  );
+  const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
 
   beforeAll(async () => {
     await master.onSync('gameID', '0');
@@ -293,13 +285,13 @@ describe('authentication', async () => {
   const storage = new InMemory();
 
   beforeAll(async () => {
-    const master = new GameMaster(game, storage, TransportAPI());
+    const master = new Master(game, storage, TransportAPI());
     await master.onSync('gameID', '0');
   });
 
   test('auth failure', async () => {
     const isActionFromAuthenticPlayer = () => false;
-    const master = new GameMaster(
+    const master = new Master(
       game,
       storage,
       TransportAPI(send, sendAll),
@@ -311,7 +303,7 @@ describe('authentication', async () => {
 
   test('auth success', async () => {
     const isActionFromAuthenticPlayer = () => true;
-    const master = new GameMaster(
+    const master = new Master(
       game,
       storage,
       TransportAPI(send, sendAll),

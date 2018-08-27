@@ -12,7 +12,7 @@ import io from 'socket.io-client';
 /**
  * SocketIO
  *
- * Transport interface that interacts with the GameMaster via socket.io.
+ * Transport interface that interacts with the Master via socket.io.
  */
 export class SocketIO {
   /**
