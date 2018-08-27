@@ -37,6 +37,18 @@ describe('layout', () => {
     expect(turns).toEqual(['0', '1']);
   });
 
+  test('payload', () => {
+    const log = [
+      { action: makeMove('moveA'), payload: { test_payload: 'payload123' } },
+    ];
+
+    const root = Enzyme.mount(
+      <GameLog log={log} initialState={state} reducer={reducer} />
+    );
+    const turns = root.find('.log-event').map(div => div.text());
+    expect(turns[0]).toContain('payload123');
+  });
+
   test('multiple moves per turn / phase', () => {
     const log = [
       { action: makeMove('moveA') },

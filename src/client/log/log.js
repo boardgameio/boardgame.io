@@ -28,7 +28,7 @@ const LogEvent = props => {
 
   const custompayload =
     props.payload !== undefined
-      ? 'payload: ' + JSON.stringify(props.payload, null, 4)
+      ? ', payload: ' + JSON.stringify(props.payload, null, 4)
       : '';
 
   return (
