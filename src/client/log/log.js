@@ -26,6 +26,11 @@ const LogEvent = props => {
     classNames += ' pinned';
   }
 
+  const custompayload =
+    props.payload !== undefined
+      ? 'payload: ' + JSON.stringify(props.payload, null, 4)
+      : '';
+
   return (
     <div
       className={classNames}
@@ -34,12 +39,14 @@ const LogEvent = props => {
       onMouseLeave={() => props.onMouseLeave()}
     >
       {action.payload.type}({args.join(',')})
+      {custompayload}
     </div>
   );
 };
 
 LogEvent.propTypes = {
   action: PropTypes.any.isRequired,
+  payload: PropTypes.object,
   logIndex: PropTypes.number.isRequired,
   onLogClick: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
@@ -165,7 +172,7 @@ export class GameLog extends React.Component {
     }
 
     for (let i = 0; i < this.props.log.length; i++) {
-      const { action } = this.props.log[i];
+      const { action, payload } = this.props.log[i];
       const oldTurn = state.ctx.turn;
       const oldPhase = state.ctx.phase;
 
@@ -179,6 +186,7 @@ export class GameLog extends React.Component {
             onMouseEnter={this.onMouseEnter}
             onMouseLeave={this.onMouseLeave}
             action={action}
+            payload={payload}
           />
         );
 
