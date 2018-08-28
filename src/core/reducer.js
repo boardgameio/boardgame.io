@@ -14,7 +14,7 @@ import { Events } from './events';
 /**
  * Context API to allow writing custom logs in games.
  */
-export class GameLoggerCtxApi {
+export class GameLoggerCtxAPI {
   constructor() {
     this._payload = undefined;
   }
@@ -61,7 +61,7 @@ export class ContextEnhancer {
   constructor(ctx, game, player) {
     this.random = new Random(ctx);
     this.events = new Events(game.flow, player);
-    this.log = new GameLoggerCtxApi();
+    this.log = new GameLoggerCtxAPI();
   }
 
   attachToContext(ctx) {
@@ -74,7 +74,7 @@ export class ContextEnhancer {
   static detachAllFromContext(ctx) {
     let ctxWithoutAPI = Random.detach(ctx);
     ctxWithoutAPI = Events.detach(ctxWithoutAPI);
-    ctxWithoutAPI = GameLoggerCtxApi.detach(ctxWithoutAPI);
+    ctxWithoutAPI = GameLoggerCtxAPI.detach(ctxWithoutAPI);
     return ctxWithoutAPI;
   }
 
