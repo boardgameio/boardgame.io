@@ -69,8 +69,7 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
       <button
         disabled={!canDrop}
         onClick={() => {
-          let ap = ctx.actionPlayers.filter(nr => nr !== playerID);
-          events.changeActionPlayers(ap);
+          moves.dropCards();
         }}
       >
         Drop Cards
@@ -92,6 +91,7 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
       <span>
         <div>{playerData.name}</div>
         <div>Actions: {playerData.actions}</div>
+        <div>Cards: {playerData.cards}</div>
       </span>
       {buttons}
       {currentPlayer}

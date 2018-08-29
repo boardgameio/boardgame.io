@@ -101,7 +101,8 @@ export function Flow({
     optimisticUpdate,
 
     canPlayerCallEvent: (G, ctx, playerID) => {
-      return ctx.currentPlayer == playerID;
+      const actionPlayers = ctx.actionPlayers || [];
+      return ctx.currentPlayer == playerID || actionPlayers.includes(playerID);
     },
 
     canPlayerMakeMove: (G, ctx, playerID) => {
