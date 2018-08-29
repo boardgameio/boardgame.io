@@ -21,15 +21,19 @@ const SecretState = Game({
   }),
 
   moves: {
+    /* eslint-disable no-unused-vars */
     clickCell(G, ctx, secretstuff) {
-      // eslint-disable-line no-unused-vars
       return { ...G };
     },
+    /* eslint-enable no-unused-vars */
   },
 
   playerView: PlayerView.STRIP_SECRETS,
 
+  /* eslint-disable no-unused-vars */
   logView: (log, ctx, playerID) => {
+    /* eslint-enable no-unused-vars */
+
     if (log === undefined) {
       return;
     }
