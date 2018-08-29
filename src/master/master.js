@@ -101,9 +101,11 @@ export class Master {
         deltalog: undefined,
       };
 
+      const log = this.game.logView(state.deltalog, state.ctx, playerID);
+
       return {
         type: 'update',
-        args: [gameID, filteredState, state.deltalog],
+        args: [gameID, filteredState, log],
       };
     });
 
@@ -138,10 +140,12 @@ export class Master {
       deltalog: undefined,
     };
 
+    const log = this.game.logView(state.deltalog, state.ctx, playerID);
+
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, filteredState, state.log],
+      args: [gameID, filteredState, log],
     });
 
     return;
