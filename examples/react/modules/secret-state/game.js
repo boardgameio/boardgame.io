@@ -20,7 +20,46 @@ const SecretState = Game({
     },
   }),
 
+  moves: {
+    clickCell(G, ctx, secretstuff) {
+      // eslint-disable-line no-unused-vars
+      return { ...G };
+    },
+  },
+
   playerView: PlayerView.STRIP_SECRETS,
+
+  logView: (log, ctx, playerID) => {
+    if (log === undefined) {
+      return;
+    }
+
+    const filteredLog = log.map(logEvent => {
+      // filter for all other players and a spectator
+      if (
+        playerID !== null &&
+        +playerID === +logEvent.action.payload.playerID
+      ) {
+        return log;
+      }
+      if (
+        logEvent.action.payload.args &&
+        logEvent.action.payload.args.length === 0
+      ) {
+        return logEvent;
+      }
+
+      const { secret, ...argsWithoutSecret } = logEvent.action.payload.args[0]; // eslint-disable-line no-unused-vars
+      const newPayload = {
+        ...logEvent.action.payload,
+        args: [argsWithoutSecret],
+      };
+      const newAction = { ...logEvent.action, payload: newPayload };
+      return { ...logEvent, action: newAction };
+    });
+
+    return filteredLog;
+  },
 });
 
 export default SecretState;

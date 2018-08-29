@@ -10,16 +10,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './board.css';
 
-const Board = ({ G }) => (
+const Board = ({ G, ctx, moves }) => (
   <div className="secret-state">
     <section>
       <pre>{JSON.stringify(G, null, 2)}</pre>
+      <button
+        onClick={() =>
+          moves.clickCell({ secret: G.players[ctx.currentPlayer] })
+        }
+      >
+        Click Cell
+      </button>
     </section>
   </div>
 );
 
 Board.propTypes = {
   G: PropTypes.any.isRequired,
+  ctx: PropTypes.any.isRequired,
+  moves: PropTypes.any.isRequired,
 };
 
 export default Board;
