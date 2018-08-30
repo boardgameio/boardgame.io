@@ -38,19 +38,19 @@ export const Pass = (G, ctx) => {
  *   }
  */
 export function SetActionPlayers(state, arg) {
-  let _actionPlayersOnce = false;
   let actionPlayers = [];
-
-  if (arg.once) {
-    _actionPlayersOnce = true;
-  }
 
   if (arg.value) {
     actionPlayers = arg.value;
   }
-
   if (arg.all) {
     actionPlayers = [...state.ctx.playOrder];
+  }
+
+  if (arg.allOthers) {
+    actionPlayers = [...state.ctx.playOrder].filter(
+      nr => nr !== state.ctx.currentPlayer
+    );
   }
 
   if (Array.isArray(arg)) {
@@ -59,7 +59,12 @@ export function SetActionPlayers(state, arg) {
 
   return {
     ...state,
-    ctx: { ...state.ctx, actionPlayers, _actionPlayersOnce },
+    ctx: {
+      ...state.ctx,
+      actionPlayers,
+      _actionPlayersOnce: arg.once,
+      _actionPlayersAllOthers: arg.allOthers,
+    },
   };
 }
 
