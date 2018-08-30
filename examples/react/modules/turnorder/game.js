@@ -33,9 +33,7 @@ const TurnExample = Game({
 
   moves: {
     playMilitia: (G, ctx) => {
-      ctx.events.setActionPlayers(
-        ['0', '1', '2'].filter(nr => +nr !== +ctx.currentPlayer)
-      );
+      ctx.events.setActionPlayers({ allOthers: true });
 
       const currentPlayer = ctx.currentPlayer;
       const playersNext = [...G.players];
@@ -46,16 +44,6 @@ const TurnExample = Game({
     },
 
     dropCards: (G, ctx) => {
-      const ap = ctx.actionPlayers.filter(nr => +nr !== +ctx.playerID);
-
-      if (ap.length !== 0) {
-        // there are still players needing to take action
-        ctx.events.setActionPlayers(ap);
-      } else {
-        // all players dropped cards => give control back to the current player
-        ctx.events.setActionPlayers([ctx.currentPlayer]);
-      }
-
       const newPlayer = { ...G.players[+ctx.playerID], cards: 3 };
       // TODO functional approach to replace element from array?
       const newPlayers = [...G.players];
