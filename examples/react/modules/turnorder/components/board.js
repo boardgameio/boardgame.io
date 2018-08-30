@@ -55,7 +55,8 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
 
   const deepEquals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-  const canEndTurn = deepEquals(ctx.actionPlayers, [playerID]);
+  const canEndTurn =
+    deepEquals(ctx.actionPlayers, [playerID]) && playerID === ctx.currentPlayer;
   const canDrop =
     ctx.actionPlayers.includes(playerID) && ctx.currentPlayer != playerID;
   const canPlay = canEndTurn && playerData.actions > 0;
