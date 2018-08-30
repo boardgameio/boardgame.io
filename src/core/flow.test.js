@@ -510,7 +510,7 @@ test('canPlayerCallEvent', () => {
     false
   );
   expect(flow.canPlayerCallEvent({}, { actionPlayers: ['0'] }, playerID)).toBe(
-    true
+    false
   );
 });
 
