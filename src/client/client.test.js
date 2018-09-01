@@ -150,6 +150,24 @@ describe('multiplayer', () => {
       expect(client.transport instanceof Local).toBe(true);
     });
   });
+
+  describe('custom transport', () => {
+    const transport = { custom: true };
+    let client;
+
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({ moves: { A: () => {} } }),
+          multiplayer: { transport },
+        })
+      );
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport).toBe(transport);
+    });
+  });
 });
 
 test('accepts enhancer for store', () => {

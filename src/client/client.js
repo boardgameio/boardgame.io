@@ -215,6 +215,8 @@ class _ClientImpl {
         server: multiplayer.server,
         socketOpts,
       });
+    } else if (multiplayer && multiplayer.transport !== undefined) {
+      this.transport = multiplayer.transport;
     } else {
       this.transport = {
         isConnected: true,
