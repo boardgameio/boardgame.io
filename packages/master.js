@@ -1,3 +1,3 @@
-import { LocalMaster } from '../src/client/transport/local';
+import { Master } from '../src/master/master';
 
-export { LocalMaster };
+export { Master };
