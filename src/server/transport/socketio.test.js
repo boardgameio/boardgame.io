@@ -10,14 +10,14 @@ import { TransportAPI, SocketIO } from './socketio';
 import Game from '../../core/game';
 
 jest.mock('../../master/master', () => {
-  class GameMaster {
+  class Master {
     constructor() {
       this.onUpdate = jest.fn();
       this.onSync = jest.fn();
     }
   }
 
-  return { GameMaster };
+  return { Master };
 });
 
 jest.mock('koa-socket-2', () => {

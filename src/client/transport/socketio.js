@@ -7,15 +7,14 @@
  */
 
 import * as ActionCreators from '../../core/action-creators';
-import { createStore, applyMiddleware, compose } from 'redux';
 import io from 'socket.io-client';
 
 /**
- * Multiplayer
+ * SocketIO
  *
- * Handles all the multiplayer interactions on the client-side.
+ * Transport interface that interacts with the Master via socket.io.
  */
-export class Multiplayer {
+export class SocketIO {
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socket - Override for unit tests.
@@ -29,6 +28,7 @@ export class Multiplayer {
   constructor({
     socket,
     socketOpts,
+    store,
     gameID,
     playerID,
     gameName,
@@ -37,6 +37,7 @@ export class Multiplayer {
   } = {}) {
     this.server = server;
     this.socket = socket;
+    this.store = store;
     this.socketOpts = socketOpts;
     this.gameName = gameName || 'default';
     this.gameID = gameID || 'default';
@@ -48,37 +49,17 @@ export class Multiplayer {
   }
 
   /**
-   * Creates a Redux store with some middleware that sends actions
-   * to the server whenever they are dispatched.
-   * @param {function} reducer - The game reducer.
-   * @param {function} enhancer - optional enhancer to apply to Redux store
+   * Called when an action that has to be relayed to the
+   * game master is made.
    */
-  createStore(reducer, enhancer) {
-    this.store = null;
-
-    // Redux middleware to emit a message on a socket
-    // whenever an action is dispatched.
-    const SocketEnhancer = applyMiddleware(({ getState }) => next => action => {
-      const state = getState();
-      const result = next(action);
-
-      if (action.clientOnly != true) {
-        this.socket.emit(
-          'update',
-          action,
-          state._stateID,
-          this.gameID,
-          this.playerID
-        );
-      }
-
-      return result;
-    });
-
-    enhancer = enhancer ? compose(enhancer, SocketEnhancer) : SocketEnhancer;
-    this.store = createStore(reducer, enhancer);
-
-    return this.store;
+  onAction(state, action) {
+    this.socket.emit(
+      'update',
+      action,
+      state._stateID,
+      this.gameID,
+      this.playerID
+    );
   }
 
   /**

@@ -15,14 +15,17 @@ const TurnExample = Game({
     players: [
       {
         name: 'Player 1',
+        cards: 5,
         actions: 0,
       },
       {
         name: 'Player 2',
+        cards: 5,
         actions: 0,
       },
       {
         name: 'Player 3',
+        cards: 5,
         actions: 0,
       },
     ],
@@ -30,9 +33,7 @@ const TurnExample = Game({
 
   moves: {
     playMilitia: (G, ctx) => {
-      // Need to keep the currentPlayer inside actionPlayers - otherwise
-      // he will not be able to make any move anymore.
-      ctx.events.setActionPlayers(['0', '1', '2']);
+      ctx.events.setActionPlayers({ allOthers: true });
 
       const currentPlayer = ctx.currentPlayer;
       const playersNext = [...G.players];
@@ -40,6 +41,15 @@ const TurnExample = Game({
 
       const nextG = { players: playersNext };
       return nextG;
+    },
+
+    dropCards: (G, ctx) => {
+      const newPlayer = { ...G.players[+ctx.playerID], cards: 3 };
+      // TODO functional approach to replace element from array?
+      const newPlayers = [...G.players];
+      newPlayers[+ctx.playerID] = newPlayer;
+
+      return { ...G, players: newPlayers };
     },
   },
 

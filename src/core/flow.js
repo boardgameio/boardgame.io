@@ -74,7 +74,8 @@ export function Flow({
     const { payload } = action;
     if (events.hasOwnProperty(payload.type)) {
       const context = { playerID: payload.playerID, dispatch };
-      const deltalog = [...(state.deltalog || []), action];
+      const newLogEntry = { action };
+      const deltalog = [...(state.deltalog || []), newLogEntry];
       state = { ...state, deltalog };
       const args = [state].concat(payload.args);
       return events[payload.type].apply(context, args);
@@ -549,9 +550,16 @@ export function FlowWithPhases({
 
     // Update actionPlayers if _actionPlayersOnce is set.
     let actionPlayers = state.ctx.actionPlayers;
-    if (state.ctx._actionPlayersOnce == true) {
+    if (state.ctx._actionPlayersOnce) {
       const playerID = action.playerID;
       actionPlayers = actionPlayers.filter(id => id !== playerID);
+    }
+    if (state.ctx._actionPlayersAllOthers) {
+      const playerID = action.playerID;
+      actionPlayers = actionPlayers.filter(id => id !== playerID);
+      if (actionPlayers.length === 0) {
+        actionPlayers = [state.ctx.currentPlayer];
+      }
     }
 
     state = {
