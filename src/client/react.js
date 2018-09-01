@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Debug } from './debug/debug';
-import { Client as RawClient } from './client';
+import { Client as RawClient, GetOpts } from './client';
 
 /**
  * Client
@@ -31,16 +31,10 @@ import { Client as RawClient } from './client';
  *   and dispatch actions such as MAKE_MOVE, GAME_EVENT, RESET,
  *   UNDO and REDO.
  */
-export function Client({
-  game,
-  numPlayers,
-  board,
-  multiplayer,
-  ai,
-  debug,
-  enhancer,
-}) {
-  if (debug === undefined) debug = true;
+export function Client(opts) {
+  const { game, numPlayers, board, multiplayer, ai, debug, enhancer } = GetOpts(
+    opts
+  );
 
   /*
    * WrappedBoard

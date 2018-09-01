@@ -16,7 +16,7 @@ const App = Client({
   game: TurnExample,
   numPlayers: 3,
   board: Board,
-  multiplayer: true,
+  multiplayer: { local: true },
 });
 
 const Multiplayer = () => (
@@ -24,7 +24,7 @@ const Multiplayer = () => (
     <div style={{ padding: 50 }}>
       <p>
         The following example demonstrates how to use
-        <strong> changeActionPlayers </strong>
+        <strong> setActionPlayers </strong>
         to allow multiple players to play in a single turn.
       </p>
 

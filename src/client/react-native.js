@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Client as RawClient } from './client';
+import { Client as RawClient, GetOpts } from './client';
 
 /**
  * Client
@@ -28,7 +28,9 @@ import { Client as RawClient } from './client';
  *   API through props for it to interact with the framework
  *   and dispatch actions such as MAKE_MOVE.
  */
-export function Client({ game, numPlayers, board, multiplayer, enhancer }) {
+export function Client(opts) {
+  const { game, numPlayers, board, multiplayer, enhancer } = GetOpts(opts);
+
   /*
    * WrappedBoard
    *
