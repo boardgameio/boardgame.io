@@ -63,4 +63,4 @@ export const getRange = (center, distance) => {
   return results;
 };
 
-export const hexUtils = { getAllNeighbors, getDistance, getRange };
+export const HexUtils = { getAllNeighbors, getDistance, getRange };

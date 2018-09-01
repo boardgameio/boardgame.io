@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { getAllNeighbors, getDistance, getRange } from './hexUtils';
+import { getAllNeighbors, getDistance, getRange } from './hex-utils';
 
 const createCoordinate = ([x, y, z]) => ({ x, y, z });
 
