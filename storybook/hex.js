@@ -10,8 +10,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, boolean, number } from '@storybook/addon-knobs/react';
-import { HexGrid, Token } from 'boardgame.io/ui';
-import { getRange } from '../src/ui/hexUtils';
+import { HexGrid, Token, hexUtils } from 'boardgame.io/ui';
 
 function Basic() {
   const levels = number('levels', 5);
@@ -50,7 +49,7 @@ function GetRange() {
   const outline = boolean('outline', true);
 
   class Runner extends React.Component {
-    state = { tokens: getRange({ x: 0, y: 0, z: 0 }, distance) };
+    state = { tokens: hexUtils.getRange({ x: 0, y: 0, z: 0 }, distance) };
     render = () => (
       <HexGrid levels={levels} outline={outline}>
         {this.state.tokens.map((t, index) => {
