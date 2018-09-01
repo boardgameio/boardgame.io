@@ -89,7 +89,6 @@ test('should place marker', () => {
   });
   expect(board.props.ctx.gameover).toEqual(undefined);
 
-  const moves = [0, 3, 1, 4, 2];
   board.props.moves.clickCell(5);
 
   expect(board.props.G).toEqual({
