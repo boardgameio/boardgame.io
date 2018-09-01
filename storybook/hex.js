@@ -10,7 +10,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, boolean, number } from '@storybook/addon-knobs/react';
-import { HexGrid, Token } from 'boardgame.io/ui';
+import { HexGrid, Token, HexUtils } from 'boardgame.io/ui';
 
 function Basic() {
   const levels = number('levels', 5);
@@ -32,6 +32,37 @@ function Basic() {
           animate={animate}
           style={{ fill: '#555' }}
         />
+      </HexGrid>
+    );
+  }
+
+  return (
+    <div style={{ padding: '50px' }}>
+      <Runner />
+    </div>
+  );
+}
+
+function GetRange() {
+  const levels = number('levels', 5);
+  const distance = number('distance', 2);
+  const outline = boolean('outline', true);
+
+  class Runner extends React.Component {
+    state = { tokens: HexUtils.getRange({ x: 0, y: 0, z: 0 }, distance) };
+    render = () => (
+      <HexGrid levels={levels} outline={outline}>
+        {this.state.tokens.map((t, index) => {
+          return (
+            <Token
+              key={index}
+              x={t.x}
+              y={t.y}
+              z={t.z}
+              style={{ fill: '#555' }}
+            />
+          );
+        })}
       </HexGrid>
     );
   }
@@ -86,4 +117,5 @@ function TokenTrail() {
 storiesOf('HexGrid', module)
   .addDecorator(withKnobs)
   .add('basic', Basic)
+  .add('Get range', GetRange)
   .add('Tokens placed on hover', TokenTrail);
