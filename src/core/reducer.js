@@ -30,6 +30,7 @@ export class GameLoggerCtxAPI {
   attach(ctx) {
     return { ...ctx, log: this._api() };
   }
+
   update(state) {
     if (this._payload === undefined) {
       return state;
@@ -43,9 +44,9 @@ export class GameLoggerCtxAPI {
     };
     this._payload = undefined;
 
-    const newState = { ...state, deltalog };
-    return newState;
+    return { ...state, deltalog };
   }
+
   static detach(ctx) {
     const { log, ...ctxWithoutLog } = ctx; // eslint-disable-line no-unused-vars
     return ctxWithoutLog;

@@ -27,9 +27,7 @@ const LogEvent = props => {
   }
 
   const custompayload =
-    props.payload !== undefined
-      ? ', payload: ' + JSON.stringify(props.payload, null, 4)
-      : '';
+    props.payload !== undefined ? JSON.stringify(props.payload, null, 4) : '';
 
   return (
     <div
@@ -38,8 +36,10 @@ const LogEvent = props => {
       onMouseEnter={() => props.onMouseEnter(props.logIndex)}
       onMouseLeave={() => props.onMouseLeave()}
     >
-      {action.payload.type}({args.join(',')})
-      {custompayload}
+      <div>
+        {action.payload.type}({args.join(',')})
+      </div>
+      <div>{custompayload}</div>
     </div>
   );
 };
