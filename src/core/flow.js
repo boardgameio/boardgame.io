@@ -249,6 +249,7 @@ export function FlowWithPhases({
   setActionPlayers,
   undoableMoves,
   allowedMoves,
+  redactedMoves,
   optimisticUpdate,
 }) {
   // Attach defaults.
@@ -673,5 +674,6 @@ export function FlowWithPhases({
     processMove,
     canMakeMove,
     canUndoMove,
+    redactedMoves,
   });
 }

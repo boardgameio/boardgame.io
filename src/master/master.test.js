@@ -10,7 +10,7 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 import { InMemory } from '../server/db/inmemory';
-import { Master } from './master';
+import { Master, evaluateRedactedMoves } from './master';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -311,5 +311,38 @@ describe('authentication', async () => {
     );
     await master.onUpdate(action, 0, 'gameID', '0');
     expect(sendAll).toHaveBeenCalled();
+  });
+});
+
+describe('evaluateRedactedMoves', () => {
+  test('no redactedMoves', () => {
+    const logEvents = [ActionCreators.gameEvent('endTurn')];
+    const result = evaluateRedactedMoves(undefined, logEvents, {}, '0');
+    expect(result).toMatchObject(logEvents);
+  });
+
+  test('showArgs = false', () => {
+    const rm = {
+      clickCell: { showArgs: false },
+    };
+    const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
+
+    // player that made the move
+    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    expect(result).toMatchObject(logEvents);
+
+    // other player
+    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    expect(result).toMatchObject([
+      {
+        type: 'MAKE_MOVE',
+        payload: {
+          argsRedacted: true,
+          credentials: undefined,
+          playerID: '0',
+          type: 'clickCell',
+        },
+      },
+    ]);
   });
 });

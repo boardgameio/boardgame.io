@@ -11,6 +11,47 @@ import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
+export function evaluateRedactedMoves(redactedMoves, log, ctx, playerID) {
+  if (redactedMoves === undefined) {
+    return log;
+  }
+
+  const filteredLog = log.map(logEvent => {
+    console.log(JSON.stringify(logEvent, null, 4));
+
+    // filter for all other players and a spectator
+    if (playerID !== null && +playerID === +logEvent.payload.playerID) {
+      return logEvent;
+    }
+
+    // only filter moves
+    if (logEvent.type !== 'MAKE_MOVE') {
+      return logEvent;
+    }
+
+    const moveName = logEvent.payload.type;
+    const config = redactedMoves[moveName];
+    if (config === undefined) {
+      // no definition for that move given => show
+      return logEvent;
+    }
+
+    let filteredEvent = logEvent;
+    if (config.showArgs === false) {
+      const newPayload = {
+        ...filteredEvent.payload,
+        args: undefined,
+        argsRedacted: true,
+      };
+      filteredEvent = { ...filteredEvent, payload: newPayload };
+    }
+
+    return filteredEvent;
+  });
+
+  return filteredLog;
+}
+
 /**
  * Master
  *
@@ -101,7 +142,14 @@ export class Master {
         deltalog: undefined,
       };
 
-      const log = this.game.logView(state.deltalog, state.ctx, playerID);
+      const rm = this.game.flow.redactedMoves;
+      const log = evaluateRedactedMoves(
+        rm,
+        state.deltalog,
+        state.ctx,
+        playerID
+      );
+      // const log = this.game.logView(state.deltalog, state.ctx, playerID);
 
       return {
         type: 'update',
@@ -140,7 +188,13 @@ export class Master {
       deltalog: undefined,
     };
 
-    const log = this.game.logView(state.deltalog, state.ctx, playerID);
+    const log = evaluateRedactedMoves(
+      this.game.flow.redactedMoves,
+      state.deltalog,
+      state.ctx,
+      playerID
+    );
+    //const log = this.game.logView(state.deltalog, state.ctx, playerID);
 
     this.transportAPI.send({
       playerID,
