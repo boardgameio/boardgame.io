@@ -12,6 +12,18 @@ import { MAKE_MOVE } from '../../core/action-types';
 import './log.css';
 
 /**
+ * Default component to render custom payload.
+ */
+const CustomPayload = props => {
+  const custompayload =
+    props.payload !== undefined ? JSON.stringify(props.payload, null, 4) : '';
+  return <div>{custompayload}</div>;
+};
+CustomPayload.propTypes = {
+  payload: PropTypes.any,
+};
+
+/**
  * LogEvent
  *
  * Logs a single action in the game.
@@ -26,8 +38,13 @@ const LogEvent = props => {
     classNames += ' pinned';
   }
 
-  const custompayload =
-    props.payload !== undefined ? JSON.stringify(props.payload, null, 4) : '';
+  // allow to pass in custom rendering component for custom payload
+  const customPayload =
+    props.payloadComponent !== undefined ? (
+      React.createElement(props.payloadComponent, { payload: props.payload })
+    ) : (
+      <CustomPayload payload={props.payload} />
+    );
 
   return (
     <div
@@ -39,19 +56,20 @@ const LogEvent = props => {
       <div>
         {action.payload.type}({args.join(',')})
       </div>
-      <div>{custompayload}</div>
+      {customPayload}
     </div>
   );
 };
 
 LogEvent.propTypes = {
   action: PropTypes.any.isRequired,
-  payload: PropTypes.object,
   logIndex: PropTypes.number.isRequired,
   onLogClick: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
   pinned: PropTypes.bool,
+  payload: PropTypes.object,
+  payloadComponent: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
 };
 
 /**
@@ -106,6 +124,7 @@ export class GameLog extends React.Component {
     reducer: PropTypes.func,
     initialState: PropTypes.any.isRequired,
     log: PropTypes.array.isRequired,
+    payloadComponent: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
   };
 
   static defaultProps = {
@@ -187,6 +206,7 @@ export class GameLog extends React.Component {
             onMouseLeave={this.onMouseLeave}
             action={action}
             payload={payload}
+            payloadComponent={this.props.payloadComponent}
           />
         );
 
