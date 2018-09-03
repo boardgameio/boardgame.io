@@ -15,7 +15,7 @@ const App = Client({
   game: TicTacToe,
   board: Board,
   debug: false,
-  multiplayer: true,
+  multiplayer: { local: true },
 });
 
 const Multiplayer = () => (

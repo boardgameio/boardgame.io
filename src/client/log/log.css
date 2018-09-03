@@ -9,7 +9,7 @@
 .gamelog {
   display: grid;
   grid-template-columns: 30px 1fr 30px;
-  :grid-auto-rows: auto;
+  grid-auto-rows: auto;
   grid-auto-flow: column;
 }
 
@@ -39,7 +39,7 @@
   text-align: center;
   color: #888;
   font-size: 14px;
-  height: 25px;
+  min-height: 25px;
   line-height: 25px;
 }
 
@@ -55,6 +55,7 @@
   text-orientation: sideways;
   writing-mode: vertical-rl;
   line-height: 30px;
+  width: 100%;
 }
 
 .gamelog.pinned .log-event {

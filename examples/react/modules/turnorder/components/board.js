@@ -55,7 +55,8 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
 
   const deepEquals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-  const canEndTurn = deepEquals(ctx.actionPlayers, [playerID]);
+  const canEndTurn =
+    deepEquals(ctx.actionPlayers, [playerID]) && playerID === ctx.currentPlayer;
   const canDrop =
     ctx.actionPlayers.includes(playerID) && ctx.currentPlayer != playerID;
   const canPlay = canEndTurn && playerData.actions > 0;
@@ -69,8 +70,7 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
       <button
         disabled={!canDrop}
         onClick={() => {
-          let ap = ctx.actionPlayers.filter(nr => nr !== playerID);
-          events.changeActionPlayers(ap);
+          moves.dropCards();
         }}
       >
         Drop Cards
@@ -92,6 +92,7 @@ const Board = ({ ctx, G, playerID, events, moves }) => {
       <span>
         <div>{playerData.name}</div>
         <div>Actions: {playerData.actions}</div>
+        <div>Cards: {playerData.cards}</div>
       </span>
       {buttons}
       {currentPlayer}

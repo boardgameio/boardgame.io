@@ -235,6 +235,41 @@ describe('SetActionPlayers', () => {
     expect(state.ctx.actionPlayers).toEqual([]);
   });
 
+  test('allOthers', () => {
+    const game = Game({
+      flow: {
+        setActionPlayers: true,
+      },
+
+      moves: {
+        B: (G, ctx) => {
+          ctx.events.setActionPlayers({
+            value: ['0', '1', '2'],
+            allOthers: true,
+          });
+          return G;
+        },
+        A: G => G,
+      },
+    });
+
+    const reducer = CreateGameReducer({ game, numPlayers: 3 });
+
+    let state = reducer(undefined, { type: 'init' });
+
+    // on move B, control switches from player 0 to players 1 and 2
+    state = reducer(state, makeMove('B', null, '0'));
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+
+    // player 1 makes move
+    state = reducer(state, makeMove('A', null, '1'));
+    expect(state.ctx.actionPlayers).toEqual(['2']);
+
+    // player 1 makes move - after that, control should return to player 0
+    state = reducer(state, makeMove('A', null, '2'));
+    expect(state.ctx.actionPlayers).toEqual(['0']);
+  });
+
   test('militia', () => {
     const game = Game({
       flow: { setActionPlayers: true },
