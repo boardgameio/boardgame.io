@@ -130,7 +130,7 @@ test('update gameID / playerID', () => {
   game = Enzyme.mount(<Board />);
   game.setProps({ gameID: 'a' });
   game.setProps({ playerID: '3' });
-  expect(game.instance().multiplayerClient).toBe(undefined);
+  expect(game.instance().transport).toBe(undefined);
 
   // Multiplayer.
 
@@ -144,7 +144,7 @@ test('update gameID / playerID', () => {
     multiplayer: true,
   });
   game = Enzyme.mount(<Board gameID="a" playerID="1" credentials="foo" />);
-  const m = game.instance().client.multiplayerClient;
+  const m = game.instance().client.transport;
   const g = game.instance().client;
 
   const spy1 = jest.spyOn(m, 'updateGameID');

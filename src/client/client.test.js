@@ -10,9 +10,12 @@ import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
 import {
   Client,
+  GetOpts,
   createEventDispatchers,
   createMoveDispatchers,
 } from './client';
+import { Local } from './transport/local';
+import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
 import Game from '../core/game';
 import { RandomBot } from '../ai/bot';
@@ -94,19 +97,77 @@ describe('step', () => {
   });
 });
 
-test('multiplayer server set when provided', () => {
-  let host = 'host';
-  let port = '4321';
+describe('multiplayer', () => {
+  describe('socket.io master', () => {
+    let host = 'host';
+    let port = '4321';
+    let client;
 
-  const client = Client({
-    game: Game({}),
-    multiplayer: { server: host + ':' + port },
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({ moves: { A: () => {} } }),
+          multiplayer: { server: host + ':' + port },
+        })
+      );
+      client.connect();
+    });
+
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport instanceof SocketIO).toBe(true);
+    });
+
+    test('server set when provided', () => {
+      expect(client.transport.socket.io.engine.hostname).toEqual(host);
+      expect(client.transport.socket.io.engine.port).toEqual(port);
+    });
+
+    test('onAction called', () => {
+      jest.spyOn(client.transport, 'onAction');
+      client.moves.A();
+      expect(client.transport.onAction).toHaveBeenCalled();
+    });
   });
 
-  client.connect();
+  describe('local master', () => {
+    let client;
 
-  expect(client.multiplayerClient.socket.io.engine.hostname).toEqual(host);
-  expect(client.multiplayerClient.socket.io.engine.port).toEqual(port);
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({ moves: { A: () => {} } }),
+          multiplayer: { local: true },
+        })
+      );
+      client.connect();
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport instanceof Local).toBe(true);
+    });
+  });
+
+  describe('custom transport', () => {
+    const transport = { custom: true };
+    let client;
+
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({ moves: { A: () => {} } }),
+          multiplayer: { transport },
+        })
+      );
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport).toBe(transport);
+    });
+  });
 });
 
 test('accepts enhancer for store', () => {
@@ -287,8 +348,8 @@ describe('log handling', () => {
     client.moves.A();
 
     expect(client.log).toEqual([
-      makeMove('A', [], '0'),
-      makeMove('A', [], '0'),
+      { action: makeMove('A', [], '0') },
+      { action: makeMove('A', [], '0') },
     ]);
   });
 

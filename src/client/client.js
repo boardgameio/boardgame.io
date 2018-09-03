@@ -9,7 +9,8 @@
 import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
-import { Multiplayer } from './multiplayer/multiplayer';
+import { SocketIO } from './transport/socketio';
+import { Local, LocalMaster } from './transport/local';
 import { CreateGameReducer } from '../core/reducer';
 
 /**
@@ -90,13 +91,6 @@ class _ClientImpl {
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;
-
-    let server = undefined;
-    if (multiplayer instanceof Object && 'server' in multiplayer) {
-      server = multiplayer.server;
-      multiplayer = true;
-    }
-
     this.multiplayer = multiplayer;
 
     this.reducer = CreateGameReducer({
@@ -139,8 +133,8 @@ class _ClientImpl {
      * Middleware that manages the log object.
      * Reducers generate deltalogs, which are log events
      * that are the result of application of a single action.
-     * The server may also send back a deltalog or the entire
-     * log depending on the type of socket request.
+     * The master may also send back a deltalog or the entire
+     * log depending on the type of request.
      * The middleware below takes care of all these cases while
      * managing the log object.
      */
@@ -176,29 +170,62 @@ class _ClientImpl {
       return result;
     };
 
+    /**
+     * Middleware that intercepts actions and sends them to the master,
+     * which keeps the authoritative version of the state.
+     */
+    const TransportMiddleware = store => next => action => {
+      const state = store.getState();
+      const result = next(action);
+
+      if (action.clientOnly != true) {
+        this.transport.onAction(state, action);
+      }
+
+      return result;
+    };
+
     if (enhancer !== undefined) {
-      enhancer = compose(applyMiddleware(LogMiddleware), enhancer);
+      enhancer = compose(
+        applyMiddleware(LogMiddleware, TransportMiddleware),
+        enhancer
+      );
     } else {
-      enhancer = applyMiddleware(LogMiddleware);
+      enhancer = applyMiddleware(LogMiddleware, TransportMiddleware);
     }
 
-    if (multiplayer) {
-      this.multiplayerClient = new Multiplayer({
+    this.store = createStore(this.reducer, enhancer);
+
+    if (multiplayer && multiplayer.master_ !== undefined) {
+      this.transport = new Local({
+        master: multiplayer.master_,
+        store: this.store,
         gameID: gameID,
         playerID: playerID,
         gameName: game.name,
         numPlayers,
-        server,
+      });
+    } else if (multiplayer && multiplayer.server !== undefined) {
+      this.transport = new SocketIO({
+        store: this.store,
+        gameID: gameID,
+        playerID: playerID,
+        gameName: game.name,
+        numPlayers,
+        server: multiplayer.server,
         socketOpts,
       });
-      this.store = this.multiplayerClient.createStore(this.reducer, enhancer);
+    } else if (multiplayer && multiplayer.transport !== undefined) {
+      this.transport = multiplayer.transport;
     } else {
-      this.store = createStore(this.reducer, enhancer);
-
-      // If no playerID was provided, set it to undefined.
-      if (this.playerID === null) {
-        this.playerID = undefined;
-      }
+      this.transport = {
+        isConnected: true,
+        onAction: () => {},
+        subscribe: () => {},
+        connect: () => {},
+        updateGameID: () => {},
+        updatePlayerID: () => {},
+      };
     }
 
     this.createDispatchers();
@@ -206,10 +233,7 @@ class _ClientImpl {
 
   subscribe(fn) {
     this.store.subscribe(fn);
-
-    if (this.multiplayerClient) {
-      this.multiplayerClient.subscribe(fn);
-    }
+    this.transport.subscribe(fn);
   }
 
   getState() {
@@ -250,18 +274,14 @@ class _ClientImpl {
     // Combine into return value.
     let ret = { ...state, isActive, G, log: this.log };
 
-    if (this.multiplayerClient) {
-      const isConnected = this.multiplayerClient.isConnected;
-      ret = { ...ret, isConnected };
-    }
+    const isConnected = this.transport.isConnected;
+    ret = { ...ret, isConnected };
 
     return ret;
   }
 
   connect() {
-    if (this.multiplayerClient) {
-      this.multiplayerClient.connect();
-    }
+    this.transport.connect();
   }
 
   createDispatchers() {
@@ -285,25 +305,39 @@ class _ClientImpl {
   updatePlayerID(playerID) {
     this.playerID = playerID;
     this.createDispatchers();
-
-    if (this.multiplayerClient) {
-      this.multiplayerClient.updatePlayerID(playerID);
-    }
+    this.transport.updatePlayerID(playerID);
   }
 
   updateGameID(gameID) {
     this.gameID = gameID;
     this.createDispatchers();
-
-    if (this.multiplayerClient) {
-      this.multiplayerClient.updateGameID(gameID);
-    }
+    this.transport.updateGameID(gameID);
   }
 
   updateCredentials(credentials) {
     this.credentials = credentials;
     this.createDispatchers();
   }
+}
+
+/**
+ * Pre-process the opts object in the client.
+ * Call this on the argument to your client implementation.
+ */
+export function GetOpts(opts) {
+  let { game, multiplayer } = opts;
+
+  if (multiplayer) {
+    if (multiplayer == true) {
+      multiplayer = { server: '' };
+    }
+
+    if (multiplayer.local == true) {
+      multiplayer.master_ = LocalMaster(game);
+    }
+  }
+
+  return { ...opts, multiplayer };
 }
 
 /**

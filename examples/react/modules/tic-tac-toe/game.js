@@ -48,6 +48,9 @@ const TicTacToe = Game({
 
       if (cells[id] === null) {
         cells[id] = ctx.currentPlayer;
+        ctx.log.setPayload({
+          date: new Date().toUTCString(),
+        });
       }
 
       return { ...G, cells };

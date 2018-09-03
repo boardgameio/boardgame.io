@@ -12,9 +12,8 @@ import {
   UpdateTurnOrderState,
   TurnOrder,
 } from './turn-order';
-import { Random } from './random';
-import { Events } from './events';
 import { automaticGameEvent } from './action-creators';
+import { ContextEnhancer } from './reducer';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -74,7 +73,8 @@ export function Flow({
     const { payload } = action;
     if (events.hasOwnProperty(payload.type)) {
       const context = { playerID: payload.playerID, dispatch };
-      const deltalog = [...(state.deltalog || []), action];
+      const newLogEntry = { action };
+      const deltalog = [...(state.deltalog || []), newLogEntry];
       state = { ...state, deltalog };
       const args = [state].concat(payload.args);
       return events[payload.type].apply(context, args);
@@ -364,9 +364,7 @@ export function FlowWithPhases({
   const startTurn = function(state, config) {
     const G = config.onTurnBegin(state.G, state.ctx);
 
-    let plainCtx = state.ctx;
-    plainCtx = Random.detach(plainCtx);
-    plainCtx = Events.detach(plainCtx);
+    const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
     const _undo = [{ G, ctx: plainCtx }];
 
     const ctx = { ...state.ctx };
@@ -549,9 +547,16 @@ export function FlowWithPhases({
 
     // Update actionPlayers if _actionPlayersOnce is set.
     let actionPlayers = state.ctx.actionPlayers;
-    if (state.ctx._actionPlayersOnce == true) {
+    if (state.ctx._actionPlayersOnce) {
       const playerID = action.playerID;
       actionPlayers = actionPlayers.filter(id => id !== playerID);
+    }
+    if (state.ctx._actionPlayersAllOthers) {
+      const playerID = action.playerID;
+      actionPlayers = actionPlayers.filter(id => id !== playerID);
+      if (actionPlayers.length === 0) {
+        actionPlayers = [state.ctx.currentPlayer];
+      }
     }
 
     state = {
@@ -603,9 +608,7 @@ export function FlowWithPhases({
       const undo = state._undo || [];
       const moveType = action.type;
 
-      let plainCtx = state.ctx;
-      plainCtx = Random.detach(plainCtx);
-      plainCtx = Events.detach(plainCtx);
+      const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
 
       state = {
         ...state,

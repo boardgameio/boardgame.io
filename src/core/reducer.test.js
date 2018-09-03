@@ -209,11 +209,11 @@ test('deltalog', () => {
   const actionC = gameEvent('endTurn');
 
   state = reducer(state, actionA);
-  expect(state.deltalog).toEqual([actionA]);
+  expect(state.deltalog).toEqual([{ action: actionA }]);
   state = reducer(state, actionB);
-  expect(state.deltalog).toEqual([actionB]);
+  expect(state.deltalog).toEqual([{ action: actionB }]);
   state = reducer(state, actionC);
-  expect(state.deltalog).toEqual([actionC]);
+  expect(state.deltalog).toEqual([{ action: actionC }]);
 });
 
 describe('Random inside setup()', () => {
@@ -327,4 +327,21 @@ test('undo / redo', () => {
   state = reducer(state, gameEvent('endTurn'));
   state = reducer(state, undo());
   expect(state.G).toEqual({ A: true });
+});
+
+test('custom log messages', () => {
+  let game = Game({
+    moves: {
+      move: (G, ctx) => {
+        ctx.log.setPayload({ msg: 'additional msg' });
+        return { ...G };
+      },
+    },
+  });
+
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
+  let state = reducer(undefined, { type: 'init' });
+
+  const newState = reducer(state, makeMove('move'));
+  expect(newState.deltalog[0].payload).toMatchObject({ msg: 'additional msg' });
 });

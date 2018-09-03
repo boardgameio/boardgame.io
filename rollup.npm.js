@@ -77,6 +77,15 @@ export default [
   },
 
   {
+    input: 'packages/master.js',
+    external: Object.keys(globals),
+    globals,
+    output: { file: 'dist/master.js', format: 'umd' },
+    name: 'Master',
+    plugins,
+  },
+
+  {
     input: 'packages/core.js',
     external: Object.keys(globals),
     globals,

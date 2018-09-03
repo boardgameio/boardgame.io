@@ -12,6 +12,88 @@ import { Random } from './random';
 import { Events } from './events';
 
 /**
+ * Context API to allow writing custom logs in games.
+ */
+export class GameLoggerCtxAPI {
+  constructor() {
+    this._payload = undefined;
+  }
+
+  _api() {
+    return {
+      setPayload: payload => {
+        this._payload = payload;
+      },
+    };
+  }
+
+  attach(ctx) {
+    return { ...ctx, log: this._api() };
+  }
+
+  update(state) {
+    if (this._payload === undefined) {
+      return state;
+    }
+
+    // attach the payload to the last log event
+    let deltalog = state.deltalog;
+    deltalog[deltalog.length - 1] = {
+      ...deltalog[deltalog.length - 1],
+      payload: this._payload,
+    };
+    this._payload = undefined;
+
+    return { ...state, deltalog };
+  }
+
+  static detach(ctx) {
+    const { log, ...ctxWithoutLog } = ctx; // eslint-disable-line no-unused-vars
+    return ctxWithoutLog;
+  }
+}
+
+/**
+ * This class is used to attach/detach various utility objects
+ * onto a ctx, without having to manually attach/detach them
+ * all separately.
+ */
+export class ContextEnhancer {
+  constructor(ctx, game, player) {
+    this.random = new Random(ctx);
+    this.events = new Events(game.flow, player);
+    this.log = new GameLoggerCtxAPI();
+  }
+
+  attachToContext(ctx) {
+    let ctxWithAPI = this.random.attach(ctx);
+    ctxWithAPI = this.events.attach(ctxWithAPI);
+    ctxWithAPI = this.log.attach(ctxWithAPI);
+    return ctxWithAPI;
+  }
+
+  static detachAllFromContext(ctx) {
+    let ctxWithoutAPI = Random.detach(ctx);
+    ctxWithoutAPI = Events.detach(ctxWithoutAPI);
+    ctxWithoutAPI = GameLoggerCtxAPI.detach(ctxWithoutAPI);
+    return ctxWithoutAPI;
+  }
+
+  update(state, updateEvents) {
+    let newState = updateEvents ? this.events.update(state) : state;
+    newState = this.random.update(newState);
+    newState = this.log.update(newState);
+    return newState;
+  }
+
+  updateAndDetach(state, updateEvents) {
+    const newState = this.update(state, updateEvents);
+    newState.ctx = ContextEnhancer.detachAllFromContext(newState.ctx);
+    return newState;
+  }
+}
+
+/**
  * CreateGameReducer
  *
  * Creates the main game state reducer.
@@ -32,8 +114,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
   ctx._random = { seed };
 
-  const random = new Random(ctx);
-  let ctxWithAPI = random.attach(ctx);
+  const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
+  let ctxWithAPI = apiCtx.attachToContext(ctx);
 
   const initial = {
     // User managed state.
@@ -58,18 +140,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
     _initial: {},
   };
 
-  const events = new Events(game.flow, ctx.currentPlayer);
-  ctxWithAPI = events.attach(ctxWithAPI);
+  let state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
-  const state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
-
-  const { ctx: ctxWithEvents } = events.update(state);
   initial.G = state.G;
   initial._undo = state._undo;
-  initial.ctx = ctxWithEvents;
-  initial.ctx = random.update(initial.ctx);
-  initial.ctx = Random.detach(initial.ctx);
-  initial.ctx = Events.detach(initial.ctx);
+  state = apiCtx.updateAndDetach(state, true);
+  initial.ctx = state.ctx;
 
   const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
@@ -84,6 +160,8 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   return (state = initial, action) => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
+        state = { ...state, deltalog: [] };
+
         // Process game events only on the server.
         // These events like `endTurn` typically
         // contain code that may rely on secret state
@@ -105,32 +183,23 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        state = { ...state, deltalog: undefined };
+        const apiCtx = new ContextEnhancer(
+          state.ctx,
+          game,
+          action.payload.playerID
+        );
+        apiCtx.attachToContext(state.ctx);
 
-        // Initialize PRNG from ctx.
-        const random = new Random(state.ctx);
-        // Initialize Events API.
-        const events = new Events(game.flow, action.payload.playerID);
-        // Attach Random API to ctx.
-        state = { ...state, ctx: random.attach(state.ctx) };
-        // Attach Events API to ctx.
-        state = { ...state, ctx: events.attach(state.ctx) };
-
-        // Update state.
         let newState = game.flow.processGameEvent(state, action);
-        // Trigger any events that were called via the Events API.
-        newState = events.update(newState);
-        // Update ctx with PRNG state.
-        let ctx = random.update(newState.ctx);
-        // Detach Random API from ctx.
-        ctx = Random.detach(ctx);
-        // Detach Events API from ctx.
-        ctx = Events.detach(ctx);
 
-        return { ...newState, ctx, _stateID: state._stateID + 1 };
+        newState = apiCtx.updateAndDetach(newState, true);
+
+        return { ...newState, _stateID: state._stateID + 1 };
       }
 
       case Actions.MAKE_MOVE: {
+        state = { ...state, deltalog: [] };
+
         // Check whether the game knows the move at all.
         if (!game.moveNames.includes(action.payload.type)) {
           return state;
@@ -154,16 +223,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        state = { ...state, deltalog: undefined };
-
-        // Initialize PRNG from ctx.
-        const random = new Random(state.ctx);
-        // Initialize Events API.
-        const events = new Events(game.flow, action.payload.playerID);
-        // Attach Random API to ctx.
-        let ctxWithAPI = random.attach(state.ctx);
-        // Attach Events API to ctx.
-        ctxWithAPI = events.attach(ctxWithAPI);
+        const apiCtx = new ContextEnhancer(
+          state.ctx,
+          game,
+          action.payload.playerID
+        );
+        let ctxWithAPI = apiCtx.attachToContext(state.ctx);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
@@ -172,12 +237,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           return state;
         }
 
-        // Update ctx with PRNG state.
-        let ctx = random.update(state.ctx);
-        // Detach Random API from ctx.
-        ctx = Random.detach(ctx);
-        // Detach Events API from ctx.
-        ctx = Events.detach(ctx);
+        // don't call into events here
+        const newState = apiCtx.updateAndDetach(
+          { ...state, deltalog: [{ action }] },
+          false
+        );
+        let ctx = newState.ctx;
 
         // Undo changes to G if the move should not run on the client.
         if (
@@ -187,8 +252,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           G = state.G;
         }
 
-        const deltalog = [action];
-        state = { ...state, G, ctx, deltalog, _stateID: state._stateID + 1 };
+        state = { ...newState, G, ctx, _stateID: state._stateID + 1 };
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -199,13 +263,12 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        state = { ...state, ctx: random.attach(state.ctx) };
-        state = { ...state, ctx: events.attach(state.ctx) };
-        state = game.flow.processMove(state, action.payload);
-        state = events.update(state);
-        state = { ...state, ctx: random.update(state.ctx) };
-        state = { ...state, ctx: Random.detach(state.ctx) };
-        state = { ...state, ctx: Events.detach(state.ctx) };
+        ctxWithAPI = apiCtx.attachToContext(state.ctx);
+        state = game.flow.processMove(
+          { ...state, ctx: ctxWithAPI },
+          action.payload
+        );
+        state = apiCtx.updateAndDetach(state, true);
 
         return state;
       }

@@ -341,7 +341,7 @@ test('endGameIf', () => {
     expect(state.ctx.currentPlayer).toBe('0');
     state = reducer(state, makeMove('A'));
     expect(state.ctx.gameover).toBe('A');
-    expect(state.deltalog[state.deltalog.length - 1].payload.type).toBe(
+    expect(state.deltalog[state.deltalog.length - 1].action.payload.type).toBe(
       'endTurn'
     );
   }
@@ -479,21 +479,39 @@ test('canMakeMove', () => {
 });
 
 test('canPlayerMakeMove', () => {
-  // default behaviour
-  const pid = '0';
+  const playerID = '0';
 
   let flow = Flow({});
-  expect(flow.canPlayerMakeMove({}, {}, pid)).toBe(false);
+  expect(flow.canPlayerMakeMove({}, {}, playerID)).toBe(false);
   // NOTE: currentPlayer is not allowed to make a move by default.
   // Their playerID must be included in the actionPlayers array.
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['1'] }, pid)).toBe(false);
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['0'] }, pid)).toBe(true);
+  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['1'] }, playerID)).toBe(
+    false
+  );
+  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['0'] }, playerID)).toBe(
+    true
+  );
 
   // no one can make a move
   flow = Flow({ canPlayerMakeMove: () => false });
-  expect(flow.canPlayerMakeMove({}, {}, pid)).toBe(false);
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: [] }, pid)).toBe(false);
+  expect(flow.canPlayerMakeMove({}, {}, playerID)).toBe(false);
+  expect(flow.canPlayerMakeMove({}, { actionPlayers: [] }, playerID)).toBe(
+    false
+  );
   expect(flow.canPlayerMakeMove({}, {}, '5')).toBe(false);
+});
+
+test('canPlayerCallEvent', () => {
+  const playerID = '0';
+
+  let flow = Flow({});
+  expect(flow.canPlayerCallEvent({}, {}, playerID)).toBe(false);
+  expect(flow.canPlayerCallEvent({}, { actionPlayers: ['1'] }, playerID)).toBe(
+    false
+  );
+  expect(flow.canPlayerCallEvent({}, { actionPlayers: ['0'] }, playerID)).toBe(
+    false
+  );
 });
 
 test('endGame', () => {

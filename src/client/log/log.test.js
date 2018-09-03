@@ -24,10 +24,10 @@ describe('layout', () => {
 
   test('sanity', () => {
     const log = [
-      makeMove('moveA'),
-      gameEvent('endTurn'),
-      makeMove('moveB'),
-      gameEvent('endTurn'),
+      { action: makeMove('moveA') },
+      { action: gameEvent('endTurn') },
+      { action: makeMove('moveB') },
+      { action: gameEvent('endTurn') },
     ];
 
     const root = Enzyme.mount(
@@ -39,11 +39,11 @@ describe('layout', () => {
 
   test('multiple moves per turn / phase', () => {
     const log = [
-      makeMove('moveA'),
-      makeMove('moveB'),
-      gameEvent('endPhase'),
-      makeMove('moveC'),
-      gameEvent('endTurn'),
+      { action: makeMove('moveA') },
+      { action: makeMove('moveB') },
+      { action: gameEvent('endPhase') },
+      { action: makeMove('moveC') },
+      { action: gameEvent('endTurn') },
     ];
 
     const root = Enzyme.mount(
@@ -156,10 +156,10 @@ describe('pinning', () => {
   let state = reducer(undefined, { type: 'init' });
   const initialState = state;
   const log = [
-    makeMove('A'),
-    gameEvent('endTurn'),
-    makeMove('B'),
-    gameEvent('endTurn'),
+    { action: makeMove('A') },
+    { action: gameEvent('endTurn') },
+    { action: makeMove('B') },
+    { action: gameEvent('endTurn') },
   ];
 
   test('pin', () => {
@@ -226,5 +226,44 @@ describe('pinning', () => {
       .at(0)
       .simulate('mouseleave');
     expect(onHover).not.toHaveBeenCalled();
+  });
+});
+
+describe('payload', () => {
+  const game = Game({ flow: { phases: [{ name: 'A' }, { name: 'B' }] } });
+  const reducer = CreateGameReducer({ game });
+  const state = reducer(undefined, { type: 'init' });
+
+  const log = [
+    { action: makeMove('moveA'), payload: { test_payload: 'payload123' } },
+  ];
+
+  test('renders custom payload using the default component', () => {
+    const root = Enzyme.mount(
+      <GameLog log={log} initialState={state} reducer={reducer} />
+    );
+    const turns = root.find('.log-event').map(div => div.text());
+    expect(turns[0]).toContain('payload123');
+  });
+
+  test('renders custom payload using a custom component', () => {
+    const log = [
+      { action: makeMove('moveA'), payload: { test_payload: 'payload123' } },
+    ];
+
+    const customPayloadComponent = () => {
+      return <div>ignoring props.payload</div>;
+    };
+
+    const root = Enzyme.mount(
+      <GameLog
+        log={log}
+        initialState={state}
+        reducer={reducer}
+        payloadComponent={customPayloadComponent}
+      />
+    );
+    const turns = root.find('.log-event').map(div => div.text());
+    expect(turns[0]).toContain('ignoring props.payload');
   });
 });
