@@ -12,9 +12,8 @@ import {
   UpdateTurnOrderState,
   TurnOrder,
 } from './turn-order';
-import { Random } from './random';
-import { Events } from './events';
 import { automaticGameEvent } from './action-creators';
+import { ContextEnhancer } from './reducer';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -365,9 +364,7 @@ export function FlowWithPhases({
   const startTurn = function(state, config) {
     const G = config.onTurnBegin(state.G, state.ctx);
 
-    let plainCtx = state.ctx;
-    plainCtx = Random.detach(plainCtx);
-    plainCtx = Events.detach(plainCtx);
+    const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
     const _undo = [{ G, ctx: plainCtx }];
 
     const ctx = { ...state.ctx };
@@ -611,9 +608,7 @@ export function FlowWithPhases({
       const undo = state._undo || [];
       const moveType = action.type;
 
-      let plainCtx = state.ctx;
-      plainCtx = Random.detach(plainCtx);
-      plainCtx = Events.detach(plainCtx);
+      const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
 
       state = {
         ...state,
