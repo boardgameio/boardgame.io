@@ -6,7 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
+export const isSame = a => b => a.x === b.x && a.y === b.y && a.z === b.z;
+export const createCoordinate = ([x, y, z]) => ({ x, y, z });
 const addPoint = (a, b) => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
+const isContained = (a, points) => points.some(isSame(a));
 
 /**
  * Get neighbors
@@ -63,4 +66,39 @@ export const getRange = (center, distance) => {
   return results;
 };
 
-export const HexUtils = { getAllNeighbors, getDistance, getRange };
+/**
+ * Get reachable
+ *
+ * A utility function which returns all reachable points given
+ * a start, a movement distance, and a set of blocked points
+ *
+ * Arguments:
+ *   start     point (Cube coordinates)
+ *   movement  number
+ *   blocked   array of blocked points (cube coordinates)
+ *
+ */
+export const getReachable = (start, movement, blocked) => {
+  const visited = [start];
+  const fringes = [[start]];
+  for (let i = 1; i <= movement; i++) {
+    fringes.push([]);
+    fringes[i - 1]
+      .map(getAllNeighbors)
+      .reduce((prev, curr) => prev.concat(curr), [])
+      .filter(neighbor => !isContained(neighbor, blocked.concat(visited)))
+      .forEach(neighbor => {
+        visited.push(neighbor);
+        fringes[i].push(neighbor);
+      });
+  }
+
+  return visited;
+};
+
+export const HexUtils = {
+  getAllNeighbors,
+  getDistance,
+  getRange,
+  getReachable,
+};

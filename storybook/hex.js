@@ -11,6 +11,7 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, boolean, number } from '@storybook/addon-knobs/react';
 import { HexGrid, Token, HexUtils } from 'boardgame.io/ui';
+import { isSame, createCoordinate } from '../src/ui/hex-utils';
 
 function Basic() {
   const levels = number('levels', 5);
@@ -74,6 +75,72 @@ function GetRange() {
   );
 }
 
+function GetReachable() {
+  const levels = number('levels', 5);
+  const distance = number('distance', 3);
+  const outline = boolean('outline', true);
+
+  class Runner extends React.Component {
+    state = {
+      filled: [
+        [0, 1, -1],
+        [1, 0, -1],
+        [2, -1, -1],
+        [0, -1, 1],
+        [-1, 0, 1],
+        [-2, 2, 0],
+      ].map(createCoordinate),
+    };
+    onClick = clickedCell => {
+      const isSameAsClicked = isSame(clickedCell);
+      const isAlreadyFilled = this.state.filled.some(isSameAsClicked);
+      const filled = isAlreadyFilled
+        ? this.state.filled.filter(cell => !isSameAsClicked(cell))
+        : [...this.state.filled, clickedCell];
+      this.setState({ ...this.state, filled });
+      action('onClick')(clickedCell);
+    };
+    render = () => {
+      return (
+        <HexGrid levels={levels} outline={outline} onClick={this.onClick}>
+          {this.state.filled.map((t, index) => {
+            return (
+              <Token
+                key={index}
+                x={t.x}
+                y={t.y}
+                z={t.z}
+                style={{ fill: '#555' }}
+              />
+            );
+          })}
+          {HexUtils.getReachable(
+            { x: 0, y: 0, z: 0 },
+            distance,
+            this.state.filled
+          ).map((t, index) => {
+            return (
+              <Token
+                key={index}
+                x={t.x}
+                y={t.y}
+                z={t.z}
+                style={{ fill: '#55f' }}
+              />
+            );
+          })}
+        </HexGrid>
+      );
+    };
+  }
+
+  return (
+    <div style={{ padding: '50px' }}>
+      <Runner />
+    </div>
+  );
+}
+
 function TokenTrail() {
   const levels = number('levels', 5);
   const outline = boolean('outline', true);
@@ -118,4 +185,5 @@ storiesOf('HexGrid', module)
   .addDecorator(withKnobs)
   .add('basic', Basic)
   .add('Get range', GetRange)
+  .add('Get reachable', GetReachable)
   .add('Tokens placed on hover', TokenTrail);
