@@ -15,6 +15,7 @@
   * [Secret State](secret-state.md)
   * [Immutability](immutability.md)
   * [Debugging](debugging.md)
+  * [Testing](testing.md)
 
 * API Reference
 

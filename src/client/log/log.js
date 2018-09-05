@@ -12,6 +12,18 @@ import { MAKE_MOVE } from '../../core/action-types';
 import './log.css';
 
 /**
+ * Default component to render custom payload.
+ */
+const CustomPayload = props => {
+  const custompayload =
+    props.payload !== undefined ? JSON.stringify(props.payload, null, 4) : '';
+  return <div>{custompayload}</div>;
+};
+CustomPayload.propTypes = {
+  payload: PropTypes.any,
+};
+
+/**
  * LogEvent
  *
  * Logs a single action in the game.
@@ -26,6 +38,14 @@ const LogEvent = props => {
     classNames += ' pinned';
   }
 
+  // allow to pass in custom rendering component for custom payload
+  const customPayload =
+    props.payloadComponent !== undefined ? (
+      React.createElement(props.payloadComponent, { payload: props.payload })
+    ) : (
+      <CustomPayload payload={props.payload} />
+    );
+
   return (
     <div
       className={classNames}
@@ -33,7 +53,10 @@ const LogEvent = props => {
       onMouseEnter={() => props.onMouseEnter(props.logIndex)}
       onMouseLeave={() => props.onMouseLeave()}
     >
-      {action.payload.type}({args.join(',')})
+      <div>
+        {action.payload.type}({args.join(',')})
+      </div>
+      {customPayload}
     </div>
   );
 };
@@ -45,6 +68,8 @@ LogEvent.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
   pinned: PropTypes.bool,
+  payload: PropTypes.object,
+  payloadComponent: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
 };
 
 /**
@@ -99,6 +124,7 @@ export class GameLog extends React.Component {
     reducer: PropTypes.func,
     initialState: PropTypes.any.isRequired,
     log: PropTypes.array.isRequired,
+    payloadComponent: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
   };
 
   static defaultProps = {
@@ -165,7 +191,7 @@ export class GameLog extends React.Component {
     }
 
     for (let i = 0; i < this.props.log.length; i++) {
-      const { action } = this.props.log[i];
+      const { action, payload } = this.props.log[i];
       const oldTurn = state.ctx.turn;
       const oldPhase = state.ctx.phase;
 
@@ -179,6 +205,8 @@ export class GameLog extends React.Component {
             onMouseEnter={this.onMouseEnter}
             onMouseLeave={this.onMouseLeave}
             action={action}
+            payload={payload}
+            payloadComponent={this.props.payloadComponent}
           />
         );
 
