@@ -12,152 +12,145 @@ import { Client } from 'boardgame.io/client';
 import TicTacToe from '../tic-tac-toe/game';
 import './main.css';
 
-class App extends React.Component {
-  state = {};
+function Init(root) {
+  const client = Client({ game: TicTacToe });
 
-  constructor(props) {
-    super(props);
+  // Set up scene.
 
-    this.client = Client({ game: TicTacToe });
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xffffff);
 
-    this.client.subscribe(() => {
-      const { ctx } = this.client.getState();
-      if (ctx.gameover) {
-        this.setState({ gameover: ctx.gameover });
-      }
-    });
+  // Set up renderer.
 
-    this.ref = null;
-    this.scene = new THREE.Scene();
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.mouse = new THREE.Vector2();
-    this.raycaster = new THREE.Raycaster();
-    this.rotation = 0;
-    this.cubes = [];
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Add nine cubes.
+
+  let cubes = [];
+  for (let i = 0; i < 9; i++) {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshLambertMaterial({ color: 0xcccccc });
+    const cube = new THREE.Mesh(geometry, material);
+    const r = Math.floor(i / 3);
+    const c = i % 3;
+    cube.position.z = -c * 2;
+    cube.position.x = r * 2;
+    cube.userData.i = i;
+    cubes.push(cube);
+    scene.add(cube);
   }
 
-  createScene() {
-    const scene = this.scene;
-    scene.background = new THREE.Color(0xffffff);
+  // Set up camera.
 
-    const camera = new THREE.PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    camera.position.z = 5;
-    camera.position.x = 12;
-    camera.position.y = 15;
-    scene.add(camera);
-    this.camera = camera;
+  const camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.z = 5;
+  camera.position.x = 12;
+  camera.position.y = 15;
+  camera.lookAt(cubes[4].position);
+  scene.add(camera);
 
-    for (let i = 0; i < 9; i++) {
-      const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshLambertMaterial({ color: 0xcccccc });
-      const cube = new THREE.Mesh(geometry, material);
-      const r = Math.floor(i / 3);
-      const c = i % 3;
-      cube.position.z = -c * 2;
-      cube.position.x = r * 2;
-      cube.userData.i = i;
-      scene.add(cube);
-      this.cubes.push(cube);
-    }
+  // Set up lights.
 
-    this.camera.lookAt(this.cubes[4].position);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0x555555);
+  scene.add(directionalLight);
 
-    let light = new THREE.AmbientLight(0xffffff, 0.7);
-    scene.add(light);
+  // Animation logic.
 
-    light = new THREE.DirectionalLight(0x555555);
-    scene.add(light);
-  }
+  let rotation = 0;
+  function animate() {
+    requestAnimationFrame(animate);
 
-  animate = () => {
-    requestAnimationFrame(this.animate);
+    const { G } = client.getState();
 
-    const { G } = this.client.getState();
-
-    this.cubes.filter(c => G.cells[c.userData.i] == '0').forEach(c => {
+    cubes.filter(c => G.cells[c.userData.i] == '0').forEach(c => {
       c.material.color.setHex(0xff0000);
-      c.rotation.x = this.rotation;
+      c.rotation.x = rotation;
     });
 
-    this.cubes.filter(c => G.cells[c.userData.i] == '1').forEach(c => {
+    cubes.filter(c => G.cells[c.userData.i] == '1').forEach(c => {
       c.material.color.setHex(0x00ff00);
-      c.rotation.y = -this.rotation;
+      c.rotation.y = -rotation;
     });
 
-    this.rotation += 0.03;
-    this.renderer.render(this.scene, this.camera);
-  };
+    rotation += 0.03;
+    renderer.render(scene, camera);
+  }
 
-  onMouseMove = e => {
-    const x = e.clientX - this.ref.offsetParent.offsetLeft;
-    const y = e.clientY;
-    this.mouse.x = x / window.innerWidth * 2 - 1;
-    this.mouse.y = -(y / window.innerHeight) * 2 + 1;
+  // Mouse handling.
 
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    const highlightedCubes = this.raycaster.intersectObjects(this.cubes);
+  const mouse = new THREE.Vector2();
+  const raycaster = new THREE.Raycaster();
 
-    if (highlightedCubes.length > 0) {
-      this.ref.style.cursor = 'pointer';
-    } else {
-      this.ref.style.cursor = '';
+  function onMouseMove(e) {
+    const { ctx } = client.getState();
+    if (ctx.gameover !== undefined) {
+      root.style.cursor = '';
+      return;
     }
 
-    this.cubes.forEach(c => {
-      c.userData.highlight = false;
+    const x = e.clientX - root.offsetParent.offsetLeft;
+    const y = e.clientY;
+    mouse.x = x / window.innerWidth * 2 - 1;
+    mouse.y = -(y / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const highlightedCubes = raycaster.intersectObjects(cubes);
+
+    cubes.forEach(c => {
       c.material.color.setHex(0xcccccc);
     });
 
     highlightedCubes.forEach(c => {
       c.object.material.color.setHex(0xaaaaaa);
     });
-  };
 
-  onMouseDown = () => {
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    this.raycaster.intersectObjects(this.cubes).forEach(cube => {
-      this.client.moves.clickCell(cube.object.userData.i);
-    });
-  };
-
-  componentDidMount() {
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.ref.appendChild(this.renderer.domElement);
-    this.createScene();
-    this.animate();
-  }
-
-  render() {
-    let text = '';
-    if (this.state.gameover) {
-      if (this.state.gameover.draw) text = 'draw';
-      if (this.state.gameover.winner == '0') text = 'winner: red';
-      if (this.state.gameover.winner == '1') text = 'winner: green';
+    if (highlightedCubes.length > 0) {
+      root.style.cursor = 'pointer';
+    } else {
+      root.style.cursor = '';
     }
-
-    return (
-      <div
-        className="root"
-        onMouseDown={this.onMouseDown}
-        onMouseMove={this.onMouseMove}
-        ref={e => (this.ref = e)}
-      >
-        <div className="text">{text}</div>
-      </div>
-    );
   }
+
+  function onMouseDown() {
+    raycaster.setFromCamera(mouse, camera);
+    raycaster.intersectObjects(cubes).forEach(cube => {
+      client.moves.clickCell(cube.object.userData.i);
+    });
+  }
+
+  root.appendChild(renderer.domElement);
+  root.addEventListener('mousemove', onMouseMove);
+  root.addEventListener('mousedown', onMouseDown);
+
+  animate();
 }
 
 const routes = [
   {
     path: '/threejs/main',
     text: 'threejs',
-    component: App,
+    component: class App extends React.Component {
+      componentDidMount() {
+        Init(this.ref);
+      }
+      render() {
+        return (
+          <div
+            ref={el => {
+              this.ref = el;
+            }}
+          />
+        );
+      }
+    },
   },
 ];
 

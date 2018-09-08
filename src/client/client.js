@@ -232,8 +232,9 @@ class _ClientImpl {
   }
 
   subscribe(fn) {
-    this.store.subscribe(fn);
-    this.transport.subscribe(fn);
+    const callback = () => fn(this.getState());
+    this.store.subscribe(callback);
+    this.transport.subscribe(callback);
   }
 
   getState() {
