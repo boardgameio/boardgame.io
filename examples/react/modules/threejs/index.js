@@ -90,6 +90,12 @@ function Init(root) {
   const raycaster = new THREE.Raycaster();
 
   function onMouseMove(e) {
+    const { ctx } = client.getState();
+    if (ctx.gameover !== undefined) {
+      root.style.cursor = '';
+      return;
+    }
+
     const x = e.clientX - root.offsetParent.offsetLeft;
     const y = e.clientY;
     mouse.x = x / window.innerWidth * 2 - 1;
@@ -98,20 +104,19 @@ function Init(root) {
     raycaster.setFromCamera(mouse, camera);
     const highlightedCubes = raycaster.intersectObjects(cubes);
 
-    if (highlightedCubes.length > 0) {
-      root.style.cursor = 'pointer';
-    } else {
-      root.style.cursor = '';
-    }
-
     cubes.forEach(c => {
-      c.userData.highlight = false;
       c.material.color.setHex(0xcccccc);
     });
 
     highlightedCubes.forEach(c => {
       c.object.material.color.setHex(0xaaaaaa);
     });
+
+    if (highlightedCubes.length > 0) {
+      root.style.cursor = 'pointer';
+    } else {
+      root.style.cursor = '';
+    }
   }
 
   function onMouseDown() {
