@@ -20,8 +20,7 @@ class App extends React.Component {
 
     this.client = Client({ game: TicTacToe });
 
-    this.client.subscribe(() => {
-      const { ctx } = this.client.getState();
+    this.client.subscribe(({ ctx }) => {
       if (ctx.gameover) {
         this.setState({ gameover: ctx.gameover });
       }
