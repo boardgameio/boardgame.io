@@ -15,6 +15,7 @@ get done before we are ready for a v1 release.
 
 * [x] Drag and Drop (cards and decks).
 * [ ] Drag and Drop (tokens and grids).
+* [ ] threejs renderer for the same components (optional).
 
 ### Lobby
 
