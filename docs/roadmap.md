@@ -13,8 +13,8 @@ get done before we are ready for a v1 release.
 
 ### UI framework
 
-* [ ] Drag and Drop **[N]**
-* [ ] Sandbox mode (can drag around cards before any rules are coded up) **[N]**
+* [x] Drag and Drop (cards and decks).
+* [ ] Drag and Drop (tokens and grids).
 
 ### Lobby
 
@@ -34,12 +34,12 @@ get done before we are ready for a v1 release.
 
 ### Core
 
-* [ ] turn order customizations ([issue](https://github.com/google/boardgame.io/issues/154))
+* [ ] turn order improvements ([issue](https://github.com/google/boardgame.io/issues/154))
 * [ ] log improvements ([issue](https://github.com/google/boardgame.io/issues/227))
 
 ### Server
 
-* [ ] abstract away server component ([issue](https://github.com/google/boardgame.io/issues/251))
+* [x] abstract away server component ([issue](https://github.com/google/boardgame.io/issues/251))
 
 ### Documentation
 
