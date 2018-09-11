@@ -6,13 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Singleplayer from './components/singleplayer';
+import DragDrop from './components/drag-n-drop';
 
 const routes = [
   {
     path: '/ui',
-    text: 'Cards & Decks',
-    component: Singleplayer,
+    text: 'Drag and Drop',
+    component: DragDrop,
   },
 ];
 

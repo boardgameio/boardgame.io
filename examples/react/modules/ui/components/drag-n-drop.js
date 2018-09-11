@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import { Client } from 'boardgame.io/react';
+import { Game } from 'boardgame.io/core';
 import { UI, Card, Deck } from 'boardgame.io/ui';
 
 function handler(type, fn) {
@@ -55,4 +57,15 @@ class Board extends React.Component {
   }
 }
 
-export default Board;
+const App = Client({
+  game: Game({}),
+  board: Board,
+});
+
+const Singleplayer = () => (
+  <div style={{ padding: 50 }}>
+    <App gameID="single" />
+  </div>
+);
+
+export default Singleplayer;
