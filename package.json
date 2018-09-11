@@ -59,6 +59,7 @@
     "@storybook/addon-knobs": "^3.3.10",
     "@storybook/addon-options": "^3.2.16",
     "@storybook/react": "^3.2.16",
+    "@tweenjs/tween.js": "^17.2.0",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.0.0",

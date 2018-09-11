@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import Token from './token';
+import { Token } from './token';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
