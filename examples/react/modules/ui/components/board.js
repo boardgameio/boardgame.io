@@ -21,56 +21,35 @@ class Board extends React.Component {
     super(props);
 
     this.state = {
-      deck1: [1, 2, 3],
-      deck2: [],
-      free: [4],
+      deck: [],
+      free: true,
     };
   }
 
-  deck1Drop = arg => {
+  onDrop = arg => {
     this.setState(s => ({
-      free: s.free.filter(t => t != arg),
-      deck2: s.deck2.filter(t => t != arg),
-      deck1: [...s.deck1.filter(t => t != arg), arg],
-    }));
-  };
-
-  deck2Drop = arg => {
-    this.setState(s => ({
-      free: s.free.filter(t => t != arg),
-      deck1: s.deck1.filter(t => t != arg),
-      deck2: [...s.deck2.filter(t => t != arg), arg],
+      deck: [...s.deck.filter(t => t != arg), arg],
+      free: null,
     }));
   };
 
   render() {
     return (
-      <UI sandboxMode={true}>
+      <UI>
+        <div style={{ marginBottom: 20 }}>Drag the card into the deck</div>
+
         <Deck
-          onDrop={handler('deck1 onDrop', this.deck1Drop)}
-          onClick={handler('deck1 onClick')}
-          onRemove={handler('deck1 onRemove', this.deck1Remove)}
+          onDrop={handler('deck onDrop', this.onDrop)}
+          onClick={handler('deck onClick')}
         >
-          {this.state.deck1.map(c => (
-            <Card key={c} data={c} back={c} onClick={handler(c + ' onClick')} />
+          {this.state.deck.map(c => (
+            <Card key={c} data={c} back={c} onClick={handler('card onClick')} />
           ))}
         </Deck>
 
-        <Deck
-          onDrop={handler('deck2 onDrop', this.deck2Drop)}
-          onClick={handler('deck2 onClick')}
-          onRemove={handler('deck2 onRemove', this.deck2Remove)}
-        >
-          {this.state.deck2.map(c => (
-            <Card key={c} data={c} back={c} onClick={handler(c + ' onClick')} />
-          ))}
-        </Deck>
-
-        <div>
-          {this.state.free.map(c => (
-            <Card key={c} data={c} back={c} onClick={handler(c + ' onClick')} />
-          ))}
-        </div>
+        {this.state.free && (
+          <Card data={1} back={1} onClick={handler('card1 onClick')} />
+        )}
       </UI>
     );
   }

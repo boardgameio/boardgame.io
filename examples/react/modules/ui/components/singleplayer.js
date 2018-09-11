@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
-import TicTacToe from '../game';
+import { Game } from 'boardgame.io/core';
 import Board from './board';
 
 const App = Client({
-  game: TicTacToe,
+  game: Game({}),
   board: Board,
 });
 
