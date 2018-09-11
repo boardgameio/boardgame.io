@@ -8,71 +8,103 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import UIContext from './ui-context';
+import { Droppable } from 'react-dragtastic';
 import './deck.css';
 
-class Deck extends React.Component {
+export class DeckImpl extends React.Component {
+  static propTypes = {
+    context: PropTypes.any,
+    children: PropTypes.any,
+    onClick: PropTypes.func,
+    onDrop: PropTypes.func,
+    splayWidth: PropTypes.number,
+    dragZone: PropTypes.string,
+    padding: PropTypes.number,
+    className: PropTypes.string,
+  };
+
+  static defaultProps = {
+    padding: 10,
+    splayWidth: 3,
+    dragZone: 'bgio-card',
+    onDrop: () => {},
+    onClick: () => {},
+  };
+
   constructor(props) {
     super(props);
-
-    this.state = {
-      cards: props.cards,
-    };
+    this.id = props.context.genID();
   }
 
   onClick = () => {
-    const cards = [...this.state.cards];
-    const topCard = cards.shift();
+    const cards = React.Children.toArray(this.props.children);
+    let topCardProps = null;
 
-    if (this.props.onClick) {
-      this.props.onClick(topCard);
+    if (cards.length > 0) {
+      topCardProps = cards[cards.length - 1].props;
+      this.props.onClick(topCardProps.data);
     }
-
-    this.setState({
-      cards,
-    });
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.cards.length !== nextProps.cards.length) {
-      this.setState({ cards: nextProps.cards });
+  onDrop = cardData => {
+    // Don't fire onDrop if the top card of this deck was
+    // dragged away and then dropped back.
+    let isChild = false;
+    React.Children.forEach(this.props.children, card => {
+      if (cardData !== undefined && card.props.data === cardData) {
+        isChild = true;
+      }
+    });
+
+    if (!isChild) {
+      this.props.onDrop(cardData);
     }
-  }
+  };
 
   render() {
-    const { className, splayWidth, ...rest } = this.props;
-    const { cards } = this.state;
-    const classNames = ['bgio-deck'];
-    if (className) classNames.push(className);
+    let cardIndex = 0;
+    const cards = React.Children.map(this.props.children, card =>
+      React.cloneElement(card, {
+        dragZone: this.props.dragZone,
+        inDeck: true,
+        deckPosition: cardIndex++,
+      })
+    );
 
     return (
-      <div className={classNames.join(' ')} {...rest} onClick={this.onClick}>
-        {cards.map((card, i) =>
-          React.cloneElement(card, {
-            key: i,
-            canHover: i === 0, // Only the top card should apply a css hover effect
-            isFaceUp: i === 0, // Only the top card should ever be face up
-            style: {
-              position: i ? 'absolute' : 'inherit',
-              left: i * splayWidth,
-              zIndex: -i,
-            },
-          })
-        )}
+      <div onClick={this.onClick}>
+        <Droppable accepts={this.props.dragZone} onDrop={this.onDrop}>
+          {({ events }) => {
+            return (
+              <div
+                {...events}
+                className={this.props.className}
+                style={{
+                  background: '#eee',
+                  marginRight: 20,
+                  padding: this.props.padding,
+                  position: 'relative',
+                  width: '100px',
+                  height: '140px',
+                  display: 'block',
+                  float: 'left',
+                }}
+              >
+                {cards}
+              </div>
+            );
+          }}
+        </Droppable>
       </div>
     );
   }
 }
 
-Deck.propTypes = {
-  cards: PropTypes.arrayOf(PropTypes.node),
-  className: PropTypes.string,
-  onClick: PropTypes.func,
-  splayWidth: PropTypes.number,
-};
-
-Deck.defaultProps = {
-  cards: [],
-  splayWidth: 3,
-};
+const Deck = props => (
+  <UIContext.Consumer>
+    {context => <DeckImpl {...props} context={context} />}
+  </UIContext.Consumer>
+);
 
 export { Deck };

@@ -7,7 +7,14 @@
  */
 
 .bgio-deck {
+  border: 1px dashed #ddd;
   position: relative;
   display: inline-flex;
-  z-index: 1;
+  border-radius: 6px;
+  padding: 5px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: 20px;
+  width: 100px;
+  height: 140px;
 }
