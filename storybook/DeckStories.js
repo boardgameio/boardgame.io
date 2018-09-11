@@ -30,7 +30,9 @@ export class StandardDeckStory extends React.Component {
   onClick = card => {
     const selectedCard = card.props;
     action('onClick')(JSON.stringify(selectedCard.card));
-    this.setState({ selectedCard });
+    let deck = this.state.deck;
+    deck.shift();
+    this.setState({ selectedCard, deck });
   };
 
   renderCard = card => (
@@ -45,7 +47,7 @@ export class StandardDeckStory extends React.Component {
 
     return (
       <div style={{ display: 'block', padding: '50px' }}>
-        <Deck onClick={this.onClick} cards={deck.map(this.renderCard)} />
+        <Deck onClick={this.onClick}>{deck.map(this.renderCard)}</Deck>
 
         {this.state.selectedCard && (
           <div style={{ display: 'block', padding: '50px' }}>

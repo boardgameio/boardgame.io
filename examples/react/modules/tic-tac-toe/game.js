@@ -51,9 +51,8 @@ const TicTacToe = Game({
         ctx.log.setPayload({
           date: new Date().toUTCString(),
         });
+        return { ...G, cells };
       }
-
-      return { ...G, cells };
     },
   },
 
