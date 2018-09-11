@@ -60,6 +60,7 @@ class Board extends React.Component {
 const App = Client({
   game: Game({}),
   board: Board,
+  debug: false,
 });
 
 const Singleplayer = () => (
