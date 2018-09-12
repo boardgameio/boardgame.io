@@ -17,8 +17,6 @@ export function evaluateRedactedMoves(redactedMoves, log, ctx, playerID) {
   }
 
   const filteredLog = log.map(logEvent => {
-    console.log(JSON.stringify(logEvent, null, 4));
-
     // filter for all other players and a spectator
     if (playerID !== null && +playerID === +logEvent.payload.playerID) {
       return logEvent;
@@ -149,7 +147,6 @@ export class Master {
         state.ctx,
         playerID
       );
-      // const log = this.game.logView(state.deltalog, state.ctx, playerID);
 
       return {
         type: 'update',
@@ -194,7 +191,6 @@ export class Master {
       state.ctx,
       playerID
     );
-    //const log = this.game.logView(state.deltalog, state.ctx, playerID);
 
     this.transportAPI.send({
       playerID,

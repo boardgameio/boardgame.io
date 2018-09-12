@@ -321,7 +321,7 @@ describe('evaluateRedactedMoves', () => {
     expect(result).toMatchObject(logEvents);
   });
 
-  test('showArgs = false', () => {
+  test('redacted move is only shown with args to the player that made the move', () => {
     const rm = {
       clickCell: { showArgs: false },
     };
@@ -344,5 +344,47 @@ describe('evaluateRedactedMoves', () => {
         },
       },
     ]);
+  });
+
+  test('not redacted move is shown to all', () => {
+    const rm = {
+      clickCell: { showArgs: false },
+    };
+    const logEvents = [ActionCreators.makeMove('unclickCell', [1, 2, 3], '0')];
+
+    // player that made the move
+    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    expect(result).toMatchObject(logEvents);
+    // other player
+    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    expect(result).toMatchObject(logEvents);
+  });
+
+  test('can explicitly set showing args to true', () => {
+    const rm = {
+      clickCell: { showArgs: true },
+    };
+    const logEvents = [ActionCreators.makeMove('unclickCell', [1, 2, 3], '0')];
+
+    // player that made the move
+    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    expect(result).toMatchObject(logEvents);
+    // other player
+    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    expect(result).toMatchObject(logEvents);
+  });
+
+  test('events are not redacted', () => {
+    const rm = {
+      clickCell: { showArgs: false },
+    };
+    const logEvents = [ActionCreators.gameEvent('endTurn')];
+
+    // player that made the move
+    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    expect(result).toMatchObject(logEvents);
+    // other player
+    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    expect(result).toMatchObject(logEvents);
   });
 });
