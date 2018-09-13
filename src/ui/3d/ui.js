@@ -82,13 +82,13 @@ export class UI extends React.Component {
     const plane = new THREE.Mesh(geometry, material);
     plane.receiveShadow = true;
     plane.lookAt(plane.up);
+    plane.position.y = -0.01;
     this.plane = plane;
     this.scene.add(plane);
 
     const helper = new THREE.GridHelper(2000, 2000);
     helper.material.opacity = 0.1;
     helper.material.transparent = true;
-    helper.position.y = 0.01;
     this.scene.add(helper);
 
     this.childGroup = new THREE.Group();
@@ -145,9 +145,24 @@ export class UI extends React.Component {
     };
 
     const onMouseUp = e => {
-      dispatchMouseCallbacks(e);
+      this.raycaster.setFromCamera(mouse, this.camera);
+      const objects = this.raycaster.intersectObjects(
+        this.childGroup.children,
+        true
+      );
+
+      dispatchMouseCallbacks(e, objects);
 
       if (dragging_.length > 0) {
+        const droppable = objects.filter(
+          obj => obj.object.userData.droppable && obj.object.userData.responsive
+        );
+
+        if (droppable.length > 0) {
+          const what = dragging_.map(o => o.object);
+          dispatchMouseCallbacks({ ...e, type: 'drop', what }, droppable);
+        }
+
         dispatchMouseCallbacks({ ...e, type: 'dragEnd' }, dragging_);
         dragging_ = [];
       }

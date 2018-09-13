@@ -50,7 +50,6 @@ export class CardImpl extends React.Component {
     const material = new THREE.MeshLambertMaterial({ color: 0x777777 });
     this.obj = new THREE.Mesh(geometry, material);
     this.obj.position.y = this.originalY;
-    this.obj.castShadow = true;
     this.obj.userData.draggable = props.draggable;
     this.obj.userData.responsive = props.responsive;
   }

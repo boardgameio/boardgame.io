@@ -41,10 +41,19 @@ export class DeckImpl extends React.Component {
     );
     const material = new THREE.MeshLambertMaterial({ color: 0xcccccc });
     this.obj = new THREE.Mesh(geometry, material);
+    this.obj.userData.droppable = true;
+    this.obj.userData.responsive = true;
     this.obj.position.y = this.originalY;
   }
 
-  onEvent = () => {};
+  onEvent = e => {
+    if (e.type == 'drop') {
+      console.log(e.what[0]);
+      e.what[0].position.x = -2;
+      e.what[0].position.z = 0;
+      e.what[0].position.y += 20 * 0.02;
+    }
+  };
 
   componentDidMount() {
     this.props.context.add(this.obj, this.onEvent);
