@@ -100,12 +100,16 @@ export class UI extends React.Component {
 
     const onGenericMouseEvent = e => {
       this.raycaster.setFromCamera(mouse, this.camera);
-      this.raycaster.intersectObjects(this.childGroup.children).forEach(obj => {
-        const callback = this.callbacks_[obj.object.id];
-        if (callback) {
-          callback(e);
-        }
-      });
+      this.raycaster
+        .intersectObjects(this.childGroup.children, true)
+        .forEach(obj => {
+          if (obj.object.id in this.callbacks_) {
+            this.callbacks_[obj.object.id](e);
+          }
+          if (obj.object.parent.id in this.callbacks_) {
+            this.callbacks_[obj.object.parent.id](e);
+          }
+        });
     };
 
     const onMouseMove = e => {
