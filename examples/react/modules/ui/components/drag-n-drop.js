@@ -37,7 +37,7 @@ class Board extends React.Component {
 
   render() {
     return (
-      <UI>
+      <UI three={true}>
         <div style={{ marginBottom: 20 }}>Drag the card into the deck</div>
 
         <Deck

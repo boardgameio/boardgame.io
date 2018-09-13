@@ -17,7 +17,6 @@ export class DeckImpl extends React.Component {
 
   constructor(props) {
     super(props);
-    this.id = props.context.genID();
   }
 
   render() {
