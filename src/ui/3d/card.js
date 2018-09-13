@@ -18,16 +18,24 @@ export class CardImpl extends React.Component {
     width: PropTypes.number,
     height: PropTypes.number,
     thickness: PropTypes.number,
+    responsive: PropTypes.bool,
+    draggable: PropTypes.bool,
+    x: PropTypes.number,
+    splayX: PropTypes.number,
+    splayY: PropTypes.number,
+    splayZ: PropTypes.number,
   };
 
   static defaultProps = {
+    responsive: true,
+    draggable: true,
+    splayX: 0,
+    splayY: 0,
+    splayZ: 0,
+    x: 0,
     width: 1,
     height: 1.5,
     thickness: 0.01,
-  };
-
-  state = {
-    isHighlighted: false,
   };
 
   constructor(props) {
@@ -43,20 +51,33 @@ export class CardImpl extends React.Component {
     this.obj = new THREE.Mesh(geometry, material);
     this.obj.position.y = this.originalY;
     this.obj.castShadow = true;
+    this.obj.userData.draggable = props.draggable;
+    this.obj.userData.responsive = props.responsive;
   }
 
   onEvent = e => {
-    if (e.type == 'click') {
-      if (!this.state.isHighlighted) {
-        new Tween(this.obj.position)
-          .to({ y: this.originalY + 0.5 }, 100)
-          .easing(Easing.Quadratic.Out)
-          .start();
-        this.setState({ isHighlighted: true });
-      } else {
-        new Tween(this.obj.position).to({ y: this.originalY }, 100).start();
-        this.setState({ isHighlighted: false });
-      }
+    if (!this.props.responsive) {
+      return;
+    }
+
+    if (e.type == 'dragStart') {
+      this.obj.castShadow = true;
+      new Tween(this.obj.position)
+        .to({ y: this.originalY + 0.5 }, 100)
+        .easing(Easing.Quadratic.Out)
+        .start();
+    }
+
+    if (e.type == 'dragEnd') {
+      new Tween(this.obj.position)
+        .to({ y: this.originalY }, 100)
+        .onComplete(() => (this.obj.castShadow = false))
+        .start();
+    }
+
+    if (e.type == 'drag') {
+      this.obj.position.x = e.point.x;
+      this.obj.position.z = e.point.z;
     }
   };
 
@@ -69,6 +90,8 @@ export class CardImpl extends React.Component {
   }
 
   render() {
+    this.obj.position.x = this.props.x + this.props.splayX;
+    this.obj.position.y = this.originalY + this.props.splayY;
     return null;
   }
 }

@@ -82,6 +82,7 @@ export class UI extends React.Component {
     const plane = new THREE.Mesh(geometry, material);
     plane.receiveShadow = true;
     plane.lookAt(plane.up);
+    this.plane = plane;
     this.scene.add(plane);
 
     const helper = new THREE.GridHelper(2000, 2000);
@@ -95,21 +96,61 @@ export class UI extends React.Component {
   }
 
   setupMouseEvents() {
+    // List of objects currently being dragged.
+    let dragging_ = [];
+
+    // The 2D viewport co-ordinates of the mouse.
     const mouse = new THREE.Vector2();
+
+    // Raycaster that's used to calculate objects that the
+    // mouse intersects.
     this.raycaster = new THREE.Raycaster();
 
-    const onGenericMouseEvent = e => {
+    const dispatchMouseCallbacks = (e, objects) => {
+      if (objects === undefined) {
+        this.raycaster.setFromCamera(mouse, this.camera);
+        objects = this.raycaster.intersectObjects(
+          this.childGroup.children,
+          true
+        );
+      }
+
+      objects.forEach(obj => {
+        e.point = obj.point;
+        if (obj.object.id in this.callbacks_) {
+          this.callbacks_[obj.object.id](e);
+        }
+        if (obj.object.parent.id in this.callbacks_) {
+          this.callbacks_[obj.object.parent.id](e);
+        }
+      });
+    };
+
+    const onMouseDown = e => {
       this.raycaster.setFromCamera(mouse, this.camera);
-      this.raycaster
-        .intersectObjects(this.childGroup.children, true)
-        .forEach(obj => {
-          if (obj.object.id in this.callbacks_) {
-            this.callbacks_[obj.object.id](e);
-          }
-          if (obj.object.parent.id in this.callbacks_) {
-            this.callbacks_[obj.object.parent.id](e);
-          }
-        });
+      const objects = this.raycaster.intersectObjects(
+        this.childGroup.children,
+        true
+      );
+
+      dragging_ = objects.filter(
+        obj => obj.object.userData.draggable && obj.object.userData.responsive
+      );
+
+      dispatchMouseCallbacks(e, objects);
+
+      if (dragging_.length > 0) {
+        dispatchMouseCallbacks({ ...e, type: 'dragStart' }, dragging_);
+      }
+    };
+
+    const onMouseUp = e => {
+      dispatchMouseCallbacks(e);
+
+      if (dragging_.length > 0) {
+        dispatchMouseCallbacks({ ...e, type: 'dragEnd' }, dragging_);
+        dragging_ = [];
+      }
     };
 
     const onMouseMove = e => {
@@ -126,11 +167,27 @@ export class UI extends React.Component {
       mouse.x = x / window.innerWidth * 2 - 1;
       mouse.y = -(y / window.innerHeight) * 2 + 1;
 
-      onGenericMouseEvent(e);
+      dispatchMouseCallbacks(e);
+
+      this.raycaster.setFromCamera(mouse, this.camera);
+      const r = this.raycaster.intersectObject(this.plane);
+
+      if (r.length > 0) {
+        const e = { ...e, type: 'drag' };
+        dragging_.forEach(obj => {
+          e.point = r[0].point;
+          if (obj.object.id in this.callbacks_) {
+            this.callbacks_[obj.object.id](e);
+          }
+          if (obj.object.parent.id in this.callbacks_) {
+            this.callbacks_[obj.object.parent.id](e);
+          }
+        });
+      }
     };
 
     const onMouseWheel = e => {
-      onGenericMouseEvent(e);
+      dispatchMouseCallbacks(e);
 
       if (e.defaultPrevented) {
         return;
@@ -150,9 +207,9 @@ export class UI extends React.Component {
     const root = this.ref_.current;
     root.addEventListener('mousemove', onMouseMove);
     root.addEventListener('wheel', onMouseWheel);
-    root.addEventListener('mousedown', onGenericMouseEvent);
-    root.addEventListener('mouseup', onGenericMouseEvent);
-    root.addEventListener('click', onGenericMouseEvent);
+    root.addEventListener('mousedown', onMouseDown);
+    root.addEventListener('mouseup', onMouseUp);
+    root.addEventListener('click', dispatchMouseCallbacks);
   }
 
   animate = () => {
