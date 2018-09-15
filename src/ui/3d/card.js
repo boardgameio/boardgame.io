@@ -10,7 +10,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
 import * as THREE from 'three';
-import { Tween, Easing } from '@tweenjs/tween.js';
+import TWEEN from '@tweenjs/tween.js';
 
 export class CardImpl extends React.Component {
   static propTypes = {
@@ -61,14 +61,14 @@ export class CardImpl extends React.Component {
 
     if (e.type == 'dragStart') {
       this.obj.castShadow = true;
-      new Tween(this.obj.position)
+      new TWEEN.Tween(this.obj.position)
         .to({ y: this.originalY + 0.5 }, 100)
-        .easing(Easing.Quadratic.Out)
+        .easing(TWEEN.Easing.Quadratic.Out)
         .start();
     }
 
     if (e.type == 'dragEnd') {
-      new Tween(this.obj.position)
+      new TWEEN.Tween(this.obj.position)
         .to({ y: this.originalY }, 100)
         .onComplete(() => (this.obj.castShadow = false))
         .start();
