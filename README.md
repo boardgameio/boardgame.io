@@ -13,12 +13,11 @@
   <strong>Full Documentation: <a href="https://google.github.io/boardgame.io">link</a></strong>
 </p>
 
-The goal of this framework is to allow a game author to
-essentially translate the rules of a game into a series of
-simple functions that describe how the game state changes
-when a particular move is made, and the framework takes
-care of the rest. You will not need to write any
-networking or backend code.
+The goal of this framework is to allow a game developer to
+translate the rules of a game into a series of simple functions
+that describe how the game state changes when a particular move is made,
+and the framework takes care of the rest. You get a fully multiplayer
+implementation without having to write any networking or storage layer code.
 
 ## Features
 
@@ -29,8 +28,14 @@ networking or backend code.
 * **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **UI Agnostic**: Client API for React, React Native or plain JS.
+* **UI Agnostic**: Vanilla JS client with bindings for React / React Native.
 * **Component Toolkit**: Components for hex grids, cards, tokens.
+
+The framework has a modular design, so you can swap out any part of it with your own
+custom implementation. For example, you can connect it to any storage backend, or
+change the underlying transport layer (socket.io) to a different implementation. Even though
+bindings are provided for React, you can use the vanilla JS client to connect
+it to any client-side framework (see the examples in this repository for how to use threejs).
 
 ## Usage
 
