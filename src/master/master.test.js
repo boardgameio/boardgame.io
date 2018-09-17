@@ -364,7 +364,7 @@ describe('evaluateRedactedMoves', () => {
     const rm = {
       clickCell: { showArgs: true },
     };
-    const logEvents = [ActionCreators.makeMove('unclickCell', [1, 2, 3], '0')];
+    const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
 
     // player that made the move
     let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
