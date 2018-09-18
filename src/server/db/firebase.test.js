@@ -121,6 +121,28 @@ describe('Firestore', async () => {
     expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
     expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
   });
+
+  test('list entries', async () => {
+    // Insert 3 entries
+    await db.set('gameID_0', { a: 0 });
+    await db.set('gameID_2', { a: 2 });
+    await db.set('gameID_1', { a: 1 });
+    const ids = await db.list();
+    expect(ids).toContain('gameID_0');
+    expect(ids).toContain('gameID_1');
+    expect(ids).toContain('gameID_2');
+  });
+
+  test('remove entry', async () => {
+    // Insert 2 entries
+    await db.set('gameID_0', { a: 0 });
+    await db.set('gameID_1', { a: 1 });
+    // Remove 1
+    await db.remove('gameID_1');
+    expect(await db.has('gameID_0')).toBe(true);
+    expect(await db.has('gameID_1')).toBe(false);
+    await db.remove('gameID_1');
+  });
 });
 
 describe('RTDB', async () => {
@@ -198,5 +220,27 @@ describe('RTDB', async () => {
     db.cache.reset();
     expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
     expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
+  });
+
+  test('list entries', async () => {
+    // Insert 3 entries
+    await db.set('gameID_0', { a: 0 });
+    await db.set('gameID_2', { a: 2 });
+    await db.set('gameID_1', { a: 1 });
+    const ids = await db.list();
+    expect(ids).toContain('gameID_0');
+    expect(ids).toContain('gameID_1');
+    expect(ids).toContain('gameID_2');
+  });
+
+  test('remove entry', async () => {
+    // Insert 2 entries
+    await db.set('gameID_0', { a: 0 });
+    await db.set('gameID_1', { a: 1 });
+    // Remove 1
+    await db.remove('gameID_1');
+    expect(await db.has('gameID_0')).toBe(true);
+    expect(await db.has('gameID_1')).toBe(false);
+    await db.remove('gameID_1');
   });
 });

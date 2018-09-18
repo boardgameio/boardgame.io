@@ -30,11 +30,9 @@ test('inmemory db', async () => {
   let keys = await db.list();
   expect(keys).toEqual(['gameID']);
 
-  // Must remove game from DB and return it.
-  state = await db.remove('gameID');
-  expect(state).toEqual({ a: 1 });
-  has = await db.has('gameID');
-  expect(has).toEqual(false);
-  state = await db.remove('gameID');
-  expect(state).toEqual(undefined);
+  // Must remove game from DB
+  await db.remove('gameID');
+  expect(await db.has('gameID')).toEqual(false);
+  // Shall not return error
+  await db.remove('gameID');
 });
