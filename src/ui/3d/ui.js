@@ -172,11 +172,20 @@ export class UI extends React.Component {
       let x = e.clientX;
       let y = e.clientY;
 
-      let el = document.getElementById('bgio-canvas');
-      while (el) {
-        if (el.offsetLeft) x -= el.offsetLeft;
-        if (el.offsetTop) y -= el.offsetTop;
-        el = el.offsetParent;
+      const el = document.getElementById('bgio-canvas');
+
+      let t = el;
+      while (t) {
+        if (t.offsetLeft) x -= t.offsetLeft;
+        if (t.offsetTop) y -= t.offsetTop;
+        t = t.offsetParent;
+      }
+
+      t = el;
+      while (t) {
+        if (t.scrollLeft) x += t.scrollLeft;
+        if (t.scrollTop) y += t.scrollTop;
+        t = t.parentNode;
       }
 
       mouse.x = x / window.innerWidth * 2 - 1;
