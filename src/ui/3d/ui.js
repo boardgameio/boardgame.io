@@ -173,9 +173,9 @@ export class UI extends React.Component {
       let y = e.clientY;
 
       let el = document.getElementById('bgio-canvas');
-      while (el && el.offsetLeft) {
-        x -= el.offsetLeft;
-        y -= el.offsetTop;
+      while (el) {
+        if (el.offsetLeft) x -= el.offsetLeft;
+        if (el.offsetTop) y -= el.offsetTop;
         el = el.offsetParent;
       }
 
