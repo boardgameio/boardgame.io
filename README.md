@@ -31,9 +31,9 @@ implementation without having to write any networking or storage layer code.
 * **UI Agnostic**: Vanilla JS client with bindings for React / React Native.
 * **Component Toolkit**: Components for hex grids, cards, tokens.
 
-The framework has a modular design, so you can swap out any part of it with your own
-custom implementation. For example, you can connect it to any storage backend, or
-change the underlying transport layer (socket.io) to a different implementation. Even though
+The framework is modular and made up of pluggable adapters, so you can swap out any part
+of it with your own custom implementation. For example, you can connect it to any storage
+backend, or change the underlying websocket layer to a different implementation. Even though
 bindings are provided for React, you can use the vanilla JS client to connect
 it to any client-side framework (see the examples in this repository for how to use threejs).
 
