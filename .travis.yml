@@ -10,7 +10,7 @@ notifications:
   email: false
 script:
   - npm run lint
-  - npm run test:coverage
+  - npm run test:coverage-travis
 after_success:
   - npm run test:coveralls
   - if [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; then curl -O https://raw.githubusercontent.com/danvk/travis-weigh-in/master/weigh_in.py && python weigh_in.py dist/boardgameio.min.js; fi
