@@ -500,6 +500,8 @@ export function FlowWithPhases({
     // Update state.
     ctx = { ...ctx, turn };
 
+    state = { ...state, G, ctx };
+
     // End phase if condition is met.
     const endPhaseArg = shouldEndPhase(state);
     if (endPhaseArg) {
@@ -508,12 +510,12 @@ export function FlowWithPhases({
 
     if (endPhase) {
       return this.dispatch(
-        { ...state, G, ctx },
+        state,
         automaticGameEvent('endPhase', [endPhaseArg], this.playerID)
       );
     }
 
-    return startTurn({ ...state, G, ctx }, conf);
+    return startTurn(state, conf);
   }
 
   function endGameEvent(state, arg) {
