@@ -16,7 +16,7 @@ const App = Client({
   numPlayers: 3,
   board: Board,
   debug: false,
-  multiplayer: true,
+  multiplayer: { local: true },
 });
 
 const Multiview = () => (
