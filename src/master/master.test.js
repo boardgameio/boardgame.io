@@ -10,7 +10,7 @@ import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import * as Redux from 'redux';
 import { InMemory } from '../server/db/inmemory';
-import { Master, evaluateRedactedMoves } from './master';
+import { Master, redactLog } from './master';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -314,10 +314,10 @@ describe('authentication', async () => {
   });
 });
 
-describe('evaluateRedactedMoves', () => {
+describe('redactLog', () => {
   test('no redactedMoves', () => {
     const logEvents = [ActionCreators.gameEvent('endTurn')];
-    const result = evaluateRedactedMoves(undefined, logEvents, {}, '0');
+    const result = redactLog(undefined, logEvents, {}, '0');
     expect(result).toMatchObject(logEvents);
   });
 
@@ -328,11 +328,11 @@ describe('evaluateRedactedMoves', () => {
     const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
 
     // player that made the move
-    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, {}, '0');
     expect(result).toMatchObject(logEvents);
 
     // other player
-    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, {}, '1');
     expect(result).toMatchObject([
       {
         type: 'MAKE_MOVE',
@@ -353,10 +353,10 @@ describe('evaluateRedactedMoves', () => {
     const logEvents = [ActionCreators.makeMove('unclickCell', [1, 2, 3], '0')];
 
     // player that made the move
-    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, {}, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, {}, '1');
     expect(result).toMatchObject(logEvents);
   });
 
@@ -367,10 +367,10 @@ describe('evaluateRedactedMoves', () => {
     const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
 
     // player that made the move
-    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, {}, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, {}, '1');
     expect(result).toMatchObject(logEvents);
   });
 
@@ -381,10 +381,10 @@ describe('evaluateRedactedMoves', () => {
     const logEvents = [ActionCreators.gameEvent('endTurn')];
 
     // player that made the move
-    let result = evaluateRedactedMoves(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, {}, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = evaluateRedactedMoves(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, {}, '1');
     expect(result).toMatchObject(logEvents);
   });
 });
