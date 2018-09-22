@@ -85,3 +85,34 @@ test('Mongo - race conditions', async () => {
   expect(await db.get('gameID')).toMatchObject({ _stateID: 1 });
   expect(db.cache.get('gameID')).toMatchObject({ _stateID: 1 });
 });
+
+test('Mongo - list', async () => {
+  const mockClient = MongoDB.MongoClient;
+  const db = new Mongo({ mockClient, url: 'a' });
+  await db.connect();
+
+  // Insert 3 entries
+  await db.set('gameID_0', { a: 0 });
+  await db.set('gameID_2', { a: 2 });
+  await db.set('gameID_1', { a: 1 });
+  const ids = await db.list();
+  expect(ids).toContain('gameID_0');
+  expect(ids).toContain('gameID_1');
+  expect(ids).toContain('gameID_2');
+});
+
+test('Mongo - remove', async () => {
+  const mockClient = MongoDB.MongoClient;
+  const db = new Mongo({ mockClient, url: 'a' });
+  await db.connect();
+
+  // Insert 2 entries
+  await db.set('gameID_0', { a: 0 });
+  await db.set('gameID_1', { a: 1 });
+  // Remove 1
+  await db.remove('gameID_1');
+  expect(await db.has('gameID_0')).toBe(true);
+  expect(await db.has('gameID_1')).toBe(false);
+  // Shall not throw error
+  await db.remove('gameID_1');
+});
