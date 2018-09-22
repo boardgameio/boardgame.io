@@ -40,6 +40,7 @@ get done before we are ready for a v1 release.
 ### Server
 
 * [x] abstract away server component ([issue](https://github.com/google/boardgame.io/issues/251))
+* [ ] server scaling ([issue](https://github.com/google/boardgame.io/issues/277))
 
 ### Documentation
 
