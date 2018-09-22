@@ -15,6 +15,7 @@ import TWEEN from '@tweenjs/tween.js';
 export class CardImpl extends React.Component {
   static propTypes = {
     context: PropTypes.any.isRequired,
+    image: PropTypes.string,
     width: PropTypes.number,
     height: PropTypes.number,
     thickness: PropTypes.number,
@@ -49,7 +50,13 @@ export class CardImpl extends React.Component {
       props.thickness,
       props.height
     );
-    const material = new THREE.MeshLambertMaterial({ color: 0x777777 });
+
+    let opts = { color: 0x777777 };
+    if (props.image) {
+      opts = { map: new THREE.TextureLoader().load(props.image) };
+    }
+
+    const material = new THREE.MeshLambertMaterial(opts);
     this.obj = new THREE.Mesh(geometry, material);
     this.obj.position.y = this.originalY;
     this.obj.userData.draggable = props.draggable;
