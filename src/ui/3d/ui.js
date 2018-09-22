@@ -79,7 +79,7 @@ export class UI extends React.Component {
     // Set up ground.
 
     const geometry = new THREE.PlaneBufferGeometry(100, 100);
-    const material = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    const material = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
     const plane = new THREE.Mesh(geometry, material);
     plane.receiveShadow = true;
     plane.lookAt(plane.up);
