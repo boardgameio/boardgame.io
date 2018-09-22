@@ -21,6 +21,7 @@ export class CardImpl extends React.Component {
     responsive: PropTypes.bool,
     draggable: PropTypes.bool,
     x: PropTypes.number,
+    z: PropTypes.number,
     splayX: PropTypes.number,
     splayY: PropTypes.number,
     splayZ: PropTypes.number,
@@ -33,6 +34,7 @@ export class CardImpl extends React.Component {
     splayY: 0,
     splayZ: 0,
     x: 0,
+    z: 0,
     width: 1,
     height: 1.5,
     thickness: 0.01,
@@ -90,6 +92,7 @@ export class CardImpl extends React.Component {
 
   render() {
     this.obj.position.x = this.props.x + this.props.splayX;
+    this.obj.position.z = this.props.z + this.props.splayZ;
     this.obj.position.y = this.originalY + this.props.splayY;
     return null;
   }
