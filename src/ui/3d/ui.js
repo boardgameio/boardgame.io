@@ -18,6 +18,7 @@ import TWEEN from '@tweenjs/tween.js';
 export class UI extends React.Component {
   static propTypes = {
     children: PropTypes.any,
+    onMouseEvent: PropTypes.func,
   };
 
   constructor(props) {
@@ -106,6 +107,30 @@ export class UI extends React.Component {
     // mouse intersects.
     this.raycaster = new THREE.Raycaster();
 
+    const getClickType = e => {
+      if (e.which !== undefined) {
+        switch (e.which) {
+          case 1:
+            return 'leftclick';
+          case 2:
+            return 'middleclick';
+          case 3:
+            return 'rightclick';
+        }
+      }
+
+      if (e.button !== undefined) {
+        switch (e.button) {
+          case 0:
+            return 'leftclick';
+          case 1:
+            return 'middleclick';
+          case 2:
+            return 'rightclick';
+        }
+      }
+    };
+
     const dispatchMouseCallbacks = (e, objects) => {
       if (objects === undefined) {
         this.raycaster.setFromCamera(mouse, this.camera);
@@ -113,6 +138,10 @@ export class UI extends React.Component {
           this.childGroup.children,
           true
         );
+      }
+
+      if (this.props.onMouseEvent) {
+        this.props.onMouseEvent(e, objects);
       }
 
       objects.forEach(obj => {
@@ -127,15 +156,7 @@ export class UI extends React.Component {
     };
 
     const onMouseDown = e => {
-      // Ignore everything but left-click.
-      if (e.which !== undefined && e.which != 1) {
-        return;
-      }
-
-      // Ignore everything but left-click.
-      if (e.button !== undefined && e.button != 0) {
-        return;
-      }
+      const type = getClickType(e);
 
       this.raycaster.setFromCamera(mouse, this.camera);
       const objects = this.raycaster.intersectObjects(
@@ -143,9 +164,13 @@ export class UI extends React.Component {
         true
       );
 
-      dragging_ = objects.filter(
-        obj => obj.object.userData.draggable && obj.object.userData.responsive
-      );
+      if (type == 'leftclick') {
+        dragging_ = objects.filter(
+          obj => obj.object.userData.draggable && obj.object.userData.responsive
+        );
+      } else {
+        e = { ...e, type };
+      }
 
       dispatchMouseCallbacks(e, objects);
 
@@ -155,16 +180,6 @@ export class UI extends React.Component {
     };
 
     const onMouseUp = e => {
-      // Ignore everything but left-click.
-      if (e.which !== undefined && e.which != 1) {
-        return;
-      }
-
-      // Ignore everything but left-click.
-      if (e.button !== undefined && e.button != 0) {
-        return;
-      }
-
       this.raycaster.setFromCamera(mouse, this.camera);
       const objects = this.raycaster.intersectObjects(
         this.childGroup.children,
@@ -254,6 +269,7 @@ export class UI extends React.Component {
     root.addEventListener('mousedown', onMouseDown);
     root.addEventListener('mouseup', onMouseUp);
     root.addEventListener('click', dispatchMouseCallbacks);
+    root.addEventListener('contextmenu', e => e.preventDefault());
   }
 
   animate = () => {
