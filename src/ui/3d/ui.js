@@ -175,6 +175,7 @@ export class UI extends React.Component {
       dispatchMouseCallbacks(e, objects);
 
       if (dragging_.length > 0) {
+        dragging_ = [dragging_[0]];
         dispatchMouseCallbacks({ ...e, type: 'dragStart' }, dragging_);
       }
     };
