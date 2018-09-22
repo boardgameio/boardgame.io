@@ -132,4 +132,31 @@ export class Mongo {
       .toArray();
     return docs.length > 0;
   }
+
+  /**
+   * Remove the game state from the DB.
+   * @param {string} id - The game id.
+   */
+  async remove(id) {
+    if (!await this.has(id)) return;
+
+    function _dropCollection(db, id) {
+      return new Promise(function(ok) {
+        db.dropCollection(id, ok);
+      });
+    }
+    await _dropCollection(this.db, id);
+
+    // Update the cache
+    this.cache.del(id);
+  }
+
+  /**
+   * Return all keys.
+   * @returns {array} - Array of keys (strings)
+   */
+  async list() {
+    const keys = await this.db.listCollections().toArray();
+    return keys.map(r => r.name);
+  }
 }

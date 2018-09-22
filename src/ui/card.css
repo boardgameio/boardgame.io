@@ -22,12 +22,22 @@
   border: 1px solid #cdcdcd;
   width: 100px;
   height: 140px;
-  transition: all 0.1s;
   overflow: hidden;
+  transition: transform 0.1s;
 }
 
-.bgio-card:not(.no-hover):hover {
-  transform: scale(1.2);
+.bgio-card.placeholder {
+  cursor: default;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bgio-card.accept {
+  transform: rotate(10deg);
+  box-shadow: 5px 5px 5px #ddd;
+}
+
+.bgio-card.reject {
 }
 
 .bgio-card__front,

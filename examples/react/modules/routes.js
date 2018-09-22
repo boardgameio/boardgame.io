@@ -12,6 +12,7 @@ import phases from './phases';
 import secret_state from './secret-state';
 import random from './random';
 import turnorder from './turnorder';
+import ui from './ui';
 import threejs from './threejs';
 
 const routes = [
@@ -38,6 +39,10 @@ const routes = [
   {
     name: 'Secret State',
     routes: secret_state.routes,
+  },
+  {
+    name: 'UI',
+    routes: ui.routes,
   },
   {
     name: 'Other Frameworks',
