@@ -58,6 +58,7 @@ export class CardImpl extends React.Component {
 
     const material = new THREE.MeshLambertMaterial(opts);
     this.obj = new THREE.Mesh(geometry, material);
+    this.obj.receiveShadow = true;
     this.obj.position.y = this.originalY;
     this.obj.userData.draggable = props.draggable;
     this.obj.userData.responsive = props.responsive;
