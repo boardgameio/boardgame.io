@@ -127,6 +127,16 @@ export class UI extends React.Component {
     };
 
     const onMouseDown = e => {
+      // Ignore everything but left-click.
+      if (e.which !== undefined && e.which != 1) {
+        return;
+      }
+
+      // Ignore everything but left-click.
+      if (e.button !== undefined && e.button != 0) {
+        return;
+      }
+
       this.raycaster.setFromCamera(mouse, this.camera);
       const objects = this.raycaster.intersectObjects(
         this.childGroup.children,
@@ -145,6 +155,16 @@ export class UI extends React.Component {
     };
 
     const onMouseUp = e => {
+      // Ignore everything but left-click.
+      if (e.which !== undefined && e.which != 1) {
+        return;
+      }
+
+      // Ignore everything but left-click.
+      if (e.button !== undefined && e.button != 0) {
+        return;
+      }
+
       this.raycaster.setFromCamera(mouse, this.camera);
       const objects = this.raycaster.intersectObjects(
         this.childGroup.children,
