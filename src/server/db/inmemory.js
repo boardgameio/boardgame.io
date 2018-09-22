@@ -52,4 +52,21 @@ export class InMemory {
   async has(id) {
     return await this.games.has(id);
   }
+
+  /**
+   * Remove the game state from the in-memory object.
+   * @param {string} id - The game id.
+   */
+  async remove(id) {
+    if (!await this.games.has(id)) return;
+    this.games.delete(id);
+  }
+
+  /**
+   * Return all keys.
+   * @returns {array} - Array of keys (strings)
+   */
+  async list() {
+    return Array.from(await this.games.keys());
+  }
 }

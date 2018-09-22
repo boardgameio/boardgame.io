@@ -151,4 +151,42 @@ export class Firebase {
 
     return exists;
   }
+
+  /**
+   * Remove the game state from the DB.
+   * @param {string} id - The game id.
+   */
+  async remove(id) {
+    if (!await this.has(id)) return;
+
+    let col;
+    if (this.engine === ENGINE_RTDB) {
+      col = this.db.child(id);
+      await col.remove();
+    } else {
+      col = this.db.collection(this.dbname).doc(id);
+      await col.delete();
+    }
+
+    // Update the cache
+    this.cache.del(id);
+  }
+
+  /**
+   * Return all keys.
+   * @returns {array} - Array of keys (strings)
+   */
+  async list() {
+    if (this.engine === ENGINE_RTDB) {
+      // firebase RTDB
+      const cols = await this.db.once('value');
+      return cols.ref.sortedDataKeys;
+    } else {
+      // firestore
+      const docs = await this.db.collection(this.dbname).get();
+      let ids = [];
+      docs.forEach(doc => ids.push(doc.id));
+      return ids;
+    }
+  }
 }
