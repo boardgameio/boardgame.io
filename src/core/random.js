@@ -89,7 +89,7 @@ export class Random {
         if (diceCount === undefined) {
           return Math.floor(random() * spotvalue) + 1;
         } else {
-          return [...Array(diceCount).keys()].map(
+          return [...new Array(diceCount).keys()].map(
             () => Math.floor(random() * spotvalue) + 1
           );
         }
@@ -128,7 +128,7 @@ export class Random {
         if (diceCount === undefined) {
           return Math.floor(random() * spotvalue) + 1;
         } else {
-          return [...Array(diceCount).keys()].map(
+          return [...new Array(diceCount).keys()].map(
             () => Math.floor(random() * spotvalue) + 1
           );
         }

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { FlippableStory, PlayingCardStory } from './CardStories';
+import { FlippableStory, PlayingCardStory } from './card-stories';
 
 storiesOf('Card', module).add('Flippable Card', () => <FlippableStory />);
 storiesOf('Card', module).add('Standard Playing Card', () => (

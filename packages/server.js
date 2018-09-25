@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server } from '../src/server/index.js';
-import { Mongo, Firebase } from '../src/server/db/index.js';
+import { Server } from '../src/server';
+import { Mongo, Firebase } from '../src/server/db';
 
 export { Server, Mongo, Firebase };

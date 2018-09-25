@@ -25,7 +25,7 @@ test('parse arguments', () => {
   expect(spy.mock.calls[1]).toEqual([['a', 'b'], ',']);
 
   root.instance().onSubmit('3, unknown, 4');
-  expect(spy.mock.calls.length).toEqual(2);
+  expect(spy.mock.calls).toHaveLength(2);
   expect(root.state().error).toEqual('ReferenceError: unknown is not defined');
 });
 
@@ -36,13 +36,13 @@ test('DebugMove', () => {
   root.simulate('click');
   root.find('.move span').simulate('keyDown', { key: 'Enter' });
 
-  expect(fn.mock.calls.length).toBe(1);
+  expect(fn.mock.calls).toHaveLength(1);
 
   root.simulate('click');
   root.find('.move span').simulate('keydown', { key: '1' });
   root.find('.move span').simulate('keydown', { key: 'Enter' });
 
-  expect(fn.mock.calls.length).toBe(2);
+  expect(fn.mock.calls).toHaveLength(2);
 });
 
 test('escape blurs DebugMove', () => {

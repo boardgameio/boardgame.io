@@ -126,10 +126,10 @@ test('toggle Debug UI', () => {
     <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
   );
 
-  expect(debug.find('.debug-ui').length).toEqual(1);
+  expect(debug.find('.debug-ui')).toHaveLength(1);
   Mousetrap.simulate('d');
   debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
-  expect(debug.find('.debug-ui').length).toEqual(0);
+  expect(debug.find('.debug-ui')).toHaveLength(0);
 });
 
 describe('log', () => {
@@ -138,10 +138,10 @@ describe('log', () => {
       <Debug gamestate={gamestate} endTurn={() => {}} gameID="default" />
     );
 
-    expect(debug.find('GameLog').length).toEqual(0);
+    expect(debug.find('GameLog')).toHaveLength(0);
     Mousetrap.simulate('l');
     debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
-    expect(debug.find('GameLog').length).toEqual(1);
+    expect(debug.find('GameLog')).toHaveLength(1);
   });
 
   test('hover', () => {
@@ -166,10 +166,10 @@ describe('log', () => {
       />
     );
 
-    expect(debug.find('GameLog').length).toEqual(0);
+    expect(debug.find('GameLog')).toHaveLength(0);
     Mousetrap.simulate('l');
     debug.setProps({}); // https://github.com/airbnb/enzyme/issues/1245
-    expect(debug.find('GameLog').length).toEqual(1);
+    expect(debug.find('GameLog')).toHaveLength(1);
 
     debug
       .find('GameLog .log-event')
@@ -199,9 +199,9 @@ test('toggle AI visualizer', () => {
     />
   );
 
-  expect(debug.find('.ai-visualization').length).toBe(0);
+  expect(debug.find('.ai-visualization')).toHaveLength(0);
   debug.setState({ AIMetadata: {} });
-  expect(debug.find('.ai-visualization').length).toBe(1);
+  expect(debug.find('.ai-visualization')).toHaveLength(1);
 });
 
 describe('simulate', () => {

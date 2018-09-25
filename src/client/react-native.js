@@ -75,6 +75,7 @@ export function Client(opts) {
       this.client.subscribe(() => this.forceUpdate());
     }
 
+    // eslint-disable-next-line react/no-deprecated
     componentWillReceiveProps(nextProps) {
       if (nextProps.gameID != this.props.gameID) {
         this.client.updateGameID(nextProps.gameID);
@@ -87,6 +88,7 @@ export function Client(opts) {
       }
     }
 
+    // eslint-disable-next-line react/no-deprecated
     componentWillMount() {
       this.client.connect();
     }
