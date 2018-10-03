@@ -5,7 +5,7 @@
 <p align="center">
 <a href="https://www.npmjs.com/package/boardgame.io"><img src="https://badge.fury.io/js/boardgame.io.svg" alt="npm version" /></a>
 <a href='https://semaphoreci.com/nicolodavis/boardgame-io'> <img src='https://semaphoreci.com/api/v1/nicolodavis/boardgame-io/branches/master/shields_badge.svg' alt='Build Status'></a>
-<a href="https://coveralls.io/github/google/boardgame.io?branch=master"><img src="https://img.shields.io/coveralls/google/boardgame.io.svg" alt="Coveralls" /></a>
+<a href="https://coveralls.io/github/nicolodavis/boardgame.io?branch=master"><img src="https://img.shields.io/coveralls/nicolodavis/boardgame.io.svg" alt="Coveralls" /></a>
 <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
 </p>
 
@@ -60,9 +60,3 @@ See [changelog](docs/CHANGELOG.md).
 
 See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](docs/roadmap.md)
 to find things that you could contribute to.
-
-## Disclaimer
-
-This is not an official Google product. It's a Googler's
-hobby project that's supported by contributions from the
-community.
