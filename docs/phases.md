@@ -117,7 +117,7 @@ or when the turn or phase is ended. These can also be overridden at the phase le
 Let's take a look at some of these:
 
 !> For a more complete set of options, take a look
-[here](https://github.com/google/boardgame.io/blob/master/src/core/flow.js#L139).
+[here](https://github.com/nicolodavis/boardgame.io/blob/master/src/core/flow.js#L139).
 
 ```js
 flow: {

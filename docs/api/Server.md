@@ -36,7 +36,7 @@ const server = Server({
   // custom storage backend not supported by
   // the framework. DbImpl must implement the
   // same interface shown in db.js:
-  // https://github.com/google/boardgame.io/blob/master/src/server/db.js
+  // https://github.com/nicolodavis/boardgame.io/blob/master/src/server/db.js
   db: new DbImpl(),
 });
 
