@@ -12,7 +12,7 @@ from time to time.
 
 ## Pull Requests
 
-We use [Pull Requests](https://help.github.com/articles/about-pull-requests/) for external contributions. Code must be well-tested and not decrease the test coverage significantly.
+[Pull Requests](https://help.github.com/articles/about-pull-requests/) are used for contributions. Code must be well-tested and not decrease the test coverage significantly.
 
 #### Use a separate branch (not `master`)
 
@@ -49,9 +49,11 @@ $ npm run docsify
 
 ## Contributor License Agreement
 
-Contributions to this project must be accompanied by a Contributor License
+This project was created by a Google employee (although this is
+not an official Google project). Therefore,
+contributions to this project must be accompanied by a Contributor License
 Agreement. You (or your employer) retain the copyright to your contribution,
-this simply gives us permission to use and redistribute your contributions as
+this simply gives Google permission to use and redistribute your contributions as
 part of the project. Head over to <https://cla.developers.google.com/> to see
 your current agreements on file or to sign a new one.
 
