@@ -37,6 +37,12 @@ export class DebugMove extends React.Component {
       this.props.fn.apply(this, argArray);
     } catch (e) {
       error = '' + e;
+      if (
+        process.env.NODE_ENV === 'development' ||
+        process.env.NODE_ENV === 'test'
+      ) {
+        console.error(e);
+      }
     }
 
     this.setState({

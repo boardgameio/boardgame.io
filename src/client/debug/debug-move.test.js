@@ -16,6 +16,8 @@ Enzyme.configure({ adapter: new Adapter() });
 
 test('parse arguments', () => {
   const spy = jest.fn();
+  console.error = jest.fn();
+
   const root = Enzyme.mount(<DebugMove name="test" fn={spy} shortcut="e" />);
 
   root.instance().onSubmit('1,2');
@@ -27,6 +29,8 @@ test('parse arguments', () => {
   root.instance().onSubmit('3, unknown, 4');
   expect(spy.mock.calls.length).toEqual(2);
   expect(root.state().error).toEqual('ReferenceError: unknown is not defined');
+
+  expect(console.error.mock.calls.length).toEqual(1);
 });
 
 test('DebugMove', () => {
