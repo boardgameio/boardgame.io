@@ -3,37 +3,9 @@
 Creates a `boardgame.io` client. This is the entry point for
 the client application.
 
-The `Board` component will receive the following as `props`:
-
-1. `G`: The game state.
-
-2. `ctx`: The game metadata.
-
-3. `moves`: An object containing functions to dispatch various
-   moves that you have defined. The functions are named after the
-   moves you created using [Game()](/api/Game.md). Each function
-   can take any number of arguments, and they are passed to the
-   move function after `G` and `ctx`.
-
-4. `events`: An object containing functions to dispatch various
-   game events like `endTurn` and `endPhase`.
-
-5. `playerID`: The player ID associated with the client.
-
-6. `isActive`: `true` if the client is able to currently make
-   a move or interact with the game.
-
-7. `isMultiplayer`: `true` if it is a multiplayer game.
-
-8. `isConnected`: `true` if connection to the server is active.
-
-9. `enhancer`: An optional Redux store enhancer, passed along to
-   the internals store. See the [Debugging](debugging.md) section
-   for more details.
-
 ### Arguments
 
-1. obj(_object_): A config object with the options shown below.
+1. obj(_object_): A config object with the options shown below in the 'Usage'.
 
 ### Returns
 
@@ -46,6 +18,14 @@ The component supports the following `props`:
 2. `playerID`: Associate the client with a player (multiplayer).
 
 3. `debug`: Set to `false` to disable the Debug UI.
+
+The returned element can also take an optional `gameID`
+argument when used in multiplayer mode to connect to a
+specific game (as opposed to the default one).
+
+```
+<App gameID="my-game-id" />
+```
 
 ### Usage
 
@@ -76,10 +56,30 @@ const App = Client({
 ReactDOM.render(<App />, document.getElementById('app'));
 ```
 
-The returned element can also take an optional `gameID`
-argument when used in multiplayer mode to connect to a
-specific game (as opposed to the default one).
+The `Board` component will receive the following as `props`:
 
-```
-<App gameID="my-game-id" />
-```
+1. `G`: The game state.
+
+2. `ctx`: The game metadata.
+
+3. `moves`: An object containing functions to dispatch various
+   moves that you have defined. The functions are named after the
+   moves you created using [Game()](/api/Game.md). Each function
+   can take any number of arguments, and they are passed to the
+   move function after `G` and `ctx`.
+
+4. `events`: An object containing functions to dispatch various
+   game events like `endTurn` and `endPhase`.
+
+5. `playerID`: The player ID associated with the client.
+
+6. `isActive`: `true` if the client is able to currently make
+   a move or interact with the game.
+
+7. `isMultiplayer`: `true` if it is a multiplayer game.
+
+8. `isConnected`: `true` if connection to the server is active.
+
+9. `enhancer`: An optional Redux store enhancer, passed along to
+   the internals store. See the [Debugging](debugging.md) section
+   for more details.
