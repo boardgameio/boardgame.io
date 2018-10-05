@@ -5,7 +5,7 @@ the client application.
 
 ### Arguments
 
-1. obj(_object_): A config object with the options shown below in the 'Usage'.
+1. obj(_object_): A config object with the options shown below under 'Usage'.
 
 ### Returns
 
