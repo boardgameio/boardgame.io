@@ -9,7 +9,7 @@ the client application.
 
 ### Returns
 
-(`client`): A React component that runs the app.
+(`client`): A React component that runs the client.
 
 The component supports the following `props`:
 
@@ -18,14 +18,6 @@ The component supports the following `props`:
 2. `playerID`: Associate the client with a player (multiplayer).
 
 3. `debug`: Set to `false` to disable the Debug UI.
-
-The returned element can also take an optional `gameID`
-argument when used in multiplayer mode to connect to a
-specific game (as opposed to the default one).
-
-```
-<App gameID="my-game-id" />
-```
 
 ### Usage
 
@@ -39,7 +31,8 @@ const App = Client({
   // The number of players.
   numPlayers: 2,
 
-  // The React component representing your game board.
+  // Your React component representing the game board.
+  // The props that this component receives are listed below.
   board: Board,
 
   // Set to true to enable sending move updates to the
