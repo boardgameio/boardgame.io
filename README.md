@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/google/boardgame.io/master/docs/logo.svg?sanitize=true" alt="boardgame.io" />
+  <img src="https://raw.githubusercontent.com/nicolodavis/boardgame.io/master/docs/logo.svg?sanitize=true" alt="boardgame.io" />
 </p>
 
 <p align="center">
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <strong>Full Documentation: <a href="https://google.github.io/boardgame.io">link</a></strong>
+  <strong>Full Documentation: <a href="https://nicolodavis.github.io/boardgame.io">link</a></strong>
 </p>
 
 The goal of this framework is to allow a game developer to
@@ -60,3 +60,7 @@ See [changelog](docs/CHANGELOG.md).
 
 See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](docs/roadmap.md)
 to find things that you could contribute to.
+
+## License
+
+MIT
