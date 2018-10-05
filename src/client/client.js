@@ -92,6 +92,7 @@ class _ClientImpl {
     this.gameID = gameID;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
+    this.subscribeCallback = () => {};
 
     this.reducer = CreateGameReducer({
       game,
@@ -167,6 +168,8 @@ class _ClientImpl {
         }
       }
 
+      this.subscribeCallback();
+
       return result;
     };
 
@@ -233,8 +236,8 @@ class _ClientImpl {
 
   subscribe(fn) {
     const callback = () => fn(this.getState());
-    this.store.subscribe(callback);
     this.transport.subscribe(callback);
+    this.subscribeCallback = callback;
   }
 
   getState() {
