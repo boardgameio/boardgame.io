@@ -2,7 +2,7 @@
   "name": "boardgame.io",
   "version": "0.25.5",
   "description": "library for turn-based games",
-  "repository": "https://github.com/google/boardgame.io",
+  "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
     "dev": "cross-env NODE_ENV=development babel-watch --presets es2015 examples/react/server.js",
     "docsify": "docsify serve docs",
