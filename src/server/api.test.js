@@ -590,7 +590,7 @@ describe('.createApiServer', () => {
       });
 
       test('returns instances of the selected game', async () => {
-        expect(instances.length).toEqual(2);
+        expect(instances).toHaveLength(2);
       });
 
       test('returns game ids', async () => {

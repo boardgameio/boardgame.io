@@ -13,8 +13,8 @@ import UIContext from './ui-context';
 import { Draggable, DragComponent } from 'react-dragtastic';
 import './card.css';
 
-/* eslint-disable */
 export function GetDraggable(props, classNames, cardStyle, onClick) {
+  /* eslint-disable-next-line react/display-name */
   return ({ isActive, events }) => {
     return (
       <div
@@ -40,13 +40,17 @@ export function GetDragComponent(
   ref,
   isOverAcceptedCallback
 ) {
+  /* eslint-disable-next-line react/display-name, react/prop-types */
   return ({ x, y, isOverAccepted, currentlyHoveredDroppableId }) => {
     const classes = [...classNames];
+    /* eslint-disable-next-line react/prop-types */
     let content = props.back;
 
     isOverAcceptedCallback(isOverAccepted);
 
+    /* eslint-disable-next-line react/prop-types */
     if (props.isFaceUp) {
+      /* eslint-disable-next-line react/prop-types */
       content = props.front;
     }
 

@@ -1,4 +1,4 @@
-import { DBFromEnv } from './index';
+import { DBFromEnv } from '.';
 
 test('MONGO_URI', () => {
   process.env.MONGO_URI = 'test';

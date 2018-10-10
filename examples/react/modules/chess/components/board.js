@@ -42,6 +42,7 @@ class Board extends React.Component {
     selected: '',
   };
 
+  // eslint-disable-next-line react/no-deprecated
   componentWillReceiveProps(nextProps) {
     if (nextProps.G.pgn) {
       this.chess.load_pgn(nextProps.G.pgn);

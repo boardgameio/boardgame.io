@@ -17,7 +17,7 @@ import App from './app';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-const Grid = n => Array(n).fill(null);
+const Grid = n => new Array(n).fill(null);
 
 // This wraps up the App in a MemoryRouter, which let's us set the route how we want
 const RoutedApp = props => (
@@ -64,7 +64,7 @@ test('clicked cells are inactive', () => {
 test('victory', () => {
   const game = Enzyme.mount(<RoutedApp route="/" />);
   const board = game.find('Board').instance();
-  const cells = Array(9).fill(null);
+  const cells = new Array(9).fill(null);
 
   expect(board.props.G).toEqual({
     cells: cells,

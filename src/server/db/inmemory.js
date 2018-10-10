@@ -67,6 +67,6 @@ export class InMemory {
    * @returns {array} - Array of keys (strings)
    */
   async list() {
-    return Array.from(await this.games.keys());
+    return [...(await this.games.keys())];
   }
 }

@@ -65,7 +65,7 @@ test('predefined dice values', () => {
 
     const multiple = pair.fn(5);
     expect(multiple).toBeDefined();
-    expect(multiple.length).toBe(5);
+    expect(multiple).toHaveLength(5);
     multiple.forEach(m => {
       expect(m).toBeGreaterThanOrEqual(1);
       expect(m).toBeLessThanOrEqual(pair.highest);
@@ -94,7 +94,7 @@ test('Random.Die', () => {
   {
     const multiple = _api.Die(6, 3);
     expect(multiple).toBeDefined();
-    expect(multiple.length).toBe(3);
+    expect(multiple).toHaveLength(3);
     multiple.forEach(m => {
       expect(m).toBeGreaterThanOrEqual(1);
       expect(m).toBeLessThanOrEqual(6);
@@ -117,7 +117,7 @@ test('Random.Shuffle', () => {
   const initialTiles = ['A', 'B', 'C', 'D', 'E'];
   const tiles = [...initialTiles];
   const result = r._api().Shuffle(tiles);
-  expect(result.length).toEqual(initialTiles.length);
+  expect(result).toHaveLength(initialTiles.length);
   expect(result).toEqual(expect.arrayContaining(initialTiles));
   expect(result.sort()).toEqual(initialTiles);
   expect(r.state.prngstate).toBeDefined();

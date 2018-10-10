@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server } from './index';
+import { Server } from '.';
 import Game from '../core/game';
 
 const game = Game({ seed: 0 });

@@ -16,7 +16,7 @@ Enzyme.configure({ adapter: new Adapter() });
 
 test('render squares correctly', () => {
   const grid = Enzyme.mount(<Checkerboard />);
-  expect(grid.find('rect').length).toEqual(64);
+  expect(grid.find('rect')).toHaveLength(64);
 });
 
 test('position', () => {

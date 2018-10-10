@@ -33,7 +33,7 @@ test('board is rendered', () => {
   expect(board.props().isActive).toBe(true);
 
   expect(board.text()).toBe('Board');
-  expect(game.find('.debug-ui').length).toBe(1);
+  expect(game.find('.debug-ui')).toHaveLength(1);
 });
 
 test('board props', () => {
@@ -95,7 +95,7 @@ test('debug ui can be turned off', () => {
   });
 
   const game = Enzyme.mount(<Board />);
-  expect(game.find('.debug-ui').length).toBe(0);
+  expect(game.find('.debug-ui')).toHaveLength(0);
 });
 
 test('can pass empty board', () => {
@@ -280,6 +280,6 @@ test('debug settings', () => {
 
   const game = Enzyme.mount(<Board />);
 
-  expect(game.find('GameInfo').length).toBe(0);
+  expect(game.find('GameInfo')).toHaveLength(0);
   expect(game.find('Controls').html()).toContain('docktop');
 });

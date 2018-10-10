@@ -14,4 +14,4 @@ setOptions({
   showLeftPanel: false,
 });
 
-configure(() => require('./index.js'), module);
+configure(() => require('.'), module);

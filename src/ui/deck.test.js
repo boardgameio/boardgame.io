@@ -27,7 +27,7 @@ describe('basic', () => {
         </Deck>
       </UI>
     );
-    expect(deck.find(Card).length).toBe(2);
+    expect(deck.find(Card)).toHaveLength(2);
   });
 
   test('custom class', () => {

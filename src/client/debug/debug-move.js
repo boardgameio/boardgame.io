@@ -35,8 +35,8 @@ export class DebugMove extends React.Component {
     try {
       let argArray = new Function(`return [${value}]`)();
       this.props.fn.apply(this, argArray);
-    } catch (e) {
-      error = '' + e;
+    } catch (error2) {
+      error = '' + error2;
     }
 
     this.setState({

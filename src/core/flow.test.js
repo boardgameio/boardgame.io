@@ -18,7 +18,7 @@ test('Flow', () => {
 
   // Check defaults of all arguments
   expect(flow.ctx()).toMatchObject({});
-  expect(flow.eventNames.length).toBe(0);
+  expect(flow.eventNames).toHaveLength(0);
   expect(flow.init({ a: 5 })).toMatchObject({ a: 5 });
   expect(flow.canMakeMove({}, {}, undefined)).toBe(true);
   expect(flow.canUndoMove()).toBe(true);

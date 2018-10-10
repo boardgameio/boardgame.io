@@ -85,6 +85,7 @@ export class Bot {
     }
 
     if (arg) {
+      // eslint-disable-next-line unicorn/explicit-length-check
       if (arg.length) {
         const id = Math.floor(number * arg.length);
         return arg[id];

@@ -655,7 +655,7 @@ export function FlowWithPhases({
       turn: 0,
       currentPlayer: '0',
       currentPlayerMoves: 0,
-      playOrder: Array.from(Array(numPlayers), (d, i) => i + ''),
+      playOrder: [...new Array(numPlayers)].map((d, i) => i + ''),
       playOrderPos: 0,
       stats: { turn: { numMoves: {} }, phase: { numMoves: {} } },
       allPlayed: false,
