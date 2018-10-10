@@ -11,12 +11,12 @@ import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
-export function evaluateRedactedMoves(redactedMoves, log, ctx, playerID) {
+export function redactLog(redactedMoves, log, ctx, playerID) {
   if (redactedMoves === undefined) {
     return log;
   }
 
-  const filteredLog = log.map(logEvent => {
+  return log.map(logEvent => {
     // filter for all other players and a spectator
     if (playerID !== null && +playerID === +logEvent.payload.playerID) {
       return logEvent;
@@ -40,8 +40,6 @@ export function evaluateRedactedMoves(redactedMoves, log, ctx, playerID) {
 
     return filteredEvent;
   });
-
-  return filteredLog;
 }
 
 /**
@@ -134,9 +132,8 @@ export class Master {
         deltalog: undefined,
       };
 
-      const rm = this.game.flow.redactedMoves;
-      const log = evaluateRedactedMoves(
-        rm,
+      const log = redactLog(
+        this.game.flow.redactedMoves,
         state.deltalog,
         state.ctx,
         playerID
@@ -179,7 +176,7 @@ export class Master {
       deltalog: undefined,
     };
 
-    const log = evaluateRedactedMoves(
+    const log = redactLog(
       this.game.flow.redactedMoves,
       state.deltalog,
       state.ctx,
