@@ -19,6 +19,7 @@ export class MCTSRoot extends React.Component {
     style: PropTypes.any,
   };
 
+  // eslint-disable-next-line react/no-deprecated
   componentWillReceiveProps(nextProps) {
     this.setState({ root: nextProps.root });
   }

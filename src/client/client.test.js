@@ -188,9 +188,9 @@ test('accepts enhancer for store', () => {
     enhancer: spyEnhancer,
   });
 
-  expect(spyDispatcher.mock.calls.length).toBe(0);
+  expect(spyDispatcher.mock.calls).toHaveLength(0);
   client.moves.A(42);
-  expect(spyDispatcher.mock.calls.length).toBe(1);
+  expect(spyDispatcher.mock.calls).toHaveLength(1);
 });
 
 test('event dispatchers', () => {

@@ -39,7 +39,7 @@ const TicTacToe = Game({
   name: 'tic-tac-toe',
 
   setup: () => ({
-    cells: Array(9).fill(null),
+    cells: new Array(9).fill(null),
   }),
 
   moves: {

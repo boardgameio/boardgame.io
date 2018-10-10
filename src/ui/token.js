@@ -70,6 +70,7 @@ class Token extends React.Component {
   /**
    * Sets the x and y of the state on creation.
    */
+  // eslint-disable-next-line react/no-deprecated
   componentWillMount() {
     this.setState(this.getCoords());
   }
@@ -79,6 +80,7 @@ class Token extends React.Component {
    * and current time. Starts animation.
    * @param {Object} nextProps Next props.
    */
+  // eslint-disable-next-line react/no-deprecated
   componentWillReceiveProps(nextProps) {
     let oldCoord = this.getCoords();
     let newCoord = this.getCoords(nextProps);

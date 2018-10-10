@@ -10,7 +10,7 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { Card, Deck } from 'boardgame.io/ui';
 
-import { PlayingCard, standardDeck } from './PlayingCard';
+import { PlayingCard, standardDeck } from './playing-card';
 
 export class StandardDeckStory extends React.Component {
   constructor(props) {
