@@ -70,7 +70,7 @@ export class Token extends React.Component {
   /**
    * Sets the x and y of the state on creation.
    */
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.setState(this.getCoords());
   }
 
@@ -79,7 +79,7 @@ export class Token extends React.Component {
    * and current time. Starts animation.
    * @param {Object} nextProps Next props.
    */
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     let oldCoord = this.getCoords();
     let newCoord = this.getCoords(nextProps);
 
