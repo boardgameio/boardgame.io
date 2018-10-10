@@ -28,14 +28,8 @@ export function evaluateRedactedMoves(redactedMoves, log, ctx, playerID) {
     }
 
     const moveName = logEvent.payload.type;
-    const config = redactedMoves[moveName];
-    if (config === undefined) {
-      // no definition for that move given => show
-      return logEvent;
-    }
-
     let filteredEvent = logEvent;
-    if (config.showArgs === false) {
+    if (redactedMoves.includes(moveName)) {
       const newPayload = {
         ...filteredEvent.payload,
         args: undefined,

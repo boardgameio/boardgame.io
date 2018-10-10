@@ -322,9 +322,7 @@ describe('evaluateRedactedMoves', () => {
   });
 
   test('redacted move is only shown with args to the player that made the move', () => {
-    const rm = {
-      clickCell: { showArgs: false },
-    };
+    const rm = ['clickCell'];
     const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
 
     // player that made the move
@@ -347,9 +345,7 @@ describe('evaluateRedactedMoves', () => {
   });
 
   test('not redacted move is shown to all', () => {
-    const rm = {
-      clickCell: { showArgs: false },
-    };
+    const rm = ['clickCell'];
     const logEvents = [ActionCreators.makeMove('unclickCell', [1, 2, 3], '0')];
 
     // player that made the move
@@ -361,9 +357,7 @@ describe('evaluateRedactedMoves', () => {
   });
 
   test('can explicitly set showing args to true', () => {
-    const rm = {
-      clickCell: { showArgs: true },
-    };
+    const rm = [];
     const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
 
     // player that made the move
@@ -375,9 +369,7 @@ describe('evaluateRedactedMoves', () => {
   });
 
   test('events are not redacted', () => {
-    const rm = {
-      clickCell: { showArgs: false },
-    };
+    const rm = ['clickCell'];
     const logEvents = [ActionCreators.gameEvent('endTurn')];
 
     // player that made the move
