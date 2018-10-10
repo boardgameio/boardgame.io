@@ -10,7 +10,7 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { Card } from 'boardgame.io/ui';
 
-import { PlayingCard, standardDeck } from './PlayingCard';
+import { PlayingCard, standardDeck } from './playing-card';
 
 export class FlippableStory extends React.Component {
   constructor(props) {

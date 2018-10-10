@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { StandardDeckStory } from './DeckStories';
+import { StandardDeckStory } from './deck-stories';
 
 storiesOf('Deck', module).add('Standard Deck of Playing Cards', () => (
   <StandardDeckStory />

@@ -51,11 +51,11 @@ describe('layout', () => {
     );
 
     const turns = root.find('TurnMarker');
-    expect(turns.length).toBe(1);
+    expect(turns).toHaveLength(1);
     expect(turns.at(0).props()).toMatchObject({ numEvents: 3 });
 
     const phases = root.find('PhaseMarker');
-    expect(phases.length).toBe(2);
+    expect(phases).toHaveLength(2);
     expect(phases.at(0).props()).toMatchObject({ numEvents: 2 });
     expect(phases.at(1).props()).toMatchObject({ numEvents: 1 });
   });

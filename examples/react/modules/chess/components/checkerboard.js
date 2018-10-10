@@ -106,7 +106,7 @@ class Checkerboard extends React.Component {
   }
 
   _algebraicToCartesian(square) {
-    let regexp = /([A-Za-z])([0-9]+)/g;
+    let regexp = /([A-Za-z])(\d+)/g;
     let match = regexp.exec(square);
     if (match == null) {
       throw 'Invalid square provided: ' + square;

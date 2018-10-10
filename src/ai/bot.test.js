@@ -41,7 +41,7 @@ function IsVictory(cells) {
 
 const TicTacToe = Game({
   setup: () => ({
-    cells: Array(9).fill(null),
+    cells: new Array(9).fill(null),
   }),
 
   moves: {

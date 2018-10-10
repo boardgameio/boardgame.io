@@ -22,7 +22,7 @@ test('render correctly', () => {
 test('outline', () => {
   const grid = Enzyme.mount(<HexGrid levels={5} outline={false} />);
   const hex = grid.find('polygon');
-  expect(hex.length).toBe(0);
+  expect(hex).toHaveLength(0);
 });
 
 test('click handler', () => {

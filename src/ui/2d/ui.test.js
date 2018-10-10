@@ -38,7 +38,7 @@ describe('basic', () => {
   });
 
   test('is rendered', () => {
-    expect(root.find(Deck).length).toBe(1);
-    expect(root.find(Card).length).toBe(2);
+    expect(root.find(Deck)).toHaveLength(1);
+    expect(root.find(Card)).toHaveLength(2);
   });
 });

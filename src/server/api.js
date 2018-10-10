@@ -107,7 +107,7 @@ export const createApiServer = ({ db, games }) => {
     const gameName = ctx.params.name;
     const gameList = await db.list();
     let gameInstances = [];
-    for (let key of Array.from(gameList)) {
+    for (let key of [...gameList]) {
       if (isGameMetadataKey(key, gameName)) {
         const gameID = key.slice(
           gameName.length + 1,

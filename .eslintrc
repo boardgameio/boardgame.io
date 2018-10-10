@@ -1,18 +1,25 @@
 {
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:jest/recommended",
+    "plugin:unicorn/recommended",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended",
+    "prettier/react",
+    "prettier/unicorn"
+  ],
   "env": {
     "node": true,
     "browser": true,
-    "jest/globals": true,
-    "es6": true,
+    "es6": true
   },
   "parser": "babel-eslint",
-  "plugins": ["react", "jest"],
   "rules": {
-    "no-console": "off",
-    "no-param-reassign": "off",
-    "no-tabs": "error",
-    "no-trailing-spaces": "error",
-    "space-infix-ops": ["error", {"int32Hint": false}],
+    "no-console": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "16.3"
+    }
   }
 }

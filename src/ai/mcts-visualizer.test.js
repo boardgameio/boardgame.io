@@ -34,8 +34,8 @@ describe('MCTSRoot', () => {
       children: [],
     };
     const m = Enzyme.mount(<MCTSRoot root={root} />);
-    expect(m.find('.parents').children().length).toBe(0);
-    expect(m.find('.children').children().length).toBe(0);
+    expect(m.find('.parents').children()).toHaveLength(0);
+    expect(m.find('.children').children()).toHaveLength(0);
   });
 
   test('with children', () => {
@@ -48,8 +48,8 @@ describe('MCTSRoot', () => {
     root.children = [node, node];
 
     const m = Enzyme.mount(<MCTSRoot root={root} />);
-    expect(m.find('.parents').children().length).toBe(0);
-    expect(m.find('.children').children().length).toBe(2);
+    expect(m.find('.parents').children()).toHaveLength(0);
+    expect(m.find('.children').children()).toHaveLength(2);
   });
 
   test('clicks', () => {
@@ -82,18 +82,18 @@ describe('MCTSRoot', () => {
 
     const m = Enzyme.mount(<MCTSRoot root={root} />);
 
-    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(0);
     m
       .find('MCTSNode')
       .at(0)
       .simulate('mouseover');
-    expect(m.find('MCTSNodeDetails').length).toBe(1);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(1);
     m
       .find('MCTSNode')
       .at(0)
       .simulate('mouseout');
     m.setProps({});
-    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(0);
   });
 
   test('trigger preview of child', () => {
@@ -107,18 +107,18 @@ describe('MCTSRoot', () => {
 
     const m = Enzyme.mount(<MCTSRoot root={root} />);
 
-    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(0);
     m
       .find('.children MCTSNode')
       .at(0)
       .simulate('mouseover');
-    expect(m.find('MCTSNodeDetails').length).toBe(1);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(1);
     m
       .find('.children MCTSNode')
       .at(0)
       .simulate('mouseout');
     m.setProps({});
-    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(0);
   });
 
   test('trigger preview of parent', () => {
@@ -132,18 +132,18 @@ describe('MCTSRoot', () => {
 
     const m = Enzyme.mount(<MCTSRoot root={node} />);
 
-    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(0);
     m
       .find('.parents MCTSNode')
       .at(0)
       .simulate('mouseover');
-    expect(m.find('MCTSNodeDetails').length).toBe(1);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(1);
     m
       .find('.parents MCTSNode')
       .at(0)
       .simulate('mouseout');
     m.setProps({});
-    expect(m.find('MCTSNodeDetails').length).toBe(0);
+    expect(m.find('MCTSNodeDetails')).toHaveLength(0);
   });
 });
 
