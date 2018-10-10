@@ -8,18 +8,19 @@ get done before we are ready for a v1 release.
 
 ### AI framework
 
-* [x] MCTS bot ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032))
-* [ ] ability to add priorities and objectives ([issue](https://github.com/google/boardgame.io/issues/7#issuecomment-389453032)) **[N]**
+* [x] MCTS bot ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
+* [ ] ability to add priorities and objectives ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032)) **[N]**
 
 ### UI framework
 
 * [x] Drag and Drop (cards and decks).
 * [ ] Drag and Drop (tokens and grids).
+* [ ] 3D components ([issue](https://github.com/nicolodavis/boardgame.io/issues/282))
 
 ### Lobby
 
 * [x] basic `create` and `join` API
-* [ ] simple web-based lobby ([issue](https://github.com/google/boardgame.io/issues/197)) **[help needed]**
+* [ ] simple web-based lobby ([issue](https://github.com/nicolodavis/boardgame.io/issues/197)) **[help needed]**
 
 ### Storage
 
@@ -34,12 +35,13 @@ get done before we are ready for a v1 release.
 
 ### Core
 
-* [ ] turn order improvements ([issue](https://github.com/google/boardgame.io/issues/154))
-* [ ] log improvements ([issue](https://github.com/google/boardgame.io/issues/227))
+* [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
+* [ ] log improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/227))
 
 ### Server
 
-* [x] abstract away server component ([issue](https://github.com/google/boardgame.io/issues/251))
+* [x] abstract away server component ([issue](https://github.com/nicolodavis/boardgame.io/issues/251))
+* [ ] server scaling ([issue](https://github.com/nicolodavis/boardgame.io/issues/277))
 
 ### Documentation
 
