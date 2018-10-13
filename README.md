@@ -49,7 +49,7 @@ $ npm install --save boardgame.io
 
 ```
 $ npm install
-$ npm run examples
+$ npm start
 ```
 
 ## Changelog
