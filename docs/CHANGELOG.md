@@ -1,3 +1,29 @@
+## v0.26.0
+
+#### Features
+
+* [[e8f165a](https://github.com/google/boardgame.io/commit/e8f165a)] server: add new API endpoints 'list' and 'leave' (#276)
+* [[8ff4745](https://github.com/google/boardgame.io/commit/8ff4745)] drag-n-drop for cards and decks
+* [[a558092](https://github.com/google/boardgame.io/commit/a558092)] return state as first argument to client.subscribe callback
+* [[965f9b7](https://github.com/google/boardgame.io/commit/965f9b7)] Allow to set payload onto a log event (#267)
+* [[2efdbc1](https://github.com/google/boardgame.io/commit/2efdbc1)] utils for working with hexagonal boards (#271)
+* [[137dd7c](https://github.com/google/boardgame.io/commit/137dd7c)] allow overriding client-side transport
+* [[63311ac](https://github.com/google/boardgame.io/commit/63311ac)] local game master
+* [[0b7a0a0](https://github.com/google/boardgame.io/commit/0b7a0a0)] add allOthers option to setActionPlayers (#269)
+
+#### Bugfixes
+
+* [[d1a1a8a](https://github.com/google/boardgame.io/commit/d1a1a8a)] shouldEndPhase can see the results of onTurnEnd
+* [[b4874a6](https://github.com/google/boardgame.io/commit/b4874a6)] call the client subscribe callback after LogMiddleware has run
+* [[9b9d735](https://github.com/google/boardgame.io/commit/9b9d735)] reset deltalog properly
+
+## v0.25.5
+
+#### Features
+
+* [[4ed6b94](https://github.com/google/boardgame.io/commit/4ed6b94)] add server startup message
+* [[1688639](https://github.com/google/boardgame.io/commit/1688639)] decouple transport layer from server logic
+
 ## v0.25.4
 
 #### Bugfixes
