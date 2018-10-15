@@ -45,7 +45,7 @@ test('animation', () => {
 });
 
 test('props change', () => {
-  const token = Enzyme.shallow(
+  const token = Enzyme.mount(
     <Token x={1} y={2} animate={true}>
       <p>foo</p>
     </Token>
@@ -56,7 +56,7 @@ test('props change', () => {
 });
 
 test('debounce', () => {
-  const token = Enzyme.shallow(
+  const token = Enzyme.mount(
     <Token x={1} y={2} animate={true}>
       <p>foo</p>
     </Token>
