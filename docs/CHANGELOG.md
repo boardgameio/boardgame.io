@@ -1,3 +1,9 @@
+## v0.26.1
+
+#### Bugfixes
+
+* [[aa5f2cf](https://github.com/google/boardgame.io/commit/aa5f2cf)] added the useNewUrlParser option to the Mongo connect() (#285)
+
 ## v0.26.0
 
 #### Features
