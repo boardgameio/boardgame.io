@@ -13,6 +13,7 @@
   * [Undo / Redo](undo.md)
   * [Randomness](random.md)
   * [Secret State](secret-state.md)
+  * [Storage](storage.md)
   * [Immutability](immutability.md)
   * [Debugging](debugging.md)
   * [Testing](testing.md)
