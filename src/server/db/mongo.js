@@ -29,7 +29,7 @@ export class Mongo {
    * Connect to the instance.
    */
   async connect() {
-    const c = await this.client.connect(this.url);
+    const c = await this.client.connect(this.url, { useNewUrlParser: true });
     this.db = c.db(this.dbname);
     return;
   }
