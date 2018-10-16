@@ -33,9 +33,16 @@ export const Pass = (G, ctx) => {
  * @param {object} arg - An array of playerID's or <object> of:
  *   {
  *     value: [],        // array of playerID's (optional if all is set).
+ *
  *     all: true,        // set value to all playerID's
+ *
  *     allOthers: true,  // set value to all except currentPlayer.
- *     once: true,       // players have one move.
+ *                       // when combined with `once` (below)
+ *                       // currentPlayer is added back after
+ *                       // everyone has taken their move.
+ *
+ *     once: true,       // players have one move
+ *                       // (after which they're pruned from actionPlayers).
  *   }
  */
 export function SetActionPlayers(state, arg) {

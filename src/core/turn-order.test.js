@@ -245,6 +245,7 @@ describe('SetActionPlayers', () => {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({
             value: ['0', '1', '2'],
+            once: true,
             allOthers: true,
           });
           return G;
