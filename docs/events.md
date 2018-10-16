@@ -66,6 +66,12 @@ const opts = {
   // Use this instead of value if you want to set
   // actionPlayers to all the players in the game.
   all: true,
+
+  // Use this to set actionPlayers to all players
+  // except the current player. When combined with
+  // `once: true`, the current player is added back
+  // to `actionPlayers` once everyone else takes a move.
+  allOthers: true,
 };
 
 setActionPlayers(opts);

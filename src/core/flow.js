@@ -553,11 +553,8 @@ export function FlowWithPhases({
     if (state.ctx._actionPlayersOnce) {
       const playerID = action.playerID;
       actionPlayers = actionPlayers.filter(id => id !== playerID);
-    }
-    if (state.ctx._actionPlayersAllOthers) {
-      const playerID = action.playerID;
-      actionPlayers = actionPlayers.filter(id => id !== playerID);
-      if (actionPlayers.length === 0) {
+
+      if (state.ctx._actionPlayersAllOthers && actionPlayers.length === 0) {
         actionPlayers = [state.ctx.currentPlayer];
       }
     }
