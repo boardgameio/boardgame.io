@@ -13,5 +13,6 @@ import { Grid } from '../src/ui/grid.js';
 import { HexGrid } from '../src/ui/hex.js';
 import { HexUtils } from '../src/ui/hex-utils.js';
 import { Token } from '../src/ui/token.js';
+import { GameLog } from '../src/client/log/log.js';
 
-export { UI, Card, Deck, Grid, HexGrid, Token, HexUtils };
+export { UI, Card, Deck, Grid, HexGrid, Token, HexUtils, GameLog };
