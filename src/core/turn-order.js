@@ -32,9 +32,10 @@ export const Pass = (G, ctx) => {
  * @param {object} state - The game state.
  * @param {object} arg - An array of playerID's or <object> of:
  *   {
- *     value: [],   // array of playerID's (optional if all is set).
- *     all: true,   // set value to all playerID's
- *     once: true,  // players have one move.
+ *     value: [],        // array of playerID's (optional if all is set).
+ *     all: true,        // set value to all playerID's
+ *     allOthers: true,  // set value to all except currentPlayer.
+ *     once: true,       // players have one move.
  *   }
  */
 export function SetActionPlayers(state, arg) {
