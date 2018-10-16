@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.26.1",
+  "version": "0.26.2",
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
@@ -22,7 +22,8 @@
     "prepublishOnly": "generate-export-aliases",
     "pretest": "npm run lint",
     "prettier": "prettier --write \"{examples,docs,src,storybook}/**/*.{js,css,md}\"",
-    "postpublish": "node ./scripts/postpublish.js"
+    "postpublish": "node ./scripts/postpublish.js",
+    "changelog": "bash ./scripts/changelog.sh"
   },
   "main": "dist/boardgameio.js",
   "unpkg": "dist/boardgameio.min.js",

@@ -33,7 +33,7 @@ const TurnExample = Game({
 
   moves: {
     playMilitia: (G, ctx) => {
-      ctx.events.setActionPlayers({ allOthers: true });
+      ctx.events.setActionPlayers({ once: true, allOthers: true });
 
       const currentPlayer = ctx.currentPlayer;
       const playersNext = [...G.players];
