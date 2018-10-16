@@ -1,10 +1,39 @@
 # Multiplayer
 
-All you need to do is add `multiplayer: true` to your client
-config object and the client will now start sending updates
-to a server every time you make a move. This server will maintain
-the game state, and also keep all clients connected to it in
-sync in realtime (without any browser refreshes needed).
+In this section, we'll explain how the framework converts your
+game logic into a multiplayer implementation without requiring
+you to write any networking or storage layer code. We will continue
+working with our Tic-Tac-Toe example from the [tutorial](tutorial.md).
+
+### Clients and Masters
+
+A boardgame.io client is what you create using the `Client` call.
+You initialize it with your `Game` object (which contains the moves),
+so it has all the information needed to the run the game.
+This is where the story ends in a single player setup.
+
+In a multiplayer setup, clients no longer act as authoritative
+stores of the game state. Instead, they delegate the running of the
+game to a game master. In this mode clients emit moves / events,
+but the game logic runs on the master, which computes the next game state
+before broadcasting it to other clients.
+
+However, since clients are aware of the game rules, they also
+run the game in parallel (this is called an optimistic update and is
+an optimization that provides a lag-free experience).
+In case a particular client computes the new game state incorrectly,
+it is overridden by the master eventually, so the entire setup still
+has a single source of authority.
+
+### Local Master
+
+The game master can run completely on the browser. This is useful to set
+up pass-and-play multiplayer or for prototyping the multiplayer experience
+without having to set up a server to test it.
+
+All you need to do is add `multiplayer: { local: true }` to your client
+config. Now you can instantiate as many of these clients in your app and you
+will notice that they're all kept in sync, playing in the same game.
 
 ```js
 // src/App.js
@@ -13,14 +42,27 @@ import { Client } from 'boardgame.io/react';
 import { TicTacToe } from './game';
 import { TicTacToeBoard } from './board';
 
-const App = Client({
+const TicTacToeClient = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
-  multiplayer: true,
+  multiplayer: { local: true },
 });
+
+const App = () => (
+  <div>
+    <TicTacToeClient playerID="0" />
+    <TicTacToeClient playerID="1" />
+  </div>
+);
 
 export default App;
 ```
+
+!> You may be wondering what the `playerID` parameter is from the
+example above. Clients needs to be associated with a particular player
+seat in order to make moves in a multiplayer setup (clients that aren't
+are just spectators that can see the live game state, but can't actually
+make any moves).
 
 Note that we moved our game implementation to `src/game.js` and
 board implementation to `src/board.js`.
@@ -37,58 +79,27 @@ import React from 'react';
 export class TicTacToeBoard extends React.Component { ... };
 ```
 
-#### Setting Up the Server
+```react
+<iframe class='react' src='react/multiplayer-1.html' height='500' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+```
 
-Behind the scenes, the client is now sending updates to a server
-via a WebSocket, and the server updates its version of the game
-while also broadcasting the update to all connected clients.
+?> In the example above, you can play as Player 0 and Player 1 alternately
+on the two boards. Clicking on a particular board when it is not that
+player's turn has no effect.
 
-For this to work, the server also needs to know what game you
-are playing. Here is a snippet showing you how to set up a Node server
-to serve the socket requests coming from the client. Copy this
-to a new file (say `src/server.js`).
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/0q7qqv11xn)
+
+### Remote Master
+
+You can also run the game master on a separate server. Any boardgame.io
+client can connect to this master (whether it is a browser, an Android
+app etc.) and it will be kept in sync with other clients in real time.
+
+In order to connect a client to a remote master, we use the `multiplayer`
+option again, but this time specify the location of the server.
 
 ```js
-const Server = require('boardgame.io/server').Server;
-const TicTacToe = require('./game').TicTacToe;
-const server = Server({ games: [TicTacToe] });
-server.run(8000);
-```
-
-You can run the server using:
-
-```
-$ node src/server.js
-```
-
-If you used any ES2015 features like module imports or other features
-like the object-spread syntax in `game.js` (which is likely the case
-if you followed the tutorial), then you need to pipe the code through
-[Babel](https://babeljs.io/) like so:
-
-```
-$ npm install -D babel-preset-zero babel-cli
-$ npx babel-node --presets zero src/server.js
-```
-
-!> `npx` allows you to run binaries like `babel-node` from the
-NPM repository easily. This is just one development setup,
-and you may choose one of many other Babel setups during deployment.
-
-This just brings up a server that's capable of servicing the socket
-communication (not to be confused with the server that's serving
-your web app), but we still need to tell our client to send all the
-socket traffic to this server. This last step is not necessary if
-you serve both your web app and socket server from the same Node
-server (see below), but is only needed if you want to keep them
-separate.
-
-There are a few options here as well (**create-react-app** has a
-[proxy](https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md#configuring-a-websocket-proxy) feature, for example), but the easiest would be to just
-tell `boardgame.io` where your socket server is:
-
-```js
-const App = Client({
+const TicTacToeClient = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
   multiplayer: { server: 'localhost:8000' },
@@ -98,53 +109,68 @@ const App = Client({
 You may also specify a protocol here (if you want to use SSL, for example):
 
 ```js
-const App = Client({
+const TicTacToeClient = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
   multiplayer: { server: 'https://localhost:8000/' },
 });
 ```
 
-#### Associating Clients with Players
+Behind the scenes, the client now sends updates to the remote master
+via a WebSocket whenever you make a move. Of course, we now need to run
+a server at the location specified, which is discussed below.
 
-Clients needs to be associated with a particular player in order
-to make moves (clients that aren't are just spectators that can
-see the live game state, but can't actually make any moves).
-This is done by rendering your app like this:
+#### Setting up the server
+
+In order to run the game master on a Node server, we need to provide
+it with the `TicTacToe` game object so that it knows how to update the
+game state. In order to do that, we'll first make some changes to our
+`src/game.js` file so that it plays nicely in a Node environment without
+ES6 modules.
 
 ```js
-<App playerID="0" />
+// src/game.js
+const Game = require('boardgame.io/core').Game;
+const TicTacToe = Game({ ... });
+module.exports = { TicTacToe };
 ```
 
-If you want to see both players on the same page, do something like this:
+Now create a new file `src/server.js`
 
 ```js
-const TicTacToeClient = Client({
-  game: TicTacToe,
-  board: TicTacToeBoard,
-  multiplayer: { server: 'localhost:8000' },
-  debug: false,
-});
-
-const App = () => (
-  <div>
-    <TicTacToeClient playerID="0" />
-    <TicTacToeClient playerID="1" />
-  </div>
-);
+// src/server.js
+const Server = require('boardgame.io/server').Server;
+const TicTacToe = require('./game').TicTacToe;
+const server = Server({ games: [TicTacToe] });
+server.run(8000);
 ```
 
-!> Note that we disabled the debug pane here with `debug: false` so that
-the screen isn't crowded.
+Run the server using a recent version of Node:
 
-Run `npm start` in a separate terminal (while also keeping your socket server
-running) and watch as your moves in one board are reflected in the other.
-You can also open different browser tabs and you will see that everything is
-in sync as you play (state is not lost even if you refresh the page).
+```
+$ node src/server.js
+```
+
+Run `npm start` in a separate terminal (while also keeping your server
+running). You can now connect multiple clients to the same game by opening
+different browser tabs and pointing them to `http://localhost:3000`.
+You will notice that everything is kept in sync as you play
+(state is not lost even if you refresh the page).
+
+This example still has both players on the same screen. A more natural
+setup would be to have each client just have a single (but distinct)
+player. You can use a URL path to determine this (and hand a different
+URL to each player) or implement a matchmaking lobby that sets this value
+prior to starting the game.
+
+!> **TIP** You can also set the `playerID` to point to any player while
+prototyping by clicking on the box of that respective player on the debug UI.
+
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/ql1k7vr1m9)
 
 #### Multiple Game Types
 
-You can also serve multiple types of games from the same socket server:
+You can serve multiple types of games from the same server:
 
 ```js
 const app = Server({ games: [TicTacToe, Chess] });
@@ -162,47 +188,17 @@ const TicTacToe = Game({
 
 #### Game Instances
 
-By default, all client instances are synced to a game with
-an ID `'default'`. To play a new game instance, just pass
-`gameID` to your client `<App/>`. All clients that use
-this ID will now see the same board (synced in realtime).
+By default all client instances connect to a game with
+an ID `default`. To play a new game instance, just pass
+`gameID` to your client. All clients that use
+this ID will now see the same game state.
 
 ```
-ReactDOM.render(<App gameID="gameid"/>, document.getElementById('root'));
+ReactDOM.render(<TicTacToeClient gameID="gameid"/>, document.getElementById('root'));
 ```
 
-The `gameID` could be determined by a URL path, for example,
-so you could have all browsers that connect to a certain
-URL be synced to the same game.
-
-#### Single Server
-
-You might want to serve both your web app and the socket
-server from the same server.
-The returned object from `Server()` contains `app`,
-which is a [Koa](http://koajs.com/) app that
-you can use to attach other handlers etc.
-
-```js
-// src/server.js
-
-const path = require('path');
-const KoaStatic = require('koa-static');
-const Server = require('boardgame.io/server').Server;
-const TicTacToe = require('./game').TicTacToe;
-
-const server = Server({ games: [TicTacToe] });
-const buildPath = path.join(__dirname, '../build');
-server.app.use(KoaStatic(buildPath));
-server.run(8000);
-```
-
-```
-$ npm run build
-$ npx babel-node --presets zero src/server.js
-
-Navigate to http://localhost:8000/
-```
+The `gameID`, similar to the `playerID` can again be determined
+either by a URL path or a lobby implementation.
 
 #### Storage
 
