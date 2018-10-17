@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Phases from './components/phases';
-import { Basic } from './components/diagram';
+import Phases from './phases';
+import { Basic } from './diagram';
 
 const routes = [
   {
@@ -22,4 +22,4 @@ const routes = [
   },
 ];
 
-export default routes;
+export default { routes };

@@ -8,19 +8,21 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
-import Game from '../game';
-import Board from './board';
+import ChessGame from './game';
+import ChessBoard from './board';
 
 const App = Client({
-  game: Game,
-  numPlayers: 1,
-  board: Board,
+  game: ChessGame,
+  board: ChessBoard,
+  multiplayer: true,
+  debug: false,
 });
 
-const SingleView = () => (
+const Multiplayer = () => (
   <div style={{ padding: 50 }}>
-    <App gameID="Random" />
+    <App gameID="multi" playerID="0" />
+    <App gameID="multi" playerID="1" />
   </div>
 );
 
-export default SingleView;
+export default Multiplayer;

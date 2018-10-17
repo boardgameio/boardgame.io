@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Singleplayer from './components/singleplayer';
-import Multiplayer from './components/multiplayer';
+import Singleplayer from './singleplayer';
+import Multiplayer from './multiplayer';
 
 const routes = [
   {
@@ -22,4 +22,4 @@ const routes = [
   },
 ];
 
-export default routes;
+export default { routes };

@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { render } from 'react-dom';
 import { HashRouter as Router, Route } from 'react-router-dom';
 import _ from 'lodash';
 import LiNavLink from './li-navlink';
@@ -55,4 +56,11 @@ const App = () => (
   </Router>
 );
 
-export default App;
+render(
+  <App />,
+  document.getElementById('test') || document.createElement('div')
+);
+
+if (module.hot) {
+  module.hot.accept();
+}

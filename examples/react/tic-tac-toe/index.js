@@ -6,10 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Singleplayer from './components/singleplayer';
-import Multiplayer from './components/multiplayer';
-import Spectator from './components/spectator';
-import Authenticated from './components/authenticated';
+import Singleplayer from './singleplayer';
+import Multiplayer from './multiplayer';
+import Spectator from './spectator';
+import Authenticated from './authenticated';
 
 const routes = [
   {
@@ -34,4 +34,4 @@ const routes = [
   },
 ];
 
-export default routes;
+export default { routes };

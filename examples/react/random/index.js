@@ -8,18 +8,27 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
-import ChessGame from '../game';
-import ChessBoard from './board';
+import Game from './game';
+import Board from './board';
 
 const App = Client({
-  game: ChessGame,
-  board: ChessBoard,
+  game: Game,
+  numPlayers: 1,
+  board: Board,
 });
 
-const Singleplayer = () => (
+const SingleView = () => (
   <div style={{ padding: 50 }}>
-    <App gameID="single" />
+    <App gameID="Random" />
   </div>
 );
 
-export default Singleplayer;
+const routes = [
+  {
+    path: '/random/main',
+    text: 'Examples',
+    component: SingleView,
+  },
+];
+
+export default { routes };

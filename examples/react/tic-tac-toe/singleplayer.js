@@ -10,7 +10,7 @@ import React from 'react';
 import { Client } from 'boardgame.io/react';
 import { AI } from 'boardgame.io/ai';
 import { MCTSVisualizer } from 'boardgame.io/ai-visualize';
-import TicTacToe from '../game';
+import TicTacToe from './game';
 import Board from './board';
 
 const App = Client({

@@ -8,21 +8,18 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
-import ChessGame from '../game';
+import ChessGame from './game';
 import ChessBoard from './board';
 
 const App = Client({
   game: ChessGame,
   board: ChessBoard,
-  multiplayer: true,
-  debug: false,
 });
 
-const Multiplayer = () => (
+const Singleplayer = () => (
   <div style={{ padding: 50 }}>
-    <App gameID="multi" playerID="0" />
-    <App gameID="multi" playerID="1" />
+    <App gameID="single" />
   </div>
 );
 
-export default Multiplayer;
+export default Singleplayer;

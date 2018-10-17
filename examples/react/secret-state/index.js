@@ -6,14 +6,14 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import View from './components/view';
+import Multiview from './multiview';
 
 const routes = [
   {
-    path: '/random/main',
+    path: '/liars-dice',
     text: 'Examples',
-    component: View,
+    component: Multiview,
   },
 ];
 
-export default routes;
+export default { routes };
