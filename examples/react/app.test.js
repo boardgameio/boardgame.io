@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import { MemoryRouter } from 'react-router';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import App from './app';
+import { App } from './app';
 
 Enzyme.configure({ adapter: new Adapter() });
 

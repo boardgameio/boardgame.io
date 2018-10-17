@@ -16,7 +16,7 @@ import routes from './routes';
 import './app.css';
 
 // CSS for the sidebar is taken from vue.css
-const App = () => (
+export const App = () => (
   <Router>
     <main>
       <aside className="sidebar">
