@@ -7,10 +7,16 @@
  */
 
 import Militia from './militia';
+import Simulator from './simulator';
 
 const routes = [
   {
     path: '/turnorder/main',
+    text: 'Simulator',
+    component: Simulator,
+  },
+  {
+    path: '/turnorder/militia',
     text: 'Militia',
     component: Militia,
   },
