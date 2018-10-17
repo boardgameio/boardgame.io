@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 
 class LobbyCreateRoomForm extends React.Component {
   static propTypes = {
-    games: PropTypes.object.isRequired,
+    games: PropTypes.array.isRequired,
     createGame: PropTypes.func.isRequired,
   };
 
@@ -35,7 +35,7 @@ class LobbyCreateRoomForm extends React.Component {
           value={this.state.selectedGame}
           onChange={evt => this.onChangeSelectedGame(evt)}
         >
-          {Object.values(this.props.games).map(this._createGameNameOption)}
+          {this.props.games.map(this._createGameNameOption)}
         </select>
         <span>Players:</span>
         <select
@@ -68,7 +68,7 @@ class LobbyCreateRoomForm extends React.Component {
 
   onClickCreate() {
     this.props.createGame(
-      Object.values(this.props.games)[this.state.selectedGame].game.name,
+      this.props.games[this.state.selectedGame].game.name,
       this.state.numPlayers
     );
   }

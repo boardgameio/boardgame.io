@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Lobby } from './lobby.js';
+import { LobbyConnection } from './lobby.js';
 
 describe('lobby', () => {
   let lobby;
@@ -40,23 +40,26 @@ describe('lobby', () => {
 
   describe('handling all games', () => {
     beforeEach(async () => {
-      lobby = new Lobby({
+      lobby = new LobbyConnection({
         server: 'localhost',
-        gameComponents: {
-          game1: {
+        gameComponents: [
+          {
             board: 'Board1',
-            game: { name: 'Game1', minPlayers: 2, maxPlayers: 4 },
+            game: { name: 'game1', minPlayers: 2, maxPlayers: 4 },
           },
-          game2: { board: 'Board2', game: { name: 'Game2' } },
-        },
+          {
+            board: 'Board2',
+            game: { name: 'game2' },
+          },
+        ],
       });
       expect(await lobby.refresh()).toBe(true);
     });
 
     describe('get list of rooms', () => {
       test('when the server requests succeed', async () => {
-        expect(fetch).toHaveBeenCalledTimes(3);
         expect(lobby.errorMsg).toBe('');
+        expect(fetch).toHaveBeenCalledTimes(3);
         expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
       });
       test('when the server request fails', async () => {
@@ -165,11 +168,9 @@ describe('lobby', () => {
 
   describe('handling some games', () => {
     beforeEach(async () => {
-      lobby = new Lobby({
+      lobby = new LobbyConnection({
         server: 'localhost',
-        gameComponents: {
-          game1: { board: 'Board1', game: 'Game1' },
-        },
+        gameComponents: [{ board: 'Board1', game: { name: 'game1' } }],
       });
       expect(await lobby.refresh()).toBe(true);
     });
