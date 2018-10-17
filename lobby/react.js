@@ -9,16 +9,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Client } from 'boardgame.io/react';
-import { Lobby as LobbyConnection } from './lobby';
+import { LobbyConnection } from './lobby';
 import LobbyRoomInstance from './room_instance';
 import LobbyCreateRoomForm from './create_room_form';
-import './lobby.css';
 
 class Lobby extends React.Component {
   static propTypes = {
     server: PropTypes.string.isRequired,
     port: PropTypes.number.isRequired,
-    gameComponents: PropTypes.object.isRequired,
+    gameComponents: PropTypes.array.isRequired,
     playerName: PropTypes.string,
     onStartGame: PropTypes.func.isRequired,
     debug: PropTypes.bool,
@@ -32,10 +31,6 @@ class Lobby extends React.Component {
   };
 
   state = {
-    phase: 'enter', // may be 'enter','list','play'
-    games: [],
-    instances: [],
-    runningGame: null,
     errorMsg: '',
   };
 
@@ -46,29 +41,19 @@ class Lobby extends React.Component {
       playerName: this.props.playerName,
     });
     this.connection.refresh();
-    this.setState({
-      instances: this.connection.gameInstances,
-    });
-  }
-
-  _getGameComponents(gameName) {
-    for (let comp of Object.values(this.props.gameComponents)) {
-      if (comp.game.name == gameName) return comp;
-    }
-    return null;
   }
 
   render() {
     // list of game instances
     let inst_rows = [];
-    for (let i = 0; i < this.state.instances.length; i++) {
+    for (let i = 0; i < this.connection.gameInstances.length; i++) {
       const gameURL = `http://${this.props.server}:${this.props.port - 1}/${
-        this.state.instances[i].gameName
-      }/${this.state.instances[i].gameID}`;
+        this.connection.gameInstances[i].gameName
+      }/${this.connection.gameInstances[i].gameID}`;
       const inst = {
-        gameID: this.state.instances[i].gameID,
-        gameName: this.state.instances[i].gameName,
-        players: Object.values(this.state.instances[i].players),
+        gameID: this.connection.gameInstances[i].gameID,
+        gameName: this.connection.gameInstances[i].gameName,
+        players: Object.values(this.connection.gameInstances[i].players),
       };
       inst_rows.push(
         <LobbyRoomInstance
@@ -85,8 +70,6 @@ class Lobby extends React.Component {
 
     return (
       <div id="lobby-view" style={{ padding: 50 }}>
-        <h1>Lobby</h1>
-
         <div id="phase-join">
           <div className="phase-title" id="game-creation">
             <span>Create a room:</span>
@@ -113,36 +96,29 @@ class Lobby extends React.Component {
     );
   }
 
-  _createRoom(gameName, numPlayers) {
-    // request new game instance
-    if (this.connection.create(gameName, numPlayers)) {
-      this.connection.refresh();
-      this.setState({ instances: this.connection.gameInstances });
-    } else {
-      this.setState({ errorMsg: this.connection.errorMsg });
+  async _createRoom(gameName, numPlayers) {
+    if (await this.connection.create(gameName, numPlayers)) {
+      await this.connection.refresh();
     }
+    this.setState({ errorMsg: this.connection.errorMsg });
   }
 
-  _joinRoom(gameName, gameID, playerID) {
-    if (this.connection.join(gameName, gameID, playerID)) {
-      this.connection.refresh();
-      this.setState({ instances: this.connection.gameInstances });
-    } else {
-      this.setState({ errorMsg: this.connection.errorMsg });
+  async _joinRoom(gameName, gameID, playerID) {
+    if (await this.connection.join(gameName, gameID, playerID)) {
+      await this.connection.refresh();
     }
+    this.setState({ errorMsg: this.connection.errorMsg });
   }
 
-  _leaveRoom(gameName, gameID) {
-    if (this.connection.leave(gameName, gameID)) {
-      this.connection.refresh();
-      this.setState({ instances: this.connection.gameInstances });
-    } else {
-      this.setState({ errorMsg: this.connection.errorMsg });
+  async _leaveRoom(gameName, gameID) {
+    if (await this.connection.leave(gameName, gameID)) {
+      await this.connection.refresh();
     }
+    this.setState({ errorMsg: this.connection.errorMsg });
   }
 
   _play(gameName, gameOpts) {
-    const gameCode = this._getGameComponents(gameName);
+    const gameCode = this.connection._getGameComponents(gameName);
     if (!gameCode) {
       this.setState({
         errorMsg: 'game ' + gameName + ' not supported',

@@ -21,14 +21,14 @@ class _LobbyImpl {
 
   async refresh() {
     try {
+      this.gameInstances.length = 0;
       const resp = await fetch(this._baseUrl());
       if (resp.status !== 200) {
-        this.gameInstances.length = 0;
         throw 'HTTP status ' + resp.status;
       }
       const json = await resp.json();
       for (let gameName of json) {
-        if (this.gameComponents[gameName] === undefined) continue;
+        if (!this._getGameComponents(gameName)) continue;
         const gameResp = await fetch(this._baseUrl() + '/' + gameName);
         const gameJson = await gameResp.json();
         for (let inst of gameJson.gameInstances) {
@@ -50,8 +50,8 @@ class _LobbyImpl {
   }
 
   _getGameComponents(gameName) {
-    for (let comp of Object.keys(this.gameComponents)) {
-      if (comp == gameName) return this.gameComponents[comp];
+    for (let comp of this.gameComponents) {
+      if (comp.game.name == gameName) return comp;
     }
   }
 
@@ -148,6 +148,6 @@ class _LobbyImpl {
  * Returns:
  *   A JS object that provides an API to create/join/start game instances.
  */
-export function Lobby(opts) {
+export function LobbyConnection(opts) {
   return new _LobbyImpl(opts);
 }

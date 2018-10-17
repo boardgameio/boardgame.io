@@ -18,10 +18,10 @@ describe('lobby', () => {
   let spy = jest.fn();
 
   beforeEach(async () => {
-    const comps = {
-      game1: { board: 'Board1', game: { name: 'GameName1' } },
-      game2: { board: 'Board2', game: { name: 'GameName2' } },
-    };
+    const comps = [
+      { board: 'Board1', game: { name: 'GameName1' } },
+      { board: 'Board2', game: { name: 'GameName2' } },
+    ];
     lobby = Enzyme.mount(
       <Lobby
         server="localhost"
@@ -46,9 +46,11 @@ describe('lobby', () => {
           gameName: 'GameName1',
         },
       ];
+      lobby.instance().forceUpdate();
+      lobby.update();
     });
     test('room with 2 players', () => {
-      lobby.instance().connection.create = spy;
+      lobby.instance().connection.create = spy.mockReturnValue(true);
       lobby
         .find('LobbyCreateRoomForm')
         .find('select')
@@ -67,6 +69,14 @@ describe('lobby', () => {
         .simulate('click');
       expect(spy).toHaveBeenCalledWith('GameName2', 2);
     });
+    test('when server request fails', async () => {
+      lobby.instance().connection.create = spy.mockReturnValue(false);
+      await lobby
+        .find('LobbyCreateRoomForm')
+        .find('button')
+        .simulate('click');
+      expect(lobby.find('.error-msg').text()).not.toBe('');
+    });
   });
 
   describe('joining a room', () => {
@@ -83,12 +93,10 @@ describe('lobby', () => {
           gameName: 'GameName1',
         },
       ];
+      lobby.instance().forceUpdate();
+      lobby.update();
     });
     test('when room is empty', () => {
-      lobby
-        .find('LobbyCreateRoomForm')
-        .find('button')
-        .simulate('click');
       // join 1st room
       lobby.instance().connection.join = spy.mockReturnValue(true);
       lobby
@@ -99,10 +107,6 @@ describe('lobby', () => {
       expect(spy).toHaveBeenCalledWith('GameName1', 'gameID1', '0');
     });
     test('when room is full', () => {
-      lobby
-        .find('LobbyCreateRoomForm')
-        .find('button')
-        .simulate('click');
       // try 2nd room
       expect(
         lobby
@@ -111,14 +115,10 @@ describe('lobby', () => {
           .text()
       ).toContain('RUNNING');
     });
-    test('when server request fails', () => {
-      lobby
-        .find('LobbyCreateRoomForm')
-        .find('button')
-        .simulate('click');
-      // join 1st room
+    test('when server request fails', async () => {
       lobby.instance().connection.join = spy.mockReturnValue(false);
-      lobby
+      // join 1st room
+      await lobby
         .find('LobbyRoomInstance')
         .first()
         .find('button')
@@ -139,14 +139,8 @@ describe('lobby', () => {
           gameName: 'GameName1',
         },
       ];
-      lobby
-        .find('LobbyCreateRoomForm')
-        .find('button')
-        .simulate('click');
-      lobby
-        .find('LobbyRoomInstance')
-        .find('button')
-        .simulate('click');
+      lobby.instance().forceUpdate();
+      lobby.update();
     });
     test('shall leave a room', () => {
       // leave room
@@ -157,9 +151,9 @@ describe('lobby', () => {
         .simulate('click');
       expect(spy).toHaveBeenCalledWith('GameName1', 'gameID1');
     });
-    test('when server request fails', () => {
+    test('when server request fails', async () => {
       lobby.instance().connection.leave = spy.mockReturnValue(false);
-      lobby
+      await lobby
         .find('LobbyRoomInstance')
         .find('button')
         .simulate('click');
@@ -186,10 +180,8 @@ describe('lobby', () => {
           gameName: 'GameName3',
         },
       ];
-      lobby
-        .find('LobbyCreateRoomForm')
-        .find('button')
-        .simulate('click');
+      lobby.instance().forceUpdate();
+      lobby.update();
     });
     test('shall instantiate a game client', () => {
       lobby
