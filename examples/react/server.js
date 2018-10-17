@@ -10,8 +10,8 @@ import KoaWebpack from 'koa-webpack';
 
 import WebpackConfig from './webpack.dev.js';
 import { Server } from 'boardgame.io/server';
-import TicTacToe from './modules/tic-tac-toe/game';
-import Chess from './modules/chess/game';
+import TicTacToe from './tic-tac-toe/game';
+import Chess from './chess/game';
 
 const PORT = process.env.PORT || 8000;
 
