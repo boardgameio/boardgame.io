@@ -11,15 +11,6 @@
   justify-content: center;
 }
 
-.end-turn {
-  border-radius: 8px;
-  cursor: pointer;
-  user-select: none;
-  border: 3px solid #aaa;
-  padding: 10px;
-  font-size: 20px;
-}
-
 .end-turn:hover {
   background: #eee;
   border-color: #888;
@@ -28,6 +19,16 @@
 .end-turn:active {
   background: #777;
   color: #eee;
+}
+
+.controls {
+  position: absolute;
+  margin-top: 50px;
+  margin-left: -30px;
+}
+
+.controls button {
+  width: 50px;
 }
 
 .turnorder-simulator .player {
@@ -53,25 +54,28 @@
 }
 
 .player.active {
-  cursor: pointer;
   border-style: solid;
 }
 
-.player-container > *:nth-of-type(1) {
-  transform: rotate(0deg) translate(8em) rotate(-0deg);
+.client {
+  padding: 0 !important;
 }
-.player-container > *:nth-of-type(2) {
-  transform: rotate(60deg) translate(8em) rotate(-60deg);
+
+.player-container > .client:nth-child(1) {
+  transform: rotate(0deg) translate(12em) rotate(-0deg);
 }
-.player-container > *:nth-of-type(3) {
-  transform: rotate(120deg) translate(8em) rotate(-120deg);
+.player-container > .client:nth-child(2) {
+  transform: rotate(60deg) translate(12em) rotate(-60deg);
 }
-.player-container > *:nth-of-type(4) {
-  transform: rotate(180deg) translate(8em) rotate(-180deg);
+.player-container > .client:nth-child(3) {
+  transform: rotate(120deg) translate(12em) rotate(-120deg);
 }
-.player-container > *:nth-of-type(5) {
-  transform: rotate(240deg) translate(8em) rotate(-240deg);
+.player-container > .client:nth-child(4) {
+  transform: rotate(180deg) translate(12em) rotate(-180deg);
 }
-.player-container > *:nth-of-type(6) {
-  transform: rotate(300deg) translate(8em) rotate(-300deg);
+.player-container > .client:nth-child(5) {
+  transform: rotate(240deg) translate(12em) rotate(-240deg);
+}
+.player-container > .client:nth-child(6) {
+  transform: rotate(300deg) translate(12em) rotate(-300deg);
 }
