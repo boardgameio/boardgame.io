@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Militia from './militia';
 import Simulator from './simulator';
 
 const routes = [
@@ -14,11 +13,6 @@ const routes = [
     path: '/turnorder/main',
     text: 'Simulator',
     component: Simulator,
-  },
-  {
-    path: '/turnorder/militia',
-    text: 'Militia',
-    component: Militia,
   },
 ];
 
