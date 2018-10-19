@@ -66,7 +66,7 @@ export class Mongo {
 
     const col = this.db.collection(id);
     delete state._id;
-    await col.insert(state);
+    await col.insertOne(state);
 
     return;
   }
