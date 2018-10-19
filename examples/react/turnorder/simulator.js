@@ -99,12 +99,12 @@ const examples = {
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.init('militia');
+    this.init('default');
   }
 
   init(type) {
+    this.type = type;
     this.desc = examples[type].desc;
-
     this.client = Client({
       game: examples[type].game,
       numPlayers: 6,
@@ -126,15 +126,26 @@ class App extends React.Component {
     }
 
     return (
-      <div className="turnorder-simulator">
-        <div className="options">
-          <button onClick={() => this.init('default')}>default</button>
-          <button onClick={() => this.init('militia')}>militia</button>
+      <div id="turnorder">
+        <div className="turnorder-options">
+          <div
+            className={this.type === 'default' ? 'active' : ''}
+            onClick={() => this.init('default')}
+          >
+            default
+          </div>
+          <div
+            className={this.type === 'militia' ? 'active' : ''}
+            onClick={() => this.init('militia')}
+          >
+            militia
+          </div>
         </div>
 
-        <Description />
-
-        <div className="player-container">{players}</div>
+        <div className="turnorder-content">
+          <Description />
+          <div className="player-container">{players}</div>
+        </div>
       </div>
     );
   }

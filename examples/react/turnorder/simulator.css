@@ -1,3 +1,7 @@
+#turnorder {
+  padding: 50px;
+}
+
 .player-container {
   position: relative;
   margin: 100px;
@@ -21,17 +25,40 @@
   color: #eee;
 }
 
+.turnorder-options {
+  display: flex;
+  flex-direction: row;
+}
+
+.turnorder-options div {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 3px solid #aaa;
+}
+
+.turnorder-options div:hover {
+  background: #efefef;
+}
+
+.turnorder-options div.active {
+  background: #efefef;
+  border-bottom-color: #555;
+}
+
+.turnorder-content {
+}
+
 .controls {
   position: absolute;
   margin-top: 50px;
-  margin-left: -30px;
+  margin-left: -32px;
 }
 
 .controls button {
   width: 50px;
 }
 
-.turnorder-simulator .player {
+#turnorder .player {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -48,16 +75,16 @@
   font-weight: bold;
 }
 
-.player.current {
+#turnorder .player.current {
   background: #555;
   color: #eee;
 }
 
-.player.active {
+#turnorder .player.active {
   border-style: solid;
 }
 
-.client {
+#turnorder .client {
   padding: 0 !important;
 }
 
