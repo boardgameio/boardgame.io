@@ -8,8 +8,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Game } from 'boardgame.io/core';
 import { Client } from 'boardgame.io/react';
+import Default from './example-default';
+import Militia from './example-militia';
 import './simulator.css';
 
 class Board extends React.Component {
@@ -37,15 +38,17 @@ class Board extends React.Component {
       current = true;
     }
 
-    const moves = Object.entries(this.props.moves).map(e => (
-      <button key={e[0]} onClick={e[1]}>
-        {e[0]}
-      </button>
-    ));
+    const moves = Object.entries(this.props.moves)
+      .filter(e => this.props.ctx.allowedMoves.includes(e[0]))
+      .map(e => (
+        <button key={e[0]} onClick={e[1]}>
+          {e[0]}
+        </button>
+      ));
 
     const events = Object.entries(this.props.events)
+      .filter(() => current)
       .filter(e => e[0] != 'setActionPlayers')
-      .filter(e => current || e[0] != 'endTurn')
       .map(e => (
         <button key={e[0]} onClick={e[1]}>
           {e[0]}
@@ -67,33 +70,9 @@ class Board extends React.Component {
   }
 }
 
-const Default = () => <div />;
-
-const Militia = () => <div />;
-
 const examples = {
-  default: {
-    desc: Default,
-    game: Game({}),
-  },
-
-  militia: {
-    desc: Militia,
-    game: Game({
-      flow: { setActionPlayers: true },
-
-      moves: {
-        play(G, ctx) {
-          ctx.events.setActionPlayers({ allOthers: true, once: true });
-          return G;
-        },
-
-        discard(G) {
-          return G;
-        },
-      },
-    }),
-  },
+  default: Default,
+  militia: Militia,
 };
 
 class App extends React.Component {
@@ -104,7 +83,7 @@ class App extends React.Component {
 
   init(type) {
     this.type = type;
-    this.desc = examples[type].desc;
+    this.description = examples[type].description;
     this.client = Client({
       game: examples[type].game,
       numPlayers: 6,
@@ -117,7 +96,7 @@ class App extends React.Component {
   }
 
   render() {
-    const Description = this.desc;
+    const Description = this.description;
     const App = this.client;
 
     let players = [];
