@@ -122,8 +122,10 @@ class App extends React.Component {
         </div>
 
         <div className="turnorder-content">
-          <Description />
           <div className="player-container">{players}</div>
+          <div className="description">
+            <Description />
+          </div>
         </div>
       </div>
     );

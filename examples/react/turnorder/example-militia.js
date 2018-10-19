@@ -6,10 +6,51 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import React from 'react';
 import { Game } from 'boardgame.io/core';
 
+const code = `{
+  flow: {
+    setActionPlayers: true,
+
+    phases: [
+      { name: 'move', allowedMoves: ['play'] },
+      { name: 'discard', allowedMoves: ['discard'] },
+    ],
+
+    onTurnBegin(G, ctx) {
+      ctx.events.endPhase('move');
+      return G;
+    },
+  },
+
+  moves: {
+    play(G, ctx) {
+      ctx.events.endPhase();
+      ctx.events.setActionPlayers({ allOthers: true, once: true });
+      return G;
+    },
+
+    discard(G) {
+      return G;
+    },
+  },
+}
+`;
+
+const Description = () => (
+  <div>
+    <p>
+      This is an example from the card game Dominion. The Militia card forces
+      every other play to discard a card.
+    </p>
+    This is one way to implement it using this framework.
+    <pre>{code}</pre>
+  </div>
+);
+
 export default {
-  description: () => null,
+  description: Description,
 
   game: Game({
     flow: {

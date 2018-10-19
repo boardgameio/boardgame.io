@@ -6,9 +6,17 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import React from 'react';
 import { Game } from 'boardgame.io/core';
 
+const Description = () => (
+  <div>
+    This is the default round-robin turn order. Click on
+    <strong> endTurn</strong> and see how the turn passes around.
+  </div>
+);
+
 export default {
-  description: () => null,
+  description: Description,
   game: Game({}),
 };

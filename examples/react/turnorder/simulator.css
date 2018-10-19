@@ -2,6 +2,16 @@
   padding: 50px;
 }
 
+#turnorder pre {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+#turnorder .description {
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+
 .player-container {
   position: relative;
   margin: 100px;
