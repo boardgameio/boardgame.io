@@ -45,17 +45,15 @@
   border-bottom-color: #555;
 }
 
-.turnorder-content {
-}
-
 .controls {
   position: absolute;
   margin-top: 50px;
-  margin-left: -32px;
+  margin-left: -47px;
 }
 
 .controls button {
-  width: 50px;
+  width: 80px;
+  margin-bottom: 5px;
 }
 
 #turnorder .player {

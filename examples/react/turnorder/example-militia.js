@@ -19,6 +19,11 @@ export default {
         { name: 'move', allowedMoves: ['play'] },
         { name: 'discard', allowedMoves: ['discard'] },
       ],
+
+      onTurnBegin(G, ctx) {
+        ctx.events.endPhase('move');
+        return G;
+      },
     },
 
     moves: {
