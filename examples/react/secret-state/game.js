@@ -21,15 +21,9 @@ const SecretState = Game({
   }),
 
   moves: {
-    /* eslint-disable no-unused-vars */
-    clickCell(G, ctx, secretstuff) {
+    clickCell(G) {
       return { ...G };
     },
-    /* eslint-enable no-unused-vars */
-  },
-
-  flow: {
-    redactedMoves: ['clickCell'],
   },
 
   playerView: PlayerView.STRIP_SECRETS,
