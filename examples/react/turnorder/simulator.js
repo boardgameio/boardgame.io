@@ -23,6 +23,19 @@ class Board extends React.Component {
   };
 
   render() {
+    if (this.props.playerID === null) {
+      if (this.props.ctx.phase === 'default') {
+        return null;
+      }
+
+      return (
+        <div className="table-interior">
+          <label>phase</label>
+          <div className="phase">{this.props.ctx.phase}</div>
+        </div>
+      );
+    }
+
     let className = 'player';
     let active = false;
     let current = false;
@@ -56,7 +69,7 @@ class Board extends React.Component {
       ));
 
     return (
-      <div>
+      <div className="player-wrap">
         <span className={className} onClick={onClick}>
           {this.props.playerID}
         </span>
@@ -122,7 +135,10 @@ class App extends React.Component {
         </div>
 
         <div className="turnorder-content">
-          <div className="player-container">{players}</div>
+          <div className="player-container">
+            <App />
+            <span>{players}</span>
+          </div>
           <div className="description">
             <Description />
           </div>

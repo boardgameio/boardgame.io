@@ -44,7 +44,6 @@ const Description = () => (
       This is an example from the card game Dominion. The Militia card forces
       every other play to discard a card.
     </p>
-    This is one way to implement it using this framework.
     <pre>{code}</pre>
   </div>
 );
