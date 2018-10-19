@@ -323,7 +323,9 @@ describe('redactLog', () => {
 
   test('redacted move is only shown with args to the player that made the move', () => {
     const rm = ['clickCell'];
-    const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
+    const logEvents = [
+      { action: ActionCreators.makeMove('clickCell', [1, 2, 3], '0') },
+    ];
 
     // player that made the move
     let result = redactLog(rm, logEvents, {}, '0');
@@ -333,12 +335,14 @@ describe('redactLog', () => {
     result = redactLog(rm, logEvents, {}, '1');
     expect(result).toMatchObject([
       {
-        type: 'MAKE_MOVE',
-        payload: {
-          argsRedacted: true,
-          credentials: undefined,
-          playerID: '0',
-          type: 'clickCell',
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            argsRedacted: true,
+            credentials: undefined,
+            playerID: '0',
+            type: 'clickCell',
+          },
         },
       },
     ]);
@@ -346,7 +350,9 @@ describe('redactLog', () => {
 
   test('not redacted move is shown to all', () => {
     const rm = ['clickCell'];
-    const logEvents = [ActionCreators.makeMove('unclickCell', [1, 2, 3], '0')];
+    const logEvents = [
+      { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
+    ];
 
     // player that made the move
     let result = redactLog(rm, logEvents, {}, '0');
@@ -358,7 +364,9 @@ describe('redactLog', () => {
 
   test('can explicitly set showing args to true', () => {
     const rm = [];
-    const logEvents = [ActionCreators.makeMove('clickCell', [1, 2, 3], '0')];
+    const logEvents = [
+      { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
+    ];
 
     // player that made the move
     let result = redactLog(rm, logEvents, {}, '0');
@@ -370,7 +378,7 @@ describe('redactLog', () => {
 
   test('events are not redacted', () => {
     const rm = ['clickCell'];
-    const logEvents = [ActionCreators.gameEvent('endTurn')];
+    const logEvents = [{ action: ActionCreators.gameEvent('endTurn') }];
 
     // player that made the move
     let result = redactLog(rm, logEvents, {}, '0');

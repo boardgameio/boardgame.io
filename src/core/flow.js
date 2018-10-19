@@ -57,6 +57,7 @@ export function Flow({
   optimisticUpdate,
   canMakeMove,
   canUndoMove,
+  redactedMoves,
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
@@ -86,6 +87,7 @@ export function Flow({
     ctx,
     init,
     canUndoMove,
+    redactedMoves,
 
     eventNames: Object.getOwnPropertyNames(events),
 

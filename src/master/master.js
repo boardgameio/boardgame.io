@@ -12,30 +12,32 @@ import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
 export function redactLog(redactedMoves, log, ctx, playerID) {
-  if (redactedMoves === undefined) {
+  if (redactedMoves === undefined || log === undefined) {
     return log;
   }
 
   return log.map(logEvent => {
     // filter for all other players and a spectator
-    if (playerID !== null && +playerID === +logEvent.payload.playerID) {
+    if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
       return logEvent;
     }
 
     // only filter moves
-    if (logEvent.type !== 'MAKE_MOVE') {
+    if (logEvent.action.type !== 'MAKE_MOVE') {
       return logEvent;
     }
 
-    const moveName = logEvent.payload.type;
+    const moveName = logEvent.action.payload.type;
     let filteredEvent = logEvent;
     if (redactedMoves.includes(moveName)) {
       const newPayload = {
-        ...filteredEvent.payload,
+        ...filteredEvent.action.payload,
         args: undefined,
         argsRedacted: true,
       };
-      filteredEvent = { ...filteredEvent, payload: newPayload };
+      filteredEvent = {
+        action: { ...filteredEvent.action, payload: newPayload },
+      };
     }
 
     return filteredEvent;
