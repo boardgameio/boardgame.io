@@ -188,7 +188,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
           game,
           action.payload.playerID
         );
-        apiCtx.attachToContext(state.ctx);
+        state.ctx = apiCtx.attachToContext(state.ctx);
 
         let newState = game.flow.processGameEvent(state, action);
 
