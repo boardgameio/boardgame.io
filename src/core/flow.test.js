@@ -506,12 +506,20 @@ test('canPlayerCallEvent', () => {
 
   let flow = Flow({});
   expect(flow.canPlayerCallEvent({}, {}, playerID)).toBe(false);
-  expect(flow.canPlayerCallEvent({}, { actionPlayers: ['1'] }, playerID)).toBe(
-    false
-  );
-  expect(flow.canPlayerCallEvent({}, { actionPlayers: ['0'] }, playerID)).toBe(
-    false
-  );
+  expect(
+    flow.canPlayerCallEvent(
+      {},
+      { currentPlayer: '0', actionPlayers: ['1'] },
+      playerID
+    )
+  ).toBe(false);
+  expect(
+    flow.canPlayerCallEvent(
+      {},
+      { currentPlayer: '0', actionPlayers: ['0'] },
+      playerID
+    )
+  ).toBe(true);
 });
 
 test('endGame', () => {
