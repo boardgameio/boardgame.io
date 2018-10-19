@@ -106,15 +106,9 @@ Game({
   },
 
   flow: {
-    phases: [
-      {
-        name: 'A',
-        turnOrder: TurnOrder.ANY,
-      },
-      {
-        name: 'B',
-        turnOrder: TurnOrder.ONCE,
-      },
+    phases: {
+      A: { turnOrder: TurnOrder.ANY },
+      B: { turnOrder: TurnOrder.ONCE },
     ],
   }
 }

@@ -14,6 +14,7 @@ import {
 } from './turn-order';
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
+import * as logging from './logger';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -182,17 +183,15 @@ export function Flow({
  *                                       the result of execution from
  *                                       the server.
  *
- * @param {...object} phases - A list of phases in the game.
+ * @param {...object} phases - A map of phases in the game.
  *
- * Each phase is described by an object:
+ * Each phase is described by an object whose key is the phase name.
  *
  * All the properties below override their global equivalents
  * above whenever they are defined (i.e. the global setting
  * is used if a phase-specific setting is absent).
  *
  * {
- *   name: 'phase_name',
- *
  *   // Any setup code to run before the phase begins.
  *   onPhaseBegin: (G, ctx) => G,
  *
@@ -238,6 +237,7 @@ export function Flow({
  */
 export function FlowWithPhases({
   phases,
+  startingPhase,
   movesPerTurn,
   endTurnIf,
   endGameIf,
@@ -269,7 +269,8 @@ export function FlowWithPhases({
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
   }
-  if (!phases) phases = [{ name: 'default' }];
+  if (!phases) phases = {};
+  if (!startingPhase) startingPhase = 'default';
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
   if (!onTurnBegin) onTurnBegin = G => G;
@@ -279,13 +280,16 @@ export function FlowWithPhases({
   if (allowedMoves === undefined) allowedMoves = null;
   if (undoableMoves === undefined) undoableMoves = null;
 
-  let phaseKeys = [];
-  let phaseMap = {};
+  const phaseMap = phases;
 
-  for (let i = 0; i < phases.length; i++) {
-    let conf = phases[i];
-    phaseKeys.push(conf.name);
-    phaseMap[conf.name] = conf;
+  if ('default' in phaseMap) {
+    logging.error('cannot specify phase with name "default"');
+  }
+
+  phaseMap['default'] = {};
+
+  for (let phase in phaseMap) {
+    const conf = phaseMap[phase];
 
     if (conf.endPhaseIf === undefined) {
       conf.endPhaseIf = () => false;
@@ -385,9 +389,15 @@ export function FlowWithPhases({
     return { ...state, G, ctx, _undo, _redo: [] };
   };
 
-  const startGame = function(state, config) {
-    state = startPhase(state, config);
-    state = startTurn(state, config);
+  const startGame = function(state) {
+    if (!(state.ctx.phase in phaseMap)) {
+      logging.error('invalid startingPhase: ' + state.ctx.phase);
+      return state;
+    }
+
+    const conf = phaseMap[state.ctx.phase];
+    state = startPhase(state, conf);
+    state = startTurn(state, conf);
     return state;
   };
 
@@ -400,8 +410,11 @@ export function FlowWithPhases({
    *
    * The next phase is chosen in a round-robin fashion, with the
    * option to override that by passing nextPhase.
+   *
+   * If this call results in a cycle, the phase is reset to
+   * the default phase.
    */
-  function endPhaseEvent(state, nextPhase, cascadeDepth) {
+  function endPhaseEvent(state, nextPhase, visitedPhases) {
     let G = state.G;
     let ctx = state.ctx;
 
@@ -418,10 +431,11 @@ export function FlowWithPhases({
     if (nextPhase in phaseMap) {
       ctx = { ...ctx, phase: nextPhase };
     } else {
-      let index = phaseKeys.indexOf(ctx.phase);
-      index = (index + 1) % phases.length;
-      const phase = phases[index].name;
-      ctx = { ...ctx, phase };
+      if (conf.next !== undefined) {
+        ctx = { ...ctx, phase: conf.next };
+      } else {
+        ctx = { ...ctx, phase: 'default' };
+      }
     }
 
     // Run any setup code for the new phase.
@@ -430,15 +444,29 @@ export function FlowWithPhases({
     const origTurn = state.ctx.turn;
 
     // End the new phase automatically if necessary.
-    // In order to avoid infinite loops, this is called
-    // a finite number of times.
-    if (!cascadeDepth) cascadeDepth = 0;
-    if (cascadeDepth < phases.length - 1) {
+    // In order to avoid infinite loops, the `default`
+    // phase is chosen as the next phase the moment we
+    // end up at a phase that we've already visited when
+    // we processed the endPhase event that kicked of this
+    // chain of events.
+    if (!visitedPhases) visitedPhases = {};
+
+    if (ctx.phase in visitedPhases) {
+      state = this.dispatch(
+        state,
+        automaticGameEvent(
+          'endPhase',
+          ['default', visitedPhases],
+          this.playerID
+        )
+      );
+    } else {
+      visitedPhases[ctx.phase] = true;
       const end = shouldEndPhase(state);
       if (end) {
         state = this.dispatch(
           state,
-          automaticGameEvent('endPhase', [end, cascadeDepth + 1], this.playerID)
+          automaticGameEvent('endPhase', [end, visitedPhases], this.playerID)
         );
       }
     }
@@ -653,15 +681,16 @@ export function FlowWithPhases({
       numPlayers,
       turn: 0,
       currentPlayer: '0',
+      actionPlayers: ['0'],
       currentPlayerMoves: 0,
       playOrder: [...new Array(numPlayers)].map((d, i) => i + ''),
       playOrderPos: 0,
       stats: { turn: { numMoves: {} }, phase: { numMoves: {} } },
       allPlayed: false,
-      phase: phases[0].name,
+      phase: startingPhase,
     }),
     init: state => {
-      return startGame(state, phases[0]);
+      return startGame(state);
     },
     optimisticUpdate: (G, ctx, action) => {
       // Some random code was executed.

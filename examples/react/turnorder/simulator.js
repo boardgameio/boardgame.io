@@ -24,10 +24,6 @@ class Board extends React.Component {
 
   render() {
     if (this.props.playerID === null) {
-      if (this.props.ctx.phase === 'default') {
-        return null;
-      }
-
       return (
         <div className="table-interior">
           <label>phase</label>
@@ -52,7 +48,11 @@ class Board extends React.Component {
     }
 
     const moves = Object.entries(this.props.moves)
-      .filter(e => this.props.ctx.allowedMoves.includes(e[0]))
+      .filter(
+        e =>
+          this.props.ctx.allowedMoves === null ||
+          this.props.ctx.allowedMoves.includes(e[0])
+      )
       .map(e => (
         <button key={e[0]} onClick={e[1]}>
           {e[0]}

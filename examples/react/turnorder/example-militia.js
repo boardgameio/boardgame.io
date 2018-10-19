@@ -12,21 +12,22 @@ import { Game } from 'boardgame.io/core';
 const code = `{
   flow: {
     setActionPlayers: true,
+    startingPhase: 'play',
 
-    phases: [
-      { name: 'move', allowedMoves: ['play'] },
-      { name: 'discard', allowedMoves: ['discard'] },
-    ],
+    phases: {
+      play: { allowedMoves: ['play'] },
+      discard: { allowedMoves: ['discard'] },
+    },
 
     onTurnBegin(G, ctx) {
-      ctx.events.endPhase('move');
+      ctx.events.endPhase('play');
       return G;
     },
   },
 
   moves: {
     play(G, ctx) {
-      ctx.events.endPhase();
+      ctx.events.endPhase('discard');
       ctx.events.setActionPlayers({ allOthers: true, once: true });
       return G;
     },
@@ -54,21 +55,22 @@ export default {
   game: Game({
     flow: {
       setActionPlayers: true,
+      startingPhase: 'play',
 
-      phases: [
-        { name: 'move', allowedMoves: ['play'] },
-        { name: 'discard', allowedMoves: ['discard'] },
-      ],
+      phases: {
+        play: { allowedMoves: ['play'] },
+        discard: { allowedMoves: ['discard'] },
+      },
 
       onTurnBegin(G, ctx) {
-        ctx.events.endPhase('move');
+        ctx.events.endPhase('play');
         return G;
       },
     },
 
     moves: {
       play(G, ctx) {
-        ctx.events.endPhase();
+        ctx.events.endPhase('discard');
         ctx.events.setActionPlayers({ allOthers: true, once: true });
         return G;
       },

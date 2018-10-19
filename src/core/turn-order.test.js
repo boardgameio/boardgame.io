@@ -15,7 +15,8 @@ import { CreateGameReducer } from './reducer';
 describe('turnOrder', () => {
   test('default', () => {
     const flow = FlowWithPhases({
-      phases: [{ name: 'A' }, { name: 'B' }],
+      startingPhase: 'A',
+      phases: { A: {}, B: {} },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -34,7 +35,8 @@ describe('turnOrder', () => {
   test('once', () => {
     const flow = FlowWithPhases({
       turnOrder: TurnOrder.ONCE,
-      phases: [{ name: 'A' }, { name: 'B' }],
+      startingPhase: 'A',
+      phases: { A: { next: 'B' }, B: {} },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -52,7 +54,8 @@ describe('turnOrder', () => {
 
   test('custom', () => {
     const flow = FlowWithPhases({
-      phases: [{ name: 'A', turnOrder: { first: () => 9, next: () => 3 } }],
+      startingPhase: 'A',
+      phases: { A: { turnOrder: { first: () => 9, next: () => 3 } } },
     });
 
     let state = { ctx: flow.ctx(10) };
@@ -67,7 +70,8 @@ describe('turnOrder', () => {
 
 test('passing', () => {
   const flow = FlowWithPhases({
-    phases: [{ name: 'A', turnOrder: TurnOrder.SKIP }],
+    startingPhase: 'A',
+    phases: { A: { turnOrder: TurnOrder.SKIP } },
   });
   const game = Game({
     flow,
@@ -112,9 +116,10 @@ test('passing', () => {
 
 test('end game after everyone passes', () => {
   const flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: TurnOrder.ANY, endGameIf: G => G.allPassed },
-    ],
+    startingPhase: 'A',
+    phases: {
+      A: { turnOrder: TurnOrder.ANY, endGameIf: G => G.allPassed },
+    },
   });
   const game = Game({
     flow,
@@ -148,7 +153,7 @@ test('override', () => {
 
   let flow = FlowWithPhases({
     turnOrder: even,
-    phases: [{ name: 'A' }, { name: 'B', turnOrder: odd }],
+    phases: { A: {}, B: { turnOrder: odd } },
   });
 
   let state = { ctx: flow.ctx(10) };
@@ -160,7 +165,7 @@ test('override', () => {
   state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('4');
 
-  state = flow.processGameEvent(state, gameEvent('endPhase'));
+  state = flow.processGameEvent(state, gameEvent('endPhase', 'B'));
 
   expect(state.ctx.currentPlayer).toBe('1');
   state = flow.processGameEvent(state, gameEvent('endTurn'));

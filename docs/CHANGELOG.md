@@ -1,3 +1,37 @@
+#### Breaking Changes
+
+1. The syntax for phases has changed:
+
+```
+// old
+phases: [
+  { name: 'A', ...opts },
+  { name: 'B', ...opts },
+]
+
+// new
+phases: {
+  'A': { ...opts },
+  'B': { ...opts },
+}
+```
+
+2. There is no implicit ordering of phases. You can specify an
+   explicit order via `next`:
+
+```
+// new
+phases: {
+  'A': { next: 'B' },
+  'B': { next: 'A' },
+}
+```
+
+3. A phase called `default` is always created. This is the phase
+   that the game begins with. This is also the phase that the
+   game reverts to in case it detects an infinite loop of
+   `endPhase` events caused by a cycle.
+
 ## v0.26.3
 
 #### Features

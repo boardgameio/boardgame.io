@@ -222,7 +222,7 @@ describe('Events API', () => {
   const game = Game({
     setup: () => ({}),
     flow: {
-      phases: [{ name: 'A' }, { name: 'B' }],
+      phases: { A: {} },
       onTurnBegin: fn,
       onTurnEnd: fn,
       onPhaseBegin: fn,

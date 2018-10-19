@@ -233,8 +233,6 @@ test('event dispatchers', () => {
         endPhase: false,
         endTurn: false,
       },
-
-      phases: [{ name: 'default' }],
     });
     const reducer = CreateGameReducer({ game, numPlayers: 2 });
     const store = createStore(reducer);
