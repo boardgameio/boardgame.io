@@ -4,7 +4,10 @@ import { Firebase } from './firebase';
 
 const DBFromEnv = () => {
   if (process.env.MONGO_URI && process.env.MONGO_DATABASE) {
-    return new Mongo({ url: process.env.MONGO_URI, dbname: process.env.MONGO_DATABASE });
+    return new Mongo({
+      url: process.env.MONGO_URI,
+      dbname: process.env.MONGO_DATABASE,
+    });
   } else if (
     process.env.FIREBASE_APIKEY &&
     process.env.FIREBASE_AUTHDOMAIN &&
