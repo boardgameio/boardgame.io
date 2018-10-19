@@ -216,6 +216,39 @@ test('deltalog', () => {
   expect(state.deltalog).toEqual([{ action: actionC }]);
 });
 
+describe('Events API', () => {
+  const fn = (G, ctx) => (ctx.events ? {} : { error: true });
+
+  const game = Game({
+    setup: () => ({}),
+    flow: {
+      phases: [{ name: 'A' }, { name: 'B' }],
+      onTurnBegin: fn,
+      onTurnEnd: fn,
+      onPhaseBegin: fn,
+      onPhaseEnd: fn,
+      onMove: fn,
+    },
+  });
+
+  const reducer = CreateGameReducer({ game });
+  let state = reducer(undefined, { type: 'init' });
+
+  test('is attached at the beginning', () => {
+    expect(state.G).not.toEqual({ error: true });
+  });
+
+  test('is attached at the end of turns', () => {
+    state = reducer(state, gameEvent('endTurn'));
+    expect(state.G).not.toEqual({ error: true });
+  });
+
+  test('is attached at the end of phases', () => {
+    state = reducer(state, gameEvent('endPhase'));
+    expect(state.G).not.toEqual({ error: true });
+  });
+});
+
 describe('Random inside setup()', () => {
   const game1 = Game({
     seed: 'seed1',
@@ -255,22 +288,6 @@ describe('Random inside setup()', () => {
     const state = reducer(undefined, makeMove());
     expect(state.ctx._random.seed).toBeDefined();
   });
-});
-
-test('events API inside first onTurnBegin', () => {
-  const game = Game({
-    flow: {
-      setActionPlayers: true,
-      onTurnBegin: (G, ctx) => {
-        ctx.events.setActionPlayers(['0', '1']);
-      },
-    },
-  });
-
-  const reducer = CreateGameReducer({ game });
-  const state = reducer(undefined, { type: 'init' });
-
-  expect(state.ctx.actionPlayers).toEqual(['0', '1']);
 });
 
 test('undo / redo', () => {
