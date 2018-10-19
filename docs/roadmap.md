@@ -35,7 +35,7 @@ get done before we are ready for a v1 release.
 
 ### Core
 
-* [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
+* [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154)) **[N]**
 * [ ] log improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/227))
 
 ### Server
