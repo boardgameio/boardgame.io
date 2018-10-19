@@ -3,7 +3,7 @@
 Many games allow moves whose outcome depends on shuffled cards or rolled dice.
 Take e.g. the game [Yahtzee](https://en.wikipedia.org/wiki/Yahtzee).
 A player rolls dice, chooses some, rolls another time, chooses some more, and does a final dice roll.
-Depending on the face-up sides he now must choose where he will score.
+Depending on the face-up sides the player now must choose where they will score.
 
 This poses interesting challenges regarding the implementation.
 

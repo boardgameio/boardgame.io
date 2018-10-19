@@ -1,3 +1,14 @@
+## v0.26.3
+
+#### Features
+
+* [[d50015d](https://github.com/nicolodavis/boardgame.io/commit/d50015d)] turn order simulator
+
+#### Bugfixes
+
+* [[58e135b](https://github.com/nicolodavis/boardgame.io/commit/58e135b)] fix bug that was causing ctx.events to be undefined
+* [[ea3754b](https://github.com/nicolodavis/boardgame.io/commit/ea3754b)] player needs to be in actionPlayers in order to call events
+
 ## v0.26.2
 
 #### Features
