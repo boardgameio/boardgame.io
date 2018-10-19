@@ -19,7 +19,7 @@
   margin-top: -0.85em;
 }
 
-.player-container {
+#turnorder .player-container {
   position: relative;
   margin: 100px;
   width: 16em;
@@ -54,13 +54,13 @@
   border-bottom-color: #555;
 }
 
-.controls {
+#turnorder .controls {
   position: absolute;
   margin-top: 50px;
   margin-left: -47px;
 }
 
-.controls button {
+#turnorder .controls button {
   width: 80px;
   margin-bottom: 5px;
 }
