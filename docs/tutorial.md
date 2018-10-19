@@ -62,6 +62,8 @@ a repeatable calculation of state without any side effects.
 !> The move function can receive any number of additional
 arguments that are passed to it from the call-site.
 
+?> To denote an illegal move, the move function should return undefined. Such a move will be ignored - as if the player hasn't acted.
+
 Run the app using:
 
 ```
