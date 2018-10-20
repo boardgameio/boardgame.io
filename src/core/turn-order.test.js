@@ -153,7 +153,8 @@ test('override', () => {
 
   let flow = FlowWithPhases({
     turnOrder: even,
-    phases: { A: {}, B: { turnOrder: odd } },
+    phases: { A: { next: 'B' }, B: { turnOrder: odd } },
+    startingPhase: 'A',
   });
 
   let state = { ctx: flow.ctx(10) };
@@ -165,7 +166,7 @@ test('override', () => {
   state = flow.processGameEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('4');
 
-  state = flow.processGameEvent(state, gameEvent('endPhase', 'B'));
+  state = flow.processGameEvent(state, gameEvent('endPhase'));
 
   expect(state.ctx.currentPlayer).toBe('1');
   state = flow.processGameEvent(state, gameEvent('endTurn'));
@@ -336,13 +337,15 @@ describe('UpdateTurnOrderState', () => {
     actionPlayers: ['0'],
   };
 
-  test('without nextPlayer', () => {
+  test('without next player', () => {
     const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT);
     expect(t).toMatchObject({ currentPlayer: '1' });
   });
 
-  test('with nextPlayer', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, '2');
+  test('with next player', () => {
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, {
+      next: '2',
+    });
     expect(t).toMatchObject({ currentPlayer: '2' });
   });
 

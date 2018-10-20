@@ -84,7 +84,7 @@ test('rounds with starting player token', () => {
   expect(state.ctx.currentPlayer).toBe('3');
 
   state = reducer(state, gameEvent('endTurn'));
-  state = reducer(state, gameEvent('endPhase', 'main'));
+  state = reducer(state, gameEvent('endPhase', { next: 'main' }));
   expect(state.ctx.currentPlayer).toBe('2');
 
   state = reducer(state, gameEvent('endTurn'));

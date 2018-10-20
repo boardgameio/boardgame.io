@@ -6,6 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import * as logging from './logger';
+
 /**
  * Standard move that simulates passing.
  *
@@ -119,19 +121,23 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
  * @param {object} G - The game object G.
  * @param {object} ctx - The game object ctx.
  * @param {object} turnOrder - A turn order object for this phase.
- * @param {string} nextPlayer - An optional argument to endTurn that
+ * @param {string} endTurnArg - An optional argument to endTurn that
                                 may specify the next player.
  */
-export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
+export function UpdateTurnOrderState(G, ctx, turnOrder, endTurnArg) {
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
   let actionPlayers = ctx.actionPlayers;
   let endPhase = false;
 
-  if (ctx.playOrder.includes(nextPlayer)) {
-    playOrderPos = ctx.playOrder.indexOf(nextPlayer);
-    currentPlayer = nextPlayer;
-    actionPlayers = [currentPlayer];
+  if (endTurnArg && endTurnArg !== true) {
+    if (ctx.playOrder.includes(endTurnArg.next)) {
+      playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
+      currentPlayer = endTurnArg.next;
+      actionPlayers = [currentPlayer];
+    } else {
+      logging.error(`invalid argument to endTurn: ${endTurnArg}`);
+    }
   } else {
     const t = turnOrder.next(G, ctx);
 

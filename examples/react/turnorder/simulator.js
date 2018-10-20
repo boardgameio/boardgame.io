@@ -54,7 +54,7 @@ class Board extends React.Component {
           this.props.ctx.allowedMoves.includes(e[0])
       )
       .map(e => (
-        <button key={e[0]} onClick={e[1]}>
+        <button key={e[0]} onClick={() => e[1]()}>
           {e[0]}
         </button>
       ));
@@ -63,7 +63,7 @@ class Board extends React.Component {
       .filter(() => current && active)
       .filter(e => e[0] != 'setActionPlayers')
       .map(e => (
-        <button key={e[0]} onClick={e[1]}>
+        <button key={e[0]} onClick={() => e[1]()}>
           {e[0]}
         </button>
       ));

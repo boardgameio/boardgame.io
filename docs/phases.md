@@ -88,31 +88,52 @@ has three phases, even though we never use the `default` phase.
 
 A phase ends when one of the following happens:
 
-###### 1. `endPhaseIf` triggers:
+###### `endPhaseIf` triggers:
 
-This is a simple boolean function that terminates the phase when
-it returns `true` (see the example above).
+This is a function that terminates the phase when it returns a truthy value (see the example above).
 
-###### 2. The `endPhase` event is dispatched:
+###### The `endPhase` event is dispatched:
 
 This can happen either in the game logic or from the client
 directly. See the [Events API](events.md) for more details
 on how to dispatch events.
 
-###### What happens when a phase terminates?
+### What happens when a phase terminates?
 
-The game moves on to the "next" phase. This phase is determined by the
-following in increasing order of precedence (i.e. if [2] and [4] are both
-relevant, the result of [4] is used):
+The game moves on to the "next" phase. This phase is determined by the following (the latter ones overruling the former):
 
-1. The `default` phase is chosen as the next phase if no other option is present.
+#### 1
 
-2. If a phase specifies the `next` option (like our example above does), then that is
-   chosen as the next phase.
+The `default` phase is chosen as the next phase if no other option is present.
 
-3. `endPhaseIf` can return the name of the next phase.
+#### 2
 
-4. The `endPhase` event accepts the name of the next phase as an argument.
+If a phase specifies the `next` option (like our example above does), then that is chosen as the next phase.
+
+```js
+phases: {
+  A: {
+    next: 'B';
+  }
+}
+```
+
+#### 3
+
+The `endPhase` event accepts an argument that can specify the
+next phase:
+
+```js
+endPhase({ next: 'B' });
+```
+
+#### 4
+
+`endPhaseIf` can return an object specifying the next phase:
+
+```js
+endPhaseIf: () => ({ next: 'B' });
+```
 
 Watch our game in action now with phases. Notice that you can only draw cards in the first
 phase, and you can only play cards in the second phase.
@@ -149,11 +170,11 @@ Let's take a look at some of these:
 
 ```js
 flow: {
-  // Ends the turn if this returns true.
-  endTurnIf: (G, ctx) => boolean
+  // Ends the turn if this returns a truthy value.
+  endTurnIf: (G, ctx) => boolean|object
 
   // Ends the game if this returns anything other than undefined.
-  endGameIf: (G, ctx) => boolean
+  endGameIf: (G, ctx) => {}
 
   // Run at the start of a turn.
   onTurnBegin: (G, ctx) => G
@@ -167,7 +188,7 @@ flow: {
   phases: {
     A: {
       // Ends the phase if this returns a truthy value.
-      endPhaseIf: (G, ctx) => {}
+      endPhaseIf: (G, ctx) => boolean|object
 
       // Run at the beginning of a phase.
       onPhaseBegin: (G, ctx) => G

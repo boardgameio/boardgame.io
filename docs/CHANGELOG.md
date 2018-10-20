@@ -32,6 +32,32 @@ phases: {
    game reverts to in case it detects an infinite loop of
    `endPhase` events caused by a cycle.
 
+4. The format of the argument to `endPhase` or the return
+   value of `endPhaseIf` is now an object of type `{ next: 'phase name' }`
+
+```
+// old
+endPhase('new phase')
+endPhaseIf: () => 'new phase'
+
+// new
+endPhase({ next: 'new phase' })
+endPhaseIf: () => ({ next: 'new phase' })
+```
+
+5. The format of the argument to `endTurn` or the return
+   value of `endTurnIf` is now an object of type `{ next: playerID }`
+
+```
+// old
+endTurn(playerID)
+endTurnIf: () => playerID
+
+// new
+endTurn({ next: playerID })
+endTurnIf: () => ({ next: playerID })
+```
+
 ## v0.26.3
 
 #### Features

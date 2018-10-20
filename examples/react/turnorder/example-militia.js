@@ -20,14 +20,14 @@ const code = `{
     },
 
     onTurnBegin(G, ctx) {
-      ctx.events.endPhase('play');
+      ctx.events.endPhase({ next: 'play' });
       return G;
     },
   },
 
   moves: {
     play(G, ctx) {
-      ctx.events.endPhase('discard');
+      ctx.events.endPhase({ next: 'discard' });
       ctx.events.setActionPlayers({ allOthers: true, once: true });
       return G;
     },
@@ -63,14 +63,14 @@ export default {
       },
 
       onTurnBegin(G, ctx) {
-        ctx.events.endPhase('play');
+        ctx.events.endPhase({ next: 'play' });
         return G;
       },
     },
 
     moves: {
       play(G, ctx) {
-        ctx.events.endPhase('discard');
+        ctx.events.endPhase({ next: 'discard' });
         ctx.events.setActionPlayers({ allOthers: true, once: true });
         return G;
       },

@@ -109,7 +109,7 @@ Game({
     phases: {
       A: { turnOrder: TurnOrder.ANY },
       B: { turnOrder: TurnOrder.ONCE },
-    ],
+    },
   }
 }
 ```
@@ -175,21 +175,25 @@ returning an object of type:
 ### endTurn / endTurnIf
 
 You can also specify the next player during the `endTurn` event.
-The `endTurn` event takes an additional argument specifying
-the next player. If `endTurnIf` returns a string that is a playerID,
-that player is made the next player (instead of following the turn
-order).
+The `endTurn` event takes an additional argument that may specify
+the next player:
 
-Player '3' is made the new player in both the following examples:
+```js
+endTurn({ next: playerID });
+```
+
+This argument can also be the return value of `endTurnIf` and works the same way.
+
+Player `3` is made the new player in both the following examples:
 
 ```js
 onClickEndTurn() {
-  this.props.endTurn('3');
+  this.props.events.endTurn({ next: '3' });
 }
 ```
 
 ```js
 flow: {
-  endTurnIf: (G, ctx) => '3',
+  endTurnIf: (G, ctx) => ({ next: '3' }),
 }
 ```

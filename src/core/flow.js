@@ -137,10 +137,10 @@ export function Flow({
  * @param {...object} endTurnIf - The turn automatically ends if this
  *                                returns a truthy value
  *                                (checked after each move).
- *                                If the return value is a playerID,
+ *                                If the return value is { next: playerID },
  *                                that player is the next player
  *                                (instead of following the turn order).
- *                                (G, ctx) => boolean|string
+ *                                (G, ctx) => boolean|object
  *
  * @param {...object} endGameIf - The game automatically ends if this function
  *                                returns anything (checked after each move).
@@ -199,15 +199,14 @@ export function Flow({
  *   onPhaseEnd: (G, ctx) => G,
  *
  *   // The phase ends if this function returns a truthy value.
- *   // If the return value is the name of another phase,
- *   // that will be chosen as the next phase (as opposed
- *   // to the next one in round-robin order).
- *   endPhaseIf: (G, ctx) => boolean|string,
+ *   // If the return value is of the form { next: 'phase name' }
+ *   // then that will be chosen as the next phase.
+ *   endPhaseIf: (G, ctx) => boolean|object,
  *
  *   Phase-specific options that override their global equivalents:
  *
  *   // A phase-specific endTurnIf.
- *   endTurnIf: (G, ctx) => boolean,
+ *   endTurnIf: (G, ctx) => boolean|object,
  *
  *   // A phase-specific endGameIf.
  *   endGameIf: (G, ctx) => {},
@@ -292,7 +291,7 @@ export function FlowWithPhases({
     const conf = phaseMap[phase];
 
     if (conf.endPhaseIf === undefined) {
-      conf.endPhaseIf = () => false;
+      conf.endPhaseIf = () => undefined;
     }
     if (conf.onPhaseBegin === undefined) {
       conf.onPhaseBegin = G => G;
@@ -414,7 +413,7 @@ export function FlowWithPhases({
    * If this call results in a cycle, the phase is reset to
    * the default phase.
    */
-  function endPhaseEvent(state, nextPhase, visitedPhases) {
+  function endPhaseEvent(state, arg, visitedPhases) {
     let G = state.G;
     let ctx = state.ctx;
 
@@ -428,14 +427,16 @@ export function FlowWithPhases({
     }
 
     // Update the phase.
-    if (nextPhase in phaseMap) {
-      ctx = { ...ctx, phase: nextPhase };
-    } else {
-      if (conf.next !== undefined) {
-        ctx = { ...ctx, phase: conf.next };
+    if (arg && arg !== true) {
+      if (arg.next in phaseMap) {
+        ctx = { ...ctx, phase: arg.next };
       } else {
-        ctx = { ...ctx, phase: 'default' };
+        logging.error('invalid argument to endPhase: ' + arg);
       }
+    } else if (conf.next !== undefined) {
+      ctx = { ...ctx, phase: conf.next };
+    } else {
+      ctx = { ...ctx, phase: 'default' };
     }
 
     // Run any setup code for the new phase.
@@ -456,7 +457,7 @@ export function FlowWithPhases({
         state,
         automaticGameEvent(
           'endPhase',
-          ['default', visitedPhases],
+          [{ next: 'default' }, visitedPhases],
           this.playerID
         )
       );
@@ -490,7 +491,7 @@ export function FlowWithPhases({
    * Ends the current turn.
    * Passes the turn to the next turn in a round-robin fashion.
    */
-  function endTurnEvent(state, nextPlayer) {
+  function endTurnEvent(state, arg) {
     let { G, ctx } = state;
 
     const conf = phaseMap[ctx.phase];
@@ -518,7 +519,7 @@ export function FlowWithPhases({
         G,
         ctx,
         conf.turnOrder,
-        nextPlayer
+        arg
       );
       endPhase = a;
       ctx = b;
