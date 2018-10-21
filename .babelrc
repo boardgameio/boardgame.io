@@ -1,11 +1,8 @@
 {
-  "presets": [
-    ["es2015", { "modules": false }],
-    "react",
-  ],
+  "presets": [["es2015", { "modules": false }], "react"],
   "env": {
     "targets": {
-      "node": "current"
+      "node": "8.12.0"
     },
     "test": {
       "plugins": ["transform-es2015-modules-commonjs"]
@@ -15,12 +12,16 @@
     }
   },
   "plugins": [
-    ["module-resolver", {
-      "alias": {
-        "boardgame.io": "./packages",
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "boardgame.io": "./packages"
+        }
       }
-    }],
+    ],
     "transform-object-rest-spread",
-    "transform-class-properties"
+    "transform-class-properties",
+    "transform-async-to-generator"
   ]
 }
