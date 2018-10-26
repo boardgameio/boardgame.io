@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, PlayerView } from 'boardgame.io/core';
+import { Game, PlayerView, TurnOrder } from 'boardgame.io/core';
 
 const RedactedMoves = Game({
   name: 'secret-state',
@@ -29,6 +29,7 @@ const RedactedMoves = Game({
 
   flow: {
     redactedMoves: ['clickCell'],
+    turnOrder: TurnOrder.ANY,
   },
 
   playerView: PlayerView.STRIP_SECRETS,
