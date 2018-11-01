@@ -158,6 +158,7 @@ class Lobby extends React.Component {
 
   async _exitLobby() {
     await this.connection.disconnect();
+    this.setState({ errorMsg: '' });
     this.props.onExitLobby();
   }
 
