@@ -1,0 +1,1 @@
+../../chess/components/checkerboard.js
