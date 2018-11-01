@@ -6,10 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from 'react';
-import Militia from './game';
+import { Game } from 'boardgame.io/core';
 
-const code = `{
+const Militia = Game({
+  name: 'militia',
+
   flow: {
     setActionPlayers: true,
 
@@ -35,20 +36,6 @@ const code = `{
       return G;
     },
   },
-}
-`;
+});
 
-const Description = () => (
-  <div>
-    <p>
-      This is an example from the card game Dominion. The Militia card forces
-      every other player to discard a card.
-    </p>
-    <pre>{code}</pre>
-  </div>
-);
-
-export default {
-  description: Description,
-  game: Militia,
-};
+export default Militia;

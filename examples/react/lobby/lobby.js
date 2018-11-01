@@ -8,27 +8,27 @@
 
 import Cookies from 'react-cookies';
 import React from 'react';
-import Lobby from '../../../../../lobby/react.js';
-//import Lobby from './react';
+// FIXME: import { Lobby } from 'boardgame.io/react';
+import Lobby from '../../../lobby/react.js';
 import { default as BoardTicTacToe } from './board-tic-tac-toe';
 import { default as BoardChess } from './board-chess';
-import { default as BoardTurnOrder } from './board-turnorder';
+import { default as BoardMilitia } from './board-militia';
 import { default as GameTicTacToe } from './game-tic-tac-toe';
 import { default as GameChess } from './game-chess';
-import { default as GameTurnOrder } from './game-turnorder';
+import { default as GameMilitia } from './game-militia';
 import { LobbyLoginForm } from './login-form';
 import './lobby.css';
 
 GameTicTacToe.minPlayers = 1;
 GameTicTacToe.maxPlayers = 2;
 GameChess.minPlayers = GameChess.maxPlayers = 2;
-GameTurnOrder.minPlayers = 2;
-GameTurnOrder.maxPlayers = 4;
+GameMilitia.minPlayers = 2;
+GameMilitia.maxPlayers = 4;
 
 const importedGames = [
   { game: GameTicTacToe, board: BoardTicTacToe },
   { game: GameChess, board: BoardChess },
-  { game: GameTurnOrder, board: BoardTurnOrder },
+  { game: GameMilitia, board: BoardMilitia },
 ];
 
 class LobbyExample extends React.Component {
@@ -40,7 +40,8 @@ class LobbyExample extends React.Component {
     refreshLobby: false,
   };
 
-  componentWillMount() {
+  constructor() {
+    super();
     let state = Cookies.load('lobbyState') || {};
     if (state.phase === 'list') {
       this._enterLobby(state.playerName);

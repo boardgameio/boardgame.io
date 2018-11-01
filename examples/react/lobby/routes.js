@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import LobbyView from './components/lobby';
+import LobbyView from './lobby';
 
 const routes = [
   {

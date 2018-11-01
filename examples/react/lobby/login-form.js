@@ -69,7 +69,7 @@ export class LobbyLoginForm extends React.Component {
     const name = event.target.value.trim();
     this.setState({
       playerName: name,
-      nameErrorMsg: name.length ? '' : 'empty player name',
+      nameErrorMsg: name.length > 0 ? '' : 'empty player name',
     });
   }
 }

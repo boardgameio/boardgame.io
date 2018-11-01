@@ -1,0 +1,1 @@
+../chess/game.js
