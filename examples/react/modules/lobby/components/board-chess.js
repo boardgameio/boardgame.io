@@ -1,1 +1,0 @@
-../../chess/components/board.js
