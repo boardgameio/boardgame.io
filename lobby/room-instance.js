@@ -69,6 +69,7 @@ class LobbyRoomInstance extends React.Component {
               gameID: inst.gameID,
               playerID: '' + playerSeat.id,
               playerCredentials: playerSeat.credentials,
+              numPlayers: inst.players.length,
             })
           }
         >
@@ -80,7 +81,10 @@ class LobbyRoomInstance extends React.Component {
     return (
       <button
         onClick={() =>
-          this.props.onClickPlay(inst.gameName, { gameID: inst.gameID })
+          this.props.onClickPlay(inst.gameName, {
+            gameID: inst.gameID,
+            numPlayers: inst.players.length,
+          })
         }
       >
         Spectate

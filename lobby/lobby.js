@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-class _LobbyImpl {
+class _LobbyConnectionImpl {
   constructor({ server, gameComponents, playerName }) {
     this.gameComponents = gameComponents;
     this.playerName = playerName || 'Visitor';
@@ -40,6 +40,7 @@ class _LobbyImpl {
       this.errorMsg = 'failed to retrieve list of games (' + e + ')';
       return false;
     }
+    this.errorMsg = '';
     return true;
   }
 
@@ -55,11 +56,24 @@ class _LobbyImpl {
     }
   }
 
+  _findPlayer(playerName) {
+    for (let inst of this.gameInstances) {
+      if (inst.players.some(player => player.name === playerName)) return inst;
+    }
+  }
+
   async join(gameName, gameID, playerID) {
     try {
-      let inst = this._getGameInstance(gameID);
-      if (!inst) throw 'game instance not found';
-      if (inst.players[playerID].playerName) throw 'player not found';
+      let inst = this._findPlayer(this.playerName);
+      if (inst) {
+        throw 'player has already joined ' + inst.gameID;
+      }
+      inst = this._getGameInstance(gameID);
+      if (!inst) {
+        throw 'game instance ' + gameID + ' not found';
+      }
+      if (inst.players[Number.parseInt(playerID)].name)
+        throw 'player not found';
       const resp = await fetch(
         this._baseUrl() + '/' + gameName + '/' + gameID + '/join',
         {
@@ -73,12 +87,13 @@ class _LobbyImpl {
       );
       if (resp.status !== 200) throw 'HTTP status ' + resp.status;
       const json = await resp.json();
-      inst.players[playerID].playerName = this.playerName;
+      inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
     } catch (e) {
       this.errorMsg = 'failed to join room ' + gameID + ' (' + e + ')';
       return false;
     }
+    this.errorMsg = '';
     return true;
   }
 
@@ -86,21 +101,22 @@ class _LobbyImpl {
     try {
       let inst = this._getGameInstance(gameID);
       if (!inst) throw 'game instance not found';
-      for (let id of Object.keys(inst.players)) {
-        if (inst.players[id].playerName === this.playerName) {
+      for (let player of inst.players) {
+        if (player.name === this.playerName) {
           const resp = await fetch(
             this._baseUrl() + '/' + gameName + '/' + gameID + '/leave',
             {
               method: 'POST',
               body: JSON.stringify({
-                playerID: id,
+                playerID: player.id,
                 playerCredentials: this.playerCredentials,
               }),
               headers: { 'Content-Type': 'application/json' },
             }
           );
           if (resp.status !== 200) throw 'HTTP status ' + resp.status;
-          delete inst.players[id].playerName;
+          delete player.name;
+          this.errorMsg = '';
           return true;
         }
       }
@@ -111,6 +127,16 @@ class _LobbyImpl {
     return false;
   }
 
+  async disconnect() {
+    let inst = this._findPlayer(this.playerName);
+    if (inst) {
+      await this.leave(inst.gameName, inst.gameID);
+    }
+    this.gameInstances = [];
+    this.playerName = 'Visitor';
+    return true;
+  }
+
   async create(gameName, numPlayers) {
     try {
       const comp = this._getGameComponents(gameName);
@@ -119,7 +145,7 @@ class _LobbyImpl {
         numPlayers < comp.game.minPlayers ||
         numPlayers > comp.game.maxPlayers
       )
-        throw 'invalid number of players';
+        throw 'invalid number of players ' + numPlayers;
       const resp = await fetch(this._baseUrl() + '/' + gameName + '/create', {
         method: 'POST',
         body: JSON.stringify({
@@ -132,22 +158,23 @@ class _LobbyImpl {
       this.errorMsg = 'failed to create room for ' + gameName + ' (' + e + ')';
       return false;
     }
+    this.errorMsg = '';
     return true;
   }
 }
 
 /**
- * Lobby
+ * LobbyConnection
  *
- * Generic lobby client.
+ * Lobby model.
  *
- * @param {...object} gameComponents - A map of Board and Game objects for the supported games.
- * @param {...object} playerName - The name of player.
- * @param {...object} server - '<host>:<port>' of the server.
+ * @param {Array}  gameComponents - A map of Board and Game objects for the supported games.
+ * @param {string} playerName - The name of the player.
+ * @param {string} server - '<host>:<port>' of the server.
  *
  * Returns:
- *   A JS object that provides an API to create/join/start game instances.
+ *   A JS object that synchronizes the list of running game instances with the server and provides an API to create/join/start instances.
  */
 export function LobbyConnection(opts) {
-  return new _LobbyImpl(opts);
+  return new _LobbyConnectionImpl(opts);
 }

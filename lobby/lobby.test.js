@@ -15,8 +15,8 @@ describe('lobby', () => {
   let nextStatus = 200;
 
   beforeEach(async () => {
-    gameInstance1 = { gameID: 'gameID_1', players: { '0': {} } };
-    gameInstance2 = { gameID: 'gameID_2', players: { '0': {} } };
+    gameInstance1 = { gameID: 'gameID_1', players: [{ id: '0' }] };
+    gameInstance2 = { gameID: 'gameID_2', players: [{ id: '1' }] };
     // result of connection requests
     jsonResult = [
       () => ['game1', 'game2'],
@@ -68,6 +68,12 @@ describe('lobby', () => {
         expect(lobby.gameInstances).toEqual([]);
         expect(lobby.errorMsg).not.toBe('');
       });
+      test('when the player has a seat in a room', async () => {
+        nextStatus = 404;
+        expect(await lobby.refresh()).toBe(false);
+        expect(lobby.gameInstances).toEqual([]);
+        expect(lobby.errorMsg).not.toBe('');
+      });
     });
 
     describe('join a room', () => {
@@ -80,8 +86,9 @@ describe('lobby', () => {
       test('when the room exists', async () => {
         expect(await lobby.join('game1', 'gameID_1', '0')).toBe(true);
         expect(fetch).toHaveBeenCalledTimes(4);
-        expect(lobby.gameInstances[0].players['0']).toEqual({
-          playerName: 'Visitor',
+        expect(lobby.gameInstances[0].players[0]).toEqual({
+          id: '0',
+          name: 'Visitor',
         });
         expect(lobby.playerCredentials).toEqual('SECRET');
         expect(lobby.errorMsg).toBe('');
@@ -92,12 +99,17 @@ describe('lobby', () => {
         expect(lobby.errorMsg).not.toBe('');
       });
       test('when the seat is not available', async () => {
-        gameInstance1.players['0'].playerName = 'Bob';
+        gameInstance1.players[0].name = 'Bob';
         expect(await lobby.join('game1', 'gameID_1', '0')).toBe(false);
         expect(lobby.errorMsg).not.toBe('');
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
+        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(false);
+        expect(lobby.errorMsg).not.toBe('');
+      });
+      test('when the player has already joined another game', async () => {
+        gameInstance2.players[0].name = 'Visitor';
         expect(await lobby.join('game1', 'gameID_1', '0')).toBe(false);
         expect(lobby.errorMsg).not.toBe('');
       });
@@ -137,6 +149,29 @@ describe('lobby', () => {
         nextStatus = 404;
         expect(await lobby.leave('game1', 'gameID_1')).toBe(false);
         expect(lobby.errorMsg).not.toBe('');
+      });
+    });
+
+    describe('disconnect', () => {
+      beforeEach(async () => {});
+      test('when the player leaves the lobby', async () => {
+        expect(await lobby.disconnect()).toBe(true);
+        expect(lobby.gameInstances).toEqual([]);
+        expect(lobby.errorMsg).toBe('');
+      });
+      test('when the player had joined a room', async () => {
+        // result of request 'join'
+        jsonResult.push(() => {
+          return { playerCredentials: 'SECRET' };
+        });
+        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(true);
+        // result of request 'leave'
+        jsonResult.push(() => {
+          return {};
+        });
+        expect(await lobby.disconnect()).toBe(true);
+        expect(lobby.gameInstances).toEqual([]);
+        expect(lobby.errorMsg).toBe('');
       });
     });
 
