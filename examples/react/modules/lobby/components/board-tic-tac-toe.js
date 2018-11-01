@@ -1,1 +1,0 @@
-../../tic-tac-toe/components/board.js

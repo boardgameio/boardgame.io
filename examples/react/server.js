@@ -12,10 +12,11 @@ import WebpackConfig from './webpack.dev.js';
 import { Server } from 'boardgame.io/server';
 import TicTacToe from './tic-tac-toe/game';
 import Chess from './chess/game';
+import Militia from './turnorder/game';
 
 const PORT = process.env.PORT || 8000;
 
-const server = Server({ games: [TicTacToe, Chess] });
+const server = Server({ games: [TicTacToe, Chess, Militia] });
 
 server.app.use(
   KoaWebpack({
