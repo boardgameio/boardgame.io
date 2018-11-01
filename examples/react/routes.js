@@ -14,6 +14,7 @@ import random from './random';
 import turnorder from './turnorder';
 import ui from './ui';
 import threejs from './threejs';
+import lobby from './lobby';
 
 const routes = [
   {
@@ -47,6 +48,10 @@ const routes = [
   {
     name: 'Other Frameworks',
     routes: threejs.routes,
+  },
+  {
+    name: 'Lobby',
+    routes: lobby.routes,
   },
 ];
 
