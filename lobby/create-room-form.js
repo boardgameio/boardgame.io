@@ -22,10 +22,29 @@ class LobbyCreateRoomForm extends React.Component {
 
   _createGameNameOption(game, idx) {
     return (
-      <option key={'option-' + idx} value={idx}>
+      <option key={'name-option-' + idx} value={idx}>
         {game.game.name}
       </option>
     );
+  }
+
+  _createNumPlayersOption(idx) {
+    return (
+      <option key={'num-option-' + idx} value={idx}>
+        {idx}
+      </option>
+    );
+  }
+
+  _createNumPlayersRange(game) {
+    if (!game.minPlayers) {
+      game.minPlayers = 1;
+    }
+    if (!game.maxPlayers) {
+      game.maxPlayers = 4;
+    }
+    console.assert(game.maxPlayers >= game.minPlayers);
+    return Array.from(Array(game.maxPlayers + 1).keys()).slice(game.minPlayers);
   }
 
   render() {
@@ -42,10 +61,9 @@ class LobbyCreateRoomForm extends React.Component {
           value={this.state.numPlayers}
           onChange={evt => this.onChangeNumPlayers(evt)}
         >
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
+          {this._createNumPlayersRange(
+            this.props.games[this.state.selectedGame].game
+          ).map(this._createNumPlayersOption)}
         </select>
         <span className="buttons">
           <button onClick={() => this.onClickCreate()}>Create</button>
@@ -61,8 +79,10 @@ class LobbyCreateRoomForm extends React.Component {
   }
 
   onChangeSelectedGame(event) {
+    let idx = Number.parseInt(event.target.value);
     this.setState({
-      selectedGame: event.target.value,
+      selectedGame: idx,
+      numPlayers: this._createNumPlayersRange(this.props.games[idx].game)[0],
     });
   }
 

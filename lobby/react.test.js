@@ -20,7 +20,14 @@ describe('lobby', () => {
   beforeEach(async () => {
     const comps = [
       { board: 'Board1', game: { name: 'GameName1' } },
-      { board: 'Board2', game: { name: 'GameName2' } },
+      {
+        board: 'Board2',
+        game: { name: 'GameName2', minPlayers: 2, maxPlayers: 3 },
+      },
+      {
+        board: 'Board3',
+        game: { name: 'GameName3', maxPlayers: 1 },
+      },
     ];
     lobby = Enzyme.mount(
       <Lobby
@@ -29,6 +36,7 @@ describe('lobby', () => {
         gameComponents={comps}
         playerName="Bob"
         onStartGame={spy.bind(this)}
+        onExitLobby={spy.bind(this)}
       />
     );
   });
@@ -76,6 +84,31 @@ describe('lobby', () => {
         .find('button')
         .simulate('click');
       expect(lobby.find('.error-msg').text()).not.toBe('');
+    });
+    test('when game has no boundaries on the number of players', async () => {
+      expect(
+        lobby
+          .find('LobbyCreateRoomForm')
+          .find('select')
+          .at(1)
+          .text()
+      ).toBe('1234');
+    });
+    test('when game has boundaries on the number of players', async () => {
+      // select 2nd game
+      lobby
+        .find('LobbyCreateRoomForm')
+        .find('select')
+        .first()
+        .props()
+        .onChange({ target: { value: '1' } });
+      expect(
+        lobby
+          .find('LobbyCreateRoomForm')
+          .find('select')
+          .at(1)
+          .text()
+      ).toBe('23');
     });
   });
 
@@ -166,7 +199,10 @@ describe('lobby', () => {
       lobby.instance().connection.gameInstances = [
         {
           gameID: 'gameID1',
-          players: { '0': { id: 0, name: 'Bob', credentials: 'SECRET1' } },
+          players: {
+            '0': { id: 0, name: 'Bob', credentials: 'SECRET1' },
+            '1': { id: 1, name: 'Charly', credentials: 'SECRET2' },
+          },
           gameName: 'GameName1',
         },
         {
@@ -176,26 +212,32 @@ describe('lobby', () => {
         },
         {
           gameID: 'gameID3',
-          players: { '0': { id: 0, name: 'Zoe' } },
+          players: { '0': { id: 0, name: 'Bob' } },
           gameName: 'GameName3',
+        },
+        {
+          gameID: 'gameID4',
+          players: { '0': { id: 0, name: 'Zoe' } },
+          gameName: 'GameNameUnknown',
         },
       ];
       lobby.instance().forceUpdate();
       lobby.update();
     });
-    test('shall instantiate a game client', () => {
+    test('if player has joined the game', () => {
       lobby
         .find('LobbyRoomInstance')
         .first()
         .find('button')
         .simulate('click');
       expect(spy).toHaveBeenCalledWith(expect.anything(), {
-        playerID: '0',
         gameID: 'gameID1',
+        playerID: '0',
         playerCredentials: 'SECRET1',
+        numPlayers: 2,
       });
     });
-    test('shall instantiate a game client for spectator', () => {
+    test('if player is spectator', () => {
       lobby
         .find('LobbyRoomInstance')
         .at(1)
@@ -203,16 +245,72 @@ describe('lobby', () => {
         .simulate('click');
       expect(spy).toHaveBeenCalledWith(expect.anything(), {
         gameID: 'gameID2',
+        numPlayers: 1,
       });
     });
-    test('shall display error if game not supported', () => {
+    test('if game is not supported', () => {
+      lobby
+        .find('LobbyRoomInstance')
+        .at(3)
+        .find('button')
+        .simulate('click');
+      expect(spy).not.toHaveBeenCalled();
+      expect(lobby.find('.error-msg').text()).not.toBe('');
+    });
+    test('if game is monoplayer', () => {
       lobby
         .find('LobbyRoomInstance')
         .at(2)
         .find('button')
         .simulate('click');
-      expect(spy).not.toHaveBeenCalled();
-      expect(lobby.find('.error-msg').text()).not.toBe('');
+      expect(spy).not.toHaveBeenCalledWith(expect.anything(), {
+        gameID: 'gameID3',
+      });
+    });
+  });
+
+  test('changing prop playerName', () => {
+    lobby.setProps({
+      playerName: 'Zoe',
+    });
+    expect(lobby.instance().connection.playerName).toBe('Zoe');
+  });
+  test('changing prop debug', () => {
+    lobby.setProps({
+      debug: !lobby.props().debug,
+    });
+  });
+
+  describe('exiting lobby', () => {
+    beforeEach(async () => {
+      lobby.instance().connection.gameInstances = [
+        {
+          gameID: 'gameID1',
+          players: {
+            '0': { id: 0, name: 'Bob' },
+            '1': { id: 1 },
+          },
+          gameName: 'GameName1',
+        },
+      ];
+      lobby.instance().forceUpdate();
+      lobby.update();
+    });
+    test('if player had joined no room', async () => {
+      lobby.instance().connection.disconnect = spy.mockReturnValue(true);
+      lobby
+        .find('button')
+        .at(2)
+        .simulate('click');
+      expect(spy).toHaveBeenCalledWith();
+    });
+    test('after player has joined a room', async () => {
+      lobby.instance().connection.disconnect = spy.mockReturnValue(true);
+      lobby
+        .find('button')
+        .at(2)
+        .simulate('click');
+      expect(spy).toHaveBeenCalledWith();
     });
   });
 });

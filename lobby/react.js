@@ -10,8 +10,28 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Client } from 'boardgame.io/react';
 import { LobbyConnection } from './lobby';
-import LobbyRoomInstance from './room_instance';
-import LobbyCreateRoomForm from './create_room_form';
+import LobbyRoomInstance from './room-instance';
+import LobbyCreateRoomForm from './create-room-form';
+
+/**
+ * Lobby
+ *
+ * React lobby component.
+ *
+ * @param {string}   server - Host address of the server.
+ * @param {number}   port - HTTP port of the server.
+ * @param {Array}    gameComponents - An array of Board and Game objects for the supported games.
+ * @param {string}   playerName - The name of the player.
+ * @param {function} onStartGame - Hook for game creation, called with arguments:
+ *                                   app: instance of Client.
+ *                                   gameOpts: props for the React component of the game.
+ * @param {function} onExitLobby - Hook called when the player exits the lobby. No arguments.
+ * @param {bool}     debug - Enable debug information.
+ * @param {bool}     refresh - Change the value of this property to refresh the list of game instances.
+ *
+ * Returns:
+ *   A React component that provides a UI to create, list, join, leave, play or spectate game instances.
+ */
 
 class Lobby extends React.Component {
   static propTypes = {
@@ -20,7 +40,9 @@ class Lobby extends React.Component {
     gameComponents: PropTypes.array.isRequired,
     playerName: PropTypes.string,
     onStartGame: PropTypes.func.isRequired,
+    onExitLobby: PropTypes.func,
     debug: PropTypes.bool,
+    refresh: PropTypes.bool,
     multiplayer: PropTypes.object,
   };
 
@@ -28,19 +50,35 @@ class Lobby extends React.Component {
     playerName: 'Visitor',
     debug: false,
     multiplayer: { local: true },
+    refresh: false,
+    onExitLobby: () => {},
   };
 
   state = {
     errorMsg: '',
   };
 
-  componentWillMount() {
+  async _updateConnection(props) {
     this.connection = LobbyConnection({
-      server: this.props.server + ':' + this.props.port,
-      gameComponents: this.props.gameComponents,
-      playerName: this.props.playerName,
+      server: props.server + ':' + props.port,
+      gameComponents: props.gameComponents,
+      playerName: props.playerName,
     });
-    this.connection.refresh();
+    await this.connection.refresh();
+    this.forceUpdate();
+  }
+
+  componentWillMount() {
+    this._updateConnection(this.props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.playerName !== this.props.playerName ||
+      nextProps.refresh !== this.props.refresh
+    ) {
+      this._updateConnection(nextProps);
+    }
   }
 
   render() {
@@ -70,27 +108,28 @@ class Lobby extends React.Component {
 
     return (
       <div id="lobby-view" style={{ padding: 50 }}>
-        <div id="phase-join">
-          <div className="phase-title" id="game-creation">
-            <span>Create a room:</span>
-            <LobbyCreateRoomForm
-              games={this.props.gameComponents}
-              createGame={this._createRoom.bind(this)}
-            />
-          </div>
-          <p className="phase-title">Join a room:</p>
-          <div id="instances">
-            <table>
-              <tbody>{inst_rows}</tbody>
-            </table>
-            <span className="error-msg">
-              {this.state.errorMsg}
-              <br />
-            </span>
-          </div>
-          <p className="phase-title">
-            Rooms that become empty are automatically deleted.
-          </p>
+        <div className="phase-title" id="game-creation">
+          <span>Create a room:</span>
+          <LobbyCreateRoomForm
+            games={this.props.gameComponents}
+            createGame={this._createRoom.bind(this)}
+          />
+        </div>
+        <p className="phase-title">Join a room:</p>
+        <div id="instances">
+          <table>
+            <tbody>{inst_rows}</tbody>
+          </table>
+          <span className="error-msg">
+            {this.state.errorMsg}
+            <br />
+          </span>
+        </div>
+        <p className="phase-title">
+          Rooms that become empty are automatically deleted.
+        </p>
+        <div className="buttons">
+          <button onClick={this._exitLobby.bind(this)}>Exit lobby</button>
         </div>
       </div>
     );
@@ -117,6 +156,11 @@ class Lobby extends React.Component {
     this.setState({ errorMsg: this.connection.errorMsg });
   }
 
+  async _exitLobby() {
+    await this.connection.disconnect();
+    this.props.onExitLobby();
+  }
+
   _play(gameName, gameOpts) {
     const gameCode = this.connection._getGameComponents(gameName);
     if (!gameCode) {
@@ -129,7 +173,7 @@ class Lobby extends React.Component {
       game: gameCode.game,
       board: gameCode.board,
       debug: this.props.debug,
-      multiplayer: this.props.multiplayer,
+      multiplayer: gameOpts.numPlayers > 1 ? this.props.multiplayer : null,
     });
     this.props.onStartGame(app, gameOpts);
   }
