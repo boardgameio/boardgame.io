@@ -196,7 +196,7 @@ test('playOrder', () => {
 });
 
 describe('SetActionPlayers', () => {
-  const flow = FlowWithPhases({ setActionPlayers: true });
+  const flow = FlowWithPhases({});
   const state = { ctx: flow.ctx(2) };
 
   test('basic', () => {
@@ -217,10 +217,6 @@ describe('SetActionPlayers', () => {
 
   test('once', () => {
     const game = Game({
-      flow: {
-        setActionPlayers: true,
-      },
-
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({ value: ['0', '1'], once: true });
@@ -243,10 +239,6 @@ describe('SetActionPlayers', () => {
 
   test('allOthers', () => {
     const game = Game({
-      flow: {
-        setActionPlayers: true,
-      },
-
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({
@@ -279,8 +271,6 @@ describe('SetActionPlayers', () => {
 
   test('militia', () => {
     const game = Game({
-      flow: { setActionPlayers: true },
-
       moves: {
         playMilitia: (G, ctx) => {
           // change which players need to act

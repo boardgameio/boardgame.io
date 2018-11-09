@@ -8,12 +8,7 @@
 
 import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
-import {
-  Client,
-  GetOpts,
-  createEventDispatchers,
-  createMoveDispatchers,
-} from './client';
+import { Client, GetOpts, createMoveDispatchers } from './client';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
@@ -193,19 +188,17 @@ test('accepts enhancer for store', () => {
   expect(spyDispatcher.mock.calls).toHaveLength(1);
 });
 
-test('event dispatchers', () => {
-  {
+describe('event dispatchers', () => {
+  test('default', () => {
     const game = Game({});
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
+    const client = Client({ game });
+    expect(Object.keys(client.events)).toEqual(['endTurn']);
+    expect(client.getState().ctx.turn).toBe(0);
+    client.events.endTurn();
+    expect(client.getState().ctx.turn).toBe(1);
+  });
 
-  {
+  test('all events', () => {
     const game = Game({
       flow: {
         endPhase: true,
@@ -213,48 +206,28 @@ test('event dispatchers', () => {
         setActionPlayers: true,
       },
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([
+    const client = Client({ game });
+    expect(Object.keys(client.events)).toEqual([
       'endTurn',
       'endPhase',
       'endGame',
       'setActionPlayers',
     ]);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
+    expect(client.getState().ctx.turn).toBe(0);
+    client.events.endTurn();
+    expect(client.getState().ctx.turn).toBe(1);
+  });
 
-  {
+  test('no events', () => {
     const game = Game({
       flow: {
         endPhase: false,
         endTurn: false,
       },
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([]);
-  }
-
-  {
-    const game = Game({
-      flow: {
-        endPhase: true,
-        undoableMoves: ['A'],
-      },
-    });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
+    const client = Client({ game });
+    expect(Object.keys(client.events)).toEqual([]);
+  });
 });
 
 describe('move dispatchers', () => {

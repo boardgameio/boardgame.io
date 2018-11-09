@@ -11,7 +11,6 @@ import { Game } from 'boardgame.io/core';
 
 const code = `{
   flow: {
-    setActionPlayers: true,
     startingPhase: 'play',
 
     phases: {
@@ -54,7 +53,7 @@ export default {
 
   game: Game({
     flow: {
-      setActionPlayers: true,
+      endPhase: false,
       startingPhase: 'play',
 
       phases: {

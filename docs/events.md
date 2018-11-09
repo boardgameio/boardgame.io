@@ -14,12 +14,6 @@ The default behavior is to increment `ctx.turn` by `1`
 and advance `currentPlayer` to the next player according
 to the configured turn order (the default being a round-robin).
 
-This event is enabled by default. To disable this event,
-pass `endTurn: false` inside your `flow` section. Note that
-turns can still end if you use `endTurnIf` or `movesPerTurn`.
-Disabling the event merely prevents you from explicitly
-triggering it.
-
 `endTurn` also accepts an argument, which (if provided)
 switches the turn to the specified player.
 
@@ -30,10 +24,6 @@ to the next phase in round-robin fashion. Note that this
 is orthogonal to a player turn (i.e. you can end the phase
 many times within a single turn, or you can have many
 turns within a single phase).
-
-To disable this event, pass `endPhase: false` inside your
-`flow` section. Note that phases can still end if you use
-`endPhaseIf`.
 
 `endPhase` also accepts an argument, which (if provided)
 switches the phase to the phase specified.
@@ -77,10 +67,6 @@ const opts = {
 setActionPlayers(opts);
 ```
 
-!> This event is not enabled by default and must be enabled
-by setting `setActionPlayers: true` in the `flow` section
-of your game.
-
 ### Triggering an event from a React client.
 
 Events are available through `props` inside the
@@ -116,3 +102,40 @@ moves: {
   };
 }
 ```
+
+### Enabling / Disabling events
+
+An important point to note is that not all events are
+enabled on the client, and some need to be explicitly
+enabled.
+
+The following table describes the defaults:
+
+|      Event       | Default |
+| :--------------: | :-----: |
+|     endTurn      |  true   |
+|     endPhase     |  true   |
+|     endGame      |  false  |
+| setActionPlayers |  false  |
+
+In order to enable an event, just add `eventName: true` to
+your `flow` section.
+
+```js
+flow: {
+  endGame: true,
+  ...
+}
+```
+
+In order to disable an event, add `eventName: false`.
+
+```js
+flow: {
+  endPhase: false,
+  ...
+}
+```
+
+!> This doesn't apply to events in game logic, inside
+which all events are always enabled.

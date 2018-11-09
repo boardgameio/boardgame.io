@@ -58,6 +58,9 @@ endTurn({ next: playerID })
 endTurnIf: () => ({ next: playerID })
 ```
 
+6. The semantics of enabling / disabling events has changed
+   a bit: see https://boardgame.io/#/events for more details.
+
 ## v0.26.3
 
 #### Features

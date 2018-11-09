@@ -32,6 +32,9 @@ import * as logging from './logger';
  *                             reducer will handle. Each function
  *                             has the following signature:
  *                             ({G, ctx}) => {G, ctx}
+ * @param {...object} enabledEvents - Map of eventName -> bool indicating
+ *                                    which events are callable from the client
+ *                                    or from within moves.
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
@@ -53,6 +56,7 @@ import * as logging from './logger';
 export function Flow({
   ctx,
   events,
+  enabledEvents,
   init,
   processMove,
   optimisticUpdate,
@@ -61,6 +65,7 @@ export function Flow({
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
+  if (!enabledEvents) enabledEvents = {};
   if (!init) init = state => state;
   if (!processMove) processMove = state => state;
   if (!canMakeMove) canMakeMove = () => true;
@@ -89,6 +94,7 @@ export function Flow({
     canUndoMove,
 
     eventNames: Object.getOwnPropertyNames(events),
+    enabledEventNames: Object.getOwnPropertyNames(enabledEvents),
 
     processMove: (state, action) => {
       return processMove(state, action, dispatch);
@@ -663,18 +669,25 @@ export function FlowWithPhases({
     return conf.undoableMoves.includes(moveName);
   };
 
+  const events = {
+    endTurn: endTurnEvent,
+    endPhase: endPhaseEvent,
+    endGame: endGameEvent,
+    setActionPlayers: SetActionPlayers,
+  };
+
   let enabledEvents = {};
   if (endTurn) {
-    enabledEvents['endTurn'] = endTurnEvent;
+    enabledEvents['endTurn'] = true;
   }
   if (endPhase) {
-    enabledEvents['endPhase'] = endPhaseEvent;
+    enabledEvents['endPhase'] = true;
   }
   if (endGame) {
-    enabledEvents['endGame'] = endGameEvent;
+    enabledEvents['endGame'] = true;
   }
   if (setActionPlayers) {
-    enabledEvents['setActionPlayers'] = SetActionPlayers;
+    enabledEvents['setActionPlayers'] = true;
   }
 
   return Flow({
@@ -700,7 +713,8 @@ export function FlowWithPhases({
       }
       return optimisticUpdate(G, ctx, action);
     },
-    events: enabledEvents,
+    events,
+    enabledEvents,
     processMove,
     canMakeMove,
     canUndoMove,
