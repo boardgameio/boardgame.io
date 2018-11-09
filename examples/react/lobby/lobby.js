@@ -10,25 +10,20 @@ import Cookies from 'react-cookies';
 import React from 'react';
 // FIXME: import { Lobby } from 'boardgame.io/react';
 import Lobby from '../../../lobby/react.js';
-import { default as BoardTicTacToe } from './board-tic-tac-toe';
-import { default as BoardChess } from './board-chess';
-import { default as BoardMilitia } from './board-militia';
-import { default as GameTicTacToe } from './game-tic-tac-toe';
-import { default as GameChess } from './game-chess';
-import { default as GameMilitia } from './game-militia';
+import { default as BoardTicTacToe } from '../tic-tac-toe/board';
+import { default as BoardChess } from '../chess/board';
+import { default as GameTicTacToe } from '../tic-tac-toe/game';
+import { default as GameChess } from '../chess/game';
 import { LobbyLoginForm } from './login-form';
 import './lobby.css';
 
 GameTicTacToe.minPlayers = 1;
 GameTicTacToe.maxPlayers = 2;
 GameChess.minPlayers = GameChess.maxPlayers = 2;
-GameMilitia.minPlayers = 2;
-GameMilitia.maxPlayers = 4;
 
 const importedGames = [
   { game: GameTicTacToe, board: BoardTicTacToe },
   { game: GameChess, board: BoardChess },
-  { game: GameMilitia, board: BoardMilitia },
 ];
 
 class LobbyExample extends React.Component {
