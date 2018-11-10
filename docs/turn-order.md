@@ -120,11 +120,20 @@ A `TurnOrder` object has the following structure:
 
 ```js
 {
-  // Get the initial value of playOrderPos,
+  // Get the initial value of playOrderPos.
+  // This is called at the beginning of the phase.
   first: (G, ctx) => 0,
 
-  // Get the next value of playOrderPos when endTurn is called.
+  // Get the next value of playOrderPos.
+  // This is called at the end of each turn.
   next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+
+  // If this section is present, setActionPlayers is called
+  // at the beginning of the phase with the object below as
+  // argument.
+  actionPlayers: {
+    ...
+  },
 }
 ```
 
@@ -147,28 +156,6 @@ Game({
       next: (G, ctx) => (ctx.playOrderPos + 2) % ctx.numPlayers,
     }
   }
-}
-```
-
-You may also set `actionPlayers` from a `TurnOrder` object by
-returning an object of type:
-
-```js
-{
-  playOrderPos, actionPlayers;
-}
-```
-
-```js
-{
-  // Get the initial value of playOrderPos,
-  first: (G, ctx) => { playOrderPos: 0, actionPlayers: ['0'] }
-
-  // Get the next value of playOrderPos when endTurn is called.
-  next: (G, ctx) => {
-    const playOrderPos = (ctx.playOrderPos + 1) % ctx.numPlayers;
-    const actionPlayers = ['0', '1'];
-    return { playOrderPos, actionPlayers };
 }
 ```
 

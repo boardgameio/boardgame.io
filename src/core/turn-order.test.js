@@ -324,7 +324,7 @@ describe('UpdateTurnOrderState', () => {
     currentPlayer: '0',
     playOrder: ['0', '1', '2'],
     playOrderPos: 0,
-    actionPlayers: ['0'],
+    actionPlayers: ['0', '1', '2'],
   };
 
   test('without next player', () => {

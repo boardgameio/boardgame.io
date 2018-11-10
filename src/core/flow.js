@@ -7,7 +7,7 @@
  */
 
 import {
-  SetActionPlayers,
+  SetActionPlayersEvent,
   InitTurnOrderState,
   UpdateTurnOrderState,
   TurnOrder,
@@ -673,7 +673,7 @@ export function FlowWithPhases({
     endTurn: endTurnEvent,
     endPhase: endPhaseEvent,
     endGame: endGameEvent,
-    setActionPlayers: SetActionPlayers,
+    setActionPlayers: SetActionPlayersEvent,
   };
 
   let enabledEvents = {};

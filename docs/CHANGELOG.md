@@ -61,6 +61,32 @@ endTurnIf: () => ({ next: playerID })
 6. The semantics of enabling / disabling events has changed
    a bit: see https://boardgame.io/#/events for more details.
 
+7. TurnOrder objects now support `setActionPlayers` args.
+   Instead of returning `actionPlayers` in `first` / `next`,
+   add an `actionPlayers` section instead.
+
+```
+// old
+{
+  first: (G, ctx) => {
+    playOrderPos: 0,
+    actionPlayers: [...ctx.playOrder],
+  },
+
+  next: (G, ctx) => {
+    playOrderPos: ctx.playOrderPos + 1,
+    actionPlayers: [...ctx.playOrder],
+  },
+}
+
+// new
+{
+  first: (G, ctx) => 0,
+  next: (G, ctx) => ctx.playOrderPos + 1,
+  actionPlayers: { all: true },
+}
+```
+
 ## v0.26.3
 
 #### Features
