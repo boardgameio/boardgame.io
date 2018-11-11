@@ -8,6 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import * as logger from '../../core/logger';
 import { KeyboardShortcut } from './keyboard-shortcut';
 import './debug.css';
 
@@ -37,6 +38,7 @@ export class DebugMove extends React.Component {
       this.props.fn.apply(this, argArray);
     } catch (error2) {
       error = '' + error2;
+      logger.error(error2);
     }
 
     this.setState({

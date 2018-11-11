@@ -11,6 +11,12 @@ import { DebugMove, DebugMoveArgField } from './debug-move';
 import { KeyboardShortcut } from './keyboard-shortcut';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import { error } from '../../core/logger';
+
+jest.mock('../../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -43,6 +49,8 @@ test('DebugMove', () => {
   root.find('.move span').simulate('keydown', { key: 'Enter' });
 
   expect(fn.mock.calls).toHaveLength(2);
+
+  expect(error.mock.calls).toHaveLength(1);
 });
 
 test('escape blurs DebugMove', () => {
