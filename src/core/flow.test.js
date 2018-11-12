@@ -834,3 +834,35 @@ test('allPlayed', () => {
   state = reducer(state, gameEvent('endTurn', null, '1'));
   expect(state.ctx.stats.phase.allPlayed).toBe(true);
 });
+
+describe('endPhase returns to previous phase', () => {
+  let state;
+  const flow = FlowWithPhases({
+    startingPhase: 'A',
+    phases: { A: {}, B: {}, C: {} },
+  });
+
+  beforeEach(() => {
+    state = { G: {}, ctx: flow.ctx(2) };
+    state = flow.init(state);
+  });
+
+  test('returns to default', () => {
+    expect(state.ctx.phase).toBe('A');
+    state = flow.processGameEvent(state, gameEvent('endPhase'));
+    expect(state.ctx.phase).toBe('default');
+  });
+
+  test('returns to previous', () => {
+    expect(state.ctx.phase).toBe('A');
+    state = flow.processGameEvent(
+      state,
+      gameEvent('endPhase', [{ next: 'B' }])
+    );
+    expect(state.ctx.phase).toBe('B');
+    state = flow.processGameEvent(state, gameEvent('endPhase'));
+    expect(state.ctx.phase).toBe('A');
+    state = flow.processGameEvent(state, gameEvent('endPhase'));
+    expect(state.ctx.phase).toBe('B');
+  });
+});

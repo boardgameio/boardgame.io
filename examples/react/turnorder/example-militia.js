@@ -22,7 +22,6 @@ const code = `{
       discard: {
         turnOrder: TurnOrder.OTHERS_ONCE,
         allowedMoves: ['discard'],
-        next: 'play',
       },
     },
   },
@@ -66,7 +65,6 @@ export default {
         discard: {
           turnOrder: TurnOrder.OTHERS_ONCE,
           allowedMoves: ['discard'],
-          next: 'play',
         },
       },
     },

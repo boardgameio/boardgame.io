@@ -432,17 +432,19 @@ export function FlowWithPhases({
       return { ...state, G, ctx: { ...ctx, gameover } };
     }
 
+    const prevPhase = ctx.phase;
+
     // Update the phase.
     if (arg && arg !== true) {
       if (arg.next in phaseMap) {
-        ctx = { ...ctx, phase: arg.next };
+        ctx = { ...ctx, phase: arg.next, prevPhase };
       } else {
         logging.error('invalid argument to endPhase: ' + arg);
       }
     } else if (conf.next !== undefined) {
-      ctx = { ...ctx, phase: conf.next };
+      ctx = { ...ctx, phase: conf.next, prevPhase };
     } else {
-      ctx = { ...ctx, phase: 'default' };
+      ctx = { ...ctx, phase: ctx.prevPhase, prevPhase };
     }
 
     // Run any setup code for the new phase.
@@ -708,6 +710,7 @@ export function FlowWithPhases({
       stats: { turn: { numMoves: {} }, phase: { numMoves: {} } },
       allPlayed: false,
       phase: startingPhase,
+      prevPhase: 'default',
     }),
     init: state => {
       return startGame(state);

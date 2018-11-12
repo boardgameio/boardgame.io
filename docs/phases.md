@@ -100,15 +100,11 @@ on how to dispatch events.
 
 ### What happens when a phase terminates?
 
-The game moves on to the "next" phase. This phase is determined by the following (the latter ones overruling the former):
+The game moves to the previous phase it was in (at the beginning
+of the game this is the `default` phase). This behavior can be
+overriden by the following:
 
-#### 1
-
-The `default` phase is chosen as the next phase if no other option is present.
-
-#### 2
-
-If a phase specifies the `next` option (like our example above does), then that is chosen as the next phase.
+1. If a phase specifies the `next` option (like our example above does), then that is chosen as the next phase.
 
 ```js
 phases: {
@@ -118,18 +114,14 @@ phases: {
 }
 ```
 
-#### 3
+2. The `endPhase` event accepts an argument that can specify the
+   next phase:
 
-The `endPhase` event accepts an argument that can specify the
-next phase:
-
-```js
+```
 endPhase({ next: 'B' });
 ```
 
-#### 4
-
-`endPhaseIf` can return an object specifying the next phase:
+3. `endPhaseIf` can return an object specifying the next phase:
 
 ```js
 endPhaseIf: () => ({ next: 'B' });
