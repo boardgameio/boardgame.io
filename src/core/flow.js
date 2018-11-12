@@ -586,12 +586,18 @@ export function FlowWithPhases({
 
     // Update actionPlayers if _actionPlayersOnce is set.
     let actionPlayers = state.ctx.actionPlayers;
+    let actionPlayersOnceDone = false;
     if (state.ctx._actionPlayersOnce) {
       const playerID = action.playerID;
       actionPlayers = actionPlayers.filter(id => id !== playerID);
 
-      if (state.ctx._actionPlayersAllOthers && actionPlayers.length === 0) {
-        actionPlayers = [state.ctx.currentPlayer];
+      if (actionPlayers.length == 0) {
+        if (conf.turnOrder.endPhaseOnceDone) {
+          actionPlayersOnceDone = true;
+        }
+        if (state.ctx._actionPlayersAllOthers) {
+          actionPlayers = [state.ctx.currentPlayer];
+        }
       }
     }
 
@@ -610,7 +616,7 @@ export function FlowWithPhases({
     const gameover = conf.endGameIf(state.G, state.ctx);
 
     // End the phase automatically if endPhaseIf is true or if endGameIf returns.
-    const endPhase = shouldEndPhase(state);
+    const endPhase = shouldEndPhase(state) || actionPlayersOnceDone;
     if (endPhase || gameover !== undefined) {
       state = dispatch(
         state,

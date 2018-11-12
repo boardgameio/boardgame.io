@@ -7,27 +7,29 @@
  */
 
 import React from 'react';
-import { Game } from 'boardgame.io/core';
+import { Game, TurnOrder } from 'boardgame.io/core';
 
 const code = `{
   flow: {
+    endPhase: false,
     startingPhase: 'play',
 
     phases: {
-      play: { allowedMoves: ['play'] },
-      discard: { allowedMoves: ['discard'] },
-    },
+      play: {
+        allowedMoves: ['play'],
+      },
 
-    onTurnBegin(G, ctx) {
-      ctx.events.endPhase({ next: 'play' });
-      return G;
+      discard: {
+        turnOrder: TurnOrder.OTHERS_ONCE,
+        allowedMoves: ['discard'],
+        next: 'play',
+      },
     },
   },
 
   moves: {
     play(G, ctx) {
       ctx.events.endPhase({ next: 'discard' });
-      ctx.events.setActionPlayers({ allOthers: true, once: true });
       return G;
     },
 
@@ -57,20 +59,21 @@ export default {
       startingPhase: 'play',
 
       phases: {
-        play: { allowedMoves: ['play'] },
-        discard: { allowedMoves: ['discard'] },
-      },
+        play: {
+          allowedMoves: ['play'],
+        },
 
-      onTurnBegin(G, ctx) {
-        ctx.events.endPhase({ next: 'play' });
-        return G;
+        discard: {
+          turnOrder: TurnOrder.OTHERS_ONCE,
+          allowedMoves: ['discard'],
+          next: 'play',
+        },
       },
     },
 
     moves: {
       play(G, ctx) {
         ctx.events.endPhase({ next: 'discard' });
-        ctx.events.setActionPlayers({ allOthers: true, once: true });
         return G;
       },
 

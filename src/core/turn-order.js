@@ -196,12 +196,53 @@ export const TurnOrder = {
   /**
    * ANY
    *
-   * currentPlayer switches around in round-robin fashion, but any player can play on each turn.
+   * The turn stays with one player, but any player can play (in any order)
+   * until the phase ends.
    */
   ANY: {
     first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: (G, ctx) => ctx.playOrderPos,
     actionPlayers: { all: true },
+  },
+
+  /**
+   * ANY_ONCE
+   *
+   * The turn stays with one player, but any player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every player in the game.
+   */
+  ANY_ONCE: {
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => ctx.playOrderPos,
+    actionPlayers: { all: true, once: true },
+    endPhaseOnceDone: true,
+  },
+
+  /**
+   * OTHERS
+   *
+   * The turn stays with one player, and every *other* player can play (in any order)
+   * until the phase ends.
+   */
+  OTHERS: {
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => ctx.playOrderPos,
+    actionPlayers: { allOthers: true },
+  },
+
+  /**
+   * OTHERS_ONCE
+   *
+   * The turn stays with one player, and every *other* player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every *other* player in the game.
+   */
+  OTHERS_ONCE: {
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => ctx.playOrderPos,
+    actionPlayers: { allOthers: true, once: true },
+    endPhaseOnceDone: true,
   },
 
   /**

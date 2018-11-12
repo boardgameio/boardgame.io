@@ -13,7 +13,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 
 describe('turnOrder', () => {
-  test('default', () => {
+  test('DEFAULT', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
       phases: { A: {}, B: {} },
@@ -32,7 +32,7 @@ describe('turnOrder', () => {
     expect(state.ctx.phase).toBe('A');
   });
 
-  test('once', () => {
+  test('ONCE', () => {
     const flow = FlowWithPhases({
       turnOrder: TurnOrder.ONCE,
       startingPhase: 'A',
@@ -50,6 +50,100 @@ describe('turnOrder', () => {
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0']);
     expect(state.ctx.phase).toBe('B');
+  });
+
+  test('ANY', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.ANY,
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+  });
+
+  test('ANY_ONCE', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.ANY_ONCE,
+      startingPhase: 'A',
+      phases: { A: {} },
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+
+    state = flow.processMove(state, makeMove('', null, '0').payload);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1']);
+
+    state = flow.processMove(state, makeMove('', null, '1').payload);
+
+    expect(state.ctx.phase).toBe('default');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+  });
+
+  test('OTHERS', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.OTHERS,
+    });
+
+    let state = { ctx: flow.ctx(3) };
+    state = flow.init(state);
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+  });
+
+  test('OTHERS_ONCE', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.OTHERS_ONCE,
+      startingPhase: 'A',
+      phases: { A: {} },
+    });
+
+    let state = { ctx: flow.ctx(3) };
+    state = flow.init(state);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+
+    state = flow.processMove(state, makeMove('', null, '1').payload);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['2']);
+
+    state = flow.processMove(state, makeMove('', null, '2').payload);
+
+    expect(state.ctx.phase).toBe('default');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
   });
 
   test('custom', () => {
@@ -342,7 +436,7 @@ describe('UpdateTurnOrderState', () => {
   test('with actionPlayers', () => {
     const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.ANY);
     expect(t).toMatchObject({
-      currentPlayer: '1',
+      currentPlayer: '0',
       actionPlayers: ['0', '1', '2'],
     });
   });
