@@ -358,9 +358,9 @@ describe('SetActionPlayers', () => {
     state = reducer(state, makeMove('A', null, '1'));
     expect(state.ctx.actionPlayers).toEqual(['2']);
 
-    // player 1 makes move - after that, control should return to player 0
+    // player 2 makes move
     state = reducer(state, makeMove('A', null, '2'));
-    expect(state.ctx.actionPlayers).toEqual(['0']);
+    expect(state.ctx.actionPlayers).toEqual([]);
   });
 
   test('militia', () => {

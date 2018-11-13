@@ -593,13 +593,8 @@ export function FlowWithPhases({
       const playerID = action.playerID;
       actionPlayers = actionPlayers.filter(id => id !== playerID);
 
-      if (actionPlayers.length == 0) {
-        if (conf.turnOrder.endPhaseOnceDone) {
-          actionPlayersOnceDone = true;
-        }
-        if (state.ctx._actionPlayersAllOthers) {
-          actionPlayers = [state.ctx.currentPlayer];
-        }
+      if (actionPlayers.length == 0 && conf.turnOrder.endPhaseOnceDone) {
+        actionPlayersOnceDone = true;
       }
     }
 
