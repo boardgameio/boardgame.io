@@ -13,10 +13,11 @@ import './board.css';
 const Board = ({ G, ctx, moves, playerID, log }) => (
   <div className="secret-state">
     <section>
-      Game
+      <strong>G</strong>
       <pre>{JSON.stringify(G, null, 2)}</pre>
-      Action.Payload.Args
-      <pre>{JSON.stringify(log.map(l => l.action.payload.args), null, 2)}</pre>
+
+      <strong>log</strong>
+      <pre>{JSON.stringify(log, null, 2)}</pre>
       {playerID && (
         <button
           onClick={() =>
