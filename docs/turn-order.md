@@ -29,14 +29,15 @@ make a move. It defaults to a list containing just the
 `currentPlayer`, but you might want to change it in order
 to support actions from other players during the currrent turn
 (for example, if you play a card that forces everyone else
-to discard a card). See the [Events](events.md) page for
-documentation on how to do this. Note that if this list
-contains multiple playerID's, they can make a move in any
-order.
+to discard a card). Note that if this list contains multiple
+playerID's, they can make a move in any order.
 
-!> The player that just made a move is available at
-`ctx.playerID` in case you need to differentiate between
-multiple players that could simultaneously move.
+##### playOrder
+
+The default value is `['0', '1', ... ]`. You can think of this
+as the order in which players sit down at the table. A round
+robin turn order would move `currentPlayer` through this
+list in order.
 
 ##### playOrderPos
 
@@ -45,11 +46,9 @@ by the turn order policy in order to compute `currentPlayer`.
 The default behavior is to just increment it in a round-robin
 fashion. `currentPlayer` is just `playOrder[playOrderPos]`.
 
-##### playOrder
-
-The default value is `['0', '1', ... ]`. It provides a level
-of indirection so that you can modify the turn order from
-within your game logic.
+!> The player that just made a move is available at
+`ctx.playerID` in case you need to differentiate between
+multiple players that could simultaneously move.
 
 ### Available turn orders
 

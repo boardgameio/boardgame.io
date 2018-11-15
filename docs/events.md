@@ -35,38 +35,6 @@ then that argument is made available in `ctx.gameover`.
 After the game is over, further state changes to the game
 (via a move or event) are not possible.
 
-##### setActionPlayers
-
-This changes `ctx.actionPlayers` to the provided argument.
-See the guide on [Turn Orders](turn-order.md) for more
-details about `actionPlayers`.
-
-You may use an alternative form for the argument to set
-more advanced options:
-
-```
-const opts = {
-  // The array of playerID's.
-  value: [...],
-
-  // Each playerID can play once (after which
-  // their entry is removed from actionPlayers)
-  once: true,
-
-  // Use this instead of value if you want to set
-  // actionPlayers to all the players in the game.
-  all: true,
-
-  // Use this to set actionPlayers to all players
-  // except the current player. When combined with
-  // `once: true`, the current player is added back
-  // to `actionPlayers` once everyone else takes a move.
-  allOthers: true,
-};
-
-setActionPlayers(opts);
-```
-
 ### Triggering an event from a React client.
 
 Events are available through `props` inside the
