@@ -60,11 +60,12 @@ flow: {
     B: {},
   }
 }
+```
 
 4. The format of the argument to `endPhase` or the return
    value of `endPhaseIf` is now an object of type `{ next: 'phase name' }`
-```
 
+```
 // old
 endPhase('new phase')
 endPhaseIf: () => 'new phase'
@@ -72,12 +73,12 @@ endPhaseIf: () => 'new phase'
 // new
 endPhase({ next: 'new phase' })
 endPhaseIf: () => ({ next: 'new phase' })
-
 ```
+
 5. The format of the argument to `endTurn` or the return
    value of `endTurnIf` is now an object of type `{ next: playerID }`
-```
 
+```
 // old
 endTurn(playerID)
 endTurnIf: () => playerID
@@ -85,37 +86,37 @@ endTurnIf: () => playerID
 // new
 endTurn({ next: playerID })
 endTurnIf: () => ({ next: playerID })
-
 ```
+
 6. The semantics of enabling / disabling events has changed
    a bit: see https://boardgame.io/#/events for more details.
 
 7. TurnOrder objects now support `setActionPlayers` args.
    Instead of returning `actionPlayers` in `first` / `next`,
    add an `actionPlayers` section instead.
-```
 
+```
 // old
 {
-first: (G, ctx) => {
-playOrderPos: 0,
-actionPlayers: [...ctx.playOrder],
-},
+  first: (G, ctx) => {
+    playOrderPos: 0,
+    actionPlayers: [...ctx.playOrder],
+  }
 
-next: (G, ctx) => {
-playOrderPos: ctx.playOrderPos + 1,
-actionPlayers: [...ctx.playOrder],
-},
+  next: (G, ctx) => {
+    playOrderPos: ctx.playOrderPos + 1,
+    actionPlayers: [...ctx.playOrder],
+  },
 }
 
 // new
 {
-first: (G, ctx) => 0,
-next: (G, ctx) => ctx.playOrderPos + 1,
-actionPlayers: { all: true },
+  first: (G, ctx) => 0,
+  next: (G, ctx) => ctx.playOrderPos + 1,
+  actionPlayers: { all: true },
 }
-
 ```
+
 ## v0.26.3
 
 #### Features
@@ -390,19 +391,17 @@ Broken, do not use (complains about babelHelpers missing).
 
 * `boardgame.io/server` no longer has a default export, but returns
   `Server` and `Mongo`.
-```
 
+```
 // v0.19
 const Server = require('boardgame.io/server').Server;
-
 ```
 
 ```
-
 // v0.18
 const Server = require('boardgame.io/server');
-
 ```
+
 ## v0.18.1
 
 #### Bugfixes
@@ -417,17 +416,17 @@ const Server = require('boardgame.io/server');
 
 This adds a new package `boardgame.io/react`. Migrate all your
 calls from:
-```
 
+```
 import { Client } from 'boardgame.io/client'
-
 ```
+
 to:
-```
 
+```
 import { Client } from 'boardgame.io/react'
-
 ```
+
 `boardgame.io/client` exposes a raw JS client that isn't tied
 to any particular UI framework.
 
@@ -523,8 +522,8 @@ Buggy fix (fixed in 0.16.7).
 #### Breaking Changes
 
 * `props.game` is now `props.events` (to avoid confusing it with the `game` object).
-```
 
+```
 // OLD
 onClick() {
 this.props.game.endTurn();
@@ -534,8 +533,8 @@ this.props.game.endTurn();
 onClick() {
 this.props.events.endTurn();
 }
-
 ```
+
 ## v0.16.3
 
 #### Features
@@ -545,13 +544,13 @@ this.props.events.endTurn();
 #### Breaking Changes
 
 * `Server` now accepts an array `games`, and no longer takes `game` and `numPlayers`.
-```
 
+```
 const app = Server({
 games: [ TicTacToe, Chess ]
 };
-
 ```
+
 ## v0.16.2
 
 #### Bugfixes
@@ -583,24 +582,25 @@ games: [ TicTacToe, Chess ]
 
 * `boardgame.io/game` is now `boardgame.io/core`, and does not have a default export.
 * `boardgame.io/client` no longer has a default export.
-```
 
+```
 // v0.16
 import { Game } from 'boardgame.io/core'
 import { Client } from 'boardgame.io/client'
-
 ```
 
 ```
-
 // v0.15
 import Game from 'boardgame.io/game'
 import Client from 'boardgame.io/client'
-
 ```
+
 * `victory` is now `endGameIf`, and goes inside a `flow` section.
 * The semantics of `endGameIf` are subtly different. The game ends if
   the function returns anything at all.
 * `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
 * `props.endTurn` is now `props.game.endTurn`.
+
+```
+
 ```
