@@ -335,6 +335,30 @@ describe('log handling', () => {
     expect(client.log).toEqual([...deltalog, ...deltalog]);
   });
 
+  test('update with payload', () => {
+    client = Client({
+      game: Game({
+        moves: {
+          A: () => ({}),
+        },
+      }),
+      playerID: 0,
+    });
+
+    const state = { restore: true };
+    const deltalog = ['0', '1'];
+    const action = update(state, deltalog);
+
+    action.payload = {};
+    client.store.dispatch(action);
+    action.payload.playerID = 0;
+    client.store.dispatch(action);
+    action.payload.playerID = 1;
+    client.store.dispatch(action);
+
+    expect(client.log).toEqual([...deltalog, ...deltalog]);
+  });
+
   test('sync', () => {
     const state = { restore: true };
     const log = ['0', '1'];

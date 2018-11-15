@@ -139,7 +139,9 @@ class _ClientImpl {
      * The middleware below takes care of all these cases while
      * managing the log object.
      */
+    /* eslint-disable no-unused-vars */
     const LogMiddleware = store => next => action => {
+      /* eslint-enable no-unused-vars */
       const result = next(action);
       const state = store.getState();
 
@@ -157,8 +159,11 @@ class _ClientImpl {
         }
 
         case Actions.UPDATE: {
-          const deltalog = action.deltalog || [];
-          this.log = [...this.log, ...deltalog];
+          // don't update the log for the player twice (done already when handling that MAKE_MOVE)
+          if (!action.payload || +action.payload.playerID !== +this.playerID) {
+            const deltalog = action.deltalog || [];
+            this.log = [...this.log, ...deltalog];
+          }
           break;
         }
 
