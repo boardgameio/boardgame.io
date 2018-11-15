@@ -104,5 +104,5 @@ flow: {
 }
 ```
 
-!> This doesn't apply to events in game logic, inside
-which all events are always enabled.
+!> This doesn't apply to events in game logic, but just the
+ability to call an event directly from a client.
