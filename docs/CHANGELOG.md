@@ -1,7 +1,7 @@
 ## v0.27.0
 
-This is a pretty exciting release with lots of goodies, but
-with some breaking changes so make sure to read the section
+This is a pretty exciting release with lots of goodies but
+with some breaking changes, so make sure to read the section
 at the end with tips on migration.
 
 #### Features
@@ -35,7 +35,9 @@ phases: {
 ```
 
 2. There is no implicit ordering of phases. You can specify an
-   explicit order via `next`:
+   explicit order via `next` (optional). Note that this allows you to create
+   more complex graphs of phases compared to the previous linear
+   approach.
 
 ```
 phases: {
@@ -50,7 +52,7 @@ phases: {
    `endPhase` events caused by a cycle.
 
 You can have the game start in a phase different from `default`
-using:
+using `startingPhase`:
 
 ```
 flow: {
