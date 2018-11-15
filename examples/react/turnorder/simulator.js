@@ -10,6 +10,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Client } from 'boardgame.io/react';
 import Default from './example-default';
+import Once from './example-once';
 import Militia from './example-militia';
 import './simulator.css';
 
@@ -86,6 +87,7 @@ class Board extends React.Component {
 const examples = {
   default: Default,
   militia: Militia,
+  once: Once,
 };
 
 class App extends React.Component {
@@ -125,6 +127,12 @@ class App extends React.Component {
             onClick={() => this.init('default')}
           >
             default
+          </div>
+          <div
+            className={this.type === 'once' ? 'active' : ''}
+            onClick={() => this.init('once')}
+          >
+            once
           </div>
           <div
             className={this.type === 'militia' ? 'active' : ''}

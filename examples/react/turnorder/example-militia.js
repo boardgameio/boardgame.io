@@ -11,7 +11,6 @@ import { Game, TurnOrder } from 'boardgame.io/core';
 
 const code = `{
   flow: {
-    endPhase: false,
     startingPhase: 'play',
 
     phases: {
