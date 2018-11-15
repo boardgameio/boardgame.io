@@ -2,7 +2,10 @@
 
 This is a pretty exciting release with lots of goodies but
 with some breaking changes, so make sure to read the section
-at the end with tips on migration.
+at the end with tips on migration. The main theme in this
+release is the reworking of Phases and Turn Orders to support
+more complex game types and other common patterns like the
+ability to quickly pop into a phase and back.
 
 #### Features
 
@@ -45,6 +48,9 @@ phases: {
   'B': { next: 'A' },
 }
 ```
+
+Take a look at [phases.md](phases.md) to see how `endPhase`
+determines which phase to move to.
 
 3. A phase called `default` is always created. This is the phase
    that the game begins in. This is also the phase that the
