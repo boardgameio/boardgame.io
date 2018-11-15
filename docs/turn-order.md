@@ -154,7 +154,7 @@ A `TurnOrder` object has the following structure:
     all: true,
 
     // Sets actionPlayers to all players except currentPlayer.
-    allOthers: true,
+    others: true,
 
     // Each time an action player makes a move, they are
     // removed from actionPlayers. Once every player in

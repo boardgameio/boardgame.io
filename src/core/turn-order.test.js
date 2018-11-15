@@ -331,14 +331,14 @@ describe('SetActionPlayers', () => {
     expect(state.ctx.actionPlayers).toEqual([]);
   });
 
-  test('allOthers', () => {
+  test('others', () => {
     const game = Game({
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({
             value: ['0', '1', '2'],
             once: true,
-            allOthers: true,
+            others: true,
           });
           return G;
         },

@@ -38,13 +38,11 @@ export const Pass = (G, ctx) => {
  *
  *     all: true,        // set value to all playerID's
  *
- *     allOthers: true,  // set value to all except currentPlayer.
- *                       // when combined with `once` (below)
- *                       // currentPlayer is added back after
- *                       // everyone has taken their move.
+ *     others: true,     // set value to all except currentPlayer.
  *
  *     once: true,       // players have one move
  *                       // (after which they're pruned from actionPlayers).
+ *                       // The phase ends once actionPlayers becomes empty.
  *   }
  */
 export function SetActionPlayersEvent(state, arg) {
@@ -61,7 +59,7 @@ function setActionPlayers(ctx, arg) {
     actionPlayers = [...ctx.playOrder];
   }
 
-  if (arg.allOthers) {
+  if (arg.others) {
     actionPlayers = [...ctx.playOrder].filter(nr => nr !== ctx.currentPlayer);
   }
 
@@ -73,7 +71,7 @@ function setActionPlayers(ctx, arg) {
     ...ctx,
     actionPlayers,
     _actionPlayersOnce: arg.once,
-    _actionPlayersAllOthers: arg.allOthers,
+    _actionPlayersOthers: arg.others,
   };
 }
 
@@ -228,7 +226,7 @@ export const TurnOrder = {
   OTHERS: {
     first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => ctx.playOrderPos,
-    actionPlayers: { allOthers: true },
+    actionPlayers: { others: true },
   },
 
   /**
@@ -241,7 +239,7 @@ export const TurnOrder = {
   OTHERS_ONCE: {
     first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => ctx.playOrderPos,
-    actionPlayers: { allOthers: true, once: true },
+    actionPlayers: { others: true, once: true },
     endPhaseOnceDone: true,
   },
 
