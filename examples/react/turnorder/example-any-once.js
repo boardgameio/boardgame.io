@@ -22,10 +22,6 @@ const code = `{
 
 const Description = () => (
   <div>
-    <p>
-      <strong>TurnOrder.ANY_ONCE</strong> allows anyone to play during the turn,
-      but exactly once.
-    </p>
     <pre>{code}</pre>
   </div>
 );

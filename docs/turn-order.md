@@ -75,6 +75,12 @@ this are to create phases where you want to elicit a response
 from all players in the game. The round-robin feature of this
 turn order is not useful in such cases.
 
+### Interactive demos
+
+```react
+<iframe class='react' src='react/turn-order/turn-order.html' height='1050' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+```
+
 ### Specifying a turn order
 
 You can change the turn order by using the `turnOrder` option.

@@ -18,10 +18,6 @@ const code = `{
 
 const Description = () => (
   <div>
-    <p>
-      <strong>TurnOrder.OTHERS</strong> allows anyone except the current player
-      to play until the phase ends.
-    </p>
     <pre>{code}</pre>
   </div>
 );

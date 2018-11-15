@@ -21,10 +21,6 @@ const code = `{
 
 const Description = () => (
   <div>
-    <p>
-      <strong>TurnOrder.ONCE</strong> goes around the table once and then ends
-      the phase automatically.
-    </p>
     <pre>{code}</pre>
   </div>
 );
