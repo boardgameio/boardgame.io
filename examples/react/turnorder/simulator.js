@@ -11,7 +11,10 @@ import PropTypes from 'prop-types';
 import { Client } from 'boardgame.io/react';
 import Default from './example-default';
 import Once from './example-once';
-import Militia from './example-militia';
+import Any from './example-any';
+import AnyOnce from './example-any-once';
+import Others from './example-others';
+import OthersOnce from './example-others-once';
 import './simulator.css';
 
 class Board extends React.Component {
@@ -86,8 +89,11 @@ class Board extends React.Component {
 
 const examples = {
   default: Default,
-  militia: Militia,
+  'others-once': OthersOnce,
   once: Once,
+  any: Any,
+  'any-once': AnyOnce,
+  others: Others,
 };
 
 class App extends React.Component {
@@ -126,19 +132,37 @@ class App extends React.Component {
             className={this.type === 'default' ? 'active' : ''}
             onClick={() => this.init('default')}
           >
-            default
+            DEFAULT
           </div>
           <div
             className={this.type === 'once' ? 'active' : ''}
             onClick={() => this.init('once')}
           >
-            once
+            ONCE
           </div>
           <div
-            className={this.type === 'militia' ? 'active' : ''}
-            onClick={() => this.init('militia')}
+            className={this.type === 'any' ? 'active' : ''}
+            onClick={() => this.init('any')}
           >
-            militia
+            ANY
+          </div>
+          <div
+            className={this.type === 'any-once' ? 'active' : ''}
+            onClick={() => this.init('any-once')}
+          >
+            ANY_ONCE
+          </div>
+          <div
+            className={this.type === 'others' ? 'active' : ''}
+            onClick={() => this.init('others')}
+          >
+            OTHERS
+          </div>
+          <div
+            className={this.type === 'others-once' ? 'active' : ''}
+            onClick={() => this.init('others-once')}
+          >
+            OTHERS_ONCE
           </div>
         </div>
 

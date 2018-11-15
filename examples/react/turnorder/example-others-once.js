@@ -41,8 +41,14 @@ const code = `{
 const Description = () => (
   <div>
     <p>
-      This is an example from the card game Dominion. The Militia card forces
-      every other player to discard a card.
+      <strong>TurnOrder.OTHERS</strong> allows everyone except the current
+      player to make one move (in any order). This is a usefule pattern in games
+      where you want to elicit a response from every other player in the game.
+    </p>
+
+    <p>
+      For example, you could have a card that (when played) requires every other
+      player to discard a card.
     </p>
     <pre>{code}</pre>
   </div>
