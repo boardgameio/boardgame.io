@@ -9,12 +9,7 @@
 import React from 'react';
 import { Game } from 'boardgame.io/core';
 
-const Description = () => (
-  <div>
-    This is the default round-robin turn order. Click on
-    <strong> endTurn</strong> and see how the turn passes around.
-  </div>
-);
+const Description = () => <div />;
 
 export default {
   description: Description,

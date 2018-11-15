@@ -1,3 +1,130 @@
+## v0.27.0
+
+This is a pretty exciting release with lots of goodies but
+with some breaking changes, so make sure to read the section
+at the end with tips on migration. The main theme in this
+release is the reworking of Phases and Turn Orders to support
+more complex game types and other common patterns like the
+ability to quickly pop into a phase and back.
+
+#### Features
+
+* [[b7abc57](https://github.com/nicolodavis/boardgame.io/commit/b7abc57)] more turn orders
+* [[5fb663a](https://github.com/nicolodavis/boardgame.io/commit/5fb663a)] allow calling setActionPlayers via TurnOrder objects
+* [[53473ef](https://github.com/nicolodavis/boardgame.io/commit/53473ef)] change semantics of enabling/disabling events
+* [[992416a](https://github.com/nicolodavis/boardgame.io/commit/992416a)] change format of args to endPhase and endTurn
+* [[0568857](https://github.com/nicolodavis/boardgame.io/commit/0568857)] change phases syntax
+
+#### Bugfixes
+
+* [[96def53](https://github.com/nicolodavis/boardgame.io/commit/96def53)] add MONGO_DATABASE env variable (#290)
+
+#### Breaking Changes
+
+1. The syntax for phases has changed:
+
+```
+// old
+phases: [
+  { name: 'A', ...opts },
+  { name: 'B', ...opts },
+]
+
+// new
+phases: {
+  'A': { ...opts },
+  'B': { ...opts },
+}
+```
+
+2. There is no implicit ordering of phases. You can specify an
+   explicit order via `next` (optional). Note that this allows you to create
+   more complex graphs of phases compared to the previous linear
+   approach.
+
+```
+phases: {
+  'A': { next: 'B' },
+  'B': { next: 'A' },
+}
+```
+
+Take a look at [phases.md](phases.md) to see how `endPhase`
+determines which phase to move to.
+
+3. A phase called `default` is always created. This is the phase
+   that the game begins in. This is also the phase that the
+   game reverts to in case it detects an infinite loop of
+   `endPhase` events caused by a cycle.
+
+You can have the game start in a phase different from `default`
+using `startingPhase`:
+
+```
+flow: {
+  startingPhase: 'A',
+  phases: {
+    A: {},
+    B: {},
+  }
+}
+```
+
+4. The format of the argument to `endPhase` or the return
+   value of `endPhaseIf` is now an object of type `{ next: 'phase name' }`
+
+```
+// old
+endPhase('new phase')
+endPhaseIf: () => 'new phase'
+
+// new
+endPhase({ next: 'new phase' })
+endPhaseIf: () => ({ next: 'new phase' })
+```
+
+5. The format of the argument to `endTurn` or the return
+   value of `endTurnIf` is now an object of type `{ next: playerID }`
+
+```
+// old
+endTurn(playerID)
+endTurnIf: () => playerID
+
+// new
+endTurn({ next: playerID })
+endTurnIf: () => ({ next: playerID })
+```
+
+6. The semantics of enabling / disabling events has changed
+   a bit: see https://boardgame.io/#/events for more details.
+
+7. TurnOrder objects now support `setActionPlayers` args.
+   Instead of returning `actionPlayers` in `first` / `next`,
+   add an `actionPlayers` section instead.
+
+```
+// old
+{
+  first: (G, ctx) => {
+    playOrderPos: 0,
+    actionPlayers: [...ctx.playOrder],
+  }
+
+  next: (G, ctx) => {
+    playOrderPos: ctx.playOrderPos + 1,
+    actionPlayers: [...ctx.playOrder],
+  },
+}
+
+// new
+{
+  first: (G, ctx) => 0,
+  next: (G, ctx) => ctx.playOrderPos + 1,
+  actionPlayers: { all: true },
+}
+```
+
 ## v0.26.3
 
 #### Features
@@ -407,12 +534,12 @@ Buggy fix (fixed in 0.16.7).
 ```
 // OLD
 onClick() {
-  this.props.game.endTurn();
+this.props.game.endTurn();
 }
 
 // NEW
 onClick() {
-  this.props.events.endTurn();
+this.props.events.endTurn();
 }
 ```
 
@@ -428,7 +555,7 @@ onClick() {
 
 ```
 const app = Server({
-  games: [ TicTacToe, Chess ]
+games: [ TicTacToe, Chess ]
 };
 ```
 
@@ -481,3 +608,7 @@ import Client from 'boardgame.io/client'
   the function returns anything at all.
 * `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
 * `props.endTurn` is now `props.game.endTurn`.
+
+```
+
+```

@@ -1,3 +1,4 @@
+.cache
 yarn.lock
 .DS_Store
 *.swp

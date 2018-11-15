@@ -62,7 +62,8 @@ test('board props', () => {
   Board = Client({
     game: Game({
       flow: {
-        phases: [{ name: 'A', turnOrder: TurnOrder.ANY }],
+        startingPhase: 'A',
+        phases: { A: { turnOrder: TurnOrder.ANY } },
       },
     }),
     board: TestBoard,

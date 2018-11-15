@@ -298,7 +298,7 @@ class _ClientImpl {
     );
 
     this.events = createEventDispatchers(
-      this.game.flow.eventNames,
+      this.game.flow.enabledEventNames,
       this.store,
       this.playerID,
       this.credentials,

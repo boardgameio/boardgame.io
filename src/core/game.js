@@ -47,11 +47,11 @@ import { FlowWithPhases } from './flow';
  *     endGameIf: (G, ctx) => { ... },
  *     endTurnIf: (G, ctx) => { ... },
  *
- *     phases: [
- *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
- *       { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *     phases: {
+ *       A: { onPhaseBegin: (G, ctx) => G, onPhaseEnd: (G, ctx) => G },
+ *       B: { onPhaseBegin: (G, ctx) => G, onPhaseEnd: (G, ctx) => G },
  *       ...
- *     ]
+ *     }
  *   },
  * })
  *

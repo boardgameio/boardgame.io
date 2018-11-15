@@ -16,17 +16,12 @@ const game = Game({
   moves: {},
 
   flow: {
-    phases: [
-      {
-        name: 'A',
-      },
-      {
-        name: 'B',
-      },
-      {
-        name: 'C',
-      },
-    ],
+    startingPhase: 'A',
+    phases: {
+      A: { next: 'B' },
+      B: { next: 'C' },
+      C: { next: 'A' },
+    },
   },
 });
 
