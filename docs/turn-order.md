@@ -58,7 +58,7 @@ This is the default round-robin. It is used if you don't
 specify any turn order. It goes on indefinitely until you
 end the phase, at which point the next phase's turn order
 kicks in. Note that if the next phase also uses
-`TurnOrder.DEFAULT`, the turn order will continue passing
+`DEFAULT`, the turn order will continue passing
 around in a round-robin seamlessly.
 
 ##### ONCE
@@ -68,12 +68,29 @@ After this, the phase ends automatically.
 
 ##### ANY
 
-This turn order passes the turn around in a round-robin.
-However, `actionPlayers` is set to all players at each turn.
-This allows anybody to make a move. Common applications of
-this are to create phases where you want to elicit a response
-from all players in the game. The round-robin feature of this
-turn order is not useful in such cases.
+`actionPlayers` is set to all players while the turn stays
+fixed with one player. This allows every player in the game
+to make a move (in any order).
+
+##### ANY_ONCE
+
+Similar to the above, but allows each player to make exactly
+one move. Also, the phase ends when all players have made their
+move.
+
+##### OTHERS
+
+Similar to `ANY`, but excludes the current player from the set
+of action players.
+
+##### OTHERS_ONCE
+
+Similar to the above, but allows each player to make exactly
+one move. Also, the phase ends when all (other) players have
+made their move. This is typically used in a phase where you
+would like to elicit a response from every other player in the
+game. For example, you might have a card which (when player)
+requires every other player in the game to discard a card.
 
 ### Interactive demos
 
@@ -90,10 +107,6 @@ This is passed inside a `flow` section of the `Game` configuration:
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 Game({
-  moves: {
-    ...
-  },
-
   flow: {
     turnOrder: TurnOrder.ANY,
   }
@@ -106,10 +119,6 @@ Turn orders can also be specified on a per-phase level.
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 Game({
-  moves: {
-    ...
-  },
-
   flow: {
     phases: {
       A: { turnOrder: TurnOrder.ANY },
@@ -131,36 +140,27 @@ A `TurnOrder` object has the following structure:
 
   // Get the next value of playOrderPos.
   // This is called at the end of each turn.
+  // The phase ends if this returns undefined.
   next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
 
-  // If this section is present, setActionPlayers is called
-  // at the beginning of the phase with the object below as
-  // argument.
+  // OPTIONAL:
+  // If this section is present, actionPlayers is modified
+  // at the beginning of the phase.
   actionPlayers: {
-    ...
+    // Sets actionPlayers to the array specified.
+    values: [...],
+
+    // Sets actionPlayers to all players.
+    all: true,
+
+    // Sets actionPlayers to all players except currentPlayer.
+    allOthers: true,
+
+    // Each time an action player makes a move, they are
+    // removed from actionPlayers. Once every player in
+    // actionPlayers has made a move, the phase ends.
+    once: true,
   },
-}
-```
-
-!> The phase ends if `next()` returns `undefined`.
-
-The implementation above shows the default round-robin order that
-repeats indefinitely. If you want to skip over every other player (for example), do something like this:
-
-```js
-import { Game } from 'boardgame.io/core';
-
-Game({
-  moves: {
-    ...
-  },
-
-  flow: {
-    turnOrder: {
-      first: () => 0,
-      next: (G, ctx) => (ctx.playOrderPos + 2) % ctx.numPlayers,
-    }
-  }
 }
 ```
 

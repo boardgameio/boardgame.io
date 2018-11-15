@@ -79,12 +79,11 @@ enabled.
 
 The following table describes the defaults:
 
-|      Event       | Default |
-| :--------------: | :-----: |
-|     endTurn      |  true   |
-|     endPhase     |  true   |
-|     endGame      |  false  |
-| setActionPlayers |  false  |
+|  Event   | Default |
+| :------: | :-----: |
+| endTurn  |  true   |
+| endPhase |  true   |
+| endGame  |  false  |
 
 In order to enable an event, just add `eventName: true` to
 your `flow` section.
