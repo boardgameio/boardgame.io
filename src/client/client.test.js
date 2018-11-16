@@ -319,44 +319,29 @@ describe('log handling', () => {
     client.moves.A();
 
     expect(client.log).toEqual([
-      { action: makeMove('A', [], '0') },
-      { action: makeMove('A', [], '0') },
+      { action: makeMove('A', [], '0'), _stateID: 0 },
+      { action: makeMove('A', [], '0'), _stateID: 1 },
     ]);
   });
 
   test('update', () => {
-    const state = { restore: true };
-    const deltalog = ['0', '1'];
+    const state = { restore: true, _stateID: 0 };
+    const deltalog = [
+      {
+        action: {},
+        _stateID: 0,
+      },
+      {
+        action: {},
+        _stateID: 1,
+      },
+    ];
     const action = update(state, deltalog);
 
     client.store.dispatch(action);
     client.store.dispatch(action);
 
-    expect(client.log).toEqual([...deltalog, ...deltalog]);
-  });
-
-  test('update with payload', () => {
-    client = Client({
-      game: Game({
-        moves: {
-          A: () => ({}),
-        },
-      }),
-      playerID: 0,
-    });
-
-    const state = { restore: true };
-    const deltalog = ['0', '1'];
-    const action = update(state, deltalog);
-
-    action.payload = {};
-    client.store.dispatch(action);
-    action.payload.playerID = 0;
-    client.store.dispatch(action);
-    action.payload.playerID = 1;
-    client.store.dispatch(action);
-
-    expect(client.log).toEqual([...deltalog, ...deltalog]);
+    expect(client.log).toEqual(deltalog);
   });
 
   test('sync', () => {
