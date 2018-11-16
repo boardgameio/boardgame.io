@@ -6,6 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import * as logging from './logger';
+
 /**
  * Standard move that simulates passing.
  *
@@ -36,29 +38,29 @@ export const Pass = (G, ctx) => {
  *
  *     all: true,        // set value to all playerID's
  *
- *     allOthers: true,  // set value to all except currentPlayer.
- *                       // when combined with `once` (below)
- *                       // currentPlayer is added back after
- *                       // everyone has taken their move.
+ *     others: true,     // set value to all except currentPlayer.
  *
  *     once: true,       // players have one move
  *                       // (after which they're pruned from actionPlayers).
+ *                       // The phase ends once actionPlayers becomes empty.
  *   }
  */
-export function SetActionPlayers(state, arg) {
+export function SetActionPlayersEvent(state, arg) {
+  return { ...state, ctx: setActionPlayers(state.ctx, arg) };
+}
+
+function setActionPlayers(ctx, arg) {
   let actionPlayers = [];
 
   if (arg.value) {
     actionPlayers = arg.value;
   }
   if (arg.all) {
-    actionPlayers = [...state.ctx.playOrder];
+    actionPlayers = [...ctx.playOrder];
   }
 
-  if (arg.allOthers) {
-    actionPlayers = [...state.ctx.playOrder].filter(
-      nr => nr !== state.ctx.currentPlayer
-    );
+  if (arg.others) {
+    actionPlayers = [...ctx.playOrder].filter(nr => nr !== ctx.currentPlayer);
   }
 
   if (Array.isArray(arg)) {
@@ -66,13 +68,10 @@ export function SetActionPlayers(state, arg) {
   }
 
   return {
-    ...state,
-    ctx: {
-      ...state.ctx,
-      actionPlayers,
-      _actionPlayersOnce: arg.once,
-      _actionPlayersAllOthers: arg.allOthers,
-    },
+    ...ctx,
+    actionPlayers,
+    _actionPlayersOnce: arg.once,
+    _actionPlayersOthers: arg.others,
   };
 }
 
@@ -92,26 +91,16 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * @param {object} turnOrder - A turn order object for this phase.
  */
 export function InitTurnOrderState(G, ctx, turnOrder) {
-  let playOrderPos;
-  let actionPlayers;
-
-  const t = turnOrder.first(G, ctx);
-
-  if (t.playOrderPos !== undefined) {
-    playOrderPos = t.playOrderPos;
-  } else {
-    playOrderPos = t;
-  }
-
+  const playOrderPos = turnOrder.first(G, ctx);
   const currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
 
-  if (t.actionPlayers !== undefined) {
-    actionPlayers = t.actionPlayers;
+  if (turnOrder.actionPlayers !== undefined) {
+    ctx = setActionPlayers(ctx, turnOrder.actionPlayers);
   } else {
-    actionPlayers = [currentPlayer];
+    ctx = { ...ctx, actionPlayers: [currentPlayer] };
   }
 
-  return { ...ctx, currentPlayer, playOrderPos, actionPlayers };
+  return { ...ctx, currentPlayer, playOrderPos };
 }
 
 /**
@@ -119,36 +108,33 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
  * @param {object} G - The game object G.
  * @param {object} ctx - The game object ctx.
  * @param {object} turnOrder - A turn order object for this phase.
- * @param {string} nextPlayer - An optional argument to endTurn that
+ * @param {string} endTurnArg - An optional argument to endTurn that
                                 may specify the next player.
  */
-export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
+export function UpdateTurnOrderState(G, ctx, turnOrder, endTurnArg) {
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
   let actionPlayers = ctx.actionPlayers;
   let endPhase = false;
 
-  if (ctx.playOrder.includes(nextPlayer)) {
-    playOrderPos = ctx.playOrder.indexOf(nextPlayer);
-    currentPlayer = nextPlayer;
-    actionPlayers = [currentPlayer];
+  if (endTurnArg && endTurnArg !== true) {
+    if (ctx.playOrder.includes(endTurnArg.next)) {
+      playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
+      currentPlayer = endTurnArg.next;
+      actionPlayers = [currentPlayer];
+    } else {
+      logging.error(`invalid argument to endTurn: ${endTurnArg}`);
+    }
   } else {
     const t = turnOrder.next(G, ctx);
 
-    if (t == undefined) {
+    if (t === undefined) {
       endPhase = true;
     } else {
-      if (t.playOrderPos !== undefined) {
-        playOrderPos = t.playOrderPos;
-      } else {
-        playOrderPos = t;
-      }
-
+      playOrderPos = t;
       currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
 
-      if (t.actionPlayers !== undefined) {
-        actionPlayers = t.actionPlayers;
-      } else {
+      if (turnOrder.actionPlayers === undefined) {
         actionPlayers = [currentPlayer];
       }
     }
@@ -173,9 +159,9 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, nextPlayer) {
  * begins, and also a function `next` to determine who the
  * next player is when the turn ends.
  *
- * first / next can also return an object of type
- * { playOrderPos, actionPlayers }
- * in which case they can also set actionPlayers simultaneously.
+ * Objects can also contain an actionPlayers section which
+ * is passed to SetActionPlayers above at the beginning of
+ * the phase.
  *
  * The phase ends if next() returns undefined.
  */
@@ -208,19 +194,53 @@ export const TurnOrder = {
   /**
    * ANY
    *
-   * currentPlayer switches around in round-robin fashion, but any player can play on each turn.
+   * The turn stays with one player, but any player can play (in any order)
+   * until the phase ends.
    */
   ANY: {
-    first: (G, ctx) => {
-      return {
-        actionPlayers: [...ctx.playOrder],
-        playOrderPos: ctx.playOrderPos,
-      };
-    },
-    next: (G, ctx) => {
-      const playOrderPos = (ctx.playOrderPos + 1) % ctx.playOrder.length;
-      return { actionPlayers: [...ctx.playOrder], playOrderPos };
-    },
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => ctx.playOrderPos,
+    actionPlayers: { all: true },
+  },
+
+  /**
+   * ANY_ONCE
+   *
+   * The turn stays with one player, but any player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every player in the game.
+   */
+  ANY_ONCE: {
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => ctx.playOrderPos,
+    actionPlayers: { all: true, once: true },
+    endPhaseOnceDone: true,
+  },
+
+  /**
+   * OTHERS
+   *
+   * The turn stays with one player, and every *other* player can play (in any order)
+   * until the phase ends.
+   */
+  OTHERS: {
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => ctx.playOrderPos,
+    actionPlayers: { others: true },
+  },
+
+  /**
+   * OTHERS_ONCE
+   *
+   * The turn stays with one player, and every *other* player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every *other* player in the game.
+   */
+  OTHERS_ONCE: {
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => ctx.playOrderPos,
+    actionPlayers: { others: true, once: true },
+    endPhaseOnceDone: true,
   },
 
   /**

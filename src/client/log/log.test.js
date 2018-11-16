@@ -18,7 +18,15 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 describe('layout', () => {
-  const game = Game({ flow: { phases: [{ name: 'A' }, { name: 'B' }] } });
+  const game = Game({
+    flow: {
+      startingPhase: 'A',
+      phases: {
+        A: { next: 'B' },
+        B: { next: 'A' },
+      },
+    },
+  });
   const reducer = CreateGameReducer({ game });
   const state = reducer(undefined, { type: 'init' });
 
@@ -230,7 +238,7 @@ describe('pinning', () => {
 });
 
 describe('payload', () => {
-  const game = Game({ flow: { phases: [{ name: 'A' }, { name: 'B' }] } });
+  const game = Game({});
   const reducer = CreateGameReducer({ game });
   const state = reducer(undefined, { type: 'init' });
 
