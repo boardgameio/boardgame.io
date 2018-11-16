@@ -159,11 +159,20 @@ class _ClientImpl {
         }
 
         case Actions.UPDATE: {
-          // don't update the log for the player twice (done already when handling that MAKE_MOVE)
-          if (!action.payload || +action.payload.playerID !== +this.playerID) {
-            const deltalog = action.deltalog || [];
-            this.log = [...this.log, ...deltalog];
+          let id = -1;
+          if (this.log.length > 0) {
+            id = this.log[this.log.length - 1]._stateID;
           }
+
+          let deltalog = action.deltalog || [];
+
+          // Filter out actions that are already present
+          // in the current log. This may occur when the
+          // client adds an entry to the log followed by
+          // the update from the master here.
+          deltalog = deltalog.filter(l => l._stateID > id);
+
+          this.log = [...this.log, ...deltalog];
           break;
         }
 
