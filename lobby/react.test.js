@@ -225,6 +225,7 @@ describe('lobby', () => {
       lobby.update();
     });
     test('if player has joined the game', () => {
+      lobby.instance().connection.playerCredentials = 'SECRET1';
       lobby
         .find('LobbyRoomInstance')
         .first()
