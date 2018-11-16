@@ -139,9 +139,7 @@ class _ClientImpl {
      * The middleware below takes care of all these cases while
      * managing the log object.
      */
-    /* eslint-disable no-unused-vars */
     const LogMiddleware = store => next => action => {
-      /* eslint-enable no-unused-vars */
       const result = next(action);
       const state = store.getState();
 
