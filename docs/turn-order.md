@@ -29,14 +29,15 @@ make a move. It defaults to a list containing just the
 `currentPlayer`, but you might want to change it in order
 to support actions from other players during the currrent turn
 (for example, if you play a card that forces everyone else
-to discard a card). See the [Events](events.md) page for
-documentation on how to do this. Note that if this list
-contains multiple playerID's, they can make a move in any
-order.
+to discard a card). Note that if this list contains multiple
+playerID's, they can make a move in any order.
 
-!> The player that just made a move is available at
-`ctx.playerID` in case you need to differentiate between
-multiple players that could simultaneously move.
+##### playOrder
+
+The default value is `['0', '1', ... ]`. You can think of this
+as the order in which players sit down at the table. A round
+robin turn order would move `currentPlayer` through this
+list in order.
 
 ##### playOrderPos
 
@@ -45,11 +46,9 @@ by the turn order policy in order to compute `currentPlayer`.
 The default behavior is to just increment it in a round-robin
 fashion. `currentPlayer` is just `playOrder[playOrderPos]`.
 
-##### playOrder
-
-The default value is `['0', '1', ... ]`. It provides a level
-of indirection so that you can modify the turn order from
-within your game logic.
+!> The player that just made a move is available at
+`ctx.playerID` in case you need to differentiate between
+multiple players that could simultaneously move.
 
 ### Available turn orders
 
@@ -59,7 +58,7 @@ This is the default round-robin. It is used if you don't
 specify any turn order. It goes on indefinitely until you
 end the phase, at which point the next phase's turn order
 kicks in. Note that if the next phase also uses
-`TurnOrder.DEFAULT`, the turn order will continue passing
+`DEFAULT`, the turn order will continue passing
 around in a round-robin seamlessly.
 
 ##### ONCE
@@ -69,12 +68,35 @@ After this, the phase ends automatically.
 
 ##### ANY
 
-This turn order passes the turn around in a round-robin.
-However, `actionPlayers` is set to all players at each turn.
-This allows anybody to make a move. Common applications of
-this are to create phases where you want to elicit a response
-from all players in the game. The round-robin feature of this
-turn order is not useful in such cases.
+`actionPlayers` is set to all players while the turn stays
+fixed with one player. This allows every player in the game
+to make a move (in any order).
+
+##### ANY_ONCE
+
+Similar to the above, but allows each player to make exactly
+one move. Also, the phase ends when all players have made their
+move.
+
+##### OTHERS
+
+Similar to `ANY`, but excludes the current player from the set
+of action players.
+
+##### OTHERS_ONCE
+
+Similar to the above, but allows each player to make exactly
+one move. Also, the phase ends when all (other) players have
+made their move. This is typically used in a phase where you
+would like to elicit a response from every other player in the
+game. For example, you might have a card which (when player)
+requires every other player in the game to discard a card.
+
+### Interactive demos
+
+```react
+<iframe class='react' src='react/turn-order/turn-order.html' height='1050' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+```
 
 ### Specifying a turn order
 
@@ -85,10 +107,6 @@ This is passed inside a `flow` section of the `Game` configuration:
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 Game({
-  moves: {
-    ...
-  },
-
   flow: {
     turnOrder: TurnOrder.ANY,
   }
@@ -101,21 +119,11 @@ Turn orders can also be specified on a per-phase level.
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 Game({
-  moves: {
-    ...
-  },
-
   flow: {
-    phases: [
-      {
-        name: 'A',
-        turnOrder: TurnOrder.ANY,
-      },
-      {
-        name: 'B',
-        turnOrder: TurnOrder.ONCE,
-      },
-    ],
+    phases: {
+      A: { turnOrder: TurnOrder.ANY },
+      B: { turnOrder: TurnOrder.ONCE },
+    },
   }
 }
 ```
@@ -126,76 +134,58 @@ A `TurnOrder` object has the following structure:
 
 ```js
 {
-  // Get the initial value of playOrderPos,
+  // Get the initial value of playOrderPos.
+  // This is called at the beginning of the phase.
   first: (G, ctx) => 0,
 
-  // Get the next value of playOrderPos when endTurn is called.
+  // Get the next value of playOrderPos.
+  // This is called at the end of each turn.
+  // The phase ends if this returns undefined.
   next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
-}
-```
 
-!> The phase ends if `next()` returns `undefined`.
+  // OPTIONAL:
+  // If this section is present, actionPlayers is modified
+  // at the beginning of the phase.
+  actionPlayers: {
+    // Sets actionPlayers to the array specified.
+    values: [...],
 
-The implementation above shows the default round-robin order that
-repeats indefinitely. If you want to skip over every other player (for example), do something like this:
+    // Sets actionPlayers to all players.
+    all: true,
 
-```js
-import { Game } from 'boardgame.io/core';
+    // Sets actionPlayers to all players except currentPlayer.
+    others: true,
 
-Game({
-  moves: {
-    ...
+    // Each time an action player makes a move, they are
+    // removed from actionPlayers. Once every player in
+    // actionPlayers has made a move, the phase ends.
+    once: true,
   },
-
-  flow: {
-    turnOrder: {
-      first: () => 0,
-      next: (G, ctx) => (ctx.playOrderPos + 2) % ctx.numPlayers,
-    }
-  }
-}
-```
-
-You may also set `actionPlayers` from a `TurnOrder` object by
-returning an object of type:
-
-```js
-{
-  playOrderPos, actionPlayers;
-}
-```
-
-```js
-{
-  // Get the initial value of playOrderPos,
-  first: (G, ctx) => { playOrderPos: 0, actionPlayers: ['0'] }
-
-  // Get the next value of playOrderPos when endTurn is called.
-  next: (G, ctx) => {
-    const playOrderPos = (ctx.playOrderPos + 1) % ctx.numPlayers;
-    const actionPlayers = ['0', '1'];
-    return { playOrderPos, actionPlayers };
 }
 ```
 
 ### endTurn / endTurnIf
 
 You can also specify the next player during the `endTurn` event.
-The `endTurn` event takes an additional argument specifying
-the next player. If `endTurnIf` returns a string that is a playerID,
-that player is made the next player (instead of following the turn
-order).
+The `endTurn` event takes an additional argument that may specify
+the next player:
 
-Player '3' is made the new player in both the following examples:
+```js
+endTurn({ next: playerID });
+```
+
+This argument can also be the return value of `endTurnIf` and works the same way.
+
+Player `3` is made the new player in both the following examples:
 
 ```js
 onClickEndTurn() {
-  this.props.endTurn('3');
+  this.props.events.endTurn({ next: '3' });
 }
 ```
 
 ```js
 flow: {
-  endTurnIf: (G, ctx) => '3',
+  endTurnIf: (G, ctx) => ({ next: '3' }),
 }
 ```

@@ -21,18 +21,19 @@ const game = Game({
   },
 
   flow: {
-    phases: [
-      {
-        name: 'take phase',
+    startingPhase: 'take',
+    phases: {
+      take: {
         endPhaseIf: G => G.deck <= 0,
         allowedMoves: ['takeCard'],
+        next: 'play',
       },
-      {
-        name: 'play phase',
+      play: {
         allowedMoves: ['playCard'],
         endPhaseIf: G => G.hand <= 0,
+        next: 'take',
       },
-    ],
+    },
   },
 });
 
@@ -45,13 +46,13 @@ class Board extends React.Component {
   };
 
   takeCard = () => {
-    if (this.props.ctx.phase != 'take phase') return;
+    if (this.props.ctx.phase != 'take') return;
     this.props.moves.takeCard();
     this.props.events.endTurn();
   };
 
   playCard = () => {
-    if (this.props.ctx.phase != 'play phase') return;
+    if (this.props.ctx.phase != 'play') return;
     this.props.moves.playCard();
     this.props.events.endTurn();
   };

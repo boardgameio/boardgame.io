@@ -1,0 +1,377 @@
+.debug-ui {
+  text-align: left;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  background: #fefefe;
+  border-left: 1px solid #ddd;
+  box-shadow: -1px 0 10px #aaa;
+  position: absolute;
+  width: 300px;
+  right: 0;
+  top: 0;
+  height: 100%;
+  font-family: monospace;
+  font-size: 14px;
+}
+#debug-controls.docktop {
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
+  min-width: 500px;
+  top: 0;
+  right: 300px;
+  height: 50px;
+  background: #fff;
+  box-shadow: -3px 3px 3px #ccc;
+}
+@media only screen and (max-device-width: 750px) {
+  .debug-ui {
+    display: none;
+  }
+}
+.debug-ui .gameinfo {
+  background: #ddd;
+  position: fixed;
+  bottom: 0;
+  box-sizing: border-box;
+  width: 285px;
+  margin-left: -20px;
+  margin-bottom: 0;
+  padding: 10px;
+}
+.debug-ui .gameinfo-item div {
+  float: right;
+  text-align: right;
+}
+.debug-ui .ai-visualization {
+  position: fixed;
+  opacity: 1%;
+  right: 300px;
+  height: 100%;
+  width: 100%;
+  max-width: 3000px;
+  background: #fafafa;
+  border-right: 1px solid #ddd;
+}
+.debug-ui .pane {
+  float: left;
+  padding: 20px;
+  box-sizing: border-box;
+  min-width: 300px;
+  max-width: 400px;
+  opacity: 0.8;
+}
+.debug-ui section {
+  margin-bottom: 20px;
+}
+.debug-ui textarea {
+  resize: none;
+}
+.debug-ui .move {
+  cursor: pointer;
+  margin-bottom: 10px;
+  color: #666;
+}
+.debug-ui .move:hover {
+  color: #333;
+}
+.debug-ui .move.active {
+  color: #111;
+  font-weight: 700;
+}
+.debug-ui .move-error {
+  color: #a00;
+  font-weight: 700;
+}
+.debug-ui .arg-field {
+  outline: none;
+  font-family: monospace;
+}
+.debug-ui .key {
+  margin-bottom: 5px;
+}
+.debug-ui .key-box {
+  display: inline-block;
+  cursor: pointer;
+  min-width: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  border: 1px solid #ccc;
+  box-shadow: 1px 1px 1px #888;
+  background: #eee;
+  color: #444;
+}
+.debug-ui .key-box:hover {
+  background: #ddd;
+}
+.debug-ui .key.active .key-box {
+  background: #ddd;
+  border: 1px solid #999;
+  box-shadow: none;
+}
+.debug-ui .key-child {
+  display: inline-block;
+  height: 20px;
+  margin-left: 10px;
+}
+.debug-ui .menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.debug-ui .menu .item {
+  cursor: pointer;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  margin-right: 10px;
+  padding: 5px;
+  min-width: 50px;
+  text-align: center;
+}
+.debug-ui .menu .item.active {
+  font-weight: 700;
+  border-bottom: 3px solid #ccc;
+}
+.debug-ui .player-box {
+  display: flex;
+  flex-direction: row;
+}
+.debug-ui .player {
+  cursor: pointer;
+  text-align: center;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  background: #eee;
+  border: 3px solid #fff;
+  box-sizing: content-box;
+}
+.debug-ui .player.current {
+  background: #555;
+  color: #eee;
+  font-weight: 700;
+}
+.debug-ui .player.active {
+  border: 3px solid coral;
+}
+.gamelog {
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  grid-auto-rows: auto;
+  grid-auto-flow: column;
+}
+.gamelog .turn-marker {
+  align-items: center;
+  grid-column: 1;
+  background: #555;
+  color: #eee;
+  font-weight: 700;
+  border: 1px solid #888;
+}
+.gamelog .log-event,
+.gamelog .turn-marker {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.gamelog .log-event {
+  grid-column: 2;
+  cursor: pointer;
+  overflow: hidden;
+  flex-direction: column;
+  background: #fff;
+  border: 1px dotted #ccc;
+  border-left: 5px solid #ccc;
+  padding: 5px;
+  color: #888;
+  font-size: 14px;
+  min-height: 25px;
+  line-height: 25px;
+}
+.gamelog .phase-marker {
+  grid-column: 3;
+  background: #555;
+  border: 1px solid #888;
+  color: #eee;
+  text-align: center;
+  font-weight: 700;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-orientation: sideways;
+  writing-mode: vertical-rl;
+  line-height: 30px;
+  width: 100%;
+}
+.gamelog.pinned .log-event {
+  opacity: 0.2;
+}
+.gamelog .log-event.pinned,
+.gamelog .log-event:hover {
+  border-style: solid;
+  background: #eee;
+}
+.gamelog .log-event.pinned {
+  opacity: 1;
+}
+.gamelog div.player0 {
+  border-left-color: #ff851b;
+}
+.gamelog div.player1 {
+  border-left-color: #7fdbff;
+}
+.gamelog div.player2 {
+  border-left-color: #0074d9;
+}
+.gamelog div.player3 {
+  border-left-color: #39cccc;
+}
+.gamelog div.player4 {
+  border-left-color: #3d9970;
+}
+.gamelog div.player5 {
+  border-left-color: #2ecc40;
+}
+.gamelog div.player6 {
+  border-left-color: #01ff70;
+}
+.gamelog div.player7 {
+  border-left-color: #ffdc00;
+}
+.gamelog div.player8 {
+  border-left-color: #001f3f;
+}
+.gamelog div.player9 {
+  border-left-color: #ff4136;
+}
+.gamelog div.player10 {
+  border-left-color: #85144b;
+}
+.gamelog div.player11 {
+  border-left-color: #f012be;
+}
+.gamelog div.player12 {
+  border-left-color: #b10dc9;
+}
+.gamelog div.player13 {
+  border-left-color: #111;
+}
+.gamelog div.player14 {
+  border-left-color: #aaa;
+}
+.gamelog div.player15 {
+  border-left-color: #ddd;
+}
+#turnorder {
+  padding: 50px;
+}
+#turnorder pre {
+  font-family: monospace;
+  font-size: 12px;
+  color: #999;
+}
+#turnorder .description {
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+#turnorder .table-interior {
+  position: absolute;
+  margin-left: -3.2em;
+  margin-top: -0.85em;
+}
+#turnorder .player-container {
+  position: relative;
+  margin: 100px;
+  width: 16em;
+  height: 16em;
+  border-radius: 50%;
+  background: #eaeaea;
+  border: 5px solid #aaa;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.turnorder-options {
+  display: flex;
+  flex-direction: row;
+}
+.turnorder-options div {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 3px solid #aaa;
+}
+.turnorder-options div:hover {
+  background: #efefef;
+}
+.turnorder-options div.active {
+  background: #efefef;
+  border-bottom-color: #555;
+}
+#turnorder .controls {
+  position: absolute;
+  margin-top: 50px;
+  margin-left: -47px;
+}
+#turnorder .controls button {
+  width: 80px;
+  margin-bottom: 5px;
+}
+#turnorder .player {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -1.5em;
+  width: 3em;
+  height: 3em;
+  line-height: 2.75em;
+  border-radius: 50%;
+  border-color: #aaa;
+  border-style: dashed;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+#turnorder .player.current {
+  background: #555;
+  color: #eee;
+}
+#turnorder .player.active {
+  border-style: solid;
+}
+#turnorder .phase {
+  display: inline-block;
+  background: #555;
+  color: #eee;
+  padding: 5px;
+  margin-left: 10px;
+}
+#turnorder .client {
+  padding: 0 !important;
+}
+.player-container span > .client:first-child .player-wrap {
+  transform: rotate(0deg) translate(12em) rotate(0deg);
+}
+.player-container span > .client:nth-child(2) .player-wrap {
+  transform: rotate(60deg) translate(12em) rotate(-60deg);
+}
+.player-container span > .client:nth-child(3) .player-wrap {
+  transform: rotate(120deg) translate(12em) rotate(-120deg);
+}
+.player-container span > .client:nth-child(4) .player-wrap {
+  transform: rotate(180deg) translate(12em) rotate(-180deg);
+}
+.player-container span > .client:nth-child(5) .player-wrap {
+  transform: rotate(240deg) translate(12em) rotate(-240deg);
+}
+.player-container span > .client:nth-child(6) .player-wrap {
+  transform: rotate(300deg) translate(12em) rotate(-300deg);
+}
