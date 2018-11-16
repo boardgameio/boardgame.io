@@ -239,7 +239,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         // don't call into events here
         const newState = apiCtx.updateAndDetach(
-          { ...state, deltalog: [{ action }] },
+          { ...state, deltalog: [{ action, _stateID: state._stateID }] },
           false
         );
         let ctx = newState.ctx;
