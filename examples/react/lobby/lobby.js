@@ -89,7 +89,7 @@ class LobbyExample extends React.Component {
             onStartGame={this._startGame.bind(this)}
             onExitLobby={this._exitLobby.bind(this)}
             refresh={this.state.refreshLobby}
-            multiplayer={{ local: false }}
+            multiplayer={true}
           />
         </div>
 
@@ -98,7 +98,7 @@ class LobbyExample extends React.Component {
             <this.state.runningGame.app
               gameID={this.state.runningGame.gameID}
               playerID={this.state.runningGame.playerID}
-              credentials={this.state.runningGame.playerCredentials}
+              credentials={this.state.runningGame.credentials}
             />
           ) : (
             ''

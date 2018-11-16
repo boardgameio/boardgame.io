@@ -35,14 +35,7 @@ class LobbyRoomInstance extends React.Component {
       // already seated: waiting for game to start
       return (
         <button
-          onClick={() =>
-            this.props.onClickLeave(
-              inst.gameName,
-              inst.gameID,
-              '' + playerSeat.id,
-              playerSeat.playerCredentials
-            )
-          }
+          onClick={() => this.props.onClickLeave(inst.gameName, inst.gameID)}
         >
           Leave
         </button>
@@ -68,7 +61,6 @@ class LobbyRoomInstance extends React.Component {
             this.props.onClickPlay(inst.gameName, {
               gameID: inst.gameID,
               playerID: '' + playerSeat.id,
-              playerCredentials: playerSeat.credentials,
               numPlayers: inst.players.length,
             })
           }

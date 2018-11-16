@@ -27,6 +27,7 @@ import LobbyCreateRoomForm from './create-room-form';
  *                                   gameOpts: props for the React component of the game.
  * @param {function} onExitLobby - Hook called when the player exits the lobby. No arguments.
  * @param {bool}     debug - Enable debug information.
+ * @param {bool}     multiplayer - Multiplayer status of instances of Game (default: true)
  * @param {bool}     refresh - Change the value of this property to refresh the list of game instances.
  *
  * Returns:
@@ -42,14 +43,14 @@ class Lobby extends React.Component {
     onStartGame: PropTypes.func.isRequired,
     onExitLobby: PropTypes.func,
     debug: PropTypes.bool,
+    multiplayer: PropTypes.bool,
     refresh: PropTypes.bool,
-    multiplayer: PropTypes.object,
   };
 
   static propDefaults = {
     playerName: 'Visitor',
     debug: false,
-    multiplayer: { local: true },
+    multiplayer: true,
     refresh: false,
     onExitLobby: () => {},
   };
@@ -58,26 +59,32 @@ class Lobby extends React.Component {
     errorMsg: '',
   };
 
-  async _updateConnection(props) {
+  _createConnection(props) {
     this.connection = LobbyConnection({
       server: props.server + ':' + props.port,
       gameComponents: props.gameComponents,
       playerName: props.playerName,
     });
+  }
+
+  async _updateConnection() {
     await this.connection.refresh();
     this.forceUpdate();
   }
 
-  componentWillMount() {
-    this._updateConnection(this.props);
+  constructor(props) {
+    super(props);
+    this._createConnection(this.props);
+    this._updateConnection();
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidUpdate(prevProps) {
     if (
-      nextProps.playerName !== this.props.playerName ||
-      nextProps.refresh !== this.props.refresh
+      prevProps.playerName !== this.props.playerName ||
+      prevProps.refresh !== this.props.refresh
     ) {
-      this._updateConnection(nextProps);
+      this._createConnection(this.props);
+      this._updateConnection();
     }
   }
 
@@ -176,7 +183,10 @@ class Lobby extends React.Component {
       debug: this.props.debug,
       multiplayer: gameOpts.numPlayers > 1 ? this.props.multiplayer : null,
     });
-    this.props.onStartGame(app, gameOpts);
+    this.props.onStartGame(app, {
+      ...gameOpts,
+      playerCredentials: this.connection.playerCredentials,
+    });
   }
 }
 
