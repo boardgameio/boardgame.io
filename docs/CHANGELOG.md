@@ -1,3 +1,13 @@
+## v0.27.1
+
+#### Features
+
+* [[2d02558](https://github.com/nicolodavis/boardgame.io/commit/2d02558)] add TurnOrder.CUSTOM and TurnOrder.CUSTOM_FROM
+
+#### Bugfixes
+
+* [[8699350](https://github.com/nicolodavis/boardgame.io/commit/8699350)] Prohibit second log event during Update (#303)
+
 ## v0.27.0
 
 This is a pretty exciting release with lots of goodies but
