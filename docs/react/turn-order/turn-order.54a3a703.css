@@ -269,6 +269,9 @@
   border-left-color: #ddd;
 }
 #turnorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 50px;
 }
 #turnorder pre {
@@ -305,6 +308,7 @@
 }
 .turnorder-options div {
   cursor: pointer;
+  font-size: 12px;
   padding: 10px;
   border-bottom: 3px solid #aaa;
 }
