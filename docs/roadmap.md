@@ -41,7 +41,7 @@ get done before we are ready for a v1 release.
 
 * [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
 * [ ] log improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/227))
-* [ ] add immutability helper (Immer) ([issue](https://github.com/nicolodavis/boardgame.io/issues/295) **[N]**
+* [ ] add immutability helper (Immer) ([issue](https://github.com/nicolodavis/boardgame.io/issues/295)) **[N]**
 
 ### Server
 
