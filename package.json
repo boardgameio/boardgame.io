@@ -21,7 +21,7 @@
     "prepare": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
     "pretest": "npm run lint",
-    "prettier": "prettier --write \"{examples,docs,src,lobby,storybook}/**/*.{js,css,md}\"",
+    "prettier": "prettier --write \"{examples,src,lobby,storybook}/**/*.{js,css,md}\"",
     "postpublish": "node ./scripts/postpublish.js",
     "changelog": "bash ./scripts/changelog.sh"
   },
