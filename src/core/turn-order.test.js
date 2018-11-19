@@ -13,9 +13,10 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 
 describe('turnOrder', () => {
-  test('default', () => {
+  test('DEFAULT', () => {
     const flow = FlowWithPhases({
-      phases: [{ name: 'A' }, { name: 'B' }],
+      startingPhase: 'A',
+      phases: { A: {}, B: {} },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -31,10 +32,11 @@ describe('turnOrder', () => {
     expect(state.ctx.phase).toBe('A');
   });
 
-  test('once', () => {
+  test('ONCE', () => {
     const flow = FlowWithPhases({
       turnOrder: TurnOrder.ONCE,
-      phases: [{ name: 'A' }, { name: 'B' }],
+      startingPhase: 'A',
+      phases: { A: { next: 'B' }, B: {} },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -50,9 +52,132 @@ describe('turnOrder', () => {
     expect(state.ctx.phase).toBe('B');
   });
 
-  test('custom', () => {
+  test('ANY', () => {
     const flow = FlowWithPhases({
-      phases: [{ name: 'A', turnOrder: { first: () => 9, next: () => 3 } }],
+      turnOrder: TurnOrder.ANY,
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+  });
+
+  test('ANY_ONCE', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.ANY_ONCE,
+      startingPhase: 'A',
+      phases: { A: {} },
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+
+    state = flow.processMove(state, makeMove('', null, '0').payload);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1']);
+
+    state = flow.processMove(state, makeMove('', null, '1').payload);
+
+    expect(state.ctx.phase).toBe('default');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+  });
+
+  test('OTHERS', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.OTHERS,
+    });
+
+    let state = { ctx: flow.ctx(3) };
+    state = flow.init(state);
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+  });
+
+  test('OTHERS_ONCE', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.OTHERS_ONCE,
+      startingPhase: 'A',
+      phases: { A: {} },
+    });
+
+    let state = { ctx: flow.ctx(3) };
+    state = flow.init(state);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+
+    state = flow.processMove(state, makeMove('', null, '1').payload);
+
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['2']);
+
+    state = flow.processMove(state, makeMove('', null, '2').payload);
+
+    expect(state.ctx.phase).toBe('default');
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+  });
+
+  test('CUSTOM', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.CUSTOM(['1', '0']),
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+
+    expect(state.ctx.currentPlayer).toBe('1');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+  });
+
+  test('CUSTOM_FROM', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.CUSTOM_FROM('order'),
+    });
+
+    let state = { G: { order: ['2', '1', '0'] }, ctx: flow.ctx(3) };
+    state = flow.init(state);
+
+    expect(state.ctx.currentPlayer).toBe('2');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+  });
+
+  test('manual', () => {
+    const flow = FlowWithPhases({
+      startingPhase: 'A',
+      phases: { A: { turnOrder: { first: () => 9, next: () => 3 } } },
     });
 
     let state = { ctx: flow.ctx(10) };
@@ -67,7 +192,8 @@ describe('turnOrder', () => {
 
 test('passing', () => {
   const flow = FlowWithPhases({
-    phases: [{ name: 'A', turnOrder: TurnOrder.SKIP }],
+    startingPhase: 'A',
+    phases: { A: { turnOrder: TurnOrder.SKIP } },
   });
   const game = Game({
     flow,
@@ -112,9 +238,10 @@ test('passing', () => {
 
 test('end game after everyone passes', () => {
   const flow = FlowWithPhases({
-    phases: [
-      { name: 'A', turnOrder: TurnOrder.ANY, endGameIf: G => G.allPassed },
-    ],
+    startingPhase: 'A',
+    phases: {
+      A: { turnOrder: TurnOrder.ANY, endGameIf: G => G.allPassed },
+    },
   });
   const game = Game({
     flow,
@@ -148,7 +275,8 @@ test('override', () => {
 
   let flow = FlowWithPhases({
     turnOrder: even,
-    phases: [{ name: 'A' }, { name: 'B', turnOrder: odd }],
+    phases: { A: { next: 'B' }, B: { turnOrder: odd } },
+    startingPhase: 'A',
   });
 
   let state = { ctx: flow.ctx(10) };
@@ -190,7 +318,7 @@ test('playOrder', () => {
 });
 
 describe('SetActionPlayers', () => {
-  const flow = FlowWithPhases({ setActionPlayers: true });
+  const flow = FlowWithPhases({});
   const state = { ctx: flow.ctx(2) };
 
   test('basic', () => {
@@ -211,10 +339,6 @@ describe('SetActionPlayers', () => {
 
   test('once', () => {
     const game = Game({
-      flow: {
-        setActionPlayers: true,
-      },
-
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({ value: ['0', '1'], once: true });
@@ -235,18 +359,14 @@ describe('SetActionPlayers', () => {
     expect(state.ctx.actionPlayers).toEqual([]);
   });
 
-  test('allOthers', () => {
+  test('others', () => {
     const game = Game({
-      flow: {
-        setActionPlayers: true,
-      },
-
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({
             value: ['0', '1', '2'],
             once: true,
-            allOthers: true,
+            others: true,
           });
           return G;
         },
@@ -266,42 +386,29 @@ describe('SetActionPlayers', () => {
     state = reducer(state, makeMove('A', null, '1'));
     expect(state.ctx.actionPlayers).toEqual(['2']);
 
-    // player 1 makes move - after that, control should return to player 0
+    // player 2 makes move
     state = reducer(state, makeMove('A', null, '2'));
-    expect(state.ctx.actionPlayers).toEqual(['0']);
+    expect(state.ctx.actionPlayers).toEqual([]);
   });
 
   test('militia', () => {
     const game = Game({
-      flow: { setActionPlayers: true },
+      flow: {
+        startingPhase: 'A',
+
+        phases: {
+          A: { allowedMoves: ['playMilitia'] },
+          B: { allowedMoves: ['dropCards'], turnOrder: TurnOrder.OTHERS_ONCE },
+        },
+      },
 
       moves: {
         playMilitia: (G, ctx) => {
-          // change which players need to act
-          ctx.events.setActionPlayers([1, 2, 3]);
-          return { ...G, playedCard: 'Militia' };
+          ctx.events.endPhase({ next: 'B' });
+          return G;
         },
-        dropCards: (G, ctx) => {
-          if (G.playedCard === 'Militia') {
-            let actedOnMilitia = G.actedOnMilitia || [];
-            actedOnMilitia.push(ctx.playerID);
-
-            // this player did drop and must not take another action.
-            var newActionPlayers = [...ctx.actionPlayers].filter(
-              pn => pn !== ctx.playerID
-            );
-            ctx.events.setActionPlayers(newActionPlayers);
-
-            let playedCard = G.playedCard;
-            if (actedOnMilitia.length === 3) {
-              ctx.events.setActionPlayers([0]);
-              actedOnMilitia = undefined;
-              playedCard = undefined;
-            }
-            return { ...G, actedOnMilitia, playedCard };
-          } else {
-            return G;
-          }
+        dropCards: G => {
+          return G;
         },
       },
     });
@@ -310,15 +417,14 @@ describe('SetActionPlayers', () => {
 
     let state = reducer(undefined, { type: 'init' });
     state = reducer(state, makeMove('playMilitia'));
-    expect(state.ctx.actionPlayers).toMatchObject([1, 2, 3]);
+    expect(state.ctx.actionPlayers).toMatchObject(['1', '2', '3']);
 
-    state = reducer(state, makeMove('dropCards', undefined, 1));
-    expect(state.ctx.actionPlayers).toMatchObject([2, 3]);
-    state = reducer(state, makeMove('dropCards', undefined, 3));
-    expect(state.ctx.actionPlayers).toMatchObject([2]);
-    state = reducer(state, makeMove('dropCards', undefined, 2));
-    expect(state.ctx.actionPlayers).toMatchObject([0]);
-    expect(state.G).toMatchObject({});
+    state = reducer(state, makeMove('dropCards', undefined, '1'));
+    expect(state.ctx.actionPlayers).toMatchObject(['2', '3']);
+    state = reducer(state, makeMove('dropCards', undefined, '3'));
+    expect(state.ctx.actionPlayers).toMatchObject(['2']);
+    state = reducer(state, makeMove('dropCards', undefined, '2'));
+    expect(state.ctx.actionPlayers).toMatchObject(['0']);
   });
 });
 
@@ -328,23 +434,25 @@ describe('UpdateTurnOrderState', () => {
     currentPlayer: '0',
     playOrder: ['0', '1', '2'],
     playOrderPos: 0,
-    actionPlayers: ['0'],
+    actionPlayers: ['0', '1', '2'],
   };
 
-  test('without nextPlayer', () => {
+  test('without next player', () => {
     const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT);
     expect(t).toMatchObject({ currentPlayer: '1' });
   });
 
-  test('with nextPlayer', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, '2');
+  test('with next player', () => {
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, {
+      next: '2',
+    });
     expect(t).toMatchObject({ currentPlayer: '2' });
   });
 
   test('with actionPlayers', () => {
     const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.ANY);
     expect(t).toMatchObject({
-      currentPlayer: '1',
+      currentPlayer: '0',
       actionPlayers: ['0', '1', '2'],
     });
   });

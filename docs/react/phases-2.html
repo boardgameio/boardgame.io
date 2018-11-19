@@ -41,30 +41,32 @@ const game = BoardgameIO.Game({
   },
 
   flow: {
-    phases: [
-      {
-        name: 'draw phase',
+    startingPhase: 'draw',
+
+    phases: {
+      draw: {
         endPhaseIf: G => (G.deck <= 0),
         allowedMoves: ['drawCard'],
+        next: 'play',
       },
-      {
-        name: 'play phase',
+      play: {
         allowedMoves: ['playCard'],
         endPhaseIf: G => (G.hand <= 0),
+        next: 'draw',
       }
-    ],
+    },
   }
 });
 
 class Board extends React.Component {
   drawCard = () => {
-    if (this.props.ctx.phase != 'draw phase') return;
+    if (this.props.ctx.phase != 'draw') return;
     this.props.moves.drawCard();
     this.props.events.endTurn();
   }
 
   playCard = () => {
-    if (this.props.ctx.phase != 'play phase') return;
+    if (this.props.ctx.phase != 'play') return;
     this.props.moves.playCard();
     this.props.events.endTurn();
   }

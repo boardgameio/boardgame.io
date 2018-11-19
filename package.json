@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.26.3",
+  "version": "0.27.1",
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
@@ -13,6 +13,7 @@
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
+    "test:integration": "bash ./scripts/integration.sh",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "storybook": "start-storybook -p 3000 -c storybook",
@@ -21,7 +22,7 @@
     "prepare": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
     "pretest": "npm run lint",
-    "prettier": "prettier --write \"{examples,docs,src,storybook}/**/*.{js,css,md}\"",
+    "prettier": "prettier --write \"{examples,src,storybook}/**/*.{js,css,md}\"",
     "postpublish": "node ./scripts/postpublish.js",
     "changelog": "bash ./scripts/changelog.sh"
   },
@@ -171,6 +172,7 @@
       "node_modules/(?!(boardgame.io|flatted)/)"
     ],
     "testPathIgnorePatterns": [
+      "integration/",
       "/examples/react-native/",
       "storybook/",
       "/node_modules/",

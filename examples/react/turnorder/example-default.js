@@ -6,9 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import React from 'react';
 import { Game } from 'boardgame.io/core';
 
+const Description = () => <div />;
+
 export default {
-  description: () => null,
+  description: Description,
   game: Game({}),
 };

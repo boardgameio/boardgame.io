@@ -33,7 +33,7 @@ game state and the moves. The moves are converted to a
     of moves have been made.
   * `flow.undoableMoves` (_array_): Enables undo and redo of listed moves.
   Leave `undefined` if all moves should be undoable.
-  * `flow.phases` (_array_): Optional list of game phases. See
+  * `flow.phases` (_object_): Optional spec of game phases. See
     [Phases](/phases) for more information.
 
 ### Returns
@@ -110,9 +110,8 @@ const game = Game({
   },
 
   flow: {
-    phases: [
-      {
-        name: 'A',
+    phases: {
+      A: {
         endGameIf: ...
         endTurnIf: ...
         onTurnBegin: ...
@@ -122,8 +121,7 @@ const game = Game({
         allowedMoves: ...
         ...
       },
-      {
-        name: 'B',
+      B: {
         endGameIf: ...
         endTurnIf: ...
         onTurnBegin: ...
@@ -133,7 +131,7 @@ const game = Game({
         allowedMoves: ...
         ...
       },
-    ]
+    }
   }
 });
 ```

@@ -57,7 +57,7 @@ Authentication APIs are available by default on `WebSocket port` + 1.
 
 ### Creating a game
 
-#### `/games/:name/create`
+#### POST `/games/:name/create`
 
 Creates a new authenticated game for a game named `name`.
 
@@ -67,17 +67,41 @@ Returns `gameID`, which is the ID of the newly created game instance.
 
 ### Joining a game
 
-#### `/games/:name/:id/join`
+#### POST `/games/:name/:id/join`
 
 Allows a player to join a particular game instance `id` of a game named `name`.
 
-Accepts three parameters, all required:
+Accepts two parameters, all required:
 
-`playerID`: the ordinal player in the game that is being joined (0, 1...)
+`playerID`: the ordinal player in the game that is being joined (0, 1...).
 
 `playerName`: the display name of the player joining the game.
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
+
+### Leaving a game
+
+#### POST `/games/:name/:id/leave`
+
+Leave the game instance `id` of a game named `name` previously joined by the player.
+
+Accepts two parameters, all required:
+
+`playerID`: the ID used by the player in the game (0, 1...).
+
+`playerCredentials`: the authentication token of the player.
+
+### Listing all instances of a given game
+
+#### GET `/games/:name`
+
+Returns all instances of the game named `name`.
+
+Returns an array of `gameInstances`. Each instance has fields:
+
+`gameID`: the ID of the game instance.
+
+`players`: the list of seats and players that have joined the game, if any.
 
 ### Client Authentication
 

@@ -1,28 +1,40 @@
 #turnorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 50px;
 }
 
-.player-container {
+#turnorder pre {
+  font-family: monospace;
+  font-size: 12px;
+  color: #999;
+}
+
+#turnorder .description {
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+
+#turnorder .table-interior {
+  position: absolute;
+  margin-left: -3.2em;
+  margin-top: -0.85em;
+}
+
+#turnorder .player-container {
   position: relative;
   margin: 100px;
   width: 16em;
   height: 16em;
   border-radius: 50%;
-  border: 1px solid #aaa;
+  background: #eaeaea;
+  border: 5px solid #aaa;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-.end-turn:hover {
-  background: #eee;
-  border-color: #888;
-}
-
-.end-turn:active {
-  background: #777;
-  color: #eee;
 }
 
 .turnorder-options {
@@ -32,6 +44,7 @@
 
 .turnorder-options div {
   cursor: pointer;
+  font-size: 12px;
   padding: 10px;
   border-bottom: 3px solid #aaa;
 }
@@ -45,17 +58,15 @@
   border-bottom-color: #555;
 }
 
-.turnorder-content {
-}
-
-.controls {
+#turnorder .controls {
   position: absolute;
   margin-top: 50px;
-  margin-left: -32px;
+  margin-left: -47px;
 }
 
-.controls button {
-  width: 50px;
+#turnorder .controls button {
+  width: 80px;
+  margin-bottom: 5px;
 }
 
 #turnorder .player {
@@ -84,25 +95,33 @@
   border-style: solid;
 }
 
+#turnorder .phase {
+  display: inline-block;
+  background: #555;
+  color: #eee;
+  padding: 5px;
+  margin-left: 10px;
+}
+
 #turnorder .client {
   padding: 0 !important;
 }
 
-.player-container > .client:nth-child(1) {
+.player-container span > .client:nth-child(1) .player-wrap {
   transform: rotate(0deg) translate(12em) rotate(-0deg);
 }
-.player-container > .client:nth-child(2) {
+.player-container span > .client:nth-child(2) .player-wrap {
   transform: rotate(60deg) translate(12em) rotate(-60deg);
 }
-.player-container > .client:nth-child(3) {
+.player-container span > .client:nth-child(3) .player-wrap {
   transform: rotate(120deg) translate(12em) rotate(-120deg);
 }
-.player-container > .client:nth-child(4) {
+.player-container span > .client:nth-child(4) .player-wrap {
   transform: rotate(180deg) translate(12em) rotate(-180deg);
 }
-.player-container > .client:nth-child(5) {
+.player-container span > .client:nth-child(5) .player-wrap {
   transform: rotate(240deg) translate(12em) rotate(-240deg);
 }
-.player-container > .client:nth-child(6) {
+.player-container span > .client:nth-child(6) .player-wrap {
   transform: rotate(300deg) translate(12em) rotate(-300deg);
 }
