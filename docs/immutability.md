@@ -1,55 +1,72 @@
 # Immutability
 
-It is important that all your move functions are pure
-and don't mutate the passed in arguments. Always return
-a new copy of `G`, unless nothing has changed, in which
-case you may return the same object that was passed in.
+The principle of immutability as applied to state changing
+functions like the moves in [boardgame.io](https://boardgame.io/)
+mandates that moves be pure functions. What this means is that
+you cannot depend on any **external state**, nor can you have any
+**side-effects**, i.e. you cannot mutate the arguments or any
+external state.
 
-!> A move can also return `undefined` (or not return),
-which indicates that the move (or its combination of arguments)
-is invalid at this point in the game and shouldn't update the
-game state.
+The benefits of architecting a system with this principle are
+that you can ensure repeatability (moves can be replayed
+over a particular state value multiple times at various places)
+and you can do cheap comparisons to check if something changed.
 
-Here are some patterns for immutable updates:
-
-#### Object.assign()
-
-You can create a new copy of an object using `Object.assign`,
-and override any properties in it.
+A traditional pure function just accepts arguments and then
+returns the new state. Something like this:
 
 ```js
-move(G, ctx) {
-  const counter = G.counter + 1;
-  return Object.assign({}, G, counter);
+function move(G, ctx) {
+  // Return new value of G without
+  // mutating the arguments.
+  return { ...G, hand: G.hand + 1 };
 }
 ```
 
-#### Object Spread
+!> The example above uses the
+[spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) to create a new object.
 
-If you use ES2015 features, the object spread is useful
-while performing immutable updates.
+[boardgame.io](https://boardgame.io/) provides a more convenient
+syntax by allowing you to mutate `G` directly while using
+[Immer](https://github.com/mweststrate/immer) under the hood
+to convert your move into a pure function that respects the
+immutability principle. Both styles are supported interchangeably,
+so use the one that you prefer.
 
 ```js
-move(G, ctx) {
-  const counter = G.counter + 1;
-  return { ...G, counter };
+function move(G, ctx) {
+  G.hand++;
 }
 ```
 
-#### Immutability Helpers
+!> Note that in this style you do not return the new state.
+In fact, returning something while also mutating `G` is
+considered an error.
 
-You might also take advantage of an external library like
-[immutable.js](https://facebook.github.io/immutable-js/).
-This is particularly helpful if you have lots of mutations
-that you want to express in a concise way.
+!> `ctx` is a read-only object, so you should never modify it.
+
+#### Invalid moves
+
+In both styles, invalid moves are indicated by returning a
+special constant. This tells the framework that the current
+set of arguments passed in is illegal and that the move
+ought to be discarded. For example, you might do this if
+the user tries to click on an already filled cell in
+Tic-Tac-Toe.
 
 ```js
-import { fromJS } from 'immutable';
+import { INVALID_MOVE } from 'boardgame.io/core';
 
-move(G, ctx) {
-  return fromJS(G).withMutations(g => {
-    ...
-  }).toJS();
+moves: {
+  clickCell: function(G, ctx, id) {
+    // Illegal move: Cell is filled.
+    if (G.cells[id] !== null) {
+      return INVALID_MOVE;
+    }
+
+    // Fill cell with 0 or 1 depending on the current player.
+    G.cells[id] = ctx.currentPlayer;
+  }
 }
 ```
 
