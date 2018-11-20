@@ -44,9 +44,7 @@ const TicTacToe = Game({
 
   moves: {
     clickCell(G, ctx, id) {
-      let cells = [...G.cells]; // don't mutate original state.
-      cells[id] = ctx.currentPlayer;
-      return { ...G, cells }; // don't mutate original state.
+      G.cells[id] = ctx.currentPlayer;
     },
   },
 });
@@ -55,9 +53,6 @@ const App = Client({ game: TicTacToe });
 
 export default App;
 ```
-
-!> The move function must be pure, meaning that it must be
-a repeatable calculation of state without any side effects.
 
 !> The move function can receive any number of additional
 arguments that are passed to it from the call-site.
@@ -114,14 +109,10 @@ const TicTacToe = Game({
 
   moves: {
     clickCell(G, ctx, id) {
-      const cells = [ ...G.cells ];
-
-      // Ensure we can't overwrite cells.
-      if (cells[id] === null) {
-        cells[id] = ctx.currentPlayer;
+      // Ensure that we can't overwrite cells.
+      if (G.cells[id] === null) {
+        G.cells[id] = ctx.currentPlayer;
       }
-
-      return { ...G, cells };
     },
   },
 
