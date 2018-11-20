@@ -26,6 +26,7 @@ const plugins = [
 ];
 
 const globals = {
+  immer: 'immer',
   react: 'React',
   redux: 'Redux',
   'prop-types': 'PropTypes',

@@ -21,10 +21,10 @@ export const Pass = (G, ctx) => {
     passOrder = G.passOrder;
   }
   const playerID = ctx.playerID;
-  passOrder.push(playerID);
+  passOrder = [...passOrder, playerID];
   G = { ...G, passOrder };
   if (passOrder.length >= ctx.numPlayers) {
-    G.allPassed = true;
+    G = { ...G, allPassed: true };
   }
   return G;
 };

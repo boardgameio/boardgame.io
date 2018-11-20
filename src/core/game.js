@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import produce from 'immer';
 import { FlowWithPhases } from './flow';
 
 /**
@@ -89,10 +90,10 @@ function Game({ name, setup, moves, playerView, flow, seed }) {
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
-        const context = { playerID: action.playerID };
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        return moves[action.type].apply(context, args);
+        const fn = produce(moves[action.type]);
+        return fn(...args);
       }
       return G;
     },

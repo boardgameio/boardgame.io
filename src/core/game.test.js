@@ -29,19 +29,6 @@ test('processMove', () => {
   expect(game.processMove(testObj, { type: 'B' })).toEqual(null);
 });
 
-test('playerID from context', () => {
-  const g = Game({
-    moves: {
-      A() {
-        return { playerID: this.playerID };
-      },
-    },
-  });
-
-  const state = g.processMove({}, { type: 'A', playerID: 'player' });
-  expect(state.playerID).toBe('player');
-});
-
 test('flow override', () => {
   const f = { processGameEvent: () => {} };
   const game = Game({
