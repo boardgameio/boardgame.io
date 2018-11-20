@@ -12,6 +12,13 @@ import { Random } from './random';
 import { Events } from './events';
 
 /**
+ * Moves can return this when they want to indicate
+ * that the combination of arguments is illegal and
+ * the move ought to be discarded.
+ */
+export const INVALID_MOVE = 'INVALID_MOVE';
+
+/**
  * Context API to allow writing custom logs in games.
  */
 export class GameLoggerCtxAPI {
@@ -232,7 +239,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
-        if (G === undefined) {
+        if (G === INVALID_MOVE) {
           // the game declared the move as invalid.
           return state;
         }

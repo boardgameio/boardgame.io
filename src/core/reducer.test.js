@@ -7,7 +7,7 @@
  */
 
 import Game from './game';
-import { CreateGameReducer } from './reducer';
+import { CreateGameReducer, INVALID_MOVE } from './reducer';
 import {
   makeMove,
   gameEvent,
@@ -43,7 +43,7 @@ test('_stateID is incremented', () => {
 test('when a move returns undef => treat as illegal move', () => {
   const game = Game({
     moves: {
-      A: () => undefined,
+      A: () => INVALID_MOVE,
     },
   });
   const reducer = CreateGameReducer({ game });
