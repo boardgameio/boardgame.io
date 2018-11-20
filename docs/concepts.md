@@ -30,47 +30,22 @@ turn orders.
 
 ### Moves
 
-These are pure functions that tell the framework how to change `G`
-when a particular game move is made.
+These are functions that tell the framework how to change `G`
+when a particular game move is made. They must not depend on
+external state or have any side-effects (except modifying `G`).
+See the guide on [Immutability](immutability.md) for how
+immutability is handled by the framework.
 
 ```js
 moves: {
-  'moveA': function(G, ctx) {
-    // Clone G.
-    const Gcopy = { ...G };
-
-    // Update copy.
-    // ...
-
-    // Return copy.
-    return Gcopy;
-  },
-
-  'moveB': function(G, ctx) {
-    // Clone G.
-    const Gcopy = { ...G };
-
-    // Update copy.
-    // ...
-
-    // Return copy.
-    return Gcopy;
+  drawCard: function(G, ctx) {
+    const card = G.deck.pop();
+    G.hand.push(card);
   },
 
   ...
 }
 ```
-
-!> A move can also return `undefined` (or not return),
-which indicates that the move (or its combination of arguments)
-is invalid at this point in the game and shouldn't update the
-game state.
-
-!> A pure function does not mutate its arguments, nor does
-it depend on any external state or have any side-effects. Calling
-it multiple times on the same input values should produce
-the same result. See the guide on [Immutability](immutability.md) for
-more details.
 
 Moves are dispatched from the client in different ways
 depending on the platform you are developing on. If you
