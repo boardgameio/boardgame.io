@@ -9,6 +9,11 @@
 <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
 </p>
 
+<p align="center">
+<a href="https://twitter.com/intent/tweet?url=https://boardgame.io/&hashtags=javascript,boardgames"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" alt="Tweet" /></a>
+<a style="margin-left: 10px" href="https://github.com/nicolodavis/boardgame.io"><img src="https://img.shields.io/github/stars/nicolodavis/boardgame.io.svg?label=Stars&style=social" alt="GitHub" /></a>
+</p>
+
 ---
 
 The goal of this framework is to allow a game developer to
