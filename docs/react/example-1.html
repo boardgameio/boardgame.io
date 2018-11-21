@@ -27,9 +27,7 @@ body {
 
     moves: {
       clickCell(G, ctx, id) {
-        let cells = [...G.cells];  // don't mutate original state.
-        cells[id] = ctx.currentPlayer;
-        return {...G, cells};      // don't mutate original state.
+        G.cells[id] = ctx.currentPlayer;
       }
     }
   });

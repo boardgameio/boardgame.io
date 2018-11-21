@@ -1,15 +1,15 @@
 # Immutability
 
 The principle of immutability as applied to state changing
-functions like the moves in [boardgame.io](https://boardgame.io/)
-mandates that moves be pure functions. What this means is that
+functions like moves in [boardgame.io](https://boardgame.io/)
+mandates that they be pure functions. What this means is that
 you cannot depend on any **external state**, nor can you have any
-**side-effects**, i.e. you cannot mutate the arguments or any
-external state.
+**side-effects**, i.e. you cannot modify anything that isn't
+a local variable (not even the arguments).
 
 The benefits of architecting a system with this principle are
 that you can ensure repeatability (moves can be replayed
-over a particular state value multiple times at various places)
+over a particular state value multiple times in different places)
 and you can do cheap comparisons to check if something changed.
 
 A traditional pure function just accepts arguments and then
@@ -17,8 +17,7 @@ returns the new state. Something like this:
 
 ```js
 function move(G, ctx) {
-  // Return new value of G without
-  // mutating the arguments.
+  // Return new value of G without modifying the arguments.
   return { ...G, hand: G.hand + 1 };
 }
 ```
@@ -28,7 +27,7 @@ function move(G, ctx) {
 
 [boardgame.io](https://boardgame.io/) provides a more convenient
 syntax by allowing you to mutate `G` directly while using
-[Immer](https://github.com/mweststrate/immer) under the hood
+a [library](https://github.com/mweststrate/immer) under the hood
 to convert your move into a pure function that respects the
 immutability principle. Both styles are supported interchangeably,
 so use the one that you prefer.
@@ -43,7 +42,7 @@ function move(G, ctx) {
 In fact, returning something while also mutating `G` is
 considered an error.
 
-!> `ctx` is a read-only object, so you should never modify it.
+!> `ctx` is a read-only object and is never modified in either style.
 
 #### Invalid moves
 

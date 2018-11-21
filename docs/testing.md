@@ -2,16 +2,14 @@
 
 #### Unit Tests
 
-Moves are pure functions, so they lend themselves to easy testing. A useful strategy would be
+Moves are just functions, so they lend themselves to easy testing. A useful strategy would be
 to implement it as a standalone function before passing it to the `Game` constructor:
 
 `game.js`
 
 ```js
 export function clickCell(G, ctx, id) {
-  const cells = [...G.cells];
-  cells[id] = ctx.currentPlayer;
-  return { ...G, cells };
+  G.cells[id] = ctx.currentPlayer;
 }
 
 Game({

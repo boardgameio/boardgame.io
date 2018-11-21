@@ -60,8 +60,7 @@ The shuffled array.
 const game = Game({
   moves: {
     move(G, ctx) {
-      const deck = ctx.random.Shuffle(G.deck);
-      return { ...G, deck };
+      G.deck = ctx.random.Shuffle(G.deck);
     },
   },
 });

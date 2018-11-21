@@ -61,11 +61,11 @@ const game = Game({
 
   moves: {
     moveWithoutArgs(G, ctx) {
-      return {...G, ...};
+      ...
     },
 
     moveWithArgs(G, ctx, arg0, arg1) {
-      return {...G, ...}
+      ...
     }
   }
 });

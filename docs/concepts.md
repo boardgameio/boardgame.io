@@ -1,9 +1,9 @@
 # Concepts
 
+### State
+
 The framework captures the game state in two objects: `G` and
 `ctx`.
-
-### State
 
 ```js
 {
