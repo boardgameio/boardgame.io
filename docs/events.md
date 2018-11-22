@@ -5,7 +5,7 @@ analogous to a move, except that while a move changes
 `G`, an event changes `ctx`. Also, events are provided by the
 framework (as opposed to moves, which are written by you).
 
-Some events are enabled by default, and can be turned off if you dont want them. Others need to be explicity turned on in order to use them. Also note that only the current player can call events (and must also be an action player to do so).
+Some events are enabled by default, and can be turned off if you dont want them. Others need to be explicitly turned on in order to use them. Also note that only the current player can call events (and must also be an action player to do so).
 
 ##### endTurn
 
