@@ -27,8 +27,8 @@ but we don't need that for Tic-Tac-Toe.
 
 In Tic-Tac-Toe, we have just one type of move that we shall
 name `clickCell`. The move function accepts
-the game state `G` and returns the new game state
-after the move is executed. `ctx` is a framework managed
+the game state `G` and updates it to the desired new state.
+`ctx` is a framework managed
 object that contains metadata like `turn` and `currentPlayer`.
 Everything after that is an argument that you pass in at the
 call-site of this move.
