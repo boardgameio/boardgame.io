@@ -22,12 +22,17 @@ import LobbyCreateRoomForm from './create-room-form';
  * @param {number}   port - HTTP port of the server.
  * @param {Array}    gameComponents - An array of Board and Game objects for the supported games.
  * @param {string}   playerName - The name of the player.
+ * @param {string}   playerCredentials - The credentials currently used by the player, if any.
+ * @param {function} onUpdateCredentials - Hook called when credentials have been exchanged
+ *                                         with the server, called with arguments:
+ *                                           playerName: current name of player.
+ *                                           playerCredentials: null if credentials were revoked.
  * @param {function} onStartGame - Hook for game creation, called with arguments:
  *                                   app: instance of Client.
  *                                   gameOpts: props for the React component of the game.
  * @param {function} onExitLobby - Hook called when the player exits the lobby. No arguments.
  * @param {bool}     debug - Enable debug information.
- * @param {bool}     multiplayer - Multiplayer status of instances of Game (default: true)
+ * @param {bool}     multiplayer - Multiplayer status of instances of Game (default: true).
  * @param {bool}     refresh - Change the value of this property to refresh the list of game instances.
  *
  * Returns:
@@ -40,6 +45,8 @@ class Lobby extends React.Component {
     port: PropTypes.number.isRequired,
     gameComponents: PropTypes.array.isRequired,
     playerName: PropTypes.string,
+    playerCredentials: PropTypes.string,
+    onUpdateCredentials: PropTypes.func,
     onStartGame: PropTypes.func.isRequired,
     onExitLobby: PropTypes.func,
     debug: PropTypes.bool,
@@ -64,6 +71,8 @@ class Lobby extends React.Component {
       server: props.server + ':' + props.port,
       gameComponents: props.gameComponents,
       playerName: props.playerName,
+      playerCredentials: props.playerCredentials,
+      onUpdateCredentials: props.onUpdateCredentials,
     });
   }
 
