@@ -28,38 +28,40 @@ const importedGames = [
 
 class LobbyExample extends React.Component {
   state = {
-    phase: 'enter', // may be 'enter','list','play'
-    playerName: '',
-    runningGame: null,
-    errorMsg: '',
-    refreshLobby: false,
+    phase: 'enter',
+    playerName: 'Visitor',
+    credentialStore: {},
   };
 
-  constructor() {
-    super();
-    let state = Cookies.load('lobbyState') || {};
-    if (state.phase === 'list') {
-      this._enterLobby(state.playerName);
+  componentDidMount() {
+    let cookie = Cookies.load('lobbyState') || {};
+    if (cookie.phase === 'play') {
+      cookie.phase = 'list';
     }
     this.setState({
-      phase: state.phase || 'enter',
-      playerName: state.playerName || 'Visitor',
+      phase: cookie.phase || 'enter',
+      playerName: cookie.playerName || 'Visitor',
+      credentialStore: cookie.credentialStore || {},
+      runningGame: null,
+      errorMsg: '',
+      refreshLobby: false,
     });
   }
 
   componentDidUpdate(prevProps, prevState) {
+    let name = this.state.playerName;
+    let creds = this.state.credentialStore[name];
     if (
       prevState.phase !== this.state.phase ||
-      prevState.playerName !== this.state.playerName
+      prevState.playerName !== name ||
+      prevState.credentialStore[name] !== creds
     ) {
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: this.state.phase,
-          playerName: this.state.playerName,
-        },
-        { path: '/' }
-      );
+      let cookie = {
+        phase: this.state.phase,
+        playerName: name,
+        credentialStore: this.state.credentialStore,
+      };
+      Cookies.save('lobbyState', cookie, { path: '/' });
     }
   }
 
@@ -67,6 +69,8 @@ class LobbyExample extends React.Component {
     const _getPhaseVisibility = phase => {
       return this.state.phase !== phase ? 'hidden' : 'phase';
     };
+    let name = this.state.playerName;
+    let creds = this.state.credentialStore[name];
 
     return (
       <div style={{ padding: 50 }}>
@@ -74,18 +78,21 @@ class LobbyExample extends React.Component {
 
         <div className={_getPhaseVisibility('enter')}>
           <LobbyLoginForm
-            playerName={this.state.playerName}
+            key={name}
+            playerName={name}
             onEnter={this._enterLobby.bind(this)}
           />
         </div>
 
         <div className={_getPhaseVisibility('list')}>
-          <p>Welcome, {this.state.playerName}</p>
+          <p>Welcome, {name}</p>
           <Lobby
             server="localhost"
             port={8001}
             gameComponents={importedGames}
-            playerName={this.state.playerName}
+            playerName={name}
+            playerCredentials={creds}
+            onUpdateCredentials={this._updateCredentials.bind(this)}
             onStartGame={this._startGame.bind(this)}
             onExitLobby={this._exitLobby.bind(this)}
             refresh={this.state.refreshLobby}
@@ -98,7 +105,7 @@ class LobbyExample extends React.Component {
             <this.state.runningGame.app
               gameID={this.state.runningGame.gameID}
               playerID={this.state.runningGame.playerID}
-              credentials={this.state.runningGame.credentials}
+              credentials={creds}
             />
           ) : (
             ''
@@ -119,6 +126,17 @@ class LobbyExample extends React.Component {
         refreshLobby: !this.state.refreshLobby,
       });
     }
+  }
+
+  _updateCredentials(playerName, credentials) {
+    this.setState(prevState => {
+      // clone store or componentDidUpdate will not be triggered
+      let store = Object.assign({}, prevState.credentialStore);
+      store[[playerName]] = credentials;
+      return {
+        credentialStore: store,
+      };
+    });
   }
 
   _startGame(clientInstance, gameOpts) {

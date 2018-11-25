@@ -7,9 +7,17 @@
  */
 
 class _LobbyConnectionImpl {
-  constructor({ server, gameComponents, playerName }) {
+  constructor({
+    server,
+    gameComponents,
+    playerName,
+    playerCredentials,
+    onUpdateCredentials,
+  }) {
     this.gameComponents = gameComponents;
     this.playerName = playerName || 'Visitor';
+    this.playerCredentials = playerCredentials;
+    this.onUpdateCredentials = onUpdateCredentials || function() {};
     this.server = server;
     this.gameInstances = [];
     this.errorMsg = '';
@@ -36,8 +44,8 @@ class _LobbyConnectionImpl {
         }
         this.gameInstances = this.gameInstances.concat(gameJson.gameInstances);
       }
-    } catch (e) {
-      this.errorMsg = 'failed to retrieve list of games (' + e + ')';
+    } catch (error) {
+      this.errorMsg = 'failed to retrieve list of games (' + error + ')';
       return false;
     }
     this.errorMsg = '';
@@ -72,8 +80,6 @@ class _LobbyConnectionImpl {
       if (!inst) {
         throw 'game instance ' + gameID + ' not found';
       }
-      if (inst.players[Number.parseInt(playerID)].name)
-        throw 'player not found';
       const resp = await fetch(
         this._baseUrl() + '/' + gameName + '/' + gameID + '/join',
         {
@@ -89,8 +95,9 @@ class _LobbyConnectionImpl {
       const json = await resp.json();
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
-    } catch (e) {
-      this.errorMsg = 'failed to join room ' + gameID + ' (' + e + ')';
+      this.onUpdateCredentials(this.playerName, this.playerCredentials);
+    } catch (error) {
+      this.errorMsg = 'failed to join room ' + gameID + ' (' + error + ')';
       return false;
     }
     this.errorMsg = '';
@@ -116,13 +123,15 @@ class _LobbyConnectionImpl {
           );
           if (resp.status !== 200) throw 'HTTP status ' + resp.status;
           delete player.name;
+          delete this.playerCredentials;
+          this.onUpdateCredentials(this.playerName, null);
           this.errorMsg = '';
           return true;
         }
       }
       throw 'player not found in room';
-    } catch (e) {
-      this.errorMsg = 'failed to leave room ' + gameID + ' (' + e + ')';
+    } catch (error) {
+      this.errorMsg = 'failed to leave room ' + gameID + ' (' + error + ')';
     }
     return false;
   }
@@ -154,8 +163,9 @@ class _LobbyConnectionImpl {
         headers: { 'Content-Type': 'application/json' },
       });
       if (resp.status !== 200) throw 'HTTP status ' + resp.status;
-    } catch (e) {
-      this.errorMsg = 'failed to create room for ' + gameName + ' (' + e + ')';
+    } catch (error) {
+      this.errorMsg =
+        'failed to create room for ' + gameName + ' (' + error + ')';
       return false;
     }
     this.errorMsg = '';
