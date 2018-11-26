@@ -16,6 +16,8 @@
 
 ---
 
+Open Source Game Engine for Tabletop Games
+
 The goal of this framework is to allow a game developer to
 translate the rules of a game into a series of simple functions
 that describe how the game state changes when a particular move is made,
