@@ -181,7 +181,7 @@ export class Master {
 
     const log = redactLog(
       this.game.flow.redactedMoves,
-      state.deltalog,
+      state.log,
       state.ctx,
       playerID
     );

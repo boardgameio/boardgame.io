@@ -387,4 +387,47 @@ describe('redactLog', () => {
     result = redactLog(rm, logEvents, {}, '1');
     expect(result).toMatchObject(logEvents);
   });
+
+  test('make sure sync redacts the log', async () => {
+    const game2 = Game({
+      moves: { A: G => G, B: G => G },
+      flow: { redactedMoves: ['B'] },
+    });
+
+    const send = jest.fn();
+    const master = new Master(game2, new InMemory(), TransportAPI(send));
+
+    const actionA = ActionCreators.makeMove('A', ['not redacted']);
+    const actionB = ActionCreators.makeMove('B', ['redacted']);
+
+    // test: ping-pong two moves, then sync and check the log
+    await master.onSync('gameID', '0', 2);
+    await master.onUpdate(actionA, 0, 'gameID', '0');
+    await master.onUpdate(actionB, 1, 'gameID', '0');
+    await master.onSync('gameID', '0', 2);
+
+    const log = send.mock.calls[send.mock.calls.length - 1][0].args[2];
+    expect(log).toMatchObject([
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            type: 'A',
+            args: ['not redacted'],
+          },
+        },
+        _stateID: 0,
+      },
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            type: 'B',
+            argsRedacted: true,
+          },
+        },
+        _stateID: 1,
+      },
+    ]);
+  });
 });
