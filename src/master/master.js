@@ -36,6 +36,7 @@ export function redactLog(redactedMoves, log, ctx, playerID) {
         argsRedacted: true,
       };
       filteredEvent = {
+        ...filteredEvent,
         action: { ...filteredEvent.action, payload: newPayload },
       };
     }
