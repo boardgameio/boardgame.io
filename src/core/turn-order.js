@@ -21,10 +21,10 @@ export const Pass = (G, ctx) => {
     passOrder = G.passOrder;
   }
   const playerID = ctx.playerID;
-  passOrder.push(playerID);
+  passOrder = [...passOrder, playerID];
   G = { ...G, passOrder };
   if (passOrder.length >= ctx.numPlayers) {
-    G.allPassed = true;
+    G = { ...G, allPassed: true };
   }
   return G;
 };
@@ -91,8 +91,13 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * @param {object} turnOrder - A turn order object for this phase.
  */
 export function InitTurnOrderState(G, ctx, turnOrder) {
+  let playOrder = [...new Array(ctx.numPlayers)].map((d, i) => i + '');
+  if (turnOrder.playOrder !== undefined) {
+    playOrder = turnOrder.playOrder(G, ctx);
+  }
+
   const playOrderPos = turnOrder.first(G, ctx);
-  const currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
+  const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   if (turnOrder.actionPlayers !== undefined) {
     ctx = setActionPlayers(ctx, turnOrder.actionPlayers);
@@ -100,7 +105,7 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
     ctx = { ...ctx, actionPlayers: [currentPlayer] };
   }
 
-  return { ...ctx, currentPlayer, playOrderPos };
+  return { ...ctx, currentPlayer, playOrderPos, playOrder };
 }
 
 /**
@@ -242,6 +247,35 @@ export const TurnOrder = {
     actionPlayers: { others: true, once: true },
     endPhaseOnceDone: true,
   },
+
+  /**
+   * CUSTOM
+   *
+   * Identical to DEFAULT, but also sets playOrder at the
+   * beginning of the phase.
+   *
+   * @param {Array} playOrder - The play order.
+   */
+  CUSTOM: playOrder => ({
+    playOrder: () => playOrder,
+    first: () => 0,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+  }),
+
+  /**
+   * CUSTOM_FROM
+   *
+   * Identical to DEFAULT, but also sets playOrder at the
+   * beginning of the phase to a value specified by a field
+   * in G.
+   *
+   * @param {string} playOrderField - Field in G.
+   */
+  CUSTOM_FROM: playOrderField => ({
+    playOrder: G => G[playOrderField],
+    first: () => 0,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+  }),
 
   /**
    * SKIP

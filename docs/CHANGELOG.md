@@ -1,3 +1,42 @@
+## v0.28.0
+
+We now support an alternative style for moves that allows modifying `G` directly.
+The old style is still supported.
+
+#### Features
+
+* [[6bdfb11](https://github.com/nicolodavis/boardgame.io/commit/6bdfb11)] add immer
+
+#### Breaking Changes
+
+`undefined` is no longer used to indicate invalid moves. Use the new `INVALID_MOVE`
+constant to accomplish this.
+
+```js
+import { INVALID_MOVE } from 'boardgame.io/core';
+
+const TicTacToe = Game({
+  moves: {
+    clickCell: (G, ctx, id) => {
+      if (G.cells[id] !== null) {
+        return INVALID_MOVE;
+      }
+      G.cells[id] = ctx.currentPlayer;
+    },
+  },
+});
+```
+
+## v0.27.1
+
+#### Features
+
+* [[2d02558](https://github.com/nicolodavis/boardgame.io/commit/2d02558)] add TurnOrder.CUSTOM and TurnOrder.CUSTOM_FROM
+
+#### Bugfixes
+
+* [[8699350](https://github.com/nicolodavis/boardgame.io/commit/8699350)] Prohibit second log event during Update (#303)
+
 ## v0.27.0
 
 This is a pretty exciting release with lots of goodies but
@@ -26,14 +65,14 @@ ability to quickly pop into a phase and back.
 ```
 // old
 phases: [
-  { name: 'A', ...opts },
-  { name: 'B', ...opts },
+{ name: 'A', ...opts },
+{ name: 'B', ...opts },
 ]
 
 // new
 phases: {
-  'A': { ...opts },
-  'B': { ...opts },
+'A': { ...opts },
+'B': { ...opts },
 }
 ```
 
@@ -44,8 +83,8 @@ phases: {
 
 ```
 phases: {
-  'A': { next: 'B' },
-  'B': { next: 'A' },
+'A': { next: 'B' },
+'B': { next: 'A' },
 }
 ```
 
@@ -62,11 +101,11 @@ using `startingPhase`:
 
 ```
 flow: {
-  startingPhase: 'A',
-  phases: {
-    A: {},
-    B: {},
-  }
+startingPhase: 'A',
+phases: {
+A: {},
+B: {},
+}
 }
 ```
 
@@ -106,22 +145,22 @@ endTurnIf: () => ({ next: playerID })
 ```
 // old
 {
-  first: (G, ctx) => {
-    playOrderPos: 0,
-    actionPlayers: [...ctx.playOrder],
-  }
+first: (G, ctx) => {
+playOrderPos: 0,
+actionPlayers: [...ctx.playOrder],
+}
 
-  next: (G, ctx) => {
-    playOrderPos: ctx.playOrderPos + 1,
-    actionPlayers: [...ctx.playOrder],
-  },
+next: (G, ctx) => {
+playOrderPos: ctx.playOrderPos + 1,
+actionPlayers: [...ctx.playOrder],
+},
 }
 
 // new
 {
-  first: (G, ctx) => 0,
-  next: (G, ctx) => ctx.playOrderPos + 1,
-  actionPlayers: { all: true },
+first: (G, ctx) => 0,
+next: (G, ctx) => ctx.playOrderPos + 1,
+actionPlayers: { all: true },
 }
 ```
 
@@ -608,6 +647,10 @@ import Client from 'boardgame.io/client'
   the function returns anything at all.
 * `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
 * `props.endTurn` is now `props.game.endTurn`.
+
+```
+
+```
 
 ```
 

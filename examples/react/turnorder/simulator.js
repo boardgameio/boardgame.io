@@ -11,6 +11,8 @@ import PropTypes from 'prop-types';
 import { Client } from 'boardgame.io/react';
 import Default from './example-default';
 import Once from './example-once';
+import Custom from './example-custom';
+import CustomFrom from './example-custom-from';
 import Any from './example-any';
 import AnyOnce from './example-any-once';
 import Others from './example-others';
@@ -91,6 +93,8 @@ const examples = {
   default: Default,
   'others-once': OthersOnce,
   once: Once,
+  custom: Custom,
+  'custom-from': CustomFrom,
   any: Any,
   'any-once': AnyOnce,
   others: Others,
@@ -163,6 +167,18 @@ class App extends React.Component {
             onClick={() => this.init('others-once')}
           >
             OTHERS_ONCE
+          </div>
+          <div
+            className={this.type === 'custom' ? 'active' : ''}
+            onClick={() => this.init('custom')}
+          >
+            CUSTOM
+          </div>
+          <div
+            className={this.type === 'custom-from' ? 'active' : ''}
+            onClick={() => this.init('custom-from')}
+          >
+            CUSTOM_FROM
           </div>
         </div>
 

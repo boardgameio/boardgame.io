@@ -24,8 +24,14 @@ const game = Game({
   setup: () => ({ deck: 5, hand: 0 }),
 
   moves: {
-    drawCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
-    playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),
+    drawCard: G => {
+      G.deck--;
+      G.hand++;
+    },
+    playCard: G => {
+      G.deck++;
+      G.hand--;
+    },
   },
 });
 ```
@@ -56,8 +62,14 @@ const game = Game({
   setup: () => ({ deck: 5, hand: 0 }),
 
   moves: {
-    drawCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
-    playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),
+    drawCard: G => {
+      G.deck--;
+      G.hand++;
+    },
+    playCard: G => {
+      G.deck++;
+      G.hand--;
+    },
   },
 
   flow: {

@@ -157,7 +157,19 @@ class _ClientImpl {
         }
 
         case Actions.UPDATE: {
-          const deltalog = action.deltalog || [];
+          let id = -1;
+          if (this.log.length > 0) {
+            id = this.log[this.log.length - 1]._stateID;
+          }
+
+          let deltalog = action.deltalog || [];
+
+          // Filter out actions that are already present
+          // in the current log. This may occur when the
+          // client adds an entry to the log followed by
+          // the update from the master here.
+          deltalog = deltalog.filter(l => l._stateID > id);
+
           this.log = [...this.log, ...deltalog];
           break;
         }

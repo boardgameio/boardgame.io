@@ -146,7 +146,35 @@ describe('turnOrder', () => {
     expect(state.ctx.actionPlayers).toEqual(['1', '2']);
   });
 
-  test('custom', () => {
+  test('CUSTOM', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.CUSTOM(['1', '0']),
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+
+    expect(state.ctx.currentPlayer).toBe('1');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+  });
+
+  test('CUSTOM_FROM', () => {
+    const flow = FlowWithPhases({
+      turnOrder: TurnOrder.CUSTOM_FROM('order'),
+    });
+
+    let state = { G: { order: ['2', '1', '0'] }, ctx: flow.ctx(3) };
+    state = flow.init(state);
+
+    expect(state.ctx.currentPlayer).toBe('2');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+  });
+
+  test('manual', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
       phases: { A: { turnOrder: { first: () => 9, next: () => 3 } } },

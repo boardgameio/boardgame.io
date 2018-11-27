@@ -92,6 +92,16 @@ would like to elicit a response from every other player in the
 game. For example, you might have a card which (when player)
 requires every other player in the game to discard a card.
 
+##### CUSTOM
+
+Round-robin like `DEFAULT`, but sets `playOrder` to the provided
+value.
+
+##### CUSTOM_FROM
+
+Round-robin like `DEFAULT`, but sets `playOrder` to the value
+in a specified field in `G`.
+
 ### Interactive demos
 
 ```react
