@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, PlayerView } from 'boardgame.io/core';
+import { Game, PlayerView, TurnOrder } from 'boardgame.io/core';
 
-const SecretState = Game({
+const RedactedMoves = Game({
   name: 'secret-state',
 
   setup: () => ({
@@ -16,17 +16,23 @@ const SecretState = Game({
     players: {
       0: 'player 0 state',
       1: 'player 1 state',
-      2: 'player 2 state',
     },
   }),
 
   moves: {
-    clickCell(G) {
+    /* eslint-disable no-unused-vars */
+    clickCell(G, ctx, secretstuff) {
       return { ...G };
     },
+    /* eslint-enable no-unused-vars */
+  },
+
+  flow: {
+    redactedMoves: ['clickCell'],
+    turnOrder: TurnOrder.ANY,
   },
 
   playerView: PlayerView.STRIP_SECRETS,
 });
 
-export default SecretState;
+export default RedactedMoves;

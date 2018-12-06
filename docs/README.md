@@ -14,25 +14,29 @@
 <a style="margin-left: 10px" href="https://github.com/nicolodavis/boardgame.io"><img src="https://img.shields.io/github/stars/nicolodavis/boardgame.io.svg?label=Stars&style=social" alt="GitHub" /></a>
 </p>
 
+<h5 align="center">
+Open Source Game Engine for Turn-Based Games
+</h5>
+
 ---
 
-The goal of this framework is to allow a game developer to
-translate the rules of a game into a series of simple functions
-that describe how the game state changes when a particular move is made,
-and the framework takes care of the rest. You get a fully multiplayer
-implementation without having to write any networking or storage layer code.
+Write simple functions that describe how the game state changes
+when a particular move is made. This is automatically converted
+into a working game complete with online multiplayer
+features, all without requiring you to write a single line of
+networking or database handling code.
 
 ### Features
 
 * **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
-* **Cross-platform Multiplayer**: All clients (Web / Android / iOS) connected to the game are synced in real time.
-* **AI Framework**: Create bots that are highly customizable and debuggable.
+* **Cross-platform Multiplayer**: All clients (Web / Android / iOS) are kept in sync in realtime.
+* **Declarative AI**: Tell the bots what to do and they will figure out how to do it.
 * **Game Phases**: with different game rules (including custom turn orders) per phase.
-* **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **UI Agnostic**: Vanilla JS client with bindings for React / React Native.
+* **View-layer Agnostic**: Vanilla JS client with bindings for React / React Native.
 * **Component Toolkit**: Components for hex grids, cards, tokens.
+* **Extendable**: Subsystems (storage, networking etc.) can be replaced with custom implementations.
 
 ### Installation
 
