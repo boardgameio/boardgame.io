@@ -44,6 +44,13 @@ const App = Client({
 
   // Set to false to disable the Debug UI.
   debug: true,
+
+  // An optional Redux store enhancer.
+  // This is useful for augmenting the Redux store
+  // for purposes of debugging or simply intercepting
+  // events in order to kick off other side-effects in
+  // response to moves.
+  enhancer: applyMiddleware(your_middleware),
 });
 
 ReactDOM.render(<App />, document.getElementById('app'));
@@ -77,6 +84,4 @@ The `Board` component will receive the following as `props`:
 
 10. `isConnected`: `true` if connection to the server is active.
 
-11. `enhancer`: An optional Redux store enhancer, passed along to
-    the internals store. See the [Debugging](debugging.md) section
-    for more details.
+11. `isSynced`: `true` if the initial sync with the server is done.
