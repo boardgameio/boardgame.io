@@ -49,6 +49,16 @@ test('isActive', () => {
   expect(client.getState().isActive).toBe(false);
 });
 
+test('isSynced', () => {
+  const client = Client({
+    game: Game({}),
+  });
+
+  expect(client.getState().isSynced).toBe(false);
+  client.store.dispatch(sync(client.getState(), []));
+  expect(client.getState().isSynced).toBe(true);
+});
+
 describe('step', () => {
   const client = Client({
     game: Game({
