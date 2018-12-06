@@ -54,9 +54,9 @@ test('isSynced', () => {
     game: Game({}),
   });
 
-  expect(client.isSynced).toBe(false);
-  client.store.dispatch(sync());
-  expect(client.isSynced).toBe(true);
+  expect(client.getState().isSynced).toBe(false);
+  client.store.dispatch(sync(client.getState(), []));
+  expect(client.getState().isSynced).toBe(true);
 });
 
 describe('step', () => {
