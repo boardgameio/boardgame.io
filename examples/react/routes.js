@@ -14,6 +14,7 @@ import random from './random';
 import turnorder from './turnorder';
 import ui from './ui';
 import threejs from './threejs';
+import redacted_move from './redacted-move';
 
 const routes = [
   {
@@ -39,6 +40,10 @@ const routes = [
   {
     name: 'Secret State',
     routes: secret_state.routes,
+  },
+  {
+    name: 'Redacted Move',
+    routes: redacted_move.routes,
   },
   {
     name: 'UI',
