@@ -28,9 +28,8 @@ const Multiview = () => (
       players.
     </p>
     <p>
-      Clicking the button on the first player, you should see the respective
-      part of the game log. The current player sees the full information, while
-      for the other ones, it is stripped.
+      Clicking the button on one of the players, you should see complete log
+      event for that player but a redacted one for everyone else.
     </p>
     <div className="runner">
       <div className="run">

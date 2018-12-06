@@ -11,7 +11,15 @@ import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
-export function redactLog(redactedMoves, log, ctx, playerID) {
+/**
+ * Redact the log.
+ *
+ * @param {Array} redactedMoves - List of moves to redact.
+ * @param {Array} log - The game log (or deltalog).
+ * @param {String} playerID - The playerID that this log is
+ *                            to be sent to.
+ */
+export function redactLog(redactedMoves, log, playerID) {
   if (redactedMoves === undefined || log === undefined) {
     return log;
   }
@@ -138,7 +146,6 @@ export class Master {
       const log = redactLog(
         this.game.flow.redactedMoves,
         state.deltalog,
-        state.ctx,
         playerID
       );
 
@@ -179,12 +186,7 @@ export class Master {
       deltalog: undefined,
     };
 
-    const log = redactLog(
-      this.game.flow.redactedMoves,
-      state.log,
-      state.ctx,
-      playerID
-    );
+    const log = redactLog(this.game.flow.redactedMoves, state.log, playerID);
 
     this.transportAPI.send({
       playerID,

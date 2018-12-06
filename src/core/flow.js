@@ -52,6 +52,9 @@ import * as logging from './logger';
  *                                  Predicate to determine whether a
  *                                  particular move is undoable at this
  *                                  time.
+ *
+ * @param {Array} redactedMoves - List of moves to be redacted
+ *                                from the log.
  */
 export function Flow({
   ctx,
@@ -183,6 +186,8 @@ export function Flow({
  * @param {...object} undoableMoves - List of moves that are undoable,
  *                                   (default: null, i.e. all moves are undoable).
  *
+ * @param {Array} redactedMoves - List of moves to be redacted
+ *                                from the log.
  *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should

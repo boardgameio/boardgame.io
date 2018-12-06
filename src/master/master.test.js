@@ -317,7 +317,7 @@ describe('authentication', async () => {
 describe('redactLog', () => {
   test('no redactedMoves', () => {
     const logEvents = [ActionCreators.gameEvent('endTurn')];
-    const result = redactLog(undefined, logEvents, {}, '0');
+    const result = redactLog(undefined, logEvents, '0');
     expect(result).toMatchObject(logEvents);
   });
 
@@ -328,11 +328,11 @@ describe('redactLog', () => {
     ];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, '0');
     expect(result).toMatchObject(logEvents);
 
     // other player
-    result = redactLog(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, '1');
     expect(result).toMatchObject([
       {
         action: {
@@ -355,10 +355,10 @@ describe('redactLog', () => {
     ];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = redactLog(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, '1');
     expect(result).toMatchObject(logEvents);
   });
 
@@ -369,10 +369,10 @@ describe('redactLog', () => {
     ];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = redactLog(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, '1');
     expect(result).toMatchObject(logEvents);
   });
 
@@ -381,10 +381,10 @@ describe('redactLog', () => {
     const logEvents = [{ action: ActionCreators.gameEvent('endTurn') }];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, {}, '0');
+    let result = redactLog(rm, logEvents, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = redactLog(rm, logEvents, {}, '1');
+    result = redactLog(rm, logEvents, '1');
     expect(result).toMatchObject(logEvents);
   });
 
