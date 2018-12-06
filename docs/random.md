@@ -25,7 +25,7 @@ This poses interesting challenges regarding the implementation.
 Game({
   moves: {
     rollDie(G, ctx) {
-      return { ...G, dice: ctx.random.D6() };
+      G.dieRoll = ctx.random.D6();
     },
   },
 });

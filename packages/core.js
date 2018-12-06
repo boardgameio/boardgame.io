@@ -7,7 +7,7 @@
  */
 
 import Game from '../src/core/game.js';
-import { CreateGameReducer } from '../src/core/reducer.js';
+import { CreateGameReducer, INVALID_MOVE } from '../src/core/reducer.js';
 import { Flow, FlowWithPhases } from '../src/core/flow.js';
 import { Pass, TurnOrder } from '../src/core/turn-order.js';
 import { PlayerView } from '../src/core/player-view.js';
@@ -20,4 +20,5 @@ export {
   TurnOrder,
   Pass,
   PlayerView,
+  INVALID_MOVE,
 };
