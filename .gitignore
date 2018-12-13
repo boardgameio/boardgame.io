@@ -2,6 +2,7 @@
 yarn.lock
 .DS_Store
 *.swp
+*.swo
 npm-debug.log*
 dist
 node_modules

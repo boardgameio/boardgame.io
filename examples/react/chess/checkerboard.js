@@ -35,7 +35,7 @@ import { Grid } from 'boardgame.io/ui';
  *   </Token>
  * </Checkerboard>
  */
-class Checkerboard extends React.Component {
+export class Checkerboard extends React.Component {
   static propTypes = {
     rows: PropTypes.number,
     cols: PropTypes.number,
@@ -61,14 +61,14 @@ class Checkerboard extends React.Component {
   };
 
   onClick = ({ x, y }) => {
-    this.props.onClick({ square: this._cartesianToAlgebraic(x, y) });
+    this.props.onClick({ square: cartesianToAlgebraic(x, y, this.props.rows) });
   };
 
   render() {
     // Convert the square="" prop to x and y.
     const tokens = React.Children.map(this.props.children, child => {
       const square = child.props.square;
-      const { x, y } = this._algebraicToCartesian(square);
+      const { x, y } = algebraicToCartesian(square, this.props.rows);
       return React.cloneElement(child, { x, y });
     });
 
@@ -87,7 +87,7 @@ class Checkerboard extends React.Component {
 
     // Add highlighted squares.
     for (const square in this.props.highlightedSquares) {
-      const { x, y } = this._algebraicToCartesian(square);
+      const { x, y } = algebraicToCartesian(square, this.props.rows);
       const key = `${x},${y}`;
       colorMap[key] = this.props.highlightedSquares[square];
     }
@@ -104,23 +104,29 @@ class Checkerboard extends React.Component {
       </Grid>
     );
   }
-
-  _algebraicToCartesian(square) {
-    let regexp = /([A-Za-z])(\d+)/g;
-    let match = regexp.exec(square);
-    if (match == null) {
-      throw 'Invalid square provided: ' + square;
-    }
-    let colSymbol = match[1].toLowerCase();
-    let col = colSymbol.charCodeAt(0) - 'a'.charCodeAt(0);
-    let row = parseInt(match[2]);
-    return { x: col, y: this.props.rows - row };
-  }
-
-  _cartesianToAlgebraic(x, y) {
-    let colSymbol = String.fromCharCode(x + 'a'.charCodeAt(0));
-    return colSymbol + (this.props.rows - y);
-  }
 }
 
-export default Checkerboard;
+/**
+ * Given an algebraic notation, returns x and y values.
+ * Example: A1 returns { x: 0, y: 0 }
+ */
+export function algebraicToCartesian(square, rows = 8) {
+  let regexp = /([A-Za-z])(\d+)/g;
+  let match = regexp.exec(square);
+  if (match == null) {
+    throw 'Invalid square provided: ' + square;
+  }
+  let colSymbol = match[1].toLowerCase();
+  let col = colSymbol.charCodeAt(0) - 'a'.charCodeAt(0);
+  let row = parseInt(match[2]);
+  return { x: col, y: rows - row };
+}
+
+/**
+ * Given an x and y values, returns algebraic notation.
+ * Example: 0, 0 returns A1
+ */
+export function cartesianToAlgebraic(x, y, rows = 8) {
+  let colSymbol = String.fromCharCode(x + 'a'.charCodeAt(0));
+  return colSymbol + (rows - y);
+}

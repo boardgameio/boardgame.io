@@ -112,4 +112,13 @@ test('correct x and y', () => {
     </Grid>
   );
   expect(grid.html()).toContain('1, 2');
+
+  // No crash when componentWillUnmount
+  {
+    grid
+      .find('Square')
+      .at(12)
+      .instance()
+      .componentWillUnmount();
+  }
 });

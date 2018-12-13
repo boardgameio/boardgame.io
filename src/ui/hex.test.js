@@ -91,10 +91,16 @@ test('mouse out handler', () => {
 test('child', () => {
   {
     const grid = Enzyme.mount(
-      <HexGrid layers={2} outline={false}>
+      <HexGrid layers={1} outline={false}>
         <Token />
       </HexGrid>
     );
+    // No errors unmounting
+    grid
+      .find('Hex')
+      .at(0)
+      .instance()
+      .componentWillUnmount();
     expect(grid.html()).toContain('polygon');
   }
 

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import Checkerboard from './checkerboard';
+import { Checkerboard } from './checkerboard';
 import { Token } from 'boardgame.io/ui';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';

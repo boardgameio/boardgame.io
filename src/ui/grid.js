@@ -55,6 +55,8 @@ export class Grid extends React.Component {
     cellSize: 1,
   };
 
+  _svgRef = React.createRef();
+
   _getCellColor(x, y) {
     const key = `${x},${y}`;
     let color = 'white';
@@ -111,14 +113,17 @@ export class Grid extends React.Component {
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
         template: Square,
+        // Overwrites Token's onClick, onMouseOver, onMouseOut
         onClick: this.onClick,
         onMouseOver: this.onMouseOver,
         onMouseOut: this.onMouseOut,
+        svgRef: this._svgRef,
       });
     });
 
     return (
       <svg
+        ref={this._svgRef}
         viewBox={'0 0 ' + this.props.cols + ' ' + this.props.rows}
         style={this.props.style}
       >
@@ -142,6 +147,8 @@ export class Grid extends React.Component {
  *   onClick - Invoked when a Square is clicked.
  *   onMouseOver - Invoked when a Square is mouse over.
  *   onMouseOut - Invoked when a Square is mouse out.
+ *   eventListeners - Array of objects with name and callback
+ *   for DOM events.
  *
  * Not meant to be used by the end user directly (use Token).
  * Also not exposed in the NPM.
@@ -155,6 +162,7 @@ export class Square extends React.Component {
     onClick: PropTypes.func,
     onMouseOver: PropTypes.func,
     onMouseOut: PropTypes.func,
+    eventListeners: PropTypes.array,
     children: PropTypes.element,
   };
 
@@ -163,62 +171,72 @@ export class Square extends React.Component {
     x: 0,
     y: 0,
     style: { fill: '#fff' },
+    eventListeners: [],
   };
 
-  onClick = () => {
-    this.props.onClick({
-      x: this.props.x,
-      y: this.props.y,
-    });
+  _gRef = React.createRef();
+
+  onClick = e => {
+    this.props.onClick(this.getCoords(), e);
   };
 
-  onMouseOver = () => {
-    this.props.onMouseOver({
-      x: this.props.x,
-      y: this.props.y,
-    });
+  onMouseOver = e => {
+    this.props.onMouseOver(this.getCoords(), e);
   };
 
-  onMouseOut = () => {
-    this.props.onMouseOut({
+  onMouseOut = e => {
+    this.props.onMouseOut(this.getCoords(), e);
+  };
+
+  getCoords() {
+    return {
       x: this.props.x,
       y: this.props.y,
-    });
-  };
+    };
+  }
+
+  componentDidMount() {
+    const element = this._gRef.current;
+    for (let listener of this.props.eventListeners) {
+      element.addEventListener(listener.name, listener.callback);
+    }
+  }
+
+  componentWillUnmount() {
+    const element = this._gRef.current;
+    for (let listener of this.props.eventListeners) {
+      element.removeEventListener(listener.name, listener.callback);
+    }
+  }
 
   render() {
     const tx = this.props.x * this.props.size;
     const ty = this.props.y * this.props.size;
 
+    // If no child, render a square.
+    let children = (
+      <rect
+        style={this.props.style}
+        width={this.props.size}
+        height={this.props.size}
+        x={0}
+        y={0}
+      />
+    );
     // If a child is passed, render child.
     if (this.props.children) {
-      return (
-        <g
-          onClick={this.onClick}
-          onMouseOver={this.onMouseOver}
-          onMouseOut={this.onMouseOut}
-          transform={`translate(${tx}, ${ty})`}
-        >
-          {this.props.children}
-        </g>
-      );
+      children = this.props.children;
     }
 
-    // If no child, render a square.
     return (
       <g
+        ref={this._gRef}
         onClick={this.onClick}
         onMouseOver={this.onMouseOver}
         onMouseOut={this.onMouseOut}
         transform={`translate(${tx}, ${ty})`}
       >
-        <rect
-          style={this.props.style}
-          width={this.props.size}
-          height={this.props.size}
-          x={0}
-          y={0}
-        />
+        {children}
       </g>
     );
   }

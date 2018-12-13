@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Chess from 'chess.js';
-import Checkerboard from './checkerboard';
+import { Checkerboard, cartesianToAlgebraic } from './checkerboard';
 import { Token } from 'boardgame.io/ui';
 import Bishop from './pieces/bishop';
 import King from './pieces/king';
@@ -19,7 +19,7 @@ import Queen from './pieces/queen';
 import Rook from './pieces/rook';
 
 const COL_NAMES = 'abcdefgh';
-const SELECTED_COLOR = 'green';
+const HIGHLIGHTED_COLOR = 'green';
 const MOVABLE_COLOR = 'palegreen';
 
 class Board extends React.Component {
@@ -40,13 +40,14 @@ class Board extends React.Component {
 
   state = {
     selected: '',
+    highlighted: '',
   };
 
   // eslint-disable-next-line react/no-deprecated
   componentWillReceiveProps(nextProps) {
     if (nextProps.G.pgn) {
       this.chess.load_pgn(nextProps.G.pgn);
-      this.setState({ selected: '' });
+      this.setState({ selected: '', highlighted: '' });
     }
   }
 
@@ -77,32 +78,44 @@ class Board extends React.Component {
     }
 
     if (!this.state.selected && this._isSelectable(square)) {
-      this.setState({ selected: square });
+      this.setState({ selected: square, highlighted: square });
     }
 
     if (this.state.selected) {
-      let moves = this._getMoves();
-      let move = moves.find(
-        move => move.from == this.state.selected && move.to == square
-      );
-      if (move) {
-        this.props.moves.move(move.san);
-      } else {
-        this.setState({ selected: '' });
-      }
+      this._tryMove(this.state.selected, square);
     }
   };
 
   _getHighlightedSquares() {
     let result = {};
-    if (this.state.selected) {
-      result[this.state.selected] = SELECTED_COLOR;
-    }
     for (let move of this._getMoves()) {
       result[move.to] = MOVABLE_COLOR;
     }
+    if (this.state.highlighted) {
+      result[this.state.highlighted] = HIGHLIGHTED_COLOR;
+    }
     return result;
   }
+
+  _shouldDrag = ({ x, y }) => {
+    return (
+      this.props.isActive && this._isSelectable(cartesianToAlgebraic(x, y))
+    );
+  };
+
+  _onDrag = ({ x, y, originalX, originalY }) => {
+    this.setState({
+      selected: cartesianToAlgebraic(originalX, originalY),
+      highlighted: cartesianToAlgebraic(Math.round(x), Math.round(y)),
+    });
+  };
+
+  _onDrop = ({ x, y }) => {
+    if (this.state.selected) {
+      const square = cartesianToAlgebraic(Math.round(x), Math.round(y));
+      this._tryMove(this.state.selected, square);
+    }
+  };
 
   _getPieces() {
     let result = [];
@@ -113,10 +126,13 @@ class Board extends React.Component {
         if (p) {
           result.push(
             <Token
+              draggable={true}
+              shouldDrag={this._shouldDrag}
+              onDrag={this._onDrag}
+              onDrop={this._onDrop}
               square={square}
               animate={true}
               key={this._getInitialCell(square)}
-              onClick={this.click.bind(this)}
             >
               {this._getPieceByTypeAndColor(p.type, p.color)}
             </Token>
@@ -208,6 +224,16 @@ class Board extends React.Component {
       verbose: true,
       square: this.state.selected,
     });
+  }
+
+  _tryMove(from, to) {
+    const moves = this._getMoves();
+    const move = moves.find(move => move.from == from && move.to == to);
+    if (move) {
+      this.props.moves.move(move.san);
+    } else {
+      this.setState({ selected: '', highlighted: '' });
+    }
   }
 }
 
