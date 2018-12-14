@@ -108,7 +108,12 @@ export class ContextEnhancer {
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function CreateGameReducer({ game, numPlayers, multiplayer }) {
+export function CreateGameReducer({
+  game,
+  numPlayers,
+  multiplayer,
+  gameSetupData,
+}) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -126,7 +131,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
   const initial = {
     // User managed state.
-    G: game.setup(ctxWithAPI),
+    G: game.setup(ctxWithAPI, gameSetupData),
 
     // Framework managed state.
     ctx: ctx,
