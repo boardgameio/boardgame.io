@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { Grid } from './grid';
 import { Token } from './token';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -107,4 +108,61 @@ test('mouse out handler', () => {
   token.simulate('mouseOut');
 
   expect(onMouseOut).toHaveBeenCalled();
+});
+
+test('shouldDrag', () => {
+  const shouldDrag = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2}>
+      <Token x={0} y={0} draggable={true} shouldDrag={shouldDrag}>
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  const mouseDownEvt = new window['MouseEvent']('mousedown', {});
+  grid
+    .find('Token')
+    .getDOMNode()
+    .dispatchEvent(mouseDownEvt);
+
+  expect(shouldDrag).toHaveBeenCalled();
+});
+
+test('drag and drop', () => {
+  const onDrag = jest.fn();
+  const onDrop = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2}>
+      <Token
+        x={0}
+        y={0}
+        draggable={true}
+        shouldDrag={() => true}
+        onDrag={onDrag}
+        onDrop={onDrop}
+      >
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  // Workaround because of JSDOM quirks
+  grid.getDOMNode().getScreenCTM = () => ({
+    inverse: () => ({ a: 0, b: 0, c: 0, d: 0 }),
+  });
+  grid.getDOMNode().addEventListener = () => {};
+  grid.getDOMNode().removeEventListener = () => {};
+  const mouseDownEvt = new window['MouseEvent']('mousedown', {
+    pageX: 1,
+    pageY: 2,
+  });
+  const token = grid.find('Token');
+  token.getDOMNode().dispatchEvent(mouseDownEvt);
+  token.instance()._drag(mouseDownEvt);
+  token.instance()._endDrag(mouseDownEvt);
+  token.instance().UNSAFE_componentWillUnmount();
+
+  expect(onDrag).toHaveBeenCalled();
+  expect(onDrop).toHaveBeenCalled();
 });
