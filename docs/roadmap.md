@@ -24,14 +24,11 @@ get done before we are ready for a v1 release.
 
 ### Storage
 
-* ##### Mongo
+* ##### Databases
 
   * [x] add Mongo support
-  * [ ] add error handling **[help needed]**
-
-* ##### Firebase / Other
-
-  * [x] add support for one more backend (Firebase?)
+  * [x] add Firebase support
+  * [ ] add Postgres support
   
 * ##### Size / Performance
 
@@ -41,7 +38,7 @@ get done before we are ready for a v1 release.
 
 * [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
 * [ ] log improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/227))
-* [ ] add immutability helper (Immer) ([issue](https://github.com/nicolodavis/boardgame.io/issues/295)) **[N]**
+* [x] add immutability helper (Immer) ([issue](https://github.com/nicolodavis/boardgame.io/issues/295))
 
 ### Server
 
