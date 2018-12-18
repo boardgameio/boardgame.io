@@ -341,7 +341,7 @@ describe('SetActionPlayers', () => {
     const game = Game({
       moves: {
         B: (G, ctx) => {
-          ctx.events.setActionPlayers({ value: ['0', '1'], once: true });
+          ctx.events.setActionPlayers({ value: () => ['0', '1'], once: true });
           return G;
         },
         A: G => G,
@@ -364,7 +364,7 @@ describe('SetActionPlayers', () => {
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({
-            value: ['0', '1', '2'],
+            value: () => ['0', '1', '2'],
             once: true,
             others: true,
           });

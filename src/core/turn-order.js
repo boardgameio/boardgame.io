@@ -34,7 +34,7 @@ export const Pass = (G, ctx) => {
  * @param {object} state - The game state.
  * @param {object} arg - An array of playerID's or <object> of:
  *   {
- *     value: [],        // array of playerID's (optional if all is set).
+ *     value: (G, ctx) => [],        // function that returns an array of playerID's (optional if all is set)
  *
  *     all: true,        // set value to all playerID's
  *
@@ -46,14 +46,14 @@ export const Pass = (G, ctx) => {
  *   }
  */
 export function SetActionPlayersEvent(state, arg) {
-  return { ...state, ctx: setActionPlayers(state.ctx, arg) };
+  return { ...state, ctx: setActionPlayers(state.G, state.ctx, arg) };
 }
 
-function setActionPlayers(ctx, arg) {
+function setActionPlayers(G, ctx, arg) {
   let actionPlayers = [];
 
   if (arg.value) {
-    actionPlayers = arg.value;
+    actionPlayers = arg.value(G, ctx);
   }
   if (arg.all) {
     actionPlayers = [...ctx.playOrder];
@@ -100,7 +100,7 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   if (turnOrder.actionPlayers !== undefined) {
-    ctx = setActionPlayers(ctx, turnOrder.actionPlayers);
+    ctx = setActionPlayers(G, ctx, turnOrder.actionPlayers);
   } else {
     ctx = { ...ctx, actionPlayers: [currentPlayer] };
   }
