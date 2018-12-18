@@ -9,9 +9,9 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-//const OpenBrowserPlugin = require('open-browser-webpack-plugin');
+const OpenBrowserPlugin = require('open-browser-webpack-plugin');
 
-//const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8000;
 
 module.exports = {
   entry: [
@@ -31,6 +31,7 @@ module.exports = {
       template: path.resolve(__dirname, './index.html'),
     }),
     new webpack.HotModuleReplacementPlugin(),
+    new OpenBrowserPlugin({ url: `http://localhost:${port}/` }),
   ],
 
   module: {
