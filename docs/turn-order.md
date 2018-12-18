@@ -157,8 +157,8 @@ A `TurnOrder` object has the following structure:
   // If this section is present, actionPlayers is modified
   // at the beginning of the phase.
   actionPlayers: {
-    // Sets actionPlayers to the array specified.
-    values: [...],
+    // Sets actionPlayers to the array returned from a function.
+    value: (G, ctx) => [...],
 
     // Sets actionPlayers to all players.
     all: true,
