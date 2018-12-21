@@ -44,6 +44,13 @@ const App = Client({
 
   // Set to false to disable the Debug UI.
   debug: true,
+
+  // An optional Redux store enhancer.
+  // This is useful for augmenting the Redux store
+  // for purposes of debugging or simply intercepting
+  // events in order to kick off other side-effects in
+  // response to moves.
+  enhancer: applyMiddleware(your_middleware),
 });
 
 ReactDOM.render(<App />, document.getElementById('app'));
@@ -64,19 +71,23 @@ The `Board` component will receive the following as `props`:
 4. `events`: An object containing functions to dispatch various
    game events like `endTurn` and `endPhase`.
 
-5. `log`: The game log.
+5. `reset`: Function that resets the game.
 
-6. `gameID`: The game ID associated with the client.
+6. `undo`: Function that undoes the last move.
 
-7. `playerID`: The player ID associated with the client.
+7. `redo`: Function that redoes the previously undone move.
 
-8. `isActive`: `true` if the client is able to currently make
-   a move or interact with the game.
+8. `log`: The game log.
 
-9. `isMultiplayer`: `true` if it is a multiplayer game.
+9. `gameID`: The game ID associated with the client.
 
-10. `isConnected`: `true` if connection to the server is active.
+10. `playerID`: The player ID associated with the client.
 
-11. `enhancer`: An optional Redux store enhancer, passed along to
-    the internals store. See the [Debugging](debugging.md) section
-    for more details.
+11. `isActive`: `true` if the client is able to currently make
+    a move or interact with the game.
+
+12. `isMultiplayer`: `true` if it is a multiplayer game.
+
+13. `isConnected`: `true` if connection to the server is active.
+
+14. `isSynced`: `true` if the initial sync with the server is done.

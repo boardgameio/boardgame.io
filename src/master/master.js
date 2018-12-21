@@ -12,6 +12,48 @@ import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
 /**
+ * Redact the log.
+ *
+ * @param {Array} redactedMoves - List of moves to redact.
+ * @param {Array} log - The game log (or deltalog).
+ * @param {String} playerID - The playerID that this log is
+ *                            to be sent to.
+ */
+export function redactLog(redactedMoves, log, playerID) {
+  if (redactedMoves === undefined || log === undefined) {
+    return log;
+  }
+
+  return log.map(logEvent => {
+    // filter for all other players and a spectator
+    if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
+      return logEvent;
+    }
+
+    // only filter moves
+    if (logEvent.action.type !== 'MAKE_MOVE') {
+      return logEvent;
+    }
+
+    const moveName = logEvent.action.payload.type;
+    let filteredEvent = logEvent;
+    if (redactedMoves.includes(moveName)) {
+      const newPayload = {
+        ...filteredEvent.action.payload,
+        args: undefined,
+        argsRedacted: true,
+      };
+      filteredEvent = {
+        ...filteredEvent,
+        action: { ...filteredEvent.action, payload: newPayload },
+      };
+    }
+
+    return filteredEvent;
+  });
+}
+
+/**
  * Master
  *
  * Class that runs the game and maintains the authoritative state.
@@ -101,9 +143,15 @@ export class Master {
         deltalog: undefined,
       };
 
+      const log = redactLog(
+        this.game.flow.redactedMoves,
+        state.deltalog,
+        playerID
+      );
+
       return {
         type: 'update',
-        args: [gameID, filteredState, state.deltalog],
+        args: [gameID, filteredState, log],
       };
     });
 
@@ -138,10 +186,12 @@ export class Master {
       deltalog: undefined,
     };
 
+    const log = redactLog(this.game.flow.redactedMoves, state.log, playerID);
+
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, filteredState, state.log],
+      args: [gameID, filteredState, log],
     });
 
     return;
