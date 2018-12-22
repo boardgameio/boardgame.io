@@ -57,7 +57,7 @@ Authentication APIs are available by default on `WebSocket port` + 1.
 
 ### Creating a game
 
-#### POST `/games/:name/create`
+#### POST `/games/{name}/create`
 
 Creates a new authenticated game for a game named `name`.
 
@@ -67,7 +67,7 @@ Returns `gameID`, which is the ID of the newly created game instance.
 
 ### Joining a game
 
-#### POST `/games/:name/:id/join`
+#### POST `/games/{name}/{id}/join`
 
 Allows a player to join a particular game instance `id` of a game named `name`.
 
@@ -81,7 +81,7 @@ Returns `playerCredentials` which is the token this player will require to authe
 
 ### Leaving a game
 
-#### POST `/games/:name/:id/leave`
+#### POST `/games/{name}/{id}/leave`
 
 Leave the game instance `id` of a game named `name` previously joined by the player.
 
@@ -93,7 +93,7 @@ Accepts two parameters, all required:
 
 ### Listing all instances of a given game
 
-#### GET `/games/:name`
+#### GET `/games/{name}`
 
 Returns all instances of the game named `name`.
 
