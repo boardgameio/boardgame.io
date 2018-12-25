@@ -428,11 +428,11 @@ describe('.createApiServer', () => {
                   players: {
                     '0': {
                       name: 'alice',
-                      playerCredentials: 'SECRET1',
+                      credentials: 'SECRET1',
                     },
                     '1': {
                       name: 'bob',
-                      playerCredentials: 'SECRET2',
+                      credentials: 'SECRET2',
                     },
                   },
                 };
@@ -455,11 +455,11 @@ describe('.createApiServer', () => {
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
-                    playerCredentials: 'SECRET1',
+                    credentials: 'SECRET1',
                   }),
                   '1': expect.objectContaining({
                     name: 'bob',
-                    playerCredentials: 'SECRET2',
+                    credentials: 'SECRET2',
                   }),
                 }),
               })
@@ -475,10 +475,10 @@ describe('.createApiServer', () => {
                     players: {
                       '0': {
                         name: 'alice',
-                        playerCredentials: 'SECRET1',
+                        credentials: 'SECRET1',
                       },
                       '1': {
-                        playerCredentials: 'SECRET2',
+                        credentials: 'SECRET2',
                       },
                     },
                   };
