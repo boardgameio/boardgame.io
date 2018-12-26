@@ -171,9 +171,7 @@ export const createApiServer = ({ db, games }) => {
     if (!gameMetadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (
-      playerCredentials !== gameMetadata.players[playerID].playerCredentials
-    ) {
+    if (playerCredentials !== gameMetadata.players[playerID].credentials) {
       ctx.throw(403, 'Invalid credentials ' + playerCredentials);
     }
 
