@@ -15,6 +15,7 @@ import {
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
 import * as logging from './logger';
+import produce from 'immer';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -363,7 +364,10 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
-    const G = config.onPhaseBegin(state.G, state.ctx);
+    const G = produce(state.G, draftG => {
+      let result = config.onPhaseBegin(draftG, state.ctx);
+      if (result) return result;
+    });
     const ctx = InitTurnOrderState(state.G, state.ctx, config.turnOrder);
 
     // Reset stats.
@@ -381,7 +385,10 @@ export function FlowWithPhases({
   };
 
   const startTurn = function(state, config) {
-    const G = config.onTurnBegin(state.G, state.ctx);
+    const G = produce(state.G, draftG => {
+      let result = config.onTurnBegin(draftG, state.ctx);
+      if (result) return result;
+    });
 
     const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -433,7 +440,10 @@ export function FlowWithPhases({
 
     // Run any cleanup code for the phase that is about to end.
     const conf = phaseMap[ctx.phase];
-    G = conf.onPhaseEnd(G, ctx);
+    G = produce(G, draftG => {
+      let result = conf.onPhaseEnd(draftG, ctx);
+      if (result) return result;
+    });
 
     const gameover = conf.endGameIf(G, ctx);
     if (gameover !== undefined) {
@@ -519,7 +529,10 @@ export function FlowWithPhases({
     }
 
     // Run turn-end triggers.
-    G = conf.onTurnEnd(G, ctx);
+    G = produce(G, draftG => {
+      let result = conf.onTurnEnd(draftG, ctx);
+      if (result) return result;
+    });
 
     // Update gameover.
     const gameover = conf.endGameIf(G, ctx);
@@ -614,7 +627,10 @@ export function FlowWithPhases({
       },
     };
 
-    const G = conf.onMove(state.G, state.ctx, action);
+    const G = produce(state.G, draftG => {
+      let result = conf.onMove(draftG, state.ctx, action);
+      if (result) return result;
+    });
     state = { ...state, G };
 
     const origTurn = state.ctx.turn;
