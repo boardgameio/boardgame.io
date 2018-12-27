@@ -44,7 +44,7 @@ class LobbyCreateRoomForm extends React.Component {
       game.maxPlayers = 4;
     }
     console.assert(game.maxPlayers >= game.minPlayers);
-    return Array.from(Array(game.maxPlayers + 1).keys()).slice(game.minPlayers);
+    return [...new Array(game.maxPlayers + 1).keys()].slice(game.minPlayers);
   }
 
   render() {

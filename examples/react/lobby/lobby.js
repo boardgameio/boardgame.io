@@ -8,8 +8,7 @@
 
 import Cookies from 'react-cookies';
 import React from 'react';
-// FIXME: import { Lobby } from 'boardgame.io/react';
-import Lobby from '../../../lobby/react.js';
+import { Lobby } from 'boardgame.io/react';
 import { default as BoardTicTacToe } from '../tic-tac-toe/board';
 import { default as BoardChess } from '../chess/board';
 import { default as GameTicTacToe } from '../tic-tac-toe/game';
