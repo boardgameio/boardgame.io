@@ -311,9 +311,11 @@ export function FlowWithPhases({
     if (conf.onPhaseBegin === undefined) {
       conf.onPhaseBegin = G => G;
     }
+    conf.onPhaseBegin = produce(conf.onPhaseBegin);
     if (conf.onPhaseEnd === undefined) {
       conf.onPhaseEnd = G => G;
     }
+    conf.onPhaseEnd = produce(conf.onPhaseEnd);
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
@@ -326,12 +328,15 @@ export function FlowWithPhases({
     if (conf.onTurnBegin === undefined) {
       conf.onTurnBegin = onTurnBegin;
     }
+    conf.onTurnBegin = produce(conf.onTurnBegin);
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
+    conf.onTurnEnd = produce(conf.onTurnEnd);
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
+    conf.onMove = produce(conf.onMove);
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
@@ -364,10 +369,7 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
-    const G = produce(state.G, draftG => {
-      let result = config.onPhaseBegin(draftG, state.ctx);
-      if (result) return result;
-    });
+    const G = config.onPhaseBegin(state.G, state.ctx);
     const ctx = InitTurnOrderState(state.G, state.ctx, config.turnOrder);
 
     // Reset stats.
@@ -385,10 +387,7 @@ export function FlowWithPhases({
   };
 
   const startTurn = function(state, config) {
-    const G = produce(state.G, draftG => {
-      let result = config.onTurnBegin(draftG, state.ctx);
-      if (result) return result;
-    });
+    const G = config.onTurnBegin(state.G, state.ctx);
 
     const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -440,10 +439,7 @@ export function FlowWithPhases({
 
     // Run any cleanup code for the phase that is about to end.
     const conf = phaseMap[ctx.phase];
-    G = produce(G, draftG => {
-      let result = conf.onPhaseEnd(draftG, ctx);
-      if (result) return result;
-    });
+    G = conf.onPhaseEnd(G, ctx);
 
     const gameover = conf.endGameIf(G, ctx);
     if (gameover !== undefined) {
@@ -529,10 +525,7 @@ export function FlowWithPhases({
     }
 
     // Run turn-end triggers.
-    G = produce(G, draftG => {
-      let result = conf.onTurnEnd(draftG, ctx);
-      if (result) return result;
-    });
+    G = conf.onTurnEnd(G, ctx);
 
     // Update gameover.
     const gameover = conf.endGameIf(G, ctx);
@@ -627,10 +620,7 @@ export function FlowWithPhases({
       },
     };
 
-    const G = produce(state.G, draftG => {
-      let result = conf.onMove(draftG, state.ctx, action);
-      if (result) return result;
-    });
+    const G = conf.onMove(state.G, state.ctx, action);
     state = { ...state, G };
 
     const origTurn = state.ctx.turn;
