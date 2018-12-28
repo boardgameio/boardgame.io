@@ -89,25 +89,6 @@ describe('phases', () => {
     });
   });
 
-  test('onPhaseBegin can change state of G', () => {
-    const flow = FlowWithPhases({
-      startingPhase: 'A',
-
-      phases: {
-        A: {
-          onPhaseBegin: G => {
-            G.example = 'testStartPhase';
-          },
-        },
-      },
-    });
-
-    let state = { G: {}, ctx: flow.ctx(1) };
-    let state2 = flow.init(state);
-    expect(state.G.example).not.toBe('testStartPhase');
-    expect(state2.G.example).toBe('testStartPhase');
-  });
-
   test('endPhaseIf', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
@@ -271,19 +252,6 @@ test('onTurnBegin', () => {
     expect(onTurnBegin).not.toHaveBeenCalled();
     expect(onTurnBeginOverride).toHaveBeenCalled();
   }
-});
-
-test('onTurnBegin can change state of G', () => {
-  const flow = FlowWithPhases({
-    onTurnBegin: G => {
-      G.example = 'testTurnBegin';
-    },
-  });
-
-  let state = { G: {}, ctx: flow.ctx(1) };
-  let state2 = flow.init(state);
-  expect(state.G.example).not.toBe('testTurnBegin');
-  expect(state2.G.example).toBe('testTurnBegin');
 });
 
 test('onTurnEnd', () => {
@@ -512,12 +480,7 @@ test('canMakeMove', () => {
       allowedMoves: ['A', 'B'],
       startingPhase: 'A',
       phases: {
-        A: {
-          allowedMoves: () => ['A'],
-          onMove: G => {
-            G.example = 'testMove';
-          },
-        },
+        A: { allowedMoves: () => ['A'] },
         B: { allowedMoves: ['B'] },
         C: {},
         D: { allowedMoves: null },
@@ -540,7 +503,6 @@ test('canMakeMove', () => {
 
   state = reducer(state, makeMove('A'));
   expect(state.G).toMatchObject({ A: true });
-  expect(state.G.example).toBe('testMove');
   state = reducer(state, makeMove('B'));
   expect(state.G).not.toMatchObject({ B: true });
   state = reducer(state, makeMove('C'));
@@ -652,23 +614,11 @@ test('endGame', () => {
 
 describe('endTurn / endPhase args', () => {
   const flow = FlowWithPhases({
-    onTurnEnd: G => {
-      G.example = 'testTurn';
-    },
     startingPhase: 'A',
-    phases: {
-      A: {
-        next: 'B',
-        onPhaseEnd: G => {
-          G.example2 = 'testPhase';
-        },
-      },
-      B: {},
-      C: {},
-    },
+    phases: { A: { next: 'B' }, B: {}, C: {} },
   });
 
-  let state = { G: {}, ctx: flow.ctx(4) };
+  const state = { ctx: flow.ctx(3) };
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -704,18 +654,6 @@ describe('endTurn / endPhase args', () => {
     expect(t.ctx.playOrderPos).toBe(2);
     expect(t.ctx.currentPlayer).toBe('2');
     expect(t.ctx.phase).toBe('C');
-  });
-
-  test('can change state of G directly on endTurn', () => {
-    let t = state;
-    t = flow.processGameEvent(t, gameEvent('endTurn', { next: '2' }));
-    expect(t.G.example).toBe('testTurn');
-  });
-
-  test('can change state of G directly on endPhase', () => {
-    let t = state;
-    t = flow.processGameEvent(t, gameEvent('endPhase', { next: 'C' }));
-    expect(t.G.example2).toBe('testPhase');
   });
 });
 
