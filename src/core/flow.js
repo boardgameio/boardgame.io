@@ -15,6 +15,7 @@ import {
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
 import * as logging from './logger';
+import produce from 'immer';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -310,9 +311,11 @@ export function FlowWithPhases({
     if (conf.onPhaseBegin === undefined) {
       conf.onPhaseBegin = G => G;
     }
+    conf.onPhaseBegin = produce(conf.onPhaseBegin);
     if (conf.onPhaseEnd === undefined) {
       conf.onPhaseEnd = G => G;
     }
+    conf.onPhaseEnd = produce(conf.onPhaseEnd);
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
@@ -325,12 +328,15 @@ export function FlowWithPhases({
     if (conf.onTurnBegin === undefined) {
       conf.onTurnBegin = onTurnBegin;
     }
+    conf.onTurnBegin = produce(conf.onTurnBegin);
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
+    conf.onTurnEnd = produce(conf.onTurnEnd);
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
+    conf.onMove = produce(conf.onMove);
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
