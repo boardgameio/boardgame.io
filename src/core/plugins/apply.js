@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import PluginImmer from './immer';
+import PluginImmer from './plugin-immer';
 
 /**
  * Applies the provided plugins to the given move function.

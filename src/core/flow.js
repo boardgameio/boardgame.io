@@ -12,7 +12,7 @@ import {
   UpdateTurnOrderState,
   TurnOrder,
 } from './turn-order';
-import { ApplyPlugins } from '../plugins';
+import { ApplyPlugins } from './plugins/apply';
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
 import * as logging from './logger';

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { ApplyPlugins } from '../plugins';
+import { ApplyPlugins } from './plugins/apply';
 import { FlowWithPhases } from './flow';
 
 /**
