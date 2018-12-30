@@ -1,3 +1,9 @@
+## v0.29.0
+
+#### Features
+
+* [[d1bd1d1](https://github.com/nicolodavis/boardgame.io/commit/d1bd1d1)] Plugin API
+
 ## v0.28.1
 
 #### Features

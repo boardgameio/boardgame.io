@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.28.1",
+  "version": "0.29.0",
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
@@ -39,6 +39,7 @@
     "dist/react.js",
     "dist/react-native.js",
     "dist/core.js",
+    "dist/plugins.js",
     "dist/ui.js",
     "dist/ai.js",
     "dist/ai-visualize.js",
@@ -49,6 +50,7 @@
     "react.js",
     "react-native.js",
     "core.js",
+    "plugins.js",
     "ui.js",
     "ai.js",
     "ai-visualize.js"
@@ -162,6 +164,7 @@
       "react-native": "./dist/react-native.js",
       "server": "./dist/server.js",
       "core": "./dist/core.js",
+      "plugins": "./dist/plugins.js",
       "ui": "./dist/ui.js",
       "ai": "./dist/ai.js",
       "ai-visualize": "./dist/ai-visualize.js",

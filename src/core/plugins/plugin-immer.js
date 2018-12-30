@@ -6,6 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Master } from '../src/master/master';
+import produce from 'immer';
 
-export { Master };
+/**
+ * Plugin that allows using Immer to make immutable changes
+ * to G by just mutating it.
+ */
+export default {
+  wrapper: move => produce(move),
+};

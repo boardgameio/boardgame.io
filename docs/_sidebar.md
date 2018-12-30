@@ -15,6 +15,7 @@
   * [Secret State](secret-state.md)
   * [Storage](storage.md)
   * [Immutability](immutability.md)
+  * [Plugins](plugins.md)
   * [Debugging](debugging.md)
   * [Testing](testing.md)
 
