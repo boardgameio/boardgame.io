@@ -50,6 +50,10 @@ $ npm start
 
 See [changelog](docs/CHANGELOG.md).
 
+## New in v0.29.0
+
+**Plugin API** that allows creating custom interfaces that target specific game genres.
+
 ## Contributing
 
 See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](docs/roadmap.md)

@@ -50,6 +50,10 @@ include via a `<script>` tag.
 
 See [changelog](CHANGELOG.md).
 
+### New in v0.29.0
+
+**Plugin API** that allows creating custom interfaces that target specific game genres.
+
 ### License
 
 MIT
