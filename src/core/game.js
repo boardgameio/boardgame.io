@@ -105,6 +105,7 @@ function Game({ name, setup, moves, playerView, flow, seed, plugins }) {
     playerView,
     flow,
     seed,
+    plugins,
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {

@@ -14,5 +14,5 @@ import PluginImmer from './plugin-immer';
  */
 export const ApplyPlugins = (fn, plugins) => {
   const reducer = (acc, { fn }) => fn(acc);
-  return [...plugins, PluginImmer].reduce(reducer, fn);
+  return [PluginImmer, ...plugins].reduce(reducer, fn);
 };

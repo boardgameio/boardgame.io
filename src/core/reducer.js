@@ -124,9 +124,14 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
+  let initialG = game.setup(ctxWithAPI);
+  game.plugins.filter(plugin => plugin.setup !== undefined).forEach(plugin => {
+    initialG = { ...initialG, ...plugin.setup(ctxWithAPI) };
+  });
+
   const initial = {
     // User managed state.
-    G: game.setup(ctxWithAPI),
+    G: initialG,
 
     // Framework managed state.
     ctx: ctx,
