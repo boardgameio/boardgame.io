@@ -23,7 +23,7 @@ networking or database handling code.
 
 * **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
 * **Cross-platform Multiplayer**: All clients (Web / Android / iOS) are kept in sync in realtime.
-* **Declarative AI**: Tell the bots what to do and they will figure out how to do it.
+* **Automatic AI**: MCTS-based bots with options to customize.
 * **Game Phases**: with different game rules (including custom turn orders) per phase.
 * **Prototyping**: Debugging interface to simulate moves even before you render the game.
 * **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
