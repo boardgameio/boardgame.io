@@ -13,5 +13,5 @@ import produce from 'immer';
  * to G by just mutating it.
  */
 export default {
-  fn: move => produce(move),
+  wrapper: move => produce(move),
 };

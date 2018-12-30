@@ -11,8 +11,11 @@ import PluginImmer from './plugin-immer';
 /**
  * Applies the provided plugins to the given move function.
  * PluginImmer is always added.
+ *
+ * @param {function} fn - The move function or trigger to apply the plugins to.
+ * @param {Array} plugins - Array of plugins.
  */
 export const ApplyPlugins = (fn, plugins) => {
-  const reducer = (acc, { fn }) => fn(acc);
+  const reducer = (acc, { wrapper }) => wrapper(acc);
   return [PluginImmer, ...plugins].reduce(reducer, fn);
 };

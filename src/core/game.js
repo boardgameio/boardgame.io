@@ -75,7 +75,7 @@ import { FlowWithPhases } from './flow';
  *
  * @param {Array} plugins - List of plugins. Each plugin is an object like the following:
  *                          {
- *                            fn: (moveFn) => {
+ *                            wrapper: (moveFn) => {
  *                              return (G, ctx) => {
  *                                // preprocess G here
  *                                G = moveFn(G, ctx);
@@ -84,8 +84,9 @@ import { FlowWithPhases } from './flow';
  *                              };
  *                            },
  *
- *                            // Optional function to modify G during setup.
- *                            setup: G => G,
+ *                            // Optional: Called during setup. The return value
+ *                            // is merged with the initial value of G.
+ *                            setup: ctx => state,
  *                          }
  */
 function Game({ name, setup, moves, playerView, flow, seed, plugins }) {

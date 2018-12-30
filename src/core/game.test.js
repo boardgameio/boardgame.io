@@ -30,7 +30,7 @@ describe('plugins', () => {
         A: G => G,
       },
 
-      plugins: [{ fn: () => () => ({ plugin: true }) }],
+      plugins: [{ wrapper: () => () => ({ plugin: true }) }],
     });
   });
 
