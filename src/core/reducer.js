@@ -126,7 +126,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
   let initialG = game.setup(ctxWithAPI);
   game.plugins.filter(plugin => plugin.setup !== undefined).forEach(plugin => {
-    initialG = { ...initialG, ...plugin.setup(ctxWithAPI) };
+    initialG = plugin.setup(initialG, ctxWithAPI);
   });
 
   const initial = {

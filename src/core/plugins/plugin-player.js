@@ -48,7 +48,7 @@ export default initPlayerState => ({
     };
   },
 
-  setup: ctx => {
+  setup: (G, ctx) => {
     let players = {};
     for (let i = 0; i < ctx.numPlayers; i++) {
       const playerState = {};
@@ -57,6 +57,6 @@ export default initPlayerState => ({
       }
       players[i + ''] = playerState;
     }
-    return { players };
+    return { ...G, players };
   },
 });
