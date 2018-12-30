@@ -9,3 +9,4 @@ npm install
 npm install ./boardgame.io-*.tgz
 rm ./boardgame.io-*.tgz
 npm test
+npm run build

@@ -1,3 +1,17 @@
+## v0.28.1
+
+#### Features
+
+* [[10de6f8](https://github.com/nicolodavis/boardgame.io/commit/10de6f8)] Turn order active player changes (#320)
+* [[58cbd1e](https://github.com/nicolodavis/boardgame.io/commit/58cbd1e)] Redact Log Events (#268)
+* [[ed165a8](https://github.com/nicolodavis/boardgame.io/commit/ed165a8)] Add a server sync status field (#307)
+
+#### Bugfixes
+
+* [[b8ec845](https://github.com/nicolodavis/boardgame.io/commit/b8ec845)] package refactor
+* [[2b5920f](https://github.com/nicolodavis/boardgame.io/commit/2b5920f)] Add Immer to other events (#327)
+* [[873e1f5](https://github.com/nicolodavis/boardgame.io/commit/873e1f5)] server: fix name of property 'credentials' in server API handler for 'leave' (#326)
+
 ## v0.28.0
 
 We now support an alternative style for moves that allows modifying `G` directly.

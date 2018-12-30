@@ -106,10 +106,10 @@ export default [
   },
 
   {
-    input: 'packages/ai-visualize.js',
+    input: 'packages/internal.js',
     external: Object.keys(globals),
-    output: { file: 'dist/ai-visualize.js', format: 'umd' },
-    name: 'AIVisualize',
+    output: { file: 'dist/internal.js', format: 'umd' },
+    name: 'Internal',
     globals,
     plugins,
   },

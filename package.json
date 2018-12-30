@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.28.0",
+  "version": "0.28.1",
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
@@ -34,19 +34,24 @@
     "dist/boardgameio.min.js",
     "dist/boardgameio.es.js",
     "dist/server.js",
+    "dist/master.js",
     "dist/client.js",
     "dist/react.js",
     "dist/react-native.js",
     "dist/core.js",
     "dist/ui.js",
     "dist/ai.js",
+    "dist/ai-visualize.js",
+    "dist/internal.js",
     "server.js",
     "client.js",
+    "master.js",
     "react.js",
     "react-native.js",
     "core.js",
     "ui.js",
-    "ai.js"
+    "ai.js",
+    "ai-visualize.js"
   ],
   "keywords": [
     "react",
@@ -158,7 +163,9 @@
       "server": "./dist/server.js",
       "core": "./dist/core.js",
       "ui": "./dist/ui.js",
-      "ai": "./dist/ai.js"
+      "ai": "./dist/ai.js",
+      "ai-visualize": "./dist/ai-visualize.js",
+      "master": "./dist/master.js"
     }
   },
   "jest": {
