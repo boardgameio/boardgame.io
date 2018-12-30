@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import produce from 'immer';
+import { ApplyPlugins } from '../plugins';
 import { FlowWithPhases } from './flow';
 
 /**
@@ -32,6 +32,8 @@ import { FlowWithPhases } from './flow';
  *     const G = {...};
  *     return G;
  *   },
+ *
+ *   plugins: [plugin1, plugin2, ...],
  *
  *   moves: {
  *     'moveWithoutArgs': (G, ctx) => {
@@ -70,15 +72,20 @@ import { FlowWithPhases } from './flow';
  *                           configuration object for FlowWithPhases().
  *
  * @param {...object} seed - Seed for the PRNG.
+ *
+ * @param {Array} plugins - Array of plugins. Each plugin is a function that wraps
+ *                          the move function and returns a new function that takes
+ *                          its place.
  */
-function Game({ name, setup, moves, playerView, flow, seed }) {
+function Game({ name, setup, moves, playerView, flow, seed, plugins }) {
   if (name === undefined) name = 'default';
   if (setup === undefined) setup = () => ({});
   if (moves === undefined) moves = {};
   if (playerView === undefined) playerView = G => G;
+  if (plugins === undefined) plugins = [];
 
   if (!flow || flow.processGameEvent === undefined) {
-    flow = FlowWithPhases(flow || {});
+    flow = FlowWithPhases({ plugins, ...flow });
   }
 
   return {
@@ -92,7 +99,7 @@ function Game({ name, setup, moves, playerView, flow, seed }) {
       if (moves.hasOwnProperty(action.type)) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        const fn = produce(moves[action.type]);
+        const fn = ApplyPlugins(moves[action.type], plugins);
         return fn(...args);
       }
       return G;
