@@ -190,9 +190,7 @@ export function Flow({
  * @param {Array} redactedMoves - List of moves to be redacted
  *                                from the log.
  *
- * @param {Array} plugins - List of plugins to apply to the move functions.
- *                          Each plugin is a function that wraps a move function
- *                          and returns a new one to replace it.
+ * @param {Array} plugins - List of plugins.
  *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should

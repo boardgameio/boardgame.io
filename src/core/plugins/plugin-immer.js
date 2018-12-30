@@ -12,4 +12,6 @@ import produce from 'immer';
  * Plugin that allows using Immer to make immutable changes
  * to G by just mutating it.
  */
-export default fn => produce(fn);
+export default {
+  fn: move => produce(move),
+};

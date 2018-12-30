@@ -13,6 +13,6 @@ import PluginImmer from './plugin-immer';
  * PluginImmer is always added.
  */
 export const ApplyPlugins = (fn, plugins) => {
-  const reducer = (acc, current) => current(acc);
+  const reducer = (acc, { fn }) => fn(acc);
   return [...plugins, PluginImmer].reduce(reducer, fn);
 };

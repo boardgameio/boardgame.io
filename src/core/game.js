@@ -73,9 +73,20 @@ import { FlowWithPhases } from './flow';
  *
  * @param {...object} seed - Seed for the PRNG.
  *
- * @param {Array} plugins - Array of plugins. Each plugin is a function that wraps
- *                          the move function and returns a new function that takes
- *                          its place.
+ * @param {Array} plugins - List of plugins. Each plugin is an object like the following:
+ *                          {
+ *                            fn: (moveFn) => {
+ *                              return (G, ctx) => {
+ *                                // preprocess G here
+ *                                G = moveFn(G, ctx);
+ *                                // postprocess G here
+ *                                return G;
+ *                              };
+ *                            },
+ *
+ *                            // Optional function to modify G during setup.
+ *                            setup: G => G,
+ *                          }
  */
 function Game({ name, setup, moves, playerView, flow, seed, plugins }) {
   if (name === undefined) name = 'default';
