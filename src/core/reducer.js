@@ -108,7 +108,12 @@ export class ContextEnhancer {
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function CreateGameReducer({ game, numPlayers, multiplayer }) {
+export function CreateGameReducer({
+  game,
+  numPlayers,
+  multiplayer,
+  setupData,
+}) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -124,7 +129,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
-  let initialG = game.setup(ctxWithAPI);
+  let initialG = game.setup(ctxWithAPI, setupData);
   game.plugins.filter(plugin => plugin.setup !== undefined).forEach(plugin => {
     initialG = plugin.setup(initialG, ctxWithAPI);
   });
