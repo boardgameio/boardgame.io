@@ -83,7 +83,7 @@ export const createApiServer = ({ db, games }) => {
     const reducer = CreateGameReducer({
       game,
       numPlayers,
-      gameSetupData: ctx.request.body.gameSetupData,
+      setupData: ctx.request.body.setupData,
     });
     const store = Redux.createStore(reducer);
     const state = store.getState();

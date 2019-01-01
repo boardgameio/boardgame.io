@@ -173,10 +173,10 @@ describe('.createApiServer', () => {
       games = [
         Game({
           name: 'foo',
-          setup: (ctx, gameSetupData) =>
-            gameSetupData
+          setup: (ctx, setupData) =>
+            setupData
               ? {
-                  colors: gameSetupData.colors,
+                  colors: setupData.colors,
                 }
               : {},
         }),
@@ -193,7 +193,7 @@ describe('.createApiServer', () => {
           .post('/games/foo/create')
           .send({
             numPlayers: 3,
-            gameSetupData: {
+            setupData: {
               colors: {
                 '0': 'green',
                 '1': 'red',

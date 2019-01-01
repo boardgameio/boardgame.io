@@ -112,7 +112,7 @@ export function CreateGameReducer({
   game,
   numPlayers,
   multiplayer,
-  gameSetupData,
+  setupData,
 }) {
   if (!numPlayers) {
     numPlayers = 2;
@@ -129,7 +129,7 @@ export function CreateGameReducer({
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
-  let initialG = game.setup(ctxWithAPI, gameSetupData);
+  let initialG = game.setup(ctxWithAPI, setupData);
   game.plugins.filter(plugin => plugin.setup !== undefined).forEach(plugin => {
     initialG = plugin.setup(initialG, ctxWithAPI);
   });
