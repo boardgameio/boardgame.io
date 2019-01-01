@@ -12,6 +12,7 @@ import {
   UpdateTurnOrderState,
   TurnOrder,
 } from './turn-order';
+import { ApplyPlugins } from './plugins/apply';
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
 import * as logging from './logger';
@@ -189,6 +190,8 @@ export function Flow({
  * @param {Array} redactedMoves - List of moves to be redacted
  *                                from the log.
  *
+ * @param {Array} plugins - List of plugins.
+ *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
  *                                       be executed optimistically on
@@ -265,6 +268,7 @@ export function FlowWithPhases({
   allowedMoves,
   redactedMoves,
   optimisticUpdate,
+  plugins,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -281,6 +285,9 @@ export function FlowWithPhases({
   }
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
+  }
+  if (plugins === undefined) {
+    plugins = [];
   }
   if (!phases) phases = {};
   if (!startingPhase) startingPhase = 'default';
@@ -310,9 +317,11 @@ export function FlowWithPhases({
     if (conf.onPhaseBegin === undefined) {
       conf.onPhaseBegin = G => G;
     }
+    conf.onPhaseBegin = ApplyPlugins(conf.onPhaseBegin, plugins);
     if (conf.onPhaseEnd === undefined) {
       conf.onPhaseEnd = G => G;
     }
+    conf.onPhaseEnd = ApplyPlugins(conf.onPhaseEnd, plugins);
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
@@ -325,12 +334,15 @@ export function FlowWithPhases({
     if (conf.onTurnBegin === undefined) {
       conf.onTurnBegin = onTurnBegin;
     }
+    conf.onTurnBegin = ApplyPlugins(conf.onTurnBegin, plugins);
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
+    conf.onTurnEnd = ApplyPlugins(conf.onTurnEnd, plugins);
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
+    conf.onMove = ApplyPlugins(conf.onMove, plugins);
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }

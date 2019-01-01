@@ -6,6 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Master } from '../src/master/master';
+import { Debug } from '../src/client/debug/debug.js';
 
-export { Master };
+export { Debug };

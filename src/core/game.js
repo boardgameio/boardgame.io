@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import produce from 'immer';
+import { ApplyPlugins } from './plugins/apply';
 import { FlowWithPhases } from './flow';
 
 /**
@@ -32,6 +32,8 @@ import { FlowWithPhases } from './flow';
  *     const G = {...};
  *     return G;
  *   },
+ *
+ *   plugins: [plugin1, plugin2, ...],
  *
  *   moves: {
  *     'moveWithoutArgs': (G, ctx) => {
@@ -70,15 +72,35 @@ import { FlowWithPhases } from './flow';
  *                           configuration object for FlowWithPhases().
  *
  * @param {...object} seed - Seed for the PRNG.
+ *
+ * @param {Array} plugins - List of plugins. Each plugin is an object like the following:
+ *                          {
+ *                            // Wraps a move / trigger function and returns
+ *                            // the wrapped function. The wrapper can do anything
+ *                            // it wants, but will typically be used to customize G.
+ *                            wrapper: (fn) => {
+ *                              return (G, ctx, ...args) => {
+ *                                G = preprocess(G);
+ *                                G = fn(G, ctx, ...args);
+ *                                G = postprocess(G);
+ *                                return G;
+ *                              };
+ *                            },
+ *
+ *                            // Optional: Called during setup. Can be used to
+ *                            // augment G with additional state during setup.
+ *                            setup: (G, ctx) => G,
+ *                          }
  */
-function Game({ name, setup, moves, playerView, flow, seed }) {
+function Game({ name, setup, moves, playerView, flow, seed, plugins }) {
   if (name === undefined) name = 'default';
   if (setup === undefined) setup = () => ({});
   if (moves === undefined) moves = {};
   if (playerView === undefined) playerView = G => G;
+  if (plugins === undefined) plugins = [];
 
   if (!flow || flow.processGameEvent === undefined) {
-    flow = FlowWithPhases(flow || {});
+    flow = FlowWithPhases({ plugins, ...flow });
   }
 
   return {
@@ -87,12 +109,13 @@ function Game({ name, setup, moves, playerView, flow, seed }) {
     playerView,
     flow,
     seed,
+    plugins,
     moveNames: Object.getOwnPropertyNames(moves),
     processMove: (G, action, ctx) => {
       if (moves.hasOwnProperty(action.type)) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        const fn = produce(moves[action.type]);
+        const fn = ApplyPlugins(moves[action.type], plugins);
         return fn(...args);
       }
       return G;

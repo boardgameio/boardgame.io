@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "boardgame.io": "file:boardgame.io-0.27.1.tgz",
+    "boardgame.io": "file:boardgame.io-0.28.0.tgz",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-scripts": "2.0.3"
