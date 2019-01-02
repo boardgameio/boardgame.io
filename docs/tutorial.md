@@ -10,8 +10,7 @@ including [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator) syntax.
 
 ```
-$ npm install -g create-react-app
-$ create-react-app game
+$ npx create-react-app game
 $ cd game
 $ npm install --save boardgame.io
 ```
