@@ -12,7 +12,7 @@ import {
   UpdateTurnOrderState,
   TurnOrder,
 } from './turn-order';
-import { ApplyPlugins } from './plugins/main';
+import { FnWrap } from './plugins/main';
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
 import * as logging from './logger';
@@ -317,11 +317,11 @@ export function FlowWithPhases({
     if (conf.onPhaseBegin === undefined) {
       conf.onPhaseBegin = G => G;
     }
-    conf.onPhaseBegin = ApplyPlugins(conf.onPhaseBegin, plugins);
+    conf.onPhaseBegin = FnWrap(conf.onPhaseBegin, plugins);
     if (conf.onPhaseEnd === undefined) {
       conf.onPhaseEnd = G => G;
     }
-    conf.onPhaseEnd = ApplyPlugins(conf.onPhaseEnd, plugins);
+    conf.onPhaseEnd = FnWrap(conf.onPhaseEnd, plugins);
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
@@ -334,15 +334,15 @@ export function FlowWithPhases({
     if (conf.onTurnBegin === undefined) {
       conf.onTurnBegin = onTurnBegin;
     }
-    conf.onTurnBegin = ApplyPlugins(conf.onTurnBegin, plugins);
+    conf.onTurnBegin = FnWrap(conf.onTurnBegin, plugins);
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
-    conf.onTurnEnd = ApplyPlugins(conf.onTurnEnd, plugins);
+    conf.onTurnEnd = FnWrap(conf.onTurnEnd, plugins);
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
-    conf.onMove = ApplyPlugins(conf.onMove, plugins);
+    conf.onMove = FnWrap(conf.onMove, plugins);
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }

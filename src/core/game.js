@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { ApplyPlugins } from './plugins/main';
+import { FnWrap } from './plugins/main';
 import { FlowWithPhases } from './flow';
 
 /**
@@ -115,7 +115,7 @@ function Game({ name, setup, moves, playerView, flow, seed, plugins }) {
       if (moves.hasOwnProperty(action.type)) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        const fn = ApplyPlugins(moves[action.type], plugins);
+        const fn = FnWrap(moves[action.type], plugins);
         return fn(...args);
       }
       return G;

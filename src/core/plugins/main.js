@@ -9,13 +9,13 @@
 import PluginImmer from './plugin-immer';
 
 /**
- * Applies the provided plugins to the given move function.
+ * Applies the provided plugins to the given move / flow function.
  * PluginImmer is always added.
  *
  * @param {function} fn - The move function or trigger to apply the plugins to.
  * @param {Array} plugins - Array of plugins.
  */
-export const ApplyPlugins = (fn, plugins) => {
+export const FnWrap = (fn, plugins) => {
   const reducer = (acc, { fnWrap }) => fnWrap(acc);
   return [PluginImmer, ...plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
