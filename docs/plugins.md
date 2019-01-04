@@ -25,10 +25,12 @@ A plugin is an object that contains the following fields.
   },
 
   // Optional.
-  // Called during setup. The return value is merged
-  // with the initial value of G. This is typically
-  // used to store state that is managed by this
-  setup: ctx => state,
+  // Called during setup in order to add state to G.
+  setupG: (G, ctx) => G,
+
+  // Optional.
+  // Called during setup in order to add state to ctx.
+  setupCtx: (ctx) => ctx,
 }
 ```
 

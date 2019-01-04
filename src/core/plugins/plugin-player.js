@@ -48,7 +48,7 @@ export default initPlayerState => ({
     };
   },
 
-  setup: (G, ctx) => {
+  setupG: (G, ctx) => {
     let players = {};
     for (let i = 0; i < ctx.numPlayers; i++) {
       const playerState = {};

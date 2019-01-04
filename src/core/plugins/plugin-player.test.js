@@ -13,7 +13,7 @@ import { makeMove, gameEvent } from '../action-creators';
 
 describe('default values', () => {
   test('playerState is not passed', () => {
-    const value = PluginPlayer().setup({}, { numPlayers: 2 });
+    const value = PluginPlayer().setupG({}, { numPlayers: 2 });
     expect(value).toEqual({ players: { '0': {}, '1': {} } });
   });
 });

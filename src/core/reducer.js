@@ -126,12 +126,21 @@ export function CreateGameReducer({
   }
   ctx._random = { seed };
 
+  // Pass ctx through all the plugins that want to modify it.
+  game.plugins
+    .filter(plugin => plugin.setupCtx !== undefined)
+    .forEach(plugin => {
+      ctx = plugin.setupCtx(ctx);
+    });
+
+  // Augment ctx with the enhancers (TODO: move these into plugins).
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
+  // Pass G through all the plugins that want to modify it.
   let initialG = game.setup(ctxWithAPI, setupData);
-  game.plugins.filter(plugin => plugin.setup !== undefined).forEach(plugin => {
-    initialG = plugin.setup(initialG, ctxWithAPI);
+  game.plugins.filter(plugin => plugin.setupG !== undefined).forEach(plugin => {
+    initialG = plugin.setupG(initialG, ctxWithAPI);
   });
 
   const initial = {
