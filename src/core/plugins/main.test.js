@@ -17,14 +17,21 @@ describe('plugins', () => {
   beforeAll(() => {
     game = Game({
       moves: {
-        A: G => G,
+        A: (G, ctx) => ({ ...G, ctx }),
       },
 
       plugins: [
         {
-          fnWrap: () => G => ({ ...G, fnWrap: true }),
+          fnWrap: fn => (G, ctx) => {
+            G = fn(G, ctx);
+            return { ...G, fnWrap: true };
+          },
           setupG: G => ({ ...G, initG: true }),
           setupCtx: ctx => ({ ...ctx, initCtx: true }),
+          addToCtx: ctx => ({ ...ctx, addToCtx: true }),
+          removeFromCtx: ctx => ({ ...ctx, removeFromCtx: true }),
+          addToG: G => ({ ...G, addToG: true }),
+          removeFromG: G => ({ ...G, removeFromG: true }),
         },
       ],
     });
@@ -46,5 +53,11 @@ describe('plugins', () => {
     let state = reducer(undefined, { type: 'init' });
     state = reducer(state, makeMove('A'));
     expect(state.G).toMatchObject({ fnWrap: true });
+  });
+
+  test('addToG / addToCtx', () => {
+    let state = reducer(undefined, { type: 'init' });
+    state = reducer(state, makeMove('A'));
+    expect(state.G).toMatchObject({ addToG: true, ctx: { addToCtx: true } });
   });
 });

@@ -87,7 +87,7 @@ export class ContextEnhancer {
     return ctxWithoutAPI;
   }
 
-  update(state, updateEvents) {
+  _update(state, updateEvents) {
     let newState = updateEvents ? this.events.update(state) : state;
     newState = this.random.update(newState);
     newState = this.log.update(newState);
@@ -95,7 +95,7 @@ export class ContextEnhancer {
   }
 
   updateAndDetach(state, updateEvents) {
-    const newState = this.update(state, updateEvents);
+    const newState = this._update(state, updateEvents);
     newState.ctx = ContextEnhancer.detachAllFromContext(newState.ctx);
     return newState;
   }
