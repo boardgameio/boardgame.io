@@ -1,3 +1,12 @@
+## v0.29.1
+
+#### Features
+
+* [[ff749e3](https://github.com/nicolodavis/boardgame.io/commit/ff749e3)] add addTo / removeFrom to plugin API
+* [[9df8145](https://github.com/nicolodavis/boardgame.io/commit/9df8145)] split plugin.setup into setupG and setupCtx
+* [[d2d44f9](https://github.com/nicolodavis/boardgame.io/commit/d2d44f9)] rename plugin.wrapper to plugin.fnWrap
+* [[ca5da32](https://github.com/nicolodavis/boardgame.io/commit/ca5da32)] Passing arbitrary data to game setup (#315)
+
 ## v0.29.0
 
 #### Features
