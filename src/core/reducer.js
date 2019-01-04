@@ -10,6 +10,7 @@ import { parse, stringify } from 'flatted';
 import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
+import * as plugins from './plugins/main';
 
 /**
  * Moves can return this when they want to indicate
@@ -127,21 +128,16 @@ export function CreateGameReducer({
   ctx._random = { seed };
 
   // Pass ctx through all the plugins that want to modify it.
-  game.plugins
-    .filter(plugin => plugin.setupCtx !== undefined)
-    .forEach(plugin => {
-      ctx = plugin.setupCtx(ctx);
-    });
+  ctx = plugins.SetupCtx(ctx, game.plugins);
 
   // Augment ctx with the enhancers (TODO: move these into plugins).
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
-  // Pass G through all the plugins that want to modify it.
   let initialG = game.setup(ctxWithAPI, setupData);
-  game.plugins.filter(plugin => plugin.setupG !== undefined).forEach(plugin => {
-    initialG = plugin.setupG(initialG, ctxWithAPI);
-  });
+
+  // Pass G through all the plugins that want to modify it.
+  initialG = plugins.SetupG(initialG, ctxWithAPI, game.plugins);
 
   const initial = {
     // User managed state.
