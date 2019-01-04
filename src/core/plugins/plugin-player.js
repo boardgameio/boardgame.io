@@ -14,7 +14,7 @@
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
 export default initPlayerState => ({
-  wrapper: moveFn => {
+  fnWrap: moveFn => {
     return (G, ctx, ...args) => {
       const current = ctx.currentPlayer;
       const player = G.players[current];

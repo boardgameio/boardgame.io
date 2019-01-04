@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { CreateGameReducer } from './reducer';
-import { makeMove, gameEvent } from './action-creators';
+import { gameEvent } from './action-creators';
 
 const game = Game({
   moves: {
@@ -20,26 +20,6 @@ const game = Game({
 test('basic', () => {
   expect(game.moveNames).toEqual(['A', 'B']);
   expect(typeof game.processMove).toEqual('function');
-});
-
-describe('plugins', () => {
-  let game;
-  beforeAll(() => {
-    game = Game({
-      moves: {
-        A: G => G,
-      },
-
-      plugins: [{ wrapper: () => () => ({ plugin: true }) }],
-    });
-  });
-
-  test('plugin is invoked', () => {
-    const reducer = CreateGameReducer({ game });
-    let state = reducer(undefined, { type: 'init' });
-    state = reducer(state, makeMove('A'));
-    expect(state.G).toEqual({ plugin: true });
-  });
 });
 
 test('processMove', () => {

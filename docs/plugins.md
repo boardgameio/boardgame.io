@@ -1,21 +1,23 @@
 # Plugins
 
-The Plugin API allows you to create custom interfaces in
-`G`. These can be small helpers or entire game systems that
-target a genre of games.
+The Plugin API allows you to provide off-the-shelf objects
+that add custom functionality to [boardgame.io](https://boardgame.io/).
+You can create wrappers around moves, provide custom interfaces
+in `G` and much more.
 
 #### Creating a Plugin
 
-A plugin is an object that contains the following fields:
+A plugin is an object that contains the following fields.
 
 ```js
 {
+  // Optional.
   // Function that accepts a move / trigger function
   // and returns another function that wraps it. This
   // wrapper can modify G before passing it down to
   // the wrapped function. It is a good practice to
   // undo the change at the end of the call.
-  wrapper: (fn) => (G, ctx, ...args) => {
+  fnWrap: (fn) => (G, ctx, ...args) => {
     G = preprocess(G);
     G = fn(G, ctx, ...args);
     G = postprocess(G);

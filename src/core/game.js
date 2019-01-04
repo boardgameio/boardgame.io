@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { ApplyPlugins } from './plugins/apply';
+import { ApplyPlugins } from './plugins/main';
 import { FlowWithPhases } from './flow';
 
 /**
@@ -75,10 +75,10 @@ import { FlowWithPhases } from './flow';
  *
  * @param {Array} plugins - List of plugins. Each plugin is an object like the following:
  *                          {
- *                            // Wraps a move / trigger function and returns
+ *                            // Optional: Wraps a move / trigger function and returns
  *                            // the wrapped function. The wrapper can do anything
  *                            // it wants, but will typically be used to customize G.
- *                            wrapper: (fn) => {
+ *                            fnWrap: (fn) => {
  *                              return (G, ctx, ...args) => {
  *                                G = preprocess(G);
  *                                G = fn(G, ctx, ...args);
