@@ -6,14 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { LobbyConnection } from './lobby.js';
+import { LobbyConnection } from './connection.js';
 
 describe('lobby', () => {
   let lobby;
   let gameInstance1, gameInstance2;
   let jsonResult = [];
   let nextStatus = 200;
-  let spyCb = jest.fn();
 
   beforeEach(async () => {
     gameInstance1 = { gameID: 'gameID_1', players: [{ id: '0' }] };
@@ -54,7 +53,6 @@ describe('lobby', () => {
           },
         ],
         playerName: 'Bob',
-        onUpdateCredentials: spyCb,
       });
       expect(await lobby.refresh()).toBe(true);
     });
@@ -94,7 +92,6 @@ describe('lobby', () => {
           name: 'Bob',
         });
         expect(lobby.playerCredentials).toEqual('SECRET');
-        expect(spyCb).toHaveBeenCalledWith('Bob', 'SECRET');
         expect(lobby.errorMsg).toBe('');
       });
       test('when the room does not exist', async () => {
@@ -135,7 +132,6 @@ describe('lobby', () => {
         expect(await lobby.leave('game1', 'gameID_1')).toBe(true);
         expect(fetch).toHaveBeenCalledTimes(5);
         expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
-        expect(spyCb).toHaveBeenCalledWith('Bob', null);
         expect(lobby.errorMsg).toBe('');
       });
       test('when the room does not exist', async () => {

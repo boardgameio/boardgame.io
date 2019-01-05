@@ -7,17 +7,10 @@
  */
 
 class _LobbyConnectionImpl {
-  constructor({
-    server,
-    gameComponents,
-    playerName,
-    playerCredentials,
-    onUpdateCredentials,
-  }) {
+  constructor({ server, gameComponents, playerName, playerCredentials }) {
     this.gameComponents = gameComponents;
     this.playerName = playerName || 'Visitor';
     this.playerCredentials = playerCredentials;
-    this.onUpdateCredentials = onUpdateCredentials || function() {};
     this.server = server;
     this.gameInstances = [];
     this.errorMsg = '';
@@ -95,7 +88,6 @@ class _LobbyConnectionImpl {
       const json = await resp.json();
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
-      this.onUpdateCredentials(this.playerName, this.playerCredentials);
     } catch (error) {
       this.errorMsg = 'failed to join room ' + gameID + ' (' + error + ')';
       return false;
@@ -124,7 +116,6 @@ class _LobbyConnectionImpl {
           if (resp.status !== 200) throw 'HTTP status ' + resp.status;
           delete player.name;
           delete this.playerCredentials;
-          this.onUpdateCredentials(this.playerName, null);
           this.errorMsg = '';
           return true;
         }
@@ -178,9 +169,10 @@ class _LobbyConnectionImpl {
  *
  * Lobby model.
  *
- * @param {Array}  gameComponents - A map of Board and Game objects for the supported games.
- * @param {string} playerName - The name of the player.
- * @param {string} server - '<host>:<port>' of the server.
+ * @param {Array}    gameComponents - A map of Board and Game objects for the supported games.
+ * @param {string}   playerName - The name of the player.
+ * @param {string}   server - '<host>:<port>' of the server.
+ * @param {string}   playerCredentials - The credentials currently used by the player, if any.
  *
  * Returns:
  *   A JS object that synchronizes the list of running game instances with the server and provides an API to create/join/start instances.

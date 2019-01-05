@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export class LobbyLoginForm extends React.Component {
+class LobbyLoginForm extends React.Component {
   static propTypes = {
     playerName: PropTypes.string,
     onEnter: PropTypes.func.isRequired,
@@ -21,16 +21,9 @@ export class LobbyLoginForm extends React.Component {
   state = {
     playerName: this.props.playerName,
     nameErrorMsg: '',
-    hasError: null,
   };
 
-  componentDidCatch(error) {
-    this.setState({ hasError: '' + error });
-  }
-
   render() {
-    if (this.state.hasError)
-      return <p>Failed to render LobbyLoginForm: {this.state.hasError}</p>;
     return (
       <div>
         <p className="phase-title">Choose a player name:</p>
@@ -73,3 +66,5 @@ export class LobbyLoginForm extends React.Component {
     });
   }
 }
+
+export default LobbyLoginForm;
