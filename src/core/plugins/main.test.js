@@ -18,6 +18,9 @@ describe('plugins', () => {
     game = Game({
       moves: {
         A: (G, ctx) => ({ ...G, ctx }),
+        B: G => {
+          G.immer = true;
+        },
       },
 
       plugins: [
@@ -37,6 +40,12 @@ describe('plugins', () => {
     });
 
     reducer = CreateGameReducer({ game });
+  });
+
+  test('immer works', () => {
+    let state = reducer(undefined, { type: 'init' });
+    state = reducer(state, makeMove('B'));
+    expect(state.G).toMatchObject({ immer: true });
   });
 
   test('setupG', () => {

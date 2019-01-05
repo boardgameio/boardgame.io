@@ -111,17 +111,17 @@ export const RemoveFromG = (G, plugins) => {
  * @param {Array} plugins - Array of plugins.
  */
 export const FnWrap = (fn, plugins) => {
-  const initialWrap = (G, ctx, ...args) => {
+  const reducer = (acc, { fnWrap }) => fnWrap(acc);
+  const g = [...DEFAULT_PLUGINS, ...plugins]
+    .filter(plugin => plugin.fnWrap !== undefined)
+    .reduce(reducer, fn);
+
+  return (G, ctx, ...args) => {
     G = AddToG(G, plugins);
     ctx = AddToCtx(ctx, plugins);
-    G = fn(G, ctx, ...args);
+    G = g(G, ctx, ...args);
     ctx = RemoveFromCtx(ctx, plugins);
     ctx = RemoveFromG(G, plugins);
     return G;
   };
-
-  const reducer = (acc, { fnWrap }) => fnWrap(acc);
-  return [...DEFAULT_PLUGINS, ...plugins]
-    .filter(plugin => plugin.fnWrap !== undefined)
-    .reduce(reducer, initialWrap);
 };
