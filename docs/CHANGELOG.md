@@ -1,3 +1,9 @@
+## v0.29.2
+
+#### Bugfixes
+
+* [[5d74c95](https://github.com/nicolodavis/boardgame.io/commit/5d74c95)] fix immer plugin order
+
 ## v0.29.1
 
 #### Features
