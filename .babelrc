@@ -1,14 +1,11 @@
 {
-  "presets": [["env", { "modules": false }], "react"],
+  "presets": [
+    ["@babel/preset-env", { "modules": false }],
+    "@babel/preset-react"
+  ],
   "env": {
-    "targets": {
-      "node": "current"
-    },
     "test": {
       "plugins": ["transform-es2015-modules-commonjs"]
-    },
-    "rollup": {
-      "plugins": ["external-helpers"]
     }
   },
   "plugins": [
@@ -20,6 +17,6 @@
         }
       }
     ],
-    "transform-object-rest-spread"
+    "@babel/plugin-proposal-class-properties"
   ]
 }
