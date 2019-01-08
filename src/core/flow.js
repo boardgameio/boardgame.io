@@ -190,7 +190,7 @@ export function Flow({
  * @param {Array} redactedMoves - List of moves to be redacted
  *                                from the log.
  *
- * @param {Array} plugins - List of plugins.
+ * @param {object} game - The game object.
  *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
@@ -268,7 +268,7 @@ export function FlowWithPhases({
   allowedMoves,
   redactedMoves,
   optimisticUpdate,
-  plugins,
+  game,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -286,8 +286,8 @@ export function FlowWithPhases({
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
   }
-  if (plugins === undefined) {
-    plugins = [];
+  if (game === undefined) {
+    game = { plugins: [] };
   }
   if (!phases) phases = {};
   if (!startingPhase) startingPhase = 'default';
@@ -317,11 +317,11 @@ export function FlowWithPhases({
     if (conf.onPhaseBegin === undefined) {
       conf.onPhaseBegin = G => G;
     }
-    conf.onPhaseBegin = FnWrap(conf.onPhaseBegin, plugins);
+    conf.onPhaseBegin = FnWrap(conf.onPhaseBegin, game);
     if (conf.onPhaseEnd === undefined) {
       conf.onPhaseEnd = G => G;
     }
-    conf.onPhaseEnd = FnWrap(conf.onPhaseEnd, plugins);
+    conf.onPhaseEnd = FnWrap(conf.onPhaseEnd, game);
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
@@ -334,15 +334,15 @@ export function FlowWithPhases({
     if (conf.onTurnBegin === undefined) {
       conf.onTurnBegin = onTurnBegin;
     }
-    conf.onTurnBegin = FnWrap(conf.onTurnBegin, plugins);
+    conf.onTurnBegin = FnWrap(conf.onTurnBegin, game);
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
-    conf.onTurnEnd = FnWrap(conf.onTurnEnd, plugins);
+    conf.onTurnEnd = FnWrap(conf.onTurnEnd, game);
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
-    conf.onMove = FnWrap(conf.onMove, plugins);
+    conf.onMove = FnWrap(conf.onMove, game);
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
