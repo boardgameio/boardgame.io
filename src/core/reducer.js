@@ -10,7 +10,7 @@ import { parse, stringify } from 'flatted';
 import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
-import * as plugins from './plugins/main';
+import * as plugins from '../plugins/main';
 
 /**
  * Moves can return this when they want to indicate

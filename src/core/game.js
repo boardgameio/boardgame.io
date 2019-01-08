@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { FnWrap } from './plugins/main';
+import { FnWrap } from '../plugins/main';
 import { FlowWithPhases } from './flow';
 
 /**

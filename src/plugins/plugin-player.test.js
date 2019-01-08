@@ -7,9 +7,9 @@
  */
 
 import PluginPlayer from './plugin-player';
-import Game from '../game';
-import { CreateGameReducer } from '../reducer';
-import { makeMove, gameEvent } from '../action-creators';
+import Game from '../core/game';
+import { CreateGameReducer } from '../core/reducer';
+import { makeMove, gameEvent } from '../core/action-creators';
 
 describe('default values', () => {
   test('playerState is not passed', () => {

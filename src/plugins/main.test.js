@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from '../game';
-import { CreateGameReducer } from '../reducer';
-import { makeMove } from '../action-creators';
+import Game from '../core/game';
+import { CreateGameReducer } from '../core/reducer';
+import { makeMove } from '../core/action-creators';
 
 describe('plugins', () => {
   let game;
