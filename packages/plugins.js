@@ -6,6 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import PluginPlayer from '../src/core/plugins/plugin-player';
+import PluginPlayer from '../src/plugins/plugin-player';
 
 export { PluginPlayer };
