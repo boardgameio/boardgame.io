@@ -21,9 +21,10 @@ const DEFAULT_PLUGINS = [PluginImmer];
  */
 export const SetupCtx = (ctx, game) => {
   [...DEFAULT_PLUGINS, ...game.plugins]
-    .filter(plugin => plugin.setupCtx !== undefined)
+    .filter(plugin => plugin.ctx !== undefined)
+    .filter(plugin => plugin.ctx.setup !== undefined)
     .forEach(plugin => {
-      ctx = plugin.setupCtx(ctx, game);
+      ctx = plugin.ctx.setup(ctx, game);
     });
   return ctx;
 };
@@ -37,9 +38,10 @@ export const SetupCtx = (ctx, game) => {
  */
 export const SetupG = (G, ctx, game) => {
   [...DEFAULT_PLUGINS, ...game.plugins]
-    .filter(plugin => plugin.setupG !== undefined)
+    .filter(plugin => plugin.G !== undefined)
+    .filter(plugin => plugin.G.setup !== undefined)
     .forEach(plugin => {
-      G = plugin.setupG(G, ctx, game);
+      G = plugin.G.setup(G, ctx, game);
     });
   return G;
 };
@@ -50,26 +52,28 @@ export const SetupG = (G, ctx, game) => {
  * @param {object} ctx - The ctx object.
  * @param {object} game - The game object.
  */
-export const AddToCtx = (ctx, game) => {
+export const CtxPreMove = (ctx, game) => {
   [...DEFAULT_PLUGINS, ...game.plugins]
-    .filter(plugin => plugin.addToCtx !== undefined)
+    .filter(plugin => plugin.ctx !== undefined)
+    .filter(plugin => plugin.ctx.preMove !== undefined)
     .forEach(plugin => {
-      ctx = plugin.addToCtx(ctx, game);
+      ctx = plugin.ctx.preMove(ctx, game);
     });
   return ctx;
 };
 
 /**
- * Removes the provided plugins to ctx after processing a move / event.
+ * Postprocesses ctx after a move / event.
  *
  * @param {object} ctx - The ctx object.
  * @param {object} game - The game object.
  */
-export const RemoveFromCtx = (ctx, game) => {
+export const CtxPostMove = (ctx, game) => {
   [...DEFAULT_PLUGINS, ...game.plugins]
-    .filter(plugin => plugin.removeFromCtx !== undefined)
+    .filter(plugin => plugin.ctx !== undefined)
+    .filter(plugin => plugin.ctx.postMove !== undefined)
     .forEach(plugin => {
-      ctx = plugin.removeFromCtx(ctx, game);
+      ctx = plugin.ctx.postMove(ctx, game);
     });
   return ctx;
 };
@@ -80,26 +84,28 @@ export const RemoveFromCtx = (ctx, game) => {
  * @param {object} G - The G object.
  * @param {object} game - The game object.
  */
-export const AddToG = (G, game) => {
+export const GPreMove = (G, game) => {
   [...DEFAULT_PLUGINS, ...game.plugins]
-    .filter(plugin => plugin.addToG !== undefined)
+    .filter(plugin => plugin.G !== undefined)
+    .filter(plugin => plugin.G.preMove !== undefined)
     .forEach(plugin => {
-      G = plugin.addToG(G, game);
+      G = plugin.G.preMove(G, game);
     });
   return G;
 };
 
 /**
- * Removes the provided plugins to G after processing a move / event.
+ * Postprocesses G after a move / event.
  *
  * @param {object} G - The G object.
  * @param {object} game - The game object.
  */
-export const RemoveFromG = (G, game) => {
+export const GPostMove = (G, game) => {
   [...DEFAULT_PLUGINS, ...game.plugins]
-    .filter(plugin => plugin.removeFromG !== undefined)
+    .filter(plugin => plugin.G !== undefined)
+    .filter(plugin => plugin.G.postMove !== undefined)
     .forEach(plugin => {
-      G = plugin.removeFromG(G, game);
+      G = plugin.G.postMove(G, game);
     });
   return G;
 };
@@ -111,17 +117,17 @@ export const RemoveFromG = (G, game) => {
  * @param {object} game - The game object.
  */
 export const FnWrap = (fn, game) => {
-  const reducer = (acc, { fnWrap }) => fnWrap(acc);
+  const reducer = (acc, { fnWrap }) => fnWrap(acc, game);
   const g = [...DEFAULT_PLUGINS, ...game.plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
     .reduce(reducer, fn);
 
   return (G, ctx, ...args) => {
-    G = AddToG(G, game);
-    ctx = AddToCtx(ctx, game);
+    G = GPreMove(G, game);
+    ctx = CtxPreMove(ctx, game);
     G = g(G, ctx, ...args);
-    ctx = RemoveFromCtx(ctx, game);
-    ctx = RemoveFromG(G, game);
+    ctx = CtxPostMove(ctx, game);
+    ctx = GPostMove(G, game);
     return G;
   };
 };

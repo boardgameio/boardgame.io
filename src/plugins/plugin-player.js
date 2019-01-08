@@ -48,15 +48,17 @@ export default initPlayerState => ({
     };
   },
 
-  setupG: (G, ctx) => {
-    let players = {};
-    for (let i = 0; i < ctx.numPlayers; i++) {
-      const playerState = {};
-      if (initPlayerState !== undefined) {
-        initPlayerState(i + '');
+  G: {
+    setup: (G, ctx) => {
+      let players = {};
+      for (let i = 0; i < ctx.numPlayers; i++) {
+        const playerState = {};
+        if (initPlayerState !== undefined) {
+          initPlayerState(i + '');
+        }
+        players[i + ''] = playerState;
       }
-      players[i + ''] = playerState;
-    }
-    return { ...G, players };
+      return { ...G, players };
+    },
   },
 });

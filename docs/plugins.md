@@ -8,29 +8,47 @@ in `G` and much more.
 #### Creating a Plugin
 
 A plugin is an object that contains the following fields.
+All fields are optional and typically accept the `game`
+object as a parameter.
 
 ```js
 {
-  // Optional.
   // Function that accepts a move / trigger function
   // and returns another function that wraps it. This
   // wrapper can modify G before passing it down to
   // the wrapped function. It is a good practice to
-  // undo the change at the end of the call.
-  fnWrap: (fn) => (G, ctx, ...args) => {
+  // undo the change at the end of the call. You can
+  // also use the more convenient preMove / postMove
+  // hooks below if all you desire is to preprocess
+  // and postprocess G.
+  fnWrap: (fn, game) => (G, ctx, ...args) => {
     G = preprocess(G);
     G = fn(G, ctx, ...args);
     G = postprocess(G);
     return G;
   },
 
-  // Optional.
-  // Called during setup in order to add state to G.
-  setupG: (G, ctx) => G,
+  G: {
+    // Called during setup in order to add state to G.
+    setup: (G, ctx, game) => G,
 
-  // Optional.
-  // Called during setup in order to add state to ctx.
-  setupCtx: (ctx) => ctx,
+    // Called right before a move / event in order to preprocess G.
+    preMove: (G, game) => G,
+
+    // Called right after a move / event in order to postprocess G.
+    postMove: (G, game) => G,
+  },
+
+  ctx: {
+    // Called during setup in order to add state to ctx.
+    setup: (ctx, game) => ctx,
+
+    // Called right before a move / event in order to preprocess ctx.
+    preMove: (ctx, game) => ctx,
+
+    // Called right after a move / event in order to postprocess ctx.
+    postMove: (ctx, game) => ctx,
+  },
 }
 ```
 

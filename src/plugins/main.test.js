@@ -29,12 +29,16 @@ describe('plugins', () => {
             G = fn(G, ctx);
             return { ...G, fnWrap: true };
           },
-          setupG: G => ({ ...G, initG: true }),
-          setupCtx: ctx => ({ ...ctx, initCtx: true }),
-          addToCtx: ctx => ({ ...ctx, addToCtx: true }),
-          removeFromCtx: ctx => ({ ...ctx, removeFromCtx: true }),
-          addToG: G => ({ ...G, addToG: true }),
-          removeFromG: G => ({ ...G, removeFromG: true }),
+          G: {
+            setup: G => ({ ...G, initG: true }),
+            preMove: G => ({ ...G, addToG: true }),
+            postMove: G => ({ ...G, removeFromG: true }),
+          },
+          ctx: {
+            setup: ctx => ({ ...ctx, initCtx: true }),
+            preMove: ctx => ({ ...ctx, addToCtx: true }),
+            postMove: ctx => ({ ...ctx, removeFromCtx: true }),
+          },
         },
       ],
     });
