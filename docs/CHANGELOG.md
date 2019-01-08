@@ -1,3 +1,10 @@
+## v0.29.3
+
+#### Features
+
+* [[da1eac6](https://github.com/nicolodavis/boardgame.io/commit/da1eac6)] rename plugin api functions
+* [[659007a](https://github.com/nicolodavis/boardgame.io/commit/659007a)] pass game object to plugins
+
 ## v0.29.2
 
 #### Bugfixes
