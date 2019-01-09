@@ -1,3 +1,9 @@
+## v0.29.5
+
+#### Features
+
+* [[7188222](https://github.com/nicolodavis/boardgame.io/commit/7188222)] add plugin.onPhaseBegin
+
 ## v0.29.4
 
 #### Features
