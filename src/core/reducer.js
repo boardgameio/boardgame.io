@@ -128,7 +128,7 @@ export function CreateGameReducer({
   ctx._random = { seed };
 
   // Pass ctx through all the plugins that want to modify it.
-  ctx = plugins.SetupCtx(ctx, game);
+  ctx = plugins.ctx.setup(ctx, game);
 
   // Augment ctx with the enhancers (TODO: move these into plugins).
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
@@ -137,7 +137,7 @@ export function CreateGameReducer({
   let initialG = game.setup(ctxWithAPI, setupData);
 
   // Pass G through all the plugins that want to modify it.
-  initialG = plugins.SetupG(initialG, ctxWithAPI, game);
+  initialG = plugins.G.setup(initialG, ctxWithAPI, game);
 
   const initial = {
     // User managed state.
