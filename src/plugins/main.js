@@ -30,22 +30,6 @@ const CtxPreMove = (ctx, game) => {
 };
 
 /**
- * Postprocesses ctx after a move / event.
- *
- * @param {object} ctx - The ctx object.
- * @param {object} game - The game object.
- */
-const CtxPostMove = (ctx, game) => {
-  [...DEFAULT_PLUGINS, ...game.plugins]
-    .filter(plugin => plugin.ctx !== undefined)
-    .filter(plugin => plugin.ctx.postMove !== undefined)
-    .forEach(plugin => {
-      ctx = plugin.ctx.postMove(ctx, game);
-    });
-  return ctx;
-};
-
-/**
  * Applies the provided plugins to G before processing a move / event.
  *
  * @param {object} G - The G object.
@@ -93,7 +77,6 @@ export const FnWrap = (fn, game) => {
     G = GPreMove(G, game);
     ctx = CtxPreMove(ctx, game);
     G = g(G, ctx, ...args);
-    ctx = CtxPostMove(ctx, game);
     G = GPostMove(G, game);
     return G;
   };

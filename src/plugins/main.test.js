@@ -38,7 +38,6 @@ describe('plugins', () => {
           ctx: {
             setup: ctx => ({ ...ctx, setup: true }),
             preMove: ctx => ({ ...ctx, preMove: true }),
-            postMove: ctx => ({ ...ctx, postMove: true }),
             onPhaseBegin: ctx => ({ ...ctx, onPhaseBegin: true }),
           },
         },

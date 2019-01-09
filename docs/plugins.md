@@ -33,10 +33,13 @@ object as a parameter.
     setup: (G, ctx, game) => G,
 
     // Called right before a move / event in order to preprocess G.
-    preMove: (G, game) => G,
+    preMove: (G, ctx, game) => G,
 
     // Called right after a move / event in order to postprocess G.
-    postMove: (G, game) => G,
+    postMove: (G, ctx, game) => G,
+
+    // Called when a phase begins.
+    onPhaseBegin: (G, ctx, game) => G,
   },
 
   ctx: {
@@ -46,8 +49,8 @@ object as a parameter.
     // Called right before a move / event in order to preprocess ctx.
     preMove: (ctx, game) => ctx,
 
-    // Called right after a move / event in order to postprocess ctx.
-    postMove: (ctx, game) => ctx,
+    // Called when a phase begins.
+    onPhaseBegin: (ctx, game) => ctx,
   },
 }
 ```
