@@ -13,7 +13,7 @@
  *
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
-export default initPlayerState => ({
+export default {
   fnWrap: moveFn => {
     return (G, ctx, ...args) => {
       const current = ctx.currentPlayer;
@@ -49,16 +49,16 @@ export default initPlayerState => ({
   },
 
   G: {
-    setup: (G, ctx) => {
+    setup: (G, ctx, game) => {
       let players = {};
       for (let i = 0; i < ctx.numPlayers; i++) {
-        const playerState = {};
-        if (initPlayerState !== undefined) {
-          initPlayerState(i + '');
+        let playerState = {};
+        if (game.playerSetup !== undefined) {
+          playerState = game.playerSetup(i + '');
         }
         players[i + ''] = playerState;
       }
       return { ...G, players };
     },
   },
-});
+};

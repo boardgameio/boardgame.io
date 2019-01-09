@@ -13,8 +13,22 @@ import { makeMove, gameEvent } from '../core/action-creators';
 
 describe('default values', () => {
   test('playerState is not passed', () => {
-    const value = PluginPlayer().G.setup({}, { numPlayers: 2 });
-    expect(value).toEqual({ players: { '0': {}, '1': {} } });
+    const game = Game({
+      plugins: [PluginPlayer],
+    });
+    const reducer = CreateGameReducer({ game });
+    const state = reducer(undefined, { type: 'init' });
+    expect(state.G).toEqual({ players: { '0': {}, '1': {} } });
+  });
+
+  test('playerState is passed', () => {
+    const game = Game({
+      playerSetup: () => ({ A: 1 }),
+      plugins: [PluginPlayer],
+    });
+    const reducer = CreateGameReducer({ game });
+    const state = reducer(undefined, { type: 'init' });
+    expect(state.G).toEqual({ players: { '0': { A: 1 }, '1': { A: 1 } } });
   });
 });
 
@@ -32,7 +46,7 @@ describe('2 player game', () => {
         },
       },
 
-      plugins: [PluginPlayer(() => ({}))],
+      plugins: [PluginPlayer],
     });
 
     reducer = CreateGameReducer({ game });
@@ -75,7 +89,7 @@ describe('3 player game', () => {
         },
       },
 
-      plugins: [PluginPlayer()],
+      plugins: [PluginPlayer],
     });
 
     reducer = CreateGameReducer({ game, numPlayers: 3 });

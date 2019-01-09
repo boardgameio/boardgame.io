@@ -80,12 +80,9 @@ that they are specified (from left to right).
 ```js
 import { PluginPlayer } from 'boardgame.io/plugins';
 
-function PlayerState(playerID) {
-  return { ... };
-}
-
 Game({
-  plugins: [PluginPlayer(PlayerState)],
+  playerSetup: (playerID) => ({ ... }),
+  plugins: [PluginPlayer],
 })
 ```
 
@@ -104,9 +101,7 @@ G: {
 }
 ```
 
-The initial values of these states are determined by the parameter
-`PlayerState`, which is a function that returns the state for a
-particular `playerID`.
+The initial values of these states are determined by the `playerSetup` function, which creates the state for a particular `playerID`.
 
 Before each move, the plugin makes the state associated with the
 current player available at `G.player`. If this is a 2 player game,
