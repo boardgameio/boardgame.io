@@ -191,7 +191,9 @@ describe('update', async () => {
   test('invalid gameID', async () => {
     await master.onUpdate(action, 1, 'unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(error).toHaveBeenCalledWith(`game not found, gameID=[unknown]`);
+    expect(error).toHaveBeenCalledWith(
+      `game not found, gameID=[default:unknown]`
+    );
   });
 
   test('invalid stateID', async () => {

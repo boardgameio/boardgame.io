@@ -78,10 +78,11 @@ export class Master {
    * along with a deltalog.
    */
   async onUpdate(action, stateID, gameID, playerID) {
-    let state = await this.storageAPI.get(gameID);
+    const key = `${this.game.name}:${gameID}`;
+    let state = await this.storageAPI.get(key);
 
     if (state === undefined) {
-      logging.error(`game not found, gameID=[${gameID}]`);
+      logging.error(`game not found, gameID=[${key}]`);
       return { error: 'game not found' };
     }
 
@@ -161,7 +162,7 @@ export class Master {
     log = [...log, ...state.deltalog];
     const stateWithLog = { ...state, log };
 
-    await this.storageAPI.set(gameID, stateWithLog);
+    await this.storageAPI.set(key, stateWithLog);
   }
 
   /**
@@ -169,13 +170,15 @@ export class Master {
    * Returns the latest game state and the entire log.
    */
   async onSync(gameID, playerID, numPlayers) {
+    const key = `${this.game.name}:${gameID}`;
+
     const reducer = CreateGameReducer({ game: this.game, numPlayers });
-    let state = await this.storageAPI.get(gameID);
+    let state = await this.storageAPI.get(key);
 
     if (state === undefined) {
       const store = createStore(reducer);
       state = store.getState();
-      await this.storageAPI.set(gameID, state);
+      await this.storageAPI.set(key, state);
     }
 
     const filteredState = {
