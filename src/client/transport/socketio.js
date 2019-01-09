@@ -79,6 +79,9 @@ export class SocketIO {
       }
     }
 
+    // Called when another player makes a move and the
+    // master broadcasts the update to other clients (including
+    // this one).
     this.socket.on('update', (gameID, state, deltalog) => {
       const currentState = this.store.getState();
 
@@ -88,6 +91,8 @@ export class SocketIO {
       }
     });
 
+    // Called when the client first connects to the master
+    // and requests the current game state.
     this.socket.on('sync', (gameID, state, log) => {
       if (gameID == this.gameID) {
         const action = ActionCreators.sync(state, log);
