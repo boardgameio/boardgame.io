@@ -1,3 +1,9 @@
+## v0.29.4
+
+#### Features
+
+* [[c1b4a03](https://github.com/nicolodavis/boardgame.io/commit/c1b4a03)] add playerSetup option to PluginPlayer
+
 ## v0.29.3
 
 #### Features
