@@ -49,16 +49,6 @@ test('isActive', () => {
   expect(client.getState().isActive).toBe(false);
 });
 
-test('isSynced', () => {
-  const client = Client({
-    game: Game({}),
-  });
-
-  expect(client.getState().isSynced).toBe(false);
-  client.store.dispatch(sync(client.getState(), []));
-  expect(client.getState().isSynced).toBe(true);
-});
-
 describe('step', () => {
   const client = Client({
     game: Game({
@@ -133,6 +123,7 @@ describe('multiplayer', () => {
 
     test('onAction called', () => {
       jest.spyOn(client.transport, 'onAction');
+      client.store.dispatch(sync({ G: {}, ctx: { phase: 'default' } }, []));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
     });

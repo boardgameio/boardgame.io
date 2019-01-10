@@ -9,7 +9,6 @@
 import React from 'react';
 import { Client } from './react';
 import Game from '../core/game';
-import { TurnOrder } from '../core/turn-order';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -44,36 +43,6 @@ test('board props', () => {
   let board = Enzyme.mount(<Board />).find(TestBoard);
   expect(board.props().isMultiplayer).toEqual(false);
   expect(board.props().isActive).toBe(true);
-
-  Board = Client({
-    game: Game({}),
-    board: TestBoard,
-    multiplayer: true,
-  });
-
-  board = Enzyme.mount(<Board />).find(TestBoard);
-  expect(board.props().isMultiplayer).toEqual(true);
-  expect(board.props().isConnected).toEqual(false);
-  expect(board.props().isActive).toBe(false);
-  board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
-  expect(board.props().isActive).toBe(true);
-  board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
-  expect(board.props().isActive).toBe(false);
-
-  Board = Client({
-    game: Game({
-      flow: {
-        startingPhase: 'A',
-        phases: { A: { turnOrder: TurnOrder.ANY } },
-      },
-    }),
-    board: TestBoard,
-    multiplayer: true,
-  });
-  board = Enzyme.mount(<Board playerID={'0'} />).find(TestBoard);
-  expect(board.props().isActive).toBe(true);
-  board = Enzyme.mount(<Board playerID={'1'} />).find(TestBoard);
-  expect(board.props().isActive).toBe(true);
 });
 
 test('can pass extra props to Client', () => {
@@ -97,6 +66,18 @@ test('debug ui can be turned off', () => {
 
   const game = Enzyme.mount(<Board />);
   expect(game.find('.debug-ui')).toHaveLength(0);
+});
+
+test('custom loading component', () => {
+  const Loading = () => <div>custom</div>;
+  const Board = Client({
+    game: Game({}),
+    loading: Loading,
+    board: TestBoard,
+    multiplayer: { local: true },
+  });
+  const board = Enzyme.mount(<Board />);
+  expect(board.html()).toContain('custom');
 });
 
 test('can pass empty board', () => {

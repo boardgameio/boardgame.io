@@ -9,7 +9,7 @@
 import { Random } from './random';
 import Game from './game';
 import { makeMove } from './action-creators';
-import { CreateGameReducer } from './reducer';
+import { InitializeGame, CreateGameReducer } from './reducer';
 
 function Init(seed) {
   const ctx = { _random: { seed } };
@@ -133,7 +133,7 @@ test('Random API is not executed optimisitically', () => {
 
   {
     const reducer = CreateGameReducer({ game });
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.G.die).not.toBeDefined();
     state = reducer(state, makeMove('rollDie'));
     expect(state.G).toMatchObject({ die: 4 });
@@ -141,7 +141,7 @@ test('Random API is not executed optimisitically', () => {
 
   {
     const reducer = CreateGameReducer({ game, multiplayer: true });
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.G.die).not.toBeDefined();
     state = reducer(state, makeMove('rollDie'));
     expect(state.G.die).not.toBeDefined();

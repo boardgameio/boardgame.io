@@ -7,7 +7,7 @@
  */
 
 import Game from './game';
-import { CreateGameReducer, INVALID_MOVE } from './reducer';
+import { InitializeGame, CreateGameReducer, INVALID_MOVE } from './reducer';
 import {
   makeMove,
   gameEvent,
@@ -56,7 +56,7 @@ test('makeMove', () => {
 
   let state;
 
-  state = reducer(undefined, { type: 'init' });
+  state = InitializeGame({ game });
   expect(state._stateID).toBe(0);
 
   state = reducer(state, makeMove('unknown'));
@@ -77,7 +77,7 @@ test('disable move by invalid playerIDs', () => {
 
   let state;
 
-  state = reducer(undefined, { type: 'init' });
+  state = InitializeGame({ game });
   expect(state._stateID).toBe(0);
 
   // playerID="1" cannot move right now.
@@ -135,13 +135,15 @@ test('victory', () => {
 test('endTurn', () => {
   {
     const reducer = CreateGameReducer({ game });
-    const state = reducer(undefined, gameEvent('endTurn'));
+    let state = InitializeGame({ game });
+    state = reducer(state, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(1);
   }
 
   {
     const reducer = CreateGameReducer({ game, multiplayer: true });
-    const state = reducer(undefined, gameEvent('endTurn'));
+    let state = InitializeGame({ game });
+    state = reducer(state, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(0);
   }
 });
@@ -154,7 +156,7 @@ test('light client when multiplayer=true', () => {
 
   {
     const reducer = CreateGameReducer({ game });
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.ctx.gameover).toBe(undefined);
     state = reducer(state, makeMove('A'));
     expect(state.ctx.gameover).toBe(true);
@@ -162,7 +164,7 @@ test('light client when multiplayer=true', () => {
 
   {
     const reducer = CreateGameReducer({ game, multiplayer: true });
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.ctx.gameover).toBe(undefined);
     state = reducer(state, makeMove('A'));
     expect(state.ctx.gameover).toBe(undefined);
@@ -177,7 +179,7 @@ test('optimisticUpdate', () => {
 
   {
     const reducer = CreateGameReducer({ game });
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.G).not.toMatchObject({ A: true });
     state = reducer(state, makeMove('A'));
     expect(state.G).toMatchObject({ A: true });
@@ -185,7 +187,7 @@ test('optimisticUpdate', () => {
 
   {
     const reducer = CreateGameReducer({ game, multiplayer: true });
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.G).not.toMatchObject({ A: true });
     state = reducer(state, makeMove('A'));
     expect(state.G).not.toMatchObject({ A: true });
@@ -232,7 +234,7 @@ describe('Events API', () => {
   });
 
   const reducer = CreateGameReducer({ game });
-  let state = reducer(undefined, { type: 'init' });
+  let state = InitializeGame({ game });
 
   test('is attached at the beginning', () => {
     expect(state.G).not.toEqual({ error: true });
@@ -299,7 +301,7 @@ test('undo / redo', () => {
 
   const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
-  let state = reducer(undefined, { type: 'init' });
+  let state = InitializeGame({ game });
 
   state = reducer(state, makeMove('move', 'A'));
   expect(state.G).toEqual({ A: true });
@@ -356,8 +358,8 @@ test('custom log messages', () => {
     },
   });
 
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
-  let state = reducer(undefined, { type: 'init' });
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game });
 
   const newState = reducer(state, makeMove('move'));
   expect(newState.deltalog[0].payload).toMatchObject({ msg: 'additional msg' });

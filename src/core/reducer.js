@@ -102,19 +102,15 @@ export class ContextEnhancer {
 }
 
 /**
- * CreateGameReducer
+ * InitializeGame
  *
- * Creates the main game state reducer.
+ * Creates the initial game state.
+ *
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function CreateGameReducer({
-  game,
-  numPlayers,
-  multiplayer,
-  setupData,
-}) {
+export function InitializeGame({ game, numPlayers, setupData }) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -171,6 +167,29 @@ export function CreateGameReducer({
 
   const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
+
+  return initial;
+}
+
+/**
+ * CreateGameReducer
+ *
+ * Creates the main game state reducer.
+ * @param {...object} game - Return value of Game().
+ * @param {...object} numPlayers - The number of players.
+ * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
+ */
+export function CreateGameReducer({
+  game,
+  numPlayers,
+  multiplayer,
+  setupData,
+}) {
+  // Create the initial state of the game.
+  let initial = null;
+  if (!multiplayer) {
+    initial = InitializeGame({ game, numPlayers, setupData });
+  }
 
   /**
    * GameReducer

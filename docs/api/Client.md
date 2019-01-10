@@ -35,6 +35,12 @@ const App = Client({
   // The props that this component receives are listed below.
   board: Board,
 
+  // Optional: React component to display while the client
+  // is in the "loading" state prior to the initial sync
+  // with the game master. Relevant only in multiplayer mode.
+  // If this is not provided, the client displays "connecting...".
+  loading: LoadingComponent,
+
   // Set to true to enable sending move updates to the
   // server via WebSockets. Can also be set to
   // { server: 'hostname:port' }
