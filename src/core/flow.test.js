@@ -8,7 +8,7 @@
 
 import Game from './game';
 import { InitializeGame, CreateGameReducer } from './reducer';
-import { makeMove, gameEvent, reset, undo, redo } from './action-creators';
+import { makeMove, gameEvent, undo } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 import { error } from '../core/logger';
 
@@ -655,43 +655,6 @@ describe('endTurn / endPhase args', () => {
     expect(t.ctx.currentPlayer).toBe('2');
     expect(t.ctx.phase).toBe('C');
   });
-});
-
-test('resetGame', () => {
-  const game = Game({
-    moves: {
-      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
-    },
-  });
-
-  const reducer = CreateGameReducer({ game });
-  let state = InitializeGame({ game });
-
-  const originalState = state;
-
-  state = reducer(state, makeMove('move', 'A'));
-  expect(state.G).toEqual({ A: true });
-
-  state = reducer(state, makeMove('move', 'B'));
-  expect(state.G).toEqual({ A: true, B: true });
-
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.ctx.turn).toEqual(1);
-
-  state = reducer(state, reset(originalState));
-  expect(state).toEqual(originalState);
-
-  state = reducer(state, makeMove('move', 'C'));
-  expect(state.G).toEqual({ C: true });
-
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
-
-  state = reducer(state, redo());
-  expect(state.G).toEqual({ C: true });
-
-  state = reducer(state, reset(originalState));
-  expect(state).toEqual(originalState);
 });
 
 test('undo / redo restricted by undoableMoves', () => {
