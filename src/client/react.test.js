@@ -135,7 +135,7 @@ test('update gameID / playerID', () => {
       },
     }),
     board: TestBoard,
-    multiplayer: true,
+    multiplayer: { local: true },
   });
   game = Enzyme.mount(<Board gameID="a" playerID="1" credentials="foo" />);
   const m = game.instance().client.transport;

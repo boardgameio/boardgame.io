@@ -179,18 +179,7 @@ export function InitializeGame({ game, numPlayers, setupData }) {
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function CreateGameReducer({
-  game,
-  numPlayers,
-  multiplayer,
-  setupData,
-}) {
-  // Create the initial state of the game.
-  let initial = null;
-  if (!multiplayer) {
-    initial = InitializeGame({ game, numPlayers, setupData });
-  }
-
+export function CreateGameReducer({ game, multiplayer }) {
   /**
    * GameReducer
    *
@@ -198,7 +187,7 @@ export function CreateGameReducer({
    * @param {object} state - The state before the action.
    * @param {object} action - A Redux action.
    */
-  return (state = initial, action) => {
+  return (state = null, action) => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
         state = { ...state, deltalog: [] };
@@ -314,13 +303,10 @@ export function CreateGameReducer({
         return state;
       }
 
+      case Actions.RESET:
       case Actions.UPDATE:
       case Actions.SYNC: {
         return action.state;
-      }
-
-      case Actions.RESET: {
-        return initial;
       }
 
       case Actions.UNDO: {

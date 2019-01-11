@@ -7,7 +7,7 @@
  */
 
 import { createStore } from 'redux';
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { Client, GetOpts, createMoveDispatchers } from './client';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
@@ -243,9 +243,10 @@ describe('move dispatchers', () => {
     },
   });
   const reducer = CreateGameReducer({ game });
+  const initialState = InitializeGame({ game });
 
   test('basic', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store);
 
     expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
@@ -268,14 +269,14 @@ describe('move dispatchers', () => {
   });
 
   test('with undefined playerID - singleplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: '0' });
   });
 
   test('with undefined playerID - multiplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(
       game.moveNames,
       store,
@@ -288,14 +289,14 @@ describe('move dispatchers', () => {
   });
 
   test('with null playerID - singleplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: '0' });
   });
 
   test('with null playerID - multiplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null, null, true);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: null });

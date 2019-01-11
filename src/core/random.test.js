@@ -161,8 +161,7 @@ test('onTurnBegin has ctx APIs at the beginning of the game', () => {
     },
   });
 
-  const reducer = CreateGameReducer({ game });
-  reducer(undefined, { type: 'init' });
+  InitializeGame({ game });
   expect(random).not.toBe(null);
   expect(events).not.toBe(null);
 });

@@ -7,12 +7,13 @@
  */
 
 import Game from '../core/game';
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { makeMove } from '../core/action-creators';
 
 describe('plugins', () => {
   let game;
   let reducer;
+  let initialState;
 
   beforeAll(() => {
     game = Game({
@@ -45,45 +46,46 @@ describe('plugins', () => {
     });
 
     reducer = CreateGameReducer({ game });
+    initialState = InitializeGame({ game });
   });
 
   test('immer works', () => {
-    let state = reducer(undefined, { type: 'init' });
+    let state = initialState;
     state = reducer(state, makeMove('B'));
     expect(state.G).toMatchObject({ immer: true });
   });
 
   test('setupG', () => {
-    const state = reducer(undefined, { type: 'init' });
+    let state = initialState;
     expect(state.G).toMatchObject({ setup: true });
   });
 
   test('setupCtx', () => {
-    const state = reducer(undefined, { type: 'init' });
+    let state = initialState;
     expect(state.ctx).toMatchObject({ setup: true });
   });
 
   test('onPhaseBegin', () => {
-    const state = reducer(undefined, { type: 'init' });
+    let state = initialState;
     expect(state.G).toMatchObject({ onPhaseBegin: true });
     expect(state.ctx).toMatchObject({ onPhaseBegin: true });
   });
 
   test('fnWrap', () => {
-    let state = reducer(undefined, { type: 'init' });
+    let state = initialState;
     state = reducer(state, makeMove('A'));
     expect(state.G).toMatchObject({ fnWrap: true });
   });
 
   test('preMove', () => {
-    let state = reducer(undefined, { type: 'init' });
+    let state = initialState;
     state = reducer(state, makeMove('A'));
     expect(state.G).toMatchObject({ preMove: true });
     expect(state.G.ctx).toMatchObject({ preMove: true });
   });
 
   test('postMove', () => {
-    let state = reducer(undefined, { type: 'init' });
+    let state = initialState;
     state = reducer(state, makeMove('A'));
     expect(state.G).toMatchObject({ postMove: true });
   });

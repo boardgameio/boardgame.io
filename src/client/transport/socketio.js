@@ -128,7 +128,7 @@ export class SocketIO {
   updateGameID(id) {
     this.gameID = this.gameName + ':' + id;
 
-    const action = ActionCreators.reset();
+    const action = ActionCreators.reset(null);
     this.store.dispatch(action);
 
     if (this.socket) {
@@ -143,7 +143,7 @@ export class SocketIO {
   updatePlayerID(id) {
     this.playerID = id;
 
-    const action = ActionCreators.reset();
+    const action = ActionCreators.reset(null);
     this.store.dispatch(action);
 
     if (this.socket) {

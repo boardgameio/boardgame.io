@@ -131,7 +131,7 @@ export class Local {
    */
   async updateGameID(id) {
     this.gameID = this.gameName + ':' + id;
-    const action = ActionCreators.reset();
+    const action = ActionCreators.reset(null);
     this.store.dispatch(action);
     await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
@@ -142,7 +142,7 @@ export class Local {
    */
   async updatePlayerID(id) {
     this.playerID = id;
-    const action = ActionCreators.reset();
+    const action = ActionCreators.reset(null);
     this.store.dispatch(action);
     await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }

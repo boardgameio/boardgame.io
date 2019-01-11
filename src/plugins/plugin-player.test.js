@@ -8,7 +8,7 @@
 
 import PluginPlayer from './plugin-player';
 import Game from '../core/game';
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { makeMove, gameEvent } from '../core/action-creators';
 
 describe('default values', () => {
@@ -16,8 +16,7 @@ describe('default values', () => {
     const game = Game({
       plugins: [PluginPlayer],
     });
-    const reducer = CreateGameReducer({ game });
-    const state = reducer(undefined, { type: 'init' });
+    const state = InitializeGame({ game });
     expect(state.G).toEqual({ players: { '0': {}, '1': {} } });
   });
 
@@ -26,8 +25,7 @@ describe('default values', () => {
       playerSetup: () => ({ A: 1 }),
       plugins: [PluginPlayer],
     });
-    const reducer = CreateGameReducer({ game });
-    const state = reducer(undefined, { type: 'init' });
+    const state = InitializeGame({ game });
     expect(state.G).toEqual({ players: { '0': { A: 1 }, '1': { A: 1 } } });
   });
 });
@@ -50,7 +48,7 @@ describe('2 player game', () => {
     });
 
     reducer = CreateGameReducer({ game });
-    state = reducer(undefined, { type: 'init' });
+    state = InitializeGame({ game });
   });
 
   test('player 0 turn', () => {
@@ -92,8 +90,8 @@ describe('3 player game', () => {
       plugins: [PluginPlayer],
     });
 
-    reducer = CreateGameReducer({ game, numPlayers: 3 });
-    state = reducer(undefined, { type: 'init' });
+    reducer = CreateGameReducer({ game });
+    state = InitializeGame({ game, numPlayers: 3 });
   });
 
   test('G.opponent is not created', () => {

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
@@ -172,12 +172,12 @@ export class Master {
   async onSync(gameID, playerID, numPlayers) {
     const key = `${this.game.name}:${gameID}`;
 
-    const reducer = CreateGameReducer({ game: this.game, numPlayers });
     let state = await this.storageAPI.get(key);
 
+    // If the game doesn't exist, then create one on demand.
+    // TODO: Move this out of the sync call.
     if (state === undefined) {
-      const store = createStore(reducer);
-      state = store.getState();
+      state = InitializeGame({ game: this.game, numPlayers });
       await this.storageAPI.set(key, state);
     }
 

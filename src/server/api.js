@@ -11,9 +11,8 @@ const Router = require('koa-router');
 const koaBody = require('koa-body');
 const uuid = require('uuid/v4');
 const cors = require('@koa/cors');
-const Redux = require('redux');
 
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame } from '../core/reducer';
 
 const createCredentials = () => uuid();
 const getGameMetadataKey = gameID => `${gameID}:metadata`;
@@ -74,13 +73,11 @@ export const isActionFromAuthenticPlayer = async ({
 export const CreateGame = async (db, game, numPlayers, setupData) => {
   const gameMetadata = createGameMetadata();
 
-  const reducer = CreateGameReducer({
+  const state = InitializeGame({
     game,
     numPlayers,
     setupData,
   });
-  const store = Redux.createStore(reducer);
-  const state = store.getState();
 
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
     const credentials = createCredentials();

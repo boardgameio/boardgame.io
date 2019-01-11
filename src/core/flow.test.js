@@ -7,7 +7,7 @@
  */
 
 import Game from './game';
-import { CreateGameReducer } from './reducer';
+import { InitializeGame, CreateGameReducer } from './reducer';
 import { makeMove, gameEvent, reset, undo, redo } from './action-creators';
 import { Flow, FlowWithPhases } from './flow';
 import { error } from '../core/logger';
@@ -392,9 +392,9 @@ test('endGameIf', () => {
       },
       flow,
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game });
 
-    let state = reducer(undefined, { type: 'init' });
     expect(state.ctx.currentPlayer).toBe('0');
     state = reducer(state, makeMove('B'));
     expect(state.ctx.gameover).toBe(undefined);
@@ -417,9 +417,9 @@ describe('endTurnIf', () => {
       },
       flow,
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game });
 
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.ctx.currentPlayer).toBe('0');
     state = reducer(state, makeMove('B'));
     expect(state.ctx.currentPlayer).toBe('0');
@@ -441,9 +441,9 @@ describe('endTurnIf', () => {
       },
       flow,
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game });
 
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     expect(state.ctx.currentPlayer).toBe('0');
     state = reducer(state, makeMove('B'));
     expect(state.ctx.currentPlayer).toBe('0');
@@ -459,9 +459,9 @@ describe('endTurnIf', () => {
       },
       flow,
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 3 });
+    const reducer = CreateGameReducer({ game });
 
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game, numPlayers: 3 });
     expect(state.ctx.currentPlayer).toBe('0');
     state = reducer(state, makeMove('A'));
     expect(state.ctx.currentPlayer).toBe('2');
@@ -488,8 +488,8 @@ test('canMakeMove', () => {
     },
   });
 
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
-  let state = reducer(undefined, { type: 'init' });
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game });
 
   // Basic.
   let flow;
@@ -664,9 +664,8 @@ test('resetGame', () => {
     },
   });
 
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
-
-  let state = reducer(undefined, { type: 'init' });
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game });
 
   const originalState = state;
 
@@ -679,7 +678,7 @@ test('resetGame', () => {
   state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.turn).toEqual(1);
 
-  state = reducer(state, reset());
+  state = reducer(state, reset(originalState));
   expect(state).toEqual(originalState);
 
   state = reducer(state, makeMove('move', 'C'));
@@ -691,7 +690,7 @@ test('resetGame', () => {
   state = reducer(state, redo());
   expect(state.G).toEqual({ C: true });
 
-  state = reducer(state, reset());
+  state = reducer(state, reset(originalState));
   expect(state).toEqual(originalState);
 });
 
@@ -715,9 +714,9 @@ test('undo / redo restricted by undoableMoves', () => {
     },
   });
 
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game });
 
-  let state = reducer(undefined, { type: 'init' });
+  let state = InitializeGame({ game });
 
   state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({ A: true });
@@ -823,9 +822,9 @@ test('allPlayed', () => {
     moves: { A: () => ({ A: true }) },
   });
 
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game });
 
-  let state = reducer(undefined, { type: 'init' });
+  let state = InitializeGame({ game });
 
   state = reducer(state, makeMove('A', null, '0'));
   state = reducer(state, gameEvent('endTurn', null, '0'));
