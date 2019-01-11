@@ -155,6 +155,9 @@ export function InitializeGame({ game, numPlayers, setupData }) {
 
     // A snapshot of this object so that actions can be
     // replayed over it to view old snapshots.
+    // TODO: This will no longer be necessary once the
+    // log stops replaying actions (but reads the actual
+    // game states instead).
     _initial: {},
   };
 
