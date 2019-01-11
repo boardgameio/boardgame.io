@@ -54,26 +54,22 @@ describe('lobby', () => {
         ],
         playerName: 'Bob',
       });
-      expect(await lobby.refresh()).toBe(true);
+      await lobby.refresh();
     });
 
     describe('get list of rooms', () => {
       test('when the server requests succeed', async () => {
-        expect(lobby.errorMsg).toBe('');
         expect(fetch).toHaveBeenCalledTimes(3);
         expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        expect(await lobby.refresh()).toBe(false);
+        try {
+          await lobby.refresh();
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
         expect(lobby.gameInstances).toEqual([]);
-        expect(lobby.errorMsg).not.toBe('');
-      });
-      test('when the player has a seat in a room', async () => {
-        nextStatus = 404;
-        expect(await lobby.refresh()).toBe(false);
-        expect(lobby.gameInstances).toEqual([]);
-        expect(lobby.errorMsg).not.toBe('');
       });
     });
 
@@ -85,34 +81,45 @@ describe('lobby', () => {
         });
       });
       test('when the room exists', async () => {
-        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(true);
+        await lobby.join('game1', 'gameID_1', '0');
         expect(fetch).toHaveBeenCalledTimes(4);
         expect(lobby.gameInstances[0].players[0]).toEqual({
           id: '0',
           name: 'Bob',
         });
         expect(lobby.playerCredentials).toEqual('SECRET');
-        expect(lobby.errorMsg).toBe('');
       });
       test('when the room does not exist', async () => {
-        expect(await lobby.join('game1', 'gameID_3', '0')).toBe(false);
+        try {
+          await lobby.join('game1', 'gameID_3', '0');
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
         expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
-        expect(lobby.errorMsg).not.toBe('');
       });
       test('when the seat is not available', async () => {
         gameInstance1.players[0].name = 'Bob';
-        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.join('game1', 'gameID_3', '0');
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.join('game1', 'gameID_1', '0');
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
       test('when the player has already joined another game', async () => {
         gameInstance2.players[0].name = 'Bob';
-        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.join('game1', 'gameID_1', '0');
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
     });
 
@@ -122,82 +129,95 @@ describe('lobby', () => {
         jsonResult.push(() => {
           return { playerCredentials: 'SECRET' };
         });
-        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(true);
+        await lobby.join('game1', 'gameID_1', '0');
         // result of request 'leave'
         jsonResult.push(() => {
           return {};
         });
       });
       test('when the room exists', async () => {
-        expect(await lobby.leave('game1', 'gameID_1')).toBe(true);
+        await lobby.leave('game1', 'gameID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
         expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
-        expect(lobby.errorMsg).toBe('');
       });
       test('when the room does not exist', async () => {
-        expect(await lobby.leave('game1', 'gameID_3')).toBe(false);
+        try {
+          await lobby.leave('game1', 'gameID_3');
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
         expect(fetch).toHaveBeenCalledTimes(4);
         expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
-        expect(lobby.errorMsg).not.toBe('');
       });
       test('when the player is not in the room', async () => {
-        expect(await lobby.leave('game1', 'gameID_1')).toBe(true);
+        await lobby.leave('game1', 'gameID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
-        expect(await lobby.leave('game1', 'gameID_1')).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.leave('game1', 'gameID_1');
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        expect(await lobby.leave('game1', 'gameID_1')).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.leave('game1', 'gameID_1');
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
     });
 
     describe('disconnect', () => {
       beforeEach(async () => {});
       test('when the player leaves the lobby', async () => {
-        expect(await lobby.disconnect()).toBe(true);
+        await lobby.disconnect();
         expect(lobby.gameInstances).toEqual([]);
-        expect(lobby.errorMsg).toBe('');
       });
       test('when the player had joined a room', async () => {
         // result of request 'join'
         jsonResult.push(() => {
           return { playerCredentials: 'SECRET' };
         });
-        expect(await lobby.join('game1', 'gameID_1', '0')).toBe(true);
+        await lobby.join('game1', 'gameID_1', '0');
         // result of request 'leave'
         jsonResult.push(() => {
           return {};
         });
-        expect(await lobby.disconnect()).toBe(true);
+        await lobby.disconnect();
         expect(lobby.gameInstances).toEqual([]);
-        expect(lobby.errorMsg).toBe('');
       });
     });
 
     describe('create a room', () => {
       test('when the server request succeeds', async () => {
-        expect(await lobby.create('game1', 2)).toBe(true);
+        await lobby.create('game1', 2);
         expect(fetch).toHaveBeenCalledTimes(4);
-        expect(lobby.errorMsg).toBe('');
       });
       test('when the number of players is off boundaries', async () => {
-        expect(await lobby.create('game1', 1)).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.create('game1', 1);
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
       test('when the number of players has no boundaries', async () => {
-        expect(await lobby.create('game2', 1)).toBe(true);
-        expect(lobby.errorMsg).toBe('');
+        await lobby.create('game2', 1);
       });
       test('when the game is unknown', async () => {
-        expect(await lobby.create('game3', 2)).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.create('game3', 2);
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        expect(await lobby.create('game1', 2)).toBe(false);
-        expect(lobby.errorMsg).not.toBe('');
+        try {
+          await lobby.create('game1', 2);
+        } catch (error) {
+          expect(error).toBeInstanceOf(Error);
+        }
       });
     });
   });
@@ -208,7 +228,7 @@ describe('lobby', () => {
         server: 'localhost',
         gameComponents: [{ board: 'Board1', game: { name: 'game1' } }],
       });
-      expect(await lobby.refresh()).toBe(true);
+      await lobby.refresh();
     });
     test('get list of rooms for supported games', async () => {
       expect(fetch).toHaveBeenCalledTimes(2);

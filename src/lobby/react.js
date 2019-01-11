@@ -222,32 +222,40 @@ class Lobby extends React.Component {
   }
 
   async _createRoom(gameName, numPlayers) {
-    if (await this.connection.create(gameName, numPlayers)) {
+    try {
+      await this.connection.create(gameName, numPlayers);
       await this.connection.refresh();
+      // rerender
+      this.setState({});
+    } catch (error) {
+      this.setState({ errorMsg: error.message });
     }
-    this.setState({ errorMsg: this.connection.errorMsg });
   }
 
   async _joinRoom(gameName, gameID, playerID) {
-    if (await this.connection.join(gameName, gameID, playerID)) {
+    try {
+      await this.connection.join(gameName, gameID, playerID);
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
         this.connection.playerCredentials
       );
+    } catch (error) {
+      this.setState({ errorMsg: error.message });
     }
-    this.setState({ errorMsg: this.connection.errorMsg });
   }
 
   async _leaveRoom(gameName, gameID) {
-    if (await this.connection.leave(gameName, gameID)) {
+    try {
+      await this.connection.leave(gameName, gameID);
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
         this.connection.playerCredentials
       );
+    } catch (error) {
+      this.setState({ errorMsg: error.message });
     }
-    this.setState({ errorMsg: this.connection.errorMsg });
   }
 
   _startGame(gameName, gameOpts) {

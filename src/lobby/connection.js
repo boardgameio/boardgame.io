@@ -13,7 +13,6 @@ class _LobbyConnectionImpl {
     this.playerCredentials = playerCredentials;
     this.server = server;
     this.gameInstances = [];
-    this.errorMsg = '';
   }
 
   _baseUrl() {
@@ -38,11 +37,8 @@ class _LobbyConnectionImpl {
         this.gameInstances = this.gameInstances.concat(gameJson.gameInstances);
       }
     } catch (error) {
-      this.errorMsg = 'failed to retrieve list of games (' + error + ')';
-      return false;
+      throw new Error('failed to retrieve list of games (' + error + ')');
     }
-    this.errorMsg = '';
-    return true;
   }
 
   _getGameInstance(gameID) {
@@ -89,11 +85,8 @@ class _LobbyConnectionImpl {
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
     } catch (error) {
-      this.errorMsg = 'failed to join room ' + gameID + ' (' + error + ')';
-      return false;
+      throw new Error('failed to join room ' + gameID + ' (' + error + ')');
     }
-    this.errorMsg = '';
-    return true;
   }
 
   async leave(gameName, gameID) {
@@ -116,15 +109,13 @@ class _LobbyConnectionImpl {
           if (resp.status !== 200) throw 'HTTP status ' + resp.status;
           delete player.name;
           delete this.playerCredentials;
-          this.errorMsg = '';
-          return true;
+          return;
         }
       }
       throw 'player not found in room';
     } catch (error) {
-      this.errorMsg = 'failed to leave room ' + gameID + ' (' + error + ')';
+      throw new Error('failed to leave room ' + gameID + ' (' + error + ')');
     }
-    return false;
   }
 
   async disconnect() {
@@ -134,7 +125,6 @@ class _LobbyConnectionImpl {
     }
     this.gameInstances = [];
     this.playerName = 'Visitor';
-    return true;
   }
 
   async create(gameName, numPlayers) {
@@ -155,12 +145,10 @@ class _LobbyConnectionImpl {
       });
       if (resp.status !== 200) throw 'HTTP status ' + resp.status;
     } catch (error) {
-      this.errorMsg =
-        'failed to create room for ' + gameName + ' (' + error + ')';
-      return false;
+      throw new Error(
+        'failed to create room for ' + gameName + ' (' + error + ')'
+      );
     }
-    this.errorMsg = '';
-    return true;
   }
 }
 
@@ -169,9 +157,9 @@ class _LobbyConnectionImpl {
  *
  * Lobby model.
  *
+ * @param {string}   server - '<host>:<port>' of the server.
  * @param {Array}    gameComponents - A map of Board and Game objects for the supported games.
  * @param {string}   playerName - The name of the player.
- * @param {string}   server - '<host>:<port>' of the server.
  * @param {string}   playerCredentials - The credentials currently used by the player, if any.
  *
  * Returns:

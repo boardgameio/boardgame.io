@@ -12,11 +12,15 @@ import Lobby from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
-Enzyme.configure({ adapter: new Adapter() });
+/* mock server requests */
+global.fetch = jest.fn().mockReturnValue({ status: 200, json: () => [] });
 
+/* mock 'Client' component */
 function NullComponent() {
   return '<noscript />';
 }
+
+Enzyme.configure({ adapter: new Adapter() });
 
 describe('lobby', () => {
   let lobby;
@@ -121,8 +125,8 @@ describe('lobby', () => {
         lobby.instance().forceUpdate();
         lobby.update();
       });
-      test('after player has joined a room', async () => {
-        lobby.instance().connection.disconnect = spy.mockReturnValue(true);
+      test('disconnect from server', async () => {
+        lobby.instance().connection.disconnect = spy;
         lobby
           .find('#lobby-exit')
           .find('button')
@@ -193,7 +197,7 @@ describe('lobby', () => {
       });
 
       test('room with 2 players', () => {
-        lobby.instance().connection.create = spy.mockReturnValue(true);
+        lobby.instance().connection.create = spy;
         lobby
           .find('LobbyCreateRoomForm')
           .find('select')
@@ -213,7 +217,9 @@ describe('lobby', () => {
         expect(spy).toHaveBeenCalledWith('GameName2', 2);
       });
       test('when server request fails', async () => {
-        lobby.instance().connection.create = spy.mockReturnValue(false);
+        lobby.instance().connection.create = spy.mockImplementation(() => {
+          throw new Error('fail');
+        });
         await lobby
           .find('LobbyCreateRoomForm')
           .find('button')
@@ -271,7 +277,7 @@ describe('lobby', () => {
       });
       test('when room is empty', () => {
         // join 1st room
-        lobby.instance().connection.join = spy.mockReturnValue(true);
+        lobby.instance().connection.join = spy;
         lobby
           .find('LobbyRoomInstance')
           .first()
@@ -289,7 +295,9 @@ describe('lobby', () => {
         ).toContain('RUNNING');
       });
       test('when server request fails', async () => {
-        lobby.instance().connection.join = spy.mockReturnValue(false);
+        lobby.instance().connection.join = spy.mockImplementation(() => {
+          throw new Error('fail');
+        });
         // join 1st room
         await lobby
           .find('LobbyRoomInstance')
@@ -328,7 +336,7 @@ describe('lobby', () => {
       });
       test('shall leave a room', () => {
         // leave room
-        lobby.instance().connection.leave = spy.mockReturnValue(true);
+        lobby.instance().connection.leave = spy;
         lobby
           .find('LobbyRoomInstance')
           .find('button')
@@ -336,7 +344,9 @@ describe('lobby', () => {
         expect(spy).toHaveBeenCalledWith('GameName1', 'gameID1');
       });
       test('when server request fails', async () => {
-        lobby.instance().connection.leave = spy.mockReturnValue(false);
+        lobby.instance().connection.leave = spy.mockImplementation(() => {
+          throw new Error('fail');
+        });
         await lobby
           .find('LobbyRoomInstance')
           .find('button')
