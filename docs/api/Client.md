@@ -41,11 +41,21 @@ const App = Client({
   // If this is not provided, the client displays "connecting...".
   loading: LoadingComponent,
 
-  // Set to true to enable sending move updates to the
-  // server via WebSockets. Can also be set to
-  // { server: 'hostname:port' }
-  // to specify a socket server that's different from
-  // the one that served up the page.
+  // Can be set to one of the following in order to enable multiplayer:
+  //
+  // 1. true
+  //
+  // This starts sending move updates to the server via socket.io.
+  //
+  // 2. { server: 'hostname:port' }
+  //
+  // Same as the above, but also specifies the server location.
+  //
+  // 3. { local: true}
+  //
+  // Special local mode that uses an in-memory game master. Useful
+  // for testing multiplayer interactions locally without having to
+  // connect to a server.
   multiplayer: false,
 
   // Set to false to disable the Debug UI.
@@ -95,5 +105,3 @@ The `Board` component will receive the following as `props`:
 12. `isMultiplayer`: `true` if it is a multiplayer game.
 
 13. `isConnected`: `true` if connection to the server is active.
-
-14. `isSynced`: `true` if the initial sync with the server is done.
