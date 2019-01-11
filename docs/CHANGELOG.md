@@ -1,3 +1,14 @@
+## v0.30.0
+
+#### Features
+
+* [[6cf81e8](https://github.com/nicolodavis/boardgame.io/commit/6cf81e8)] create initial game state outside reducer
+* [[8d08381](https://github.com/nicolodavis/boardgame.io/commit/8d08381)] add a loading component for multiplayer clients
+
+#### Bugfixes
+
+* [[d20d26c](https://github.com/nicolodavis/boardgame.io/commit/d20d26c)] make master write to proper namepspaced keys
+
 ## v0.29.5
 
 #### Features
