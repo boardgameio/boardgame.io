@@ -7,7 +7,7 @@
  */
 
 import Game from '../core/game';
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame } from '../core/reducer';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { makeMove } from '../core/action-creators';
 import { Simulate, Bot, RandomBot, MCTSBot } from './bot';
@@ -86,16 +86,14 @@ describe('Simulate', () => {
   };
 
   test('multiple bots', () => {
-    const reducer = CreateGameReducer({ game: TicTacToe });
-    const state = reducer(undefined, { type: 'init' });
+    const state = InitializeGame({ game: TicTacToe });
     const { state: endState } = Simulate({ game: TicTacToe, bots, state });
     expect(endState.ctx.gameover).not.toBe(undefined);
   });
 
   test('single bot', () => {
     const bot = new RandomBot({ seed: 'test', enumerate });
-    const reducer = CreateGameReducer({ game: TicTacToe });
-    const state = reducer(undefined, { type: 'init' });
+    const state = InitializeGame({ game: TicTacToe });
     const { state: endState } = Simulate({
       game: TicTacToe,
       bots: bot,
@@ -146,8 +144,7 @@ describe('MCTSBot', () => {
 
   test('game that never ends', () => {
     const game = Game({});
-    const reducer = CreateGameReducer({ game });
-    const state = reducer(undefined, { type: 'init' });
+    const state = InitializeGame({ game });
     const bot = new MCTSBot({ seed: 'test', game, enumerate: () => [] });
     const { state: endState } = Simulate({ game, bots: bot, state });
     expect(endState.ctx.turn).toBe(0);
@@ -165,17 +162,17 @@ describe('MCTSBot', () => {
       }),
     };
 
-    const reducer = CreateGameReducer({ game: TicTacToe });
+    const initialState = InitializeGame({ game: TicTacToe });
 
     for (let i = 0; i < 5; i++) {
-      const state = reducer(undefined, { type: 'init' });
+      const state = initialState;
       const { state: endState } = Simulate({ game: TicTacToe, bots, state });
       expect(endState.ctx.gameover).not.toEqual({ winner: '0' });
     }
   });
 
   test('MCTSBot vs. MCTSBot', () => {
-    const reducer = CreateGameReducer({ game: TicTacToe });
+    const initialState = InitializeGame({ game: TicTacToe });
     const iterations = 400;
 
     for (let i = 0; i < 5; i++) {
@@ -195,7 +192,7 @@ describe('MCTSBot', () => {
           iterations,
         }),
       };
-      const state = reducer(undefined, { type: 'init' });
+      const state = initialState;
       const { state: endState } = Simulate({ game: TicTacToe, bots, state });
       expect(endState.ctx.gameover).toEqual({ draw: true });
     }
@@ -209,8 +206,7 @@ describe('MCTSBot', () => {
       },
     });
 
-    const reducer = CreateGameReducer({ game: TicTacToe });
-    const state = reducer(undefined, { type: 'init' });
+    const state = InitializeGame({ game: TicTacToe });
 
     for (let i = 0; i < 10; i++) {
       const bot = new MCTSBot({

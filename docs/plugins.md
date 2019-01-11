@@ -8,29 +8,50 @@ in `G` and much more.
 #### Creating a Plugin
 
 A plugin is an object that contains the following fields.
+All fields are optional and typically accept the `game`
+object as a parameter.
 
 ```js
 {
-  // Optional.
   // Function that accepts a move / trigger function
   // and returns another function that wraps it. This
   // wrapper can modify G before passing it down to
   // the wrapped function. It is a good practice to
-  // undo the change at the end of the call.
-  fnWrap: (fn) => (G, ctx, ...args) => {
+  // undo the change at the end of the call. You can
+  // also use the more convenient preMove / postMove
+  // hooks below if all you desire is to preprocess
+  // and postprocess G.
+  fnWrap: (fn, game) => (G, ctx, ...args) => {
     G = preprocess(G);
     G = fn(G, ctx, ...args);
     G = postprocess(G);
     return G;
   },
 
-  // Optional.
-  // Called during setup in order to add state to G.
-  setupG: (G, ctx) => G,
+  G: {
+    // Called during setup in order to add state to G.
+    setup: (G, ctx, game) => G,
 
-  // Optional.
-  // Called during setup in order to add state to ctx.
-  setupCtx: (ctx) => ctx,
+    // Called right before a move / event in order to preprocess G.
+    preMove: (G, ctx, game) => G,
+
+    // Called right after a move / event in order to postprocess G.
+    postMove: (G, ctx, game) => G,
+
+    // Called when a phase begins.
+    onPhaseBegin: (G, ctx, game) => G,
+  },
+
+  ctx: {
+    // Called during setup in order to add state to ctx.
+    setup: (ctx, game) => ctx,
+
+    // Called right before a move / event in order to preprocess ctx.
+    preMove: (ctx, game) => ctx,
+
+    // Called when a phase begins.
+    onPhaseBegin: (ctx, game) => ctx,
+  },
 }
 ```
 
@@ -62,12 +83,9 @@ that they are specified (from left to right).
 ```js
 import { PluginPlayer } from 'boardgame.io/plugins';
 
-function PlayerState(playerID) {
-  return { ... };
-}
-
 Game({
-  plugins: [PluginPlayer(PlayerState)],
+  playerSetup: (playerID) => ({ ... }),
+  plugins: [PluginPlayer],
 })
 ```
 
@@ -86,9 +104,7 @@ G: {
 }
 ```
 
-The initial values of these states are determined by the parameter
-`PlayerState`, which is a function that returns the state for a
-particular `playerID`.
+The initial values of these states are determined by the `playerSetup` function, which creates the state for a particular `playerID`.
 
 Before each move, the plugin makes the state associated with the
 current player available at `G.player`. If this is a 2 player game,

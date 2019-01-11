@@ -10,7 +10,7 @@ import { createStore } from 'redux';
 import { SocketIO } from './socketio';
 import Game from '../../core/game';
 import { makeMove } from '../../core/action-creators';
-import { CreateGameReducer } from '../../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../../core/reducer';
 import * as Actions from '../../core/action-types';
 
 class MockSocket {
@@ -85,7 +85,9 @@ describe('multiplayer', () => {
   let store = null;
 
   beforeEach(() => {
-    m.store = store = createStore(CreateGameReducer({ game }));
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game });
+    m.store = store = createStore(reducer, initialState);
   });
 
   test('returns a valid store', () => {

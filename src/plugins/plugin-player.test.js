@@ -7,14 +7,26 @@
  */
 
 import PluginPlayer from './plugin-player';
-import Game from '../game';
-import { CreateGameReducer } from '../reducer';
-import { makeMove, gameEvent } from '../action-creators';
+import Game from '../core/game';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
+import { makeMove, gameEvent } from '../core/action-creators';
 
 describe('default values', () => {
   test('playerState is not passed', () => {
-    const value = PluginPlayer().setupG({}, { numPlayers: 2 });
-    expect(value).toEqual({ players: { '0': {}, '1': {} } });
+    const game = Game({
+      plugins: [PluginPlayer],
+    });
+    const state = InitializeGame({ game });
+    expect(state.G).toEqual({ players: { '0': {}, '1': {} } });
+  });
+
+  test('playerState is passed', () => {
+    const game = Game({
+      playerSetup: () => ({ A: 1 }),
+      plugins: [PluginPlayer],
+    });
+    const state = InitializeGame({ game });
+    expect(state.G).toEqual({ players: { '0': { A: 1 }, '1': { A: 1 } } });
   });
 });
 
@@ -32,11 +44,11 @@ describe('2 player game', () => {
         },
       },
 
-      plugins: [PluginPlayer(() => ({}))],
+      plugins: [PluginPlayer],
     });
 
     reducer = CreateGameReducer({ game });
-    state = reducer(undefined, { type: 'init' });
+    state = InitializeGame({ game });
   });
 
   test('player 0 turn', () => {
@@ -75,11 +87,11 @@ describe('3 player game', () => {
         },
       },
 
-      plugins: [PluginPlayer()],
+      plugins: [PluginPlayer],
     });
 
-    reducer = CreateGameReducer({ game, numPlayers: 3 });
-    state = reducer(undefined, { type: 'init' });
+    reducer = CreateGameReducer({ game });
+    state = InitializeGame({ game, numPlayers: 3 });
   });
 
   test('G.opponent is not created', () => {

@@ -11,9 +11,8 @@ const Router = require('koa-router');
 const koaBody = require('koa-body');
 const uuid = require('uuid/v4');
 const cors = require('@koa/cors');
-const Redux = require('redux');
 
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame } from '../core/reducer';
 
 const createCredentials = () => uuid();
 const getGameMetadataKey = gameID => `${gameID}:metadata`;
@@ -62,6 +61,38 @@ export const isActionFromAuthenticPlayer = async ({
   return true;
 };
 
+/**
+ * Creates a new game.
+ *
+ * @param {object} db - The storage API.
+ * @param {object} game - The game config object.
+ * @param {number} numPlayers - The number of players.
+ * @param {object} setupData - User-defined object that's available
+ *                             during game setup.
+ */
+export const CreateGame = async (db, game, numPlayers, setupData) => {
+  const gameMetadata = createGameMetadata();
+
+  const state = InitializeGame({
+    game,
+    numPlayers,
+    setupData,
+  });
+
+  for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+    const credentials = createCredentials();
+    gameMetadata.players[playerIndex] = { id: playerIndex, credentials };
+  }
+
+  const gameID = getNewGameInstanceID();
+  const namespacedGameID = getNamespacedGameID(gameID, game.name);
+
+  await db.set(getGameMetadataKey(namespacedGameID), gameMetadata);
+  await db.set(namespacedGameID, state);
+
+  return gameID;
+};
+
 export const createApiServer = ({ db, games }) => {
   const app = new Koa();
   const router = new Router();
@@ -71,33 +102,18 @@ export const createApiServer = ({ db, games }) => {
   });
 
   router.post('/games/:name/create', koaBody(), async ctx => {
+    // The name of the game (for example: tic-tac-toe).
     const gameName = ctx.params.name;
+    // User-data to pass to the game setup function.
+    const setupData = ctx.request.body.setupData;
+    // The number of players for this game instance.
     let numPlayers = parseInt(ctx.request.body.numPlayers);
     if (!numPlayers) {
       numPlayers = 2;
     }
 
-    const gameMetadata = createGameMetadata();
-
     const game = games.find(g => g.name === gameName);
-    const reducer = CreateGameReducer({
-      game,
-      numPlayers,
-      setupData: ctx.request.body.setupData,
-    });
-    const store = Redux.createStore(reducer);
-    const state = store.getState();
-
-    for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-      const credentials = createCredentials();
-      gameMetadata.players[playerIndex] = { id: playerIndex, credentials };
-    }
-
-    const gameID = getNewGameInstanceID();
-    const namespacedGameID = getNamespacedGameID(gameID, gameName);
-
-    await db.set(getGameMetadataKey(namespacedGameID), gameMetadata);
-    await db.set(namespacedGameID, state);
+    const gameID = await CreateGame(db, game, numPlayers, setupData);
 
     ctx.body = {
       gameID,

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
@@ -78,10 +78,11 @@ export class Master {
    * along with a deltalog.
    */
   async onUpdate(action, stateID, gameID, playerID) {
-    let state = await this.storageAPI.get(gameID);
+    const key = `${this.game.name}:${gameID}`;
+    let state = await this.storageAPI.get(key);
 
     if (state === undefined) {
-      logging.error(`game not found, gameID=[${gameID}]`);
+      logging.error(`game not found, gameID=[${key}]`);
       return { error: 'game not found' };
     }
 
@@ -161,7 +162,7 @@ export class Master {
     log = [...log, ...state.deltalog];
     const stateWithLog = { ...state, log };
 
-    await this.storageAPI.set(gameID, stateWithLog);
+    await this.storageAPI.set(key, stateWithLog);
   }
 
   /**
@@ -169,13 +170,15 @@ export class Master {
    * Returns the latest game state and the entire log.
    */
   async onSync(gameID, playerID, numPlayers) {
-    const reducer = CreateGameReducer({ game: this.game, numPlayers });
-    let state = await this.storageAPI.get(gameID);
+    const key = `${this.game.name}:${gameID}`;
 
+    let state = await this.storageAPI.get(key);
+
+    // If the game doesn't exist, then create one on demand.
+    // TODO: Move this out of the sync call.
     if (state === undefined) {
-      const store = createStore(reducer);
-      state = store.getState();
-      await this.storageAPI.set(gameID, state);
+      state = InitializeGame({ game: this.game, numPlayers });
+      await this.storageAPI.set(key, state);
     }
 
     const filteredState = {
