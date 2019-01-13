@@ -78,6 +78,14 @@ export class Token extends React.Component {
     template: Square,
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      ...this.getCoords(),
+      dragged: null,
+    };
+  }
+
   _startDrag = e => {
     if (this.props.draggable && this.props.shouldDrag(this.getCoords())) {
       e = e.touches ? e.touches[0] : e;
@@ -135,18 +143,7 @@ export class Token extends React.Component {
     }
   };
 
-  /**
-   * Sets the x and y of the state on creation.
-   */
-  // eslint-disable-next-line react/no-deprecated
-  UNSAFE_componentWillMount() {
-    this.setState({
-      ...this.getCoords(),
-      dragged: null,
-    });
-  }
-
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     if (this.state.dragged) {
       this._addOrRemoveDragEventListeners(false);
     }

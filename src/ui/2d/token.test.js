@@ -161,7 +161,6 @@ test('drag and drop', () => {
   token.getDOMNode().dispatchEvent(mouseDownEvt);
   token.instance()._drag(mouseDownEvt);
   token.instance()._endDrag(mouseDownEvt);
-  token.instance().UNSAFE_componentWillUnmount();
 
   expect(onDrag).toHaveBeenCalled();
   expect(onDrop).toHaveBeenCalled();
@@ -169,9 +168,10 @@ test('drag and drop', () => {
 
 class MockComponent extends React.Component {
   state = { show: true };
+  _shouldDrag = () => true;
   render() {
     const token = (
-      <Token x={0} y={0}>
+      <Token x={0} y={0} draggable={true} shouldDrag={this._shouldDrag}>
         <circle r={0.25} />
       </Token>
     );
@@ -184,6 +184,16 @@ class MockComponent extends React.Component {
 }
 
 test('unmount regression', () => {
-  const token = Enzyme.mount(<MockComponent />);
-  token.setState({ show: false });
+  const grid = Enzyme.mount(<MockComponent />);
+  grid.setState({ show: false });
+
+  grid.setState({ show: true });
+
+  const mouseDownEvt = new window['MouseEvent']('mousedown', {});
+  grid
+    .find('Token')
+    .getDOMNode()
+    .dispatchEvent(mouseDownEvt);
+
+  grid.unmount();
 });
