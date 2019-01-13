@@ -41,13 +41,14 @@ class Board extends React.Component {
   state = {
     selected: '',
     highlighted: '',
+    dragged: '',
   };
 
   // eslint-disable-next-line react/no-deprecated
   componentWillReceiveProps(nextProps) {
     if (nextProps.G.pgn) {
       this.chess.load_pgn(nextProps.G.pgn);
-      this.setState({ selected: '', highlighted: '' });
+      this.setState({ ...this.state, selected: '', highlighted: '' });
     }
   }
 
@@ -78,7 +79,7 @@ class Board extends React.Component {
     }
 
     if (!this.state.selected && this._isSelectable(square)) {
-      this.setState({ selected: square, highlighted: square });
+      this.setState({ ...this.state, selected: square, highlighted: square });
     }
 
     if (this.state.selected) {
@@ -98,33 +99,49 @@ class Board extends React.Component {
   }
 
   _shouldDrag = ({ x, y }) => {
-    return (
-      this.props.isActive && this._isSelectable(cartesianToAlgebraic(x, y))
-    );
+    const square = cartesianToAlgebraic(x, y);
+    const result = this.props.isActive && this._isSelectable(square);
+    if (result) {
+      this.setState({
+        ...this.state,
+        dragged: this._getInitialCell(square),
+      });
+      return true;
+    }
   };
 
   _onDrag = ({ x, y, originalX, originalY }) => {
     this.setState({
-      selected: cartesianToAlgebraic(originalX, originalY),
-      highlighted: cartesianToAlgebraic(Math.round(x), Math.round(y)),
+      ...this.state,
+      selected: this._getSquare(originalX, originalY),
+      highlighted: this._getSquare(x, y),
     });
   };
 
   _onDrop = ({ x, y }) => {
     if (this.state.selected) {
-      const square = cartesianToAlgebraic(Math.round(x), Math.round(y));
-      this._tryMove(this.state.selected, square);
+      this.setState({ ...this.state, dragged: '' });
+      this._tryMove(this.state.selected, this._getSquare(x, y));
     }
   };
 
+  _getSquare(x, y) {
+    return cartesianToAlgebraic(this._getInRange(x), this._getInRange(y));
+  }
+
+  _getInRange(x) {
+    return Math.max(Math.min(Math.round(x), 7), 0);
+  }
+
   _getPieces() {
+    let dragged = [];
     let result = [];
     for (let y = 1; y <= 8; y++) {
       for (let x = 0; x < 8; x++) {
         let square = COL_NAMES[x] + y;
-        let p = this.chess.get(square);
-        if (p) {
-          result.push(
+        let piece = this.chess.get(square);
+        if (piece) {
+          const token = (
             <Token
               draggable={true}
               shouldDrag={this._shouldDrag}
@@ -134,13 +151,18 @@ class Board extends React.Component {
               animate={true}
               key={this._getInitialCell(square)}
             >
-              {this._getPieceByTypeAndColor(p.type, p.color)}
+              {this._getPieceByTypeAndColor(piece.type, piece.color)}
             </Token>
           );
+          if (square === this.state.dragged) {
+            result.push(token);
+          } else {
+            dragged.push(token);
+          }
         }
       }
     }
-    return result;
+    return dragged.concat(result);
   }
 
   _getPieceByTypeAndColor(type, color) {
@@ -232,7 +254,7 @@ class Board extends React.Component {
     if (move) {
       this.props.moves.move(move.san);
     } else {
-      this.setState({ selected: '', highlighted: '' });
+      this.setState({ ...this.state, selected: '', highlighted: '' });
     }
   }
 }

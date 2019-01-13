@@ -83,10 +83,12 @@ export class Token extends React.Component {
     this.state = {
       ...this.getCoords(),
       dragged: null,
+      usingTouch: false,
     };
   }
 
   _startDrag = e => {
+    console.log('_startDrag');
     if (this.props.draggable && this.props.shouldDrag(this.getCoords())) {
       e = e.touches ? e.touches[0] : e;
       this.setState({
@@ -99,10 +101,10 @@ export class Token extends React.Component {
 
   _drag = e => {
     if (this.state.dragged) {
-      e = e.touches ? e.touches[0] : e;
+      const newE = e.touches ? e.touches[0] : e;
       const ctm = this.props.svgRef.current.getScreenCTM().inverse();
-      const deltaPageX = e.pageX - this.state.dragged.x;
-      const deltaPageY = e.pageY - this.state.dragged.y;
+      const deltaPageX = newE.pageX - this.state.dragged.x;
+      const deltaPageY = newE.pageY - this.state.dragged.y;
       const deltaSvgX = ctm.a * deltaPageX + ctm.b * deltaPageY;
       const deltaSvgY = ctm.c * deltaPageX + ctm.d * deltaPageY;
       const x = this.state.x + deltaSvgX;
@@ -120,26 +122,42 @@ export class Token extends React.Component {
         ...this.state,
         x,
         y,
-        dragged: { x: e.pageX, y: e.pageY },
+        dragged: { x: newE.pageX, y: newE.pageY },
+        movedDragged: true,
+        usingTouch: 'touches' in e,
       });
     }
   };
 
   _endDrag = () => {
     if (this.state.dragged) {
-      this.props.onDrop({
-        x: this.state.x,
-        y: this.state.y,
-        originalX: this.props.x,
-        originalY: this.props.y,
-      });
+      if (this.state.movedDragged) {
+        this.props.onDrop({
+          x: this.state.x,
+          y: this.state.y,
+          originalX: this.props.x,
+          originalY: this.props.y,
+        });
+      }
       this.setState({
         ...this.state,
         x: this.props.x,
         y: this.props.y,
         dragged: null,
+        usingTouch: false,
       });
       this._addOrRemoveDragEventListeners(false);
+    }
+  };
+
+  _onClick = param => {
+    if (this.state.movedDragged && !this.state.usingTouch) {
+      this.setState({
+        ...this.state,
+        movedDragged: false,
+      });
+    } else {
+      this.props.onClick(param);
     }
   };
 
@@ -275,7 +293,7 @@ export class Token extends React.Component {
         y={this.state.y}
         z={this.state.z}
         style={this.props.style}
-        onClick={this.props.onClick}
+        onClick={this._onClick}
         onMouseOver={this.props.onMouseOver}
         onMouseOut={this.props.onMouseOut}
         eventListeners={this._eventListeners()}

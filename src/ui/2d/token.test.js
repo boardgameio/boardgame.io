@@ -161,6 +161,8 @@ test('drag and drop', () => {
   token.getDOMNode().dispatchEvent(mouseDownEvt);
   token.instance()._drag(mouseDownEvt);
   token.instance()._endDrag(mouseDownEvt);
+  // Browser always send an onClick after dropping.
+  token.instance()._onClick({});
 
   expect(onDrag).toHaveBeenCalled();
   expect(onDrop).toHaveBeenCalled();
