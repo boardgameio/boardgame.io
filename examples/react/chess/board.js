@@ -80,9 +80,7 @@ class Board extends React.Component {
 
     if (!this.state.selected && this._isSelectable(square)) {
       this.setState({ ...this.state, selected: square, highlighted: square });
-    }
-
-    if (this.state.selected) {
+    } else if (this.state.selected) {
       this._tryMove(this.state.selected, square);
     }
   };
@@ -119,6 +117,7 @@ class Board extends React.Component {
   };
 
   _onDrop = ({ x, y }) => {
+    console.log('_onDrop!!!');
     if (this.state.selected) {
       this.setState({ ...this.state, dragged: '' });
       this._tryMove(this.state.selected, this._getSquare(x, y));

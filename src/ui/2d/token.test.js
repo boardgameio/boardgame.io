@@ -129,6 +129,41 @@ test('shouldDrag', () => {
   expect(shouldDrag).toHaveBeenCalled();
 });
 
+test('click', () => {
+  const onClick = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2}>
+      <Token
+        x={0}
+        y={0}
+        draggable={true}
+        shouldDrag={() => true}
+        onClick={onClick}
+      >
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  // Workaround because of JSDOM quirks
+  grid.getDOMNode().getScreenCTM = () => ({
+    inverse: () => ({ a: 0, b: 0, c: 0, d: 0 }),
+  });
+  grid.getDOMNode().addEventListener = () => {};
+  grid.getDOMNode().removeEventListener = () => {};
+  const mouseDownEvt = new window['MouseEvent']('mousedown', {
+    pageX: 1,
+    pageY: 2,
+  });
+  const mouseUpEvt = new window['MouseEvent']('mouseup', {
+    pageX: 1,
+    pageY: 2,
+  });
+  const token = grid.find('Token');
+  token.instance()._startDrag(mouseDownEvt);
+  token.instance()._endDrag(mouseUpEvt);
+});
+
 test('drag and drop', () => {
   const onDrag = jest.fn();
   const onDrop = jest.fn();
