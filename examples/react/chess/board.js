@@ -125,7 +125,6 @@ class Board extends React.Component {
   };
 
   _onDrop = ({ x, y }) => {
-    console.log('_onDrop!!!');
     if (this.state.selected) {
       this.setState({ ...this.state, dragged: '' });
       this._tryMove(this.state.selected, this._getSquare(x, y));
