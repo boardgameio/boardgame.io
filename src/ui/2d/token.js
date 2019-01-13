@@ -147,7 +147,9 @@ export class Token extends React.Component {
   }
 
   UNSAFE_componentWillUnmount() {
-    this._addOrRemoveDragEventListeners(false);
+    if (this.state.dragged) {
+      this._addOrRemoveDragEventListeners(false);
+    }
   }
 
   /**

@@ -166,3 +166,24 @@ test('drag and drop', () => {
   expect(onDrag).toHaveBeenCalled();
   expect(onDrop).toHaveBeenCalled();
 });
+
+class MockComponent extends React.Component {
+  state = { show: true };
+  render() {
+    const token = (
+      <Token x={0} y={0}>
+        <circle r={0.25} />
+      </Token>
+    );
+    return (
+      <Grid rows={2} cols={2}>
+        {this.state.show ? token : null}
+      </Grid>
+    );
+  }
+}
+
+test('unmount regression', () => {
+  const token = Enzyme.mount(<MockComponent />);
+  token.setState({ show: false });
+});
