@@ -88,7 +88,6 @@ export class Token extends React.Component {
   }
 
   _startDrag = e => {
-    console.log('_startDrag');
     if (this.props.draggable && this.props.shouldDrag(this.getCoords())) {
       e = e.touches ? e.touches[0] : e;
       this.setState({
