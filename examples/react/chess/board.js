@@ -109,11 +109,19 @@ class Board extends React.Component {
   };
 
   _onDrag = ({ x, y, originalX, originalY }) => {
-    this.setState({
-      ...this.state,
-      selected: this._getSquare(originalX, originalY),
-      highlighted: this._getSquare(x, y),
-    });
+    if (Math.sqrt((x - originalX) ** 2 + (y - originalY) ** 2) > 0.2) {
+      this.setState({
+        ...this.state,
+        selected: this._getSquare(originalX, originalY),
+        highlighted: this._getSquare(x, y),
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        selected: '',
+        highlighted: '',
+      });
+    }
   };
 
   _onDrop = ({ x, y }) => {

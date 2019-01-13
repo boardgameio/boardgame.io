@@ -130,14 +130,16 @@ test('shouldDrag', () => {
 });
 
 test('click', () => {
+  const onDrag = jest.fn();
   const onClick = jest.fn();
   const grid = Enzyme.mount(
-    <Grid rows={2} cols={2}>
+    <Grid rows={2} cols={2} onClick={onClick}>
       <Token
         x={0}
         y={0}
         draggable={true}
         shouldDrag={() => true}
+        onDrag={onDrag}
         onClick={onClick}
       >
         <circle r={0.25} />
@@ -147,21 +149,20 @@ test('click', () => {
 
   // Workaround because of JSDOM quirks
   grid.getDOMNode().getScreenCTM = () => ({
-    inverse: () => ({ a: 0, b: 0, c: 0, d: 0 }),
+    inverse: () => ({ a: 1, b: 1, c: 1, d: 1 }),
   });
   grid.getDOMNode().addEventListener = () => {};
   grid.getDOMNode().removeEventListener = () => {};
-  const mouseDownEvt = new window['MouseEvent']('mousedown', {
-    pageX: 1,
-    pageY: 2,
-  });
-  const mouseUpEvt = new window['MouseEvent']('mouseup', {
-    pageX: 1,
-    pageY: 2,
-  });
   const token = grid.find('Token');
-  token.instance()._startDrag(mouseDownEvt);
-  token.instance()._endDrag(mouseUpEvt);
+  const preventDefault = () => {};
+  token.instance()._startDrag({ preventDefault, pageX: 1, pageY: 2 });
+  token.instance()._drag({ preventDefault, pageX: 1, pageY: 2 });
+  token.instance()._endDrag({ preventDefault });
+  // Browser always send an onClick after dropping.
+  token.instance()._onClick({});
+
+  expect(onDrag).toHaveBeenCalled();
+  expect(onClick).toHaveBeenCalled();
 });
 
 test('drag and drop', () => {
@@ -184,18 +185,15 @@ test('drag and drop', () => {
 
   // Workaround because of JSDOM quirks
   grid.getDOMNode().getScreenCTM = () => ({
-    inverse: () => ({ a: 0, b: 0, c: 0, d: 0 }),
+    inverse: () => ({ a: 1, b: 1, c: 1, d: 1 }),
   });
   grid.getDOMNode().addEventListener = () => {};
   grid.getDOMNode().removeEventListener = () => {};
-  const mouseDownEvt = new window['MouseEvent']('mousedown', {
-    pageX: 1,
-    pageY: 2,
-  });
   const token = grid.find('Token');
-  token.getDOMNode().dispatchEvent(mouseDownEvt);
-  token.instance()._drag(mouseDownEvt);
-  token.instance()._endDrag(mouseDownEvt);
+  const preventDefault = () => {};
+  token.instance()._startDrag({ preventDefault, pageX: 1, pageY: 2 });
+  token.instance()._drag({ preventDefault, pageX: 200, pageY: 200 });
+  token.instance()._endDrag({ preventDefault });
   // Browser always send an onClick after dropping.
   token.instance()._onClick({});
 

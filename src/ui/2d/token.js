@@ -94,7 +94,6 @@ export class Token extends React.Component {
       this.setState({
         ...this.state,
         dragged: { x: e.pageX, y: e.pageY },
-        movedAfterDrag: false,
       });
       this._addOrRemoveDragEventListeners(true);
     }
@@ -125,7 +124,6 @@ export class Token extends React.Component {
         x,
         y,
         dragged: { x: e.pageX, y: e.pageY },
-        movedAfterDrag: true,
       });
     }
   };
@@ -134,7 +132,11 @@ export class Token extends React.Component {
     if (this.state.dragged) {
       e.preventDefault();
       // Whether this is a drop or a click depends if the mouse moved after drag.
-      if (this.state.movedAfterDrag) {
+      // Android will issue very small drag events, so we need a distance.
+      const dist = Math.sqrt(
+        (this.state.x - this.props.x) ** 2 + (this.state.y - this.props.y) ** 2
+      );
+      if (dist > 0.2) {
         this.props.onDrop({
           x: this.state.x,
           y: this.state.y,
