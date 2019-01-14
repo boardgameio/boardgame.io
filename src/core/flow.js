@@ -12,7 +12,7 @@ import {
   UpdateTurnOrderState,
   TurnOrder,
 } from './turn-order';
-import { ApplyPlugins } from './plugins/apply';
+import * as plugins from '../plugins/main';
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
 import * as logging from './logger';
@@ -190,7 +190,7 @@ export function Flow({
  * @param {Array} redactedMoves - List of moves to be redacted
  *                                from the log.
  *
- * @param {Array} plugins - List of plugins.
+ * @param {object} game - The game object.
  *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
@@ -268,7 +268,7 @@ export function FlowWithPhases({
   allowedMoves,
   redactedMoves,
   optimisticUpdate,
-  plugins,
+  game,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -286,8 +286,8 @@ export function FlowWithPhases({
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
   }
-  if (plugins === undefined) {
-    plugins = [];
+  if (game === undefined) {
+    game = { plugins: [] };
   }
   if (!phases) phases = {};
   if (!startingPhase) startingPhase = 'default';
@@ -317,11 +317,11 @@ export function FlowWithPhases({
     if (conf.onPhaseBegin === undefined) {
       conf.onPhaseBegin = G => G;
     }
-    conf.onPhaseBegin = ApplyPlugins(conf.onPhaseBegin, plugins);
+    conf.onPhaseBegin = plugins.FnWrap(conf.onPhaseBegin, game);
     if (conf.onPhaseEnd === undefined) {
       conf.onPhaseEnd = G => G;
     }
-    conf.onPhaseEnd = ApplyPlugins(conf.onPhaseEnd, plugins);
+    conf.onPhaseEnd = plugins.FnWrap(conf.onPhaseEnd, game);
     if (conf.movesPerTurn === undefined) {
       conf.movesPerTurn = movesPerTurn;
     }
@@ -334,15 +334,15 @@ export function FlowWithPhases({
     if (conf.onTurnBegin === undefined) {
       conf.onTurnBegin = onTurnBegin;
     }
-    conf.onTurnBegin = ApplyPlugins(conf.onTurnBegin, plugins);
+    conf.onTurnBegin = plugins.FnWrap(conf.onTurnBegin, game);
     if (conf.onTurnEnd === undefined) {
       conf.onTurnEnd = onTurnEnd;
     }
-    conf.onTurnEnd = ApplyPlugins(conf.onTurnEnd, plugins);
+    conf.onTurnEnd = plugins.FnWrap(conf.onTurnEnd, game);
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
-    conf.onMove = ApplyPlugins(conf.onMove, plugins);
+    conf.onMove = plugins.FnWrap(conf.onMove, game);
     if (conf.turnOrder === undefined) {
       conf.turnOrder = turnOrder;
     }
@@ -375,8 +375,12 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
-    const G = config.onPhaseBegin(state.G, state.ctx);
-    const ctx = InitTurnOrderState(state.G, state.ctx, config.turnOrder);
+    let G = config.onPhaseBegin(state.G, state.ctx);
+    let ctx = InitTurnOrderState(state.G, state.ctx, config.turnOrder);
+
+    // Allow plugins to modify G and ctx at the beginning of a phase.
+    G = plugins.G.onPhaseBegin(G, ctx, game);
+    ctx = plugins.ctx.onPhaseBegin(ctx, game);
 
     // Reset stats.
     ctx.stats = {

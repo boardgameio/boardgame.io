@@ -8,7 +8,6 @@
 
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
-import * as Redux from 'redux';
 import { InMemory } from '../server/db/inmemory';
 import { Master, redactLog } from './master';
 import { error } from '../core/logger';
@@ -27,7 +26,6 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 describe('sync', async () => {
   const send = jest.fn();
   const master = new Master(game, new InMemory(), TransportAPI(send));
-  const spy = jest.spyOn(Redux, 'createStore');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,17 +38,11 @@ describe('sync', async () => {
         type: 'sync',
       })
     );
-    expect(spy).toHaveBeenCalled();
   });
 
   test('sync a second time does not create a game', async () => {
     await master.onSync('gameID', '0', 2);
     expect(send).toHaveBeenCalled();
-    expect(spy).not.toHaveBeenCalled();
-  });
-
-  afterAll(() => {
-    spy.mockRestore();
   });
 });
 
@@ -191,7 +183,9 @@ describe('update', async () => {
   test('invalid gameID', async () => {
     await master.onUpdate(action, 1, 'unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(error).toHaveBeenCalledWith(`game not found, gameID=[unknown]`);
+    expect(error).toHaveBeenCalledWith(
+      `game not found, gameID=[default:unknown]`
+    );
   });
 
   test('invalid stateID', async () => {

@@ -74,9 +74,11 @@ export const update = (state, deltalog) => ({
 
 /**
  * Used to reset the game state.
+ * @param {object} state - The initial state.
  */
-export const reset = () => ({
+export const reset = state => ({
   type: Actions.RESET,
+  state,
   clientOnly: true,
 });
 

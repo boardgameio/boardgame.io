@@ -1,3 +1,48 @@
+## v0.30.0
+
+#### Features
+
+* [[6cf81e8](https://github.com/nicolodavis/boardgame.io/commit/6cf81e8)] create initial game state outside reducer
+* [[8d08381](https://github.com/nicolodavis/boardgame.io/commit/8d08381)] add a loading component for multiplayer clients
+
+#### Bugfixes
+
+* [[d20d26c](https://github.com/nicolodavis/boardgame.io/commit/d20d26c)] make master write to proper namepspaced keys
+
+## v0.29.5
+
+#### Features
+
+* [[7188222](https://github.com/nicolodavis/boardgame.io/commit/7188222)] add plugin.onPhaseBegin
+
+## v0.29.4
+
+#### Features
+
+* [[c1b4a03](https://github.com/nicolodavis/boardgame.io/commit/c1b4a03)] add playerSetup option to PluginPlayer
+
+## v0.29.3
+
+#### Features
+
+* [[da1eac6](https://github.com/nicolodavis/boardgame.io/commit/da1eac6)] rename plugin api functions
+* [[659007a](https://github.com/nicolodavis/boardgame.io/commit/659007a)] pass game object to plugins
+
+## v0.29.2
+
+#### Bugfixes
+
+* [[5d74c95](https://github.com/nicolodavis/boardgame.io/commit/5d74c95)] fix immer plugin order
+
+## v0.29.1
+
+#### Features
+
+* [[ff749e3](https://github.com/nicolodavis/boardgame.io/commit/ff749e3)] add addTo / removeFrom to plugin API
+* [[9df8145](https://github.com/nicolodavis/boardgame.io/commit/9df8145)] split plugin.setup into setupG and setupCtx
+* [[d2d44f9](https://github.com/nicolodavis/boardgame.io/commit/d2d44f9)] rename plugin.wrapper to plugin.fnWrap
+* [[ca5da32](https://github.com/nicolodavis/boardgame.io/commit/ca5da32)] Passing arbitrary data to game setup (#315)
+
 ## v0.29.0
 
 #### Features

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { ApplyPlugins } from './plugins/apply';
+import { FnWrap } from '../plugins/main';
 import { FlowWithPhases } from './flow';
 
 /**
@@ -75,10 +75,10 @@ import { FlowWithPhases } from './flow';
  *
  * @param {Array} plugins - List of plugins. Each plugin is an object like the following:
  *                          {
- *                            // Wraps a move / trigger function and returns
+ *                            // Optional: Wraps a move / trigger function and returns
  *                            // the wrapped function. The wrapper can do anything
  *                            // it wants, but will typically be used to customize G.
- *                            wrapper: (fn) => {
+ *                            fnWrap: (fn) => {
  *                              return (G, ctx, ...args) => {
  *                                G = preprocess(G);
  *                                G = fn(G, ctx, ...args);
@@ -92,30 +92,25 @@ import { FlowWithPhases } from './flow';
  *                            setup: (G, ctx) => G,
  *                          }
  */
-function Game({ name, setup, moves, playerView, flow, seed, plugins }) {
-  if (name === undefined) name = 'default';
-  if (setup === undefined) setup = () => ({});
-  if (moves === undefined) moves = {};
-  if (playerView === undefined) playerView = G => G;
-  if (plugins === undefined) plugins = [];
+function Game(game) {
+  if (game.name === undefined) game.name = 'default';
+  if (game.setup === undefined) game.setup = () => ({});
+  if (game.moves === undefined) game.moves = {};
+  if (game.playerView === undefined) game.playerView = G => G;
+  if (game.plugins === undefined) game.plugins = [];
 
-  if (!flow || flow.processGameEvent === undefined) {
-    flow = FlowWithPhases({ plugins, ...flow });
+  if (!game.flow || game.flow.processGameEvent === undefined) {
+    game.flow = FlowWithPhases({ game, ...game.flow });
   }
 
   return {
-    name,
-    setup,
-    playerView,
-    flow,
-    seed,
-    plugins,
-    moveNames: Object.getOwnPropertyNames(moves),
+    ...game,
+    moveNames: Object.getOwnPropertyNames(game.moves),
     processMove: (G, action, ctx) => {
-      if (moves.hasOwnProperty(action.type)) {
+      if (game.moves.hasOwnProperty(action.type)) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        const fn = ApplyPlugins(moves[action.type], plugins);
+        const fn = FnWrap(game.moves[action.type], game);
         return fn(...args);
       }
       return G;
