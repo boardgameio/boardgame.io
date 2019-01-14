@@ -43,7 +43,7 @@ class Lobby extends React.Component {
   static defaultProps = {
     multiplayer: true,
     debug: false,
-    clientFactory: Client.bind(this),
+    clientFactory: Client,
   };
 
   state = {
