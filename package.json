@@ -16,13 +16,11 @@
     "test:integration": "bash ./scripts/integration.sh",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "storybook": "start-storybook -p 3000 -c storybook",
-    "storybook:build": "build-storybook -c storybook -o docs/storybook",
     "clean": "node ./scripts/clean.js",
     "prepare": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "prepublishOnly": "generate-export-aliases",
     "pretest": "npm run lint",
-    "prettier": "prettier --write \"{examples,src,lobby,storybook}/**/*.{js,css,md}\"",
+    "prettier": "prettier --write \"{examples,src,lobby}/**/*.{js,css,md}\"",
     "postpublish": "node ./scripts/postpublish.js",
     "changelog": "bash ./scripts/changelog.sh"
   },
@@ -67,11 +65,6 @@
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
   "devDependencies": {
-    "@storybook/addon-actions": "^3.2.16",
-    "@storybook/addon-knobs": "^3.3.10",
-    "@storybook/addon-options": "^3.2.16",
-    "@storybook/react": "^3.4.11",
-    "@storybook/addons": "^3.4.11",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.0.0",
@@ -185,7 +178,6 @@
     "testPathIgnorePatterns": [
       "integration/",
       "/examples/react-native/",
-      "storybook/",
       "/node_modules/",
       ".npm/"
     ]
