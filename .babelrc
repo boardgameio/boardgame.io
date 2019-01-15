@@ -1,6 +1,6 @@
 {
   "presets": [
-    ["@babel/preset-env", { "modules": false }],
+    ["@babel/preset-env", { "modules": false, "exclude": ["transform-regenerator", "transform-async-to-generator"] }],
     "@babel/preset-react"
   ],
   "env": {
@@ -18,6 +18,5 @@
       }
     ],
     "@babel/plugin-proposal-class-properties",
-    "@babel/plugin-transform-runtime"
   ]
 }
