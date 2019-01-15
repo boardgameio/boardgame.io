@@ -19,7 +19,7 @@ const env = process.env.NODE_ENV;
 
 const plugins = [
   postcss(),
-  babel({ exclude: '**/node_modules/**' }),
+  babel({ exclude: '**/node_modules/**', runtimeHelpers: true }),
   filesize(),
 ];
 
@@ -40,10 +40,8 @@ export default [
     input: 'packages/server.js',
     output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
     plugins: [
-      babel({ exclude: ['**/node_modules/**'] }),
-      commonjs({
-        exclude: 'node_modules/**',
-      }),
+      babel({ exclude: ['**/node_modules/**'], runtimeHelpers: true }),
+      commonjs({ include: 'node_modules/**' }),
       resolve(),
     ],
   },
