@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Setup
+rm -rf dist
+npm run prepare
 npm run prepublishOnly
 npm pack
 npm run postpublish
