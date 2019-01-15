@@ -103,7 +103,7 @@
     "jest": "^21.2.1",
     "koa-helmet": "^3.2.0",
     "koa-webpack": "^5.1.1",
-    "lint-staged": "^6.0.1",
+    "lint-staged": "^8.1.0",
     "mongo-mock": "^3.3.2",
     "mongodb": "^3.0.3",
     "open-browser-webpack-plugin": "0.0.5",
