@@ -1,26 +1,22 @@
 {
   "presets": [
-    ["es2015", { "modules": false }],
-    "react",
+    ["@babel/preset-env", { "modules": false, "exclude": ["transform-regenerator", "transform-async-to-generator"] }],
+    "@babel/preset-react"
   ],
   "env": {
-    "targets": {
-      "node": "current"
-    },
     "test": {
-      "plugins": ["transform-es2015-modules-commonjs"]
-    },
-    "rollup": {
-      "plugins": ["external-helpers"]
+      "plugins": ["@babel/plugin-transform-modules-commonjs"]
     }
   },
   "plugins": [
-    ["module-resolver", {
-      "alias": {
-        "boardgame.io": "./packages",
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "boardgame.io": "./packages"
+        }
       }
-    }],
-    "transform-object-rest-spread",
-    "transform-class-properties"
+    ],
+    "@babel/plugin-proposal-class-properties",
   ]
 }

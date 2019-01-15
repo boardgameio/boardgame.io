@@ -11,10 +11,9 @@ import resolve from 'rollup-plugin-node-resolve';
 import replace from 'rollup-plugin-replace';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
-import uglify from 'rollup-plugin-uglify';
 import postcss from 'rollup-plugin-postcss';
 import filesize from 'rollup-plugin-filesize';
-import { minify } from 'uglify-es';
+import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
 const env = process.env.NODE_ENV;
@@ -40,13 +39,10 @@ export default [
   // Sub-packages.
   {
     input: 'packages/server.js',
-    output: { file: 'dist/server.js', format: 'cjs' },
-    name: 'Server',
+    output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
     plugins: [
       babel({ exclude: ['**/node_modules/**'] }),
-      commonjs({
-        exclude: 'node_modules/**',
-      }),
+      commonjs({ include: 'node_modules/**' }),
       resolve(),
     ],
   },
@@ -54,81 +50,78 @@ export default [
   {
     input: 'packages/react.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/react.js', format: 'umd' },
-    name: 'Client',
+    output: { file: 'dist/react.js', format: 'umd', name: 'Client', globals },
     plugins,
   },
 
   {
     input: 'packages/client.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/client.js', format: 'umd' },
-    name: 'Client',
+    output: { file: 'dist/client.js', format: 'umd', name: 'Client', globals },
     plugins,
   },
 
   {
     input: 'packages/react-native.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/react-native.js', format: 'umd' },
-    name: 'ReactNativeClient',
+    output: {
+      file: 'dist/react-native.js',
+      format: 'umd',
+      name: 'ReactNativeClient',
+      globals,
+    },
     plugins,
   },
 
   {
     input: 'packages/master.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/master.js', format: 'umd' },
-    name: 'Master',
+    output: { file: 'dist/master.js', format: 'umd', name: 'Master', globals },
     plugins,
   },
 
   {
     input: 'packages/core.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/core.js', format: 'umd' },
-    name: 'Core',
+    output: { file: 'dist/core.js', format: 'umd', name: 'Core', globals },
     plugins,
   },
 
   {
     input: 'packages/plugins.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/plugins.js', format: 'umd' },
-    name: 'Plugins',
+    output: {
+      file: 'dist/plugins.js',
+      format: 'umd',
+      name: 'Plugins',
+      globals,
+    },
     plugins,
   },
 
   {
     input: 'packages/ai.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/ai.js', format: 'umd' },
-    name: 'AI',
+    output: { file: 'dist/ai.js', format: 'umd', name: 'AI', globals },
     plugins,
   },
 
   {
     input: 'packages/internal.js',
     external: Object.keys(globals),
-    output: { file: 'dist/internal.js', format: 'umd' },
-    name: 'Internal',
-    globals,
+    output: {
+      file: 'dist/internal.js',
+      format: 'umd',
+      name: 'Internal',
+      globals,
+    },
     plugins,
   },
 
   {
     input: 'packages/ui.js',
     external: Object.keys(globals),
-    globals,
-    output: { file: 'dist/ui.js', format: 'umd' },
-    name: 'UI',
+    output: { file: 'dist/ui.js', format: 'umd', name: 'UI', globals },
     plugins,
   },
 
@@ -136,10 +129,9 @@ export default [
   {
     input: 'packages/main.js',
     external: Object.keys(globals),
-    globals,
     output: [
-      { file: pkg.main, format: 'umd', name: 'BoardgameIO' },
-      { file: pkg.module, format: 'es' },
+      { file: pkg.main, format: 'umd', name: 'BoardgameIO', globals },
+      { file: pkg.module, format: 'es', globals },
     ],
     plugins: plugins.concat([
       replace({ 'process.env.NODE_ENV': JSON.stringify(env) }),
@@ -149,28 +141,23 @@ export default [
   // Browser minified version.
   {
     input: 'packages/main.js',
-    globals: { react: 'React' },
     external: ['react'],
-    output: [{ file: pkg.unpkg, format: 'umd' }],
-    name: 'BoardgameIO',
+    output: [
+      {
+        file: pkg.unpkg,
+        format: 'umd',
+        name: 'BoardgameIO',
+        globals,
+      },
+    ],
     plugins: plugins.concat([
       builtins(),
-      commonjs(),
       resolve({ browser: true, preferBuiltins: false }),
+      commonjs(),
       replace({
         'process.env.NODE_ENV': JSON.stringify('production'),
       }),
-      uglify(
-        {
-          compress: {
-            pure_getters: true,
-            unsafe: true,
-            unsafe_comps: true,
-            warnings: false,
-          },
-        },
-        minify
-      ),
+      terser(),
     ]),
   },
 ];
