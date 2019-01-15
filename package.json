@@ -123,6 +123,7 @@
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-postcss": "^1.6.3",
     "rollup-plugin-replace": "^2.1.0",
+    "rollup-plugin-terser": "^4.0.2",
     "shelljs": "^0.7.8",
     "style-loader": "^0.18.2",
     "superagent": "^3.8.3",

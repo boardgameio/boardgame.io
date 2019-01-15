@@ -13,6 +13,7 @@ import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
 import filesize from 'rollup-plugin-filesize';
+import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
 const env = process.env.NODE_ENV;
@@ -156,6 +157,7 @@ export default [
       replace({
         'process.env.NODE_ENV': JSON.stringify('production'),
       }),
+      terser(),
     ]),
   },
 ];
