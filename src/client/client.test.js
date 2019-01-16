@@ -129,6 +129,24 @@ describe('multiplayer', () => {
     });
   });
 
+  describe('multiplayer: true', () => {
+    let client;
+
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({}),
+          multiplayer: true,
+        })
+      );
+      client.connect();
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport instanceof SocketIO).toBe(true);
+    });
+  });
+
   describe('local master', () => {
     let client;
 

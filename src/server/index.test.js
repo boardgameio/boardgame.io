@@ -37,6 +37,8 @@ test('basic', async () => {
   const server = Server({ games: [game] });
   await server.run();
   expect(server).not.toBe(undefined);
+  const close = () => {};
+  server.kill({ apiServer: { close }, appServer: { close } });
 });
 
 test('custom db implementation', async () => {

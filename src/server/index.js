@@ -39,11 +39,18 @@ export function Server({ games, db, transport }) {
     app,
     api,
     db,
+
     run: async (port, callback) => {
       await db.connect();
-      await api.listen(port + 1);
-      await app.listen(port, callback);
+      let apiServer = await api.listen(port + 1);
+      let appServer = await app.listen(port, callback);
       logger.info('listening...');
+      return { apiServer, appServer };
+    },
+
+    kill: ({ apiServer, appServer }) => {
+      apiServer.close();
+      appServer.close();
     },
   };
 }
