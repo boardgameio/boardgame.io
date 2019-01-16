@@ -63,8 +63,7 @@ describe('MCTSRoot', () => {
 
     const m = Enzyme.mount(<MCTSRoot root={root} />);
 
-    m
-      .find('.children MCTSNode')
+    m.find('.children MCTSNode')
       .at(0)
       .simulate('click');
 
@@ -83,13 +82,11 @@ describe('MCTSRoot', () => {
     const m = Enzyme.mount(<MCTSRoot root={root} />);
 
     expect(m.find('MCTSNodeDetails')).toHaveLength(0);
-    m
-      .find('MCTSNode')
+    m.find('MCTSNode')
       .at(0)
       .simulate('mouseover');
     expect(m.find('MCTSNodeDetails')).toHaveLength(1);
-    m
-      .find('MCTSNode')
+    m.find('MCTSNode')
       .at(0)
       .simulate('mouseout');
     m.setProps({});
@@ -108,13 +105,11 @@ describe('MCTSRoot', () => {
     const m = Enzyme.mount(<MCTSRoot root={root} />);
 
     expect(m.find('MCTSNodeDetails')).toHaveLength(0);
-    m
-      .find('.children MCTSNode')
+    m.find('.children MCTSNode')
       .at(0)
       .simulate('mouseover');
     expect(m.find('MCTSNodeDetails')).toHaveLength(1);
-    m
-      .find('.children MCTSNode')
+    m.find('.children MCTSNode')
       .at(0)
       .simulate('mouseout');
     m.setProps({});
@@ -133,13 +128,11 @@ describe('MCTSRoot', () => {
     const m = Enzyme.mount(<MCTSRoot root={node} />);
 
     expect(m.find('MCTSNodeDetails')).toHaveLength(0);
-    m
-      .find('.parents MCTSNode')
+    m.find('.parents MCTSNode')
       .at(0)
       .simulate('mouseover');
     expect(m.find('MCTSNodeDetails')).toHaveLength(1);
-    m
-      .find('.parents MCTSNode')
+    m.find('.parents MCTSNode')
       .at(0)
       .simulate('mouseout');
     m.setProps({});
