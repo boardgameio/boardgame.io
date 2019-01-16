@@ -58,7 +58,7 @@ export class InMemory {
    * @param {string} id - The game id.
    */
   async remove(id) {
-    if (!await this.games.has(id)) return;
+    if (!(await this.games.has(id))) return;
     this.games.delete(id);
   }
 

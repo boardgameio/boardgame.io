@@ -177,7 +177,7 @@ export class Hex extends React.Component {
   }
 
   get height() {
-    return (Math.sqrt(3) / 2 * this.width).toFixed(3);
+    return ((Math.sqrt(3) / 2) * this.width).toFixed(3);
   }
 
   /**
@@ -186,7 +186,7 @@ export class Hex extends React.Component {
   get center() {
     const q = this.props.x;
     const r = this.props.z;
-    const x = this.props.size * 3 * q / 2.0;
+    const x = (this.props.size * 3 * q) / 2.0;
     const y = this.props.size * Math.sqrt(3) * (r + q / 2.0);
     return { x, y };
   }

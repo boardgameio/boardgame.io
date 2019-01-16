@@ -70,15 +70,19 @@ function Init(root) {
 
     const { G } = client.getState();
 
-    cubes.filter(c => G.cells[c.userData.i] == '0').forEach(c => {
-      c.material.color.setHex(0xff0000);
-      c.rotation.x = rotation;
-    });
+    cubes
+      .filter(c => G.cells[c.userData.i] == '0')
+      .forEach(c => {
+        c.material.color.setHex(0xff0000);
+        c.rotation.x = rotation;
+      });
 
-    cubes.filter(c => G.cells[c.userData.i] == '1').forEach(c => {
-      c.material.color.setHex(0x00ff00);
-      c.rotation.y = -rotation;
-    });
+    cubes
+      .filter(c => G.cells[c.userData.i] == '1')
+      .forEach(c => {
+        c.material.color.setHex(0x00ff00);
+        c.rotation.y = -rotation;
+      });
 
     rotation += 0.03;
     renderer.render(scene, camera);
@@ -98,7 +102,7 @@ function Init(root) {
 
     const x = e.clientX - root.offsetParent.offsetLeft;
     const y = e.clientY;
-    mouse.x = x / window.innerWidth * 2 - 1;
+    mouse.x = (x / window.innerWidth) * 2 - 1;
     mouse.y = -(y / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);

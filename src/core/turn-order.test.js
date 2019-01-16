@@ -266,12 +266,12 @@ test('end game after everyone passes', () => {
 test('override', () => {
   const even = {
     first: () => '0',
-    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers + '',
+    next: (G, ctx) => ((+ctx.currentPlayer + 2) % ctx.numPlayers) + '',
   };
 
   const odd = {
     first: () => '1',
-    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers + '',
+    next: (G, ctx) => ((+ctx.currentPlayer + 2) % ctx.numPlayers) + '',
   };
 
   let flow = FlowWithPhases({
