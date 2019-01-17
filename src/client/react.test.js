@@ -265,3 +265,17 @@ test('debug settings', () => {
   expect(game.find('GameInfo')).toHaveLength(0);
   expect(game.find('Controls').html()).toContain('docktop');
 });
+
+test('pass ai section', () => {
+  const Board = Client({
+    game: Game({}),
+    board: TestBoard,
+    ai: {
+      bot: () => {},
+      visualize: () => {},
+    },
+  });
+
+  const game = Enzyme.mount(<Board />);
+  expect(game.find('.debug-ui')).toHaveLength(1);
+});
