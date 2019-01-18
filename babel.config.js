@@ -19,7 +19,7 @@ module.exports = {
       'module-resolver',
       {
         alias: {
-          'boardgame.io': './dist',
+          'boardgame.io': './packages',
         },
       },
     ],

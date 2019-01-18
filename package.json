@@ -6,7 +6,7 @@
   "scripts": {
     "start": "bash ./scripts/dev.sh",
     "dev:client": "(cd examples/react-web; npm start)",
-    "dev:server": "cross-env NODE_ENV=development babel-node --presets @babel/preset-env examples/react-web/server.js",
+    "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples --exec babel-node --presets @babel/preset-env examples/react-web/server.js",
     "build": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "docsify": "docsify serve docs",
     "docsify:update": "node ./scripts/docsify-update.js",
@@ -102,6 +102,7 @@
     "lint-staged": "^8.1.0",
     "mongo-mock": "^3.3.2",
     "mongodb": "^3.0.3",
+    "nodemon": "^1.18.9",
     "prettier": "^1.10.2",
     "raf": "^3.4.0",
     "react": "^16.7.0",
