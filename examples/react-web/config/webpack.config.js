@@ -365,10 +365,14 @@ module.exports = function(webpackEnv) {
                 configFile: false,
                 compact: false,
                 presets: [
+                  require.resolve('@babel/preset-react'),
                   [
                     require.resolve('babel-preset-react-app/dependencies'),
                     { helpers: true },
                   ],
+                ],
+                plugins: [
+                  require.resolve('@babel/plugin-proposal-class-properties'),
                 ],
                 cacheDirectory: true,
                 cacheCompression: isEnvProduction,
