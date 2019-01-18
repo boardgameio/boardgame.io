@@ -105,7 +105,7 @@ class AuthenticatedExample extends React.Component {
 
   render() {
     return (
-      <div style={{ padding: 50 }}>
+      <div>
         <h1>Authenticated</h1>
 
         <p>

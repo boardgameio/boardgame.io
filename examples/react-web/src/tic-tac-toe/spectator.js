@@ -19,7 +19,7 @@ const App = Client({
 });
 
 const Spectator = () => (
-  <div style={{ padding: 50 }}>
+  <div>
     <h1>Spectator</h1>
     <div className="runner">
       <div className="run">

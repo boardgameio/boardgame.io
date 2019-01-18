@@ -103,25 +103,25 @@
   margin-left: 10px;
 }
 
-#turnorder .client {
+#turnorder .bgio-client {
   padding: 0 !important;
 }
 
-.player-container span > .client:nth-child(1) .player-wrap {
+.player-container span > .bgio-client:nth-child(1) .player-wrap {
   transform: rotate(0deg) translate(12em) rotate(-0deg);
 }
-.player-container span > .client:nth-child(2) .player-wrap {
+.player-container span > .bgio-client:nth-child(2) .player-wrap {
   transform: rotate(60deg) translate(12em) rotate(-60deg);
 }
-.player-container span > .client:nth-child(3) .player-wrap {
+.player-container span > .bgio-client:nth-child(3) .player-wrap {
   transform: rotate(120deg) translate(12em) rotate(-120deg);
 }
-.player-container span > .client:nth-child(4) .player-wrap {
+.player-container span > .bgio-client:nth-child(4) .player-wrap {
   transform: rotate(180deg) translate(12em) rotate(-180deg);
 }
-.player-container span > .client:nth-child(5) .player-wrap {
+.player-container span > .bgio-client:nth-child(5) .player-wrap {
   transform: rotate(240deg) translate(12em) rotate(-240deg);
 }
-.player-container span > .client:nth-child(6) .player-wrap {
+.player-container span > .bgio-client:nth-child(6) .player-wrap {
   transform: rotate(300deg) translate(12em) rotate(-300deg);
 }
