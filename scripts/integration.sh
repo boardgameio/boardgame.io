@@ -2,10 +2,7 @@
 
 # Setup
 rm -rf dist
-npm run prepare
-npm run prepublishOnly
 npm pack
-npm run postpublish
 mv ./boardgame.io-*.tgz integration
 cd integration
 rm -rf node_modules
