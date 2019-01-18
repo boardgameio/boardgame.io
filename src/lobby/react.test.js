@@ -46,7 +46,22 @@ describe('lobby', () => {
   });
 
   describe('specify servers', () => {
-    test('gameServer', () => {});
+    test('gameServer', () => {
+      const spy = jest.fn();
+      const lobby = Enzyme.mount(
+        <Lobby
+          gameComponents={components}
+          clientFactory={spy.mockReturnValue(NullComponent)}
+          gameServer="localhost:9000"
+        />
+      );
+      lobby.instance()._startGame('GameName1', { numPlayers: 2 });
+      expect(spy).toBeCalledWith(
+        expect.objectContaining({
+          multiplayer: { server: 'localhost:9000' },
+        })
+      );
+    });
   });
 
   describe('login/logout', () => {
@@ -388,6 +403,7 @@ describe('lobby', () => {
         lobby.instance().forceUpdate();
         lobby.update();
       });
+
       test('if player has joined the game', () => {
         lobby.instance().connection.playerCredentials = 'SECRET1';
         lobby
@@ -408,6 +424,7 @@ describe('lobby', () => {
           debug: false,
         });
       });
+
       test('if player is spectator', () => {
         lobby
           .find('LobbyRoomInstance')
@@ -420,6 +437,7 @@ describe('lobby', () => {
           playerID: null,
         });
       });
+
       test('if game is not supported', () => {
         lobby
           .find('LobbyRoomInstance')
@@ -434,6 +452,7 @@ describe('lobby', () => {
             .text()
         ).not.toBe('');
       });
+
       test('if game is monoplayer', () => {
         lobby
           .find('LobbyRoomInstance')
