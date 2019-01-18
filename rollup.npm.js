@@ -28,6 +28,7 @@ const globals = {
   immer: 'immer',
   react: 'React',
   redux: 'Redux',
+  'react-cookies': 'Cookies',
   'prop-types': 'PropTypes',
   'react-dragtastic': 'ReactDragtastic',
   mousetrap: 'Mousetrap',
