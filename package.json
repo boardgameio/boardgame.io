@@ -138,6 +138,7 @@
     "lru-cache": "^4.1.1",
     "mousetrap": "^1.6.1",
     "prop-types": "^15.5.10",
+    "react-cookies": "^0.1.0",
     "react-dragtastic": "^2.4.3",
     "redux": "^4.0.0",
     "socket.io": "^2.1.1",
