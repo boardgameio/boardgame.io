@@ -159,7 +159,7 @@ export const createApiServer = ({ db, games }) => {
     if (!gameMetadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (gameMetadata.players[playerID].name) {
+    if (gameMetadata.players[playerID].name!= null || gameMetadata.players[playerID].name!=undefined) {
       ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 
