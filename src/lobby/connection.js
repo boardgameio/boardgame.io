@@ -16,7 +16,10 @@ class _LobbyConnectionImpl {
   }
 
   _baseUrl() {
-    return `http://${this.server}/games`;
+    if (this.server) {
+      return `http://${this.server}/games`;
+    }
+    return '/games';
   }
 
   async refresh() {

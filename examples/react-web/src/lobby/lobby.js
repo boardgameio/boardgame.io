@@ -26,7 +26,12 @@ const importedGames = [
 const LobbyView = () => (
   <div style={{ padding: 50 }}>
     <h1>Lobby</h1>
-    <Lobby server="localhost" port={8001} gameComponents={importedGames} />
+
+    <Lobby
+      gameServer="localhost:8000"
+      lobbyServer="localhost:8001"
+      gameComponents={importedGames}
+    />
   </div>
 );
 

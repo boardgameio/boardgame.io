@@ -45,11 +45,13 @@ describe('lobby', () => {
     spy.mockReset();
   });
 
+  describe('specify servers', () => {
+    test('gameServer', () => {});
+  });
+
   describe('login/logout', () => {
     beforeEach(async () => {
-      lobby = Enzyme.mount(
-        <Lobby server="localhost" port={8001} gameComponents={components} />
-      );
+      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
     });
 
     test('changing prop debug', () => {
@@ -147,9 +149,7 @@ describe('lobby', () => {
         },
         { path: '/' }
       );
-      lobby = Enzyme.mount(
-        <Lobby server="localhost" port={8001} gameComponents={components} />
-      );
+      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
     });
     test('reset phase to list', async () => {
       expect(lobby.instance().state.phase).toBe('list');
@@ -170,8 +170,6 @@ describe('lobby', () => {
       );
       lobby = Enzyme.mount(
         <Lobby
-          server="localhost"
-          port={8001}
           gameComponents={components}
           // stub for Client factory
           clientFactory={spyClient.mockReturnValue(NullComponent)}

@@ -20,11 +20,13 @@ import LobbyCreateRoomForm from './create-room-form';
  *
  * React lobby component.
  *
- * @param {string}   server - Host address of the server.
- * @param {number}   port - HTTP port of the server.
- * @param {Array}    gameComponents - An array of Board and Game objects for the supported games.
- * @param {bool}     multiplayer - Multiplayer status of instances of Game (default: true).
- * @param {bool}     debug - Enable debug information (default: false).
+ * @param {Array}  gameComponents - An array of Board and Game objects for the supported games.
+ * @param {string} lobbyServer - Address of the lobby server (for example 'localhost:8000').
+ *                               If not set, defaults to the server that served the page.
+ * @param {string} gameServer - Address of the game server (for example 'localhost:8001').
+ *                              If not set, defaults to the server that served the page.
+ * @param {function} clientFactory - Function that is used to create the game clients.
+ * @param {bool}   debug - Enable debug information (default: false).
  *
  * Returns:
  *   A React component that provides a UI to create, list, join, leave, play or spectate game instances.
@@ -32,16 +34,14 @@ import LobbyCreateRoomForm from './create-room-form';
 
 class Lobby extends React.Component {
   static propTypes = {
-    server: PropTypes.string.isRequired,
-    port: PropTypes.number.isRequired,
     gameComponents: PropTypes.array.isRequired,
-    multiplayer: PropTypes.bool,
+    lobbyServer: PropTypes.string,
+    gameServer: PropTypes.string,
     debug: PropTypes.bool,
     clientFactory: PropTypes.func,
   };
 
   static defaultProps = {
-    multiplayer: true,
     debug: false,
     clientFactory: Client,
   };
@@ -88,7 +88,7 @@ class Lobby extends React.Component {
   _createConnection(props) {
     let name = this.state.playerName;
     this.connection = LobbyConnection({
-      server: props.server + ':' + props.port,
+      server: props.lobbyServer,
       gameComponents: props.gameComponents,
       playerName: name,
       playerCredentials: this.state.credentialStore[name],
@@ -128,9 +128,6 @@ class Lobby extends React.Component {
     // list of game instances
     let inst_rows = [];
     for (let i = 0; i < this.connection.gameInstances.length; i++) {
-      const gameURL = `http://${this.props.server}:${this.props.port - 1}/${
-        this.connection.gameInstances[i].gameName
-      }/${this.connection.gameInstances[i].gameID}`;
       const inst = {
         gameID: this.connection.gameInstances[i].gameID,
         gameName: this.connection.gameInstances[i].gameName,
@@ -140,7 +137,6 @@ class Lobby extends React.Component {
         <LobbyRoomInstance
           key={'instance-' + i}
           gameInstance={inst}
-          gameURL={gameURL}
           playerName={name}
           onClickJoin={this._joinRoom.bind(this)}
           onClickLeave={this._leaveRoom.bind(this)}
@@ -266,18 +262,30 @@ class Lobby extends React.Component {
       });
       return;
     }
+
+    let multiplayer = null;
+    if (gameOpts.numPlayers > 1) {
+      if (this.props.gameServer) {
+        multiplayer = { server: this.props.gameServer };
+      } else {
+        multiplayer = true;
+      }
+    }
+
     const app = this.props.clientFactory({
       game: gameCode.game,
       board: gameCode.board,
       debug: this.props.debug,
-      multiplayer: gameOpts.numPlayers > 1 ? this.props.multiplayer : null,
+      multiplayer,
     });
+
     const game = {
       app: app,
       gameID: gameOpts.gameID,
       playerID: gameOpts.numPlayers > 1 ? gameOpts.playerID : null,
       credentials: this.connection.playerCredentials,
     };
+
     this.setState({
       phase: 'play',
       runningGame: game,
