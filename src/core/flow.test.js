@@ -69,11 +69,15 @@ describe('phases', () => {
           next: 'A',
         },
       },
+      turnOrder: {
+        first: G => (G.setupA ? '1' : '0'),
+      },
     });
 
     let state = { G: {}, ctx: flow.ctx(2) };
     state = flow.init(state);
     expect(state.G).toMatchObject({ setupA: true });
+    expect(state.ctx.currentPlayer).toBe('1');
     state = flow.processGameEvent(state, gameEvent('endPhase'));
     expect(state.G).toMatchObject({
       setupA: true,
