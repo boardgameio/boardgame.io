@@ -47,7 +47,7 @@ import { Square } from './grid';
  *   </Token>
  * </Grid>
  */
-class Token extends React.Component {
+export class Token extends React.Component {
   static propTypes = {
     x: PropTypes.number,
     y: PropTypes.number,
@@ -180,5 +180,3 @@ class Token extends React.Component {
     );
   }
 }
-
-export default Token;
