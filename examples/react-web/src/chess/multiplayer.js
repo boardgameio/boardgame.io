@@ -14,7 +14,7 @@ import ChessBoard from './board';
 const App = Client({
   game: ChessGame,
   board: ChessBoard,
-  multiplayer: true,
+  multiplayer: { server: 'localhost:8000' },
   debug: false,
 });
 

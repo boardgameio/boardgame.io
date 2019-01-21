@@ -10,12 +10,8 @@
   box-sizing: content-box;
 }
 
-.client {
-  padding: 50px;
-}
-
 .content {
-  padding-top: 0;
+  padding: 50px;
 }
 
 .runner {

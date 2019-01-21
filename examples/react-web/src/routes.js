@@ -14,6 +14,7 @@ import random from './random';
 import turnorder from './turnorder';
 import ui from './ui';
 import threejs from './threejs';
+import lobby from './lobby';
 import redacted_move from './redacted-move';
 
 const routes = [
@@ -52,6 +53,10 @@ const routes = [
   {
     name: 'Other Frameworks',
     routes: threejs.routes,
+  },
+  {
+    name: 'Lobby',
+    routes: lobby.routes,
   },
 ];
 
