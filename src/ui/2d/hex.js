@@ -50,6 +50,8 @@ export class HexGrid extends React.Component {
     cellSize: 1,
   };
 
+  _svgRef = React.createRef();
+
   _getCellColor(x, y, z) {
     const key = `${x},${y},${z}`;
     let color = 'white';
@@ -113,12 +115,14 @@ export class HexGrid extends React.Component {
         onClick: this.onClick,
         onMouseOver: this.onMouseOver,
         onMouseOut: this.onMouseOut,
+        svgRef: this._svgRef,
       });
     });
 
     const t = this.props.cellSize * this.props.levels * 2;
     return (
       <svg
+        ref={this._svgRef}
         viewBox={-t + ' ' + -t + ' ' + 2 * t + ' ' + 2 * t}
         style={this.props.style}
       >
@@ -143,6 +147,8 @@ export class HexGrid extends React.Component {
  *   onClick - Invoked when a Hex is clicked.
  *   onMouseOver - Invoked when a Hex is mouse over.
  *   onMouseOut - Invoked when a Hex is mouse out.
+ *   eventListeners - Array of objects with name and callback
+ *   for DOM events.
  *
  * Not meant to be used by the end user directly (use Token).
  * Also not exposed in the NPM.
@@ -157,6 +163,7 @@ export class Hex extends React.Component {
     onClick: PropTypes.func,
     onMouseOver: PropTypes.func,
     onMouseOut: PropTypes.func,
+    eventListeners: PropTypes.array,
     children: PropTypes.element,
   };
 
@@ -166,10 +173,27 @@ export class Hex extends React.Component {
     y: 0,
     z: 0,
     style: { fill: '#fff' },
+    eventListeners: [],
   };
+
+  _gRef = React.createRef();
 
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount() {
+    const element = this._gRef.current;
+    for (let listener of this.props.eventListeners) {
+      element.addEventListener(listener.name, listener.callback);
+    }
+  }
+
+  componentWillUnmount() {
+    const element = this._gRef.current;
+    for (let listener of this.props.eventListeners) {
+      element.removeEventListener(listener.name, listener.callback);
+    }
   }
 
   get width() {
@@ -231,62 +255,53 @@ export class Hex extends React.Component {
     return flatTop.join(' ');
   }
 
-  onClick = () => {
-    this.props.onClick({
-      x: this.props.x,
-      y: this.props.y,
-      z: this.props.z,
-    });
+  onClick = e => {
+    this.props.onClick(this.getCoords(), e);
   };
 
-  onMouseOver = () => {
-    this.props.onMouseOver({
-      x: this.props.x,
-      y: this.props.y,
-      z: this.props.z,
-    });
+  onMouseOver = e => {
+    this.props.onMouseOver(this.getCoords(), e);
   };
 
-  onMouseOut = () => {
-    this.props.onMouseOut({
+  onMouseOut = e => {
+    this.props.onMouseOut(this.getCoords(), e);
+  };
+
+  getCoords() {
+    return {
       x: this.props.x,
       y: this.props.y,
       z: this.props.z,
-    });
-  };
+    };
+  }
 
   render() {
     const tx = this.center.x;
     const ty = this.center.y;
 
+    // If no child, render a hex.
+    let children = (
+      <polygon
+        style={this.props.style}
+        points={this.points}
+        stroke="#aaa"
+        strokeWidth={0.01}
+      />
+    );
     // If a child is passed, render child.
     if (this.props.children) {
-      return (
-        <g
-          onClick={this.onClick}
-          onMouseOver={this.onMouseOver}
-          onMouseOut={this.onMouseOut}
-          transform={`translate(${tx}, ${ty})`}
-        >
-          {this.props.children}
-        </g>
-      );
+      children = this.props.children;
     }
 
-    // If no child, render a hex.
     return (
       <g
+        ref={this._gRef}
         onClick={this.onClick}
         onMouseOver={this.onMouseOver}
         onMouseOut={this.onMouseOut}
         transform={`translate(${tx}, ${ty})`}
       >
-        <polygon
-          style={this.props.style}
-          points={this.points}
-          stroke="#aaa"
-          strokeWidth={0.01}
-        />
+        {children}
       </g>
     );
   }

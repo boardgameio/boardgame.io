@@ -30,6 +30,12 @@ import { Square } from './grid';
  *   onClick - Called when the token is clicked.
  *   onMouseOver - Called when the token is mouse over.
  *   onMouseOut - Called when the token is mouse out.
+ *   draggable - Whether a Token is draggable or not.
+ *   shouldDrag - Whether a draggable token should start drag.
+ *   onDrag - Called when a token was dragged (moved).
+ *            Parameter contain { x, y, originalX, originalY }.
+ *   onDrop - Called when the token was dropped after dragging.
+ *            Parameter contain { x, y, originalX, originalY }.
  *
  * Usage:
  *
@@ -60,6 +66,11 @@ export class Token extends React.Component {
     onMouseOut: PropTypes.func,
     children: PropTypes.element,
     animationDuration: PropTypes.number,
+    draggable: PropTypes.bool,
+    shouldDrag: PropTypes.func,
+    onDrag: PropTypes.func,
+    onDrop: PropTypes.func,
+    svgRef: PropTypes.object,
   };
 
   static defaultProps = {
@@ -67,12 +78,97 @@ export class Token extends React.Component {
     template: Square,
   };
 
-  /**
-   * Sets the x and y of the state on creation.
-   */
-  // eslint-disable-next-line react/no-deprecated
-  componentWillMount() {
-    this.setState(this.getCoords());
+  constructor(props) {
+    super(props);
+    this.state = {
+      ...this.getCoords(),
+      dragged: null,
+      usingTouch: false,
+    };
+  }
+
+  _startDrag = e => {
+    if (this.props.draggable && this.props.shouldDrag(this.getCoords())) {
+      e.preventDefault(); // Required for Safari/iOs.
+      e = e.touches ? e.touches[0] : e;
+      this.setState({
+        ...this.state,
+        dragged: { x: e.pageX, y: e.pageY },
+      });
+      this._addOrRemoveDragEventListeners(true);
+    }
+  };
+
+  _drag = e => {
+    if (this.state.dragged) {
+      e.preventDefault(); // Required for Safari/iOs.
+      e = e.touches ? e.touches[0] : e;
+      const ctm = this.props.svgRef.current.getScreenCTM().inverse();
+      const deltaPageX = e.pageX - this.state.dragged.x;
+      const deltaPageY = e.pageY - this.state.dragged.y;
+      const deltaSvgX = ctm.a * deltaPageX + ctm.b * deltaPageY;
+      const deltaSvgY = ctm.c * deltaPageX + ctm.d * deltaPageY;
+      const x = this.state.x + deltaSvgX;
+      const y = this.state.y + deltaSvgY;
+      if (this.props.onDrag) {
+        this.props.onDrag({
+          x,
+          y,
+          originalX: this.props.x,
+          originalY: this.props.y,
+        });
+      }
+
+      this.setState({
+        ...this.state,
+        x,
+        y,
+        dragged: { x: e.pageX, y: e.pageY },
+      });
+    }
+  };
+
+  _endDrag = e => {
+    if (this.state.dragged) {
+      e.preventDefault();
+      // Whether this is a drop or a click depends if the mouse moved after drag.
+      // Android will issue very small drag events, so we need a distance.
+      const dist = Math.sqrt(
+        (this.state.x - this.props.x) ** 2 + (this.state.y - this.props.y) ** 2
+      );
+      if (dist > 0.2) {
+        this.props.onDrop({
+          x: this.state.x,
+          y: this.state.y,
+          originalX: this.props.x,
+          originalY: this.props.y,
+        });
+      } else {
+        this.props.onClick({ x: this.state.x, y: this.state.y });
+      }
+      this.setState({
+        ...this.state,
+        x: this.props.x,
+        y: this.props.y,
+        dragged: null,
+      });
+      this._addOrRemoveDragEventListeners(false);
+    }
+  };
+
+  _onClick = param => {
+    // Ignore onClick if the element is draggable, because desktops will
+    // send both onClick and touch events, leading to duplication.
+    // Whether this will be a click or a drop will be defined in _endDrag.
+    if (!(this.props.draggable && this.props.shouldDrag(this.getCoords()))) {
+      this.props.onClick(param);
+    }
+  };
+
+  componentWillUnmount() {
+    if (this.state.dragged) {
+      this._addOrRemoveDragEventListeners(false);
+    }
   }
 
   /**
@@ -81,7 +177,7 @@ export class Token extends React.Component {
    * @param {Object} nextProps Next props.
    */
   // eslint-disable-next-line react/no-deprecated
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     let oldCoord = this.getCoords();
     let newCoord = this.getCoords(nextProps);
 
@@ -93,12 +189,32 @@ export class Token extends React.Component {
     this.setState({
       ...this.state,
       originTime: Date.now(),
-      originX: oldCoord.x,
-      originY: oldCoord.y,
-      originZ: oldCoord.z,
+      originX: this.state.x,
+      originY: this.state.y,
+      originZ: this.state.z,
     });
 
     requestAnimationFrame(this._animate(Date.now()));
+  }
+
+  /**
+   * Add or remove event listeners.
+   * @param {boolean} shouldAdd If it should add (or remove) listeners.
+   */
+  _addOrRemoveDragEventListeners(shouldAdd) {
+    const svgEl = this.props.svgRef.current;
+    if (!svgEl) return;
+    let addOrRemoveEventListener = svgEl.addEventListener;
+    if (!shouldAdd) {
+      addOrRemoveEventListener = svgEl.removeEventListener;
+    }
+    addOrRemoveEventListener('touchmove', this._drag, { passive: false });
+    addOrRemoveEventListener('mousemove', this._drag, { passive: false });
+    addOrRemoveEventListener('mouseup', this._endDrag, { passive: false });
+    addOrRemoveEventListener('mouseleave', this._endDrag, { passive: false });
+    addOrRemoveEventListener('touchcancel', this._endDrag, { passive: false });
+    addOrRemoveEventListener('touchleave', this._endDrag, { passive: false });
+    addOrRemoveEventListener('touchend', this._endDrag, { passive: false });
   }
 
   /**
@@ -162,6 +278,16 @@ export class Token extends React.Component {
     return (c / 2) * (t * t * t + 2) + b;
   }
 
+  /**
+   * Gets event listeners needed for drag and drop.
+   */
+  _eventListeners() {
+    return [
+      { name: 'mousedown', callback: this._startDrag },
+      { name: 'touchstart', callback: this._startDrag },
+    ];
+  }
+
   render() {
     const Component = this.props.template;
 
@@ -171,9 +297,10 @@ export class Token extends React.Component {
         y={this.state.y}
         z={this.state.z}
         style={this.props.style}
-        onClick={this.props.onClick}
+        onClick={this._onClick}
         onMouseOver={this.props.onMouseOver}
         onMouseOut={this.props.onMouseOut}
+        eventListeners={this._eventListeners()}
       >
         {this.props.children}
       </Component>
