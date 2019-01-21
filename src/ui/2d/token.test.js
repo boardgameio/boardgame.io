@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { Grid } from './grid';
 import { Token } from './token';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -107,4 +108,127 @@ test('mouse out handler', () => {
   token.simulate('mouseOut');
 
   expect(onMouseOut).toHaveBeenCalled();
+});
+
+test('shouldDrag', () => {
+  const shouldDrag = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2}>
+      <Token x={0} y={0} draggable={true} shouldDrag={shouldDrag}>
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  const mouseDownEvt = new window['MouseEvent']('mousedown', {});
+  grid
+    .find('Token')
+    .getDOMNode()
+    .dispatchEvent(mouseDownEvt);
+
+  expect(shouldDrag).toHaveBeenCalled();
+});
+
+test('click', () => {
+  const onDrag = jest.fn();
+  const onClick = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2} onClick={onClick}>
+      <Token
+        x={0}
+        y={0}
+        draggable={true}
+        shouldDrag={() => true}
+        onDrag={onDrag}
+        onClick={onClick}
+      >
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  // Workaround because of JSDOM quirks
+  grid.getDOMNode().getScreenCTM = () => ({
+    inverse: () => ({ a: 1, b: 1, c: 1, d: 1 }),
+  });
+  grid.getDOMNode().addEventListener = () => {};
+  grid.getDOMNode().removeEventListener = () => {};
+  const token = grid.find('Token');
+  const preventDefault = () => {};
+  token.instance()._startDrag({ preventDefault, pageX: 1, pageY: 2 });
+  token.instance()._drag({ preventDefault, pageX: 1, pageY: 2 });
+  token.instance()._endDrag({ preventDefault });
+  // Browser always send an onClick after dropping.
+  token.instance()._onClick({});
+
+  expect(onDrag).toHaveBeenCalled();
+  expect(onClick).toHaveBeenCalled();
+});
+
+test('drag and drop', () => {
+  const onDrag = jest.fn();
+  const onDrop = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2}>
+      <Token
+        x={0}
+        y={0}
+        draggable={true}
+        shouldDrag={() => true}
+        onDrag={onDrag}
+        onDrop={onDrop}
+      >
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  // Workaround because of JSDOM quirks
+  grid.getDOMNode().getScreenCTM = () => ({
+    inverse: () => ({ a: 1, b: 1, c: 1, d: 1 }),
+  });
+  grid.getDOMNode().addEventListener = () => {};
+  grid.getDOMNode().removeEventListener = () => {};
+  const token = grid.find('Token');
+  const preventDefault = () => {};
+  token.instance()._startDrag({ preventDefault, pageX: 1, pageY: 2 });
+  token.instance()._drag({ preventDefault, pageX: 200, pageY: 200 });
+  token.instance()._endDrag({ preventDefault });
+  // Browser always send an onClick after dropping.
+  token.instance()._onClick({});
+
+  expect(onDrag).toHaveBeenCalled();
+  expect(onDrop).toHaveBeenCalled();
+});
+
+class MockComponent extends React.Component {
+  state = { show: true };
+  _shouldDrag = () => true;
+  render() {
+    const token = (
+      <Token x={0} y={0} draggable={true} shouldDrag={this._shouldDrag}>
+        <circle r={0.25} />
+      </Token>
+    );
+    return (
+      <Grid rows={2} cols={2}>
+        {this.state.show ? token : null}
+      </Grid>
+    );
+  }
+}
+
+test('unmount regression', () => {
+  const grid = Enzyme.mount(<MockComponent />);
+  grid.setState({ show: false });
+
+  grid.setState({ show: true });
+
+  const mouseDownEvt = new window['MouseEvent']('mousedown', {});
+  grid
+    .find('Token')
+    .getDOMNode()
+    .dispatchEvent(mouseDownEvt);
+
+  grid.unmount();
 });
