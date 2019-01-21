@@ -224,7 +224,7 @@ export class UI extends React.Component {
         t = t.parentNode;
       }
 
-      mouse.x = x / window.innerWidth * 2 - 1;
+      mouse.x = (x / window.innerWidth) * 2 - 1;
       mouse.y = -(y / window.innerHeight) * 2 + 1;
 
       dispatchMouseCallbacks(e);
