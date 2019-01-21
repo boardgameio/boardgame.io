@@ -7,7 +7,7 @@
  */
 
 import { createStore } from 'redux';
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { Client, GetOpts, createMoveDispatchers } from './client';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
@@ -47,16 +47,6 @@ test('isActive', () => {
   client.moves.A(42);
   expect(client.getState().G).toEqual({ arg: 42 });
   expect(client.getState().isActive).toBe(false);
-});
-
-test('isSynced', () => {
-  const client = Client({
-    game: Game({}),
-  });
-
-  expect(client.getState().isSynced).toBe(false);
-  client.store.dispatch(sync(client.getState(), []));
-  expect(client.getState().isSynced).toBe(true);
 });
 
 describe('step', () => {
@@ -133,8 +123,27 @@ describe('multiplayer', () => {
 
     test('onAction called', () => {
       jest.spyOn(client.transport, 'onAction');
+      client.store.dispatch(sync({ G: {}, ctx: { phase: 'default' } }, []));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
+    });
+  });
+
+  describe('multiplayer: true', () => {
+    let client;
+
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({}),
+          multiplayer: true,
+        })
+      );
+      client.connect();
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport instanceof SocketIO).toBe(true);
     });
   });
 
@@ -252,9 +261,10 @@ describe('move dispatchers', () => {
     },
   });
   const reducer = CreateGameReducer({ game });
+  const initialState = InitializeGame({ game });
 
   test('basic', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store);
 
     expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
@@ -277,14 +287,14 @@ describe('move dispatchers', () => {
   });
 
   test('with undefined playerID - singleplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: '0' });
   });
 
   test('with undefined playerID - multiplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(
       game.moveNames,
       store,
@@ -297,14 +307,14 @@ describe('move dispatchers', () => {
   });
 
   test('with null playerID - singleplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: '0' });
   });
 
   test('with null playerID - multiplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null, null, true);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: null });

@@ -10,7 +10,7 @@ import { FlowWithPhases } from './flow';
 import { UpdateTurnOrderState, TurnOrder, Pass } from './turn-order';
 import Game from './game';
 import { makeMove, gameEvent } from './action-creators';
-import { CreateGameReducer } from './reducer';
+import { InitializeGame, CreateGameReducer } from './reducer';
 
 describe('turnOrder', () => {
   test('DEFAULT', () => {
@@ -199,8 +199,8 @@ test('passing', () => {
     flow,
     moves: { pass: Pass },
   });
-  const reducer = CreateGameReducer({ game, numPlayers: 3 });
-  let state = reducer(undefined, { type: 'init' });
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game, numPlayers: 3 });
 
   expect(state.ctx.currentPlayer).toBe('0');
   state = reducer(state, makeMove('pass', null, '0'));
@@ -247,9 +247,10 @@ test('end game after everyone passes', () => {
     flow,
     moves: { pass: Pass },
   });
-  const reducer = CreateGameReducer({ game, numPlayers: 3 });
 
-  let state = reducer(undefined, { type: 'init' });
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game, numPlayers: 3 });
+
   expect(state.ctx.actionPlayers).toEqual(['0', '1', '2']);
 
   // Passes can be make in any order with TurnOrder.ANY.
@@ -265,12 +266,12 @@ test('end game after everyone passes', () => {
 test('override', () => {
   const even = {
     first: () => '0',
-    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers + '',
+    next: (G, ctx) => ((+ctx.currentPlayer + 2) % ctx.numPlayers) + '',
   };
 
   const odd = {
     first: () => '1',
-    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers + '',
+    next: (G, ctx) => ((+ctx.currentPlayer + 2) % ctx.numPlayers) + '',
   };
 
   let flow = FlowWithPhases({
@@ -299,9 +300,9 @@ test('override', () => {
 
 test('playOrder', () => {
   const game = Game({});
-  const reducer = CreateGameReducer({ game, numPlayers: 3 });
+  const reducer = CreateGameReducer({ game });
 
-  let state = reducer(undefined, { type: 'init' });
+  let state = InitializeGame({ game, numPlayers: 3 });
 
   state.ctx = {
     ...state.ctx,
@@ -341,16 +342,16 @@ describe('SetActionPlayers', () => {
     const game = Game({
       moves: {
         B: (G, ctx) => {
-          ctx.events.setActionPlayers({ value: ['0', '1'], once: true });
+          ctx.events.setActionPlayers({ value: () => ['0', '1'], once: true });
           return G;
         },
         A: G => G,
       },
     });
 
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
+    const reducer = CreateGameReducer({ game });
 
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game });
     state = reducer(state, makeMove('B', null, '0'));
     expect(state.ctx.actionPlayers).toEqual(['0', '1']);
     state = reducer(state, makeMove('A', null, '0'));
@@ -364,7 +365,7 @@ describe('SetActionPlayers', () => {
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({
-            value: ['0', '1', '2'],
+            value: () => ['0', '1', '2'],
             once: true,
             others: true,
           });
@@ -374,9 +375,9 @@ describe('SetActionPlayers', () => {
       },
     });
 
-    const reducer = CreateGameReducer({ game, numPlayers: 3 });
+    const reducer = CreateGameReducer({ game });
 
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game, numPlayers: 3 });
 
     // on move B, control switches from player 0 to players 1 and 2
     state = reducer(state, makeMove('B', null, '0'));
@@ -413,9 +414,9 @@ describe('SetActionPlayers', () => {
       },
     });
 
-    const reducer = CreateGameReducer({ game, numPlayers: 4 });
+    const reducer = CreateGameReducer({ game });
 
-    let state = reducer(undefined, { type: 'init' });
+    let state = InitializeGame({ game, numPlayers: 4 });
     state = reducer(state, makeMove('playMilitia'));
     expect(state.ctx.actionPlayers).toMatchObject(['1', '2', '3']);
 

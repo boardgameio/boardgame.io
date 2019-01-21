@@ -19,6 +19,7 @@ import { Client as RawClient, GetOpts } from './client';
  * @param {...object} game - The return value of `Game`.
  * @param {...object} numPlayers - The number of players.
  * @param {...object} board - The React component for the game.
+ * @param {...object} loading - (optional) The React component for the loading state.
  * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
  *                                  to make a multiplayer client. The second
  *                                  syntax specifies a non-default socket server.
@@ -32,9 +33,23 @@ import { Client as RawClient, GetOpts } from './client';
  *   UNDO and REDO.
  */
 export function Client(opts) {
-  const { game, numPlayers, board, multiplayer, ai, debug, enhancer } = GetOpts(
-    opts
-  );
+  let {
+    game,
+    numPlayers,
+    loading,
+    board,
+    multiplayer,
+    ai,
+    debug,
+    enhancer,
+  } = GetOpts(opts);
+
+  // Component that is displayed before the client has synced
+  // with the game master.
+  if (loading === undefined) {
+    const Loading = () => <div className="bgio-loading">connecting...</div>;
+    loading = Loading;
+  }
 
   /*
    * WrappedBoard
@@ -138,6 +153,10 @@ export function Client(opts) {
         state = { ...state, ...this.state.gameStateOverride };
       }
 
+      if (state === null) {
+        return React.createElement(loading);
+      }
+
       if (board) {
         _board = React.createElement(board, {
           ...state,
@@ -181,11 +200,9 @@ export function Client(opts) {
       }
 
       return (
-        <div className="client">
-          <span>
-            {_debug}
-            {_board}
-          </span>
+        <div className="bgio-client">
+          {_debug}
+          {_board}
         </div>
       );
     }

@@ -17,7 +17,6 @@ test('board is rendered - ssr', () => {
   const Board = Client({
     game: Game({}),
     board: TestBoard,
-    multiplayer: true,
   });
   let ssrRender = ReactDOMServer.renderToString(<Board />);
   expect(ssrRender).toContain('debug-ui');

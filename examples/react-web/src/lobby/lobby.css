@@ -1,0 +1,71 @@
+/*
+ * Copyright 2018 The boardgame.io Authors.
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+#lobby-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.phase-title {
+  margin-top: 40px;
+}
+
+.hidden {
+  display: none;
+}
+
+.phase {
+  border: none;
+  outline: none;
+}
+
+#game-creation select {
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+#game-creation span {
+  margin-right: 10px;
+}
+
+#instances td {
+  list-style: none;
+  border: 0px solid #eee;
+  border-top: none;
+  height: 30px;
+  line-height: 30px;
+  text-align: left;
+  font-size: 14px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+#instances table {
+  height: 100%;
+  width: 500px;
+  white-space: nowrap;
+}
+
+#instances button {
+  font-size: 12px;
+}
+
+.error-msg {
+  font-size: 12px;
+  color: red;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.buttons button {
+  margin-left: 10px;
+  margin-top: 10px;
+  width: 70px;
+}

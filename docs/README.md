@@ -9,11 +9,6 @@
 <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
 </p>
 
-<p align="center">
-<a href="https://twitter.com/intent/tweet?url=https://boardgame.io/&hashtags=javascript,boardgames"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" alt="Tweet" /></a>
-<a style="margin-left: 10px" href="https://github.com/nicolodavis/boardgame.io"><img src="https://img.shields.io/github/stars/nicolodavis/boardgame.io.svg?label=Stars&style=social" alt="GitHub" /></a>
-</p>
-
 <h5 align="center">
 Open Source Game Engine for Turn-Based Games
 </h5>
@@ -28,15 +23,15 @@ networking or database handling code.
 
 ### Features
 
-* **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
-* **Cross-platform Multiplayer**: All clients (Web / Android / iOS) are kept in sync in realtime.
-* **Declarative AI**: Tell the bots what to do and they will figure out how to do it.
-* **Game Phases**: with different game rules (including custom turn orders) per phase.
-* **Prototyping**: Debugging interface to simulate moves even before you render the game.
-* **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **View-layer Agnostic**: Vanilla JS client with bindings for React / React Native.
-* **Component Toolkit**: Components for hex grids, cards, tokens.
-* **Extendable**: Subsystems (storage, networking etc.) can be replaced with custom implementations.
+- **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
+- **Cross-platform Multiplayer**: All clients (Web / Android / iOS) are kept in sync in realtime.
+- **Automatic AI**: MCTS-based bots with options to customize.
+- **Game Phases**: with different game rules (including custom turn orders) per phase.
+- **Prototyping**: Debugging interface to simulate moves even before you render the game.
+- **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
+- **View-layer Agnostic**: Vanilla JS client with bindings for React / React Native.
+- **Component Toolkit**: Components for hex grids, cards, tokens.
+- **Extendable**: Subsystems (storage, networking etc.) can be replaced with custom implementations.
 
 ### Installation
 
@@ -54,6 +49,10 @@ include via a `<script>` tag.
 ### Changelog
 
 See [changelog](CHANGELOG.md).
+
+### New in v0.29.0
+
+**Plugin API** that allows creating custom interfaces that target specific game genres.
 
 ### License
 

@@ -29,7 +29,10 @@ export class Mongo {
    * Connect to the instance.
    */
   async connect() {
-    const c = await this.client.connect(this.url, { useNewUrlParser: true });
+    const c = await this.client.connect(
+      this.url,
+      { useNewUrlParser: true }
+    );
     this.db = c.db(this.dbname);
     return;
   }
@@ -138,7 +141,7 @@ export class Mongo {
    * @param {string} id - The game id.
    */
   async remove(id) {
-    if (!await this.has(id)) return;
+    if (!(await this.has(id))) return;
 
     function _dropCollection(db, id) {
       return new Promise(function(ok) {

@@ -67,6 +67,11 @@ export class Local {
     this.isConnected = true;
   }
 
+  /**
+   * Called when another player makes a move and the
+   * master broadcasts the update to other clients (including
+   * this one).
+   */
   onUpdate(gameID, state, deltalog) {
     const currentState = this.store.getState();
 
@@ -76,6 +81,10 @@ export class Local {
     }
   }
 
+  /**
+   * Called when the client first connects to the master
+   * and requests the current game state.
+   */
   onSync(gameID, state, log) {
     if (gameID == this.gameID) {
       const action = ActionCreators.sync(state, log);
@@ -100,14 +109,18 @@ export class Local {
    * Connect to the server.
    */
   async connect() {
-    this.master.connect(this.gameID, this.playerID, (type, ...args) => {
-      if (type == 'sync') {
-        this.onSync.apply(this, args);
+    this.master.connect(
+      this.gameID,
+      this.playerID,
+      (type, ...args) => {
+        if (type == 'sync') {
+          this.onSync.apply(this, args);
+        }
+        if (type == 'update') {
+          this.onUpdate.apply(this, args);
+        }
       }
-      if (type == 'update') {
-        this.onUpdate.apply(this, args);
-      }
-    });
+    );
     await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
 
@@ -122,7 +135,7 @@ export class Local {
    */
   async updateGameID(id) {
     this.gameID = this.gameName + ':' + id;
-    const action = ActionCreators.reset();
+    const action = ActionCreators.reset(null);
     this.store.dispatch(action);
     await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
@@ -133,7 +146,7 @@ export class Local {
    */
   async updatePlayerID(id) {
     this.playerID = id;
-    const action = ActionCreators.reset();
+    const action = ActionCreators.reset(null);
     this.store.dispatch(action);
     await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }

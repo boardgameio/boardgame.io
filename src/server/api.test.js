@@ -170,7 +170,17 @@ describe('.createApiServer', () => {
       db = {
         set: async (id, state) => setSpy(id, state),
       };
-      games = [Game({ name: 'foo' })];
+      games = [
+        Game({
+          name: 'foo',
+          setup: (ctx, setupData) =>
+            setupData
+              ? {
+                  colors: setupData.colors,
+                }
+              : {},
+        }),
+      ];
     });
 
     describe('for an unprotected lobby server', () => {
@@ -181,7 +191,15 @@ describe('.createApiServer', () => {
 
         response = await request(app.callback())
           .post('/games/foo/create')
-          .send('numPlayers=3');
+          .send({
+            numPlayers: 3,
+            setupData: {
+              colors: {
+                '0': 'green',
+                '1': 'red',
+              },
+            },
+          });
       });
 
       test('is successful', () => {
@@ -194,6 +212,20 @@ describe('.createApiServer', () => {
           expect.objectContaining({
             ctx: expect.objectContaining({
               numPlayers: 3,
+            }),
+          })
+        );
+      });
+
+      test('passes arbitrary data to game setup', () => {
+        expect(setSpy).toHaveBeenCalledWith(
+          expect.stringMatching('foo:'),
+          expect.objectContaining({
+            G: expect.objectContaining({
+              colors: {
+                '0': 'green',
+                '1': 'red',
+              },
             }),
           })
         );
@@ -428,11 +460,11 @@ describe('.createApiServer', () => {
                   players: {
                     '0': {
                       name: 'alice',
-                      playerCredentials: 'SECRET1',
+                      credentials: 'SECRET1',
                     },
                     '1': {
                       name: 'bob',
-                      playerCredentials: 'SECRET2',
+                      credentials: 'SECRET2',
                     },
                   },
                 };
@@ -455,11 +487,11 @@ describe('.createApiServer', () => {
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
-                    playerCredentials: 'SECRET1',
+                    credentials: 'SECRET1',
                   }),
                   '1': expect.objectContaining({
                     name: 'bob',
-                    playerCredentials: 'SECRET2',
+                    credentials: 'SECRET2',
                   }),
                 }),
               })
@@ -475,10 +507,10 @@ describe('.createApiServer', () => {
                     players: {
                       '0': {
                         name: 'alice',
-                        playerCredentials: 'SECRET1',
+                        credentials: 'SECRET1',
                       },
                       '1': {
-                        playerCredentials: 'SECRET2',
+                        credentials: 'SECRET2',
                       },
                     },
                   };

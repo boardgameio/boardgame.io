@@ -8,9 +8,8 @@
 
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
-import * as Redux from 'redux';
 import { InMemory } from '../server/db/inmemory';
-import { Master } from './master';
+import { Master, redactLog } from './master';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -27,7 +26,6 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 describe('sync', async () => {
   const send = jest.fn();
   const master = new Master(game, new InMemory(), TransportAPI(send));
-  const spy = jest.spyOn(Redux, 'createStore');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,17 +38,11 @@ describe('sync', async () => {
         type: 'sync',
       })
     );
-    expect(spy).toHaveBeenCalled();
   });
 
   test('sync a second time does not create a game', async () => {
     await master.onSync('gameID', '0', 2);
     expect(send).toHaveBeenCalled();
-    expect(spy).not.toHaveBeenCalled();
-  });
-
-  afterAll(() => {
-    spy.mockRestore();
   });
 });
 
@@ -191,7 +183,9 @@ describe('update', async () => {
   test('invalid gameID', async () => {
     await master.onUpdate(action, 1, 'unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(error).toHaveBeenCalledWith(`game not found, gameID=[unknown]`);
+    expect(error).toHaveBeenCalledWith(
+      `game not found, gameID=[default:unknown]`
+    );
   });
 
   test('invalid stateID', async () => {
@@ -311,5 +305,123 @@ describe('authentication', async () => {
     );
     await master.onUpdate(action, 0, 'gameID', '0');
     expect(sendAll).toHaveBeenCalled();
+  });
+});
+
+describe('redactLog', () => {
+  test('no redactedMoves', () => {
+    const logEvents = [ActionCreators.gameEvent('endTurn')];
+    const result = redactLog(undefined, logEvents, '0');
+    expect(result).toMatchObject(logEvents);
+  });
+
+  test('redacted move is only shown with args to the player that made the move', () => {
+    const rm = ['clickCell'];
+    const logEvents = [
+      { action: ActionCreators.makeMove('clickCell', [1, 2, 3], '0') },
+    ];
+
+    // player that made the move
+    let result = redactLog(rm, logEvents, '0');
+    expect(result).toMatchObject(logEvents);
+
+    // other player
+    result = redactLog(rm, logEvents, '1');
+    expect(result).toMatchObject([
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            argsRedacted: true,
+            credentials: undefined,
+            playerID: '0',
+            type: 'clickCell',
+          },
+        },
+      },
+    ]);
+  });
+
+  test('not redacted move is shown to all', () => {
+    const rm = ['clickCell'];
+    const logEvents = [
+      { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
+    ];
+
+    // player that made the move
+    let result = redactLog(rm, logEvents, '0');
+    expect(result).toMatchObject(logEvents);
+    // other player
+    result = redactLog(rm, logEvents, '1');
+    expect(result).toMatchObject(logEvents);
+  });
+
+  test('can explicitly set showing args to true', () => {
+    const rm = [];
+    const logEvents = [
+      { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
+    ];
+
+    // player that made the move
+    let result = redactLog(rm, logEvents, '0');
+    expect(result).toMatchObject(logEvents);
+    // other player
+    result = redactLog(rm, logEvents, '1');
+    expect(result).toMatchObject(logEvents);
+  });
+
+  test('events are not redacted', () => {
+    const rm = ['clickCell'];
+    const logEvents = [{ action: ActionCreators.gameEvent('endTurn') }];
+
+    // player that made the move
+    let result = redactLog(rm, logEvents, '0');
+    expect(result).toMatchObject(logEvents);
+    // other player
+    result = redactLog(rm, logEvents, '1');
+    expect(result).toMatchObject(logEvents);
+  });
+
+  test('make sure sync redacts the log', async () => {
+    const game2 = Game({
+      moves: { A: G => G, B: G => G },
+      flow: { redactedMoves: ['B'] },
+    });
+
+    const send = jest.fn();
+    const master = new Master(game2, new InMemory(), TransportAPI(send));
+
+    const actionA = ActionCreators.makeMove('A', ['not redacted']);
+    const actionB = ActionCreators.makeMove('B', ['redacted']);
+
+    // test: ping-pong two moves, then sync and check the log
+    await master.onSync('gameID', '0', 2);
+    await master.onUpdate(actionA, 0, 'gameID', '0');
+    await master.onUpdate(actionB, 1, 'gameID', '0');
+    await master.onSync('gameID', '0', 2);
+
+    const log = send.mock.calls[send.mock.calls.length - 1][0].args[2];
+    expect(log).toMatchObject([
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            type: 'A',
+            args: ['not redacted'],
+          },
+        },
+        _stateID: 0,
+      },
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            type: 'B',
+            argsRedacted: true,
+          },
+        },
+        _stateID: 1,
+      },
+    ]);
   });
 });

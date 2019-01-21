@@ -6,10 +6,52 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
+
+/**
+ * Redact the log.
+ *
+ * @param {Array} redactedMoves - List of moves to redact.
+ * @param {Array} log - The game log (or deltalog).
+ * @param {String} playerID - The playerID that this log is
+ *                            to be sent to.
+ */
+export function redactLog(redactedMoves, log, playerID) {
+  if (redactedMoves === undefined || log === undefined) {
+    return log;
+  }
+
+  return log.map(logEvent => {
+    // filter for all other players and a spectator
+    if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
+      return logEvent;
+    }
+
+    // only filter moves
+    if (logEvent.action.type !== 'MAKE_MOVE') {
+      return logEvent;
+    }
+
+    const moveName = logEvent.action.payload.type;
+    let filteredEvent = logEvent;
+    if (redactedMoves.includes(moveName)) {
+      const newPayload = {
+        ...filteredEvent.action.payload,
+        args: undefined,
+        argsRedacted: true,
+      };
+      filteredEvent = {
+        ...filteredEvent,
+        action: { ...filteredEvent.action, payload: newPayload },
+      };
+    }
+
+    return filteredEvent;
+  });
+}
 
 /**
  * Master
@@ -36,10 +78,11 @@ export class Master {
    * along with a deltalog.
    */
   async onUpdate(action, stateID, gameID, playerID) {
-    let state = await this.storageAPI.get(gameID);
+    const key = `${this.game.name}:${gameID}`;
+    let state = await this.storageAPI.get(key);
 
     if (state === undefined) {
-      logging.error(`game not found, gameID=[${gameID}]`);
+      logging.error(`game not found, gameID=[${key}]`);
       return { error: 'game not found' };
     }
 
@@ -101,9 +144,15 @@ export class Master {
         deltalog: undefined,
       };
 
+      const log = redactLog(
+        this.game.flow.redactedMoves,
+        state.deltalog,
+        playerID
+      );
+
       return {
         type: 'update',
-        args: [gameID, filteredState, state.deltalog],
+        args: [gameID, filteredState, log],
       };
     });
 
@@ -113,7 +162,7 @@ export class Master {
     log = [...log, ...state.deltalog];
     const stateWithLog = { ...state, log };
 
-    await this.storageAPI.set(gameID, stateWithLog);
+    await this.storageAPI.set(key, stateWithLog);
   }
 
   /**
@@ -121,13 +170,15 @@ export class Master {
    * Returns the latest game state and the entire log.
    */
   async onSync(gameID, playerID, numPlayers) {
-    const reducer = CreateGameReducer({ game: this.game, numPlayers });
-    let state = await this.storageAPI.get(gameID);
+    const key = `${this.game.name}:${gameID}`;
 
+    let state = await this.storageAPI.get(key);
+
+    // If the game doesn't exist, then create one on demand.
+    // TODO: Move this out of the sync call.
     if (state === undefined) {
-      const store = createStore(reducer);
-      state = store.getState();
-      await this.storageAPI.set(gameID, state);
+      state = InitializeGame({ game: this.game, numPlayers });
+      await this.storageAPI.set(key, state);
     }
 
     const filteredState = {
@@ -138,10 +189,12 @@ export class Master {
       deltalog: undefined,
     };
 
+    const log = redactLog(this.game.flow.redactedMoves, state.log, playerID);
+
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, filteredState, state.log],
+      args: [gameID, filteredState, log],
     });
 
     return;

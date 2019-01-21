@@ -11,7 +11,7 @@ import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { SocketIO } from './transport/socketio';
 import { Local, LocalMaster } from './transport/local';
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 
 /**
  * createDispatchers
@@ -93,7 +93,6 @@ class _ClientImpl {
     this.credentials = credentials;
     this.multiplayer = multiplayer;
     this.subscribeCallback = () => {};
-    this.isSynced = false;
 
     this.reducer = CreateGameReducer({
       game,
@@ -118,8 +117,13 @@ class _ClientImpl {
       };
     }
 
+    let initialState = null;
+    if (multiplayer === undefined) {
+      initialState = InitializeGame({ game, numPlayers });
+    }
+
     this.reset = () => {
-      this.store.dispatch(ActionCreators.reset());
+      this.store.dispatch(ActionCreators.reset(initialState));
     };
     this.undo = () => {
       this.store.dispatch(ActionCreators.undo());
@@ -177,7 +181,6 @@ class _ClientImpl {
 
         case Actions.SYNC: {
           this.log = action.log || [];
-          this.isSynced = true;
           break;
         }
       }
@@ -211,7 +214,7 @@ class _ClientImpl {
       enhancer = applyMiddleware(LogMiddleware, TransportMiddleware);
     }
 
-    this.store = createStore(this.reducer, enhancer);
+    this.store = createStore(this.reducer, initialState, enhancer);
 
     if (multiplayer && multiplayer.master_ !== undefined) {
       this.transport = new Local({
@@ -257,6 +260,11 @@ class _ClientImpl {
   getState() {
     const state = this.store.getState();
 
+    // This is the state before a sync with the game master.
+    if (state === null) {
+      return state;
+    }
+
     // isActive.
 
     let isActive = true;
@@ -290,7 +298,7 @@ class _ClientImpl {
     const G = this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
-    let ret = { ...state, isActive, isSynced: this.isSynced, G, log: this.log };
+    let ret = { ...state, isActive, G, log: this.log };
 
     const isConnected = this.transport.isConnected;
     ret = { ...ret, isConnected };

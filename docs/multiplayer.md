@@ -93,7 +93,7 @@ player's turn has no effect.
 
 You can also run the game master on a separate server. Any boardgame.io
 client can connect to this master (whether it is a browser, an Android
-app etc.) and it will be kept in sync with other clients in real time.
+app etc.) and it will be kept in sync with other clients in realtime.
 
 In order to connect a client to a remote master, we use the `multiplayer`
 option again, but this time specify the location of the server.
@@ -124,18 +124,7 @@ a server at the location specified, which is discussed below.
 
 In order to run the game master on a Node server, we need to provide
 it with the `TicTacToe` game object so that it knows how to update the
-game state. In order to do that, we'll first make some changes to our
-`src/game.js` file so that it plays nicely in a Node environment without
-ES6 modules.
-
-```js
-// src/game.js
-const Game = require('boardgame.io/core').Game;
-const TicTacToe = Game({ ... });
-module.exports = { TicTacToe };
-```
-
-Now create a new file `src/server.js`
+game state.
 
 ```js
 // src/server.js
@@ -145,28 +134,46 @@ const server = Server({ games: [TicTacToe] });
 server.run(8000);
 ```
 
-Run the server using a recent version of Node:
+Run the server using a recent version of Node (v8 or above). We use [esm](https://github.com/standard-things/esm) here to import `game.js` (which is an ES module) in a Node environment:
 
 ```
-$ node src/server.js
+$ npm i esm
+$ node -r esm src/server.js
 ```
 
 Run `npm start` in a separate terminal (while also keeping your server
 running). You can now connect multiple clients to the same game by opening
-different browser tabs and pointing them to `http://localhost:3000`.
+different browser tabs and pointing them to `http://localhost:3000/`.
 You will notice that everything is kept in sync as you play
 (state is not lost even if you refresh the page).
 
 This example still has both players on the same screen. A more natural
 setup would be to have each client just have a single (but distinct)
-player. You can use a URL path to determine this (and hand a different
-URL to each player) or implement a matchmaking lobby that sets this value
-prior to starting the game.
+player.
+
+You want one client to render:
+
+```
+<TicTacToeClient playerID="0" />
+```
+
+and another to render:
+
+```
+<TicTacToeClient playerID="1" />
+```
+
+One way to do this is to just ask the player which seat they
+want to take at the beginning of the game and then set the
+`playerID` prop accordingly. You can also use a URL path to
+determine the player or a matchmaking lobby.
+
+Complete code from this section is available on [CodeSandbox](https://codesandbox.io/s/qq77m12nv6). To run it, click on the
+download button, then run the server and client as described
+above (don't forget to run `npm install` first).
 
 !> **TIP** You can also set the `playerID` to point to any player while
 prototyping by clicking on the box of that respective player on the debug UI.
-
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/ql1k7vr1m9)
 
 #### Multiple Game Types
 

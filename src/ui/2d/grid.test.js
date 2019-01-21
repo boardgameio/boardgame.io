@@ -122,3 +122,9 @@ test('correct x and y', () => {
       .componentWillUnmount();
   }
 });
+
+test('colorMap', () => {
+  const colorMap = { '0,0': 'red' };
+  const grid = Enzyme.mount(<Grid rows={1} cols={1} colorMap={colorMap} />);
+  expect(grid.html()).toContain('fill: red');
+});
