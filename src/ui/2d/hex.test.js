@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { HexGrid } from './hex';
-import Token from './token';
+import { Token } from './token';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -91,10 +91,16 @@ test('mouse out handler', () => {
 test('child', () => {
   {
     const grid = Enzyme.mount(
-      <HexGrid layers={2} outline={false}>
+      <HexGrid layers={1} outline={false}>
         <Token />
       </HexGrid>
     );
+    // No errors unmounting
+    grid
+      .find('Hex')
+      .at(0)
+      .instance()
+      .componentWillUnmount();
     expect(grid.html()).toContain('polygon');
   }
 

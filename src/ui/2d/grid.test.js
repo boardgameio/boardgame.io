@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Grid } from './grid';
-import Token from './token';
+import { Token } from './token';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -112,6 +112,15 @@ test('correct x and y', () => {
     </Grid>
   );
   expect(grid.html()).toContain('1, 2');
+
+  // No crash when componentWillUnmount
+  {
+    grid
+      .find('Square')
+      .at(12)
+      .instance()
+      .componentWillUnmount();
+  }
 });
 
 test('colorMap', () => {

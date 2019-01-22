@@ -14,7 +14,7 @@
     "pretest": "npm run lint",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --forceExit",
+    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --collectCoverageFrom=!src/ui/3d/** --collectCoverageFrom=!src/ui/*.js --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "test:integration": "bash ./scripts/integration.sh",
     "lint": "eslint .",
@@ -73,6 +73,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.2.0",
     "@babel/preset-env": "^7.2.3",
     "@babel/preset-react": "^7.0.0",
+    "@tweenjs/tween.js": "^17.2.0",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^8.0.0",
@@ -121,7 +122,8 @@
     "shelljs": "^0.7.8",
     "style-loader": "^0.18.2",
     "superagent": "^3.8.3",
-    "supertest": "^3.1.0"
+    "supertest": "^3.1.0",
+    "three": "^0.100.0"
   },
   "dependencies": {
     "@koa/cors": "^2.2.1",
