@@ -224,7 +224,7 @@ export class UI extends React.Component {
         t = t.parentNode;
       }
 
-      mouse.x = x / window.innerWidth * 2 - 1;
+      mouse.x = (x / window.innerWidth) * 2 - 1;
       mouse.y = -(y / window.innerHeight) * 2 + 1;
 
       dispatchMouseCallbacks(e);
@@ -287,6 +287,12 @@ export class UI extends React.Component {
     }
   };
 
+  registerCallback = (obj, callback) => {
+    if (obj && callback) {
+      this.callbacks_[obj.id] = callback;
+    }
+  };
+
   getContext = () => {
     return {
       three: true,
@@ -294,6 +300,7 @@ export class UI extends React.Component {
       remove: obj => this.scene.remove(obj),
       scene: this.scene,
       camera: this.camera,
+      regCall: this.registerCallback,
     };
   };
 

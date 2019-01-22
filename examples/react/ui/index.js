@@ -7,12 +7,18 @@
  */
 
 import DragDrop from './drag-n-drop';
+import Test3D from './test3d';
 
 const routes = [
   {
-    path: '/ui',
+    path: '/ui/2d',
     text: 'Drag and Drop',
     component: DragDrop,
+  },
+  {
+    path: '/ui/3d',
+    text: '3D',
+    component: Test3D,
   },
 ];
 
