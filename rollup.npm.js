@@ -156,7 +156,7 @@ export default [
   // Browser minified version.
   {
     input: 'packages/main.js',
-    external: ['react'],
+    external: ['react', 'three'],
     output: [
       {
         file: pkg.unpkg,
