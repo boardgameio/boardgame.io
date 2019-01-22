@@ -1,3 +1,17 @@
+## v0.31.0
+
+#### Features
+
+- [[a32d3d5](https://github.com/nicolodavis/boardgame.io/commit/a32d3d5)] Generic lobby (#294)
+- [[fb19e9b](https://github.com/nicolodavis/boardgame.io/commit/fb19e9b)] move examples into a create-react-app package (#335)
+- [[1f71bbd](https://github.com/nicolodavis/boardgame.io/commit/1f71bbd)] Upgrade Babel 7 (#332)
+
+#### Bugfixes
+
+- [[3334d38](https://github.com/nicolodavis/boardgame.io/commit/3334d38)] fix race condition in game instantiation inside onSync
+- [[f544511](https://github.com/nicolodavis/boardgame.io/commit/f544511)] Allow result of onPhaseBegin to influence turn order (#341)
+- [[e1c1f6b](https://github.com/nicolodavis/boardgame.io/commit/e1c1f6b)] fail integration test if any subcommand fails
+
 ## v0.30.0
 
 #### Features
