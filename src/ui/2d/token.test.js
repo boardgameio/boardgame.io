@@ -165,9 +165,10 @@ test('click', () => {
   expect(onClick).toHaveBeenCalled();
 });
 
-test('drag and drop', () => {
+test('drag and drop - desktop', () => {
   const onDrag = jest.fn();
   const onDrop = jest.fn();
+  const onClick = jest.fn();
   const grid = Enzyme.mount(
     <Grid rows={2} cols={2}>
       <Token
@@ -177,6 +178,7 @@ test('drag and drop', () => {
         shouldDrag={() => true}
         onDrag={onDrag}
         onDrop={onDrop}
+        onClick={onClick}
       >
         <circle r={0.25} />
       </Token>
@@ -194,11 +196,88 @@ test('drag and drop', () => {
   token.instance()._startDrag({ preventDefault, pageX: 1, pageY: 2 });
   token.instance()._drag({ preventDefault, pageX: 200, pageY: 200 });
   token.instance()._endDrag({ preventDefault });
-  // Browser always send an onClick after dropping.
+  // Browser always send an onClick after dropping, must be ignored.
   token.instance()._onClick({});
 
   expect(onDrag).toHaveBeenCalled();
   expect(onDrop).toHaveBeenCalled();
+  expect(onClick).not.toHaveBeenCalled();
+});
+
+test('drag and drop - mobile', () => {
+  const onDrop = jest.fn();
+  const onClick = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2}>
+      <Token
+        x={0}
+        y={0}
+        draggable={true}
+        shouldDrag={() => true}
+        onDrop={onDrop}
+        onClick={onClick}
+      >
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  // Workaround because of JSDOM quirks
+  grid.getDOMNode().getScreenCTM = () => ({
+    inverse: () => ({ a: 1, b: 1, c: 1, d: 1 }),
+  });
+  grid.getDOMNode().addEventListener = () => {};
+  grid.getDOMNode().removeEventListener = () => {};
+  const token = grid.find('Token');
+  const preventDefault = () => {};
+  token
+    .instance()
+    ._startDrag({ preventDefault, touches: [{ pageX: 1, pageY: 2 }] });
+  token
+    .instance()
+    ._drag({ preventDefault, touches: [{ pageX: 200, pageY: 200 }] });
+  token.instance()._endDrag({ preventDefault });
+
+  expect(onDrop).toHaveBeenCalled();
+  expect(onClick).not.toHaveBeenCalled();
+});
+
+test('ignore drag and drop events of non-dragged element', () => {
+  const onDrag = jest.fn();
+  const onDrop = jest.fn();
+  const onClick = jest.fn();
+  const grid = Enzyme.mount(
+    <Grid rows={2} cols={2}>
+      <Token
+        x={0}
+        y={0}
+        draggable={true}
+        shouldDrag={() => true}
+        onDrag={onDrag}
+        onDrop={onDrop}
+        onClick={onClick}
+      >
+        <circle r={0.25} />
+      </Token>
+    </Grid>
+  );
+
+  // Workaround because of JSDOM quirks
+  grid.getDOMNode().getScreenCTM = () => ({
+    inverse: () => ({ a: 1, b: 1, c: 1, d: 1 }),
+  });
+  grid.getDOMNode().addEventListener = () => {};
+  grid.getDOMNode().removeEventListener = () => {};
+  const token = grid.find('Token');
+  const preventDefault = () => {};
+  token
+    .instance()
+    ._drag({ preventDefault, touches: [{ pageX: 200, pageY: 200 }] });
+  token.instance()._endDrag({ preventDefault });
+
+  expect(onDrag).not.toHaveBeenCalled();
+  expect(onDrop).not.toHaveBeenCalled();
+  expect(onClick).not.toHaveBeenCalled();
 });
 
 class MockComponent extends React.Component {
