@@ -9,7 +9,7 @@
     "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples --exec babel-node --presets @babel/preset-env examples/react-web/server.js",
     "build": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "docsify": "docsify serve docs",
-    "docsify:update": "node ./scripts/docsify-update.js",
+    "docsify:update": "npm run build && node ./scripts/docsify-update.js",
     "examples": "npm run start",
     "pretest": "npm run lint",
     "test": "cross-env NODE_ENV=test jest --no-cache",
