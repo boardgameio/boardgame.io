@@ -110,6 +110,7 @@ export class Grid extends React.Component {
   componentWillUnmount() {
     this.ctx.remove(this.squareGroup);
     this.ctx.remove(this.tokenGroup);
+    //unregister callback
   }
 
   render() {

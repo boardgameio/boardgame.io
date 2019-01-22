@@ -64,11 +64,11 @@ export class Token extends React.Component {
     this.props.parrent.add(mesh);
     const onEvent = e => {
       if (e.type == 'click') {
-        this.props.onClick({ x: x, y: y });
+        this.props.onClick({ x: this.props.x, y: this.props.y });
       } else if (e.type == 'mouseOver') {
-        this.props.onMouseOver({ x: x, y: y });
+        this.props.onMouseOver({ x: this.props.x, y: this.props.y });
       } else if (e.type == 'mouseOut') {
-        this.props.onMouseOut({ x: x, y: y });
+        this.props.onMouseOut({ x: this.props.x, y: this.props.y });
       }
     };
     this.props.ui.regCall(mesh, onEvent);
@@ -93,6 +93,7 @@ export class Token extends React.Component {
 
   componentWillUnmount() {
     this.props.parrent.remove(this.props.mesh);
+    //unregister callback
   }
 
   render() {
