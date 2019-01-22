@@ -12,6 +12,8 @@ import { Game } from 'boardgame.io/core';
 import { UI, Card, Deck } from 'boardgame.io/ui';
 import { Grid } from '../../../src/ui/3d/grid';
 import { Token } from '../../../src/ui/3d/token';
+import gltfURL from './scene.gltf';
+import binURL from './scene.bin';
 
 function handler(type, fn) {
   return arg => {
@@ -35,6 +37,11 @@ class Board extends React.Component {
   };
 
   render() {
+    const mesh={
+      url: gltfURL,
+      resourceUrl: binURL,
+      type: 'gltf',
+    }
     return (
       <UI three={true}>
         <div style={{ marginBottom: 20 }}>Drag the card into the deck</div>
@@ -43,7 +50,7 @@ class Board extends React.Component {
           <Token
             x={1}
             y={1}
-            mesh="https://raw.githubusercontent.com/SuperiorJT/Threejs-Chess/master/assets/models/Bishop.obj"
+            mesh={mesh}
           />
         </Grid>
       </UI>

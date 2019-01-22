@@ -63,6 +63,17 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.(bin|gltf)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options:{
+              name: '[name].[ext]',
+            },
+          }
+        ]
+      }
     ],
   },
 };

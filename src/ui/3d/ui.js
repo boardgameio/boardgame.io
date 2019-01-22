@@ -306,9 +306,32 @@ export class UI extends React.Component {
 
   componentDidMount() {
     this.renderer.domElement.id = 'bgio-canvas';
-    this.ref_.current.appendChild(this.renderer.domElement);
-    this.setupMouseEvents();
-    this.animate();
+    if (!THREE.DefaultLoadingManager.onStart){
+      //render the scene if nothing will be loaded
+      this.ref_.current.appendChild(this.renderer.domElement);
+      this.setupMouseEvents();
+      this.animate();
+      return null;
+    }
+    THREE.DefaultLoadingManager.onStart = ( url, itemsLoaded, itemsTotal )=>{
+      console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+    };
+    THREE.DefaultLoadingManager.onLoad = ( )=> {
+      console.log( 'Loading Complete!');
+      this.ref_.current.appendChild(this.renderer.domElement);
+      this.setupMouseEvents();
+      this.animate();
+    };
+    THREE.DefaultLoadingManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+    
+      console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+    
+    };
+    THREE.DefaultLoadingManager.onError = function ( url ) {
+    
+      console.log( 'There was an error loading ' + url );
+    
+    };
   }
 
   render() {
