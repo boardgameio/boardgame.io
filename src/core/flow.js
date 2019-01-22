@@ -376,7 +376,7 @@ export function FlowWithPhases({
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
     let G = config.onPhaseBegin(state.G, state.ctx);
-    let ctx = InitTurnOrderState(state.G, state.ctx, config.turnOrder);
+    let ctx = InitTurnOrderState(G, state.ctx, config.turnOrder);
 
     // Allow plugins to modify G and ctx at the beginning of a phase.
     G = plugins.G.onPhaseBegin(G, ctx, game);

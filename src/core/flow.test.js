@@ -69,17 +69,28 @@ describe('phases', () => {
           next: 'A',
         },
       },
+
+      turnOrder: {
+        first: G => {
+          if (G.setupB && !G.cleanupB) return '1';
+          return '0';
+        },
+      },
     });
 
     let state = { G: {}, ctx: flow.ctx(2) };
     state = flow.init(state);
     expect(state.G).toMatchObject({ setupA: true });
+    expect(state.ctx.currentPlayer).toBe('0');
+
     state = flow.processGameEvent(state, gameEvent('endPhase'));
     expect(state.G).toMatchObject({
       setupA: true,
       cleanupA: true,
       setupB: true,
     });
+    expect(state.ctx.currentPlayer).toBe('1');
+
     state = flow.processGameEvent(state, gameEvent('endPhase'));
     expect(state.G).toMatchObject({
       setupA: true,
@@ -87,6 +98,7 @@ describe('phases', () => {
       setupB: true,
       cleanupB: true,
     });
+    expect(state.ctx.currentPlayer).toBe('0');
   });
 
   test('endPhaseIf', () => {
