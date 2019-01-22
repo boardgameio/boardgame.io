@@ -1,3 +1,9 @@
+## v0.31.1
+
+#### Bugfixes
+
+- [[4a796dc](https://github.com/nicolodavis/boardgame.io/commit/4a796dc)] remove three from minified rollup bundle
+
 ## v0.31.0
 
 #### Features
