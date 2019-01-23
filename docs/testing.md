@@ -30,10 +30,10 @@ it('should place the correct value in the cell', () => {
   };
 
   // make move.
-  const newGameState = clickCell(G, { currentPlayer: '1' }, 3);
+  clickCell(G, { currentPlayer: '1' }, 3);
 
   // verify new state.
-  expect(newGameState).toEqual({
+  expect(G).toEqual({
     cells: [null, null, null, '1', null, null, null, null, null],
   });
 });
