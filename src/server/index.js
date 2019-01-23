@@ -8,8 +8,8 @@
 
 const Koa = require('koa');
 
+import { addApiToServer, createApiServer } from './api';
 import { DBFromEnv } from './db';
-import { createApiServer } from './api';
 import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
 
@@ -20,7 +20,7 @@ import { SocketIO } from './transport/socketio';
  * @param {object} db - The interface with the database.
  * @param {object} transport - The interface with the clients.
  */
-export function Server({ games, db, transport }) {
+export function Server({ games, db, transport, singlePort = false }) {
   const app = new Koa();
 
   if (db === undefined) {
@@ -33,23 +33,36 @@ export function Server({ games, db, transport }) {
   }
   transport.init(app, games);
 
-  const api = createApiServer({ db, games });
+  const api = singlePort
+    ? addApiToServer({ app, db, games })
+    : createApiServer({ db, games });
 
   return {
     app,
     api,
     db,
 
-    run: async (port, callback) => {
+    run: async (port, callback, apiPort) => {
       await db.connect();
-      let apiServer = await api.listen(port + 1);
-      let appServer = await app.listen(port, callback);
-      logger.info('listening...');
+
+      let apiServer;
+      if (!singlePort) {
+        apiServer = await api.listen(
+          apiPort ? apiPort : port ? port + 1 : null
+        );
+        logger.info(`Listening API on ${apiServer.address().port}...`);
+      }
+
+      const appServer = await app.listen(port, callback);
+      logger.info(`Listening App on ${appServer.address().port}...`);
+
       return { apiServer, appServer };
     },
 
     kill: ({ apiServer, appServer }) => {
-      apiServer.close();
+      if (apiServer) {
+        apiServer.close();
+      }
       appServer.close();
     },
   };

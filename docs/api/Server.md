@@ -8,21 +8,26 @@ broadcasts updates to those clients so that all browsers
 that are connected to the same game are kept in sync in
 realtime.
 
-The `games` argument takes a list of game implementations
-(each is the return value of [Game](/api/Game.md)).
-
 ### Arguments
 
-1. obj(_object_): A config object with the options shown below.
+A config object with the following options:
+
+1. games (_array_): A list of game implementations
+   (each is the return value of [Game](/api/Game.md)).
+2. db (_object_): A database implementation. If not provided, default in-memory db will be used.
+3. transport (_object_): A server transport implementation. If not provided, default SocketIO implementation will be used.
+4. singlePort (_boolean_): An option to run api and app using single port or two different ports. `false` (2 ports) by default.
 
 ### Returns
 
 An object that contains:
 
 1. run (_function_): A function to run the server.
-   Signature: (port, callback) => {}
-2. app (_object_): The Koa app.
-3. db (_object_): The `db` implementation.
+   Signature: (port, callback, apiPort) => {}
+2. kill (_function_): A function to stop the server.
+   Signature: ({ apiServer, appServer }) => {}
+3. app (_object_): The Koa app.
+4. db (_object_): The `db` implementation.
 
 ### Usage
 
@@ -53,7 +58,7 @@ A game that is authenticated will not accept moves from a client on behalf of a 
 
 Use the create API call to create a game that requires credential tokens. When you call the join API, you can retrieve the credential token for a particular player.
 
-Authentication APIs are available by default on `WebSocket port` + 1.
+Authentication APIs are available by default on `WebSocket port` (e.g. `8000`).
 
 ### Creating a game
 
