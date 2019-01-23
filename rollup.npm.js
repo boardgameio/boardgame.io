@@ -34,6 +34,8 @@ const globals = {
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
   flatted: 'Flatted',
+  three: 'THREE',
+  '@tweenjs/tween.js': 'TWEEN',
 };
 
 export default [
@@ -154,7 +156,7 @@ export default [
   // Browser minified version.
   {
     input: 'packages/main.js',
-    external: ['react'],
+    external: ['react', 'three'],
     output: [
       {
         file: pkg.unpkg,

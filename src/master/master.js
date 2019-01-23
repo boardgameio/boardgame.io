@@ -78,7 +78,7 @@ export class Master {
    * along with a deltalog.
    */
   async onUpdate(action, stateID, gameID, playerID) {
-    const key = `${this.game.name}:${gameID}`;
+    const key = gameID;
     let state = await this.storageAPI.get(key);
 
     if (state === undefined) {
@@ -170,7 +170,7 @@ export class Master {
    * Returns the latest game state and the entire log.
    */
   async onSync(gameID, playerID, numPlayers) {
-    const key = `${this.game.name}:${gameID}`;
+    const key = gameID;
 
     let state = await this.storageAPI.get(key);
 
@@ -179,6 +179,7 @@ export class Master {
     if (state === undefined) {
       state = InitializeGame({ game: this.game, numPlayers });
       await this.storageAPI.set(key, state);
+      state = await this.storageAPI.get(key);
     }
 
     const filteredState = {
