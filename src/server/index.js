@@ -14,13 +14,33 @@ import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
 
 /**
+ * Build config object from server run arguments.
+ *
+ * @param {number} portOrConfig - Either port or server config object. Optional.
+ * @param {function} callback - Server run callback. Optional.
+ */
+export const createServerRunConfig = (portOrConfig, callback) => {
+  const config = {};
+  if (portOrConfig && typeof portOrConfig === 'object') {
+    config.port = portOrConfig.port;
+    config.callback = portOrConfig.callback || callback;
+    config.apiPort = portOrConfig.apiPort;
+    config.apiCallback = portOrConfig.apiCallback;
+  } else {
+    config.port = portOrConfig;
+    config.callback = callback;
+  }
+  return config;
+};
+
+/**
  * Instantiate a game server.
  *
  * @param {Array} games - The games that this server will handle.
  * @param {object} db - The interface with the database.
  * @param {object} transport - The interface with the clients.
  */
-export function Server({ games, db, transport, singlePort = false }) {
+export function Server({ games, db, transport }) {
   const app = new Koa();
 
   if (db === undefined) {
@@ -33,27 +53,35 @@ export function Server({ games, db, transport, singlePort = false }) {
   }
   transport.init(app, games);
 
-  const api = singlePort
-    ? addApiToServer({ app, db, games })
-    : createApiServer({ db, games });
-
   return {
     app,
-    api,
     db,
 
-    run: async (port, callback, apiPort) => {
+    run: async (portOrConfig, callback) => {
+      const serverRunConfig = createServerRunConfig(portOrConfig, callback);
+
+      // DB
       await db.connect();
 
+      // API
       let apiServer;
-      if (!singlePort) {
+      if (!serverRunConfig.apiPort) {
+        addApiToServer({ app, db, games });
+      } else {
+        // Run API on a separate koa server
+        const api = createApiServer({ db, games });
         apiServer = await api.listen(
-          apiPort ? apiPort : port ? port + 1 : null
+          serverRunConfig.apiPort,
+          serverRunConfig.apiCallback
         );
         logger.info(`Listening API on ${apiServer.address().port}...`);
       }
 
-      const appServer = await app.listen(port, callback);
+      // Socket or Socket + API
+      const appServer = await app.listen(
+        serverRunConfig.port,
+        serverRunConfig.callback
+      );
       logger.info(`Listening App on ${appServer.address().port}...`);
 
       return { apiServer, appServer };

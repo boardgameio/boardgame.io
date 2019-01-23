@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server } from '.';
+import { Server, createServerRunConfig } from '.';
 import Game from '../core/game';
 import * as api from './api';
 
@@ -77,7 +77,7 @@ describe('run', () => {
   });
 
   test('single server running', async () => {
-    server = Server({ games: [game], singlePort: true });
+    server = Server({ games: [game] });
     runningServer = await server.run();
 
     expect(server).not.toBeUndefined();
@@ -88,33 +88,12 @@ describe('run', () => {
 
   test('multiple servers running', async () => {
     server = Server({ games: [game] });
-    runningServer = await server.run();
+    runningServer = await server.run({ port: 57890, apiPort: 57891 });
 
     expect(server).not.toBeUndefined();
     expect(api.addApiToServer).not.toBeCalled();
     expect(api.createApiServer).toBeCalled();
     expect(mockApiServerListen).toBeCalled();
-  });
-
-  test('run api server with random port', async () => {
-    server = Server({ games: [game] });
-    runningServer = await server.run();
-
-    expect(mockApiServerListen).toBeCalledWith(null);
-  });
-
-  test('run api server with websocket port + 1', async () => {
-    server = Server({ games: [game] });
-    runningServer = await server.run(63488);
-
-    expect(mockApiServerListen).toBeCalledWith(63489);
-  });
-
-  test('run api server with custom port', async () => {
-    server = Server({ games: [game] });
-    runningServer = await server.run(null, null, 51345);
-
-    expect(mockApiServerListen).toBeCalledWith(51345);
   });
 });
 
@@ -142,5 +121,60 @@ describe('kill', () => {
 
     expect(() => server.kill({ appServer })).not.toThrowError();
     expect(appServer.close).toBeCalled();
+  });
+});
+
+describe('createServerRunConfig', () => {
+  // TODO use data-driven-test when upgrade jest to 23+
+  test('should return valid config with different server run arguments', () => {
+    const mockCallback = () => {};
+    const mockApiCallback = () => {};
+
+    expect(createServerRunConfig()).toEqual({
+      port: undefined,
+      callback: undefined,
+    });
+    expect(createServerRunConfig(8000)).toEqual({
+      port: 8000,
+      callback: undefined,
+    });
+    expect(createServerRunConfig(8000, mockCallback)).toEqual({
+      port: 8000,
+      callback: mockCallback,
+    });
+
+    expect(createServerRunConfig({})).toEqual({
+      port: undefined,
+      callback: undefined,
+    });
+    expect(createServerRunConfig({ port: 1234 })).toEqual({
+      port: 1234,
+      callback: undefined,
+    });
+    expect(
+      createServerRunConfig({ port: 1234, callback: mockCallback })
+    ).toEqual({
+      port: 1234,
+      callback: mockCallback,
+    });
+
+    expect(createServerRunConfig({ port: 1234, apiPort: 5467 })).toEqual({
+      port: 1234,
+      callback: undefined,
+      apiPort: 5467,
+    });
+    expect(
+      createServerRunConfig({
+        port: 1234,
+        callback: mockCallback,
+        apiPort: 5467,
+        apiCallback: mockApiCallback,
+      })
+    ).toEqual({
+      port: 1234,
+      callback: mockCallback,
+      apiPort: 5467,
+      apiCallback: mockApiCallback,
+    });
   });
 });

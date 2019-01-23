@@ -14,16 +14,15 @@ A config object with the following options:
 
 1. games (_array_): A list of game implementations
    (each is the return value of [Game](/api/Game.md)).
-2. db (_object_): A database implementation. If not provided, default in-memory db will be used.
-3. transport (_object_): A server transport implementation. If not provided, default SocketIO implementation will be used.
-4. singlePort (_boolean_): An option to run api and app using single port or two different ports. `false` (2 ports) by default.
+2. db (_object_): Database implementation. If not provided, default in-memory db will be used.
+3. transport (_object_): Server transport implementation. If not provided, default SocketIO implementation will be used.
 
 ### Returns
 
 An object that contains:
 
 1. run (_function_): A function to run the server.
-   Signature: (port, callback, apiPort) => {}
+   Signature: (port, callback) => {}
 2. kill (_function_): A function to stop the server.
    Signature: ({ apiServer, appServer }) => {}
 3. app (_object_): The Koa app.
@@ -58,7 +57,8 @@ A game that is authenticated will not accept moves from a client on behalf of a 
 
 Use the create API call to create a game that requires credential tokens. When you call the join API, you can retrieve the credential token for a particular player.
 
-Authentication APIs are available by default on `WebSocket port` (e.g. `8000`).
+Authentication APIs are available by default on `WebSocket port` (e.g. 8000).
+To run API server on a different port, use `server.run({ port: 8000, apiPort: 8001 })`.
 
 ### Creating a game
 
