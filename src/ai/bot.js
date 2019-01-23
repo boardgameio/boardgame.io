@@ -173,7 +173,7 @@ export class MCTSBot extends Bot {
       const childVisits = child.visits + Number.EPSILON;
       const uct =
         child.value / childVisits +
-        Math.sqrt(2 * Math.log(node.visits) / childVisits);
+        Math.sqrt((2 * Math.log(node.visits)) / childVisits);
       if (selectedChild == null || uct > best) {
         best = uct;
         selectedChild = child;

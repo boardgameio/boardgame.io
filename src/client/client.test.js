@@ -7,13 +7,8 @@
  */
 
 import { createStore } from 'redux';
-import { CreateGameReducer } from '../core/reducer';
-import {
-  Client,
-  GetOpts,
-  createEventDispatchers,
-  createMoveDispatchers,
-} from './client';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
+import { Client, GetOpts, createMoveDispatchers } from './client';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
@@ -128,8 +123,27 @@ describe('multiplayer', () => {
 
     test('onAction called', () => {
       jest.spyOn(client.transport, 'onAction');
+      client.store.dispatch(sync({ G: {}, ctx: { phase: 'default' } }, []));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
+    });
+  });
+
+  describe('multiplayer: true', () => {
+    let client;
+
+    beforeAll(() => {
+      client = Client(
+        GetOpts({
+          game: Game({}),
+          multiplayer: true,
+        })
+      );
+      client.connect();
+    });
+
+    test('correct transport used', () => {
+      expect(client.transport instanceof SocketIO).toBe(true);
     });
   });
 
@@ -193,19 +207,17 @@ test('accepts enhancer for store', () => {
   expect(spyDispatcher.mock.calls).toHaveLength(1);
 });
 
-test('event dispatchers', () => {
-  {
+describe('event dispatchers', () => {
+  test('default', () => {
     const game = Game({});
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
+    const client = Client({ game });
+    expect(Object.keys(client.events)).toEqual(['endTurn']);
+    expect(client.getState().ctx.turn).toBe(0);
+    client.events.endTurn();
+    expect(client.getState().ctx.turn).toBe(1);
+  });
 
-  {
+  test('all events', () => {
     const game = Game({
       flow: {
         endPhase: true,
@@ -213,50 +225,28 @@ test('event dispatchers', () => {
         setActionPlayers: true,
       },
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([
+    const client = Client({ game });
+    expect(Object.keys(client.events)).toEqual([
       'endTurn',
       'endPhase',
       'endGame',
       'setActionPlayers',
     ]);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
+    expect(client.getState().ctx.turn).toBe(0);
+    client.events.endTurn();
+    expect(client.getState().ctx.turn).toBe(1);
+  });
 
-  {
+  test('no events', () => {
     const game = Game({
       flow: {
         endPhase: false,
         endTurn: false,
       },
-
-      phases: [{ name: 'default' }],
     });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual([]);
-  }
-
-  {
-    const game = Game({
-      flow: {
-        endPhase: true,
-        undoableMoves: ['A'],
-      },
-    });
-    const reducer = CreateGameReducer({ game, numPlayers: 2 });
-    const store = createStore(reducer);
-    const api = createEventDispatchers(game.flow.eventNames, store);
-    expect(Object.getOwnPropertyNames(api)).toEqual(['endTurn', 'endPhase']);
-    expect(store.getState().ctx.turn).toBe(0);
-    api.endTurn();
-    expect(store.getState().ctx.turn).toBe(1);
-  }
+    const client = Client({ game });
+    expect(Object.keys(client.events)).toEqual([]);
+  });
 });
 
 describe('move dispatchers', () => {
@@ -271,9 +261,10 @@ describe('move dispatchers', () => {
     },
   });
   const reducer = CreateGameReducer({ game });
+  const initialState = InitializeGame({ game });
 
   test('basic', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store);
 
     expect(Object.getOwnPropertyNames(api)).toEqual(['A', 'B', 'C']);
@@ -296,14 +287,14 @@ describe('move dispatchers', () => {
   });
 
   test('with undefined playerID - singleplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: '0' });
   });
 
   test('with undefined playerID - multiplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(
       game.moveNames,
       store,
@@ -316,14 +307,14 @@ describe('move dispatchers', () => {
   });
 
   test('with null playerID - singleplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: '0' });
   });
 
   test('with null playerID - multiplayer mode', () => {
-    const store = createStore(reducer);
+    const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null, null, true);
     api.B();
     expect(store.getState().G).toMatchObject({ moved: null });
@@ -348,20 +339,29 @@ describe('log handling', () => {
     client.moves.A();
 
     expect(client.log).toEqual([
-      { action: makeMove('A', [], '0') },
-      { action: makeMove('A', [], '0') },
+      { action: makeMove('A', [], '0'), _stateID: 0 },
+      { action: makeMove('A', [], '0'), _stateID: 1 },
     ]);
   });
 
   test('update', () => {
-    const state = { restore: true };
-    const deltalog = ['0', '1'];
+    const state = { restore: true, _stateID: 0 };
+    const deltalog = [
+      {
+        action: {},
+        _stateID: 0,
+      },
+      {
+        action: {},
+        _stateID: 1,
+      },
+    ];
     const action = update(state, deltalog);
 
     client.store.dispatch(action);
     client.store.dispatch(action);
 
-    expect(client.log).toEqual([...deltalog, ...deltalog]);
+    expect(client.log).toEqual(deltalog);
   });
 
   test('sync', () => {

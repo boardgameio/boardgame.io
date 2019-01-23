@@ -100,7 +100,8 @@ export class DebugMoveArgField extends React.Component {
     return (
       <div className={className} onClick={this.props.activate}>
         {this.props.name}
-        (<span
+        (
+        <span
           ref={r => {
             this.span = r;
           }}
@@ -108,7 +109,8 @@ export class DebugMoveArgField extends React.Component {
           onBlur={this.props.deactivate}
           onKeyDown={this.onKeyDown}
           contentEditable
-        />)
+        />
+        )
       </div>
     );
   }

@@ -8,34 +8,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import UIContext from './ui-context';
+import { UI as UI2D } from './2d/ui';
+import { UI as UI3D } from './3d/ui';
 
 /**
- * Root element of the UI framework.
+ * Root component of the UI framework.
  */
-class UI extends React.Component {
-  static propTypes = {
-    children: PropTypes.any,
-  };
+export const UI = props => {
+  return props.three ? (
+    <UI3D {...props}>{props.children}</UI3D>
+  ) : (
+    <UI2D {...props}>{props.children}</UI2D>
+  );
+};
 
-  constructor(props) {
-    super(props);
-    this._nextID = 1;
-  }
-
-  getContext = () => {
-    return {
-      genID: () => this._nextID++,
-    };
-  };
-
-  render() {
-    return (
-      <UIContext.Provider value={this.getContext()}>
-        <div className="bgio-ui">{this.props.children}</div>
-      </UIContext.Provider>
-    );
-  }
-}
-
-export { UI };
+UI.propTypes = {
+  three: PropTypes.bool,
+  children: PropTypes.any,
+};

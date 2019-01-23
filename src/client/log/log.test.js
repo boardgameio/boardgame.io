@@ -11,16 +11,24 @@ import { Client } from '../client';
 import { makeMove, gameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { GameLog } from './log';
-import { CreateGameReducer } from '../../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../../core/reducer';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 Enzyme.configure({ adapter: new Adapter() });
 
 describe('layout', () => {
-  const game = Game({ flow: { phases: [{ name: 'A' }, { name: 'B' }] } });
+  const game = Game({
+    flow: {
+      startingPhase: 'A',
+      phases: {
+        A: { next: 'B' },
+        B: { next: 'A' },
+      },
+    },
+  });
   const reducer = CreateGameReducer({ game });
-  const state = reducer(undefined, { type: 'init' });
+  const state = InitializeGame({ game });
 
   test('sanity', () => {
     const log = [
@@ -153,7 +161,7 @@ describe('pinning', () => {
   });
 
   const reducer = CreateGameReducer({ game });
-  let state = reducer(undefined, { type: 'init' });
+  let state = InitializeGame({ game });
   const initialState = state;
   const log = [
     { action: makeMove('A') },
@@ -230,9 +238,9 @@ describe('pinning', () => {
 });
 
 describe('payload', () => {
-  const game = Game({ flow: { phases: [{ name: 'A' }, { name: 'B' }] } });
+  const game = Game({});
   const reducer = CreateGameReducer({ game });
-  const state = reducer(undefined, { type: 'init' });
+  const state = InitializeGame({ game });
 
   const log = [
     { action: makeMove('moveA'), payload: { test_payload: 'payload123' } },

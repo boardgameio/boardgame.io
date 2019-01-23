@@ -35,15 +35,38 @@ const App = Client({
   // The props that this component receives are listed below.
   board: Board,
 
-  // Set to true to enable sending move updates to the
-  // server via WebSockets. Can also be set to
-  // { server: 'hostname:port' }
-  // to specify a socket server that's different from
-  // the one that served up the page.
+  // Optional: React component to display while the client
+  // is in the "loading" state prior to the initial sync
+  // with the game master. Relevant only in multiplayer mode.
+  // If this is not provided, the client displays "connecting...".
+  loading: LoadingComponent,
+
+  // Can be set to one of the following in order to enable multiplayer:
+  //
+  // 1. true
+  //
+  // This starts sending move updates to the server via socket.io.
+  //
+  // 2. { server: 'hostname:port' }
+  //
+  // Same as the above, but also specifies the server location.
+  //
+  // 3. { local: true}
+  //
+  // Special local mode that uses an in-memory game master. Useful
+  // for testing multiplayer interactions locally without having to
+  // connect to a server.
   multiplayer: false,
 
   // Set to false to disable the Debug UI.
   debug: true,
+
+  // An optional Redux store enhancer.
+  // This is useful for augmenting the Redux store
+  // for purposes of debugging or simply intercepting
+  // events in order to kick off other side-effects in
+  // response to moves.
+  enhancer: applyMiddleware(your_middleware),
 });
 
 ReactDOM.render(<App />, document.getElementById('app'));
@@ -64,19 +87,21 @@ The `Board` component will receive the following as `props`:
 4. `events`: An object containing functions to dispatch various
    game events like `endTurn` and `endPhase`.
 
-5. `log`: The game log.
+5. `reset`: Function that resets the game.
 
-6. `gameID`: The game ID associated with the client.
+6. `undo`: Function that undoes the last move.
 
-7. `playerID`: The player ID associated with the client.
+7. `redo`: Function that redoes the previously undone move.
 
-8. `isActive`: `true` if the client is able to currently make
-   a move or interact with the game.
+8. `log`: The game log.
 
-9. `isMultiplayer`: `true` if it is a multiplayer game.
+9. `gameID`: The game ID associated with the client.
 
-10. `isConnected`: `true` if connection to the server is active.
+10. `playerID`: The player ID associated with the client.
 
-11. `enhancer`: An optional Redux store enhancer, passed along to
-    the internals store. See the [Debugging](debugging.md) section
-    for more details.
+11. `isActive`: `true` if the client is able to currently make
+    a move or interact with the game.
+
+12. `isMultiplayer`: `true` if it is a multiplayer game.
+
+13. `isConnected`: `true` if connection to the server is active.

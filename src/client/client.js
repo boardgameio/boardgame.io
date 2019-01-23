@@ -11,7 +11,7 @@ import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { SocketIO } from './transport/socketio';
 import { Local, LocalMaster } from './transport/local';
-import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame, CreateGameReducer } from '../core/reducer';
 
 /**
  * createDispatchers
@@ -117,8 +117,13 @@ class _ClientImpl {
       };
     }
 
+    let initialState = null;
+    if (multiplayer === undefined) {
+      initialState = InitializeGame({ game, numPlayers });
+    }
+
     this.reset = () => {
-      this.store.dispatch(ActionCreators.reset());
+      this.store.dispatch(ActionCreators.reset(initialState));
     };
     this.undo = () => {
       this.store.dispatch(ActionCreators.undo());
@@ -157,7 +162,19 @@ class _ClientImpl {
         }
 
         case Actions.UPDATE: {
-          const deltalog = action.deltalog || [];
+          let id = -1;
+          if (this.log.length > 0) {
+            id = this.log[this.log.length - 1]._stateID;
+          }
+
+          let deltalog = action.deltalog || [];
+
+          // Filter out actions that are already present
+          // in the current log. This may occur when the
+          // client adds an entry to the log followed by
+          // the update from the master here.
+          deltalog = deltalog.filter(l => l._stateID > id);
+
           this.log = [...this.log, ...deltalog];
           break;
         }
@@ -197,7 +214,7 @@ class _ClientImpl {
       enhancer = applyMiddleware(LogMiddleware, TransportMiddleware);
     }
 
-    this.store = createStore(this.reducer, enhancer);
+    this.store = createStore(this.reducer, initialState, enhancer);
 
     if (multiplayer && multiplayer.master_ !== undefined) {
       this.transport = new Local({
@@ -242,6 +259,11 @@ class _ClientImpl {
 
   getState() {
     const state = this.store.getState();
+
+    // This is the state before a sync with the game master.
+    if (state === null) {
+      return state;
+    }
 
     // isActive.
 
@@ -298,7 +320,7 @@ class _ClientImpl {
     );
 
     this.events = createEventDispatchers(
-      this.game.flow.eventNames,
+      this.game.flow.enabledEventNames,
       this.store,
       this.playerID,
       this.credentials,

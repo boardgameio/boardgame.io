@@ -7,7 +7,7 @@
  */
 
 import Game from './game';
-import { CreateGameReducer } from './reducer';
+import { InitializeGame, CreateGameReducer } from './reducer';
 import { gameEvent } from './action-creators';
 
 const game = Game({
@@ -29,19 +29,6 @@ test('processMove', () => {
   expect(game.processMove(testObj, { type: 'B' })).toEqual(null);
 });
 
-test('playerID from context', () => {
-  const g = Game({
-    moves: {
-      A() {
-        return { playerID: this.playerID };
-      },
-    },
-  });
-
-  const state = g.processMove({}, { type: 'A', playerID: 'player' });
-  expect(state.playerID).toBe('player');
-});
-
 test('flow override', () => {
   const f = { processGameEvent: () => {} };
   const game = Game({
@@ -55,21 +42,21 @@ test('rounds with starting player token', () => {
   let game = Game({
     setup: () => ({ startingPlayerToken: 0 }),
     flow: {
-      phases: [
-        {
-          name: 'main',
+      startingPhase: 'main',
+      phases: {
+        main: {
           turnOrder: {
             first: G => G.startingPlayerToken,
             next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
-      ],
+      },
     },
   });
 
   const numPlayers = 4;
-  const reducer = CreateGameReducer({ game, numPlayers: numPlayers });
-  let state = reducer(undefined, { type: 'init' });
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game, numPlayers });
 
   expect(state.ctx.currentPlayer).toBe('0');
 
@@ -84,7 +71,7 @@ test('rounds with starting player token', () => {
   expect(state.ctx.currentPlayer).toBe('3');
 
   state = reducer(state, gameEvent('endTurn'));
-  state = reducer(state, gameEvent('endPhase'));
+  state = reducer(state, gameEvent('endPhase', { next: 'main' }));
   expect(state.ctx.currentPlayer).toBe('2');
 
   state = reducer(state, gameEvent('endTurn'));
@@ -98,35 +85,35 @@ test('rounds with starting player token', () => {
 test('serpentine setup phases', () => {
   let game = Game({
     flow: {
-      phases: [
-        {
-          name: 'first setup round',
+      startingPhase: 'first setup round',
+      phases: {
+        'first setup round': {
           turnOrder: {
             first: () => 0,
             next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
+          next: 'second setup round',
         },
-        {
-          name: 'second setup round',
+        'second setup round': {
           turnOrder: {
             first: (G, ctx) => ctx.playOrder.length - 1,
             next: (G, ctx) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
           },
+          next: 'main phase',
         },
-        {
-          name: 'main phase',
+        'main phase': {
           turnOrder: {
             first: () => 0,
             next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
-      ],
+      },
     },
   });
 
   const numPlayers = 4;
-  const reducer = CreateGameReducer({ game, numPlayers: numPlayers });
-  let state = reducer(undefined, { type: 'init' });
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game, numPlayers });
 
   expect(state.ctx.currentPlayer).toBe('0');
   expect(state.ctx.phase).toBe('first setup round');

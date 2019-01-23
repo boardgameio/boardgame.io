@@ -13,29 +13,23 @@
   <strong>Full Documentation: <a href="https://nicolodavis.github.io/boardgame.io">link</a></strong>
 </p>
 
-The goal of this framework is to allow a game developer to
-translate the rules of a game into a series of simple functions
-that describe how the game state changes when a particular move is made,
-and the framework takes care of the rest. You get a fully multiplayer
-implementation without having to write any networking or storage layer code.
+Write simple functions that describe how the game state changes
+when a particular move is made. This is automatically converted
+into a working game complete with online multiplayer
+features, all without requiring you to write a single line of
+networking or database handling code.
 
-## Features
+### Features
 
-* **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
-* **Cross-platform Multiplayer**: All clients (Web / Android / iOS) connected to the game are synced in real time.
-* **AI Framework**: Create bots that are highly customizable and debuggable.
-* **Game Phases**: with different game rules (including custom turn orders) per phase.
-* **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
-* **Prototyping**: Debugging interface to simulate moves even before you render the game.
-* **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **UI Agnostic**: Vanilla JS client with bindings for React / React Native.
-* **Component Toolkit**: Components for hex grids, cards, tokens.
-
-The framework is modular and made up of pluggable adapters, so you can swap out any part
-of it with your own custom implementation. For example, you can connect it to any storage
-backend, or change the underlying websocket layer to a different implementation. Even though
-bindings are provided for React, you can use the vanilla JS client to connect
-it to any client-side framework (see the examples in this repository for how to use threejs).
+- **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
+- **Cross-platform Multiplayer**: All clients (Web / Android / iOS) are kept in sync in realtime.
+- **Automatic AI**: MCTS-based bots with options to customize.
+- **Game Phases**: with different game rules (including custom turn orders) per phase.
+- **Prototyping**: Debugging interface to simulate moves even before you render the game.
+- **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
+- **View-layer Agnostic**: Vanilla JS client with bindings for React / React Native.
+- **Component Toolkit**: Components for hex grids, cards, tokens.
+- **Extendable**: Subsystems (storage, networking etc.) can be replaced with custom implementations.
 
 ## Usage
 
@@ -55,6 +49,10 @@ $ npm start
 ## Changelog
 
 See [changelog](docs/CHANGELOG.md).
+
+## New in v0.29.0
+
+**Plugin API** that allows creating custom interfaces that target specific game genres.
 
 ## Contributing
 

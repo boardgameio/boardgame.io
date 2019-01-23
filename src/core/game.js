@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { FnWrap } from '../plugins/main';
 import { FlowWithPhases } from './flow';
 
 /**
@@ -32,6 +33,8 @@ import { FlowWithPhases } from './flow';
  *     return G;
  *   },
  *
+ *   plugins: [plugin1, plugin2, ...],
+ *
  *   moves: {
  *     'moveWithoutArgs': (G, ctx) => {
  *       return Object.assign({}, G, ...);
@@ -47,11 +50,11 @@ import { FlowWithPhases } from './flow';
  *     endGameIf: (G, ctx) => { ... },
  *     endTurnIf: (G, ctx) => { ... },
  *
- *     phases: [
- *       { name: 'A', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
- *       { name: 'B', setup: (G, ctx) => G, cleanup: (G, ctx) => G },
+ *     phases: {
+ *       A: { onPhaseBegin: (G, ctx) => G, onPhaseEnd: (G, ctx) => G },
+ *       B: { onPhaseBegin: (G, ctx) => G, onPhaseEnd: (G, ctx) => G },
  *       ...
- *     ]
+ *     }
  *   },
  * })
  *
@@ -69,30 +72,46 @@ import { FlowWithPhases } from './flow';
  *                           configuration object for FlowWithPhases().
  *
  * @param {...object} seed - Seed for the PRNG.
+ *
+ * @param {Array} plugins - List of plugins. Each plugin is an object like the following:
+ *                          {
+ *                            // Optional: Wraps a move / trigger function and returns
+ *                            // the wrapped function. The wrapper can do anything
+ *                            // it wants, but will typically be used to customize G.
+ *                            fnWrap: (fn) => {
+ *                              return (G, ctx, ...args) => {
+ *                                G = preprocess(G);
+ *                                G = fn(G, ctx, ...args);
+ *                                G = postprocess(G);
+ *                                return G;
+ *                              };
+ *                            },
+ *
+ *                            // Optional: Called during setup. Can be used to
+ *                            // augment G with additional state during setup.
+ *                            setup: (G, ctx) => G,
+ *                          }
  */
-function Game({ name, setup, moves, playerView, flow, seed }) {
-  if (name === undefined) name = 'default';
-  if (setup === undefined) setup = () => ({});
-  if (moves === undefined) moves = {};
-  if (playerView === undefined) playerView = G => G;
+function Game(game) {
+  if (game.name === undefined) game.name = 'default';
+  if (game.setup === undefined) game.setup = () => ({});
+  if (game.moves === undefined) game.moves = {};
+  if (game.playerView === undefined) game.playerView = G => G;
+  if (game.plugins === undefined) game.plugins = [];
 
-  if (!flow || flow.processGameEvent === undefined) {
-    flow = FlowWithPhases(flow || {});
+  if (!game.flow || game.flow.processGameEvent === undefined) {
+    game.flow = FlowWithPhases({ game, ...game.flow });
   }
 
   return {
-    name,
-    setup,
-    playerView,
-    flow,
-    seed,
-    moveNames: Object.getOwnPropertyNames(moves),
+    ...game,
+    moveNames: Object.getOwnPropertyNames(game.moves),
     processMove: (G, action, ctx) => {
-      if (moves.hasOwnProperty(action.type)) {
-        const context = { playerID: action.playerID };
+      if (game.moves.hasOwnProperty(action.type)) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        return moves[action.type].apply(context, args);
+        const fn = FnWrap(game.moves[action.type], game);
+        return fn(...args);
       }
       return G;
     },

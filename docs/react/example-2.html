@@ -54,13 +54,9 @@ const TicTacToe = BoardgameIO.Game({
 
   moves: {
     clickCell(G, ctx, id) {
-      const cells = [...G.cells];
-
-      if (cells[id] === null) {
-        cells[id] = ctx.currentPlayer;
+      if (G.cells[id] === null) {
+        G.cells[id] = ctx.currentPlayer;
       }
-
-      return { ...G, cells };
     }
   },
 

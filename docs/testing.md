@@ -2,16 +2,14 @@
 
 #### Unit Tests
 
-Moves are pure functions, so they lend themselves to easy testing. A useful strategy would be
+Moves are just functions, so they lend themselves to easy testing. A useful strategy would be
 to implement it as a standalone function before passing it to the `Game` constructor:
 
 `game.js`
 
 ```js
 export function clickCell(G, ctx, id) {
-  const cells = [...G.cells];
-  cells[id] = ctx.currentPlayer;
-  return { ...G, cells };
+  G.cells[id] = ctx.currentPlayer;
 }
 
 Game({
@@ -32,10 +30,10 @@ it('should place the correct value in the cell', () => {
   };
 
   // make move.
-  const newGameState = clickCell(G, { currentPlayer: '1' }, 3);
+  clickCell(G, { currentPlayer: '1' }, 3);
 
   // verify new state.
-  expect(newGameState).toEqual({
+  expect(G).toEqual({
     cells: [null, null, null, '1', null, null, null, null, null],
   });
 });

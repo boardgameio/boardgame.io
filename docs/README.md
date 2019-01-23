@@ -9,25 +9,29 @@
 <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
 </p>
 
+<h5 align="center">
+Open Source Game Engine for Turn-Based Games
+</h5>
+
 ---
 
-The goal of this framework is to allow a game developer to
-translate the rules of a game into a series of simple functions
-that describe how the game state changes when a particular move is made,
-and the framework takes care of the rest. You get a fully multiplayer
-implementation without having to write any networking or storage layer code.
+Write simple functions that describe how the game state changes
+when a particular move is made. This is automatically converted
+into a working game complete with online multiplayer
+features, all without requiring you to write a single line of
+networking or database handling code.
 
 ### Features
 
-* **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
-* **Cross-platform Multiplayer**: All clients (Web / Android / iOS) connected to the game are synced in real time.
-* **AI Framework**: Create bots that are highly customizable and debuggable.
-* **Game Phases**: with different game rules (including custom turn orders) per phase.
-* **Secret State**: Secret information (like the opponent's cards) can be hidden from the client.
-* **Prototyping**: Debugging interface to simulate moves even before you render the game.
-* **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-* **UI Agnostic**: Vanilla JS client with bindings for React / React Native.
-* **Component Toolkit**: Components for hex grids, cards, tokens.
+- **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
+- **Cross-platform Multiplayer**: All clients (Web / Android / iOS) are kept in sync in realtime.
+- **Automatic AI**: MCTS-based bots with options to customize.
+- **Game Phases**: with different game rules (including custom turn orders) per phase.
+- **Prototyping**: Debugging interface to simulate moves even before you render the game.
+- **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
+- **View-layer Agnostic**: Vanilla JS client with bindings for React / React Native.
+- **Component Toolkit**: Components for hex grids, cards, tokens.
+- **Extendable**: Subsystems (storage, networking etc.) can be replaced with custom implementations.
 
 ### Installation
 
@@ -45,6 +49,10 @@ include via a `<script>` tag.
 ### Changelog
 
 See [changelog](CHANGELOG.md).
+
+### New in v0.29.0
+
+**Plugin API** that allows creating custom interfaces that target specific game genres.
 
 ### License
 

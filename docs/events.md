@@ -5,7 +5,7 @@ analogous to a move, except that while a move changes
 `G`, an event changes `ctx`. Also, events are provided by the
 framework (as opposed to moves, which are written by you).
 
-Some events are enabled by default, and can be turned off if you dont want them. Others need to be explicity turned on in order to use them. Also note that only the current player can call events (and must also be an action player to do so).
+Only the current player can call events (and must also be an action player to do so).
 
 ##### endTurn
 
@@ -13,12 +13,6 @@ This event just ends the current player's turn.
 The default behavior is to increment `ctx.turn` by `1`
 and advance `currentPlayer` to the next player according
 to the configured turn order (the default being a round-robin).
-
-This event is enabled by default. To disable this event,
-pass `endTurn: false` inside your `flow` section. Note that
-turns can still end if you use `endTurnIf` or `movesPerTurn`.
-Disabling the event merely prevents you from explicitly
-triggering it.
 
 `endTurn` also accepts an argument, which (if provided)
 switches the turn to the specified player.
@@ -31,10 +25,6 @@ is orthogonal to a player turn (i.e. you can end the phase
 many times within a single turn, or you can have many
 turns within a single phase).
 
-To disable this event, pass `endPhase: false` inside your
-`flow` section. Note that phases can still end if you use
-`endPhaseIf`.
-
 `endPhase` also accepts an argument, which (if provided)
 switches the phase to the phase specified.
 
@@ -44,42 +34,6 @@ This event ends the game. If you pass an argument to it,
 then that argument is made available in `ctx.gameover`.
 After the game is over, further state changes to the game
 (via a move or event) are not possible.
-
-##### setActionPlayers
-
-This changes `ctx.actionPlayers` to the provided argument.
-See the guide on [Turn Orders](turn-order.md) for more
-details about `actionPlayers`.
-
-You may use an alternative form for the argument to set
-more advanced options:
-
-```
-const opts = {
-  // The array of playerID's.
-  value: [...],
-
-  // Each playerID can play once (after which
-  // their entry is removed from actionPlayers)
-  once: true,
-
-  // Use this instead of value if you want to set
-  // actionPlayers to all the players in the game.
-  all: true,
-
-  // Use this to set actionPlayers to all players
-  // except the current player. When combined with
-  // `once: true`, the current player is added back
-  // to `actionPlayers` once everyone else takes a move.
-  allOthers: true,
-};
-
-setActionPlayers(opts);
-```
-
-!> This event is not enabled by default and must be enabled
-by setting `setActionPlayers: true` in the `flow` section
-of your game.
 
 ### Triggering an event from a React client.
 
@@ -116,3 +70,39 @@ moves: {
   };
 }
 ```
+
+### Enabling / Disabling events
+
+An important point to note is that not all events are
+enabled on the client, and some need to be explicitly
+enabled.
+
+The following table describes the defaults:
+
+|  Event   | Default |
+| :------: | :-----: |
+| endTurn  |  true   |
+| endPhase |  true   |
+| endGame  |  false  |
+
+In order to enable an event, just add `eventName: true` to
+your `flow` section.
+
+```js
+flow: {
+  endGame: true,
+  ...
+}
+```
+
+In order to disable an event, add `eventName: false`.
+
+```js
+flow: {
+  endPhase: false,
+  ...
+}
+```
+
+!> This doesn't apply to events in game logic, but just the
+ability to call an event directly from a client.

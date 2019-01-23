@@ -31,9 +31,11 @@ game state and the moves. The moves are converted to a
     Code to run at the end of a move.
   * `flow.movesPerTurn` (_number_): Ends the turn automatically if a certain number
     of moves have been made.
-  * `flow.undoableMoves` (_array_): Enables undo and redo of listed moves.
-  Leave `undefined` if all moves should be undoable.
-  * `flow.phases` (_array_): Optional list of game phases. See
+  * `flow.undoableMoves` (_array_): Enables undo and redo of listed moves.  Leave `undefined` if all moves should be undoable.
+  * `flow.redactedMoves` (_array_): List of moves to redact from the log.
+  * `flow.optimisticUpdate` (_function_): _(G, ctx, move) => boolean_
+    Return `false` to disable optimistic execution of a particular move on the client.
+  * `flow.phases` (_object_): Optional spec of game phases. See
     [Phases](/phases) for more information.
 
 ### Returns
@@ -61,11 +63,11 @@ const game = Game({
 
   moves: {
     moveWithoutArgs(G, ctx) {
-      return {...G, ...};
+      ...
     },
 
     moveWithArgs(G, ctx, arg0, arg1) {
-      return {...G, ...}
+      ...
     }
   }
 });
@@ -110,9 +112,8 @@ const game = Game({
   },
 
   flow: {
-    phases: [
-      {
-        name: 'A',
+    phases: {
+      A: {
         endGameIf: ...
         endTurnIf: ...
         onTurnBegin: ...
@@ -122,8 +123,7 @@ const game = Game({
         allowedMoves: ...
         ...
       },
-      {
-        name: 'B',
+      B: {
         endGameIf: ...
         endTurnIf: ...
         onTurnBegin: ...
@@ -133,7 +133,7 @@ const game = Game({
         allowedMoves: ...
         ...
       },
-    ]
+    }
   }
 });
 ```

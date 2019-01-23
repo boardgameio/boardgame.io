@@ -125,7 +125,8 @@ export class MCTSRoot extends React.Component {
             Unexpanded nodes are marked black. Read more about MCTS{' '}
             <a href="https://jeffbradberry.com/posts/2015/09/intro-to-monte-carlo-tree-search/">
               here
-            </a>.
+            </a>
+            .
           </p>
         </div>
 
@@ -207,7 +208,7 @@ export class MCTSNodeDetails extends React.Component {
       classes += ' mcts-root';
     }
 
-    let uct = value / visits + Math.sqrt(2 * Math.log(parentVisits) / visits);
+    let uct = value / visits + Math.sqrt((2 * Math.log(parentVisits)) / visits);
     let ratio = value / visits;
     uct = Math.floor(100 * uct);
     ratio = Math.floor(100 * ratio);

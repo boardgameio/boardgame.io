@@ -27,8 +27,8 @@ but we don't need that for Tic-Tac-Toe.
 
 In Tic-Tac-Toe, we have just one type of move that we shall
 name `clickCell`. The move function accepts
-the game state `G` and returns the new game state
-after the move is executed. `ctx` is a framework managed
+the game state `G` and updates it to the desired new state.
+`ctx` is a framework managed
 object that contains metadata like `turn` and `currentPlayer`.
 Everything after that is an argument that you pass in at the
 call-site of this move.
@@ -44,9 +44,7 @@ const TicTacToe = Game({
 
   moves: {
     clickCell(G, ctx, id) {
-      let cells = [...G.cells]; // don't mutate original state.
-      cells[id] = ctx.currentPlayer;
-      return { ...G, cells }; // don't mutate original state.
+      G.cells[id] = ctx.currentPlayer;
     },
   },
 });
@@ -55,9 +53,6 @@ const App = Client({ game: TicTacToe });
 
 export default App;
 ```
-
-!> The move function must be pure, meaning that it must be
-a repeatable calculation of state without any side effects.
 
 !> The move function can receive any number of additional
 arguments that are passed to it from the call-site.
@@ -114,14 +109,10 @@ const TicTacToe = Game({
 
   moves: {
     clickCell(G, ctx, id) {
-      const cells = [ ...G.cells ];
-
-      // Ensure we can't overwrite cells.
-      if (cells[id] === null) {
-        cells[id] = ctx.currentPlayer;
+      // Ensure that we can't overwrite cells.
+      if (G.cells[id] === null) {
+        G.cells[id] = ctx.currentPlayer;
       }
-
-      return { ...G, cells };
     },
   },
 
@@ -330,4 +321,4 @@ and it will figure out the right combination of moves to make it happen!
 Detailed documentation about all this is coming soon. Adding bots to games for actual
 networked play (as opposed to merely simulating moves) is also in the works.
 
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/y2v75z3381)
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/x9z2z95o14)

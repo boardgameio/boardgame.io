@@ -157,7 +157,7 @@ export class Firebase {
    * @param {string} id - The game id.
    */
   async remove(id) {
-    if (!await this.has(id)) return;
+    if (!(await this.has(id))) return;
 
     let col;
     if (this.engine === ENGINE_RTDB) {

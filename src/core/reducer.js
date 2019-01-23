@@ -10,6 +10,14 @@ import { parse, stringify } from 'flatted';
 import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
+import * as plugins from '../plugins/main';
+
+/**
+ * Moves can return this when they want to indicate
+ * that the combination of arguments is illegal and
+ * the move ought to be discarded.
+ */
+export const INVALID_MOVE = 'INVALID_MOVE';
 
 /**
  * Context API to allow writing custom logs in games.
@@ -79,7 +87,7 @@ export class ContextEnhancer {
     return ctxWithoutAPI;
   }
 
-  update(state, updateEvents) {
+  _update(state, updateEvents) {
     let newState = updateEvents ? this.events.update(state) : state;
     newState = this.random.update(newState);
     newState = this.log.update(newState);
@@ -87,21 +95,22 @@ export class ContextEnhancer {
   }
 
   updateAndDetach(state, updateEvents) {
-    const newState = this.update(state, updateEvents);
+    const newState = this._update(state, updateEvents);
     newState.ctx = ContextEnhancer.detachAllFromContext(newState.ctx);
     return newState;
   }
 }
 
 /**
- * CreateGameReducer
+ * InitializeGame
  *
- * Creates the main game state reducer.
+ * Creates the initial game state.
+ *
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function CreateGameReducer({ game, numPlayers, multiplayer }) {
+export function InitializeGame({ game, numPlayers, setupData }) {
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -114,12 +123,21 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   }
   ctx._random = { seed };
 
+  // Pass ctx through all the plugins that want to modify it.
+  ctx = plugins.ctx.setup(ctx, game);
+
+  // Augment ctx with the enhancers (TODO: move these into plugins).
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
   let ctxWithAPI = apiCtx.attachToContext(ctx);
 
+  let initialG = game.setup(ctxWithAPI, setupData);
+
+  // Pass G through all the plugins that want to modify it.
+  initialG = plugins.G.setup(initialG, ctxWithAPI, game);
+
   const initial = {
     // User managed state.
-    G: game.setup(ctxWithAPI),
+    G: initialG,
 
     // Framework managed state.
     ctx: ctx,
@@ -137,6 +155,9 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
     // A snapshot of this object so that actions can be
     // replayed over it to view old snapshots.
+    // TODO: This will no longer be necessary once the
+    // log stops replaying actions (but reads the actual
+    // game states instead).
     _initial: {},
   };
 
@@ -150,6 +171,18 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
   const deepCopy = obj => parse(stringify(obj));
   initial._initial = deepCopy(initial);
 
+  return initial;
+}
+
+/**
+ * CreateGameReducer
+ *
+ * Creates the main game state reducer.
+ * @param {...object} game - Return value of Game().
+ * @param {...object} numPlayers - The number of players.
+ * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
+ */
+export function CreateGameReducer({ game, multiplayer }) {
   /**
    * GameReducer
    *
@@ -157,7 +190,7 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
    * @param {object} state - The state before the action.
    * @param {object} action - A Redux action.
    */
-  return (state = initial, action) => {
+  return (state = null, action) => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
         state = { ...state, deltalog: [] };
@@ -232,14 +265,14 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
-        if (G === undefined) {
+        if (G === INVALID_MOVE) {
           // the game declared the move as invalid.
           return state;
         }
 
         // don't call into events here
         const newState = apiCtx.updateAndDetach(
-          { ...state, deltalog: [{ action }] },
+          { ...state, deltalog: [{ action, _stateID: state._stateID }] },
           false
         );
         let ctx = newState.ctx;
@@ -273,13 +306,10 @@ export function CreateGameReducer({ game, numPlayers, multiplayer }) {
         return state;
       }
 
+      case Actions.RESET:
       case Actions.UPDATE:
       case Actions.SYNC: {
         return action.state;
-      }
-
-      case Actions.RESET: {
-        return initial;
       }
 
       case Actions.UNDO: {
