@@ -9,7 +9,12 @@ game state and the moves. The moves are converted to a
 1. `obj` (_object_): An object that contains
 
   * `name` (_string_): The name of the game.
-  * `setup` (_object_): Function that returns the initial value of G.
+  * `setup` (_function_): _(ctx, setupData) => G_
+
+    Function that returns the initial value of G.
+    `setupData` is an optional custom object that is passed through the
+    Game Creation [API](/api/Server?id=creating-a-game).
+
   * `moves` (_object_): The keys are move names, and the values
     are pure functions that return the new value of `G` once
     the move has been processed.
