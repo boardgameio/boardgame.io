@@ -24,4 +24,5 @@
   - [Game](api/Game.md)
   - [Client](api/Client.md)
   - [Server](api/Server.md)
+  - [API](api/API.md)
   - [Random](api/Random.md)
