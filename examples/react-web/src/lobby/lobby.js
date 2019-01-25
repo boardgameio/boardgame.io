@@ -29,7 +29,7 @@ const LobbyView = () => (
 
     <Lobby
       gameServer="localhost:8000"
-      lobbyServer="localhost:8001"
+      lobbyServer="localhost:8000"
       gameComponents={importedGames}
     />
   </div>
