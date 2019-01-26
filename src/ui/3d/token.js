@@ -8,8 +8,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Square } from './grid';
-import { Hex } from './hex';
 let THREE = window.THREE = require('three');
 require('three/examples/js/loaders/OBJLoader');
 require('three/examples/js/loaders/GLTFLoader');
@@ -21,8 +19,6 @@ export class Token extends React.Component {
     y: PropTypes.number,
     z: PropTypes.number,
     mesh: PropTypes.any,
-    texture: PropTypes.string,
-    color: PropTypes.string,
     padding: PropTypes.number,
     size: PropTypes.number,
     lift: PropTypes.number,
@@ -41,31 +37,34 @@ export class Token extends React.Component {
     size: 1,
     padding: 0.1,
     lift: 0.1,
+    mesh: new THREE.Mesh(
+      new THREE.BoxBufferGeometry(1,1*0.3,1),
+      new THREE.MeshLambertMaterial({color:'#eeeeee'}),
+    ),
   };
 
   _attachMesh = mesh => {
-    mesh = mesh.scene.children[0];
-    console.log(mesh);
     const size = this.props.size;
     let meshSize = new THREE.Vector3();
     let meshCenter = new THREE.Vector3();
     const bbox = new THREE.Box3().setFromObject(mesh);
     bbox.getSize(meshSize);
     bbox.getCenter(meshCenter);
-    // reset the center to (0,0,0)
-    mesh.translateX(-meshCenter.x);
-    mesh.translateY(-meshCenter.y);
-    mesh.translateZ(-meshCenter.z);
     // determine the scale factor
     let scale = meshSize.z < meshSize.x ? meshSize.x : meshSize.z;
     scale = size / scale;
     mesh.scale.set(scale, scale, scale);
+    // reset the center to (0,0,0)
+    mesh.translateX(-meshCenter.x*scale);
+    mesh.translateY(-meshCenter.y*scale);
+    mesh.translateZ(-meshCenter.z*scale);
     // move the object to the location in the board
-    const lift = this.props.lift + meshSize.y / 2;
+    const lift = this.props.lift + scale*meshSize.y / 2;
     mesh.translateX(this.props.x * (this.props.size + this.props.padding));
     mesh.translateZ(this.props.y * (this.props.size + this.props.padding));
     mesh.translateY(lift);
     this.props.parrent.add(mesh);
+    // register the event
     const onEvent = e => {
       if (e.type == 'click') {
         this.props.onClick({ x: this.props.x, y: this.props.y });
@@ -78,13 +77,23 @@ export class Token extends React.Component {
     this.props.ui.regCall(mesh, onEvent);
   };
 
-  componentDidMount() {
-    const size = this.props.size;
+
+  componentWillUnmount() {
+    this.props.parrent.remove(this.prevMesh);
+  }
+
+  render() {
     let mesh = this.props.mesh;
-    if (!mesh){
-    } else if (mesh instanceof THREE.Mesh) {
-      this._attachMesh(mesh);
+    
+    if(this.prevMesh === mesh)
       return null;
+
+    if(!mesh){
+      mesh=new THREE.Mesh(
+        new THREE.BoxBufferGeometry(1,1*0.3,1),
+        new THREE.MeshLambertMaterial({color:'#eeeeee'}));
+    }else if (mesh instanceof THREE.Object3D) {
+      this._attachMesh(mesh);
     } else if (mesh.type) {
       if (mesh.type ==='obj'){
         const loader = new THREE.OBJLoader();
@@ -94,22 +103,12 @@ export class Token extends React.Component {
         const loader = new THREE.GLTFLoader();
         loader.load(mesh.url,this._attachMesh);
       }
-      return null;
     } else {
-      console.log('Illegal input Mesh')
+      console.error('Illegal input Mesh')
     }
-    mesh = new THREE.Mesh(
-      new THREE.Geometry(size,size*0.3,size),
-      new THREE.MeshLambertMaterial({color:'#eeeeee'}),
-    )
-    this._attachMesh(mesh);
-  }
+    this.props.parrent.remove(this.prevMesh);
+    this.prevMesh = mesh;
 
-  componentWillUnmount() {
-    this.props.parrent.remove(this.props.mesh);
-  }
-
-  render() {
     return null;
   }
 }

@@ -64,7 +64,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.(bin|gltf)$/,
+        test: /\.(bin|gltf|obj)$/,
         use: [
           {
             loader: 'file-loader',

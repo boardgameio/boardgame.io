@@ -48,7 +48,6 @@ export class DeckImpl extends React.Component {
 
   onEvent = e => {
     if (e.type == 'drop') {
-      console.log(e.what[0]);
       e.what[0].position.x = -2;
       e.what[0].position.z = 0;
       e.what[0].position.y += 20 * 0.02;

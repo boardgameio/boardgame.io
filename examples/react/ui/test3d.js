@@ -9,11 +9,11 @@
 import React from 'react';
 import { Client } from 'boardgame.io/react';
 import { Game } from 'boardgame.io/core';
-import { UI, Card, Deck } from 'boardgame.io/ui';
-import { Grid } from '../../../src/ui/3d/grid';
-import { Token } from '../../../src/ui/3d/token';
-import gltfURL from './scene.gltf';
-import binURL from './scene.bin';
+import { UI, Grid, Token } from 'boardgame.io/ui';
+import bishop from './chess3d/pieces/bishop3d.obj';
+import knight from './chess3d/pieces/knight3d.obj';
+let THREE = window.THREE = require('three');
+require('three/examples/js/loaders/OBJLoader');
 
 function handler(type, fn) {
   return arg => {
@@ -29,28 +29,33 @@ class Board extends React.Component {
     this.state = {
       deck: [],
       free: true,
+      mesh: null,
     };
+    this.loader = new THREE.OBJLoader();
+    this.loader.load(bishop, out=>{
+      this.setState({
+        mesh: out,
+      })
+    });
   }
 
   onClick = ({ x, y }) => {
     console.log(x + ' ' + y);
   };
 
+
   render() {
-    const mesh={
-      url: gltfURL,
-      resourceUrl: binURL,
-      type: 'gltf',
-    }
     return (
-      <UI three={true}>
+      <UI three={true} willLoad = {true}>
         <div style={{ marginBottom: 20 }}>Drag the card into the deck</div>
 
-        <Grid rows={8} cols={8} onClick={this.onClick}>
-          <Token
-            x={1}
-            y={1}
-            mesh={mesh}
+        <Grid three = {true} rows={8} cols={8} onClick={this.onClick}>
+          <Token 
+            three = {true}
+            x={3}
+            y={3}
+            mesh={this.state.mesh}
+            onClick={this.onClick}
           />
         </Grid>
       </UI>

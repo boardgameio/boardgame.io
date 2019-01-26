@@ -8,6 +8,7 @@
 
 import DragDrop from './drag-n-drop';
 import Test3D from './test3d';
+import Singleplayer3d from './chess3d/singleplayer3d';
 
 const routes = [
   {
@@ -19,6 +20,11 @@ const routes = [
     path: '/ui/3d',
     text: '3D',
     component: Test3D,
+  },
+  {
+    path: '/ui/chess3d',
+    text: 'Chess 3D',
+    component: Singleplayer3d,
   },
 ];
 

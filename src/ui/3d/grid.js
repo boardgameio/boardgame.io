@@ -40,10 +40,15 @@ export class Grid extends React.Component {
   constructor(props) {
     super(props);
     this.boardGroup = new THREE.Group();
-    this.squareGroup = new THREE.Group();
     this.tokenGroup = new THREE.Group();
-    this.boardGroup.add(this.squareGroup);
     this.boardGroup.add(this.tokenGroup);
+    // translate the board to center on (0,0,0)
+    this.boardGroup.translateX(
+      (-(this.props.padding + this.props.cellSize) * (this.props.cols - 1)) / 2
+    );
+    this.boardGroup.translateZ(
+      (-(this.props.padding + this.props.cellSize) * (this.props.rows - 1)) / 2
+    );
   }
 
   _getCellColor(x, y) {
@@ -55,15 +60,15 @@ export class Grid extends React.Component {
     return color;
   }
 
+
   _drawSquare(ctx) {
-    this.ctx = ctx;
+    this.ctx=ctx;
     ctx.add(this.boardGroup);
-    this.boardGroup.translateX(
-      (-(this.props.padding + this.props.cellSize) * (this.props.cols - 1)) / 2
-    );
-    this.boardGroup.translateZ(
-      (-(this.props.padding + this.props.cellSize) * (this.props.rows - 1)) / 2
-    );
+
+    // every time render a new squareGroup
+    this.boardGroup.remove(this.squareGroup);
+    this.squareGroup = new THREE.Group();
+    this.boardGroup.add(this.squareGroup);
 
     // add square base
     if (this.props.outline) {
@@ -93,7 +98,6 @@ export class Grid extends React.Component {
         }
       }
     }
-
     //set tokens
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
@@ -104,6 +108,7 @@ export class Grid extends React.Component {
         lift: this.props.thickness,
       });
     });
+    
     return tokens;
   }
 

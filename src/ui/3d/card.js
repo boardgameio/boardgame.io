@@ -48,7 +48,7 @@ export class CardImpl extends React.Component {
     const geometry = new THREE.BoxGeometry(
       props.width,
       props.thickness,
-      props.height
+      props.height,
     );
 
     let opts = { color: 0x777777 };
