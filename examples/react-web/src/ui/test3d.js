@@ -1,0 +1,70 @@
+/*
+ * Copyright 2018 The boardgame.io Authors.
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+import React from 'react';
+import { Client } from 'boardgame.io/react';
+import { Game } from 'boardgame.io/core';
+import { UI, Grid, Token } from 'boardgame.io/ui';
+import bishop from './chess3d/pieces/bishop3d.obj';
+// import knight from './chess3d/pieces/knight3d.obj';
+let THREE = (window.THREE = require('three'));
+require('three/examples/js/loaders/OBJLoader');
+
+class Board extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      deck: [],
+      free: true,
+      mesh: null,
+    };
+    this.loader = new THREE.OBJLoader();
+    this.loader.load(bishop, out => {
+      this.setState({
+        mesh: out,
+      });
+    });
+  }
+
+  onClick = ({ x, y }) => {
+    console.log(x + ' ' + y);
+  };
+
+  render() {
+    return (
+      <UI three={true} willLoad={true}>
+        <div style={{ marginBottom: 20 }}>Drag the card into the deck</div>
+
+        <Grid three={true} rows={8} cols={8} onClick={this.onClick}>
+          <Token
+            three={true}
+            x={3}
+            y={3}
+            mesh={this.state.mesh}
+            onClick={this.onClick}
+          />
+        </Grid>
+      </UI>
+    );
+  }
+}
+
+const App = Client({
+  game: Game({}),
+  board: Board,
+  debug: false,
+});
+
+const Singleplayer = () => (
+  <div style={{ padding: 50 }}>
+    <App gameID="single" />
+  </div>
+);
+
+export default Singleplayer;
