@@ -28,17 +28,37 @@ jest.mock('./api', () => ({
   addApiToServer: jest.fn(),
 }));
 
-// TODO fix external module mock cause it is not really working in tests..
-// i.e. listen method is called from real koa dependency, but not from mock
-// you can see real koa ports in logs if you delete logger mock
+jest.mock('koa-socket-2', () => {
+  class MockSocket {
+    on() {}
+  }
+
+  return class {
+    constructor() {
+      this.socket = new MockSocket();
+    }
+    attach(app) {
+      app.io = app._io = this;
+    }
+    of() {
+      return this;
+    }
+    on(type, callback) {
+      callback(this.socket);
+    }
+  };
+});
+
 jest.mock('koa', () => {
   return class {
     constructor() {
       this.context = {};
+      this.callback = () => {};
+      this.listen = async () => ({
+        address: () => ({ port: 'mock-api-port' }),
+        close: () => {},
+      });
     }
-
-    callback() {}
-    async listen() {}
   };
 });
 
@@ -125,7 +145,7 @@ describe('kill', () => {
 });
 
 describe('createServerRunConfig', () => {
-  // TODO use data-driven-test when upgrade jest to 23+
+  // TODO use data-driven-test here after upgrading to Jest 23+.
   test('should return valid config with different server run arguments', () => {
     const mockCallback = () => {};
     const mockApiCallback = () => {};
