@@ -11,16 +11,39 @@ import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
 import * as THREE from 'three';
 
-// Not yet implemented.
+/**
+ * Grid
+ *
+ * Component that will show children on a cartesian regular grid.
+ *
+ * Props:
+ *   rows       - Number of rows (height) of the grid.
+ *   cols       - Number of columns (width) of the grid.
+ *   cellSize   - Size of a square.
+ *   thichness  - Thichness of a square.
+ *   padding    - Padding between squares.
+ *   colorMap   - A map from 'x,y' => color.
+ *   onClick    - (x, y) => {}
+ *                Called when a square is clicked.
+ *   onMouseOver    - (x, y) => {}
+ *                Called when a square is mouse over.
+ *   onMouseOut    - (x, y) => {}
+ *                Called when a square is mouse out.
+ *
+ * Usage:
+ *
+ * <Grid rows={8} cols={8}>
+ *   <Token x={1} y={2}/>
+ * </Grid>
+ */
 export class Grid extends React.Component {
   static propTypes = {
     rows: PropTypes.number.isRequired,
     cols: PropTypes.number.isRequired,
-    outline: PropTypes.bool,
-    colorMap: PropTypes.object,
     cellSize: PropTypes.number,
     thickness: PropTypes.number,
     padding: PropTypes.number,
+    colorMap: PropTypes.object,
     onClick: PropTypes.func,
     onMouseOver: PropTypes.func,
     onMouseOut: PropTypes.func,
@@ -31,7 +54,6 @@ export class Grid extends React.Component {
   };
   static defaultProps = {
     colorMap: {},
-    outline: true,
     cellSize: 1,
     padding: 0.1,
     thickness: 0.1,
@@ -64,37 +86,35 @@ export class Grid extends React.Component {
     this.ctx = ctx;
     ctx.add(this.boardGroup);
 
-    // every time render a new squareGroup
+    // when rerendering, render a new squareGroup
     this.boardGroup.remove(this.squareGroup);
     this.squareGroup = new THREE.Group();
     this.boardGroup.add(this.squareGroup);
 
     // add square base
-    if (this.props.outline) {
-      for (let x = 0; x < this.props.cols; x++) {
-        for (let y = 0; y < this.props.rows; y++) {
-          let squareProps = {
-            x: x,
-            y: y,
-            ctx: ctx,
-            size: this.props.cellSize,
-            color: this._getCellColor(x, y),
-            padding: this.props.padding,
-            thickness: this.props.thickness,
-          };
-          let square = new Square(squareProps);
-          this.squareGroup.add(square);
-          const onEvent = e => {
-            if (e.type == 'click') {
-              this.props.onClick({ x: x, y: y });
-            } else if (e.type == 'mouseOver') {
-              this.props.onMouseOver({ x: x, y: y });
-            } else if (e.type == 'mouseOut') {
-              this.props.onMouseOut({ x: x, y: y });
-            }
-          };
-          ctx.regCall(square, onEvent);
-        }
+    for (let x = 0; x < this.props.cols; x++) {
+      for (let y = 0; y < this.props.rows; y++) {
+        let squareProps = {
+          x: x,
+          y: y,
+          ctx: ctx,
+          size: this.props.cellSize,
+          color: this._getCellColor(x, y),
+          padding: this.props.padding,
+          thickness: this.props.thickness,
+        };
+        let square = new Square(squareProps);
+        this.squareGroup.add(square);
+        const onEvent = e => {
+          if (e.type == 'click') {
+            this.props.onClick({ x: x, y: y });
+          } else if (e.type == 'mouseOver') {
+            this.props.onMouseOver({ x: x, y: y });
+          } else if (e.type == 'mouseOut') {
+            this.props.onMouseOut({ x: x, y: y });
+          }
+        };
+        ctx.regCall(square, onEvent);
       }
     }
     //set tokens
@@ -123,7 +143,23 @@ export class Grid extends React.Component {
   }
 }
 
-// Not yet implemented.
+/**
+ * Square
+ *
+ * Component that renders a square inside a Grid.
+ *
+ * Props
+ *   x          - X coordinate on grid coordinates.
+ *   y          - Y coordinate on grid coordinates.
+ *   size       - Square size.
+ *   ctx        - Three js context to render.
+ *   color      - Color of the square
+ *   thichness  - Thichness of a square.
+ *   padding    - Padding between squares.
+ *
+ * Not meant to be used by the end user directly (use Token).
+ * Also not exposed in the NPM.
+ */
 export class Square extends THREE.Mesh {
   constructor(props) {
     super();

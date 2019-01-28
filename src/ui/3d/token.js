@@ -10,7 +10,39 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as THREE from 'three';
 
-// Not yet implemented.
+/**
+ * Token
+ *
+ * Component that represents a board game piece (or token).
+ * Can be used by itself or with one of the grid systems
+ * provided (Grid or HexGrid).
+ *
+ * A token renders as a 3D Mesh. IF no mesh prop is passed.
+ * It will render a white box on the grid.
+ *
+ * Props:
+ *   x       - X coordinate on grid / hex grid.
+ *   y       - Y coordinate on grid / hex grid.
+ *   z       - Z coordinate on hex grid.
+ *   onClick - Called when the token is clicked.
+ *   onMouseOver - Called when the token is mouse over.
+ *   onMouseOut - Called when the token is mouse out.
+ *
+ * Usage:
+ *
+ * <Grid rows={8} cols={8}>
+ *   <Token x={1} y={2}/>
+ * </Grid>
+ *
+ * <HexGrid>
+ *   <Token x={1} y={2} z={-3}/>
+ * </HexGrid>
+ *
+ * <Grid rows={8} cols={8}>
+ *   <Token x={1} y={2} mesh={THREE.js 3D-Object}/>
+ * </Grid>
+ *
+ */
 export class Token extends React.Component {
   static propTypes = {
     x: PropTypes.number,
@@ -78,7 +110,7 @@ export class Token extends React.Component {
   render() {
     let mesh = this.props.mesh;
 
-    // if (this.prevMesh && this.prevMesh === mesh) return null;
+    if (this.prevMesh && this.prevMesh === mesh) return null;
 
     if (!mesh) {
       mesh = new THREE.Mesh(
