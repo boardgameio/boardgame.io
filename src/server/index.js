@@ -68,21 +68,21 @@ export function Server({ games, db, transport }) {
       if (!serverRunConfig.apiPort) {
         addApiToServer({ app, db, games });
       } else {
-        // Run API on a separate koa server
+        // Run API in a separate Koa app.
         const api = createApiServer({ db, games });
         apiServer = await api.listen(
           serverRunConfig.apiPort,
           serverRunConfig.apiCallback
         );
-        logger.info(`Listening API on ${apiServer.address().port}...`);
+        logger.info(`API serving on ${apiServer.address().port}...`);
       }
 
-      // Socket or Socket + API
+      // Run Game Server (+ API, if necessary).
       const appServer = await app.listen(
         serverRunConfig.port,
         serverRunConfig.callback
       );
-      logger.info(`Listening App on ${appServer.address().port}...`);
+      logger.info(`App serving on ${appServer.address().port}...`);
 
       return { apiServer, appServer };
     },
