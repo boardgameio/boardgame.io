@@ -95,6 +95,10 @@ export const CreateGame = async (db, game, numPlayers, setupData) => {
 
 export const createApiServer = ({ db, games }) => {
   const app = new Koa();
+  return addApiToServer({ app, db, games });
+};
+
+export const addApiToServer = ({ app, db, games }) => {
   const router = new Router();
 
   router.get('/games', async ctx => {
