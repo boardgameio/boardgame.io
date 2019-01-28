@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
 import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
+import './loading.css';
 
 /**
  * Root element of the React/threejs based 3D UI framework.
@@ -30,6 +31,9 @@ export class UI extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      isLoading: false,
+    };
 
     /**
      * Set of callbacks that children of this element pass via context.subscribeToMouseEvents
@@ -101,6 +105,39 @@ export class UI extends React.Component {
 
     this.childGroup = new THREE.Group();
     this.scene.add(this.childGroup);
+
+    //set up loading screen
+    this.loader = <div className="loader" />;
+    THREE.DefaultLoadingManager.onStart = () => {
+      this.setState({ isLoading: true });
+      this.ref_.current.removeChild(this.renderer.domElement);
+      console.log('Started loading file');
+    };
+    THREE.DefaultLoadingManager.onLoad = () => {
+      this.setState({ isLoading: false });
+      this.ref_.current.appendChild(this.renderer.domElement);
+      console.log('Loading Complete!');
+    };
+
+    THREE.DefaultLoadingManager.onProgress = function(
+      url,
+      itemsLoaded,
+      itemsTotal
+    ) {
+      console.log(
+        'Loading file: ' +
+          url +
+          '.\nLoaded ' +
+          itemsLoaded +
+          ' of ' +
+          itemsTotal +
+          ' files.'
+      );
+    };
+
+    THREE.DefaultLoadingManager.onError = function(url) {
+      console.log('There was an error loading ' + url);
+    };
   }
   state = {
     loading: false,
@@ -160,16 +197,6 @@ export class UI extends React.Component {
           this.callbacks_[obj.object.id](e);
         }
       }
-
-      // objects.forEach(obj => {
-      //   e.point = obj.point;
-      //   if (obj.object.id in this.callbacks_) {
-      //     this.callbacks_[obj.object.id](e);
-      //   }
-      //   if (obj.object.parent.id in this.callbacks_) {
-      //     this.callbacks_[obj.object.parent.id](e);
-      //   }
-      // });
     };
 
     const onMouseDown = e => {
@@ -341,7 +368,7 @@ export class UI extends React.Component {
     return (
       <UIContext.Provider value={this.getContext()}>
         <div className="bgio-ui" ref={this.ref_}>
-          {children}
+          {this.state.isLoading ? this.loader : children}
         </div>
       </UIContext.Provider>
     );

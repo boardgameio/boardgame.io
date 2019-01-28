@@ -17,8 +17,8 @@ import knightObj from './pieces/knight3d.obj';
 import pawnObj from './pieces/pawn3d.obj';
 import queenObj from './pieces/queen3d.obj';
 import rookObj from './pieces/rook3d.obj';
-let THREE = (window.THREE = require('three'));
-import '../loading.css';
+var THREE = (window.THREE = require('../../../../../node_modules/three'));
+require('../../../../../node_modules/three/examples/js/loaders/OBJLoader');
 
 const COL_NAMES = 'abcdefgh';
 const SELECTED_COLOR = 'green';
@@ -39,50 +39,6 @@ class Board extends React.Component {
     super(props);
     this.chess = new Chess();
     this.loader = new THREE.OBJLoader();
-    // loading 3d objects
-    this.loader.load(bishopObj, out => this._handleMesh(out, 'bishop'));
-    this.loader.load(kingObj, out => this._handleMesh(out, 'king'));
-    this.loader.load(knightObj, out => this._handleMesh(out, 'knight'));
-    this.loader.load(pawnObj, out => this._handleMesh(out, 'pawn'));
-    this.loader.load(queenObj, out => this._handleMesh(out, 'queen'));
-    this.loader.load(rookObj, out => this._handleMesh(out, 'rook'));
-    //set up loading
-    this.loader = <div className="loader" />;
-    THREE.DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
-      console.log(
-        'Started loading file: ' +
-          url +
-          '.\nLoaded ' +
-          itemsLoaded +
-          ' of ' +
-          itemsTotal +
-          ' files.'
-      );
-    };
-    THREE.DefaultLoadingManager.onLoad = () => {
-      this.setState({ loading: false });
-      console.log('Loading Complete!');
-    };
-
-    THREE.DefaultLoadingManager.onProgress = function(
-      url,
-      itemsLoaded,
-      itemsTotal
-    ) {
-      console.log(
-        'Loading file: ' +
-          url +
-          '.\nLoaded ' +
-          itemsLoaded +
-          ' of ' +
-          itemsTotal +
-          ' files.'
-      );
-    };
-
-    THREE.DefaultLoadingManager.onError = function(url) {
-      console.log('There was an error loading ' + url);
-    };
   }
 
   _handleMesh = (out, type) => {
@@ -98,6 +54,16 @@ class Board extends React.Component {
     loading: true,
   };
 
+  componentDidMount() {
+    // loading 3d objects
+    this.loader.load(bishopObj, out => this._handleMesh(out, 'bishop'));
+    this.loader.load(kingObj, out => this._handleMesh(out, 'king'));
+    this.loader.load(knightObj, out => this._handleMesh(out, 'knight'));
+    this.loader.load(pawnObj, out => this._handleMesh(out, 'pawn'));
+    this.loader.load(queenObj, out => this._handleMesh(out, 'queen'));
+    this.loader.load(rookObj, out => this._handleMesh(out, 'rook'));
+  }
+
   // eslint-disable-next-line react/no-deprecated
   componentWillReceiveProps(nextProps) {
     if (nextProps.G.pgn) {
@@ -107,22 +73,19 @@ class Board extends React.Component {
   }
 
   render() {
-    const checker = (
-      <Checkerboard
-        highlightedSquares={this._getHighlightedSquares()}
-        style={{ width: '400px' }}
-        onClick={this.click}
-      >
-        {this._getPieces()}
-      </Checkerboard>
-    );
     let disconnected = null;
     if (this.props.isMultiplayer && !this.props.isConnected) {
       disconnected = <p>Disconnected!</p>;
     }
     return (
       <div>
-        {this.state.loading ? this.loader : checker}
+        <Checkerboard
+          highlightedSquares={this._getHighlightedSquares()}
+          style={{ width: '400px' }}
+          onClick={this.click}
+        >
+          {this._getPieces()}
+        </Checkerboard>
         {this._getStatus()}
         {disconnected}
       </div>
