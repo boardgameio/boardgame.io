@@ -8,10 +8,30 @@
 
 const Koa = require('koa');
 
+import { addApiToServer, createApiServer } from './api';
 import { DBFromEnv } from './db';
-import { createApiServer } from './api';
 import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
+
+/**
+ * Build config object from server run arguments.
+ *
+ * @param {number} portOrConfig - Either port or server config object. Optional.
+ * @param {function} callback - Server run callback. Optional.
+ */
+export const createServerRunConfig = (portOrConfig, callback) => {
+  const config = {};
+  if (portOrConfig && typeof portOrConfig === 'object') {
+    config.port = portOrConfig.port;
+    config.callback = portOrConfig.callback || callback;
+    config.apiPort = portOrConfig.apiPort;
+    config.apiCallback = portOrConfig.apiCallback;
+  } else {
+    config.port = portOrConfig;
+    config.callback = callback;
+  }
+  return config;
+};
 
 /**
  * Instantiate a game server.
@@ -33,23 +53,44 @@ export function Server({ games, db, transport }) {
   }
   transport.init(app, games);
 
-  const api = createApiServer({ db, games });
-
   return {
     app,
-    api,
     db,
 
-    run: async (port, callback) => {
+    run: async (portOrConfig, callback) => {
+      const serverRunConfig = createServerRunConfig(portOrConfig, callback);
+
+      // DB
       await db.connect();
-      let apiServer = await api.listen(port + 1);
-      let appServer = await app.listen(port, callback);
-      logger.info('listening...');
+
+      // API
+      let apiServer;
+      if (!serverRunConfig.apiPort) {
+        addApiToServer({ app, db, games });
+      } else {
+        // Run API in a separate Koa app.
+        const api = createApiServer({ db, games });
+        apiServer = await api.listen(
+          Number(serverRunConfig.apiPort),
+          serverRunConfig.apiCallback
+        );
+        logger.info(`API serving on ${apiServer.address().port}...`);
+      }
+
+      // Run Game Server (+ API, if necessary).
+      const appServer = await app.listen(
+        Number(serverRunConfig.port),
+        serverRunConfig.callback
+      );
+      logger.info(`App serving on ${appServer.address().port}...`);
+
       return { apiServer, appServer };
     },
 
     kill: ({ apiServer, appServer }) => {
-      apiServer.close();
+      if (apiServer) {
+        apiServer.close();
+      }
       appServer.close();
     },
   };

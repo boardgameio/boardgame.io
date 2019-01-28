@@ -6,8 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server } from '.';
+import { Server, createServerRunConfig } from '.';
 import Game from '../core/game';
+import * as api from './api';
 
 const game = Game({ seed: 0 });
 
@@ -16,41 +17,184 @@ jest.mock('../core/logger', () => ({
   error: () => {},
 }));
 
-jest.mock('./api', () => ({
-  createApiServer: () => ({
-    listen: async () => {},
-  }),
+const mockApiServerListen = jest.fn(async () => ({
+  address: () => ({ port: 'mock-api-port' }),
+  close: () => {},
 }));
+jest.mock('./api', () => ({
+  createApiServer: jest.fn(() => ({
+    listen: mockApiServerListen,
+  })),
+  addApiToServer: jest.fn(),
+}));
+
+jest.mock('koa-socket-2', () => {
+  class MockSocket {
+    on() {}
+  }
+
+  return class {
+    constructor() {
+      this.socket = new MockSocket();
+    }
+    attach(app) {
+      app.io = app._io = this;
+    }
+    of() {
+      return this;
+    }
+    on(type, callback) {
+      callback(this.socket);
+    }
+  };
+});
 
 jest.mock('koa', () => {
   return class {
     constructor() {
       this.context = {};
+      this.callback = () => {};
+      this.listen = async () => ({
+        address: () => ({ port: 'mock-api-port' }),
+        close: () => {},
+      });
     }
-
-    callback() {}
-    async listen() {}
   };
 });
 
-test('basic', async () => {
-  const server = Server({ games: [game] });
-  await server.run();
-  expect(server).not.toBe(undefined);
-  const close = () => {};
-  server.kill({ apiServer: { close }, appServer: { close } });
+describe('new', () => {
+  test('custom db implementation', () => {
+    const game = Game({});
+    const db = {};
+    const server = Server({ games: [game], db });
+    expect(server.db).toBe(db);
+  });
+
+  test('custom transport implementation', () => {
+    const game = Game({});
+    const transport = { init: jest.fn() };
+    Server({ games: [game], transport });
+    expect(transport.init).toBeCalled();
+  });
 });
 
-test('custom db implementation', async () => {
-  const game = Game({});
-  const db = {};
-  const server = Server({ games: [game], db });
-  expect(server.db).toBe(db);
+describe('run', () => {
+  let server, runningServer;
+
+  beforeEach(() => {
+    server = null;
+    runningServer = null;
+    api.createApiServer.mockClear();
+    api.addApiToServer.mockClear();
+    mockApiServerListen.mockClear();
+  });
+
+  afterEach(() => {
+    if (server && runningServer) {
+      const { apiServer, appServer } = runningServer;
+      server.kill({ apiServer, appServer });
+    }
+  });
+
+  test('single server running', async () => {
+    server = Server({ games: [game] });
+    runningServer = await server.run();
+
+    expect(server).not.toBeUndefined();
+    expect(api.addApiToServer).toBeCalled();
+    expect(api.createApiServer).not.toBeCalled();
+    expect(mockApiServerListen).not.toBeCalled();
+  });
+
+  test('multiple servers running', async () => {
+    server = Server({ games: [game] });
+    runningServer = await server.run({ port: 57890, apiPort: 57891 });
+
+    expect(server).not.toBeUndefined();
+    expect(api.addApiToServer).not.toBeCalled();
+    expect(api.createApiServer).toBeCalled();
+    expect(mockApiServerListen).toBeCalled();
+  });
 });
 
-test('custom transport implementation', async () => {
-  const game = Game({});
-  const transport = { init: jest.fn() };
-  Server({ games: [game], transport });
-  expect(transport.init).toBeCalled();
+describe('kill', () => {
+  test('call close on both servers', async () => {
+    const apiServer = {
+      close: jest.fn(),
+    };
+    const appServer = {
+      close: jest.fn(),
+    };
+    const server = Server({ games: [game], singlePort: true });
+
+    server.kill({ appServer, apiServer });
+
+    expect(apiServer.close).toBeCalled();
+    expect(appServer.close).toBeCalled();
+  });
+
+  test('do not fail if api server is not defined', async () => {
+    const appServer = {
+      close: jest.fn(),
+    };
+    const server = Server({ games: [game], singlePort: true });
+
+    expect(() => server.kill({ appServer })).not.toThrowError();
+    expect(appServer.close).toBeCalled();
+  });
+});
+
+describe('createServerRunConfig', () => {
+  // TODO use data-driven-test here after upgrading to Jest 23+.
+  test('should return valid config with different server run arguments', () => {
+    const mockCallback = () => {};
+    const mockApiCallback = () => {};
+
+    expect(createServerRunConfig()).toEqual({
+      port: undefined,
+      callback: undefined,
+    });
+    expect(createServerRunConfig(8000)).toEqual({
+      port: 8000,
+      callback: undefined,
+    });
+    expect(createServerRunConfig(8000, mockCallback)).toEqual({
+      port: 8000,
+      callback: mockCallback,
+    });
+
+    expect(createServerRunConfig({})).toEqual({
+      port: undefined,
+      callback: undefined,
+    });
+    expect(createServerRunConfig({ port: 1234 })).toEqual({
+      port: 1234,
+      callback: undefined,
+    });
+    expect(
+      createServerRunConfig({ port: 1234, callback: mockCallback })
+    ).toEqual({
+      port: 1234,
+      callback: mockCallback,
+    });
+
+    expect(createServerRunConfig({ port: 1234, apiPort: 5467 })).toEqual({
+      port: 1234,
+      callback: undefined,
+      apiPort: 5467,
+    });
+    expect(
+      createServerRunConfig({
+        port: 1234,
+        callback: mockCallback,
+        apiPort: 5467,
+        apiCallback: mockApiCallback,
+      })
+    ).toEqual({
+      port: 1234,
+      callback: mockCallback,
+      apiPort: 5467,
+      apiCallback: mockApiCallback,
+    });
+  });
 });

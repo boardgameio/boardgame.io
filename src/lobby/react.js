@@ -263,7 +263,7 @@ class Lobby extends React.Component {
       return;
     }
 
-    let multiplayer = null;
+    let multiplayer = undefined;
     if (gameOpts.numPlayers > 1) {
       if (this.props.gameServer) {
         multiplayer = { server: this.props.gameServer };

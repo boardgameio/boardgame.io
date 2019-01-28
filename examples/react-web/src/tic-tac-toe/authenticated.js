@@ -41,7 +41,7 @@ class AuthenticatedClient extends React.Component {
     const PORT = 8000;
 
     const newGame = await request
-      .post(`http://localhost:${PORT + 1}/games/${gameName}/create`)
+      .post(`http://localhost:${PORT}/games/${gameName}/create`)
       .send({ numPlayers: 2 });
 
     const gameID = newGame.body.gameID;
@@ -50,7 +50,7 @@ class AuthenticatedClient extends React.Component {
 
     for (let playerID of [0, 1]) {
       const player = await request
-        .post(`http://localhost:${PORT + 1}/games/${gameName}/${gameID}/join`)
+        .post(`http://localhost:${PORT}/games/${gameName}/${gameID}/join`)
         .send({
           gameName,
           playerID,
