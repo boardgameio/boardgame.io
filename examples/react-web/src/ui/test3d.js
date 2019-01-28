@@ -49,7 +49,7 @@ class Board extends React.Component {
   render() {
     return (
       <div>
-        <div style={{ marginBottom: 20 }}>Drag the card into the deck</div>
+        <div style={{ marginBottom: 20 }}>Showing chess pieces on the grid</div>
         <UI three={true}>
           <Grid rows={8} cols={8} onClick={this.onClick}>
             <Token
