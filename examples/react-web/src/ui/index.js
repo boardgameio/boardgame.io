@@ -18,7 +18,7 @@ const routes = [
   },
   {
     path: '/ui/3d',
-    text: '3D',
+    text: '3D Grid',
     component: Test3D,
   },
   {

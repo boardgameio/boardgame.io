@@ -18,6 +18,7 @@ import pawnObj from './pieces/pawn3d.obj';
 import queenObj from './pieces/queen3d.obj';
 import rookObj from './pieces/rook3d.obj';
 let THREE = (window.THREE = require('three'));
+import '../loading.css';
 
 const COL_NAMES = 'abcdefgh';
 const SELECTED_COLOR = 'green';
@@ -45,6 +46,43 @@ class Board extends React.Component {
     this.loader.load(pawnObj, out => this._handleMesh(out, 'pawn'));
     this.loader.load(queenObj, out => this._handleMesh(out, 'queen'));
     this.loader.load(rookObj, out => this._handleMesh(out, 'rook'));
+    //set up loading
+    this.loader = <div className="loader" />;
+    THREE.DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+      console.log(
+        'Started loading file: ' +
+          url +
+          '.\nLoaded ' +
+          itemsLoaded +
+          ' of ' +
+          itemsTotal +
+          ' files.'
+      );
+    };
+    THREE.DefaultLoadingManager.onLoad = () => {
+      this.setState({ loading: false });
+      console.log('Loading Complete!');
+    };
+
+    THREE.DefaultLoadingManager.onProgress = function(
+      url,
+      itemsLoaded,
+      itemsTotal
+    ) {
+      console.log(
+        'Loading file: ' +
+          url +
+          '.\nLoaded ' +
+          itemsLoaded +
+          ' of ' +
+          itemsTotal +
+          ' files.'
+      );
+    };
+
+    THREE.DefaultLoadingManager.onError = function(url) {
+      console.log('There was an error loading ' + url);
+    };
   }
 
   _handleMesh = (out, type) => {
@@ -57,6 +95,7 @@ class Board extends React.Component {
   state = {
     selected: '',
     mesh: {},
+    loading: true,
   };
 
   // eslint-disable-next-line react/no-deprecated
@@ -68,20 +107,22 @@ class Board extends React.Component {
   }
 
   render() {
+    const checker = (
+      <Checkerboard
+        highlightedSquares={this._getHighlightedSquares()}
+        style={{ width: '400px' }}
+        onClick={this.click}
+      >
+        {this._getPieces()}
+      </Checkerboard>
+    );
     let disconnected = null;
     if (this.props.isMultiplayer && !this.props.isConnected) {
       disconnected = <p>Disconnected!</p>;
     }
     return (
       <div>
-        <Checkerboard
-          highlightedSquares={this._getHighlightedSquares()}
-          style={{ width: '400px' }}
-          onClick={this.click}
-        >
-          {this._getPieces()}
-        </Checkerboard>
-
+        {this.state.loading ? this.loader : checker}
         {this._getStatus()}
         {disconnected}
       </div>
@@ -128,7 +169,6 @@ class Board extends React.Component {
         if (p) {
           result.push(
             <Token
-              three={true}
               square={square}
               animate={true}
               key={this._getInitialCell(square)}

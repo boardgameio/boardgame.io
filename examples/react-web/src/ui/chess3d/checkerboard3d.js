@@ -97,9 +97,8 @@ class Checkerboard extends React.Component {
     }
 
     return (
-      <UI three={true} willLoad={true}>
+      <UI three={true}>
         <Grid
-          three={true}
           rows={this.props.rows}
           cols={this.props.cols}
           padding={0}

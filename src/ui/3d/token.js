@@ -8,9 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-let THREE = (window.THREE = require('three'));
-require('three/examples/js/loaders/OBJLoader');
-require('three/examples/js/loaders/GLTFLoader');
+import * as THREE from 'three';
 
 // Not yet implemented.
 export class Token extends React.Component {
@@ -37,10 +35,6 @@ export class Token extends React.Component {
     size: 1,
     padding: 0.1,
     lift: 0.1,
-    mesh: new THREE.Mesh(
-      new THREE.BoxBufferGeometry(1, 1 * 0.3, 1),
-      new THREE.MeshLambertMaterial({ color: '#eeeeee' })
-    ),
   };
 
   _attachMesh = mesh => {
@@ -84,23 +78,16 @@ export class Token extends React.Component {
   render() {
     let mesh = this.props.mesh;
 
-    if (this.prevMesh === mesh) return null;
+    // if (this.prevMesh && this.prevMesh === mesh) return null;
 
     if (!mesh) {
       mesh = new THREE.Mesh(
         new THREE.BoxBufferGeometry(1, 1 * 0.3, 1),
         new THREE.MeshLambertMaterial({ color: '#eeeeee' })
       );
-    } else if (mesh instanceof THREE.Object3D) {
       this._attachMesh(mesh);
-    } else if (mesh.type) {
-      if (mesh.type === 'obj') {
-        const loader = new THREE.OBJLoader();
-        loader.load(mesh.url, this._attachMesh);
-      } else if (mesh.type === 'gltf') {
-        const loader = new THREE.GLTFLoader();
-        loader.load(mesh.url, this._attachMesh);
-      }
+    } else if (mesh.children) {
+      this._attachMesh(mesh);
     } else {
       console.error('Illegal input Mesh');
     }

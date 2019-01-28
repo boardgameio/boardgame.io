@@ -100,6 +100,7 @@ export class Grid extends React.Component {
     //set tokens
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
+        three: true,
         size: this.props.cellSize,
         ui: ctx,
         parrent: this.tokenGroup,

@@ -11,7 +11,6 @@ import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
 import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
-import './ui.css';
 
 /**
  * Root element of the React/threejs based 3D UI framework.
@@ -20,7 +19,6 @@ export class UI extends React.Component {
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    willLoad: PropTypes.bool,
     children: PropTypes.any,
     onMouseEvent: PropTypes.func,
   };
@@ -28,7 +26,6 @@ export class UI extends React.Component {
   static defaultProps = {
     width: 1024,
     height: 768,
-    willLoad: false,
   };
 
   constructor(props) {
@@ -104,14 +101,10 @@ export class UI extends React.Component {
 
     this.childGroup = new THREE.Group();
     this.scene.add(this.childGroup);
-
-    //set up loading
-    this.loader = <div className="loader" />;
-    this.state = {
-      loading: false,
-    };
   }
-
+  state = {
+    loading: false,
+  };
   setupMouseEvents() {
     // List of objects currently being dragged.
     let dragging_ = [];
@@ -336,57 +329,19 @@ export class UI extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.willLoad) {
-      this.setState({
-        loading: true,
-      });
-    } else {
-      this._initCanvas();
-    }
-    THREE.DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
-      console.log(
-        'Started loading file: ' +
-          url +
-          '.\nLoaded ' +
-          itemsLoaded +
-          ' of ' +
-          itemsTotal +
-          ' files.'
-      );
-    };
-    THREE.DefaultLoadingManager.onLoad = () => {
-      console.log('Loading Complete!');
-      this.setState({
-        loading: false,
-      });
-      this._initCanvas();
-    };
-    THREE.DefaultLoadingManager.onProgress = function(
-      url,
-      itemsLoaded,
-      itemsTotal
-    ) {
-      console.log(
-        'Loading file: ' +
-          url +
-          '.\nLoaded ' +
-          itemsLoaded +
-          ' of ' +
-          itemsTotal +
-          ' files.'
-      );
-    };
-    THREE.DefaultLoadingManager.onError = function(url) {
-      console.log('There was an error loading ' + url);
-    };
+    this._initCanvas();
   }
 
   render() {
+    const children = React.Children.map(this.props.children, child => {
+      return React.cloneElement(child, {
+        three: true,
+      });
+    });
     return (
       <UIContext.Provider value={this.getContext()}>
         <div className="bgio-ui" ref={this.ref_}>
-          {this.props.children}
-          {this.state.loading ? this.loader : null}
+          {children}
         </div>
       </UIContext.Provider>
     );
