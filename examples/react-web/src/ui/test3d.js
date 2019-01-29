@@ -10,11 +10,13 @@ import React from 'react';
 import { Client } from 'boardgame.io/react';
 import { Game } from 'boardgame.io/core';
 import { UI, Grid, Token } from 'boardgame.io/ui';
-import bishop from './chess3d/pieces/bishop3d.obj';
-import knight from './chess3d/pieces/knight3d.obj';
+import bishop from './chess3d/pieces/bishop.gltf';
+import knight from './chess3d/pieces/knight.gltf';
+import './chess3d/pieces/bishop.bin';
+import './chess3d/pieces/knight.bin';
 // example and source use different modules, so direct to source modules here to make THREE.js global.
 var THREE = (window.THREE = require('../../../../node_modules/three'));
-require('../../../../node_modules/three/examples/js/loaders/OBJLoader');
+require('../../../../node_modules/three/examples/js/loaders/GLTFLoader');
 
 class Board extends React.Component {
   constructor(props) {
@@ -32,14 +34,16 @@ class Board extends React.Component {
   };
 
   componentDidMount() {
-    this.loader = new THREE.OBJLoader();
+    this.loader = new THREE.GLTFLoader();
     this.loader.load(bishop, out => {
+      out = out.scene.children[0];
       this.setState({
         bishop: out,
       });
     });
 
     this.loader.load(knight, out => {
+      out = out.scene.children[0];
       this.setState({
         knight: out,
       });
@@ -62,6 +66,7 @@ class Board extends React.Component {
             <Token
               x={2}
               y={3}
+              size={0.7}
               mesh={this.state.bishop}
               onClick={this.onClick}
               key={2}

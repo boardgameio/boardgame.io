@@ -34,6 +34,10 @@ import * as THREE from 'three';
  *   <Token x={1} y={2}/>
  * </Grid>
  *
+ * <Grid rows={8} cols={8}>
+ *   <Token x={1} y={2} size={0.5}/>
+ * </Grid>
+ *
  * <HexGrid>
  *   <Token x={1} y={2} z={-3}/>
  * </HexGrid>
@@ -52,6 +56,7 @@ export class Token extends React.Component {
     padding: PropTypes.number,
     size: PropTypes.number,
     lift: PropTypes.number,
+    boardSize: PropTypes.number,
     parrent: PropTypes.instanceOf(THREE.Object3D),
     ui: PropTypes.object,
     animate: PropTypes.bool,
@@ -69,8 +74,17 @@ export class Token extends React.Component {
     lift: 0.1,
   };
 
+  constructor(props) {
+    super();
+    if (!props.size) {
+      this.size = props.boardSize;
+    } else {
+      this.size = props.size;
+    }
+  }
+
   _attachMesh = mesh => {
-    const size = this.props.size;
+    const size = this.size;
     let meshSize = new THREE.Vector3();
     let meshCenter = new THREE.Vector3();
     const bbox = new THREE.Box3().setFromObject(mesh);
@@ -80,15 +94,12 @@ export class Token extends React.Component {
     let scale = meshSize.z < meshSize.x ? meshSize.x : meshSize.z;
     scale = size / scale;
     mesh.scale.set(scale, scale, scale);
-    // reset the center to (0,0,0)
-    mesh.translateX(-meshCenter.x * scale);
-    mesh.translateY(-meshCenter.y * scale);
-    mesh.translateZ(-meshCenter.z * scale);
-    // move the object to the location in the board
-    const lift = this.props.lift + (scale * meshSize.y) / 2;
-    mesh.translateX(this.props.x * (this.props.size + this.props.padding));
-    mesh.translateZ(this.props.y * (this.props.size + this.props.padding));
-    mesh.translateY(lift);
+    // set the mesh to the ground
+    mesh.position.x =
+      this.props.x * (this.props.boardSize + this.props.padding);
+    mesh.position.z =
+      this.props.y * (this.props.boardSize + this.props.padding);
+    mesh.position.y = -bbox.min.y + this.props.lift;
     this.props.parrent.add(mesh);
     // register the event
     const onEvent = e => {
@@ -118,10 +129,10 @@ export class Token extends React.Component {
         new THREE.MeshLambertMaterial({ color: '#eeeeee' })
       );
       this._attachMesh(mesh);
-    } else if (mesh.children) {
+    } else if (mesh.isObject3D) {
       this._attachMesh(mesh);
     } else {
-      console.error('Illegal input Mesh');
+      console.error('Your input to tokens should be an three js 3d object');
     }
     this.props.parrent.remove(this.prevMesh);
     this.prevMesh = mesh;

@@ -11,14 +11,20 @@ import PropTypes from 'prop-types';
 import Chess from 'chess.js';
 import Checkerboard from './checkerboard3d';
 import { Token } from 'boardgame.io/ui';
-import bishopObj from './pieces/bishop3d.obj';
-import kingObj from './pieces/king3d.obj';
-import knightObj from './pieces/knight3d.obj';
-import pawnObj from './pieces/pawn3d.obj';
-import queenObj from './pieces/queen3d.obj';
-import rookObj from './pieces/rook3d.obj';
+import bishopObj from './pieces/bishop.gltf';
+import './pieces/bishop.bin';
+import kingObj from './pieces/king.gltf';
+import './pieces/king.bin';
+import knightObj from './pieces/knight.gltf';
+import './pieces/knight.bin';
+import pawnObj from './pieces/pawn.gltf';
+import './pieces/pawn.bin';
+import queenObj from './pieces/queen.gltf';
+import './pieces/queen.bin';
+import rookObj from './pieces/rook.gltf';
+import './pieces/rook.bin';
 var THREE = (window.THREE = require('../../../../../node_modules/three'));
-require('../../../../../node_modules/three/examples/js/loaders/OBJLoader');
+require('../../../../../node_modules/three/examples/js/loaders/GLTFLoader');
 
 const COL_NAMES = 'abcdefgh';
 const SELECTED_COLOR = 'green';
@@ -38,13 +44,18 @@ class Board extends React.Component {
   constructor(props) {
     super(props);
     this.chess = new Chess();
-    this.loader = new THREE.OBJLoader();
+    this.loader = new THREE.GLTFLoader();
   }
 
   _handleMesh = (out, type) => {
-    out = out.children[0];
+    out = out.scene.children[0];
     let temp = {};
     temp[type] = out;
+    // get the relative size of he piece
+    const bbox = new THREE.Box3().setFromObject(out);
+    let meshSize = new THREE.Vector3();
+    bbox.getSize(meshSize);
+    temp[type].realSize = meshSize.x;
     this.setState(temp);
   };
 
@@ -123,6 +134,44 @@ class Board extends React.Component {
     return result;
   }
 
+  _getLargest() {
+    let max = -Infinity;
+    for (const p of 'bknpqr') {
+      let piece = this._pieceShortToLong(p);
+      max = this.state[piece].realSize > max ? this.state[piece].realSize : max;
+    }
+    this._maxRealSize = max;
+  }
+
+  _getSize(type) {
+    // if not finished loading return null
+    for (const p of 'bknpqr') {
+      let piece = this._pieceShortToLong(p);
+      if (!this.state[piece]) return null;
+    }
+    // otherwise return size ratio to max size
+    let piece = this._pieceShortToLong(type);
+    if (!this._maxRealSize) this._getLargest();
+    return this.state[piece].realSize / this._maxRealSize;
+  }
+
+  _pieceShortToLong(type) {
+    switch (type) {
+      case 'b':
+        return 'bishop';
+      case 'k':
+        return 'king';
+      case 'n':
+        return 'knight';
+      case 'p':
+        return 'pawn';
+      case 'q':
+        return 'queen';
+      case 'r':
+        return 'rook';
+    }
+  }
+
   _getPieces() {
     let result = [];
     for (let y = 1; y <= 8; y++) {
@@ -134,6 +183,7 @@ class Board extends React.Component {
             <Token
               square={square}
               animate={true}
+              size={this._getSize(p.type)}
               key={this._getInitialCell(square)}
               onClick={this.click.bind(this)}
               mesh={this._getPieceByTypeAndColor(p.type, p.color)}
@@ -146,35 +196,34 @@ class Board extends React.Component {
   }
 
   _getPieceByTypeAndColor(type, color) {
-    let piece;
+    let piece = this._pieceShortToLong(type);
     let mesh;
-    switch (type) {
-      case 'b':
-        piece = 'bishop';
-        break;
-      case 'k':
-        piece = 'king';
-        break;
-      case 'n':
-        piece = 'knight';
-        break;
-      case 'p':
-        piece = 'pawn';
-        break;
-      case 'q':
-        piece = 'queen';
-        break;
-      case 'r':
-        piece = 'rook';
-        break;
-    }
     mesh = this.state[piece];
     if (mesh) {
       let ret = mesh.clone();
-      let blackMat = new THREE.MeshLambertMaterial({ color: 0x333333 });
-      let whiteMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-      if (color == 'b') ret.material = blackMat;
-      else ret.material = whiteMat;
+      let blackMat = new THREE.MeshLambertMaterial({ color: 0x555555 });
+      let whiteMat = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
+      // rotate the piece and assign color.
+      if (color == 'b') {
+        if (piece == 'bishop') {
+          // the bishop piece has different orientation with other pieces
+          ret.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
+        }
+        ret.traverse(obj => {
+          if (obj.material) {
+            obj.material = blackMat;
+          }
+        });
+      } else {
+        if (piece != 'bishop') {
+          ret.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
+        }
+        ret.traverse(obj => {
+          if (obj.material) {
+            obj.material = whiteMat;
+          }
+        });
+      }
       return ret;
     } else return null;
   }

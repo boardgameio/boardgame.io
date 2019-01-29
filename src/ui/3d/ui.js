@@ -127,7 +127,7 @@ export class UI extends React.Component {
       console.log(
         'Loading file: ' +
           url +
-          '.\nLoaded ' +
+          '\nLoaded ' +
           itemsLoaded +
           ' of ' +
           itemsTotal +
@@ -136,7 +136,7 @@ export class UI extends React.Component {
     };
 
     THREE.DefaultLoadingManager.onError = function(url) {
-      console.log('There was an error loading ' + url);
+      console.log('There was an error loading: ' + url);
     };
   }
   state = {
@@ -193,8 +193,18 @@ export class UI extends React.Component {
       let obj = objects[0];
       if (obj) {
         e.point = obj.point;
-        if (obj.object.id in this.callbacks_) {
-          this.callbacks_[obj.object.id](e);
+        let current = this.childGroup.getObjectById(obj.object.id);
+        // check parents untill hit a callback or hit top level
+        while (current) {
+          if (current.id in this.callbacks_) {
+            this.callbacks_[current.id](e);
+            break;
+          } else {
+            current = current.parent;
+            if (current.id == this.childGroup.id || !current.parent) {
+              break;
+            }
+          }
         }
       }
     };
@@ -357,6 +367,7 @@ export class UI extends React.Component {
 
   componentDidMount() {
     this._initCanvas();
+    console.log(this.scene);
   }
 
   render() {
