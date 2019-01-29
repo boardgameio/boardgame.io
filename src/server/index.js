@@ -71,7 +71,7 @@ export function Server({ games, db, transport }) {
         // Run API in a separate Koa app.
         const api = createApiServer({ db, games });
         apiServer = await api.listen(
-          Number(serverRunConfig.apiPort),
+          serverRunConfig.apiPort,
           serverRunConfig.apiCallback
         );
         logger.info(`API serving on ${apiServer.address().port}...`);
@@ -79,7 +79,7 @@ export function Server({ games, db, transport }) {
 
       // Run Game Server (+ API, if necessary).
       const appServer = await app.listen(
-        Number(serverRunConfig.port),
+        serverRunConfig.port,
         serverRunConfig.callback
       );
       logger.info(`App serving on ${appServer.address().port}...`);
