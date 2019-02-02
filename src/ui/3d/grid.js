@@ -107,11 +107,11 @@ export class Grid extends React.Component {
         this.squareGroup.add(square);
         const onEvent = e => {
           if (e.type == 'click') {
-            this.props.onClick({ x: x, y: y });
+            if (this.props.onClick) this.props.onClick({ x: x, y: y });
           } else if (e.type == 'mouseOver') {
-            this.props.onMouseOver({ x: x, y: y });
+            if (this.props.onMouseOver) this.props.onMouseOver({ x: x, y: y });
           } else if (e.type == 'mouseOut') {
-            this.props.onMouseOut({ x: x, y: y });
+            if (this.props.onMouseOut) this.props.onMouseOut({ x: x, y: y });
           }
         };
         ctx.regCall(square, onEvent);

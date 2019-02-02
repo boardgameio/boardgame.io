@@ -367,7 +367,6 @@ export class UI extends React.Component {
 
   componentDidMount() {
     this._initCanvas();
-    console.log(this.scene);
   }
 
   render() {
