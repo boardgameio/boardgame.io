@@ -36,7 +36,13 @@ import * as THREE from 'three';
  *   <Token x={1} y={2}/>
  * </Grid>
  */
-export class Grid extends React.Component {
+export const Grid = props => (
+  <UIContext.Consumer>
+    {context => <GridImpl {...props} context={context} />}
+  </UIContext.Consumer>
+);
+
+class GridImpl extends React.Component {
   static propTypes = {
     rows: PropTypes.number.isRequired,
     cols: PropTypes.number.isRequired,
@@ -47,6 +53,7 @@ export class Grid extends React.Component {
     onClick: PropTypes.func,
     onMouseOver: PropTypes.func,
     onMouseOut: PropTypes.func,
+    context: PropTypes.any,
     children: PropTypes.oneOfType([
       PropTypes.arrayOf(PropTypes.element),
       PropTypes.element,
@@ -82,9 +89,13 @@ export class Grid extends React.Component {
     return color;
   }
 
-  _drawSquare(ctx) {
-    this.ctx = ctx;
-    ctx.add(this.boardGroup);
+  componentWillUnmount() {
+    this.context.remove(this.boardGroup);
+  }
+
+  render() {
+    this.context = this.props.context;
+    this.context.add(this.boardGroup);
 
     // when rerendering, render a new squareGroup
     this.boardGroup.remove(this.squareGroup);
@@ -97,7 +108,6 @@ export class Grid extends React.Component {
         let squareProps = {
           x: x,
           y: y,
-          ctx: ctx,
           size: this.props.cellSize,
           color: this._getCellColor(x, y),
           padding: this.props.padding,
@@ -114,7 +124,7 @@ export class Grid extends React.Component {
             if (this.props.onMouseOut) this.props.onMouseOut({ x: x, y: y });
           }
         };
-        ctx.regCall(square, onEvent);
+        this.context.regCall(square, onEvent);
       }
     }
     //set tokens
@@ -122,7 +132,7 @@ export class Grid extends React.Component {
       return React.cloneElement(child, {
         three: true,
         boardSize: this.props.cellSize,
-        ui: ctx,
+        ui: this.context,
         parrent: this.tokenGroup,
         padding: this.props.padding,
         lift: this.props.thickness,
@@ -130,16 +140,6 @@ export class Grid extends React.Component {
     });
 
     return tokens;
-  }
-
-  componentWillUnmount() {
-    this.ctx.remove(this.boardGroup);
-  }
-
-  render() {
-    return (
-      <UIContext.Consumer>{ctx => this._drawSquare(ctx)}</UIContext.Consumer>
-    );
   }
 }
 
@@ -152,7 +152,6 @@ export class Grid extends React.Component {
  *   x          - X coordinate on grid coordinates.
  *   y          - Y coordinate on grid coordinates.
  *   size       - Square size.
- *   ctx        - Three js context to render.
  *   color      - Color of the square
  *   thichness  - Thichness of a square.
  *   padding    - Padding between squares.
