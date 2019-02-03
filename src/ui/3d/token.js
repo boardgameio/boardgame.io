@@ -8,6 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import UIContext from '../ui-context';
 import * as THREE from 'three';
 
 /**
@@ -47,7 +48,13 @@ import * as THREE from 'three';
  * </Grid>
  *
  */
-export class Token extends React.Component {
+export const Token = props => (
+  <UIContext.Consumer>
+    {context => <TokenImpl {...props} context={context} />}
+  </UIContext.Consumer>
+);
+
+class TokenImpl extends React.Component {
   static propTypes = {
     x: PropTypes.number,
     y: PropTypes.number,
@@ -58,7 +65,7 @@ export class Token extends React.Component {
     lift: PropTypes.number,
     boardSize: PropTypes.number,
     parrent: PropTypes.instanceOf(THREE.Object3D),
-    ui: PropTypes.object,
+    context: PropTypes.object,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
     onMouseOver: PropTypes.func,
@@ -81,6 +88,11 @@ export class Token extends React.Component {
     } else {
       this.size = props.size;
     }
+    if (props.parrent) {
+      this.parrent = props.parrent;
+    } else {
+      this.parrent = props.context;
+    }
   }
 
   _attachMesh = mesh => {
@@ -100,7 +112,7 @@ export class Token extends React.Component {
     mesh.position.z =
       this.props.y * (this.props.boardSize + this.props.padding);
     mesh.position.y = -bbox.min.y + this.props.lift;
-    this.props.parrent.add(mesh);
+    this.parrent.add(mesh);
     // register the event
     const onEvent = e => {
       if (e.type == 'click') {
@@ -111,11 +123,11 @@ export class Token extends React.Component {
         this.props.onMouseOut({ x: this.props.x, y: this.props.y });
       }
     };
-    this.props.ui.regCall(mesh, onEvent);
+    this.props.context.regCall(mesh, onEvent);
   };
 
   componentWillUnmount() {
-    this.props.parrent.remove(this.prevMesh);
+    this.parrent.remove(this.prevMesh);
   }
 
   render() {
@@ -134,7 +146,7 @@ export class Token extends React.Component {
     } else {
       console.error('Your input to tokens should be an three js 3d object');
     }
-    this.props.parrent.remove(this.prevMesh);
+    this.parrent.remove(this.prevMesh);
     this.prevMesh = mesh;
 
     return null;
