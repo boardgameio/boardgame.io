@@ -46,7 +46,7 @@ test('click handler', () => {
   );
 
   const uiIns = token.instance();
-  const tokenIns = token.find('Token').instance();
+  const tokenIns = token.find('TokenImpl').instance();
 
   const id = tokenIns.prevMesh.id;
   uiIns.callbacks_[id]({
@@ -71,7 +71,7 @@ test('correct x and y', () => {
       </Grid>
     </UI>
   );
-  const tokenIns = grid.find('Token').instance();
+  const tokenIns = grid.find('TokenImpl').instance();
   const x =
     tokenIns.props.x * (tokenIns.props.boardSize + tokenIns.props.padding);
   const y =
@@ -82,7 +82,7 @@ test('correct x and y', () => {
   // No crash when componentWillUnmount
   {
     grid
-      .find('Token')
+      .find('TokenImpl')
       .instance()
       .componentWillUnmount();
   }

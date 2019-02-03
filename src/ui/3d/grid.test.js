@@ -41,7 +41,7 @@ test('render correctly', () => {
   );
   expect(grid.html()).toContain('rect');
   expect(grid.html()).toContain('bgio-canvas');
-  const gridIns = grid.find('Grid').instance();
+  const gridIns = grid.find('GridImpl').instance();
   expect(gridIns.squareGroup.children).toHaveLength(12);
 });
 
@@ -65,7 +65,7 @@ test('click handler', () => {
       </UI>
     );
     const uiIns = grid.instance();
-    const gridIns = grid.find('Grid').instance();
+    const gridIns = grid.find('GridImpl').instance();
     const id = gridIns.squareGroup.children[0].id;
     uiIns.callbacks_[id]({
       type: 'mouseOver',
@@ -90,7 +90,7 @@ test('click handler', () => {
     </UI>
   );
   const uiIns = grid.instance();
-  const gridIns = grid.find('Grid').instance();
+  const gridIns = grid.find('GridImpl').instance();
   const id = gridIns.squareGroup.children[0].id;
   uiIns.callbacks_[id]({
     type: 'mouseOver',
@@ -110,7 +110,7 @@ test('colorMap', () => {
       <Grid rows={1} cols={1} colorMap={colorMap} />
     </UI>
   );
-  const gridIns = grid.find('Grid').instance();
+  let gridIns = grid.find('GridImpl').instance();
   expect(gridIns.squareGroup.children[0].material.color.getHexString()).toBe(
     'd18b47'
   );
