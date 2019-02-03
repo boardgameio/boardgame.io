@@ -497,5 +497,59 @@ describe('lobby', () => {
         expect(lobby.instance().state.phase).toEqual('list');
       });
     });
+
+    describe('custom renderer', () => {
+      test('should render custom lobby ui', () => {
+        const lobby = Enzyme.mount(
+          <Lobby gameComponents={[]} renderer={() => <div>Foo</div>} />
+        );
+
+        expect(lobby.html()).toEqual('<div>Foo</div>');
+      });
+
+      test('should render custom lobby with games list', () => {
+        const components = [
+          { game: { name: 'GameName1' } },
+          { game: { name: 'GameName2' } },
+        ];
+        const CustomLobbyUI = ({ gameComponents }) => (
+          <div>
+            {gameComponents
+              .map(gameComponent => gameComponent.game.name)
+              .join(',')}
+          </div>
+        );
+
+        const lobby = Enzyme.mount(
+          <Lobby
+            gameComponents={components}
+            renderer={({ gameComponents }) => (
+              <CustomLobbyUI gameComponents={gameComponents} />
+            )}
+          />
+        );
+
+        expect(lobby.html()).toEqual('<div>GameName1,GameName2</div>');
+      });
+
+      test('should change lobby phase when click on custom enter button', () => {
+        const CustomLobbyUI = ({ onEnterLobby }) => (
+          <button onClick={() => onEnterLobby('Alex')}>Enter</button>
+        );
+
+        const lobby = Enzyme.mount(
+          <Lobby
+            gameComponents={[]}
+            renderer={({ handleEnterLobby }) => (
+              <CustomLobbyUI onEnterLobby={handleEnterLobby} />
+            )}
+          />
+        );
+        lobby.find('button').simulate('click');
+
+        expect(lobby.instance().state.phase).toEqual('list');
+        expect(lobby.instance().state.playerName).toEqual('Alex');
+      });
+    });
   });
 });
