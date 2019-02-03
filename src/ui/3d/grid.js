@@ -132,7 +132,6 @@ class GridImpl extends React.Component {
       return React.cloneElement(child, {
         three: true,
         boardSize: this.props.cellSize,
-        context: this.context,
         parrent: this.tokenGroup,
         padding: this.props.padding,
         lift: this.props.thickness,

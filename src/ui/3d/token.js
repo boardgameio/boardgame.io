@@ -107,11 +107,17 @@ class TokenImpl extends React.Component {
     scale = size / scale;
     mesh.scale.set(scale, scale, scale);
     // set the mesh to the ground
-    mesh.position.x =
-      this.props.x * (this.props.boardSize + this.props.padding);
-    mesh.position.z =
-      this.props.y * (this.props.boardSize + this.props.padding);
-    mesh.position.y = -bbox.min.y + this.props.lift;
+    if (this.props.boardSize && this.props.lift && this.props.padding) {
+      mesh.position.x =
+        this.props.x * (this.props.boardSize + this.props.padding);
+      mesh.position.z =
+        this.props.y * (this.props.boardSize + this.props.padding);
+      mesh.position.y = -bbox.min.y + this.props.lift;
+    } else {
+      mesh.position.x = this.props.x;
+      mesh.position.z = this.props.y;
+      mesh.position.y = -bbox.min.y;
+    }
     this.parrent.add(mesh);
     // register the event
     const onEvent = e => {
