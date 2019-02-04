@@ -1,7 +1,6 @@
 # API
 
-The [Server](/api/Server) object hosts a REST API that can be used to
-create and join games. It is particularly useful when you want to
+The [Server](/api/Server) hosts a REST API that can be used to create and join games. It is particularly useful when you want to
 authenticate clients to prove that they have the right to send
 actions on behalf of a player.
 
@@ -10,10 +9,6 @@ Authenticated games are created with server-side tokens for each player. You can
 A game that is authenticated will not accept moves from a client on behalf of a player without the appropriate credential token.
 
 Use the `create` API call to create a game that requires credential tokens. When you call the `join` API, you can retrieve the credential token for a particular player.
-
-The API is available at server `port + 1` by default (i.e. if your
-server is at `localhost:8000`, then the API is hosted at
-`localhost:8001`.
 
 ### Creating a game
 
