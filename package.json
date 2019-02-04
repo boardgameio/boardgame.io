@@ -122,8 +122,7 @@
     "shelljs": "^0.7.8",
     "style-loader": "^0.18.2",
     "superagent": "^3.8.3",
-    "supertest": "^3.1.0",
-    "three": "^0.100.0"
+    "supertest": "^3.1.0"
   },
   "dependencies": {
     "@koa/cors": "^2.2.1",
@@ -140,7 +139,8 @@
     "react-dragtastic": "^2.4.3",
     "redux": "^4.0.0",
     "socket.io": "^2.1.1",
-    "uuid": "3.2.1"
+    "uuid": "3.2.1",
+    "three": "^0.100.0"
   },
   "config": {
     "exportAliases": {
