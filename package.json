@@ -73,7 +73,6 @@
     "@babel/plugin-transform-modules-commonjs": "^7.2.0",
     "@babel/preset-env": "^7.2.3",
     "@babel/preset-react": "^7.0.0",
-    "@tweenjs/tween.js": "^17.2.0",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^8.0.0",
@@ -140,7 +139,8 @@
     "redux": "^4.0.0",
     "socket.io": "^2.1.1",
     "uuid": "3.2.1",
-    "three": "^0.100.0"
+    "three": "^0.100.0",
+    "@tweenjs/tween.js": "^17.2.0"
   },
   "config": {
     "exportAliases": {
