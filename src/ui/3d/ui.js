@@ -9,7 +9,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
-import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
 
 /**
@@ -37,21 +36,22 @@ export class UI extends React.Component {
      */
     this.ref_ = React.createRef();
 
+    this.three = require('three');
     // Set up scene.
 
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xffffff);
+    this.scene = new this.three.Scene();
+    this.scene.background = new this.three.Color(0xffffff);
 
     // Set up renderer.
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new this.three.WebGLRenderer({ antialias: true });
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = this.three.PCFSoftShadowMap;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     // Set up camera.
 
-    this.camera = new THREE.PerspectiveCamera(
+    this.camera = new this.three.PerspectiveCamera(
       45,
       window.innerWidth / window.innerHeight,
       0.1,
@@ -59,15 +59,15 @@ export class UI extends React.Component {
     );
     this.camera.position.z = 7;
     this.camera.position.y = 10;
-    this.camera.lookAt(new THREE.Vector3());
+    this.camera.lookAt(new this.three.Vector3());
     this.scene.add(this.camera);
 
     // Set up lights.
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new this.three.AmbientLight(0xffffff, 0.7);
     this.scene.add(ambientLight);
 
-    const light = new THREE.DirectionalLight(0x555555);
+    const light = new this.three.DirectionalLight(0x555555);
     light.position.y = 50;
     light.shadow.camera.left = -10;
     light.shadow.camera.bottom = -10;
@@ -78,21 +78,21 @@ export class UI extends React.Component {
 
     // Set up ground.
 
-    const geometry = new THREE.PlaneBufferGeometry(100, 100);
-    const material = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
-    const plane = new THREE.Mesh(geometry, material);
+    const geometry = new this.three.PlaneBufferGeometry(100, 100);
+    const material = new this.three.MeshLambertMaterial({ color: 0xeeeeee });
+    const plane = new this.three.Mesh(geometry, material);
     plane.receiveShadow = true;
     plane.lookAt(plane.up);
     plane.position.y = -0.01;
     this.plane = plane;
     this.scene.add(plane);
 
-    const helper = new THREE.GridHelper(2000, 2000);
+    const helper = new this.three.GridHelper(2000, 2000);
     helper.material.opacity = 0.1;
     helper.material.transparent = true;
     this.scene.add(helper);
 
-    this.childGroup = new THREE.Group();
+    this.childGroup = new this.three.Group();
     this.scene.add(this.childGroup);
   }
 
@@ -101,11 +101,11 @@ export class UI extends React.Component {
     let dragging_ = [];
 
     // The 2D viewport co-ordinates of the mouse.
-    const mouse = new THREE.Vector2();
+    const mouse = new this.three.Vector2();
 
     // Raycaster that's used to calculate objects that the
     // mouse intersects.
-    this.raycaster = new THREE.Raycaster();
+    this.raycaster = new this.three.Raycaster();
 
     const getClickType = e => {
       if (e.which !== undefined) {

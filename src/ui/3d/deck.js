@@ -10,7 +10,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
 import { Card } from './card';
-import * as THREE from 'three';
 
 export class DeckImpl extends React.Component {
   static propTypes = {
@@ -33,14 +32,15 @@ export class DeckImpl extends React.Component {
   constructor(props) {
     super(props);
 
+    this.three = require('three');
     this.originalY = props.thickness / 2 - 0.0001;
-    const geometry = new THREE.BoxGeometry(
+    const geometry = new this.three.BoxGeometry(
       props.width,
       props.thickness,
       props.height
     );
-    const material = new THREE.MeshLambertMaterial({ color: 0xcccccc });
-    this.obj = new THREE.Mesh(geometry, material);
+    const material = new this.three.MeshLambertMaterial({ color: 0xcccccc });
+    this.obj = new this.three.Mesh(geometry, material);
     this.obj.userData.droppable = true;
     this.obj.userData.responsive = true;
     this.obj.position.y = this.originalY;

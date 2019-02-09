@@ -9,7 +9,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
-import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
 
 export class CardImpl extends React.Component {
@@ -45,7 +44,8 @@ export class CardImpl extends React.Component {
     super(props);
 
     this.originalY = props.thickness / 2 - 0.0001;
-    const geometry = new THREE.BoxGeometry(
+    this.three = require('three');
+    const geometry = new this.three.BoxGeometry(
       props.width,
       props.thickness,
       props.height
@@ -53,11 +53,11 @@ export class CardImpl extends React.Component {
 
     let opts = { color: 0x777777 };
     if (props.image) {
-      opts = { map: new THREE.TextureLoader().load(props.image) };
+      opts = { map: new this.three.TextureLoader().load(props.image) };
     }
 
-    const material = new THREE.MeshLambertMaterial(opts);
-    this.obj = new THREE.Mesh(geometry, material);
+    const material = new this.three.MeshLambertMaterial(opts);
+    this.obj = new this.three.Mesh(geometry, material);
     this.obj.receiveShadow = true;
     this.obj.position.y = this.originalY;
     this.obj.userData.draggable = props.draggable;
