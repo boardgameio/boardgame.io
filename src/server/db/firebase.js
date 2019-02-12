@@ -64,14 +64,18 @@ export class Firebase {
       return;
     }
 
-    this.cache.set(id, state);
+    // Remove any undefined values (ie, credentials)
+    let cleanedState = JSON.parse(JSON.stringify(state));
+
+    this.cache.set(id, cleanedState);
 
     const col =
       this.engine === ENGINE_RTDB
         ? this.db.child(id)
         : this.db.collection(this.dbname).doc(id);
-    delete state._id;
-    await col.set(state);
+    delete cleanedState._id;
+
+    await col.set(cleanedState);
 
     return;
   }

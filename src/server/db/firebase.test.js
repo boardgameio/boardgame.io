@@ -243,4 +243,10 @@ describe('RTDB', async () => {
     expect(await db.has('gameID_1')).toBe(false);
     await db.remove('gameID_1');
   });
+
+  test('strip credentials on save', async () => {
+    await db.set('gameID_0', { a: 0, credentials: undefined });
+    const state = await db.get('gameID_0');
+    expect(state).toEqual({ a: 0 });
+  });
 });
