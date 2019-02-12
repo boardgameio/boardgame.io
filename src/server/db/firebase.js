@@ -74,7 +74,6 @@ export class Firebase {
         ? this.db.child(id)
         : this.db.collection(this.dbname).doc(id);
     delete cleanedState._id;
-
     await col.set(cleanedState);
 
     return;
