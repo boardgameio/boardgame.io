@@ -58,7 +58,7 @@ describe('Firestore', async () => {
 
   test('must return undefined when no game exists', async () => {
     const state = await db.get('gameID');
-    expect(state).toEqual(null);
+    expect(state).toEqual(undefined);
   });
 
   test('cache hit', async () => {
@@ -158,7 +158,7 @@ describe('RTDB', async () => {
 
   test('must return undefined when no game exists', async () => {
     const state = await db.get('gameID');
-    expect(state).toEqual(null);
+    expect(state).toEqual(undefined);
   });
 
   test('cache hit', async () => {
