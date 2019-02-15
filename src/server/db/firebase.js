@@ -124,6 +124,10 @@ export class Firebase {
       this.cache.set(id, doc);
     }
 
+    if (doc === null) {
+      return undefined;
+    }
+
     return doc;
   }
 

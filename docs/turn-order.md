@@ -144,6 +144,11 @@ A `TurnOrder` object has the following structure:
 
 ```js
 {
+  // OPTIONAL:
+  // Override the initial value of playOrder.
+  // This is called at the beginning of the phase.
+  playOrder: (G, ctx) => [...],
+
   // Get the initial value of playOrderPos.
   // This is called at the beginning of the phase.
   first: (G, ctx) => 0,
