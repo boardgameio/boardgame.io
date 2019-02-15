@@ -105,7 +105,7 @@ class GridImpl extends React.Component {
     // add square base
     for (let x = 0; x < this.props.cols; x++) {
       for (let y = 0; y < this.props.rows; y++) {
-        let squareProps = {
+        const squareProps = {
           x: x,
           y: y,
           size: this.props.cellSize,
@@ -113,8 +113,10 @@ class GridImpl extends React.Component {
           padding: this.props.padding,
           thickness: this.props.thickness,
         };
-        let square = new Square(squareProps);
+
+        const square = new Square(squareProps);
         this.squareGroup.add(square);
+
         const onEvent = e => {
           if (e.type == 'click') {
             if (this.props.onClick) this.props.onClick({ x: x, y: y });
@@ -124,22 +126,27 @@ class GridImpl extends React.Component {
             if (this.props.onMouseOut) this.props.onMouseOut({ x: x, y: y });
           }
         };
+
         this.context.regCall(square, onEvent);
       }
     }
-    //set tokens
+
+    // set tokens
     const tokens = React.Children.map(this.props.children, child => {
       return React.cloneElement(child, {
         three: true,
         boardSize: this.props.cellSize,
-        parrent: this.tokenGroup,
+        parent: this.tokenGroup,
         padding: this.props.padding,
         lift: this.props.thickness,
       });
     });
 
-    if (tokens) return tokens;
-    else return null;
+    if (tokens) {
+      return tokens;
+    }
+
+    return null;
   }
 }
 

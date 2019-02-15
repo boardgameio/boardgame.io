@@ -106,7 +106,8 @@ export class UI extends React.Component {
     this.childGroup = new THREE.Group();
     this.scene.add(this.childGroup);
 
-    //set up loading screen
+    // set up loading screen
+
     this.loader = <div className="loader" />;
     THREE.DefaultLoadingManager.onStart = () => {
       this.setState({ isLoading: true });
@@ -139,9 +140,11 @@ export class UI extends React.Component {
       console.log('There was an error loading: ' + url);
     };
   }
+
   state = {
     loading: false,
   };
+
   setupMouseEvents() {
     // List of objects currently being dragged.
     let dragging_ = [];
@@ -189,12 +192,12 @@ export class UI extends React.Component {
         this.props.onMouseEvent(e, objects);
       }
 
-      // only intersect the nearest object
+      // only intersect the nearest object.
       let obj = objects[0];
       if (obj) {
         e.point = obj.point;
         let current = this.childGroup.getObjectById(obj.object.id);
-        // check parents untill hit a callback or hit top level
+        // check parents until we hit a callback or hit the top level.
         while (current) {
           if (current.id in this.callbacks_) {
             this.callbacks_[current.id](e);

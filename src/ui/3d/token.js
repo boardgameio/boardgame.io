@@ -64,7 +64,7 @@ class TokenImpl extends React.Component {
     size: PropTypes.number,
     lift: PropTypes.number,
     boardSize: PropTypes.number,
-    parrent: PropTypes.instanceOf(THREE.Object3D),
+    parent: PropTypes.instanceOf(THREE.Object3D),
     context: PropTypes.object,
     animate: PropTypes.bool,
     onClick: PropTypes.func,
@@ -83,15 +83,17 @@ class TokenImpl extends React.Component {
 
   constructor(props) {
     super();
+
     if (!props.size) {
       this.size = props.boardSize;
     } else {
       this.size = props.size;
     }
-    if (props.parrent) {
-      this.parrent = props.parrent;
+
+    if (props.parent) {
+      this.parent = props.parent;
     } else {
-      this.parrent = props.context;
+      this.parent = props.context;
     }
   }
 
@@ -118,7 +120,7 @@ class TokenImpl extends React.Component {
       mesh.position.z = this.props.y;
       mesh.position.y = -bbox.min.y;
     }
-    this.parrent.add(mesh);
+    this.parent.add(mesh);
     // register the event
     const onEvent = e => {
       if (e.type == 'click') {
@@ -133,7 +135,7 @@ class TokenImpl extends React.Component {
   };
 
   componentWillUnmount() {
-    this.parrent.remove(this.prevMesh);
+    this.parent.remove(this.prevMesh);
   }
 
   render() {
@@ -152,7 +154,7 @@ class TokenImpl extends React.Component {
     } else {
       console.error('Your input to tokens should be an three js 3d object');
     }
-    this.parrent.remove(this.prevMesh);
+    this.parent.remove(this.prevMesh);
     this.prevMesh = mesh;
 
     return null;
