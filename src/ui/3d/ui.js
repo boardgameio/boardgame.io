@@ -31,6 +31,7 @@ export class UI extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       isLoading: false,
     };
@@ -140,10 +141,6 @@ export class UI extends React.Component {
       console.log('There was an error loading: ' + url);
     };
   }
-
-  state = {
-    loading: false,
-  };
 
   setupMouseEvents() {
     // List of objects currently being dragged.
