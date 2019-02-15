@@ -195,16 +195,12 @@ export class UI extends React.Component {
         e.point = obj.point;
         let current = this.childGroup.getObjectById(obj.object.id);
         // check parents until we hit a callback or hit the top level.
-        while (current) {
+        while (current && current.parent && current.id != this.childGroup.id) {
           if (current.id in this.callbacks_) {
             this.callbacks_[current.id](e);
             break;
-          } else {
-            current = current.parent;
-            if (current.id == this.childGroup.id || !current.parent) {
-              break;
-            }
           }
+          current = current.parent;
         }
       }
     };
