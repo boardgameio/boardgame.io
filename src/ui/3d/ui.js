@@ -11,18 +11,30 @@ import PropTypes from 'prop-types';
 import UIContext from '../ui-context';
 import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
+import './loading.css';
 
 /**
  * Root element of the React/threejs based 3D UI framework.
  */
 export class UI extends React.Component {
   static propTypes = {
+    width: PropTypes.number,
+    height: PropTypes.number,
     children: PropTypes.any,
     onMouseEvent: PropTypes.func,
   };
 
+  static defaultProps = {
+    width: 1024,
+    height: 768,
+  };
+
   constructor(props) {
     super(props);
+
+    this.state = {
+      isLoading: false,
+    };
 
     /**
      * Set of callbacks that children of this element pass via context.subscribeToMouseEvents
@@ -47,13 +59,13 @@ export class UI extends React.Component {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.props.width, this.props.height);
 
     // Set up camera.
 
     this.camera = new THREE.PerspectiveCamera(
       45,
-      window.innerWidth / window.innerHeight,
+      this.props.width / this.props.height,
       0.1,
       1000
     );
@@ -94,6 +106,40 @@ export class UI extends React.Component {
 
     this.childGroup = new THREE.Group();
     this.scene.add(this.childGroup);
+
+    // set up loading screen
+
+    this.loader = <div className="loader" />;
+    THREE.DefaultLoadingManager.onStart = () => {
+      this.setState({ isLoading: true });
+      this.ref_.current.removeChild(this.renderer.domElement);
+      console.log('Started loading file');
+    };
+    THREE.DefaultLoadingManager.onLoad = () => {
+      this.setState({ isLoading: false });
+      this.ref_.current.appendChild(this.renderer.domElement);
+      console.log('Loading Complete!');
+    };
+
+    THREE.DefaultLoadingManager.onProgress = function(
+      url,
+      itemsLoaded,
+      itemsTotal
+    ) {
+      console.log(
+        'Loading file: ' +
+          url +
+          '\nLoaded ' +
+          itemsLoaded +
+          ' of ' +
+          itemsTotal +
+          ' files.'
+      );
+    };
+
+    THREE.DefaultLoadingManager.onError = function(url) {
+      console.log('There was an error loading: ' + url);
+    };
   }
 
   setupMouseEvents() {
@@ -139,20 +185,24 @@ export class UI extends React.Component {
           true
         );
       }
-
       if (this.props.onMouseEvent) {
         this.props.onMouseEvent(e, objects);
       }
 
-      objects.forEach(obj => {
+      // only intersect the nearest object.
+      let obj = objects[0];
+      if (obj) {
         e.point = obj.point;
-        if (obj.object.id in this.callbacks_) {
-          this.callbacks_[obj.object.id](e);
+        let current = this.childGroup.getObjectById(obj.object.id);
+        // check parents until we hit a callback or hit the top level.
+        while (current && current.parent && current.id != this.childGroup.id) {
+          if (current.id in this.callbacks_) {
+            this.callbacks_[current.id](e);
+            break;
+          }
+          current = current.parent;
         }
-        if (obj.object.parent.id in this.callbacks_) {
-          this.callbacks_[obj.object.parent.id](e);
-        }
-      });
+      }
     };
 
     const onMouseDown = e => {
@@ -224,8 +274,8 @@ export class UI extends React.Component {
         t = t.parentNode;
       }
 
-      mouse.x = (x / window.innerWidth) * 2 - 1;
-      mouse.y = -(y / window.innerHeight) * 2 + 1;
+      mouse.x = (x / this.props.width) * 2 - 1;
+      mouse.y = -(y / this.props.height) * 2 + 1;
 
       dispatchMouseCallbacks(e);
 
@@ -287,6 +337,12 @@ export class UI extends React.Component {
     }
   };
 
+  registerCallback = (obj, callback) => {
+    if (obj && callback) {
+      this.callbacks_[obj.id] = callback;
+    }
+  };
+
   getContext = () => {
     return {
       three: true,
@@ -294,21 +350,31 @@ export class UI extends React.Component {
       remove: obj => this.scene.remove(obj),
       scene: this.scene,
       camera: this.camera,
+      regCall: this.registerCallback,
     };
   };
 
-  componentDidMount() {
+  _initCanvas() {
     this.renderer.domElement.id = 'bgio-canvas';
     this.ref_.current.appendChild(this.renderer.domElement);
     this.setupMouseEvents();
     this.animate();
   }
 
+  componentDidMount() {
+    this._initCanvas();
+  }
+
   render() {
+    const children = React.Children.map(this.props.children, child => {
+      return React.cloneElement(child, {
+        three: true,
+      });
+    });
     return (
       <UIContext.Provider value={this.getContext()}>
         <div className="bgio-ui" ref={this.ref_}>
-          {this.props.children}
+          {this.state.isLoading ? this.loader : children}
         </div>
       </UIContext.Provider>
     );
