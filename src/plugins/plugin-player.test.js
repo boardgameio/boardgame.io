@@ -85,6 +85,11 @@ describe('3 player game', () => {
           G.player.field = 'A';
           G.fields = Object.keys(G);
         },
+        B: G => {
+          Object.values(G.players).forEach(player => {
+            player.field = 'B';
+          });
+        },
       },
 
       plugins: [PluginPlayer],
@@ -101,6 +106,18 @@ describe('3 player game', () => {
         '0': { field: 'A' },
         '1': {},
         '2': {},
+      },
+      fields: ['players', 'player'],
+    });
+  });
+
+  test('Changing current player in G.players propagates the changes', () => {
+    state = reducer(state, makeMove('B'));
+    expect(state.G).toEqual({
+      players: {
+        '0': { field: 'B' },
+        '1': { field: 'B' },
+        '2': { field: 'B' },
       },
       fields: ['players', 'player'],
     });
