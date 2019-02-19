@@ -15,6 +15,12 @@ import LobbyLoginForm from './login-form';
 import LobbyRoomInstance from './room-instance';
 import LobbyCreateRoomForm from './create-room-form';
 
+const LobbyPhases = {
+  ENTER: 'enter',
+  PLAY: 'play',
+  LIST: 'list',
+};
+
 /**
  * Lobby
  *
@@ -31,7 +37,6 @@ import LobbyCreateRoomForm from './create-room-form';
  * Returns:
  *   A React component that provides a UI to create, list, join, leave, play or spectate game instances.
  */
-
 class Lobby extends React.Component {
   static propTypes = {
     gameComponents: PropTypes.array.isRequired,
@@ -47,20 +52,26 @@ class Lobby extends React.Component {
   };
 
   state = {
-    phase: 'enter',
+    phase: LobbyPhases.ENTER,
     playerName: 'Visitor',
     runningGame: null,
     errorMsg: '',
     credentialStore: {},
   };
 
+  constructor(props) {
+    super(props);
+    this._createConnection(this.props);
+    this._updateConnection();
+  }
+
   componentDidMount() {
     let cookie = Cookies.load('lobbyState') || {};
-    if (cookie.phase && cookie.phase === 'play') {
-      cookie.phase = 'list';
+    if (cookie.phase && cookie.phase === LobbyPhases.PLAY) {
+      cookie.phase = LobbyPhases.LIST;
     }
     this.setState({
-      phase: cookie.phase || 'enter',
+      phase: cookie.phase || LobbyPhases.ENTER,
       playerName: cookie.playerName || 'Visitor',
       credentialStore: cookie.credentialStore || {},
     });
@@ -85,139 +96,40 @@ class Lobby extends React.Component {
     }
   }
 
-  _createConnection(props) {
-    let name = this.state.playerName;
+  _createConnection = props => {
+    const name = this.state.playerName;
     this.connection = LobbyConnection({
       server: props.lobbyServer,
       gameComponents: props.gameComponents,
       playerName: name,
       playerCredentials: this.state.credentialStore[name],
     });
-  }
+  };
 
-  _updateCredentials(playerName, credentials) {
+  _updateCredentials = (playerName, credentials) => {
     this.setState(prevState => {
       // clone store or componentDidUpdate will not be triggered
-      let store = Object.assign({}, prevState.credentialStore);
+      const store = Object.assign({}, prevState.credentialStore);
       store[[playerName]] = credentials;
-      return {
-        credentialStore: store,
-      };
+      return { credentialStore: store };
     });
-  }
+  };
 
-  async _updateConnection() {
+  _updateConnection = async () => {
     await this.connection.refresh();
     this.forceUpdate();
-  }
+  };
 
-  constructor(props) {
-    super(props);
-    this._createConnection(this.props);
-    this._updateConnection();
-  }
+  _enterLobby = playerName => {
+    this.setState({ playerName, phase: LobbyPhases.LIST });
+  };
 
-  render() {
-    const _getPhaseVisibility = phase => {
-      return this.state.phase !== phase ? 'hidden' : 'phase';
-    };
-
-    // player info
-    let name = this.state.playerName;
-
-    // list of game instances
-    let inst_rows = [];
-    for (let i = 0; i < this.connection.gameInstances.length; i++) {
-      const inst = {
-        gameID: this.connection.gameInstances[i].gameID,
-        gameName: this.connection.gameInstances[i].gameName,
-        players: Object.values(this.connection.gameInstances[i].players),
-      };
-      inst_rows.push(
-        <LobbyRoomInstance
-          key={'instance-' + i}
-          gameInstance={inst}
-          playerName={name}
-          onClickJoin={this._joinRoom.bind(this)}
-          onClickLeave={this._leaveRoom.bind(this)}
-          onClickPlay={this._startGame.bind(this)}
-        />
-      );
-    }
-
-    return (
-      <div id="lobby-view" style={{ padding: 50 }}>
-        <div className={_getPhaseVisibility('enter')}>
-          <LobbyLoginForm
-            key={name}
-            playerName={name}
-            onEnter={this._enterLobby.bind(this)}
-          />
-        </div>
-
-        <div className={_getPhaseVisibility('list')}>
-          <p>Welcome, {name}</p>
-
-          <div className="phase-title" id="game-creation">
-            <span>Create a room:</span>
-            <LobbyCreateRoomForm
-              games={this.props.gameComponents}
-              createGame={this._createRoom.bind(this)}
-            />
-          </div>
-          <p className="phase-title">Join a room:</p>
-          <div id="instances">
-            <table>
-              <tbody>{inst_rows}</tbody>
-            </table>
-            <span className="error-msg">
-              {this.state.errorMsg}
-              <br />
-            </span>
-          </div>
-          <p className="phase-title">
-            Rooms that become empty are automatically deleted.
-          </p>
-        </div>
-
-        <div className={_getPhaseVisibility('play')}>
-          {this.state.runningGame ? (
-            <this.state.runningGame.app
-              gameID={this.state.runningGame.gameID}
-              playerID={this.state.runningGame.playerID}
-              credentials={this.state.runningGame.credentials}
-            />
-          ) : (
-            ''
-          )}
-          <div className="buttons" id="game-exit">
-            <button onClick={this._exitGame.bind(this)}>Exit game</button>
-          </div>
-        </div>
-
-        <div className="buttons" id="lobby-exit">
-          <button onClick={this._exitLobby.bind(this)}>Exit lobby</button>
-        </div>
-      </div>
-    );
-  }
-
-  _enterLobby(playerName) {
-    this.setState({
-      playerName: playerName,
-      phase: 'list',
-    });
-  }
-
-  async _exitLobby() {
+  _exitLobby = async () => {
     await this.connection.disconnect();
-    this.setState({
-      phase: 'enter',
-      errorMsg: '',
-    });
-  }
+    this.setState({ phase: LobbyPhases.ENTER, errorMsg: '' });
+  };
 
-  async _createRoom(gameName, numPlayers) {
+  _createRoom = async (gameName, numPlayers) => {
     try {
       await this.connection.create(gameName, numPlayers);
       await this.connection.refresh();
@@ -226,9 +138,9 @@ class Lobby extends React.Component {
     } catch (error) {
       this.setState({ errorMsg: error.message });
     }
-  }
+  };
 
-  async _joinRoom(gameName, gameID, playerID) {
+  _joinRoom = async (gameName, gameID, playerID) => {
     try {
       await this.connection.join(gameName, gameID, playerID);
       await this.connection.refresh();
@@ -239,9 +151,9 @@ class Lobby extends React.Component {
     } catch (error) {
       this.setState({ errorMsg: error.message });
     }
-  }
+  };
 
-  async _leaveRoom(gameName, gameID) {
+  _leaveRoom = async (gameName, gameID) => {
     try {
       await this.connection.leave(gameName, gameID);
       await this.connection.refresh();
@@ -252,9 +164,9 @@ class Lobby extends React.Component {
     } catch (error) {
       this.setState({ errorMsg: error.message });
     }
-  }
+  };
 
-  _startGame(gameName, gameOpts) {
+  _startGame = (gameName, gameOpts) => {
     const gameCode = this.connection._getGameComponents(gameName);
     if (!gameCode) {
       this.setState({
@@ -286,17 +198,111 @@ class Lobby extends React.Component {
       credentials: this.connection.playerCredentials,
     };
 
-    this.setState({
-      phase: 'play',
-      runningGame: game,
-    });
-  }
+    this.setState({ phase: LobbyPhases.PLAY, runningGame: game });
+  };
 
-  _exitGame() {
-    this.setState({
-      phase: 'list',
-      runningGame: null,
+  _exitRoom = () => {
+    this.setState({ phase: LobbyPhases.LIST, runningGame: null });
+  };
+
+  _getPhaseVisibility = phase => {
+    return this.state.phase !== phase ? 'hidden' : 'phase';
+  };
+
+  renderRooms = (gameInstances, playerName) => {
+    return gameInstances.map(gameInstance => {
+      const { gameID, gameName, players } = gameInstance;
+      return (
+        <LobbyRoomInstance
+          key={'instance-' + gameID}
+          gameInstance={{ gameID, gameName, players: Object.values(players) }}
+          playerName={playerName}
+          onClickJoin={this._joinRoom}
+          onClickLeave={this._leaveRoom}
+          onClickPlay={this._startGame}
+        />
+      );
     });
+  };
+
+  render() {
+    const { gameComponents, renderer } = this.props;
+    const { errorMsg, playerName, phase, runningGame } = this.state;
+
+    if (renderer) {
+      return renderer({
+        errorMsg,
+        gameComponents,
+        gameInstances: this.connection.gameInstances,
+        phase,
+        playerName,
+        runningGame,
+        handleEnterLobby: this._enterLobby,
+        handleExitLobby: this._exitLobby,
+        handleCreateRoom: this._createRoom,
+        handleJoinRoom: this._joinRoom,
+        handleLeaveRoom: this._leaveRoom,
+        handleExitRoom: this._exitRoom,
+        handleRefreshRooms: this._updateConnection,
+        handleStartGame: this._startGame,
+      });
+    }
+
+    return (
+      <div id="lobby-view" style={{ padding: 50 }}>
+        <div className={this._getPhaseVisibility(LobbyPhases.ENTER)}>
+          <LobbyLoginForm
+            key={playerName}
+            playerName={playerName}
+            onEnter={this._enterLobby}
+          />
+        </div>
+
+        <div className={this._getPhaseVisibility(LobbyPhases.LIST)}>
+          <p>Welcome, {playerName}</p>
+
+          <div className="phase-title" id="game-creation">
+            <span>Create a room:</span>
+            <LobbyCreateRoomForm
+              games={gameComponents}
+              createGame={this._createRoom}
+            />
+          </div>
+          <p className="phase-title">Join a room:</p>
+          <div id="instances">
+            <table>
+              <tbody>
+                {this.renderRooms(this.connection.gameInstances, playerName)}
+              </tbody>
+            </table>
+            <span className="error-msg">
+              {errorMsg}
+              <br />
+            </span>
+          </div>
+          <p className="phase-title">
+            Rooms that become empty are automatically deleted.
+          </p>
+        </div>
+
+        <div className={this._getPhaseVisibility(LobbyPhases.PLAY)}>
+          {runningGame && (
+            <runningGame.app
+              gameID={runningGame.gameID}
+              playerID={runningGame.playerID}
+              credentials={runningGame.credentials}
+            />
+          )}
+          <div className="buttons" id="game-exit">
+            <button onClick={this._exitRoom}>Exit game</button>
+          </div>
+        </div>
+
+        <div className="buttons" id="lobby-exit">
+          <button onClick={this._exitLobby}>Exit lobby</button>
+        </div>
+      </div>
+    );
   }
 }
 
