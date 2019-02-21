@@ -44,7 +44,6 @@ it('should place the correct value in the cell', () => {
 Test your game logic in specific scenarios.
 
 ```js
-// import vanilla Javascript client (not the React client).
 import { Client } from 'boardgame.io/client';
 import { TicTacToe } from './game';
 
@@ -73,6 +72,27 @@ it('should declare player 1 as the winner', () => {
   expect(G.cells).toEqual(['0', '0', null, '1', '1', '1', null, null, '0']);
   // player '1' should be declared the winner
   expect(ctx.gameover).toEqual({ winner: '1' });
+});
+```
+
+!> Note that we imported the vanilla JavaScript client, not the
+one from `boardgame.io/react`.
+
+#### Multiplayer Tests
+
+Use `updatePlayerID` to change the player making the move
+to test multiplayer interactions.
+
+```js
+it('multiplayer test', () => {
+  const client = Client({ game: MyGame });
+
+  client.updatePlayerID('0');
+  client.moves.moveA();
+  client.events.endTurn();
+
+  client.updatePlayerID('1');
+  client.moves.moveB();
 });
 ```
 
