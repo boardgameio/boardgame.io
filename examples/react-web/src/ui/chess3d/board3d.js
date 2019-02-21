@@ -84,6 +84,9 @@ class Board extends React.Component {
   }
 
   render() {
+    if (this.props.G.pgn !== undefined) {
+      this.chess.load_pgn(this.props.G.pgn);
+    }
     let disconnected = null;
     if (this.props.isMultiplayer && !this.props.isConnected) {
       disconnected = <p>Disconnected!</p>;
@@ -117,9 +120,8 @@ class Board extends React.Component {
       );
       if (move) {
         this.props.moves.move(move.san);
-      } else {
-        this.setState({ selected: '' });
       }
+      this.setState({ selected: '' });
     }
   };
 

@@ -45,7 +45,7 @@ class Board extends React.Component {
   };
 
   render() {
-    if (this.props.G.pgn) {
+    if (this.props.G.pgn !== undefined) {
       this.chess.load_pgn(this.props.G.pgn);
     }
     let disconnected = null;
