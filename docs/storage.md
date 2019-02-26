@@ -72,7 +72,7 @@ First, install the necessary packages:
 npm install --save node-persist
 ```
 
-Then modify your server spec to indicate that you want to connect to Firebase:
+Then modify your server spec to indicate that you want to connect to the flatfile database:
 
 ```js
 const { Server, FlatFile } = require('boardgame.io/server');
