@@ -13,17 +13,22 @@ export class FlatFile {
   /**
    * Creates a new FlatFile storage.
    */
-  constructor({ dir, logging }) {
+  constructor({ dir, logging, ttl }) {
     this.games = require('node-persist');
     this.dir = dir;
     this.logging = logging || false;
+    this.ttl = ttl || false;
   }
 
   /**
    * Connect.
    */
   async connect() {
-    await this.games.init({ dir: this.dir, logging: this.logging });
+    await this.games.init({
+      dir: this.dir,
+      logging: this.logging,
+      ttl: this.ttl,
+    });
     return;
   }
 
