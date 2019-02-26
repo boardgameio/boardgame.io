@@ -64,6 +64,33 @@ const server = Server({
 server.run(8000);
 ```
 
+### Flatfile database with [node-persist](https://github.com/simonlast/node-persist)
+
+First, install the necessary packages:
+
+```
+npm install --save node-persist
+```
+
+Then modify your server spec to indicate that you want to connect to Firebase:
+
+```js
+const { Server, FlatFile } = require('boardgame.io/server');
+const { TicTacToe } = require('./game');
+
+const server = Server({
+  games: [TicTacToe],
+
+  db: new FlatFile({
+    dir: '/storage/directory', 
+    logging: (true/false),
+    ttl: (optional, see node-persist docs),
+  }),
+});
+
+server.run(8000);
+```
+
 ### Writing a Custom Connector
 
 Just create a class with the same interface as
