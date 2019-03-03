@@ -1,3 +1,10 @@
+## v0.31.3
+
+#### Features
+
+- [[94b1d65](https://github.com/nicolodavis/boardgame.io/commit/94b1d65)] Add flatfile database with node-persist (#372)
+- [[f6e70fd](https://github.com/nicolodavis/boardgame.io/commit/f6e70fd)] Add custom renderer parameter to lobby + clean up code (#353)
+
 ## v0.31.2
 
 #### Features
