@@ -82,7 +82,7 @@ const server = Server({
   games: [TicTacToe],
 
   db: new FlatFile({
-    dir: '/storage/directory', 
+    dir: '/storage/directory',
     logging: (true/false),
     ttl: (optional, see node-persist docs),
   }),
