@@ -166,6 +166,7 @@ export function Client(opts) {
           events: this.client.events,
           gameID: this.gameID,
           playerID: this.playerID,
+          step: this.client.step,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
