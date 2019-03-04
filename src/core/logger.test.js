@@ -8,18 +8,22 @@
 
 describe('logging', () => {
   const oldConsoleLog = console.log;
+  const oldConsoleError = console.error;
   const oldNodeEnv = process.env.NODE_ENV;
 
   beforeEach(() => {
     console.log.mockReset();
+    console.error.mockReset();
   });
 
   afterAll(() => {
     console.log = oldConsoleLog;
+    console.error = oldConsoleError;
     process.env.NODE_ENV = oldNodeEnv;
   });
 
   console.log = jest.fn();
+  console.error = jest.fn();
 
   describe('dev', () => {
     let logging;
@@ -30,7 +34,7 @@ describe('logging', () => {
 
     test('error', () => {
       logging.error('msg1');
-      expect(console.log).toHaveBeenCalledWith('ERROR: msg1');
+      expect(console.error).toHaveBeenCalledWith('ERROR:', 'msg1');
     });
 
     test('info', () => {
@@ -50,7 +54,7 @@ describe('logging', () => {
 
     test('error stripped', () => {
       logging.error('msg1');
-      expect(console.log).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
     });
 
     test('info stripped', () => {
