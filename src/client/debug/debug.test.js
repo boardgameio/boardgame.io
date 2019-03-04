@@ -54,7 +54,7 @@ test('basic', () => {
     <Debug
       gamestate={gamestate}
       store={store}
-      step={() => {}}
+      step={async () => {}}
       endTurn={() => {}}
       gameID="default"
     />
@@ -208,7 +208,7 @@ describe('simulate', () => {
   jest.useFakeTimers();
 
   test('basic', () => {
-    const step = jest.fn(() => true);
+    const step = jest.fn(async () => true);
     Enzyme.mount(
       <Debug
         step={step}
@@ -220,11 +220,11 @@ describe('simulate', () => {
     expect(step).not.toHaveBeenCalled();
     Mousetrap.simulate('5');
     jest.runAllTimers();
-    expect(step).toHaveBeenCalledTimes(10000);
+    expect(step).toHaveBeenCalled();
   });
 
   test('break out if no action is returned', () => {
-    const step = jest.fn(() => undefined);
+    const step = jest.fn(async () => undefined);
     Enzyme.mount(
       <Debug
         step={step}

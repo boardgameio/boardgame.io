@@ -73,9 +73,9 @@ describe('step', () => {
     },
   });
 
-  test('advances game state', () => {
+  test('advances game state', async () => {
     expect(client.getState().G).toEqual({ moved: false });
-    client.step();
+    await client.step();
     expect(client.getState().G).toEqual({ moved: true });
   });
 
