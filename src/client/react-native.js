@@ -122,6 +122,7 @@ export function Client(opts) {
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
+          step: this.client.step,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
