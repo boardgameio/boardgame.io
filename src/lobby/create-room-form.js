@@ -20,23 +20,23 @@ class LobbyCreateRoomForm extends React.Component {
     numPlayers: 2,
   };
 
-  _createGameNameOption(game, idx) {
+  _createGameNameOption = (game, idx) => {
     return (
       <option key={'name-option-' + idx} value={idx}>
         {game.game.name}
       </option>
     );
-  }
+  };
 
-  _createNumPlayersOption(idx) {
+  _createNumPlayersOption = idx => {
     return (
       <option key={'num-option-' + idx} value={idx}>
         {idx}
       </option>
     );
-  }
+  };
 
-  _createNumPlayersRange(game) {
+  _createNumPlayersRange = game => {
     if (!game.minPlayers) {
       game.minPlayers = 1;
     }
@@ -45,7 +45,7 @@ class LobbyCreateRoomForm extends React.Component {
     }
     console.assert(game.maxPlayers >= game.minPlayers);
     return [...new Array(game.maxPlayers + 1).keys()].slice(game.minPlayers);
-  }
+  };
 
   render() {
     return (
@@ -59,39 +59,39 @@ class LobbyCreateRoomForm extends React.Component {
         <span>Players:</span>
         <select
           value={this.state.numPlayers}
-          onChange={evt => this.onChangeNumPlayers(evt)}
+          onChange={this.onChangeNumPlayers}
         >
           {this._createNumPlayersRange(
             this.props.games[this.state.selectedGame].game
           ).map(this._createNumPlayersOption)}
         </select>
         <span className="buttons">
-          <button onClick={() => this.onClickCreate()}>Create</button>
+          <button onClick={this.onClickCreate}>Create</button>
         </span>
       </div>
     );
   }
 
-  onChangeNumPlayers(event) {
+  onChangeNumPlayers = event => {
     this.setState({
       numPlayers: Number.parseInt(event.target.value),
     });
-  }
+  };
 
-  onChangeSelectedGame(event) {
+  onChangeSelectedGame = event => {
     let idx = Number.parseInt(event.target.value);
     this.setState({
       selectedGame: idx,
       numPlayers: this._createNumPlayersRange(this.props.games[idx].game)[0],
     });
-  }
+  };
 
-  onClickCreate() {
+  onClickCreate = () => {
     this.props.createGame(
       this.props.games[this.state.selectedGame].game.name,
       this.state.numPlayers
     );
-  }
+  };
 }
 
 export default LobbyCreateRoomForm;

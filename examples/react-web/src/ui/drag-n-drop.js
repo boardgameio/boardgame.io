@@ -37,22 +37,28 @@ class Board extends React.Component {
 
   render() {
     return (
-      <UI three={true}>
+      <div>
         <div style={{ marginBottom: 20 }}>Drag the card into the deck</div>
+        <UI three={true}>
+          <Deck
+            onDrop={handler('deck onDrop', this.onDrop)}
+            onClick={handler('deck onClick')}
+          >
+            {this.state.deck.map(c => (
+              <Card
+                key={c}
+                data={c}
+                back={c}
+                onClick={handler('card onClick')}
+              />
+            ))}
+          </Deck>
 
-        <Deck
-          onDrop={handler('deck onDrop', this.onDrop)}
-          onClick={handler('deck onClick')}
-        >
-          {this.state.deck.map(c => (
-            <Card key={c} data={c} back={c} onClick={handler('card onClick')} />
-          ))}
-        </Deck>
-
-        {this.state.free && (
-          <Card data={1} back={1} onClick={handler('card1 onClick')} />
-        )}
-      </UI>
+          {this.state.free && (
+            <Card data={1} back={1} onClick={handler('card1 onClick')} />
+          )}
+        </UI>
+      </div>
     );
   }
 }

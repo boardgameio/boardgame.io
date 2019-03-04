@@ -30,11 +30,11 @@ class LobbyLoginForm extends React.Component {
         <input
           type="text"
           value={this.state.playerName}
-          onChange={evt => this.onChangePlayerName(evt)}
-          onKeyPress={evt => this.onKeyPress(evt)}
+          onChange={this.onChangePlayerName}
+          onKeyPress={this.onKeyPress}
         />
         <span className="buttons">
-          <button className="buttons" onClick={() => this.onClickEnter()}>
+          <button className="buttons" onClick={this.onClickEnter}>
             Enter
           </button>
         </span>
@@ -47,24 +47,24 @@ class LobbyLoginForm extends React.Component {
     );
   }
 
-  onClickEnter() {
+  onClickEnter = () => {
     if (this.state.playerName === '') return;
     this.props.onEnter(this.state.playerName);
-  }
+  };
 
-  onKeyPress(event) {
+  onKeyPress = event => {
     if (event.key === 'Enter') {
       this.onClickEnter();
     }
-  }
+  };
 
-  onChangePlayerName(event) {
+  onChangePlayerName = event => {
     const name = event.target.value.trim();
     this.setState({
       playerName: name,
       nameErrorMsg: name.length > 0 ? '' : 'empty player name',
     });
-  }
+  };
 }
 
 export default LobbyLoginForm;

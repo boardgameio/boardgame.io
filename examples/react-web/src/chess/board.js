@@ -44,15 +44,10 @@ class Board extends React.Component {
     dragged: '',
   };
 
-  // eslint-disable-next-line react/no-deprecated
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.G.pgn) {
-      this.chess.load_pgn(nextProps.G.pgn);
-      this.setState({ ...this.state, selected: '', highlighted: '' });
-    }
-  }
-
   render() {
+    if (this.props.G.pgn !== undefined) {
+      this.chess.load_pgn(this.props.G.pgn);
+    }
     let disconnected = null;
     if (this.props.isMultiplayer && !this.props.isConnected) {
       disconnected = <p>Disconnected!</p>;
@@ -259,9 +254,8 @@ class Board extends React.Component {
     const move = moves.find(move => move.from == from && move.to == to);
     if (move) {
       this.props.moves.move(move.san);
-    } else {
-      this.setState({ ...this.state, selected: '', highlighted: '' });
     }
+    this.setState({ ...this.state, selected: '', highlighted: '' });
   }
 }
 

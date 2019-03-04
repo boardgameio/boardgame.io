@@ -103,10 +103,10 @@ class _ClientImpl {
     if (ai !== undefined && multiplayer === undefined) {
       const bot = new ai.bot({ game, enumerate: ai.enumerate });
 
-      this.step = () => {
+      this.step = async () => {
         const state = this.store.getState();
         const playerID = state.ctx.actionPlayers[0];
-        const { action, metadata } = bot.play(state, playerID);
+        const { action, metadata } = await bot.play(state, playerID);
 
         if (action) {
           action.payload.metadata = metadata;

@@ -16,10 +16,7 @@ class _LobbyConnectionImpl {
   }
 
   _baseUrl() {
-    if (this.server) {
-      return `http://${this.server}/games`;
-    }
-    return '/games';
+    return `${this.server || ''}/games`;
   }
 
   async refresh() {
@@ -27,7 +24,7 @@ class _LobbyConnectionImpl {
       this.gameInstances.length = 0;
       const resp = await fetch(this._baseUrl());
       if (resp.status !== 200) {
-        throw 'HTTP status ' + resp.status;
+        throw new Error('HTTP status ' + resp.status);
       }
       const json = await resp.json();
       for (let gameName of json) {
@@ -52,7 +49,7 @@ class _LobbyConnectionImpl {
 
   _getGameComponents(gameName) {
     for (let comp of this.gameComponents) {
-      if (comp.game.name == gameName) return comp;
+      if (comp.game.name === gameName) return comp;
     }
   }
 
@@ -66,11 +63,11 @@ class _LobbyConnectionImpl {
     try {
       let inst = this._findPlayer(this.playerName);
       if (inst) {
-        throw 'player has already joined ' + inst.gameID;
+        throw new Error('player has already joined ' + inst.gameID);
       }
       inst = this._getGameInstance(gameID);
       if (!inst) {
-        throw 'game instance ' + gameID + ' not found';
+        throw new Error('game instance ' + gameID + ' not found');
       }
       const resp = await fetch(
         this._baseUrl() + '/' + gameName + '/' + gameID + '/join',
@@ -83,7 +80,7 @@ class _LobbyConnectionImpl {
           headers: { 'Content-Type': 'application/json' },
         }
       );
-      if (resp.status !== 200) throw 'HTTP status ' + resp.status;
+      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
       const json = await resp.json();
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
@@ -95,7 +92,7 @@ class _LobbyConnectionImpl {
   async leave(gameName, gameID) {
     try {
       let inst = this._getGameInstance(gameID);
-      if (!inst) throw 'game instance not found';
+      if (!inst) throw new Error('game instance not found');
       for (let player of inst.players) {
         if (player.name === this.playerName) {
           const resp = await fetch(
@@ -109,13 +106,15 @@ class _LobbyConnectionImpl {
               headers: { 'Content-Type': 'application/json' },
             }
           );
-          if (resp.status !== 200) throw 'HTTP status ' + resp.status;
+          if (resp.status !== 200) {
+            throw new Error('HTTP status ' + resp.status);
+          }
           delete player.name;
           delete this.playerCredentials;
           return;
         }
       }
-      throw 'player not found in room';
+      throw new Error('player not found in room');
     } catch (error) {
       throw new Error('failed to leave room ' + gameID + ' (' + error + ')');
     }
@@ -133,12 +132,12 @@ class _LobbyConnectionImpl {
   async create(gameName, numPlayers) {
     try {
       const comp = this._getGameComponents(gameName);
-      if (!comp) throw 'game not found';
+      if (!comp) throw new Error('game not found');
       if (
         numPlayers < comp.game.minPlayers ||
         numPlayers > comp.game.maxPlayers
       )
-        throw 'invalid number of players ' + numPlayers;
+        throw new Error('invalid number of players ' + numPlayers);
       const resp = await fetch(this._baseUrl() + '/' + gameName + '/create', {
         method: 'POST',
         body: JSON.stringify({
@@ -146,7 +145,7 @@ class _LobbyConnectionImpl {
         }),
         headers: { 'Content-Type': 'application/json' },
       });
-      if (resp.status !== 200) throw 'HTTP status ' + resp.status;
+      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
     } catch (error) {
       throw new Error(
         'failed to create room for ' + gameName + ' (' + error + ')'

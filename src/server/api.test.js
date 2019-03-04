@@ -8,7 +8,11 @@
 
 import request from 'supertest';
 
-import { isActionFromAuthenticPlayer, createApiServer } from './api';
+import {
+  isActionFromAuthenticPlayer,
+  addApiToServer,
+  createApiServer,
+} from './api';
 import Game from '../core/game';
 
 jest.setTimeout(2000000000);
@@ -634,6 +638,37 @@ describe('.createApiServer', () => {
         expect(instances[0].players).toEqual([{ id: 0 }, { id: 1 }]);
         expect(instances[1].players).toEqual([{ id: 0 }, { id: 1 }]);
       });
+    });
+  });
+});
+
+describe('.addApiToServer', () => {
+  describe('when server app is provided', () => {
+    let setSpy;
+    let db;
+    let server;
+    let useChain;
+    let games;
+
+    beforeEach(async () => {
+      setSpy = jest.fn();
+      useChain = jest.fn(() => ({ use: useChain }));
+      server = { use: useChain };
+      db = {
+        set: async (id, state) => setSpy(id, state),
+      };
+      games = [
+        Game({
+          name: 'foo',
+          setup: () => {},
+        }),
+      ];
+
+      addApiToServer({ app: server, db, games });
+    });
+
+    test('call .use method several times', async () => {
+      expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
   });
 });

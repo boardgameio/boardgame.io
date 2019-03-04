@@ -22,11 +22,11 @@ class LobbyRoomInstance extends React.Component {
     onClickPlay: PropTypes.func.isRequired,
   };
 
-  _createSeat(player) {
+  _createSeat = player => {
     return player.name || '[free]';
-  }
+  };
 
-  _createInstanceButtons(inst) {
+  _createInstanceButtons = inst => {
     const playerSeat = inst.players.find(
       player => player.name === this.props.playerName
     );
@@ -82,7 +82,7 @@ class LobbyRoomInstance extends React.Component {
         Spectate
       </button>
     );
-  }
+  };
 
   render() {
     const inst = this.props.gameInstance;

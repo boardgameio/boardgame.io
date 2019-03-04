@@ -1,3 +1,23 @@
+## v0.31.3
+
+#### Features
+
+- [[94b1d65](https://github.com/nicolodavis/boardgame.io/commit/94b1d65)] Add flatfile database with node-persist (#372)
+- [[f6e70fd](https://github.com/nicolodavis/boardgame.io/commit/f6e70fd)] Add custom renderer parameter to lobby + clean up code (#353)
+
+## v0.31.2
+
+#### Features
+
+- [[01a7e79](https://github.com/nicolodavis/boardgame.io/commit/01a7e79)] 3D Grid and Token (#352)
+- [[1f33d43](https://github.com/nicolodavis/boardgame.io/commit/1f33d43)] Serve API and Game Server on same port with option to split (#343)
+
+#### Bugfixes
+
+- [[87d1e5b](https://github.com/nicolodavis/boardgame.io/commit/87d1e5b)] Changed default Firebase return value to undefined (#361)
+- [[d7d6b44](https://github.com/nicolodavis/boardgame.io/commit/d7d6b44)] Fix lobby example (#351)
+- [[a285fbf](https://github.com/nicolodavis/boardgame.io/commit/a285fbf)] Allow https urls to be passed to lobby (#350)
+
 ## v0.31.1
 
 #### Bugfixes
