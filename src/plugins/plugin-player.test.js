@@ -82,7 +82,7 @@ describe('3 player game', () => {
     game = Game({
       moves: {
         A: G => {
-          G.player.field = 'A';
+          G.player = { field: 'A' };
           G.fields = Object.keys(G);
         },
         B: G => {

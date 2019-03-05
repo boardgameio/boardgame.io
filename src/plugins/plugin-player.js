@@ -17,33 +17,36 @@ export default {
   fnWrap: moveFn => {
     return (G, ctx, ...args) => {
       const current = ctx.currentPlayer;
-      const player = G.players[current];
 
-      G = { ...G, player };
+      Object.defineProperty(G, 'player', {
+        get: () => {
+          console.log('getter');
+          return G.players[current];
+        },
 
-      let other = null;
-      let opponent = null;
+        set: function(value) {
+          console.log('setter');
+          this.players[current] = value;
+        },
+      });
+
       if (ctx.numPlayers == 2) {
-        other = current == '0' ? '1' : '0';
-        opponent = G.players[other];
-        G.opponent = opponent;
+        const other = current == '0' ? '1' : '0';
+
+        Object.defineProperty(G, 'opponent', {
+          get: () => G.players[other],
+          set: value => {
+            this.players[other] = value;
+          },
+        });
       }
 
       G = moveFn(G, ctx, ...args);
 
-      const players = {
-        ...G.players,
-        [current]: G.player,
-      };
-
-      if (other !== null) {
-        players[other] = G.opponent;
-      }
-
       {
         /* eslint-disable-next-line no-unused-vars */
         const { player, opponent, ...rest } = G;
-        return { ...rest, players };
+        return { ...rest };
       }
     };
   },
