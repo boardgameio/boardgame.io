@@ -13,7 +13,7 @@
     "babel-plugin-named-asset-import": "^0.3.0",
     "babel-preset-react-app": "^7.0.0",
     "bfj": "6.1.1",
-    "boardgame.io": "^0.30.0",
+    "boardgame.io": "^0.31.3",
     "case-sensitive-paths-webpack-plugin": "2.1.2",
     "chalk": "2.4.1",
     "chess.js": "^0.10.2",
