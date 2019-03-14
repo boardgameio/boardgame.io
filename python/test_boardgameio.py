@@ -16,7 +16,7 @@
 import unittest
 import logging
 import mock
-import socketIO_client as io
+import socketIO_client_nexus as io
 from boardgameio import Namespace, Bot
 
 
@@ -46,7 +46,15 @@ class TestNamespace(unittest.TestCase):
         # call Namespace.on_sync()
         self.sut.on_sync(self.botmock.game_id, self.game_state)
         self.botmock.think.assert_called_once_with(self.game_state['G'], self.game_state['ctx'])
-        self.sut.emit.assert_called_once_with('action', self.resulting_move,
+        self.sut.emit.assert_called_once_with('update', self.resulting_move,
+                                              self.game_state['_stateID'],
+                                              self.botmock.game_id, self.botmock.player_id)
+
+    def test_on_update_shall_call_think(self):
+        # call Namespace.on_update()
+        self.sut.on_update(self.botmock.game_id, self.game_state)
+        self.botmock.think.assert_called_once_with(self.game_state['G'], self.game_state['ctx'])
+        self.sut.emit.assert_called_once_with('update', self.resulting_move,
                                               self.game_state['_stateID'],
                                               self.botmock.game_id, self.botmock.player_id)
 
