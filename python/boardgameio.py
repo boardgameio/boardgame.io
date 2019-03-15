@@ -12,7 +12,7 @@ Boardgame.io python client.
 """
 
 import logging
-import socketIO_client as io
+import socketIO_client_nexus as io
 
 class Namespace(io.BaseNamespace):
     """
@@ -47,8 +47,12 @@ class Namespace(io.BaseNamespace):
         """ Handle reconnection event. """
         self.log.info('reconnected')
 
+    def on_update(self, *args):
+        """ Handle server 'update' event. """
+        self.on_sync(*args)
+
     def on_sync(self, *args):
-        """ Handle serve 'sync' event. """
+        """ Handle server 'sync' event. """
         game_id = args[0]
         state = args[1]
         state_id = state['_stateID']
@@ -77,7 +81,7 @@ class Namespace(io.BaseNamespace):
                         # pop next action
                         action = self.actions.pop(0)
                         self.log.info('sent action: %s', action['payload'])
-                        self.emit('action', action, state_id, game_id,
+                        self.emit('update', action, state_id, game_id,
                                   self.bot.player_id)
 
 
@@ -144,11 +148,11 @@ class Bot(object):
         To be overridden by the user.
         Shall return a list of actions, instantiated with make_move().
         """
-        assert False
+        raise NotImplementedError
 
     def gameover(self, _G, _ctx):
         """
         To be overridden by the user.
         Shall handle game over.
         """
-        assert False
+        raise NotImplementedError
