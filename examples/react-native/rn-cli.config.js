@@ -1,5 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  getProjectRoots: () => [__dirname, path.join(__dirname, '..')],
+  getProjectRoots() {
+    return [
+      path.join(__dirname, '..', '..', 'packages'),
+      __dirname
+    ];
+  }
 };
