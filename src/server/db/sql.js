@@ -51,11 +51,14 @@ export class SQL {
    */
   async set(id, state) {
     const JSONstate = JSON.encode(state);
-    this.games.findOne({ where: { gameID: id } }).then(game => {
-      game.gameState = JSONstate;
-      return;
-    });
-    return await this.games.create({ gameID: id, gameState: JSONstate });
+    if ((await this.get(id)) !== undefined) {
+      return await this.games.update(
+        { gameState: JSONstate },
+        { where: { gameID: id } }
+      );
+    } else {
+      return await this.games.create({ gameID: id, gameState: JSONstate });
+    }
   }
 
   /**

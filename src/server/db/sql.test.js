@@ -18,9 +18,18 @@ test('SQLite db', async () => {
 
   // Create game.
   await db.set('gameID', { a: 1 });
+
   // Must return created game.
+  await db.get('gameID');
   state = await db.get('gameID');
   expect(state).toEqual({ a: 1 });
+
+  // Must modify created game.
+  await db.set('gameID', { a: 2 });
+
+  // Must return modified game.
+  state = await db.get('gameID');
+  expect(state).toEqual({ a: 2 });
 
   // Must return true if game exists
   let has = await db.has('gameID');
