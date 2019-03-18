@@ -91,6 +91,34 @@ const server = Server({
 server.run(8000);
 ```
 
+### SQLite/MySQL/MSSQL/PostgreSQL
+
+First, install the appropriate packages per http://docs.sequelizejs.com/manual/installation/getting-started#installation .
+
+Then modify your server spec to indicate that you want to use the SQL connector:
+
+```js
+const { Server, SQL } = require('boardgame.io/server');
+const { TicTacToe } = require('./game');
+
+const server = Server({
+  games: [TicTacToe],
+
+  db: new SQL({
+    dialect: 'sqlite',
+    storage: ':memory:',
+    logging: false,
+  }),
+});
+
+server.run(8000);
+```
+
+The SQL() constructor passes all arguments to Sequelize.  When no arguments are provided, an in-memory SQLite database will be used (like the example above).
+
+A list of parameters can be found at http://docs.sequelizejs.com/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor .
+
+
 ### Writing a Custom Connector
 
 Just create a class with the same interface as

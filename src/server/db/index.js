@@ -2,6 +2,7 @@ import { InMemory } from './inmemory';
 import { Mongo } from './mongo';
 import { Firebase } from './firebase';
 import { FlatFile } from './flatfile';
+import { SQL } from './sql';
 
 const DBFromEnv = () => {
   if (process.env.MONGO_URI && process.env.MONGO_DATABASE) {
@@ -27,4 +28,4 @@ const DBFromEnv = () => {
   }
 };
 
-export { InMemory, Mongo, Firebase, FlatFile, DBFromEnv };
+export { InMemory, Mongo, Firebase, FlatFile, SQL, DBFromEnv };
