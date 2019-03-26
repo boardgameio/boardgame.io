@@ -56,18 +56,6 @@ test('can pass extra props to Client', () => {
   expect(board.props().extraValue).toBe(55);
 });
 
-test('custom loading component', () => {
-  const Loading = () => <div>custom</div>;
-  const Board = Client({
-    game: Game({}),
-    loading: Loading,
-    board: TestBoard,
-    multiplayer: { local: true },
-  });
-  const board = Enzyme.mount(<Board />);
-  expect(board.html()).toContain('custom');
-});
-
 test('can pass empty board', () => {
   const Board = Client({
     game: Game({}),

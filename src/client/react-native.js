@@ -30,16 +30,7 @@ import { Client as RawClient, GetOpts } from './client';
  *   and dispatch actions such as MAKE_MOVE.
  */
 export function Client(opts) {
-  let { game, numPlayers, board, loading, multiplayer, enhancer } = GetOpts(
-    opts
-  );
-
-  // Component that is displayed before the client has synced
-  // with the game master.
-  if (loading === undefined) {
-    const Loading = () => <div className="bgio-loading">connecting...</div>;
-    loading = Loading;
-  }
+  let { game, numPlayers, board, multiplayer, enhancer } = GetOpts(opts);
 
   /*
    * WrappedBoard
@@ -109,10 +100,6 @@ export function Client(opts) {
       const state = this.client.getState();
       const { gameID, playerID, ...rest } = this.props;
 
-      if (state === null) {
-        return React.createElement(loading);
-      }
-
       if (board) {
         _board = React.createElement(board, {
           ...state,
@@ -129,7 +116,7 @@ export function Client(opts) {
         });
       }
 
-      return <div className="bgio-client">{_board}</div>;
+      return _board;
     }
   };
 }

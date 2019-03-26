@@ -1,3 +1,15 @@
+## v0.31.4
+
+#### Features
+
+- [[3bde0ca](https://github.com/nicolodavis/boardgame.io/commit/3bde0ca)] Adding step props to the Board (#376)
+- [[4c3056c](https://github.com/nicolodavis/boardgame.io/commit/4c3056c)] Making step accept a Promise from bot.play() (#375)
+
+#### Bugfixes
+
+- [[c24e0cd](https://github.com/nicolodavis/boardgame.io/commit/c24e0cd)] upgrade Expo and fix React Native example
+- [[c1ee6f3](https://github.com/nicolodavis/boardgame.io/commit/c1ee6f3)] python bot: fix #379 (#380)
+
 ## v0.31.3
 
 #### Features
