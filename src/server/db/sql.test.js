@@ -19,8 +19,11 @@ test('SQLite db', async () => {
   // Create game.
   await db.set('gameID', { a: 1 });
 
+  // Must return true if game exists
+  let has = await db.has('gameID');
+  expect(has).toEqual(true);
+
   // Must return created game.
-  await db.get('gameID');
   state = await db.get('gameID');
   expect(state).toEqual({ a: 1 });
 
@@ -30,10 +33,6 @@ test('SQLite db', async () => {
   // Must return modified game.
   state = await db.get('gameID');
   expect(state).toEqual({ a: 2 });
-
-  // Must return true if game exists
-  let has = await db.has('gameID');
-  expect(has).toEqual(true);
 
   // Must return all keys
   let keys = await db.list();
@@ -45,4 +44,8 @@ test('SQLite db', async () => {
 
   // Shall not return error
   await db.remove('gameID');
+
+  // Must return false if game does not exist
+  has = await db.has('gameID');
+  expect(has).toEqual(false);
 });

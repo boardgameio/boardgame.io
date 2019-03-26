@@ -30,7 +30,7 @@ export class SQL {
    * Connect.
    */
   async connect() {
-    this.db = new Sequelize({ ...this.params, operatorsAliases: Sequelize.Op });
+    this.db = new Sequelize(this.params);
     this.games = this.db.define('games', {
       gameState: {
         type: Sequelize.STRING,
@@ -51,7 +51,7 @@ export class SQL {
    */
   async set(id, state) {
     const JSONstate = JSON.encode(state);
-    if ((await this.get(id)) !== undefined) {
+    if (await this.has(id)) {
       return await this.games.update(
         { gameState: JSONstate },
         { where: { gameID: id } }
@@ -81,8 +81,8 @@ export class SQL {
    * @returns {boolean} - True if a game with this id exists.
    */
   async has(id) {
-    const game = await this.games.findOne({ where: { gameID: id } });
-    return game !== null;
+    const count = await this.games.count({ where: { gameID: id } });
+    return count !== 0;
   }
 
   /**
