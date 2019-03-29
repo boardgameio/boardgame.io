@@ -13,6 +13,29 @@ import { makeMove, gameEvent } from './action-creators';
 import { InitializeGame, CreateGameReducer } from './reducer';
 
 describe('turnOrder', () => {
+  // Defines a matcher for testing that ctx has no undefined properties.
+  // Identifies which property is undefined.
+  expect.extend({
+    toHaveUndefinedProperties(ctx) {
+      const undefinedEntry = Object.entries(ctx).find(entry => {
+        const [, value] = entry;
+        return value === undefined;
+      });
+      if (undefinedEntry === undefined) {
+        return {
+          message: () => `expected some properties of ctx to be undefined`,
+          pass: false,
+        };
+      } else {
+        const [k] = undefinedEntry;
+        return {
+          message: () => `expected ctx.${k} to be defined`,
+          pass: true,
+        };
+      }
+    },
+  });
+
   test('DEFAULT', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
@@ -23,6 +46,8 @@ describe('turnOrder', () => {
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0']);
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.actionPlayers).toEqual(['1']);
@@ -43,6 +68,8 @@ describe('turnOrder', () => {
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0']);
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.actionPlayers).toEqual(['1']);
@@ -61,6 +88,8 @@ describe('turnOrder', () => {
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0', '1']);
@@ -79,6 +108,7 @@ describe('turnOrder', () => {
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0', '1']);
+    expect(state.ctx).not.toHaveUndefinedProperties();
 
     state = flow.processGameEvent(state, gameEvent('endTurn'));
 
@@ -108,6 +138,8 @@ describe('turnOrder', () => {
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['1', '2']);
@@ -126,6 +158,7 @@ describe('turnOrder', () => {
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['1', '2']);
+    expect(state.ctx).not.toHaveUndefinedProperties();
 
     state = flow.processGameEvent(state, gameEvent('endTurn'));
 
@@ -155,6 +188,8 @@ describe('turnOrder', () => {
     state = flow.init(state);
 
     expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
   });
@@ -168,6 +203,8 @@ describe('turnOrder', () => {
     state = flow.init(state);
 
     expect(state.ctx.currentPlayer).toBe('2');
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     state = flow.processGameEvent(state, gameEvent('endTurn'));
@@ -184,6 +221,8 @@ describe('turnOrder', () => {
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('9');
     expect(state.ctx.actionPlayers).toEqual(['9']);
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('3');
     expect(state.ctx.actionPlayers).toEqual(['3']);

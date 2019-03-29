@@ -70,8 +70,7 @@ function setActionPlayers(G, ctx, arg) {
   return {
     ...ctx,
     actionPlayers,
-    _actionPlayersOnce: arg.once,
-    _actionPlayersOthers: arg.others,
+    _actionPlayersOnce: arg.once || false,
   };
 }
 
