@@ -50,33 +50,19 @@ export class SQL {
    */
   async set(id, state) {
     const JSONstate = JSON.encode(state);
-    return this.db.transaction(t => {
-      // chain all your queries here. make sure you return them.
-      return this.games
-        .count(
-          {
-            gameID: id,
-          },
-          { transaction: t }
-        )
-        .then(count => {
-          if (count === 0) {
-            return this.games.create(
-              {
-                gameID: id,
-                gameState: JSONstate,
-              },
-              { transaction: t }
-            );
-          } else {
-            return this.games.update(
-              { gameState: JSONstate },
-              { where: { gameID: id } },
-              { transaction: t }
-            );
-          }
-        });
+    const game = await this.games.findOrCreate({
+      where: { gameID: id },
+      defaults: { gameID: id, gameState: JSONstate },
     });
+    if (!game[1]) {
+      // if not created
+      const updatedGame = await this.games.update(
+        { gameState: JSONstate },
+        { where: { gameID: id } }
+      );
+      return updatedGame;
+    }
+    return game;
   }
 
   /**
