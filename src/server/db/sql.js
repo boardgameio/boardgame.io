@@ -40,8 +40,7 @@ export class SQL {
         primaryKey: true,
       },
     });
-    await this.db.sync();
-    return;
+    return await this.db.sync();
   }
 
   /**
@@ -51,14 +50,33 @@ export class SQL {
    */
   async set(id, state) {
     const JSONstate = JSON.encode(state);
-    if (await this.has(id)) {
-      return await this.games.update(
-        { gameState: JSONstate },
-        { where: { gameID: id } }
-      );
-    } else {
-      return await this.games.create({ gameID: id, gameState: JSONstate });
-    }
+    return this.db.transaction(t => {
+      // chain all your queries here. make sure you return them.
+      return this.games
+        .count(
+          {
+            gameID: id,
+          },
+          { transaction: t }
+        )
+        .then(count => {
+          if (count === 0) {
+            return this.games.create(
+              {
+                gameID: id,
+                gameState: JSONstate,
+              },
+              { transaction: t }
+            );
+          } else {
+            return this.games.update(
+              { gameState: JSONstate },
+              { where: { gameID: id } },
+              { transaction: t }
+            );
+          }
+        });
+    });
   }
 
   /**
@@ -72,7 +90,7 @@ export class SQL {
     if (game === null) {
       return undefined; // this is what BGIO expects
     }
-    return await JSON.decode(game.gameState);
+    return JSON.decode(game.gameState);
   }
 
   /**
