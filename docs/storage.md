@@ -73,7 +73,7 @@ The `Firebase` constructor is passed an object with the following properties:
 1. `config` (_object_): passed to the underlying SDK's `initializeApp` function.
    See the Firebase
    [Admin SDK](https://firebase.google.com/docs/admin/setup) or
-   [Web SDK](https://firebase.google.com/docs/admin/setup) for information
+   [Web SDK](https://firebase.google.com/docs/web/setup) for information
    on what this should contain.
 
 2. `dbname` (_string_): the name of the database within the Firebase project.
