@@ -20,7 +20,7 @@ export class Firebase {
    * The default engine is Firestore.
    * @constructor
    */
-  constructor({ config, dbname, engine, cacheSize }) {
+  constructor({ config, dbname, engine, cacheSize, adminClient }) {
     if (cacheSize === undefined) {
       cacheSize = 1000;
     }
@@ -34,7 +34,12 @@ export class Firebase {
       config = {};
     }
 
-    this.client = require('firebase');
+    if (adminClient) {
+      this.client = require('firebase-admin');
+    } else {
+      this.client = require('firebase');
+    }
+
     this.engine = engine === ENGINE_RTDB ? engine : ENGINE_FIRESTORE;
     this.config = config;
     this.dbname = dbname;

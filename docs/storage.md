@@ -35,34 +35,61 @@ server.run(8000);
 
 ### Firebase
 
-First, install the necessary packages:
+First, install the Firebase Admin Node.js SDK:
 
 ```
-npm install --save firebase
+npm install --save firebase-admin
 ```
 
-Then modify your server spec to indicate that you want to connect to Firebase:
+Download a service account key with the Cloud Datastore User role,
+then modify your server spec to indicate that you want to connect to Firebase:
 
 ```js
 const { Server, Firebase } = require('boardgame.io/server');
 const { TicTacToe } = require('./game');
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json');
 
 const server = Server({
   games: [TicTacToe],
 
   db: new Firebase({
     config: {
-      apiKey: '...',
-      authDomain: '...',
+      credential: admin.credential.cert(serviceAccount),
       databaseURL: '...',
-      projectID: '...',
     },
-    dbname: 'bgio',
+    engine: 'Firestore',
+    adminClient: true,
   }),
 });
 
 server.run(8000);
 ```
+
+#### Constructor
+
+The `Firebase` constructor is passed an object with the following properties:
+
+1. `config` (_object_): passed to the underlying SDK's `initializeApp` function.
+   See the Firebase
+   [Admin SDK](https://firebase.google.com/docs/admin/setup) or
+   [Web SDK](https://firebase.google.com/docs/web/setup) for information
+   on what this should contain.
+
+2. `dbname` (_string_): the name of the database within the Firebase project.
+   If not provided, `bgio` is used.
+
+3. `engine` (_string_): the underlying database engine.
+   Can be `Firestore` or `RTDB`. If not provided, `RTDB` is used.
+
+4. `cacheSize` (_number_): size of the cache in games.
+   If not provided, 1000 is used.
+
+5. `adminClient` (_boolean_): whether to use the Firebase Admin SDK.
+   If true, create a client using the Firebase Admin SDK (`firebase-admin`
+   module). If false or not provided, create a client using the Firebase
+   Web Client SDK (`firebase` module). The Admin SDK should be preferred.
+   Note the corresponding `config` objects are not compatible.
 
 ### Flatfile database with [node-persist](https://github.com/simonlast/node-persist)
 

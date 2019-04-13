@@ -45,6 +45,18 @@ test('construction', () => {
   expect(db.config).toEqual({});
 });
 
+test('adminClient', () => {
+  const dbname = 'a';
+
+  const db = new Firebase({ dbname, adminClient: false });
+  const dbAdmin = new Firebase({ dbname, adminClient: true });
+
+  // The projectManagement function is part of the Admin SDK but not the
+  // Web SDK.
+  expect(dbAdmin.client.projectManagement).toBeDefined();
+  expect(db.client.projectManagement).not.toBeDefined();
+});
+
 describe('Firestore', async () => {
   let db = null;
 
