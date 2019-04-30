@@ -9,7 +9,7 @@
 import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import { InMemory } from '../server/db/inmemory';
-import { Master, redactLog } from './master';
+import { Master, redactLog, isActionFromAuthenticPlayer } from './master';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -306,6 +306,12 @@ describe('authentication', async () => {
     await master.onUpdate(action, 0, 'gameID', '0');
     expect(sendAll).toHaveBeenCalled();
   });
+
+  test('default', async () => {
+    const master = new Master(game, storage, TransportAPI(send, sendAll), true);
+    await master.onUpdate(action, 0, 'gameID', '0');
+    expect(sendAll).toHaveBeenCalled();
+  });
 });
 
 describe('redactLog', () => {
@@ -423,5 +429,134 @@ describe('redactLog', () => {
         _stateID: 1,
       },
     ]);
+  });
+});
+
+describe('isActionFromAuthenticPlayer', () => {
+  let action;
+  let playerID;
+  let gameMetadata;
+
+  beforeEach(() => {
+    playerID = '0';
+
+    action = {
+      payload: {
+        credentials: 'SECRET',
+      },
+    };
+
+    gameMetadata = {
+      players: {
+        '0': {
+          credentials: 'SECRET',
+        },
+      },
+    };
+  });
+
+  describe('when game metadata is not found', () => {
+    beforeEach(() => {
+      gameMetadata = null;
+    });
+
+    test('the action is authentic', () => {
+      const result = isActionFromAuthenticPlayer({
+        action,
+        gameMetadata,
+        playerID,
+      });
+
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe('when action contains no payload', () => {
+    beforeEach(() => {
+      action = {};
+    });
+
+    test('the action is authentic', async () => {
+      const result = isActionFromAuthenticPlayer({
+        action,
+        gameMetadata,
+        playerID,
+      });
+
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe('when game has no credentials', () => {
+    beforeEach(() => {
+      gameMetadata = {
+        players: {
+          '0': {},
+        },
+      };
+    });
+
+    test('then action is authentic', async () => {
+      const result = isActionFromAuthenticPlayer({
+        action,
+        gameMetadata,
+        playerID,
+      });
+
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe('when game has credentials', () => {
+    describe('when action contains no credentials', () => {
+      beforeEach(() => {
+        action = {
+          payload: {
+            someStuff: 'foo',
+          },
+        };
+      });
+
+      test('then action is not authentic', async () => {
+        const result = isActionFromAuthenticPlayer({
+          action,
+          gameMetadata,
+          playerID,
+        });
+
+        expect(result).toBeFalsy();
+      });
+    });
+
+    describe('when action credentials do not match game credentials', () => {
+      beforeEach(() => {
+        action = {
+          payload: {
+            credentials: 'WRONG',
+          },
+        };
+      });
+      test('then action is not authentic', async () => {
+        const result = isActionFromAuthenticPlayer({
+          action,
+          gameMetadata,
+          playerID,
+        });
+
+        expect(result).toBeFalsy();
+      });
+    });
+
+    describe('when action credentials do match game credentials', () => {
+      test('then action is authentic', async () => {
+        const result = isActionFromAuthenticPlayer({
+          action,
+          gameMetadata,
+          playerID,
+        });
+
+        expect(result).toBeTruthy();
+      });
+    });
   });
 });

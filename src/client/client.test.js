@@ -148,20 +148,46 @@ describe('multiplayer', () => {
   });
 
   describe('local master', () => {
-    let client;
+    let client0;
+    let client1;
+    let spec;
 
     beforeAll(() => {
-      client = Client(
-        GetOpts({
-          game: Game({ moves: { A: () => {} } }),
-          multiplayer: { local: true },
-        })
-      );
-      client.connect();
+      spec = GetOpts({
+        game: Game({ moves: { A: (G, ctx) => ({ A: ctx.playerID }) } }),
+        multiplayer: { local: true },
+      });
+
+      client0 = Client({ ...spec, playerID: '0' });
+      client1 = Client({ ...spec, playerID: '1' });
+
+      client0.connect();
+      client1.connect();
     });
 
     test('correct transport used', () => {
-      expect(client.transport instanceof Local).toBe(true);
+      expect(client0.transport instanceof Local).toBe(true);
+      expect(client1.transport instanceof Local).toBe(true);
+    });
+
+    test('multiplayer interactions', () => {
+      expect(client0.getState().ctx.currentPlayer).toBe('0');
+      expect(client1.getState().ctx.currentPlayer).toBe('0');
+
+      client0.moves.A();
+
+      expect(client0.getState().G).toEqual({ A: '0' });
+      expect(client1.getState().G).toEqual({ A: '0' });
+
+      client0.events.endTurn();
+
+      expect(client0.getState().ctx.currentPlayer).toBe('1');
+      expect(client1.getState().ctx.currentPlayer).toBe('1');
+
+      client1.moves.A();
+
+      expect(client0.getState().G).toEqual({ A: '1' });
+      expect(client1.getState().G).toEqual({ A: '1' });
     });
   });
 

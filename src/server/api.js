@@ -15,7 +15,6 @@ const cors = require('@koa/cors');
 import { InitializeGame } from '../core/reducer';
 
 const createCredentials = () => uuid();
-const getGameMetadataKey = gameID => `${gameID}:metadata`;
 const isGameMetadataKey = (key, gameName) =>
   key.match(gameName + ':.*:metadata');
 const getNamespacedGameID = (gameID, gameName) => `${gameName}:${gameID}`;
@@ -24,42 +23,7 @@ const createGameMetadata = () => ({
   players: {},
 });
 
-export const isActionFromAuthenticPlayer = async ({
-  action,
-  db,
-  gameID,
-  playerID,
-}) => {
-  const gameMetadata = await db.get(getGameMetadataKey(gameID));
-  if (!gameMetadata) {
-    return true;
-  }
-
-  if (!action.payload) {
-    return true;
-  }
-
-  const hasCredentials = Object.keys(gameMetadata.players).some(key => {
-    return !!(
-      gameMetadata.players[key] && gameMetadata.players[key].credentials
-    );
-  });
-  if (!hasCredentials) {
-    return true;
-  }
-
-  if (!action.payload.credentials) {
-    return false;
-  }
-
-  if (
-    action.payload.credentials !== gameMetadata.players[playerID].credentials
-  ) {
-    return false;
-  }
-
-  return true;
-};
+const GameMetadataKey = gameID => `${gameID}:metadata`;
 
 /**
  * Creates a new game.
@@ -87,7 +51,7 @@ export const CreateGame = async (db, game, numPlayers, setupData) => {
   const gameID = getNewGameInstanceID();
   const namespacedGameID = getNamespacedGameID(gameID, game.name);
 
-  await db.set(getGameMetadataKey(namespacedGameID), gameMetadata);
+  await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
   await db.set(namespacedGameID, state);
 
   return gameID;
@@ -155,7 +119,7 @@ export const addApiToServer = ({ app, db, games }) => {
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
     const namespacedGameID = getNamespacedGameID(gameID, gameName);
-    const gameMetadata = await db.get(getGameMetadataKey(namespacedGameID));
+    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
 
     if (!gameMetadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
@@ -170,7 +134,7 @@ export const addApiToServer = ({ app, db, games }) => {
     gameMetadata.players[playerID].name = playerName;
     const playerCredentials = gameMetadata.players[playerID].credentials;
 
-    await db.set(getGameMetadataKey(namespacedGameID), gameMetadata);
+    await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
 
     ctx.body = {
       playerCredentials,
@@ -183,7 +147,7 @@ export const addApiToServer = ({ app, db, games }) => {
     const playerID = ctx.request.body.playerID;
     const playerCredentials = ctx.request.body.playerCredentials;
     const namespacedGameID = getNamespacedGameID(gameID, gameName);
-    const gameMetadata = await db.get(getGameMetadataKey(namespacedGameID));
+    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
 
     if (!gameMetadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
@@ -197,11 +161,11 @@ export const addApiToServer = ({ app, db, games }) => {
 
     delete gameMetadata.players[playerID].name;
     if (Object.values(gameMetadata.players).some(val => val.name)) {
-      await db.set(getGameMetadataKey(namespacedGameID), gameMetadata);
+      await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
     } else {
       // remove game
       await db.remove(gameID);
-      await db.remove(getGameMetadataKey(namespacedGameID));
+      await db.remove(GameMetadataKey(namespacedGameID));
     }
     ctx.body = {};
   });

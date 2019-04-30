@@ -31,7 +31,8 @@ export function LocalMaster(game) {
     }
   };
 
-  const master = new Master(game, new InMemory(), { send, sendAll });
+  const master = new Master(game, new InMemory(), { send, sendAll }, false);
+  master.executeSynchronously = true;
   master.connect = (gameID, playerID, callback) => {
     clientCallbacks[playerID] = callback;
   };
@@ -96,19 +97,14 @@ export class Local {
    * Called when an action that has to be relayed to the
    * game master is made.
    */
-  async onAction(state, action) {
-    await this.master.onUpdate(
-      action,
-      state._stateID,
-      this.gameID,
-      this.playerID
-    );
+  onAction(state, action) {
+    this.master.onUpdate(action, state._stateID, this.gameID, this.playerID);
   }
 
   /**
    * Connect to the server.
    */
-  async connect() {
+  connect() {
     this.master.connect(
       this.gameID,
       this.playerID,
@@ -121,7 +117,7 @@ export class Local {
         }
       }
     );
-    await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
+    this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
 
   /**
@@ -133,21 +129,21 @@ export class Local {
    * Updates the game id.
    * @param {string} id - The new game id.
    */
-  async updateGameID(id) {
+  updateGameID(id) {
     this.gameID = this.gameName + ':' + id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
-    await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
+    this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
 
   /**
    * Updates the player associated with this client.
    * @param {string} id - The new player id.
    */
-  async updatePlayerID(id) {
+  updatePlayerID(id) {
     this.playerID = id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
-    await this.master.onSync(this.gameID, this.playerID, this.numPlayers);
+    this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
 }

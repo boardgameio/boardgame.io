@@ -74,7 +74,7 @@ test('custom loading component', () => {
     game: Game({}),
     loading: Loading,
     board: TestBoard,
-    multiplayer: { local: true },
+    multiplayer: true,
   });
   const board = Enzyme.mount(<Board />);
   expect(board.html()).toContain('custom');

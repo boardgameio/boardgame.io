@@ -7,7 +7,6 @@
  */
 
 import { Master } from '../../master/master';
-import { isActionFromAuthenticPlayer } from '../api';
 const IO = require('koa-socket-2');
 
 const PING_TIMEOUT = 20 * 1e3;
@@ -84,7 +83,7 @@ export function SocketIO(_clientInfo, _roomInfo) {
               game,
               app.context.db,
               TransportAPI(gameID, socket, clientInfo, roomInfo),
-              isActionFromAuthenticPlayer
+              true
             );
             await master.onUpdate(action, stateID, gameID, playerID);
           });
@@ -111,7 +110,7 @@ export function SocketIO(_clientInfo, _roomInfo) {
               game,
               app.context.db,
               TransportAPI(gameID, socket, clientInfo, roomInfo),
-              isActionFromAuthenticPlayer
+              true
             );
             await master.onSync(gameID, playerID, numPlayers);
           });

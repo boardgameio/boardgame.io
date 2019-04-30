@@ -21,7 +21,7 @@ export class InMemory {
    * Connect.
    * No-op for the InMemory instance.
    */
-  async connect() {
+  connect() {
     return;
   }
 
@@ -30,8 +30,8 @@ export class InMemory {
    * @param {string} id - The game id.
    * @param {object} store - A game state to persist.
    */
-  async set(id, state) {
-    return await this.games.set(id, state);
+  set(id, state) {
+    return this.games.set(id, state);
   }
 
   /**
@@ -40,8 +40,8 @@ export class InMemory {
    * @returns {object} - A game state, or undefined
    *                     if no game is found with this id.
    */
-  async get(id) {
-    return await this.games.get(id);
+  get(id) {
+    return this.games.get(id);
   }
 
   /**
@@ -49,16 +49,16 @@ export class InMemory {
    * @param {string} id - The game id.
    * @returns {boolean} - True if a game with this id exists.
    */
-  async has(id) {
-    return await this.games.has(id);
+  has(id) {
+    return this.games.has(id);
   }
 
   /**
    * Remove the game state from the in-memory object.
    * @param {string} id - The game id.
    */
-  async remove(id) {
-    if (!(await this.games.has(id))) return;
+  remove(id) {
+    if (!this.games.has(id)) return;
     this.games.delete(id);
   }
 
@@ -66,7 +66,7 @@ export class InMemory {
    * Return all keys.
    * @returns {array} - Array of keys (strings)
    */
-  async list() {
-    return [...(await this.games.keys())];
+  list() {
+    return [...this.games.keys()];
   }
 }

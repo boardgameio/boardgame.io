@@ -11,6 +11,8 @@ import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
+const GameMetadataKey = gameID => `${gameID}:metadata`;
+
 /**
  * Redact the log.
  *
@@ -54,6 +56,45 @@ export function redactLog(redactedMoves, log, playerID) {
 }
 
 /**
+ * Verifies that the move came from a player with the
+ * appropriate credentials.
+ */
+export const isActionFromAuthenticPlayer = ({
+  action,
+  gameMetadata,
+  playerID,
+}) => {
+  if (!gameMetadata) {
+    return true;
+  }
+
+  if (!action.payload) {
+    return true;
+  }
+
+  const hasCredentials = Object.keys(gameMetadata.players).some(key => {
+    return !!(
+      gameMetadata.players[key] && gameMetadata.players[key].credentials
+    );
+  });
+  if (!hasCredentials) {
+    return true;
+  }
+
+  if (!action.payload.credentials) {
+    return false;
+  }
+
+  if (
+    action.payload.credentials !== gameMetadata.players[playerID].credentials
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
  * Master
  *
  * Class that runs the game and maintains the authoritative state.
@@ -61,14 +102,16 @@ export function redactLog(redactedMoves, log, playerID) {
  * storageAPI to communicate with the database.
  */
 export class Master {
-  constructor(game, storageAPI, transportAPI, isActionFromAuthenticPlayer) {
+  constructor(game, storageAPI, transportAPI, auth) {
     this.game = game;
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
-    this.isActionFromAuthenticPlayer = () => true;
+    this.auth = () => true;
 
-    if (isActionFromAuthenticPlayer !== undefined) {
-      this.isActionFromAuthenticPlayer = isActionFromAuthenticPlayer;
+    if (auth === true) {
+      this.auth = isActionFromAuthenticPlayer;
+    } else if (typeof auth === 'function') {
+      this.auth = auth;
     }
   }
 
@@ -78,8 +121,37 @@ export class Master {
    * along with a deltalog.
    */
   async onUpdate(action, stateID, gameID, playerID) {
+    let isActionAuthentic;
+
+    if (this.executeSynchronously) {
+      const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
+      isActionAuthentic = this.auth({
+        action,
+        gameMetadata,
+        gameID,
+        playerID,
+      });
+    } else {
+      const gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
+      isActionAuthentic = this.auth({
+        action,
+        gameMetadata,
+        gameID,
+        playerID,
+      });
+    }
+    if (!isActionAuthentic) {
+      return { error: 'unauthorized action' };
+    }
+
     const key = gameID;
-    let state = await this.storageAPI.get(key);
+
+    let state;
+    if (this.executeSynchronously) {
+      state = this.storageAPI.get(key);
+    } else {
+      state = await this.storageAPI.get(key);
+    }
 
     if (state === undefined) {
       logging.error(`game not found, gameID=[${key}]`);
@@ -91,16 +163,6 @@ export class Master {
       numPlayers: state.ctx.numPlayers,
     });
     const store = createStore(reducer, state);
-
-    const isActionAuthentic = await this.isActionFromAuthenticPlayer({
-      action,
-      db: this.storageAPI,
-      gameID,
-      playerID,
-    });
-    if (!isActionAuthentic) {
-      return { error: 'unauthorized action' };
-    }
 
     // Check whether the player is allowed to make the move.
     if (
@@ -162,7 +224,11 @@ export class Master {
     log = [...log, ...state.deltalog];
     const stateWithLog = { ...state, log };
 
-    await this.storageAPI.set(key, stateWithLog);
+    if (this.executeSynchronously) {
+      this.storageAPI.set(key, stateWithLog);
+    } else {
+      await this.storageAPI.set(key, stateWithLog);
+    }
   }
 
   /**
@@ -172,14 +238,26 @@ export class Master {
   async onSync(gameID, playerID, numPlayers) {
     const key = gameID;
 
-    let state = await this.storageAPI.get(key);
+    let state;
+
+    if (this.executeSynchronously) {
+      state = this.storageAPI.get(key);
+    } else {
+      state = await this.storageAPI.get(key);
+    }
 
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
     if (state === undefined) {
       state = InitializeGame({ game: this.game, numPlayers });
-      await this.storageAPI.set(key, state);
-      state = await this.storageAPI.get(key);
+
+      if (this.executeSynchronously) {
+        this.storageAPI.set(key, state);
+        state = this.storageAPI.get(key);
+      } else {
+        await this.storageAPI.set(key, state);
+        state = await this.storageAPI.get(key);
+      }
     }
 
     const filteredState = {

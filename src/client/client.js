@@ -185,8 +185,6 @@ class _ClientImpl {
         }
       }
 
-      this.subscribeCallback();
-
       return result;
     };
 
@@ -195,23 +193,40 @@ class _ClientImpl {
      * which keeps the authoritative version of the state.
      */
     const TransportMiddleware = store => next => action => {
-      const state = store.getState();
+      const baseState = store.getState();
       const result = next(action);
 
       if (action.clientOnly != true) {
-        this.transport.onAction(state, action);
+        this.transport.onAction(baseState, action);
       }
 
       return result;
     };
 
+    /**
+     * Middleware that intercepts actions and invokes the subscription callback.
+     */
+    const SubscriptionMiddleware = () => next => action => {
+      const result = next(action);
+      this.subscribeCallback();
+      return result;
+    };
+
     if (enhancer !== undefined) {
       enhancer = compose(
-        applyMiddleware(LogMiddleware, TransportMiddleware),
+        applyMiddleware(
+          SubscriptionMiddleware,
+          TransportMiddleware,
+          LogMiddleware
+        ),
         enhancer
       );
     } else {
-      enhancer = applyMiddleware(LogMiddleware, TransportMiddleware);
+      enhancer = applyMiddleware(
+        SubscriptionMiddleware,
+        TransportMiddleware,
+        LogMiddleware
+      );
     }
 
     this.store = createStore(this.reducer, initialState, enhancer);
