@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Client as RawClient, GetOpts } from './client';
+import { Client as RawClient } from './client';
 
 /**
  * Client
@@ -30,7 +30,7 @@ import { Client as RawClient, GetOpts } from './client';
  *   and dispatch actions such as MAKE_MOVE.
  */
 export function Client(opts) {
-  let { game, numPlayers, board, multiplayer, enhancer } = GetOpts(opts);
+  let { game, numPlayers, board, multiplayer, enhancer } = opts;
 
   /*
    * WrappedBoard

@@ -8,12 +8,18 @@
 
 import { createStore } from 'redux';
 import { InitializeGame, CreateGameReducer } from '../core/reducer';
-import { Client, GetOpts, createMoveDispatchers } from './client';
+import { Client, createMoveDispatchers } from './client';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
 import Game from '../core/game';
 import { RandomBot } from '../ai/bot';
+import { error } from '../core/logger';
+
+jest.mock('../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 test('move api', () => {
   const client = Client({
@@ -99,12 +105,10 @@ describe('multiplayer', () => {
     let client;
 
     beforeAll(() => {
-      client = Client(
-        GetOpts({
-          game: Game({ moves: { A: () => {} } }),
-          multiplayer: { server: host + ':' + port },
-        })
-      );
+      client = Client({
+        game: Game({ moves: { A: () => {} } }),
+        multiplayer: { server: host + ':' + port },
+      });
       client.connect();
     });
 
@@ -133,12 +137,10 @@ describe('multiplayer', () => {
     let client;
 
     beforeAll(() => {
-      client = Client(
-        GetOpts({
-          game: Game({}),
-          multiplayer: true,
-        })
-      );
+      client = Client({
+        game: Game({}),
+        multiplayer: true,
+      });
       client.connect();
     });
 
@@ -153,10 +155,10 @@ describe('multiplayer', () => {
     let spec;
 
     beforeAll(() => {
-      spec = GetOpts({
+      spec = {
         game: Game({ moves: { A: (G, ctx) => ({ A: ctx.playerID }) } }),
         multiplayer: { local: true },
-      });
+      };
 
       client0 = Client({ ...spec, playerID: '0' });
       client1 = Client({ ...spec, playerID: '1' });
@@ -196,16 +198,24 @@ describe('multiplayer', () => {
     let client;
 
     beforeAll(() => {
-      client = Client(
-        GetOpts({
-          game: Game({ moves: { A: () => {} } }),
-          multiplayer: { transport },
-        })
-      );
+      client = Client({
+        game: Game({ moves: { A: () => {} } }),
+        multiplayer: { transport },
+      });
     });
 
     test('correct transport used', () => {
       expect(client.transport).toBe(transport);
+    });
+  });
+
+  describe('invalid spec', () => {
+    test('logs error', () => {
+      Client({
+        game: Game({ moves: { A: () => {} } }),
+        multiplayer: { blah: true },
+      });
+      expect(error).toHaveBeenCalledWith('invalid multiplayer spec');
     });
   });
 });

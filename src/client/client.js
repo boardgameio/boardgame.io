@@ -9,9 +9,13 @@
 import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
+import { error } from '../core/logger';
 import { SocketIO } from './transport/socketio';
 import { Local, LocalMaster } from './transport/local';
 import { InitializeGame, CreateGameReducer } from '../core/reducer';
+
+// The Game Master object (if using a local one).
+let localMaster_ = null;
 
 /**
  * createDispatchers
@@ -231,36 +235,48 @@ class _ClientImpl {
 
     this.store = createStore(this.reducer, initialState, enhancer);
 
-    if (multiplayer && multiplayer.master_ !== undefined) {
-      this.transport = new Local({
-        master: multiplayer.master_,
-        store: this.store,
-        gameID: gameID,
-        playerID: playerID,
-        gameName: game.name,
-        numPlayers,
-      });
-    } else if (multiplayer && multiplayer.server !== undefined) {
-      this.transport = new SocketIO({
-        store: this.store,
-        gameID: gameID,
-        playerID: playerID,
-        gameName: game.name,
-        numPlayers,
-        server: multiplayer.server,
-        socketOpts,
-      });
-    } else if (multiplayer && multiplayer.transport !== undefined) {
-      this.transport = multiplayer.transport;
-    } else {
-      this.transport = {
-        isConnected: true,
-        onAction: () => {},
-        subscribe: () => {},
-        connect: () => {},
-        updateGameID: () => {},
-        updatePlayerID: () => {},
-      };
+    this.transport = {
+      isConnected: true,
+      onAction: () => {},
+      subscribe: () => {},
+      connect: () => {},
+      updateGameID: () => {},
+      updatePlayerID: () => {},
+    };
+
+    if (multiplayer !== undefined) {
+      if (multiplayer === true) {
+        multiplayer = { server: '' };
+      }
+
+      if (multiplayer.local === true) {
+        if (localMaster_ === null) {
+          localMaster_ = new LocalMaster(game);
+        }
+
+        this.transport = new Local({
+          master: localMaster_,
+          store: this.store,
+          gameID: gameID,
+          playerID: playerID,
+          gameName: game.name,
+          numPlayers,
+        });
+      } else if (multiplayer.server !== undefined) {
+        this.transport = new SocketIO({
+          store: this.store,
+          gameID: gameID,
+          playerID: playerID,
+          gameName: game.name,
+          numPlayers,
+          server: multiplayer.server,
+          socketOpts,
+        });
+      } else if (multiplayer.transport !== undefined) {
+        this.transport = multiplayer.transport;
+      } else {
+        error('invalid multiplayer spec');
+      }
     }
 
     this.createDispatchers();
@@ -359,26 +375,6 @@ class _ClientImpl {
     this.credentials = credentials;
     this.createDispatchers();
   }
-}
-
-/**
- * Pre-process the opts object in the client.
- * Call this on the argument to your client implementation.
- */
-export function GetOpts(opts) {
-  let { game, multiplayer } = opts;
-
-  if (multiplayer) {
-    if (multiplayer == true) {
-      multiplayer = { server: '' };
-    }
-
-    if (multiplayer.local == true) {
-      multiplayer.master_ = LocalMaster(game);
-    }
-  }
-
-  return { ...opts, multiplayer };
 }
 
 /**

@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Debug } from './debug/debug';
-import { Client as RawClient, GetOpts } from './client';
+import { Client as RawClient } from './client';
 
 /**
  * Client
@@ -42,7 +42,7 @@ export function Client(opts) {
     ai,
     debug,
     enhancer,
-  } = GetOpts(opts);
+  } = opts;
 
   // Component that is displayed before the client has synced
   // with the game master.
