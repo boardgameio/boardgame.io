@@ -1,3 +1,15 @@
+## v0.31.5
+
+#### Features
+
+- [[3982150](https://github.com/nicolodavis/boardgame.io/commit/3982150)] synchronous mode for game master
+- [[8732d9f](https://github.com/nicolodavis/boardgame.io/commit/8732d9f)] Add adminClient option for Firebase storage (#386)
+
+#### Bugfixes
+
+- [[8ed812e](https://github.com/nicolodavis/boardgame.io/commit/8ed812e)] handle default number of players bigger than 2 for 1st game of the list (#392)
+- [[ec7dde5](https://github.com/nicolodavis/boardgame.io/commit/ec7dde5)] Don't leak undefined ctx properties from turnOrder.actionPlayers (#382)
+
 ## v0.31.4
 
 #### Features
