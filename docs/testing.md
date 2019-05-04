@@ -80,19 +80,29 @@ one from `boardgame.io/react`.
 
 #### Multiplayer Tests
 
-Use `updatePlayerID` to change the player making the move
-to test multiplayer interactions.
+Use the local multiplayer mode to simulate multiplayer interactions
+in unit tests.
 
 ```js
 it('multiplayer test', () => {
-  const client = Client({ game: MyGame });
+  const spec = {
+    game: MyGame,
+    multiplayer: { local: true },
+  };
 
-  client.updatePlayerID('0');
-  client.moves.moveA();
-  client.events.endTurn();
+  const p0 = Client({ ...spec, playerID: '0' });
+  const p1 = Client({ ...spec, playerID: '1' });
 
-  client.updatePlayerID('1');
-  client.moves.moveB();
+  p0.moves.moveA();
+  p0.events.endTurn();
+
+  // Player 1's state reflects the moves made by Player 0.
+  expect(p1.getState()).toEqual(...);
+
+  p1.moves.moveA();
+  p0.events.endTurn();
+
+  ...
 });
 ```
 
