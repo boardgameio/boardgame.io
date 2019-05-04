@@ -20,6 +20,25 @@ class LobbyCreateRoomForm extends React.Component {
     numPlayers: 2,
   };
 
+  constructor(props) {
+    super(props);
+    /* fix min and max number of players */
+    for (let game of props.games) {
+      let game_details = game.game;
+      if (!game_details.minPlayers) {
+        game_details.minPlayers = 1;
+      }
+      if (!game_details.maxPlayers) {
+        game_details.maxPlayers = 4;
+      }
+      console.assert(game_details.maxPlayers >= game_details.minPlayers);
+    }
+    this.state = {
+      selectedGame: 0,
+      numPlayers: props.games[0].game.minPlayers,
+    };
+  }
+
   _createGameNameOption = (game, idx) => {
     return (
       <option key={'name-option-' + idx} value={idx}>
@@ -37,13 +56,6 @@ class LobbyCreateRoomForm extends React.Component {
   };
 
   _createNumPlayersRange = game => {
-    if (!game.minPlayers) {
-      game.minPlayers = 1;
-    }
-    if (!game.maxPlayers) {
-      game.maxPlayers = 4;
-    }
-    console.assert(game.maxPlayers >= game.minPlayers);
     return [...new Array(game.maxPlayers + 1).keys()].slice(game.minPlayers);
   };
 
@@ -82,7 +94,7 @@ class LobbyCreateRoomForm extends React.Component {
     let idx = Number.parseInt(event.target.value);
     this.setState({
       selectedGame: idx,
-      numPlayers: this._createNumPlayersRange(this.props.games[idx].game)[0],
+      numPlayers: this.props.games[idx].game.minPlayers,
     });
   };
 
