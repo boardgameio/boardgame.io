@@ -29,11 +29,11 @@ describe('lobby', () => {
 
   beforeEach(async () => {
     components = [
-      { board: 'Board1', game: { name: 'GameName1' } },
       {
-        board: 'Board2',
-        game: { name: 'GameName2', minPlayers: 2, maxPlayers: 3 },
+        board: 'Board1',
+        game: { name: 'GameName1', minPlayers: 3, maxPlayers: 5 },
       },
+      { board: 'Board2', game: { name: 'GameName2' } },
       {
         board: 'Board3',
         game: { name: 'GameName3', maxPlayers: 1 },
@@ -209,6 +209,14 @@ describe('lobby', () => {
         lobby.update();
       });
 
+      test('room with default number of players', () => {
+        lobby.instance().connection.create = spy;
+        lobby
+          .find('LobbyCreateRoomForm')
+          .find('button')
+          .simulate('click');
+        expect(spy).toHaveBeenCalledWith('GameName1', 3);
+      });
       test('room with 2 players', () => {
         lobby.instance().connection.create = spy;
         lobby
@@ -245,15 +253,6 @@ describe('lobby', () => {
         ).not.toBe('');
       });
       test('when game has no boundaries on the number of players', async () => {
-        expect(
-          lobby
-            .find('LobbyCreateRoomForm')
-            .find('select')
-            .at(1)
-            .text()
-        ).toBe('1234');
-      });
-      test('when game has boundaries on the number of players', async () => {
         // select 2nd game
         lobby
           .find('LobbyCreateRoomForm')
@@ -267,7 +266,16 @@ describe('lobby', () => {
             .find('select')
             .at(1)
             .text()
-        ).toBe('23');
+        ).toBe('1234');
+      });
+      test('when game has boundaries on the number of players', async () => {
+        expect(
+          lobby
+            .find('LobbyCreateRoomForm')
+            .find('select')
+            .at(1)
+            .text()
+        ).toBe('345');
       });
     });
 
