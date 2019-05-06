@@ -320,6 +320,75 @@ test('undo / redo', () => {
   expect(state.G).toEqual({ A: true });
 });
 
+test('undo/redo phase', () => {
+  let game = Game({
+    moves: {
+      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+      startPhase2: (G, ctx) => {
+        ctx.events.endPhase({ next: 'phase2' });
+      },
+    },
+    flow: {
+      startingPhase: 'phase1',
+      phases: {
+        phase1: {},
+        phase2: {},
+      },
+    },
+  });
+
+  const reducer = CreateGameReducer({ game, numPlayers: 2 });
+
+  let state = InitializeGame({ game });
+
+  state = reducer(state, makeMove('move', 'A'));
+  expect(state.G).toEqual({ A: true });
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, makeMove('move', 'B'));
+  state = reducer(state, makeMove('move', 'C'));
+  expect(state.G).toEqual({ A: true, B: true, C: true });
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, makeMove('startPhase2'));
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, makeMove('move', 'D'));
+  expect(state.G).toEqual({ A: true, B: true, D: true });
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ A: true, B: true, D: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx.phase).toEqual('phase1');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+});
+
 test('custom log messages', () => {
   let game = Game({
     moves: {
