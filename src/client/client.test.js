@@ -375,8 +375,18 @@ describe('log handling', () => {
     client.moves.A();
 
     expect(client.log).toEqual([
-      { action: makeMove('A', [], '0'), _stateID: 0 },
-      { action: makeMove('A', [], '0'), _stateID: 1 },
+      {
+        action: makeMove('A', [], '0'),
+        _stateID: 0,
+        phase: 'default',
+        turn: 0,
+      },
+      {
+        action: makeMove('A', [], '0'),
+        _stateID: 1,
+        phase: 'default',
+        turn: 0,
+      },
     ]);
   });
 

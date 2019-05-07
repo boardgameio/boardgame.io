@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Client } from '../client';
-import { makeMove, gameEvent } from '../../core/action-creators';
+import { makeMove, automaticGameEvent } from '../../core/action-creators';
 import Game from '../../core/game';
 import { GameLog } from './log';
 import { InitializeGame, CreateGameReducer } from '../../core/reducer';
@@ -32,10 +32,10 @@ describe('layout', () => {
 
   test('sanity', () => {
     const log = [
-      { action: makeMove('moveA') },
-      { action: gameEvent('endTurn') },
-      { action: makeMove('moveB') },
-      { action: gameEvent('endTurn') },
+      { action: makeMove('moveA'), turn: 0, phase: 'A' },
+      { action: automaticGameEvent('endTurn'), turn: 0, phase: 'A' },
+      { action: makeMove('moveB'), turn: 1, phase: 'A' },
+      { action: automaticGameEvent('endTurn'), turn: 1, phase: 'A' },
     ];
 
     const root = Enzyme.mount(
@@ -47,11 +47,11 @@ describe('layout', () => {
 
   test('multiple moves per turn / phase', () => {
     const log = [
-      { action: makeMove('moveA') },
-      { action: makeMove('moveB') },
-      { action: gameEvent('endPhase') },
-      { action: makeMove('moveC') },
-      { action: gameEvent('endTurn') },
+      { action: makeMove('moveA'), turn: 0, phase: 'A' },
+      { action: makeMove('moveB'), turn: 0, phase: 'A' },
+      { action: automaticGameEvent('endPhase'), turn: 0, phase: 'A' },
+      { action: makeMove('moveC'), turn: 0, phase: 'B' },
+      { action: automaticGameEvent('endTurn'), turn: 0, phase: 'B' },
     ];
 
     const root = Enzyme.mount(
@@ -70,40 +70,46 @@ describe('layout', () => {
 });
 
 describe('time travel', () => {
-  const game = Game({
-    moves: {
-      A: (G, ctx, arg) => {
-        return { arg };
+  let client;
+  let root;
+  let hoverState;
+
+  beforeAll(() => {
+    const game = Game({
+      moves: {
+        A: (G, ctx, arg) => {
+          return { arg };
+        },
       },
-    },
 
-    flow: {
-      endTurnIf: G => G && G.arg == 42,
-    },
+      flow: {
+        endTurnIf: G => G && G.arg == 42,
+      },
+    });
+
+    client = Client({ game });
+    const initialState = client.getState()._initial;
+
+    client.moves.A(1);
+    client.events.endTurn();
+    // Also ends the turn automatically.
+    client.moves.A(42);
+    client.moves.A(2);
+    client.events.endTurn();
+
+    hoverState = null;
+
+    root = Enzyme.mount(
+      <GameLog
+        log={client.log}
+        initialState={initialState}
+        onHover={({ state }) => {
+          hoverState = state;
+        }}
+        reducer={client.reducer}
+      />
+    );
   });
-
-  const client = Client({ game });
-  const initialState = client.getState()._initial;
-
-  client.moves.A(1);
-  client.events.endTurn();
-  // Also ends the turn automatically.
-  client.moves.A(42);
-  client.moves.A(2);
-  client.events.endTurn();
-
-  let hoverState = null;
-
-  const root = Enzyme.mount(
-    <GameLog
-      log={client.log}
-      initialState={initialState}
-      onHover={({ state }) => {
-        hoverState = state;
-      }}
-      reducer={client.reducer}
-    />
-  );
 
   test('before rewind', () => {
     expect(client.getState().G).toMatchObject({ arg: 2 });
@@ -164,10 +170,10 @@ describe('pinning', () => {
   let state = InitializeGame({ game });
   const initialState = state;
   const log = [
-    { action: makeMove('A') },
-    { action: gameEvent('endTurn') },
-    { action: makeMove('B') },
-    { action: gameEvent('endTurn') },
+    { action: makeMove('A'), turn: 0, phase: 'default' },
+    { action: automaticGameEvent('endTurn'), turn: 0, phase: 'default' },
+    { action: makeMove('B'), turn: 1, phase: 'default' },
+    { action: automaticGameEvent('endTurn'), turn: 1, phase: 'default' },
   ];
 
   test('pin', () => {
@@ -243,7 +249,12 @@ describe('payload', () => {
   const state = InitializeGame({ game });
 
   const log = [
-    { action: makeMove('moveA'), payload: { test_payload: 'payload123' } },
+    {
+      action: makeMove('moveA'),
+      payload: { test_payload: 'payload123' },
+      turn: 0,
+      phase: 'default',
+    },
   ];
 
   test('renders custom payload using the default component', () => {
@@ -255,10 +266,6 @@ describe('payload', () => {
   });
 
   test('renders custom payload using a custom component', () => {
-    const log = [
-      { action: makeMove('moveA'), payload: { test_payload: 'payload123' } },
-    ];
-
     const customPayloadComponent = () => {
       return <div>ignoring props.payload</div>;
     };

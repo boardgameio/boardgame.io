@@ -189,11 +189,32 @@ test('deltalog', () => {
   const actionC = gameEvent('endTurn');
 
   state = reducer(state, actionA);
-  expect(state.deltalog).toEqual([{ action: actionA, _stateID: 0 }]);
+  expect(state.deltalog).toEqual([
+    {
+      action: actionA,
+      _stateID: 0,
+      phase: 'default',
+      turn: 0,
+    },
+  ]);
   state = reducer(state, actionB);
-  expect(state.deltalog).toEqual([{ action: actionB, _stateID: 1 }]);
+  expect(state.deltalog).toEqual([
+    {
+      action: actionB,
+      _stateID: 1,
+      phase: 'default',
+      turn: 0,
+    },
+  ]);
   state = reducer(state, actionC);
-  expect(state.deltalog).toEqual([{ action: actionC, _stateID: 2 }]);
+  expect(state.deltalog).toEqual([
+    {
+      action: actionC,
+      _stateID: 2,
+      phase: 'default',
+      turn: 0,
+    },
+  ]);
 });
 
 describe('Events API', () => {
