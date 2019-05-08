@@ -137,10 +137,19 @@ export class GameLog extends React.Component {
 
   rewind = logIndex => {
     let state = this.props.initialState;
-    for (let i = 0; i <= logIndex; i++) {
+    for (let i = 0; i < this.props.log.length; i++) {
       const { action } = this.props.log[i];
+
       if (!action.automatic) {
         state = this.props.reducer(state, action);
+      }
+
+      if (action.type == MAKE_MOVE) {
+        if (logIndex == 0) {
+          break;
+        }
+
+        logIndex--;
       }
     }
     return { G: state.G, ctx: state.ctx };
@@ -149,7 +158,10 @@ export class GameLog extends React.Component {
   onLogClick = logIndex => {
     this.setState(o => {
       const state = this.rewind(logIndex);
-      const metadata = this.props.log[logIndex].action.payload.metadata;
+      const renderedLogEntries = this.props.log.filter(
+        e => e.action.type == MAKE_MOVE
+      );
+      const metadata = renderedLogEntries[logIndex].action.payload.metadata;
 
       if (o.pinned === logIndex) {
         this.props.onHover({ logIndex, state, metadata: undefined });
@@ -180,72 +192,57 @@ export class GameLog extends React.Component {
     let phases = [];
     let eventsInCurrentPhase = 0;
     let eventsInCurrentTurn = 0;
-    let state = this.props.initialState;
 
-    let lastAction = 0;
-    for (let i = 0; i < this.props.log.length; i++) {
-      const { action } = this.props.log[i];
-      if (action.type == MAKE_MOVE || !action.automatic) {
-        lastAction = i;
-      }
-    }
+    const renderedLogEntries = this.props.log.filter(
+      e => e.action.type == MAKE_MOVE
+    );
 
-    for (let i = 0; i < this.props.log.length; i++) {
-      const { action, payload } = this.props.log[i];
-      const oldTurn = state.ctx.turn;
-      const oldPhase = state.ctx.phase;
+    for (let i = 0; i < renderedLogEntries.length; i++) {
+      const { action, payload, turn, phase } = renderedLogEntries[i];
 
-      if (action.type == MAKE_MOVE) {
-        log.push(
-          <LogEvent
-            key={i}
-            pinned={i === this.state.pinned}
-            logIndex={i}
-            onLogClick={this.onLogClick}
-            onMouseEnter={this.onMouseEnter}
-            onMouseLeave={this.onMouseLeave}
-            action={action}
-            payload={payload}
-            payloadComponent={this.props.payloadComponent}
+      eventsInCurrentPhase++;
+      eventsInCurrentTurn++;
+
+      log.push(
+        <LogEvent
+          key={i}
+          pinned={i === this.state.pinned}
+          logIndex={i}
+          onLogClick={this.onLogClick}
+          onMouseEnter={this.onMouseEnter}
+          onMouseLeave={this.onMouseLeave}
+          action={action}
+          payload={payload}
+          payloadComponent={this.props.payloadComponent}
+        />
+      );
+
+      if (
+        i == renderedLogEntries.length - 1 ||
+        renderedLogEntries[i + 1].turn != turn
+      ) {
+        turns.push(
+          <TurnMarker
+            key={turns.length}
+            turn={turn}
+            numEvents={eventsInCurrentTurn}
           />
         );
-
-        eventsInCurrentTurn++;
-        eventsInCurrentPhase++;
+        eventsInCurrentTurn = 0;
       }
 
-      if (!action.automatic) {
-        state = this.props.reducer(state, action);
-
-        if (
-          state.ctx.turn != oldTurn ||
-          state.ctx.gameover !== undefined ||
-          i == lastAction
-        ) {
-          turns.push(
-            <TurnMarker
-              key={turns.length}
-              turn={oldTurn}
-              numEvents={eventsInCurrentTurn}
-            />
-          );
-          eventsInCurrentTurn = 0;
-        }
-
-        if (
-          state.ctx.phase != oldPhase ||
-          state.ctx.gameover !== undefined ||
-          i == lastAction
-        ) {
-          phases.push(
-            <PhaseMarker
-              key={phases.length}
-              phase={oldPhase}
-              numEvents={eventsInCurrentPhase}
-            />
-          );
-          eventsInCurrentPhase = 0;
-        }
+      if (
+        i == renderedLogEntries.length - 1 ||
+        renderedLogEntries[i + 1].phase != phase
+      ) {
+        phases.push(
+          <PhaseMarker
+            key={phases.length}
+            phase={phase}
+            numEvents={eventsInCurrentPhase}
+          />
+        );
+        eventsInCurrentPhase = 0;
       }
     }
 
