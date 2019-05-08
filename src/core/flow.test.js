@@ -70,10 +70,12 @@ describe('phases', () => {
         },
       },
 
-      turnOrder: {
-        first: G => {
-          if (G.setupB && !G.cleanupB) return '1';
-          return '0';
+      turn: {
+        order: {
+          first: G => {
+            if (G.setupB && !G.cleanupB) return '1';
+            return '0';
+          },
         },
       },
     });
@@ -202,7 +204,7 @@ describe('phases', () => {
 test('movesPerTurn', () => {
   {
     const flow = FlowWithPhases({ movesPerTurn: 2 });
-    let state = { ctx: flow.ctx(2) };
+    let state = flow.init({ ctx: flow.ctx(2) });
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(0);
@@ -217,7 +219,7 @@ test('movesPerTurn', () => {
       movesPerTurn: 2,
       phases: { B: { movesPerTurn: 1 } },
     });
-    let state = { ctx: flow.ctx(2) };
+    let state = flow.init({ ctx: flow.ctx(2) });
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(0);
@@ -349,7 +351,7 @@ test('endGameIf', () => {
   {
     const flow = FlowWithPhases({ endGameIf: G => G.win });
 
-    let state = { G: {}, ctx: flow.ctx(2) };
+    let state = flow.init({ G: {}, ctx: flow.ctx(2) });
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.gameover).toBe(undefined);
 
@@ -372,7 +374,7 @@ test('endGameIf', () => {
       phases: { A: { endGameIf: G => G.win } },
     });
 
-    let state = { G: {}, ctx: flow.ctx(2) };
+    let state = flow.init({ G: {}, ctx: flow.ctx(2) });
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.gameover).toBe(undefined);
 
@@ -711,7 +713,7 @@ test('endTurn is not called twice in one move', () => {
     phases: { A: { endPhaseIf: G => G.endPhase, next: 'B' }, B: {} },
   });
 
-  let state = { G: {}, ctx: flow.ctx(2) };
+  let state = flow.init({ G: {}, ctx: flow.ctx(2) });
 
   expect(state.ctx.phase).toBe('A');
   expect(state.ctx.currentPlayer).toBe('0');
