@@ -87,19 +87,23 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * Called at the start of a phase to initialize turn order state.
  * @param {object} G - The game object G.
  * @param {object} ctx - The game object ctx.
- * @param {object} turnOrder - A turn order object for this phase.
+ * @param {object} turn - A turn object for this phase.
  */
-export function InitTurnOrderState(G, ctx, turnOrder) {
-  let playOrder = [...new Array(ctx.numPlayers)].map((d, i) => i + '');
-  if (turnOrder.playOrder !== undefined) {
-    playOrder = turnOrder.playOrder(G, ctx);
+export function InitTurnOrderState(G, ctx, turn) {
+  if (turn.order === undefined) {
+    turn.order = TurnOrder.DEFAULT;
   }
 
-  const playOrderPos = turnOrder.first(G, ctx);
+  let playOrder = [...new Array(ctx.numPlayers)].map((d, i) => i + '');
+  if (turn.order.playOrder !== undefined) {
+    playOrder = turn.order.playOrder(G, ctx);
+  }
+
+  const playOrderPos = turn.order.first(G, ctx);
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
-  if (turnOrder.actionPlayers !== undefined) {
-    ctx = setActionPlayers(G, ctx, turnOrder.actionPlayers);
+  if (turn.order.actionPlayers !== undefined) {
+    ctx = setActionPlayers(G, ctx, turn.order.actionPlayers);
   } else {
     ctx = { ...ctx, actionPlayers: [currentPlayer] };
   }
@@ -111,11 +115,11 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
  * Called at the end of each turn to update the turn order state.
  * @param {object} G - The game object G.
  * @param {object} ctx - The game object ctx.
- * @param {object} turnOrder - A turn order object for this phase.
+ * @param {object} turn - A turn object for this phase.
  * @param {string} endTurnArg - An optional argument to endTurn that
                                 may specify the next player.
  */
-export function UpdateTurnOrderState(G, ctx, turnOrder, endTurnArg) {
+export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
   let actionPlayers = ctx.actionPlayers;
@@ -130,7 +134,7 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, endTurnArg) {
       logging.error(`invalid argument to endTurn: ${endTurnArg}`);
     }
   } else {
-    const t = turnOrder.next(G, ctx);
+    const t = turn.order.next(G, ctx);
 
     if (t === undefined) {
       endPhase = true;
@@ -138,7 +142,7 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, endTurnArg) {
       playOrderPos = t;
       currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
 
-      if (turnOrder.actionPlayers === undefined) {
+      if (turn.order.actionPlayers === undefined) {
         actionPlayers = [currentPlayer];
       }
     }
@@ -156,7 +160,7 @@ export function UpdateTurnOrderState(G, ctx, turnOrder, endTurnArg) {
 
 /**
  * Set of different turn orders possible in a phase.
- * These are meant to be passed to the `turnOrder` setting
+ * These are meant to be passed to the `turn` setting
  * in the flow objects.
  *
  * Each object defines the first player when the phase / game

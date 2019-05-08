@@ -12,7 +12,7 @@ import Game from './game';
 import { makeMove, gameEvent } from './action-creators';
 import { InitializeGame, CreateGameReducer } from './reducer';
 
-describe('turnOrder', () => {
+describe('turn orders', () => {
   // Defines a matcher for testing that ctx has no undefined properties.
   // Identifies which property is undefined.
   expect.extend({
@@ -59,7 +59,7 @@ describe('turnOrder', () => {
 
   test('ONCE', () => {
     const flow = FlowWithPhases({
-      turnOrder: TurnOrder.ONCE,
+      turn: { order: TurnOrder.ONCE },
       startingPhase: 'A',
       phases: { A: { next: 'B' }, B: {} },
     });
@@ -81,7 +81,7 @@ describe('turnOrder', () => {
 
   test('ANY', () => {
     const flow = FlowWithPhases({
-      turnOrder: TurnOrder.ANY,
+      turn: { order: TurnOrder.ANY },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -97,7 +97,7 @@ describe('turnOrder', () => {
 
   test('ANY_ONCE', () => {
     const flow = FlowWithPhases({
-      turnOrder: TurnOrder.ANY_ONCE,
+      turn: { order: TurnOrder.ANY_ONCE },
       startingPhase: 'A',
       phases: { A: {} },
     });
@@ -131,7 +131,7 @@ describe('turnOrder', () => {
 
   test('OTHERS', () => {
     const flow = FlowWithPhases({
-      turnOrder: TurnOrder.OTHERS,
+      turn: { order: TurnOrder.OTHERS },
     });
 
     let state = { ctx: flow.ctx(3) };
@@ -147,7 +147,7 @@ describe('turnOrder', () => {
 
   test('OTHERS_ONCE', () => {
     const flow = FlowWithPhases({
-      turnOrder: TurnOrder.OTHERS_ONCE,
+      turn: { order: TurnOrder.OTHERS_ONCE },
       startingPhase: 'A',
       phases: { A: {} },
     });
@@ -181,7 +181,7 @@ describe('turnOrder', () => {
 
   test('CUSTOM', () => {
     const flow = FlowWithPhases({
-      turnOrder: TurnOrder.CUSTOM(['1', '0']),
+      turn: { order: TurnOrder.CUSTOM(['1', '0']) },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -196,7 +196,7 @@ describe('turnOrder', () => {
 
   test('CUSTOM_FROM', () => {
     const flow = FlowWithPhases({
-      turnOrder: TurnOrder.CUSTOM_FROM('order'),
+      turn: { order: TurnOrder.CUSTOM_FROM('order') },
     });
 
     let state = { G: { order: ['2', '1', '0'] }, ctx: flow.ctx(3) };
@@ -214,7 +214,16 @@ describe('turnOrder', () => {
   test('manual', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
-      phases: { A: { turnOrder: { first: () => 9, next: () => 3 } } },
+      phases: {
+        A: {
+          turn: {
+            order: {
+              first: () => 9,
+              next: () => 3,
+            },
+          },
+        },
+      },
     });
 
     let state = { ctx: flow.ctx(10) };
@@ -232,7 +241,7 @@ describe('turnOrder', () => {
 test('passing', () => {
   const flow = FlowWithPhases({
     startingPhase: 'A',
-    phases: { A: { turnOrder: TurnOrder.SKIP } },
+    phases: { A: { turn: { order: TurnOrder.SKIP } } },
   });
   const game = Game({
     flow,
@@ -279,7 +288,7 @@ test('end game after everyone passes', () => {
   const flow = FlowWithPhases({
     startingPhase: 'A',
     phases: {
-      A: { turnOrder: TurnOrder.ANY, endGameIf: G => G.allPassed },
+      A: { turn: { order: TurnOrder.ANY }, endGameIf: G => G.allPassed },
     },
   });
   const game = Game({
@@ -314,8 +323,8 @@ test('override', () => {
   };
 
   let flow = FlowWithPhases({
-    turnOrder: even,
-    phases: { A: { next: 'B' }, B: { turnOrder: odd } },
+    turn: { order: even },
+    phases: { A: { next: 'B' }, B: { turn: { order: odd } } },
     startingPhase: 'A',
   });
 
@@ -447,7 +456,9 @@ describe('SetActionPlayers', () => {
           },
 
           B: {
-            turnOrder: TurnOrder.OTHERS_ONCE,
+            turn: {
+              order: TurnOrder.OTHERS_ONCE,
+            },
 
             moves: {
               dropCards: G => {
@@ -482,21 +493,23 @@ describe('UpdateTurnOrderState', () => {
     playOrderPos: 0,
     actionPlayers: ['0', '1', '2'],
   };
+  const t1 = { order: TurnOrder.DEFAULT };
+  const t2 = { order: TurnOrder.ANY };
 
   test('without next player', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT);
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, t1);
     expect(t).toMatchObject({ currentPlayer: '1' });
   });
 
   test('with next player', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.DEFAULT, {
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, t1, {
       next: '2',
     });
     expect(t).toMatchObject({ currentPlayer: '2' });
   });
 
   test('with actionPlayers', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, TurnOrder.ANY);
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, t2);
     expect(t).toMatchObject({
       currentPlayer: '0',
       actionPlayers: ['0', '1', '2'],

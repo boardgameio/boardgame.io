@@ -56,9 +56,11 @@ test('rounds with starting player token', () => {
       startingPhase: 'main',
       phases: {
         main: {
-          turnOrder: {
-            first: G => G.startingPlayerToken,
-            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+          turn: {
+            order: {
+              first: G => G.startingPlayerToken,
+              next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+            },
           },
         },
       },
@@ -99,23 +101,29 @@ test('serpentine setup phases', () => {
       startingPhase: 'first setup round',
       phases: {
         'first setup round': {
-          turnOrder: {
-            first: () => 0,
-            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+          turn: {
+            order: {
+              first: () => 0,
+              next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+            },
           },
           next: 'second setup round',
         },
         'second setup round': {
-          turnOrder: {
-            first: (G, ctx) => ctx.playOrder.length - 1,
-            next: (G, ctx) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
+          turn: {
+            order: {
+              first: (G, ctx) => ctx.playOrder.length - 1,
+              next: (G, ctx) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
+            },
           },
           next: 'main phase',
         },
         'main phase': {
-          turnOrder: {
-            first: () => 0,
-            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+          turn: {
+            order: {
+              first: () => 0,
+              next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+            },
           },
         },
       },

@@ -10,7 +10,6 @@ import {
   SetActionPlayersEvent,
   InitTurnOrderState,
   UpdateTurnOrderState,
-  TurnOrder,
 } from './turn-order';
 import * as plugins from '../plugins/main';
 import { automaticGameEvent } from './action-creators';
@@ -176,7 +175,7 @@ export function Flow({
  * @param {...object} onMove - Any code to run at the end of a move.
  *                             (G, ctx, { type: 'moveName', args: [] }) => G
  *
- * @param {...object} turnOrder - Customize the turn order (see turn-order.js).
+ * @param {...object} turn - Customize the turn structure (see turn-order.js).
  *
  * @param {...object} endTurn - Set to false to disable the `endTurn` event.
  *
@@ -238,8 +237,8 @@ export function Flow({
  *   // A phase-specific onMove.
  *   onMove - (G, ctx) => G,
  *
- *   // A phase-specific turnOrder.
- *   turnOrder: TurnOrder.DEFAULT,
+ *   // A phase-specific turn structure.
+ *   turn: { order: TurnOrder.DEFAULT },
  *
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
@@ -257,7 +256,7 @@ export function FlowWithPhases({
   onTurnBegin,
   onTurnEnd,
   onMove,
-  turnOrder,
+  turn,
   endTurn,
   endPhase,
   endGame,
@@ -292,7 +291,7 @@ export function FlowWithPhases({
   if (!onTurnBegin) onTurnBegin = G => G;
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
-  if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
+  if (!turn) turn = {};
   if (undoableMoves === undefined) undoableMoves = null;
 
   const phaseMap = game.phases || phases || {};
@@ -346,8 +345,8 @@ export function FlowWithPhases({
       conf.onMove = onMove;
     }
     conf.onMove = plugins.FnWrap(conf.onMove, game);
-    if (conf.turnOrder === undefined) {
-      conf.turnOrder = turnOrder;
+    if (conf.turn === undefined) {
+      conf.turn = turn;
     }
     if (conf.undoableMoves === undefined) {
       conf.undoableMoves = undoableMoves;
@@ -372,7 +371,7 @@ export function FlowWithPhases({
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
     let G = config.onPhaseBegin(state.G, state.ctx);
-    let ctx = InitTurnOrderState(G, state.ctx, config.turnOrder);
+    let ctx = InitTurnOrderState(G, state.ctx, config.turn);
 
     // Allow plugins to modify G and ctx at the beginning of a phase.
     G = plugins.G.onPhaseBegin(G, ctx, game);
@@ -544,7 +543,7 @@ export function FlowWithPhases({
       const { endPhase: a, ctx: b } = UpdateTurnOrderState(
         G,
         ctx,
-        conf.turnOrder,
+        conf.turn,
         arg
       );
       endPhase = a;
@@ -611,7 +610,7 @@ export function FlowWithPhases({
       const playerID = action.playerID;
       actionPlayers = actionPlayers.filter(id => id !== playerID);
 
-      if (actionPlayers.length == 0 && conf.turnOrder.endPhaseOnceDone) {
+      if (actionPlayers.length == 0 && conf.turn.order.endPhaseOnceDone) {
         actionPlayersOnceDone = true;
       }
     }
@@ -724,6 +723,7 @@ export function FlowWithPhases({
       allPlayed: false,
       phase: startingPhase,
       prevPhase: 'default',
+      stage: {},
     }),
     init: state => {
       return startGame(state);
