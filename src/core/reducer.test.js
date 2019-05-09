@@ -289,6 +289,16 @@ test('undo / redo', () => {
   let game = Game({
     moves: {
       move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+      nextPhase: (G, ctx) => {
+        ctx.events.endPhase({ next: 'phase2' });
+      },
+    },
+    flow: {
+      startingPhase: 'phase1',
+      phases: {
+        phase1: {},
+        phase2: {},
+      },
     },
   });
 
@@ -336,6 +346,42 @@ test('undo / redo', () => {
   state = reducer(state, makeMove('move', 'A'));
   expect(state.G).toEqual({ A: true });
 
+  state = reducer(state, makeMove('nextPhase'));
+  expect(state.G).toEqual({ A: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, makeMove('move', 'B'));
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
+  expect(state.G).toEqual({ A: true });
+  expect(state.ctx.phase).toEqual('phase1');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, redo());
+  expect(state.G).toEqual({ A: true });
+  expect(state.ctx.phase).toEqual('phase2');
+  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+  state = reducer(state, undo());
   state = reducer(state, gameEvent('endTurn'));
   state = reducer(state, undo());
   expect(state.G).toEqual({ A: true });
