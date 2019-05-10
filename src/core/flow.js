@@ -21,9 +21,10 @@ import * as logging from './logger';
  * Helper to create a reducer that manages ctx (with the
  * ability to also update G).
  *
- * You probably want to use FlowWithPhases below, but you might
- * need to use this directly if you are creating a very customized
- * game flow that it cannot handle.
+ * This is mostly around for legacy reasons. The original plan
+ * was to have two flows, one with phases etc. and another
+ * simpler one like this. The current state is such that this
+ * is merely an internal function of FlowWithPhases below.
  *
  * @param {...object} ctx - Function with the signature
  *                          numPlayers => ctx
@@ -67,6 +68,7 @@ export function Flow({
   canMakeMove,
   canUndoMove,
   redactedMoves,
+  moveMap,
 }) {
   if (!ctx) ctx = () => ({});
   if (!events) events = {};
@@ -103,6 +105,7 @@ export function Flow({
     init,
     canUndoMove,
     redactedMoves,
+    moveMap,
 
     eventNames: Object.getOwnPropertyNames(events),
     enabledEventNames: Object.getOwnPropertyNames(enabledEvents),
@@ -313,8 +316,16 @@ export function FlowWithPhases({
 
   phaseMap['default'] = {};
 
+  let moveMap = {};
+
   for (let phase in phaseMap) {
     const conf = phaseMap[phase];
+
+    if (conf.moves !== undefined) {
+      for (let move of Object.keys(conf.moves)) {
+        moveMap[phase + '.' + move] = conf.moves[move];
+      }
+    }
 
     if (conf.endPhaseIf === undefined) {
       conf.endPhaseIf = () => undefined;
@@ -752,5 +763,6 @@ export function FlowWithPhases({
     canMakeMove,
     canUndoMove,
     redactedMoves,
+    moveMap,
   });
 }
