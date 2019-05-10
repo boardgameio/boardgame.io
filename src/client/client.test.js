@@ -35,6 +35,64 @@ test('move api', () => {
   expect(client.getState().G).toEqual({ arg: 42 });
 });
 
+describe('namespaced moves', () => {
+  let client;
+  beforeAll(() => {
+    client = Client({
+      game: Game({
+        moves: {
+          A: () => {},
+        },
+
+        flow: {
+          phases: {
+            PA: {
+              moves: {
+                B: () => {},
+                C: () => {},
+              },
+            },
+          },
+        },
+      }),
+    });
+  });
+
+  test('top-level moves', () => {
+    expect(client.moves.A).toBeInstanceOf(Function);
+  });
+
+  test('phase-level moves', () => {
+    expect(client.moves.PA.B).toBeInstanceOf(Function);
+    expect(client.moves.PA.C).toBeInstanceOf(Function);
+  });
+
+  test('name clash', () => {
+    Client({
+      game: Game({
+        moves: {
+          A: () => {},
+        },
+
+        flow: {
+          phases: {
+            A: {
+              moves: {
+                B: () => {},
+                C: () => {},
+              },
+            },
+          },
+        },
+      }),
+    });
+
+    expect(error).toHaveBeenCalledWith(
+      'namespace A clashes with top-level move'
+    );
+  });
+});
+
 test('isActive', () => {
   const client = Client({
     game: Game({

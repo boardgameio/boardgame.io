@@ -105,14 +105,30 @@ function Game(game) {
 
   return {
     ...game,
-    moveNames: Object.getOwnPropertyNames(game.moves),
+
+    moveNames: [
+      ...Object.getOwnPropertyNames(game.moves),
+      ...Object.keys(game.flow.moveMap || []),
+    ],
+
     processMove: (G, action, ctx) => {
+      let moveFn = null;
+
       if (game.moves.hasOwnProperty(action.type)) {
+        moveFn = game.moves[action.type];
+      }
+
+      if (action.type in game.flow.moveMap) {
+        moveFn = game.flow.moveMap[action.type];
+      }
+
+      if (moveFn !== null) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        const fn = FnWrap(game.moves[action.type], game);
+        const fn = FnWrap(moveFn, game);
         return fn(...args);
       }
+
       return G;
     },
   };

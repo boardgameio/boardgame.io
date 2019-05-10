@@ -15,10 +15,20 @@ const game = Game({
     A: G => G,
     B: () => null,
   },
+
+  flow: {
+    phases: {
+      PA: {
+        moves: {
+          A: () => 'PA.A',
+        },
+      },
+    },
+  },
 });
 
 test('basic', () => {
-  expect(game.moveNames).toEqual(['A', 'B']);
+  expect(game.moveNames).toEqual(['A', 'B', 'PA.A']);
   expect(typeof game.processMove).toEqual('function');
 });
 
@@ -27,6 +37,7 @@ test('processMove', () => {
   expect(game.processMove(testObj, { type: 'A' })).toEqual(testObj);
   expect(game.processMove(testObj, { type: 'C' })).toEqual(testObj);
   expect(game.processMove(testObj, { type: 'B' })).toEqual(null);
+  expect(game.processMove(testObj, { type: 'PA.A' })).toEqual('PA.A');
 });
 
 test('flow override', () => {
