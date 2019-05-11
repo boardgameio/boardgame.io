@@ -17,6 +17,12 @@ import {
   undo,
   redo,
 } from './action-creators';
+import { error } from '../core/logger';
+
+jest.mock('../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 const game = Game({
   moves: {
@@ -57,6 +63,7 @@ test('makeMove', () => {
   state = reducer(state, makeMove('unknown'));
   expect(state._stateID).toBe(0);
   expect(state.G).not.toMatchObject({ moved: true });
+  expect(error).toHaveBeenCalledWith('unrecognized move: unknown');
 
   state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(1);

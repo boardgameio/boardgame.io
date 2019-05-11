@@ -14,7 +14,7 @@ const code = `{
     startingPhase: 'A',
     phases: {
       A: { turnOrder: TurnOrder.ANY_ONCE, next: 'B' },
-      B: { allowedMoves: [] },
+      B: {},
     }
   },
 }
@@ -40,7 +40,7 @@ export default {
 
       phases: {
         A: { turnOrder: TurnOrder.ANY_ONCE, next: 'B' },
-        B: { allowedMoves: [] },
+        B: {},
       },
     },
   }),

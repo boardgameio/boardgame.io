@@ -25,11 +25,9 @@ const game = Game({
     phases: {
       take: {
         endPhaseIf: G => G.deck <= 0,
-        allowedMoves: ['takeCard'],
         next: 'play',
       },
       play: {
-        allowedMoves: ['playCard'],
         endPhaseIf: G => G.hand <= 0,
         next: 'take',
       },

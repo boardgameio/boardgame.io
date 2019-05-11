@@ -11,6 +11,7 @@ import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
 import * as plugins from '../plugins/main';
+import { error } from './logger';
 
 /**
  * Moves can return this when they want to indicate
@@ -235,11 +236,13 @@ export function CreateGameReducer({ game, multiplayer }) {
 
         // Check whether the game knows the move at all.
         if (!game.moveNames.includes(action.payload.type)) {
+          error(`unrecognized move: ${action.payload.type}`);
           return state;
         }
 
         // Ignore the move if it isn't allowed at this point.
         if (!game.flow.canMakeMove(state.G, state.ctx, action.payload.type)) {
+          error(`disallowed move: ${action.payload.type}`);
           return state;
         }
 

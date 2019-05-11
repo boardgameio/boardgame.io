@@ -14,13 +14,10 @@ const code = `{
     startingPhase: 'play',
 
     phases: {
-      play: {
-        allowedMoves: ['play'],
-      },
+      play: {},
 
       discard: {
         turnOrder: TurnOrder.OTHERS_ONCE,
-        allowedMoves: ['discard'],
       },
     },
   },
@@ -53,13 +50,10 @@ export default {
       startingPhase: 'play',
 
       phases: {
-        play: {
-          allowedMoves: ['play'],
-        },
+        play: {},
 
         discard: {
           turnOrder: TurnOrder.OTHERS_ONCE,
-          allowedMoves: ['discard'],
         },
       },
     },
