@@ -186,12 +186,6 @@ export function Flow({
  *
  * @param {...object} setActionPlayers - Set to true to enable the `setActionPlayers` event.
  *
- * @param {...object} allowedMoves - List of moves that are allowed.
- *                                   This can be either a list of
- *                                   move names or a function with the
- *                                   signature (G, ctx) => [].
- *                                   (default: null, i.e. all moves are allowed).
- *
  * @param {...object} undoableMoves - List of moves that are undoable,
  *                                   (default: null, i.e. all moves are undoable).
  *
@@ -250,10 +244,6 @@ export function Flow({
  *   // A phase-specific movesPerTurn.
  *   movesPerTurn: integer,
  *
- *   // List of moves or a function that returns a list of moves
- *   // that are allowed in this phase.
- *   allowedMoves: (G, ctx) => ['moveA', ...],
- *
  *   // List of moves that are undoable.
  *   undoableMoves: ['moveA', ...],
  * }
@@ -273,7 +263,6 @@ export function FlowWithPhases({
   endGame,
   setActionPlayers,
   undoableMoves,
-  allowedMoves,
   redactedMoves,
   optimisticUpdate,
   game,
@@ -305,7 +294,6 @@ export function FlowWithPhases({
   if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
-  if (allowedMoves === undefined) allowedMoves = null;
   if (undoableMoves === undefined) undoableMoves = null;
 
   const phaseMap = phases;
@@ -365,13 +353,6 @@ export function FlowWithPhases({
     if (conf.undoableMoves === undefined) {
       conf.undoableMoves = undoableMoves;
     }
-    if (conf.allowedMoves === undefined) {
-      conf.allowedMoves = allowedMoves;
-    }
-    if (typeof conf.allowedMoves !== 'function') {
-      const t = conf.allowedMoves;
-      conf.allowedMoves = () => t;
-    }
   }
 
   const shouldEndPhase = ({ G, ctx }) => {
@@ -408,8 +389,7 @@ export function FlowWithPhases({
       },
     };
 
-    const allowedMoves = config.allowedMoves(G, ctx);
-    return { ...state, G, ctx: { ...ctx, allowedMoves } };
+    return { ...state, G, ctx };
   };
 
   const startTurn = function(state, config) {
@@ -419,7 +399,6 @@ export function FlowWithPhases({
     const _undo = [{ G, ctx: plainCtx }];
 
     const ctx = { ...state.ctx };
-    ctx.allowedMoves = config.allowedMoves(G, ctx);
 
     // Reset stats.
     ctx.stats = {
@@ -678,10 +657,6 @@ export function FlowWithPhases({
       return { ...state, ctx: { ...state.ctx, gameover } };
     }
 
-    // Update allowedMoves.
-    const allowedMoves = conf.allowedMoves(state.G, state.ctx);
-    state = { ...state, ctx: { ...state.ctx, allowedMoves } };
-
     // Update undo / redo state.
     if (!endTurn) {
       const undo = state._undo || [];
@@ -700,10 +675,14 @@ export function FlowWithPhases({
   }
 
   const canMakeMove = (G, ctx, moveName) => {
-    const conf = phaseMap[ctx.phase];
-    const moves = conf.allowedMoves(G, ctx);
-    if (!moves) return true;
-    return moves.includes(moveName);
+    // If this is a namespaced move, verify that
+    // we are in the correct phase.
+    if (moveName.includes('.')) {
+      const tokens = moveName.split('.');
+      return tokens[0] == ctx.phase;
+    }
+    // If not, then the move is allowed.
+    return true;
   };
 
   const canUndoMove = (G, ctx, moveName) => {

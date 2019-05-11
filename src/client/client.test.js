@@ -41,15 +41,15 @@ describe('namespaced moves', () => {
     client = Client({
       game: Game({
         moves: {
-          A: () => {},
+          A: () => 'A',
         },
 
         flow: {
           phases: {
             PA: {
               moves: {
-                B: () => {},
-                C: () => {},
+                B: () => 'B',
+                C: () => 'C',
               },
             },
           },
@@ -65,6 +65,26 @@ describe('namespaced moves', () => {
   test('phase-level moves', () => {
     expect(client.moves.PA.B).toBeInstanceOf(Function);
     expect(client.moves.PA.C).toBeInstanceOf(Function);
+  });
+
+  test('moves are allowed only when phase is active', () => {
+    client.moves.A();
+    expect(client.getState().G).toEqual('A');
+
+    client.moves.PA.B();
+    expect(error).toHaveBeenCalledWith('disallowed move: PA.B');
+    client.moves.PA.C();
+    expect(error).toHaveBeenCalledWith('disallowed move: PA.C');
+
+    client.events.endPhase({ next: 'PA' });
+    expect(client.getState().ctx.phase).toBe('PA');
+
+    client.moves.PA.B();
+    expect(client.getState().G).toEqual('B');
+    client.moves.PA.C();
+    expect(client.getState().G).toEqual('C');
+    client.moves.A();
+    expect(client.getState().G).toEqual('A');
   });
 
   test('name clash', () => {

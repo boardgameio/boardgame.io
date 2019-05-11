@@ -437,18 +437,24 @@ describe('SetActionPlayers', () => {
         startingPhase: 'A',
 
         phases: {
-          A: { allowedMoves: ['playMilitia'] },
-          B: { allowedMoves: ['dropCards'], turnOrder: TurnOrder.OTHERS_ONCE },
-        },
-      },
+          A: {
+            moves: {
+              playMilitia: (G, ctx) => {
+                ctx.events.endPhase({ next: 'B' });
+                return G;
+              },
+            },
+          },
 
-      moves: {
-        playMilitia: (G, ctx) => {
-          ctx.events.endPhase({ next: 'B' });
-          return G;
-        },
-        dropCards: G => {
-          return G;
+          B: {
+            turnOrder: TurnOrder.OTHERS_ONCE,
+
+            moves: {
+              dropCards: G => {
+                return G;
+              },
+            },
+          },
         },
       },
     });
@@ -456,14 +462,14 @@ describe('SetActionPlayers', () => {
     const reducer = CreateGameReducer({ game });
 
     let state = InitializeGame({ game, numPlayers: 4 });
-    state = reducer(state, makeMove('playMilitia'));
+    state = reducer(state, makeMove('A.playMilitia'));
     expect(state.ctx.actionPlayers).toMatchObject(['1', '2', '3']);
 
-    state = reducer(state, makeMove('dropCards', undefined, '1'));
+    state = reducer(state, makeMove('B.dropCards', undefined, '1'));
     expect(state.ctx.actionPlayers).toMatchObject(['2', '3']);
-    state = reducer(state, makeMove('dropCards', undefined, '3'));
+    state = reducer(state, makeMove('B.dropCards', undefined, '3'));
     expect(state.ctx.actionPlayers).toMatchObject(['2']);
-    state = reducer(state, makeMove('dropCards', undefined, '2'));
+    state = reducer(state, makeMove('B.dropCards', undefined, '2'));
     expect(state.ctx.actionPlayers).toMatchObject(['0']);
   });
 });

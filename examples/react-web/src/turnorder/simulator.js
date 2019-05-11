@@ -53,17 +53,11 @@ class Board extends React.Component {
       current = true;
     }
 
-    const moves = Object.entries(this.props.moves)
-      .filter(
-        e =>
-          this.props.ctx.allowedMoves === null ||
-          this.props.ctx.allowedMoves.includes(e[0])
-      )
-      .map(e => (
-        <button key={e[0]} onClick={() => e[1]()}>
-          {e[0]}
-        </button>
-      ));
+    const moves = Object.entries(this.props.moves).map(e => (
+      <button key={e[0]} onClick={() => e[1]()}>
+        {e[0]}
+      </button>
+    ));
 
     const events = Object.entries(this.props.events)
       .filter(() => current && active)
