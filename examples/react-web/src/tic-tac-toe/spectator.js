@@ -11,11 +11,12 @@ import { Client } from 'boardgame.io/react';
 import TicTacToe from './game';
 import Board from './board';
 
+const hostname = window.location.hostname;
 const App = Client({
   game: TicTacToe,
   board: Board,
   debug: false,
-  multiplayer: { server: 'localhost:8000' },
+  multiplayer: { server: `${hostname}:8000` },
 });
 
 const Spectator = () => (

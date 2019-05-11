@@ -13,11 +13,12 @@ import Board from './board';
 import PropTypes from 'prop-types';
 import request from 'superagent';
 
+const hostname = window.location.hostname;
 const App = Client({
   game: TicTacToe,
   board: Board,
   debug: false,
-  multiplayer: { server: 'localhost:8000' },
+  multiplayer: { server: `${hostname}:8000` },
 });
 
 class AuthenticatedClient extends React.Component {
@@ -41,7 +42,7 @@ class AuthenticatedClient extends React.Component {
     const PORT = 8000;
 
     const newGame = await request
-      .post(`http://localhost:${PORT}/games/${gameName}/create`)
+      .post(`http://${hostname}:${PORT}/games/${gameName}/create`)
       .send({ numPlayers: 2 });
 
     const gameID = newGame.body.gameID;
@@ -50,7 +51,7 @@ class AuthenticatedClient extends React.Component {
 
     for (let playerID of [0, 1]) {
       const player = await request
-        .post(`http://localhost:${PORT}/games/${gameName}/${gameID}/join`)
+        .post(`http://${hostname}:${PORT}/games/${gameName}/${gameID}/join`)
         .send({
           gameName,
           playerID,
