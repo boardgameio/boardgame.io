@@ -11,10 +11,11 @@ import { Client } from 'boardgame.io/react';
 import ChessGame from './game';
 import ChessBoard from './board';
 
+const hostname = window.location.hostname;
 const App = Client({
   game: ChessGame,
   board: ChessBoard,
-  multiplayer: { server: 'localhost:8000' },
+  multiplayer: { server: `${hostname}:8000` },
   debug: false,
 });
 
