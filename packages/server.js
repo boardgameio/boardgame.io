@@ -7,6 +7,6 @@
  */
 
 import { Server } from '../src/server';
-import { Mongo, Firebase } from '../src/server/db';
+import { Mongo, Firebase, FlatFile } from '../src/server/db';
 
-export { Server, Mongo, Firebase };
+export { Server, Mongo, Firebase, FlatFile };
