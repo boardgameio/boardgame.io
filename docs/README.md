@@ -21,6 +21,8 @@ into a working game complete with online multiplayer
 features, all without requiring you to write a single line of
 networking or database handling code.
 
+Check out [projects made with boardgame.io](/made_with.md)!
+
 ### Features
 
 - **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
