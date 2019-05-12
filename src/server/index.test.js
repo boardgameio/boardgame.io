@@ -108,7 +108,10 @@ describe('run', () => {
 
   test('multiple servers running', async () => {
     server = Server({ games: [game] });
-    runningServer = await server.run({ port: 57890, apiPort: 57891 });
+    runningServer = await server.run({
+      port: 57890,
+      lobbyConfig: { apiPort: 57891 },
+    });
 
     expect(server).not.toBeUndefined();
     expect(api.addApiToServer).not.toBeCalled();
@@ -178,23 +181,29 @@ describe('createServerRunConfig', () => {
       callback: mockCallback,
     });
 
-    expect(createServerRunConfig({ port: 1234, apiPort: 5467 })).toEqual({
+    expect(
+      createServerRunConfig({ port: 1234, lobbyConfig: { apiPort: 5467 } })
+    ).toEqual({
       port: 1234,
       callback: undefined,
-      apiPort: 5467,
+      lobbyConfig: { apiPort: 5467 },
     });
     expect(
       createServerRunConfig({
         port: 1234,
         callback: mockCallback,
-        apiPort: 5467,
-        apiCallback: mockApiCallback,
+        lobbyConfig: {
+          apiPort: 5467,
+          apiCallback: mockApiCallback,
+        },
       })
     ).toEqual({
       port: 1234,
       callback: mockCallback,
-      apiPort: 5467,
-      apiCallback: mockApiCallback,
+      lobbyConfig: {
+        apiPort: 5467,
+        apiCallback: mockApiCallback,
+      },
     });
   });
 });

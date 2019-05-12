@@ -14,11 +14,9 @@ const cors = require('@koa/cors');
 
 import { InitializeGame } from '../core/reducer';
 
-const createCredentials = () => uuid();
 const isGameMetadataKey = (key, gameName) =>
   key.match(gameName + ':.*:metadata');
 const getNamespacedGameID = (gameID, gameName) => `${gameName}:${gameID}`;
-const getNewGameInstanceID = () => uuid();
 const createGameMetadata = () => ({
   players: {},
 });
@@ -33,8 +31,15 @@ const GameMetadataKey = gameID => `${gameID}:metadata`;
  * @param {number} numPlayers - The number of players.
  * @param {object} setupData - User-defined object that's available
  *                             during game setup.
+ * @param {object } serverConfig - Configuration options for the server.
  */
-export const CreateGame = async (db, game, numPlayers, setupData) => {
+export const CreateGame = async (
+  db,
+  game,
+  numPlayers,
+  setupData,
+  lobbyConfig
+) => {
   const gameMetadata = createGameMetadata();
 
   const state = InitializeGame({
@@ -44,11 +49,11 @@ export const CreateGame = async (db, game, numPlayers, setupData) => {
   });
 
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    const credentials = createCredentials();
+    const credentials = lobbyConfig.uuid();
     gameMetadata.players[playerIndex] = { id: playerIndex, credentials };
   }
 
-  const gameID = getNewGameInstanceID();
+  const gameID = lobbyConfig.uuid();
   const namespacedGameID = getNamespacedGameID(gameID, game.name);
 
   await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
@@ -57,12 +62,15 @@ export const CreateGame = async (db, game, numPlayers, setupData) => {
   return gameID;
 };
 
-export const createApiServer = ({ db, games }) => {
+export const createApiServer = ({ db, games, lobbyConfig }) => {
   const app = new Koa();
-  return addApiToServer({ app, db, games });
+  return addApiToServer({ app, db, games, lobbyConfig });
 };
 
-export const addApiToServer = ({ app, db, games }) => {
+export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
+  if (!lobbyConfig || !lobbyConfig.uuid) {
+    lobbyConfig = { ...lobbyConfig, uuid };
+  }
   const router = new Router();
 
   router.get('/games', async ctx => {
@@ -81,7 +89,13 @@ export const addApiToServer = ({ app, db, games }) => {
     }
 
     const game = games.find(g => g.name === gameName);
-    const gameID = await CreateGame(db, game, numPlayers, setupData);
+    const gameID = await CreateGame(
+      db,
+      game,
+      numPlayers,
+      setupData,
+      lobbyConfig
+    );
 
     ctx.body = {
       gameID,
