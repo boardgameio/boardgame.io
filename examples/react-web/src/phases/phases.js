@@ -15,23 +15,25 @@ import './phases.css';
 const game = Game({
   setup: () => ({ deck: 5, hand: 0 }),
 
-  moves: {
-    takeCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
-    playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),
+  phases: {
+    take: {
+      endPhaseIf: G => G.deck <= 0,
+      next: 'play',
+      moves: {
+        takeCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
+      },
+    },
+    play: {
+      endPhaseIf: G => G.hand <= 0,
+      next: 'take',
+      moves: {
+        playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),
+      },
+    },
   },
 
   flow: {
     startingPhase: 'take',
-    phases: {
-      take: {
-        endPhaseIf: G => G.deck <= 0,
-        next: 'play',
-      },
-      play: {
-        endPhaseIf: G => G.hand <= 0,
-        next: 'take',
-      },
-    },
   },
 });
 
@@ -45,13 +47,13 @@ class Board extends React.Component {
 
   takeCard = () => {
     if (this.props.ctx.phase != 'take') return;
-    this.props.moves.takeCard();
+    this.props.moves.take.takeCard();
     this.props.events.endTurn();
   };
 
   playCard = () => {
     if (this.props.ctx.phase != 'play') return;
-    this.props.moves.playCard();
+    this.props.moves.play.playCard();
     this.props.events.endTurn();
   };
 
