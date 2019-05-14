@@ -192,14 +192,14 @@ export function Flow({
  * @param {Array} redactedMoves - List of moves to be redacted
  *                                from the log.
  *
- * @param {object} game - The game object.
- *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
  *                                       be executed optimistically on
  *                                       the client while waiting for
  *                                       the result of execution from
  *                                       the server.
+ *
+ * @param {object} game - The game object.
  *
  * @param {...object} phases - A map of phases in the game.
  *
@@ -286,7 +286,6 @@ export function FlowWithPhases({
   if (game === undefined) {
     game = { plugins: [] };
   }
-  if (!phases) phases = {};
   if (!startingPhase) startingPhase = 'default';
   if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
@@ -296,7 +295,7 @@ export function FlowWithPhases({
   if (!turnOrder) turnOrder = TurnOrder.DEFAULT;
   if (undoableMoves === undefined) undoableMoves = null;
 
-  const phaseMap = phases;
+  const phaseMap = game.phases || phases || {};
 
   if ('default' in phaseMap) {
     logging.error('cannot specify phase with name "default"');
