@@ -133,6 +133,45 @@ test('toggle Debug UI', () => {
   expect(debug.find('.debug-ui')).toHaveLength(0);
 });
 
+describe('namespaced moves', () => {
+  let game;
+  let client;
+
+  beforeAll(() => {
+    game = Game({
+      moves: {
+        A: G => G,
+      },
+
+      flow: {
+        phases: {
+          phaseA: {
+            moves: {
+              B: G => G,
+            },
+          },
+        },
+      },
+    });
+
+    client = Client({ game });
+  });
+
+  test('basic', () => {
+    const debug = Enzyme.mount(
+      <Debug
+        moves={client.moves}
+        reducer={client.reducer}
+        gamestate={client.getState()}
+        endTurn={() => {}}
+        gameID="default"
+      />
+    );
+
+    expect(debug.find('DebugMove')).toHaveLength(2);
+  });
+});
+
 describe('log', () => {
   test('toggle', () => {
     const debug = Enzyme.mount(
