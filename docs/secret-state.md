@@ -33,7 +33,7 @@ player in a game, use the `player` prop to make the client
 aware of this.
 
 ```
-ReactDOM.render(<App gameID="gameid" player="1" />, document.getElementById('root'));
+ReactDOM.render(<App gameID="gameid" playerID="1" />, document.getElementById('root'));
 ```
 
 From now on, this client will see state that is customized
