@@ -50,9 +50,9 @@ include via a `<script>` tag.
 
 See [changelog](CHANGELOG.md).
 
-### New in v0.29.0
+### Notable Projects
 
-**Plugin API** that allows creating custom interfaces that target specific game genres.
+Check out these [projects](/made_with.md) that were made with boardgame.io.
 
 ### License
 
