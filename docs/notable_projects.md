@@ -2,7 +2,7 @@
 
 List of notable projects using boardgame.io. This list is not exhaustive. Feel free to send a PR to add your project to this list, but please have a demo that's accessible via a URL.
 
-### Games
+## Games
 
 - [Bad Flamingo](https://github.com/jayelm/bad-flamingo) - Fool the computer, but not your friends! Adversarial "Quick, Draw"
 
@@ -22,7 +22,7 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [Territories](https://github.com/lehaSVV2009/territories) - [play](https://lehasvv2009.github.io/territories/) - Simple board game Territories.
 
-### Libraries
+## Libraries
 
 - [boardgame.io-angular](https://github.com/turn-based/boardgame.io-angular) - [demo](https://turn-based-209306.firebaseapp.com/) - Unofficial Angular client for boardgame.io.
 
