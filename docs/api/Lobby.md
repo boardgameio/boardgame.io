@@ -43,7 +43,7 @@ Options are:
 
 - `apiPort`: If specified, runs the Lobby API in a separate Koa server in this port. Otherwise, shares the same Koa server runnning on default boardgame.io `port`.
 - `apiCallback`: Called when the Koa server is ready. Only applicable if `apiPort` is specified.
-- `uuid`: Function that returns an unique identifier, needed for creating new match codes and user's credentials in matches. If not specified, uses [uuid/v4](https://www.npmjs.com/package/uuid).
+- `shortid`: Function that returns an unique identifier, needed for creating new match codes and user's credentials in matches. If not specified, uses [shortid](https://www.npmjs.com/package/shortid).
 
 ### Creating a game
 

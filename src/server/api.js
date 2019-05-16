@@ -9,7 +9,7 @@
 const Koa = require('koa');
 const Router = require('koa-router');
 const koaBody = require('koa-body');
-const uuid = require('uuid/v4');
+const shortid = require('shortid').generate;
 const cors = require('@koa/cors');
 
 import { InitializeGame } from '../core/reducer';
@@ -32,6 +32,7 @@ const GameMetadataKey = gameID => `${gameID}:metadata`;
  * @param {object} setupData - User-defined object that's available
  *                             during game setup.
  * @param {object } serverConfig - Configuration options for the server.
+ * @param {object } lobbyConfig - Configuration options for the lobby.
  */
 export const CreateGame = async (
   db,
@@ -49,11 +50,11 @@ export const CreateGame = async (
   });
 
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    const credentials = lobbyConfig.uuid();
+    const credentials = lobbyConfig.shortid();
     gameMetadata.players[playerIndex] = { id: playerIndex, credentials };
   }
 
-  const gameID = lobbyConfig.uuid();
+  const gameID = lobbyConfig.shortid();
   const namespacedGameID = getNamespacedGameID(gameID, game.name);
 
   await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
@@ -68,8 +69,8 @@ export const createApiServer = ({ db, games, lobbyConfig }) => {
 };
 
 export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
-  if (!lobbyConfig || !lobbyConfig.uuid) {
-    lobbyConfig = { ...lobbyConfig, uuid };
+  if (!lobbyConfig || !lobbyConfig.shortid) {
+    lobbyConfig = { ...lobbyConfig, shortid };
   }
   const router = new Router();
 
