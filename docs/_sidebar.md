@@ -3,7 +3,6 @@
   - [Overview](/)
   - [Concepts](concepts.md)
   - [Tutorial](tutorial.md)
-  - [Notable Projects](notable_projects.md)
 
 - Guides
 
