@@ -235,8 +235,8 @@ describe('Events API', () => {
         onBegin: fn,
         onEnd: fn,
       },
-      onPhaseBegin: fn,
-      onPhaseEnd: fn,
+      onBegin: fn,
+      onEnd: fn,
       onMove: fn,
     },
   });

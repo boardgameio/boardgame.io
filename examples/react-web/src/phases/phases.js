@@ -17,14 +17,14 @@ const game = Game({
 
   phases: {
     take: {
-      endPhaseIf: G => G.deck <= 0,
+      endIf: G => G.deck <= 0,
       next: 'play',
       moves: {
         takeCard: G => ({ ...G, deck: G.deck - 1, hand: G.hand + 1 }),
       },
     },
     play: {
-      endPhaseIf: G => G.hand <= 0,
+      endIf: G => G.hand <= 0,
       next: 'take',
       moves: {
         playCard: G => ({ ...G, deck: G.deck + 1, hand: G.hand - 1 }),

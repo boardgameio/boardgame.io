@@ -50,8 +50,8 @@ import { FlowWithPhases } from './flow';
  *     endGameIf: (G, ctx) => { ... },
  *
  *     phases: {
- *       A: { onPhaseBegin: (G, ctx) => G, onPhaseEnd: (G, ctx) => G },
- *       B: { onPhaseBegin: (G, ctx) => G, onPhaseEnd: (G, ctx) => G },
+ *       A: { onBegin: (G, ctx) => G, onEnd: (G, ctx) => G },
+ *       B: { onBegin: (G, ctx) => G, onEnd: (G, ctx) => G },
  *       ...
  *     }
  *   },
