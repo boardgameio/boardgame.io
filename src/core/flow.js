@@ -149,33 +149,36 @@ export function Flow({
  * - Custom phase end conditions.
  * - A move whitelist that disallows other moves during the phase.
  *
- * @param {...object} movesPerTurn - End the turn automatically after a certain number
- *                                   of moves (default: undefined, i.e. the turn does
- *                                   not automatically end after a certain number of moves).
- *
- * @param {...object} endTurnIf - The turn automatically ends if this
- *                                returns a truthy value
- *                                (checked after each move).
- *                                If the return value is { next: playerID },
- *                                that player is the next player
- *                                (instead of following the turn order).
- *                                (G, ctx) => boolean|object
- *
  * @param {...object} endGameIf - The game automatically ends if this function
  *                                returns anything (checked after each move).
  *                                The return value is available at ctx.gameover.
  *                                (G, ctx) => {}
  *
- * @param {...object} onTurnBegin - Any code to run when a turn begins.
- *                                 (G, ctx) => G
- *
- * @param {...object} onTurnEnd - Any code to run when a turn ends.
- *                                (G, ctx) => G
- *
  * @param {...object} onMove - Any code to run at the end of a move.
  *                             (G, ctx, { type: 'moveName', args: [] }) => G
  *
  * @param {...object} turn - Customize the turn structure (see turn-order.js).
+ *                    {
+ *                      // The turn order.
+ *                      order: TurnOrder.DEFAULT,
+ *
+ *                      // Code to run at the beginning of the turn.
+ *                      onBegin: (G, ctx) => G,
+ *
+ *                      // Code to run at the end of the turn.
+ *                      onEnd: (G, ctx) => G,
+ *
+ *                      // The turn automatically ends if this returns a truthy
+ *                      // value (checked after each move).
+ *                      // If the return value is { next: playerID },
+ *                      // then that player is the next player
+ *                      // instead of following the turn order.
+ *                      endIf: (G, ctx) => boolean|object,
+ *
+ *                      // End the turn automatically after a certain number
+ *                      // of moves.
+ *                      movesPerTurn: 1,
+ *                    }
  *
  * @param {...object} endTurn - Set to false to disable the `endTurn` event.
  *
@@ -222,26 +225,14 @@ export function Flow({
  *
  *   Phase-specific options that override their global equivalents:
  *
- *   // A phase-specific endTurnIf.
- *   endTurnIf: (G, ctx) => boolean|object,
- *
  *   // A phase-specific endGameIf.
  *   endGameIf: (G, ctx) => {},
- *
- *   // A phase-specific onTurnBegin
- *   onTurnBegin: (G, ctx) => G,
- *
- *   // A phase-specific onTurnEnd.
- *   onTurnEnd: (G, ctx) => G,
  *
  *   // A phase-specific onMove.
  *   onMove - (G, ctx) => G,
  *
  *   // A phase-specific turn structure.
  *   turn: { order: TurnOrder.DEFAULT },
- *
- *   // A phase-specific movesPerTurn.
- *   movesPerTurn: integer,
  *
  *   // List of moves that are undoable.
  *   undoableMoves: ['moveA', ...],
@@ -250,11 +241,7 @@ export function Flow({
 export function FlowWithPhases({
   phases,
   startingPhase,
-  movesPerTurn,
-  endTurnIf,
   endGameIf,
-  onTurnBegin,
-  onTurnEnd,
   onMove,
   turn,
   endTurn,
@@ -286,10 +273,7 @@ export function FlowWithPhases({
     game = { plugins: [] };
   }
   if (!startingPhase) startingPhase = 'default';
-  if (!endTurnIf) endTurnIf = () => false;
   if (!endGameIf) endGameIf = () => undefined;
-  if (!onTurnBegin) onTurnBegin = G => G;
-  if (!onTurnEnd) onTurnEnd = G => G;
   if (!onMove) onMove = G => G;
   if (!turn) turn = {};
   if (undoableMoves === undefined) undoableMoves = null;
@@ -324,33 +308,34 @@ export function FlowWithPhases({
       conf.onPhaseEnd = G => G;
     }
     conf.onPhaseEnd = plugins.FnWrap(conf.onPhaseEnd, game);
-    if (conf.movesPerTurn === undefined) {
-      conf.movesPerTurn = movesPerTurn;
-    }
-    if (conf.endTurnIf === undefined) {
-      conf.endTurnIf = endTurnIf;
-    }
+
     if (conf.endGameIf === undefined) {
       conf.endGameIf = endGameIf;
     }
-    if (conf.onTurnBegin === undefined) {
-      conf.onTurnBegin = onTurnBegin;
-    }
-    conf.onTurnBegin = plugins.FnWrap(conf.onTurnBegin, game);
-    if (conf.onTurnEnd === undefined) {
-      conf.onTurnEnd = onTurnEnd;
-    }
-    conf.onTurnEnd = plugins.FnWrap(conf.onTurnEnd, game);
+
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
     conf.onMove = plugins.FnWrap(conf.onMove, game);
-    if (conf.turn === undefined) {
-      conf.turn = turn;
-    }
+
     if (conf.undoableMoves === undefined) {
       conf.undoableMoves = undoableMoves;
     }
+
+    if (conf.turn === undefined) {
+      conf.turn = turn;
+    }
+    if (conf.turn.onBegin === undefined) {
+      conf.turn.onBegin = G => G;
+    }
+    if (conf.turn.onEnd === undefined) {
+      conf.turn.onEnd = G => G;
+    }
+    if (conf.turn.endIf === undefined) {
+      conf.turn.endIf = () => false;
+    }
+    conf.turn.onBegin = plugins.FnWrap(conf.turn.onBegin, game);
+    conf.turn.onEnd = plugins.FnWrap(conf.turn.onEnd, game);
   }
 
   const shouldEndPhase = ({ G, ctx }) => {
@@ -362,10 +347,13 @@ export function FlowWithPhases({
     const conf = phaseMap[ctx.phase];
 
     const currentPlayerMoves = ctx.stats.turn.numMoves[ctx.currentPlayer] || 0;
-    if (conf.movesPerTurn && currentPlayerMoves >= conf.movesPerTurn) {
+    if (
+      conf.turn.movesPerTurn &&
+      currentPlayerMoves >= conf.turn.movesPerTurn
+    ) {
       return true;
     }
-    return conf.endTurnIf(G, ctx);
+    return conf.turn.endIf(G, ctx);
   };
 
   // Helper to perform start-of-phase initialization.
@@ -391,7 +379,7 @@ export function FlowWithPhases({
   };
 
   const startTurn = function(state, config) {
-    const G = config.onTurnBegin(state.G, state.ctx);
+    const G = config.turn.onBegin(state.G, state.ctx);
 
     const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -497,7 +485,7 @@ export function FlowWithPhases({
       }
     }
 
-    // End turn if endTurnIf returns something
+    // End turn if turn.endIf returns something
     // (and the turn has not already been ended by a nested endPhase call).
     const endTurn = shouldEndTurn(state);
     if (endTurn && state.ctx.turn == origTurn) {
@@ -523,12 +511,12 @@ export function FlowWithPhases({
 
     // Prevent ending the turn if movesPerTurn haven't been made.
     const currentPlayerMoves = ctx.stats.turn.numMoves[ctx.currentPlayer] || 0;
-    if (conf.movesPerTurn && currentPlayerMoves < conf.movesPerTurn) {
+    if (conf.turn.movesPerTurn && currentPlayerMoves < conf.turn.movesPerTurn) {
       return state;
     }
 
     // Run turn-end triggers.
-    G = conf.onTurnEnd(G, ctx);
+    G = conf.turn.onEnd(G, ctx);
 
     // Update gameover.
     const gameover = conf.endGameIf(G, ctx);
@@ -640,7 +628,7 @@ export function FlowWithPhases({
       conf = phaseMap[state.ctx.phase];
     }
 
-    // End the turn automatically if endTurnIf is true or if endGameIf returns.
+    // End the turn automatically if turn.endIf is true or if endGameIf returns.
     // (but not if endPhase above already ends the turn).
     const endTurn = shouldEndTurn(state);
     if (state.ctx.turn == origTurn && (endTurn || gameover !== undefined)) {

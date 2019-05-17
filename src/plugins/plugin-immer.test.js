@@ -35,11 +35,13 @@ describe('immer', () => {
             },
           },
         },
-        onTurnBegin: G => {
-          G.onTurnBegin = true;
-        },
-        onTurnEnd: G => {
-          G.onTurnEnd = true;
+        turn: {
+          onBegin: G => {
+            G.onTurnBegin = true;
+          },
+          onEnd: G => {
+            G.onTurnEnd = true;
+          },
         },
         onMove: G => {
           G.onMove = true;

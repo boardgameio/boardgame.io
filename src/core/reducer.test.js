@@ -231,8 +231,10 @@ describe('Events API', () => {
     setup: () => ({}),
     flow: {
       phases: { A: {} },
-      onTurnBegin: fn,
-      onTurnEnd: fn,
+      turn: {
+        onBegin: fn,
+        onEnd: fn,
+      },
       onPhaseBegin: fn,
       onPhaseEnd: fn,
       onMove: fn,
