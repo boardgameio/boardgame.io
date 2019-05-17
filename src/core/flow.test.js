@@ -155,13 +155,13 @@ describe('phases', () => {
       startingPhase: 'A',
       phases: {
         A: {
-          endTurnIf: () => true,
+          turn: { endIf: () => true },
           endPhaseIf: () => true,
           onPhaseEnd: () => ++endPhaseACount,
           next: 'B',
         },
         B: {
-          endTurnIf: () => false,
+          turn: { endIf: () => false },
           endPhaseIf: () => false,
           onPhaseEnd: () => ++endPhaseBCount,
         },
@@ -179,7 +179,7 @@ describe('phases', () => {
 
   test('end turn when final phase is reached', () => {
     const flow = FlowWithPhases({
-      endTurnIf: (G, ctx) => ctx.phase === 'C',
+      turn: { endIf: (G, ctx) => ctx.phase === 'C' },
       startingPhase: 'A',
       phases: { A: { next: 'B' }, B: { next: 'C' }, C: {} },
     });
@@ -203,7 +203,11 @@ describe('phases', () => {
 
 test('movesPerTurn', () => {
   {
-    const flow = FlowWithPhases({ movesPerTurn: 2 });
+    const flow = FlowWithPhases({
+      turn: {
+        movesPerTurn: 2,
+      },
+    });
     let state = flow.init({ ctx: flow.ctx(2) });
     expect(state.ctx.turn).toBe(0);
     state = flow.processMove(state, makeMove('move', null, '0').payload);
@@ -216,8 +220,14 @@ test('movesPerTurn', () => {
 
   {
     const flow = FlowWithPhases({
-      movesPerTurn: 2,
-      phases: { B: { movesPerTurn: 1 } },
+      turn: { movesPerTurn: 2 },
+      phases: {
+        B: {
+          turn: {
+            movesPerTurn: 1,
+          },
+        },
+      },
     });
     let state = flow.init({ ctx: flow.ctx(2) });
     expect(state.ctx.turn).toBe(0);
@@ -236,70 +246,29 @@ test('movesPerTurn', () => {
   }
 });
 
-test('onTurnBegin', () => {
-  {
-    const onTurnBegin = jest.fn(G => G);
-    const onTurnBeginOverride = jest.fn(G => G);
+test('turn.onBegin', () => {
+  const onBegin = jest.fn(G => G);
+  const flow = FlowWithPhases({
+    turn: { onBegin },
+  });
+  const state = { ctx: flow.ctx(2) };
 
-    const flow = FlowWithPhases({
-      onTurnBegin,
-      phases: { B: { onTurnBegin: onTurnBeginOverride } },
-    });
-
-    let state = { ctx: flow.ctx(2) };
-
-    expect(onTurnBegin).not.toHaveBeenCalled();
-
-    flow.init(state);
-
-    expect(onTurnBegin).toHaveBeenCalled();
-    expect(onTurnBeginOverride).not.toHaveBeenCalled();
-
-    state = flow.processGameEvent(state, gameEvent('endPhase', { next: 'B' }));
-    expect(state.ctx.phase).toBe('B');
-    expect(onTurnBeginOverride).not.toHaveBeenCalled();
-
-    onTurnBegin.mockReset();
-    onTurnBeginOverride.mockReset();
-
-    flow.processGameEvent(state, gameEvent('endTurn'));
-    expect(onTurnBegin).not.toHaveBeenCalled();
-    expect(onTurnBeginOverride).toHaveBeenCalled();
-  }
+  expect(onBegin).not.toHaveBeenCalled();
+  flow.init(state);
+  expect(onBegin).toHaveBeenCalled();
 });
 
-test('onTurnEnd', () => {
-  {
-    const onTurnEnd = jest.fn(G => G);
-    const onTurnEndOverride = jest.fn(G => G);
+test('turn.onEnd', () => {
+  const onEnd = jest.fn(G => G);
+  const flow = FlowWithPhases({
+    turn: { onEnd },
+  });
+  const state = { ctx: flow.ctx(2) };
+  flow.init(state);
 
-    const flow = FlowWithPhases({
-      onTurnEnd,
-      startingPhase: 'A',
-      phases: { A: { next: 'B' }, B: { onTurnEnd: onTurnEndOverride } },
-    });
-
-    let state = { ctx: flow.ctx(2) };
-
-    expect(onTurnEnd).not.toHaveBeenCalled();
-    expect(onTurnEndOverride).not.toHaveBeenCalled();
-
-    flow.init(state);
-    expect(state.ctx.phase).toBe('A');
-
-    flow.processGameEvent(state, gameEvent('endTurn'));
-    expect(onTurnEnd).toHaveBeenCalled();
-    expect(onTurnEndOverride).not.toHaveBeenCalled();
-
-    onTurnEnd.mockReset();
-    onTurnEndOverride.mockReset();
-
-    state = flow.processGameEvent(state, gameEvent('endPhase'));
-
-    flow.processGameEvent(state, gameEvent('endTurn'));
-    expect(onTurnEnd).not.toHaveBeenCalled();
-    expect(onTurnEndOverride).toHaveBeenCalled();
-  }
+  expect(onEnd).not.toHaveBeenCalled();
+  flow.processGameEvent(state, gameEvent('endTurn'));
+  expect(onEnd).toHaveBeenCalled();
 });
 
 test('onMove', () => {
@@ -421,9 +390,11 @@ test('endGameIf', () => {
   }
 });
 
-describe('endTurnIf', () => {
+describe('turn.endIf', () => {
   test('global', () => {
-    const flow = FlowWithPhases({ endTurnIf: G => G.endTurn });
+    const flow = FlowWithPhases({
+      turn: { endIf: G => G.endTurn },
+    });
     const game = Game({
       moves: {
         A: () => ({ endTurn: true }),
@@ -445,7 +416,7 @@ describe('endTurnIf', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
       phases: {
-        A: { endTurnIf: G => G.endTurn },
+        A: { turn: { endIf: G => G.endTurn } },
       },
     });
     const game = Game({
@@ -466,7 +437,9 @@ describe('endTurnIf', () => {
   });
 
   test('return value', () => {
-    const flow = FlowWithPhases({ endTurnIf: () => ({ next: '2' }) });
+    const flow = FlowWithPhases({
+      turn: { endIf: () => ({ next: '2' }) },
+    });
     const game = Game({
       moves: {
         A: G => G,
@@ -708,7 +681,7 @@ test('undo / redo restricted by undoableMoves', () => {
 
 test('endTurn is not called twice in one move', () => {
   const flow = FlowWithPhases({
-    endTurnIf: () => true,
+    turn: { endIf: () => true },
     startingPhase: 'A',
     phases: { A: { endPhaseIf: G => G.endPhase, next: 'B' }, B: {} },
   });
@@ -727,9 +700,9 @@ test('endTurn is not called twice in one move', () => {
 
   state.G.endPhase = true;
 
-  // endPhaseIf and endTurnIf both return true here,
+  // endPhaseIf and turn.endIf both return true here,
   // but the turn should only advance once, despite
-  // endTurnIf being checked in endPhaseIf as well as processMove.
+  // turn.endIf being checked in endPhaseIf as well as processMove.
   state = flow.processMove(state, makeMove().payload);
 
   expect(state.ctx.phase).toBe('B');

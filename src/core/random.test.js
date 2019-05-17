@@ -148,15 +148,17 @@ test('Random API is not executed optimisitically', () => {
   }
 });
 
-test('onTurnBegin has ctx APIs at the beginning of the game', () => {
+test('turn.onBegin has ctx APIs at the beginning of the game', () => {
   let random = null;
   let events = null;
 
   const game = Game({
     flow: {
-      onTurnBegin: (G, ctx) => {
-        random = ctx.random;
-        events = ctx.events;
+      turn: {
+        onBegin: (G, ctx) => {
+          random = ctx.random;
+          events = ctx.events;
+        },
       },
     },
   });

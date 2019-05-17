@@ -83,7 +83,9 @@ describe('time travel', () => {
       },
 
       flow: {
-        endTurnIf: G => G && G.arg == 42,
+        turn: {
+          endIf: G => G && G.arg == 42,
+        },
       },
     });
 

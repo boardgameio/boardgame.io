@@ -42,7 +42,7 @@ const ChessGame = Game({
   },
 
   flow: {
-    movesPerTurn: 1,
+    turn: { movesPerTurn: 1 },
 
     endGameIf: G => {
       const chess = Load(G.pgn);
