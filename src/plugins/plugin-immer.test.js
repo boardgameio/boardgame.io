@@ -27,10 +27,10 @@ describe('immer', () => {
         startingPhase: 'A',
         phases: {
           A: {
-            onPhaseBegin: G => {
+            onBegin: G => {
               G.onPhaseBegin = true;
             },
-            onPhaseEnd: G => {
+            onEnd: G => {
               G.onPhaseEnd = true;
             },
           },

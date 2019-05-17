@@ -158,27 +158,27 @@ export function Flow({
  *                             (G, ctx, { type: 'moveName', args: [] }) => G
  *
  * @param {...object} turn - Customize the turn structure (see turn-order.js).
- *                    {
- *                      // The turn order.
- *                      order: TurnOrder.DEFAULT,
+ *   {
+ *     // The turn order.
+ *     order: TurnOrder.DEFAULT,
  *
- *                      // Code to run at the beginning of the turn.
- *                      onBegin: (G, ctx) => G,
+ *     // Code to run at the beginning of the turn.
+ *     onBegin: (G, ctx) => G,
  *
- *                      // Code to run at the end of the turn.
- *                      onEnd: (G, ctx) => G,
+ *     // Code to run at the end of the turn.
+ *     onEnd: (G, ctx) => G,
  *
- *                      // The turn automatically ends if this returns a truthy
- *                      // value (checked after each move).
- *                      // If the return value is { next: playerID },
- *                      // then that player is the next player
- *                      // instead of following the turn order.
- *                      endIf: (G, ctx) => boolean|object,
+ *     // The turn automatically ends if this returns a truthy
+ *     // value (checked after each move).
+ *     // If the return value is { next: playerID },
+ *     // then that player is the next player
+ *     // instead of following the turn order.
+ *     endIf: (G, ctx) => boolean|object,
  *
- *                      // End the turn automatically after a certain number
- *                      // of moves.
- *                      movesPerTurn: 1,
- *                    }
+ *     // End the turn automatically after a certain number
+ *     // of moves.
+ *     movesPerTurn: 1,
+ *   }
  *
  * @param {...object} endTurn - Set to false to disable the `endTurn` event.
  *
@@ -213,15 +213,15 @@ export function Flow({
  *
  * {
  *   // Any setup code to run before the phase begins.
- *   onPhaseBegin: (G, ctx) => G,
+ *   onBegin: (G, ctx) => G,
  *
  *   // Any cleanup code to run after the phase ends.
- *   onPhaseEnd: (G, ctx) => G,
+ *   onEnd: (G, ctx) => G,
  *
  *   // The phase ends if this function returns a truthy value.
  *   // If the return value is of the form { next: 'phase name' }
  *   // then that will be chosen as the next phase.
- *   endPhaseIf: (G, ctx) => boolean|object,
+ *   endIf: (G, ctx) => boolean|object,
  *
  *   Phase-specific options that override their global equivalents:
  *
@@ -232,7 +232,7 @@ export function Flow({
  *   onMove - (G, ctx) => G,
  *
  *   // A phase-specific turn structure.
- *   turn: { order: TurnOrder.DEFAULT },
+ *   turn: { ... },
  *
  *   // List of moves that are undoable.
  *   undoableMoves: ['moveA', ...],
@@ -297,17 +297,17 @@ export function FlowWithPhases({
       }
     }
 
-    if (conf.endPhaseIf === undefined) {
-      conf.endPhaseIf = () => undefined;
+    if (conf.endIf === undefined) {
+      conf.endIf = () => undefined;
     }
-    if (conf.onPhaseBegin === undefined) {
-      conf.onPhaseBegin = G => G;
+    if (conf.onBegin === undefined) {
+      conf.onBegin = G => G;
     }
-    conf.onPhaseBegin = plugins.FnWrap(conf.onPhaseBegin, game);
-    if (conf.onPhaseEnd === undefined) {
-      conf.onPhaseEnd = G => G;
+    conf.onBegin = plugins.FnWrap(conf.onBegin, game);
+    if (conf.onEnd === undefined) {
+      conf.onEnd = G => G;
     }
-    conf.onPhaseEnd = plugins.FnWrap(conf.onPhaseEnd, game);
+    conf.onEnd = plugins.FnWrap(conf.onEnd, game);
 
     if (conf.endGameIf === undefined) {
       conf.endGameIf = endGameIf;
@@ -340,7 +340,7 @@ export function FlowWithPhases({
 
   const shouldEndPhase = ({ G, ctx }) => {
     const conf = phaseMap[ctx.phase];
-    return conf.endPhaseIf(G, ctx);
+    return conf.endIf(G, ctx);
   };
 
   const shouldEndTurn = ({ G, ctx }) => {
@@ -358,7 +358,7 @@ export function FlowWithPhases({
 
   // Helper to perform start-of-phase initialization.
   const startPhase = function(state, config) {
-    let G = config.onPhaseBegin(state.G, state.ctx);
+    let G = config.onBegin(state.G, state.ctx);
     let ctx = InitTurnOrderState(G, state.ctx, config.turn);
 
     // Allow plugins to modify G and ctx at the beginning of a phase.
@@ -430,7 +430,7 @@ export function FlowWithPhases({
 
     // Run any cleanup code for the phase that is about to end.
     const conf = phaseMap[ctx.phase];
-    G = conf.onPhaseEnd(G, ctx);
+    G = conf.onEnd(G, ctx);
 
     const gameover = conf.endGameIf(G, ctx);
     if (gameover !== undefined) {
@@ -617,7 +617,7 @@ export function FlowWithPhases({
     const origTurn = state.ctx.turn;
     const gameover = conf.endGameIf(state.G, state.ctx);
 
-    // End the phase automatically if endPhaseIf is true or if endGameIf returns.
+    // End the phase automatically if phase.endIf is true or if endGameIf returns.
     const endPhase = shouldEndPhase(state) || actionPlayersOnceDone;
     if (endPhase || gameover !== undefined) {
       state = dispatch(

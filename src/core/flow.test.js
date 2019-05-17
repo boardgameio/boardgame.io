@@ -53,19 +53,19 @@ describe('phases', () => {
     );
   });
 
-  test('onPhaseBegin / onPhaseEnd', () => {
+  test('onBegin / onEnd', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
 
       phases: {
         A: {
-          onPhaseBegin: s => ({ ...s, setupA: true }),
-          onPhaseEnd: s => ({ ...s, cleanupA: true }),
+          onBegin: s => ({ ...s, setupA: true }),
+          onEnd: s => ({ ...s, cleanupA: true }),
           next: 'B',
         },
         B: {
-          onPhaseBegin: s => ({ ...s, setupB: true }),
-          onPhaseEnd: s => ({ ...s, cleanupB: true }),
+          onBegin: s => ({ ...s, setupB: true }),
+          onEnd: s => ({ ...s, cleanupB: true }),
           next: 'A',
         },
       },
@@ -103,10 +103,10 @@ describe('phases', () => {
     expect(state.ctx.currentPlayer).toBe('0');
   });
 
-  test('endPhaseIf', () => {
+  test('endIf', () => {
     const flow = FlowWithPhases({
       startingPhase: 'A',
-      phases: { A: { endPhaseIf: () => true, next: 'B' }, B: {} },
+      phases: { A: { endIf: () => true, next: 'B' }, B: {} },
     });
 
     const state = { ctx: flow.ctx(2) };
@@ -128,12 +128,12 @@ describe('phases', () => {
   });
 
   test('infinite loop', () => {
-    const endPhaseIf = () => true;
+    const endIf = () => true;
     const flow = FlowWithPhases({
       startingPhase: 'A',
       phases: {
-        A: { endPhaseIf, next: 'B' },
-        B: { endPhaseIf, next: 'A' },
+        A: { endIf, next: 'B' },
+        B: { endIf, next: 'A' },
       },
     });
 
@@ -156,14 +156,14 @@ describe('phases', () => {
       phases: {
         A: {
           turn: { endIf: () => true },
-          endPhaseIf: () => true,
-          onPhaseEnd: () => ++endPhaseACount,
+          endIf: () => true,
+          onEnd: () => ++endPhaseACount,
           next: 'B',
         },
         B: {
           turn: { endIf: () => false },
-          endPhaseIf: () => false,
-          onPhaseEnd: () => ++endPhaseBCount,
+          endIf: () => false,
+          onEnd: () => ++endPhaseBCount,
         },
       },
     });
@@ -298,7 +298,7 @@ test('onMove', () => {
 test('init', () => {
   let flow = FlowWithPhases({
     startingPhase: 'A',
-    phases: { A: { onPhaseEnd: () => ({ done: true }) } },
+    phases: { A: { onEnd: () => ({ done: true }) } },
   });
 
   const orig = flow.ctx(2);
@@ -308,7 +308,7 @@ test('init', () => {
 
   flow = FlowWithPhases({
     startingPhase: 'A',
-    phases: { A: { onPhaseBegin: () => ({ done: true }) } },
+    phases: { A: { onBegin: () => ({ done: true }) } },
   });
 
   state = { ctx: orig };
@@ -683,7 +683,7 @@ test('endTurn is not called twice in one move', () => {
   const flow = FlowWithPhases({
     turn: { endIf: () => true },
     startingPhase: 'A',
-    phases: { A: { endPhaseIf: G => G.endPhase, next: 'B' }, B: {} },
+    phases: { A: { endIf: G => G.endPhase, next: 'B' }, B: {} },
   });
 
   let state = flow.init({ G: {}, ctx: flow.ctx(2) });
@@ -700,9 +700,9 @@ test('endTurn is not called twice in one move', () => {
 
   state.G.endPhase = true;
 
-  // endPhaseIf and turn.endIf both return true here,
+  // phase.endIf and turn.endIf both return true here,
   // but the turn should only advance once, despite
-  // turn.endIf being checked in endPhaseIf as well as processMove.
+  // turn.endIf being checked in phase.endIf as well as processMove.
   state = flow.processMove(state, makeMove().payload);
 
   expect(state.ctx.phase).toBe('B');
