@@ -129,7 +129,7 @@ describe('lobby', () => {
 
     describe('exiting lobby', () => {
       beforeEach(async () => {
-        lobby.instance().connection.gameInstances = [
+        lobby.instance().connection.rooms = [
           {
             gameID: 'gameID1',
             players: {
@@ -198,7 +198,7 @@ describe('lobby', () => {
 
     describe('creating a room', () => {
       beforeEach(async () => {
-        lobby.instance().connection.gameInstances = [
+        lobby.instance().connection.rooms = [
           {
             gameID: 'gameID1',
             players: { '0': { id: 0 } },
@@ -281,7 +281,7 @@ describe('lobby', () => {
 
     describe('joining a room', () => {
       beforeEach(async () => {
-        lobby.instance().connection.gameInstances = [
+        lobby.instance().connection.rooms = [
           {
             gameID: 'gameID1',
             players: { '0': { id: 0 } },
@@ -336,7 +336,7 @@ describe('lobby', () => {
 
     describe('leaving a room', () => {
       beforeEach(async () => {
-        lobby.instance().connection.gameInstances = [
+        lobby.instance().connection.rooms = [
           {
             gameID: 'gameID1',
             players: {
@@ -383,7 +383,7 @@ describe('lobby', () => {
 
     describe('starting a game', () => {
       beforeEach(async () => {
-        lobby.instance().connection.gameInstances = [
+        lobby.instance().connection.rooms = [
           {
             gameID: 'gameID1',
             players: {
@@ -475,7 +475,7 @@ describe('lobby', () => {
 
     describe('exiting during game', () => {
       beforeEach(async () => {
-        lobby.instance().connection.gameInstances = [
+        lobby.instance().connection.rooms = [
           {
             gameID: 'gameID1',
             players: {

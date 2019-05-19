@@ -209,13 +209,13 @@ class Lobby extends React.Component {
     return this.state.phase !== phase ? 'hidden' : 'phase';
   };
 
-  renderRooms = (gameInstances, playerName) => {
-    return gameInstances.map(gameInstance => {
-      const { gameID, gameName, players } = gameInstance;
+  renderRooms = (rooms, playerName) => {
+    return rooms.map(room => {
+      const { gameID, gameName, players } = room;
       return (
         <LobbyRoomInstance
           key={'instance-' + gameID}
-          gameInstance={{ gameID, gameName, players: Object.values(players) }}
+          room={{ gameID, gameName, players: Object.values(players) }}
           playerName={playerName}
           onClickJoin={this._joinRoom}
           onClickLeave={this._leaveRoom}
@@ -233,7 +233,7 @@ class Lobby extends React.Component {
       return renderer({
         errorMsg,
         gameComponents,
-        gameInstances: this.connection.gameInstances,
+        rooms: this.connection.rooms,
         phase,
         playerName,
         runningGame,
@@ -272,7 +272,7 @@ class Lobby extends React.Component {
           <div id="instances">
             <table>
               <tbody>
-                {this.renderRooms(this.connection.gameInstances, playerName)}
+                {this.renderRooms(this.connection.rooms, playerName)}
               </tbody>
             </table>
             <span className="error-msg">

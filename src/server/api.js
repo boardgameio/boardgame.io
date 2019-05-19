@@ -91,7 +91,7 @@ export const addApiToServer = ({ app, db, games }) => {
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
     const gameList = await db.list();
-    let gameInstances = [];
+    let rooms = [];
     for (let key of [...gameList]) {
       if (isGameMetadataKey(key, gameName)) {
         const gameID = key.slice(
@@ -99,7 +99,7 @@ export const addApiToServer = ({ app, db, games }) => {
           key.lastIndexOf(':metadata')
         );
         const metadata = await db.get(key);
-        gameInstances.push({
+        rooms.push({
           gameID: gameID,
           players: Object.values(metadata.players).map(player => {
             // strip away credentials
@@ -109,7 +109,7 @@ export const addApiToServer = ({ app, db, games }) => {
       }
     }
     ctx.body = {
-      gameInstances: gameInstances,
+      rooms: rooms,
     };
   });
 
