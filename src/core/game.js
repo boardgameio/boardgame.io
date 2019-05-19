@@ -121,6 +121,10 @@ function Game(game) {
         moveFn = game.flow.moveMap[action.type];
       }
 
+      if (moveFn instanceof Object && moveFn.impl) {
+        moveFn = moveFn.impl;
+      }
+
       if (moveFn !== null) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
