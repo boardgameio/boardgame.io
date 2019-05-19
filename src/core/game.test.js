@@ -16,6 +16,9 @@ describe('basic', () => {
       moves: {
         A: G => G,
         B: () => null,
+        C: {
+          impl: () => 'C',
+        },
       },
 
       flow: {
@@ -31,16 +34,20 @@ describe('basic', () => {
   });
 
   test('sanity', () => {
-    expect(game.moveNames).toEqual(['A', 'B', 'PA.A']);
+    expect(game.moveNames).toEqual(['A', 'B', 'C', 'PA.A']);
     expect(typeof game.processMove).toEqual('function');
   });
 
   test('processMove', () => {
     const testObj = { test: true };
     expect(game.processMove(testObj, { type: 'A' })).toEqual(testObj);
-    expect(game.processMove(testObj, { type: 'C' })).toEqual(testObj);
+    expect(game.processMove(testObj, { type: 'D' })).toEqual(testObj);
     expect(game.processMove(testObj, { type: 'B' })).toEqual(null);
     expect(game.processMove(testObj, { type: 'PA.A' })).toEqual('PA.A');
+  });
+
+  test('long-form move syntax', () => {
+    expect(game.processMove({}, { type: 'C' })).toEqual('C');
   });
 
   test('flow override', () => {
