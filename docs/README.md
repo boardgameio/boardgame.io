@@ -52,7 +52,7 @@ See [changelog](CHANGELOG.md).
 
 ### Notable Projects
 
-Check out these [projects](/made_with.md) that were made with boardgame.io.
+Check out these [projects](/notable_projects.md) that were made with boardgame.io.
 
 ### License
 
