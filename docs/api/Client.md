@@ -47,11 +47,15 @@ const App = Client({
   //
   // This starts sending move updates to the server via socket.io.
   //
-  // 2. { server: 'hostname:port' }
+  // 2. { server: 'hostname[:port]' }
   //
   // Same as the above, but also specifies the server location.
+  // 
+  // 3. { server: 'http[s]://hostname[:port]' }
   //
-  // 3. { local: true}
+  // Same as the above, but also specifies the server protocol (for example, HTTPS).
+  //
+  // 4. { local: true}
   //
   // Special local mode that uses an in-memory game master. Useful
   // for testing multiplayer interactions locally without having to
