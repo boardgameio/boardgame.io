@@ -107,6 +107,11 @@ class App extends React.Component {
   }
 
   init(type) {
+    let shouldUpdate = false;
+    if (this.client !== undefined) {
+      shouldUpdate = true;
+    }
+
     this.type = type;
     this.description = examples[type].description;
     this.client = Client({
@@ -117,7 +122,9 @@ class App extends React.Component {
       multiplayer: { local: true },
     });
 
-    this.forceUpdate();
+    if (shouldUpdate) {
+      this.forceUpdate();
+    }
   }
 
   render() {
@@ -126,7 +133,7 @@ class App extends React.Component {
 
     let players = [];
     for (let i = 0; i < 6; i++) {
-      players.push(<App key={i} playerID={i + ''} />);
+      players.push(<App key={i} gameID={this.type} playerID={i + ''} />);
     }
 
     return (
@@ -184,7 +191,7 @@ class App extends React.Component {
 
         <div className="turnorder-content">
           <div className="player-container">
-            <App />
+            <App gameID={this.type} />
             <span>{players}</span>
           </div>
           <div className="description">

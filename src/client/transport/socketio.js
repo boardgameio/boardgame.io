@@ -72,8 +72,11 @@ export class SocketIO {
         if (server.search(/^https?:\/\//) == -1) {
           server = 'http://' + this.server;
         }
-
-        this.socket = io(server + '/' + this.gameName, this.socketOpts);
+        if (server.substr(-1) != '/') {
+          // add trailing slash if not already present
+          server = server + '/';
+        }
+        this.socket = io(server + this.gameName, this.socketOpts);
       } else {
         this.socket = io('/' + this.gameName, this.socketOpts);
       }

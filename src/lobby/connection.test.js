@@ -10,21 +10,21 @@ import { LobbyConnection } from './connection.js';
 
 describe('lobby', () => {
   let lobby;
-  let gameInstance1, gameInstance2;
+  let room1, room2;
   let jsonResult = [];
   let nextStatus = 200;
 
   beforeEach(async () => {
-    gameInstance1 = { gameID: 'gameID_1', players: [{ id: '0' }] };
-    gameInstance2 = { gameID: 'gameID_2', players: [{ id: '1' }] };
+    room1 = { gameID: 'gameID_1', players: [{ id: '0' }] };
+    room2 = { gameID: 'gameID_2', players: [{ id: '1' }] };
     // result of connection requests
     jsonResult = [
       () => ['game1', 'game2'],
       () => {
-        return { gameInstances: [gameInstance1] };
+        return { rooms: [room1] };
       },
       () => {
-        return { gameInstances: [gameInstance2] };
+        return { rooms: [room2] };
       },
     ];
     let nextResult = jsonResult.shift.bind(jsonResult);
@@ -60,7 +60,7 @@ describe('lobby', () => {
     describe('get list of rooms', () => {
       test('when the server requests succeed', async () => {
         expect(fetch).toHaveBeenCalledTimes(3);
-        expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
+        expect(lobby.rooms).toEqual([room1, room2]);
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
@@ -69,7 +69,7 @@ describe('lobby', () => {
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
-        expect(lobby.gameInstances).toEqual([]);
+        expect(lobby.rooms).toEqual([]);
       });
     });
 
@@ -83,7 +83,7 @@ describe('lobby', () => {
       test('when the room exists', async () => {
         await lobby.join('game1', 'gameID_1', '0');
         expect(fetch).toHaveBeenCalledTimes(4);
-        expect(lobby.gameInstances[0].players[0]).toEqual({
+        expect(lobby.rooms[0].players[0]).toEqual({
           id: '0',
           name: 'Bob',
         });
@@ -95,10 +95,10 @@ describe('lobby', () => {
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
-        expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
+        expect(lobby.rooms).toEqual([room1, room2]);
       });
       test('when the seat is not available', async () => {
-        gameInstance1.players[0].name = 'Bob';
+        room1.players[0].name = 'Bob';
         try {
           await lobby.join('game1', 'gameID_3', '0');
         } catch (error) {
@@ -114,7 +114,7 @@ describe('lobby', () => {
         }
       });
       test('when the player has already joined another game', async () => {
-        gameInstance2.players[0].name = 'Bob';
+        room2.players[0].name = 'Bob';
         try {
           await lobby.join('game1', 'gameID_1', '0');
         } catch (error) {
@@ -138,7 +138,7 @@ describe('lobby', () => {
       test('when the room exists', async () => {
         await lobby.leave('game1', 'gameID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
-        expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
+        expect(lobby.rooms).toEqual([room1, room2]);
       });
       test('when the room does not exist', async () => {
         try {
@@ -147,7 +147,7 @@ describe('lobby', () => {
           expect(error).toBeInstanceOf(Error);
         }
         expect(fetch).toHaveBeenCalledTimes(4);
-        expect(lobby.gameInstances).toEqual([gameInstance1, gameInstance2]);
+        expect(lobby.rooms).toEqual([room1, room2]);
       });
       test('when the player is not in the room', async () => {
         await lobby.leave('game1', 'gameID_1');
@@ -172,7 +172,7 @@ describe('lobby', () => {
       beforeEach(async () => {});
       test('when the player leaves the lobby', async () => {
         await lobby.disconnect();
-        expect(lobby.gameInstances).toEqual([]);
+        expect(lobby.rooms).toEqual([]);
       });
       test('when the player had joined a room', async () => {
         // result of request 'join'
@@ -185,7 +185,7 @@ describe('lobby', () => {
           return {};
         });
         await lobby.disconnect();
-        expect(lobby.gameInstances).toEqual([]);
+        expect(lobby.rooms).toEqual([]);
       });
     });
 
@@ -232,7 +232,7 @@ describe('lobby', () => {
     });
     test('get list of rooms for supported games', async () => {
       expect(fetch).toHaveBeenCalledTimes(2);
-      expect(lobby.gameInstances).toEqual([gameInstance1]);
+      expect(lobby.rooms).toEqual([room1]);
     });
   });
 });

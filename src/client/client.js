@@ -250,7 +250,7 @@ class _ClientImpl {
       }
 
       if (multiplayer.local === true) {
-        if (localMaster_ === null) {
+        if (localMaster_ === null || localMaster_.game !== game) {
           localMaster_ = new LocalMaster(game);
         }
 

@@ -91,7 +91,7 @@ Accepts two parameters, all required:
 
 Returns all instances of the game named `name`.
 
-Returns an array of `gameInstances`. Each instance has fields:
+Returns an array of `rooms`. Each instance has fields:
 
 `gameID`: the ID of the game instance.
 

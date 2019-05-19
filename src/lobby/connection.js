@@ -12,7 +12,7 @@ class _LobbyConnectionImpl {
     this.playerName = playerName || 'Visitor';
     this.playerCredentials = playerCredentials;
     this.server = server;
-    this.gameInstances = [];
+    this.rooms = [];
   }
 
   _baseUrl() {
@@ -21,7 +21,7 @@ class _LobbyConnectionImpl {
 
   async refresh() {
     try {
-      this.gameInstances.length = 0;
+      this.rooms.length = 0;
       const resp = await fetch(this._baseUrl());
       if (resp.status !== 200) {
         throw new Error('HTTP status ' + resp.status);
@@ -31,10 +31,10 @@ class _LobbyConnectionImpl {
         if (!this._getGameComponents(gameName)) continue;
         const gameResp = await fetch(this._baseUrl() + '/' + gameName);
         const gameJson = await gameResp.json();
-        for (let inst of gameJson.gameInstances) {
+        for (let inst of gameJson.rooms) {
           inst.gameName = gameName;
         }
-        this.gameInstances = this.gameInstances.concat(gameJson.gameInstances);
+        this.rooms = this.rooms.concat(gameJson.rooms);
       }
     } catch (error) {
       throw new Error('failed to retrieve list of games (' + error + ')');
@@ -42,7 +42,7 @@ class _LobbyConnectionImpl {
   }
 
   _getGameInstance(gameID) {
-    for (let inst of this.gameInstances) {
+    for (let inst of this.rooms) {
       if (inst['gameID'] === gameID) return inst;
     }
   }
@@ -54,7 +54,7 @@ class _LobbyConnectionImpl {
   }
 
   _findPlayer(playerName) {
-    for (let inst of this.gameInstances) {
+    for (let inst of this.rooms) {
       if (inst.players.some(player => player.name === playerName)) return inst;
     }
   }
@@ -125,7 +125,7 @@ class _LobbyConnectionImpl {
     if (inst) {
       await this.leave(inst.gameName, inst.gameID);
     }
-    this.gameInstances = [];
+    this.rooms = [];
     this.playerName = 'Visitor';
   }
 

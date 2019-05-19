@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 
 class LobbyRoomInstance extends React.Component {
   static propTypes = {
-    gameInstance: PropTypes.shape({
+    room: PropTypes.shape({
       gameName: PropTypes.string.isRequired,
       gameID: PropTypes.string.isRequired,
       players: PropTypes.array.isRequired,
@@ -85,20 +85,20 @@ class LobbyRoomInstance extends React.Component {
   };
 
   render() {
-    const inst = this.props.gameInstance;
+    const room = this.props.room;
     let status = 'OPEN';
-    if (!inst.players.find(player => !player.name)) {
+    if (!room.players.find(player => !player.name)) {
       status = 'RUNNING';
     }
     return (
-      <tr key={'line-' + inst.gameID}>
-        <td key={'cell-name-' + inst.gameID}>{inst.gameName}</td>
-        <td key={'cell-status-' + inst.gameID}>{status}</td>
-        <td key={'cell-seats-' + inst.gameID}>
-          {inst.players.map(this._createSeat).join(', ')}
+      <tr key={'line-' + room.gameID}>
+        <td key={'cell-name-' + room.gameID}>{room.gameName}</td>
+        <td key={'cell-status-' + room.gameID}>{status}</td>
+        <td key={'cell-seats-' + room.gameID}>
+          {room.players.map(this._createSeat).join(', ')}
         </td>
-        <td key={'cell-buttons-' + inst.gameID}>
-          {this._createInstanceButtons(inst)}
+        <td key={'cell-buttons-' + room.gameID}>
+          {this._createInstanceButtons(room)}
         </td>
       </tr>
     );

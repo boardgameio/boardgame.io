@@ -469,26 +469,26 @@ describe('.createApiServer', () => {
     });
     describe('when given 2 games', async () => {
       let response;
-      let instances;
+      let rooms;
       beforeEach(async () => {
         let games = [Game({ name: 'foo' }), Game({ name: 'bar' })];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar');
-        instances = JSON.parse(response.text).gameInstances;
+        rooms = JSON.parse(response.text).rooms;
       });
 
       test('returns instances of the selected game', async () => {
-        expect(instances).toHaveLength(2);
+        expect(rooms).toHaveLength(2);
       });
 
       test('returns game ids', async () => {
-        expect(instances[0].gameID).toEqual('bar-0');
-        expect(instances[1].gameID).toEqual('bar-1');
+        expect(rooms[0].gameID).toEqual('bar-0');
+        expect(rooms[1].gameID).toEqual('bar-1');
       });
 
       test('returns player names', async () => {
-        expect(instances[0].players).toEqual([{ id: 0 }, { id: 1 }]);
-        expect(instances[1].players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(rooms[0].players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(rooms[1].players).toEqual([{ id: 0 }, { id: 1 }]);
       });
     });
   });
