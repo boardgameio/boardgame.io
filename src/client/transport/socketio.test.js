@@ -144,6 +144,13 @@ describe('server option', () => {
     expect(m.socket.io.engine.secure).toEqual(false);
   });
 
+  test('without trailing slash', () => {
+    const server = 'http://' + hostname + ':' + port;
+    const m = new SocketIO({ server });
+    m.connect();
+    expect(m.socket.io.uri).toEqual(server + '/default');
+  });
+
   test('https', () => {
     const serverWithProtocol = 'https://' + hostname + ':' + port + '/';
     const m = new SocketIO({ server: serverWithProtocol });
