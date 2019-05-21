@@ -312,29 +312,30 @@ describe('authentication', () => {
 
 describe('redactLog', () => {
   test('no redactedMoves', () => {
-    const logEvents = [ActionCreators.gameEvent('endTurn')];
-    const result = redactLog(undefined, logEvents, '0');
+    const logEvents = [{ action: ActionCreators.gameEvent('endTurn') }];
+    const result = redactLog(logEvents, '0');
     expect(result).toMatchObject(logEvents);
   });
 
   test('redacted move is only shown with args to the player that made the move', () => {
-    const rm = ['clickCell'];
     const logEvents = [
-      { action: ActionCreators.makeMove('clickCell', [1, 2, 3], '0') },
+      {
+        action: ActionCreators.makeMove('clickCell', [1, 2, 3], '0'),
+        redact: true,
+      },
     ];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, '0');
+    let result = redactLog(logEvents, '0');
     expect(result).toMatchObject(logEvents);
 
     // other player
-    result = redactLog(rm, logEvents, '1');
+    result = redactLog(logEvents, '1');
     expect(result).toMatchObject([
       {
         action: {
           type: 'MAKE_MOVE',
           payload: {
-            argsRedacted: true,
             credentials: undefined,
             playerID: '0',
             type: 'clickCell',
@@ -345,53 +346,55 @@ describe('redactLog', () => {
   });
 
   test('not redacted move is shown to all', () => {
-    const rm = ['clickCell'];
     const logEvents = [
       { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
     ];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, '0');
+    let result = redactLog(logEvents, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = redactLog(rm, logEvents, '1');
+    result = redactLog(logEvents, '1');
     expect(result).toMatchObject(logEvents);
   });
 
   test('can explicitly set showing args to true', () => {
-    const rm = [];
     const logEvents = [
       { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
     ];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, '0');
+    let result = redactLog(logEvents, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = redactLog(rm, logEvents, '1');
+    result = redactLog(logEvents, '1');
     expect(result).toMatchObject(logEvents);
   });
 
   test('events are not redacted', () => {
-    const rm = ['clickCell'];
     const logEvents = [{ action: ActionCreators.gameEvent('endTurn') }];
 
     // player that made the move
-    let result = redactLog(rm, logEvents, '0');
+    let result = redactLog(logEvents, '0');
     expect(result).toMatchObject(logEvents);
     // other player
-    result = redactLog(rm, logEvents, '1');
+    result = redactLog(logEvents, '1');
     expect(result).toMatchObject(logEvents);
   });
 
   test('make sure sync redacts the log', async () => {
-    const game2 = Game({
-      moves: { A: G => G, B: G => G },
-      flow: { redactedMoves: ['B'] },
+    const game = Game({
+      moves: {
+        A: G => G,
+        B: {
+          impl: G => G,
+          redact: true,
+        },
+      },
     });
 
     const send = jest.fn();
-    const master = new Master(game2, new InMemory(), TransportAPI(send));
+    const master = new Master(game, new InMemory(), TransportAPI(send));
 
     const actionA = ActionCreators.makeMove('A', ['not redacted']);
     const actionB = ActionCreators.makeMove('B', ['redacted']);
@@ -419,7 +422,7 @@ describe('redactLog', () => {
           type: 'MAKE_MOVE',
           payload: {
             type: 'B',
-            argsRedacted: true,
+            args: null,
           },
         },
         _stateID: 1,

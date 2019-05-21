@@ -16,42 +16,37 @@ const GameMetadataKey = gameID => `${gameID}:metadata`;
 /**
  * Redact the log.
  *
- * @param {Array} redactedMoves - List of moves to redact.
  * @param {Array} log - The game log (or deltalog).
  * @param {String} playerID - The playerID that this log is
  *                            to be sent to.
  */
-export function redactLog(redactedMoves, log, playerID) {
-  if (redactedMoves === undefined || log === undefined) {
+export function redactLog(log, playerID) {
+  if (log === undefined) {
     return log;
   }
 
   return log.map(logEvent => {
-    // filter for all other players and a spectator
+    // filter for all other players and spectators.
     if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
       return logEvent;
     }
 
-    // only filter moves
-    if (logEvent.action.type !== 'MAKE_MOVE') {
+    if (logEvent.redact !== true) {
       return logEvent;
     }
 
-    const moveName = logEvent.action.payload.type;
-    let filteredEvent = logEvent;
-    if (redactedMoves.includes(moveName)) {
-      const newPayload = {
-        ...filteredEvent.action.payload,
-        args: undefined,
-        argsRedacted: true,
-      };
-      filteredEvent = {
-        ...filteredEvent,
-        action: { ...filteredEvent.action, payload: newPayload },
-      };
-    }
+    const payload = {
+      ...logEvent.action.payload,
+      args: null,
+    };
+    const filteredEvent = {
+      ...logEvent,
+      action: { ...logEvent.action, payload },
+    };
 
-    return filteredEvent;
+    /* eslint-disable-next-line no-unused-vars */
+    const { redact, ...remaining } = filteredEvent;
+    return remaining;
   });
 }
 
@@ -227,11 +222,7 @@ export class Master {
         },
       };
 
-      const log = redactLog(
-        this.game.flow.redactedMoves,
-        state.deltalog,
-        playerID
-      );
+      const log = redactLog(state.deltalog, playerID);
 
       return {
         type: 'update',
@@ -302,7 +293,7 @@ export class Master {
       },
     };
 
-    const log = redactLog(this.game.flow.redactedMoves, state.log, playerID);
+    const log = redactLog(state.log, playerID);
 
     this.transportAPI.send({
       playerID,
