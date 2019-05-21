@@ -587,22 +587,27 @@ describe('endTurn / endPhase args', () => {
   });
 });
 
-test('undo / redo restricted by undoableMoves', () => {
+test('undoable moves', () => {
   const game = Game({
     moves: {
-      A: () => ({ A: true }),
-      B: () => ({ B: true }),
+      A: {
+        impl: () => ({ A: true }),
+        undoable: (G, ctx) => {
+          return ctx.phase == 'A';
+        },
+      },
+      B: {
+        impl: () => ({ B: true }),
+        undoable: false,
+      },
       C: () => ({ C: true }),
     },
 
     flow: {
-      undoableMoves: ['A', 'B'],
       startingPhase: 'A',
       phases: {
-        A: { undoableMoves: ['A'] },
-        B: { undoableMoves: ['B'] },
-        C: {},
-        D: { undoableMoves: null },
+        A: {},
+        B: {},
       },
     },
   });
@@ -622,7 +627,7 @@ test('undo / redo restricted by undoableMoves', () => {
   state = reducer(state, makeMove('C'));
   expect(state.G).toEqual({ C: true });
   state = reducer(state, undo());
-  expect(state.G).toEqual({ C: true });
+  expect(state.G).toEqual({ B: true });
 
   state.G = {};
   state = reducer(state, gameEvent('endPhase', { next: 'B' }));
@@ -636,47 +641,11 @@ test('undo / redo restricted by undoableMoves', () => {
   state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
   state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, makeMove('C'));
-  expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ C: true });
-
-  state.G = {};
-  state = reducer(state, gameEvent('endPhase', { next: 'C' }));
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.ctx.phase).toBe('C');
-
-  state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
-  state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
   state = reducer(state, makeMove('C'));
   expect(state.G).toEqual({ C: true });
   state = reducer(state, undo());
-  expect(state.G).toEqual({ C: true });
-
-  state.G = {};
-  state = reducer(state, gameEvent('endPhase', { next: 'D' }));
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.ctx.phase).toBe('D');
-
-  state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
-  state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
-  state = reducer(state, makeMove('C'));
-  expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
 });
 
 test('endTurn is not called twice in one move', () => {
