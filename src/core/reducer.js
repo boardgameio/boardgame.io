@@ -273,13 +273,19 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
+        const move = game.getMove(action.payload.type);
+
         // Create a log entry for this move.
-        const logEntry = {
+        let logEntry = {
           action,
           _stateID: state._stateID,
           turn: state.ctx.turn,
           phase: state.ctx.phase,
         };
+
+        if (move.redact === true) {
+          logEntry.redact = true;
+        }
 
         // don't call into events here
         const newState = apiCtx.updateAndDetach(

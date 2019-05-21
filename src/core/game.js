@@ -102,8 +102,22 @@ function Game(game) {
     game.flow = FlowWithPhases({ game, ...game.flow });
   }
 
+  const getMove = name => {
+    if (name in game.moves) {
+      return game.moves[name];
+    }
+
+    if (name in game.flow.moveMap) {
+      return game.flow.moveMap[name];
+    }
+
+    return null;
+  };
+
   return {
     ...game,
+
+    getMove,
 
     moveNames: [
       ...Object.getOwnPropertyNames(game.moves),
@@ -111,21 +125,13 @@ function Game(game) {
     ],
 
     processMove: (G, action, ctx) => {
-      let moveFn = null;
-
-      if (game.moves.hasOwnProperty(action.type)) {
-        moveFn = game.moves[action.type];
-      }
-
-      if (action.type in game.flow.moveMap) {
-        moveFn = game.flow.moveMap[action.type];
-      }
+      let moveFn = getMove(action.type);
 
       if (moveFn instanceof Object && moveFn.impl) {
         moveFn = moveFn.impl;
       }
 
-      if (moveFn !== null) {
+      if (moveFn instanceof Function) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
         const fn = FnWrap(moveFn, game);
