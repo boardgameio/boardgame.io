@@ -33,7 +33,8 @@ Use the `create` API call to create a game that requires credential tokens. When
 
 #### Configuration
 
-You can pass configure the Lobby API further during server startup:
+You can pass `lobbyConfig` to configure the Lobby API
+during server startup:
 
 ```js
 server.run({ port: 8000, lobbyConfig });
@@ -41,7 +42,7 @@ server.run({ port: 8000, lobbyConfig });
 
 Options are:
 
-- `apiPort`: If specified, runs the Lobby API in a separate Koa server in this port. Otherwise, shares the same Koa server runnning on default boardgame.io `port`.
+- `apiPort`: If specified, it runs the Lobby API in a separate Koa server on this port. Otherwise, it shares the same Koa server runnning on the default boardgame.io `port`.
 - `apiCallback`: Called when the Koa server is ready. Only applicable if `apiPort` is specified.
 - `shortid`: Function that returns an unique identifier, needed for creating new match codes and user's credentials in matches. If not specified, uses [shortid](https://www.npmjs.com/package/shortid).
 
