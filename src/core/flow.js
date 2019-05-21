@@ -48,11 +48,6 @@ import * as logging from './logger';
  *                                  Predicate to determine whether a
  *                                  particular move is allowed at
  *                                  this time.
- *
- * @param {...object} canUndoMove - (G, ctx, moveName) => boolean
- *                                  Predicate to determine whether a
- *                                  particular move is undoable at this
- *                                  time.
  */
 export function Flow({
   ctx,
@@ -183,9 +178,6 @@ export function Flow({
  *
  * @param {...object} setActionPlayers - Set to true to enable the `setActionPlayers` event.
  *
- * @param {...object} undoableMoves - List of moves that are undoable,
- *                                   (default: null, i.e. all moves are undoable).
- *
  * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
  *                                       Control whether a move should
  *                                       be executed optimistically on
@@ -225,9 +217,6 @@ export function Flow({
  *
  *   // A phase-specific turn structure.
  *   turn: { ... },
- *
- *   // List of moves that are undoable.
- *   undoableMoves: ['moveA', ...],
  * }
  */
 export function FlowWithPhases({
@@ -240,8 +229,8 @@ export function FlowWithPhases({
   endPhase,
   endGame,
   setActionPlayers,
-  undoableMoves,
   optimisticUpdate,
+  getMove,
   game,
 }) {
   // Attach defaults.
@@ -267,7 +256,6 @@ export function FlowWithPhases({
   if (!endGameIf) endGameIf = () => undefined;
   if (!onMove) onMove = G => G;
   if (!turn) turn = {};
-  if (undoableMoves === undefined) undoableMoves = null;
 
   const phaseMap = game.phases || phases || {};
 
@@ -308,10 +296,6 @@ export function FlowWithPhases({
       conf.onMove = onMove;
     }
     conf.onMove = plugins.FnWrap(conf.onMove, game);
-
-    if (conf.undoableMoves === undefined) {
-      conf.undoableMoves = undoableMoves;
-    }
 
     if (conf.turn === undefined) {
       conf.turn = turn;
@@ -663,9 +647,17 @@ export function FlowWithPhases({
   };
 
   const canUndoMove = (G, ctx, moveName) => {
-    const conf = phaseMap[ctx.phase];
-    if (!conf.undoableMoves) return true;
-    return conf.undoableMoves.includes(moveName);
+    const move = getMove(moveName);
+
+    if (move.undoable === false) {
+      return false;
+    }
+
+    if (move.undoable instanceof Function) {
+      return move.undoable(G, ctx);
+    }
+
+    return true;
   };
 
   const events = {

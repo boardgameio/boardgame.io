@@ -98,10 +98,6 @@ function Game(game) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
-  if (!game.flow || game.flow.processGameEvent === undefined) {
-    game.flow = FlowWithPhases({ game, ...game.flow });
-  }
-
   const getMove = name => {
     if (name in game.moves) {
       return game.moves[name];
@@ -113,6 +109,10 @@ function Game(game) {
 
     return null;
   };
+
+  if (!game.flow || game.flow.processGameEvent === undefined) {
+    game.flow = FlowWithPhases({ game, getMove, ...game.flow });
+  }
 
   return {
     ...game,
