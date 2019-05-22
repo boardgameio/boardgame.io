@@ -153,12 +153,10 @@ test('turn.onBegin has ctx APIs at the beginning of the game', () => {
   let events = null;
 
   const game = Game({
-    flow: {
-      turn: {
-        onBegin: (G, ctx) => {
-          random = ctx.random;
-          events = ctx.events;
-        },
+    turn: {
+      onBegin: (G, ctx) => {
+        random = ctx.random;
+        events = ctx.events;
       },
     },
   });

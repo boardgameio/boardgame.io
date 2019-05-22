@@ -10,9 +10,7 @@ import React from 'react';
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 const code = `{
-  flow: {
-    turnOrder: TurnOrder.CUSTOM(['1', '0', '2', '3', '5', '4']),
-  },
+  turn: { order: TurnOrder.CUSTOM(['1', '0', '2', '3', '5', '4']) },
 }
 `;
 
@@ -25,9 +23,7 @@ const Description = () => (
 export default {
   description: Description,
   game: Game({
-    flow: {
-      endPhase: false,
-      turnOrder: TurnOrder.CUSTOM(['1', '0', '2', '3', '5', '4']),
-    },
+    endPhase: false,
+    turn: { order: TurnOrder.CUSTOM(['1', '0', '2', '3', '5', '4']) },
   }),
 };

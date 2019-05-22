@@ -32,9 +32,7 @@ const game = Game({
     },
   },
 
-  flow: {
-    startingPhase: 'take',
-  },
+  startingPhase: 'take',
 });
 
 class Board extends React.Component {

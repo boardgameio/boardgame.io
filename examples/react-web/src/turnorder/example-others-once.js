@@ -10,15 +10,13 @@ import React from 'react';
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 const code = `{
-  flow: {
-    startingPhase: 'play',
+  startingPhase: 'play',
 
-    phases: {
-      play: {},
+  phases: {
+    play: {},
 
-      discard: {
-        turnOrder: TurnOrder.OTHERS_ONCE,
-      },
+    discard: {
+      turn: { order: TurnOrder.OTHERS_ONCE },
     },
   },
 
@@ -45,16 +43,14 @@ export default {
   description: Description,
 
   game: Game({
-    flow: {
-      endPhase: false,
-      startingPhase: 'play',
+    endPhase: false,
+    startingPhase: 'play',
 
-      phases: {
-        play: {},
+    phases: {
+      play: {},
 
-        discard: {
-          turnOrder: TurnOrder.OTHERS_ONCE,
-        },
+      discard: {
+        turn: { order: TurnOrder.OTHERS_ONCE },
       },
     },
 

@@ -30,9 +30,7 @@ const game = Game({
     B: () => ({ moved: true }),
     C: () => ({ victory: true }),
   },
-  flow: {
-    endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
-  },
+  endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
 });
 const reducer = CreateGameReducer({ game });
 const initialState = InitializeGame({ game });
@@ -139,7 +137,7 @@ test('endTurn', () => {
 test('light client when multiplayer=true', () => {
   const game = Game({
     moves: { A: () => ({ win: true }) },
-    flow: { endGameIf: G => G.win },
+    endGameIf: G => G.win,
   });
 
   {
@@ -162,7 +160,7 @@ test('light client when multiplayer=true', () => {
 test('optimisticUpdate', () => {
   const game = Game({
     moves: { A: () => ({ A: true }) },
-    flow: { optimisticUpdate: () => false },
+    optimisticUpdate: () => false,
   });
 
   {
@@ -229,16 +227,12 @@ describe('Events API', () => {
 
   const game = Game({
     setup: () => ({}),
-    flow: {
-      phases: { A: {} },
-      turn: {
-        onBegin: fn,
-        onEnd: fn,
-      },
+    phases: { A: {} },
+    turn: {
       onBegin: fn,
       onEnd: fn,
-      onMove: fn,
     },
+    onMove: fn,
   });
 
   const reducer = CreateGameReducer({ game });
@@ -302,12 +296,10 @@ test('undo / redo', () => {
         ctx.events.endPhase({ next: 'phase2' });
       },
     },
-    flow: {
-      startingPhase: 'phase1',
-      phases: {
-        phase1: {},
-        phase2: {},
-      },
+    startingPhase: 'phase1',
+    phases: {
+      phase1: {},
+      phase2: {},
     },
   });
 

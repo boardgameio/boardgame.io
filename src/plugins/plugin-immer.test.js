@@ -23,29 +23,30 @@ describe('immer', () => {
         },
       },
 
-      flow: {
-        startingPhase: 'A',
-        phases: {
-          A: {
-            onBegin: G => {
-              G.onPhaseBegin = true;
-            },
-            onEnd: G => {
-              G.onPhaseEnd = true;
-            },
-          },
-        },
-        turn: {
+      startingPhase: 'A',
+
+      phases: {
+        A: {
           onBegin: G => {
-            G.onTurnBegin = true;
+            G.onPhaseBegin = true;
           },
           onEnd: G => {
-            G.onTurnEnd = true;
+            G.onPhaseEnd = true;
           },
         },
-        onMove: G => {
-          G.onMove = true;
+      },
+
+      turn: {
+        onBegin: G => {
+          G.onTurnBegin = true;
         },
+        onEnd: G => {
+          G.onTurnEnd = true;
+        },
+      },
+
+      onMove: G => {
+        G.onMove = true;
       },
     });
 

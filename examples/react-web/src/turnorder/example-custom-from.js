@@ -14,9 +14,7 @@ const code = `{
     order: ['1', '0', '2', '3', '5', '4'],
   }),
 
-  flow: {
-    turnOrder: TurnOrder.CUSTOM_FROM('order'),
-  },
+  turn: { order: TurnOrder.CUSTOM_FROM('order') },
 }
 `;
 
@@ -33,9 +31,7 @@ export default {
       order: ['1', '0', '2', '3', '5', '4'],
     }),
 
-    flow: {
-      endPhase: false,
-      turnOrder: TurnOrder.CUSTOM_FROM('order'),
-    },
+    endPhase: false,
+    turn: { order: TurnOrder.CUSTOM_FROM('order') },
   }),
 };

@@ -442,28 +442,26 @@ describe('SetActionPlayers', () => {
 
   test('militia', () => {
     const game = Game({
-      flow: {
-        startingPhase: 'A',
+      startingPhase: 'A',
 
-        phases: {
-          A: {
-            moves: {
-              playMilitia: (G, ctx) => {
-                ctx.events.endPhase({ next: 'B' });
-                return G;
-              },
+      phases: {
+        A: {
+          moves: {
+            playMilitia: (G, ctx) => {
+              ctx.events.endPhase({ next: 'B' });
+              return G;
             },
           },
+        },
 
-          B: {
-            turn: {
-              order: TurnOrder.OTHERS_ONCE,
-            },
+        B: {
+          turn: {
+            order: TurnOrder.OTHERS_ONCE,
+          },
 
-            moves: {
-              dropCards: G => {
-                return G;
-              },
+          moves: {
+            dropCards: G => {
+              return G;
             },
           },
         },

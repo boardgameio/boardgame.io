@@ -20,17 +20,17 @@ const RedactedMoves = Game({
   }),
 
   moves: {
-    /* eslint-disable no-unused-vars */
-    clickCell(G, ctx, secretstuff) {
-      return { ...G };
+    clickCell: {
+      /* eslint-disable no-unused-vars */
+      impl: (G, ctx, secretstuff) => {
+        return { ...G };
+      },
+      /* eslint-enable no-unused-vars */
+      redact: true,
     },
-    /* eslint-enable no-unused-vars */
   },
 
-  flow: {
-    redactedMoves: ['clickCell'],
-    turnOrder: TurnOrder.ANY,
-  },
+  turn: { order: TurnOrder.ANY },
 
   playerView: PlayerView.STRIP_SECRETS,
 });
