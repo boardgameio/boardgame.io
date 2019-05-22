@@ -603,12 +603,10 @@ test('undoable moves', () => {
       C: () => ({ C: true }),
     },
 
-    flow: {
-      startingPhase: 'A',
-      phases: {
-        A: {},
-        B: {},
-      },
+    startingPhase: 'A',
+    phases: {
+      A: {},
+      B: {},
     },
   });
 

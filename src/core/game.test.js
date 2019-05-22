@@ -21,12 +21,10 @@ describe('basic', () => {
         },
       },
 
-      flow: {
-        phases: {
-          PA: {
-            moves: {
-              A: () => 'PA.A',
-            },
+      phases: {
+        PA: {
+          moves: {
+            A: () => 'PA.A',
           },
         },
       },
@@ -70,15 +68,13 @@ test('rounds with starting player token', () => {
       },
     },
 
-    flow: {
-      startingPhase: 'main',
-      phases: {
-        main: {
-          turn: {
-            order: {
-              first: G => G.startingPlayerToken,
-              next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
-            },
+    startingPhase: 'main',
+    phases: {
+      main: {
+        turn: {
+          order: {
+            first: G => G.startingPlayerToken,
+            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
       },
@@ -114,33 +110,31 @@ test('rounds with starting player token', () => {
 // The following pattern is used in Catan, Twilight Imperium, and (sort of) Powergrid.
 test('serpentine setup phases', () => {
   const game = Game({
-    flow: {
-      startingPhase: 'first setup round',
-      phases: {
-        'first setup round': {
-          turn: {
-            order: {
-              first: () => 0,
-              next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
-            },
+    startingPhase: 'first setup round',
+    phases: {
+      'first setup round': {
+        turn: {
+          order: {
+            first: () => 0,
+            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
-          next: 'second setup round',
         },
-        'second setup round': {
-          turn: {
-            order: {
-              first: (G, ctx) => ctx.playOrder.length - 1,
-              next: (G, ctx) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
-            },
+        next: 'second setup round',
+      },
+      'second setup round': {
+        turn: {
+          order: {
+            first: (G, ctx) => ctx.playOrder.length - 1,
+            next: (G, ctx) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
           },
-          next: 'main phase',
         },
-        'main phase': {
-          turn: {
-            order: {
-              first: () => 0,
-              next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
-            },
+        next: 'main phase',
+      },
+      'main phase': {
+        turn: {
+          order: {
+            first: () => 0,
+            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
       },

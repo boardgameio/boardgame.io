@@ -14,14 +14,11 @@ import './diagram.css';
 
 const game = Game({
   moves: {},
-
-  flow: {
-    startingPhase: 'A',
-    phases: {
-      A: { next: 'B' },
-      B: { next: 'C' },
-      C: { next: 'A' },
-    },
+  startingPhase: 'A',
+  phases: {
+    A: { next: 'B' },
+    B: { next: 'C' },
+    C: { next: 'A' },
   },
 });
 

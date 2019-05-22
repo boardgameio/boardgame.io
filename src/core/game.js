@@ -111,7 +111,7 @@ function Game(game) {
   };
 
   if (!game.flow || game.flow.processGameEvent === undefined) {
-    game.flow = FlowWithPhases({ game, getMove, ...game.flow });
+    game.flow = FlowWithPhases({ ...game, getMove });
   }
 
   return {

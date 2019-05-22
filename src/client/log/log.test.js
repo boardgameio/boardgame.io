@@ -19,12 +19,10 @@ Enzyme.configure({ adapter: new Adapter() });
 
 describe('layout', () => {
   const game = Game({
-    flow: {
-      startingPhase: 'A',
-      phases: {
-        A: { next: 'B' },
-        B: { next: 'A' },
-      },
+    startingPhase: 'A',
+    phases: {
+      A: { next: 'B' },
+      B: { next: 'A' },
     },
   });
   const reducer = CreateGameReducer({ game });
@@ -82,10 +80,8 @@ describe('time travel', () => {
         },
       },
 
-      flow: {
-        turn: {
-          endIf: G => G && G.arg == 42,
-        },
+      turn: {
+        endIf: G => G && G.arg == 42,
       },
     });
 

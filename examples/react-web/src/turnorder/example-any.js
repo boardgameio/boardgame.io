@@ -10,9 +10,7 @@ import React from 'react';
 import { Game, TurnOrder } from 'boardgame.io/core';
 
 const code = `{
-  flow: {
-    turnOrder: TurnOrder.ANY,
-  },
+  turn: { order: TurnOrder.ANY },
 }
 `;
 
@@ -29,10 +27,8 @@ export default {
       move: G => G,
     },
 
-    flow: {
-      endTurn: false,
-      endPhase: false,
-      turnOrder: TurnOrder.ANY,
-    },
+    endTurn: false,
+    endPhase: false,
+    turn: { order: TurnOrder.ANY },
   }),
 };

@@ -143,12 +143,10 @@ describe('namespaced moves', () => {
         A: G => G,
       },
 
-      flow: {
-        phases: {
-          phaseA: {
-            moves: {
-              B: G => G,
-            },
+      phases: {
+        phaseA: {
+          moves: {
+            B: G => G,
           },
         },
       },

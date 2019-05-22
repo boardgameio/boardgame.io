@@ -11,7 +11,7 @@ import {
   InitTurnOrderState,
   UpdateTurnOrderState,
 } from './turn-order';
-import * as plugins from '../plugins/main';
+import * as plugin from '../plugins/main';
 import { automaticGameEvent } from './action-creators';
 import { ContextEnhancer } from './reducer';
 import * as logging from './logger';
@@ -231,7 +231,7 @@ export function FlowWithPhases({
   setActionPlayers,
   optimisticUpdate,
   getMove,
-  game,
+  plugins,
 }) {
   // Attach defaults.
   if (endPhase === undefined && phases) {
@@ -249,15 +249,16 @@ export function FlowWithPhases({
   if (optimisticUpdate === undefined) {
     optimisticUpdate = () => true;
   }
-  if (game === undefined) {
-    game = { plugins: [] };
+  if (plugins === undefined) {
+    plugins = [];
   }
   if (!startingPhase) startingPhase = 'default';
   if (!endGameIf) endGameIf = () => undefined;
   if (!onMove) onMove = G => G;
   if (!turn) turn = {};
+  const game = { plugins };
 
-  const phaseMap = game.phases || phases || {};
+  const phaseMap = phases || {};
 
   if ('default' in phaseMap) {
     logging.error('cannot specify phase with name "default"');
@@ -282,11 +283,11 @@ export function FlowWithPhases({
     if (conf.onBegin === undefined) {
       conf.onBegin = G => G;
     }
-    conf.onBegin = plugins.FnWrap(conf.onBegin, game);
+    conf.onBegin = plugin.FnWrap(conf.onBegin, game);
     if (conf.onEnd === undefined) {
       conf.onEnd = G => G;
     }
-    conf.onEnd = plugins.FnWrap(conf.onEnd, game);
+    conf.onEnd = plugin.FnWrap(conf.onEnd, game);
 
     if (conf.endGameIf === undefined) {
       conf.endGameIf = endGameIf;
@@ -295,7 +296,7 @@ export function FlowWithPhases({
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
     }
-    conf.onMove = plugins.FnWrap(conf.onMove, game);
+    conf.onMove = plugin.FnWrap(conf.onMove, game);
 
     if (conf.turn === undefined) {
       conf.turn = turn;
@@ -309,8 +310,8 @@ export function FlowWithPhases({
     if (conf.turn.endIf === undefined) {
       conf.turn.endIf = () => false;
     }
-    conf.turn.onBegin = plugins.FnWrap(conf.turn.onBegin, game);
-    conf.turn.onEnd = plugins.FnWrap(conf.turn.onEnd, game);
+    conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, game);
+    conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, game);
   }
 
   const shouldEndPhase = ({ G, ctx }) => {
@@ -337,8 +338,8 @@ export function FlowWithPhases({
     let ctx = InitTurnOrderState(G, state.ctx, config.turn);
 
     // Allow plugins to modify G and ctx at the beginning of a phase.
-    G = plugins.G.onPhaseBegin(G, ctx, game);
-    ctx = plugins.ctx.onPhaseBegin(ctx, game);
+    G = plugin.G.onPhaseBegin(G, ctx, game);
+    ctx = plugin.ctx.onPhaseBegin(ctx, game);
 
     // Reset stats.
     ctx.stats = {

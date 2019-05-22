@@ -53,17 +53,15 @@ const TicTacToe = Game({
     },
   },
 
-  flow: {
-    movesPerTurn: 1,
+  movesPerTurn: 1,
 
-    endGameIf: (G, ctx) => {
-      if (IsVictory(G.cells)) {
-        return { winner: ctx.currentPlayer };
-      }
-      if (G.cells.filter(c => c === null).length == 0) {
-        return { draw: true };
-      }
-    },
+  endGameIf: (G, ctx) => {
+    if (IsVictory(G.cells)) {
+      return { winner: ctx.currentPlayer };
+    }
+    if (G.cells.filter(c => c === null).length == 0) {
+      return { draw: true };
+    }
   },
 });
 
