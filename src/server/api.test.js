@@ -522,9 +522,9 @@ describe('.addApiToServer', () => {
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
 
-    test('call .use method several times with shortid', async () => {
-      const shortid = () => 'foo';
-      addApiToServer({ app: server, db, games, lobbyConfig: { shortid } });
+    test('call .use method several times with uuid', async () => {
+      const uuid = () => 'foo';
+      addApiToServer({ app: server, db, games, lobbyConfig: { uuid } });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
   });
