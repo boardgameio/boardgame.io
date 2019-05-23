@@ -17,7 +17,7 @@ import { Lobby } from 'boardgame.io/react';
 `importedGames` is an array of objects with these fields:
 
 - `game`: The boardgame.io `Game` definition.
-- `board`: The react component that will render the board.
+- `board`: The React component that will render the board.
 
 ### Server-side API
 
