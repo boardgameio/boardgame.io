@@ -76,21 +76,7 @@ export class Debug extends React.Component {
 
   constructor(props) {
     super(props);
-
-    // Flatten out moves in case there are any namespaced moves.
-    this.flattenedMoves = {};
-    for (const name in this.props.moves) {
-      const t = this.props.moves[name];
-      if (t instanceof Function) {
-        this.flattenedMoves[name] = t;
-      } else {
-        for (const key in t) {
-          this.flattenedMoves[name + '.' + key] = t[key];
-        }
-      }
-    }
-
-    this.shortcuts = AssignShortcuts(this.flattenedMoves, props.events, 'dlit');
+    this.shortcuts = AssignShortcuts(props.moves, props.events, 'dlit');
 
     this.state = {
       showDebugUI: true,
@@ -177,8 +163,8 @@ export class Debug extends React.Component {
     }
 
     let moves = [];
-    for (const name in this.flattenedMoves) {
-      const fn = this.flattenedMoves[name];
+    for (let name in this.props.moves) {
+      const fn = this.props.moves[name];
       const shortcut = this.shortcuts[name];
       moves.push(
         <DebugMove key={name} name={name} fn={fn} shortcut={shortcut} />
@@ -186,7 +172,7 @@ export class Debug extends React.Component {
     }
 
     let events = [];
-    for (const name in this.props.events) {
+    for (let name in this.props.events) {
       const fn = this.props.events[name];
       const shortcut = this.shortcuts[name];
       events.push(
