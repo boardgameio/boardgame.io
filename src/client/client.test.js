@@ -116,7 +116,7 @@ test('isActive', () => {
         A: (G, ctx, arg) => ({ arg }),
       },
 
-      endGameIf: G => G.arg == 42,
+      endIf: G => G.arg == 42,
     }),
   });
 
@@ -138,7 +138,7 @@ describe('step', () => {
         },
       },
 
-      endGameIf(G) {
+      endIf(G) {
         if (G.moved) return true;
       },
     }),
@@ -373,7 +373,7 @@ describe('move dispatchers', () => {
       B: (G, ctx) => ({ moved: ctx.playerID }),
       C: () => ({ victory: true }),
     },
-    endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
+    endIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
   });
   const reducer = CreateGameReducer({ game });
   const initialState = InitializeGame({ game });

@@ -316,9 +316,9 @@ test('init', () => {
   expect(state.G).toMatchObject({ done: true });
 });
 
-test('endGameIf', () => {
+test('endIf', () => {
   {
-    const flow = FlowWithPhases({ endGameIf: G => G.win });
+    const flow = FlowWithPhases({ endIf: G => G.win });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) });
     state = flow.processGameEvent(state, gameEvent('endTurn'));
@@ -328,34 +328,6 @@ test('endGameIf', () => {
 
     {
       const t = flow.processGameEvent(state, gameEvent('endTurn'));
-      expect(t.ctx.gameover).toBe('A');
-    }
-
-    {
-      const t = flow.processMove(state, makeMove('move').payload);
-      expect(t.ctx.gameover).toBe('A');
-    }
-  }
-
-  {
-    const flow = FlowWithPhases({
-      startingPhase: 'A',
-      phases: { A: { endGameIf: G => G.win } },
-    });
-
-    let state = flow.init({ G: {}, ctx: flow.ctx(2) });
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
-    expect(state.ctx.gameover).toBe(undefined);
-
-    state.G.win = 'A';
-
-    {
-      const t = flow.processGameEvent(state, gameEvent('endTurn'));
-      expect(t.ctx.gameover).toBe('A');
-    }
-
-    {
-      const t = flow.processGameEvent(state, gameEvent('endPhase'));
       expect(t.ctx.gameover).toBe('A');
     }
 
@@ -367,7 +339,7 @@ test('endGameIf', () => {
 
   // Test that the turn automatically ends.
   {
-    const flow = FlowWithPhases({ endGameIf: G => G.win });
+    const flow = FlowWithPhases({ endIf: G => G.win });
     const game = Game({
       moves: {
         A: () => ({ win: 'A' }),

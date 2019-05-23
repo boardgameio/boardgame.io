@@ -30,7 +30,7 @@ const game = Game({
     B: () => ({ moved: true }),
     C: () => ({ victory: true }),
   },
-  endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
+  endIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
 });
 const reducer = CreateGameReducer({ game });
 const initialState = InitializeGame({ game });
@@ -137,7 +137,7 @@ test('endTurn', () => {
 test('light client when multiplayer=true', () => {
   const game = Game({
     moves: { A: () => ({ win: true }) },
-    endGameIf: G => G.win,
+    endIf: G => G.win,
   });
 
   {

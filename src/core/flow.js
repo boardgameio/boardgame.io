@@ -139,7 +139,7 @@ export function Flow({
  * - Custom phase end conditions.
  * - A move whitelist that disallows other moves during the phase.
  *
- * @param {...object} endGameIf - The game automatically ends if this function
+ * @param {...object} endIf - The game automatically ends if this function
  *                                returns anything (checked after each move).
  *                                The return value is available at ctx.gameover.
  *                                (G, ctx) => {}
@@ -209,9 +209,6 @@ export function Flow({
  *
  *   Phase-specific options that override their global equivalents:
  *
- *   // A phase-specific endGameIf.
- *   endGameIf: (G, ctx) => {},
- *
  *   // A phase-specific onMove.
  *   onMove - (G, ctx) => G,
  *
@@ -222,7 +219,7 @@ export function Flow({
 export function FlowWithPhases({
   phases,
   startingPhase,
-  endGameIf,
+  endIf,
   onMove,
   turn,
   endTurn,
@@ -253,7 +250,7 @@ export function FlowWithPhases({
     plugins = [];
   }
   if (!startingPhase) startingPhase = 'default';
-  if (!endGameIf) endGameIf = () => undefined;
+  if (!endIf) endIf = () => undefined;
   if (!onMove) onMove = G => G;
   if (!turn) turn = {};
   const game = { plugins };
@@ -288,10 +285,6 @@ export function FlowWithPhases({
       conf.onEnd = G => G;
     }
     conf.onEnd = plugin.FnWrap(conf.onEnd, game);
-
-    if (conf.endGameIf === undefined) {
-      conf.endGameIf = endGameIf;
-    }
 
     if (conf.onMove === undefined) {
       conf.onMove = onMove;
@@ -408,7 +401,7 @@ export function FlowWithPhases({
     const conf = phaseMap[ctx.phase];
     G = conf.onEnd(G, ctx);
 
-    const gameover = conf.endGameIf(G, ctx);
+    const gameover = endIf(G, ctx);
     if (gameover !== undefined) {
       return { ...state, G, ctx: { ...ctx, gameover } };
     }
@@ -495,7 +488,7 @@ export function FlowWithPhases({
     G = conf.turn.onEnd(G, ctx);
 
     // Update gameover.
-    const gameover = conf.endGameIf(G, ctx);
+    const gameover = endIf(G, ctx);
     if (gameover !== undefined) {
       return { ...state, G, ctx: { ...ctx, gameover } };
     }
@@ -591,9 +584,9 @@ export function FlowWithPhases({
     state = { ...state, G };
 
     const origTurn = state.ctx.turn;
-    const gameover = conf.endGameIf(state.G, state.ctx);
+    const gameover = endIf(state.G, state.ctx);
 
-    // End the phase automatically if phase.endIf is true or if endGameIf returns.
+    // End the phase automatically if phase.endIf is true or if endIf returns.
     const endPhase = shouldEndPhase(state) || actionPlayersOnceDone;
     if (endPhase || gameover !== undefined) {
       state = dispatch(
@@ -604,7 +597,7 @@ export function FlowWithPhases({
       conf = phaseMap[state.ctx.phase];
     }
 
-    // End the turn automatically if turn.endIf is true or if endGameIf returns.
+    // End the turn automatically if turn.endIf is true or if endIf returns.
     // (but not if endPhase above already ends the turn).
     const endTurn = shouldEndTurn(state);
     if (state.ctx.turn == origTurn && (endTurn || gameover !== undefined)) {
@@ -614,7 +607,7 @@ export function FlowWithPhases({
       );
     }
 
-    // End the game automatically if endGameIf returns.
+    // End the game automatically if endIf returns.
     if (gameover !== undefined) {
       return { ...state, ctx: { ...state.ctx, gameover } };
     }
