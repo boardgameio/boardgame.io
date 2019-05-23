@@ -80,30 +80,9 @@ describe('update', async () => {
       _initial: {
         G: {},
         _initial: {},
-        _redo: [],
+        _redo: undefined,
         _stateID: 0,
-        _undo: [
-          {
-            G: {},
-            ctx: {
-              _random: { seed: 0 },
-              actionPlayers: ['0'],
-              allPlayed: false,
-              allowedMoves: null,
-              currentPlayer: '0',
-              currentPlayerMoves: 0,
-              numPlayers: 2,
-              phase: 'default',
-              playOrder: ['0', '1'],
-              playOrderPos: 0,
-              stats: {
-                phase: { allPlayed: false, numMoves: {} },
-                turn: { numMoves: {} },
-              },
-              turn: 0,
-            },
-          },
-        ],
+        _undo: undefined,
         ctx: {
           _random: { seed: 0 },
           actionPlayers: ['0'],
@@ -122,30 +101,9 @@ describe('update', async () => {
           turn: 0,
         },
       },
-      _redo: [],
+      _redo: undefined,
       _stateID: 1,
-      _undo: [
-        {
-          G: {},
-          ctx: {
-            _random: { seed: 0 },
-            actionPlayers: ['1'],
-            allPlayed: false,
-            allowedMoves: null,
-            currentPlayer: '1',
-            currentPlayerMoves: 0,
-            numPlayers: 2,
-            phase: 'default',
-            playOrder: ['0', '1'],
-            playOrderPos: 1,
-            stats: {
-              phase: { allPlayed: false, numMoves: {} },
-              turn: { allPlayed: false, numMoves: {} },
-            },
-            turn: 1,
-          },
-        },
-      ],
+      _undo: undefined,
       ctx: {
         _random: undefined,
         actionPlayers: ['1'],
