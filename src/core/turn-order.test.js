@@ -466,14 +466,14 @@ describe('SetActionPlayers', () => {
     const reducer = CreateGameReducer({ game });
 
     let state = InitializeGame({ game, numPlayers: 4 });
-    state = reducer(state, makeMove('A.playMilitia'));
+    state = reducer(state, makeMove('playMilitia'));
     expect(state.ctx.actionPlayers).toMatchObject(['1', '2', '3']);
 
-    state = reducer(state, makeMove('B.dropCards', undefined, '1'));
+    state = reducer(state, makeMove('dropCards', undefined, '1'));
     expect(state.ctx.actionPlayers).toMatchObject(['2', '3']);
-    state = reducer(state, makeMove('B.dropCards', undefined, '3'));
+    state = reducer(state, makeMove('dropCards', undefined, '3'));
     expect(state.ctx.actionPlayers).toMatchObject(['2']);
-    state = reducer(state, makeMove('B.dropCards', undefined, '2'));
+    state = reducer(state, makeMove('dropCards', undefined, '2'));
     expect(state.ctx.actionPlayers).toMatchObject(['0']);
   });
 });

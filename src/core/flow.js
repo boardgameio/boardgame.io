@@ -44,10 +44,6 @@ import * as logging from './logger';
  *                                       the client while waiting for
  *                                       the result of execution from
  *                                       the server.
- * @param {...object} canMakeMove - (G, ctx, moveName) => boolean
- *                                  Predicate to determine whether a
- *                                  particular move is allowed at
- *                                  this time.
  */
 export function Flow({
   ctx,
@@ -56,7 +52,6 @@ export function Flow({
   init,
   processMove,
   optimisticUpdate,
-  canMakeMove,
   canUndoMove,
   moveMap,
 }) {
@@ -65,7 +60,6 @@ export function Flow({
   if (!enabledEvents) enabledEvents = {};
   if (!init) init = state => state;
   if (!processMove) processMove = state => state;
-  if (!canMakeMove) canMakeMove = () => true;
   if (!canUndoMove) canUndoMove = () => true;
 
   if (optimisticUpdate === undefined) {
@@ -118,13 +112,6 @@ export function Flow({
     canPlayerMakeMove: (G, ctx, playerID) => {
       const actionPlayers = ctx.actionPlayers || [];
       return actionPlayers.includes(playerID);
-    },
-
-    canMakeMove: (G, ctx, moveName) => {
-      // Disallow moves once the game is over.
-      if (ctx.gameover !== undefined) return false;
-      // User-provided move validation.
-      return canMakeMove(G, ctx, moveName);
     },
   };
 }
@@ -615,19 +602,8 @@ export function FlowWithPhases({
     return state;
   }
 
-  const canMakeMove = (G, ctx, moveName) => {
-    // If this is a namespaced move, verify that
-    // we are in the correct phase.
-    if (moveName.includes('.')) {
-      const tokens = moveName.split('.');
-      return tokens[0] == ctx.phase;
-    }
-    // If not, then the move is allowed.
-    return true;
-  };
-
   const canUndoMove = (G, ctx, moveName) => {
-    const move = getMove(moveName);
+    const move = getMove(ctx, moveName);
 
     if (move.undoable === false) {
       return false;
@@ -689,7 +665,6 @@ export function FlowWithPhases({
     events,
     enabledEvents,
     processMove,
-    canMakeMove,
     canUndoMove,
     moveMap,
   });
