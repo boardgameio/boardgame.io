@@ -26,7 +26,6 @@ test('Flow', () => {
   expect(flow.ctx()).toMatchObject({});
   expect(flow.eventNames).toHaveLength(0);
   expect(flow.init({ a: 5 })).toMatchObject({ a: 5 });
-  expect(flow.canMakeMove({}, {}, undefined)).toBe(true);
   expect(flow.canUndoMove()).toBe(true);
   expect(flow.processMove({ b: 6 })).toMatchObject({ b: 6 });
   expect(flow.optimisticUpdate()).toBe(true);
@@ -424,34 +423,6 @@ describe('turn.endIf', () => {
     state = reducer(state, makeMove('A'));
     expect(state.ctx.currentPlayer).toBe('2');
   });
-});
-
-test('canMakeMove', () => {
-  const game = Game({
-    moves: {
-      A: () => ({ A: true }),
-      B: () => ({ B: true }),
-      C: () => ({ C: true }),
-    },
-  });
-
-  const reducer = CreateGameReducer({ game });
-  let state = InitializeGame({ game });
-
-  // Basic.
-  let flow;
-  flow = Flow({});
-  expect(flow.canMakeMove(state.G, state.ctx)).toBe(true);
-  flow = Flow({ canMakeMove: () => false });
-  expect(flow.canMakeMove(state.G, state.ctx)).toBe(false);
-
-  // No moves are allowed after the game is over.
-  state.ctx.gameover = true;
-  state.G = {};
-  state = reducer(state, makeMove('A'));
-  expect(state.G).not.toMatchObject({ A: true });
-  state = reducer(state, makeMove('B'));
-  expect(state.G).not.toMatchObject({ B: true });
 });
 
 test('canPlayerMakeMove', () => {

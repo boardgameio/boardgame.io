@@ -98,13 +98,22 @@ function Game(game) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
-  const getMove = name => {
-    if (name in game.moves) {
-      return game.moves[name];
-    }
+  const getMove = (ctx, name) => {
+    // Check if moves are defined for the current phase.
+    // If they are, then attempt to find the move there.
+    if (
+      ctx.phase !== 'default' &&
+      game.phases !== undefined &&
+      game.phases[ctx.phase].moves !== undefined
+    ) {
+      const key = ctx.phase + '.' + name;
+      if (key in game.flow.moveMap) {
+        return game.flow.moveMap[key];
+      }
 
-    if (name in game.flow.moveMap) {
-      return game.flow.moveMap[name];
+      // Else check in the global moves.
+    } else if (name in game.moves) {
+      return game.moves[name];
     }
 
     return null;
@@ -114,18 +123,24 @@ function Game(game) {
     game.flow = FlowWithPhases({ ...game, getMove });
   }
 
+  const moveNameSet = new Set();
+  Object.getOwnPropertyNames(game.moves).forEach(name => {
+    moveNameSet.add(name);
+  });
+  Object.keys(game.flow.moveMap || []).forEach(name => {
+    const s = name.split('.');
+    moveNameSet.add(s[s.length - 1]);
+  });
+
   return {
     ...game,
 
     getMove,
 
-    moveNames: [
-      ...Object.getOwnPropertyNames(game.moves),
-      ...Object.keys(game.flow.moveMap || []),
-    ],
+    moveNames: [...moveNameSet.values()],
 
     processMove: (G, action, ctx) => {
-      let moveFn = getMove(action.type);
+      let moveFn = getMove(ctx, action.type);
 
       if (moveFn instanceof Object && moveFn.impl) {
         moveFn = moveFn.impl;

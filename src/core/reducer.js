@@ -234,15 +234,16 @@ export function CreateGameReducer({ game, multiplayer }) {
       case Actions.MAKE_MOVE: {
         state = { ...state, deltalog: [] };
 
-        // Check whether the game knows the move at all.
-        if (!game.moveNames.includes(action.payload.type)) {
-          error(`unrecognized move: ${action.payload.type}`);
+        // Check whether the move is allowed at this time.
+        const move = game.getMove(state.ctx, action.payload.type);
+        if (move === null) {
+          error(`disallowed move: ${action.payload.type}`);
           return state;
         }
 
-        // Ignore the move if it isn't allowed at this point.
-        if (!game.flow.canMakeMove(state.G, state.ctx, action.payload.type)) {
-          error(`disallowed move: ${action.payload.type}`);
+        // Disallow moves once the game is over.
+        if (state.ctx.gameover !== undefined) {
+          error(`cannot make move after game end`);
           return state;
         }
 
@@ -272,8 +273,6 @@ export function CreateGameReducer({ game, multiplayer }) {
           // the game declared the move as invalid.
           return state;
         }
-
-        const move = game.getMove(action.payload.type);
 
         // Create a log entry for this move.
         let logEntry = {

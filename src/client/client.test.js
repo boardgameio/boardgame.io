@@ -61,51 +61,28 @@ describe('namespaced moves', () => {
   });
 
   test('phase-level moves', () => {
-    expect(client.moves.PA.B).toBeInstanceOf(Function);
-    expect(client.moves.PA.C).toBeInstanceOf(Function);
+    expect(client.moves.B).toBeInstanceOf(Function);
+    expect(client.moves.C).toBeInstanceOf(Function);
   });
 
   test('moves are allowed only when phase is active', () => {
     client.moves.A();
     expect(client.getState().G).toEqual('A');
 
-    client.moves.PA.B();
-    expect(error).toHaveBeenCalledWith('disallowed move: PA.B');
-    client.moves.PA.C();
-    expect(error).toHaveBeenCalledWith('disallowed move: PA.C');
+    client.moves.B();
+    expect(error).toHaveBeenCalledWith('disallowed move: B');
+    client.moves.C();
+    expect(error).toHaveBeenCalledWith('disallowed move: C');
 
     client.events.endPhase({ next: 'PA' });
     expect(client.getState().ctx.phase).toBe('PA');
 
-    client.moves.PA.B();
-    expect(client.getState().G).toEqual('B');
-    client.moves.PA.C();
-    expect(client.getState().G).toEqual('C');
     client.moves.A();
-    expect(client.getState().G).toEqual('A');
-  });
-
-  test('name clash', () => {
-    Client({
-      game: Game({
-        moves: {
-          A: () => {},
-        },
-
-        phases: {
-          A: {
-            moves: {
-              B: () => {},
-              C: () => {},
-            },
-          },
-        },
-      }),
-    });
-
-    expect(error).toHaveBeenCalledWith(
-      'namespace A clashes with top-level move'
-    );
+    expect(error).toHaveBeenCalledWith('disallowed move: A');
+    client.moves.B();
+    expect(client.getState().G).toEqual('B');
+    client.moves.C();
+    expect(client.getState().G).toEqual('C');
   });
 });
 

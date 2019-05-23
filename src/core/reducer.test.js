@@ -61,7 +61,7 @@ test('makeMove', () => {
   state = reducer(state, makeMove('unknown'));
   expect(state._stateID).toBe(0);
   expect(state.G).not.toMatchObject({ moved: true });
-  expect(error).toHaveBeenCalledWith('unrecognized move: unknown');
+  expect(error).toBeCalledWith('disallowed move: unknown');
 
   state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(1);
@@ -70,6 +70,12 @@ test('makeMove', () => {
   state = reducer(state, makeMove('B'));
   expect(state._stateID).toBe(2);
   expect(state.G).toMatchObject({ moved: true });
+
+  state.ctx.gameover = true;
+
+  state = reducer(state, makeMove('B'));
+  expect(state._stateID).toBe(2);
+  expect(error).toBeCalledWith('cannot make move after game end');
 });
 
 test('disable move by invalid playerIDs', () => {

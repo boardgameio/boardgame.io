@@ -31,7 +31,7 @@ function createDispatchers(
   multiplayer
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
-    const fn = function(...args) {
+    dispatchers[name] = function(...args) {
       let assumedPlayerID = playerID;
 
       // In singleplayer mode, if the client does not have a playerID
@@ -50,19 +50,6 @@ function createDispatchers(
         )
       );
     };
-
-    if (name.includes('.')) {
-      const [namespace, moveName] = name.split('.', 2);
-      if (!(namespace in dispatchers)) {
-        dispatchers[namespace] = {};
-      }
-      if (innerActionNames.indexOf(namespace) != -1) {
-        error(`namespace ${namespace} clashes with top-level move`);
-      }
-      dispatchers[namespace][moveName] = fn;
-    } else {
-      dispatchers[name] = fn;
-    }
 
     return dispatchers;
   }, {});
