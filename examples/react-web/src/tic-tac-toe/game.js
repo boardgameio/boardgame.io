@@ -55,7 +55,7 @@ const TicTacToe = Game({
 
   movesPerTurn: 1,
 
-  endGameIf: (G, ctx) => {
+  endIf: (G, ctx) => {
     if (IsVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }

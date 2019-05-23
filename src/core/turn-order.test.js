@@ -285,14 +285,9 @@ test('passing', () => {
 });
 
 test('end game after everyone passes', () => {
-  const flow = FlowWithPhases({
-    startingPhase: 'A',
-    phases: {
-      A: { turn: { order: TurnOrder.ANY }, endGameIf: G => G.allPassed },
-    },
-  });
   const game = Game({
-    flow,
+    endIf: G => G.allPassed,
+    turn: { order: TurnOrder.ANY },
     moves: { pass: Pass },
   });
 

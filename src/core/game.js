@@ -47,7 +47,7 @@ import { FlowWithPhases } from './flow';
  *   playerView: (G, ctx, playerID) => { ... },
  *
  *   flow: {
- *     endGameIf: (G, ctx) => { ... },
+ *     endIf: (G, ctx) => { ... },
  *
  *     phases: {
  *       A: { onBegin: (G, ctx) => G, onEnd: (G, ctx) => G },
