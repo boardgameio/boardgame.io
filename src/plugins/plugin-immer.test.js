@@ -43,10 +43,9 @@ describe('immer', () => {
         onEnd: G => {
           G.onTurnEnd = true;
         },
-      },
-
-      onMove: G => {
-        G.onMove = true;
+        onMove: G => {
+          G.onMove = true;
+        },
       },
     });
 

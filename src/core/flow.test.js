@@ -151,17 +151,16 @@ describe('phases', () => {
     const onMove = () => ({ A: true });
 
     const flow = FlowWithPhases({
-      onMove,
       startingPhase: 'A',
       phases: {
         A: {
-          turn: { endIf: () => true },
+          turn: { endIf: () => true, onMove },
           endIf: () => true,
           onEnd: () => ++endPhaseACount,
           next: 'B',
         },
         B: {
-          turn: { endIf: () => false },
+          turn: { endIf: () => false, onMove },
           endIf: () => false,
           onEnd: () => ++endPhaseBCount,
         },
@@ -275,7 +274,7 @@ test('onMove', () => {
   const onMove = () => ({ A: true });
 
   {
-    const flow = FlowWithPhases({ onMove });
+    const flow = FlowWithPhases({ turn: { onMove } });
     let state = { G: {}, ctx: flow.ctx(2) };
     state = flow.processMove(state, makeMove().payload);
     expect(state.G).toEqual({ A: true });
@@ -283,8 +282,8 @@ test('onMove', () => {
 
   {
     const flow = FlowWithPhases({
-      onMove,
-      phases: { B: { onMove: () => ({ B: true }) } },
+      turn: { onMove },
+      phases: { B: { turn: { onMove: () => ({ B: true }) } } },
     });
     let state = { G: {}, ctx: flow.ctx(2) };
     state = flow.processMove(state, makeMove().payload);

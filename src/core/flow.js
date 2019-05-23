@@ -144,10 +144,8 @@ export function Flow({
  *                                The return value is available at ctx.gameover.
  *                                (G, ctx) => {}
  *
- * @param {...object} onMove - Any code to run at the end of a move.
- *                             (G, ctx, { type: 'moveName', args: [] }) => G
- *
  * @param {...object} turn - Customize the turn structure (see turn-order.js).
+ *
  *   {
  *     // The turn order.
  *     order: TurnOrder.DEFAULT,
@@ -168,6 +166,9 @@ export function Flow({
  *     // End the turn automatically after a certain number
  *     // of moves.
  *     movesPerTurn: 1,
+ *
+ *     // Code to run at the end of a move.
+ *     onMove: (G, ctx, { type: 'moveName', args: [] }) => G
  *   }
  *
  * @param {...object} endTurn - Set to false to disable the `endTurn` event.
@@ -185,15 +186,7 @@ export function Flow({
  *                                       the result of execution from
  *                                       the server.
  *
- * @param {object} game - The game object.
- *
  * @param {...object} phases - A map of phases in the game.
- *
- * Each phase is described by an object whose key is the phase name.
- *
- * All the properties below override their global equivalents
- * above whenever they are defined (i.e. the global setting
- * is used if a phase-specific setting is absent).
  *
  * {
  *   // Any setup code to run before the phase begins.
@@ -207,12 +200,8 @@ export function Flow({
  *   // then that will be chosen as the next phase.
  *   endIf: (G, ctx) => boolean|object,
  *
- *   Phase-specific options that override their global equivalents:
- *
- *   // A phase-specific onMove.
- *   onMove - (G, ctx) => G,
- *
- *   // A phase-specific turn structure.
+ *   // A phase-specific turn structure that overrides the global.
+ *   // turn order during this phase.
  *   turn: { ... },
  * }
  */
@@ -220,7 +209,6 @@ export function FlowWithPhases({
   phases,
   startingPhase,
   endIf,
-  onMove,
   turn,
   endTurn,
   endPhase,
@@ -251,7 +239,6 @@ export function FlowWithPhases({
   }
   if (!startingPhase) startingPhase = 'default';
   if (!endIf) endIf = () => undefined;
-  if (!onMove) onMove = G => G;
   if (!turn) turn = {};
   const game = { plugins };
 
@@ -286,11 +273,6 @@ export function FlowWithPhases({
     }
     conf.onEnd = plugin.FnWrap(conf.onEnd, game);
 
-    if (conf.onMove === undefined) {
-      conf.onMove = onMove;
-    }
-    conf.onMove = plugin.FnWrap(conf.onMove, game);
-
     if (conf.turn === undefined) {
       conf.turn = turn;
     }
@@ -303,6 +285,10 @@ export function FlowWithPhases({
     if (conf.turn.endIf === undefined) {
       conf.turn.endIf = () => false;
     }
+    if (conf.turn.onMove === undefined) {
+      conf.turn.onMove = G => G;
+    }
+    conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, game);
     conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, game);
     conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, game);
   }
@@ -580,7 +566,7 @@ export function FlowWithPhases({
       },
     };
 
-    const G = conf.onMove(state.G, state.ctx, action);
+    const G = conf.turn.onMove(state.G, state.ctx, action);
     state = { ...state, G };
 
     const origTurn = state.ctx.turn;
