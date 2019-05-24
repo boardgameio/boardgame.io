@@ -24,8 +24,7 @@ export const createServerRunConfig = (portOrConfig, callback) => {
   if (portOrConfig && typeof portOrConfig === 'object') {
     config.port = portOrConfig.port;
     config.callback = portOrConfig.callback || callback;
-    config.apiPort = portOrConfig.apiPort;
-    config.apiCallback = portOrConfig.apiCallback;
+    config.lobbyConfig = portOrConfig.lobbyConfig;
   } else {
     config.port = portOrConfig;
     config.callback = callback;
@@ -63,16 +62,17 @@ export function Server({ games, db, transport }) {
       // DB
       await db.connect();
 
-      // API
+      // Lobby API
+      const lobbyConfig = serverRunConfig.lobbyConfig;
       let apiServer;
-      if (!serverRunConfig.apiPort) {
-        addApiToServer({ app, db, games });
+      if (!lobbyConfig || !lobbyConfig.apiPort) {
+        addApiToServer({ app, db, games, lobbyConfig });
       } else {
         // Run API in a separate Koa app.
-        const api = createApiServer({ db, games });
+        const api = createApiServer({ db, games, lobbyConfig });
         apiServer = await api.listen(
-          serverRunConfig.apiPort,
-          serverRunConfig.apiCallback
+          lobbyConfig.apiPort,
+          lobbyConfig.apiCallback
         );
         logger.info(`API serving on ${apiServer.address().port}...`);
       }
