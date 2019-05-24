@@ -62,6 +62,18 @@ Returns an array of `rooms`. Each instance has fields:
 
 `players`: the list of seats and players that have joined the game, if any.
 
+#### Getting specific instance of a room by its ID
+
+##### GET `/games/{name}/{id}`
+
+Returns a room instance given its roomID.
+
+Returns a room instance. Each instance has fields:
+
+`roomID`: the ID of the game instance.
+
+`players`: the list of seats and players that have joined the game, if any.
+
 ### Client Authentication
 
 All actions for an authenticated game require an additional payload field `credentials`, which must be the given secret associated with the player.

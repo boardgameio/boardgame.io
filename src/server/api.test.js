@@ -492,6 +492,75 @@ describe('.createApiServer', () => {
       });
     });
   });
+
+  describe('requesting room', () => {
+    let db;
+    beforeEach(() => {
+      delete process.env.API_SECRET;
+      db = {
+        get: async () => {
+          return {
+            players: {
+              '0': {
+                id: 0,
+                credentials: 'SECRET1',
+              },
+              '1': {
+                id: 1,
+                credentials: 'SECRET2',
+              },
+            },
+          };
+        },
+        set: async () => {},
+        list: async () => {
+          return [
+            'bar:bar-0',
+            'bar:bar-0:metadata',
+            'foo:foo-0',
+            'foo:foo-0:metadata',
+            'bar:bar-1',
+            'bar:bar-1:metadata',
+          ];
+        },
+      };
+    });
+
+    describe('when given room ID', async () => {
+      let response;
+      let room;
+      beforeEach(async () => {
+        let games = [Game({ name: 'foo' }), Game({ name: 'bar' })];
+        let app = createApiServer({ db, games });
+        response = await request(app.callback()).get('/games/bar/bar-0');
+        room = JSON.parse(response.text);
+      });
+
+      test('returns game ids', async () => {
+        expect(room.roomID).toEqual('bar-0');
+      });
+
+      test('returns player names', async () => {
+        expect(room.players).toEqual([{ id: 0 }, { id: 1 }]);
+      });
+    });
+
+    describe('when given a non-existent room ID', async () => {
+      let response;
+      beforeEach(async () => {
+        db.get = async () => {
+          return null;
+        };
+        let games = [Game({ name: 'foo' })];
+        let app = createApiServer({ db, games });
+        response = await request(app.callback()).get('/games/bar/doesnotexist');
+      });
+
+      test('throws error 404', async () => {
+        expect(response.status).toEqual(404);
+      });
+    });
+  });
 });
 
 describe('.addApiToServer', () => {

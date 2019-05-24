@@ -113,6 +113,22 @@ export const addApiToServer = ({ app, db, games }) => {
     };
   });
 
+  router.get('/games/:name/:id', async ctx => {
+    const gameName = ctx.params.name;
+    const gameID = ctx.params.id;
+    const room = await db.get(`${gameName}:${GameMetadataKey(gameID)}`);
+    if (!room) {
+      ctx.throw(404, 'Room ' + gameID + ' not found');
+    }
+    const strippedRoom = {
+      roomID: gameID,
+      players: Object.values(room.players).map(player => {
+        return { id: player.id, name: player.name };
+      }),
+    };
+    ctx.body = strippedRoom;
+  });
+
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
     const gameName = ctx.params.name;
     const gameID = ctx.params.id;
