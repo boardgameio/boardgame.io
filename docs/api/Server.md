@@ -57,9 +57,3 @@ server.run(8000);
 ```
 server.run(8000, () => console.log("server running..."));
 ```
-
-##### Running the API server on a separate port
-
-```js
-server.run({ port: 8000, apiPort: 8001 });
-```

@@ -584,11 +584,16 @@ describe('.addApiToServer', () => {
           setup: () => {},
         }),
       ];
-
-      addApiToServer({ app: server, db, games });
     });
 
     test('call .use method several times', async () => {
+      addApiToServer({ app: server, db, games });
+      expect(server.use.mock.calls.length).toBeGreaterThan(1);
+    });
+
+    test('call .use method several times with uuid', async () => {
+      const uuid = () => 'foo';
+      addApiToServer({ app: server, db, games, lobbyConfig: { uuid } });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
   });
