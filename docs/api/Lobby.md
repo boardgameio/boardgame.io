@@ -21,15 +21,15 @@ import { Lobby } from 'boardgame.io/react';
 
 ### Server-side API
 
-The [Server](/api/Server) hosts the Lobby REST API that can be used to create and join games. It is particularly useful when you want to
+The [Server](/api/Server) hosts the Lobby REST API that can be used to create and join rooms. It is particularly useful when you want to
 authenticate clients to prove that they have the right to send
 actions on behalf of a player.
 
-Authenticated games are created with server-side tokens for each player. You can create a game with the `create` API call, and join a player to a game with the `join` API call.
+Authenticated games are created with server-side tokens for each player. You can create a room with the `create` API call, and join a player to a room with the `join` API call.
 
 A game that is authenticated will not accept moves from a client on behalf of a player without the appropriate credential token.
 
-Use the `create` API call to create a game that requires credential tokens. When you call the `join` API, you can retrieve the credential token for a particular player.
+Use the `create` API call to create a room that requires credential tokens. When you call the `join` API, you can retrieve the credential token for a particular player.
 
 #### Configuration
 
@@ -46,11 +46,11 @@ Options are:
 - `apiCallback`: Called when the Koa server is ready. Only applicable if `apiPort` is specified.
 - `shortid`: Function that returns an unique identifier, needed for creating new match codes and user's credentials in matches. If not specified, uses [shortid](https://www.npmjs.com/package/shortid).
 
-#### Creating a game
+#### Creating a room
 
 ##### POST `/games/{name}/create`
 
-Creates a new authenticated game for a game named `name`.
+Creates a new authenticated room for a game named `name`.
 
 Accepts two parameters:
 
@@ -58,13 +58,13 @@ Accepts two parameters:
 
 `setupData` (optional): custom object that is passed to the game `setup` function.
 
-Returns `gameID`, which is the ID of the newly created game instance.
+Returns `roomID`, which is the ID of the newly created game instance.
 
 #### Joining a game
 
 ##### POST `/games/{name}/{id}/join`
 
-Allows a player to join a particular game instance `id` of a game named `name`.
+Allows a player to join a particular room instance `id` of a game named `name`.
 
 Accepts two parameters, all required:
 
@@ -74,11 +74,11 @@ Accepts two parameters, all required:
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
 
-#### Leaving a game
+#### Leaving a room
 
 ##### POST `/games/{name}/{id}/leave`
 
-Leave the game instance `id` of a game named `name` previously joined by the player.
+Leave the room instance `id` of a game named `name` previously joined by the player.
 
 Accepts two parameters, all required:
 
@@ -86,15 +86,15 @@ Accepts two parameters, all required:
 
 `playerCredentials`: the authentication token of the player.
 
-#### Listing all instances of a given game
+#### Listing all room instances of a given game
 
 ##### GET `/games/{name}`
 
-Returns all instances of the game named `name`.
+Returns all room instances of the game named `name`.
 
 Returns an array of `rooms`. Each instance has fields:
 
-`gameID`: the ID of the game instance.
+`roomID`: the ID of the room instance.
 
 `players`: the list of seats and players that have joined the game, if any.
 
@@ -106,7 +106,7 @@ Returns a room instance given its roomID.
 
 Returns a room instance. Each instance has fields:
 
-`roomID`: the ID of the game instance.
+`roomID`: the ID of the room instance.
 
 `players`: the list of seats and players that have joined the game, if any.
 

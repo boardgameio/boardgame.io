@@ -148,14 +148,14 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
 
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
     const gameName = ctx.params.name;
-    const gameID = ctx.params.id;
+    const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
-    const namespacedGameID = getNamespacedGameID(gameID, gameName);
+    const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
 
     if (!gameMetadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Game ' + roomID + ' not found');
     }
     if (!gameMetadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -176,14 +176,14 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
 
   router.post('/games/:name/:id/leave', koaBody(), async ctx => {
     const gameName = ctx.params.name;
-    const gameID = ctx.params.id;
+    const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const playerCredentials = ctx.request.body.playerCredentials;
-    const namespacedGameID = getNamespacedGameID(gameID, gameName);
+    const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
 
     if (!gameMetadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Game ' + roomID + ' not found');
     }
     if (!gameMetadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -196,8 +196,8 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     if (Object.values(gameMetadata.players).some(val => val.name)) {
       await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
     } else {
-      // remove game
-      await db.remove(gameID);
+      // remove room
+      await db.remove(roomID);
       await db.remove(GameMetadataKey(namespacedGameID));
     }
     ctx.body = {};
