@@ -227,7 +227,6 @@ export function FlowWithPhases({
   if (!startingPhase) startingPhase = 'default';
   if (!endIf) endIf = () => undefined;
   if (!turn) turn = {};
-  const game = { plugins };
 
   const phaseMap = phases || {};
 
@@ -254,11 +253,11 @@ export function FlowWithPhases({
     if (conf.onBegin === undefined) {
       conf.onBegin = G => G;
     }
-    conf.onBegin = plugin.FnWrap(conf.onBegin, game);
+    conf.onBegin = plugin.FnWrap(conf.onBegin, plugins);
     if (conf.onEnd === undefined) {
       conf.onEnd = G => G;
     }
-    conf.onEnd = plugin.FnWrap(conf.onEnd, game);
+    conf.onEnd = plugin.FnWrap(conf.onEnd, plugins);
 
     if (conf.turn === undefined) {
       conf.turn = turn;
@@ -275,9 +274,9 @@ export function FlowWithPhases({
     if (conf.turn.onMove === undefined) {
       conf.turn.onMove = G => G;
     }
-    conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, game);
-    conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, game);
-    conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, game);
+    conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, plugins);
+    conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, plugins);
+    conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
   }
 
   const shouldEndPhase = ({ G, ctx }) => {
@@ -304,8 +303,8 @@ export function FlowWithPhases({
     let ctx = InitTurnOrderState(G, state.ctx, config.turn);
 
     // Allow plugins to modify G and ctx at the beginning of a phase.
-    G = plugin.G.onPhaseBegin(G, ctx, game);
-    ctx = plugin.ctx.onPhaseBegin(ctx, game);
+    G = plugin.G.onPhaseBegin(G, ctx, plugins);
+    ctx = plugin.ctx.onPhaseBegin(ctx, plugins);
 
     // Reset stats.
     ctx.stats = {

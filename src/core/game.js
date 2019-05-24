@@ -149,7 +149,7 @@ function Game(game) {
       if (moveFn instanceof Function) {
         const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
         const args = [G, ctxWithPlayerID].concat(action.args);
-        const fn = FnWrap(moveFn, game);
+        const fn = FnWrap(moveFn, game.plugins);
         return fn(...args);
       }
 
