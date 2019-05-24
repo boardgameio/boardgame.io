@@ -6,9 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from './game';
-import { InitializeGame, CreateGameReducer } from './reducer';
-import { makeMove, gameEvent, undo } from './action-creators';
+import { makeMove, gameEvent } from './action-creators';
+import { Client } from '../client/client';
 import { Flow, FlowWithPhases } from './flow';
 import { error } from '../core/logger';
 
@@ -337,91 +336,79 @@ test('endIf', () => {
 
   // Test that the turn automatically ends.
   {
-    const flow = FlowWithPhases({ endIf: G => G.win });
-    const game = Game({
+    const game = {
       moves: {
         A: () => ({ win: 'A' }),
         B: G => G,
       },
-      flow,
-    });
-    const reducer = CreateGameReducer({ game });
-    let state = InitializeGame({ game });
+      endIf: G => G.win,
+    };
+    const client = Client({ game });
 
-    expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove('B'));
-    expect(state.ctx.gameover).toBe(undefined);
-    expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove('A'));
-    expect(state.ctx.gameover).toBe('A');
-    expect(state.deltalog[state.deltalog.length - 1].action.payload.type).toBe(
-      'endTurn'
-    );
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.B();
+    expect(client.getState().ctx.gameover).toBe(undefined);
+
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.A();
+    expect(client.getState().ctx.gameover).toBe('A');
+    expect(
+      client.getState().deltalog[client.getState().deltalog.length - 1].action
+        .payload.type
+    ).toBe('endTurn');
   }
 });
 
 describe('turn.endIf', () => {
   test('global', () => {
-    const flow = FlowWithPhases({
-      turn: { endIf: G => G.endTurn },
-    });
-    const game = Game({
+    const game = {
       moves: {
         A: () => ({ endTurn: true }),
         B: G => G,
       },
-      flow,
-    });
-    const reducer = CreateGameReducer({ game });
+      turn: { endIf: G => G.endTurn },
+    };
+    const client = Client({ game });
 
-    let state = InitializeGame({ game });
-    expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove('B'));
-    expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove('A'));
-    expect(state.ctx.currentPlayer).toBe('1');
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.B();
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.A();
+    expect(client.getState().ctx.currentPlayer).toBe('1');
   });
 
   test('phase specific', () => {
-    const flow = FlowWithPhases({
+    const game = {
+      moves: {
+        A: () => ({ endTurn: true }),
+        B: G => G,
+      },
       startingPhase: 'A',
       phases: {
         A: { turn: { endIf: G => G.endTurn } },
       },
-    });
-    const game = Game({
-      moves: {
-        A: () => ({ endTurn: true }),
-        B: G => G,
-      },
-      flow,
-    });
-    const reducer = CreateGameReducer({ game });
+    };
+    const client = Client({ game });
 
-    let state = InitializeGame({ game });
-    expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove('B'));
-    expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove('A'));
-    expect(state.ctx.currentPlayer).toBe('1');
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.B();
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.A();
+    expect(client.getState().ctx.currentPlayer).toBe('1');
   });
 
   test('return value', () => {
-    const flow = FlowWithPhases({
-      turn: { endIf: () => ({ next: '2' }) },
-    });
-    const game = Game({
+    const game = {
       moves: {
         A: G => G,
       },
-      flow,
-    });
-    const reducer = CreateGameReducer({ game });
+      turn: { endIf: () => ({ next: '2' }) },
+    };
+    const client = Client({ game, numPlayers: 3 });
 
-    let state = InitializeGame({ game, numPlayers: 3 });
-    expect(state.ctx.currentPlayer).toBe('0');
-    state = reducer(state, makeMove('A'));
-    expect(state.ctx.currentPlayer).toBe('2');
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.A();
+    expect(client.getState().ctx.currentPlayer).toBe('2');
   });
 });
 
@@ -530,7 +517,7 @@ describe('endTurn / endPhase args', () => {
 });
 
 test('undoable moves', () => {
-  const game = Game({
+  const game = {
     moves: {
       A: {
         impl: () => ({ A: true }),
@@ -550,42 +537,40 @@ test('undoable moves', () => {
       A: {},
       B: {},
     },
-  });
+  };
 
-  const reducer = CreateGameReducer({ game });
+  const client = Client({ game });
 
-  let state = InitializeGame({ game });
+  client.moves.A();
+  expect(client.getState().G).toEqual({ A: true });
+  client.undo();
+  expect(client.getState().G).toEqual({});
+  client.moves.B();
+  expect(client.getState().G).toEqual({ B: true });
+  client.undo();
+  expect(client.getState().G).toEqual({ B: true });
+  client.moves.C();
+  expect(client.getState().G).toEqual({ C: true });
+  client.undo();
+  expect(client.getState().G).toEqual({ B: true });
 
-  state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
-  state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ B: true });
-  state = reducer(state, makeMove('C'));
-  expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ B: true });
+  client.reset();
+  client.events.endPhase({ next: 'B' });
+  client.events.endTurn();
+  expect(client.getState().ctx.phase).toBe('B');
 
-  state.G = {};
-  state = reducer(state, gameEvent('endPhase', { next: 'B' }));
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.ctx.phase).toBe('B');
-
-  state = reducer(state, makeMove('A'));
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, makeMove('B'));
-  expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ B: true });
-  state = reducer(state, makeMove('C'));
-  expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ B: true });
+  client.moves.A();
+  expect(client.getState().G).toEqual({ A: true });
+  client.undo();
+  expect(client.getState().G).toEqual({ A: true });
+  client.moves.B();
+  expect(client.getState().G).toEqual({ B: true });
+  client.undo();
+  expect(client.getState().G).toEqual({ B: true });
+  client.moves.C();
+  expect(client.getState().G).toEqual({ C: true });
+  client.undo();
+  expect(client.getState().G).toEqual({ B: true });
 });
 
 test('endTurn is not called twice in one move', () => {
@@ -620,20 +605,26 @@ test('endTurn is not called twice in one move', () => {
 });
 
 test('allPlayed', () => {
-  const game = Game({
+  const game = {
     moves: { A: () => ({ A: true }) },
-  });
+  };
+  const p0 = Client({ game, playerID: '0', multiplayer: { local: true } });
+  const p1 = Client({ game, playerID: '1', multiplayer: { local: true } });
 
-  const reducer = CreateGameReducer({ game });
+  p0.connect();
+  p1.connect();
 
-  let state = InitializeGame({ game });
+  p0.moves.A();
+  p0.events.endTurn();
 
-  state = reducer(state, makeMove('A', null, '0'));
-  state = reducer(state, gameEvent('endTurn', null, '0'));
-  expect(state.ctx.stats.phase.allPlayed).toBe(false);
-  state = reducer(state, makeMove('A', null, '1'));
-  state = reducer(state, gameEvent('endTurn', null, '1'));
-  expect(state.ctx.stats.phase.allPlayed).toBe(true);
+  expect(p0.getState().ctx.stats.phase.allPlayed).toBe(false);
+  expect(p1.getState().ctx.stats.phase.allPlayed).toBe(false);
+
+  p1.moves.A();
+  p1.events.endTurn();
+
+  expect(p0.getState().ctx.stats.phase.allPlayed).toBe(true);
+  expect(p1.getState().ctx.stats.phase.allPlayed).toBe(true);
 });
 
 describe('endPhase returns to previous phase', () => {

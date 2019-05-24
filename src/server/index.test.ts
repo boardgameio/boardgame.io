@@ -7,10 +7,9 @@
  */
 
 import { Server, createServerRunConfig } from '.';
-import Game from '../core/game';
 import * as api from './api';
 
-const game = Game({ seed: 0 });
+const game = { seed: 0 };
 
 jest.mock('../core/logger', () => ({
   info: () => {},
@@ -64,14 +63,14 @@ jest.mock('koa', () => {
 
 describe('new', () => {
   test('custom db implementation', () => {
-    const game = Game({});
+    const game = {};
     const db = {};
     const server = Server({ games: [game], db });
     expect(server.db).toBe(db);
   });
 
   test('custom transport implementation', () => {
-    const game = Game({});
+    const game = {};
     const transport = { init: jest.fn() };
     Server({ games: [game], transport });
     expect(transport.init).toBeCalled();

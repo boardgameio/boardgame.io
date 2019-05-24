@@ -8,7 +8,6 @@
 
 import { FlowWithPhases } from './flow';
 import { UpdateTurnOrderState, TurnOrder, Pass } from './turn-order';
-import Game from './game';
 import { makeMove, gameEvent } from './action-creators';
 import { InitializeGame, CreateGameReducer } from './reducer';
 
@@ -239,14 +238,11 @@ describe('turn orders', () => {
 });
 
 test('passing', () => {
-  const flow = FlowWithPhases({
+  const game = {
+    moves: { pass: Pass },
     startingPhase: 'A',
     phases: { A: { turn: { order: TurnOrder.SKIP } } },
-  });
-  const game = Game({
-    flow,
-    moves: { pass: Pass },
-  });
+  };
   const reducer = CreateGameReducer({ game });
   let state = InitializeGame({ game, numPlayers: 3 });
 
@@ -285,11 +281,11 @@ test('passing', () => {
 });
 
 test('end game after everyone passes', () => {
-  const game = Game({
+  const game = {
     endIf: G => G.allPassed,
     turn: { order: TurnOrder.ANY },
     moves: { pass: Pass },
-  });
+  };
 
   const reducer = CreateGameReducer({ game });
   let state = InitializeGame({ game, numPlayers: 3 });
@@ -342,7 +338,7 @@ test('override', () => {
 });
 
 test('playOrder', () => {
-  const game = Game({});
+  const game = {};
   const reducer = CreateGameReducer({ game });
 
   let state = InitializeGame({ game, numPlayers: 3 });
@@ -382,7 +378,7 @@ describe('SetActionPlayers', () => {
   });
 
   test('once', () => {
-    const game = Game({
+    const game = {
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({ value: () => ['0', '1'], once: true });
@@ -390,7 +386,7 @@ describe('SetActionPlayers', () => {
         },
         A: G => G,
       },
-    });
+    };
 
     const reducer = CreateGameReducer({ game });
 
@@ -404,7 +400,7 @@ describe('SetActionPlayers', () => {
   });
 
   test('others', () => {
-    const game = Game({
+    const game = {
       moves: {
         B: (G, ctx) => {
           ctx.events.setActionPlayers({
@@ -416,7 +412,7 @@ describe('SetActionPlayers', () => {
         },
         A: G => G,
       },
-    });
+    };
 
     const reducer = CreateGameReducer({ game });
 
@@ -436,7 +432,7 @@ describe('SetActionPlayers', () => {
   });
 
   test('militia', () => {
-    const game = Game({
+    const game = {
       startingPhase: 'A',
 
       phases: {
@@ -461,7 +457,7 @@ describe('SetActionPlayers', () => {
           },
         },
       },
-    });
+    };
 
     const reducer = CreateGameReducer({ game });
 

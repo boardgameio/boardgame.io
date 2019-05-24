@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from './game';
+import { Game } from './game';
 import { Client } from '../client/client';
 
 describe('basic', () => {
@@ -55,16 +55,16 @@ describe('basic', () => {
 
   test('flow override', () => {
     const f = { processGameEvent: () => {} };
-    const game = Game({
+    const game = {
       flow: f,
-    });
+    };
     expect(game.flow).toBe(f);
   });
 });
 
 // Following turn order is often used in worker placement games like Agricola and Viticulture.
 test('rounds with starting player token', () => {
-  const game = Game({
+  const game = {
     setup: () => ({ startingPlayerToken: 0 }),
 
     moves: {
@@ -84,7 +84,7 @@ test('rounds with starting player token', () => {
         },
       },
     },
-  });
+  };
 
   const numPlayers = 4;
   const client = Client({ game, numPlayers });
@@ -114,7 +114,7 @@ test('rounds with starting player token', () => {
 
 // The following pattern is used in Catan, Twilight Imperium, and (sort of) Powergrid.
 test('serpentine setup phases', () => {
-  const game = Game({
+  const game = {
     startingPhase: 'first setup round',
     phases: {
       'first setup round': {
@@ -144,7 +144,7 @@ test('serpentine setup phases', () => {
         },
       },
     },
-  });
+  };
 
   const numPlayers = 4;
   const client = Client({ game, numPlayers });

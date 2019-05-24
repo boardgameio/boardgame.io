@@ -6,11 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from '../core/game';
 import { InitializeGame } from '../core/reducer';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { makeMove } from '../core/action-creators';
 import { Simulate, Bot, RandomBot, MCTSBot } from './bot';
+import { Game } from '../core/game';
 
 function IsVictory(cells) {
   const positions = [
@@ -141,7 +141,7 @@ describe('MCTSBot', () => {
   });
 
   test('game that never ends', () => {
-    const game = Game({});
+    const game = {};
     const state = InitializeGame({ game });
     const bot = new MCTSBot({ seed: 'test', game, enumerate: () => [] });
     const { state: endState } = Simulate({ game, bots: bot, state });

@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { Client } from './react';
-import Game from '../core/game';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -22,7 +21,7 @@ class TestBoard extends React.Component {
 
 test('board is rendered', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
   });
 
@@ -37,7 +36,7 @@ test('board is rendered', () => {
 
 test('board props', () => {
   let Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
   });
   let board = Enzyme.mount(<Board />).find(TestBoard);
@@ -47,7 +46,7 @@ test('board props', () => {
 
 test('can pass extra props to Client', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
   });
   const board = Enzyme.mount(
@@ -59,7 +58,7 @@ test('can pass extra props to Client', () => {
 
 test('debug ui can be turned off', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
     debug: false,
   });
@@ -71,7 +70,7 @@ test('debug ui can be turned off', () => {
 test('custom loading component', () => {
   const Loading = () => <div>custom</div>;
   const Board = Client({
-    game: Game({}),
+    game: {},
     loading: Loading,
     board: TestBoard,
     multiplayer: true,
@@ -82,7 +81,7 @@ test('custom loading component', () => {
 
 test('can pass empty board', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
   });
 
   const game = Enzyme.mount(<Board />);
@@ -91,11 +90,11 @@ test('can pass empty board', () => {
 
 test('move api', () => {
   const Board = Client({
-    game: Game({
+    game: {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
-    }),
+    },
     board: TestBoard,
   });
 
@@ -114,11 +113,11 @@ test('update gameID / playerID', () => {
   // No multiplayer.
 
   Board = Client({
-    game: Game({
+    game: {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
-    }),
+    },
     board: TestBoard,
   });
   game = Enzyme.mount(<Board />);
@@ -129,11 +128,11 @@ test('update gameID / playerID', () => {
   // Multiplayer.
 
   Board = Client({
-    game: Game({
+    game: {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
-    }),
+    },
     board: TestBoard,
     multiplayer: { local: true },
   });
@@ -171,10 +170,10 @@ test('update gameID / playerID', () => {
 
 test('local playerView', () => {
   const Board = Client({
-    game: Game({
+    game: {
       setup: () => ({ secret: true }),
       playerView: (G, ctx, playerID) => ({ stripped: playerID }),
-    }),
+    },
     board: TestBoard,
     numPlayers: 2,
   });
@@ -186,11 +185,11 @@ test('local playerView', () => {
 
 test('reset Game', () => {
   const Board = Client({
-    game: Game({
+    game: {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
-    }),
+    },
     board: TestBoard,
   });
 
@@ -209,7 +208,7 @@ test('reset Game', () => {
 
 test('overrideGameState', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
   });
 
@@ -226,7 +225,7 @@ test('overrideGameState', () => {
 
 test('debug settings', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
     debug: {
       showGameInfo: false,
@@ -242,7 +241,7 @@ test('debug settings', () => {
 
 test('pass ai section', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
     ai: {
       bot: () => {},

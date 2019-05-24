@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from '../src/core/game.js';
+import { Game } from '../src/core/game.js';
 import {
   InitializeGame,
   CreateGameReducer,

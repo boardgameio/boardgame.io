@@ -6,73 +6,68 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from '../core/game';
-import { InitializeGame, CreateGameReducer } from '../core/reducer';
-import { makeMove, gameEvent } from '../core/action-creators';
+import { Client } from '../client/client';
 
 describe('immer', () => {
-  let game;
-  let state;
-  let reducer;
+  let client;
 
   beforeAll(() => {
-    game = Game({
-      moves: {
-        A: G => {
-          G.moveBody = true;
+    client = Client({
+      game: {
+        moves: {
+          A: G => {
+            G.moveBody = true;
+          },
         },
-      },
 
-      startingPhase: 'A',
+        startingPhase: 'A',
 
-      phases: {
-        A: {
+        phases: {
+          A: {
+            onBegin: G => {
+              G.onPhaseBegin = true;
+            },
+            onEnd: G => {
+              G.onPhaseEnd = true;
+            },
+          },
+        },
+
+        turn: {
           onBegin: G => {
-            G.onPhaseBegin = true;
+            G.onTurnBegin = true;
           },
           onEnd: G => {
-            G.onPhaseEnd = true;
+            G.onTurnEnd = true;
           },
-        },
-      },
-
-      turn: {
-        onBegin: G => {
-          G.onTurnBegin = true;
-        },
-        onEnd: G => {
-          G.onTurnEnd = true;
-        },
-        onMove: G => {
-          G.onMove = true;
+          onMove: G => {
+            G.onMove = true;
+          },
         },
       },
     });
-
-    state = InitializeGame({ game });
-    reducer = CreateGameReducer({ game });
   });
 
   test('begin', () => {
-    expect(state.G.onPhaseBegin).toBe(true);
-    expect(state.G.onTurnBegin).toBe(true);
-    expect(state.G.onPhaseEnd).not.toBe(true);
-    expect(state.G.onTurnEnd).not.toBe(true);
+    expect(client.getState().G.onPhaseBegin).toBe(true);
+    expect(client.getState().G.onTurnBegin).toBe(true);
+    expect(client.getState().G.onPhaseEnd).not.toBe(true);
+    expect(client.getState().G.onTurnEnd).not.toBe(true);
   });
 
   test('end turn', () => {
-    state = reducer(state, gameEvent('endTurn'));
-    expect(state.G.onTurnEnd).toBe(true);
+    client.events.endTurn();
+    expect(client.getState().G.onTurnEnd).toBe(true);
   });
 
   test('end phase', () => {
-    state = reducer(state, gameEvent('endPhase'));
-    expect(state.G.onPhaseEnd).toBe(true);
+    client.events.endPhase();
+    expect(client.getState().G.onPhaseEnd).toBe(true);
   });
 
   test('move', () => {
-    state = reducer(state, makeMove('A'));
-    expect(state.G.moveBody).toBe(true);
-    expect(state.G.onMove).toBe(true);
+    client.moves.A();
+    expect(client.getState().G.moveBody).toBe(true);
+    expect(client.getState().G.onMove).toBe(true);
   });
 });

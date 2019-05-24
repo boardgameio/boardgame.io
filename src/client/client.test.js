@@ -9,10 +9,10 @@
 import { createStore } from 'redux';
 import { InitializeGame, CreateGameReducer } from '../core/reducer';
 import { Client, createMoveDispatchers } from './client';
+import { Game } from '../core/game';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
-import Game from '../core/game';
 import { RandomBot } from '../ai/bot';
 import { error } from '../core/logger';
 
@@ -23,11 +23,11 @@ jest.mock('../core/logger', () => ({
 
 test('move api', () => {
   const client = Client({
-    game: Game({
+    game: {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
-    }),
+    },
   });
 
   expect(client.getState().G).toEqual({});
@@ -39,7 +39,7 @@ describe('namespaced moves', () => {
   let client;
   beforeAll(() => {
     client = Client({
-      game: Game({
+      game: {
         moves: {
           A: () => 'A',
         },
@@ -52,7 +52,7 @@ describe('namespaced moves', () => {
             },
           },
         },
-      }),
+      },
     });
   });
 
@@ -88,13 +88,13 @@ describe('namespaced moves', () => {
 
 test('isActive', () => {
   const client = Client({
-    game: Game({
+    game: {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
 
       endIf: G => G.arg == 42,
-    }),
+    },
   });
 
   expect(client.getState().G).toEqual({});
@@ -106,7 +106,7 @@ test('isActive', () => {
 
 describe('step', () => {
   const client = Client({
-    game: Game({
+    game: {
       setup: () => ({ moved: false }),
 
       moves: {
@@ -118,7 +118,7 @@ describe('step', () => {
       endIf(G) {
         if (G.moved) return true;
       },
-    }),
+    },
 
     ai: {
       bot: RandomBot,
@@ -134,7 +134,7 @@ describe('step', () => {
 
   test('does not crash on empty action', () => {
     const client = Client({
-      game: Game({}),
+      game: {},
 
       ai: {
         bot: RandomBot,
@@ -153,7 +153,7 @@ describe('multiplayer', () => {
 
     beforeAll(() => {
       client = Client({
-        game: Game({ moves: { A: () => {} } }),
+        game: { moves: { A: () => {} } },
         multiplayer: { server: host + ':' + port },
       });
       client.connect();
@@ -185,7 +185,7 @@ describe('multiplayer', () => {
 
     beforeAll(() => {
       client = Client({
-        game: Game({}),
+        game: {},
         multiplayer: true,
       });
       client.connect();
@@ -203,7 +203,7 @@ describe('multiplayer', () => {
 
     beforeAll(() => {
       spec = {
-        game: Game({ moves: { A: (G, ctx) => ({ A: ctx.playerID }) } }),
+        game: { moves: { A: (G, ctx) => ({ A: ctx.playerID }) } },
         multiplayer: { local: true },
       };
 
@@ -255,7 +255,7 @@ describe('multiplayer', () => {
 
     beforeAll(() => {
       client = Client({
-        game: Game({ moves: { A: () => {} } }),
+        game: { moves: { A: () => {} } },
         multiplayer: { transport: CustomTransport },
       });
     });
@@ -274,7 +274,7 @@ describe('multiplayer', () => {
   describe('invalid spec', () => {
     test('logs error', () => {
       Client({
-        game: Game({ moves: { A: () => {} } }),
+        game: { moves: { A: () => {} } },
         multiplayer: { blah: true },
       });
       expect(error).toHaveBeenCalledWith('invalid multiplayer spec');
@@ -292,11 +292,11 @@ test('accepts enhancer for store', () => {
     };
   };
   const client = Client({
-    game: Game({
+    game: {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
-    }),
+    },
     enhancer: spyEnhancer,
   });
 
@@ -307,7 +307,7 @@ test('accepts enhancer for store', () => {
 
 describe('event dispatchers', () => {
   test('default', () => {
-    const game = Game({});
+    const game = {};
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual(['endTurn']);
     expect(client.getState().ctx.turn).toBe(0);
@@ -316,11 +316,11 @@ describe('event dispatchers', () => {
   });
 
   test('all events', () => {
-    const game = Game({
+    const game = {
       endPhase: true,
       endGame: true,
       setActionPlayers: true,
-    });
+    };
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual([
       'endTurn',
@@ -334,10 +334,10 @@ describe('event dispatchers', () => {
   });
 
   test('no events', () => {
-    const game = Game({
+    const game = {
       endPhase: false,
       endTurn: false,
-    });
+    };
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual([]);
   });
@@ -418,11 +418,11 @@ describe('log handling', () => {
 
   beforeEach(() => {
     client = Client({
-      game: Game({
+      game: {
         moves: {
           A: () => ({}),
         },
-      }),
+      },
     });
   });
 

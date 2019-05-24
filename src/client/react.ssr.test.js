@@ -4,7 +4,6 @@
 
 import React from 'react';
 import { Client } from './react';
-import Game from '../core/game';
 import ReactDOMServer from 'react-dom/server';
 
 class TestBoard extends React.Component {
@@ -15,7 +14,7 @@ class TestBoard extends React.Component {
 
 test('board is rendered - ssr', () => {
   const Board = Client({
-    game: Game({}),
+    game: {},
     board: TestBoard,
   });
   let ssrRender = ReactDOMServer.renderToString(<Board />);

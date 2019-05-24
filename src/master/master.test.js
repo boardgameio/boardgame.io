@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from '../core/game';
 import * as ActionCreators from '../core/action-creators';
 import { InMemory } from '../server/db/inmemory';
 import { Master, redactLog, isActionFromAuthenticPlayer } from './master';
@@ -17,7 +16,7 @@ jest.mock('../core/logger', () => ({
   error: jest.fn(),
 }));
 
-const game = Game({ seed: 0, flow: { setActionPlayers: true } });
+const game = { seed: 0, flow: { setActionPlayers: true } };
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
@@ -230,11 +229,11 @@ describe('playerView', () => {
   const sendAll = jest.fn(arg => {
     sendAllReturn = arg;
   });
-  const game = Game({
+  const game = {
     playerView: (G, ctx, player) => {
       return { ...G, player };
     },
-  });
+  };
   const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
 
   beforeAll(async () => {
@@ -270,7 +269,7 @@ describe('playerView', () => {
 describe('authentication', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
-  const game = Game({ seed: 0 });
+  const game = { seed: 0 };
   const action = ActionCreators.gameEvent('endTurn');
   const storage = new InMemory();
 
@@ -383,7 +382,7 @@ describe('redactLog', () => {
   });
 
   test('make sure sync redacts the log', async () => {
-    const game = Game({
+    const game = {
       moves: {
         A: G => G,
         B: {
@@ -391,7 +390,7 @@ describe('redactLog', () => {
           redact: true,
         },
       },
-    });
+    };
 
     const send = jest.fn();
     const master = new Master(game, new InMemory(), TransportAPI(send));

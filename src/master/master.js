@@ -7,6 +7,7 @@
  */
 
 import { InitializeGame, CreateGameReducer } from '../core/reducer';
+import { Game } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
@@ -98,7 +99,7 @@ export const isActionFromAuthenticPlayer = ({
  */
 export class Master {
   constructor(game, storageAPI, transportAPI, auth) {
-    this.game = game;
+    this.game = Game(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
     this.auth = () => true;
