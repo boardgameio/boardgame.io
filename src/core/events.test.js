@@ -7,9 +7,7 @@
  */
 
 import { Events } from './events';
-import { makeMove } from './action-creators';
-import Game from './game';
-import { InitializeGame, CreateGameReducer } from './reducer';
+import { Client } from '../client/client';
 
 test('constructor', () => {
   const flow = {};
@@ -44,17 +42,16 @@ test('dispatch', () => {
 });
 
 test('update ctx', () => {
-  const game = Game({
+  const game = {
     moves: {
       A: (G, ctx) => {
         ctx.events.endTurn();
         return G;
       },
     },
-  });
-  const reducer = CreateGameReducer({ game });
-  let state = InitializeGame({ game });
-  expect(state.ctx.turn).toBe(0);
-  state = reducer(state, makeMove('A'));
-  expect(state.ctx.turn).toBe(1);
+  };
+  const client = Client({ game });
+  expect(client.getState().ctx.turn).toBe(0);
+  client.moves.A();
+  expect(client.getState().ctx.turn).toBe(1);
 });

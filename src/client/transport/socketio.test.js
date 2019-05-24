@@ -8,7 +8,6 @@
 
 import { createStore } from 'redux';
 import { SocketIO } from './socketio';
-import Game from '../../core/game';
 import { makeMove } from '../../core/action-creators';
 import { InitializeGame, CreateGameReducer } from '../../core/reducer';
 import * as Actions from '../../core/action-types';
@@ -81,7 +80,7 @@ describe('multiplayer', () => {
   const mockSocket = new MockSocket();
   const m = new SocketIO({ socket: mockSocket });
   m.connect();
-  const game = Game({});
+  const game = {};
   let store = null;
 
   beforeEach(() => {
@@ -179,7 +178,7 @@ describe('server option', () => {
 
 test('changing a gameID resets the state before resync', () => {
   const m = new SocketIO();
-  const game = Game({});
+  const game = {};
   const store = createStore(CreateGameReducer({ game }));
   m.store = store;
   const dispatchSpy = jest.spyOn(store, 'dispatch');
@@ -196,7 +195,7 @@ test('changing a gameID resets the state before resync', () => {
 
 test('changing a playerID resets the state before resync', () => {
   const m = new SocketIO();
-  const game = Game({});
+  const game = {};
   const store = createStore(CreateGameReducer({ game }));
   m.store = store;
   const dispatchSpy = jest.spyOn(store, 'dispatch');

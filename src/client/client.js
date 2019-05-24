@@ -9,6 +9,7 @@
 import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
+import { Game } from '../core/game';
 import { error } from '../core/logger';
 import { SocketIO } from './transport/socketio';
 import { Local, LocalMaster } from './transport/local';
@@ -92,7 +93,7 @@ class _ClientImpl {
     credentials,
     enhancer,
   }) {
-    this.game = game;
+    this.game = Game(game);
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;
@@ -100,7 +101,7 @@ class _ClientImpl {
     this.subscribeCallback = () => {};
 
     this.reducer = CreateGameReducer({
-      game,
+      game: this.game,
       numPlayers,
       multiplayer,
     });
@@ -124,7 +125,7 @@ class _ClientImpl {
 
     let initialState = null;
     if (multiplayer === undefined) {
-      initialState = InitializeGame({ game, numPlayers });
+      initialState = InitializeGame({ game: this.game, numPlayers });
     }
 
     this.reset = () => {
@@ -252,8 +253,9 @@ class _ClientImpl {
       }
 
       if (multiplayer.local === true) {
-        if (localMaster_ === null || localMaster_.game !== game) {
-          localMaster_ = new LocalMaster(game);
+        if (localMaster_ === null || localMaster_.config !== game) {
+          localMaster_ = new LocalMaster(this.game);
+          localMaster_.config = game;
         }
 
         this.transport = new Local({
@@ -261,7 +263,7 @@ class _ClientImpl {
           store: this.store,
           gameID: gameID,
           playerID: playerID,
-          gameName: game.name,
+          gameName: this.game.name,
           numPlayers,
         });
       } else if (multiplayer.server !== undefined) {
@@ -269,7 +271,7 @@ class _ClientImpl {
           store: this.store,
           gameID: gameID,
           playerID: playerID,
-          gameName: game.name,
+          gameName: this.game.name,
           numPlayers,
           server: multiplayer.server,
           socketOpts,

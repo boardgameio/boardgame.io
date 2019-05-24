@@ -10,7 +10,6 @@ import React from 'react';
 import { stringify } from 'flatted';
 import { Client } from '../client';
 import { sync } from '../../core/action-creators';
-import Game from '../../core/game';
 import { createStore } from 'redux';
 import { Debug } from './debug';
 import Mousetrap from 'mousetrap';
@@ -147,11 +146,11 @@ describe('log', () => {
 
   test('hover', () => {
     const overrideGameState = jest.fn();
-    const game = Game({
+    const game = {
       moves: {
         A: (G, ctx, arg) => ({ arg }),
       },
-    });
+    };
 
     const client = Client({ game });
     client.moves.A(42);

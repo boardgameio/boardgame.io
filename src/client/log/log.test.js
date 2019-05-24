@@ -9,7 +9,6 @@
 import React from 'react';
 import { Client } from '../client';
 import { makeMove, automaticGameEvent } from '../../core/action-creators';
-import Game from '../../core/game';
 import { GameLog } from './log';
 import { InitializeGame, CreateGameReducer } from '../../core/reducer';
 import Enzyme from 'enzyme';
@@ -18,13 +17,13 @@ import Adapter from 'enzyme-adapter-react-16';
 Enzyme.configure({ adapter: new Adapter() });
 
 describe('layout', () => {
-  const game = Game({
+  const game = {
     startingPhase: 'A',
     phases: {
       A: { next: 'B' },
       B: { next: 'A' },
     },
-  });
+  };
   const reducer = CreateGameReducer({ game });
   const state = InitializeGame({ game });
 
@@ -73,7 +72,7 @@ describe('time travel', () => {
   let hoverState;
 
   beforeAll(() => {
-    const game = Game({
+    const game = {
       moves: {
         A: (G, ctx, arg) => {
           return { arg };
@@ -83,7 +82,7 @@ describe('time travel', () => {
       turn: {
         endIf: G => G && G.arg == 42,
       },
-    });
+    };
 
     client = Client({ game });
     const initialState = client.getState()._initial;
@@ -157,12 +156,12 @@ describe('time travel', () => {
 });
 
 describe('pinning', () => {
-  const game = Game({
+  const game = {
     moves: {
       A: () => ({ A: true }),
       B: () => ({ B: true }),
     },
-  });
+  };
 
   const reducer = CreateGameReducer({ game });
   let state = InitializeGame({ game });
@@ -242,7 +241,7 @@ describe('pinning', () => {
 });
 
 describe('payload', () => {
-  const game = Game({});
+  const game = {};
   const reducer = CreateGameReducer({ game });
   const state = InitializeGame({ game });
 

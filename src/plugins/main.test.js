@@ -6,17 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from '../core/game';
-import { InitializeGame, CreateGameReducer } from '../core/reducer';
-import { makeMove } from '../core/action-creators';
+import { Client } from '../client/client';
 
 describe('plugins', () => {
-  let game;
-  let reducer;
-  let initialState;
+  let client;
 
   beforeAll(() => {
-    game = Game({
+    const game = {
       moves: {
         A: (G, ctx) => ({ ...G, ctx }),
         B: G => {
@@ -43,50 +39,42 @@ describe('plugins', () => {
           },
         },
       ],
-    });
+    };
 
-    reducer = CreateGameReducer({ game });
-    initialState = InitializeGame({ game });
+    client = Client({ game });
   });
 
   test('immer works', () => {
-    let state = initialState;
-    state = reducer(state, makeMove('B'));
-    expect(state.G).toMatchObject({ immer: true });
+    client.moves.B();
+    expect(client.getState().G).toMatchObject({ immer: true });
   });
 
   test('setupG', () => {
-    let state = initialState;
-    expect(state.G).toMatchObject({ setup: true });
+    expect(client.getState().G).toMatchObject({ setup: true });
   });
 
   test('setupCtx', () => {
-    let state = initialState;
-    expect(state.ctx).toMatchObject({ setup: true });
+    expect(client.getState().ctx).toMatchObject({ setup: true });
   });
 
   test('onPhaseBegin', () => {
-    let state = initialState;
-    expect(state.G).toMatchObject({ onPhaseBegin: true });
-    expect(state.ctx).toMatchObject({ onPhaseBegin: true });
+    expect(client.getState().G).toMatchObject({ onPhaseBegin: true });
+    expect(client.getState().ctx).toMatchObject({ onPhaseBegin: true });
   });
 
   test('fnWrap', () => {
-    let state = initialState;
-    state = reducer(state, makeMove('A'));
-    expect(state.G).toMatchObject({ fnWrap: true });
+    client.moves.A();
+    expect(client.getState().G).toMatchObject({ fnWrap: true });
   });
 
   test('preMove', () => {
-    let state = initialState;
-    state = reducer(state, makeMove('A'));
-    expect(state.G).toMatchObject({ preMove: true });
-    expect(state.G.ctx).toMatchObject({ preMove: true });
+    client.moves.A();
+    expect(client.getState().G).toMatchObject({ preMove: true });
+    expect(client.getState().G.ctx).toMatchObject({ preMove: true });
   });
 
   test('postMove', () => {
-    let state = initialState;
-    state = reducer(state, makeMove('A'));
-    expect(state.G).toMatchObject({ postMove: true });
+    client.moves.A();
+    expect(client.getState().G).toMatchObject({ postMove: true });
   });
 });

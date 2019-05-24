@@ -7,7 +7,6 @@
  */
 
 import { Random } from './random';
-import Game from './game';
 import { makeMove } from './action-creators';
 import { InitializeGame, CreateGameReducer } from './reducer';
 
@@ -124,12 +123,12 @@ test('Random.Shuffle', () => {
 });
 
 test('Random API is not executed optimisitically', () => {
-  const game = Game({
+  const game = {
     seed: 0,
     moves: {
       rollDie: (G, ctx) => ({ ...G, die: ctx.random.D6() }),
     },
-  });
+  };
 
   {
     const reducer = CreateGameReducer({ game });
@@ -152,14 +151,14 @@ test('turn.onBegin has ctx APIs at the beginning of the game', () => {
   let random = null;
   let events = null;
 
-  const game = Game({
+  const game = {
     turn: {
       onBegin: (G, ctx) => {
         random = ctx.random;
         events = ctx.events;
       },
     },
-  });
+  };
 
   InitializeGame({ game });
   expect(random).not.toBe(null);

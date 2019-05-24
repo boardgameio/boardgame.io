@@ -11,6 +11,7 @@ import * as Actions from './action-types';
 import { Random } from './random';
 import { Events } from './events';
 import * as plugins from '../plugins/main';
+import { Game } from './game';
 import { error } from './logger';
 
 /**
@@ -112,6 +113,8 @@ export class ContextEnhancer {
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
 export function InitializeGame({ game, numPlayers, setupData }) {
+  game = Game(game);
+
   if (!numPlayers) {
     numPlayers = 2;
   }
@@ -184,6 +187,8 @@ export function InitializeGame({ game, numPlayers, setupData }) {
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
 export function CreateGameReducer({ game, multiplayer }) {
+  game = Game(game);
+
   /**
    * GameReducer
    *

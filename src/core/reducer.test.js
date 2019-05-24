@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Game from './game';
 import { InitializeGame, CreateGameReducer, INVALID_MOVE } from './reducer';
 import {
   makeMove,
@@ -24,14 +23,14 @@ jest.mock('../core/logger', () => ({
   error: jest.fn(),
 }));
 
-const game = Game({
+const game = {
   moves: {
     A: G => G,
     B: () => ({ moved: true }),
     C: () => ({ victory: true }),
   },
   endIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
-});
+};
 const reducer = CreateGameReducer({ game });
 const initialState = InitializeGame({ game });
 
@@ -44,11 +43,11 @@ test('_stateID is incremented', () => {
 });
 
 test('move returns INVALID_MOVE', () => {
-  const game = Game({
+  const game = {
     moves: {
       A: () => INVALID_MOVE,
     },
-  });
+  };
   const reducer = CreateGameReducer({ game });
   let state = reducer(initialState, makeMove('A'));
   expect(state._stateID).toBe(0);
@@ -141,10 +140,10 @@ test('endTurn', () => {
 });
 
 test('light client when multiplayer=true', () => {
-  const game = Game({
+  const game = {
     moves: { A: () => ({ win: true }) },
     endIf: G => G.win,
-  });
+  };
 
   {
     const reducer = CreateGameReducer({ game });
@@ -164,10 +163,10 @@ test('light client when multiplayer=true', () => {
 });
 
 test('optimisticUpdate', () => {
-  const game = Game({
+  const game = {
     moves: { A: () => ({ A: true }) },
     optimisticUpdate: () => false,
-  });
+  };
 
   {
     const reducer = CreateGameReducer({ game });
@@ -231,7 +230,7 @@ test('deltalog', () => {
 describe('Events API', () => {
   const fn = (G, ctx) => (ctx.events ? {} : { error: true });
 
-  const game = Game({
+  const game = {
     setup: () => ({}),
     phases: { A: {} },
     turn: {
@@ -239,7 +238,7 @@ describe('Events API', () => {
       onEnd: fn,
     },
     onMove: fn,
-  });
+  };
 
   const reducer = CreateGameReducer({ game });
   let state = InitializeGame({ game });
@@ -260,24 +259,24 @@ describe('Events API', () => {
 });
 
 describe('Random inside setup()', () => {
-  const game1 = Game({
+  const game1 = {
     seed: 'seed1',
     setup: ctx => ({ n: ctx.random.D6() }),
-  });
+  };
 
-  const game2 = Game({
+  const game2 = {
     seed: 'seed2',
     setup: ctx => ({ n: ctx.random.D6() }),
-  });
+  };
 
-  const game3 = Game({
+  const game3 = {
     seed: 'seed2',
     setup: ctx => ({ n: ctx.random.D6() }),
-  });
+  };
 
-  const game4 = Game({
+  const game4 = {
     setup: ctx => ({ n: ctx.random.D6() }),
-  });
+  };
 
   test('setting seed', () => {
     const state1 = InitializeGame({ game: game1 });
@@ -295,7 +294,7 @@ describe('Random inside setup()', () => {
 });
 
 test('undo / redo', () => {
-  let game = Game({
+  const game = {
     moves: {
       move: (G, ctx, arg) => ({ ...G, [arg]: true }),
       nextPhase: (G, ctx) => {
@@ -307,7 +306,7 @@ test('undo / redo', () => {
       phase1: {},
       phase2: {},
     },
-  });
+  };
 
   const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
@@ -395,14 +394,14 @@ test('undo / redo', () => {
 });
 
 test('custom log messages', () => {
-  let game = Game({
+  const game = {
     moves: {
       move: (G, ctx) => {
         ctx.log.setPayload({ msg: 'additional msg' });
         return { ...G };
       },
     },
-  });
+  };
 
   const reducer = CreateGameReducer({ game });
   let state = InitializeGame({ game });

@@ -7,7 +7,7 @@
  */
 
 import { TransportAPI, SocketIO } from './socketio';
-import Game from '../../core/game';
+import { Game } from '../../core/game';
 
 jest.mock('../../master/master', () => {
   class Master {

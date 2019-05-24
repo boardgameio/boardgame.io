@@ -7,36 +7,34 @@
  */
 
 import PluginPlayer from './plugin-player';
-import Game from '../core/game';
-import { InitializeGame, CreateGameReducer } from '../core/reducer';
-import { makeMove, gameEvent } from '../core/action-creators';
+import { Client } from '../client/client';
 
 describe('default values', () => {
   test('playerState is not passed', () => {
-    const game = Game({
+    const game = {
       plugins: [PluginPlayer],
-    });
-    const state = InitializeGame({ game });
-    expect(state.G).toEqual({ players: { '0': {}, '1': {} } });
+    };
+    const client = Client({ game });
+    expect(client.getState().G).toEqual({ players: { '0': {}, '1': {} } });
   });
 
   test('playerState is passed', () => {
-    const game = Game({
+    const game = {
       playerSetup: () => ({ A: 1 }),
       plugins: [PluginPlayer],
+    };
+    const client = Client({ game });
+    expect(client.getState().G).toEqual({
+      players: { '0': { A: 1 }, '1': { A: 1 } },
     });
-    const state = InitializeGame({ game });
-    expect(state.G).toEqual({ players: { '0': { A: 1 }, '1': { A: 1 } } });
   });
 });
 
 describe('2 player game', () => {
-  let game;
-  let state;
-  let reducer;
+  let client;
 
   beforeAll(() => {
-    game = Game({
+    const game = {
       moves: {
         A: G => {
           G.player.field = 'A1';
@@ -45,15 +43,14 @@ describe('2 player game', () => {
       },
 
       plugins: [PluginPlayer],
-    });
+    };
 
-    reducer = CreateGameReducer({ game });
-    state = InitializeGame({ game });
+    client = Client({ game });
   });
 
   test('player 0 turn', () => {
-    state = reducer(state, makeMove('A'));
-    expect(state.G).toEqual({
+    client.moves.A();
+    expect(client.getState().G).toEqual({
       players: {
         '0': { field: 'A1' },
         '1': { field: 'A2' },
@@ -62,9 +59,9 @@ describe('2 player game', () => {
   });
 
   test('player 1 turn', () => {
-    state = reducer(state, gameEvent('endTurn'));
-    state = reducer(state, makeMove('A'));
-    expect(state.G).toEqual({
+    client.events.endTurn();
+    client.moves.A();
+    expect(client.getState().G).toEqual({
       players: {
         '0': { field: 'A2' },
         '1': { field: 'A1' },
@@ -74,12 +71,10 @@ describe('2 player game', () => {
 });
 
 describe('3 player game', () => {
-  let game;
-  let state;
-  let reducer;
+  let client;
 
   beforeAll(() => {
-    game = Game({
+    const game = {
       moves: {
         A: G => {
           G.player.field = 'A';
@@ -88,15 +83,14 @@ describe('3 player game', () => {
       },
 
       plugins: [PluginPlayer],
-    });
+    };
 
-    reducer = CreateGameReducer({ game });
-    state = InitializeGame({ game, numPlayers: 3 });
+    client = Client({ game, numPlayers: 3 });
   });
 
   test('G.opponent is not created', () => {
-    state = reducer(state, makeMove('A'));
-    expect(state.G).toEqual({
+    client.moves.A();
+    expect(client.getState().G).toEqual({
       players: {
         '0': { field: 'A' },
         '1': {},

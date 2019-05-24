@@ -8,12 +8,11 @@
 
 import { createStore } from 'redux';
 import { Local, LocalMaster } from './local';
-import Game from '../../core/game';
 import { makeMove, gameEvent } from '../../core/action-creators';
 import { InitializeGame, CreateGameReducer } from '../../core/reducer';
 
 describe('LocalMaster', () => {
-  const game = Game({});
+  const game = {};
   const master = LocalMaster(game);
 
   const storeA = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
@@ -87,7 +86,7 @@ describe('Local', () => {
   describe('multiplayer', () => {
     const master = { onSync: jest.fn(), onUpdate: jest.fn() };
     const m = new Local({ master });
-    const game = Game({});
+    const game = {};
     let store = null;
 
     beforeEach(() => {
