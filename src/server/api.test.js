@@ -151,7 +151,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('joining a game', () => {
+  describe('joining a room', () => {
     let response;
     let db;
     let games;
@@ -278,7 +278,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('leaving a game', () => {
+  describe('leaving a room', () => {
     let response;
     let db;
     let games;
@@ -435,7 +435,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('requesting game instances list', () => {
+  describe('requesting room list', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
@@ -467,7 +467,7 @@ describe('.createApiServer', () => {
         },
       };
     });
-    describe('when given 2 games', async () => {
+    describe('when given 2 rooms', async () => {
       let response;
       let rooms;
       beforeEach(async () => {
@@ -477,11 +477,11 @@ describe('.createApiServer', () => {
         rooms = JSON.parse(response.text).rooms;
       });
 
-      test('returns instances of the selected game', async () => {
+      test('returns instances of the selected room', async () => {
         expect(rooms).toHaveLength(2);
       });
 
-      test('returns game ids', async () => {
+      test('returns room ids', async () => {
         expect(rooms[0].gameID).toEqual('bar-0');
         expect(rooms[1].gameID).toEqual('bar-1');
       });
