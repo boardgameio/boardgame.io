@@ -204,12 +204,12 @@ export class Master {
         ctx: { ...state.ctx, _random: undefined },
         log: undefined,
         deltalog: undefined,
-        _undo: undefined,
-        _redo: undefined,
+        _undo: [],
+        _redo: [],
         _initial: {
           ...state._initial,
-          _undo: undefined,
-          _redo: undefined,
+          _undo: [],
+          _redo: [],
         },
       };
 
@@ -273,12 +273,12 @@ export class Master {
       ctx: { ...state.ctx, _random: undefined },
       log: undefined,
       deltalog: undefined,
-      _undo: undefined,
-      _redo: undefined,
+      _undo: [],
+      _redo: [],
       _initial: {
         ...state._initial,
-        _undo: undefined,
-        _redo: undefined,
+        _undo: [],
+        _redo: [],
       },
     };
 
