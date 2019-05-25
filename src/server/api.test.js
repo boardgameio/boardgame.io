@@ -151,7 +151,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('joining a game', () => {
+  describe('joining a room', () => {
     let response;
     let db;
     let games;
@@ -278,7 +278,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('leaving a game', () => {
+  describe('leaving a room', () => {
     let response;
     let db;
     let games;
@@ -435,7 +435,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('requesting game instances list', () => {
+  describe('requesting room list', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
@@ -467,7 +467,7 @@ describe('.createApiServer', () => {
         },
       };
     });
-    describe('when given 2 games', async () => {
+    describe('when given 2 rooms', async () => {
       let response;
       let rooms;
       beforeEach(async () => {
@@ -477,11 +477,11 @@ describe('.createApiServer', () => {
         rooms = JSON.parse(response.text).rooms;
       });
 
-      test('returns instances of the selected game', async () => {
+      test('returns instances of the selected room', async () => {
         expect(rooms).toHaveLength(2);
       });
 
-      test('returns game ids', async () => {
+      test('returns room ids', async () => {
         expect(rooms[0].gameID).toEqual('bar-0');
         expect(rooms[1].gameID).toEqual('bar-1');
       });
@@ -489,6 +489,75 @@ describe('.createApiServer', () => {
       test('returns player names', async () => {
         expect(rooms[0].players).toEqual([{ id: 0 }, { id: 1 }]);
         expect(rooms[1].players).toEqual([{ id: 0 }, { id: 1 }]);
+      });
+    });
+  });
+
+  describe('requesting room', () => {
+    let db;
+    beforeEach(() => {
+      delete process.env.API_SECRET;
+      db = {
+        get: async () => {
+          return {
+            players: {
+              '0': {
+                id: 0,
+                credentials: 'SECRET1',
+              },
+              '1': {
+                id: 1,
+                credentials: 'SECRET2',
+              },
+            },
+          };
+        },
+        set: async () => {},
+        list: async () => {
+          return [
+            'bar:bar-0',
+            'bar:bar-0:metadata',
+            'foo:foo-0',
+            'foo:foo-0:metadata',
+            'bar:bar-1',
+            'bar:bar-1:metadata',
+          ];
+        },
+      };
+    });
+
+    describe('when given room ID', async () => {
+      let response;
+      let room;
+      beforeEach(async () => {
+        let games = [Game({ name: 'foo' }), Game({ name: 'bar' })];
+        let app = createApiServer({ db, games });
+        response = await request(app.callback()).get('/games/bar/bar-0');
+        room = JSON.parse(response.text);
+      });
+
+      test('returns game ids', async () => {
+        expect(room.roomID).toEqual('bar-0');
+      });
+
+      test('returns player names', async () => {
+        expect(room.players).toEqual([{ id: 0 }, { id: 1 }]);
+      });
+    });
+
+    describe('when given a non-existent room ID', async () => {
+      let response;
+      beforeEach(async () => {
+        db.get = async () => {
+          return null;
+        };
+        let games = [Game({ name: 'foo' })];
+        let app = createApiServer({ db, games });
+        response = await request(app.callback()).get('/games/bar/doesnotexist');
+      });
+
+      test('throws error 404', async () => {
+        expect(response.status).toEqual(404);
       });
     });
   });
@@ -515,11 +584,16 @@ describe('.addApiToServer', () => {
           setup: () => {},
         }),
       ];
-
-      addApiToServer({ app: server, db, games });
     });
 
     test('call .use method several times', async () => {
+      addApiToServer({ app: server, db, games });
+      expect(server.use.mock.calls.length).toBeGreaterThan(1);
+    });
+
+    test('call .use method several times with uuid', async () => {
+      const uuid = () => 'foo';
+      addApiToServer({ app: server, db, games, lobbyConfig: { uuid } });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
   });

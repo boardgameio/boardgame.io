@@ -9,16 +9,14 @@
 const Koa = require('koa');
 const Router = require('koa-router');
 const koaBody = require('koa-body');
-const uuid = require('uuid/v4');
+const uuid = require('shortid').generate;
 const cors = require('@koa/cors');
 
 import { InitializeGame } from '../core/reducer';
 
-const createCredentials = () => uuid();
 const isGameMetadataKey = (key, gameName) =>
   key.match(gameName + ':.*:metadata');
 const getNamespacedGameID = (gameID, gameName) => `${gameName}:${gameID}`;
-const getNewGameInstanceID = () => uuid();
 const createGameMetadata = () => ({
   players: {},
 });
@@ -33,8 +31,15 @@ const GameMetadataKey = gameID => `${gameID}:metadata`;
  * @param {number} numPlayers - The number of players.
  * @param {object} setupData - User-defined object that's available
  *                             during game setup.
+ * @param {object } lobbyConfig - Configuration options for the lobby.
  */
-export const CreateGame = async (db, game, numPlayers, setupData) => {
+export const CreateGame = async (
+  db,
+  game,
+  numPlayers,
+  setupData,
+  lobbyConfig
+) => {
   const gameMetadata = createGameMetadata();
 
   const state = InitializeGame({
@@ -44,11 +49,11 @@ export const CreateGame = async (db, game, numPlayers, setupData) => {
   });
 
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    const credentials = createCredentials();
+    const credentials = lobbyConfig.uuid();
     gameMetadata.players[playerIndex] = { id: playerIndex, credentials };
   }
 
-  const gameID = getNewGameInstanceID();
+  const gameID = lobbyConfig.uuid();
   const namespacedGameID = getNamespacedGameID(gameID, game.name);
 
   await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
@@ -57,12 +62,18 @@ export const CreateGame = async (db, game, numPlayers, setupData) => {
   return gameID;
 };
 
-export const createApiServer = ({ db, games }) => {
+export const createApiServer = ({ db, games, lobbyConfig }) => {
   const app = new Koa();
-  return addApiToServer({ app, db, games });
+  return addApiToServer({ app, db, games, lobbyConfig });
 };
 
-export const addApiToServer = ({ app, db, games }) => {
+export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
+  if (!lobbyConfig) {
+    lobbyConfig = {};
+  }
+  if (!lobbyConfig.uuid) {
+    lobbyConfig = { ...lobbyConfig, uuid };
+  }
   const router = new Router();
 
   router.get('/games', async ctx => {
@@ -81,7 +92,13 @@ export const addApiToServer = ({ app, db, games }) => {
     }
 
     const game = games.find(g => g.name === gameName);
-    const gameID = await CreateGame(db, game, numPlayers, setupData);
+    const gameID = await CreateGame(
+      db,
+      game,
+      numPlayers,
+      setupData,
+      lobbyConfig
+    );
 
     ctx.body = {
       gameID,
@@ -113,16 +130,32 @@ export const addApiToServer = ({ app, db, games }) => {
     };
   });
 
-  router.post('/games/:name/:id/join', koaBody(), async ctx => {
+  router.get('/games/:name/:id', async ctx => {
     const gameName = ctx.params.name;
     const gameID = ctx.params.id;
+    const room = await db.get(`${gameName}:${GameMetadataKey(gameID)}`);
+    if (!room) {
+      ctx.throw(404, 'Room ' + gameID + ' not found');
+    }
+    const strippedRoom = {
+      roomID: gameID,
+      players: Object.values(room.players).map(player => {
+        return { id: player.id, name: player.name };
+      }),
+    };
+    ctx.body = strippedRoom;
+  });
+
+  router.post('/games/:name/:id/join', koaBody(), async ctx => {
+    const gameName = ctx.params.name;
+    const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
-    const namespacedGameID = getNamespacedGameID(gameID, gameName);
+    const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
 
     if (!gameMetadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Game ' + roomID + ' not found');
     }
     if (!gameMetadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -143,14 +176,14 @@ export const addApiToServer = ({ app, db, games }) => {
 
   router.post('/games/:name/:id/leave', koaBody(), async ctx => {
     const gameName = ctx.params.name;
-    const gameID = ctx.params.id;
+    const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const playerCredentials = ctx.request.body.playerCredentials;
-    const namespacedGameID = getNamespacedGameID(gameID, gameName);
+    const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
 
     if (!gameMetadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Game ' + roomID + ' not found');
     }
     if (!gameMetadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -163,8 +196,8 @@ export const addApiToServer = ({ app, db, games }) => {
     if (Object.values(gameMetadata.players).some(val => val.name)) {
       await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
     } else {
-      // remove game
-      await db.remove(gameID);
+      // remove room
+      await db.remove(roomID);
       await db.remove(GameMetadataKey(namespacedGameID));
     }
     ctx.body = {};

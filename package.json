@@ -141,6 +141,7 @@
     "react-cookies": "^0.1.0",
     "react-dragtastic": "^2.4.3",
     "redux": "^4.0.0",
+    "shortid": "^2.2.14",
     "socket.io": "^2.1.1",
     "uuid": "3.2.1"
   },
