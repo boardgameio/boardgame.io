@@ -80,9 +80,9 @@ describe('update', async () => {
       _initial: {
         G: {},
         _initial: {},
-        _redo: undefined,
+        _redo: [],
         _stateID: 0,
-        _undo: undefined,
+        _undo: [],
         ctx: {
           _random: { seed: 0 },
           actionPlayers: ['0'],
@@ -101,9 +101,9 @@ describe('update', async () => {
           turn: 0,
         },
       },
-      _redo: undefined,
+      _redo: [],
       _stateID: 1,
-      _undo: undefined,
+      _undo: [],
       ctx: {
         _random: undefined,
         actionPlayers: ['1'],
