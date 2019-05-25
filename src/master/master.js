@@ -204,6 +204,13 @@ export class Master {
         ctx: { ...state.ctx, _random: undefined },
         log: undefined,
         deltalog: undefined,
+        _undo: [],
+        _redo: [],
+        _initial: {
+          ...state._initial,
+          _undo: [],
+          _redo: [],
+        },
       };
 
       const log = redactLog(
@@ -266,6 +273,13 @@ export class Master {
       ctx: { ...state.ctx, _random: undefined },
       log: undefined,
       deltalog: undefined,
+      _undo: [],
+      _redo: [],
+      _initial: {
+        ...state._initial,
+        _undo: [],
+        _redo: [],
+      },
     };
 
     const log = redactLog(this.game.flow.redactedMoves, state.log, playerID);
