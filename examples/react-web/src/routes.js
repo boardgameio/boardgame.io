@@ -16,6 +16,7 @@ import ui from './ui';
 import threejs from './threejs';
 import lobby from './lobby';
 import redacted_move from './redacted-move';
+import undo from './undo';
 
 const routes = [
   {
@@ -45,6 +46,10 @@ const routes = [
   {
     name: 'Redacted Move',
     routes: redacted_move.routes,
+  },
+  {
+    name: 'Undo',
+    routes: undo.routes,
   },
   {
     name: 'UI',
