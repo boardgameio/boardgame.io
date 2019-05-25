@@ -1,3 +1,16 @@
+## v0.31.6
+
+#### Bugfixes
+
+- [[5ad5c3f](https://github.com/nicolodavis/boardgame.io/commit/5ad5c3f)] Remove some secrets from client in multiplayer game (#400)
+- [[3e50dca](https://github.com/nicolodavis/boardgame.io/commit/3e50dca)] Get specific instance of a room by its ID (#405)
+- [[4964e3f](https://github.com/nicolodavis/boardgame.io/commit/4964e3f)] Creating lobby API config and making the UUID customizable (#396)
+- [[efece0c](https://github.com/nicolodavis/boardgame.io/commit/efece0c)] Auto-add trailing slash to server only if needed (#403)
+- [[f289379](https://github.com/nicolodavis/boardgame.io/commit/f289379)] Rename gameInstances to rooms (#402)
+- [[1d5586c](https://github.com/nicolodavis/boardgame.io/commit/1d5586c)] export FlatFile in server.js
+- [[eda9728](https://github.com/nicolodavis/boardgame.io/commit/eda9728)] update undo to reflect current ctx (#393)
+- [[e46f195](https://github.com/nicolodavis/boardgame.io/commit/e46f195)] add turn and phase to log entries
+
 ## v0.31.5
 
 #### Features
