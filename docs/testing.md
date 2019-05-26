@@ -100,7 +100,7 @@ it('multiplayer test', () => {
   expect(p1.getState()).toEqual(...);
 
   p1.moves.moveA();
-  p0.events.endTurn();
+  p1.events.endTurn();
 
   ...
 });
