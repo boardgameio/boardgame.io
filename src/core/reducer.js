@@ -336,6 +336,10 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
+        if (action.payload.playerID && action.payload.playerID !== state.ctx.currentPlayer) {
+          return state;
+        }
+
         return {
           ...state,
           G: restore.G,
@@ -349,6 +353,10 @@ export function CreateGameReducer({ game, multiplayer }) {
         const { _undo, _redo } = state;
 
         if (_redo.length == 0) {
+          return state;
+        }
+
+        if (action.payload.playerID && action.payload.playerID !== state.ctx.currentPlayer) {
           return state;
         }
 
