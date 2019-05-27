@@ -315,35 +315,35 @@ describe('undo / redo', () => {
     expect(state._undo[1].ctx.events).toBeUndefined();
     expect(state._undo[1].ctx.random).toBeUndefined();
 
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
 
-    state = reducer(state, redo());
+    state = reducer(state, redo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true, B: true });
 
-    state = reducer(state, redo());
+    state = reducer(state, redo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true, B: true });
 
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
 
-    state = reducer(state, undo());
-    state = reducer(state, undo());
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
+    state = reducer(state, undo(state.ctx.currentPlayer));
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({});
 
-    state = reducer(state, redo());
+    state = reducer(state, redo(state.ctx.currentPlayer));
     state = reducer(state, makeMove('move', 'C'));
     expect(state.G).toEqual({ A: true, C: true });
 
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
 
-    state = reducer(state, redo());
+    state = reducer(state, redo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true, C: true });
 
-    state = reducer(state, undo());
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
+    state = reducer(state, undo(state.ctx.currentPlayer));
     state = reducer(state, makeMove('move', 'A'));
     expect(state.G).toEqual({ A: true });
 
@@ -357,34 +357,34 @@ describe('undo / redo', () => {
     expect(state.ctx.phase).toEqual('phase2');
     expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
 
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
     expect(state.ctx.phase).toEqual('phase2');
     expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
 
-    state = reducer(state, redo());
+    state = reducer(state, redo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true, B: true });
     expect(state.ctx.phase).toEqual('phase2');
     expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
 
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
     expect(state.ctx.phase).toEqual('phase2');
     expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
 
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
     expect(state.ctx.phase).toEqual('phase1');
     expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
 
-    state = reducer(state, redo());
+    state = reducer(state, redo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
     expect(state.ctx.phase).toEqual('phase2');
     expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
 
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     state = reducer(state, gameEvent('endTurn'));
-    state = reducer(state, undo());
+    state = reducer(state, undo(state.ctx.currentPlayer));
     expect(state.G).toEqual({ A: true });
   });
 

@@ -336,7 +336,7 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
-        if (action.payload.playerID && action.payload.playerID !== state.ctx.currentPlayer) {
+        if (action.payload.playerID !== state.ctx.currentPlayer) {
           return state;
         }
 
@@ -356,7 +356,7 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
-        if (action.payload.playerID && action.payload.playerID !== state.ctx.currentPlayer) {
+        if (action.payload.playerID !== state.ctx.currentPlayer) {
           return state;
         }
 
