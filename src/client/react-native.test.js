@@ -202,10 +202,10 @@ test('undo/redo', () => {
   board.props.moves.A(42);
   expect(board.props.G).toEqual({ arg: 42 });
 
-  board.props.undo();
+  board.props.undo(board.props.ctx.currentPlayer);
   expect(board.props.G).toEqual(initial.G);
 
-  board.props.redo();
+  board.props.redo(board.props.ctx.currentPlayer);
   expect(board.props.G).toEqual({ arg: 42 });
 });
 

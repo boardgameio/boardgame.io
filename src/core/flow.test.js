@@ -695,15 +695,15 @@ test('undo / redo restricted by undoableMoves', () => {
 
   state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({});
   state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({ B: true });
   state = reducer(state, makeMove('C'));
   expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({ C: true });
 
   state.G = {};
@@ -713,15 +713,15 @@ test('undo / redo restricted by undoableMoves', () => {
 
   state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({ A: true });
   state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({ A: true });
   state = reducer(state, makeMove('C'));
   expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({ C: true });
 
   state.G = {};
@@ -731,15 +731,15 @@ test('undo / redo restricted by undoableMoves', () => {
 
   state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({});
   state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({});
   state = reducer(state, makeMove('C'));
   expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({ C: true });
 
   state.G = {};
@@ -749,15 +749,15 @@ test('undo / redo restricted by undoableMoves', () => {
 
   state = reducer(state, makeMove('A'));
   expect(state.G).toEqual({ A: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({});
   state = reducer(state, makeMove('B'));
   expect(state.G).toEqual({ B: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({});
   state = reducer(state, makeMove('C'));
   expect(state.G).toEqual({ C: true });
-  state = reducer(state, undo());
+  state = reducer(state, undo(state.ctx.currentPlayer));
   expect(state.G).toEqual({});
 });
 
