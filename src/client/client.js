@@ -130,10 +130,10 @@ class _ClientImpl {
       this.store.dispatch(ActionCreators.reset(initialState));
     };
     this.undo = () => {
-      this.store.dispatch(ActionCreators.undo(this.playerID));
+      this.store.dispatch(ActionCreators.undo(this.playerID, this.credentials));
     };
     this.redo = () => {
-      this.store.dispatch(ActionCreators.redo(this.playerID));
+      this.store.dispatch(ActionCreators.redo(this.playerID, this.credentials));
     };
 
     this.store = null;
