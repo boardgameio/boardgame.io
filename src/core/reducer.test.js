@@ -285,147 +285,149 @@ describe('Random inside setup()', () => {
   });
 });
 
-test('undo / redo', () => {
-  let game = Game({
-    moves: {
-      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
-      nextPhase: (G, ctx) => {
-        ctx.events.endPhase({ next: 'phase2' });
+describe('undo / redo', () => {
+  test('can undo / redo', () => {
+    let game = Game({
+      moves: {
+        move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+        nextPhase: (G, ctx) => {
+          ctx.events.endPhase({ next: 'phase2' });
+        },
       },
-    },
-    flow: {
-      startingPhase: 'phase1',
-      phases: {
-        phase1: {},
-        phase2: {},
+      flow: {
+        startingPhase: 'phase1',
+        phases: {
+          phase1: {},
+          phase2: {},
+        },
       },
-    },
+    });
+
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
+
+    let state = InitializeGame({ game });
+
+    state = reducer(state, makeMove('move', 'A'));
+    expect(state.G).toEqual({ A: true });
+
+    state = reducer(state, makeMove('move', 'B'));
+    expect(state.G).toEqual({ A: true, B: true });
+    expect(state._undo[1].ctx.events).toBeUndefined();
+    expect(state._undo[1].ctx.random).toBeUndefined();
+
+    state = reducer(state, undo());
+    expect(state.G).toEqual({ A: true });
+
+    state = reducer(state, redo());
+    expect(state.G).toEqual({ A: true, B: true });
+
+    state = reducer(state, redo());
+    expect(state.G).toEqual({ A: true, B: true });
+
+    state = reducer(state, undo());
+    expect(state.G).toEqual({ A: true });
+
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    expect(state.G).toEqual({});
+
+    state = reducer(state, redo());
+    state = reducer(state, makeMove('move', 'C'));
+    expect(state.G).toEqual({ A: true, C: true });
+
+    state = reducer(state, undo());
+    expect(state.G).toEqual({ A: true });
+
+    state = reducer(state, redo());
+    expect(state.G).toEqual({ A: true, C: true });
+
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    state = reducer(state, makeMove('move', 'A'));
+    expect(state.G).toEqual({ A: true });
+
+    state = reducer(state, makeMove('nextPhase'));
+    expect(state.G).toEqual({ A: true });
+    expect(state.ctx.phase).toEqual('phase2');
+    expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+    state = reducer(state, makeMove('move', 'B'));
+    expect(state.G).toEqual({ A: true, B: true });
+    expect(state.ctx.phase).toEqual('phase2');
+    expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+    state = reducer(state, undo());
+    expect(state.G).toEqual({ A: true });
+    expect(state.ctx.phase).toEqual('phase2');
+    expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+    state = reducer(state, redo());
+    expect(state.G).toEqual({ A: true, B: true });
+    expect(state.ctx.phase).toEqual('phase2');
+    expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+    state = reducer(state, undo());
+    expect(state.G).toEqual({ A: true });
+    expect(state.ctx.phase).toEqual('phase2');
+    expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+    state = reducer(state, undo());
+    expect(state.G).toEqual({ A: true });
+    expect(state.ctx.phase).toEqual('phase1');
+    expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+    state = reducer(state, redo());
+    expect(state.G).toEqual({ A: true });
+    expect(state.ctx.phase).toEqual('phase2');
+    expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+
+    state = reducer(state, undo());
+    state = reducer(state, gameEvent('endTurn'));
+    state = reducer(state, undo());
+    expect(state.G).toEqual({ A: true });
   });
 
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
-  let state = InitializeGame({ game });
+  test('currentPlayer only can undo/redo', () => {
+    let game = Game({
+      moves: {
+        move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+      },
+    });
 
-  state = reducer(state, makeMove('move', 'A'));
-  expect(state.G).toEqual({ A: true });
+    const reducer = CreateGameReducer({ game, numPlayers: 2 });
 
-  state = reducer(state, makeMove('move', 'B'));
-  expect(state.G).toEqual({ A: true, B: true });
-  expect(state._undo[1].ctx.events).toBeUndefined();
-  expect(state._undo[1].ctx.random).toBeUndefined();
+    let state = InitializeGame({ game });
 
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
+    state = reducer(state, makeMove('move', 'A'));
+    expect(state.G).toEqual({ A: true });
 
-  state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, B: true });
+    state = reducer(state, makeMove('move', 'B'));
+    expect(state.G).toEqual({ A: true, B: true });
 
-  state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, B: true });
+    expect(state.ctx.currentPlayer).toEqual('0');
 
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
+    // Player 0 only can undo and redo.
+    state = reducer(state, undo('1'));
+    expect(state.G).toEqual({ A: true, B: true });
+    state = reducer(state, undo('0'));
+    expect(state.G).toEqual({ A: true });
+    state = reducer(state, redo('1'));
+    expect(state.G).toEqual({ A: true });
+    state = reducer(state, redo('0'));
+    expect(state.G).toEqual({ A: true, B: true });
 
-  state = reducer(state, undo());
-  state = reducer(state, undo());
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
+    // Player 0 nor 1 cannot undo or redo after turn ended.
+    state = reducer(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toEqual('1');
 
-  state = reducer(state, redo());
-  state = reducer(state, makeMove('move', 'C'));
-  expect(state.G).toEqual({ A: true, C: true });
-
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-
-  state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, C: true });
-
-  state = reducer(state, undo());
-  state = reducer(state, undo());
-  state = reducer(state, makeMove('move', 'A'));
-  expect(state.G).toEqual({ A: true });
-
-  state = reducer(state, makeMove('nextPhase'));
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, makeMove('move', 'B'));
-  expect(state.G).toEqual({ A: true, B: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, B: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase1');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, undo());
-  state = reducer(state, gameEvent('endTurn'));
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-});
-
-
-test('undo / redo on 2 players game', () => {
-  let game = Game({
-    moves: {
-      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
-    },
+    state = reducer(state, undo('1'));
+    expect(state.G).toEqual({ A: true, B: true });
+    state = reducer(state, undo('0'));
+    expect(state.G).toEqual({ A: true, B: true });
+    expect(state.ctx.currentPlayer).toEqual('1');
   });
-
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
-
-  let state = InitializeGame({ game });
-
-  state = reducer(state, makeMove('move', 'A'));
-  expect(state.G).toEqual({ A: true });
-
-  state = reducer(state, makeMove('move', 'B'));
-  expect(state.G).toEqual({ A: true, B: true });
-
-  expect(state.ctx.currentPlayer).toEqual('0');
-
-  // Player 0 only can undo
-  state = reducer(state, undo('1'));
-  expect(state.G).toEqual({ A: true, B: true });
-  state = reducer(state, undo('0'));
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, redo('1'));
-  expect(state.G).toEqual({ A: true });
-  state = reducer(state, redo('0'));
-  expect(state.G).toEqual({ A: true, B: true });
-
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.ctx.currentPlayer).toEqual('1');
-
-  // Player 0 nor 1 cannot undo or redo.
-  state = reducer(state, undo('1'));
-  expect(state.G).toEqual({ A: true, B: true });
-  state = reducer(state, undo('0'));
-  expect(state.G).toEqual({ A: true, B: true });
-  expect(state.ctx.currentPlayer).toEqual('1');
 });
 
 test('custom log messages', () => {
