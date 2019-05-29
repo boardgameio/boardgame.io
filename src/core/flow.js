@@ -45,7 +45,6 @@ export function Flow({
   enabledEvents,
   init,
   processMove,
-  canUndoMove,
   moveMap,
 }) {
   if (!ctx) ctx = () => ({});
@@ -53,7 +52,6 @@ export function Flow({
   if (!enabledEvents) enabledEvents = {};
   if (!init) init = state => state;
   if (!processMove) processMove = state => state;
-  if (!canUndoMove) canUndoMove = () => true;
 
   const dispatch = (state, action) => {
     const { payload } = action;
@@ -76,7 +74,6 @@ export function Flow({
   return {
     ctx,
     init,
-    canUndoMove,
     moveMap,
 
     eventNames: Object.getOwnPropertyNames(events),
@@ -181,7 +178,6 @@ export function FlowWithPhases({
   endPhase,
   endGame,
   setActionPlayers,
-  getMove,
   plugins,
 }) {
   // Attach defaults.
@@ -577,20 +573,6 @@ export function FlowWithPhases({
     return state;
   }
 
-  const canUndoMove = (G, ctx, moveName) => {
-    const move = getMove(ctx, moveName);
-
-    if (move.undoable === false) {
-      return false;
-    }
-
-    if (move.undoable instanceof Function) {
-      return move.undoable(G, ctx);
-    }
-
-    return true;
-  };
-
   const events = {
     endTurn: endTurnEvent,
     endPhase: endPhaseEvent,
@@ -633,7 +615,6 @@ export function FlowWithPhases({
     events,
     enabledEvents,
     processMove,
-    canUndoMove,
     moveMap,
   });
 }

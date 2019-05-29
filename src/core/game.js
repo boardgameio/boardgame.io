@@ -126,7 +126,7 @@ export function Game(game) {
   };
 
   if (!game.flow || game.flow.processGameEvent === undefined) {
-    game.flow = FlowWithPhases({ ...game, getMove });
+    game.flow = FlowWithPhases(game);
   }
 
   const moveNameSet = new Set();
