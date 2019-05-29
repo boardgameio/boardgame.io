@@ -25,7 +25,6 @@ test('Flow', () => {
   expect(flow.ctx()).toMatchObject({});
   expect(flow.eventNames).toHaveLength(0);
   expect(flow.init({ a: 5 })).toMatchObject({ a: 5 });
-  expect(flow.canUndoMove()).toBe(true);
   expect(flow.processMove({ b: 6 })).toMatchObject({ b: 6 });
 });
 

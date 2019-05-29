@@ -15,6 +15,21 @@ import { Game } from './game';
 import { error } from './logger';
 
 /**
+ * Returns true if a move can be undone.
+ */
+const CanUndoMove = (G, ctx, move) => {
+  if (move.undoable === false) {
+    return false;
+  }
+
+  if (move.undoable instanceof Function) {
+    return move.undoable(G, ctx);
+  }
+
+  return true;
+};
+
+/**
  * Moves can return this when they want to indicate
  * that the combination of arguments is illegal and
  * the move ought to be discarded.
@@ -353,7 +368,8 @@ export function CreateGameReducer({ game, multiplayer }) {
         const restore = _undo[_undo.length - 2];
 
         // Only allow undoable moves to be undone.
-        if (!game.flow.canUndoMove(state.G, state.ctx, last.moveType)) {
+        const lastMove = game.getMove(state.ctx, last.moveType);
+        if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;
         }
 
