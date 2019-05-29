@@ -164,8 +164,10 @@ export function Flow({
  *   // then that will be chosen as the next phase.
  *   endIf: (G, ctx) => boolean|object,
  *
+ *   // A phase-specific set of moves that overrides the global.
+ *   moves: { ... },
+ *
  *   // A phase-specific turn structure that overrides the global.
- *   // turn order during this phase.
  *   turn: { ... },
  * }
  */
