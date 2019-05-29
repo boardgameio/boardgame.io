@@ -246,6 +246,11 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
+        // Don't run move on client if optimistic = false.
+        if (multiplayer && move.optimistic === false) {
+          return state;
+        }
+
         // Disallow moves once the game is over.
         if (state.ctx.gameover !== undefined) {
           error(`cannot make move after game end`);
@@ -274,8 +279,9 @@ export function CreateGameReducer({ game, multiplayer }) {
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
+
+        // The game declared the move as invalid.
         if (G === INVALID_MOVE) {
-          // the game declared the move as invalid.
           return state;
         }
 
@@ -291,19 +297,21 @@ export function CreateGameReducer({ game, multiplayer }) {
           logEntry.redact = true;
         }
 
-        // don't call into events here
+        // Don't call into events here.
         const newState = apiCtx.updateAndDetach(
           { ...state, deltalog: [logEntry] },
           false
         );
         let ctx = newState.ctx;
 
-        // Undo changes to G if the move should not run on the client.
+        // Random API code was executed. If we are on the
+        // client, wait for the master response instead.
         if (
           multiplayer &&
-          !game.flow.optimisticUpdate(G, ctx, action.payload)
+          ctx._random !== undefined &&
+          ctx._random.prngstate !== undefined
         ) {
-          G = state.G;
+          return state;
         }
 
         state = { ...newState, G, ctx, _stateID: state._stateID + 1 };

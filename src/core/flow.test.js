@@ -27,7 +27,6 @@ test('Flow', () => {
   expect(flow.init({ a: 5 })).toMatchObject({ a: 5 });
   expect(flow.canUndoMove()).toBe(true);
   expect(flow.processMove({ b: 6 })).toMatchObject({ b: 6 });
-  expect(flow.optimisticUpdate()).toBe(true);
 });
 
 describe('phases', () => {

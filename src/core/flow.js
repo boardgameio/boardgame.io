@@ -38,12 +38,6 @@ import * as logging from './logger';
  *                                    or from within moves.
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
- * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
- *                                       Control whether a move should
- *                                       be executed optimistically on
- *                                       the client while waiting for
- *                                       the result of execution from
- *                                       the server.
  */
 export function Flow({
   ctx,
@@ -51,7 +45,6 @@ export function Flow({
   enabledEvents,
   init,
   processMove,
-  optimisticUpdate,
   canUndoMove,
   moveMap,
 }) {
@@ -61,10 +54,6 @@ export function Flow({
   if (!init) init = state => state;
   if (!processMove) processMove = state => state;
   if (!canUndoMove) canUndoMove = () => true;
-
-  if (optimisticUpdate === undefined) {
-    optimisticUpdate = () => true;
-  }
 
   const dispatch = (state, action) => {
     const { payload } = action;
@@ -100,8 +89,6 @@ export function Flow({
     processGameEvent: (state, action) => {
       return dispatch(state, action, dispatch);
     },
-
-    optimisticUpdate,
 
     canPlayerCallEvent: (G, ctx, playerID) => {
       return (
@@ -166,13 +153,6 @@ export function Flow({
  *
  * @param {...object} setActionPlayers - Set to true to enable the `setActionPlayers` event.
  *
- * @param {...object} optimisticUpdate - (G, ctx, move) => boolean
- *                                       Control whether a move should
- *                                       be executed optimistically on
- *                                       the client while waiting for
- *                                       the result of execution from
- *                                       the server.
- *
  * @param {...object} phases - A map of phases in the game.
  *
  * {
@@ -201,7 +181,6 @@ export function FlowWithPhases({
   endPhase,
   endGame,
   setActionPlayers,
-  optimisticUpdate,
   getMove,
   plugins,
 }) {
@@ -217,9 +196,6 @@ export function FlowWithPhases({
   }
   if (setActionPlayers === undefined) {
     setActionPlayers = false;
-  }
-  if (optimisticUpdate === undefined) {
-    optimisticUpdate = () => true;
   }
   if (plugins === undefined) {
     plugins = [];
@@ -653,13 +629,6 @@ export function FlowWithPhases({
     }),
     init: state => {
       return startGame(state);
-    },
-    optimisticUpdate: (G, ctx, action) => {
-      // Some random code was executed.
-      if (ctx._random !== undefined && ctx._random.prngstate !== undefined) {
-        return false;
-      }
-      return optimisticUpdate(G, ctx, action);
     },
     events,
     enabledEvents,
