@@ -162,10 +162,14 @@ test('light client when multiplayer=true', () => {
   }
 });
 
-test('optimisticUpdate', () => {
+test('disable optimistic updates', () => {
   const game = {
-    moves: { A: () => ({ A: true }) },
-    optimisticUpdate: () => false,
+    moves: {
+      A: {
+        impl: () => ({ A: true }),
+        optimistic: false,
+      },
+    },
   };
 
   {
