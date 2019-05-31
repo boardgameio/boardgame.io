@@ -13,7 +13,7 @@ import {
 } from './turn-order';
 import * as plugin from '../plugins/main';
 import { automaticGameEvent } from './action-creators';
-import { ContextEnhancer } from './reducer';
+import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
 
 /**

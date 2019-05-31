@@ -7,7 +7,8 @@
  */
 
 import { createStore } from 'redux';
-import { InitializeGame, CreateGameReducer } from '../core/reducer';
+import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame } from '../core/initialize';
 import { Client, createMoveDispatchers } from './client';
 import { Game } from '../core/game';
 import { Local } from './transport/local';

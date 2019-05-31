@@ -9,7 +9,8 @@
 import { createStore } from 'redux';
 import { SocketIO } from './socketio';
 import { makeMove } from '../../core/action-creators';
-import { InitializeGame, CreateGameReducer } from '../../core/reducer';
+import { CreateGameReducer } from '../../core/reducer';
+import { InitializeGame } from '../../core/initialize';
 import * as Actions from '../../core/action-types';
 
 class MockSocket {

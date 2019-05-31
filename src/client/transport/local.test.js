@@ -9,7 +9,8 @@
 import { createStore } from 'redux';
 import { Local, LocalMaster } from './local';
 import { makeMove, gameEvent } from '../../core/action-creators';
-import { InitializeGame, CreateGameReducer } from '../../core/reducer';
+import { CreateGameReducer } from '../../core/reducer';
+import { InitializeGame } from '../../core/initialize';
 
 describe('LocalMaster', () => {
   const game = {};

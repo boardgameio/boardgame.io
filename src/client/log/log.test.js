@@ -10,7 +10,8 @@ import React from 'react';
 import { Client } from '../client';
 import { makeMove, automaticGameEvent } from '../../core/action-creators';
 import { GameLog } from './log';
-import { InitializeGame, CreateGameReducer } from '../../core/reducer';
+import { CreateGameReducer } from '../../core/reducer';
+import { InitializeGame } from '../../core/initialize';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
