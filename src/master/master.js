@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { InitializeGame, CreateGameReducer } from '../core/reducer';
+import { InitializeGame } from '../core/initialize';
+import { CreateGameReducer } from '../core/reducer';
 import { Game } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';

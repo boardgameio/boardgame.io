@@ -12,7 +12,7 @@ const koaBody = require('koa-body');
 const uuid = require('shortid').generate;
 const cors = require('@koa/cors');
 
-import { InitializeGame } from '../core/reducer';
+import { InitializeGame } from '../core/initialize';
 
 const isGameMetadataKey = (key, gameName) =>
   key.match(gameName + ':.*:metadata');

@@ -13,7 +13,8 @@ import { Game } from '../core/game';
 import { error } from '../core/logger';
 import { SocketIO } from './transport/socketio';
 import { Local, LocalMaster } from './transport/local';
-import { InitializeGame, CreateGameReducer } from '../core/reducer';
+import { CreateGameReducer } from '../core/reducer';
+import { InitializeGame } from '../core/initialize';
 
 // The Game Master object (if using a local one).
 let localMaster_ = null;

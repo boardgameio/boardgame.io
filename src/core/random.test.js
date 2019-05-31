@@ -8,7 +8,8 @@
 
 import { Random } from './random';
 import { makeMove } from './action-creators';
-import { InitializeGame, CreateGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
+import { InitializeGame } from './initialize';
 
 function Init(seed) {
   const ctx = { _random: { seed } };

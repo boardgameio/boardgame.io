@@ -9,7 +9,8 @@
 import { FlowWithPhases } from './flow';
 import { UpdateTurnOrderState, TurnOrder, Pass } from './turn-order';
 import { makeMove, gameEvent } from './action-creators';
-import { InitializeGame, CreateGameReducer } from './reducer';
+import { CreateGameReducer } from './reducer';
+import { InitializeGame } from './initialize';
 
 describe('turn orders', () => {
   // Defines a matcher for testing that ctx has no undefined properties.

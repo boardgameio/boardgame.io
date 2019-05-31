@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { InitializeGame } from '../core/reducer';
+import { InitializeGame } from '../core/initialize';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { makeMove } from '../core/action-creators';
 import { Simulate, Bot, RandomBot, MCTSBot } from './bot';
