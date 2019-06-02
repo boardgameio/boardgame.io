@@ -74,6 +74,20 @@ Accepts two parameters, all required:
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
 
+#### Renaming a player
+
+##### POST `/games/{name}/{id}/rename`
+
+Rename a user in the room instance `id` of a game named `name` previously joined by the player.
+
+Accepts three parameters, all required:
+
+`playerID`: the ID used by the player in the game (0, 1...).
+
+`playerCredentials`: the authentication token of the player.
+
+`newName`: the new name of the player.
+
 #### Leaving a room
 
 ##### POST `/games/{name}/{id}/leave`

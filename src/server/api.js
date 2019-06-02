@@ -211,6 +211,35 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     ctx.body = {};
   });
 
+  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+    const gameName = ctx.params.name;
+    const roomID = ctx.params.id;
+    const playerID = ctx.request.body.playerID;
+    const playerCredentials = ctx.request.body.playerCredentials;
+    const newName = ctx.request.body.newName;
+    const namespacedGameID = getNamespacedGameID(roomID, gameName);
+    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
+    if (typeof playerID === 'undefined') {
+      ctx.throw(403, 'playerID is required');
+    }
+    if (!newName) {
+      ctx.throw(403, 'newName is required');
+    }
+    if (!gameMetadata) {
+      ctx.throw(404, 'Game ' + roomID + ' not found');
+    }
+    if (!gameMetadata.players[playerID]) {
+      ctx.throw(404, 'Player ' + playerID + ' not found');
+    }
+    if (playerCredentials !== gameMetadata.players[playerID].credentials) {
+      ctx.throw(403, 'Invalid credentials ' + playerCredentials);
+    }
+
+    gameMetadata.players[playerID].name = newName;
+    await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
+    ctx.body = {};
+  });
+
   app.use(cors());
 
   // If API_SECRET is set, then require that requests set an
