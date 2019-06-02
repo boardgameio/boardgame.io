@@ -1,3 +1,13 @@
+## v0.31.7
+
+#### Features
+
+- [[febb1c0](https://github.com/nicolodavis/boardgame.io/commit/febb1c0)] Check if required parameters are passed to API (#407)
+
+#### Bugfixes
+
+- [[a6145a5](https://github.com/nicolodavis/boardgame.io/commit/a6145a5)] upgrade koa and koa-body
+
 ## v0.31.6
 
 #### Bugfixes
