@@ -388,7 +388,6 @@ describe('undo / redo', () => {
     expect(state.G).toEqual({ A: true });
   });
 
-
   test('currentPlayer only can undo/redo', () => {
     let game = Game({
       moves: {

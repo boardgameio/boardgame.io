@@ -129,11 +129,39 @@ class _ClientImpl {
     this.reset = () => {
       this.store.dispatch(ActionCreators.reset(initialState));
     };
+
     this.undo = () => {
-      this.store.dispatch(ActionCreators.undo(this.playerID, this.credentials));
+      let assumedPlayerID = this.playerID;
+      // In singleplayer mode, if the client does not have a playerID
+      // associated with it, we attach the currentPlayer as playerID.
+      if (
+        multiplayer === undefined &&
+        (assumedPlayerID === null || assumedPlayerID === undefined)
+      ) {
+        const state = this.store.getState();
+        assumedPlayerID = state.ctx.currentPlayer;
+      }
+
+      this.store.dispatch(
+        ActionCreators.undo(assumedPlayerID, this.credentials)
+      );
     };
+
     this.redo = () => {
-      this.store.dispatch(ActionCreators.redo(this.playerID, this.credentials));
+      let assumedPlayerID = this.playerID;
+      // In singleplayer mode, if the client does not have a playerID
+      // associated with it, we attach the currentPlayer as playerID.
+      if (
+        multiplayer === undefined &&
+        (assumedPlayerID === null || assumedPlayerID === undefined)
+      ) {
+        const state = this.store.getState();
+        assumedPlayerID = state.ctx.currentPlayer;
+      }
+
+      this.store.dispatch(
+        ActionCreators.redo(assumedPlayerID, this.credentials)
+      );
     };
 
     this.store = null;

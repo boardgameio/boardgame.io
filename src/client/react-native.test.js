@@ -183,32 +183,6 @@ test('reset Game', () => {
   expect(board.props.ctx).toEqual(initial.ctx);
 });
 
-test('undo/redo', () => {
-  const Board = Client({
-    game: Game({
-      moves: {
-        A: (G, ctx, arg) => ({ arg }),
-      },
-    }),
-    board: TestBoard,
-  });
-
-  const game = Enzyme.mount(<Board />);
-  const board = game.find('TestBoard').instance();
-
-  const initial = { G: { ...board.props.G }, ctx: { ...board.props.ctx } };
-
-  expect(board.props.G).toEqual({});
-  board.props.moves.A(42);
-  expect(board.props.G).toEqual({ arg: 42 });
-
-  board.props.undo(board.props.ctx.currentPlayer);
-  expect(board.props.G).toEqual(initial.G);
-
-  board.props.redo(board.props.ctx.currentPlayer);
-  expect(board.props.G).toEqual({ arg: 42 });
-});
-
 test('can receive enhancer', () => {
   const enhancer = jest.fn().mockImplementation(next => next);
   const Board = Client({
