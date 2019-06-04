@@ -304,6 +304,126 @@ describe('.createApiServer', () => {
     });
   });
 
+  describe('rename', () => {
+    let response;
+    let db;
+    let games;
+
+    beforeEach(() => {
+      games = [Game({ name: 'foo' })];
+    });
+
+    describe('for an unprotected lobby', () => {
+      beforeEach(() => {
+        delete process.env.API_SECRET;
+      });
+
+      describe('when the game does not exist', () => {
+        test('throws a "not found" error', async () => {
+          db = {
+            get: async () => null,
+          };
+          const app = createApiServer({ db, games });
+          response = await request(app.callback())
+            .post('/games/foo/1/rename')
+            .send('playerID=0&playerName=alice&newName=ali');
+          expect(response.status).toEqual(404);
+        });
+      });
+
+      describe('when the game does exist', () => {
+        describe('when the playerID does exist', () => {
+          let setSpy;
+          beforeEach(async () => {
+            setSpy = jest.fn();
+            db = {
+              get: async () => {
+                return {
+                  players: {
+                    '0': {
+                      name: 'alice',
+                      credentials: 'SECRET1',
+                    },
+                    '1': {
+                      name: 'bob',
+                      credentials: 'SECRET2',
+                    },
+                  },
+                };
+              },
+              set: async (id, game) => setSpy(id, game),
+            };
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/rename')
+              .send('playerID=0&credentials=SECRET1&newName=ali');
+          });
+
+          test('is successful', async () => {
+            expect(response.status).toEqual(200);
+          });
+
+          test('updates the players', async () => {
+            expect(setSpy).toHaveBeenCalledWith(
+              expect.stringMatching(':metadata'),
+              expect.objectContaining({
+                players: expect.objectContaining({
+                  '0': expect.objectContaining({
+                    name: 'ali',
+                  }),
+                }),
+              })
+            );
+          });
+        });
+
+        describe('when the playerID does not exist', () => {
+          test('throws error 404', async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/rename')
+              .send('playerID=2&credentials=SECRET1&newName=joe');
+            expect(response.status).toEqual(404);
+          });
+        });
+
+        describe('when the credentials are invalid', () => {
+          test('throws error 404', async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/rename')
+              .send('playerID=0&credentials=SECRET2&newName=mike');
+            expect(response.status).toEqual(403);
+          });
+        });
+        describe('when playerID is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/rename')
+              .send('credentials=foo&newName=bill');
+          });
+
+          test('throws error 403', async () => {
+            expect(response.status).toEqual(403);
+          });
+          describe('when newName is omitted', () => {
+            beforeEach(async () => {
+              const app = createApiServer({ db, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/rename')
+                .send('credentials=foo&playerID=0');
+            });
+
+            test('throws error 403', async () => {
+              expect(response.status).toEqual(403);
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('leaving a room', () => {
     let response;
     let db;
