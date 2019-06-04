@@ -147,13 +147,18 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
   });
 
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
-    const gameName = ctx.params.name;
-    const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
+    if (!playerID) {
+      ctx.throw(403, 'playerID is required');
+    }
+    if (!playerName) {
+      ctx.throw(403, 'playerName is required');
+    }
+    const gameName = ctx.params.name;
+    const roomID = ctx.params.id;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
-
     if (!gameMetadata) {
       ctx.throw(404, 'Game ' + roomID + ' not found');
     }
@@ -181,6 +186,9 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     const playerCredentials = ctx.request.body.playerCredentials;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
+    if (!playerID) {
+      ctx.throw(403, 'playerID is required');
+    }
 
     if (!gameMetadata) {
       ctx.throw(404, 'Game ' + roomID + ' not found');

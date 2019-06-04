@@ -247,6 +247,32 @@ describe('.createApiServer', () => {
           });
         });
 
+        describe('when playerID is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/join')
+              .send('playerName=1');
+          });
+
+          test('throws error 403', async () => {
+            expect(response.status).toEqual(403);
+          });
+        });
+
+        describe('when playerName is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/join')
+              .send('playerID=1');
+          });
+
+          test('throws error 403', async () => {
+            expect(response.status).toEqual(403);
+          });
+        });
+
         describe('when the playerID is not available', () => {
           beforeEach(async () => {
             setSpy = jest.fn();
@@ -401,6 +427,18 @@ describe('.createApiServer', () => {
             response = await request(app.callback())
               .post('/games/foo/1/leave')
               .send('playerID=0&playerCredentials=SECRET2');
+            expect(response.status).toEqual(403);
+          });
+        });
+        describe('when playerID is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/leave')
+              .send('playerCredentials=foo');
+          });
+
+          test('throws error 403', async () => {
             expect(response.status).toEqual(403);
           });
         });

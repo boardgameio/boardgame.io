@@ -92,6 +92,9 @@ it('multiplayer test', () => {
 
   const p0 = Client({ ...spec, playerID: '0' });
   const p1 = Client({ ...spec, playerID: '1' });
+  
+  p0.connect();
+  p1.connect();
 
   p0.moves.moveA();
   p0.events.endTurn();
@@ -100,7 +103,7 @@ it('multiplayer test', () => {
   expect(p1.getState()).toEqual(...);
 
   p1.moves.moveA();
-  p0.events.endTurn();
+  p1.events.endTurn();
 
   ...
 });
