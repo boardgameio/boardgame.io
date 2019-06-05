@@ -6,8 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from 'boardgame.io/core';
-
 function IsVictory(cells) {
   const positions = [
     [0, 1, 2],
@@ -35,7 +33,7 @@ function IsVictory(cells) {
   return false;
 }
 
-const TicTacToe = Game({
+const TicTacToe = {
   name: 'tic-tac-toe',
 
   setup: () => ({
@@ -53,18 +51,18 @@ const TicTacToe = Game({
     },
   },
 
-  flow: {
+  turn: {
     moveLimit: 1,
-
-    endGameIf: (G, ctx) => {
-      if (IsVictory(G.cells)) {
-        return { winner: ctx.currentPlayer };
-      }
-      if (G.cells.filter(c => c === null).length === 0) {
-        return { draw: true };
-      }
-    },
   },
-});
+
+  endIf: (G, ctx) => {
+    if (IsVictory(G.cells)) {
+      return { winner: ctx.currentPlayer };
+    }
+    if (G.cells.filter(c => c === null).length === 0) {
+      return { draw: true };
+    }
+  },
+};
 
 export default TicTacToe;
