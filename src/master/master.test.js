@@ -168,7 +168,17 @@ describe('update', async () => {
     expect(sendAll).toHaveBeenCalled();
   });
 
-  test('writes log when player is not an action player', async () => {
+  test('undo / redo', async () => {
+    await master.onUpdate(ActionCreators.undo(), 2, 'gameID', '0');
+    expect(error).not.toBeCalled();
+
+    await master.onUpdate(ActionCreators.undo(), 2, 'gameID', '1');
+    expect(error).toHaveBeenCalledWith(
+      `playerID=[1] cannot undo / redo right now`
+    );
+  });
+
+  test('playerID is not an action player', async () => {
     const setActionPlayersEvent = ActionCreators.gameEvent('setActionPlayers', [
       '1',
     ]);

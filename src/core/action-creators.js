@@ -84,20 +84,14 @@ export const reset = state => ({
 
 /**
  * Used to undo the last move.
- * @param {string}  playerID - The ID of the player making this action.
- * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const undo = (playerID, credentials) => ({
+export const undo = () => ({
   type: Actions.UNDO,
-  payload: { playerID, credentials },
 });
 
 /**
  * Used to redo the last undone move.
- * @param {string}  playerID - The ID of the player making this action.
- * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const redo = (playerID, credentials) => ({
+export const redo = () => ({
   type: Actions.REDO,
-  payload: { playerID, credentials },
 });

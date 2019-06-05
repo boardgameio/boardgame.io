@@ -444,22 +444,8 @@ describe('undo / redo', () => {
     });
   });
 
-  test('playerID not specified', () => {
+  test('basic', () => {
     const client = Client({ game });
-
-    expect(client.getState().G).toEqual({});
-    client.moves.A(42);
-    expect(client.getState().G).toEqual({ arg: 42 });
-
-    client.undo();
-    expect(client.getState().G).toEqual({});
-
-    client.redo();
-    expect(client.getState().G).toEqual({ arg: 42 });
-  });
-
-  test('playerID specified', () => {
-    const client = Client({ game, playerID: '0' });
 
     expect(client.getState().G).toEqual({});
     client.moves.A(42);
