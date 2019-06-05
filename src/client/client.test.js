@@ -433,3 +433,28 @@ describe('log handling', () => {
     expect(client.log).toEqual([]);
   });
 });
+
+describe('undo / redo', () => {
+  let game;
+  beforeEach(() => {
+    game = Game({
+      moves: {
+        A: (G, ctx, arg) => ({ arg }),
+      },
+    });
+  });
+
+  test('basic', () => {
+    const client = Client({ game });
+
+    expect(client.getState().G).toEqual({});
+    client.moves.A(42);
+    expect(client.getState().G).toEqual({ arg: 42 });
+
+    client.undo();
+    expect(client.getState().G).toEqual({});
+
+    client.redo();
+    expect(client.getState().G).toEqual({ arg: 42 });
+  });
+});

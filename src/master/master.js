@@ -7,7 +7,7 @@
  */
 
 import { InitializeGame, CreateGameReducer } from '../core/reducer';
-import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
+import { UNDO, REDO, MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
@@ -163,6 +163,20 @@ export class Master {
       numPlayers: state.ctx.numPlayers,
     });
     const store = createStore(reducer, state);
+
+    // Only allow UNDO / REDO if there is exactly one player
+    // that can make moves right now and the person doing the
+    // action is that player.
+    if (action.type == UNDO || action.type == REDO) {
+      if (
+        state.ctx.currentPlayer !== playerID ||
+        state.ctx.actionPlayers.length != 1 ||
+        state.ctx.actionPlayers[0] !== playerID
+      ) {
+        logging.error(`playerID=[${playerID}] cannot undo / redo right now`);
+        return;
+      }
+    }
 
     // Check whether the player is allowed to make the move.
     if (
