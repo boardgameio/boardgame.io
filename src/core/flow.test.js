@@ -196,11 +196,11 @@ describe('phases', () => {
   });
 });
 
-test('movesPerTurn', () => {
+test('moveLimit', () => {
   {
     const flow = FlowWithPhases({
       turn: {
-        movesPerTurn: 2,
+        moveLimit: 2,
       },
     });
     let state = flow.init({ ctx: flow.ctx(2) });
@@ -215,11 +215,11 @@ test('movesPerTurn', () => {
 
   {
     const flow = FlowWithPhases({
-      turn: { movesPerTurn: 2 },
+      turn: { moveLimit: 2 },
       phases: {
         B: {
           turn: {
-            movesPerTurn: 1,
+            moveLimit: 1,
           },
         },
       },

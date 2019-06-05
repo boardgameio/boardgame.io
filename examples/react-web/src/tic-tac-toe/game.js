@@ -52,7 +52,7 @@ const TicTacToe = {
   },
 
   turn: {
-    movesPerTurn: 1,
+    moveLimit: 1,
   },
 
   endIf: (G, ctx) => {
