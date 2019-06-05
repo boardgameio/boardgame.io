@@ -136,7 +136,7 @@ export function Flow({
  *
  *     // End the turn automatically after a certain number
  *     // of moves.
- *     movesPerTurn: 1,
+ *     moveLimit: 1,
  *
  *     // Code to run at the end of a move.
  *     onMove: (G, ctx, { type: 'moveName', args: [] }) => G
@@ -262,10 +262,7 @@ export function FlowWithPhases({
     const conf = phaseMap[ctx.phase];
 
     const currentPlayerMoves = ctx.stats.turn.numMoves[ctx.currentPlayer] || 0;
-    if (
-      conf.turn.movesPerTurn &&
-      currentPlayerMoves >= conf.turn.movesPerTurn
-    ) {
+    if (conf.turn.moveLimit && currentPlayerMoves >= conf.turn.moveLimit) {
       return true;
     }
     return conf.turn.endIf(G, ctx);
@@ -424,9 +421,9 @@ export function FlowWithPhases({
 
     const conf = phaseMap[ctx.phase];
 
-    // Prevent ending the turn if movesPerTurn haven't been made.
+    // Prevent ending the turn if moveLimit haven't been made.
     const currentPlayerMoves = ctx.stats.turn.numMoves[ctx.currentPlayer] || 0;
-    if (conf.turn.movesPerTurn && currentPlayerMoves < conf.turn.movesPerTurn) {
+    if (conf.turn.moveLimit && currentPlayerMoves < conf.turn.moveLimit) {
       return state;
     }
 

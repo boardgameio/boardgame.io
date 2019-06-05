@@ -40,7 +40,7 @@ const ChessGame = {
     },
   },
 
-  turn: { movesPerTurn: 1 },
+  turn: { moveLimit: 1 },
 
   endIf: G => {
     const chess = Load(G.pgn);

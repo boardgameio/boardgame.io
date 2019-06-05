@@ -54,7 +54,7 @@ const TicTacToe = Game({
   },
 
   flow: {
-    movesPerTurn: 1,
+    moveLimit: 1,
 
     endGameIf: (G, ctx) => {
       if (IsVictory(G.cells)) {
