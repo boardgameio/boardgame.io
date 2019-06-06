@@ -476,7 +476,7 @@ describe('.createApiServer', () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
-              .send('playerID=0&playerCredentials=SECRET1');
+              .send('playerID=0&credentials=SECRET1');
           });
 
           test('is successful', async () => {
@@ -522,7 +522,7 @@ describe('.createApiServer', () => {
               const app = createApiServer({ db, games });
               response = await request(app.callback())
                 .post('/games/foo/1/leave')
-                .send('playerID=0&playerCredentials=SECRET1');
+                .send('playerID=0&credentials=SECRET1');
               expect(setSpy).toHaveBeenCalledWith('1');
               expect(setSpy).toHaveBeenCalledWith(
                 expect.stringMatching(':metadata')
@@ -536,7 +536,7 @@ describe('.createApiServer', () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
-              .send('playerID=2&playerCredentials=SECRET1');
+              .send('playerID=2&credentials=SECRET1');
             expect(response.status).toEqual(404);
           });
         });
@@ -546,7 +546,7 @@ describe('.createApiServer', () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
-              .send('playerID=0&playerCredentials=SECRET2');
+              .send('playerID=0&credentials=SECRET2');
             expect(response.status).toEqual(403);
           });
         });
@@ -555,7 +555,7 @@ describe('.createApiServer', () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
-              .send('playerCredentials=foo');
+              .send('credentials=foo');
           });
 
           test('throws error 403', async () => {

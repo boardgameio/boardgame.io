@@ -101,7 +101,7 @@ class _LobbyConnectionImpl {
               method: 'POST',
               body: JSON.stringify({
                 playerID: player.id,
-                playerCredentials: this.playerCredentials,
+                credentials: this.playerCredentials,
               }),
               headers: { 'Content-Type': 'application/json' },
             }
