@@ -98,7 +98,7 @@ Accepts two parameters, all required:
 
 `playerID`: the ID used by the player in the game (0, 1...).
 
-`playerCredentials`: the authentication token of the player.
+`credentials`: the authentication token of the player.
 
 #### Listing all room instances of a given game
 

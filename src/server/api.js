@@ -183,7 +183,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     const gameName = ctx.params.name;
     const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
-    const playerCredentials = ctx.request.body.playerCredentials;
+    const credentials = ctx.request.body.credentials;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
     if (!playerID) {
@@ -196,8 +196,8 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     if (!gameMetadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (playerCredentials !== gameMetadata.players[playerID].credentials) {
-      ctx.throw(403, 'Invalid credentials ' + playerCredentials);
+    if (credentials !== gameMetadata.players[playerID].credentials) {
+      ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
     delete gameMetadata.players[playerID].name;
