@@ -194,18 +194,22 @@ describe('multiplayer', () => {
   });
 
   describe('custom transport', () => {
-    const transport = { custom: true };
+    class CustomTransport {
+      custom = true;
+    }
+
     let client;
 
     beforeAll(() => {
       client = Client({
         game: Game({ moves: { A: () => {} } }),
-        multiplayer: { transport },
+        multiplayer: { transport: CustomTransport },
       });
     });
 
     test('correct transport used', () => {
-      expect(client.transport).toBe(transport);
+      expect(client.transport).toBeInstanceOf(CustomTransport);
+      expect(client.transport.custom).toBe(true);
     });
   });
 

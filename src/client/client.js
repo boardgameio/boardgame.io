@@ -273,7 +273,14 @@ class _ClientImpl {
           socketOpts,
         });
       } else if (multiplayer.transport !== undefined) {
-        this.transport = multiplayer.transport;
+        this.transport = new multiplayer.transport({
+          store: this.store,
+          gameID: gameID,
+          playerID: playerID,
+          gameName: game.name,
+          numPlayers,
+          socketOpts,
+        });
       } else {
         error('invalid multiplayer spec');
       }
