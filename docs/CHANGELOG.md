@@ -1,3 +1,12 @@
+## v0.32.0
+
+#### Features
+
+- [[2b98fb6](https://github.com/nicolodavis/boardgame.io/commit/2b98fb6)] change custom client transport to a constructor (#417)
+- [[89faece](https://github.com/nicolodavis/boardgame.io/commit/89faece)] Rename playerCredentials to credentials for /leave endpoint, update src/lobby/connection.js accordingly (#416)
+- [[25c2263](https://github.com/nicolodavis/boardgame.io/commit/25c2263)] Fix #345; restrict undo/redo to currentPlayer (#408)
+- [[6de7b64](https://github.com/nicolodavis/boardgame.io/commit/6de7b64)] Add /rename endpoint for lobby (#414)
+
 ## v0.31.7
 
 #### Features
