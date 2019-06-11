@@ -279,7 +279,6 @@ class _ClientImpl {
           playerID: playerID,
           gameName: game.name,
           numPlayers,
-          socketOpts,
         });
       } else {
         error('invalid multiplayer spec');

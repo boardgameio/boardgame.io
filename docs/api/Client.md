@@ -50,7 +50,7 @@ const App = Client({
   // 2. { server: 'hostname[:port]' }
   //
   // Same as the above, but also specifies the server location.
-  // 
+  //
   // 3. { server: 'http[s]://hostname[:port]' }
   //
   // Same as the above, but also specifies the server protocol (for example, HTTPS).
@@ -60,6 +60,11 @@ const App = Client({
   // Special local mode that uses an in-memory game master. Useful
   // for testing multiplayer interactions locally without having to
   // connect to a server.
+  //
+  // 5. CustomClass
+  //
+  // Your own transport implementation. See `src/client/client.js` for
+  // details on how to implement a custom transport adapter.
   multiplayer: false,
 
   // Set to false to disable the Debug UI.
