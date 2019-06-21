@@ -101,7 +101,7 @@ export function InitTurnOrderState(G, ctx, turnOrder) {
   if (turnOrder.actionPlayers !== undefined) {
     ctx = setActionPlayers(G, ctx, turnOrder.actionPlayers);
   } else {
-    ctx = { ...ctx, actionPlayers: [currentPlayer] };
+    ctx = { ...ctx, actionPlayers: [currentPlayer], _actionPlayersOnce: false };
   }
 
   return { ...ctx, currentPlayer, playOrderPos, playOrder };
