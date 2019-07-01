@@ -593,6 +593,120 @@ describe('.createApiServer', () => {
     });
   });
 
+  describe('play again', () => {
+    let response;
+    let db;
+    let games;
+    let setSpy;
+
+    beforeEach(() => {
+      games = [Game({ name: 'foo' })];
+      delete process.env.API_SECRET;
+      setSpy = jest.fn();
+      db = {
+        get: async () => {
+          return {
+            players: {
+              '0': {
+                name: 'alice',
+                credentials: 'SECRET1',
+              },
+              '1': {
+                name: 'bob',
+                credentials: 'SECRET2',
+              },
+            },
+          };
+        },
+        set: async (id, game) => setSpy(id, game),
+      };
+    });
+
+    test('creates new game data', async () => {
+      const app = createApiServer({ db, games });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('playerID=0&credentials=SECRET1&numPlayers=4');
+      expect(setSpy).toHaveBeenCalledWith(
+        expect.stringMatching('foo:'),
+        expect.objectContaining({
+          ctx: expect.objectContaining({
+            numPlayers: 4,
+          }),
+        })
+      );
+      expect(response.body.nextRoomID).not.toBeNull();
+    });
+
+    test('fetches next id', async () => {
+      db = {
+        get: async () => {
+          return {
+            players: {
+              '0': {
+                name: 'alice',
+                credentials: 'SECRET1',
+              },
+              '1': {
+                name: 'bob',
+                credentials: 'SECRET2',
+              },
+            },
+            nextRoomID: '12345',
+          };
+        },
+      };
+      const app = createApiServer({ db, games });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('playerID=0&credentials=SECRET1');
+      expect(response.body.nextRoomID).toBe('12345');
+    });
+
+    test('when the game does not exist throws a "not found" error', async () => {
+      db = {
+        get: async () => null,
+      };
+      const app = createApiServer({ db, games });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('playerID=0&playerName=alice');
+      expect(response.status).toEqual(404);
+    });
+
+    test('when the playerID is undefnied throws error 403', async () => {
+      const app = createApiServer({ db, games });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('credentials=SECRET1');
+      expect(response.status).toEqual(403);
+    });
+
+    test('when the playerID does not exist throws error 404', async () => {
+      const app = createApiServer({ db, games });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('playerID=2&credentials=SECRET1');
+      expect(response.status).toEqual(404);
+    });
+
+    test('when the credentials are invalid throws error 404', async () => {
+      const app = createApiServer({ db, games });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('playerID=0&credentials=SECRET2');
+      expect(response.status).toEqual(403);
+    });
+
+    test('when playerID is omitted throws error 403', async () => {
+      const app = createApiServer({ db, games });
+      response = await request(app.callback())
+        .post('/games/foo/1/leave')
+        .send('credentials=foo');
+      expect(response.status).toEqual(403);
+    });
+  });
+
   describe('requesting room list', () => {
     let db;
     beforeEach(() => {

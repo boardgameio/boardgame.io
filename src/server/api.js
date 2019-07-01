@@ -211,6 +211,58 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     ctx.body = {};
   });
 
+  router.post('/games/:name/:id/playAgain', koaBody(), async ctx => {
+    const gameName = ctx.params.name;
+    const roomID = ctx.params.id;
+    const playerID = ctx.request.body.playerID;
+    const credentials = ctx.request.body.credentials;
+    const namespacedGameID = getNamespacedGameID(roomID, gameName);
+    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
+    // User-data to pass to the game setup function.
+    const setupData = ctx.request.body.setupData;
+    // The number of players for this game instance.
+    let numPlayers = parseInt(ctx.request.body.numPlayers);
+    if (!numPlayers) {
+      numPlayers = 2;
+    }
+
+    if (typeof playerID === 'undefined' || playerID === null) {
+      ctx.throw(403, 'playerID is required');
+    }
+
+    if (!gameMetadata) {
+      ctx.throw(404, 'Game ' + roomID + ' not found');
+    }
+    if (!gameMetadata.players[playerID]) {
+      ctx.throw(404, 'Player ' + playerID + ' not found');
+    }
+    if (credentials !== gameMetadata.players[playerID].credentials) {
+      ctx.throw(403, 'Invalid credentials ' + credentials);
+    }
+
+    // Check if nextRoom is already set, if so, return that id.
+    if (gameMetadata.nextRoomID) {
+      ctx.body = { nextRoomID: gameMetadata.nextRoomID };
+      return;
+    }
+
+    const game = games.find(g => g.name === gameName);
+    const nextRoomID = await CreateGame(
+      db,
+      game,
+      numPlayers,
+      setupData,
+      lobbyConfig
+    );
+    gameMetadata.nextRoomID = nextRoomID;
+
+    await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
+
+    ctx.body = {
+      nextRoomID,
+    };
+  });
+
   router.post('/games/:name/:id/rename', koaBody(), async ctx => {
     const gameName = ctx.params.name;
     const roomID = ctx.params.id;
