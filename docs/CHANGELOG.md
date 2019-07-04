@@ -1,3 +1,13 @@
+## v0.32.1
+
+#### Features
+
+- [[9cff03e](https://github.com/nicolodavis/boardgame.io/commit/9cff03e)] Create play again endpoint (#428)
+
+#### Bugfixes
+
+- [[0a75e4b](https://github.com/nicolodavis/boardgame.io/commit/0a75e4b)] fix: Fix join/leave a room when playerID is 0 (#425)
+
 ## v0.32.0
 
 #### Features
