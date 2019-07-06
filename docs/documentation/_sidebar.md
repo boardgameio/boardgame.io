@@ -1,6 +1,5 @@
 - Getting Started
 
-  - [Overview](/)
   - [Concepts](concepts.md)
   - [Tutorial](tutorial.md)
 
