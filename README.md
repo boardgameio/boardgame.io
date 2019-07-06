@@ -52,7 +52,7 @@ See [changelog](docs/documentation/CHANGELOG.md).
 
 ## Contributing
 
-See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](docs/roadmap.md)
+See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](roadmap.md)
 to find things that you could contribute to.
 
 ## License
