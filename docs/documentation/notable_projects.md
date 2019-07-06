@@ -2,8 +2,6 @@
 
 List of notable projects using boardgame.io. This list is not exhaustive. Feel free to send a PR to add your project to this list, but please have a demo that's accessible via a URL.
 
-### Games
-
 - [Bad Flamingo](https://github.com/jayelm/bad-flamingo) - Fool the computer, but not your friends! Adversarial "Quick, Draw"
 
 - [Cardman Multiplayer](https://github.com/VengelStudio/cardman-multiplayer) - [play](http://cardman-multiplayer.herokuapp.com) - A cross between Hangman and a card game.
@@ -21,8 +19,6 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 - [Pong240's Boardgame](https://github.com/Pong420/Boardgame) - [play](http://play-boardgame.herokuapp.com) - A project for building board games with React and boardgame.io.
 
 - [Territories](https://github.com/lehaSVV2009/territories) - [play](https://lehasvv2009.github.io/territories/) - Simple board game Territories.
-
-### Libraries
 
 - [boardgame.io-angular](https://github.com/turn-based/boardgame.io-angular) - [demo](https://turn-based-209306.firebaseapp.com/) - Unofficial Angular client for boardgame.io.
 
