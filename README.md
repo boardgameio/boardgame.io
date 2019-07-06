@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <strong>Full Documentation: <a href="https://nicolodavis.github.io/boardgame.io">link</a></strong>
+  <strong>Full Documentation: <a href="https://boardgame.io/documentation/#/">link</a></strong>
 </p>
 
 Write simple functions that describe how the game state changes
@@ -48,7 +48,7 @@ $ npm start
 
 ## Changelog
 
-See [changelog](docs/CHANGELOG.md).
+See [changelog](docs/documentation/CHANGELOG.md).
 
 ## Contributing
 
