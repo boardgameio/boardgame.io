@@ -377,21 +377,6 @@ test('undo / redo', () => {
   expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
 
   state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase1');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, undo());
   state = reducer(state, gameEvent('endTurn'));
   state = reducer(state, undo());
   expect(state.G).toEqual({ A: true });

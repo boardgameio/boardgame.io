@@ -90,20 +90,18 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * @param {object} turn - A turn object for this phase.
  */
 export function InitTurnOrderState(G, ctx, turn) {
-  if (turn.order === undefined) {
-    turn.order = TurnOrder.DEFAULT;
-  }
+  const order = turn.order || TurnOrder.DEFAULT;
 
   let playOrder = [...new Array(ctx.numPlayers)].map((d, i) => i + '');
-  if (turn.order.playOrder !== undefined) {
-    playOrder = turn.order.playOrder(G, ctx);
+  if (order.playOrder !== undefined) {
+    playOrder = order.playOrder(G, ctx);
   }
 
-  const playOrderPos = turn.order.first(G, ctx);
+  const playOrderPos = order.first(G, ctx);
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
-  if (turn.order.actionPlayers !== undefined) {
-    ctx = setActionPlayers(G, ctx, turn.order.actionPlayers);
+  if (order.actionPlayers !== undefined) {
+    ctx = setActionPlayers(G, ctx, order.actionPlayers);
   } else {
     ctx = { ...ctx, actionPlayers: [currentPlayer] };
   }
@@ -120,6 +118,8 @@ export function InitTurnOrderState(G, ctx, turn) {
                                 may specify the next player.
  */
 export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
+  const order = turn.order || TurnOrder.DEFAULT;
+
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
   let actionPlayers = ctx.actionPlayers;
@@ -134,7 +134,7 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
       logging.error(`invalid argument to endTurn: ${endTurnArg}`);
     }
   } else {
-    const t = turn.order.next(G, ctx);
+    const t = order.next(G, ctx);
 
     if (t === undefined) {
       endPhase = true;
@@ -142,7 +142,7 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
       playOrderPos = t;
       currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
 
-      if (turn.order.actionPlayers === undefined) {
+      if (order.actionPlayers === undefined) {
         actionPlayers = [currentPlayer];
       }
     }

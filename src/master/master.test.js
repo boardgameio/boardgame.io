@@ -115,17 +115,12 @@ describe('update', () => {
         ctx: {
           _random: { seed: 0 },
           actionPlayers: ['0'],
-          allPlayed: false,
           currentPlayer: '0',
           currentPlayerMoves: 0,
           numPlayers: 2,
           phase: '',
           playOrder: ['0', '1'],
           playOrderPos: 0,
-          stats: {
-            phase: { allPlayed: false, numMoves: {} },
-            turn: { allPlayed: false, numMoves: {} },
-          },
           turn: 0,
         },
       },
@@ -135,17 +130,12 @@ describe('update', () => {
       ctx: {
         _random: undefined,
         actionPlayers: ['1'],
-        allPlayed: false,
         currentPlayer: '1',
         currentPlayerMoves: 0,
         numPlayers: 2,
         phase: '',
         playOrder: ['0', '1'],
         playOrderPos: 1,
-        stats: {
-          phase: { allPlayed: false, numMoves: {} },
-          turn: { allPlayed: false, numMoves: {} },
-        },
         turn: 1,
       },
     });

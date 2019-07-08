@@ -129,19 +129,16 @@ describe('phases', () => {
   test('end phase on move', () => {
     let endPhaseACount = 0;
     let endPhaseBCount = 0;
-    const onMove = () => ({ A: true });
 
     const flow = FlowWithPhases({
       phases: {
         A: {
           start: true,
-          turn: { endIf: () => true, onMove },
           endIf: () => true,
           onEnd: () => ++endPhaseACount,
           next: 'B',
         },
         B: {
-          turn: { endIf: () => false, onMove },
           endIf: () => false,
           onEnd: () => ++endPhaseBCount,
         },
@@ -155,28 +152,6 @@ describe('phases', () => {
 
     expect(endPhaseACount).toEqual(1);
     expect(endPhaseBCount).toEqual(0);
-  });
-
-  test('end turn when final phase is reached', () => {
-    const flow = FlowWithPhases({
-      turn: { endIf: (G, ctx) => ctx.phase === 'C' },
-      phases: { A: { start: true, next: 'B' }, B: { next: 'C' }, C: {} },
-    });
-
-    let state = { G: {}, ctx: flow.ctx(2) };
-
-    expect(state.ctx.phase).toBe('A');
-    expect(state.ctx.currentPlayer).toBe('0');
-
-    state = flow.processGameEvent(state, gameEvent('endPhase'));
-
-    expect(state.ctx.phase).toBe('B');
-    expect(state.ctx.currentPlayer).toBe('0');
-
-    state = flow.processGameEvent(state, gameEvent('endPhase'));
-
-    expect(state.ctx.phase).toBe('C');
-    expect(state.ctx.currentPlayer).toBe('1');
   });
 });
 
@@ -219,9 +194,10 @@ test('moveLimit', () => {
 
     state = flow.processGameEvent(state, gameEvent('endPhase', { next: 'B' }));
 
-    expect(state.ctx.turn).toBe(1);
-    state = flow.processMove(state, makeMove('move', null, '1').payload);
+    expect(state.ctx.phase).toBe('B');
     expect(state.ctx.turn).toBe(2);
+    state = flow.processMove(state, makeMove('move', null, '0').payload);
+    expect(state.ctx.turn).toBe(3);
   }
 });
 
@@ -314,7 +290,7 @@ test('endIf', () => {
     }
   }
 
-  // Test that the turn automatically ends.
+  // Test that the phase automatically ends.
   {
     const game = {
       moves: {
@@ -335,7 +311,7 @@ test('endIf', () => {
     expect(
       client.getState().deltalog[client.getState().deltalog.length - 1].action
         .payload.type
-    ).toBe('endTurn');
+    ).toBe('endPhase');
   }
 });
 
@@ -435,19 +411,24 @@ test('canPlayerCallEvent', () => {
   ).toBe(true);
 });
 
-test('endGame', () => {
-  const flow = FlowWithPhases({ endGame: true });
-  const state = { ctx: {} };
+describe('endGame', () => {
+  let client;
+  beforeEach(() => {
+    const game = {
+      events: { endGame: true },
+    };
+    client = Client({ game });
+  });
 
-  {
-    const t = flow.processGameEvent(state, gameEvent('endGame'));
-    expect(t.ctx.gameover).toBe(true);
-  }
+  test('without arguments', () => {
+    client.events.endGame();
+    expect(client.getState().ctx.gameover).toBe(true);
+  });
 
-  {
-    const t = flow.processGameEvent(state, gameEvent('endGame', 42));
-    expect(t.ctx.gameover).toBe(42);
-  }
+  test('with arguments', () => {
+    client.events.endGame(42);
+    expect(client.getState().ctx.gameover).toBe(42);
+  });
 });
 
 describe('endTurn / endPhase args', () => {
@@ -474,7 +455,7 @@ describe('endTurn / endPhase args', () => {
     let t = state;
     t = flow.processGameEvent(t, gameEvent('endPhase', 'C'));
     expect(error).toBeCalledWith(`invalid argument to endPhase: C`);
-    expect(t.ctx.phase).toBe('A');
+    expect(t.ctx.phase).toBe('');
   });
 
   test('invalid arg to endTurn', () => {
@@ -570,37 +551,11 @@ test('endTurn is not called twice in one move', () => {
 
   state.G.endPhase = true;
 
-  // phase.endIf and turn.endIf both return true here,
-  // but the turn should only advance once, despite
-  // turn.endIf being checked in phase.endIf as well as processMove.
   state = flow.processMove(state, makeMove().payload);
 
   expect(state.ctx.phase).toBe('B');
   expect(state.ctx.currentPlayer).toBe('0');
   expect(state.ctx.turn).toBe(2);
-});
-
-test('allPlayed', () => {
-  const game = {
-    moves: { A: () => ({ A: true }) },
-  };
-  const p0 = Client({ game, playerID: '0', multiplayer: { local: true } });
-  const p1 = Client({ game, playerID: '1', multiplayer: { local: true } });
-
-  p0.connect();
-  p1.connect();
-
-  p0.moves.A();
-  p0.events.endTurn();
-
-  expect(p0.getState().ctx.stats.phase.allPlayed).toBe(false);
-  expect(p1.getState().ctx.stats.phase.allPlayed).toBe(false);
-
-  p1.moves.A();
-  p1.events.endTurn();
-
-  expect(p0.getState().ctx.stats.phase.allPlayed).toBe(true);
-  expect(p1.getState().ctx.stats.phase.allPlayed).toBe(true);
 });
 
 describe('endPhase returns to previous phase', () => {
@@ -619,4 +574,17 @@ describe('endPhase returns to previous phase', () => {
     state = flow.processGameEvent(state, gameEvent('endPhase'));
     expect(state.ctx.phase).toBe('');
   });
+});
+
+test('another infinite loop', () => {
+  const endIf = () => true;
+  const game = {
+    phases: {
+      A: { endIf, next: 'B', start: true },
+      B: { endIf, next: 'A' },
+    },
+  };
+  const client = Client({ game });
+
+  expect(client.getState().ctx.phase).toBe('');
 });
