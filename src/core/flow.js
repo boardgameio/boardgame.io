@@ -174,16 +174,13 @@ export function Flow({
  *
  *   // A phase-specific turn structure that overrides the global.
  *   turn: { ... },
+ *
+ *   // Set to true to begin the game in this phase. Only one phase
+ *   // can have this set to true.
+ *   start: false,
  * }
  */
-export function FlowWithPhases({
-  phases,
-  startingPhase,
-  endIf,
-  turn,
-  events,
-  plugins,
-}) {
+export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
   // Attach defaults.
   if (events === undefined) {
     events = {};
@@ -203,22 +200,27 @@ export function FlowWithPhases({
   if (plugins === undefined) {
     plugins = [];
   }
-  if (!startingPhase) startingPhase = 'default';
+
   if (!endIf) endIf = () => undefined;
   if (!turn) turn = {};
 
   const phaseMap = phases || {};
 
-  if ('default' in phaseMap) {
-    logging.error('cannot specify phase with name "default"');
+  if ('' in phaseMap) {
+    logging.error('cannot specify phase with empty name');
   }
 
-  phaseMap['default'] = {};
+  phaseMap[''] = {};
 
   let moveMap = {};
+  let startingPhase = '';
 
   for (let phase in phaseMap) {
     const conf = phaseMap[phase];
+
+    if (conf.start === true) {
+      startingPhase = phase;
+    }
 
     if (conf.moves !== undefined) {
       for (let move of Object.keys(conf.moves)) {
@@ -258,13 +260,17 @@ export function FlowWithPhases({
     conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
   }
 
+  function GetPhase(ctx) {
+    return phaseMap[ctx.phase];
+  }
+
   const shouldEndPhase = ({ G, ctx }) => {
-    const conf = phaseMap[ctx.phase];
+    const conf = GetPhase(ctx);
     return conf.endIf(G, ctx);
   };
 
   const shouldEndTurn = ({ G, ctx }) => {
-    const conf = phaseMap[ctx.phase];
+    const conf = GetPhase(ctx);
 
     const currentPlayerMoves = ctx.stats.turn.numMoves[ctx.currentPlayer] || 0;
     if (conf.turn.moveLimit && currentPlayerMoves >= conf.turn.moveLimit) {
@@ -317,12 +323,7 @@ export function FlowWithPhases({
   };
 
   const startGame = function(state) {
-    if (!(state.ctx.phase in phaseMap)) {
-      logging.error('invalid startingPhase: ' + state.ctx.phase);
-      return state;
-    }
-
-    const conf = phaseMap[state.ctx.phase];
+    const conf = GetPhase(state.ctx);
     state = startPhase(state, conf);
     state = startTurn(state, conf);
     return state;
@@ -346,7 +347,7 @@ export function FlowWithPhases({
     let ctx = state.ctx;
 
     // Run any cleanup code for the phase that is about to end.
-    const conf = phaseMap[ctx.phase];
+    const conf = GetPhase(ctx);
     G = conf.onEnd(G, ctx);
 
     const gameover = endIf(G, ctx);
@@ -354,23 +355,21 @@ export function FlowWithPhases({
       return { ...state, G, ctx: { ...ctx, gameover } };
     }
 
-    const prevPhase = ctx.phase;
-
     // Update the phase.
     if (arg && arg !== true) {
       if (arg.next in phaseMap) {
-        ctx = { ...ctx, phase: arg.next, prevPhase };
+        ctx = { ...ctx, phase: arg.next };
       } else {
         logging.error('invalid argument to endPhase: ' + arg);
       }
     } else if (conf.next !== undefined) {
-      ctx = { ...ctx, phase: conf.next, prevPhase };
+      ctx = { ...ctx, phase: conf.next };
     } else {
-      ctx = { ...ctx, phase: ctx.prevPhase, prevPhase };
+      ctx = { ...ctx, phase: '' };
     }
 
     // Run any setup code for the new phase.
-    state = startPhase({ ...state, G, ctx }, phaseMap[ctx.phase]);
+    state = startPhase({ ...state, G, ctx }, GetPhase(ctx));
 
     const origTurn = state.ctx.turn;
 
@@ -387,7 +386,7 @@ export function FlowWithPhases({
         state,
         automaticGameEvent(
           'endPhase',
-          [{ next: 'default' }, visitedPhases],
+          [{ next: '' }, visitedPhases],
           this.playerID
         )
       );
@@ -424,7 +423,7 @@ export function FlowWithPhases({
   function endTurnEvent(state, arg) {
     let { G, ctx } = state;
 
-    const conf = phaseMap[ctx.phase];
+    const conf = GetPhase(ctx);
 
     // Prevent ending the turn if moveLimit haven't been made.
     const currentPlayerMoves = ctx.stats.turn.numMoves[ctx.currentPlayer] || 0;
@@ -503,7 +502,7 @@ export function FlowWithPhases({
   }
 
   function processMove(state, action, dispatch) {
-    let conf = phaseMap[state.ctx.phase];
+    let conf = GetPhase(state.ctx);
 
     state = updateStats(state, 'turn', action.playerID);
     state = updateStats(state, 'phase', action.playerID);
@@ -542,7 +541,7 @@ export function FlowWithPhases({
         automaticGameEvent('endPhase', [endPhase], action.playerID)
       );
       // Update to the new phase configuration
-      conf = phaseMap[state.ctx.phase];
+      conf = GetPhase(state.ctx);
     }
 
     // End the turn automatically if turn.endIf is true or if endIf returns.
@@ -610,7 +609,6 @@ export function FlowWithPhases({
       stats: { turn: { numMoves: {} }, phase: { numMoves: {} } },
       allPlayed: false,
       phase: startingPhase,
-      prevPhase: 'default',
       stage: {},
     }),
     init: state => {

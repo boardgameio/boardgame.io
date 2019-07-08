@@ -175,7 +175,7 @@ describe('multiplayer', () => {
 
     test('onAction called', () => {
       jest.spyOn(client.transport, 'onAction');
-      client.store.dispatch(sync({ G: {}, ctx: { phase: 'default' } }, []));
+      client.store.dispatch(sync({ G: {}, ctx: { phase: '' } }, []));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
     });
@@ -439,13 +439,13 @@ describe('log handling', () => {
       {
         action: makeMove('A', [], '0'),
         _stateID: 0,
-        phase: 'default',
+        phase: '',
         turn: 0,
       },
       {
         action: makeMove('A', [], '0'),
         _stateID: 1,
-        phase: 'default',
+        phase: '',
         turn: 0,
       },
     ]);
