@@ -28,11 +28,11 @@ import * as logging from './logger';
  * @param {...object} ctx - Function with the signature
  *                          numPlayers => ctx
  *                          that determines the initial value of ctx.
- * @param {...object} events - Object containing functions
- *                             named after events that this
- *                             reducer will handle. Each function
- *                             has the following signature:
- *                             ({G, ctx}) => {G, ctx}
+ * @param {...object} eventHandlers - Object containing functions
+ *                                    named after events that this
+ *                                    reducer will handle. Each function
+ *                                    has the following signature:
+ *                                    ({G, ctx}) => {G, ctx}
  * @param {...object} enabledEvents - Map of eventName -> bool indicating
  *                                    which events are callable from the client
  *                                    or from within moves.
@@ -41,21 +41,21 @@ import * as logging from './logger';
  */
 export function Flow({
   ctx,
-  events,
+  eventHandlers,
   enabledEvents,
   init,
   processMove,
   moveMap,
 }) {
   if (!ctx) ctx = () => ({});
-  if (!events) events = {};
+  if (!eventHandlers) eventHandlers = {};
   if (!enabledEvents) enabledEvents = {};
   if (!init) init = state => state;
   if (!processMove) processMove = state => state;
 
   const dispatch = (state, action) => {
     const { payload } = action;
-    if (events.hasOwnProperty(payload.type)) {
+    if (eventHandlers.hasOwnProperty(payload.type)) {
       const context = { playerID: payload.playerID, dispatch };
       const logEntry = {
         action,
@@ -66,7 +66,7 @@ export function Flow({
       const deltalog = [...(state.deltalog || []), logEntry];
       state = { ...state, deltalog };
       const args = [state].concat(payload.args);
-      return events[payload.type].apply(context, args);
+      return eventHandlers[payload.type].apply(context, args);
     }
     return state;
   };
@@ -76,7 +76,7 @@ export function Flow({
     init,
     moveMap,
 
-    eventNames: Object.getOwnPropertyNames(events),
+    eventNames: Object.getOwnPropertyNames(eventHandlers),
     enabledEventNames: Object.getOwnPropertyNames(enabledEvents),
 
     processMove: (state, action) => {
@@ -111,44 +111,49 @@ export function Flow({
  * - A move whitelist that disallows other moves during the phase.
  *
  * @param {...object} endIf - The game automatically ends if this function
- *                                returns anything (checked after each move).
- *                                The return value is available at ctx.gameover.
- *                                (G, ctx) => {}
+ *                            returns anything (checked after each move).
+ *                            The return value is available at ctx.gameover.
+ *                            (G, ctx) => {}
  *
  * @param {...object} turn - Customize the turn structure (see turn-order.js).
  *
- *   {
- *     // The turn order.
- *     order: TurnOrder.DEFAULT,
+ * {
+ *   // The turn order.
+ *   order: TurnOrder.DEFAULT,
  *
- *     // Code to run at the beginning of the turn.
- *     onBegin: (G, ctx) => G,
+ *   // Code to run at the beginning of the turn.
+ *   onBegin: (G, ctx) => G,
  *
- *     // Code to run at the end of the turn.
- *     onEnd: (G, ctx) => G,
+ *   // Code to run at the end of the turn.
+ *   onEnd: (G, ctx) => G,
  *
- *     // The turn automatically ends if this returns a truthy
- *     // value (checked after each move).
- *     // If the return value is { next: playerID },
- *     // then that player is the next player
- *     // instead of following the turn order.
- *     endIf: (G, ctx) => boolean|object,
+ *   // The turn automatically ends if this returns a truthy
+ *   // value (checked after each move).
+ *   // If the return value is { next: playerID },
+ *   // then that player is the next player
+ *   // instead of following the turn order.
+ *   endIf: (G, ctx) => boolean|object,
  *
- *     // End the turn automatically after a certain number
- *     // of moves.
- *     moveLimit: 1,
+ *   // End the turn automatically after a certain number
+ *   // of moves.
+ *   moveLimit: 1,
  *
- *     // Code to run at the end of a move.
- *     onMove: (G, ctx, { type: 'moveName', args: [] }) => G
- *   }
+ *   // Code to run at the end of a move.
+ *   onMove: (G, ctx, { type: 'moveName', args: [] }) => G
+ * }
  *
- * @param {...object} endTurn - Set to false to disable the `endTurn` event.
+ * @param {...object} events - Section that allows enabling / disabling events.
  *
- * @param {...object} endPhase - Set to false to disable the `endPhase` event.
+ * {
+ *   endTurn - Set to false to disable the `endTurn` event.
  *
- * @param {...object} endGame - Set to true to enable the `endGame` event.
+ *   endPhase - Set to false to disable the `endPhase` event.
  *
- * @param {...object} setActionPlayers - Set to true to enable the `setActionPlayers` event.
+ *   endGame - Set to true to enable the `endGame` event.
+ *
+ *   setActionPlayers - Set to true to enable the `setActionPlayers` event.
+ * }
+ *
  *
  * @param {...object} phases - A map of phases in the game.
  *
@@ -176,24 +181,24 @@ export function FlowWithPhases({
   startingPhase,
   endIf,
   turn,
-  endTurn,
-  endPhase,
-  endGame,
-  setActionPlayers,
+  events,
   plugins,
 }) {
   // Attach defaults.
-  if (endPhase === undefined && phases) {
-    endPhase = true;
+  if (events === undefined) {
+    events = {};
   }
-  if (endTurn === undefined) {
-    endTurn = true;
+  if (events.endPhase === undefined && phases) {
+    events.endPhase = true;
   }
-  if (endGame === undefined) {
-    endGame = false;
+  if (events.endTurn === undefined) {
+    events.endTurn = true;
   }
-  if (setActionPlayers === undefined) {
-    setActionPlayers = false;
+  if (events.endGame === undefined) {
+    events.endGame = false;
+  }
+  if (events.setActionPlayers === undefined) {
+    events.setActionPlayers = false;
   }
   if (plugins === undefined) {
     plugins = [];
@@ -572,7 +577,7 @@ export function FlowWithPhases({
     return state;
   }
 
-  const events = {
+  const eventHandlers = {
     endTurn: endTurnEvent,
     endPhase: endPhaseEvent,
     endGame: endGameEvent,
@@ -580,16 +585,16 @@ export function FlowWithPhases({
   };
 
   let enabledEvents = {};
-  if (endTurn) {
+  if (events.endTurn) {
     enabledEvents['endTurn'] = true;
   }
-  if (endPhase) {
+  if (events.endPhase) {
     enabledEvents['endPhase'] = true;
   }
-  if (endGame) {
+  if (events.endGame) {
     enabledEvents['endGame'] = true;
   }
-  if (setActionPlayers) {
+  if (events.setActionPlayers) {
     enabledEvents['setActionPlayers'] = true;
   }
 
@@ -611,7 +616,7 @@ export function FlowWithPhases({
     init: state => {
       return startGame(state);
     },
-    events,
+    eventHandlers,
     enabledEvents,
     processMove,
     moveMap,
