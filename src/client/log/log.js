@@ -138,9 +138,9 @@ export class GameLog extends React.Component {
   rewind = logIndex => {
     let state = this.props.initialState;
     for (let i = 0; i < this.props.log.length; i++) {
-      const { action } = this.props.log[i];
+      const { action, automatic } = this.props.log[i];
 
-      if (!action.automatic) {
+      if (!automatic) {
         state = this.props.reducer(state, action);
       }
 

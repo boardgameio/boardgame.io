@@ -186,7 +186,10 @@ export function CreateGameReducer({ game, multiplayer }) {
           action.payload
         );
         state = apiCtx.updateAndDetach(state, true);
-        state._undo[state._undo.length - 1].ctx = state.ctx;
+
+        if (state._undo.length > 0) {
+          state._undo[state._undo.length - 1].ctx = state.ctx;
+        }
 
         return state;
       }

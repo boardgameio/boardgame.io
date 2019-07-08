@@ -86,8 +86,7 @@ test('rounds with starting player token', () => {
     },
   };
 
-  const numPlayers = 4;
-  const client = Client({ game, numPlayers });
+  const client = Client({ game, numPlayers: 4 });
 
   expect(client.getState().ctx.currentPlayer).toBe('0');
 
