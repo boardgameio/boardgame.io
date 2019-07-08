@@ -69,6 +69,10 @@ ul {
     font-size: 1.3em;
   }
 
+  #summary {
+    text-align: center;
+  }
+
   .web-only {
     display: none;
   }
