@@ -62,7 +62,11 @@ ul {
 
   #topbar,
   #heading {
-    font-size: 1.3rem;
+    font-size: 1.3em;
+  }
+
+  #content {
+    font-size: 1.3em;
   }
 
   .web-only {
