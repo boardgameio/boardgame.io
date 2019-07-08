@@ -19,9 +19,8 @@ Enzyme.configure({ adapter: new Adapter() });
 
 describe('layout', () => {
   const game = {
-    startingPhase: 'A',
     phases: {
-      A: { next: 'B' },
+      A: { next: 'B', start: true },
       B: { next: 'A' },
     },
   };

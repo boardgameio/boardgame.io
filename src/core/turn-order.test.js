@@ -38,8 +38,7 @@ describe('turn orders', () => {
 
   test('DEFAULT', () => {
     const flow = FlowWithPhases({
-      startingPhase: 'A',
-      phases: { A: {}, B: {} },
+      phases: { A: { start: true }, B: {} },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -60,8 +59,7 @@ describe('turn orders', () => {
   test('ONCE', () => {
     const flow = FlowWithPhases({
       turn: { order: TurnOrder.ONCE },
-      startingPhase: 'A',
-      phases: { A: { next: 'B' }, B: {} },
+      phases: { A: { start: true, next: 'B' }, B: {} },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -98,8 +96,7 @@ describe('turn orders', () => {
   test('ANY_ONCE', () => {
     const flow = FlowWithPhases({
       turn: { order: TurnOrder.ANY_ONCE },
-      startingPhase: 'A',
-      phases: { A: {} },
+      phases: { A: { start: true } },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -124,7 +121,7 @@ describe('turn orders', () => {
 
     state = flow.processMove(state, makeMove('', null, '1').payload);
 
-    expect(state.ctx.phase).toBe('default');
+    expect(state.ctx.phase).toBe('');
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['0', '1']);
   });
@@ -148,8 +145,7 @@ describe('turn orders', () => {
   test('OTHERS_ONCE', () => {
     const flow = FlowWithPhases({
       turn: { order: TurnOrder.OTHERS_ONCE },
-      startingPhase: 'A',
-      phases: { A: {} },
+      phases: { A: { start: true } },
     });
 
     let state = { ctx: flow.ctx(3) };
@@ -174,7 +170,7 @@ describe('turn orders', () => {
 
     state = flow.processMove(state, makeMove('', null, '2').payload);
 
-    expect(state.ctx.phase).toBe('default');
+    expect(state.ctx.phase).toBe('');
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.actionPlayers).toEqual(['1', '2']);
   });
@@ -213,9 +209,9 @@ describe('turn orders', () => {
 
   test('manual', () => {
     const flow = FlowWithPhases({
-      startingPhase: 'A',
       phases: {
         A: {
+          start: true,
           turn: {
             order: {
               first: () => 9,
@@ -241,8 +237,7 @@ describe('turn orders', () => {
 test('passing', () => {
   const game = {
     moves: { pass: Pass },
-    startingPhase: 'A',
-    phases: { A: { turn: { order: TurnOrder.SKIP } } },
+    phases: { A: { start: true, turn: { order: TurnOrder.SKIP } } },
   };
   const reducer = CreateGameReducer({ game });
   let state = InitializeGame({ game, numPlayers: 3 });
@@ -316,8 +311,7 @@ test('override', () => {
 
   let flow = FlowWithPhases({
     turn: { order: even },
-    phases: { A: { next: 'B' }, B: { turn: { order: odd } } },
-    startingPhase: 'A',
+    phases: { A: { start: true, next: 'B' }, B: { turn: { order: odd } } },
   });
 
   let state = { ctx: flow.ctx(10) };
@@ -434,10 +428,9 @@ describe('SetActionPlayers', () => {
 
   test('militia', () => {
     const game = {
-      startingPhase: 'A',
-
       phases: {
         A: {
+          start: true,
           moves: {
             playMilitia: (G, ctx) => {
               ctx.events.endPhase({ next: 'B' });

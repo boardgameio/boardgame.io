@@ -73,9 +73,9 @@ test('rounds with starting player token', () => {
       },
     },
 
-    startingPhase: 'main',
     phases: {
       main: {
+        start: true,
         turn: {
           order: {
             first: G => G.startingPlayerToken,
@@ -115,9 +115,9 @@ test('rounds with starting player token', () => {
 // The following pattern is used in Catan, Twilight Imperium, and (sort of) Powergrid.
 test('serpentine setup phases', () => {
   const game = {
-    startingPhase: 'first setup round',
     phases: {
       'first setup round': {
+        start: true,
         turn: {
           order: {
             first: () => 0,

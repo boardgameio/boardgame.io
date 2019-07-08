@@ -208,7 +208,7 @@ test('deltalog', () => {
     {
       action: actionA,
       _stateID: 0,
-      phase: 'default',
+      phase: '',
       turn: 0,
     },
   ]);
@@ -217,7 +217,7 @@ test('deltalog', () => {
     {
       action: actionB,
       _stateID: 1,
-      phase: 'default',
+      phase: '',
       turn: 0,
     },
   ]);
@@ -226,7 +226,7 @@ test('deltalog', () => {
     {
       action: actionC,
       _stateID: 2,
-      phase: 'default',
+      phase: '',
       turn: 0,
     },
   ]);
@@ -306,9 +306,8 @@ test('undo / redo', () => {
         ctx.events.endPhase({ next: 'phase2' });
       },
     },
-    startingPhase: 'phase1',
     phases: {
-      phase1: {},
+      phase1: { start: true },
       phase2: {},
     },
   };
