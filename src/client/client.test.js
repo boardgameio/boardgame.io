@@ -318,9 +318,11 @@ describe('event dispatchers', () => {
 
   test('all events', () => {
     const game = {
-      endPhase: true,
-      endGame: true,
-      setActionPlayers: true,
+      events: {
+        endPhase: true,
+        endGame: true,
+        setActionPlayers: true,
+      },
     };
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual([
@@ -336,8 +338,10 @@ describe('event dispatchers', () => {
 
   test('no events', () => {
     const game = {
-      endPhase: false,
-      endTurn: false,
+      events: {
+        endPhase: false,
+        endTurn: false,
+      },
     };
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual([]);
