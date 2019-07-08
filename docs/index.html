@@ -45,7 +45,7 @@
       </span>
     </div>
 
-    <div>
+    <div id="main-content">
       <p id="summary">
       Write simple functions that describe how the game state changes
       when a particular move is made. This is automatically converted
@@ -56,17 +56,44 @@
 
       <h2>Features</h2>
 
-      <ul>
-      <li><strong>State Management</strong>: Game state is managed seamlessly across clients, server and storage automatically.</li>
-      <li><strong>Cross-platform Multiplayer</strong>: All clients (Web / Android / iOS) are kept in sync in realtime.</li>
-      <li><strong>Automatic AI</strong>: MCTS-based bots with options to customize.</li>
-      <li><strong>Game Phases</strong>: with different game rules (including custom turn orders) per phase.</li>
-      <li><strong>Prototyping</strong>: Debugging interface to simulate moves even before you render the game.</li>
-      <li><strong>Logs</strong>: Game logs with the ability to time travel (viewing the board at an earlier state).</li>
-      <li><strong>View-layer Agnostic</strong>: Vanilla JS client with bindings for React / React Native.</li>
-      <li><strong>Component Toolkit</strong>: Components for hex grids, cards, tokens.</li>
-      <li><strong>Extendable</strong>: Subsystems (storage, networking etc.) can be replaced with custom implementations.</li>
-      </ul>
+      <div id="features">
+      <div>
+        <label>State Management</label>
+        <div>Game state is managed seamlessly across clients, server and storage automatically.</div>
+      </div>
+      <div>
+        <label>Multiplayer</label>
+        <div>Game state across all clients (Web / Android / iOS) is kept in sync in realtime.</div>
+      </div>
+      <div>
+        <label>AI</label>
+        <div>Automatically generated bots that can play your game.</div>
+      </div>
+      <div>
+        <label>Game Phases</label>
+        <div>with different game rules (including custom turn orders) per phase.</div>
+      </div>
+      <div>
+        <label>Prototyping</label>
+        <div>Debugging interface to simulate moves even before you render the game.</div>
+      </div>
+      <div>
+        <label>Logs</label>
+        <div>Game logs with the ability to time travel (viewing the board at an eardiver state).</div>
+      </div>
+      <div>
+        <label>View-layer Agnostic</label>
+        <div>Vanilla JS client with bindings for React / React Native.</div>
+      </div>
+      <div>
+        <label>Component Toolkit</label>
+        <div>Components for hex grids, cards, tokens etc.</div>
+      </div>
+      <div>
+        <label>Extendable</label>
+        <div>Subsystems (storage, networking etc.) can be replaced with custom implementations.</div>
+      </div>
+      </div>
 
       <h2>Installation</h2>
 
@@ -79,13 +106,6 @@
       MIT
     </div>
   </div>
-
-  <script>
-    ((window.gitter = {}).chat = {}).options = {
-      room: 'boardgame-io/General'
-    };
-  </script>
-  <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
 </body>
 
 </html>

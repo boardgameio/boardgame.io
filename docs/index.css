@@ -15,10 +15,46 @@ body {
   overflow-y: auto !important;
 }
 
+code {
+  text-align: center;
+}
+
 ul {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+#summary {
+  text-align: center;
+}
+
+#main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#features {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 20px;
+}
+
+#features label {
+  font-weight: bold;
+  display: block;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+}
+
+#features > div {
+  border: 3px solid #eee;
+  width: 200px;
+  height: 200px;
+  padding: 20px;
+  text-align: center;
 }
 
 #content {
@@ -46,18 +82,26 @@ ul {
 }
 
 @media screen and (max-width: 768px) {
-  .github-corner {
-    display: none;
-  }
-
   li {
     margin-bottom: 10px;
   }
 }
 
-@media screen and (max-width: 550px) {
+@media screen and (max-width: 768px) {
+  .github-corner {
+    display: none;
+  }
+
   #badges {
     display: none;
+  }
+
+  #features {
+    grid-template-columns: 1fr;
+  }
+
+  #features > div {
+    font-size: 0.8em;
   }
 
   #topbar,
@@ -67,10 +111,6 @@ ul {
 
   #content {
     font-size: 1.3em;
-  }
-
-  #summary {
-    text-align: center;
   }
 
   .web-only {
