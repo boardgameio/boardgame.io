@@ -69,7 +69,7 @@ export const isActionFromAuthenticPlayer = ({
   }
 
   if (!action.payload) {
-    return true;
+    return false;
   }
 
   const hasCredentials = Object.keys(gameMetadata.players).some(key => {

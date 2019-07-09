@@ -444,14 +444,14 @@ describe('isActionFromAuthenticPlayer', () => {
       action = {};
     });
 
-    test('the action is authentic', async () => {
+    test('the action is not authentic', async () => {
       const result = isActionFromAuthenticPlayer({
         action,
         gameMetadata,
         playerID,
       });
 
-      expect(result).toBeTruthy();
+      expect(result).toBeFalsy();
     });
   });
 
