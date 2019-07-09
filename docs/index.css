@@ -50,7 +50,9 @@ ul {
 }
 
 #features > div {
-  border: 3px solid #eee;
+  border-radius: 5px;
+  box-shadow: 0 0 5px #eee;
+  border: 1px solid #ccc;
   width: 200px;
   height: 200px;
   padding: 20px;
