@@ -84,16 +84,6 @@ ul {
 }
 
 @media screen and (max-width: 768px) {
-  li {
-    margin-bottom: 10px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .github-corner {
-    display: none;
-  }
-
   #badges {
     display: none;
   }
