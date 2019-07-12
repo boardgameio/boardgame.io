@@ -8,6 +8,7 @@ module.exports = {
       },
     ],
     '@babel/preset-react',
+    '@babel/typescript',
   ],
   env: {
     test: {
@@ -24,5 +25,6 @@ module.exports = {
       },
     ],
     '@babel/plugin-proposal-class-properties',
+    '@babel/proposal-object-rest-spread',
   ],
 };

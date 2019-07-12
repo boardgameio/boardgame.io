@@ -147,7 +147,7 @@ describe('sync / update', () => {
   });
 });
 
-describe('connect / disconnect', async () => {
+describe('connect / disconnect', () => {
   const app = { context: {} };
   const games = [Game({ seed: 0 })];
   let _clientInfo;
