@@ -19,8 +19,8 @@ import { SocketIO } from './transport/socketio';
  * @param {number} portOrConfig - Either port or server config object. Optional.
  * @param {function} callback - Server run callback. Optional.
  */
-export const createServerRunConfig = (portOrConfig, callback) => {
-  const config = {};
+export const createServerRunConfig = (portOrConfig?: any, callback?: any) => {
+  const config: any = {};
   if (portOrConfig && typeof portOrConfig === 'object') {
     config.port = portOrConfig.port;
     config.callback = portOrConfig.callback || callback;
@@ -39,7 +39,7 @@ export const createServerRunConfig = (portOrConfig, callback) => {
  * @param {object} db - The interface with the database.
  * @param {object} transport - The interface with the clients.
  */
-export function Server({ games, db, transport }) {
+export function Server({ games, db, transport }: any) {
   const app = new Koa();
 
   if (db === undefined) {
@@ -87,7 +87,7 @@ export function Server({ games, db, transport }) {
       return { apiServer, appServer };
     },
 
-    kill: ({ apiServer, appServer }) => {
+    kill: ({ apiServer, appServer }: any) => {
       if (apiServer) {
         apiServer.close();
       }
