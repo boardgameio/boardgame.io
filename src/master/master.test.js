@@ -439,22 +439,6 @@ describe('isActionFromAuthenticPlayer', () => {
     });
   });
 
-  describe('when action contains no payload', () => {
-    beforeEach(() => {
-      action = {};
-    });
-
-    test('the action is authentic', async () => {
-      const result = isActionFromAuthenticPlayer({
-        action,
-        gameMetadata,
-        playerID,
-      });
-
-      expect(result).toBeTruthy();
-    });
-  });
-
   describe('when game has no credentials', () => {
     beforeEach(() => {
       gameMetadata = {
@@ -476,6 +460,22 @@ describe('isActionFromAuthenticPlayer', () => {
   });
 
   describe('when game has credentials', () => {
+    describe('when action contains no payload', () => {
+      beforeEach(() => {
+        action = {};
+      });
+
+      test('the action is not authentic', async () => {
+        const result = isActionFromAuthenticPlayer({
+          action,
+          gameMetadata,
+          playerID,
+        });
+
+        expect(result).toBeFalsy();
+      });
+    });
+
     describe('when action contains no credentials', () => {
       beforeEach(() => {
         action = {
