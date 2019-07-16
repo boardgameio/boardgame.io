@@ -301,5 +301,6 @@ test('unmount regression', () => {
   const grid = Enzyme.mount(<MockComponent />);
   grid.setState({ show: false });
   grid.setState({ show: true });
+  grid.find('Token').setState({ dragged: true });
   grid.unmount();
 });
