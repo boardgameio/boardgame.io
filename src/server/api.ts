@@ -118,7 +118,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
         const metadata = await db.get(key);
         rooms.push({
           gameID: gameID,
-          players: Object.values(metadata.players).map(player => {
+          players: Object.values(metadata.players).map((player: any) => {
             // strip away credentials
             return { id: player.id, name: player.name };
           }),
@@ -139,7 +139,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     }
     const strippedRoom = {
       roomID: gameID,
-      players: Object.values(room.players).map(player => {
+      players: Object.values(room.players).map((player: any) => {
         return { id: player.id, name: player.name };
       }),
     };
@@ -201,7 +201,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     }
 
     delete gameMetadata.players[playerID].name;
-    if (Object.values(gameMetadata.players).some(val => val.name)) {
+    if (Object.values(gameMetadata.players).some((val: any) => val.name)) {
       await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
     } else {
       // remove room

@@ -23,7 +23,7 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
 }
 
-describe('sync', async () => {
+describe('sync', () => {
   const send = jest.fn();
   const master = new Master(game, new InMemory(), TransportAPI(send));
 
@@ -46,7 +46,7 @@ describe('sync', async () => {
   });
 });
 
-describe('update', async () => {
+describe('update', () => {
   let sendAllReturn;
 
   const send = jest.fn();
@@ -239,7 +239,7 @@ describe('playerView', () => {
   });
 });
 
-describe('authentication', async () => {
+describe('authentication', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
   const game = Game({ seed: 0 });

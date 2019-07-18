@@ -576,7 +576,7 @@ describe('.createApiServer', () => {
       };
     });
 
-    describe('when given 2 games', async () => {
+    describe('when given 2 games', () => {
       let response;
       beforeEach(async () => {
         let app;
@@ -739,7 +739,7 @@ describe('.createApiServer', () => {
         },
       };
     });
-    describe('when given 2 rooms', async () => {
+    describe('when given 2 rooms', () => {
       let response;
       let rooms;
       beforeEach(async () => {
@@ -798,7 +798,7 @@ describe('.createApiServer', () => {
       };
     });
 
-    describe('when given room ID', async () => {
+    describe('when given room ID', () => {
       let response;
       let room;
       beforeEach(async () => {
@@ -817,7 +817,7 @@ describe('.createApiServer', () => {
       });
     });
 
-    describe('when given a non-existent room ID', async () => {
+    describe('when given a non-existent room ID', () => {
       let response;
       beforeEach(async () => {
         db.get = async () => {

@@ -300,14 +300,7 @@ class MockComponent extends React.Component {
 test('unmount regression', () => {
   const grid = Enzyme.mount(<MockComponent />);
   grid.setState({ show: false });
-
   grid.setState({ show: true });
-
-  const mouseDownEvt = new window['MouseEvent']('mousedown', {});
-  grid
-    .find('Token')
-    .getDOMNode()
-    .dispatchEvent(mouseDownEvt);
-
+  grid.find('Token').setState({ dragged: true });
   grid.unmount();
 });

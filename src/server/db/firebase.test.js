@@ -57,7 +57,7 @@ test('adminClient', () => {
   expect(db.client.projectManagement).not.toBeDefined();
 });
 
-describe('Firestore', async () => {
+describe('Firestore', () => {
   let db = null;
 
   beforeEach(async () => {
@@ -157,7 +157,7 @@ describe('Firestore', async () => {
   });
 });
 
-describe('RTDB', async () => {
+describe('RTDB', () => {
   let db = null;
 
   beforeEach(async () => {
