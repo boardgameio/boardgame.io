@@ -16,8 +16,8 @@ ability to restrict moves, use a specific turn order and much more.
 Let us start with a contrived example of a single player
 game that has exactly two moves:
 
-* draw a card from the deck into your hand
-* play a card from your hand onto the deck
+- draw a card from the deck into your hand
+- play a card from your hand onto the deck
 
 ```js
 const game = Game({
@@ -48,8 +48,8 @@ We'll ignore the rendering component of this game, but this is how it might look
 
 Now let's say we want the game to work in two phases:
 
-* a first phase where the player can only draw cards (until the deck is empty).
-* a second phase where the player can only play cards (until their hand is empty).
+- a first phase where the player can only draw cards (until the deck is empty).
+- a second phase where the player can only play cards (until their hand is empty).
 
 In order to do this, we add a `flow` section to the game
 spec (you should already be familiar with this as the location

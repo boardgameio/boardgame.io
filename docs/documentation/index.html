@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>boardgame.io</title>
+  <meta name="description" content="Open-Source JavaScript Game Engine for Turn-Based Games">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="@nicolodavis">
+  <meta name="twitter:title" content="boardgame.io">
+  <meta name="twitter:image" content="https://res.cloudinary.com/dyfmhmho5/image/upload/v1543585150/logo_w1snck.png">
+  <meta name="twitter:description" content="Open Source Game Engine for Turn-Based Games">
+  <link rel="shortcut icon" href="https://raw.githubusercontent.com/nicolodavis/boardgame.io/master/docs/favicon.png" type="image/png" sizes="16x16">
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+
+  <style>
+  .app-sub-sidebar .section-link:before {
+    content: "";
+    padding-right: 4px;
+  }
+
+  iframe {
+    box-shadow: 0 0 10px #ccc;
+  }
+
+  @media only screen and (max-device-width: 500px) {
+    iframe.react {
+      display: none;
+    }
+  }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+</body>
+
+<script>
+  window.$docsify = {
+    name: 'boardgame.io',
+    nameLink: {
+      '/': '..'
+    },
+    repo: 'https://github.com/nicolodavis/boardgame.io',
+    homepage: 'concepts.md',
+    loadSidebar: 'sidebar.md',
+    subMaxLevel: 2,
+    auto2top: true,
+    search: 'auto', // default
+    markdown: {
+      renderer: {
+        code: function(code, lang) {
+          if (lang == 'codepen') {
+            return code;
+          }
+          if (lang == 'react') {
+            return code;
+          }
+          return this.origin.code.apply(this, arguments);
+        }
+      }
+    }
+  }
+</script>
+
+<script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+<script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
+
+<script>
+  ((window.gitter = {}).chat = {}).options = {
+    room: 'boardgame-io/General'
+  };
+</script>
+<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+
+</html>

@@ -19,5 +19,5 @@ git log --oneline "$PREVIOUS_TAG".. \
   >> "$FILE"
 echo >> "$FILE"
 
-cat docs/CHANGELOG.md >> "$FILE"
-cp "$FILE" docs/CHANGELOG.md
+cat docs/documentation/CHANGELOG.md >> "$FILE"
+cp "$FILE" docs/documentation/CHANGELOG.md

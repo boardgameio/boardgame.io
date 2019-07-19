@@ -15,6 +15,8 @@ import postcss from 'rollup-plugin-postcss';
 import filesize from 'rollup-plugin-filesize';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
+import ttypescript from 'ttypescript';
+import tsPlugin from 'rollup-plugin-typescript2';
 
 const env = process.env.NODE_ENV;
 
@@ -41,12 +43,15 @@ const globals = {
 export default [
   // Sub-packages.
   {
-    input: 'packages/server.js',
+    input: 'packages/server.ts',
     output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
     plugins: [
+      resolve(),
+      tsPlugin({
+        typescript: ttypescript,
+      }),
       babel({ exclude: ['**/node_modules/**'] }),
       commonjs({ include: 'node_modules/**' }),
-      resolve(),
     ],
   },
 

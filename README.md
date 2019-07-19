@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <strong>Full Documentation: <a href="https://nicolodavis.github.io/boardgame.io">link</a></strong>
+  <strong>Full Documentation: <a href="https://boardgame.io/documentation/#/">link</a></strong>
 </p>
 
 Write simple functions that describe how the game state changes
@@ -22,14 +22,14 @@ networking or database handling code.
 ### Features
 
 - **State Management**: Game state is managed seamlessly across clients, server and storage automatically.
-- **Cross-platform Multiplayer**: All clients (Web / Android / iOS) are kept in sync in realtime.
-- **Automatic AI**: MCTS-based bots with options to customize.
-- **Game Phases**: with different game rules (including custom turn orders) per phase.
-- **Prototyping**: Debugging interface to simulate moves even before you render the game.
+- **Multiplayer**: Game state is kept in sync in realtime and across platforms.
+- **AI**: Automatically generated bots that can play your game.
+- **Game Phases**: with different game rules and turn orders per phase.
+- **Prototyping**: Interface to simulate moves even before you render the game.
 - **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
-- **View-layer Agnostic**: Vanilla JS client with bindings for React / React Native.
-- **Component Toolkit**: Components for hex grids, cards, tokens.
-- **Extendable**: Subsystems (storage, networking etc.) can be replaced with custom implementations.
+- **View-layer Agnostic**: Use the vanilla JS client or the bindings for React / React Native.
+- **Component Toolkit**: Components for hex grids, cards, tokens etc.
+- **Extendable**: Plugin system that allows creating new abstractions.
 
 ## Usage
 
@@ -48,11 +48,11 @@ $ npm start
 
 ## Changelog
 
-See [changelog](docs/CHANGELOG.md).
+See [changelog](docs/documentation/CHANGELOG.md).
 
 ## Contributing
 
-See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](docs/roadmap.md)
+See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](roadmap.md)
 to find things that you could contribute to.
 
 ## License

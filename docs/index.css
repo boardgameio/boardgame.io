@@ -1,0 +1,115 @@
+/*
+ * Copyright 2017 The boardgame.io Authors
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+body {
+  padding: 50px;
+  line-height: 1.8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto !important;
+}
+
+code {
+  text-align: center;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#summary {
+  text-align: center;
+}
+
+#main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#features {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 20px;
+}
+
+#features label {
+  font-weight: bold;
+  display: block;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+}
+
+#features > div {
+  border-radius: 5px;
+  box-shadow: 0 0 5px #eee;
+  border: 1px solid #ccc;
+  width: 200px;
+  height: 200px;
+  padding: 20px;
+  text-align: center;
+}
+
+#content {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#topbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  font-size: 1.2em;
+}
+
+#heading {
+  text-align: center;
+  font-size: 1.4em;
+}
+
+#topbar a {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+@media screen and (max-width: 768px) {
+  #badges {
+    display: none;
+  }
+
+  #features {
+    grid-template-columns: 1fr;
+  }
+
+  #features > div {
+    font-size: 0.8em;
+  }
+
+  #topbar,
+  #heading {
+    font-size: 1.3em;
+  }
+
+  #content {
+    font-size: 1.3em;
+  }
+
+  .web-only {
+    display: none;
+  }
+
+  li {
+    margin-bottom: 20px;
+  }
+}

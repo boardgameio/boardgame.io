@@ -45,8 +45,8 @@ function above.
 The framework comes bundled with an implementation of `playerView`
 that does the following:
 
-* It removes a key named `secret` from `G`.
-* If `G` contains a `players` object, it removes all keys except
+- It removes a key named `secret` from `G`.
+- If `G` contains a `players` object, it removes all keys except
   for one that matches `playerID`.
 
 ```

@@ -90,7 +90,8 @@ describe('save / restore', () => {
   const getItem = jest.fn(() => restoredJSON);
 
   beforeEach(() => {
-    window.localStorage = { setItem, getItem };
+    Storage.prototype.setItem = setItem;
+    Storage.prototype.getItem = getItem;
 
     Enzyme.mount(
       <Debug

@@ -35,7 +35,7 @@ jest.mock('koa-socket-2', () => {
 
   return class {
     constructor() {
-      this.socket = new MockSocket();
+      (this as any).socket = new MockSocket();
     }
     attach(app) {
       app.io = app._io = this;
@@ -44,7 +44,7 @@ jest.mock('koa-socket-2', () => {
       return this;
     }
     on(type, callback) {
-      callback(this.socket);
+      callback((this as any).socket);
     }
   };
 });
@@ -52,9 +52,9 @@ jest.mock('koa-socket-2', () => {
 jest.mock('koa', () => {
   return class {
     constructor() {
-      this.context = {};
-      this.callback = () => {};
-      this.listen = async () => ({
+      (this as any).context = {};
+      (this as any).callback = () => {};
+      (this as any).listen = async () => ({
         address: () => ({ port: 'mock-api-port' }),
         close: () => {},
       });
@@ -84,9 +84,9 @@ describe('run', () => {
   beforeEach(() => {
     server = null;
     runningServer = null;
-    api.createApiServer.mockClear();
-    api.addApiToServer.mockClear();
-    mockApiServerListen.mockClear();
+    (api.createApiServer as any).mockClear();
+    (api.addApiToServer as any).mockClear();
+    (mockApiServerListen as any).mockClear();
   });
 
   afterEach(() => {

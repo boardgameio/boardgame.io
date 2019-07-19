@@ -11,3 +11,4 @@ coverage
 npm
 .idea/
 .vscode/*
+.rpt2_cache/
