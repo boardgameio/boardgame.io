@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, PlayerView, TurnOrder } from 'boardgame.io/core';
+import { PlayerView, TurnOrder } from 'boardgame.io/core';
 
-const RedactedMoves = Game({
+const RedactedMoves = {
   name: 'secret-state',
 
   setup: () => ({
@@ -33,6 +33,6 @@ const RedactedMoves = Game({
   turn: { order: TurnOrder.ANY },
 
   playerView: PlayerView.STRIP_SECRETS,
-});
+};
 
 export default RedactedMoves;

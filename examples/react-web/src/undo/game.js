@@ -6,9 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from 'boardgame.io/core';
-
-const UndoExample = Game({
+const UndoExample = {
   name: 'undo',
 
   setup: () => ({ moves: [] }),
@@ -21,6 +19,6 @@ const UndoExample = Game({
       G.moves.push('B');
     },
   },
-});
+};
 
 export default UndoExample;

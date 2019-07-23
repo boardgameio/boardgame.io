@@ -6,8 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from 'boardgame.io/core';
-
 function IsVictory(cells) {
   const positions = [
     [0, 1, 2],
@@ -35,7 +33,7 @@ function IsVictory(cells) {
   return false;
 }
 
-const TicTacToe = Game({
+const TicTacToe = {
   name: 'tic-tac-toe',
 
   setup: () => ({
@@ -63,6 +61,6 @@ const TicTacToe = Game({
       return { draw: true };
     }
   },
-});
+};
 
 export default TicTacToe;

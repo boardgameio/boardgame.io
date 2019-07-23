@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game, PlayerView } from 'boardgame.io/core';
+import { PlayerView } from 'boardgame.io/core';
 
-const SecretState = Game({
+const SecretState = {
   name: 'secret-state',
 
   setup: () => ({
@@ -27,6 +27,6 @@ const SecretState = Game({
   },
 
   playerView: PlayerView.STRIP_SECRETS,
-});
+};
 
 export default SecretState;
