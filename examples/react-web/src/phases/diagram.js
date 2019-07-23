@@ -8,11 +8,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Game } from 'boardgame.io/core';
 import { Client } from 'boardgame.io/react';
 import './diagram.css';
 
-const game = Game({
+const game = {
   moves: {},
   startingPhase: 'A',
   phases: {
@@ -20,7 +19,7 @@ const game = Game({
     B: { next: 'C' },
     C: { next: 'A' },
   },
-});
+};
 
 class Board extends React.Component {
   static propTypes = {

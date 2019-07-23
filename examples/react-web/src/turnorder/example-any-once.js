@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Game, TurnOrder } from 'boardgame.io/core';
+import { TurnOrder } from 'boardgame.io/core';
 
 const code = `{
   startingPhase: 'A',
@@ -26,7 +26,7 @@ const Description = () => (
 
 export default {
   description: Description,
-  game: Game({
+  game: {
     moves: {
       move: G => G,
     },
@@ -39,5 +39,5 @@ export default {
       A: { turn: { order: TurnOrder.ANY_ONCE }, next: 'B' },
       B: {},
     },
-  }),
+  },
 };

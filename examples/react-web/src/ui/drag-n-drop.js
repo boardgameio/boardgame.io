@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
-import { Game } from 'boardgame.io/core';
 import { UI, Card, Deck } from 'boardgame.io/ui';
 
 function handler(type, fn) {
@@ -64,7 +63,7 @@ class Board extends React.Component {
 }
 
 const App = Client({
-  game: Game({}),
+  game: {},
   board: Board,
   debug: false,
 });

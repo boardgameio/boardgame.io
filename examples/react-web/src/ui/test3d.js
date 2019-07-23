@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
-import { Game } from 'boardgame.io/core';
 import { UI, Grid, Token } from 'boardgame.io/ui';
 import bishop from './chess3d/pieces/bishop.gltf';
 import knight from './chess3d/pieces/knight.gltf';
@@ -79,7 +78,7 @@ class Board extends React.Component {
 }
 
 const App = Client({
-  game: Game({}),
+  game: {},
   board: Board,
   debug: false,
 });

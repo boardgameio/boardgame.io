@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from 'boardgame.io/core';
 import Chess from 'chess.js';
 
 // Helper to instantiate chess.js correctly on
@@ -22,7 +21,7 @@ function Load(pgn) {
   return chess;
 }
 
-const ChessGame = Game({
+const ChessGame = {
   name: 'chess',
 
   setup: () => ({ pgn: '' }),
@@ -63,6 +62,6 @@ const ChessGame = Game({
       }
     }
   },
-});
+};
 
 export default ChessGame;
