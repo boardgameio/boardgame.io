@@ -16,6 +16,7 @@ const game = {
 
   phases: {
     take: {
+      start: true,
       endIf: G => G.deck <= 0,
       next: 'play',
       moves: {
@@ -30,8 +31,6 @@ const game = {
       },
     },
   },
-
-  startingPhase: 'take',
 };
 
 class Board extends React.Component {
@@ -44,13 +43,13 @@ class Board extends React.Component {
 
   takeCard = () => {
     if (this.props.ctx.phase != 'take') return;
-    this.props.moves.take.takeCard();
+    this.props.moves.takeCard();
     this.props.events.endTurn();
   };
 
   playCard = () => {
     if (this.props.ctx.phase != 'play') return;
-    this.props.moves.play.playCard();
+    this.props.moves.playCard();
     this.props.events.endTurn();
   };
 
