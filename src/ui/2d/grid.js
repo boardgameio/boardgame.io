@@ -228,8 +228,22 @@ export class Square extends React.Component {
       children = this.props.children;
     }
 
+    if (this.props.svgRef) {
+      return (
+        <g
+          ref={this._gRef}
+          onClick={this.onClick}
+          onMouseOver={this.onMouseOver}
+          onMouseOut={this.onMouseOut}
+          transform={`translate(${tx}, ${ty})`}
+        >
+          {children}
+        </g>
+      );
+    }
+
     return (
-      <g
+      <svg
         ref={this._gRef}
         onClick={this.onClick}
         onMouseOver={this.onMouseOver}
@@ -237,7 +251,7 @@ export class Square extends React.Component {
         transform={`translate(${tx}, ${ty})`}
       >
         {children}
-      </g>
+      </svg>
     );
   }
 }
