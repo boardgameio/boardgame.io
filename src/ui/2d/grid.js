@@ -164,6 +164,7 @@ export class Square extends React.Component {
     onMouseOut: PropTypes.func,
     eventListeners: PropTypes.array,
     children: PropTypes.element,
+    svgRef: PropTypes.object,
   };
 
   static defaultProps = {
