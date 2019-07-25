@@ -145,7 +145,7 @@ describe('MCTSBot', () => {
     const state = InitializeGame({ game });
     const bot = new MCTSBot({ seed: 'test', game, enumerate: () => [] });
     const { state: endState } = Simulate({ game, bots: bot, state });
-    expect(endState.ctx.turn).toBe(0);
+    expect(endState.ctx.turn).toBe(1);
   });
 
   test('RandomBot vs. MCTSBot', () => {

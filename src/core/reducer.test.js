@@ -130,13 +130,13 @@ test('victory', () => {
 test('endTurn', () => {
   {
     let state = reducer(initialState, gameEvent('endTurn'));
-    expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.turn).toBe(2);
   }
 
   {
     const reducer = CreateGameReducer({ game, multiplayer: true });
     let state = reducer(initialState, gameEvent('endTurn'));
-    expect(state.ctx.turn).toBe(0);
+    expect(state.ctx.turn).toBe(1);
   }
 });
 
@@ -209,7 +209,7 @@ test('deltalog', () => {
       action: actionA,
       _stateID: 0,
       phase: '',
-      turn: 0,
+      turn: 1,
     },
   ]);
   state = reducer(state, actionB);
@@ -218,7 +218,7 @@ test('deltalog', () => {
       action: actionB,
       _stateID: 1,
       phase: '',
-      turn: 0,
+      turn: 1,
     },
   ]);
   state = reducer(state, actionC);
@@ -227,7 +227,7 @@ test('deltalog', () => {
       action: actionC,
       _stateID: 2,
       phase: '',
-      turn: 0,
+      turn: 1,
     },
   ]);
 });

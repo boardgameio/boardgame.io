@@ -119,7 +119,7 @@ describe('time travel', () => {
       .simulate('mouseenter');
 
     expect(hoverState.G).toMatchObject({ arg: 1 });
-    expect(hoverState.ctx.turn).toBe(0);
+    expect(hoverState.ctx.turn).toBe(1);
     expect(hoverState.ctx.currentPlayer).toBe('0');
   });
 
@@ -130,7 +130,7 @@ describe('time travel', () => {
       .simulate('mouseenter');
 
     expect(hoverState.G).toMatchObject({ arg: 42 });
-    expect(hoverState.ctx.turn).toBe(2);
+    expect(hoverState.ctx.turn).toBe(3);
     expect(hoverState.ctx.currentPlayer).toBe('0');
   });
 
@@ -141,7 +141,7 @@ describe('time travel', () => {
       .simulate('mouseenter');
 
     expect(hoverState.G).toMatchObject({ arg: 2 });
-    expect(hoverState.ctx.turn).toBe(2);
+    expect(hoverState.ctx.turn).toBe(3);
     expect(hoverState.ctx.currentPlayer).toBe('0');
   });
 
