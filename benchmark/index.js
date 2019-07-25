@@ -8,6 +8,7 @@
 
 import Benchmark from 'benchmark';
 import Game from '../src/core/game';
+import { Client } from '../src/client/client';
 import { InitializeGame, CreateGameReducer } from '../src/core/reducer';
 import { makeMove, gameEvent } from '../src/core/action-creators';
 
@@ -16,19 +17,26 @@ const game = Game({
     A: G => G,
   },
   flow: {
-    endGameIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
+    endGameIf: () => false,
   },
 });
 
 const reducer = CreateGameReducer({ game });
 const state = InitializeGame({ game });
+const client = Client({ game });
 
 new Benchmark.Suite()
-  .add('move', function() {
+  .add('reducer::makeMove', function() {
     reducer(state, makeMove('A'));
   })
-  .add('endTurn', function() {
+  .add('reducer::endTurn', function() {
     reducer(state, gameEvent('endTurn'));
+  })
+  .add('client::move', function() {
+    client.moves.A();
+  })
+  .add('client::endTurn', function() {
+    client.events.endTurn();
   })
   .on('cycle', function(event) {
     console.log(String(event.target));
