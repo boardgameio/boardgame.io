@@ -7,19 +7,17 @@
  */
 
 import Benchmark from 'benchmark';
-import Game from '../src/core/game';
 import { Client } from '../src/client/client';
-import { InitializeGame, CreateGameReducer } from '../src/core/reducer';
+import { InitializeGame } from '../src/core/initialize';
+import { CreateGameReducer } from '../src/core/reducer';
 import { makeMove, gameEvent } from '../src/core/action-creators';
 
-const game = Game({
+const game = {
   moves: {
     A: G => G,
   },
-  flow: {
-    endGameIf: () => false,
-  },
-});
+  endIf: () => false,
+};
 
 const reducer = CreateGameReducer({ game });
 const state = InitializeGame({ game });
