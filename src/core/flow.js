@@ -369,8 +369,9 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
   // Start //
   ///////////
 
-  function StartGame(state) {
-    return ProcessEvents(state, [{ fn: StartPhase }]);
+  function StartGame(state, { next }) {
+    next.push({ fn: StartPhase });
+    return state;
   }
 
   function StartPhase(state, { next }) {
@@ -706,7 +707,7 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
   return Flow({
     ctx: numPlayers => ({
       numPlayers,
-      turn: -1,
+      turn: 0,
       currentPlayer: '0',
       actionPlayers: ['0'],
       currentPlayerMoves: 0,
@@ -716,7 +717,7 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
       stage: {},
     }),
     init: state => {
-      return StartGame(state);
+      return ProcessEvents(state, [{ fn: StartGame }]);
     },
     eventHandlers,
     enabledEvents,

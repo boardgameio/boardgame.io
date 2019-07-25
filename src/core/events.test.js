@@ -51,7 +51,7 @@ test('update ctx', () => {
     },
   };
   const client = Client({ game });
-  expect(client.getState().ctx.turn).toBe(0);
-  client.moves.A();
   expect(client.getState().ctx.turn).toBe(1);
+  client.moves.A();
+  expect(client.getState().ctx.turn).toBe(2);
 });
