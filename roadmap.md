@@ -6,16 +6,18 @@ get done before we are ready for a v1 release.
 - _Areas that need help are marked with **[help needed]**._
 - _Stuff that [nicolodavis@](https://github.com/nicolodavis) is working on is marked with **[N]**._
 
-### AI framework
+### AI
 
 - [x] MCTS bot ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
-- [ ] ability to add priorities and objectives ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032)) **[N]**
+- [ ] ability to add priorities and objectives ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
+- [ ] run bots in multiplayer games
 
-### UI framework
+### UI
 
 - [x] Drag and Drop (cards and decks)
 - [ ] Drag and Drop (tokens and grids)
-- [ ] 3D components ([issue](https://github.com/nicolodavis/boardgame.io/issues/282)) **[N]**
+- [ ] 3D components ([issue](https://github.com/nicolodavis/boardgame.io/issues/282))
+- [ ] Decouple from React ([issue](https://github.com/nicolodavis/boardgame.io/issues/432)
 
 ### Lobby
 
@@ -36,7 +38,8 @@ get done before we are ready for a v1 release.
 
 ### Core
 
-- [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
+- [ ] phases -> turns -> stages **[N]**
+- [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154)) **[N]**
 - [ ] log improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/227))
 - [x] add immutability helper (Immer) ([issue](https://github.com/nicolodavis/boardgame.io/issues/295))
 

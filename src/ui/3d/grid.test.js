@@ -25,11 +25,7 @@ THREE.WebGLRenderer = jest.fn(function() {
 });
 Enzyme.configure({ adapter: new Adapter() });
 
-class MockChild extends React.Component {
-  render() {
-    return <rect width="3" height="2" style={{ fill: 'red' }} />;
-  }
-}
+const MockChild = () => <div />;
 
 test('render correctly', () => {
   const grid = Enzyme.mount(
@@ -39,7 +35,7 @@ test('render correctly', () => {
       </Grid>
     </UI>
   );
-  expect(grid.html()).toContain('rect');
+  expect(grid.html()).toContain('div');
   expect(grid.html()).toContain('bgio-canvas');
   const gridIns = grid.find('GridImpl').instance();
   expect(gridIns.squareGroup.children).toHaveLength(12);

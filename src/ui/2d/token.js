@@ -301,6 +301,7 @@ export class Token extends React.Component {
         onMouseOver={this.props.onMouseOver}
         onMouseOut={this.props.onMouseOut}
         eventListeners={this._eventListeners()}
+        svgRef={this.props.svgRef}
       >
         {this.props.children}
       </Component>
