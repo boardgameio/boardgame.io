@@ -38,7 +38,7 @@ describe('basic', () => {
 
   test('processMove', () => {
     const testObj = { test: true };
-    const ctx = { phase: 'default' };
+    const ctx = { phase: '' };
     expect(game.processMove(testObj, { type: 'A' }, ctx)).toEqual(testObj);
     expect(game.processMove(testObj, { type: 'D' }, ctx)).toEqual(testObj);
     expect(game.processMove(testObj, { type: 'B' }, ctx)).toEqual(null);
@@ -48,9 +48,7 @@ describe('basic', () => {
   });
 
   test('long-form move syntax', () => {
-    expect(game.processMove({}, { type: 'C' }, { phase: 'default' })).toEqual(
-      'C'
-    );
+    expect(game.processMove({}, { type: 'C' }, { phase: '' })).toEqual('C');
   });
 
   test('flow override', () => {

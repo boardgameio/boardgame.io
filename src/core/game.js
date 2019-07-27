@@ -7,7 +7,7 @@
  */
 
 import { FnWrap } from '../plugins/main';
-import { FlowWithPhases } from './flow';
+import { Flow } from './flow';
 
 /**
  * Game
@@ -66,9 +66,6 @@ import { FlowWithPhases } from './flow';
  *                                 the specified player.
  *
  * @param {...object} flow - Customize the flow of the game (see flow.js).
- *                           Must contain the return value of Flow().
- *                           If it contains any other object, it is presumed to be a
- *                           configuration object for FlowWithPhases().
  *
  * @param {...object} seed - Seed for the PRNG.
  *
@@ -104,49 +101,17 @@ export function Game(game) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
-  const getMove = (ctx, name) => {
-    // Check if moves are defined for the current phase.
-    // If they are, then attempt to find the move there.
-    if (
-      ctx.phase !== 'default' &&
-      game.phases !== undefined &&
-      game.phases[ctx.phase].moves !== undefined
-    ) {
-      const key = ctx.phase + '.' + name;
-      if (key in game.flow.moveMap) {
-        return game.flow.moveMap[key];
-      }
-
-      // Else check in the global moves.
-    } else if (name in game.moves) {
-      return game.moves[name];
-    }
-
-    return null;
-  };
-
   if (!game.flow || game.flow.processGameEvent === undefined) {
-    game.flow = FlowWithPhases(game);
+    game.flow = Flow(game);
   }
-
-  const moveNameSet = new Set();
-  Object.getOwnPropertyNames(game.moves).forEach(name => {
-    moveNameSet.add(name);
-  });
-  Object.keys(game.flow.moveMap).forEach(name => {
-    const s = name.split('.');
-    moveNameSet.add(s[s.length - 1]);
-  });
 
   return {
     ...game,
 
-    getMove,
-
-    moveNames: [...moveNameSet.values()],
+    moveNames: game.flow.moveNames,
 
     processMove: (G, action, ctx) => {
-      let moveFn = getMove(ctx, action.type);
+      let moveFn = game.flow.getMove(ctx, action.type, action.playerID);
 
       if (moveFn instanceof Object && moveFn.impl) {
         moveFn = moveFn.impl;

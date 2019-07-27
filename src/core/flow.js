@@ -7,9 +7,10 @@
  */
 
 import {
-  SetActionPlayersEvent,
+  SetStageEvent,
   InitTurnOrderState,
   UpdateTurnOrderState,
+  TurnOrder,
 } from './turn-order';
 import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
@@ -23,7 +24,7 @@ import * as logging from './logger';
  * This is mostly around for legacy reasons. The original plan
  * was to have two flows, one with phases etc. and another
  * simpler one like this. The current state is such that this
- * is merely an internal function of FlowWithPhases below.
+ * is merely an internal function of Flow below.
  *
  * @param {...object} ctx - Function with the signature
  *                          numPlayers => ctx
@@ -39,13 +40,15 @@ import * as logging from './logger';
  * @param {...object} processMove - A function that's called whenever a move is made.
  *                                  (state, action, dispatch) => state.
  */
-export function Flow({
+export function FlowInternal({
   ctx,
   eventHandlers,
   enabledEvents,
   init,
   processMove,
   moveMap,
+  moveNames,
+  getMove,
 }) {
   if (!ctx) ctx = () => ({});
   if (!eventHandlers) eventHandlers = {};
@@ -67,9 +70,11 @@ export function Flow({
     ctx,
     init,
     moveMap,
+    moveNames,
+    getMove,
 
-    eventNames: Object.getOwnPropertyNames(eventHandlers),
-    enabledEventNames: Object.getOwnPropertyNames(enabledEvents),
+    eventNames: Object.keys(eventHandlers),
+    enabledEventNames: Object.keys(enabledEvents),
 
     processMove: (state, action) => {
       return processMove(state, action);
@@ -79,28 +84,42 @@ export function Flow({
       return dispatch(state, action);
     },
 
-    canPlayerCallEvent: (G, ctx, playerID) => {
-      return (
-        ctx.currentPlayer == playerID && ctx.actionPlayers.includes(playerID)
-      );
+    canPlayerCallEvent: (_G, ctx, playerID) => {
+      const isCurrentPlayer = ctx.currentPlayer == playerID;
+      if (ctx.stage) {
+        return isCurrentPlayer && ctx.currentPlayer in ctx.stage;
+      }
+      return isCurrentPlayer;
     },
 
-    canPlayerMakeMove: (G, ctx, playerID) => {
-      const actionPlayers = ctx.actionPlayers || [];
-      return actionPlayers.includes(playerID);
+    canPlayerMakeMove: (_G, ctx, action) => {
+      const playerID = action.payload.playerID;
+      const move = getMove(ctx, action.payload.type, playerID);
+
+      if (move === null) {
+        return false;
+      }
+
+      if (ctx.stage === null && ctx.currentPlayer !== playerID) {
+        return false;
+      }
+
+      return true;
+    },
+
+    canPlayerMakeAnyMove: (_G, ctx, playerID) => {
+      if (ctx.stage) {
+        return playerID in ctx.stage;
+      }
+      return ctx.currentPlayer === playerID;
     },
   };
 }
 
 /**
- * FlowWithPhases
+ * Flow
  *
- * A very customizable game flow that introduces phases to the
- * game. Each phase can be configured with:
- * - A custom turn order.
- * - Automatically executed setup / cleanup code.
- * - Custom phase end conditions.
- * - A move whitelist that disallows other moves during the phase.
+ * Creates a reducer that updates ctx (analogous to how moves update G).
  *
  * @param {...object} endIf - The game automatically ends if this function
  *                            returns anything (checked after each move).
@@ -142,8 +161,6 @@ export function Flow({
  *   endPhase - Set to false to disable the `endPhase` event.
  *
  *   endGame - Set to true to enable the `endGame` event.
- *
- *   setActionPlayers - Set to true to enable the `setActionPlayers` event.
  * }
  *
  *
@@ -172,10 +189,16 @@ export function Flow({
  *   start: false,
  * }
  */
-export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
+export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   // Attach defaults.
+  if (moves === undefined) {
+    moves = {};
+  }
   if (events === undefined) {
     events = {};
+  }
+  if (events.setStage === undefined) {
+    events.setStage = true;
   }
   if (events.endPhase === undefined && phases) {
     events.endPhase = true;
@@ -185,9 +208,6 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
   }
   if (events.endGame === undefined) {
     events.endGame = false;
-  }
-  if (events.setActionPlayers === undefined) {
-    events.setActionPlayers = false;
   }
   if (plugins === undefined) {
     plugins = [];
@@ -205,7 +225,10 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
   phaseMap[''] = {};
 
   let moveMap = {};
+  let moveNames = new Set();
   let startingPhase = '';
+
+  Object.keys(moves).forEach(name => moveNames.add(name));
 
   for (let phase in phaseMap) {
     const conf = phaseMap[phase];
@@ -217,6 +240,7 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
     if (conf.moves !== undefined) {
       for (let move of Object.keys(conf.moves)) {
         moveMap[phase + '.' + move] = conf.moves[move];
+        moveNames.add(move);
       }
     }
 
@@ -235,6 +259,9 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
     if (conf.turn === undefined) {
       conf.turn = turn;
     }
+    if (conf.turn.order === undefined) {
+      conf.turn.order = TurnOrder.DEFAULT;
+    }
     if (conf.turn.onBegin === undefined) {
       conf.turn.onBegin = G => G;
     }
@@ -247,6 +274,20 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
     if (conf.turn.onMove === undefined) {
       conf.turn.onMove = G => G;
     }
+    if (conf.turn.stages === undefined) {
+      conf.turn.stages = {};
+    }
+
+    for (const stage in conf.turn.stages) {
+      const stageConfig = conf.turn.stages[stage];
+      const moves = stageConfig.moves || {};
+      for (let move of Object.keys(moves)) {
+        let key = phase + '.' + stage + '.' + move;
+        moveMap[key] = moves[move];
+        moveNames.add(move);
+      }
+    }
+
     conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, plugins);
     conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, plugins);
     conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
@@ -264,15 +305,8 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
     const phasesEnded = new Set();
     const turnsEnded = new Set();
 
-    function LOG(d, msg) {
-      if (msg) console.log(msg);
-    }
-
     for (let i = 0; i < events.length; i++) {
       const { fn, arg, ...rest } = events[i];
-
-      LOG(fn);
-      LOG(rest);
 
       // Detect a loop of EndPhase calls.
       // This could potentially even be an infinite loop
@@ -316,7 +350,6 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
       // Check if we should end the game.
       const shouldEndGame = ShouldEndGame(state);
       if (shouldEndGame) {
-        LOG('shouldEndGame');
         events.push({
           fn: EndGame,
           arg: shouldEndGame,
@@ -330,7 +363,6 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
       // Check if we should end the phase.
       const shouldEndPhase = ShouldEndPhase(state);
       if (shouldEndPhase) {
-        LOG('shouldEndPhase');
         events.push({
           fn: EndPhase,
           arg: shouldEndPhase,
@@ -345,7 +377,6 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
       if (fn === OnMove) {
         const shouldEndTurn = ShouldEndTurn(state);
         if (shouldEndTurn) {
-          LOG('shouldEndTurn');
           events.push({
             fn: EndTurn,
             arg: shouldEndTurn,
@@ -588,7 +619,7 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
     }
 
     // Reset currentPlayer.
-    ctx = { ...ctx, currentPlayer: '' };
+    ctx = { ...ctx, currentPlayer: '', stage: null };
 
     // Add log entry.
     const action = gameEvent('endTurn', arg);
@@ -608,31 +639,75 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog, _undo: [], _redo: [] };
   }
 
-  function processMove(state, action) {
-    let conf = GetPhase(state.ctx);
+  /**
+   * Retrieves the relevant move that can be played by playerID.
+   *
+   * If ctx.stage is set (i.e. one or more players are in some stage),
+   * then it attempts to find the move inside the stages config for
+   * that turn. If the stage for a player is '', then the player is
+   * allowed to make a move (as determined by the phase config), but
+   * isn't restricted to a particular set as defined in the stage config.
+   *
+   * If not, it then looks for the move inside the phase.
+   *
+   * If it doesn't find the move there, it looks at the global move definition.
+   *
+   * @param {object} ctx
+   * @param {string} name
+   * @param {string} playerID
+   */
+  function GetMove(ctx, name, playerID) {
+    const conf = GetPhase(ctx);
+    const stages = conf.turn.stages;
 
-    // Update actionPlayers if _actionPlayersOnce is set.
-    let actionPlayers = state.ctx.actionPlayers;
-    if (state.ctx._actionPlayersOnce) {
-      const playerID = action.playerID;
-      actionPlayers = actionPlayers.filter(id => id !== playerID);
+    if (ctx.stage && stages[ctx.stage[playerID]]) {
+      // Check if moves are defined for the player's stage.
+      const stage = stages[ctx.stage[playerID]];
+      if (stage) {
+        const moves = stage.moves;
+        if (name in moves) {
+          return moves[name];
+        }
+      }
+    } else if (conf.moves) {
+      // Check if moves are defined for the current phase.
+      if (name in conf.moves) {
+        return conf.moves[name];
+      }
+    } else if (name in moves) {
+      // Check for the move globally.
+      return moves[name];
     }
 
-    let actionPlayersOnceDone = false;
-    if (
-      actionPlayers.length == 0 &&
-      conf.turn &&
-      conf.turn.order &&
-      conf.turn.order.endPhaseOnceDone
-    ) {
-      actionPlayersOnceDone = true;
+    return null;
+  }
+
+  function ProcessMove(state, action) {
+    let conf = GetPhase(state.ctx);
+
+    let endPhase = false;
+
+    let stage = state.ctx.stage;
+    if (state.ctx._stageOnce) {
+      const playerID = action.playerID;
+      stage = Object.keys(stage)
+        .filter(id => id !== playerID)
+        .reduce((obj, key) => {
+          obj[key] = stage[key];
+          return obj;
+        }, {});
+
+      if (Object.keys(stage).length == 0) {
+        stage = null;
+        endPhase = conf.turn.order.endPhaseOnceDone;
+      }
     }
 
     state = {
       ...state,
       ctx: {
         ...state.ctx,
-        actionPlayers,
+        stage,
         numMoves: state.ctx.numMoves + 1,
       },
     };
@@ -654,7 +729,7 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
 
     let events = [{ fn: OnMove }];
 
-    if (actionPlayersOnceDone) {
+    if (endPhase) {
       events.push({
         fn: EndPhase,
         turn: state.ctx.turn,
@@ -687,7 +762,7 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
     endTurn: EndTurnEvent,
     endPhase: EndPhaseEvent,
     endGame: EndGameEvent,
-    setActionPlayers: SetActionPlayersEvent,
+    setStage: SetStageEvent,
   };
 
   let enabledEvents = {};
@@ -700,28 +775,29 @@ export function FlowWithPhases({ phases, endIf, turn, events, plugins }) {
   if (events.endGame) {
     enabledEvents['endGame'] = true;
   }
-  if (events.setActionPlayers) {
-    enabledEvents['setActionPlayers'] = true;
+  if (events.setStage) {
+    enabledEvents['setStage'] = true;
   }
 
-  return Flow({
+  return FlowInternal({
     ctx: numPlayers => ({
       numPlayers,
       turn: 0,
       currentPlayer: '0',
-      actionPlayers: ['0'],
       currentPlayerMoves: 0,
       playOrder: [...new Array(numPlayers)].map((d, i) => i + ''),
       playOrderPos: 0,
       phase: startingPhase,
-      stage: {},
+      stage: null,
     }),
     init: state => {
       return ProcessEvents(state, [{ fn: StartGame }]);
     },
     eventHandlers,
     enabledEvents,
-    processMove,
     moveMap,
+    moveNames: [...moveNames.values()],
+    processMove: ProcessMove,
+    getMove: GetMove,
   });
 }

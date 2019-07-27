@@ -30,48 +30,51 @@ export const Pass = (G, ctx) => {
 };
 
 /**
- * Event to change the actionPlayers array.
- * @param {object} state - The game state.
- * @param {object} arg - An array of playerID's or <object> of:
- *   {
- *     value: (G, ctx) => [],        // function that returns an array of playerID's (optional if all is set)
- *
- *     all: true,        // set value to all playerID's
- *
- *     others: true,     // set value to all except currentPlayer.
- *
- *     once: true,       // players have one move
- *                       // (after which they're pruned from actionPlayers).
- *                       // The phase ends once actionPlayers becomes empty.
- *   }
+ * Event to change the stages of different players in the current turn.
+ * @param {*} state
+ * @param {*} arg
  */
-export function SetActionPlayersEvent(state, arg) {
-  return { ...state, ctx: setActionPlayers(state.G, state.ctx, arg) };
+export function SetStageEvent(state, arg) {
+  return { ...state, ctx: setStage(state.ctx, arg) };
 }
 
-function setActionPlayers(G, ctx, arg) {
-  let actionPlayers = [];
+function setStage(ctx, arg) {
+  let stage = ctx.stage || {};
+  let _stageOnce = false;
 
   if (arg.value) {
-    actionPlayers = arg.value(G, ctx);
-  }
-  if (arg.all) {
-    actionPlayers = [...ctx.playOrder];
+    stage = arg.value;
   }
 
-  if (arg.others) {
-    actionPlayers = [...ctx.playOrder].filter(nr => nr !== ctx.currentPlayer);
+  if (arg.currentPlayer !== undefined) {
+    stage[ctx.currentPlayer] = arg.currentPlayer;
   }
 
-  if (Array.isArray(arg)) {
-    actionPlayers = arg;
+  if (arg.others !== undefined) {
+    for (let i = 0; i < ctx.playOrder.length; i++) {
+      const playerID = ctx.playOrder[i];
+      if (playerID !== ctx.currentPlayer) {
+        stage[playerID] = arg.others;
+      }
+    }
   }
 
-  return {
-    ...ctx,
-    actionPlayers,
-    _actionPlayersOnce: arg.once || false,
-  };
+  if (arg.all !== undefined) {
+    for (let i = 0; i < ctx.playOrder.length; i++) {
+      const playerID = ctx.playOrder[i];
+      stage[playerID] = arg.all;
+    }
+  }
+
+  if (arg.once) {
+    _stageOnce = true;
+  }
+
+  if (Object.keys(stage).length == 0) {
+    stage = null;
+  }
+
+  return { ...ctx, stage, _stageOnce };
 }
 
 /**
@@ -84,7 +87,13 @@ function getCurrentPlayer(playOrder, playOrderPos) {
 }
 
 /**
- * Called at the start of a phase to initialize turn order state.
+ * Called at the start of a turn to initialize turn order state.
+ *
+ * TODO: This is called inside StartTurn, which is called from
+ * both UpdateTurn and StartPhase (so it's called at the beginning
+ * of a new phase as well as between turns). We should probably
+ * split it into two.
+ *
  * @param {object} G - The game object G.
  * @param {object} ctx - The game object ctx.
  * @param {object} turn - A turn object for this phase.
@@ -100,13 +109,10 @@ export function InitTurnOrderState(G, ctx, turn) {
   const playOrderPos = order.first(G, ctx);
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
-  if (order.actionPlayers !== undefined) {
-    ctx = setActionPlayers(G, ctx, order.actionPlayers);
-  } else {
-    ctx = { ...ctx, actionPlayers: [currentPlayer] };
-  }
+  ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
+  ctx = setStage(ctx, order.stages || {});
 
-  return { ...ctx, currentPlayer, playOrderPos, playOrder };
+  return ctx;
 }
 
 /**
@@ -122,14 +128,12 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
 
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
-  let actionPlayers = ctx.actionPlayers;
   let endPhase = false;
 
   if (endTurnArg && endTurnArg !== true) {
     if (ctx.playOrder.includes(endTurnArg.next)) {
       playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
       currentPlayer = endTurnArg.next;
-      actionPlayers = [currentPlayer];
     } else {
       logging.error(`invalid argument to endTurn: ${endTurnArg}`);
     }
@@ -142,8 +146,8 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
       playOrderPos = t;
       currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
 
-      if (order.actionPlayers === undefined) {
-        actionPlayers = [currentPlayer];
+      if (order.stages !== undefined) {
+        ctx = setStage(ctx, order.stages);
       }
     }
   }
@@ -152,7 +156,6 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
     ...ctx,
     playOrderPos,
     currentPlayer,
-    actionPlayers,
   };
 
   return { endPhase, ctx };
@@ -166,10 +169,6 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
  * Each object defines the first player when the phase / game
  * begins, and also a function `next` to determine who the
  * next player is when the turn ends.
- *
- * Objects can also contain an actionPlayers section which
- * is passed to SetActionPlayers above at the beginning of
- * the phase.
  *
  * The phase ends if next() returns undefined.
  */
@@ -208,7 +207,7 @@ export const TurnOrder = {
   ANY: {
     first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => ctx.playOrderPos,
-    actionPlayers: { all: true },
+    stages: { all: '' },
   },
 
   /**
@@ -221,7 +220,7 @@ export const TurnOrder = {
   ANY_ONCE: {
     first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => ctx.playOrderPos,
-    actionPlayers: { all: true, once: true },
+    stages: { all: '', once: true },
     endPhaseOnceDone: true,
   },
 
@@ -234,7 +233,7 @@ export const TurnOrder = {
   OTHERS: {
     first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => ctx.playOrderPos,
-    actionPlayers: { others: true },
+    stages: { others: '' },
   },
 
   /**
@@ -247,7 +246,7 @@ export const TurnOrder = {
   OTHERS_ONCE: {
     first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => ctx.playOrderPos,
-    actionPlayers: { others: true, once: true },
+    stages: { others: '', once: true },
     endPhaseOnceDone: true,
   },
 

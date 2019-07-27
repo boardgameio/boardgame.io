@@ -95,7 +95,11 @@ export function CreateGameReducer({ game, multiplayer }) {
         state = { ...state, deltalog: [] };
 
         // Check whether the move is allowed at this time.
-        const move = game.getMove(state.ctx, action.payload.type);
+        const move = game.flow.getMove(
+          state.ctx,
+          action.payload.type,
+          action.payload.playerID || state.ctx.currentPlayer
+        );
         if (move === null) {
           error(`disallowed move: ${action.payload.type}`);
           return state;
@@ -116,12 +120,9 @@ export function CreateGameReducer({ game, multiplayer }) {
         if (
           action.payload.playerID !== null &&
           action.payload.playerID !== undefined &&
-          !game.flow.canPlayerMakeMove(
-            state.G,
-            state.ctx,
-            action.payload.playerID
-          )
+          !game.flow.canPlayerMakeMove(state.G, state.ctx, action)
         ) {
+          error(`disallowed move: ${action.payload.type}`);
           return state;
         }
 
@@ -211,7 +212,11 @@ export function CreateGameReducer({ game, multiplayer }) {
         const restore = _undo[_undo.length - 2];
 
         // Only allow undoable moves to be undone.
-        const lastMove = game.getMove(state.ctx, last.moveType);
+        const lastMove = game.flow.getMove(
+          state.ctx,
+          last.moveType,
+          state.ctx.currentPlayer
+        );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;
         }
