@@ -8,7 +8,7 @@
 
 import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
-import { Flow, FlowWithPhases } from './flow';
+import { FlowInternal, Flow } from './flow';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -17,7 +17,7 @@ jest.mock('../core/logger', () => ({
 }));
 
 test('Flow', () => {
-  const flow = Flow({});
+  const flow = FlowInternal({});
   const state = {};
   expect(flow.processGameEvent(state, gameEvent('unknown'))).toBe(state);
 
@@ -30,7 +30,7 @@ test('Flow', () => {
 
 describe('phases', () => {
   test('invalid phase name', () => {
-    const flow = FlowWithPhases({
+    const flow = Flow({
       phases: { '': {} },
     });
     flow.init({ ctx: flow.ctx(2) });
@@ -38,7 +38,7 @@ describe('phases', () => {
   });
 
   test('onBegin / onEnd', () => {
-    const flow = FlowWithPhases({
+    const flow = Flow({
       phases: {
         A: {
           start: true,
@@ -87,7 +87,7 @@ describe('phases', () => {
   });
 
   test('endIf', () => {
-    const flow = FlowWithPhases({
+    const flow = Flow({
       phases: { A: { start: true, endIf: () => true, next: 'B' }, B: {} },
     });
 
@@ -111,7 +111,7 @@ describe('phases', () => {
 
   test('infinite loop', () => {
     const endIf = () => true;
-    const flow = FlowWithPhases({
+    const flow = Flow({
       phases: {
         A: { endIf, next: 'B', start: true },
         B: { endIf, next: 'A' },
@@ -130,7 +130,7 @@ describe('phases', () => {
     let endPhaseACount = 0;
     let endPhaseBCount = 0;
 
-    const flow = FlowWithPhases({
+    const flow = Flow({
       phases: {
         A: {
           start: true,
@@ -157,7 +157,7 @@ describe('phases', () => {
 
 test('moveLimit', () => {
   {
-    const flow = FlowWithPhases({
+    const flow = Flow({
       turn: {
         moveLimit: 2,
       },
@@ -173,7 +173,7 @@ test('moveLimit', () => {
   }
 
   {
-    const flow = FlowWithPhases({
+    const flow = Flow({
       turn: { moveLimit: 2 },
       phases: {
         B: {
@@ -203,7 +203,7 @@ test('moveLimit', () => {
 
 test('turn.onBegin', () => {
   const onBegin = jest.fn(G => G);
-  const flow = FlowWithPhases({
+  const flow = Flow({
     turn: { onBegin },
   });
   const state = { ctx: flow.ctx(2) };
@@ -215,7 +215,7 @@ test('turn.onBegin', () => {
 
 test('turn.onEnd', () => {
   const onEnd = jest.fn(G => G);
-  const flow = FlowWithPhases({
+  const flow = Flow({
     turn: { onEnd },
   });
   const state = { ctx: flow.ctx(2) };
@@ -230,14 +230,14 @@ test('onMove', () => {
   const onMove = () => ({ A: true });
 
   {
-    const flow = FlowWithPhases({ turn: { onMove } });
+    const flow = Flow({ turn: { onMove } });
     let state = { G: {}, ctx: flow.ctx(2) };
     state = flow.processMove(state, makeMove().payload);
     expect(state.G).toEqual({ A: true });
   }
 
   {
-    const flow = FlowWithPhases({
+    const flow = Flow({
       turn: { onMove },
       phases: { B: { turn: { onMove: () => ({ B: true }) } } },
     });
@@ -251,7 +251,7 @@ test('onMove', () => {
 });
 
 test('init', () => {
-  let flow = FlowWithPhases({
+  let flow = Flow({
     phases: { A: { start: true, onEnd: () => ({ done: true }) } },
   });
 
@@ -260,7 +260,7 @@ test('init', () => {
   state = flow.processGameEvent(state, gameEvent('init'));
   expect(state).toEqual({ G: {}, ctx: orig });
 
-  flow = FlowWithPhases({
+  flow = Flow({
     phases: { A: { start: true, onBegin: () => ({ done: true }) } },
   });
 
@@ -271,7 +271,7 @@ test('init', () => {
 
 test('endIf', () => {
   {
-    const flow = FlowWithPhases({ endIf: G => G.win });
+    const flow = Flow({ endIf: G => G.win });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) });
     state = flow.processGameEvent(state, gameEvent('endTurn'));
@@ -367,48 +367,41 @@ describe('turn.endIf', () => {
   });
 });
 
-test('canPlayerMakeMove', () => {
+test('canPlayerMakeAnyMove', () => {
   const playerID = '0';
 
-  let flow = Flow({});
-  expect(flow.canPlayerMakeMove({}, {}, playerID)).toBe(false);
-  // NOTE: currentPlayer is not allowed to make a move by default.
-  // Their playerID must be included in the actionPlayers array.
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['1'] }, playerID)).toBe(
+  let flow = FlowInternal({});
+  expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
+
+  expect(flow.canPlayerMakeAnyMove({}, { stage: { '1': '' } }, playerID)).toBe(
     false
   );
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: ['0'] }, playerID)).toBe(
+  expect(flow.canPlayerMakeAnyMove({}, { stage: { '0': '' } }, playerID)).toBe(
     true
   );
 
   // no one can make a move
-  flow = Flow({ canPlayerMakeMove: () => false });
-  expect(flow.canPlayerMakeMove({}, {}, playerID)).toBe(false);
-  expect(flow.canPlayerMakeMove({}, { actionPlayers: [] }, playerID)).toBe(
-    false
-  );
-  expect(flow.canPlayerMakeMove({}, {}, '5')).toBe(false);
+  flow = FlowInternal({ canPlayerMakeAnyMove: () => false });
+  expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
+  expect(flow.canPlayerMakeAnyMove({}, { stage: null }, playerID)).toBe(false);
+  expect(flow.canPlayerMakeAnyMove({}, {}, '5')).toBe(false);
 });
 
 test('canPlayerCallEvent', () => {
   const playerID = '0';
 
-  const flow = Flow({});
+  const flow = FlowInternal({});
   expect(flow.canPlayerCallEvent({}, {}, playerID)).toBe(false);
   expect(
     flow.canPlayerCallEvent(
       {},
-      { currentPlayer: '0', actionPlayers: ['1'] },
+      { currentPlayer: '0', stage: { '1': '' } },
       playerID
     )
   ).toBe(false);
-  expect(
-    flow.canPlayerCallEvent(
-      {},
-      { currentPlayer: '0', actionPlayers: ['0'] },
-      playerID
-    )
-  ).toBe(true);
+  expect(flow.canPlayerCallEvent({}, { currentPlayer: '0' }, playerID)).toBe(
+    true
+  );
 });
 
 describe('endGame', () => {
@@ -432,7 +425,7 @@ describe('endGame', () => {
 });
 
 describe('endTurn / endPhase args', () => {
-  const flow = FlowWithPhases({
+  const flow = Flow({
     phases: { A: { start: true, next: 'B' }, B: {}, C: {} },
   });
 
@@ -532,7 +525,7 @@ test('undoable moves', () => {
 });
 
 test('endTurn is not called twice in one move', () => {
-  const flow = FlowWithPhases({
+  const flow = Flow({
     turn: { endIf: () => true },
     phases: { A: { start: true, endIf: G => G.endPhase, next: 'B' }, B: {} },
   });
@@ -560,7 +553,7 @@ test('endTurn is not called twice in one move', () => {
 
 describe('endPhase returns to previous phase', () => {
   let state;
-  const flow = FlowWithPhases({
+  const flow = Flow({
     phases: { A: { start: true }, B: {}, C: {} },
   });
 
@@ -573,6 +566,45 @@ describe('endPhase returns to previous phase', () => {
     expect(state.ctx.phase).toBe('A');
     state = flow.processGameEvent(state, gameEvent('endPhase'));
     expect(state.ctx.phase).toBe('');
+  });
+});
+
+describe('moveMap', () => {
+  const game = {
+    moves: { A: () => {} },
+
+    turn: {
+      stages: {
+        SA: {
+          moves: {
+            A: () => {},
+          },
+        },
+      },
+    },
+
+    phases: {
+      PA: {
+        moves: {
+          A: () => {},
+        },
+
+        turn: {
+          stages: {
+            SB: {
+              moves: {
+                A: () => {},
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  test('basic', () => {
+    const { moveMap } = Flow(game);
+    expect(Object.keys(moveMap)).toEqual(['PA.A', 'PA.SB.A', '.SA.A']);
   });
 });
 

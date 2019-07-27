@@ -114,7 +114,6 @@ describe('update', () => {
         _undo: [],
         ctx: {
           _random: { seed: 0 },
-          actionPlayers: ['0'],
           currentPlayer: '0',
           currentPlayerMoves: 0,
           numPlayers: 2,
@@ -129,7 +128,6 @@ describe('update', () => {
       _undo: [],
       ctx: {
         _random: undefined,
-        actionPlayers: ['1'],
         currentPlayer: '1',
         currentPlayerMoves: 0,
         numPlayers: 2,
@@ -385,14 +383,14 @@ describe('redactLog', () => {
     const send = jest.fn();
     const master = new Master(game, new InMemory(), TransportAPI(send));
 
-    const actionA = ActionCreators.makeMove('A', ['not redacted']);
-    const actionB = ActionCreators.makeMove('B', ['redacted']);
+    const actionA = ActionCreators.makeMove('A', ['not redacted'], '0');
+    const actionB = ActionCreators.makeMove('B', ['redacted'], '0');
 
     // test: ping-pong two moves, then sync and check the log
     await master.onSync('gameID', '0', 2);
     await master.onUpdate(actionA, 0, 'gameID', '0');
     await master.onUpdate(actionB, 1, 'gameID', '0');
-    await master.onSync('gameID', '0', 2);
+    await master.onSync('gameID', '1', 2);
 
     const log = send.mock.calls[send.mock.calls.length - 1][0].args[2];
     expect(log).toMatchObject([
@@ -402,6 +400,7 @@ describe('redactLog', () => {
           payload: {
             type: 'A',
             args: ['not redacted'],
+            playerID: '0',
           },
         },
         _stateID: 0,
@@ -412,6 +411,7 @@ describe('redactLog', () => {
           payload: {
             type: 'B',
             args: null,
+            playerID: '0',
           },
         },
         _stateID: 1,

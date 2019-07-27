@@ -165,11 +165,7 @@ export class Master {
     // that can make moves right now and the person doing the
     // action is that player.
     if (action.type == UNDO || action.type == REDO) {
-      if (
-        state.ctx.currentPlayer !== playerID ||
-        state.ctx.actionPlayers.length != 1 ||
-        state.ctx.actionPlayers[0] !== playerID
-      ) {
+      if (state.ctx.currentPlayer !== playerID || state.ctx.stage !== null) {
         logging.error(`playerID=[${playerID}] cannot undo / redo right now`);
         return;
       }
@@ -178,7 +174,7 @@ export class Master {
     // Check whether the player is allowed to make the move.
     if (
       action.type == MAKE_MOVE &&
-      !this.game.flow.canPlayerMakeMove(state.G, state.ctx, playerID)
+      !this.game.flow.canPlayerMakeMove(state.G, state.ctx, action)
     ) {
       logging.error(
         `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`

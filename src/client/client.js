@@ -112,7 +112,12 @@ class _ClientImpl {
 
       this.step = async () => {
         const state = this.store.getState();
-        const playerID = state.ctx.actionPlayers[0];
+
+        let playerID = state.ctx.currentPlayer;
+        if (state.ctx.stage) {
+          playerID = Object.keys(state.ctx.stage)[0];
+        }
+
         const { action, metadata } = await bot.play(state, playerID);
 
         if (action) {
@@ -315,7 +320,7 @@ class _ClientImpl {
 
     let isActive = true;
 
-    const canPlayerMakeMove = this.game.flow.canPlayerMakeMove(
+    const canPlayerMakeMove = this.game.flow.canPlayerMakeAnyMove(
       state.G,
       state.ctx,
       this.playerID
