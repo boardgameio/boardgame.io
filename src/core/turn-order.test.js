@@ -11,6 +11,12 @@ import { UpdateTurnOrderState, TurnOrder, Pass } from './turn-order';
 import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
+import { error } from '../core/logger';
+
+jest.mock('../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 describe('turn orders', () => {
   // Defines a matcher for testing that ctx has no undefined properties.
@@ -416,48 +422,94 @@ describe('SetStage', () => {
     expect(state.ctx.stage).toBeNull();
   });
 
-  test('militia', () => {
-    const game = {
-      turn: {
-        onBegin: (G, ctx) => {
-          ctx.events.setStage({ currentPlayer: 'A' });
-        },
+  describe('militia', () => {
+    let state;
+    let reducer;
+    beforeAll(() => {
+      const game = {
+        turn: {
+          onBegin: (G, ctx) => {
+            ctx.events.setStage({ currentPlayer: 'A' });
+          },
 
-        stages: {
-          A: {
-            moves: {
-              militia: (G, ctx) => {
-                ctx.events.setStage({
-                  currentPlayer: '',
-                  others: 'B',
-                  once: true,
-                });
+          stages: {
+            A: {
+              moves: {
+                militia: (G, ctx) => {
+                  ctx.events.setStage({
+                    currentPlayer: '',
+                    others: 'B',
+                    once: true,
+                  });
+                },
+              },
+            },
+
+            B: {
+              moves: {
+                discard: G => G,
               },
             },
           },
-
-          B: {
-            moves: {
-              discard: G => G,
-            },
-          },
         },
-      },
-    };
+      };
 
-    const reducer = CreateGameReducer({ game });
+      reducer = CreateGameReducer({ game });
+      state = InitializeGame({ game, numPlayers: 3 });
+    });
 
-    let state = InitializeGame({ game, numPlayers: 4 });
-    expect(state.ctx.stage).toEqual({ '0': 'A' });
-    state = reducer(state, makeMove('militia', undefined, '0'));
-    expect(state.ctx.stage).toEqual({ '0': '', '1': 'B', '2': 'B', '3': 'B' });
+    beforeEach(() => {
+      error.mockClear();
+    });
 
-    state = reducer(state, makeMove('discard', undefined, '1'));
-    expect(state.ctx.stage).toEqual({ '0': '', '2': 'B', '3': 'B' });
-    state = reducer(state, makeMove('discard', undefined, '3'));
-    expect(state.ctx.stage).toEqual({ '0': '', '2': 'B' });
-    state = reducer(state, makeMove('discard', undefined, '2'));
-    expect(state.ctx.stage).toEqual({ '0': '' });
+    test('sanity', () => {
+      expect(state.ctx.stage).toEqual({ '0': 'A' });
+    });
+
+    test('player 1 cannot play the militia card', () => {
+      state = reducer(state, makeMove('militia', undefined, '1'));
+      expect(error).toHaveBeenCalledWith('disallowed move: militia');
+    });
+
+    test('player 2 cannot play the militia card', () => {
+      state = reducer(state, makeMove('militia', undefined, '2'));
+      expect(error).toHaveBeenCalledWith('disallowed move: militia');
+    });
+
+    test('player 0 cannot discard', () => {
+      state = reducer(state, makeMove('discard', undefined, '0'));
+      expect(error).toHaveBeenCalledWith('disallowed move: discard');
+    });
+
+    test('player 1 cannot discard', () => {
+      state = reducer(state, makeMove('discard', undefined, '1'));
+      expect(error).toHaveBeenCalledWith('disallowed move: discard');
+    });
+
+    test('player 2 cannot discard', () => {
+      state = reducer(state, makeMove('discard', undefined, '2'));
+      expect(error).toHaveBeenCalledWith('disallowed move: discard');
+    });
+
+    test('player 0 plays militia', () => {
+      state = reducer(state, makeMove('militia', undefined, '0'));
+      expect(state.ctx.stage).toEqual({
+        '0': '',
+        '1': 'B',
+        '2': 'B',
+      });
+    });
+
+    test('player 0 still cannot discard', () => {
+      state = reducer(state, makeMove('discard', undefined, '0'));
+    });
+
+    test('everyone else discards', () => {
+      state = reducer(state, makeMove('discard', undefined, '1'));
+      expect(state.ctx.stage).toEqual({ '0': '', '2': 'B' });
+      state = reducer(state, makeMove('discard', undefined, '2'));
+      expect(state.ctx.stage).toEqual({ '0': '' });
+    });
   });
 });
 
