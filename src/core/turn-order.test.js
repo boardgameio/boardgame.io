@@ -519,28 +519,18 @@ describe('UpdateTurnOrderState', () => {
     currentPlayer: '0',
     playOrder: ['0', '1', '2'],
     playOrderPos: 0,
-    actionPlayers: ['0', '1', '2'],
   };
-  const t1 = { order: TurnOrder.DEFAULT };
-  const t2 = { order: TurnOrder.ANY };
+  const turn = { order: TurnOrder.DEFAULT };
 
   test('without next player', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, t1);
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, turn);
     expect(t).toMatchObject({ currentPlayer: '1' });
   });
 
   test('with next player', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, t1, {
+    const { ctx: t } = UpdateTurnOrderState(G, ctx, turn, {
       next: '2',
     });
     expect(t).toMatchObject({ currentPlayer: '2' });
-  });
-
-  test('with actionPlayers', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, t2);
-    expect(t).toMatchObject({
-      currentPlayer: '0',
-      actionPlayers: ['0', '1', '2'],
-    });
   });
 });
