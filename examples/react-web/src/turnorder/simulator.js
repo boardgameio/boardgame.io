@@ -43,9 +43,16 @@ class Board extends React.Component {
     let current = false;
     let onClick = () => {};
 
-    if (this.props.ctx.actionPlayers.includes(this.props.playerID)) {
-      className += ' active';
-      active = true;
+    if (this.props.ctx.stage) {
+      if (this.props.playerID in this.props.ctx.stage) {
+        className += ' active';
+        active = true;
+      }
+    } else {
+      if (this.props.playerID === this.props.ctx.currentPlayer) {
+        className += ' active';
+        active = true;
+      }
     }
 
     if (this.props.playerID == this.props.ctx.currentPlayer) {
