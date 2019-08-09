@@ -226,7 +226,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
   let moveMap = {};
   let moveNames = new Set();
-  let startingPhase = '';
+  let startingPhase = null;
 
   Object.keys(moves).forEach(name => moveNames.add(name));
 
@@ -294,7 +294,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function GetPhase(ctx) {
-    return phaseMap[ctx.phase];
+    return ctx.phase ? phaseMap[ctx.phase] : phaseMap[''];
   }
 
   function OnMove(s) {
@@ -555,21 +555,21 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       return state;
     }
 
-    // If we aren't in a phase, there is nothing to do.
-    // if (ctx.phase === '') {
-    //   return state;
-    // }
+    if (next) {
+      next.push({ fn: UpdatePhase, arg, phase: ctx.phase });
+    }
+
+    // If we aren't in a phase, there is nothing else to do.
+    if (ctx.phase === null) {
+      return state;
+    }
 
     // Run any cleanup code for the phase that is about to end.
     const conf = GetPhase(ctx);
     G = conf.onEnd(G, ctx);
 
-    if (next) {
-      next.push({ fn: UpdatePhase, arg, phase: ctx.phase });
-    }
-
     // Reset the phase.
-    ctx = { ...ctx, phase: '', playOrderPos: 0 };
+    ctx = { ...ctx, phase: null, playOrderPos: 0 };
 
     // Add log entry.
     const action = gameEvent('endPhase', arg);

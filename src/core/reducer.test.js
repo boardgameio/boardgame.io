@@ -208,7 +208,7 @@ test('deltalog', () => {
     {
       action: actionA,
       _stateID: 0,
-      phase: '',
+      phase: null,
       turn: 1,
     },
   ]);
@@ -217,7 +217,7 @@ test('deltalog', () => {
     {
       action: actionB,
       _stateID: 1,
-      phase: '',
+      phase: null,
       turn: 1,
     },
   ]);
@@ -226,7 +226,7 @@ test('deltalog', () => {
     {
       action: actionC,
       _stateID: 2,
-      phase: '',
+      phase: null,
       turn: 1,
     },
   ]);

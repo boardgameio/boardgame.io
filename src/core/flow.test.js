@@ -269,8 +269,8 @@ test('init', () => {
   expect(state.G).toMatchObject({ done: true });
 });
 
-test('endIf', () => {
-  {
+describe('endIf', () => {
+  test('basic', () => {
     const flow = Flow({ endIf: G => G.win });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) });
@@ -288,14 +288,18 @@ test('endIf', () => {
       const t = flow.processMove(state, makeMove('move').payload);
       expect(t.ctx.gameover).toBe('A');
     }
-  }
+  });
 
-  // Test that the phase automatically ends.
-  {
+  test('phase automatically ends', () => {
     const game = {
-      moves: {
-        A: () => ({ win: 'A' }),
-        B: G => G,
+      phases: {
+        A: {
+          start: true,
+          moves: {
+            A: () => ({ win: 'A' }),
+            B: G => G,
+          },
+        },
       },
       endIf: G => G.win,
     };
@@ -312,7 +316,7 @@ test('endIf', () => {
       client.getState().deltalog[client.getState().deltalog.length - 1].action
         .payload.type
     ).toBe('endPhase');
-  }
+  });
 });
 
 describe('turn.endIf', () => {
@@ -448,7 +452,7 @@ describe('endTurn / endPhase args', () => {
     let t = state;
     t = flow.processGameEvent(t, gameEvent('endPhase', 'C'));
     expect(error).toBeCalledWith(`invalid argument to endPhase: C`);
-    expect(t.ctx.phase).toBe('');
+    expect(t.ctx.phase).toBe(null);
   });
 
   test('invalid arg to endTurn', () => {

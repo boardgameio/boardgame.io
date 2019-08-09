@@ -439,13 +439,13 @@ describe('log handling', () => {
       {
         action: makeMove('A', [], '0'),
         _stateID: 0,
-        phase: '',
+        phase: null,
         turn: 1,
       },
       {
         action: makeMove('A', [], '0'),
         _stateID: 1,
-        phase: '',
+        phase: null,
         turn: 1,
       },
     ]);

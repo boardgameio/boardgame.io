@@ -109,7 +109,7 @@ const PhaseMarker = props => {
 };
 
 PhaseMarker.propTypes = {
-  phase: PropTypes.string.isRequired,
+  phase: PropTypes.string,
   numEvents: PropTypes.number.isRequired,
 };
 
