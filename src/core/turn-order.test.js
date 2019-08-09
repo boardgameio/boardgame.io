@@ -428,8 +428,9 @@ describe('SetStage', () => {
     beforeAll(() => {
       const game = {
         turn: {
-          onBegin: (G, ctx) => {
-            ctx.events.setStage({ currentPlayer: 'A' });
+          order: {
+            ...TurnOrder.DEFAULT,
+            stages: { currentPlayer: 'A' },
           },
 
           stages: {
