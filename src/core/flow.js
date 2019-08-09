@@ -329,7 +329,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       if (fn === EndTurn) {
         const currentPlayer = state.ctx.currentPlayer;
         if (turnsEnded.has(currentPlayer)) {
-          const ctx = { ...state.ctx, currentPlayer: '' };
+          const ctx = { ...state.ctx, currentPlayer: null, stage: null };
           return { ...state, ctx };
         }
         turnsEnded.add(currentPlayer);
@@ -426,7 +426,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     const conf = GetPhase(ctx);
 
     // Initialize the turn order state.
-    if (currentPlayer !== undefined) {
+    if (currentPlayer) {
       ctx = { ...ctx, currentPlayer };
     } else {
       ctx = InitTurnOrderState(G, ctx, conf.turn);
@@ -513,7 +513,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function ShouldEndTurn({ G, ctx }) {
-    if (ctx.currentPlayer === '') {
+    if (ctx.currentPlayer === null) {
       return false;
     }
 
@@ -593,7 +593,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let { G, ctx } = state;
 
     // If we are not in a turn currently, do nothing.
-    if (ctx.currentPlayer === '') {
+    if (ctx.currentPlayer === null) {
       return state;
     }
 
@@ -618,8 +618,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       next.push({ fn: UpdateTurn, arg, currentPlayer: ctx.currentPlayer });
     }
 
-    // Reset currentPlayer.
-    ctx = { ...ctx, currentPlayer: '', stage: null };
+    // Reset currentPlayer and stages.
+    ctx = { ...ctx, currentPlayer: null, stage: null };
 
     // Add log entry.
     const action = gameEvent('endTurn', arg);
