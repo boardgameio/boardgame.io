@@ -105,18 +105,14 @@ export class Local {
    * Connect to the server.
    */
   connect() {
-    this.master.connect(
-      this.gameID,
-      this.playerID,
-      (type, ...args) => {
-        if (type == 'sync') {
-          this.onSync.apply(this, args);
-        }
-        if (type == 'update') {
-          this.onUpdate.apply(this, args);
-        }
+    this.master.connect(this.gameID, this.playerID, (type, ...args) => {
+      if (type == 'sync') {
+        this.onSync.apply(this, args);
       }
-    );
+      if (type == 'update') {
+        this.onUpdate.apply(this, args);
+      }
+    });
     this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
 

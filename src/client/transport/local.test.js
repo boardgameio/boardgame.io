@@ -60,11 +60,7 @@ describe('LocalMaster', () => {
   });
 
   test('connect without callback', async () => {
-    master.connect(
-      'gameID',
-      '0',
-      undefined
-    );
+    master.connect('gameID', '0', undefined);
     await master.onSync('gameID', '0');
   });
 });
