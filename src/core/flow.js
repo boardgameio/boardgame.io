@@ -323,18 +323,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         phasesEnded.add(phase);
       }
 
-      // Detect a loop of EndTurn calls.
-      // We set the currentPlayer to an empty value
-      // (i.e. we are no longer in a turn) in this case.
-      if (fn === EndTurn) {
-        const currentPlayer = state.ctx.currentPlayer;
-        if (turnsEnded.has(currentPlayer)) {
-          const ctx = { ...state.ctx, currentPlayer: null, stage: null };
-          return { ...state, ctx };
-        }
-        turnsEnded.add(currentPlayer);
-      }
-
       // Process event.
       let next = [];
       state = fn(state, {
@@ -513,10 +501,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function ShouldEndTurn({ G, ctx }) {
-    if (ctx.currentPlayer === null) {
-      return false;
-    }
-
     const conf = GetPhase(ctx);
 
     // End the turn if the required number of moves has been made.
@@ -590,19 +574,18 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function EndTurn(state, { arg, next, turn, automatic }) {
-    let { G, ctx } = state;
-
     // If we are not in a turn currently, do nothing.
-    if (ctx.currentPlayer === null) {
+    if (state.ctx.currentPlayer === null) {
       return state;
     }
 
     // This is not the turn that EndTurn was originally
     // called for. The turn was probably ended some other way.
-    if (turn !== ctx.turn) {
+    if (turn !== state.ctx.turn) {
       return state;
     }
 
+    let { G, ctx } = state;
     const conf = GetPhase(ctx);
 
     // Prevent ending the turn if moveLimit haven't been made.
