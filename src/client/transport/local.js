@@ -121,6 +121,8 @@ export class Local {
    */
   subscribe() {}
 
+  subscribeGameMetadata() {}
+
   /**
    * Updates the game id.
    * @param {string} id - The new game id.

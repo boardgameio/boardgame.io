@@ -97,6 +97,7 @@ class _ClientImpl {
     this.credentials = credentials;
     this.multiplayer = multiplayer;
     this.subscribeCallback = () => {};
+    this.gameMetadataCallback = () => {};
 
     this.reducer = CreateGameReducer({
       game,
@@ -213,6 +214,9 @@ class _ClientImpl {
     const SubscriptionMiddleware = () => next => action => {
       const result = next(action);
       this.subscribeCallback();
+      if (action.type === 'SYNC') {
+        this.gameMetadataCallback();
+      }
       return result;
     };
 
@@ -239,6 +243,7 @@ class _ClientImpl {
       isConnected: true,
       onAction: () => {},
       subscribe: () => {},
+      subscribeGameMetadata: () => {},
       connect: () => {},
       updateGameID: () => {},
       updatePlayerID: () => {},
@@ -289,6 +294,11 @@ class _ClientImpl {
   }
 
   subscribe(fn) {
+    const gameMetadataCallback = metadata =>
+      fn(this.updateGameMetadata(metadata));
+    this.transport.subscribeGameMetadata(gameMetadataCallback);
+    this.gameMetadataCallback = gameMetadataCallback;
+
     const callback = () => fn(this.getState());
     this.transport.subscribe(callback);
     this.subscribeCallback = callback;
@@ -381,6 +391,11 @@ class _ClientImpl {
     this.credentials = credentials;
     this.createDispatchers();
   }
+
+  // arrow function to bind this.
+  updateGameMetadata = gameMetadata => {
+    this.gameMetadata = gameMetadata;
+  };
 }
 
 /**
