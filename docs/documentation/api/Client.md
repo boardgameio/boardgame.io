@@ -117,12 +117,10 @@ Example:
   "players": {
     "0": {
       "id": 0,
-      "credentials": "qS2m4Ujb_",
       "name": "Alice"
     },
     "1": {
       "id": 1,
-      "credentials": "nIQtXFybDD",
       "name": "Bob"
     }
   }

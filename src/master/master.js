@@ -259,7 +259,7 @@ export class Master {
   async onSync(gameID, playerID, numPlayers) {
     const key = gameID;
 
-    let state, gameMetadata;
+    let state, gameMetadata, filteredGameMetadata;
 
     if (this.executeSynchronously) {
       state = this.storageAPI.get(key);
@@ -267,6 +267,11 @@ export class Master {
     } else {
       state = await this.storageAPI.get(key);
       gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
+    }
+    if (gameMetadata) {
+      filteredGameMetadata = Object.values(gameMetadata.players).map(player => {
+        return { id: player.id, name: player.name };
+      });
     }
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
@@ -302,7 +307,7 @@ export class Master {
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, filteredState, log, gameMetadata],
+      args: [gameID, filteredState, log, filteredGameMetadata],
     });
 
     return;
