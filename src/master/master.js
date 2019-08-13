@@ -263,10 +263,10 @@ export class Master {
 
     if (this.executeSynchronously) {
       state = this.storageAPI.get(key);
-      gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
+      gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
     } else {
       state = await this.storageAPI.get(key);
-      gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
+      gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
     }
     if (gameMetadata) {
       filteredGameMetadata = Object.values(gameMetadata.players).map(player => {

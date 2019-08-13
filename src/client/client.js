@@ -239,7 +239,7 @@ class _ClientImpl {
       isConnected: true,
       onAction: () => {},
       subscribe: () => {},
-      subscribeGameMetadata: () => {},
+      subscribeGameMetadata: _metadata => {}, // eslint-disable-line no-unused-vars
       connect: () => {},
       updateGameID: () => {},
       updatePlayerID: () => {},
