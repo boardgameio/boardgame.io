@@ -195,7 +195,13 @@ describe('multiplayer', () => {
 
   describe('custom transport', () => {
     class CustomTransport {
-      custom = true;
+      constructor() {
+        this.callback = null;
+      }
+
+      subscribeGameMetadata(fn) {
+        this.callback = fn;
+      }
     }
 
     let client;
@@ -209,7 +215,12 @@ describe('multiplayer', () => {
 
     test('correct transport used', () => {
       expect(client.transport).toBeInstanceOf(CustomTransport);
-      expect(client.transport.custom).toBe(true);
+    });
+
+    test('metadata callback', () => {
+      const metadata = { m: true };
+      client.transport.callback(metadata);
+      expect(client.gameMetadata).toEqual(metadata);
     });
   });
 

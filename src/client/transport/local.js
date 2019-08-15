@@ -105,18 +105,14 @@ export class Local {
    * Connect to the server.
    */
   connect() {
-    this.master.connect(
-      this.gameID,
-      this.playerID,
-      (type, ...args) => {
-        if (type == 'sync') {
-          this.onSync.apply(this, args);
-        }
-        if (type == 'update') {
-          this.onUpdate.apply(this, args);
-        }
+    this.master.connect(this.gameID, this.playerID, (type, ...args) => {
+      if (type == 'sync') {
+        this.onSync.apply(this, args);
       }
-    );
+      if (type == 'update') {
+        this.onUpdate.apply(this, args);
+      }
+    });
     this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
 
@@ -124,6 +120,8 @@ export class Local {
    * Subscribe to connection state changes.
    */
   subscribe() {}
+
+  subscribeGameMetadata(_metadata) {} // eslint-disable-line no-unused-vars
 
   /**
    * Updates the game id.

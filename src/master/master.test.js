@@ -44,6 +44,36 @@ describe('sync', () => {
     await master.onSync('gameID', '0', 2);
     expect(send).toHaveBeenCalled();
   });
+
+  test('should not have metadata', async () => {
+    await master.onSync('gameID', '0', 2);
+    // [0][0] = first call, first argument
+    expect(send.mock.calls[0][0].args[3]).toBeUndefined();
+  });
+
+  test('should have metadata', async () => {
+    const db = new InMemory();
+    const dbMetadata = {
+      players: {
+        '0': {
+          id: 0,
+          credentials: 'qS2m4Ujb_',
+          name: 'Alice',
+        },
+        '1': {
+          id: 1,
+          credentials: 'nIQtXFybDD',
+          name: 'Bob',
+        },
+      },
+    };
+    db.set('gameID:metadata', dbMetadata);
+    const masterWithMetadata = new Master(game, db, TransportAPI(send));
+    await masterWithMetadata.onSync('gameID', '0', 2);
+
+    const expectedMetadata = [{ id: 0, name: 'Alice' }, { id: 1, name: 'Bob' }];
+    expect(send.mock.calls[0][0].args[3]).toMatchObject(expectedMetadata);
+  });
 });
 
 describe('update', () => {

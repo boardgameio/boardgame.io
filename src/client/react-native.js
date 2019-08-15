@@ -77,7 +77,7 @@ export function Client(opts) {
     }
 
     // eslint-disable-next-line react/no-deprecated
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
       if (nextProps.gameID != this.props.gameID) {
         this.client.updateGameID(nextProps.gameID);
       }
@@ -90,7 +90,7 @@ export function Client(opts) {
     }
 
     // eslint-disable-next-line react/no-deprecated
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
       this.client.connect();
     }
 
@@ -113,6 +113,7 @@ export function Client(opts) {
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
+          gameMetadata: this.client.gameMetadata,
         });
       }
 
