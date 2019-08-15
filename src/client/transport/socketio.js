@@ -46,6 +46,7 @@ export class SocketIO {
     this.gameID = this.gameName + ':' + this.gameID;
     this.isConnected = false;
     this.callback = () => {};
+    this.gameMetadataCallback = () => {};
   }
 
   /**
@@ -96,10 +97,11 @@ export class SocketIO {
 
     // Called when the client first connects to the master
     // and requests the current game state.
-    this.socket.on('sync', (gameID, state, log) => {
+    this.socket.on('sync', (gameID, state, log, gameMetadata) => {
       if (gameID == this.gameID) {
         const action = ActionCreators.sync(state, log);
         this.store.dispatch(action);
+        this.gameMetadataCallback(gameMetadata);
       }
     });
 
@@ -122,6 +124,10 @@ export class SocketIO {
    */
   subscribe(fn) {
     this.callback = fn;
+  }
+
+  subscribeGameMetadata(fn) {
+    this.gameMetadataCallback = fn;
   }
 
   /**

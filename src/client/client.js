@@ -239,6 +239,7 @@ class _ClientImpl {
       isConnected: true,
       onAction: () => {},
       subscribe: () => {},
+      subscribeGameMetadata: _metadata => {}, // eslint-disable-line no-unused-vars
       connect: () => {},
       updateGameID: () => {},
       updatePlayerID: () => {},
@@ -286,6 +287,10 @@ class _ClientImpl {
     }
 
     this.createDispatchers();
+
+    this.transport.subscribeGameMetadata(metadata => {
+      this.gameMetadata = metadata;
+    });
   }
 
   subscribe(fn) {

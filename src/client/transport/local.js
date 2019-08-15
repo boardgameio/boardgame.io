@@ -121,6 +121,8 @@ export class Local {
    */
   subscribe() {}
 
+  subscribeGameMetadata(_metadata) {} // eslint-disable-line no-unused-vars
+
   /**
    * Updates the game id.
    * @param {string} id - The new game id.
