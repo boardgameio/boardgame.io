@@ -6,6 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MCTSVisualizer } from '../src/ai/mcts-visualizer.js';
+import { MCTSVisualizer } from '../src/ai/mcts-visualizer';
 
 export { MCTSVisualizer };

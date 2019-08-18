@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Debug } from './debug/debug';
 import { Client as RawClient } from './client';
 
@@ -51,33 +50,40 @@ export function Client(opts) {
     loading = Loading;
   }
 
+  type WrappedBoardProps = {
+    // The ID of a game to connect to.
+    // Only relevant in multiplayer.
+    gameID: string;
+    // The ID of the player associated with this client.
+    // Only relevant in multiplayer.
+    playerID: string;
+    // This client's authentication credentials.
+    // Only relevant in multiplayer.
+    credentials: string;
+    // Enable / disable the Debug UI.
+    debug: boolean;
+  };
+
   /*
    * WrappedBoard
    *
    * The main React component that wraps the passed in
    * board component and adds the API to its props.
    */
-  return class WrappedBoard extends React.Component {
-    static propTypes = {
-      // The ID of a game to connect to.
-      // Only relevant in multiplayer.
-      gameID: PropTypes.string,
-      // The ID of the player associated with this client.
-      // Only relevant in multiplayer.
-      playerID: PropTypes.string,
-      // This client's authentication credentials.
-      // Only relevant in multiplayer.
-      credentials: PropTypes.string,
-      // Enable / disable the Debug UI.
-      debug: PropTypes.any,
-    };
-
+  return class WrappedBoard extends React.Component<WrappedBoardProps> {
     static defaultProps = {
       gameID: 'default',
       playerID: null,
       credentials: null,
       debug: true,
     };
+
+    gameID: WrappedBoardProps['gameID'];
+    playerID: WrappedBoardProps['playerID'];
+    credentials: WrappedBoardProps['credentials'];
+    debug: WrappedBoardProps['debug'];
+
+    client: ReturnType<RawClient>;
 
     state = {
       gameStateOverride: null,
@@ -210,3 +216,5 @@ export function Client(opts) {
     }
   };
 }
+
+export default Client;

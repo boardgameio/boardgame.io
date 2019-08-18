@@ -8,11 +8,7 @@
 
 import React from 'react';
 import { makeMove } from '../core/action-creators';
-import {
-  MCTSVisualizer,
-  MCTSRoot,
-  MCTSNodeDetails,
-} from './mcts-visualizer.js';
+import { MCTSVisualizer, MCTSRoot, MCTSNodeDetails } from './mcts-visualizer';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 

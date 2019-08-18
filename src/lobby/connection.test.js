@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { LobbyConnection } from './connection.js';
+import { LobbyConnection } from './connection';
 
 describe('lobby', () => {
   let lobby;

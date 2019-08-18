@@ -22,7 +22,12 @@ const env = process.env.NODE_ENV;
 
 const plugins = [
   postcss(),
+  resolve(),
+  tsPlugin({
+    typescript: ttypescript,
+  }),
   babel({ exclude: '**/node_modules/**' }),
+  commonjs({ include: 'node_modules/**' }),
   filesize(),
 ];
 
@@ -45,14 +50,7 @@ export default [
   {
     input: 'packages/server.ts',
     output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
-    plugins: [
-      resolve(),
-      tsPlugin({
-        typescript: ttypescript,
-      }),
-      babel({ exclude: ['**/node_modules/**'] }),
-      commonjs({ include: 'node_modules/**' }),
-    ],
+    plugins,
   },
 
   {

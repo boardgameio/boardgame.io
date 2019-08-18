@@ -6,13 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { UI } from '../src/ui/ui.js';
-import { Card } from '../src/ui/card.js';
-import { Deck } from '../src/ui/deck.js';
-import { Grid } from '../src/ui/grid.js';
-import { HexGrid } from '../src/ui/hex.js';
-import { HexUtils } from '../src/ui/hex-utils.js';
-import { Token } from '../src/ui/token.js';
-import { GameLog } from '../src/client/log/log.js';
+import { UI } from '../src/ui/ui';
+import { Card } from '../src/ui/card';
+import { Deck } from '../src/ui/deck';
+import { Grid } from '../src/ui/grid';
+import { HexGrid } from '../src/ui/hex';
+import { HexUtils } from '../src/ui/hex-utils';
+import { Token } from '../src/ui/token';
+import { GameLog } from '../src/client/log/log';
 
 export { UI, Card, Deck, Grid, HexGrid, Token, HexUtils, GameLog };

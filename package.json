@@ -77,6 +77,8 @@
     "@babel/preset-typescript": "^7.3.3",
     "@tweenjs/tween.js": "^17.2.0",
     "@types/jest": "^24.0.0",
+    "@typescript-eslint/eslint-plugin": "^1.11.0",
+    "@typescript-eslint/parser": "^1.11.0",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^8.0.0",

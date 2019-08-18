@@ -6,16 +6,16 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Client } from '../src/client/client.js';
-import { Client as ReactClient } from '../src/client/react.js';
-import { Client as ReactNativeClient } from '../src/client/react-native.js';
-import { TurnOrder, Pass } from '../src/core/turn-order.js';
-import { Token } from '../src/ui/token.js';
-import { Card } from '../src/ui/card.js';
-import { Grid } from '../src/ui/grid.js';
-import { HexGrid } from '../src/ui/hex.js';
-import { AI } from '../src/ai/ai.js';
-import { RandomBot, MCTSBot } from '../src/ai/bot.js';
+import { Client } from '../src/client/client';
+import { Client as ReactClient } from '../src/client/react';
+import { Client as ReactNativeClient } from '../src/client/react-native';
+import { TurnOrder, Pass } from '../src/core/turn-order';
+import { Token } from '../src/ui/token';
+import { Card } from '../src/ui/card';
+import { Grid } from '../src/ui/grid';
+import { HexGrid } from '../src/ui/hex';
+import { AI } from '../src/ai/ai';
+import { RandomBot, MCTSBot } from '../src/ai/bot';
 
 export default {
   Client,

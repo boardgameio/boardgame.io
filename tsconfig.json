@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
@@ -9,7 +10,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "plugins": [
-      { "transform": "ts-transformer-imports" }
+      {
+        "transform": "ts-transformer-imports"
+      }
     ]
   }
 }

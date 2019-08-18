@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { INVALID_MOVE } from '../src/core/reducer.js';
-import { Pass, TurnOrder } from '../src/core/turn-order.js';
-import { PlayerView } from '../src/core/player-view.js';
+import { INVALID_MOVE } from '../src/core/reducer';
+import { Pass, TurnOrder } from '../src/core/turn-order';
+import { PlayerView } from '../src/core/player-view';
 
 export { TurnOrder, Pass, PlayerView, INVALID_MOVE };
