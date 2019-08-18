@@ -300,15 +300,12 @@ describe('Random inside setup()', () => {
 
 test('undo / redo', () => {
   const game = {
+    seed: 0,
     moves: {
       move: (G, ctx, arg) => ({ ...G, [arg]: true }),
-      nextPhase: (G, ctx) => {
-        ctx.events.endPhase({ next: 'phase2' });
+      roll: (G, ctx) => {
+        G.roll = ctx.random.D6();
       },
-    },
-    phases: {
-      phase1: { start: true },
-      phase2: {},
     },
   };
 
@@ -317,24 +314,24 @@ test('undo / redo', () => {
   let state = InitializeGame({ game });
 
   state = reducer(state, makeMove('move', 'A'));
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
 
   state = reducer(state, makeMove('move', 'B'));
-  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.G).toMatchObject({ A: true, B: true });
   expect(state._undo[1].ctx.events).toBeUndefined();
   expect(state._undo[1].ctx.random).toBeUndefined();
 
   state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
 
   state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.G).toMatchObject({ A: true, B: true });
 
   state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, B: true });
+  expect(state.G).toMatchObject({ A: true, B: true });
 
   state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
 
   state = reducer(state, undo());
   state = reducer(state, undo());
@@ -343,43 +340,27 @@ test('undo / redo', () => {
 
   state = reducer(state, redo());
   state = reducer(state, makeMove('move', 'C'));
-  expect(state.G).toEqual({ A: true, C: true });
+  expect(state.G).toMatchObject({ A: true, C: true });
 
   state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ A: true });
 
   state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, C: true });
+  expect(state.G).toMatchObject({ A: true, C: true });
 
   state = reducer(state, undo());
   state = reducer(state, undo());
-  state = reducer(state, makeMove('move', 'A'));
-  expect(state.G).toEqual({ A: true });
-
-  state = reducer(state, makeMove('nextPhase'));
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
-  state = reducer(state, makeMove('move', 'B'));
-  expect(state.G).toEqual({ A: true, B: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+  state = reducer(state, makeMove('roll'));
+  expect(state.G).toMatchObject({ roll: 4 });
 
   state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
-
+  expect(state.G).toEqual({});
   state = reducer(state, redo());
-  expect(state.G).toEqual({ A: true, B: true });
-  expect(state.ctx.phase).toEqual('phase2');
-  expect(state.ctx).toEqual(state._undo[state._undo.length - 1].ctx);
+  expect(state.G).toMatchObject({ roll: 4 });
 
-  state = reducer(state, undo());
   state = reducer(state, gameEvent('endTurn'));
   state = reducer(state, undo());
-  expect(state.G).toEqual({ A: true });
+  expect(state.G).toMatchObject({ roll: 4 });
 });
 
 test('custom log messages', () => {
