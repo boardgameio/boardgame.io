@@ -8,6 +8,8 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [Cardman Multiplayer](https://github.com/VengelStudio/cardman-multiplayer) - [play](http://cardman-multiplayer.herokuapp.com) - A cross between Hangman and a card game.
 
+- [Elevation of Privilege](https://github.com/dehydr8/elevation-of-privilege) - [play](https://elevation-of-privilege.herokuapp.com/) - An online multiplayer version of the threat modeling card game.
+
 - [Fields of Arle simulator](https://github.com/philihp/fields-of-arle) - [play](https://arle.philihp.com) - Open source simulator of Fields of Arle.
 
 - [Four in a row](https://github.com/PJohannessen/four-in-a-row) - [tutorial](https://www.lonesomecrowdedweb.com/blog/four-in-a-row-boardgameio/) - Four in a Row using boardgame.io.
