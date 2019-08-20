@@ -8,6 +8,7 @@
 
 import {
   SetStageEvent,
+  SetStage,
   InitTurnOrderState,
   UpdateTurnOrderState,
   TurnOrder,
@@ -416,7 +417,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     // Initialize the turn order state.
     if (currentPlayer) {
       ctx = { ...ctx, currentPlayer };
+      if (conf.turn.setStage) {
+        ctx = SetStage(ctx, conf.turn.setStage);
+      }
     } else {
+      // This is only called at the beginning of the phase
+      // when there is no currentPlayer yet.
       ctx = InitTurnOrderState(G, ctx, conf.turn);
     }
 
@@ -464,13 +470,13 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     const conf = GetPhase(ctx);
 
     // Update turn order state.
-    const { endPhase, ctx: b } = UpdateTurnOrderState(
+    const { endPhase, ctx: newCtx } = UpdateTurnOrderState(
       G,
       { ...ctx, currentPlayer },
       conf.turn,
       arg
     );
-    ctx = b;
+    ctx = newCtx;
 
     state = { ...state, G, ctx };
 
@@ -528,7 +534,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
   function EndPhase(state, { arg, next, phase, turn, automatic }) {
     // End the turn first.
-    state = EndTurn(state, { turn });
+    state = EndTurn(state, { turn, force: true });
 
     let G = state.G;
     let ctx = state.ctx;
@@ -573,7 +579,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog };
   }
 
-  function EndTurn(state, { arg, next, turn, automatic }) {
+  function EndTurn(state, { arg, next, turn, force, automatic }) {
     // If we are not in a turn currently, do nothing.
     if (state.ctx.currentPlayer === null) {
       return state;
@@ -590,7 +596,11 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Prevent ending the turn if moveLimit haven't been made.
     const currentPlayerMoves = ctx.numMoves || 0;
-    if (conf.turn.moveLimit && currentPlayerMoves < conf.turn.moveLimit) {
+    if (
+      !force &&
+      conf.turn.moveLimit &&
+      currentPlayerMoves < conf.turn.moveLimit
+    ) {
       return state;
     }
 
@@ -668,8 +678,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   function ProcessMove(state, action) {
     let conf = GetPhase(state.ctx);
 
-    let endPhase = false;
-
     let stage = state.ctx.stage;
     if (state.ctx._stageOnce) {
       const playerID = action.playerID;
@@ -682,8 +690,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
       if (Object.keys(stage).length == 0) {
         stage = null;
-        endPhase = conf.turn.order.endPhaseOnceDone;
       }
+    }
+
+    let numMoves = state.ctx.numMoves;
+    if (action.playerID == state.ctx.currentPlayer) {
+      numMoves++;
     }
 
     state = {
@@ -691,7 +703,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...state.ctx,
         stage,
-        numMoves: state.ctx.numMoves + 1,
+        numMoves,
       },
     };
 
@@ -711,14 +723,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     };
 
     let events = [{ fn: OnMove }];
-
-    if (endPhase) {
-      events.push({
-        fn: EndPhase,
-        turn: state.ctx.turn,
-        phase: state.ctx.phase,
-      });
-    }
 
     return ProcessEvents(state, events);
   }
@@ -767,7 +771,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       numPlayers,
       turn: 0,
       currentPlayer: '0',
-      currentPlayerMoves: 0,
       playOrder: [...new Array(numPlayers)].map((d, i) => i + ''),
       playOrderPos: 0,
       phase: startingPhase,

@@ -35,10 +35,10 @@ export const Pass = (G, ctx) => {
  * @param {*} arg
  */
 export function SetStageEvent(state, arg) {
-  return { ...state, ctx: setStage(state.ctx, arg) };
+  return { ...state, ctx: SetStage(state.ctx, arg) };
 }
 
-function setStage(ctx, arg) {
+export function SetStage(ctx, arg) {
   let stage = ctx.stage || {};
   let _stageOnce = false;
 
@@ -110,7 +110,7 @@ export function InitTurnOrderState(G, ctx, turn) {
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-  ctx = setStage(ctx, order.stages || {});
+  ctx = SetStage(ctx, turn.setStage || {});
 
   return ctx;
 }
@@ -145,10 +145,6 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
     } else {
       playOrderPos = t;
       currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
-
-      if (order.stages !== undefined) {
-        ctx = setStage(ctx, order.stages);
-      }
     }
   }
 
@@ -196,58 +192,6 @@ export const TurnOrder = {
         return ctx.playOrderPos + 1;
       }
     },
-  },
-
-  /**
-   * ANY
-   *
-   * The turn stays with one player, but any player can play (in any order)
-   * until the phase ends.
-   */
-  ANY: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { all: '' },
-  },
-
-  /**
-   * ANY_ONCE
-   *
-   * The turn stays with one player, but any player can play (once, and in any order).
-   * This is typically used in a phase where you want to elicit a response
-   * from every player in the game.
-   */
-  ANY_ONCE: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { all: '', once: true },
-    endPhaseOnceDone: true,
-  },
-
-  /**
-   * OTHERS
-   *
-   * The turn stays with one player, and every *other* player can play (in any order)
-   * until the phase ends.
-   */
-  OTHERS: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { others: '' },
-  },
-
-  /**
-   * OTHERS_ONCE
-   *
-   * The turn stays with one player, and every *other* player can play (once, and in any order).
-   * This is typically used in a phase where you want to elicit a response
-   * from every *other* player in the game.
-   */
-  OTHERS_ONCE: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { others: '', once: true },
-    endPhaseOnceDone: true,
   },
 
   /**
@@ -299,4 +243,40 @@ export const TurnOrder = {
       }
     },
   },
+};
+
+export const Stage = {
+  /**
+   * ANY
+   *
+   * The turn stays with one player, but any player can play (in any order)
+   * until the phase ends.
+   */
+  ANY: { all: '' },
+
+  /**
+   * ANY_ONCE
+   *
+   * The turn stays with one player, but any player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every player in the game.
+   */
+  ANY_ONCE: { all: '', once: true },
+
+  /**
+   * OTHERS
+   *
+   * The turn stays with one player, and every *other* player can play (in any order)
+   * until the phase ends.
+   */
+  OTHERS: { others: '' },
+
+  /**
+   * OTHERS_ONCE
+   *
+   * The turn stays with one player, and every *other* player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every *other* player in the game.
+   */
+  OTHERS_ONCE: { others: '', once: true },
 };

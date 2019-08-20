@@ -7,7 +7,7 @@
  */
 
 import { Flow } from './flow';
-import { UpdateTurnOrderState, TurnOrder, Pass } from './turn-order';
+import { UpdateTurnOrderState, TurnOrder, Stage, Pass } from './turn-order';
 import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
@@ -79,7 +79,7 @@ describe('turn orders', () => {
 
   test('ANY', () => {
     const flow = Flow({
-      turn: { order: TurnOrder.ANY },
+      turn: { setStage: Stage.ANY },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -89,13 +89,13 @@ describe('turn orders', () => {
     expect(state.ctx).not.toHaveUndefinedProperties();
 
     state = flow.processGameEvent(state, gameEvent('endTurn'));
-    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.stage).toEqual({ '0': '', '1': '' });
   });
 
   test('ANY_ONCE', () => {
     const flow = Flow({
-      phases: { A: { start: true, turn: { order: TurnOrder.ANY_ONCE } } },
+      phases: { A: { start: true, turn: { setStage: Stage.ANY_ONCE } } },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -109,25 +109,24 @@ describe('turn orders', () => {
     state = flow.processGameEvent(state, gameEvent('endTurn'));
 
     expect(state.ctx.phase).toBe('A');
-    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.currentPlayer).toBe('1');
     expect(Object.keys(state.ctx.stage)).toEqual(['0', '1']);
 
     state = flow.processMove(state, makeMove('', null, '0').payload);
 
     expect(state.ctx.phase).toBe('A');
-    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.currentPlayer).toBe('1');
     expect(Object.keys(state.ctx.stage)).toEqual(['1']);
 
     state = flow.processMove(state, makeMove('', null, '1').payload);
 
-    expect(state.ctx.phase).toBe('');
-    expect(state.ctx.currentPlayer).toBe('0');
-    expect(state.ctx.stage).toBe(null);
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.stage).toBeNull();
   });
 
   test('OTHERS', () => {
     const flow = Flow({
-      turn: { order: TurnOrder.OTHERS },
+      turn: { setStage: Stage.OTHERS },
     });
 
     let state = { ctx: flow.ctx(3) };
@@ -137,13 +136,13 @@ describe('turn orders', () => {
     expect(state.ctx).not.toHaveUndefinedProperties();
 
     state = flow.processGameEvent(state, gameEvent('endTurn'));
-    expect(state.ctx.currentPlayer).toBe('0');
-    expect(Object.keys(state.ctx.stage)).toEqual(['1', '2']);
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(Object.keys(state.ctx.stage)).toEqual(['0', '2']);
   });
 
   test('OTHERS_ONCE', () => {
     const flow = Flow({
-      turn: { order: TurnOrder.OTHERS_ONCE },
+      turn: { setStage: Stage.OTHERS_ONCE },
       phases: { A: { start: true } },
     });
 
@@ -158,20 +157,19 @@ describe('turn orders', () => {
     state = flow.processGameEvent(state, gameEvent('endTurn'));
 
     expect(state.ctx.phase).toBe('A');
-    expect(state.ctx.currentPlayer).toBe('0');
-    expect(Object.keys(state.ctx.stage)).toEqual(['1', '2']);
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(Object.keys(state.ctx.stage)).toEqual(['0', '2']);
 
-    state = flow.processMove(state, makeMove('', null, '1').payload);
+    state = flow.processMove(state, makeMove('', null, '0').payload);
 
     expect(state.ctx.phase).toBe('A');
-    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.currentPlayer).toBe('1');
     expect(Object.keys(state.ctx.stage)).toEqual(['2']);
 
     state = flow.processMove(state, makeMove('', null, '2').payload);
 
-    expect(state.ctx.phase).toBe('');
-    expect(state.ctx.currentPlayer).toBe('0');
-    expect(Object.keys(state.ctx.stage)).toEqual(['1', '2']);
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.stage).toBeNull();
   });
 
   test('CUSTOM', () => {
@@ -276,7 +274,7 @@ test('passing', () => {
 test('end game after everyone passes', () => {
   const game = {
     endIf: G => G.allPassed,
-    turn: { order: TurnOrder.ANY },
+    turn: { setStage: Stage.ANY },
     moves: { pass: Pass },
   };
 
@@ -428,10 +426,7 @@ describe('SetStage', () => {
     beforeAll(() => {
       const game = {
         turn: {
-          order: {
-            ...TurnOrder.DEFAULT,
-            stages: { currentPlayer: 'A' },
-          },
+          setStage: { currentPlayer: 'A' },
 
           stages: {
             A: {

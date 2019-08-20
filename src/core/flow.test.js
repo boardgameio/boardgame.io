@@ -168,8 +168,8 @@ test('numMoves', () => {
   expect(state.ctx.numMoves).toBe(0);
 });
 
-test('moveLimit', () => {
-  {
+describe('moveLimit', () => {
+  test('without phases', () => {
     const flow = Flow({
       turn: {
         moveLimit: 2,
@@ -183,9 +183,9 @@ test('moveLimit', () => {
     expect(state.ctx.turn).toBe(1);
     state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(2);
-  }
+  });
 
-  {
+  test('with phases', () => {
     const flow = Flow({
       turn: { moveLimit: 2 },
       phases: {
@@ -197,21 +197,34 @@ test('moveLimit', () => {
       },
     });
     let state = flow.init({ ctx: flow.ctx(2) });
+
     expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.currentPlayer).toBe('0');
+
     state = flow.processMove(state, makeMove('move', null, '0').payload);
+
     expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.currentPlayer).toBe('0');
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
+
     expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.currentPlayer).toBe('0');
+
     state = flow.processMove(state, makeMove('move', null, '0').payload);
+
     expect(state.ctx.turn).toBe(2);
+    expect(state.ctx.currentPlayer).toBe('1');
 
     state = flow.processGameEvent(state, gameEvent('endPhase', { next: 'B' }));
 
     expect(state.ctx.phase).toBe('B');
     expect(state.ctx.turn).toBe(3);
-    state = flow.processMove(state, makeMove('move', null, '0').payload);
+    expect(state.ctx.currentPlayer).toBe('1');
+
+    state = flow.processMove(state, makeMove('move', null, '1').payload);
     expect(state.ctx.turn).toBe(4);
-  }
+  });
 });
 
 test('turn.onBegin', () => {
@@ -657,5 +670,37 @@ describe('infinite loops', () => {
     expect(client.getState().ctx.phase).toBe('A');
     client.events.endPhase();
     expect(client.getState().ctx.phase).toBe('B');
+  });
+});
+
+describe('setStage', () => {
+  test('sets stages at each turn', () => {
+    const game = {
+      turn: {
+        stages: { A: {}, B: {} },
+        setStage: {
+          currentPlayer: 'A',
+          others: 'B',
+        },
+      },
+    };
+
+    const client = Client({ game, numPlayers: 3 });
+
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState().ctx.stage).toEqual({
+      '0': 'A',
+      '1': 'B',
+      '2': 'B',
+    });
+
+    client.events.endTurn();
+
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+    expect(client.getState().ctx.stage).toEqual({
+      '0': 'B',
+      '1': 'A',
+      '2': 'B',
+    });
   });
 });
