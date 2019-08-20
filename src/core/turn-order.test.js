@@ -508,7 +508,7 @@ describe('SetStage', () => {
     });
 
     test('stages reset on new turn', () => {
-      reducer(state, gameEvent('endTurn', undefined, '0'));
+      state = reducer(state, gameEvent('endTurn', undefined, '0'));
       expect(state.ctx.stage).toEqual({ '1': 'A' });
     });
   });
