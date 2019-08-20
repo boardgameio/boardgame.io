@@ -678,8 +678,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   function ProcessMove(state, action) {
     let conf = GetPhase(state.ctx);
 
-    let endPhase = false;
-
     let stage = state.ctx.stage;
     if (state.ctx._stageOnce) {
       const playerID = action.playerID;
@@ -692,7 +690,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
       if (Object.keys(stage).length == 0) {
         stage = null;
-        endPhase = conf.turn.order.endPhaseOnceDone;
       }
     }
 
@@ -726,14 +723,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     };
 
     let events = [{ fn: OnMove }];
-
-    if (endPhase) {
-      events.push({
-        fn: EndPhase,
-        turn: state.ctx.turn,
-        phase: state.ctx.phase,
-      });
-    }
 
     return ProcessEvents(state, events);
   }
