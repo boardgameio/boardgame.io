@@ -155,6 +155,20 @@ describe('phases', () => {
   });
 });
 
+describe('move counts', () => {
+  test('numMoves', () => {
+    const flow = Flow({});
+    let state = flow.init({ ctx: flow.ctx(2) });
+    expect(state.ctx.numMoves).toBe(0);
+    state = flow.processMove(state, makeMove().payload);
+    expect(state.ctx.numMoves).toBe(1);
+    state = flow.processMove(state, makeMove().payload);
+    expect(state.ctx.numMoves).toBe(2);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.numMoves).toBe(0);
+  });
+});
+
 test('moveLimit', () => {
   {
     const flow = Flow({
