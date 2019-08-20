@@ -767,7 +767,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       numPlayers,
       turn: 0,
       currentPlayer: '0',
-      currentPlayerMoves: 0,
       playOrder: [...new Array(numPlayers)].map((d, i) => i + ''),
       playOrderPos: 0,
       phase: startingPhase,
