@@ -155,8 +155,8 @@ describe('phases', () => {
   });
 });
 
-test('moveLimit', () => {
-  {
+describe('moveLimit', () => {
+  test('without phases', () => {
     const flow = Flow({
       turn: {
         moveLimit: 2,
@@ -170,9 +170,9 @@ test('moveLimit', () => {
     expect(state.ctx.turn).toBe(1);
     state = flow.processMove(state, makeMove('move', null, '0').payload);
     expect(state.ctx.turn).toBe(2);
-  }
+  });
 
-  {
+  test('with phases', () => {
     const flow = Flow({
       turn: { moveLimit: 2 },
       phases: {
@@ -184,21 +184,34 @@ test('moveLimit', () => {
       },
     });
     let state = flow.init({ ctx: flow.ctx(2) });
+
     expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.currentPlayer).toBe('0');
+
     state = flow.processMove(state, makeMove('move', null, '0').payload);
+
     expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.currentPlayer).toBe('0');
+
     state = flow.processGameEvent(state, gameEvent('endTurn'));
+
     expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.currentPlayer).toBe('0');
+
     state = flow.processMove(state, makeMove('move', null, '0').payload);
+
     expect(state.ctx.turn).toBe(2);
+    expect(state.ctx.currentPlayer).toBe('1');
 
     state = flow.processGameEvent(state, gameEvent('endPhase', { next: 'B' }));
 
     expect(state.ctx.phase).toBe('B');
     expect(state.ctx.turn).toBe(3);
-    state = flow.processMove(state, makeMove('move', null, '0').payload);
+    expect(state.ctx.currentPlayer).toBe('1');
+
+    state = flow.processMove(state, makeMove('move', null, '1').payload);
     expect(state.ctx.turn).toBe(4);
-  }
+  });
 });
 
 test('turn.onBegin', () => {
