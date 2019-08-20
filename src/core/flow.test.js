@@ -646,3 +646,35 @@ describe('infinite loops', () => {
     expect(client.getState().ctx.phase).toBe('B');
   });
 });
+
+describe('setStage', () => {
+  test('sets stages at each turn', () => {
+    const game = {
+      turn: {
+        stages: { A: {}, B: {} },
+        setStage: {
+          currentPlayer: 'A',
+          others: 'B',
+        },
+      },
+    };
+
+    const client = Client({ game, numPlayers: 3 });
+
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState().ctx.stage).toEqual({
+      '0': 'A',
+      '1': 'B',
+      '2': 'B',
+    });
+
+    client.events.endTurn();
+
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+    expect(client.getState().ctx.stage).toEqual({
+      '0': 'B',
+      '1': 'A',
+      '2': 'B',
+    });
+  });
+});

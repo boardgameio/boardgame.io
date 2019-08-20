@@ -8,6 +8,7 @@
 
 import {
   SetStageEvent,
+  SetStage,
   InitTurnOrderState,
   UpdateTurnOrderState,
   TurnOrder,
@@ -416,7 +417,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     // Initialize the turn order state.
     if (currentPlayer) {
       ctx = { ...ctx, currentPlayer };
+      if (conf.turn.setStage) {
+        ctx = SetStage(ctx, conf.turn.setStage);
+      }
     } else {
+      // This is only called at the beginning of the phase
+      // when there is no currentPlayer yet.
       ctx = InitTurnOrderState(G, ctx, conf.turn);
     }
 
@@ -464,13 +470,13 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     const conf = GetPhase(ctx);
 
     // Update turn order state.
-    const { endPhase, ctx: b } = UpdateTurnOrderState(
+    const { endPhase, ctx: newCtx } = UpdateTurnOrderState(
       G,
       { ...ctx, currentPlayer },
       conf.turn,
       arg
     );
-    ctx = b;
+    ctx = newCtx;
 
     state = { ...state, G, ctx };
 

@@ -35,10 +35,10 @@ export const Pass = (G, ctx) => {
  * @param {*} arg
  */
 export function SetStageEvent(state, arg) {
-  return { ...state, ctx: setStage(state.ctx, arg) };
+  return { ...state, ctx: SetStage(state.ctx, arg) };
 }
 
-function setStage(ctx, arg) {
+export function SetStage(ctx, arg) {
   let stage = ctx.stage || {};
   let _stageOnce = false;
 
@@ -110,7 +110,7 @@ export function InitTurnOrderState(G, ctx, turn) {
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-  ctx = setStage(ctx, order.stages || {});
+  ctx = SetStage(ctx, turn.setStage || {});
 
   return ctx;
 }
@@ -145,10 +145,6 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
     } else {
       playOrderPos = t;
       currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
-
-      if (order.stages !== undefined) {
-        ctx = setStage(ctx, order.stages);
-      }
     }
   }
 
