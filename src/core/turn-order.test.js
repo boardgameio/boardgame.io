@@ -511,6 +511,11 @@ describe('SetStage', () => {
       state = reducer(state, makeMove('discard', undefined, '2'));
       expect(state.ctx.stage).toEqual({ '0': '' });
     });
+
+    test('stages reset on new turn', () => {
+      reducer(state, gameEvent('endTurn', undefined, '0'));
+      expect(state.ctx.stage).toEqual({ '1': 'A' });
+    });
   });
 });
 
