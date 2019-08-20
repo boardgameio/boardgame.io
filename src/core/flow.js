@@ -534,7 +534,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
   function EndPhase(state, { arg, next, phase, turn, automatic }) {
     // End the turn first.
-    state = EndTurn(state, { turn });
+    state = EndTurn(state, { turn, force: true });
 
     let G = state.G;
     let ctx = state.ctx;
@@ -579,7 +579,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog };
   }
 
-  function EndTurn(state, { arg, next, turn, automatic }) {
+  function EndTurn(state, { arg, next, turn, force, automatic }) {
     // If we are not in a turn currently, do nothing.
     if (state.ctx.currentPlayer === null) {
       return state;
@@ -596,7 +596,11 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Prevent ending the turn if moveLimit haven't been made.
     const currentPlayerMoves = ctx.numMoves || 0;
-    if (conf.turn.moveLimit && currentPlayerMoves < conf.turn.moveLimit) {
+    if (
+      !force &&
+      conf.turn.moveLimit &&
+      currentPlayerMoves < conf.turn.moveLimit
+    ) {
       return state;
     }
 
@@ -692,12 +696,17 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       }
     }
 
+    let numMoves = state.ctx.numMoves;
+    if (action.playerID == state.ctx.currentPlayer) {
+      numMoves++;
+    }
+
     state = {
       ...state,
       ctx: {
         ...state.ctx,
         stage,
-        numMoves: state.ctx.numMoves + 1,
+        numMoves,
       },
     };
 
