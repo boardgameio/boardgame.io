@@ -39,7 +39,9 @@ export class Events {
    * @param {object} state - The state object { G, ctx }.
    */
   update(state) {
-    for (const item of this.dispatch) {
+    const length = this.dispatch.length;
+    for (let i = 0; i < length; i++) {
+      const item = this.dispatch[i];
       const action = automaticGameEvent(item.key, item.args, this.playerID);
       state = {
         ...state,

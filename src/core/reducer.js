@@ -85,7 +85,6 @@ export function CreateGameReducer({ game, multiplayer }) {
         state.ctx = apiCtx.attachToContext(state.ctx);
 
         let newState = game.flow.processGameEvent(state, action);
-
         newState = apiCtx.updateAndDetach(newState, true);
 
         return { ...newState, _stateID: state._stateID + 1 };

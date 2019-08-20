@@ -612,15 +612,37 @@ describe('moveMap', () => {
   });
 });
 
-test('another infinite loop', () => {
-  const endIf = () => true;
-  const game = {
-    phases: {
-      A: { endIf, next: 'B', start: true },
-      B: { endIf, next: 'A' },
-    },
-  };
-  const client = Client({ game });
+describe('infinite loops', () => {
+  test('A', () => {
+    const endIf = () => true;
+    const game = {
+      phases: {
+        A: { endIf, next: 'B', start: true },
+        B: { endIf, next: 'A' },
+      },
+    };
+    const client = Client({ game });
 
-  expect(client.getState().ctx.phase).toBe('');
+    expect(client.getState().ctx.phase).toBe('');
+  });
+
+  test('B', () => {
+    const game = {
+      turn: {
+        onEnd: (G, ctx) => {
+          ctx.events.endPhase();
+        },
+      },
+      phases: {
+        A: { next: 'B', start: true },
+        B: { next: 'C' },
+        C: { next: 'A' },
+      },
+    };
+    const client = Client({ game });
+
+    expect(client.getState().ctx.phase).toBe('A');
+    client.events.endPhase();
+    expect(client.getState().ctx.phase).toBe('B');
+  });
 });
