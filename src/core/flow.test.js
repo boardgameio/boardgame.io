@@ -167,6 +167,30 @@ describe('move counts', () => {
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.numMoves).toBe(0);
   });
+
+  test('currentPlayerMoves', () => {
+    const flow = Flow({});
+    let state = flow.init({ ctx: flow.ctx(2) });
+    console.log({ flow, state });
+    expect(state.ctx.currentPlayerMoves).toBe(0);
+    state = flow.processMove(
+      state,
+      makeMove(undefined, undefined, '0').payload
+    );
+    expect(state.ctx.currentPlayerMoves).toBe(1);
+    state = flow.processMove(
+      state,
+      makeMove(undefined, undefined, '0').payload
+    );
+    state = flow.processMove(
+      state,
+      makeMove(undefined, undefined, '1').payload
+    );
+    expect(state.ctx.currentPlayerMoves).toBe(2);
+    expect(state.ctx.numMoves).toBe(3);
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayerMoves).toBe(0);
+  });
 });
 
 test('moveLimit', () => {
