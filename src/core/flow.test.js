@@ -154,7 +154,7 @@ describe('phases', () => {
     expect(endPhaseBCount).toEqual(0);
   });
 
-  test('endPhase returns to default phase', () => {
+  test('endPhase returns to null phase', () => {
     const flow = Flow({
       phases: { A: { start: true }, B: {}, C: {} },
     });
@@ -163,7 +163,7 @@ describe('phases', () => {
 
     expect(state.ctx.phase).toBe('A');
     state = flow.processGameEvent(state, gameEvent('endPhase'));
-    expect(state.ctx.phase).toBe('');
+    expect(state.ctx.phase).toBe(null);
   });
 });
 

@@ -454,7 +454,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     } else if (conf.next !== undefined) {
       ctx = { ...ctx, phase: conf.next };
     } else {
-      ctx = { ...ctx, phase: '' };
+      ctx = { ...ctx, phase: null };
     }
 
     state = { ...state, ctx };
