@@ -679,7 +679,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let conf = GetPhase(state.ctx);
 
     let stage = state.ctx.stage;
-    if (state.ctx._stageOnce) {
+    let _stageOnce = state.ctx._stageOnce;
+    if (_stageOnce) {
       const playerID = action.playerID;
       stage = Object.keys(stage)
         .filter(id => id !== playerID)
@@ -690,6 +691,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
       if (Object.keys(stage).length == 0) {
         stage = null;
+        _stageOnce = false;
       }
     }
 
@@ -703,6 +705,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...state.ctx,
         stage,
+        _stageOnce,
         numMoves,
       },
     };
