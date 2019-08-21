@@ -122,6 +122,8 @@ describe('turn orders', () => {
 
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.stage).toBeNull();
+
+    state = flow.processMove(state, makeMove('', null, '1').payload);
   });
 
   test('OTHERS', () => {
