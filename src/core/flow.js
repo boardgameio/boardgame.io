@@ -678,8 +678,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   function ProcessMove(state, action) {
     let conf = GetPhase(state.ctx);
 
-    let stage = state.ctx.stage;
-    let _stageOnce = state.ctx._stageOnce;
+    let { stage, _stageOnce, stageCompleted } = state.ctx;
     if (_stageOnce) {
       const playerID = action.playerID;
       stage = Object.keys(stage)
@@ -692,6 +691,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       if (Object.keys(stage).length == 0) {
         stage = null;
         _stageOnce = false;
+        stageCompleted = true;
       }
     }
 
@@ -705,6 +705,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...state.ctx,
         stage,
+        stageCompleted,
         _stageOnce,
         numMoves,
       },

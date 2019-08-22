@@ -40,6 +40,7 @@ export function SetStageEvent(state, arg) {
 
 export function SetStage(ctx, arg) {
   let stage = ctx.stage || {};
+  let stageCompleted = null;
   let _stageOnce = false;
 
   if (arg.value) {
@@ -74,7 +75,11 @@ export function SetStage(ctx, arg) {
     stage = null;
   }
 
-  return { ...ctx, stage, _stageOnce };
+  if (arg.once && Object.keys(stage).length > 0) {
+    stageCompleted = false;
+  }
+
+  return { ...ctx, stage, stageCompleted, _stageOnce };
 }
 
 /**

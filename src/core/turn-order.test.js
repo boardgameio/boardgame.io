@@ -369,6 +369,7 @@ describe('SetStage', () => {
       gameEvent('setStage', [{ all: '' }])
     );
     expect(newState.ctx.stage).toMatchObject({ '0': '', '1': '' });
+    expect(newState.ctx.stageCompleted).toBeNull();
   });
 
   test('once', () => {
@@ -387,10 +388,13 @@ describe('SetStage', () => {
     let state = InitializeGame({ game });
     state = reducer(state, makeMove('B', null, '0'));
     expect(Object.keys(state.ctx.stage)).toEqual(['0', '1']);
+    expect(state.ctx.stageCompleted).toBe(false);
     state = reducer(state, makeMove('A', null, '0'));
     expect(Object.keys(state.ctx.stage)).toEqual(['1']);
+    expect(state.ctx.stageCompleted).toBe(false);
     state = reducer(state, makeMove('A', null, '1'));
     expect(state.ctx.stage).toBeNull();
+    expect(state.ctx.stageCompleted).toBe(true);
   });
 
   test('others', () => {
