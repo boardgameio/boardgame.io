@@ -23,7 +23,9 @@ const Description = () => (
 export default {
   description: Description,
   game: {
-    endPhase: false,
+    events: {
+      endPhase: false,
+    },
     turn: { order: TurnOrder.CUSTOM(['1', '0', '2', '3', '5', '4']) },
   },
 };
