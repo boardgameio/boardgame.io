@@ -68,7 +68,7 @@ class Board extends React.Component {
 
     const events = Object.entries(this.props.events)
       .filter(() => current && active)
-      .filter(e => e[0] != 'setActionPlayers')
+      .filter(e => e[0] != 'setActivePlayers')
       .map(e => (
         <button key={e[0]} onClick={() => e[1]()}>
           {e[0]}
