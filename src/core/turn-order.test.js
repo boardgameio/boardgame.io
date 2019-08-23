@@ -82,9 +82,9 @@ describe('turn orders', () => {
     expect(state.ctx.phase).toBe('B');
   });
 
-  test('ANY', () => {
+  test('ALL', () => {
     const flow = Flow({
-      turn: { activePlayers: ActivePlayers.ANY },
+      turn: { activePlayers: ActivePlayers.ALL },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -98,10 +98,10 @@ describe('turn orders', () => {
     expect(state.ctx.activePlayers).toEqual({ '0': '', '1': '' });
   });
 
-  test('ANY_ONCE', () => {
+  test('ALL_ONCE', () => {
     const flow = Flow({
       phases: {
-        A: { start: true, turn: { activePlayers: ActivePlayers.ANY_ONCE } },
+        A: { start: true, turn: { activePlayers: ActivePlayers.ALL_ONCE } },
       },
     });
 
@@ -285,7 +285,7 @@ test('passing', () => {
 test('end game after everyone passes', () => {
   const game = {
     endIf: G => G.allPassed,
-    turn: { activePlayers: ActivePlayers.ANY },
+    turn: { activePlayers: ActivePlayers.ALL },
     moves: { pass: Pass },
   };
 

@@ -257,21 +257,21 @@ export const TurnOrder = {
 
 export const ActivePlayers = {
   /**
-   * ANY
+   * ALL
    *
    * The turn stays with one player, but any player can play (in any order)
    * until the phase ends.
    */
-  ANY: { all: '' },
+  ALL: { all: '' },
 
   /**
-   * ANY_ONCE
+   * ALL_ONCE
    *
    * The turn stays with one player, but any player can play (once, and in any order).
    * This is typically used in a phase where you want to elicit a response
    * from every player in the game.
    */
-  ANY_ONCE: { all: '', once: true },
+  ALL_ONCE: { all: '', once: true },
 
   /**
    * OTHERS
