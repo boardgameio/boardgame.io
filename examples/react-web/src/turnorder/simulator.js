@@ -14,7 +14,7 @@ import Once from './example-once';
 import Custom from './example-custom';
 import CustomFrom from './example-custom-from';
 import Any from './example-any';
-import AnyOnce from './example-any-once';
+import AllOnce from './example-all-once';
 import Others from './example-others';
 import OthersOnce from './example-others-once';
 import './simulator.css';
@@ -97,7 +97,7 @@ const examples = {
   custom: Custom,
   'custom-from': CustomFrom,
   any: Any,
-  'any-once': AnyOnce,
+  'all-once': AllOnce,
   others: Others,
 };
 
@@ -159,10 +159,10 @@ class App extends React.Component {
             ANY
           </div>
           <div
-            className={this.type === 'any-once' ? 'active' : ''}
-            onClick={() => this.init('any-once')}
+            className={this.type === 'all-once' ? 'active' : ''}
+            onClick={() => this.init('all-once')}
           >
-            ANY_ONCE
+            ALL_ONCE
           </div>
           <div
             className={this.type === 'others' ? 'active' : ''}
