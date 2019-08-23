@@ -294,7 +294,7 @@ test('end game after everyone passes', () => {
 
   expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1', '2']);
 
-  // Passes can be make in any order with TurnOrder.ANY.
+  // Passes can be made in any order with ActivePlayers.ALL.
 
   state = reducer(state, makeMove('pass', null, '1'));
   expect(state.ctx.gameover).toBe(undefined);
