@@ -437,17 +437,19 @@ test('canPlayerMakeAnyMove', () => {
   let flow = FlowInternal({});
   expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
 
-  expect(flow.canPlayerMakeAnyMove({}, { stage: { '1': '' } }, playerID)).toBe(
-    false
-  );
-  expect(flow.canPlayerMakeAnyMove({}, { stage: { '0': '' } }, playerID)).toBe(
-    true
-  );
+  expect(
+    flow.canPlayerMakeAnyMove({}, { activePlayers: { '1': '' } }, playerID)
+  ).toBe(false);
+  expect(
+    flow.canPlayerMakeAnyMove({}, { activePlayers: { '0': '' } }, playerID)
+  ).toBe(true);
 
   // no one can make a move
   flow = FlowInternal({ canPlayerMakeAnyMove: () => false });
   expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
-  expect(flow.canPlayerMakeAnyMove({}, { stage: null }, playerID)).toBe(false);
+  expect(flow.canPlayerMakeAnyMove({}, { activePlayers: null }, playerID)).toBe(
+    false
+  );
   expect(flow.canPlayerMakeAnyMove({}, {}, '5')).toBe(false);
 });
 
@@ -459,7 +461,7 @@ test('canPlayerCallEvent', () => {
   expect(
     flow.canPlayerCallEvent(
       {},
-      { currentPlayer: '0', stage: { '1': '' } },
+      { currentPlayer: '0', activePlayers: { '1': '' } },
       playerID
     )
   ).toBe(false);
@@ -662,12 +664,12 @@ describe('infinite loops', () => {
   });
 });
 
-describe('setStage', () => {
-  test('sets stages at each turn', () => {
+describe('activePlayers', () => {
+  test('sets activePlayers at each turn', () => {
     const game = {
       turn: {
         stages: { A: {}, B: {} },
-        setStage: {
+        activePlayers: {
           currentPlayer: 'A',
           others: 'B',
         },
@@ -677,7 +679,7 @@ describe('setStage', () => {
     const client = Client({ game, numPlayers: 3 });
 
     expect(client.getState().ctx.currentPlayer).toBe('0');
-    expect(client.getState().ctx.stage).toEqual({
+    expect(client.getState().ctx.activePlayers).toEqual({
       '0': 'A',
       '1': 'B',
       '2': 'B',
@@ -686,7 +688,7 @@ describe('setStage', () => {
     client.events.endTurn();
 
     expect(client.getState().ctx.currentPlayer).toBe('1');
-    expect(client.getState().ctx.stage).toEqual({
+    expect(client.getState().ctx.activePlayers).toEqual({
       '0': 'B',
       '1': 'A',
       '2': 'B',
