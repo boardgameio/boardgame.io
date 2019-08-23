@@ -30,31 +30,32 @@ export const Pass = (G, ctx) => {
 };
 
 /**
- * Event to change the stages of different players in the current turn.
+ * Event to change the active players (and their stages) in the current turn.
  * @param {*} state
  * @param {*} arg
  */
-export function SetStageEvent(state, arg) {
-  return { ...state, ctx: SetStage(state.ctx, arg) };
+export function SetActivePlayersEvent(state, arg) {
+  return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
 }
 
-export function SetStage(ctx, arg) {
-  let stage = ctx.stage || {};
-  let _stageOnce = false;
+export function SetActivePlayers(ctx, arg) {
+  let activePlayers = ctx.activePlayers || {};
+  let activePlayersDone = null;
+  let _activePlayersOnce = false;
 
   if (arg.value) {
-    stage = arg.value;
+    activePlayers = arg.value;
   }
 
   if (arg.currentPlayer !== undefined) {
-    stage[ctx.currentPlayer] = arg.currentPlayer;
+    activePlayers[ctx.currentPlayer] = arg.currentPlayer;
   }
 
   if (arg.others !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
       const playerID = ctx.playOrder[i];
       if (playerID !== ctx.currentPlayer) {
-        stage[playerID] = arg.others;
+        activePlayers[playerID] = arg.others;
       }
     }
   }
@@ -62,19 +63,28 @@ export function SetStage(ctx, arg) {
   if (arg.all !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
       const playerID = ctx.playOrder[i];
-      stage[playerID] = arg.all;
+      activePlayers[playerID] = arg.all;
     }
   }
 
   if (arg.once) {
-    _stageOnce = true;
+    _activePlayersOnce = true;
   }
 
-  if (Object.keys(stage).length == 0) {
-    stage = null;
+  if (Object.keys(activePlayers).length == 0) {
+    activePlayers = null;
   }
 
-  return { ...ctx, stage, _stageOnce };
+  if (arg.once && Object.keys(activePlayers).length > 0) {
+    activePlayersDone = false;
+  }
+
+  return {
+    ...ctx,
+    activePlayers,
+    activePlayersDone,
+    _activePlayersOnce,
+  };
 }
 
 /**
@@ -110,7 +120,7 @@ export function InitTurnOrderState(G, ctx, turn) {
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-  ctx = SetStage(ctx, turn.setStage || {});
+  ctx = SetActivePlayers(ctx, turn.activePlayers || {});
 
   return ctx;
 }
@@ -245,23 +255,23 @@ export const TurnOrder = {
   },
 };
 
-export const Stage = {
+export const ActivePlayers = {
   /**
-   * ANY
+   * ALL
    *
    * The turn stays with one player, but any player can play (in any order)
    * until the phase ends.
    */
-  ANY: { all: '' },
+  ALL: { all: '' },
 
   /**
-   * ANY_ONCE
+   * ALL_ONCE
    *
    * The turn stays with one player, but any player can play (once, and in any order).
    * This is typically used in a phase where you want to elicit a response
    * from every player in the game.
    */
-  ANY_ONCE: { all: '', once: true },
+  ALL_ONCE: { all: '', once: true },
 
   /**
    * OTHERS

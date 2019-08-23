@@ -25,8 +25,8 @@ export function Simulate({ game, bots, state, depth }) {
   let iter = 0;
   while (state.ctx.gameover === undefined && iter < depth) {
     let playerID = state.ctx.currentPlayer;
-    if (state.ctx.stage) {
-      playerID = Object.keys(state.ctx.stage)[0];
+    if (state.ctx.activePlayers) {
+      playerID = Object.keys(state.ctx.activePlayers)[0];
     }
 
     const bot = bots instanceof Bot ? bots : bots[playerID];
@@ -128,8 +128,8 @@ export class MCTSBot extends Bot {
     if (playerID !== undefined) {
       actions = this.enumerate(G, ctx, playerID);
       objectives = this.objectives(G, ctx, playerID);
-    } else if (ctx.stage) {
-      for (let playerID in ctx.stage) {
+    } else if (ctx.activePlayers) {
+      for (let playerID in ctx.activePlayers) {
         actions = actions.concat(this.enumerate(G, ctx, playerID));
         objectives = objectives.concat(this.objectives(G, ctx, playerID));
       }
@@ -218,8 +218,8 @@ export class MCTSBot extends Bot {
     ) {
       const { G, ctx } = state;
       let playerID = ctx.currentPlayer;
-      if (ctx.stage) {
-        playerID = Object.keys(ctx.stage)[0];
+      if (ctx.activePlayers) {
+        playerID = Object.keys(ctx.activePlayers)[0];
       }
       const moves = this.enumerate(G, ctx, playerID);
 

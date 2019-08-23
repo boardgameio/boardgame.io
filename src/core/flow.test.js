@@ -437,17 +437,19 @@ test('canPlayerMakeAnyMove', () => {
   let flow = FlowInternal({});
   expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
 
-  expect(flow.canPlayerMakeAnyMove({}, { stage: { '1': '' } }, playerID)).toBe(
-    false
-  );
-  expect(flow.canPlayerMakeAnyMove({}, { stage: { '0': '' } }, playerID)).toBe(
-    true
-  );
+  expect(
+    flow.canPlayerMakeAnyMove({}, { activePlayers: { '1': '' } }, playerID)
+  ).toBe(false);
+  expect(
+    flow.canPlayerMakeAnyMove({}, { activePlayers: { '0': '' } }, playerID)
+  ).toBe(true);
 
   // no one can make a move
   flow = FlowInternal({ canPlayerMakeAnyMove: () => false });
   expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
-  expect(flow.canPlayerMakeAnyMove({}, { stage: null }, playerID)).toBe(false);
+  expect(flow.canPlayerMakeAnyMove({}, { activePlayers: null }, playerID)).toBe(
+    false
+  );
   expect(flow.canPlayerMakeAnyMove({}, {}, '5')).toBe(false);
 });
 
@@ -459,7 +461,7 @@ test('canPlayerCallEvent', () => {
   expect(
     flow.canPlayerCallEvent(
       {},
-      { currentPlayer: '0', stage: { '1': '' } },
+      { currentPlayer: '0', activePlayers: { '1': '' } },
       playerID
     )
   ).toBe(false);
@@ -662,12 +664,12 @@ describe('infinite loops', () => {
   });
 });
 
-describe('setStage', () => {
-  test('sets stages at each turn', () => {
+describe('activePlayers', () => {
+  test('sets activePlayers at each turn', () => {
     const game = {
       turn: {
         stages: { A: {}, B: {} },
-        setStage: {
+        activePlayers: {
           currentPlayer: 'A',
           others: 'B',
         },
@@ -677,7 +679,7 @@ describe('setStage', () => {
     const client = Client({ game, numPlayers: 3 });
 
     expect(client.getState().ctx.currentPlayer).toBe('0');
-    expect(client.getState().ctx.stage).toEqual({
+    expect(client.getState().ctx.activePlayers).toEqual({
       '0': 'A',
       '1': 'B',
       '2': 'B',
@@ -686,10 +688,70 @@ describe('setStage', () => {
     client.events.endTurn();
 
     expect(client.getState().ctx.currentPlayer).toBe('1');
-    expect(client.getState().ctx.stage).toEqual({
+    expect(client.getState().ctx.activePlayers).toEqual({
       '0': 'B',
       '1': 'A',
       '2': 'B',
     });
+  });
+
+  test('activePlayersDone', () => {
+    const spec = {
+      numPlayers: 3,
+      multiplayer: { local: true },
+      game: {
+        moves: {
+          moveA: (G, ctx) => {
+            ctx.events.setActivePlayers({ all: '', once: true });
+          },
+          moveB: G => G,
+        },
+      },
+    };
+
+    const p0 = Client({ ...spec, playerID: '0' });
+    const p1 = Client({ ...spec, playerID: '1' });
+    const p2 = Client({ ...spec, playerID: '2' });
+
+    p0.connect();
+    p1.connect();
+    p2.connect();
+
+    expect(p0.getState().ctx.currentPlayer).toBe('0');
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(null);
+    p0.moves.moveA();
+    expect(p0.getState().ctx.activePlayersDone).toBe(false);
+
+    expect(p0.getState().ctx.activePlayers).toEqual({
+      '0': '',
+      '1': '',
+      '2': '',
+    });
+
+    p0.moves.moveB();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(false);
+    expect(p0.getState().ctx.activePlayers).toEqual({
+      '1': '',
+      '2': '',
+    });
+
+    p1.moves.moveB();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(false);
+    expect(p0.getState().ctx.activePlayers).toEqual({
+      '2': '',
+    });
+
+    p2.moves.moveB();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(true);
+    expect(p0.getState().ctx.activePlayers).toEqual(null);
+
+    p0.events.endTurn();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(null);
+    expect(p0.getState().ctx.activePlayers).toEqual(null);
   });
 });
