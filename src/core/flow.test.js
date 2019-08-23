@@ -694,4 +694,64 @@ describe('activePlayers', () => {
       '2': 'B',
     });
   });
+
+  test('activePlayersDone', () => {
+    const spec = {
+      numPlayers: 3,
+      multiplayer: { local: true },
+      game: {
+        moves: {
+          moveA: (G, ctx) => {
+            ctx.events.setActivePlayers({ all: '', once: true });
+          },
+          moveB: G => G,
+        },
+      },
+    };
+
+    const p0 = Client({ ...spec, playerID: '0' });
+    const p1 = Client({ ...spec, playerID: '1' });
+    const p2 = Client({ ...spec, playerID: '2' });
+
+    p0.connect();
+    p1.connect();
+    p2.connect();
+
+    expect(p0.getState().ctx.currentPlayer).toBe('0');
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(null);
+    p0.moves.moveA();
+    expect(p0.getState().ctx.activePlayersDone).toBe(false);
+
+    expect(p0.getState().ctx.activePlayers).toEqual({
+      '0': '',
+      '1': '',
+      '2': '',
+    });
+
+    p0.moves.moveB();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(false);
+    expect(p0.getState().ctx.activePlayers).toEqual({
+      '1': '',
+      '2': '',
+    });
+
+    p1.moves.moveB();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(false);
+    expect(p0.getState().ctx.activePlayers).toEqual({
+      '2': '',
+    });
+
+    p2.moves.moveB();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(true);
+    expect(p0.getState().ctx.activePlayers).toEqual(null);
+
+    p0.events.endTurn();
+
+    expect(p0.getState().ctx.activePlayersDone).toBe(null);
+    expect(p0.getState().ctx.activePlayers).toEqual(null);
+  });
 });
