@@ -42,12 +42,14 @@ class Board extends React.Component {
     let className = 'player';
     let active = false;
     let current = false;
+    let stage;
     let onClick = () => {};
 
     if (this.props.ctx.activePlayers) {
       if (this.props.playerID in this.props.ctx.activePlayers) {
         className += ' active';
         active = true;
+        stage = this.props.ctx.activePlayers[this.props.playerID];
       }
     } else {
       if (this.props.playerID === this.props.ctx.currentPlayer) {
@@ -81,6 +83,15 @@ class Board extends React.Component {
         <span className={className} onClick={onClick}>
           {this.props.playerID}
         </span>
+
+        <div className="stage-label">
+          stage
+          {stage !== undefined ? (
+            <span className="stage">&apos;{stage}&apos;</span>
+          ) : (
+            ' undefined'
+          )}
+        </div>
 
         <div className="controls">
           {active && moves}

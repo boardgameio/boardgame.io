@@ -58,9 +58,18 @@
   border-bottom-color: #555;
 }
 
+#turnorder .stage-label {
+  position: absolute;
+  top: 2.25em;
+  left: 50%;
+  margin-left: -3.5em;
+  width: 8em;
+  text-align: center;
+}
+
 #turnorder .controls {
   position: absolute;
-  margin-top: 50px;
+  margin-top: 60px;
   margin-left: -47px;
 }
 
@@ -95,12 +104,13 @@
   border-style: solid;
 }
 
-#turnorder .phase {
+#turnorder .phase,
+#turnorder .stage {
   display: inline-block;
   background: #555;
   color: #eee;
-  padding: 5px;
-  margin-left: 10px;
+  padding: 3px 5px;
+  margin-left: 5px;
 }
 
 #turnorder .bgio-client {
