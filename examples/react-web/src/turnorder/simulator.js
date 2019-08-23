@@ -30,10 +30,11 @@ class Board extends React.Component {
 
   render() {
     if (this.props.playerID === null) {
+      const { phase } = this.props.ctx;
       return (
         <div className="table-interior">
           <label>phase</label>
-          <div className="phase">{this.props.ctx.phase}</div>
+          <div className="phase">{phase ? `'${phase}'` : 'null'}</div>
         </div>
       );
     }
