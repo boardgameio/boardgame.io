@@ -87,14 +87,11 @@ class Board extends React.Component {
           {this.props.playerID}
         </span>
 
-        <div className="stage-label">
-          stage
-          {stage !== undefined ? (
-            <span className="stage">&apos;{stage}&apos;</span>
-          ) : (
-            ' undefined'
-          )}
-        </div>
+        {stage !== undefined && (
+          <div className="stage-label">
+            stage <span className="stage">&apos;{stage}&apos;</span>
+          </div>
+        )}
 
         <div className="controls">
           {active && moves}
