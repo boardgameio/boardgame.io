@@ -34,7 +34,7 @@ class Board extends React.Component {
       return (
         <div className="table-interior">
           <label>phase</label>
-          <div className="phase">{phase ? `'${phase}'` : 'null'}</div>
+          <div className="phase">{phase || 'null'}</div>
         </div>
       );
     }
@@ -89,7 +89,7 @@ class Board extends React.Component {
 
         {stage !== undefined && (
           <div className="stage-label">
-            stage <span className="stage">&apos;{stage}&apos;</span>
+            stage <span className="stage">{stage || "''"}</span>
           </div>
         )}
 
