@@ -7,12 +7,16 @@
  */
 
 import React from 'react';
-import { TurnOrder } from 'boardgame.io/core';
+import { ActivePlayers } from 'boardgame.io/core';
 
 const code = `{
-  startingPhase: 'A',
   phases: {
-    A: { turn: { order: TurnOrder.ANY_ONCE }, next: 'B' },
+    A: {
+      start: true,
+      next: 'B',
+      turn: { activePlayers: ActivePlayers.ALL_ONCE },
+      endIf: (G, ctx) => ctx.activePlayersDone,
+    },
     B: {},
   }
 }
@@ -31,12 +35,18 @@ export default {
       move: G => G,
     },
 
-    endTurn: false,
-    endPhase: false,
-    startingPhase: 'A',
+    events: {
+      endTurn: false,
+      endPhase: false,
+    },
 
     phases: {
-      A: { turn: { order: TurnOrder.ANY_ONCE }, next: 'B' },
+      A: {
+        start: true,
+        next: 'B',
+        turn: { activePlayers: ActivePlayers.ALL_ONCE },
+        endIf: (G, ctx) => ctx.activePlayersDone,
+      },
       B: {},
     },
   },
