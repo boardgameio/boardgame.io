@@ -13,8 +13,8 @@ import Default from './example-default';
 import Once from './example-once';
 import Custom from './example-custom';
 import CustomFrom from './example-custom-from';
-import Any from './example-any';
-import AnyOnce from './example-any-once';
+import All from './example-all';
+import AllOnce from './example-all-once';
 import Others from './example-others';
 import OthersOnce from './example-others-once';
 import './simulator.css';
@@ -30,10 +30,11 @@ class Board extends React.Component {
 
   render() {
     if (this.props.playerID === null) {
+      const { phase } = this.props.ctx;
       return (
         <div className="table-interior">
           <label>phase</label>
-          <div className="phase">{this.props.ctx.phase}</div>
+          <div className="phase">{phase || 'null'}</div>
         </div>
       );
     }
@@ -41,12 +42,14 @@ class Board extends React.Component {
     let className = 'player';
     let active = false;
     let current = false;
+    let stage;
     let onClick = () => {};
 
     if (this.props.ctx.activePlayers) {
       if (this.props.playerID in this.props.ctx.activePlayers) {
         className += ' active';
         active = true;
+        stage = this.props.ctx.activePlayers[this.props.playerID];
       }
     } else {
       if (this.props.playerID === this.props.ctx.currentPlayer) {
@@ -60,15 +63,18 @@ class Board extends React.Component {
       current = true;
     }
 
-    const moves = Object.entries(this.props.moves).map(e => (
-      <button key={e[0]} onClick={() => e[1]()}>
-        {e[0]}
-      </button>
-    ));
+    const moves = Object.entries(this.props.moves)
+      .filter(e => !(e[0] === 'play' && stage === 'discard'))
+      .filter(e => !(e[0] === 'discard' && stage !== 'discard'))
+      .map(e => (
+        <button key={e[0]} onClick={() => e[1]()}>
+          {e[0]}
+        </button>
+      ));
 
     const events = Object.entries(this.props.events)
       .filter(() => current && active)
-      .filter(e => e[0] != 'setActionPlayers')
+      .filter(e => e[0] != 'setActivePlayers')
       .map(e => (
         <button key={e[0]} onClick={() => e[1]()}>
           {e[0]}
@@ -80,6 +86,12 @@ class Board extends React.Component {
         <span className={className} onClick={onClick}>
           {this.props.playerID}
         </span>
+
+        {stage !== undefined && (
+          <div className="stage-label">
+            stage <span className="stage">{stage || "''"}</span>
+          </div>
+        )}
 
         <div className="controls">
           {active && moves}
@@ -96,8 +108,8 @@ const examples = {
   once: Once,
   custom: Custom,
   'custom-from': CustomFrom,
-  any: Any,
-  'any-once': AnyOnce,
+  all: All,
+  'all-once': AllOnce,
   others: Others,
 };
 
@@ -153,16 +165,16 @@ class App extends React.Component {
             ONCE
           </div>
           <div
-            className={this.type === 'any' ? 'active' : ''}
-            onClick={() => this.init('any')}
+            className={this.type === 'all' ? 'active' : ''}
+            onClick={() => this.init('all')}
           >
-            ANY
+            ALL
           </div>
           <div
-            className={this.type === 'any-once' ? 'active' : ''}
-            onClick={() => this.init('any-once')}
+            className={this.type === 'all-once' ? 'active' : ''}
+            onClick={() => this.init('all-once')}
           >
-            ANY_ONCE
+            ALL_ONCE
           </div>
           <div
             className={this.type === 'others' ? 'active' : ''}

@@ -12,10 +12,8 @@ import { Client } from 'boardgame.io/react';
 import './diagram.css';
 
 const game = {
-  moves: {},
-  startingPhase: 'A',
   phases: {
-    A: { next: 'B' },
+    A: { start: true, next: 'B' },
     B: { next: 'C' },
     C: { next: 'A' },
   },
