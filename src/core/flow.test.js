@@ -371,7 +371,7 @@ describe('turn', () => {
     state = flow.processMove(state, makeMove().payload);
 
     expect(state.ctx.phase).toBe('B');
-    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.turn).toBe(3);
   });
 });
