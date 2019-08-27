@@ -559,7 +559,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     G = conf.onEnd(G, ctx);
 
     // Reset the phase.
-    ctx = { ...ctx, phase: null, playOrderPos: 0 };
+    ctx = { ...ctx, phase: null };
 
     // Add log entry.
     const action = gameEvent('endPhase', arg);
