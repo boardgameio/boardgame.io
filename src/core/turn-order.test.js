@@ -438,6 +438,75 @@ describe('setActivePlayers', () => {
     expect(state.ctx.activePlayers).toBeNull();
   });
 
+  describe('reset behavior', () => {
+    test('start of turn', () => {
+      const game = {
+        moves: {
+          A: () => {},
+        },
+
+        turn: {
+          activePlayers: { currentPlayer: 'stage', once: true },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game });
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: { '0': 'stage' },
+        _prevActivePlayers: null,
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: null,
+        _prevActivePlayers: null,
+      });
+    });
+
+    test('reset to previous', () => {
+      const game = {
+        moves: {
+          A: (G, ctx) => {
+            ctx.events.setActivePlayers({
+              currentPlayer: 'stage2',
+              once: true,
+            });
+          },
+          B: () => {},
+        },
+
+        turn: {
+          activePlayers: { currentPlayer: 'stage1' },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game });
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: { '0': 'stage1' },
+        _prevActivePlayers: null,
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: { '0': 'stage2' },
+        _prevActivePlayers: { '0': 'stage1' },
+      });
+
+      state = reducer(state, makeMove('B', null, '0'));
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: { '0': 'stage1' },
+        _prevActivePlayers: null,
+      });
+    });
+  });
+
   describe('militia', () => {
     let state;
     let reducer;
@@ -451,7 +520,6 @@ describe('setActivePlayers', () => {
               moves: {
                 militia: (G, ctx) => {
                   ctx.events.setActivePlayers({
-                    currentPlayer: '',
                     others: 'B',
                     once: true,
                   });
@@ -508,7 +576,6 @@ describe('setActivePlayers', () => {
     test('player 0 plays militia', () => {
       state = reducer(state, makeMove('militia', undefined, '0'));
       expect(state.ctx.activePlayers).toEqual({
-        '0': '',
         '1': 'B',
         '2': 'B',
       });
@@ -520,9 +587,12 @@ describe('setActivePlayers', () => {
 
     test('everyone else discards', () => {
       state = reducer(state, makeMove('discard', undefined, '1'));
-      expect(state.ctx.activePlayers).toEqual({ '0': '', '2': 'B' });
+      expect(state.ctx.activePlayers).toEqual({ '2': 'B' });
       state = reducer(state, makeMove('discard', undefined, '2'));
-      expect(state.ctx.activePlayers).toEqual({ '0': '' });
+    });
+
+    test('activePlayers is restored to previous state', () => {
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
     });
   });
 });

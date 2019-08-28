@@ -429,7 +429,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     G = conf.turn.onBegin(G, ctx);
 
     const turn = ctx.turn + 1;
-    ctx = { ...ctx, turn, numMoves: 0 };
+    ctx = { ...ctx, turn, numMoves: 0, _prevActivePlayers: null };
 
     const plainCtx = ContextEnhancer.detachAllFromContext(ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -679,7 +679,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   function ProcessMove(state, action) {
     let conf = GetPhase(state.ctx);
 
-    let { activePlayers, _activePlayersOnce, activePlayersDone } = state.ctx;
+    let {
+      activePlayers,
+      _activePlayersOnce,
+      _prevActivePlayers,
+      activePlayersDone,
+    } = state.ctx;
 
     if (_activePlayersOnce) {
       const playerID = action.playerID;
@@ -691,8 +696,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         }, {});
 
       if (Object.keys(activePlayers).length == 0) {
-        activePlayers = null;
+        activePlayers = state.ctx._prevActivePlayers;
         _activePlayersOnce = false;
+        _prevActivePlayers = null;
         activePlayersDone = true;
       }
     }
@@ -709,6 +715,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         activePlayers,
         activePlayersDone,
         _activePlayersOnce,
+        _prevActivePlayers,
         numMoves,
       },
     };

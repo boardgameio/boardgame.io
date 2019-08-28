@@ -39,7 +39,8 @@ export function SetActivePlayersEvent(state, arg) {
 }
 
 export function SetActivePlayers(ctx, arg) {
-  let activePlayers = ctx.activePlayers || {};
+  let _prevActivePlayers = ctx.activePlayers || null;
+  let activePlayers = {};
   let activePlayersDone = null;
   let _activePlayersOnce = false;
 
@@ -84,6 +85,7 @@ export function SetActivePlayers(ctx, arg) {
     activePlayers,
     activePlayersDone,
     _activePlayersOnce,
+    _prevActivePlayers,
   };
 }
 
