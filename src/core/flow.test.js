@@ -552,13 +552,13 @@ test('undoable moves', () => {
   const game = {
     moves: {
       A: {
-        impl: () => ({ A: true }),
+        move: () => ({ A: true }),
         undoable: (G, ctx) => {
           return ctx.phase == 'A';
         },
       },
       B: {
-        impl: () => ({ B: true }),
+        move: () => ({ B: true }),
         undoable: false,
       },
       C: () => ({ C: true }),
