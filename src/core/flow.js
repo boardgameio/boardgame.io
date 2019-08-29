@@ -11,6 +11,7 @@ import {
   SetActivePlayers,
   InitTurnOrderState,
   UpdateTurnOrderState,
+  Stage,
   TurnOrder,
 } from './turn-order';
 import { gameEvent } from './action-creators';
@@ -654,14 +655,18 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     const stages = conf.turn.stages;
     const { activePlayers } = ctx;
 
-    if (activePlayers && stages[activePlayers[playerID]]) {
+    if (
+      activePlayers &&
+      activePlayers[playerID] !== undefined &&
+      activePlayers[playerID] !== Stage.NULL &&
+      stages[activePlayers[playerID]] !== undefined &&
+      stages[activePlayers[playerID]].moves !== undefined
+    ) {
       // Check if moves are defined for the player's stage.
       const stage = stages[activePlayers[playerID]];
-      if (stage) {
-        const moves = stage.moves;
-        if (name in moves) {
-          return moves[name];
-        }
+      const moves = stage.moves;
+      if (name in moves) {
+        return moves[name];
       }
     } else if (conf.moves) {
       // Check if moves are defined for the current phase.
