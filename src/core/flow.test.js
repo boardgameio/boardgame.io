@@ -10,6 +10,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { FlowInternal, Flow } from './flow';
 import { error } from '../core/logger';
+import { Stage } from './turn-order';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -376,6 +377,75 @@ describe('turn', () => {
   });
 });
 
+describe('stages', () => {
+  let client;
+
+  beforeAll(() => {
+    const A = () => {};
+    const B = () => {};
+
+    const game = {
+      moves: { A },
+      turn: {
+        stages: {
+          B: { moves: { B } },
+          C: {},
+        },
+      },
+    };
+
+    client = Client({ game });
+  });
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('no stage', () => {
+    test('A is allowed', () => {
+      client.moves.A();
+      expect(error).not.toBeCalled();
+    });
+
+    test('B is not allowed', () => {
+      client.moves.B();
+      expect(error).toBeCalledWith('disallowed move: B');
+    });
+  });
+
+  describe('stage B', () => {
+    beforeAll(() => {
+      client.events.setActivePlayers({ currentPlayer: 'B' });
+    });
+
+    test('A is not allowed', () => {
+      client.moves.A();
+      expect(error).toBeCalledWith('disallowed move: A');
+    });
+
+    test('B is allowed', () => {
+      client.moves.B();
+      expect(error).not.toBeCalled();
+    });
+  });
+
+  describe('stage C', () => {
+    beforeAll(() => {
+      client.events.setActivePlayers({ currentPlayer: 'C' });
+    });
+
+    test('A is allowed', () => {
+      client.moves.A();
+      expect(error).not.toBeCalled();
+    });
+
+    test('B is not allowed', () => {
+      client.moves.B();
+      expect(error).toBeCalledWith('disallowed move: B');
+    });
+  });
+});
+
 test('init', () => {
   let flow = Flow({
     phases: { A: { start: true, onEnd: () => ({ done: true }) } },
@@ -716,7 +786,7 @@ describe('activePlayers', () => {
       game: {
         moves: {
           moveA: (G, ctx) => {
-            ctx.events.setActivePlayers({ all: '', once: true });
+            ctx.events.setActivePlayers({ all: Stage.NULL, once: true });
           },
           moveB: G => G,
         },
@@ -738,24 +808,24 @@ describe('activePlayers', () => {
     expect(p0.getState().ctx.activePlayersDone).toBe(false);
 
     expect(p0.getState().ctx.activePlayers).toEqual({
-      '0': '',
-      '1': '',
-      '2': '',
+      '0': Stage.NULL,
+      '1': Stage.NULL,
+      '2': Stage.NULL,
     });
 
     p0.moves.moveB();
 
     expect(p0.getState().ctx.activePlayersDone).toBe(false);
     expect(p0.getState().ctx.activePlayers).toEqual({
-      '1': '',
-      '2': '',
+      '1': Stage.NULL,
+      '2': Stage.NULL,
     });
 
     p1.moves.moveB();
 
     expect(p0.getState().ctx.activePlayersDone).toBe(false);
     expect(p0.getState().ctx.activePlayers).toEqual({
-      '2': '',
+      '2': Stage.NULL,
     });
 
     p2.moves.moveB();
