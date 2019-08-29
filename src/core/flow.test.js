@@ -110,23 +110,6 @@ describe('phases', () => {
     }
   });
 
-  test('infinite loop', () => {
-    const endIf = () => true;
-    const flow = Flow({
-      phases: {
-        A: { endIf, next: 'B', start: true },
-        B: { endIf, next: 'A' },
-      },
-    });
-
-    let state = { ctx: flow.ctx(2) };
-    flow.init(state);
-
-    expect(state.ctx.phase).toBe('A');
-    state = flow.processGameEvent(state, gameEvent('endPhase'));
-    expect(state.ctx.phase).toBe('');
-  });
-
   test('end phase on move', () => {
     let endPhaseACount = 0;
     let endPhaseBCount = 0;
@@ -714,7 +697,7 @@ describe('moveMap', () => {
 });
 
 describe('infinite loops', () => {
-  test('A', () => {
+  test('loop 1', () => {
     const endIf = () => true;
     const game = {
       phases: {
@@ -723,11 +706,10 @@ describe('infinite loops', () => {
       },
     };
     const client = Client({ game });
-
-    expect(client.getState().ctx.phase).toBe('');
+    expect(client.getState().ctx.phase).toBe(null);
   });
 
-  test('B', () => {
+  test('loop 2', () => {
     const game = {
       turn: {
         onEnd: (G, ctx) => {

@@ -11,6 +11,7 @@ import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { makeMove } from '../core/action-creators';
 import { Simulate, Bot, RandomBot, MCTSBot } from './bot';
 import { Game } from '../core/game';
+import { Stage } from '../core/turn-order';
 
 function IsVictory(cells) {
   const positions = [
@@ -97,6 +98,34 @@ describe('Simulate', () => {
       bots: bot,
       state,
       depth: 10,
+    });
+    expect(endState.ctx.gameover).not.toBe(undefined);
+  });
+
+  test('with activePlayers', () => {
+    const game = Game({
+      moves: {
+        A: G => {
+          G.moved = true;
+        },
+      },
+      turn: {
+        activePlayers: { currentPlayer: Stage.NULL },
+      },
+      endIf: G => G.moved,
+    });
+
+    const bot = new RandomBot({
+      seed: 'test',
+      enumerate: () => [makeMove('A')],
+    });
+
+    const state = InitializeGame({ game });
+    const { state: endState } = Simulate({
+      game,
+      bots: bot,
+      state,
+      depth: 1,
     });
     expect(endState.ctx.gameover).not.toBe(undefined);
   });
@@ -194,6 +223,36 @@ describe('MCTSBot', () => {
       const { state: endState } = Simulate({ game: TicTacToe, bots, state });
       expect(endState.ctx.gameover).toEqual({ draw: true });
     }
+  });
+
+  test('with activePlayers', () => {
+    const game = Game({
+      setup: () => ({ moves: 0 }),
+      moves: {
+        A: G => {
+          G.moves++;
+        },
+      },
+      turn: {
+        activePlayers: { currentPlayer: Stage.NULL },
+      },
+      endIf: G => G.moves > 5,
+    });
+
+    const bot = new MCTSBot({
+      seed: 'test',
+      game,
+      enumerate: () => [makeMove('A')],
+    });
+
+    const state = InitializeGame({ game });
+    const { state: endState } = Simulate({
+      game,
+      bots: bot,
+      state,
+      depth: 10,
+    });
+    expect(endState.ctx.gameover).not.toBe(undefined);
   });
 
   test('objectives', () => {

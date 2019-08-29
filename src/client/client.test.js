@@ -106,28 +106,28 @@ test('isActive', () => {
 });
 
 describe('step', () => {
-  const client = Client({
-    game: {
-      setup: () => ({ moved: false }),
+  test('advances game state', async () => {
+    const client = Client({
+      game: {
+        setup: () => ({ moved: false }),
 
-      moves: {
-        clickCell(G) {
-          return { moved: !G.moved };
+        moves: {
+          clickCell(G) {
+            return { moved: !G.moved };
+          },
+        },
+
+        endIf(G) {
+          if (G.moved) return true;
         },
       },
 
-      endIf(G) {
-        if (G.moved) return true;
+      ai: {
+        bot: RandomBot,
+        enumerate: () => [{ move: 'clickCell' }],
       },
-    },
+    });
 
-    ai: {
-      bot: RandomBot,
-      enumerate: () => [{ move: 'clickCell' }],
-    },
-  });
-
-  test('advances game state', async () => {
     expect(client.getState().G).toEqual({ moved: false });
     await client.step();
     expect(client.getState().G).toEqual({ moved: true });
@@ -143,6 +143,31 @@ describe('step', () => {
       },
     });
     client.step();
+  });
+
+  test('works with stages', async () => {
+    const client = Client({
+      game: {
+        moves: {
+          A: G => {
+            G.moved = true;
+          },
+        },
+
+        turn: {
+          activePlayers: { currentPlayer: 'stage' },
+        },
+      },
+
+      ai: {
+        bot: RandomBot,
+        enumerate: () => [{ move: 'A' }],
+      },
+    });
+
+    expect(client.getState().G).not.toEqual({ moved: true });
+    await client.step();
+    expect(client.getState().G).toEqual({ moved: true });
   });
 });
 

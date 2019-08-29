@@ -319,7 +319,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         turnsEnded.clear();
         const phase = state.ctx.phase;
         if (phasesEnded.has(phase)) {
-          const ctx = { ...state.ctx, phase: '' };
+          const ctx = { ...state.ctx, phase: null };
           return { ...state, ctx };
         }
         phasesEnded.add(phase);
@@ -499,10 +499,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function ShouldEndPhase({ G, ctx }) {
-    if (ctx.phase === '') {
-      return false;
-    }
-
     const conf = GetPhase(ctx);
     return conf.endIf(G, ctx);
   }
@@ -533,18 +529,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
-  function EndPhase(state, { arg, next, phase, turn, automatic }) {
+  function EndPhase(state, { arg, next, turn, automatic }) {
     // End the turn first.
     state = EndTurn(state, { turn, force: true });
 
     let G = state.G;
     let ctx = state.ctx;
-
-    // This is not the phase that EndPhase was originally
-    // called for. The phase was probably ended some other way.
-    if (phase !== ctx.phase) {
-      return state;
-    }
 
     if (next) {
       next.push({ fn: UpdatePhase, arg, phase: ctx.phase });
