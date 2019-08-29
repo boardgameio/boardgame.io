@@ -111,7 +111,7 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * @param {object} turn - A turn object for this phase.
  */
 export function InitTurnOrderState(G, ctx, turn) {
-  const order = turn.order || TurnOrder.DEFAULT;
+  const order = turn.order;
 
   let playOrder = [...new Array(ctx.numPlayers)].map((d, i) => i + '');
   if (order.playOrder !== undefined) {
@@ -136,7 +136,7 @@ export function InitTurnOrderState(G, ctx, turn) {
                                 may specify the next player.
  */
 export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
-  const order = turn.order || TurnOrder.DEFAULT;
+  const order = turn.order;
 
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
