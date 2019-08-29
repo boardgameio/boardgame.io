@@ -372,7 +372,7 @@ describe('redactLog', () => {
       moves: {
         A: G => G,
         B: {
-          impl: G => G,
+          move: G => G,
           redact: true,
         },
       },

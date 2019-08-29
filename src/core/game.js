@@ -113,8 +113,8 @@ export function Game(game) {
     processMove: (G, action, ctx) => {
       let moveFn = game.flow.getMove(ctx, action.type, action.playerID);
 
-      if (moveFn instanceof Object && moveFn.impl) {
-        moveFn = moveFn.impl;
+      if (moveFn instanceof Object && moveFn.move) {
+        moveFn = moveFn.move;
       }
 
       if (moveFn instanceof Function) {
