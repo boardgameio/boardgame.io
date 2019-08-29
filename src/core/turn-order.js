@@ -257,6 +257,10 @@ export const TurnOrder = {
   },
 };
 
+export const Stage = {
+  NULL: null,
+};
+
 export const ActivePlayers = {
   /**
    * ALL
@@ -264,7 +268,7 @@ export const ActivePlayers = {
    * The turn stays with one player, but any player can play (in any order)
    * until the phase ends.
    */
-  ALL: { all: '' },
+  ALL: { all: Stage.NULL },
 
   /**
    * ALL_ONCE
@@ -273,7 +277,7 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every player in the game.
    */
-  ALL_ONCE: { all: '', once: true },
+  ALL_ONCE: { all: Stage.NULL, once: true },
 
   /**
    * OTHERS
@@ -281,7 +285,7 @@ export const ActivePlayers = {
    * The turn stays with one player, and every *other* player can play (in any order)
    * until the phase ends.
    */
-  OTHERS: { others: '' },
+  OTHERS: { others: Stage.NULL },
 
   /**
    * OTHERS_ONCE
@@ -290,5 +294,5 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every *other* player in the game.
    */
-  OTHERS_ONCE: { others: '', once: true },
+  OTHERS_ONCE: { others: Stage.NULL, once: true },
 };

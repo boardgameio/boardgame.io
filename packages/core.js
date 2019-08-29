@@ -7,7 +7,12 @@
  */
 
 import { INVALID_MOVE } from '../src/core/reducer.js';
-import { Pass, ActivePlayers, TurnOrder } from '../src/core/turn-order.js';
+import {
+  Pass,
+  ActivePlayers,
+  TurnOrder,
+  Stage,
+} from '../src/core/turn-order.js';
 import { PlayerView } from '../src/core/player-view.js';
 
-export { ActivePlayers, TurnOrder, Pass, PlayerView, INVALID_MOVE };
+export { ActivePlayers, Stage, TurnOrder, Pass, PlayerView, INVALID_MOVE };
