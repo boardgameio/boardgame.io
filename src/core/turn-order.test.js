@@ -9,6 +9,7 @@
 import { Flow } from './flow';
 import {
   UpdateTurnOrderState,
+  Stage,
   TurnOrder,
   ActivePlayers,
   Pass,
@@ -90,12 +91,18 @@ describe('turn orders', () => {
     let state = { ctx: flow.ctx(2) };
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
-    expect(state.ctx.activePlayers).toEqual({ '0': '', '1': '' });
+    expect(state.ctx.activePlayers).toEqual({
+      '0': Stage.NULL,
+      '1': Stage.NULL,
+    });
     expect(state.ctx).not.toHaveUndefinedProperties();
 
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
-    expect(state.ctx.activePlayers).toEqual({ '0': '', '1': '' });
+    expect(state.ctx.activePlayers).toEqual({
+      '0': Stage.NULL,
+      '1': Stage.NULL,
+    });
   });
 
   test('ALL_ONCE', () => {
@@ -365,17 +372,20 @@ describe('setActivePlayers', () => {
   test('basic', () => {
     const newState = flow.processGameEvent(
       state,
-      gameEvent('setActivePlayers', [{ value: { '1': '' } }])
+      gameEvent('setActivePlayers', [{ value: { '1': Stage.NULL } }])
     );
-    expect(newState.ctx.activePlayers).toMatchObject({ '1': '' });
+    expect(newState.ctx.activePlayers).toMatchObject({ '1': Stage.NULL });
   });
 
   test('all', () => {
     const newState = flow.processGameEvent(
       state,
-      gameEvent('setActivePlayers', [{ all: '' }])
+      gameEvent('setActivePlayers', [{ all: Stage.NULL }])
     );
-    expect(newState.ctx.activePlayers).toMatchObject({ '0': '', '1': '' });
+    expect(newState.ctx.activePlayers).toMatchObject({
+      '0': Stage.NULL,
+      '1': Stage.NULL,
+    });
     expect(newState.ctx.activePlayersDone).toBeNull();
   });
 
@@ -384,7 +394,7 @@ describe('setActivePlayers', () => {
       moves: {
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
-            value: { '0': '', '1': '' },
+            value: { '0': Stage.NULL, '1': Stage.NULL },
             once: true,
           });
           return G;
@@ -413,7 +423,7 @@ describe('setActivePlayers', () => {
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
             once: true,
-            others: '',
+            others: Stage.NULL,
           });
           return G;
         },
