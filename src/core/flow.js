@@ -378,9 +378,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         }
       }
 
-      if (i == events.length - 1) {
-        events.push(...next);
-      }
+      events.push(...next);
     }
 
     return state;
@@ -565,7 +563,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       logEntry.automatic = true;
     }
 
-    const deltalog = [...(state.deltalog || []), logEntry];
+    const deltalog = [...state.deltalog, logEntry];
 
     return { ...state, G, ctx, deltalog };
   }
