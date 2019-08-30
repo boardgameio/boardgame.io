@@ -55,3 +55,36 @@ test('update ctx', () => {
   client.moves.A();
   expect(client.getState().ctx.turn).toBe(2);
 });
+
+test('no duplicate endTurn', () => {
+  const game = {
+    turn: {
+      onEnd: (G, ctx) => {
+        ctx.events.endTurn();
+      },
+    },
+  };
+  const client = Client({ game });
+  expect(client.getState().ctx.turn).toBe(1);
+  client.events.endTurn();
+  expect(client.getState().ctx.turn).toBe(2);
+});
+
+test('no duplicate endPhase', () => {
+  const game = {
+    phases: {
+      A: {
+        start: true,
+        onEnd: (G, ctx) => {
+          ctx.events.endPhase({ next: 'C' });
+        },
+      },
+      B: {},
+      C: {},
+    },
+  };
+  const client = Client({ game });
+  expect(client.getState().ctx.phase).toBe('A');
+  client.events.endPhase({ next: 'B' });
+  expect(client.getState().ctx.phase).toBe('B');
+});

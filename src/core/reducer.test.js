@@ -167,7 +167,7 @@ test('disable optimistic updates', () => {
   const game = {
     moves: {
       A: {
-        impl: () => ({ A: true }),
+        move: () => ({ A: true }),
         optimistic: false,
       },
     },

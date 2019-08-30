@@ -106,28 +106,28 @@ test('isActive', () => {
 });
 
 describe('step', () => {
-  const client = Client({
-    game: {
-      setup: () => ({ moved: false }),
+  test('advances game state', async () => {
+    const client = Client({
+      game: {
+        setup: () => ({ moved: false }),
 
-      moves: {
-        clickCell(G) {
-          return { moved: !G.moved };
+        moves: {
+          clickCell(G) {
+            return { moved: !G.moved };
+          },
+        },
+
+        endIf(G) {
+          if (G.moved) return true;
         },
       },
 
-      endIf(G) {
-        if (G.moved) return true;
+      ai: {
+        bot: RandomBot,
+        enumerate: () => [{ move: 'clickCell' }],
       },
-    },
+    });
 
-    ai: {
-      bot: RandomBot,
-      enumerate: () => [{ move: 'clickCell' }],
-    },
-  });
-
-  test('advances game state', async () => {
     expect(client.getState().G).toEqual({ moved: false });
     await client.step();
     expect(client.getState().G).toEqual({ moved: true });
@@ -143,6 +143,31 @@ describe('step', () => {
       },
     });
     client.step();
+  });
+
+  test('works with stages', async () => {
+    const client = Client({
+      game: {
+        moves: {
+          A: G => {
+            G.moved = true;
+          },
+        },
+
+        turn: {
+          activePlayers: { currentPlayer: 'stage' },
+        },
+      },
+
+      ai: {
+        bot: RandomBot,
+        enumerate: () => [{ move: 'A' }],
+      },
+    });
+
+    expect(client.getState().G).not.toEqual({ moved: true });
+    await client.step();
+    expect(client.getState().G).toEqual({ moved: true });
   });
 });
 
@@ -310,7 +335,7 @@ describe('event dispatchers', () => {
   test('default', () => {
     const game = {};
     const client = Client({ game });
-    expect(Object.keys(client.events)).toEqual(['endTurn', 'setStage']);
+    expect(Object.keys(client.events)).toEqual(['endTurn', 'setActivePlayers']);
     expect(client.getState().ctx.turn).toBe(1);
     client.events.endTurn();
     expect(client.getState().ctx.turn).toBe(2);
@@ -328,7 +353,7 @@ describe('event dispatchers', () => {
       'endTurn',
       'endPhase',
       'endGame',
-      'setStage',
+      'setActivePlayers',
     ]);
     expect(client.getState().ctx.turn).toBe(1);
     client.events.endTurn();
@@ -340,7 +365,7 @@ describe('event dispatchers', () => {
       events: {
         endPhase: false,
         endTurn: false,
-        setStage: false,
+        setActivePlayers: false,
       },
     };
     const client = Client({ game });

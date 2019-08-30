@@ -11,7 +11,11 @@ import { TurnOrder } from 'boardgame.io/core';
 
 const code = `{
   phases: {
-    A: { turn: { order: TurnOrder.ONCE }, next: 'B' },
+    A: {
+      start: true,
+      next: 'B',
+      turn: { order: TurnOrder.ONCE },
+    },
     B: {},
   },
 }
@@ -26,10 +30,15 @@ const Description = () => (
 export default {
   description: Description,
   game: {
-    endPhase: false,
-    startingPhase: 'A',
+    events: {
+      endPhase: false,
+    },
     phases: {
-      A: { turn: { order: TurnOrder.ONCE }, next: 'B' },
+      A: {
+        start: true,
+        next: 'B',
+        turn: { order: TurnOrder.ONCE },
+      },
       B: {},
     },
   },

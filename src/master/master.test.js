@@ -115,7 +115,6 @@ describe('update', () => {
         ctx: {
           _random: { seed: 0 },
           currentPlayer: '0',
-          currentPlayerMoves: 0,
           numPlayers: 2,
           phase: null,
           playOrder: ['0', '1'],
@@ -129,7 +128,6 @@ describe('update', () => {
       ctx: {
         _random: undefined,
         currentPlayer: '1',
-        currentPlayerMoves: 0,
         numPlayers: 2,
         phase: null,
         playOrder: ['0', '1'],
@@ -374,7 +372,7 @@ describe('redactLog', () => {
       moves: {
         A: G => G,
         B: {
-          impl: G => G,
+          move: G => G,
           redact: true,
         },
       },

@@ -114,8 +114,8 @@ class _ClientImpl {
         const state = this.store.getState();
 
         let playerID = state.ctx.currentPlayer;
-        if (state.ctx.stage) {
-          playerID = Object.keys(state.ctx.stage)[0];
+        if (state.ctx.activePlayers) {
+          playerID = Object.keys(state.ctx.activePlayers)[0];
         }
 
         const { action, metadata } = await bot.play(state, playerID);

@@ -17,7 +17,7 @@ describe('basic', () => {
         A: G => G,
         B: () => null,
         C: {
-          impl: () => 'C',
+          move: () => 'C',
         },
       },
 

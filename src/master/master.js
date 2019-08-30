@@ -165,7 +165,10 @@ export class Master {
     // that can make moves right now and the person doing the
     // action is that player.
     if (action.type == UNDO || action.type == REDO) {
-      if (state.ctx.currentPlayer !== playerID || state.ctx.stage !== null) {
+      if (
+        state.ctx.currentPlayer !== playerID ||
+        state.ctx.activePlayers !== null
+      ) {
         logging.error(`playerID=[${playerID}] cannot undo / redo right now`);
         return;
       }

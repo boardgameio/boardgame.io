@@ -30,31 +30,33 @@ export const Pass = (G, ctx) => {
 };
 
 /**
- * Event to change the stages of different players in the current turn.
+ * Event to change the active players (and their stages) in the current turn.
  * @param {*} state
  * @param {*} arg
  */
-export function SetStageEvent(state, arg) {
-  return { ...state, ctx: setStage(state.ctx, arg) };
+export function SetActivePlayersEvent(state, arg) {
+  return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
 }
 
-function setStage(ctx, arg) {
-  let stage = ctx.stage || {};
-  let _stageOnce = false;
+export function SetActivePlayers(ctx, arg) {
+  let _prevActivePlayers = ctx.activePlayers || null;
+  let activePlayers = {};
+  let activePlayersDone = null;
+  let _activePlayersOnce = false;
 
   if (arg.value) {
-    stage = arg.value;
+    activePlayers = arg.value;
   }
 
   if (arg.currentPlayer !== undefined) {
-    stage[ctx.currentPlayer] = arg.currentPlayer;
+    activePlayers[ctx.currentPlayer] = arg.currentPlayer;
   }
 
   if (arg.others !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
       const playerID = ctx.playOrder[i];
       if (playerID !== ctx.currentPlayer) {
-        stage[playerID] = arg.others;
+        activePlayers[playerID] = arg.others;
       }
     }
   }
@@ -62,19 +64,29 @@ function setStage(ctx, arg) {
   if (arg.all !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
       const playerID = ctx.playOrder[i];
-      stage[playerID] = arg.all;
+      activePlayers[playerID] = arg.all;
     }
   }
 
   if (arg.once) {
-    _stageOnce = true;
+    _activePlayersOnce = true;
   }
 
-  if (Object.keys(stage).length == 0) {
-    stage = null;
+  if (Object.keys(activePlayers).length == 0) {
+    activePlayers = null;
   }
 
-  return { ...ctx, stage, _stageOnce };
+  if (arg.once && Object.keys(activePlayers).length > 0) {
+    activePlayersDone = false;
+  }
+
+  return {
+    ...ctx,
+    activePlayers,
+    activePlayersDone,
+    _activePlayersOnce,
+    _prevActivePlayers,
+  };
 }
 
 /**
@@ -99,7 +111,7 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * @param {object} turn - A turn object for this phase.
  */
 export function InitTurnOrderState(G, ctx, turn) {
-  const order = turn.order || TurnOrder.DEFAULT;
+  const order = turn.order;
 
   let playOrder = [...new Array(ctx.numPlayers)].map((d, i) => i + '');
   if (order.playOrder !== undefined) {
@@ -110,7 +122,7 @@ export function InitTurnOrderState(G, ctx, turn) {
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-  ctx = setStage(ctx, order.stages || {});
+  ctx = SetActivePlayers(ctx, turn.activePlayers || {});
 
   return ctx;
 }
@@ -124,7 +136,7 @@ export function InitTurnOrderState(G, ctx, turn) {
                                 may specify the next player.
  */
 export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
-  const order = turn.order || TurnOrder.DEFAULT;
+  const order = turn.order;
 
   let playOrderPos = ctx.playOrderPos;
   let currentPlayer = ctx.currentPlayer;
@@ -145,10 +157,6 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
     } else {
       playOrderPos = t;
       currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
-
-      if (order.stages !== undefined) {
-        ctx = setStage(ctx, order.stages);
-      }
     }
   }
 
@@ -184,6 +192,16 @@ export const TurnOrder = {
   },
 
   /**
+   * RESET
+   *
+   * Similar to DEFAULT, but starts from 0 each time.
+   */
+  RESET: {
+    first: () => 0,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+  },
+
+  /**
    * ONCE
    *
    * Another round-robin turn order, but goes around just once.
@@ -196,58 +214,6 @@ export const TurnOrder = {
         return ctx.playOrderPos + 1;
       }
     },
-  },
-
-  /**
-   * ANY
-   *
-   * The turn stays with one player, but any player can play (in any order)
-   * until the phase ends.
-   */
-  ANY: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { all: '' },
-  },
-
-  /**
-   * ANY_ONCE
-   *
-   * The turn stays with one player, but any player can play (once, and in any order).
-   * This is typically used in a phase where you want to elicit a response
-   * from every player in the game.
-   */
-  ANY_ONCE: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { all: '', once: true },
-    endPhaseOnceDone: true,
-  },
-
-  /**
-   * OTHERS
-   *
-   * The turn stays with one player, and every *other* player can play (in any order)
-   * until the phase ends.
-   */
-  OTHERS: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { others: '' },
-  },
-
-  /**
-   * OTHERS_ONCE
-   *
-   * The turn stays with one player, and every *other* player can play (once, and in any order).
-   * This is typically used in a phase where you want to elicit a response
-   * from every *other* player in the game.
-   */
-  OTHERS_ONCE: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => ctx.playOrderPos,
-    stages: { others: '', once: true },
-    endPhaseOnceDone: true,
   },
 
   /**
@@ -299,4 +265,44 @@ export const TurnOrder = {
       }
     },
   },
+};
+
+export const Stage = {
+  NULL: null,
+};
+
+export const ActivePlayers = {
+  /**
+   * ALL
+   *
+   * The turn stays with one player, but any player can play (in any order)
+   * until the phase ends.
+   */
+  ALL: { all: Stage.NULL },
+
+  /**
+   * ALL_ONCE
+   *
+   * The turn stays with one player, but any player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every player in the game.
+   */
+  ALL_ONCE: { all: Stage.NULL, once: true },
+
+  /**
+   * OTHERS
+   *
+   * The turn stays with one player, and every *other* player can play (in any order)
+   * until the phase ends.
+   */
+  OTHERS: { others: Stage.NULL },
+
+  /**
+   * OTHERS_ONCE
+   *
+   * The turn stays with one player, and every *other* player can play (once, and in any order).
+   * This is typically used in a phase where you want to elicit a response
+   * from every *other* player in the game.
+   */
+  OTHERS_ONCE: { others: Stage.NULL, once: true },
 };
