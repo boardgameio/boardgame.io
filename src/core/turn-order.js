@@ -192,6 +192,16 @@ export const TurnOrder = {
   },
 
   /**
+   * RESET
+   *
+   * Similar to DEFAULT, but starts from 0 each time.
+   */
+  RESET: {
+    first: () => 0,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+  },
+
+  /**
    * ONCE
    *
    * Another round-robin turn order, but goes around just once.

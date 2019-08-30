@@ -50,7 +50,7 @@ describe('turn orders', () => {
 
   test('DEFAULT', () => {
     const flow = Flow({
-      phases: { A: { start: true }, B: {} },
+      phases: { A: { start: true, next: 'B' }, B: {} },
     });
 
     let state = { ctx: flow.ctx(2) };
@@ -62,7 +62,35 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('1');
     state = flow.processGameEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.phase).toBe('A');
+    state = flow.processGameEvent(state, gameEvent('endPhase'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.phase).toBe('B');
+  });
+
+  test('RESET', () => {
+    const flow = Flow({
+      turn: { order: TurnOrder.RESET },
+      phases: { A: { start: true, next: 'B' }, B: {} },
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.phase).toBe('A');
+    state = flow.processGameEvent(state, gameEvent('endPhase'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.phase).toBe('B');
   });
 
   test('ONCE', () => {
