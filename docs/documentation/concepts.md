@@ -7,14 +7,14 @@ The framework captures the game state in two objects: `G` and
 
 ```js
 {
-  // The game state (user-managed).
+  // The game state (managed by you).
   G: {},
 
-  // Read-only metadata managed by the framework.
+  // Read-only metadata (managed by the framework).
   ctx: {
     turn: 0,
     currentPlayer: '0',
-    numPlayers: 2
+    numPlayers: 2,
   }
 }
 ```
@@ -38,7 +38,7 @@ immutability is handled by the framework.
 
 ```js
 moves: {
-  drawCard: function(G, ctx) {
+  drawCard: (G, ctx) => {
     const card = G.deck.pop();
     G.hand.push(card);
   },
@@ -54,14 +54,13 @@ provided through `props`.
 
 ```js
 onClick() {
-  this.props.moves.moveA();
+  this.props.moves.drawCard();
 }
 ```
 
 ### Events
 
-These are functions provided by the framework in order to change state
-in `ctx`. These typically advance the game state by doing things like
+These are framework-provided functions that are analagous to moves, except that they work on `ctx`. These typically advance the game state by doing things like
 ending the turn, changing the game phase etc.
 Events are dispatched from the client in a similar way to moves. Here
 is an example in React again:
@@ -74,22 +73,25 @@ onClick() {
 
 For more details, see the guide on [Events](events.md).
 
+### Phase
+
+A phase is a period in the game that overrides the game
+configuration while it is active. For example, you can use
+a different set of moves or a different turn order during
+a phase. The game can transition between different phases, and turns
+occur inside each phase. See the guide on [Phases](phases.md) for more details.
+
 ### Turn
 
-A turn is a period of the game that is associated with a single
-player. It typically consists of a set of moves made by
+A turn is a period of the game that is associated with an individual
+player. It typically consists of one or more moves made by
 that player before it passes on to another player. You can
 also allow other players to play during your turn, although
 this is less common. See the guide on
 [Turn Orders](turn-order.md) for more details.
 
-### Phase
+### Stage
 
-A phase is a label that is associated with a particular
-game configuration. A phase can be configured with a
-custom turn order, enable a certain subset of moves and
-much more. The game can transition between different phases
-just like the turn can be passed between different players.
-These happen independently (i.e. you can design your game
-to have multiple phases per turn or multiple turns per phase).
-See the guide on [Phases](phases.md) for more details.
+A stage is similar to a phase, except that it happens within a turn,
+and it applies to individual players rather than the game as a whole. Different players can be in different stages during a turn, and the
+stages defines moves that those players can make.
