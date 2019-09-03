@@ -91,7 +91,7 @@ The `Firebase` constructor is passed an object with the following properties:
    Web Client SDK (`firebase` module). The Admin SDK should be preferred.
    Note the corresponding `config` objects are not compatible.
 
-### Flatfile database with [node-persist](https://github.com/simonlast/node-persist)
+### Flatfile
 
 First, install the necessary packages:
 

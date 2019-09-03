@@ -25,7 +25,7 @@ The component supports the following `props`:
 import { Client } from 'boardgame.io/react';
 
 const App = Client({
-  // The return value of Game().
+  // A game object.
   game: game,
 
   // The number of players.

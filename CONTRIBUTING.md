@@ -44,7 +44,7 @@ $ npm run test:coverage
 Use the following command to preview them:
 
 ```
-$ npm run docsify
+$ npm run docs
 ```
 
 ## Contributor License Agreement

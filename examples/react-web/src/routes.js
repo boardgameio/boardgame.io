@@ -8,12 +8,11 @@
 
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
-import phases from './phases';
 import secret_state from './secret-state';
 import random from './random';
-import turnorder from './turnorder';
 import threejs from './threejs';
 import lobby from './lobby';
+import simulator from './simulator';
 import redacted_move from './redacted-move';
 import undo from './undo';
 
@@ -27,12 +26,8 @@ const routes = [
     routes: chess.routes,
   },
   {
-    name: 'Phases',
-    routes: phases.routes,
-  },
-  {
     name: 'Turn Orders',
-    routes: turnorder.routes,
+    routes: simulator.routes,
   },
   {
     name: 'Random API',

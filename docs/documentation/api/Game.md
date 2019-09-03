@@ -1,144 +1,95 @@
 # Game
 
-Creates a new game implementation described by the initial
-game state and the moves. The moves are converted to a
-[Redux](http://redux.js.org/docs/basics/Reducers.html) reducer to maintain `G`.
-
-### Arguments
-
-1. `obj` (_object_): An object that contains
-
-  * `name` (_string_): The name of the game.
-  * `setup` (_function_): _(ctx, setupData) => G_
-
-    Function that returns the initial value of G.
-    `setupData` is an optional custom object that is passed through the
-    Game Creation [API](/api/Server?id=creating-a-game).
-
-  * `moves` (_object_): The keys are move names, and the values
-    are pure functions that return the new value of `G` once
-    the move has been processed.
-  * `playerView` (_function_): Returns a version of `G` that
-    is customized for a given player. See [Secret State](/secret-state) for more information.
-  * `seed` (_string_): Seed for the PRNG.
-  * `flow` (_object_): Arguments to customize the flow of the game. See
-    [Phases](/phases) for more information.
-  * `flow.endGameIf` (_function_): _(G, ctx) => {}_
-    The game automatically ends if this function returns anything (checked after each move).
-    The return value is available at `ctx.gameover`.
-  * `flow.endTurnIf` (_function_): _(G, ctx) => boolean_
-    The turn automatically ends if this function returns true (checked after each move).
-  * `flow.onTurnBegin` (_function_): _(G, ctx) => G_
-    Code to run at the start of a turn.
-  * `flow.onTurnEnd` (_function_): _(G, ctx) => G_
-    Code to run at the end of a turn.
-  * `flow.onMove` (_function_): _(G, ctx, { type: 'moveName', args: [] }) => G_
-    Code to run at the end of a move.
-  * `flow.movesPerTurn` (_number_): Ends the turn automatically if a certain number
-    of moves have been made.
-  * `flow.undoableMoves` (_array_): Enables undo and redo of listed moves.  Leave `undefined` if all moves should be undoable.
-  * `flow.redactedMoves` (_array_): List of moves to redact from the log.
-  * `flow.optimisticUpdate` (_function_): _(G, ctx, move) => boolean_
-    Return `false` to disable optimistic execution of a particular move on the client.
-  * `flow.phases` (_object_): Optional spec of game phases. See
-    [Phases](/phases) for more information.
-
-### Returns
-
-(`game`): An object that contains
-
-1. `setup`: The same `setup` from the input object.
-2. `moveNames`: The names of the moves of the game.
-3. `processMove`: The reducer to maintain `G`.
-4. `playerView`: The passed in `playerView` function.
-5. `flow`: An object derived from `obj.flow` containing a reducer to maintain `ctx`.
-
-### Usage
-
-#### Simple Game
-
 ```js
-import { Game } from 'boardgame.io/core';
+{
+  // The name of the game.
+  name: 'tic-tac-toe',
 
-const game = Game({
-  setup: (ctx) => {
-    const G = {...};
-    return G;
-  },
+  // Function that returns the initial value of G.
+  // setupData is an optional custom object that is
+  // passed through the Game Creation API.
+  setup: (ctx, setupData) => G,
 
   moves: {
-    moveWithoutArgs(G, ctx) {
-      ...
+    // short-form move.
+    A: (G, ctx) => {},
+
+    // long-form move.
+    B: {
+      move: (G, ctx) => {},
+      undoable: false,  // prevents undoing the move.
+      redact: true,     // prevents the move arguments from showing up in the log.
     },
-
-    moveWithArgs(G, ctx, arg0, arg1) {
-      ...
-    }
-  }
-});
-```
-
-#### With Victory Condition
-
-```js
-import { Game } from 'boardgame.io/core';
-
-const game = Game({
-  setup: (ctx) => {
-    ...
   },
 
-  moves: {
-    ...
-  },
+  // Everything below is OPTIONAL.
 
-  flow: {
-    endGameIf: (G, ctx) => {
-      if (IsWinner(G, ctx.currentPlayer)) {
-        return ctx.currentPlayer;
-      }
-    },
-  }
-});
-```
+  // Function that allows you to tailor the game state to a specific player.
+  playerView: (G, ctx, playerID) => G,
 
-#### With Phases
+  // The seed used by the pseudo-random number generator.
+  seed: 'random-string',
 
-```js
-import { Game } from 'boardgame.io/core';
+  turn: {
+    // The turn order.
+    order: TurnOrder.DEFAULT,
 
-const game = Game({
-  setup: (ctx) => {
-    ...
-  },
+    // Called at the beginning of a turn.
+    onBegin: (G, ctx) => G,
 
-  moves: {
-    ...
-  },
+    // Called at the end of a turn.
+    onEnd: (G, ctx) => G,
 
-  flow: {
-    phases: {
+    // Ends the turn if this returns true.
+    endIf: (G, ctx) => true,
+
+    // Called at the end of each move.
+    onMove: (G, ctx) => G,
+
+    // Ends the turn automatically after a number of moves.
+    moveLimit: 1,
+
+    // Calls setActivePlayers with this as argument at the
+    // beginning of the turn.
+    activePlayers: { ... },
+
+    stages: {
       A: {
-        endGameIf: ...
-        endTurnIf: ...
-        onTurnBegin: ...
-        onTurnEnd: ...
-        onPhaseBegin: ...
-        onPhaseEnd: ...
-        allowedMoves: ...
-        ...
+        // Players in this stage are restricted to moves defined here.
+        moves: { ... },
+
+        // Players in this stage will be moved to the stage specified
+        // here when the endStage event is called.
+        next: 'B'
       },
-      B: {
-        endGameIf: ...
-        endTurnIf: ...
-        onTurnBegin: ...
-        onTurnEnd: ...
-        onPhaseBegin: ...
-        onPhaseEnd: ...
-        allowedMoves: ...
-        ...
-      },
-    }
-  }
-});
+
+      ...
+    },
+  },
+
+  phases: {
+    A: {
+      // Called at the beginning of a phase.
+      onBegin: (G, ctx) => G,
+
+      // Called at the end of a phase.
+      onEnd: (G, ctx) => G,
+
+      // Ends the phase if this returns true.
+      endIf: (G, ctx) => true,
+
+      // Overrides `moves` for the duration of this phase.
+      moves: { ... },
+
+      // Overrides `turn` for the duration of this phase.
+      turn: { ... },
+    },
+
+    ...
+  },
+
+  // Ends the game if this returns anything.
+  // The return value is available in `ctx.gameover`.
+  endIf: (G, ctx) => obj,
+}
 ```
