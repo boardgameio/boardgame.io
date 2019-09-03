@@ -16,7 +16,7 @@ $ cd game
 $ npm install --save boardgame.io
 ```
 
-## Define Moves
+## Moves
 
 We create the game by providing the initial value of the
 game state `G` (through the `setup` function), and the moves
@@ -82,7 +82,7 @@ can end the turn using `endTurn` and the next call to
 !> The Debug Panel can be turned off by passing `debug: false`
 in the `Client` config.
 
-## Add Victory Condition
+## Victory Condition
 
 The Tic-Tac-Toe game we have so far doesn't really terminate.
 Let's keep track of a winner in case one player wins the game.
@@ -128,7 +128,7 @@ const TicTacToe = {
 the game is over. If it returns anything at all, the game ends and
 the return value is available at `ctx.gameover`.
 
-## Render Board
+## Game Board
 
 **React** is a great fit for board games because
 it provides a declarative API to translate objects
@@ -242,7 +242,7 @@ And there you have it. A basic tic-tac-toe game!
 !> You can press `1` (or click on the button next to `reset`) to reset the
 state of the game and start over.
 
-## Adding AI
+## Bots
 
 In this section we will show you how easy it is to add a bot that is
 capable of playing your game. All you need to do is just tell the
