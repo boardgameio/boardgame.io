@@ -15,7 +15,7 @@ const code = `{
       start: true,
       next: 'B',
       turn: { activePlayers: ActivePlayers.ALL_ONCE },
-      endIf: (G, ctx) => ctx.activePlayersDone,
+      endIf: (G, ctx) => ctx.numMoves && ctx.activePlayers === null,
     },
     B: {},
   }
@@ -45,7 +45,7 @@ export default {
         start: true,
         next: 'B',
         turn: { activePlayers: ActivePlayers.ALL_ONCE },
-        endIf: (G, ctx) => ctx.activePlayersDone,
+        endIf: (G, ctx) => ctx.numMoves && ctx.activePlayers === null,
       },
       B: {},
     },

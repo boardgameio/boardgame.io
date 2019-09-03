@@ -48,7 +48,6 @@ export function SetActivePlayers(ctx, arg) {
   }
 
   let activePlayers = {};
-  let activePlayersDone = null;
   let _activePlayersOnce = false;
 
   if (arg.value) {
@@ -83,14 +82,9 @@ export function SetActivePlayers(ctx, arg) {
     activePlayers = null;
   }
 
-  if (arg.once && Object.keys(activePlayers).length > 0) {
-    activePlayersDone = false;
-  }
-
   return {
     ...ctx,
     activePlayers,
-    activePlayersDone,
     _activePlayersOnce,
     _prevActivePlayers,
   };

@@ -415,7 +415,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Initialize the turn order state.
     if (currentPlayer) {
-      ctx = { ...ctx, currentPlayer, activePlayersDone: null };
+      ctx = { ...ctx, currentPlayer };
       if (conf.turn.activePlayers) {
         ctx = SetActivePlayers(ctx, conf.turn.activePlayers);
       }
@@ -672,12 +672,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   function ProcessMove(state, action) {
     let conf = GetPhase(state.ctx);
 
-    let {
-      activePlayers,
-      _activePlayersOnce,
-      _prevActivePlayers,
-      activePlayersDone,
-    } = state.ctx;
+    let { activePlayers, _activePlayersOnce, _prevActivePlayers } = state.ctx;
 
     if (_activePlayersOnce) {
       const playerID = action.playerID;
@@ -697,7 +692,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       } else {
         activePlayers = null;
         _activePlayersOnce = false;
-        activePlayersDone = true;
       }
     }
 
@@ -711,7 +705,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...state.ctx,
         activePlayers,
-        activePlayersDone,
         _activePlayersOnce,
         _prevActivePlayers,
         numMoves,

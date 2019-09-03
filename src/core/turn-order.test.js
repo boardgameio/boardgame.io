@@ -414,7 +414,6 @@ describe('setActivePlayers', () => {
       '0': Stage.NULL,
       '1': Stage.NULL,
     });
-    expect(newState.ctx.activePlayersDone).toBeNull();
   });
 
   test('once', () => {
@@ -436,13 +435,10 @@ describe('setActivePlayers', () => {
     let state = InitializeGame({ game });
     state = reducer(state, makeMove('B', null, '0'));
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1']);
-    expect(state.ctx.activePlayersDone).toBe(false);
     state = reducer(state, makeMove('A', null, '0'));
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['1']);
-    expect(state.ctx.activePlayersDone).toBe(false);
     state = reducer(state, makeMove('A', null, '1'));
     expect(state.ctx.activePlayers).toBeNull();
-    expect(state.ctx.activePlayersDone).toBe(true);
   });
 
   test('others', () => {
