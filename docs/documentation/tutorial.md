@@ -5,8 +5,8 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
 ## Setup
 
 We shall use [create-react-app](https://github.com/facebookincubator/create-react-app) to create a **React** app and add
-**boardgame.io** features. The code uses ES2015 features,
-including [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import), and
+**boardgame.io** to it. The code uses ES2015 features,
+including [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) and
 the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator) syntax.
 
 ```
@@ -37,17 +37,16 @@ call-site of this move.
 // src/App.js
 
 import { Client } from 'boardgame.io/react';
-import { Game } from 'boardgame.io/core';
 
-const TicTacToe = Game({
+const TicTacToe = {
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
-    clickCell(G, ctx, id) {
+    clickCell: (G, ctx, id) => {
       G.cells[id] = ctx.currentPlayer;
     },
   },
-});
+};
 
 const App = Client({ game: TicTacToe });
 
@@ -68,10 +67,10 @@ npm start
 ```
 
 Notice that we have a fully playable game that we can
-interact with via the Debug UI with just this little piece of code!
+interact with using the Debug Panel with just this little piece of code!
 
 ?> You can make a move by clicking on `clickCell` on the
-Debug UI (or pressing the keyboard shortcut `c`),
+Debug Panel (or pressing the keyboard shortcut `c`),
 entering `0` as an argument and pressing
 `Enter` to have the current player make a move on the 0-th
 cell. This `id` is available inside the move function as
@@ -80,18 +79,17 @@ the first argument after `G` and `ctx`. Notice how the
 can end the turn using `endTurn` and the next call to
 `clickCell` will result in a `1` in the chosen cell.
 
-!> The Debug UI can be turned off by passing `debug: false`
+!> The Debug Panel can be turned off by passing `debug: false`
 in the `Client` config.
 
 ## Add Victory Condition
 
 The Tic-Tac-Toe game we have so far doesn't really terminate.
 Let's keep track of a winner in case one player wins the game.
-Let's also prevent players from being able to overwrite cells.
+In order to do this, we add a game termination condition
+to `endIf`.
 
-In order to do this, we add a `flow` section to control the
-"flow" of the game. In this case, we just add a game termination
-condition to it.
+Let's also prevent players from being able to overwrite cells:
 
 ```js
 // Return true if `cells` is in a winning configuration.
@@ -104,32 +102,29 @@ function IsDraw(cells) {
   return cells.filter(c => c === null).length == 0;
 }
 
-const TicTacToe = Game({
+const TicTacToe = {
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
-    clickCell(G, ctx, id) {
-      // Ensure that we can't overwrite cells.
+    clickCell: (G, ctx, id) => {
       if (G.cells[id] === null) {
         G.cells[id] = ctx.currentPlayer;
       }
     },
   },
 
-  flow: {
-    endGameIf: (G, ctx) => {
-      if (IsVictory(G.cells)) {
-        return { winner: ctx.currentPlayer };
-      }
-      if (IsDraw(G.cells)) {
-        return { draw: true };
-      }
-    },
+  endIf: (G, ctx) => {
+    if (IsVictory(G.cells)) {
+      return { winner: ctx.currentPlayer };
+    }
+    if (IsDraw(G.cells)) {
+      return { draw: true };
+    }
   },
-});
+};
 ```
 
-!> The `endGameIf` field takes a function that determines if
+!> `endIf` takes a function that determines if
 the game is over. If it returns anything at all, the game ends and
 the return value is available at `ctx.gameover`.
 
@@ -251,18 +246,23 @@ state of the game and start over.
 
 In this section we will show you how easy it is to add a bot that is
 capable of playing your game. All you need to do is just tell the
-bot how to find legal moves in the game, and it will do the rest.
+bot how to find legal moves in the game, and it will find moves that
+work well.
 
-We shall first modify our flow section by adding a useful option
-called `movesPerTurn` to automatically end the player's turn after
+We shall first modify our game by adding a useful option
+called `moveLimit` to automatically end the player's turn after
 a single move has been made. That way the bot doesn't have to worry about
 issuing `endTurn` calls (which, while possible, makes the game tree
 a bit messier to search).
 
 ```js
-flow: {
-  movesPerTurn: 1,
-  ...
+const TicTacToe = {
+  setup: () => { ... },
+  moves: { ... }
+
+  turn: {
+    moveLimit: 1,
+  },
 }
 ```
 
