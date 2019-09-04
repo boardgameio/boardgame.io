@@ -39,9 +39,15 @@ export function SetActivePlayersEvent(state, arg) {
 }
 
 export function SetActivePlayers(ctx, arg) {
-  let _prevActivePlayers = ctx.activePlayers || null;
+  let { _prevActivePlayers } = ctx;
+
+  if (arg.revert) {
+    _prevActivePlayers = _prevActivePlayers.concat(ctx.activePlayers);
+  } else {
+    _prevActivePlayers = [];
+  }
+
   let activePlayers = {};
-  let activePlayersDone = null;
   let _activePlayersOnce = false;
 
   if (arg.value) {
@@ -76,14 +82,9 @@ export function SetActivePlayers(ctx, arg) {
     activePlayers = null;
   }
 
-  if (arg.once && Object.keys(activePlayers).length > 0) {
-    activePlayersDone = false;
-  }
-
   return {
     ...ctx,
     activePlayers,
-    activePlayersDone,
     _activePlayersOnce,
     _prevActivePlayers,
   };

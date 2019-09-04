@@ -414,7 +414,6 @@ describe('setActivePlayers', () => {
       '0': Stage.NULL,
       '1': Stage.NULL,
     });
-    expect(newState.ctx.activePlayersDone).toBeNull();
   });
 
   test('once', () => {
@@ -436,13 +435,10 @@ describe('setActivePlayers', () => {
     let state = InitializeGame({ game });
     state = reducer(state, makeMove('B', null, '0'));
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1']);
-    expect(state.ctx.activePlayersDone).toBe(false);
     state = reducer(state, makeMove('A', null, '0'));
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['1']);
-    expect(state.ctx.activePlayersDone).toBe(false);
     state = reducer(state, makeMove('A', null, '1'));
     expect(state.ctx.activePlayers).toBeNull();
-    expect(state.ctx.activePlayersDone).toBe(true);
   });
 
   test('others', () => {
@@ -493,14 +489,14 @@ describe('setActivePlayers', () => {
 
       expect(state.ctx).toMatchObject({
         activePlayers: { '0': 'stage' },
-        _prevActivePlayers: null,
+        _prevActivePlayers: [],
       });
 
       state = reducer(state, makeMove('A', null, '0'));
 
       expect(state.ctx).toMatchObject({
         activePlayers: null,
-        _prevActivePlayers: null,
+        _prevActivePlayers: [],
       });
     });
 
@@ -511,6 +507,7 @@ describe('setActivePlayers', () => {
             ctx.events.setActivePlayers({
               currentPlayer: 'stage2',
               once: true,
+              revert: true,
             });
           },
           B: () => {},
@@ -526,21 +523,21 @@ describe('setActivePlayers', () => {
 
       expect(state.ctx).toMatchObject({
         activePlayers: { '0': 'stage1' },
-        _prevActivePlayers: null,
+        _prevActivePlayers: [],
       });
 
       state = reducer(state, makeMove('A', null, '0'));
 
       expect(state.ctx).toMatchObject({
         activePlayers: { '0': 'stage2' },
-        _prevActivePlayers: { '0': 'stage1' },
+        _prevActivePlayers: [{ '0': 'stage1' }],
       });
 
       state = reducer(state, makeMove('B', null, '0'));
 
       expect(state.ctx).toMatchObject({
         activePlayers: { '0': 'stage1' },
-        _prevActivePlayers: null,
+        _prevActivePlayers: [],
       });
     });
   });
@@ -560,6 +557,7 @@ describe('setActivePlayers', () => {
                   ctx.events.setActivePlayers({
                     others: 'B',
                     once: true,
+                    revert: true,
                   });
                 },
               },
