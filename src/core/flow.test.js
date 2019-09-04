@@ -10,7 +10,6 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { FlowInternal, Flow } from './flow';
 import { error } from '../core/logger';
-import { Stage } from './turn-order';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -759,65 +758,5 @@ describe('activePlayers', () => {
       '1': 'A',
       '2': 'B',
     });
-  });
-
-  test('activePlayersDone', () => {
-    const spec = {
-      numPlayers: 3,
-      multiplayer: { local: true },
-      game: {
-        moves: {
-          moveA: (G, ctx) => {
-            ctx.events.setActivePlayers({ all: Stage.NULL, once: true });
-          },
-          moveB: G => G,
-        },
-      },
-    };
-
-    const p0 = Client({ ...spec, playerID: '0' });
-    const p1 = Client({ ...spec, playerID: '1' });
-    const p2 = Client({ ...spec, playerID: '2' });
-
-    p0.connect();
-    p1.connect();
-    p2.connect();
-
-    expect(p0.getState().ctx.currentPlayer).toBe('0');
-
-    expect(p0.getState().ctx.activePlayersDone).toBe(null);
-    p0.moves.moveA();
-    expect(p0.getState().ctx.activePlayersDone).toBe(false);
-
-    expect(p0.getState().ctx.activePlayers).toEqual({
-      '0': Stage.NULL,
-      '1': Stage.NULL,
-      '2': Stage.NULL,
-    });
-
-    p0.moves.moveB();
-
-    expect(p0.getState().ctx.activePlayersDone).toBe(false);
-    expect(p0.getState().ctx.activePlayers).toEqual({
-      '1': Stage.NULL,
-      '2': Stage.NULL,
-    });
-
-    p1.moves.moveB();
-
-    expect(p0.getState().ctx.activePlayersDone).toBe(false);
-    expect(p0.getState().ctx.activePlayers).toEqual({
-      '2': Stage.NULL,
-    });
-
-    p2.moves.moveB();
-
-    expect(p0.getState().ctx.activePlayersDone).toBe(true);
-    expect(p0.getState().ctx.activePlayers).toEqual(null);
-
-    p0.events.endTurn();
-
-    expect(p0.getState().ctx.activePlayersDone).toBe(null);
-    expect(p0.getState().ctx.activePlayers).toEqual(null);
   });
 });

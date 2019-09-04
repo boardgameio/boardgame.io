@@ -415,7 +415,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Initialize the turn order state.
     if (currentPlayer) {
-      ctx = { ...ctx, currentPlayer, activePlayersDone: null };
+      ctx = { ...ctx, currentPlayer };
       if (conf.turn.activePlayers) {
         ctx = SetActivePlayers(ctx, conf.turn.activePlayers);
       }
@@ -428,7 +428,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     G = conf.turn.onBegin(G, ctx);
 
     const turn = ctx.turn + 1;
-    ctx = { ...ctx, turn, numMoves: 0, _prevActivePlayers: null };
+    ctx = { ...ctx, turn, numMoves: 0, _prevActivePlayers: [] };
 
     const plainCtx = ContextEnhancer.detachAllFromContext(ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -672,12 +672,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   function ProcessMove(state, action) {
     let conf = GetPhase(state.ctx);
 
-    let {
-      activePlayers,
-      _activePlayersOnce,
-      _prevActivePlayers,
-      activePlayersDone,
-    } = state.ctx;
+    let { activePlayers, _activePlayersOnce, _prevActivePlayers } = state.ctx;
 
     if (_activePlayersOnce) {
       const playerID = action.playerID;
@@ -687,12 +682,16 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
           obj[key] = activePlayers[key];
           return obj;
         }, {});
+    }
 
-      if (Object.keys(activePlayers).length == 0) {
-        activePlayers = state.ctx._prevActivePlayers;
+    if (activePlayers && Object.keys(activePlayers).length == 0) {
+      if (state.ctx._prevActivePlayers.length > 0) {
+        const lastIndex = state.ctx._prevActivePlayers.length - 1;
+        activePlayers = state.ctx._prevActivePlayers[lastIndex];
+        _prevActivePlayers = state.ctx._prevActivePlayers.slice(0, lastIndex);
+      } else {
+        activePlayers = null;
         _activePlayersOnce = false;
-        _prevActivePlayers = null;
-        activePlayersDone = true;
       }
     }
 
@@ -706,7 +705,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...state.ctx,
         activePlayers,
-        activePlayersDone,
         _activePlayersOnce,
         _prevActivePlayers,
         numMoves,
