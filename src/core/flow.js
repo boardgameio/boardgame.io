@@ -672,6 +672,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   function ProcessMove(state, action) {
     let conf = GetPhase(state.ctx);
 
+    let { ctx } = state;
     let { activePlayers, _activePlayersOnce, _prevActivePlayers } = state.ctx;
 
     if (_activePlayersOnce) {
@@ -685,7 +686,10 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     }
 
     if (activePlayers && Object.keys(activePlayers).length == 0) {
-      if (state.ctx._prevActivePlayers.length > 0) {
+      if (ctx._nextActivePlayers) {
+        ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
+        ({ activePlayers, _activePlayersOnce, _prevActivePlayers } = ctx);
+      } else if (state.ctx._prevActivePlayers.length > 0) {
         const lastIndex = state.ctx._prevActivePlayers.length - 1;
         activePlayers = state.ctx._prevActivePlayers[lastIndex];
         _prevActivePlayers = state.ctx._prevActivePlayers.slice(0, lastIndex);
@@ -703,7 +707,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     state = {
       ...state,
       ctx: {
-        ...state.ctx,
+        ...ctx,
         activePlayers,
         _activePlayersOnce,
         _prevActivePlayers,
