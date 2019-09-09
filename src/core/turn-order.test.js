@@ -540,6 +540,61 @@ describe('setActivePlayers', () => {
         _prevActivePlayers: [],
       });
     });
+
+    test('set to next', () => {
+      const game = {
+        moves: {
+          A: () => {},
+        },
+
+        turn: {
+          activePlayers: {
+            currentPlayer: 'stage1',
+            once: true,
+            next: {
+              currentPlayer: 'stage2',
+              once: true,
+              next: {
+                currentPlayer: 'stage3',
+              },
+            },
+          },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game });
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: { '0': 'stage1' },
+        _prevActivePlayers: [],
+        _nextActivePlayers: {
+          currentPlayer: 'stage2',
+          once: true,
+          next: {
+            currentPlayer: 'stage3',
+          },
+        },
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: { '0': 'stage2' },
+        _prevActivePlayers: [],
+        _nextActivePlayers: {
+          currentPlayer: 'stage3',
+        },
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+
+      expect(state.ctx).toMatchObject({
+        activePlayers: { '0': 'stage3' },
+        _prevActivePlayers: [],
+        _nextActivePlayers: null,
+      });
+    });
   });
 
   describe('militia', () => {
