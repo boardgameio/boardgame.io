@@ -15,14 +15,12 @@ get done before we are ready for a v1 release.
 ### UI
 
 - [x] Drag and Drop (cards and decks)
-- [ ] Drag and Drop (tokens and grids)
-- [ ] 3D components ([issue](https://github.com/nicolodavis/boardgame.io/issues/282))
-- [ ] Decouple from React ([issue](https://github.com/nicolodavis/boardgame.io/issues/432)
+- [ ] Migrate to Svelte ([issue](https://github.com/nicolodavis/boardgame.io/issues/432))
 
 ### Lobby
 
 - [x] basic `create` and `join` API
-- [ ] simple web-based lobby ([issue](https://github.com/nicolodavis/boardgame.io/issues/197)) **[help needed]**
+- [x] simple web-based lobby ([issue](https://github.com/nicolodavis/boardgame.io/issues/197))
 
 ### Storage
 
@@ -38,8 +36,8 @@ get done before we are ready for a v1 release.
 
 ### Core
 
-- [ ] phases -> turns -> stages **[N]**
-- [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154)) **[N]**
+- [x] phases -> turns -> stages
+- [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
 - [ ] log improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/227))
 - [x] add immutability helper (Immer) ([issue](https://github.com/nicolodavis/boardgame.io/issues/295))
 
@@ -51,6 +49,5 @@ get done before we are ready for a v1 release.
 ### Documentation
 
 - [ ] code organization best practices
-- [ ] document event API thoroughly (with examples)
 - [ ] deployment tutorial
 - [ ] generate markdown from jsdoc?
