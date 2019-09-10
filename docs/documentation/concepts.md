@@ -79,7 +79,7 @@ A phase is a period in the game that overrides the game
 configuration while it is active. For example, you can use
 a different set of moves or a different turn order during
 a phase. The game can transition between different phases, and turns
-occur inside each phase. See the guide on [Phases](phases.md) for more details.
+occur inside phases. See the guide on [Phases](phases.md) for more details.
 
 ### Turn
 
@@ -92,6 +92,6 @@ this is less common. See the guide on
 
 ### Stage
 
-A stage is similar to a phase, except that it happens within a turn,
-and it applies to individual players rather than the game as a whole. Different players can be in different stages during a turn, and the
-stages defines moves that those players can make.
+A stage is similar to a phase, except that it applies to individual players
+rather than the game as a whole. Different players can be in different stages
+during a turn, and the stages define moves that those players can make.
