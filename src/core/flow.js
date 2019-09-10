@@ -725,6 +725,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
       } else {
         activePlayers = null;
+        _activePlayersMoveLimit = null;
       }
     }
 
