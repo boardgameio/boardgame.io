@@ -115,10 +115,6 @@ export function SetActivePlayers(ctx, arg) {
           }
         }
       }
-
-      if (Object.keys(activePlayers).length == 0) {
-        activePlayers = null;
-      }
     }
   }
 
