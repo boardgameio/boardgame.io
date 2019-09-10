@@ -331,7 +331,7 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every player in the game.
    */
-  ALL_ONCE: { all: Stage.NULL, once: true },
+  ALL_ONCE: { all: Stage.NULL, moveLimit: 1 },
 
   /**
    * OTHERS
@@ -348,5 +348,5 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every *other* player in the game.
    */
-  OTHERS_ONCE: { others: Stage.NULL, once: true },
+  OTHERS_ONCE: { others: Stage.NULL, moveLimit: 1 },
 };

@@ -422,7 +422,7 @@ describe('setActivePlayers', () => {
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
             value: { '0': Stage.NULL, '1': Stage.NULL },
-            once: true,
+            moveLimit: 1,
           });
           return G;
         },
@@ -446,7 +446,7 @@ describe('setActivePlayers', () => {
       moves: {
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
-            once: true,
+            moveLimit: 1,
             others: Stage.NULL,
           });
           return G;
@@ -480,7 +480,7 @@ describe('setActivePlayers', () => {
         },
 
         turn: {
-          activePlayers: { currentPlayer: 'stage', once: true },
+          activePlayers: { currentPlayer: 'stage', moveLimit: 1 },
         },
       };
 
@@ -506,7 +506,7 @@ describe('setActivePlayers', () => {
           A: (G, ctx) => {
             ctx.events.setActivePlayers({
               currentPlayer: 'stage2',
-              once: true,
+              moveLimit: 1,
               revert: true,
             });
           },
@@ -550,10 +550,10 @@ describe('setActivePlayers', () => {
         turn: {
           activePlayers: {
             currentPlayer: 'stage1',
-            once: true,
+            moveLimit: 1,
             next: {
               currentPlayer: 'stage2',
-              once: true,
+              moveLimit: 1,
               next: {
                 currentPlayer: 'stage3',
               },
@@ -570,7 +570,7 @@ describe('setActivePlayers', () => {
         _prevActivePlayers: [],
         _nextActivePlayers: {
           currentPlayer: 'stage2',
-          once: true,
+          moveLimit: 1,
           next: {
             currentPlayer: 'stage3',
           },
@@ -611,7 +611,7 @@ describe('setActivePlayers', () => {
                 militia: (G, ctx) => {
                   ctx.events.setActivePlayers({
                     others: 'B',
-                    once: true,
+                    moveLimit: 1,
                     revert: true,
                   });
                 },
