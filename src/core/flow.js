@@ -729,7 +729,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     }
 
     let numMoves = state.ctx.numMoves;
-    if (action.playerID == state.ctx.currentPlayer) {
+    if (playerID == state.ctx.currentPlayer) {
       numMoves++;
     }
 
