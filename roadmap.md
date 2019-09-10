@@ -15,7 +15,6 @@ get done before we are ready for a v1 release.
 ### UI
 
 - [x] Drag and Drop (cards and decks)
-- [ ] Drag and Drop (tokens and grids)
 - [ ] Migrate to Svelte ([issue](https://github.com/nicolodavis/boardgame.io/issues/432))
 
 ### Lobby
@@ -38,7 +37,7 @@ get done before we are ready for a v1 release.
 ### Core
 
 - [x] phases -> turns -> stages
-- [x] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
+- [ ] turn order improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/154))
 - [ ] log improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/227))
 - [x] add immutability helper (Immer) ([issue](https://github.com/nicolodavis/boardgame.io/issues/295))
 
