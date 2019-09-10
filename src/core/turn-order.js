@@ -123,6 +123,11 @@ export function SetActivePlayers(ctx, arg) {
     }
   }
 
+  let _activePlayersNumMoves = {};
+  for (var id in activePlayers) {
+    _activePlayersNumMoves[id] = 0;
+  }
+
   return {
     ...ctx,
     activePlayers,
@@ -130,6 +135,7 @@ export function SetActivePlayers(ctx, arg) {
     _prevActivePlayers,
     _nextActivePlayers,
     _activePlayersMoveLimit,
+    _activePlayersNumMoves,
   };
 }
 

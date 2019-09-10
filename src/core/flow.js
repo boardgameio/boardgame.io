@@ -677,7 +677,14 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
-    let { activePlayers, _activePlayersOnce, _prevActivePlayers } = ctx;
+    let {
+      activePlayers,
+      _activePlayersNumMoves,
+      _activePlayersOnce,
+      _prevActivePlayers,
+    } = ctx;
+
+    if (activePlayers) _activePlayersNumMoves[action.playerID]++;
 
     if (_activePlayersOnce) {
       const playerID = action.playerID;
@@ -715,6 +722,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         activePlayers,
         _activePlayersOnce,
         _prevActivePlayers,
+        _activePlayersNumMoves,
         numMoves,
       },
     };
