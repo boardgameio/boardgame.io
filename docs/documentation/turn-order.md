@@ -11,7 +11,7 @@ following fields:
 ```
 ctx: {
   currentPlayer: '0',
-  activePlayers: ['0'],
+  activePlayers: { '0': null },
   playOrder: ['0', '1', '2', ...],
   playOrderPos: 0,
 }
@@ -24,13 +24,13 @@ player that can call events (`endTurn`, `endPhase` etc.).
 
 ##### `activePlayers`
 
-This is the set of players that can currently make a move.
-By default, `activePlayers` is not used and only the `currentPlayer`
-can make a move. You can use `activePlayers`
+This is a map of players that can currently make a move and their
+current “stage”. By default, `activePlayers` is not used and only
+the `currentPlayer` can make a move. You can use `activePlayers`
 to support actions from other players during the currrent turn
 (for example, if you play a card that forces everyone else
-to discard a card). Note that if this list contains multiple
-player IDs, they can make a move in any order.
+to discard a card). Note that if `activePlayers` contains multiple
+players, they can make a move in any order.
 
 ##### `playOrder`
 
