@@ -85,13 +85,11 @@ export function SetActivePlayers(ctx, arg) {
 
   let _activePlayersMoveLimit = null;
 
-  if (arg.moveLimit) {
+  if (activePlayers && arg.moveLimit) {
     if (typeof arg.moveLimit === 'number') {
-      if (activePlayers) {
-        _activePlayersMoveLimit = {};
-        for (const id in activePlayers) {
-          _activePlayersMoveLimit[id] = arg.moveLimit;
-        }
+      _activePlayersMoveLimit = {};
+      for (const id in activePlayers) {
+        _activePlayersMoveLimit[id] = arg.moveLimit;
       }
     } else {
       _activePlayersMoveLimit = {};
