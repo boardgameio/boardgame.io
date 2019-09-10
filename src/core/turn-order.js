@@ -124,10 +124,10 @@ export function SetActivePlayers(ctx, arg) {
   return {
     ...ctx,
     activePlayers,
-    _prevActivePlayers,
-    _nextActivePlayers,
     _activePlayersMoveLimit,
     _activePlayersNumMoves,
+    _prevActivePlayers,
+    _nextActivePlayers,
   };
 }
 

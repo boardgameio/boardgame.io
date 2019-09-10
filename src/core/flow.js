@@ -739,9 +739,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...ctx,
         activePlayers,
-        _prevActivePlayers,
         _activePlayersMoveLimit,
         _activePlayersNumMoves,
+        _prevActivePlayers,
         numMoves,
       },
     };
