@@ -117,7 +117,7 @@ export function SetActivePlayers(ctx, arg) {
   }
 
   let _activePlayersNumMoves = {};
-  for (var id in activePlayers) {
+  for (const id in activePlayers) {
     _activePlayersNumMoves[id] = 0;
   }
 
