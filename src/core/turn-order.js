@@ -50,7 +50,6 @@ export function SetActivePlayers(ctx, arg) {
   }
 
   let activePlayers = {};
-  let _activePlayersOnce = false;
 
   if (arg.value) {
     activePlayers = arg.value;
@@ -74,10 +73,6 @@ export function SetActivePlayers(ctx, arg) {
       const playerID = ctx.playOrder[i];
       activePlayers[playerID] = arg.all;
     }
-  }
-
-  if (arg.once) {
-    _activePlayersOnce = true;
   }
 
   if (Object.keys(activePlayers).length == 0) {
@@ -131,7 +126,6 @@ export function SetActivePlayers(ctx, arg) {
   return {
     ...ctx,
     activePlayers,
-    _activePlayersOnce,
     _prevActivePlayers,
     _nextActivePlayers,
     _activePlayersMoveLimit,

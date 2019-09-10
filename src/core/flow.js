@@ -677,12 +677,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
-    let {
-      activePlayers,
-      _activePlayersNumMoves,
-      _activePlayersOnce,
-      _prevActivePlayers,
-    } = ctx;
+    let { activePlayers, _activePlayersNumMoves, _prevActivePlayers } = ctx;
 
     if (activePlayers) _activePlayersNumMoves[action.playerID]++;
 
@@ -699,14 +694,13 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     if (activePlayers && Object.keys(activePlayers).length == 0) {
       if (ctx._nextActivePlayers) {
         ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
-        ({ activePlayers, _activePlayersOnce, _prevActivePlayers } = ctx);
+        ({ activePlayers, _prevActivePlayers } = ctx);
       } else if (_prevActivePlayers.length > 0) {
         const lastIndex = _prevActivePlayers.length - 1;
         activePlayers = _prevActivePlayers[lastIndex];
         _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
       } else {
         activePlayers = null;
-        _activePlayersOnce = false;
       }
     }
 
@@ -720,7 +714,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...ctx,
         activePlayers,
-        _activePlayersOnce,
         _prevActivePlayers,
         _activePlayersNumMoves,
         numMoves,
