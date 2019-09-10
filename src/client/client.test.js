@@ -75,7 +75,7 @@ describe('namespaced moves', () => {
     client.moves.C();
     expect(error).toHaveBeenCalledWith('disallowed move: C');
 
-    client.events.endPhase({ next: 'PA' });
+    client.events.setPhase('PA');
     expect(client.getState().ctx.phase).toBe('PA');
 
     client.moves.A();
@@ -352,6 +352,7 @@ describe('event dispatchers', () => {
     expect(Object.keys(client.events)).toEqual([
       'endTurn',
       'endPhase',
+      'setPhase',
       'endGame',
       'setActivePlayers',
     ]);

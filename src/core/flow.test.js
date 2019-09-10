@@ -162,6 +162,34 @@ describe('phases', () => {
     state = flow.processGameEvent(state, gameEvent('endPhase'));
     expect(state.ctx.playOrderPos).toBe(1);
   });
+
+  describe('setPhase', () => {
+    let flow;
+    beforeEach(() => {
+      flow = Flow({
+        phases: { A: { start: true }, B: {} },
+      });
+    });
+
+    test('basic', () => {
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.phase).toBe('A');
+      state = flow.processGameEvent(state, gameEvent('setPhase', 'B'));
+      expect(state.ctx.phase).toBe('B');
+    });
+
+    test('invalid arg', () => {
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.phase).toBe('A');
+      state = flow.processGameEvent(state, gameEvent('setPhase', 'C'));
+      expect(error).toBeCalledWith('invalid phase: C');
+      expect(state.ctx.phase).toBe(null);
+    });
+  });
 });
 
 describe('turn', () => {
@@ -208,10 +236,7 @@ describe('turn', () => {
       let state = { G: {}, ctx: flow.ctx(2) };
       state = flow.processMove(state, makeMove().payload);
       expect(state.G).toEqual({ A: true });
-      state = flow.processGameEvent(
-        state,
-        gameEvent('endPhase', { next: 'B' })
-      );
+      state = flow.processGameEvent(state, gameEvent('setPhase', 'B'));
       state = flow.processMove(state, makeMove().payload);
       expect(state.G).toEqual({ B: true });
     }
@@ -265,10 +290,7 @@ describe('turn', () => {
       expect(state.ctx.turn).toBe(2);
       expect(state.ctx.currentPlayer).toBe('1');
 
-      state = flow.processGameEvent(
-        state,
-        gameEvent('endPhase', { next: 'B' })
-      );
+      state = flow.processGameEvent(state, gameEvent('setPhase', 'B'));
 
       expect(state.ctx.phase).toBe('B');
       expect(state.ctx.turn).toBe(3);
@@ -556,7 +578,7 @@ describe('endGame', () => {
   });
 });
 
-describe('endTurn / endPhase args', () => {
+describe('endTurn args', () => {
   const flow = Flow({
     phases: { A: { start: true, next: 'B' }, B: {}, C: {} },
   });
@@ -576,13 +598,6 @@ describe('endTurn / endPhase args', () => {
     expect(t.ctx.phase).toBe('B');
   });
 
-  test('invalid arg to endPhase', () => {
-    let t = state;
-    t = flow.processGameEvent(t, gameEvent('endPhase', 'C'));
-    expect(error).toBeCalledWith(`invalid argument to endPhase: C`);
-    expect(t.ctx.phase).toBe(null);
-  });
-
   test('invalid arg to endTurn', () => {
     let t = state;
     t = flow.processGameEvent(t, gameEvent('endTurn', '2'));
@@ -592,11 +607,9 @@ describe('endTurn / endPhase args', () => {
 
   test('valid args', () => {
     let t = state;
-    t = flow.processGameEvent(t, gameEvent('endPhase', { next: 'C' }));
     t = flow.processGameEvent(t, gameEvent('endTurn', { next: '2' }));
     expect(t.ctx.playOrderPos).toBe(2);
     expect(t.ctx.currentPlayer).toBe('2');
-    expect(t.ctx.phase).toBe('C');
   });
 });
 
@@ -638,8 +651,7 @@ test('undoable moves', () => {
   expect(client.getState().G).toEqual({ B: true });
 
   client.reset();
-  client.events.endPhase({ next: 'B' });
-  client.events.endTurn();
+  client.events.setPhase('B');
   expect(client.getState().ctx.phase).toBe('B');
 
   client.moves.A();

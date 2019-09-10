@@ -85,6 +85,6 @@ test('no duplicate endPhase', () => {
   };
   const client = Client({ game });
   expect(client.getState().ctx.phase).toBe('A');
-  client.events.endPhase({ next: 'B' });
+  client.events.setPhase('B');
   expect(client.getState().ctx.phase).toBe('B');
 });

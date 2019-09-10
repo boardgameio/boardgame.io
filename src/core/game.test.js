@@ -99,7 +99,7 @@ test('rounds with starting player token', () => {
   expect(client.getState().ctx.currentPlayer).toBe('3');
 
   client.events.endTurn();
-  client.events.endPhase({ next: 'main' });
+  client.events.setPhase('main');
   expect(client.getState().ctx.currentPlayer).toBe('2');
 
   client.events.endTurn();

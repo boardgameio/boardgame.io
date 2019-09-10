@@ -205,6 +205,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   if (events.endPhase === undefined && phases) {
     events.endPhase = true;
   }
+  if (events.setPhase === undefined && phases) {
+    events.setPhase = true;
+  }
   if (events.endTurn === undefined) {
     events.endTurn = true;
   }
@@ -444,11 +447,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     const conf = GetPhase({ phase });
     let { ctx } = state;
 
-    if (arg && arg !== true) {
+    if (arg && arg.next) {
       if (arg.next in phaseMap) {
         ctx = { ...ctx, phase: arg.next };
       } else {
-        logging.error('invalid argument to endPhase: ' + arg);
+        logging.error('invalid phase: ' + arg.next);
+        return state;
       }
     } else if (conf.next !== undefined) {
       ctx = { ...ctx, phase: conf.next };
@@ -735,9 +739,20 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return ProcessEvents(state, events);
   }
 
-  function EndPhaseEvent(state, arg) {
+  function SetPhaseEvent(state, newPhase) {
     return ProcessEvents(state, [
-      { fn: EndPhase, phase: state.ctx.phase, turn: state.ctx.turn, arg },
+      {
+        fn: EndPhase,
+        phase: state.ctx.phase,
+        turn: state.ctx.turn,
+        arg: { next: newPhase },
+      },
+    ]);
+  }
+
+  function EndPhaseEvent(state) {
+    return ProcessEvents(state, [
+      { fn: EndPhase, phase: state.ctx.phase, turn: state.ctx.turn },
     ]);
   }
 
@@ -756,6 +771,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   const eventHandlers = {
     endTurn: EndTurnEvent,
     endPhase: EndPhaseEvent,
+    setPhase: SetPhaseEvent,
     endGame: EndGameEvent,
     setActivePlayers: SetActivePlayersEvent,
   };
@@ -766,6 +782,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
   if (events.endPhase) {
     enabledEvents['endPhase'] = true;
+    enabledEvents['setPhase'] = true;
   }
   if (events.endGame) {
     enabledEvents['endGame'] = true;
