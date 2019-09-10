@@ -44,7 +44,11 @@ export function SetActivePlayers(ctx, arg) {
   const _nextActivePlayers = arg.next || null;
 
   if (arg.revert) {
-    _prevActivePlayers = _prevActivePlayers.concat(ctx.activePlayers);
+    _prevActivePlayers = _prevActivePlayers.concat({
+      activePlayers: ctx.activePlayers,
+      _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
+      _activePlayersNumMoves: ctx._activePlayersNumMoves,
+    });
   } else {
     _prevActivePlayers = [];
   }

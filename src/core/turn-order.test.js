@@ -530,7 +530,13 @@ describe('setActivePlayers', () => {
 
       expect(state.ctx).toMatchObject({
         activePlayers: { '0': 'stage2' },
-        _prevActivePlayers: [{ '0': 'stage1' }],
+        _prevActivePlayers: [
+          {
+            activePlayers: { '0': 'stage1' },
+            _activePlayersMoveLimit: null,
+            _activePlayersNumMoves: { '0': 1 },
+          },
+        ],
       });
 
       state = reducer(state, makeMove('B', null, '0'));
