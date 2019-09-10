@@ -684,26 +684,26 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       _prevActivePlayers,
     } = ctx;
 
-    if (activePlayers) _activePlayersNumMoves[action.playerID]++;
+    const { playerID } = action;
 
-    if (_activePlayersMoveLimit) {
-      const playerID = action.playerID;
-      if (
-        _activePlayersNumMoves[playerID] >= _activePlayersMoveLimit[playerID]
-      ) {
-        activePlayers = Object.keys(activePlayers)
-          .filter(id => id !== playerID)
-          .reduce((obj, key) => {
-            obj[key] = activePlayers[key];
-            return obj;
-          }, {});
-        _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
-          .filter(id => id !== playerID)
-          .reduce((obj, key) => {
-            obj[key] = _activePlayersMoveLimit[key];
-            return obj;
-          }, {});
-      }
+    if (activePlayers) _activePlayersNumMoves[playerID]++;
+
+    if (
+      _activePlayersMoveLimit &&
+      _activePlayersNumMoves[playerID] >= _activePlayersMoveLimit[playerID]
+    ) {
+      activePlayers = Object.keys(activePlayers)
+        .filter(id => id !== playerID)
+        .reduce((obj, key) => {
+          obj[key] = activePlayers[key];
+          return obj;
+        }, {});
+      _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
+        .filter(id => id !== playerID)
+        .reduce((obj, key) => {
+          obj[key] = _activePlayersMoveLimit[key];
+          return obj;
+        }, {});
     }
 
     if (activePlayers && Object.keys(activePlayers).length == 0) {
