@@ -84,12 +84,52 @@ export function SetActivePlayers(ctx, arg) {
     activePlayers = null;
   }
 
+  let _activePlayersMoveLimit = null;
+
+  if (arg.moveLimit) {
+    if (typeof arg.moveLimit === 'number') {
+      if (activePlayers) {
+        _activePlayersMoveLimit = {};
+        for (const id in activePlayers) {
+          _activePlayersMoveLimit[id] = arg.moveLimit;
+        }
+      }
+    } else {
+      _activePlayersMoveLimit = {};
+
+      if (arg.moveLimit.value) {
+        _activePlayersMoveLimit = arg.moveLimit.value;
+      }
+
+      if (
+        arg.moveLimit.currentPlayer !== undefined &&
+        activePlayers[ctx.currentPlayer]
+      ) {
+        _activePlayersMoveLimit[ctx.currentPlayer] =
+          arg.moveLimit.currentPlayer;
+      }
+
+      if (arg.moveLimit.others !== undefined) {
+        for (const id in activePlayers) {
+          if (id !== ctx.currentPlayer) {
+            _activePlayersMoveLimit[id] = arg.moveLimit.others;
+          }
+        }
+      }
+
+      if (Object.keys(activePlayers).length == 0) {
+        activePlayers = null;
+      }
+    }
+  }
+
   return {
     ...ctx,
     activePlayers,
     _activePlayersOnce,
     _prevActivePlayers,
     _nextActivePlayers,
+    _activePlayersMoveLimit,
   };
 }
 
