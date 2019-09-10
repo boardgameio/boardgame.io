@@ -774,6 +774,45 @@ describe('setActivePlayers', () => {
       expect(state.ctx.activePlayers).toBeNull();
     });
 
+    test('value syntax', () => {
+      const game = {
+        turn: {
+          activePlayers: {
+            all: 'play',
+            moveLimit: {
+              value: { '0': 1, '1': 2, '2': 3 },
+            },
+          },
+          stages: {
+            play: { moves: { A: () => {} } },
+          },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game, numPlayers: 3 });
+
+      expect(state.ctx._activePlayersMoveLimit).toEqual({
+        '0': 1,
+        '1': 2,
+        '2': 3,
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+      state = reducer(state, makeMove('A', null, '1'));
+      state = reducer(state, makeMove('A', null, '2'));
+
+      expect(state.ctx.activePlayers).toEqual({ '1': 'play', '2': 'play' });
+
+      state = reducer(state, makeMove('A', null, '1'));
+      state = reducer(state, makeMove('A', null, '2'));
+
+      expect(state.ctx.activePlayers).toEqual({ '2': 'play' });
+
+      state = reducer(state, makeMove('A', null, '2'));
+      expect(state.ctx.activePlayers).toBeNull();
+    });
+
     test('move counts reset on turn end', () => {
       const game = {
         turn: {
