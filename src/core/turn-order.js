@@ -41,6 +41,8 @@ export function SetActivePlayersEvent(state, arg) {
 export function SetActivePlayers(ctx, arg) {
   let { _prevActivePlayers } = ctx;
 
+  const _nextActivePlayers = arg.next || null;
+
   if (arg.revert) {
     _prevActivePlayers = _prevActivePlayers.concat(ctx.activePlayers);
   } else {
@@ -87,6 +89,7 @@ export function SetActivePlayers(ctx, arg) {
     activePlayers,
     _activePlayersOnce,
     _prevActivePlayers,
+    _nextActivePlayers,
   };
 }
 
