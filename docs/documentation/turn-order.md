@@ -149,38 +149,34 @@ requires every other player in the game to discard a card.
 ### Specifying a turn order
 
 You can change the turn order by using the `turn.order` option.
-This is passed inside a `flow` section of the `Game` configuration:
+This can be passed inside your game configuration:
 
 ```js
-import { Game, TurnOrder, ActivePlayers } from 'boardgame.io/core';
+import { TurnOrder, ActivePlayers } from 'boardgame.io/core';
 
-Game({
-  flow: {
-    turn: {
-      order: TurnOrder.DEFAULT,
-      activePlayers: ActivePlayers.ALL,
-    }
-  }
-}
+export const game = {
+  turn: {
+    order: TurnOrder.DEFAULT,
+    activePlayers: ActivePlayers.ALL,
+  },
+};
 ```
 
 Turn orders can also be specified on a per-phase level.
 
 ```js
-import { Game, TurnOrder, ActivePlayers } from 'boardgame.io/core';
+import { TurnOrder, ActivePlayers } from 'boardgame.io/core';
 
-Game({
-  flow: {
-    phases: {
-      A: {
-        turn: { activePlayers: ActivePlayers.ALL }
-      },
-      B: {
-        turn: { order: TurnOrder.ONCE }
-      },
+export const game = {
+  phases: {
+    A: {
+      turn: { activePlayers: ActivePlayers.ALL },
     },
-  }
-}
+    B: {
+      turn: { order: TurnOrder.ONCE },
+    },
+  },
+};
 ```
 
 ### Implementing a custom turn order
@@ -260,9 +256,9 @@ onClickEndTurn() {
 ```
 
 ```js
-flow: {
+const game = {
   turn: {
     endIf: (G, ctx) => ({ next: '3' }),
-  }
-}
+  },
+};
 ```
