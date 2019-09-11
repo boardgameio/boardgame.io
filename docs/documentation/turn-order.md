@@ -181,23 +181,28 @@ export const game = {
 
 ### Implementing a custom turn order
 
-A `turn.order` object has the following structure:
+The following settings inside `turn` affect turn order:
 
 ```js
-{
+const turn = {
   // OPTIONAL:
-  // Override the initial value of playOrder.
-  // This is called at the beginning of the phase.
-  playOrder: (G, ctx) => [...],
+  // If this section is present, it will override the DEFAULT
+  // turn order.
+  order: {
+    // OPTIONAL:
+    // Override the initial value of playOrder.
+    // This is called at the beginning of the phase.
+    playOrder: (G, ctx) => [...],
 
-  // Get the initial value of playOrderPos.
-  // This is called at the beginning of the phase.
-  first: (G, ctx) => 0,
+    // Get the initial value of playOrderPos.
+    // This is called at the beginning of the phase.
+    first: (G, ctx) => 0,
 
-  // Get the next value of playOrderPos.
-  // This is called at the end of each turn.
-  // The phase ends if this returns undefined.
-  next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+    // Get the next value of playOrderPos.
+    // This is called at the end of each turn.
+    // The phase ends if this returns undefined.
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+  },
 
   // OPTIONAL:
   // If this section is present, activePlayers is modified
