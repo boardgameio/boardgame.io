@@ -237,6 +237,16 @@ const turn = {
       currentPlayer: true
     },
   },
+
+  // OPTIONAL:
+  // Limits the number of moves the current player can make
+  // during the turn. Once the limit is reached the turn ends.
+  moveLimit: 2,
+
+  // OPTIONAL:
+  // A function that returns a truthy value if the turn should end.
+  // It can also return the player for the next turn (see below).
+  endIf: (G, ctx) => {}
 }
 ```
 
