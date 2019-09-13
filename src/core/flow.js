@@ -18,7 +18,6 @@ import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
-import { flattenDiagnosticMessageText } from 'typescript';
 
 /**
  * Helper to create a reducer that manages ctx (with the
