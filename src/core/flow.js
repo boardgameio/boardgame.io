@@ -102,8 +102,14 @@ export function FlowInternal({
         return false;
       }
 
-      if (ctx.activePlayers === null && ctx.currentPlayer !== playerID) {
-        return false;
+      if (ctx.activePlayers) {
+        if (!(playerID in ctx.activePlayers)) {
+          return false;
+        }
+      } else {
+        if (ctx.currentPlayer !== playerID) {
+          return false;
+        }
       }
 
       return true;

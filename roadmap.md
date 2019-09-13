@@ -15,7 +15,8 @@ get done before we are ready for a v1 release.
 ### UI
 
 - [x] Drag and Drop (cards and decks)
-- [ ] Migrate to Svelte ([issue](https://github.com/nicolodavis/boardgame.io/issues/432))
+- [ ] Migrate to Svelte ([issue](https://github.com/nicolodavis/boardgame.io/issues/432))  **[help needed]**
+- [ ] Game Object API ([issue](https://github.com/nicolodavis/boardgame.io/issues/455))  **[help needed]**
 
 ### Lobby
 

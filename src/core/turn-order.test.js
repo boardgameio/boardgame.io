@@ -852,23 +852,19 @@ describe('setActivePlayers', () => {
     let reducer;
     beforeAll(() => {
       const game = {
+        moves: {
+          militia: (G, ctx) => {
+            ctx.events.setActivePlayers({
+              others: 'discard',
+              moveLimit: 1,
+              revert: true,
+            });
+          },
+        },
+
         turn: {
-          activePlayers: { currentPlayer: 'A' },
-
           stages: {
-            A: {
-              moves: {
-                militia: (G, ctx) => {
-                  ctx.events.setActivePlayers({
-                    others: 'B',
-                    moveLimit: 1,
-                    revert: true,
-                  });
-                },
-              },
-            },
-
-            B: {
+            discard: {
               moves: {
                 discard: G => G,
               },
@@ -886,7 +882,7 @@ describe('setActivePlayers', () => {
     });
 
     test('sanity', () => {
-      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+      expect(state.ctx.activePlayers).toEqual(null);
     });
 
     test('player 1 cannot play the militia card', () => {
@@ -917,23 +913,29 @@ describe('setActivePlayers', () => {
     test('player 0 plays militia', () => {
       state = reducer(state, makeMove('militia', undefined, '0'));
       expect(state.ctx.activePlayers).toEqual({
-        '1': 'B',
-        '2': 'B',
+        '1': 'discard',
+        '2': 'discard',
       });
+    });
+
+    test('player 0 cannot play militia again', () => {
+      state = reducer(state, makeMove('militia', undefined, '0'));
+      expect(error).toHaveBeenCalledWith('disallowed move: militia');
     });
 
     test('player 0 still cannot discard', () => {
       state = reducer(state, makeMove('discard', undefined, '0'));
+      expect(error).toHaveBeenCalledWith('disallowed move: discard');
     });
 
     test('everyone else discards', () => {
       state = reducer(state, makeMove('discard', undefined, '1'));
-      expect(state.ctx.activePlayers).toEqual({ '2': 'B' });
+      expect(state.ctx.activePlayers).toEqual({ '2': 'discard' });
       state = reducer(state, makeMove('discard', undefined, '2'));
     });
 
     test('activePlayers is restored to previous state', () => {
-      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+      expect(state.ctx.activePlayers).toEqual(null);
     });
   });
 });
