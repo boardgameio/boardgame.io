@@ -18,6 +18,7 @@ import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
+import { flattenDiagnosticMessageText } from 'typescript';
 
 /**
  * Helper to create a reducer that manages ctx (with the
@@ -102,8 +103,14 @@ export function FlowInternal({
         return false;
       }
 
-      if (ctx.activePlayers === null && ctx.currentPlayer !== playerID) {
-        return false;
+      if (ctx.activePlayers) {
+        if (!(playerID in ctx.activePlayers)) {
+          return false;
+        }
+      } else {
+        if (ctx.currentPlayer !== playerID) {
+          return false;
+        }
       }
 
       return true;
