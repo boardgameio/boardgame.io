@@ -9,6 +9,7 @@
 import {
   SetActivePlayersEvent,
   SetActivePlayers,
+  UpdateActivePlayers,
   InitTurnOrderState,
   UpdateTurnOrderState,
   Stage,
@@ -712,28 +713,13 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         }, {});
     }
 
-    if (activePlayers && Object.keys(activePlayers).length == 0) {
-      if (ctx._nextActivePlayers) {
-        ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
-        ({
-          activePlayers,
-          _activePlayersMoveLimit,
-          _activePlayersNumMoves,
-          _prevActivePlayers,
-        } = ctx);
-      } else if (_prevActivePlayers.length > 0) {
-        const lastIndex = _prevActivePlayers.length - 1;
-        ({
-          activePlayers,
-          _activePlayersMoveLimit,
-          _activePlayersNumMoves,
-        } = _prevActivePlayers[lastIndex]);
-        _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
-      } else {
-        activePlayers = null;
-        _activePlayersMoveLimit = null;
-      }
-    }
+    ctx = UpdateActivePlayers({
+      ...ctx,
+      activePlayers,
+      _activePlayersMoveLimit,
+      _activePlayersNumMoves,
+      _prevActivePlayers,
+    });
 
     let numMoves = state.ctx.numMoves;
     if (playerID == state.ctx.currentPlayer) {
@@ -744,10 +730,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ...state,
       ctx: {
         ...ctx,
-        activePlayers,
-        _activePlayersMoveLimit,
-        _activePlayersNumMoves,
-        _prevActivePlayers,
         numMoves,
       },
     };
