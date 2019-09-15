@@ -209,6 +209,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   if (events.setActivePlayers === undefined) {
     events.setActivePlayers = true;
   }
+  if (events.endStage === undefined) {
+    events.endStage = true;
+  }
+  if (events.setStage === undefined) {
+    events.setStage = true;
+  }
   if (events.endPhase === undefined && phases) {
     events.endPhase = true;
   }
@@ -499,6 +505,34 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return state;
   }
 
+  function UpdateStage(state, { arg }) {
+    const playerID = state.ctx.currentPlayer;
+
+    let { ctx } = state;
+    let {
+      activePlayers,
+      _activePlayersMoveLimit,
+      _activePlayersNumMoves,
+    } = ctx;
+
+    if (arg.next) {
+      if (activePlayers === null) {
+        activePlayers = {};
+      }
+      activePlayers[playerID] = arg.next;
+      _activePlayersNumMoves[playerID] = 0;
+    }
+
+    ctx = {
+      ...ctx,
+      activePlayers,
+      _activePlayersMoveLimit,
+      _activePlayersNumMoves,
+    };
+
+    return { ...state, ctx };
+  }
+
   ///////////////
   // ShouldEnd //
   ///////////////
@@ -632,6 +666,63 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog, _undo: [], _redo: [] };
   }
 
+  function EndStage(state, { arg, next, automatic }) {
+    const playerID = state.ctx.currentPlayer;
+
+    let { ctx } = state;
+    let { activePlayers, _activePlayersMoveLimit } = ctx;
+
+    if (next) {
+      next.push({ fn: UpdateStage, arg });
+    }
+
+    // If player isn’t in a stage, there is nothing else to do.
+    if (activePlayers === null || !(playerID in activePlayers)) {
+      return state;
+    }
+
+    // Remove player from activePlayers.
+    activePlayers = Object.keys(activePlayers)
+      .filter(id => id !== playerID)
+      .reduce((obj, key) => {
+        obj[key] = activePlayers[key];
+        return obj;
+      }, {});
+
+    if (_activePlayersMoveLimit) {
+      // Remove player from _activePlayersMoveLimit.
+      _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
+        .filter(id => id !== playerID)
+        .reduce((obj, key) => {
+          obj[key] = _activePlayersMoveLimit[key];
+          return obj;
+        }, {});
+    }
+
+    ctx = UpdateActivePlayers({
+      ...ctx,
+      activePlayers,
+      _activePlayersMoveLimit,
+    });
+
+    // Add log entry.
+    const action = gameEvent('endStage', arg);
+    const logEntry = {
+      action,
+      _stateID: state._stateID,
+      turn: state.ctx.turn,
+      phase: state.ctx.phase,
+    };
+
+    if (automatic) {
+      logEntry.automatic = true;
+    }
+
+    const deltalog = [...(state.deltalog || []), logEntry];
+
+    return { ...state, ctx, deltalog };
+  }
+
   /**
    * Retrieves the relevant move that can be played by playerID.
    *
@@ -754,6 +845,14 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return ProcessEvents(state, events);
   }
 
+  function SetStageEvent(state, newStage) {
+    return ProcessEvents(state, [{ fn: EndStage, arg: { next: newStage } }]);
+  }
+
+  function EndStageEvent(state) {
+    return ProcessEvents(state, [{ fn: EndStage }]);
+  }
+
   function SetPhaseEvent(state, newPhase) {
     return ProcessEvents(state, [
       {
@@ -784,6 +883,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   const eventHandlers = {
+    endStage: EndStageEvent,
+    setStage: SetStageEvent,
     endTurn: EndTurnEvent,
     endPhase: EndPhaseEvent,
     setPhase: SetPhaseEvent,
@@ -804,6 +905,10 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
   if (events.setActivePlayers) {
     enabledEvents['setActivePlayers'] = true;
+  }
+  if (events.endStage) {
+    enabledEvents['endStage'] = true;
+    enabledEvents['setStage'] = true;
   }
 
   return FlowInternal({
