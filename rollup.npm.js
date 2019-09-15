@@ -36,8 +36,6 @@ const globals = {
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
   flatted: 'Flatted',
-  three: 'THREE',
-  '@tweenjs/tween.js': 'TWEEN',
 };
 
 export default [
