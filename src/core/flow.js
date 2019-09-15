@@ -683,14 +683,31 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
-    let { activePlayers, _activePlayersOnce, _prevActivePlayers } = ctx;
+    let {
+      activePlayers,
+      _activePlayersMoveLimit,
+      _activePlayersNumMoves,
+      _prevActivePlayers,
+    } = ctx;
 
-    if (_activePlayersOnce) {
-      const playerID = action.playerID;
+    const { playerID } = action;
+
+    if (activePlayers) _activePlayersNumMoves[playerID]++;
+
+    if (
+      _activePlayersMoveLimit &&
+      _activePlayersNumMoves[playerID] >= _activePlayersMoveLimit[playerID]
+    ) {
       activePlayers = Object.keys(activePlayers)
         .filter(id => id !== playerID)
         .reduce((obj, key) => {
           obj[key] = activePlayers[key];
+          return obj;
+        }, {});
+      _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
+        .filter(id => id !== playerID)
+        .reduce((obj, key) => {
+          obj[key] = _activePlayersMoveLimit[key];
           return obj;
         }, {});
     }
@@ -698,19 +715,28 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     if (activePlayers && Object.keys(activePlayers).length == 0) {
       if (ctx._nextActivePlayers) {
         ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
-        ({ activePlayers, _activePlayersOnce, _prevActivePlayers } = ctx);
+        ({
+          activePlayers,
+          _activePlayersMoveLimit,
+          _activePlayersNumMoves,
+          _prevActivePlayers,
+        } = ctx);
       } else if (_prevActivePlayers.length > 0) {
         const lastIndex = _prevActivePlayers.length - 1;
-        activePlayers = _prevActivePlayers[lastIndex];
+        ({
+          activePlayers,
+          _activePlayersMoveLimit,
+          _activePlayersNumMoves,
+        } = _prevActivePlayers[lastIndex]);
         _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
       } else {
         activePlayers = null;
-        _activePlayersOnce = false;
+        _activePlayersMoveLimit = null;
       }
     }
 
     let numMoves = state.ctx.numMoves;
-    if (action.playerID == state.ctx.currentPlayer) {
+    if (playerID == state.ctx.currentPlayer) {
       numMoves++;
     }
 
@@ -719,7 +745,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...ctx,
         activePlayers,
-        _activePlayersOnce,
+        _activePlayersMoveLimit,
+        _activePlayersNumMoves,
         _prevActivePlayers,
         numMoves,
       },

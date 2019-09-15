@@ -422,7 +422,7 @@ describe('setActivePlayers', () => {
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
             value: { '0': Stage.NULL, '1': Stage.NULL },
-            once: true,
+            moveLimit: 1,
           });
           return G;
         },
@@ -446,7 +446,7 @@ describe('setActivePlayers', () => {
       moves: {
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
-            once: true,
+            moveLimit: 1,
             others: Stage.NULL,
           });
           return G;
@@ -480,7 +480,7 @@ describe('setActivePlayers', () => {
         },
 
         turn: {
-          activePlayers: { currentPlayer: 'stage', once: true },
+          activePlayers: { currentPlayer: 'stage', moveLimit: 1 },
         },
       };
 
@@ -500,44 +500,125 @@ describe('setActivePlayers', () => {
       });
     });
 
-    test('reset to previous', () => {
-      const game = {
-        moves: {
-          A: (G, ctx) => {
-            ctx.events.setActivePlayers({
-              currentPlayer: 'stage2',
-              once: true,
-              revert: true,
-            });
+    describe('revert', () => {
+      test('resets to previous', () => {
+        const game = {
+          moves: {
+            A: (G, ctx) => {
+              ctx.events.setActivePlayers({
+                currentPlayer: 'stage2',
+                moveLimit: 1,
+                revert: true,
+              });
+            },
+            B: () => {},
           },
-          B: () => {},
-        },
 
-        turn: {
-          activePlayers: { currentPlayer: 'stage1' },
-        },
-      };
+          turn: {
+            activePlayers: { currentPlayer: 'stage1' },
+          },
+        };
 
-      const reducer = CreateGameReducer({ game });
-      let state = InitializeGame({ game });
+        const reducer = CreateGameReducer({ game });
+        let state = InitializeGame({ game });
 
-      expect(state.ctx).toMatchObject({
-        activePlayers: { '0': 'stage1' },
-        _prevActivePlayers: [],
+        expect(state.ctx).toMatchObject({
+          activePlayers: { '0': 'stage1' },
+          _prevActivePlayers: [],
+        });
+
+        state = reducer(state, makeMove('A', null, '0'));
+
+        expect(state.ctx).toMatchObject({
+          activePlayers: { '0': 'stage2' },
+          _prevActivePlayers: [
+            {
+              activePlayers: { '0': 'stage1' },
+              _activePlayersMoveLimit: null,
+              _activePlayersNumMoves: { '0': 1 },
+            },
+          ],
+        });
+
+        state = reducer(state, makeMove('B', null, '0'));
+
+        expect(state.ctx).toMatchObject({
+          activePlayers: { '0': 'stage1' },
+          _prevActivePlayers: [],
+        });
       });
 
-      state = reducer(state, makeMove('A', null, '0'));
+      test('restores move limits and counts', () => {
+        const game = {
+          moves: {
+            A: (G, ctx) => {
+              ctx.events.setActivePlayers({
+                currentPlayer: 'stage2',
+                moveLimit: 1,
+                revert: true,
+              });
+            },
+            B: () => {},
+          },
 
-      expect(state.ctx).toMatchObject({
-        activePlayers: { '0': 'stage2' },
-        _prevActivePlayers: [{ '0': 'stage1' }],
-      });
+          turn: {
+            activePlayers: {
+              currentPlayer: 'stage1',
+              moveLimit: 3,
+            },
+          },
+        };
 
-      state = reducer(state, makeMove('B', null, '0'));
+        const reducer = CreateGameReducer({ game });
+        let state = InitializeGame({ game });
 
-      expect(state.ctx).toMatchObject({
-        activePlayers: { '0': 'stage1' },
-        _prevActivePlayers: [],
+        expect(state.ctx).toMatchObject({
+          activePlayers: { '0': 'stage1' },
+          _prevActivePlayers: [],
+          _activePlayersMoveLimit: { '0': 3 },
+          _activePlayersNumMoves: {
+            '0': 0,
+          },
+        });
+
+        state = reducer(state, makeMove('B', null, '0'));
+
+        expect(state.ctx).toMatchObject({
+          activePlayers: { '0': 'stage1' },
+          _prevActivePlayers: [],
+          _activePlayersMoveLimit: { '0': 3 },
+          _activePlayersNumMoves: {
+            '0': 1,
+          },
+        });
+
+        state = reducer(state, makeMove('A', null, '0'));
+
+        expect(state.ctx).toMatchObject({
+          activePlayers: { '0': 'stage2' },
+          _prevActivePlayers: [
+            {
+              activePlayers: { '0': 'stage1' },
+              _activePlayersNumMoves: { '0': 2 },
+              _activePlayersMoveLimit: { '0': 3 },
+            },
+          ],
+          _activePlayersMoveLimit: { '0': 1 },
+          _activePlayersNumMoves: {
+            '0': 0,
+          },
+        });
+
+        state = reducer(state, makeMove('B', null, '0'));
+
+        expect(state.ctx).toMatchObject({
+          activePlayers: { '0': 'stage1' },
+          _prevActivePlayers: [],
+          _activePlayersMoveLimit: { '0': 3 },
+          _activePlayersNumMoves: {
+            '0': 2,
+          },
+        });
       });
     });
 
@@ -550,10 +631,10 @@ describe('setActivePlayers', () => {
         turn: {
           activePlayers: {
             currentPlayer: 'stage1',
-            once: true,
+            moveLimit: 1,
             next: {
               currentPlayer: 'stage2',
-              once: true,
+              moveLimit: 1,
               next: {
                 currentPlayer: 'stage3',
               },
@@ -570,7 +651,7 @@ describe('setActivePlayers', () => {
         _prevActivePlayers: [],
         _nextActivePlayers: {
           currentPlayer: 'stage2',
-          once: true,
+          moveLimit: 1,
           next: {
             currentPlayer: 'stage3',
           },
@@ -597,6 +678,175 @@ describe('setActivePlayers', () => {
     });
   });
 
+  describe('move limits', () => {
+    test('shorthand syntax', () => {
+      const game = {
+        turn: {
+          activePlayers: {
+            all: 'play',
+            moveLimit: 3,
+          },
+          stages: {
+            play: { moves: { A: () => {} } },
+          },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game, numPlayers: 3 });
+
+      expect(state.ctx._activePlayersMoveLimit).toEqual({
+        '0': 3,
+        '1': 3,
+        '2': 3,
+      });
+
+      expect(state.ctx._activePlayersNumMoves).toEqual({
+        '0': 0,
+        '1': 0,
+        '2': 0,
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+      state = reducer(state, makeMove('A', null, '1'));
+      state = reducer(state, makeMove('A', null, '1'));
+      state = reducer(state, makeMove('A', null, '2'));
+
+      expect(state.ctx._activePlayersNumMoves).toEqual({
+        '0': 1,
+        '1': 2,
+        '2': 1,
+      });
+
+      state = reducer(state, makeMove('A', null, '1'));
+
+      expect(state.ctx.activePlayers).toEqual({
+        '0': 'play',
+        '2': 'play',
+      });
+    });
+
+    test('long-form syntax', () => {
+      const game = {
+        turn: {
+          activePlayers: {
+            all: 'play',
+            moveLimit: {
+              currentPlayer: 2,
+              others: 1,
+            },
+          },
+          stages: {
+            play: { moves: { A: () => {} } },
+          },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game, numPlayers: 3 });
+
+      expect(state.ctx._activePlayersMoveLimit).toEqual({
+        '0': 2,
+        '1': 1,
+        '2': 1,
+      });
+
+      expect(state.ctx._activePlayersNumMoves).toEqual({
+        '0': 0,
+        '1': 0,
+        '2': 0,
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+      state = reducer(state, makeMove('A', null, '1'));
+      state = reducer(state, makeMove('A', null, '2'));
+
+      expect(state.ctx._activePlayersNumMoves).toEqual({
+        '0': 1,
+        '1': 1,
+        '2': 1,
+      });
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'play' });
+
+      state = reducer(state, makeMove('A', null, '0'));
+
+      expect(state.ctx.activePlayers).toBeNull();
+    });
+
+    test('value syntax', () => {
+      const game = {
+        turn: {
+          activePlayers: {
+            all: 'play',
+            moveLimit: {
+              value: { '0': 1, '1': 2, '2': 3 },
+            },
+          },
+          stages: {
+            play: { moves: { A: () => {} } },
+          },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game, numPlayers: 3 });
+
+      expect(state.ctx._activePlayersMoveLimit).toEqual({
+        '0': 1,
+        '1': 2,
+        '2': 3,
+      });
+
+      state = reducer(state, makeMove('A', null, '0'));
+      state = reducer(state, makeMove('A', null, '1'));
+      state = reducer(state, makeMove('A', null, '2'));
+
+      expect(state.ctx.activePlayers).toEqual({ '1': 'play', '2': 'play' });
+
+      state = reducer(state, makeMove('A', null, '1'));
+      state = reducer(state, makeMove('A', null, '2'));
+
+      expect(state.ctx.activePlayers).toEqual({ '2': 'play' });
+
+      state = reducer(state, makeMove('A', null, '2'));
+      expect(state.ctx.activePlayers).toBeNull();
+    });
+
+    test('move counts reset on turn end', () => {
+      const game = {
+        turn: {
+          activePlayers: {
+            all: 'play',
+          },
+          stages: {
+            play: { moves: { A: () => {} } },
+          },
+        },
+      };
+
+      const reducer = CreateGameReducer({ game });
+      let state = InitializeGame({ game, numPlayers: 3 });
+
+      state = reducer(state, makeMove('A', null, '0'));
+      state = reducer(state, makeMove('A', null, '1'));
+
+      expect(state.ctx._activePlayersNumMoves).toEqual({
+        '0': 1,
+        '1': 1,
+        '2': 0,
+      });
+
+      state = reducer(state, gameEvent('endTurn'));
+
+      expect(state.ctx._activePlayersNumMoves).toEqual({
+        '0': 0,
+        '1': 0,
+        '2': 0,
+      });
+    });
+  });
+
   describe('militia', () => {
     let state;
     let reducer;
@@ -606,7 +856,7 @@ describe('setActivePlayers', () => {
           militia: (G, ctx) => {
             ctx.events.setActivePlayers({
               others: 'discard',
-              once: true,
+              moveLimit: 1,
               revert: true,
             });
           },

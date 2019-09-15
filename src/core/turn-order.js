@@ -44,13 +44,16 @@ export function SetActivePlayers(ctx, arg) {
   const _nextActivePlayers = arg.next || null;
 
   if (arg.revert) {
-    _prevActivePlayers = _prevActivePlayers.concat(ctx.activePlayers);
+    _prevActivePlayers = _prevActivePlayers.concat({
+      activePlayers: ctx.activePlayers,
+      _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
+      _activePlayersNumMoves: ctx._activePlayersNumMoves,
+    });
   } else {
     _prevActivePlayers = [];
   }
 
   let activePlayers = {};
-  let _activePlayersOnce = false;
 
   if (arg.value) {
     activePlayers = arg.value;
@@ -76,18 +79,53 @@ export function SetActivePlayers(ctx, arg) {
     }
   }
 
-  if (arg.once) {
-    _activePlayersOnce = true;
-  }
-
   if (Object.keys(activePlayers).length == 0) {
     activePlayers = null;
+  }
+
+  let _activePlayersMoveLimit = null;
+
+  if (activePlayers && arg.moveLimit) {
+    if (typeof arg.moveLimit === 'number') {
+      _activePlayersMoveLimit = {};
+      for (const id in activePlayers) {
+        _activePlayersMoveLimit[id] = arg.moveLimit;
+      }
+    } else {
+      _activePlayersMoveLimit = {};
+
+      if (arg.moveLimit.value) {
+        _activePlayersMoveLimit = arg.moveLimit.value;
+      }
+
+      if (
+        arg.moveLimit.currentPlayer !== undefined &&
+        activePlayers[ctx.currentPlayer]
+      ) {
+        _activePlayersMoveLimit[ctx.currentPlayer] =
+          arg.moveLimit.currentPlayer;
+      }
+
+      if (arg.moveLimit.others !== undefined) {
+        for (const id in activePlayers) {
+          if (id !== ctx.currentPlayer) {
+            _activePlayersMoveLimit[id] = arg.moveLimit.others;
+          }
+        }
+      }
+    }
+  }
+
+  let _activePlayersNumMoves = {};
+  for (const id in activePlayers) {
+    _activePlayersNumMoves[id] = 0;
   }
 
   return {
     ...ctx,
     activePlayers,
-    _activePlayersOnce,
+    _activePlayersMoveLimit,
+    _activePlayersNumMoves,
     _prevActivePlayers,
     _nextActivePlayers,
   };
@@ -291,7 +329,7 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every player in the game.
    */
-  ALL_ONCE: { all: Stage.NULL, once: true },
+  ALL_ONCE: { all: Stage.NULL, moveLimit: 1 },
 
   /**
    * OTHERS
@@ -308,5 +346,5 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every *other* player in the game.
    */
-  OTHERS_ONCE: { others: Stage.NULL, once: true },
+  OTHERS_ONCE: { others: Stage.NULL, moveLimit: 1 },
 };

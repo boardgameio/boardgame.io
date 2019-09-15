@@ -11,7 +11,7 @@ import React from 'react';
 const code = `{
   moves: {
     play(G, ctx) {
-      ctx.events.setActivePlayers({ others: 'discard', once: true });
+      ctx.events.setActivePlayers({ others: 'discard', moveLimit: 1 });
       return G;
     },
   },
@@ -46,7 +46,7 @@ export default {
 
     moves: {
       play(G, ctx) {
-        ctx.events.setActivePlayers({ others: 'discard', once: true });
+        ctx.events.setActivePlayers({ others: 'discard', moveLimit: 1 });
         return G;
       },
     },
