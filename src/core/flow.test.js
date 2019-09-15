@@ -461,6 +461,19 @@ describe('stage events', () => {
       state = flow.processGameEvent(state, gameEvent('setStage', 'A'));
       expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
     });
+
+    test('with move limit', () => {
+      let flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx._activePlayersMoveLimit).toBeNull();
+      state = flow.processGameEvent(
+        state,
+        gameEvent('setStage', 'A', { moveLimit: 2 })
+      );
+      expect(state.ctx._activePlayersMoveLimit).toEqual({ '0': 2 });
+    });
   });
 
   describe('endStage', () => {
