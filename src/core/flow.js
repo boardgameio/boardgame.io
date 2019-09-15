@@ -521,6 +521,13 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       }
       activePlayers[playerID] = arg.next;
       _activePlayersNumMoves[playerID] = 0;
+
+      if (arg.moveLimit) {
+        if (_activePlayersMoveLimit === null) {
+          _activePlayersMoveLimit = {};
+        }
+        _activePlayersMoveLimit[playerID] = arg.moveLimit;
+      }
     }
 
     ctx = {
