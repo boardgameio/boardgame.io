@@ -450,6 +450,36 @@ describe('stages', () => {
   });
 });
 
+describe('stage events', () => {
+  describe('setStage', () => {
+    test('basic', () => {
+      let flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toBeNull();
+      state = flow.processGameEvent(state, gameEvent('setStage', 'A'));
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+    });
+  });
+
+  describe('endStage', () => {
+    test('basic', () => {
+      let flow = Flow({
+        turn: {
+          activePlayers: { currentPlayer: 'A' },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+      state = flow.processGameEvent(state, gameEvent('endStage'));
+      expect(state.ctx.activePlayers).toBeNull();
+    });
+  });
+});
+
 test('init', () => {
   let flow = Flow({
     phases: { A: { start: true, onEnd: () => ({ done: true }) } },
