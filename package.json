@@ -130,7 +130,6 @@
     "style-loader": "^0.18.2",
     "superagent": "^3.8.3",
     "supertest": "^3.1.0",
-    "three": "^0.100.0",
     "ts-jest": "^24.0.2",
     "ts-transformer-imports": "^0.4.3",
     "ttypescript": "^1.5.7",
