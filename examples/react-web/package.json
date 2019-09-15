@@ -44,7 +44,6 @@
     "sass-loader": "7.1.0",
     "style-loader": "0.23.0",
     "terser-webpack-plugin": "1.1.0",
-    "three": "^0.100.0",
     "url-loader": "1.1.1",
     "webpack": "4.19.1",
     "webpack-dev-server": "3.1.14",
@@ -69,7 +68,8 @@
     "babel-plugin-module-resolver": "^3.1.2",
     "cross-env": "^5.2.0",
     "rollup": "^1.1.0",
-    "rollup-plugin-node-builtins": "^2.1.2"
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "three": "^0.100.0"
   },
   "jest": {
     "collectCoverageFrom": [
