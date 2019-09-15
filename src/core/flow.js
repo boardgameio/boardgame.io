@@ -506,6 +506,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function UpdateStage(state, { arg }) {
+    if (!arg) return state;
+
     const playerID = state.ctx.currentPlayer;
 
     let { ctx } = state;
