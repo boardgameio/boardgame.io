@@ -8,6 +8,7 @@ entering a playing phase, for example.
 Each phase in `boardgame.io` defines a set of options
 that are applied during that phase. This includes the
 ability to restrict moves, use a specific turn order and much more.
+Turns happen within phases.
 
 #### Card Game
 
@@ -155,7 +156,7 @@ phase, and you can only play cards in the second phase.
 <iframe class='react' src='react/phases-2.html' height='300' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
-#### Automatic Setup and Cleanup
+#### Setup and Cleanup hooks
 
 Phases can also specify automatic "board actions" that occur at the beginning or
 end of a phase. These are specified just like normal moves in `onBegin` and `onEnd`.
@@ -174,3 +175,19 @@ multiplayer games. Moves, on the other hand, run on both client
 and server. They are run on the client in order to facilitate
 a lag-free experience, and are run on the server to calculate the
 authoritative game state.
+
+#### Moving between phases
+
+The two primary ways of moving between phases are by calling the
+following events:
+
+1. `endPhase`: This ends the current phase and returns the game
+   to a state where no phase is active. If the phase specifies a
+   `next` option, then the game will move into that phase instead.
+   This event can also be triggered automatically by using an `endIf`
+   condition in the phase spec.
+
+2. `setPhase`: This ends the current phase and moves the game into
+   the phase specified by the argument.
+
+!> Whenever a phase ends, the current player's turn is first ended automatically.
