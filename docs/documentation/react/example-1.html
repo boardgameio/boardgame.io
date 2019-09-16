@@ -22,7 +22,7 @@ body {
   <div id="app"></div>
 
   <script type="text/babel">
-  var TicTacToe = BoardgameIO.Game({
+  var TicTacToe = {
     setup: () => ({ cells: Array(9).fill(null) }),
 
     moves: {
@@ -30,7 +30,7 @@ body {
         G.cells[id] = ctx.currentPlayer;
       }
     }
-  });
+  };
 
   var App = BoardgameIO.ReactClient({ game: TicTacToe, debug: { showGameInfo: false }});
   ReactDOM.render(<App/>, document.getElementById('app'));
