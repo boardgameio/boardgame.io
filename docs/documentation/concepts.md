@@ -92,6 +92,9 @@ this is less common. See the guide on
 
 ### Stage
 
-A stage is similar to a phase, except that it applies to individual players
-rather than the game as a whole. Different players can be in different stages
-during a turn, and the stages define moves that those players can make.
+A stage is similar to a phase, except that it happens within a turn, and
+applies to individual players rather than the game as a whole.
+A turn may be subdivided into many stages, each allowing a different set of moves
+and overriding other game configuration options while that stage is active.
+Also, different players can be in different stages during a turn.
+See the guide of [Stages]() for more details.
