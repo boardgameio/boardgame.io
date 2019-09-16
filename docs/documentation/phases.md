@@ -3,9 +3,7 @@
 Most games beyond very simple ones tend to have different
 behaviors at various "phases". A game might have a phase
 at the beginning where players are drafting cards before
-playing, for example. Alternatively, an individual player's turn
-might be divided into different phases (an action phase followed by
-a buy phase in Dominion, for example).
+entering a playing phase, for example.
 
 Each phase in `boardgame.io` defines a set of options
 that are applied during that phase. This includes the
@@ -20,21 +18,24 @@ game that has exactly two moves:
 - play a card from your hand onto the deck
 
 ```js
-const game = Game({
-  setup: () => ({ deck: 5, hand: 0 }),
+function DrawCard(G) {
+  G.deck--;
+  G.hand++;
+}
 
-  moves: {
-    drawCard: G => {
-      G.deck--;
-      G.hand++;
-    },
-    playCard: G => {
-      G.deck++;
-      G.hand--;
-    },
-  },
-});
+function PlayCard(G) {
+  G.deck++;
+  G.hand--;
+}
+
+const game = {
+  setup: () => ({ deck: 5, hand: 0 }),
+  moves: { DrawCard, PlayCard },
+};
 ```
+
+!> Notice how we moved the moves out into standalone functions
+instead of inlining them in the game spec like we did in the [tutorial](tutorial.md).
 
 We'll ignore the rendering component of this game, but this is how it might look:
 
@@ -51,50 +52,29 @@ Now let's say we want the game to work in two phases:
 - a first phase where the player can only draw cards (until the deck is empty).
 - a second phase where the player can only play cards (until their hand is empty).
 
-In order to do this, we add a `flow` section to the game
-spec (you should already be familiar with this as the location
-where you placed `endGameIf` in the
-[tutorial](#/tutorial?id=add-victory-condition)). It can also contain a `phases` object, which defines different phases in the game. Each phase can specify a list of `allowedMoves`,
-which allows only those moves to be played during that phase.
+In order to do this, we define two `phases`. Each phase can specify its own
+list of moves, which come into effect during that phase:
 
 ```js
 const game = Game({
   setup: () => ({ deck: 5, hand: 0 }),
 
-  moves: {
-    drawCard: G => {
-      G.deck--;
-      G.hand++;
+  phases: {
+    draw: {
+      moves: { DrawCard },
+      endIf: G => G.deck <= 0,
+      start: true,
+      next: 'play',
     },
-    playCard: G => {
-      G.deck++;
-      G.hand--;
-    },
-  },
 
-  flow: {
-    startingPhase: 'draw',
-
-    phases: {
-      draw: {
-        allowedMoves: ['drawCard'],
-        endPhaseIf: G => G.deck <= 0,
-        next: 'play',
-      },
-
-      play: {
-        allowedMoves: ['playCard'],
-        endPhaseIf: G => G.hand <= 0,
-        next: 'draw',
-      },
+    play: {
+      moves: { PlayCard },
+      endIf: G => G.hand <= 0,
+      next: 'draw',
     },
   },
 });
 ```
-
-!> Every game also has an implicit `default` phase, which is just
-a phase with no specific options, so the example above actually
-has three phases, even though we never use the `default` phase.
 
 ### Terminating a phase
 
