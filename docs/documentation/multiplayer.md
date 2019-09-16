@@ -9,7 +9,7 @@ working with our Tic-Tac-Toe example from the [tutorial](tutorial.md).
 
 A boardgame.io client is what you create using the `Client` call.
 You initialize it with your game object (which contains the moves),
-so it has all the information needed to the run the game.
+so it has all the information that is needed to run the game.
 This is where the story ends in a single player setup.
 
 In a multiplayer setup, clients no longer act as authoritative
