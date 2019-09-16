@@ -470,7 +470,7 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersMoveLimit).toBeNull();
       state = flow.processGameEvent(
         state,
-        gameEvent('setStage', 'A', { moveLimit: 2 })
+        gameEvent('setStage', { stage: 'A', moveLimit: 2 })
       );
       expect(state.ctx._activePlayersMoveLimit).toEqual({ '0': 2 });
     });
