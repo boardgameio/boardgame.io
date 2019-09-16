@@ -462,6 +462,19 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
     });
 
+    test('object syntax', () => {
+      let flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toBeNull();
+      state = flow.processGameEvent(
+        state,
+        gameEvent('setStage', { stage: 'A' })
+      );
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+    });
+
     test('with move limit', () => {
       let flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) };
