@@ -521,6 +521,20 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toBeNull();
     });
 
+    test('with multiple active players', () => {
+      let flow = Flow({
+        turn: {
+          activePlayers: { all: 'A', moveLimit: 5 },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(3) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
+      state = flow.processGameEvent(state, gameEvent('endStage'));
+      expect(state.ctx.activePlayers).toEqual({ '1': 'A', '2': 'A' });
+    });
+
     test('maintains move count', () => {
       let flow = Flow({
         moves: { A: () => {} },
