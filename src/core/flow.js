@@ -507,6 +507,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
   function UpdateStage(state, { arg }) {
     if (!arg) return state;
+    if (typeof arg === 'string') {
+      arg = { stage: arg };
+    }
 
     const playerID = state.ctx.currentPlayer;
 
@@ -517,11 +520,11 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       _activePlayersNumMoves,
     } = ctx;
 
-    if (arg.next) {
+    if (arg.stage) {
       if (activePlayers === null) {
         activePlayers = {};
       }
-      activePlayers[playerID] = arg.next;
+      activePlayers[playerID] = arg.stage;
       _activePlayersNumMoves[playerID] = 0;
 
       if (arg.moveLimit) {
@@ -854,8 +857,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return ProcessEvents(state, events);
   }
 
-  function SetStageEvent(state, newStage) {
-    return ProcessEvents(state, [{ fn: EndStage, arg: { next: newStage } }]);
+  function SetStageEvent(state, arg) {
+    return ProcessEvents(state, [{ fn: EndStage, arg }]);
   }
 
   function EndStageEvent(state) {
