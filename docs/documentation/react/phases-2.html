@@ -32,31 +32,33 @@ body {
   <div id="app"></div>
 
   <script type="text/babel">
-const game = BoardgameIO.Game({
+function drawCard(G) {
+  G.deck--;
+  G.hand++;
+}
+
+function playCard(G) {
+  G.deck++;
+  G.hand--;
+}
+
+const game = {
   setup: () => ({ deck: 5, hand: 0 }),
 
-  moves: {
-    drawCard: G => { G.deck--; G.hand++; },
-    playCard: G => { G.deck++; G.hand--; },
-  },
-
-  flow: {
-    startingPhase: 'draw',
-
-    phases: {
-      draw: {
-        endPhaseIf: G => (G.deck <= 0),
-        allowedMoves: ['drawCard'],
-        next: 'play',
-      },
-      play: {
-        allowedMoves: ['playCard'],
-        endPhaseIf: G => (G.hand <= 0),
-        next: 'draw',
-      }
+  phases: {
+    draw: {
+      moves: { drawCard },
+      endIf: G => (G.deck <= 0),
+      start: true,
+      next: 'play',
     },
-  }
-});
+    play: {
+      moves: { playCard },
+      endIf: G => (G.hand <= 0),
+      next: 'draw',
+    }
+  },
+};
 
 class Board extends React.Component {
   drawCard = () => {
@@ -74,7 +76,7 @@ class Board extends React.Component {
   render() {
     return (
       <div className="phases">
-        <li style={{ border: '3px solid #aaa' }}>{ this.props.ctx.phase }</li>
+        <li style={{ border: '2px solid #aaa' }}>{ this.props.ctx.phase } phase</li>
         <li>Deck: { this.props.G.deck }</li>
         <li>Hand: { this.props.G.hand }</li>
         <li><button id="draw" onClick={this.drawCard}>Draw Card</button></li>
@@ -88,7 +90,7 @@ const Phases = BoardgameIO.ReactClient({
   game,
   numPlayers: 1,
   board: Board,
-  debug: { showGameInfo: false },
+  debug: false,
 });
 
 ReactDOM.render(<Phases/>, document.getElementById('app'));

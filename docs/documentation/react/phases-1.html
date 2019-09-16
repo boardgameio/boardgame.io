@@ -31,14 +31,20 @@ body {
   <div id="app"></div>
 
   <script type="text/babel">
-const game = BoardgameIO.Game({
-  setup: () => ({ deck: 5, hand: 0 }),
+function drawCard(G) {
+  G.deck--;
+  G.hand++;
+}
 
-  moves: {
-    drawCard: G => { G.deck--; G.hand++; },
-    playCard: G => { G.deck++; G.hand--; },
-  },
-});
+function playCard(G) {
+  G.deck++;
+  G.hand--;
+}
+
+const game = {
+  setup: () => ({ deck: 5, hand: 0 }),
+  moves: { drawCard, playCard },
+};
 
 class Board extends React.Component {
   drawCard = () => {
@@ -67,7 +73,7 @@ const Phases = BoardgameIO.ReactClient({
   game,
   numPlayers: 1,
   board: Board,
-  debug: { showGameInfo: false },
+  debug: false,
 });
 
 ReactDOM.render(<Phases/>, document.getElementById('app'));
