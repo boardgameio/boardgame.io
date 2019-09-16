@@ -505,13 +505,11 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return state;
   }
 
-  function UpdateStage(state, { arg }) {
+  function UpdateStage(state, { arg, playerID }) {
     if (!arg) return state;
     if (typeof arg === 'string') {
       arg = { stage: arg };
     }
-
-    const playerID = state.ctx.currentPlayer;
 
     let { ctx } = state;
     let {
@@ -678,14 +676,14 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog, _undo: [], _redo: [] };
   }
 
-  function EndStage(state, { arg, next, automatic }) {
-    const playerID = state.ctx.currentPlayer;
+  function EndStage(state, { arg, next, automatic, playerID }) {
+    playerID = playerID || state.ctx.currentPlayer;
 
     let { ctx } = state;
     let { activePlayers, _activePlayersMoveLimit } = ctx;
 
     if (next) {
-      next.push({ fn: UpdateStage, arg });
+      next.push({ fn: UpdateStage, arg, playerID });
     }
 
     // If player isn’t in a stage, there is nothing else to do.
@@ -787,42 +785,11 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
-    let {
-      activePlayers,
-      _activePlayersMoveLimit,
-      _activePlayersNumMoves,
-      _prevActivePlayers,
-    } = ctx;
+    let { _activePlayersNumMoves } = ctx;
 
     const { playerID } = action;
 
-    if (activePlayers) _activePlayersNumMoves[playerID]++;
-
-    if (
-      _activePlayersMoveLimit &&
-      _activePlayersNumMoves[playerID] >= _activePlayersMoveLimit[playerID]
-    ) {
-      activePlayers = Object.keys(activePlayers)
-        .filter(id => id !== playerID)
-        .reduce((obj, key) => {
-          obj[key] = activePlayers[key];
-          return obj;
-        }, {});
-      _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
-        .filter(id => id !== playerID)
-        .reduce((obj, key) => {
-          obj[key] = _activePlayersMoveLimit[key];
-          return obj;
-        }, {});
-    }
-
-    ctx = UpdateActivePlayers({
-      ...ctx,
-      activePlayers,
-      _activePlayersMoveLimit,
-      _activePlayersNumMoves,
-      _prevActivePlayers,
-    });
+    if (ctx.activePlayers) _activePlayersNumMoves[playerID]++;
 
     let numMoves = state.ctx.numMoves;
     if (playerID == state.ctx.currentPlayer) {
@@ -834,8 +801,16 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx: {
         ...ctx,
         numMoves,
+        _activePlayersNumMoves,
       },
     };
+
+    if (
+      ctx._activePlayersMoveLimit &&
+      _activePlayersNumMoves[playerID] >= ctx._activePlayersMoveLimit[playerID]
+    ) {
+      state = EndStage(state, { playerID, automatic: true });
+    }
 
     const G = conf.turn.onMove(state.G, state.ctx, action);
     state = { ...state, G };
