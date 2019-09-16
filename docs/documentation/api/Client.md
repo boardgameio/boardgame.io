@@ -112,7 +112,7 @@ The `Board` component will receive the following as `props`:
 
 Example:
 
-````json
+```json
 {
   "players": {
     "0": {
@@ -124,12 +124,12 @@ Example:
       "name": "Bob"
     }
   }
-}```
+}
+```
 
-12.  `isActive`: `true` if the client is able to currently make
+12. `isActive`: `true` if the client is able to currently make
     a move or interact with the game.
 
-13.  `isMultiplayer`: `true` if it is a multiplayer game.
+13. `isMultiplayer`: `true` if it is a multiplayer game.
 
-14.  `isConnected`: `true` if connection to the server is active.
-````
+14. `isConnected`: `true` if connection to the server is active.
