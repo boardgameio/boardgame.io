@@ -75,6 +75,7 @@
     "@babel/preset-env": "^7.5.4",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
+    "@firebase/app": "^0.4.16",
     "@types/jest": "^24.0.0",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
@@ -95,8 +96,8 @@
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-unicorn": "^6.0.1",
-    "firebase": "^5.7.3",
-    "firebase-admin": "^7.2.0",
+    "firebase": "^6.6.1",
+    "firebase-admin": "^8.5.0",
     "firebase-mock": "^2.2.10",
     "generate-export-aliases": "^1.0.0",
     "graceful-fs": "https://github.com/mekwall/node-graceful-fs.git#patch-1",
@@ -130,9 +131,11 @@
     "superagent": "^3.8.3",
     "supertest": "^3.1.0",
     "ts-jest": "^24.0.2",
+    "ts-node": "^8.4.1",
     "ts-transformer-imports": "^0.4.3",
     "ttypescript": "^1.5.7",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "webpack": "^4.40.2"
   },
   "dependencies": {
     "@koa/cors": "^2.2.1",
