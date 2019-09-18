@@ -502,7 +502,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function UpdateStage(state, { arg, playerID }) {
-    if (!arg) return state;
     if (typeof arg === 'string') {
       arg = { stage: arg };
     }
