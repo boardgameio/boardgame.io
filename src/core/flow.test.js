@@ -450,6 +450,137 @@ describe('stages', () => {
   });
 });
 
+describe('stage events', () => {
+  describe('setStage', () => {
+    test('basic', () => {
+      let flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toBeNull();
+      state = flow.processGameEvent(state, gameEvent('setStage', 'A'));
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+    });
+
+    test('object syntax', () => {
+      let flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toBeNull();
+      state = flow.processGameEvent(
+        state,
+        gameEvent('setStage', { stage: 'A' })
+      );
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+    });
+
+    test('with multiple active players', () => {
+      let flow = Flow({
+        turn: {
+          activePlayers: { all: 'A', moveLimit: 5 },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(3) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
+      state = flow.processGameEvent(
+        state,
+        gameEvent('setStage', { stage: 'B', moveLimit: 1 })
+      );
+      expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'A', '2': 'A' });
+    });
+
+    test('resets move count', () => {
+      let flow = Flow({
+        moves: { A: () => {} },
+        turn: {
+          activePlayers: { currentPlayer: 'A' },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 0 });
+      state = flow.processMove(state, makeMove('A', null, '0').payload);
+      expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 1 });
+      state = flow.processGameEvent(state, gameEvent('setStage', 'B'));
+      expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 0 });
+    });
+
+    test('with move limit', () => {
+      let flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx._activePlayersMoveLimit).toBeNull();
+      state = flow.processGameEvent(
+        state,
+        gameEvent('setStage', { stage: 'A', moveLimit: 2 })
+      );
+      expect(state.ctx._activePlayersMoveLimit).toEqual({ '0': 2 });
+    });
+
+    test('empty argument ends stage', () => {
+      let flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+      state = flow.processGameEvent(state, gameEvent('setStage', {}));
+      expect(state.ctx.activePlayers).toBeNull();
+    });
+  });
+
+  describe('endStage', () => {
+    test('basic', () => {
+      let flow = Flow({
+        turn: {
+          activePlayers: { currentPlayer: 'A' },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+      state = flow.processGameEvent(state, gameEvent('endStage'));
+      expect(state.ctx.activePlayers).toBeNull();
+    });
+
+    test('with multiple active players', () => {
+      let flow = Flow({
+        turn: {
+          activePlayers: { all: 'A', moveLimit: 5 },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(3) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
+      state = flow.processGameEvent(state, gameEvent('endStage'));
+      expect(state.ctx.activePlayers).toEqual({ '1': 'A', '2': 'A' });
+    });
+
+    test('maintains move count', () => {
+      let flow = Flow({
+        moves: { A: () => {} },
+        turn: {
+          activePlayers: { currentPlayer: 'A' },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 0 });
+      state = flow.processMove(state, makeMove('A', null, '0').payload);
+      expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 1 });
+      state = flow.processGameEvent(state, gameEvent('endStage'));
+      expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 1 });
+    });
+  });
+});
+
 test('init', () => {
   let flow = Flow({
     phases: { A: { start: true, onEnd: () => ({ done: true }) } },
