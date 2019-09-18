@@ -682,7 +682,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let { ctx } = state;
     let { activePlayers, _activePlayersMoveLimit } = ctx;
 
-    if (next) {
+    if (next && arg) {
       next.push({ fn: UpdateStage, arg, playerID });
     }
 
