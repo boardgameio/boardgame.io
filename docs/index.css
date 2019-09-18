@@ -97,6 +97,10 @@ ul {
     font-size: 0.8em;
   }
 
+  #summary {
+    font-size: 1em;
+  }
+
   #topbar,
   #heading {
     font-size: 1.3em;
