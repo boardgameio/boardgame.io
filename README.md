@@ -27,8 +27,8 @@ networking or database handling code.
 - **Game Phases**: with different game rules and turn orders per phase.
 - **Prototyping**: Interface to simulate moves even before you render the game.
 - **Logs**: Game logs with the ability to time travel (viewing the board at an earlier state).
+- **Lobby**: Player matchmaking and game creation.
 - **View-layer Agnostic**: Use the vanilla JS client or the bindings for React / React Native.
-- **Component Toolkit**: Components for hex grids, cards, tokens etc.
 - **Extendable**: Plugin system that allows creating new abstractions.
 
 ## Usage
