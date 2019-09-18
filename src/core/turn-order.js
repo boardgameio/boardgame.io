@@ -136,7 +136,7 @@ export function SetActivePlayers(ctx, arg) {
  * when it becomes empty.
  * @param {Object} ctx
  */
-export function UpdateActivePlayers(ctx) {
+export function UpdateActivePlayersOnceEmpty(ctx) {
   let {
     activePlayers,
     _activePlayersMoveLimit,

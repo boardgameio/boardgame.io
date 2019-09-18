@@ -9,7 +9,7 @@
 import {
   SetActivePlayersEvent,
   SetActivePlayers,
-  UpdateActivePlayers,
+  UpdateActivePlayersOnceEmpty,
   InitTurnOrderState,
   UpdateTurnOrderState,
   Stage,
@@ -709,7 +709,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
         }, {});
     }
 
-    ctx = UpdateActivePlayers({
+    ctx = UpdateActivePlayersOnceEmpty({
       ...ctx,
       activePlayers,
       _activePlayersMoveLimit,
