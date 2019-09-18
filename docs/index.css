@@ -27,6 +27,7 @@ ul {
 
 #summary {
   text-align: center;
+  font-size: 1.2em;
 }
 
 #main-content {
@@ -94,6 +95,10 @@ ul {
 
   #features > div {
     font-size: 0.8em;
+  }
+
+  #summary {
+    font-size: 1em;
   }
 
   #topbar,

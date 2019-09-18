@@ -9,6 +9,7 @@
 import {
   SetActivePlayersEvent,
   SetActivePlayers,
+  UpdateActivePlayersOnceEmpty,
   InitTurnOrderState,
   UpdateTurnOrderState,
   Stage,
@@ -208,10 +209,12 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   if (events.setActivePlayers === undefined) {
     events.setActivePlayers = true;
   }
+  if (events.endStage === undefined) {
+    events.endStage = true;
+    events.setStage = true;
+  }
   if (events.endPhase === undefined && phases) {
     events.endPhase = true;
-  }
-  if (events.setPhase === undefined && phases) {
     events.setPhase = true;
   }
   if (events.endTurn === undefined) {
@@ -498,6 +501,43 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return state;
   }
 
+  function UpdateStage(state, { arg, playerID }) {
+    if (typeof arg === 'string') {
+      arg = { stage: arg };
+    }
+
+    let { ctx } = state;
+    let {
+      activePlayers,
+      _activePlayersMoveLimit,
+      _activePlayersNumMoves,
+    } = ctx;
+
+    if (arg.stage) {
+      if (activePlayers === null) {
+        activePlayers = {};
+      }
+      activePlayers[playerID] = arg.stage;
+      _activePlayersNumMoves[playerID] = 0;
+
+      if (arg.moveLimit) {
+        if (_activePlayersMoveLimit === null) {
+          _activePlayersMoveLimit = {};
+        }
+        _activePlayersMoveLimit[playerID] = arg.moveLimit;
+      }
+    }
+
+    ctx = {
+      ...ctx,
+      activePlayers,
+      _activePlayersMoveLimit,
+      _activePlayersNumMoves,
+    };
+
+    return { ...state, ctx };
+  }
+
   ///////////////
   // ShouldEnd //
   ///////////////
@@ -631,6 +671,63 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog, _undo: [], _redo: [] };
   }
 
+  function EndStage(state, { arg, next, automatic, playerID }) {
+    playerID = playerID || state.ctx.currentPlayer;
+
+    let { ctx } = state;
+    let { activePlayers, _activePlayersMoveLimit } = ctx;
+
+    if (next && arg) {
+      next.push({ fn: UpdateStage, arg, playerID });
+    }
+
+    // If player isn’t in a stage, there is nothing else to do.
+    if (activePlayers === null || !(playerID in activePlayers)) {
+      return state;
+    }
+
+    // Remove player from activePlayers.
+    activePlayers = Object.keys(activePlayers)
+      .filter(id => id !== playerID)
+      .reduce((obj, key) => {
+        obj[key] = activePlayers[key];
+        return obj;
+      }, {});
+
+    if (_activePlayersMoveLimit) {
+      // Remove player from _activePlayersMoveLimit.
+      _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
+        .filter(id => id !== playerID)
+        .reduce((obj, key) => {
+          obj[key] = _activePlayersMoveLimit[key];
+          return obj;
+        }, {});
+    }
+
+    ctx = UpdateActivePlayersOnceEmpty({
+      ...ctx,
+      activePlayers,
+      _activePlayersMoveLimit,
+    });
+
+    // Add log entry.
+    const action = gameEvent('endStage', arg);
+    const logEntry = {
+      action,
+      _stateID: state._stateID,
+      turn: state.ctx.turn,
+      phase: state.ctx.phase,
+    };
+
+    if (automatic) {
+      logEntry.automatic = true;
+    }
+
+    const deltalog = [...(state.deltalog || []), logEntry];
+
+    return { ...state, ctx, deltalog };
+  }
+
   /**
    * Retrieves the relevant move that can be played by playerID.
    *
@@ -683,57 +780,11 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
-    let {
-      activePlayers,
-      _activePlayersMoveLimit,
-      _activePlayersNumMoves,
-      _prevActivePlayers,
-    } = ctx;
+    let { _activePlayersNumMoves } = ctx;
 
     const { playerID } = action;
 
-    if (activePlayers) _activePlayersNumMoves[playerID]++;
-
-    if (
-      _activePlayersMoveLimit &&
-      _activePlayersNumMoves[playerID] >= _activePlayersMoveLimit[playerID]
-    ) {
-      activePlayers = Object.keys(activePlayers)
-        .filter(id => id !== playerID)
-        .reduce((obj, key) => {
-          obj[key] = activePlayers[key];
-          return obj;
-        }, {});
-      _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
-        .filter(id => id !== playerID)
-        .reduce((obj, key) => {
-          obj[key] = _activePlayersMoveLimit[key];
-          return obj;
-        }, {});
-    }
-
-    if (activePlayers && Object.keys(activePlayers).length == 0) {
-      if (ctx._nextActivePlayers) {
-        ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
-        ({
-          activePlayers,
-          _activePlayersMoveLimit,
-          _activePlayersNumMoves,
-          _prevActivePlayers,
-        } = ctx);
-      } else if (_prevActivePlayers.length > 0) {
-        const lastIndex = _prevActivePlayers.length - 1;
-        ({
-          activePlayers,
-          _activePlayersMoveLimit,
-          _activePlayersNumMoves,
-        } = _prevActivePlayers[lastIndex]);
-        _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
-      } else {
-        activePlayers = null;
-        _activePlayersMoveLimit = null;
-      }
-    }
+    if (ctx.activePlayers) _activePlayersNumMoves[playerID]++;
 
     let numMoves = state.ctx.numMoves;
     if (playerID == state.ctx.currentPlayer) {
@@ -744,13 +795,17 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ...state,
       ctx: {
         ...ctx,
-        activePlayers,
-        _activePlayersMoveLimit,
-        _activePlayersNumMoves,
-        _prevActivePlayers,
         numMoves,
+        _activePlayersNumMoves,
       },
     };
+
+    if (
+      ctx._activePlayersMoveLimit &&
+      _activePlayersNumMoves[playerID] >= ctx._activePlayersMoveLimit[playerID]
+    ) {
+      state = EndStage(state, { playerID, automatic: true });
+    }
 
     const G = conf.turn.onMove(state.G, state.ctx, action);
     state = { ...state, G };
@@ -770,6 +825,14 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let events = [{ fn: OnMove }];
 
     return ProcessEvents(state, events);
+  }
+
+  function SetStageEvent(state, arg) {
+    return ProcessEvents(state, [{ fn: EndStage, arg }]);
+  }
+
+  function EndStageEvent(state) {
+    return ProcessEvents(state, [{ fn: EndStage }]);
   }
 
   function SetPhaseEvent(state, newPhase) {
@@ -802,6 +865,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   const eventHandlers = {
+    endStage: EndStageEvent,
+    setStage: SetStageEvent,
     endTurn: EndTurnEvent,
     endPhase: EndPhaseEvent,
     setPhase: SetPhaseEvent,
@@ -822,6 +887,10 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
   if (events.setActivePlayers) {
     enabledEvents['setActivePlayers'] = true;
+  }
+  if (events.endStage) {
+    enabledEvents['endStage'] = true;
+    enabledEvents['setStage'] = true;
   }
 
   return FlowInternal({

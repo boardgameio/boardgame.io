@@ -132,6 +132,51 @@ export function SetActivePlayers(ctx, arg) {
 }
 
 /**
+ * Update activePlayers, setting it to previous, next or null values
+ * when it becomes empty.
+ * @param {Object} ctx
+ */
+export function UpdateActivePlayersOnceEmpty(ctx) {
+  let {
+    activePlayers,
+    _activePlayersMoveLimit,
+    _activePlayersNumMoves,
+    _prevActivePlayers,
+  } = ctx;
+
+  if (activePlayers && Object.keys(activePlayers).length == 0) {
+    if (ctx._nextActivePlayers) {
+      ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
+      ({
+        activePlayers,
+        _activePlayersMoveLimit,
+        _activePlayersNumMoves,
+        _prevActivePlayers,
+      } = ctx);
+    } else if (_prevActivePlayers.length > 0) {
+      const lastIndex = _prevActivePlayers.length - 1;
+      ({
+        activePlayers,
+        _activePlayersMoveLimit,
+        _activePlayersNumMoves,
+      } = _prevActivePlayers[lastIndex]);
+      _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
+    } else {
+      activePlayers = null;
+      _activePlayersMoveLimit = null;
+    }
+  }
+
+  return {
+    ...ctx,
+    activePlayers,
+    _activePlayersMoveLimit,
+    _activePlayersNumMoves,
+    _prevActivePlayers,
+  };
+}
+
+/**
  * Converts a playOrderPos index into its value in playOrder.
  * @param {Array} playOrder - An array of player ID's.
  * @param {number} playOrderPos - An index into the above.
