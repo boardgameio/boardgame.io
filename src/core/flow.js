@@ -211,14 +211,10 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
   if (events.endStage === undefined) {
     events.endStage = true;
-  }
-  if (events.setStage === undefined) {
     events.setStage = true;
   }
   if (events.endPhase === undefined && phases) {
     events.endPhase = true;
-  }
-  if (events.setPhase === undefined && phases) {
     events.setPhase = true;
   }
   if (events.endTurn === undefined) {
