@@ -102,7 +102,8 @@ class TestBot(unittest.TestCase):
                           'payload': {
                               'type': 'type',
                               'args': ['foo', 'bar'],
-                              'playerID': self.sut.player_id
+                              'playerID': self.sut.player_id,
+                              'credentials': self.sut.credentials
                           }})
 
     def test_game_event_shall_return_event_action(self):
@@ -111,7 +112,8 @@ class TestBot(unittest.TestCase):
                           'payload': {
                               'type': 'foobar',
                               'args': [],
-                              'playerID': self.sut.player_id}
+                              'playerID': self.sut.player_id,
+                              'credentials': self.sut.credentials}
                          })
 
 

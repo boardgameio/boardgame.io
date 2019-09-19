@@ -100,10 +100,12 @@ class Bot(object):
         opts = {'game_name'  : 'default',
                 'game_id'    : 'default',
                 'player_id'  : '1',
+                'credentials': 'default',
                 'num_players': 2}
         opts.update(options or {})
         self.game_id = opts['game_name'] + ':' + opts['game_id']
         self.player_id = opts['player_id']
+        self.credentials = opts['credentials']
         self.num_players = opts['num_players']
 
         # open websocket
@@ -123,7 +125,8 @@ class Bot(object):
             'payload': {
                 'type': typ,
                 'args': args,
-                'playerID': self.player_id
+                'playerID': self.player_id,
+                'credentials': self.credentials
             }
         }
 
