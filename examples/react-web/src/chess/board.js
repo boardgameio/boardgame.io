@@ -10,7 +10,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Chess from 'chess.js';
 import { Checkerboard, cartesianToAlgebraic } from './checkerboard';
-import { Token } from 'boardgame.io/ui';
+import { Token } from './token';
 import Bishop from './pieces/bishop';
 import King from './pieces/king';
 import Knight from './pieces/knight';

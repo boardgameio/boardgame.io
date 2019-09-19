@@ -6,7 +6,6 @@ shell.rm('-f', [
   'client.js',
   'core.js',
   'plugins.js',
-  'ui.js',
   'ai.js',
   'ai-visualize.js',
   'master.js',
