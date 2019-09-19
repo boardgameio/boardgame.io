@@ -1,7 +1,7 @@
 # Turn Orders
 
 When the turn ends (either by calling `endTurn` manually
-or if the `endTurnIf` condition triggers), then the
+or if the `turn.endIf` condition triggers), then the
 turn is passed to the "next" player. The default behavior
 is to pass the turn around in a round-robin fashion.
 
@@ -11,35 +11,35 @@ following fields:
 ```
 ctx: {
   currentPlayer: '0',
-  actionPlayers: ['0'],
+  activePlayers: { '0': null },
   playOrder: ['0', '1', '2', ...],
   playOrderPos: 0,
 }
 ```
 
-##### currentPlayer
+##### `currentPlayer`
 
 This is the owner of the current turn, and the only
 player that can call events (`endTurn`, `endPhase` etc.).
 
-##### actionPlayers
+##### `activePlayers`
 
-This is the set of players that can currently
-make a move. It defaults to a list containing just the
-`currentPlayer`, but you might want to change it in order
+This is a map of players that can currently make a move and their
+current “stage”. By default, `activePlayers` is not used and only
+the `currentPlayer` can make a move. You can use `activePlayers`
 to support actions from other players during the currrent turn
 (for example, if you play a card that forces everyone else
-to discard a card). Note that if this list contains multiple
-playerID's, they can make a move in any order.
+to discard a card). Note that if `activePlayers` contains multiple
+players, they can make a move in any order.
 
-##### playOrder
+##### `playOrder`
 
 The default value is `['0', '1', ... ]`. You can think of this
 as the order in which players sit down at the table. A round
 robin turn order would move `currentPlayer` through this
 list in order.
 
-##### playOrderPos
+##### `playOrderPos`
 
 An index into `playOrder`. It is the value that is updated
 by the turn order policy in order to compute `currentPlayer`.
@@ -50,9 +50,24 @@ fashion. `currentPlayer` is just `playOrder[playOrderPos]`.
 `ctx.playerID` in case you need to differentiate between
 multiple players that could simultaneously move.
 
-### Available turn orders
+### Default `turn.order` configurations
 
-##### DEFAULT
+**boardgame.io** provides some default turn order
+configurations for common patterns.
+
+```js
+import { TurnOrder } from 'boardgame.io/core';
+```
+
+You can then use these in your turn configuration:
+
+```js
+turn: {
+  order: TurnOrder.DEFAULT;
+}
+```
+
+##### `DEFAULT`
 
 This is the default round-robin. It is used if you don't
 specify any turn order. It goes on indefinitely until you
@@ -61,46 +76,69 @@ kicks in. Note that if the next phase also uses
 `DEFAULT`, the turn order will continue passing
 around in a round-robin seamlessly.
 
-##### ONCE
+##### `RESET`
+
+This is similar to `DEFAULT`, but instead of continuing
+from the previous position at the beginning of a phase, it
+will always start from `0`.
+
+##### `ONCE`
 
 This is another round-robin, but it goes around only once.
 After this, the phase ends automatically.
 
-##### ANY
-
-`actionPlayers` is set to all players while the turn stays
-fixed with one player. This allows every player in the game
-to make a move (in any order).
-
-##### ANY_ONCE
-
-Similar to the above, but allows each player to make exactly
-one move. Also, the phase ends when all players have made their
-move.
-
-##### OTHERS
-
-Similar to `ANY`, but excludes the current player from the set
-of action players.
-
-##### OTHERS_ONCE
-
-Similar to the above, but allows each player to make exactly
-one move. Also, the phase ends when all (other) players have
-made their move. This is typically used in a phase where you
-would like to elicit a response from every other player in the
-game. For example, you might have a card which (when player)
-requires every other player in the game to discard a card.
-
-##### CUSTOM
+##### `CUSTOM`
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the provided
 value.
 
-##### CUSTOM_FROM
+##### `CUSTOM_FROM`
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the value
 in a specified field in `G`.
+
+### Default `activePlayers` configurations
+
+**boardgame.io** also provides some default configurations
+for `activePlayers` for common patterns.
+
+```js
+import { ActivePlayers } from 'boardgame.io/core';
+```
+
+You can then use these in your turn configuration:
+
+```js
+turn: {
+  activePlayers: ActivePlayers.ALL;
+}
+```
+
+##### `ALL`
+
+`activePlayers` is set to include all players while the turn stays
+fixed with one player. This allows every player in the game
+to make a move (in any order) during the current player’s turn.
+
+##### `ALL_ONCE`
+
+Similar to `ALL`, but allows each player to make exactly
+one move. Once all players have made their move, the turn will
+return to the current player.
+
+##### `OTHERS`
+
+Similar to `ALL`, but excludes the current player from the set
+of action players.
+
+##### `OTHERS_ONCE`
+
+Similar to `OTHERS`, but allows each player to make exactly one
+move. When all (other) players have made their move, the current
+player can move again. This is typically used in a phase where you
+would like to elicit a response from every other player in the
+game. For example, you might have a card which (when played)
+requires every other player in the game to discard a card.
 
 ### Interactive demos
 
@@ -110,76 +148,109 @@ in a specified field in `G`.
 
 ### Specifying a turn order
 
-You can change the turn order by using the `turnOrder` option.
-This is passed inside a `flow` section of the `Game` configuration:
+You can change the turn order by using the `turn.order` option.
+This can be passed inside your game configuration:
 
 ```js
-import { Game, TurnOrder } from 'boardgame.io/core';
+import { TurnOrder, ActivePlayers } from 'boardgame.io/core';
 
-Game({
-  flow: {
-    turnOrder: TurnOrder.ANY,
-  }
-}
+export const game = {
+  turn: {
+    order: TurnOrder.DEFAULT,
+    activePlayers: ActivePlayers.ALL,
+  },
+};
 ```
 
 Turn orders can also be specified on a per-phase level.
 
 ```js
-import { Game, TurnOrder } from 'boardgame.io/core';
+import { TurnOrder, ActivePlayers } from 'boardgame.io/core';
 
-Game({
-  flow: {
-    phases: {
-      A: { turnOrder: TurnOrder.ANY },
-      B: { turnOrder: TurnOrder.ONCE },
+export const game = {
+  phases: {
+    A: {
+      turn: { activePlayers: ActivePlayers.ALL },
     },
-  }
-}
+    B: {
+      turn: { order: TurnOrder.ONCE },
+    },
+  },
+};
 ```
 
 ### Implementing a custom turn order
 
-A `TurnOrder` object has the following structure:
+The following settings inside `turn` affect turn order:
 
 ```js
-{
+const turn = {
   // OPTIONAL:
-  // Override the initial value of playOrder.
-  // This is called at the beginning of the phase.
-  playOrder: (G, ctx) => [...],
+  // If this section is present, it will override the DEFAULT
+  // turn order.
+  order: {
+    // OPTIONAL:
+    // Override the initial value of playOrder.
+    // This is called at the beginning of the phase.
+    playOrder: (G, ctx) => [...],
 
-  // Get the initial value of playOrderPos.
-  // This is called at the beginning of the phase.
-  first: (G, ctx) => 0,
+    // Get the initial value of playOrderPos.
+    // This is called at the beginning of the phase.
+    first: (G, ctx) => 0,
 
-  // Get the next value of playOrderPos.
-  // This is called at the end of each turn.
-  // The phase ends if this returns undefined.
-  next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+    // Get the next value of playOrderPos.
+    // This is called at the end of each turn.
+    // The phase ends if this returns undefined.
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+  },
 
   // OPTIONAL:
-  // If this section is present, actionPlayers is modified
+  // If this section is present, activePlayers is modified
   // at the beginning of the phase.
-  actionPlayers: {
-    // Sets actionPlayers to the array returned from a function.
-    value: (G, ctx) => [...],
+  activePlayers: {
+    // Sets activePlayers to the provided map.
+    value: {
+      '0': 'myStage',
+      '1': Stage.NULL
+    },
 
-    // Sets actionPlayers to all players.
+    // Makes all players active with the passed value.
     all: true,
 
-    // Sets actionPlayers to all players except currentPlayer.
+    // Makes all players except currentPlayer active with the passed value.
     others: true,
 
-    // Each time an action player makes a move, they are
-    // removed from actionPlayers. Once every player in
-    // actionPlayers has made a move, the phase ends.
-    once: true,
+    // Makes the current player active with the passed value.
+    currentPlayer: true,
+
+    // Limits the number of moves each active player can make.
+    // When the limit is reached, the player is removed from
+    // activePlayers. Once every player in activePlayers has
+    // reached the limit, activePlayers is set to null.
+    moveLimit: 2,
+
+    // A next option will be used once activePlayers becomes empty
+    // (either by using moveLimit or manually removing players).
+    // All options available inside activePlayers are available
+    // inside next.
+    next: {
+      currentPlayer: true
+    },
   },
+
+  // OPTIONAL:
+  // Limits the number of moves the current player can make
+  // during the turn. Once the limit is reached the turn ends.
+  moveLimit: 2,
+
+  // OPTIONAL:
+  // A function that returns a truthy value if the turn should end.
+  // It can also return the player for the next turn (see below).
+  endIf: (G, ctx) => {}
 }
 ```
 
-### endTurn / endTurnIf
+### `endTurn` / `turn.endIf`
 
 You can also specify the next player during the `endTurn` event.
 The `endTurn` event takes an additional argument that may specify
@@ -189,7 +260,7 @@ the next player:
 endTurn({ next: playerID });
 ```
 
-This argument can also be the return value of `endTurnIf` and works the same way.
+This argument can also be the return value of `turn.endIf` and works the same way.
 
 Player `3` is made the new player in both the following examples:
 
@@ -200,7 +271,9 @@ onClickEndTurn() {
 ```
 
 ```js
-flow: {
-  endTurnIf: (G, ctx) => ({ next: '3' }),
-}
+const game = {
+  turn: {
+    endIf: (G, ctx) => ({ next: '3' }),
+  },
+};
 ```
