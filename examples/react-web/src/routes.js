@@ -12,7 +12,6 @@ import phases from './phases';
 import secret_state from './secret-state';
 import random from './random';
 import turnorder from './turnorder';
-import ui from './ui';
 import threejs from './threejs';
 import lobby from './lobby';
 import redacted_move from './redacted-move';
@@ -50,10 +49,6 @@ const routes = [
   {
     name: 'Undo',
     routes: undo.routes,
-  },
-  {
-    name: 'UI',
-    routes: ui.routes,
   },
   {
     name: 'Other Frameworks',
