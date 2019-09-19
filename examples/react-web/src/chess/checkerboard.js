@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid } from 'boardgame.io/ui';
+import { Grid } from './grid';
 
 /**
  * Checkerboard
