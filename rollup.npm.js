@@ -32,7 +32,6 @@ const globals = {
   redux: 'Redux',
   'react-cookies': 'Cookies',
   'prop-types': 'PropTypes',
-  'react-dragtastic': 'ReactDragtastic',
   mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
   flatted: 'Flatted',
@@ -133,13 +132,6 @@ export default [
       name: 'Internal',
       globals,
     },
-    plugins,
-  },
-
-  {
-    input: 'packages/ui.js',
-    external: Object.keys(globals),
-    output: { file: 'dist/ui.js', format: 'umd', name: 'UI', globals },
     plugins,
   },
 
