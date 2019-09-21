@@ -1,10 +1,9 @@
 # Turn Order
 
 The framework's default behavior is to pass the turn around
-in a round-robin fashion. Players can make one or more moves
+in a round-robin fashion. Players make one or more moves
 before triggering an `endTurn` event, which passes the turn
-to the next player. A number of other turn orders are
-available, including the ability to create your own.
+to the next player.
 
 Turn order state is maintained in the following fields:
 
@@ -51,7 +50,7 @@ players, they can make a move in any order.
 
 ### Available Turn Orders
 
-##### `DEFAULT`
+##### DEFAULT
 
 This is the default round-robin. It is used if you don't
 specify any turn order. It goes on indefinitely until you
@@ -60,23 +59,23 @@ kicks in. Note that if the next phase also uses
 `DEFAULT`, the turn order will continue passing
 around in a round-robin seamlessly.
 
-##### `RESET`
+##### RESET
 
 This is similar to `DEFAULT`, but instead of continuing
 from the previous position at the beginning of a phase, it
 will always start from `0`.
 
-##### `ONCE`
+##### ONCE
 
 This is another round-robin, but it goes around only once.
 After this, the phase ends automatically.
 
-##### `CUSTOM`
+##### CUSTOM
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the provided
 value.
 
-##### `CUSTOM_FROM`
+##### CUSTOM_FROM
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the value
 in a specified field in `G`.
@@ -194,7 +193,8 @@ the next player:
 endTurn({ next: playerID });
 ```
 
-This argument can also be the return value of `turn.endIf` and works the same way.
+This argument can also be the return value of `turn.endIf` and
+works the same way.
 
 Player `3` is made the new player in both the following examples:
 
