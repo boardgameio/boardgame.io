@@ -337,7 +337,6 @@ describe('event dispatchers', () => {
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual([
       'endTurn',
-      'setActivePlayers',
       'endStage',
       'setStage',
     ]);
@@ -359,7 +358,6 @@ describe('event dispatchers', () => {
       'endPhase',
       'setPhase',
       'endGame',
-      'setActivePlayers',
       'endStage',
       'setStage',
     ]);
