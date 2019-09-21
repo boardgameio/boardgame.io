@@ -41,7 +41,7 @@ instead of inlining them in the game spec.
 We'll ignore the rendering part of this game, but this is how it might look:
 
 ```react
-<iframe class='react' src='react/phases-1.html' height='270' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
+<iframe class='plain' src='react/phases-1.html' height='270' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
 ```
 
 !> Note that you can draw or play a card at any time, including taking a card when the deck is empty.
@@ -153,7 +153,7 @@ Watch our game in action now with phases. Notice that you can only draw cards in
 phase, and you can only play cards in the second phase.
 
 ```react
-<iframe class='react' src='react/phases-2.html' height='300' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='plain' src='react/phases-2.html' height='300' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
 ```
 
 #### Setup and Cleanup hooks

@@ -18,7 +18,6 @@ body {
 </head>
 
 <body>
-  <div class="msg">interactive (not an image)</div>
   <div id="app"></div>
 
   <script type="text/babel">
@@ -145,12 +144,15 @@ var TicTacToeClient = BoardgameIO.ReactClient({
 
 const App = () => (
   <div>
-    Player 0
-    <TicTacToeClient playerID="0"/>
-    <br/>
+    <div style={{ float: "left" }}>
+      Player 0
+      <TicTacToeClient playerID="0"/>
+    </div>
 
-    Player 1
-    <TicTacToeClient playerID="1"/>
+    <div style={{ float: "right" }}>
+      Player 1
+      <TicTacToeClient playerID="1"/>
+    </div>
   </div>
 );
 

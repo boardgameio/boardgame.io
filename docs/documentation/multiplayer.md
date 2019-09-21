@@ -79,7 +79,7 @@ export class TicTacToeBoard extends React.Component { ... };
 ```
 
 ```react
-<iframe class='react' src='react/multiplayer-1.html' height='500' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='plain' src='react/multiplayer-1.html' height='250' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 ?> In the example above, you can play as Player 0 and Player 1 alternately
