@@ -49,7 +49,7 @@ function IsVictory(cells) {
   return false;
 }
 
-const TicTacToe = BoardgameIO.Game({
+const TicTacToe = {
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
@@ -64,19 +64,17 @@ const TicTacToe = BoardgameIO.Game({
     }
   },
 
-  flow: {
-    movesPerTurn: 1,
+  turn: { moveLimit: 1 },
 
-    endGameIf: (G, ctx) => {
-      if (IsVictory(G.cells)) {
-        return { winner: ctx.currentPlayer };
-      }
-      if (G.cells.filter(c => c === null).length == 0) {
-        return { draw: true };
-      }
+  endIf: (G, ctx) => {
+    if (IsVictory(G.cells)) {
+      return { winner: ctx.currentPlayer };
     }
-  }
-});
+    if (G.cells.filter(c => c === null).length == 0) {
+      return { draw: true };
+    }
+  },
+};
 
 
 class TicTacToeBoard extends React.Component {

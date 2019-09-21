@@ -7,7 +7,8 @@
 
   - [Multiplayer](multiplayer.md)
   - [Phases](phases.md)
-  - [Turn Orders](turn-order.md)
+  - [Stages](stages.md)
+  - [Turn Order](turn-order.md)
   - [Events](events.md)
   - [Undo / Redo](undo.md)
   - [Randomness](random.md)
@@ -18,7 +19,7 @@
   - [Debugging](debugging.md)
   - [Testing](testing.md)
 
-- API Reference
+- Reference
 
   - [Game](api/Game.md)
   - [Client](api/Client.md)
