@@ -59,7 +59,7 @@ In order to do this, we define two `phases`. Each phase can specify its own
 list of moves, which come into effect during that phase:
 
 ```js
-const game = Game({
+const game = {
   setup: () => ({ deck: 5, hand: 0 }),
 
   phases: {
@@ -71,7 +71,7 @@ const game = Game({
       moves: { PlayCard },
     },
   },
-});
+};
 ```
 
 !> A phase that doesn't specify any moves just uses moves from
@@ -84,7 +84,7 @@ in the "draw" phase, we add a `start: true` to its config. Only
 one phase can have `start: true`.
 
 ```js
-const game = Game({
+const game = {
   setup: () => ({ deck: 5, hand: 0 }),
 
   phases: {
@@ -97,7 +97,7 @@ const game = Game({
       moves: { PlayCard },
     },
   },
-});
+};
 ```
 
 Let's also add conditions for when these phases end. The "draw"
@@ -105,7 +105,7 @@ phase ends once the deck is empty, and the "play" phase ends once
 the hand is empty.
 
 ```js
-const game = Game({
+const game = {
   setup: () => ({ deck: 5, hand: 0 }),
 
   phases: {
@@ -120,7 +120,7 @@ const game = Game({
 +     endIf: G => (G.hand <= 0),
     },
   },
-});
+};
 ```
 
 `endIf` ends the phase that it is defined in when it returns
