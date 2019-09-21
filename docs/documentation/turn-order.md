@@ -1,36 +1,25 @@
-# Turn Orders
+# Turn Order
 
-When the turn ends (either by calling `endTurn` manually
-or if the `turn.endIf` condition triggers), then the
-turn is passed to the "next" player. The default behavior
-is to pass the turn around in a round-robin fashion.
+The framework's default behavior is to pass the turn around
+in a round-robin fashion. Players can make one or more moves
+before triggering an `endTurn` event, which passes the turn
+to the next player. A number of other turn orders are
+available, including the ability to create your own.
 
-The framework maintains the turn order state using the
-following fields:
+Turn order state is maintained in the following fields:
 
 ```
 ctx: {
   currentPlayer: '0',
-  activePlayers: { '0': null },
   playOrder: ['0', '1', '2', ...],
   playOrderPos: 0,
+  activePlayers: { '0': 'stage-a', '1': ... },
 }
 ```
 
 ##### `currentPlayer`
 
-This is the owner of the current turn, and the only
-player that can call events (`endTurn`, `endPhase` etc.).
-
-##### `activePlayers`
-
-This is a map of players that can currently make a move and their
-current “stage”. By default, `activePlayers` is not used and only
-the `currentPlayer` can make a move. You can use `activePlayers`
-to support actions from other players during the currrent turn
-(for example, if you play a card that forces everyone else
-to discard a card). Note that if `activePlayers` contains multiple
-players, they can make a move in any order.
+This is the owner of the current turn.
 
 ##### `playOrder`
 
@@ -50,22 +39,17 @@ fashion. `currentPlayer` is just `playOrder[playOrderPos]`.
 `ctx.playerID` in case you need to differentiate between
 multiple players that could simultaneously move.
 
-### Default `turn.order` configurations
+##### `activePlayers`
 
-**boardgame.io** provides some default turn order
-configurations for common patterns.
+This is a map of players that can currently make a move and their
+current “stage”. By default, `activePlayers` is not used and only
+the `currentPlayer` can make a move. You can use `activePlayers`
+to support actions from other players during the currrent turn
+(for example, if you play a card that forces everyone else
+to discard a card). Note that if `activePlayers` contains multiple
+players, they can make a move in any order.
 
-```js
-import { TurnOrder } from 'boardgame.io/core';
-```
-
-You can then use these in your turn configuration:
-
-```js
-turn: {
-  order: TurnOrder.DEFAULT;
-}
-```
+### Available Turn Orders
 
 ##### `DEFAULT`
 
@@ -97,67 +81,17 @@ value.
 Round-robin like `DEFAULT`, but sets `playOrder` to the value
 in a specified field in `G`.
 
-### Default `activePlayers` configurations
-
-**boardgame.io** also provides some default configurations
-for `activePlayers` for common patterns.
-
-```js
-import { ActivePlayers } from 'boardgame.io/core';
-```
-
-You can then use these in your turn configuration:
-
-```js
-turn: {
-  activePlayers: ActivePlayers.ALL;
-}
-```
-
-##### `ALL`
-
-`activePlayers` is set to include all players while the turn stays
-fixed with one player. This allows every player in the game
-to make a move (in any order) during the current player’s turn.
-
-##### `ALL_ONCE`
-
-Similar to `ALL`, but allows each player to make exactly
-one move. Once all players have made their move, the turn will
-return to the current player.
-
-##### `OTHERS`
-
-Similar to `ALL`, but excludes the current player from the set
-of action players.
-
-##### `OTHERS_ONCE`
-
-Similar to `OTHERS`, but allows each player to make exactly one
-move. When all (other) players have made their move, the current
-player can move again. This is typically used in a phase where you
-would like to elicit a response from every other player in the
-game. For example, you might have a card which (when played)
-requires every other player in the game to discard a card.
-
-### Interactive demos
-
-```react
-<iframe class='react' src='react/turn-order/turn-order.html' height='1050' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
-```
-
-### Specifying a turn order
+### Changing the Turn Order
 
 You can change the turn order by using the `turn.order` option.
 This can be passed inside your game configuration:
 
 ```js
-import { TurnOrder, ActivePlayers } from 'boardgame.io/core';
+import { TurnOrder } from 'boardgame.io/core';
 
 export const game = {
   turn: {
-    order: TurnOrder.DEFAULT,
-    activePlayers: ActivePlayers.ALL,
+    order: TurnOrder.ONCE,
   },
 };
 ```
@@ -165,21 +99,21 @@ export const game = {
 Turn orders can also be specified on a per-phase level.
 
 ```js
-import { TurnOrder, ActivePlayers } from 'boardgame.io/core';
+import { TurnOrder } from 'boardgame.io/core';
 
 export const game = {
   phases: {
     A: {
-      turn: { activePlayers: ActivePlayers.ALL },
+      turn: { order: TurnOrder.ONCE },
     },
     B: {
-      turn: { order: TurnOrder.ONCE },
+      turn: { order: TurnOrder.RESET },
     },
   },
 };
 ```
 
-### Implementing a custom turn order
+### Creating a Custom Turn Order
 
 The following settings inside `turn` affect turn order:
 
