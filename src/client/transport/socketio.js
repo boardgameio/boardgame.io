@@ -100,8 +100,8 @@ export class SocketIO {
     this.socket.on('sync', (gameID, state, log, gameMetadata) => {
       if (gameID == this.gameID) {
         const action = ActionCreators.sync(state, log);
-        this.store.dispatch(action);
         this.gameMetadataCallback(gameMetadata);
+        this.store.dispatch(action);
       }
     });
 
