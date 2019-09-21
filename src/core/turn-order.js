@@ -34,7 +34,7 @@ export const Pass = (G, ctx) => {
  * @param {*} state
  * @param {*} arg
  */
-export function SetActivePlayersEvent(state, arg) {
+export function SetActivePlayersEvent(state, { arg }) {
   return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
 }
 

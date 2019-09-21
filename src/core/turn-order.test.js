@@ -393,14 +393,14 @@ test('playOrder', () => {
   expect(state.ctx.currentPlayer).toBe('2');
 });
 
-describe('setActivePlayers', () => {
+describe('setStage - advanced', () => {
   const flow = Flow({});
   const state = { ctx: flow.ctx(2) };
 
   test('basic', () => {
     const newState = flow.processGameEvent(
       state,
-      gameEvent('setActivePlayers', [{ value: { '1': Stage.NULL } }])
+      gameEvent('setStage', [{ value: { '1': Stage.NULL } }])
     );
     expect(newState.ctx.activePlayers).toMatchObject({ '1': Stage.NULL });
   });
@@ -408,7 +408,7 @@ describe('setActivePlayers', () => {
   test('all', () => {
     const newState = flow.processGameEvent(
       state,
-      gameEvent('setActivePlayers', [{ all: Stage.NULL }])
+      gameEvent('setStage', [{ all: Stage.NULL }])
     );
     expect(newState.ctx.activePlayers).toMatchObject({
       '0': Stage.NULL,
@@ -420,7 +420,7 @@ describe('setActivePlayers', () => {
     const game = {
       moves: {
         B: (G, ctx) => {
-          ctx.events.setActivePlayers({
+          ctx.events.setStage({
             value: { '0': Stage.NULL, '1': Stage.NULL },
             moveLimit: 1,
           });
@@ -445,7 +445,7 @@ describe('setActivePlayers', () => {
     const game = {
       moves: {
         B: (G, ctx) => {
-          ctx.events.setActivePlayers({
+          ctx.events.setStage({
             moveLimit: 1,
             others: Stage.NULL,
           });
@@ -505,7 +505,7 @@ describe('setActivePlayers', () => {
         const game = {
           moves: {
             A: (G, ctx) => {
-              ctx.events.setActivePlayers({
+              ctx.events.setStage({
                 currentPlayer: 'stage2',
                 moveLimit: 1,
                 revert: true,
@@ -552,7 +552,7 @@ describe('setActivePlayers', () => {
         const game = {
           moves: {
             A: (G, ctx) => {
-              ctx.events.setActivePlayers({
+              ctx.events.setStage({
                 currentPlayer: 'stage2',
                 moveLimit: 1,
                 revert: true,
@@ -854,7 +854,7 @@ describe('setActivePlayers', () => {
       const game = {
         moves: {
           militia: (G, ctx) => {
-            ctx.events.setActivePlayers({
+            ctx.events.setStage({
               others: 'discard',
               moveLimit: 1,
               revert: true,
