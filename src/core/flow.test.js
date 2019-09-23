@@ -419,7 +419,7 @@ describe('stages', () => {
 
   describe('stage B', () => {
     beforeAll(() => {
-      client.events.setStage('B');
+      client.events.setActivePlayers({ currentPlayer: 'B' });
     });
 
     test('A is not allowed', () => {
@@ -435,7 +435,7 @@ describe('stages', () => {
 
   describe('stage C', () => {
     beforeAll(() => {
-      client.events.setStage('C');
+      client.events.setActivePlayers({ currentPlayer: 'C' });
     });
 
     test('A is allowed', () => {
@@ -475,19 +475,6 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
     });
 
-    test('with move limit', () => {
-      let flow = Flow({});
-      let state = { G: {}, ctx: flow.ctx(2) };
-      state = flow.init(state);
-
-      expect(state.ctx._activePlayersMoveLimit).toBeNull();
-      state = flow.processGameEvent(
-        state,
-        gameEvent('setStage', { stage: 'A', moveLimit: 2 })
-      );
-      expect(state.ctx._activePlayersMoveLimit).toEqual({ '0': 2 });
-    });
-
     test('with multiple active players', () => {
       let flow = Flow({
         turn: {
@@ -498,21 +485,11 @@ describe('stage events', () => {
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
-      expect(state.ctx._activePlayersMoveLimit).toEqual({
-        '0': 5,
-        '1': 5,
-        '2': 5,
-      });
       state = flow.processGameEvent(
         state,
         gameEvent('setStage', { stage: 'B', moveLimit: 1 })
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'A', '2': 'A' });
-      expect(state.ctx._activePlayersMoveLimit).toEqual({
-        '0': 1,
-        '1': 5,
-        '2': 5,
-      });
     });
 
     test('resets move count', () => {
@@ -530,6 +507,19 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 1 });
       state = flow.processGameEvent(state, gameEvent('setStage', 'B'));
       expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 0 });
+    });
+
+    test('with move limit', () => {
+      let flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx._activePlayersMoveLimit).toBeNull();
+      state = flow.processGameEvent(
+        state,
+        gameEvent('setStage', { stage: 'A', moveLimit: 2 })
+      );
+      expect(state.ctx._activePlayersMoveLimit).toEqual({ '0': 2 });
     });
 
     test('empty argument ends stage', () => {

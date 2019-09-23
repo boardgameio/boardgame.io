@@ -206,6 +206,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   if (events === undefined) {
     events = {};
   }
+  if (events.setActivePlayers === undefined) {
+    events.setActivePlayers = true;
+  }
   if (events.endStage === undefined) {
     events.endStage = true;
     events.setStage = true;
@@ -499,6 +502,10 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function UpdateStage(state, { arg, playerID }) {
+    if (typeof arg === 'string') {
+      arg = { stage: arg };
+    }
+
     let { ctx } = state;
     let {
       activePlayers,
@@ -506,17 +513,19 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       _activePlayersNumMoves,
     } = ctx;
 
-    if (activePlayers === null) {
-      activePlayers = {};
-    }
-    activePlayers[playerID] = arg.stage;
-    _activePlayersNumMoves[playerID] = 0;
-
-    if (arg.moveLimit) {
-      if (_activePlayersMoveLimit === null) {
-        _activePlayersMoveLimit = {};
+    if (arg.stage) {
+      if (activePlayers === null) {
+        activePlayers = {};
       }
-      _activePlayersMoveLimit[playerID] = arg.moveLimit;
+      activePlayers[playerID] = arg.stage;
+      _activePlayersNumMoves[playerID] = 0;
+
+      if (arg.moveLimit) {
+        if (_activePlayersMoveLimit === null) {
+          _activePlayersMoveLimit = {};
+        }
+        _activePlayersMoveLimit[playerID] = arg.moveLimit;
+      }
     }
 
     ctx = {
@@ -819,11 +828,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function SetStageEvent(state, arg) {
-    if (typeof arg === 'string' || arg.stage) {
-      if (!arg.stage) arg = { stage: arg };
-      return ProcessEvents(state, [{ fn: EndStage, arg }]);
-    }
-    return ProcessEvents(state, [{ fn: SetActivePlayersEvent, arg }]);
+    return ProcessEvents(state, [{ fn: EndStage, arg }]);
   }
 
   function EndStageEvent(state) {
@@ -860,12 +865,13 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   const eventHandlers = {
-    endPhase: EndPhaseEvent,
-    setPhase: SetPhaseEvent,
     endStage: EndStageEvent,
     setStage: SetStageEvent,
     endTurn: EndTurnEvent,
+    endPhase: EndPhaseEvent,
+    setPhase: SetPhaseEvent,
     endGame: EndGameEvent,
+    setActivePlayers: SetActivePlayersEvent,
   };
 
   let enabledEvents = {};
@@ -878,6 +884,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
   if (events.endGame) {
     enabledEvents['endGame'] = true;
+  }
+  if (events.setActivePlayers) {
+    enabledEvents['setActivePlayers'] = true;
   }
   if (events.endStage) {
     enabledEvents['endStage'] = true;
