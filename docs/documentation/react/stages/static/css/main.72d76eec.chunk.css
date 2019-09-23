@@ -151,7 +151,7 @@
   line-height: 30px;
   background: #eee;
   border: 3px solid #fff;
-  box-sizing: content-box;
+  box-sizing: initial;
 }
 .debug-ui .player.current {
   background: #555;
@@ -205,6 +205,8 @@
   padding-top: 10px;
   padding-bottom: 10px;
   text-orientation: sideways;
+  -webkit-writing-mode: vertical-rl;
+  -ms-writing-mode: tb-rl;
   writing-mode: vertical-rl;
   line-height: 30px;
   width: 100%;
@@ -303,25 +305,37 @@
   justify-content: center;
 }
 .turnorder-options {
+  width: 500px;
   display: flex;
   flex-direction: row;
+  justify-content: space-evenly;
 }
 .turnorder-options div {
+  text-align: center;
   cursor: pointer;
   font-size: 12px;
   padding: 10px;
-  border-bottom: 3px solid #aaa;
+  border: 1px solid #aaa;
+  width: 100px;
 }
 .turnorder-options div:hover {
   background: #efefef;
 }
 .turnorder-options div.active {
   background: #efefef;
-  border-bottom-color: #555;
+  font-weight: 700;
+}
+#turnorder .stage-label {
+  position: absolute;
+  top: 2.25em;
+  left: 50%;
+  margin-left: -3.5em;
+  width: 8em;
+  text-align: center;
 }
 #turnorder .controls {
   position: absolute;
-  margin-top: 50px;
+  margin-top: 60px;
   margin-left: -47px;
 }
 #turnorder .controls button {
@@ -338,44 +352,54 @@
   line-height: 2.75em;
   border-radius: 50%;
   border-color: #aaa;
-  border-style: dashed;
+  border-style: solid;
   box-sizing: border-box;
   text-align: center;
   font-size: 24px;
   font-weight: 700;
+  opacity: 0.3;
 }
 #turnorder .player.current {
+  opacity: 1;
   background: #555;
   color: #eee;
 }
 #turnorder .player.active {
-  border-style: solid;
+  opacity: 1;
 }
-#turnorder .phase {
+#turnorder .phase,
+#turnorder .stage {
   display: inline-block;
   background: #555;
   color: #eee;
-  padding: 5px;
-  margin-left: 10px;
+  padding: 3px 5px;
+  margin-left: 5px;
 }
-#turnorder .client {
+#turnorder .bgio-client {
   padding: 0 !important;
 }
-.player-container span > .client:first-child .player-wrap {
+.player-container span > .bgio-client:first-child .player-wrap {
+  -webkit-transform: rotate(0deg) translate(12em) rotate(0deg);
   transform: rotate(0deg) translate(12em) rotate(0deg);
 }
-.player-container span > .client:nth-child(2) .player-wrap {
+.player-container span > .bgio-client:nth-child(2) .player-wrap {
+  -webkit-transform: rotate(60deg) translate(12em) rotate(-60deg);
   transform: rotate(60deg) translate(12em) rotate(-60deg);
 }
-.player-container span > .client:nth-child(3) .player-wrap {
+.player-container span > .bgio-client:nth-child(3) .player-wrap {
+  -webkit-transform: rotate(120deg) translate(12em) rotate(-120deg);
   transform: rotate(120deg) translate(12em) rotate(-120deg);
 }
-.player-container span > .client:nth-child(4) .player-wrap {
+.player-container span > .bgio-client:nth-child(4) .player-wrap {
+  -webkit-transform: rotate(180deg) translate(12em) rotate(-180deg);
   transform: rotate(180deg) translate(12em) rotate(-180deg);
 }
-.player-container span > .client:nth-child(5) .player-wrap {
+.player-container span > .bgio-client:nth-child(5) .player-wrap {
+  -webkit-transform: rotate(240deg) translate(12em) rotate(-240deg);
   transform: rotate(240deg) translate(12em) rotate(-240deg);
 }
-.player-container span > .client:nth-child(6) .player-wrap {
+.player-container span > .bgio-client:nth-child(6) .player-wrap {
+  -webkit-transform: rotate(300deg) translate(12em) rotate(-300deg);
   transform: rotate(300deg) translate(12em) rotate(-300deg);
 }
+/*# sourceMappingURL=main.72d76eec.chunk.css.map */

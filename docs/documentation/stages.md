@@ -175,5 +175,5 @@ Similar to `ALL_ONCE`, but excludes the current player from the set
 of active players.
 
 ```react
-<iframe class='plain' src='react/turn-order/turn-order.html' height='1050' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='plain' src='react/stages' height='1050' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
