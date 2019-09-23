@@ -111,9 +111,11 @@ setActivePlayers({
   // configuration to the value prior to this setStage call.
   revert: true,
 
-  // if this is preset, setActivePlayers is called with
-  // this as an argument once all the players fall off the
-  // set of activePlayers.
+  // A next option will be used once the set of active players
+  // becomes empty (either by using moveLimit or manually removing
+  // players).
+  // All options available inside setActivePlayers are available
+  // inside next.
   next: { ... },
 });
 ```
