@@ -48,7 +48,7 @@ to support actions from other players during the currrent turn
 to discard a card). Note that if `activePlayers` contains multiple
 players, they can make a move in any order.
 
-### Available Turn Orders
+### Presets
 
 ##### DEFAULT
 

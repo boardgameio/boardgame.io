@@ -63,7 +63,7 @@ This removes the player from the stage that they are currently
 in and returns them to a state where they aren't in any stage.
 
 ```js
-endStage(); // takes no arguments
+endStage();
 ```
 
 It is possible to automatically take a player to another stage
@@ -81,55 +81,98 @@ stages: {
 In the example above, `endStage` will cycle between the three
 stages.
 
-### Other Players
+### Advanced
 
-The events above move the player that called them between stages.
-Sometimes you want other players to enter stages.
+Sometimes you need to move a group of players into a stage
+(as opposed to just the player that called the event). For
+example, if we need "everyone else" to discard a card in
+response to a move that we made, we have to move multiple
+players into a stage. We use the `setActivePlayers` event
+for this:
 
-**TODO**: talk about activePlayers here
+```js
+setActivePlayers({
+  // move the currentPlayer to a stage.
+  currentPlayer: 'stage-name',
 
-### Default `activePlayers` configurations
+  // move every other player to a stage.
+  others: 'stage-name'
 
-**boardgame.io** provides some default configurations
-for `activePlayers` for common patterns.
+  // move all players to a stage.
+  all: 'stage-name'
+
+  // calls endStage automatically after the player
+  // has made the specified number of moves.
+  moveLimit: 5,
+
+  // once all players have called endStage (either
+  // by calling the event directly or by having
+  // it triggered via moveLimit), takes the stage
+  // configuration to the value prior to this setStage call.
+  revert: true,
+
+  // if this is preset, setActivePlayers is called with
+  // this as an argument once all the players fall off the
+  // set of activePlayers.
+  next: { ... },
+});
+```
+
+Sometimes you want to add a player to the set of "active" players
+but don't want them to be in a specific stage. You can use `Stage.NULL`
+for this:
+
+```js
+import { Stage } from 'boardgame.io/core';
+
+// This allows any player to make a move, but doesn't restrict them to
+// a particular stage.  The set of moves may still be restricted if a
+// phase is active.
+setActivePlayers({ all: Stage.NULL });
+```
+
+You can have `setActivePlayers` automatically called
+at the beginning of the turn by adding an `activePlayers` section
+to the `turn` config:
+
+```js
+turn: {
+  activePlayers: { all: Stage.NULL },
+}
+```
+
+### Presets
+
+A number of `activePlayers` configurations are available as presets that you
+can use directly:
 
 ```js
 import { ActivePlayers } from 'boardgame.io/core';
-```
 
-You can then use these in your turn configuration:
-
-```js
 turn: {
   activePlayers: ActivePlayers.ALL;
 }
 ```
 
-##### `ALL`
+##### ALL
 
-`activePlayers` is set to include all players while the turn stays
-fixed with one player. This allows every player in the game
-to make a move (in any order) during the current player’s turn.
+Equivalent to `{ all: Stage.NULL }`. Any player can play, and they
+aren't restricted to any particular stage.
 
-##### `ALL_ONCE`
+##### ALL_ONCE
 
-Similar to `ALL`, but allows each player to make exactly
-one move. Once all players have made their move, the turn will
-return to the current player.
+Equivalent to `{ all: Stage.NULL, moveLimit: 1 }`. Any player can make
+exactly one move before they are removed from the set of active players.
 
-##### `OTHERS`
+##### OTHERS
 
 Similar to `ALL`, but excludes the current player from the set
-of action players.
+of active players.
 
-##### `OTHERS_ONCE`
+##### OTHERS_ONCE
 
-Similar to `OTHERS`, but allows each player to make exactly one
-move. When all (other) players have made their move, the current
-player can move again. This is typically used in a phase where you
-would like to elicit a response from every other player in the
-game. For example, you might have a card which (when played)
-requires every other player in the game to discard a card.
+Similar to `ALL_ONCE`, but excludes the current player from the set
+of active players.
 
 ### Showcase
 
