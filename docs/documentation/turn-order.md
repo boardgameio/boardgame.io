@@ -33,10 +33,6 @@ by the turn order policy in order to compute `currentPlayer`.
 The default behavior is to just increment it in a round-robin
 fashion. `currentPlayer` is just `playOrder[playOrderPos]`.
 
-!> The player that just made a move is available at
-`ctx.playerID` in case you need to differentiate between
-multiple players that could simultaneously move.
-
 ### Presets
 
 ##### DEFAULT

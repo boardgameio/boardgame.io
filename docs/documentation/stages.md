@@ -120,6 +120,10 @@ setActivePlayers({
 });
 ```
 
+!> The player that just made a move is available at
+`ctx.playerID` in case you need to differentiate between
+multiple players that could simultaneously move.
+
 Sometimes you want to add a player to the set of "active" players
 but don't want them to be in a specific stage. You can use `Stage.NULL`
 for this:
