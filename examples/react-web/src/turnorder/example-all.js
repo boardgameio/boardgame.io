@@ -27,11 +27,10 @@ export default {
       move: G => G,
     },
 
+    turn: { activePlayers: ActivePlayers.ALL },
+
     events: {
-      endTurn: false,
       endPhase: false,
     },
-
-    turn: { activePlayers: ActivePlayers.ALL },
   },
 };

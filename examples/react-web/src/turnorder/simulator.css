@@ -38,15 +38,19 @@
 }
 
 .turnorder-options {
+  width: 500px;
   display: flex;
   flex-direction: row;
+  justify-content: space-evenly;
 }
 
 .turnorder-options div {
+  text-align: center;
   cursor: pointer;
   font-size: 12px;
   padding: 10px;
-  border-bottom: 3px solid #aaa;
+  border: 1px solid #aaa;
+  width: 90px;
 }
 
 .turnorder-options div:hover {
@@ -55,7 +59,7 @@
 
 .turnorder-options div.active {
   background: #efefef;
-  border-bottom-color: #555;
+  font-weight: bold;
 }
 
 #turnorder .stage-label {
@@ -88,20 +92,22 @@
   line-height: 2.75em;
   border-radius: 50%;
   border-color: #aaa;
-  border-style: dashed;
+  border-style: solid;
   box-sizing: border-box;
   text-align: center;
   font-size: 24px;
   font-weight: bold;
+  opacity: 0.3;
 }
 
 #turnorder .player.current {
+  opacity: 1;
   background: #555;
   color: #eee;
 }
 
 #turnorder .player.active {
-  border-style: solid;
+  opacity: 1;
 }
 
 #turnorder .phase,

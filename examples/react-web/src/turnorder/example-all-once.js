@@ -10,15 +10,7 @@ import React from 'react';
 import { ActivePlayers } from 'boardgame.io/core';
 
 const code = `{
-  phases: {
-    A: {
-      start: true,
-      next: 'B',
-      turn: { activePlayers: ActivePlayers.ALL_ONCE },
-      endIf: (G, ctx) => ctx.numMoves && ctx.activePlayers === null,
-    },
-    B: {},
-  }
+  turn: { activePlayers: ActivePlayers.ALL_ONCE },
 }
 `;
 
@@ -35,19 +27,10 @@ export default {
       move: G => G,
     },
 
-    events: {
-      endTurn: false,
-      endPhase: false,
-    },
+    turn: { activePlayers: ActivePlayers.ALL_ONCE },
 
-    phases: {
-      A: {
-        start: true,
-        next: 'B',
-        turn: { activePlayers: ActivePlayers.ALL_ONCE },
-        endIf: (G, ctx) => ctx.numMoves && ctx.activePlayers === null,
-      },
-      B: {},
+    events: {
+      endPhase: false,
     },
   },
 };
