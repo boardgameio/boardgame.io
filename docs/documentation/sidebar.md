@@ -6,9 +6,9 @@
 - Guides
 
   - [Multiplayer](multiplayer.md)
+  - [Turn Order](turn-order.md)
   - [Phases](phases.md)
   - [Stages](stages.md)
-  - [Turn Order](turn-order.md)
   - [Events](events.md)
   - [Undo / Redo](undo.md)
   - [Randomness](random.md)
