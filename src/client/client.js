@@ -320,13 +320,13 @@ class _ClientImpl {
 
     let isActive = true;
 
-    const canPlayerMakeMove = this.game.flow.canPlayerMakeAnyMove(
+    const isPlayerActive = this.game.flow.isPlayerActive(
       state.G,
       state.ctx,
       this.playerID
     );
 
-    if (this.multiplayer && !canPlayerMakeMove) {
+    if (this.multiplayer && !isPlayerActive) {
       isActive = false;
     }
 
@@ -334,7 +334,7 @@ class _ClientImpl {
       !this.multiplayer &&
       this.playerID !== null &&
       this.playerID !== undefined &&
-      !canPlayerMakeMove
+      !isPlayerActive
     ) {
       isActive = false;
     }

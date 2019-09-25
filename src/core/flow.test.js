@@ -650,43 +650,19 @@ describe('endIf', () => {
   });
 });
 
-test('canPlayerMakeAnyMove', () => {
-  const playerID = '0';
-
-  let flow = FlowInternal({});
-  expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
-
-  expect(
-    flow.canPlayerMakeAnyMove({}, { activePlayers: { '1': '' } }, playerID)
-  ).toBe(false);
-  expect(
-    flow.canPlayerMakeAnyMove({}, { activePlayers: { '0': '' } }, playerID)
-  ).toBe(true);
-
-  // no one can make a move
-  flow = FlowInternal({ canPlayerMakeAnyMove: () => false });
-  expect(flow.canPlayerMakeAnyMove({}, {}, playerID)).toBe(false);
-  expect(flow.canPlayerMakeAnyMove({}, { activePlayers: null }, playerID)).toBe(
-    false
-  );
-  expect(flow.canPlayerMakeAnyMove({}, {}, '5')).toBe(false);
-});
-
-test('canPlayerCallEvent', () => {
+test('isPlayerActive', () => {
   const playerID = '0';
 
   const flow = FlowInternal({});
-  expect(flow.canPlayerCallEvent({}, {}, playerID)).toBe(false);
+  expect(flow.isPlayerActive({}, {}, playerID)).toBe(false);
   expect(
-    flow.canPlayerCallEvent(
+    flow.isPlayerActive(
       {},
       { currentPlayer: '0', activePlayers: { '1': '' } },
       playerID
     )
   ).toBe(false);
-  expect(flow.canPlayerCallEvent({}, { currentPlayer: '0' }, playerID)).toBe(
-    true
-  );
+  expect(flow.isPlayerActive({}, { currentPlayer: '0' }, playerID)).toBe(true);
 });
 
 describe('endGame', () => {
