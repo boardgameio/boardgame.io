@@ -76,7 +76,7 @@ test('no duplicate endPhase', () => {
       A: {
         start: true,
         onEnd: (G, ctx) => {
-          ctx.events.endPhase({ next: 'C' });
+          ctx.events.setPhase('C');
         },
       },
       B: {},
