@@ -52,7 +52,10 @@ export class Events {
 
       // If the phase already ended some other way,
       // don't try to end the phase again.
-      if (item.key === 'endPhase' && item.phase !== state.ctx.phase) {
+      if (
+        (item.key === 'endPhase' || item.key === 'setPhase') &&
+        item.phase !== state.ctx.phase
+      ) {
         continue;
       }
 

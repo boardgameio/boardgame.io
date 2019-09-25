@@ -206,23 +206,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   if (events === undefined) {
     events = {};
   }
-  if (events.setActivePlayers === undefined) {
-    events.setActivePlayers = true;
-  }
-  if (events.endStage === undefined) {
-    events.endStage = true;
-    events.setStage = true;
-  }
-  if (events.endPhase === undefined && phases) {
-    events.endPhase = true;
-    events.setPhase = true;
-  }
-  if (events.endTurn === undefined) {
-    events.endTurn = true;
-  }
-  if (events.endGame === undefined) {
-    events.endGame = false;
-  }
   if (plugins === undefined) {
     plugins = [];
   }
@@ -875,21 +858,25 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   };
 
   let enabledEvents = {};
-  if (events.endTurn) {
+  if (events.endTurn !== false) {
     enabledEvents['endTurn'] = true;
   }
-  if (events.endPhase) {
+  if (events.endPhase !== false) {
     enabledEvents['endPhase'] = true;
+  }
+  if (events.setPhase !== false) {
     enabledEvents['setPhase'] = true;
   }
-  if (events.endGame) {
+  if (events.endGame !== false) {
     enabledEvents['endGame'] = true;
   }
-  if (events.setActivePlayers) {
+  if (events.setActivePlayers !== false) {
     enabledEvents['setActivePlayers'] = true;
   }
-  if (events.endStage) {
+  if (events.endStage !== false) {
     enabledEvents['endStage'] = true;
+  }
+  if (events.setStage !== false) {
     enabledEvents['setStage'] = true;
   }
 
