@@ -602,11 +602,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function EndTurn(state, { arg, next, turn, force, automatic }) {
-    // If we are not in a turn currently, do nothing.
-    if (state.ctx.currentPlayer === null) {
-      return state;
-    }
-
     // This is not the turn that EndTurn was originally
     // called for. The turn was probably ended some other way.
     if (turn !== state.ctx.turn) {
@@ -633,8 +628,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       next.push({ fn: UpdateTurn, arg, currentPlayer: ctx.currentPlayer });
     }
 
-    // Reset currentPlayer and activePlayers.
-    ctx = { ...ctx, currentPlayer: null, activePlayers: null };
+    // Reset activePlayers.
+    ctx = { ...ctx, activePlayers: null };
 
     // Add log entry.
     const action = gameEvent('endTurn', arg);
