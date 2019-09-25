@@ -9,7 +9,7 @@
 import { InitializeGame } from '../core/initialize';
 import { CreateGameReducer } from '../core/reducer';
 import { Game } from '../core/game';
-import { UNDO, REDO, MAKE_MOVE, GAME_EVENT } from '../core/action-types';
+import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 
@@ -155,6 +155,11 @@ export class Master {
       return { error: 'game not found' };
     }
 
+    if (state.ctx.gameover !== undefined) {
+      logging.error(`game over - gameID=[${key}]`);
+      return;
+    }
+
     const reducer = CreateGameReducer({
       game: this.game,
       numPlayers: state.ctx.numPlayers,
@@ -174,23 +179,20 @@ export class Master {
       }
     }
 
+    // Check whether the player is active.
+    if (!this.game.flow.isPlayerActive(state.G, state.ctx, playerID)) {
+      logging.error(`player not active - playerID=[${playerID}]`);
+      return;
+    }
+
     // Check whether the player is allowed to make the move.
     if (
       action.type == MAKE_MOVE &&
-      !this.game.flow.canPlayerMakeMove(state.G, state.ctx, action)
+      !this.game.flow.getMove(state.ctx, action.payload.type, playerID)
     ) {
       logging.error(
         `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`
       );
-      return;
-    }
-
-    // Check whether the player is allowed to call the event.
-    if (
-      action.type == GAME_EVENT &&
-      !this.game.flow.canPlayerCallEvent(state.G, state.ctx, playerID)
-    ) {
-      logging.error(`event not processed - invalid playerID=[${playerID}]`);
       return;
     }
 

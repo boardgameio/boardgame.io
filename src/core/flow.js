@@ -87,36 +87,7 @@ export function FlowInternal({
       return dispatch(state, action);
     },
 
-    canPlayerCallEvent: (_G, ctx, playerID) => {
-      const isCurrentPlayer = ctx.currentPlayer == playerID;
-      if (ctx.activePlayers) {
-        return isCurrentPlayer && ctx.currentPlayer in ctx.activePlayers;
-      }
-      return isCurrentPlayer;
-    },
-
-    canPlayerMakeMove: (_G, ctx, action) => {
-      const playerID = action.payload.playerID;
-      const move = getMove(ctx, action.payload.type, playerID);
-
-      if (move === null) {
-        return false;
-      }
-
-      if (ctx.activePlayers) {
-        if (!(playerID in ctx.activePlayers)) {
-          return false;
-        }
-      } else {
-        if (ctx.currentPlayer !== playerID) {
-          return false;
-        }
-      }
-
-      return true;
-    },
-
-    canPlayerMakeAnyMove: (_G, ctx, playerID) => {
+    isPlayerActive: (_G, ctx, playerID) => {
       if (ctx.activePlayers) {
         return playerID in ctx.activePlayers;
       }

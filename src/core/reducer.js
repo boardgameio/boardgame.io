@@ -64,16 +64,19 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
-        // Ignore the event if the player isn't allowed to make it.
+        // Disallow events once the game is over.
+        if (state.ctx.gameover !== undefined) {
+          error(`cannot call event after game end`);
+          return state;
+        }
+
+        // Ignore the event if the player isn't active.
         if (
           action.payload.playerID !== null &&
           action.payload.playerID !== undefined &&
-          !game.flow.canPlayerCallEvent(
-            state.G,
-            state.ctx,
-            action.payload.playerID
-          )
+          !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
+          error(`disallowed event: ${action.payload.type}`);
           return state;
         }
 
@@ -115,11 +118,11 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
-        // Ignore the move if the player isn't allowed to make it.
+        // Ignore the move if the player isn't active.
         if (
           action.payload.playerID !== null &&
           action.payload.playerID !== undefined &&
-          !game.flow.canPlayerMakeMove(state.G, state.ctx, action)
+          !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed move: ${action.payload.type}`);
           return state;

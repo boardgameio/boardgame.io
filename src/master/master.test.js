@@ -16,7 +16,7 @@ jest.mock('../core/logger', () => ({
   error: jest.fn(),
 }));
 
-const game = { seed: 0, flow: { setActionPlayers: true } };
+const game = { seed: 0 };
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
@@ -82,7 +82,8 @@ describe('update', () => {
   const sendAll = jest.fn(arg => {
     sendAllReturn = arg;
   });
-  const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
+  const db = new InMemory();
+  const master = new Master(game, db, TransportAPI(send, sendAll));
   const action = ActionCreators.gameEvent('endTurn');
 
   beforeAll(async () => {
@@ -171,8 +172,14 @@ describe('update', () => {
     await master.onUpdate(action, 1, 'gameID', '100');
     await master.onUpdate(ActionCreators.makeMove(), 1, 'gameID', '100');
     expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(`player not active - playerID=[100]`);
+  });
+
+  test('invalid move', async () => {
+    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'gameID', '1');
+    expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `event not processed - invalid playerID=[100]`
+      `move not processed - canPlayerMakeMove=false, playerID=[1]`
     );
   });
 
@@ -191,17 +198,12 @@ describe('update', () => {
     );
   });
 
-  test('playerID is not an action player', async () => {
-    const setActionPlayersEvent = ActionCreators.gameEvent('setActionPlayers', [
-      '1',
-    ]);
-    await master.onUpdate(setActionPlayersEvent, 2, 'gameID', '0');
-
-    const move = ActionCreators.makeMove('move');
-    await master.onUpdate(move, 3, 'gameID', '0');
-    expect(error).toHaveBeenCalledWith(
-      `move not processed - canPlayerMakeMove=false, playerID=[0]`
-    );
+  test('game over', async () => {
+    let event = ActionCreators.gameEvent('endGame');
+    await master.onUpdate(event, 2, 'gameID', '0');
+    event = ActionCreators.gameEvent('endTurn');
+    await master.onUpdate(event, 3, 'gameID', '0');
+    expect(error).toHaveBeenCalledWith(`game over - gameID=[gameID]`);
   });
 });
 

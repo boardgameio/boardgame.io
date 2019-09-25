@@ -76,6 +76,10 @@ test('makeMove', () => {
   state = reducer(state, makeMove('B'));
   expect(state._stateID).toBe(2);
   expect(error).toBeCalledWith('cannot make move after game end');
+
+  state = reducer(state, gameEvent('endTurn'));
+  expect(state._stateID).toBe(2);
+  expect(error).toBeCalledWith('cannot call event after game end');
 });
 
 test('disable move by invalid playerIDs', () => {
