@@ -82,7 +82,7 @@ export class TicTacToeBoard extends React.Component { ... };
 <iframe class='plain' src='react/multiplayer-1.html' height='250' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
-?> In the example above, you can play as Player 0 and Player 1 alternately
+?> In the example above you can play as Player 0 and Player 1 alternately
 on the two boards. Clicking on a particular board when it is not that
 player's turn has no effect.
 
