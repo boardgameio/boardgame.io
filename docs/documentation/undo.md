@@ -9,8 +9,8 @@ before committing to one.
 
 #### Usage
 
-You can use the `undo` and `redo` functions in a similar
-manner like `reset`:
+You can call the `undo` and `redo` functions from the client
+like this:
 
 ```
 onClickUndoButton() {
@@ -24,26 +24,23 @@ onClickRedoButton() {
 
 ##### Restricting Undoable Moves
 
-In case you just want specific moves to be undoable,
-for example to prevent peeking at cards or rerolling of
-dices, you can instead add `undoableMoves` to your `flow`
-section similar to `allowedMoves` in `phases`:
+In case you just want specific moves to be undoable
+(to prevent peeking at cards or rerolling of dice, for example),
+you can use the long-form move syntax, which specifies the
+move as an object rather than a function. The `undoable` bit
+indicates whether the move can be undone:
 
 ```js
-Game({
+const game = {
   moves: {
-    rollDice: (G, ctx) => ...
+    rollDice: {
+      move: (G, ctx) => ...
+      undoable: false,
+    },
+
     playCard: (G, ctx) => ...
   },
-
-  flow: {
-    undoableMoves: ['playCard'],
-  }
-});
+};
 ```
 
-This way only `playCard` will be undoable, but not `rollDice`.
-If this is set to an empty list, no move will be undoable.
-
-!> This setting is overridable on a per-phase basis like
-most other settings in `flow`.
+In the example above, `playCard` will be undoable, but not `rollDice`.
