@@ -22,13 +22,13 @@ This poses interesting challenges regarding the implementation.
 ### Using Randomness in Games
 
 ```js
-Game({
+{
   moves: {
-    rollDie(G, ctx) {
+    rollDie: (G, ctx) => {
       G.dieRoll = ctx.random.D6();
     },
   },
-});
+}
 ```
 
 !> The PRNG state is maintained inside `ctx._random` by the `Random`
@@ -43,10 +43,10 @@ is sent to the client. All the code that needs randomness uses this
 You can override the initial `seed` like this:
 
 ```js
-Game({
+const game = {
   seed: <somevalue>
   ...
-})
+};
 ```
 
 ### API Reference
