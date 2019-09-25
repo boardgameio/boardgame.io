@@ -1,7 +1,9 @@
 # Debugging
 
-It may help to debug the internal Redux store. In order to do so, you can
-pass along a Redux store enhancer with your client. For example,
+The framework uses Redux under the hood.
+You may sometimes want to debug this Redux store directly.
+In order to do so, you can pass along a Redux store enhancer
+with your client. For example,
 
 ```js
 import logger from 'redux-logger';
@@ -15,7 +17,7 @@ export default Client({
 });
 ```
 
-Doing so will console.log on state changes. This can also hook into the [Chrome Redux DevTools](http://extension.remotedev.io/) browser extension like this:
+Doing so will `console.log` on state changes. This can also hook into the [Chrome Redux DevTools](http://extension.remotedev.io/) browser extension like this:
 
 ```js
 export default Client({
