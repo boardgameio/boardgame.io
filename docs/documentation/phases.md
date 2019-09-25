@@ -1,5 +1,7 @@
 # Phases
 
+TODO: Document how the overriding happens (including turn orders).
+
 Most games beyond very simple ones tend to have different
 behaviors at various "phases". A game might have a phase
 at the beginning where players are drafting cards before

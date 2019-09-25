@@ -14,7 +14,7 @@ can still play other cards before the turn finally ends). Stages are useful
 in such situations.
 
 Whenever one or more players enters a stage during a turn, then the framework
-only allows moves from those players (rather than `currentPlayer`). Those
+only allows moves from those players (rather than `currentPlayer`). The
 players don't have to all be in the same stage either (each player can be
 in their own stage). Each player that is in a stage is now considered an
 "active" player that can make moves as allowed by the stage that they are in.
@@ -92,23 +92,24 @@ for this:
 
 ```js
 setActivePlayers({
-  // move the currentPlayer to a stage.
+  // Move the currentPlayer to a stage.
   currentPlayer: 'stage-name',
 
-  // move every other player to a stage.
+  // Move every other player to a stage.
   others: 'stage-name'
 
-  // move all players to a stage.
+  // Move all players to a stage.
   all: 'stage-name'
 
-  // calls endStage automatically after the player
+  // Calls endStage automatically after the player
   // has made the specified number of moves.
   moveLimit: 5,
 
-  // once all players have called endStage (either
-  // by calling the event directly or by having
-  // it triggered via moveLimit), takes the stage
-  // configuration to the value prior to this setStage call.
+  // This takes the stage configuration to the
+  // value prior to this setActivePlayers call
+  // once the set of active players becomes empty
+  // (due to players either calling endStage or
+  // a moveLimit ending the stage for them).
   revert: true,
 
   // A next option will be used once the set of active players
@@ -124,7 +125,7 @@ setActivePlayers({
 `ctx.playerID` in case you need to differentiate between
 multiple players that could simultaneously move.
 
-Sometimes you want to add a player to the set of "active" players
+Sometimes you want to add a player to the set of active players
 but don't want them to be in a specific stage. You can use `Stage.NULL`
 for this:
 
@@ -132,8 +133,7 @@ for this:
 import { Stage } from 'boardgame.io/core';
 
 // This allows any player to make a move, but doesn't restrict them to
-// a particular stage.  The set of moves may still be restricted if a
-// phase is active.
+// a particular stage.
 setActivePlayers({ all: Stage.NULL });
 ```
 
