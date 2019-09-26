@@ -52,7 +52,7 @@ describe('basic', () => {
   });
 
   test('flow override', () => {
-    const f = { processGameEvent: () => {} };
+    const f = { processEvent: () => {} };
     const game = {
       flow: f,
     };

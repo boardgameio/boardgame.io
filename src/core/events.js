@@ -63,7 +63,7 @@ export class Events {
 
       state = {
         ...state,
-        ...this.flow.processGameEvent(state, action),
+        ...this.flow.processEvent(state, action),
       };
     }
     return state;

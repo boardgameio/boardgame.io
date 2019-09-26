@@ -808,7 +808,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     moveMap,
     moveNames: [...moveNames.values()],
     processMove: ProcessMove,
-    processGameEvent: ProcessEvent,
+    processEvent: ProcessEvent,
     getMove: GetMove,
   };
 }

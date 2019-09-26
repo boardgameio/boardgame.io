@@ -101,7 +101,7 @@ export function Game(game) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
-  if (!game.flow || game.flow.processGameEvent === undefined) {
+  if (!game.flow || game.flow.processEvent === undefined) {
     game.flow = Flow(game);
   }
 
