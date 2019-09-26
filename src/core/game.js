@@ -107,6 +107,7 @@ export function Game(game) {
 
   return {
     ...game,
+    name: game.name.replace(' ', '-'),
 
     moveNames: game.flow.moveNames,
 

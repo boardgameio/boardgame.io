@@ -40,6 +40,7 @@ export class SocketIO {
     this.store = store;
     this.socketOpts = socketOpts;
     this.gameName = gameName || 'default';
+    this.gameName = this.gameName.replace(' ', '-');
     this.gameID = gameID || 'default';
     this.playerID = playerID || null;
     this.numPlayers = numPlayers || 2;
