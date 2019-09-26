@@ -11,7 +11,6 @@ import chess from './chess';
 import phases from './phases';
 import secret_state from './secret-state';
 import random from './random';
-import turnorder from './turnorder';
 import threejs from './threejs';
 import lobby from './lobby';
 import redacted_move from './redacted-move';
@@ -29,10 +28,6 @@ const routes = [
   {
     name: 'Phases',
     routes: phases.routes,
-  },
-  {
-    name: 'Turn Orders',
-    routes: turnorder.routes,
   },
   {
     name: 'Random API',
