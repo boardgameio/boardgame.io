@@ -113,10 +113,20 @@ export class MCTSBot extends Bot {
       objectives = () => ({});
     }
 
+    if (typeof iterations === 'number') {
+      const iter8ns = iterations;
+      iterations = () => iter8ns;
+    }
+
+    if (typeof playoutDepth === 'number') {
+      const depth = playoutDepth;
+      playoutDepth = () => depth;
+    }
+
     this.objectives = objectives;
     this.reducer = CreateGameReducer({ game });
-    this.iterations = iterations || 1000;
-    this.playoutDepth = playoutDepth || 50;
+    this.iterations = iterations || (() => 1000);
+    this.playoutDepth = playoutDepth || (() => 50);
   }
 
   createNode({ state, parentAction, parent, playerID }) {
@@ -211,11 +221,13 @@ export class MCTSBot extends Bot {
   playout(node) {
     let state = node.state;
 
-    for (
-      let i = 0;
-      i < this.playoutDepth && state.ctx.gameover === undefined;
-      i++
-    ) {
+    const playoutDepth = this.playoutDepth(
+      state.G,
+      state.ctx,
+      state.ctx.currentPlayer
+    );
+
+    for (let i = 0; i < playoutDepth && state.ctx.gameover === undefined; i++) {
       const { G, ctx } = state;
       let playerID = ctx.currentPlayer;
       if (ctx.activePlayers) {
@@ -276,7 +288,9 @@ export class MCTSBot extends Bot {
   play(state, playerID) {
     const root = this.createNode({ state, playerID });
 
-    for (let i = 0; i < this.iterations; i++) {
+    const iterations = this.iterations(state.G, state.ctx, playerID);
+
+    for (let i = 0; i < iterations; i++) {
       const leaf = this.select(root);
       const child = this.expand(leaf);
       const result = this.playout(child);
