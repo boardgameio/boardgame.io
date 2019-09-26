@@ -58,14 +58,14 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.phase).toBe('A');
-    state = flow.processGameEvent(state, gameEvent('endPhase'));
+    state = flow.processEvent(state, gameEvent('endPhase'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.phase).toBe('B');
   });
@@ -81,14 +81,14 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.phase).toBe('A');
-    state = flow.processGameEvent(state, gameEvent('endPhase'));
+    state = flow.processEvent(state, gameEvent('endPhase'));
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.phase).toBe('B');
   });
@@ -104,9 +104,9 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.phase).toBe('B');
   });
@@ -125,7 +125,7 @@ describe('turn orders', () => {
     });
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.activePlayers).toEqual({
       '0': Stage.NULL,
@@ -148,7 +148,7 @@ describe('turn orders', () => {
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1']);
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
 
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.currentPlayer).toBe('1');
@@ -179,7 +179,7 @@ describe('turn orders', () => {
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['1', '2']);
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '2']);
   });
@@ -198,7 +198,7 @@ describe('turn orders', () => {
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['1', '2']);
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
 
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.currentPlayer).toBe('1');
@@ -229,7 +229,7 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
   });
 
@@ -244,9 +244,9 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('2');
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('1');
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('0');
   });
 
@@ -270,7 +270,7 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('9');
     expect(state.ctx).not.toHaveUndefinedProperties();
 
-    state = flow.processGameEvent(state, gameEvent('endTurn'));
+    state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('3');
   });
 });
@@ -359,17 +359,17 @@ test('override', () => {
   state = flow.init(state);
 
   expect(state.ctx.currentPlayer).toBe('0');
-  state = flow.processGameEvent(state, gameEvent('endTurn'));
+  state = flow.processEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('2');
-  state = flow.processGameEvent(state, gameEvent('endTurn'));
+  state = flow.processEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('4');
 
-  state = flow.processGameEvent(state, gameEvent('endPhase'));
+  state = flow.processEvent(state, gameEvent('endPhase'));
 
   expect(state.ctx.currentPlayer).toBe('1');
-  state = flow.processGameEvent(state, gameEvent('endTurn'));
+  state = flow.processEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('3');
-  state = flow.processGameEvent(state, gameEvent('endTurn'));
+  state = flow.processEvent(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('5');
 });
 
@@ -398,7 +398,7 @@ describe('setActivePlayers', () => {
   const state = { ctx: flow.ctx(2) };
 
   test('basic', () => {
-    const newState = flow.processGameEvent(
+    const newState = flow.processEvent(
       state,
       gameEvent('setActivePlayers', [{ value: { '1': Stage.NULL } }])
     );
@@ -406,7 +406,7 @@ describe('setActivePlayers', () => {
   });
 
   test('all', () => {
-    const newState = flow.processGameEvent(
+    const newState = flow.processEvent(
       state,
       gameEvent('setActivePlayers', [{ all: Stage.NULL }])
     );

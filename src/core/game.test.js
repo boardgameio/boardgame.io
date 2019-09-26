@@ -50,14 +50,6 @@ describe('basic', () => {
   test('long-form move syntax', () => {
     expect(game.processMove({}, { type: 'C' }, { phase: '' })).toEqual('C');
   });
-
-  test('flow override', () => {
-    const f = { processGameEvent: () => {} };
-    const game = {
-      flow: f,
-    };
-    expect(game.flow).toBe(f);
-  });
 });
 
 // Following turn order is often used in worker placement games like Agricola and Viticulture.
