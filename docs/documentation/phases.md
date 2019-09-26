@@ -129,8 +129,7 @@ phase, and you can only play cards in the second phase.
 
 #### Setup and Cleanup hooks
 
-Phases can also specify automatic "board actions" that occur at the beginning or
-end of a phase. These are specified just like normal moves in `onBegin` and `onEnd`.
+You can also run code automatically at the beginning or end of a phase. These are specified just like normal moves in `onBegin` and `onEnd`.
 
 ```js
 phases: {
@@ -147,7 +146,7 @@ and server. They are run on the client in order to facilitate
 a lag-free experience, and are run on the server to calculate the
 authoritative game state.
 
-#### Moving between phases
+#### Moving between Phases
 
 The two primary ways of moving between phases are by calling the
 following events:
@@ -162,3 +161,16 @@ following events:
    the phase specified by the argument.
 
 !> Whenever a phase ends, the current player's turn is first ended automatically.
+
+#### Override Behavior
+
+As observed above, a phase can specify its own `moves` section
+which comes into effect when the phase is active. This `moves`
+section completely replaces the global `moves` section
+for the duration of the phase. The moves may have the
+same name as their global equivalents, but they are not related
+to them in any way.
+
+A phase can similarly also override the `turn` section. You will
+typically do this if you want to use a different
+[Turn Order](turn-order.md) during the phase.
