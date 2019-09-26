@@ -5,6 +5,7 @@
 <style>
 body {
   padding: 20px;
+  font-family: monospace;
 }
 .msg {
   position: absolute;
@@ -14,11 +15,36 @@ body {
   font-size: 12px;
   margin-bottom: 20px;
 }
-.phases li {
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+.deck {
+  width: 40px;
+  height: 60px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #ddd;
+  padding: 20px;
+  text-align: center;
+  border-radius: 5px;
+  margin-bottom: 50px;
+}
+.client {
+  border-radius: 5px;
+  width: 100px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  opacity: .8;
+}
+.client.active {
+  box-shadow: 0 0 5px #aaa;
+  background: #fff;
+  opacity: 1;
+}
+.client li {
   list-style: none;
-  width: 200px;
-  border: 1px solid #eee;
-  border-top: none;
   padding: 5px;
   height: 30px;
   line-height: 30px;
@@ -31,68 +57,89 @@ body {
   <div id="app"></div>
 
   <script type="text/babel">
-function drawCard(G) {
+function DrawCard(G, ctx) {
   G.deck--;
-  G.hand++;
+  G.hand[ctx.currentPlayer]++;
 }
 
-function playCard(G) {
+function PlayCard(G, ctx) {
   G.deck++;
-  G.hand--;
+  G.hand[ctx.currentPlayer]--;
 }
 
 const game = {
-  setup: () => ({ deck: 5, hand: 0 }),
-
+  setup: (ctx) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   phases: {
     draw: {
-      moves: { drawCard },
+      moves: { DrawCard },
       endIf: G => (G.deck <= 0),
       start: true,
       next: 'play',
     },
     play: {
-      moves: { playCard },
-      endIf: G => (G.hand <= 0),
-      next: 'draw',
+      moves: { PlayCard },
     }
   },
+  turn: { moveLimit: 1 },
 };
 
+const Deck = ({ G, ctx }) => (
+  <div className="deck">
+    <div>{G.deck}</div>
+    <div>cards</div>
+    <div style={{ fontSize: "1.2em", marginTop: 20, color: '#aaa' }}>{ctx.phase}</div>
+  </div>
+);
+
 class Board extends React.Component {
-  drawCard = () => {
-    if (this.props.ctx.phase != 'draw') return;
-    this.props.moves.drawCard();
-    this.props.events.endTurn();
+  DrawCard = () => {
+    this.props.moves.DrawCard();
   }
 
-  playCard = () => {
-    if (this.props.ctx.phase != 'play') return;
-    this.props.moves.playCard();
-    this.props.events.endTurn();
+  PlayCard = () => {
+    this.props.moves.PlayCard();
   }
 
   render() {
+    const { playerID, isActive } = this.props;
+    if (!playerID) return <Deck {...this.props} />;
+    let c = "client";
+    if (isActive) {
+      c += " active";
+    }
     return (
-      <div className="phases">
-        <li style={{ border: '2px solid #aaa' }}>{ this.props.ctx.phase } phase</li>
-        <li>Deck: { this.props.G.deck }</li>
-        <li>Hand: { this.props.G.hand }</li>
-        <li><button id="draw" onClick={this.drawCard}>Draw Card</button></li>
-        <li><button id="play" onClick={this.playCard}>Play Card</button></li>
+      <div className={c}>
+        <li><strong>Player { playerID }</strong></li>
+        <li>{ this.props.G.hand[playerID] } cards</li>
+        <li><button id="take" onClick={this.DrawCard}>Draw Card</button></li>
+        <li><button id="play" onClick={this.PlayCard}>Play Card</button></li>
       </div>
     );
   }
 }
 
-const Phases = BoardgameIO.ReactClient({
+const Client = BoardgameIO.ReactClient({
   game,
-  numPlayers: 1,
   board: Board,
   debug: false,
+  numPlayers: 3,
+  multiplayer: { local: true },
 });
 
-ReactDOM.render(<Phases/>, document.getElementById('app'));
+const App = () => (
+  <div>
+    <div style={{ width: '100%' }}>
+      <Client />
+    </div>
+    <div className="container">
+      <Client playerID="0" />
+      <Client playerID="1" />
+      <Client playerID="2" />
+    </div>
+  </div>
+);
+
+ReactDOM.render(<App/>, document.getElementById('app'));
   </script>
 
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>

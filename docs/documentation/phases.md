@@ -1,68 +1,65 @@
 # Phases
 
-TODO: Document how the overriding happens (including turn orders).
-
 Most games beyond very simple ones tend to have different
-behaviors at various "phases". A game might have a phase
+behaviors at various phases. A game might have a phase
 at the beginning where players are drafting cards before
 entering a playing phase, for example.
 
-Each phase in `boardgame.io` defines a set of options
-that are applied during that phase. This includes the
-ability to restrict moves, use a specific turn order and much more.
-Turns happen within phases.
+Each phase in [boardgame.io](https://boardgame.io/) defines a set
+of game configuration options that are applied for the duration
+of that phase. This includes the ability to define a different
+set of moves, use a different turn order etc. Turns happen
+inside phases.
 
 #### Card Game
 
-Let us start with a contrived example of a single player
-game that has exactly two moves:
+Let us start with a contrived example of a game that has exactly
+two moves:
 
 - draw a card from the deck into your hand.
 - play a card from your hand onto the deck.
 
 ```js
-function DrawCard(G) {
+function DrawCard(G, ctx) {
   G.deck--;
-  G.hand++;
+  G.hand[ctx.currentPlayer]++;
 }
 
-function PlayCard(G) {
+function PlayCard(G, ctx) {
   G.deck++;
-  G.hand--;
+  G.hand[ctx.currentPlayer]--;
 }
 
 const game = {
-  setup: () => ({ deck: 5, hand: 0 }),
+  setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   moves: { DrawCard, PlayCard },
+  turn: { moveLimit: 1 },
 };
 ```
 
 !> Notice how we moved the moves out into standalone functions
-instead of inlining them in the game spec.
+instead of inlining them in the game object.
 
-We'll ignore the rendering part of this game, but this is how it might look:
+We'll ignore the rendering part of this game, but this is how it might look. Note that you can draw or play a card at any time, including taking a card when the deck is empty.
 
 ```react
-<iframe class='plain' src='react/phases-1.html' height='270' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
+<iframe class='plain' src='react/phases-1.html' height='350' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
 ```
-
-!> Note that you can draw or play a card at any time, including taking a card when the deck is empty.
 
 #### Phases
 
 Now let's say we want the game to work in two phases:
 
-- a first phase where the player can only draw cards (until the deck is empty).
-- a second phase where the player can only play cards (until their hand is empty).
-
-The game alternates between these two phases indefinitely.
+- a first phase where the players only draw cards (until the deck is empty).
+- a second phase where the players only play cards.
 
 In order to do this, we define two `phases`. Each phase can specify its own
 list of moves, which come into effect during that phase:
 
 ```js
 const game = {
-  setup: () => ({ deck: 5, hand: 0 }),
+  setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
+  turn: { moveLimit: 1 },
 
   phases: {
     draw: {
@@ -86,76 +83,48 @@ in the "draw" phase, we add a `start: true` to its config. Only
 one phase can have `start: true`.
 
 ```js
-const game = {
-  setup: () => ({ deck: 5, hand: 0 }),
-
-  phases: {
-    draw: {
-      moves: { DrawCard },
-+     start: true,
-    },
-
-    play: {
-      moves: { PlayCard },
-    },
+phases: {
+  draw: {
+    moves: { DrawCard },
++   start: true,
   },
-};
+
+  play: {
+    moves: { PlayCard },
+  },
+}
 ```
 
-Let's also add conditions for when these phases end. The "draw"
-phase ends once the deck is empty, and the "play" phase ends once
-the hand is empty.
+Let's also end the "draw" phase automatically once the deck is
+empty.
 
 ```js
-const game = {
-  setup: () => ({ deck: 5, hand: 0 }),
-
-  phases: {
-    draw: {
-      moves: { DrawCard },
-+     endIf: G => (G.deck <= 0),
-      start: true,
-    },
-
-    play: {
-      moves: { PlayCard },
-+     endIf: G => (G.hand <= 0),
-    },
+phases: {
+  draw: {
+    moves: { DrawCard },
++   endIf: G => (G.deck <= 0),
++   next: 'play',
+    start: true,
   },
-};
+
+  play: {
+    moves: { PlayCard },
+  },
+}
 ```
 
 `endIf` ends the phase that it is defined in when it returns
-`true`. The game is then returned to a state where no phase is
-active. However, for this game, we want the game to move to
-the "play" phase once the "draw" phase is done (and vice-versa).
-To do this, we add a `next` option to each phase:
+`true`. The game is returned to a state where no phase is
+active. However, for this game, we want to move to
+the "play" phase once the "draw" phase is done. We specify a
+`next` option for this, which tells the framework to go to that
+phase.
 
-```js
-const game = {
-  setup: () => ({ deck: 5, hand: 0 }),
-
-  phases: {
-    draw: {
-      moves: { drawCard },
-      endIf: G => (G.deck <= 0),
-      start: true,
-+     next: 'play',
-    },
-    play: {
-      moves: { playCard },
-      endIf: G => (G.hand <= 0),
-+     next: 'draw',
-    }
-  },
-};
-```
-
-Watch our game in action now with phases. Notice that you can only draw cards in the first
+Watch our game in action (now with phases). Notice that you can only draw cards in the first
 phase, and you can only play cards in the second phase.
 
 ```react
-<iframe class='plain' src='react/phases-2.html' height='300' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
+<iframe class='plain' src='react/phases-2.html' height='350' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
 ```
 
 #### Setup and Cleanup hooks
