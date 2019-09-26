@@ -21,82 +21,6 @@ import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
 
 /**
- * Helper to create a reducer that manages ctx (with the
- * ability to also update G).
- *
- * This is mostly around for legacy reasons. The original plan
- * was to have two flows, one with phases etc. and another
- * simpler one like this. The current state is such that this
- * is merely an internal function of Flow below.
- *
- * @param {...object} ctx - Function with the signature
- *                          numPlayers => ctx
- *                          that determines the initial value of ctx.
- * @param {...object} eventHandlers - Object containing functions
- *                                    named after events that this
- *                                    reducer will handle. Each function
- *                                    has the following signature:
- *                                    ({G, ctx}) => {G, ctx}
- * @param {...object} enabledEvents - Map of eventName -> bool indicating
- *                                    which events are callable from the client
- *                                    or from within moves.
- * @param {...object} processMove - A function that's called whenever a move is made.
- *                                  (state, action, dispatch) => state.
- */
-export function FlowInternal({
-  ctx,
-  eventHandlers,
-  enabledEvents,
-  init,
-  processMove,
-  moveMap,
-  moveNames,
-  getMove,
-}) {
-  if (!ctx) ctx = () => ({});
-  if (!eventHandlers) eventHandlers = {};
-  if (!enabledEvents) enabledEvents = {};
-  if (!init) init = state => state;
-  if (!processMove) processMove = state => state;
-
-  const dispatch = (state, action) => {
-    const { payload } = action;
-    if (eventHandlers.hasOwnProperty(payload.type)) {
-      const context = { playerID: payload.playerID, dispatch };
-      const args = [state].concat(payload.args);
-      return eventHandlers[payload.type].apply(context, args);
-    }
-    return state;
-  };
-
-  return {
-    ctx,
-    init,
-    moveMap,
-    moveNames,
-    getMove,
-
-    eventNames: Object.keys(eventHandlers),
-    enabledEventNames: Object.keys(enabledEvents),
-
-    processMove: (state, action) => {
-      return processMove(state, action);
-    },
-
-    processGameEvent: (state, action) => {
-      return dispatch(state, action);
-    },
-
-    isPlayerActive: (_G, ctx, playerID) => {
-      if (ctx.activePlayers) {
-        return playerID in ctx.activePlayers;
-      }
-      return ctx.currentPlayer === playerID;
-    },
-  };
-}
-
-/**
  * Flow
  *
  * Creates a reducer that updates ctx (analogous to how moves update G).
@@ -823,30 +747,48 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     setActivePlayers: SetActivePlayersEvent,
   };
 
-  let enabledEvents = {};
+  let enabledEventNames = [];
+
   if (events.endTurn !== false) {
-    enabledEvents['endTurn'] = true;
+    enabledEventNames.push('endTurn');
   }
   if (events.endPhase !== false) {
-    enabledEvents['endPhase'] = true;
+    enabledEventNames.push('endPhase');
   }
   if (events.setPhase !== false) {
-    enabledEvents['setPhase'] = true;
+    enabledEventNames.push('setPhase');
   }
   if (events.endGame !== false) {
-    enabledEvents['endGame'] = true;
+    enabledEventNames.push('endGame');
   }
   if (events.setActivePlayers !== false) {
-    enabledEvents['setActivePlayers'] = true;
+    enabledEventNames.push('setActivePlayers');
   }
   if (events.endStage !== false) {
-    enabledEvents['endStage'] = true;
+    enabledEventNames.push('endStage');
   }
   if (events.setStage !== false) {
-    enabledEvents['setStage'] = true;
+    enabledEventNames.push('setStage');
   }
 
-  return FlowInternal({
+  function ProcessEvent(state, action) {
+    const { payload } = action;
+    if (eventHandlers.hasOwnProperty(payload.type)) {
+      const context = { playerID: payload.playerID };
+      const args = [state].concat(payload.args);
+      return eventHandlers[payload.type].apply(context, args);
+    }
+    return state;
+  }
+
+  function IsPlayerActive(_G, ctx, playerID) {
+    if (ctx.activePlayers) {
+      return playerID in ctx.activePlayers;
+    }
+    return ctx.currentPlayer === playerID;
+  }
+
+  return {
     ctx: numPlayers => ({
       numPlayers,
       turn: 0,
@@ -859,11 +801,14 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     init: state => {
       return ProcessEvents(state, [{ fn: StartGame }]);
     },
+    isPlayerActive: IsPlayerActive,
     eventHandlers,
-    enabledEvents,
+    eventNames: Object.keys(eventHandlers),
+    enabledEventNames,
     moveMap,
     moveNames: [...moveNames.values()],
     processMove: ProcessMove,
+    processGameEvent: ProcessEvent,
     getMove: GetMove,
-  });
+  };
 }

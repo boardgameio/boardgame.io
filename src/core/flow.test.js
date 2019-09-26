@@ -8,25 +8,13 @@
 
 import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
-import { FlowInternal, Flow } from './flow';
+import { Flow } from './flow';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
-
-test('Flow', () => {
-  const flow = FlowInternal({});
-  const state = {};
-  expect(flow.processGameEvent(state, gameEvent('unknown'))).toBe(state);
-
-  // Check defaults of all arguments
-  expect(flow.ctx()).toMatchObject({});
-  expect(flow.eventNames).toHaveLength(0);
-  expect(flow.init({ a: 5 })).toMatchObject({ a: 5 });
-  expect(flow.processMove({ b: 6 })).toMatchObject({ b: 6 });
-});
 
 describe('phases', () => {
   test('invalid phase name', () => {
@@ -653,7 +641,7 @@ describe('endIf', () => {
 test('isPlayerActive', () => {
   const playerID = '0';
 
-  const flow = FlowInternal({});
+  const flow = Flow({});
   expect(flow.isPlayerActive({}, {}, playerID)).toBe(false);
   expect(
     flow.isPlayerActive(
