@@ -8,7 +8,6 @@
 
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
-import phases from './phases';
 import secret_state from './secret-state';
 import random from './random';
 import threejs from './threejs';
@@ -24,10 +23,6 @@ const routes = [
   {
     name: 'Chess',
     routes: chess.routes,
-  },
-  {
-    name: 'Phases',
-    routes: phases.routes,
   },
   {
     name: 'Random API',
