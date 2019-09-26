@@ -104,11 +104,14 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   if (plugins === undefined) {
     plugins = [];
   }
+  if (phases === undefined) {
+    phases = {};
+  }
 
   if (!endIf) endIf = () => undefined;
   if (!turn) turn = {};
 
-  const phaseMap = phases || {};
+  const phaseMap = { ...phases };
 
   if ('' in phaseMap) {
     logging.error('cannot specify phase with empty name');
