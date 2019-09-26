@@ -196,7 +196,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return s;
   }
 
-  function ProcessEvents(state, events) {
+  function Process(state, events) {
     const phasesEnded = new Set();
     const turnsEnded = new Set();
 
@@ -700,19 +700,19 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     let events = [{ fn: OnMove }];
 
-    return ProcessEvents(state, events);
+    return Process(state, events);
   }
 
   function SetStageEvent(state, arg) {
-    return ProcessEvents(state, [{ fn: EndStage, arg }]);
+    return Process(state, [{ fn: EndStage, arg }]);
   }
 
   function EndStageEvent(state) {
-    return ProcessEvents(state, [{ fn: EndStage }]);
+    return Process(state, [{ fn: EndStage }]);
   }
 
   function SetPhaseEvent(state, newPhase) {
-    return ProcessEvents(state, [
+    return Process(state, [
       {
         fn: EndPhase,
         phase: state.ctx.phase,
@@ -723,19 +723,19 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
   }
 
   function EndPhaseEvent(state) {
-    return ProcessEvents(state, [
+    return Process(state, [
       { fn: EndPhase, phase: state.ctx.phase, turn: state.ctx.turn },
     ]);
   }
 
   function EndTurnEvent(state, arg) {
-    return ProcessEvents(state, [
+    return Process(state, [
       { fn: EndTurn, turn: state.ctx.turn, phase: state.ctx.phase, arg },
     ]);
   }
 
   function EndGameEvent(state, arg) {
-    return ProcessEvents(state, [
+    return Process(state, [
       { fn: EndGame, turn: state.ctx.turn, phase: state.ctx.phase, arg },
     ]);
   }
@@ -802,7 +802,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       activePlayers: null,
     }),
     init: state => {
-      return ProcessEvents(state, [{ fn: StartGame }]);
+      return Process(state, [{ fn: StartGame }]);
     },
     isPlayerActive: IsPlayerActive,
     eventHandlers,
