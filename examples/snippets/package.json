@@ -1,0 +1,23 @@
+{
+  "name": "snippets",
+  "scripts": {
+    "start": "parcel src/*/index.html",
+    "build": "parcel build --no-source-maps --public-url /documentation/snippets src/*/index.html"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.7.0"
+  },
+  "alias": {
+    "boardgame.io": "../../dist"
+  },
+  "browserslist": [
+      "last 1 Chrome versions"
+  ],
+  "dependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/preset-react": "^7.0.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0"
+  }
+}

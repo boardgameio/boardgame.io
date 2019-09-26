@@ -63,7 +63,7 @@ npm start
 ```
 
 ```react
-<iframe class='react' src='react/example-1.html' height='800' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-1' height='800' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 Notice that we have a fully playable game that we can
@@ -236,7 +236,7 @@ export default App;
 And there you have it. A basic tic-tac-toe game!
 
 ```react
-<iframe class='react' src='react/example-2.html' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-2' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 !> You can press `1` (or click on the button next to `reset`) to reset the
@@ -304,7 +304,7 @@ some manual moves to get two in a row and then verify that
 the bot makes a block, for example.
 
 ```react
-<iframe class='react' src='react/example-3.html' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-3' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 !> The bot uses [MCTS](http://www.baeldung.com/java-monte-carlo-tree-search) under the

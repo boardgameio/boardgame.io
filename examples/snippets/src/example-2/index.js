@@ -1,27 +1,7 @@
-<!DOCTYPE html>
-<html>
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Client } from 'boardgame.io/react';
 
-<head>
-<style>
-body {
-  padding: 20px;
-}
-.msg {
-  position: absolute;
-  bottom: 0;
-  left: 20px;
-  color: #aaa;
-  font-size: 12px;
-  margin-bottom: 20px;
-}
-</style>
-</head>
-
-<body>
-  <div class="msg">interactive (not an image)</div>
-  <div id="app"></div>
-
-  <script type="text/babel">
 function IsVictory(cells) {
   const positions = [
     [0, 1, 2],
@@ -57,7 +37,7 @@ const TicTacToe = {
       if (G.cells[id] === null) {
         G.cells[id] = ctx.currentPlayer;
       }
-    }
+    },
   },
 
   endIf: (G, ctx) => {
@@ -67,9 +47,8 @@ const TicTacToe = {
     if (G.cells.filter(c => c === null).length == 0) {
       return { draw: true };
     }
-  }
+  },
 };
-
 
 class TicTacToeBoard extends React.Component {
   onClick(id) {
@@ -86,9 +65,12 @@ class TicTacToeBoard extends React.Component {
   render() {
     let winner = '';
     if (this.props.ctx.gameover) {
-      winner = this.props.ctx.gameover.winner !== undefined ?
-          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div> :
-          <div id="winner">Draw!</div>;
+      winner =
+        this.props.ctx.gameover.winner !== undefined ? (
+          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
+        ) : (
+          <div id="winner">Draw!</div>
+        );
     }
 
     const cellStyle = {
@@ -109,9 +91,7 @@ class TicTacToeBoard extends React.Component {
       for (let j = 0; j < 3; j++) {
         const id = 3 * i + j;
         cells.push(
-          <td style={cellStyle}
-              key={id}
-              onClick={() => this.onClick(id)}>
+          <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
             {this.props.G.cells[id]}
           </td>
         );
@@ -122,7 +102,7 @@ class TicTacToeBoard extends React.Component {
     return (
       <div>
         <table id="board">
-        <tbody>{tbody}</tbody>
+          <tbody>{tbody}</tbody>
         </table>
         {winner}
       </div>
@@ -130,20 +110,10 @@ class TicTacToeBoard extends React.Component {
   }
 }
 
-var App = BoardgameIO.ReactClient({
+var App = Client({
   board: TicTacToeBoard,
   game: TicTacToe,
-  debug: { showGameInfo: false }
+  debug: { showGameInfo: false },
 });
 
-
-ReactDOM.render(<App/>, document.getElementById('app'));
-  </script>
-
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <script src="//unpkg.com/react@next/umd/react.development.js"></script>
-  <script src="//unpkg.com/react-dom@next/umd/react-dom.development.js"></script>
-  <script src="boardgameio.min.js"></script>
-</body>
-
-</html>
+ReactDOM.render(<App />, document.getElementById('app'));
