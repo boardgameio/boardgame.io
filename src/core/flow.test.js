@@ -407,7 +407,7 @@ describe('stages', () => {
 
   describe('stage B', () => {
     beforeAll(() => {
-      client.events.setActivePlayers({ currentPlayer: 'B' });
+      client.events.setStage('B');
     });
 
     test('A is not allowed', () => {
@@ -423,7 +423,7 @@ describe('stages', () => {
 
   describe('stage C', () => {
     beforeAll(() => {
-      client.events.setActivePlayers({ currentPlayer: 'C' });
+      client.events.setStage('C');
     });
 
     test('A is allowed', () => {
@@ -475,13 +475,19 @@ describe('stage events', () => {
         gameEvent('setStage', { stage: 'B', moveLimit: 1 })
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'A', '2': 'A' });
+
+      state = flow.processEvent(
+        state,
+        gameEvent('setStage', { stage: 'B', moveLimit: 1 }, '1')
+      );
+      expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'B', '2': 'A' });
     });
 
     test('resets move count', () => {
       let flow = Flow({
         moves: { A: () => {} },
         turn: {
-          activePlayers: { currentPlayer: 'A' },
+          activePlayers: { player: 'A' },
         },
       });
       let state = { G: {}, ctx: flow.ctx(2) };
@@ -508,7 +514,7 @@ describe('stage events', () => {
     });
 
     test('empty argument ends stage', () => {
-      let flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
+      let flow = Flow({ turn: { activePlayers: { player: 'A' } } });
       let state = { G: {}, ctx: flow.ctx(2) };
       state = flow.init(state);
 
@@ -522,7 +528,7 @@ describe('stage events', () => {
     test('basic', () => {
       let flow = Flow({
         turn: {
-          activePlayers: { currentPlayer: 'A' },
+          activePlayers: { player: 'A' },
         },
       });
       let state = { G: {}, ctx: flow.ctx(2) };
@@ -551,7 +557,7 @@ describe('stage events', () => {
       let flow = Flow({
         moves: { A: () => {} },
         turn: {
-          activePlayers: { currentPlayer: 'A' },
+          activePlayers: { player: 'A' },
         },
       });
       let state = { G: {}, ctx: flow.ctx(2) };
@@ -839,7 +845,7 @@ describe('activePlayers', () => {
       turn: {
         stages: { A: {}, B: {} },
         activePlayers: {
-          currentPlayer: 'A',
+          player: 'A',
           others: 'B',
         },
       },
