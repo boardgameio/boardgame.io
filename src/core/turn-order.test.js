@@ -405,6 +405,17 @@ describe('setActivePlayers', () => {
     expect(newState.ctx.activePlayers).toMatchObject({ '1': Stage.NULL });
   });
 
+  test('short form', () => {
+    const newState = flow.processEvent(
+      state,
+      gameEvent('setActivePlayers', [['1', '2']])
+    );
+    expect(newState.ctx.activePlayers).toMatchObject({
+      '1': Stage.NULL,
+      '2': Stage.NULL,
+    });
+  });
+
   test('all', () => {
     const newState = flow.processEvent(
       state,

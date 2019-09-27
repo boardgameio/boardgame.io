@@ -53,6 +53,12 @@ export function SetActivePlayers(ctx, playerID, arg) {
 
   let activePlayers = {};
 
+  if (Array.isArray(arg)) {
+    let value = {};
+    arg.forEach(v => (value[v] = Stage.NULL));
+    activePlayers = value;
+  }
+
   if (arg.value) {
     activePlayers = arg.value;
   }
