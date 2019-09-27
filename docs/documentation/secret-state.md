@@ -12,8 +12,8 @@ the client.
 In order to do this, use the `playerView` setting in
 the game object. It accepts a function that
 takes `G`, `ctx`, `playerID` and returns a version of `G`
-that is stripped of any secret information for that specific
-player.
+that is stripped of any information that should be hidden
+from that specific player.
 
 ```js
 const game = {
