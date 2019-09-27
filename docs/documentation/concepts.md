@@ -97,4 +97,4 @@ applies to individual players rather than the game as a whole.
 A turn may be subdivided into many stages, each allowing a different set of moves
 and overriding other game configuration options while that stage is active.
 Also, different players can be in different stages during a turn.
-See the guide of [Stages]() for more details.
+See the guide of [Stages](stages.md) for more details.
