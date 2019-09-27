@@ -155,7 +155,7 @@ describe('step', () => {
         },
 
         turn: {
-          activePlayers: { currentPlayer: 'stage' },
+          activePlayers: { player: 'stage' },
         },
       },
 
