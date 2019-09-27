@@ -57,6 +57,10 @@
       A: {
         // Players in this stage are restricted to moves defined here.
         moves: { ... },
+        
+        // Players in this stage will be moved to the stage specified
+        // here when the endStage event is called.
+        next: 'B'
       },
 
       ...
