@@ -92,8 +92,8 @@ for this:
 
 ```js
 setActivePlayers({
-  // Move the currentPlayer to a stage.
-  currentPlayer: 'stage-name',
+  // Move the player that called the event to a stage.
+  player: 'stage-name',
 
   // Move every other player to a stage.
   others: 'stage-name'
@@ -172,12 +172,12 @@ exactly one move before they are removed from the set of active players.
 
 ##### OTHERS
 
-Similar to `ALL`, but excludes the current player from the set
+Similar to `ALL`, but excludes the player from the set
 of active players.
 
 ##### OTHERS_ONCE
 
-Similar to `ALL_ONCE`, but excludes the current player from the set
+Similar to `ALL_ONCE`, but excludes the player from the set
 of active players.
 
 ```react
