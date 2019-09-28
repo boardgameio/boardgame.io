@@ -797,9 +797,6 @@ describe('setActivePlayers', () => {
             all: { stage: 'play', moveLimit: 2 },
             moveLimit: 1,
           },
-          stages: {
-            play: { moves: { A: () => {} } },
-          },
         },
       };
 
