@@ -419,7 +419,7 @@ describe('setActivePlayers', () => {
   test('undefined stage leaves player inactive', () => {
     const newState = flow.processEvent(
       state,
-      gameEvent('setActivePlayers', [{ value: { '1': { stage: undefined } } }])
+      gameEvent('setActivePlayers', [{ value: { '1': { moveLimit: 2 } } }])
     );
     expect(newState.ctx.activePlayers).toBeNull();
   });
