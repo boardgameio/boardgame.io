@@ -89,6 +89,14 @@ export function SetActivePlayers(ctx, playerID, arg) {
     }
   }
 
+  if (arg.moveLimit) {
+    for (const id in localCtx.activePlayers) {
+      if (localCtx._activePlayersMoveLimit[id] === undefined) {
+        localCtx._activePlayersMoveLimit[id] = arg.moveLimit;
+      }
+    }
+  }
+
   if (Object.keys(localCtx.activePlayers).length == 0) {
     localCtx.activePlayers = null;
   }
