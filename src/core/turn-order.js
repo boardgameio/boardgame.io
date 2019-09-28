@@ -52,6 +52,7 @@ export function SetActivePlayers(ctx, playerID, arg) {
   }
 
   let activePlayers = {};
+  let _activePlayersMoveLimit = {};
 
   if (Array.isArray(arg)) {
     let value = {};
@@ -60,25 +61,44 @@ export function SetActivePlayers(ctx, playerID, arg) {
   }
 
   if (arg.value) {
-    activePlayers = arg.value;
+    for (const id in arg.value) {
+      const { stage, moveLimit } = getActivePlayerParameters(arg.value[id]);
+      if (stage !== undefined) {
+        activePlayers[id] = stage;
+        if (moveLimit) _activePlayersMoveLimit[id] = moveLimit;
+      }
+    }
   }
 
   if (arg.player !== undefined) {
-    activePlayers[playerID] = arg.player;
+    const { stage, moveLimit } = getActivePlayerParameters(arg.player);
+    if (stage !== undefined) {
+      activePlayers[playerID] = stage;
+      if (moveLimit) _activePlayersMoveLimit[playerID] = moveLimit;
+    }
   }
 
   if (arg.others !== undefined) {
-    for (let i = 0; i < ctx.playOrder.length; i++) {
-      const p = ctx.playOrder[i];
-      if (p !== playerID) {
-        activePlayers[p] = arg.others;
+    const { stage, moveLimit } = getActivePlayerParameters(arg.others);
+    if (stage !== undefined) {
+      for (let i = 0; i < ctx.playOrder.length; i++) {
+        const p = ctx.playOrder[i];
+        if (p !== playerID) {
+          activePlayers[p] = stage;
+          if (moveLimit) _activePlayersMoveLimit[p] = moveLimit;
+        }
       }
     }
   }
 
   if (arg.all !== undefined) {
-    for (let i = 0; i < ctx.playOrder.length; i++) {
-      activePlayers[ctx.playOrder[i]] = arg.all;
+    const { stage, moveLimit } = getActivePlayerParameters(arg.all);
+    if (stage !== undefined) {
+      for (let i = 0; i < ctx.playOrder.length; i++) {
+        const p = ctx.playOrder[i];
+        activePlayers[p] = stage;
+        if (moveLimit) _activePlayersMoveLimit[p] = moveLimit;
+      }
     }
   }
 
@@ -86,33 +106,8 @@ export function SetActivePlayers(ctx, playerID, arg) {
     activePlayers = null;
   }
 
-  let _activePlayersMoveLimit = null;
-
-  if (activePlayers && arg.moveLimit) {
-    if (typeof arg.moveLimit === 'number') {
-      _activePlayersMoveLimit = {};
-      for (const id in activePlayers) {
-        _activePlayersMoveLimit[id] = arg.moveLimit;
-      }
-    } else {
-      _activePlayersMoveLimit = {};
-
-      if (arg.moveLimit.value) {
-        _activePlayersMoveLimit = arg.moveLimit.value;
-      }
-
-      if (arg.moveLimit.player !== undefined && activePlayers[playerID]) {
-        _activePlayersMoveLimit[playerID] = arg.moveLimit.player;
-      }
-
-      if (arg.moveLimit.others !== undefined) {
-        for (const id in activePlayers) {
-          if (id !== playerID) {
-            _activePlayersMoveLimit[id] = arg.moveLimit.others;
-          }
-        }
-      }
-    }
+  if (Object.keys(_activePlayersMoveLimit).length == 0) {
+    _activePlayersMoveLimit = null;
   }
 
   let _activePlayersNumMoves = {};
@@ -173,6 +168,19 @@ export function UpdateActivePlayersOnceEmpty(ctx) {
     _activePlayersNumMoves,
     _prevActivePlayers,
   };
+}
+
+/**
+ * Parses the stage & moveLimit arguments used in SetActivePlayers
+ * @param  {(String|Object)} arg The argument to parse
+ * @return {Object}
+ */
+function getActivePlayerParameters(arg) {
+  if (typeof arg === 'object' && arg !== null) {
+    return arg;
+  } else {
+    return { stage: arg };
+  }
 }
 
 /**
