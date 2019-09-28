@@ -741,11 +741,8 @@ describe('setActivePlayers', () => {
       const game = {
         turn: {
           activePlayers: {
-            all: 'play',
-            moveLimit: {
-              player: 2,
-              others: 1,
-            },
+            player: { stage: 'play', moveLimit: 2 },
+            others: { stage: 'play', moveLimit: 1 },
           },
           stages: {
             play: { moves: { A: () => {} } },
@@ -789,9 +786,10 @@ describe('setActivePlayers', () => {
       const game = {
         turn: {
           activePlayers: {
-            all: 'play',
-            moveLimit: {
-              value: { '0': 1, '1': 2, '2': 3 },
+            value: {
+              '0': { stage: 'play', moveLimit: 1 },
+              '1': { stage: 'play', moveLimit: 2 },
+              '2': { stage: 'play', moveLimit: 3 },
             },
           },
           stages: {
