@@ -150,6 +150,27 @@ const game = {
 <iframe class='plain' src='snippets/stages-1' height='160' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
+#### Advanced Move Limits
+
+Passing a `moveLimit` argument to `setActivePlayers` limits all the
+active players to making that number of moves, but sometimes you might want
+to set different move limits for different players. For cases like this,
+`setStage` and `setActivePlayers` support long-form arguments:
+
+```js
+setStage({ stage: 'stage-name', moveLimit: 3 });
+```
+
+```js
+setActivePlayers({
+  player: { stage: 'stage-name', moveLimit: 2 },
+  others: { stage: 'stage-name', moveLimit: 1 },
+  value: {
+    '0': { stage: 'stage-name', moveLimit: 4 },
+  },
+});
+```
+
 ### Stage.NULL
 
 Sometimes you want to add a player to the set of active players
