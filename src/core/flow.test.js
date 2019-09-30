@@ -569,6 +569,39 @@ describe('stage events', () => {
       state = flow.processEvent(state, gameEvent('endStage'));
       expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 1 });
     });
+
+    test('sets to next', () => {
+      let flow = Flow({
+        turn: {
+          activePlayers: { player: 'A1', others: 'B1' },
+          stages: {
+            A1: { next: 'A2' },
+            B1: { next: 'B2' },
+          },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) };
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toMatchObject({
+        '0': 'A1',
+        '1': 'B1',
+      });
+
+      state = flow.processEvent(state, gameEvent('endStage', null, '0'));
+
+      expect(state.ctx.activePlayers).toMatchObject({
+        '0': 'A2',
+        '1': 'B1',
+      });
+
+      state = flow.processEvent(state, gameEvent('endStage', null, '1'));
+
+      expect(state.ctx.activePlayers).toMatchObject({
+        '0': 'A2',
+        '1': 'B2',
+      });
+    });
   });
 });
 
