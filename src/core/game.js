@@ -67,6 +67,10 @@ export function Game(game) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
+  if (game.name.includes(' ')) {
+    throw new Error(game.name + ': Game name must not include spaces');
+  }
+
   const flow = Flow(game);
 
   return {
