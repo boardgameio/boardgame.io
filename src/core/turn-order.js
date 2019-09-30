@@ -195,7 +195,7 @@ function ApplyActivePlayerArgument(
   playerID,
   arg
 ) {
-  if (typeof arg !== 'object' || arg === null) {
+  if (typeof arg !== 'object' || arg === Stage.NULL) {
     arg = { stage: arg };
   }
 
