@@ -52,6 +52,7 @@ export function SetActivePlayers(ctx, playerID, arg) {
   }
 
   let activePlayers = {};
+  let _activePlayersMoveLimit = {};
 
   if (Array.isArray(arg)) {
     let value = {};
@@ -60,25 +61,56 @@ export function SetActivePlayers(ctx, playerID, arg) {
   }
 
   if (arg.value) {
-    activePlayers = arg.value;
+    for (const id in arg.value) {
+      ApplyActivePlayerArgument(
+        activePlayers,
+        _activePlayersMoveLimit,
+        id,
+        arg.value[id]
+      );
+    }
   }
 
   if (arg.player !== undefined) {
-    activePlayers[playerID] = arg.player;
+    ApplyActivePlayerArgument(
+      activePlayers,
+      _activePlayersMoveLimit,
+      playerID,
+      arg.player
+    );
   }
 
   if (arg.others !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
-      const p = ctx.playOrder[i];
-      if (p !== playerID) {
-        activePlayers[p] = arg.others;
+      const id = ctx.playOrder[i];
+      if (id !== playerID) {
+        ApplyActivePlayerArgument(
+          activePlayers,
+          _activePlayersMoveLimit,
+          id,
+          arg.others
+        );
       }
     }
   }
 
   if (arg.all !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
-      activePlayers[ctx.playOrder[i]] = arg.all;
+      const id = ctx.playOrder[i];
+      ApplyActivePlayerArgument(
+        activePlayers,
+        _activePlayersMoveLimit,
+        id,
+        arg.all
+      );
+    }
+  }
+
+  if (arg.moveLimit) {
+    for (const id in activePlayers) {
+      if (_activePlayersMoveLimit[id] === undefined) {
+        _activePlayersMoveLimit[id] = arg.moveLimit;
+      }
     }
   }
 
@@ -86,33 +118,8 @@ export function SetActivePlayers(ctx, playerID, arg) {
     activePlayers = null;
   }
 
-  let _activePlayersMoveLimit = null;
-
-  if (activePlayers && arg.moveLimit) {
-    if (typeof arg.moveLimit === 'number') {
-      _activePlayersMoveLimit = {};
-      for (const id in activePlayers) {
-        _activePlayersMoveLimit[id] = arg.moveLimit;
-      }
-    } else {
-      _activePlayersMoveLimit = {};
-
-      if (arg.moveLimit.value) {
-        _activePlayersMoveLimit = arg.moveLimit.value;
-      }
-
-      if (arg.moveLimit.player !== undefined && activePlayers[playerID]) {
-        _activePlayersMoveLimit[playerID] = arg.moveLimit.player;
-      }
-
-      if (arg.moveLimit.others !== undefined) {
-        for (const id in activePlayers) {
-          if (id !== playerID) {
-            _activePlayersMoveLimit[id] = arg.moveLimit.others;
-          }
-        }
-      }
-    }
+  if (Object.keys(_activePlayersMoveLimit).length == 0) {
+    _activePlayersMoveLimit = null;
   }
 
   let _activePlayersNumMoves = {};
@@ -173,6 +180,29 @@ export function UpdateActivePlayersOnceEmpty(ctx) {
     _activePlayersNumMoves,
     _prevActivePlayers,
   };
+}
+
+/**
+ * Apply an active player argument to the given player ID
+ * @param {Object} activePlayers
+ * @param {Object} _activePlayersMoveLimit
+ * @param {String} playerID The player to apply the parameter to
+ * @param {(String|Object)} arg An active player argument
+ */
+function ApplyActivePlayerArgument(
+  activePlayers,
+  _activePlayersMoveLimit,
+  playerID,
+  arg
+) {
+  if (typeof arg !== 'object' || arg === Stage.NULL) {
+    arg = { stage: arg };
+  }
+
+  if (arg.stage !== undefined) {
+    activePlayers[playerID] = arg.stage;
+    if (arg.moveLimit) _activePlayersMoveLimit[playerID] = arg.moveLimit;
+  }
 }
 
 /**
