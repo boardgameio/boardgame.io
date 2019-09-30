@@ -82,7 +82,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
 
   router.post('/games/:name/create', koaBody(), async ctx => {
     // The name of the game (for example: tic-tac-toe).
-    const gameName = ctx.params.name.replace(' ', '-');
+    const gameName = ctx.params.name;
     // User-data to pass to the game setup function.
     const setupData = ctx.request.body.setupData;
     // The number of players for this game instance.
@@ -106,7 +106,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
   });
 
   router.get('/games/:name', async ctx => {
-    const gameName = ctx.params.name.replace(' ', '-');
+    const gameName = ctx.params.name;
     const gameList = await db.list();
     let rooms = [];
     for (let key of [...gameList]) {
@@ -131,7 +131,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
   });
 
   router.get('/games/:name/:id', async ctx => {
-    const gameName = ctx.params.name.replace(' ', '-');
+    const gameName = ctx.params.name;
     const gameID = ctx.params.id;
     const room = await db.get(`${gameName}:${GameMetadataKey(gameID)}`);
     if (!room) {
@@ -155,7 +155,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     if (!playerName) {
       ctx.throw(403, 'playerName is required');
     }
-    const gameName = ctx.params.name.replace(' ', '-');
+    const gameName = ctx.params.name;
     const roomID = ctx.params.id;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
     const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
@@ -180,7 +180,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
   });
 
   router.post('/games/:name/:id/leave', koaBody(), async ctx => {
-    const gameName = ctx.params.name.replace(' ', '-');
+    const gameName = ctx.params.name;
     const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
@@ -212,7 +212,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
   });
 
   router.post('/games/:name/:id/playAgain', koaBody(), async ctx => {
-    const gameName = ctx.params.name.replace(' ', '-');
+    const gameName = ctx.params.name;
     const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
@@ -264,7 +264,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
   });
 
   router.post('/games/:name/:id/rename', koaBody(), async ctx => {
-    const gameName = ctx.params.name.replace(' ', '-');
+    const gameName = ctx.params.name;
     const roomID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
