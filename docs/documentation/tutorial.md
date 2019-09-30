@@ -321,4 +321,4 @@ and it will figure out the right combination of moves to make it happen!
 Detailed documentation about all this is coming soon. Adding bots to games for actual
 networked play (as opposed to merely simulating moves) is also in the works.
 
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/x9z2z95o14)
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-xg44h)
