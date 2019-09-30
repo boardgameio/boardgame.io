@@ -211,3 +211,10 @@ test('serpentine setup phases', () => {
   expect(client.getState().ctx.currentPlayer).toBe('1');
   expect(client.getState().ctx.phase).toBe('main phase');
 });
+
+test('game name with spaces should raise Error', () => {
+  const game = () => {
+    Game({ name: 'tic tac toe' });
+  };
+  expect(game).toThrow();
+});
