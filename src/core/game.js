@@ -25,38 +25,6 @@ import { Flow } from './flow';
  * action.args contain any additional arguments as an
  * Array.
  *
- * ({
- *   name: 'tic-tac-toe',
- *
- *   setup: (numPlayers) => {
- *     const G = {...};
- *     return G;
- *   },
- *
- *   plugins: [plugin1, plugin2, ...],
- *
- *   moves: {
- *     'moveWithoutArgs': (G, ctx) => {
- *       return Object.assign({}, G, ...);
- *     },
- *     'moveWithArgs': (G, ctx, arg0, arg1) => {
- *       return Object.assign({}, G, ...);
- *     }
- *   },
- *
- *   playerView: (G, ctx, playerID) => { ... },
- *
- *   flow: {
- *     endIf: (G, ctx) => { ... },
- *
- *     phases: {
- *       A: { onBegin: (G, ctx) => G, onEnd: (G, ctx) => G },
- *       B: { onBegin: (G, ctx) => G, onEnd: (G, ctx) => G },
- *       ...
- *     }
- *   },
- * })
- *
  * @param {...object} setup - Function that returns the initial state of G.
  *
  * @param {...object} moves - A dictionary of move functions.
@@ -64,8 +32,6 @@ import { Flow } from './flow';
  * @param {...object} playerView - A function that returns a
  *                                 derivative of G tailored for
  *                                 the specified player.
- *
- * @param {...object} flow - Customize the flow of the game (see flow.js).
  *
  * @param {...object} seed - Seed for the PRNG.
  *
@@ -91,7 +57,7 @@ import { Flow } from './flow';
 export function Game(game) {
   // The Game() function has already been called on this
   // config object, so just pass it through.
-  if (game.processMove !== undefined) {
+  if (game.processMove) {
     return game;
   }
 
@@ -101,18 +67,18 @@ export function Game(game) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
-  if (!game.flow || game.flow.processGameEvent === undefined) {
-    game.flow = Flow(game);
-  }
+  const flow = Flow(game);
 
   return {
     ...game,
     name: game.name.replace(' ', '-'),
 
-    moveNames: game.flow.moveNames,
+    flow,
+
+    moveNames: flow.moveNames,
 
     processMove: (G, action, ctx) => {
-      let moveFn = game.flow.getMove(ctx, action.type, action.playerID);
+      let moveFn = flow.getMove(ctx, action.type, action.playerID);
 
       if (moveFn instanceof Object && moveFn.move) {
         moveFn = moveFn.move;

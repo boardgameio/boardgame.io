@@ -31,14 +31,12 @@ export const Pass = (G, ctx) => {
 
 /**
  * Event to change the active players (and their stages) in the current turn.
- * @param {*} state
- * @param {*} arg
  */
-export function SetActivePlayersEvent(state, arg) {
-  return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
+export function SetActivePlayersEvent(state, playerID, arg) {
+  return { ...state, ctx: SetActivePlayers(state.ctx, playerID, arg) };
 }
 
-export function SetActivePlayers(ctx, arg) {
+export function SetActivePlayers(ctx, playerID, arg) {
   let { _prevActivePlayers } = ctx;
 
   const _nextActivePlayers = arg.next || null;
@@ -55,27 +53,32 @@ export function SetActivePlayers(ctx, arg) {
 
   let activePlayers = {};
 
+  if (Array.isArray(arg)) {
+    let value = {};
+    arg.forEach(v => (value[v] = Stage.NULL));
+    activePlayers = value;
+  }
+
   if (arg.value) {
     activePlayers = arg.value;
   }
 
-  if (arg.currentPlayer !== undefined) {
-    activePlayers[ctx.currentPlayer] = arg.currentPlayer;
+  if (arg.player !== undefined) {
+    activePlayers[playerID] = arg.player;
   }
 
   if (arg.others !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
-      const playerID = ctx.playOrder[i];
-      if (playerID !== ctx.currentPlayer) {
-        activePlayers[playerID] = arg.others;
+      const p = ctx.playOrder[i];
+      if (p !== playerID) {
+        activePlayers[p] = arg.others;
       }
     }
   }
 
   if (arg.all !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
-      const playerID = ctx.playOrder[i];
-      activePlayers[playerID] = arg.all;
+      activePlayers[ctx.playOrder[i]] = arg.all;
     }
   }
 
@@ -98,17 +101,13 @@ export function SetActivePlayers(ctx, arg) {
         _activePlayersMoveLimit = arg.moveLimit.value;
       }
 
-      if (
-        arg.moveLimit.currentPlayer !== undefined &&
-        activePlayers[ctx.currentPlayer]
-      ) {
-        _activePlayersMoveLimit[ctx.currentPlayer] =
-          arg.moveLimit.currentPlayer;
+      if (arg.moveLimit.player !== undefined && activePlayers[playerID]) {
+        _activePlayersMoveLimit[playerID] = arg.moveLimit.player;
       }
 
       if (arg.moveLimit.others !== undefined) {
         for (const id in activePlayers) {
-          if (id !== ctx.currentPlayer) {
+          if (id !== playerID) {
             _activePlayersMoveLimit[id] = arg.moveLimit.others;
           }
         }
@@ -146,7 +145,7 @@ export function UpdateActivePlayersOnceEmpty(ctx) {
 
   if (activePlayers && Object.keys(activePlayers).length == 0) {
     if (ctx._nextActivePlayers) {
-      ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
+      ctx = SetActivePlayers(ctx, ctx.currentPlayer, ctx._nextActivePlayers);
       ({
         activePlayers,
         _activePlayersMoveLimit,
@@ -209,7 +208,7 @@ export function InitTurnOrderState(G, ctx, turn) {
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-  ctx = SetActivePlayers(ctx, turn.activePlayers || {});
+  ctx = SetActivePlayers(ctx, currentPlayer, turn.activePlayers || {});
 
   return ctx;
 }
