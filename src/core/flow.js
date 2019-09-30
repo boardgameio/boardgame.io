@@ -553,14 +553,20 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let { ctx } = state;
     let { activePlayers, _activePlayersMoveLimit } = ctx;
 
+    const playerInStage = activePlayers !== null && playerID in activePlayers;
+
+    if (!arg && playerInStage) {
+      const conf = GetPhase(ctx);
+      const stage = conf.turn.stages[activePlayers[playerID]];
+      if (stage && stage.next) arg = stage.next;
+    }
+
     if (next && arg) {
       next.push({ fn: UpdateStage, arg, playerID });
     }
 
     // If player isn’t in a stage, there is nothing else to do.
-    if (activePlayers === null || !(playerID in activePlayers)) {
-      return state;
-    }
+    if (!playerInStage) return state;
 
     // Remove player from activePlayers.
     activePlayers = Object.keys(activePlayers)
