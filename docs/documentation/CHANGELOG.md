@@ -1,9 +1,9 @@
 ## v0.33.0
 
-Huge release with a much more streamlined API and the much
+Huge release with a more streamlined API and the much
 awaited feature: Stages!
 
-Stay tuned for a migration guide from v0.32 to v0.33.
+Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/).
 
 #### Features
 
