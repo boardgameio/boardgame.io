@@ -11,13 +11,15 @@
     "boardgame.io": "../../dist"
   },
   "browserslist": [
-      "last 1 Chrome versions"
+    "last 1 Chrome versions"
   ],
   "dependencies": {
     "@babel/core": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
     "@babel/preset-react": "^7.0.0",
+    "parcel-plugin-svelte": "^4.0.4",
     "react": "^16.9.0",
-    "react-dom": "^16.9.0"
+    "react-dom": "^16.9.0",
+    "svelte": "^3.12.1"
   }
 }
