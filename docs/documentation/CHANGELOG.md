@@ -1,3 +1,10 @@
+## v0.33.1
+
+#### Features
+
+- [[6eb4ebd](https://github.com/nicolodavis/boardgame.io/commit/6eb4ebd)] rewrite one of the snippets in Svelte
+- [[86e65fe](https://github.com/nicolodavis/boardgame.io/commit/86e65fe)] fix: Move player to “next” stage on `endStage` (#484)
+
 ## v0.33.0
 
 Huge release with a more streamlined API and the much
