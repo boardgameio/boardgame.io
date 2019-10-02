@@ -111,24 +111,25 @@ The `Board` component will receive the following as `props`:
 
 11. `playerID`: The player ID associated with the client.
 
-12. `gameMetadata`: An object containing the players that have joined the game from a [room](/api/Lobby.md).
+12. `gameMetadata`: An object containing the players that have joined
+    the game from a [room](/api/Lobby.md).
 
-Example:
+    Example:
 
-```json
-{
-  "players": {
-    "0": {
-      "id": 0,
-      "name": "Alice"
-    },
-    "1": {
-      "id": 1,
-      "name": "Bob"
+    ```json
+    {
+      "players": {
+        "0": {
+          "id": 0,
+          "name": "Alice"
+        },
+        "1": {
+          "id": 1,
+          "name": "Bob"
+        }
+      }
     }
-  }
-}
-```
+    ```
 
 13. `isActive`: `true` if the client is able to currently make
     a move or interact with the game.
