@@ -102,13 +102,16 @@ The `Board` component will receive the following as `props`:
 
 7. `redo`: Function that redoes the previously undone move.
 
-8. `log`: The game log.
+8. `step`:
+   Function that will advance the game if [AI is configured](/tutorial.md#bots).
 
-9. `gameID`: The game ID associated with the client.
+9. `log`: The game log.
 
-10. `playerID`: The player ID associated with the client.
+10. `gameID`: The game ID associated with the client.
 
-11. `gameMetadata`: An object containing the players that have joined the game from a [room](/api/Lobby.md).
+11. `playerID`: The player ID associated with the client.
+
+12. `gameMetadata`: An object containing the players that have joined the game from a [room](/api/Lobby.md).
 
 Example:
 
@@ -127,9 +130,9 @@ Example:
 }
 ```
 
-12. `isActive`: `true` if the client is able to currently make
+13. `isActive`: `true` if the client is able to currently make
     a move or interact with the game.
 
-13. `isMultiplayer`: `true` if it is a multiplayer game.
+14. `isMultiplayer`: `true` if it is a multiplayer game.
 
-14. `isConnected`: `true` if connection to the server is active.
+15. `isConnected`: `true` if connection to the server is active.
