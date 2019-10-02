@@ -137,3 +137,6 @@ The `Board` component will receive the following as `props`:
 14. `isMultiplayer`: `true` if it is a multiplayer game.
 
 15. `isConnected`: `true` if connection to the server is active.
+
+16. `credentials`: Authentication token for this player when using
+    the [Lobby REST API](/api/Lobby.md#server-side-api).
