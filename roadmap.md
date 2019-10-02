@@ -10,7 +10,7 @@ get done before we are ready for a v1 release.
 
 - [x] MCTS bot ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
 - [ ] ability to add priorities and objectives ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
-- [ ] run bots in multiplayer games
+- [ ] Bots in multiplayer games ([issue](https://github.com/nicolodavis/boardgame.io/issues/383))  **[help needed]**
 
 ### UI
 
