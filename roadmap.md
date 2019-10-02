@@ -20,6 +20,7 @@ get done before we are ready for a v1 release.
 
 - [x] basic `create` and `join` API
 - [x] simple web-based lobby ([issue](https://github.com/nicolodavis/boardgame.io/issues/197))
+- [ ] Lobby Improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/354))  **[help needed]**
 
 ### Storage
 
