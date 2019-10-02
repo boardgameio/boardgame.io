@@ -292,16 +292,19 @@ const App = Client({
 export default App;
 ```
 
-That's it! You will notice that you now have two more options in
-the **Controls** section (`step` and `simulate`). You can use the
-keyboard shortcuts `4` and `5` to trigger them.
+That's it! Now that you have configured AI, there are two more options in
+the **Controls** section of the Debug Panel:
 
-Press `5` and just watch your game play by itself!
+- `step` causes the AI to calculate and make a single move
+  (shortcut: <kbd>4</kbd>)
 
-You can also use a combination of moves that you make yourself
-and bot moves (press `4` to have the bot make a move). You can make
+- `simulate` causes the AI to play the entire game by itself
+  (shortcut: <kbd>5</kbd>)
+
+`step` helps you combine moves that you make yourself
+and bot moves. For example, you can make
 some manual moves to get two in a row and then verify that
-the bot makes a block, for example.
+the bot makes a block.
 
 ```react
 <iframe class='react' src='snippets/example-3' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
