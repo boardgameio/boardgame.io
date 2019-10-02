@@ -325,7 +325,7 @@ class TicTacToeBoard extends React.Component {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
       this.props.events.endTurn();
-      +setTimeout(() => this.props.step(), 1000);
+      setTimeout(() => this.props.step(), 1000);
     }
   }
 
