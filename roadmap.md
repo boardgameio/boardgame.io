@@ -50,7 +50,7 @@ The issues below (and some others that are not in this document) are also availa
 
 ### Documentation
 
-- [ ] code organization best practices
+- [ ] recipes for different game scenarios
+- [ ] code organization patterns
 - [ ] deployment tutorial
 - [ ] tutorial using the vanilla JS client
-- [ ] generate markdown from jsdoc?
