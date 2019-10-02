@@ -315,29 +315,6 @@ hood to explore the game tree and find good moves. The default uses 1000 iterati
 move, which isn't sufficient to create a bullet-proof tic-tac-toe player. This can be
 configured to adjust the bot strength.
 
-If you want to call `step` from the React client, it is passed as one of the
-props to your `<Board>` component. Adapting our previous example, we could add
-a call to `step` each time the human player clicks on a cell:
-
-```js
-class TicTacToeBoard extends React.Component {
-  onClick(id) {
-    if (this.isActive(id)) {
-      this.props.moves.clickCell(id);
-      this.props.events.endTurn();
-      setTimeout(() => this.props.step(), 1000);
-    }
-  }
-
-  // ...
-}
-```
-
-We’re missing some checks to make sure the `clickCell` move was valid
-before activating the bot or to prevent multiple timeouts if the player
-clicks several times, but this demonstrates a basic use of `step`.
-A better API for AI-enabled games will be added as the framework develops.
-
 The framework will come bundled with a few different bot algorithms, and an advanced
 version of MCTS that will allow you to specify a set of objectives to optimize for.
 For example, at any given point in the game you can tell the bot to gather resources
