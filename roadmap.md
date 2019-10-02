@@ -52,4 +52,5 @@ The issues below (and some others that are not in this document) are also availa
 
 - [ ] code organization best practices
 - [ ] deployment tutorial
+- [ ] tutorial using the vanilla JS client
 - [ ] generate markdown from jsdoc?
