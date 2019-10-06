@@ -60,17 +60,6 @@ export function SetActivePlayers(ctx, playerID, arg) {
     activePlayers = value;
   }
 
-  if (arg.value) {
-    for (const id in arg.value) {
-      ApplyActivePlayerArgument(
-        activePlayers,
-        _activePlayersMoveLimit,
-        id,
-        arg.value[id]
-      );
-    }
-  }
-
   if (arg.player !== undefined) {
     ApplyActivePlayerArgument(
       activePlayers,
@@ -102,6 +91,17 @@ export function SetActivePlayers(ctx, playerID, arg) {
         _activePlayersMoveLimit,
         id,
         arg.all
+      );
+    }
+  }
+
+  if (arg.value) {
+    for (const id in arg.value) {
+      ApplyActivePlayerArgument(
+        activePlayers,
+        _activePlayersMoveLimit,
+        id,
+        arg.value[id]
       );
     }
   }
