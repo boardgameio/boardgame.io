@@ -24,8 +24,10 @@ in their own stage). Each player that is in a stage is now considered an
 Stages are defined inside a `turn` section:
 
 ```js
+const DicscardCard = (G, ctx) => { ... }
+
 const game = {
-  moves: { ... },
+  moves: { DicscarCard, ... },
 
   turn: {
     stages: {
