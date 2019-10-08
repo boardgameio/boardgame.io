@@ -62,7 +62,7 @@ The list of plugins is specified in the game spec.
 ```js
 import { PluginA, PluginB } from 'boardgame.io/plugins';
 
-Game({
+const game = {
   name: 'my-game',
 
   moves: {
@@ -70,7 +70,7 @@ Game({
   },
 
   plugins: [PluginA, PluginB],
-})
+};
 ```
 
 !> Plugins are applied one after the other in the order
@@ -83,10 +83,10 @@ that they are specified (from left to right).
 ```js
 import { PluginPlayer } from 'boardgame.io/plugins';
 
-Game({
+const game = {
   playerSetup: (playerID) => ({ ... }),
   plugins: [PluginPlayer],
-})
+};
 ```
 
 `PluginPlayer` makes it easy to manage player state.

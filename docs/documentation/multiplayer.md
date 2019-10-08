@@ -8,8 +8,8 @@ working with our Tic-Tac-Toe example from the [tutorial](tutorial.md).
 ### Clients and Masters
 
 A boardgame.io client is what you create using the `Client` call.
-You initialize it with your `Game` object (which contains the moves),
-so it has all the information needed to the run the game.
+You initialize it with your game object (which contains the moves),
+so it has all the information that is needed to run the game.
 This is where the story ends in a single player setup.
 
 In a multiplayer setup, clients no longer act as authoritative
@@ -69,8 +69,7 @@ board implementation to `src/board.js`.
 
 ```js
 // src/game.js
-import { Game } from 'boardgame.io/core';
-export const TicTacToe = Game({ ... });
+export const TicTacToe = { ... };
 ```
 
 ```js
@@ -80,14 +79,14 @@ export class TicTacToeBoard extends React.Component { ... };
 ```
 
 ```react
-<iframe class='react' src='react/multiplayer-1.html' height='500' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='plain' src='snippets/multiplayer' height='250' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
-?> In the example above, you can play as Player 0 and Player 1 alternately
+?> In the example above you can play as Player 0 and Player 1 alternately
 on the two boards. Clicking on a particular board when it is not that
 player's turn has no effect.
 
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/0q7qqv11xn)
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-quouk)
 
 ### Remote Master
 
@@ -168,7 +167,7 @@ want to take at the beginning of the game and then set the
 `playerID` prop accordingly. You can also use a URL path to
 determine the player or a matchmaking lobby.
 
-Complete code from this section is available on [CodeSandbox](https://codesandbox.io/s/qq77m12nv6). To run it, click on the
+Complete code from this section is available on [CodeSandbox](https://codesandbox.io/s/boardgameio-5lbe5). To run it, click on the
 download button, then run the server and client as described
 above (don't forget to run `npm install` first).
 
@@ -184,13 +183,13 @@ const app = Server({ games: [TicTacToe, Chess] });
 ```
 
 For this to work correctly, make sure that each game
-implementation specifies a name in the `Game` constructor:
+implementation specifies a name:
 
 ```js
-const TicTacToe = Game({
+const TicTacToe = {
   name: 'tic-tac-toe',
   ...
-})
+};
 ```
 
 #### Game Instances

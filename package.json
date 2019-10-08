@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.32.1",
+  "version": "0.33.1",
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
@@ -9,8 +9,7 @@
     "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions '.ts,.js' --ignore 'src/**/*.test.ts' --presets @babel/preset-env examples/react-web/server.js",
     "build": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "benchmark": "babel-node --presets @babel/preset-env benchmark/index.js",
-    "docsify": "docsify serve docs",
-    "docsify:update": "npm run build && node ./scripts/docsify-update.js",
+    "docs": "docsify serve docs",
     "examples": "npm run start",
     "pretest": "npm run lint",
     "test": "cross-env NODE_ENV=test jest --no-cache",

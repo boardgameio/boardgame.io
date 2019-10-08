@@ -5,28 +5,43 @@ analogous to a move, except that while a move changes
 `G`, an event changes `ctx`. Also, events are provided by the
 framework (as opposed to moves, which are written by you).
 
-Only the current player can call events (and must also be an action player to do so).
+Here is the complete list of events:
+
+##### endStage
+
+This event takes the player that called it out of the stage
+that they are in. If the stage specifies a `next` option, then
+the player is taken to the next stage. If not, the player is
+returned to a state where they are not in any stage.
+
+```js
+endStage();
+```
 
 ##### endTurn
 
-This event just ends the current player's turn.
+This event ends the turn.
 The default behavior is to increment `ctx.turn` by `1`
 and advance `currentPlayer` to the next player according
-to the configured turn order (the default being a round-robin).
+to the configured [turn order](turn-order.md) (the default being a round-robin).
 
-`endTurn` also accepts an argument, which (if provided)
-switches the turn to the specified player.
+This event also accepts an argument, which (if provided)
+switches the turn to the specified player instead.
+
+```js
+endTurn(); // without argument
+endTurn({ next: '2' }); // Player 2 is the next player.
+```
 
 ##### endPhase
 
-This event just ends the current phase, and sets `ctx.phase`
-to the next phase in round-robin fashion. Note that this
-is orthogonal to a player turn (i.e. you can end the phase
-many times within a single turn, or you can have many
-turns within a single phase).
+This event ends the current phase. If the phase specifies a
+`next` option, then the game moves to that phase. If not, the
+game returns to a state where no phase is active.
 
-`endPhase` also accepts an argument, which (if provided)
-switches the phase to the phase specified.
+```js
+endPhase();
+```
 
 ##### endGame
 
@@ -34,6 +49,50 @@ This event ends the game. If you pass an argument to it,
 then that argument is made available in `ctx.gameover`.
 After the game is over, further state changes to the game
 (via a move or event) are not possible.
+
+```js
+endGame();
+```
+
+##### setStage
+
+Takes the player that called the event into the stage specified.
+
+```js
+setStage('stage-name');
+```
+
+##### setPhase
+
+Takes the game into the phase specified. Ends the active phase first.
+
+```js
+setPhase('phase-name');
+```
+
+##### setActivePlayers
+
+Allows adding additional players to the set of "active players", and
+also any stages that you want to put them in. See the guide on [Stages](stages.md)
+for more details.
+
+### Triggering an event from game logic.
+
+You can trigger events from a move or any code inside
+your game logic (the phase's `onBegin` hook, for example).
+This is done through the `ctx.events` object:
+
+```js
+moves: {
+  drawCard: (G, ctx) => {
+    ctx.events.endPhase();
+  };
+}
+```
+
+Note that the event is just queued up and triggered **after** the move.
+You can still have other logic at the end of the move which will be
+run before the event is triggered.
 
 ### Triggering an event from a React client.
 
@@ -57,51 +116,22 @@ class Board extends React.Component {
 }
 ```
 
-### Triggering an event from inside game logic.
+### Disabling events
 
-You can also trigger events from within a move or any
-code inside the `flow` section. This is done through
-the `ctx.events` object:
+Events can be disabled. For example, you might not want a
+player to be able to end the game directly by simply calling
+the `endGame` event.
 
-```js
-moves: {
-  drawCard: (G, ctx) => {
-    ctx.events.endPhase();
-  };
-}
-```
-
-### Enabling / Disabling events
-
-An important point to note is that not all events are
-enabled on the client, and some need to be explicitly
-enabled.
-
-The following table describes the defaults:
-
-|  Event   | Default |
-| :------: | :-----: |
-| endTurn  |  true   |
-| endPhase |  true   |
-| endGame  |  false  |
-
-In order to enable an event, just add `eventName: true` to
-your `flow` section.
+In order to disable an event, just add `eventName: false` to
+the `events` section in your game config.
 
 ```js
-flow: {
-  endGame: true,
-  ...
-}
-```
-
-In order to disable an event, add `eventName: false`.
-
-```js
-flow: {
-  endPhase: false,
-  ...
-}
+const game = {
+  events: {
+    endGame: false,
+    ...
+  },
+};
 ```
 
 !> This doesn't apply to events in game logic, but just the

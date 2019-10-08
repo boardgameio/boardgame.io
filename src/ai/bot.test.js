@@ -110,7 +110,7 @@ describe('Simulate', () => {
         },
       },
       turn: {
-        activePlayers: { currentPlayer: Stage.NULL },
+        activePlayers: { player: Stage.NULL },
       },
       endIf: G => G.moved,
     });
@@ -236,7 +236,7 @@ describe('MCTSBot', () => {
         },
       },
       turn: {
-        activePlayers: { currentPlayer: Stage.NULL },
+        activePlayers: { player: Stage.NULL },
       },
       endIf: G => G.moves > 5,
     });

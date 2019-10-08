@@ -1,3 +1,55 @@
+## v0.33.1
+
+#### Features
+
+- [[6eb4ebd](https://github.com/nicolodavis/boardgame.io/commit/6eb4ebd)] rewrite one of the snippets in Svelte
+- [[86e65fe](https://github.com/nicolodavis/boardgame.io/commit/86e65fe)] fix: Move player to “next” stage on `endStage` (#484)
+
+## v0.33.0
+
+Huge release with a more streamlined API and the much
+awaited feature: Stages!
+
+Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/).
+
+#### Features
+
+- [[6762219](https://github.com/nicolodavis/boardgame.io/commit/6762219)] refactor: Change moveLimit syntax in setActivePlayers (#481)
+- [[64971ee](https://github.com/nicolodavis/boardgame.io/commit/64971ee)] Disallow game names with spaces (#474)
+- [[d43d239](https://github.com/nicolodavis/boardgame.io/commit/d43d239)] short form syntax for literal value in setActivePlayers
+- [[462f452](https://github.com/nicolodavis/boardgame.io/commit/462f452)] allow all players to call events
+- [[2409729](https://github.com/nicolodavis/boardgame.io/commit/2409729)] enable all events by default
+- [[1261475](https://github.com/nicolodavis/boardgame.io/commit/1261475)] remove UI toolkit
+- [[b2f5160](https://github.com/nicolodavis/boardgame.io/commit/b2f5160)] feat: Add `endStage` and `setStage` events (#458)
+- [[ca61bf6](https://github.com/nicolodavis/boardgame.io/commit/ca61bf6)] feat: Support move limits in `setActivePlayers` (#452)
+- [[ec15ad2](https://github.com/nicolodavis/boardgame.io/commit/ec15ad2)] TurnOrder.RESET
+- [[d251f4a](https://github.com/nicolodavis/boardgame.io/commit/d251f4a)] set phase to null instead of empty string
+- [[9c6f55d](https://github.com/nicolodavis/boardgame.io/commit/9c6f55d)] set currentPlayer to null instead of empty string
+- [[da2f0ea](https://github.com/nicolodavis/boardgame.io/commit/da2f0ea)] add stages
+- [[d5e2b55](https://github.com/nicolodavis/boardgame.io/commit/d5e2b55)] start turn at 1
+- [[35a34a0](https://github.com/nicolodavis/boardgame.io/commit/35a34a0)] nest turns inside phases
+- [[cff284b](https://github.com/nicolodavis/boardgame.io/commit/cff284b)] convert startingPhase into boolean option
+- [[b9ce7f1](https://github.com/nicolodavis/boardgame.io/commit/b9ce7f1)] move event disablers inside separate section in config
+- [[61eb8d8](https://github.com/nicolodavis/boardgame.io/commit/61eb8d8)] rename movesPerTurn to moveLimit
+- [[3a97a16](https://github.com/nicolodavis/boardgame.io/commit/3a97a16)] make optimistic an option in long-form move syntax
+- [[10ef457](https://github.com/nicolodavis/boardgame.io/commit/10ef457)] retire Game(). call it internally instead.
+- [[3d46a4a](https://github.com/nicolodavis/boardgame.io/commit/3d46a4a)] rename endGameIf to endIf
+- [[33ac684](https://github.com/nicolodavis/boardgame.io/commit/33ac684)] retire flow section
+- [[d75fe44](https://github.com/nicolodavis/boardgame.io/commit/d75fe44)] move undoableMoves into boolean inside long form move syntax
+- [[8924e84](https://github.com/nicolodavis/boardgame.io/commit/8924e84)] move redactedMoves into a boolean option in the long form move syntax
+- [[4b202ee](https://github.com/nicolodavis/boardgame.io/commit/4b202ee)] long form move syntax
+- [[f00e736](https://github.com/nicolodavis/boardgame.io/commit/f00e736)] rename some hooks
+- [[19ca21f](https://github.com/nicolodavis/boardgame.io/commit/19ca21f)] move onTurnBegin/onTurnEnd/endTurnIf/movesPerTurn into turn object
+- [[53b7ac7](https://github.com/nicolodavis/boardgame.io/commit/53b7ac7)] convert turnOrder into a turn object
+- [[fa58e5b](https://github.com/nicolodavis/boardgame.io/commit/fa58e5b)] retire allowedMoves
+- [[7a411c9](https://github.com/nicolodavis/boardgame.io/commit/7a411c9)] introduce namespaced moves that are defined within phases
+- [[a0d5f36](https://github.com/nicolodavis/boardgame.io/commit/a0d5f36)] Surface game metadata and player nicknames in client / react props (#436)
+- [[221b0d5](https://github.com/nicolodavis/boardgame.io/commit/221b0d5)] add benchmark
+
+#### Bugfixes
+
+- [[fd70ed5](https://github.com/nicolodavis/boardgame.io/commit/fd70ed5)] No payload is not an authentic player (#430)
+
 ## v0.32.1
 
 #### Features

@@ -31,14 +31,12 @@ export const Pass = (G, ctx) => {
 
 /**
  * Event to change the active players (and their stages) in the current turn.
- * @param {*} state
- * @param {*} arg
  */
-export function SetActivePlayersEvent(state, arg) {
-  return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
+export function SetActivePlayersEvent(state, playerID, arg) {
+  return { ...state, ctx: SetActivePlayers(state.ctx, playerID, arg) };
 }
 
-export function SetActivePlayers(ctx, arg) {
+export function SetActivePlayers(ctx, playerID, arg) {
   let { _prevActivePlayers } = ctx;
 
   const _nextActivePlayers = arg.next || null;
@@ -54,28 +52,65 @@ export function SetActivePlayers(ctx, arg) {
   }
 
   let activePlayers = {};
+  let _activePlayersMoveLimit = {};
 
-  if (arg.value) {
-    activePlayers = arg.value;
+  if (Array.isArray(arg)) {
+    let value = {};
+    arg.forEach(v => (value[v] = Stage.NULL));
+    activePlayers = value;
   }
 
-  if (arg.currentPlayer !== undefined) {
-    activePlayers[ctx.currentPlayer] = arg.currentPlayer;
+  if (arg.value) {
+    for (const id in arg.value) {
+      ApplyActivePlayerArgument(
+        activePlayers,
+        _activePlayersMoveLimit,
+        id,
+        arg.value[id]
+      );
+    }
+  }
+
+  if (arg.player !== undefined) {
+    ApplyActivePlayerArgument(
+      activePlayers,
+      _activePlayersMoveLimit,
+      playerID,
+      arg.player
+    );
   }
 
   if (arg.others !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
-      const playerID = ctx.playOrder[i];
-      if (playerID !== ctx.currentPlayer) {
-        activePlayers[playerID] = arg.others;
+      const id = ctx.playOrder[i];
+      if (id !== playerID) {
+        ApplyActivePlayerArgument(
+          activePlayers,
+          _activePlayersMoveLimit,
+          id,
+          arg.others
+        );
       }
     }
   }
 
   if (arg.all !== undefined) {
     for (let i = 0; i < ctx.playOrder.length; i++) {
-      const playerID = ctx.playOrder[i];
-      activePlayers[playerID] = arg.all;
+      const id = ctx.playOrder[i];
+      ApplyActivePlayerArgument(
+        activePlayers,
+        _activePlayersMoveLimit,
+        id,
+        arg.all
+      );
+    }
+  }
+
+  if (arg.moveLimit) {
+    for (const id in activePlayers) {
+      if (_activePlayersMoveLimit[id] === undefined) {
+        _activePlayersMoveLimit[id] = arg.moveLimit;
+      }
     }
   }
 
@@ -83,37 +118,8 @@ export function SetActivePlayers(ctx, arg) {
     activePlayers = null;
   }
 
-  let _activePlayersMoveLimit = null;
-
-  if (activePlayers && arg.moveLimit) {
-    if (typeof arg.moveLimit === 'number') {
-      _activePlayersMoveLimit = {};
-      for (const id in activePlayers) {
-        _activePlayersMoveLimit[id] = arg.moveLimit;
-      }
-    } else {
-      _activePlayersMoveLimit = {};
-
-      if (arg.moveLimit.value) {
-        _activePlayersMoveLimit = arg.moveLimit.value;
-      }
-
-      if (
-        arg.moveLimit.currentPlayer !== undefined &&
-        activePlayers[ctx.currentPlayer]
-      ) {
-        _activePlayersMoveLimit[ctx.currentPlayer] =
-          arg.moveLimit.currentPlayer;
-      }
-
-      if (arg.moveLimit.others !== undefined) {
-        for (const id in activePlayers) {
-          if (id !== ctx.currentPlayer) {
-            _activePlayersMoveLimit[id] = arg.moveLimit.others;
-          }
-        }
-      }
-    }
+  if (Object.keys(_activePlayersMoveLimit).length == 0) {
+    _activePlayersMoveLimit = null;
   }
 
   let _activePlayersNumMoves = {};
@@ -146,7 +152,7 @@ export function UpdateActivePlayersOnceEmpty(ctx) {
 
   if (activePlayers && Object.keys(activePlayers).length == 0) {
     if (ctx._nextActivePlayers) {
-      ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
+      ctx = SetActivePlayers(ctx, ctx.currentPlayer, ctx._nextActivePlayers);
       ({
         activePlayers,
         _activePlayersMoveLimit,
@@ -174,6 +180,29 @@ export function UpdateActivePlayersOnceEmpty(ctx) {
     _activePlayersNumMoves,
     _prevActivePlayers,
   };
+}
+
+/**
+ * Apply an active player argument to the given player ID
+ * @param {Object} activePlayers
+ * @param {Object} _activePlayersMoveLimit
+ * @param {String} playerID The player to apply the parameter to
+ * @param {(String|Object)} arg An active player argument
+ */
+function ApplyActivePlayerArgument(
+  activePlayers,
+  _activePlayersMoveLimit,
+  playerID,
+  arg
+) {
+  if (typeof arg !== 'object' || arg === Stage.NULL) {
+    arg = { stage: arg };
+  }
+
+  if (arg.stage !== undefined) {
+    activePlayers[playerID] = arg.stage;
+    if (arg.moveLimit) _activePlayersMoveLimit[playerID] = arg.moveLimit;
+  }
 }
 
 /**
@@ -209,7 +238,7 @@ export function InitTurnOrderState(G, ctx, turn) {
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-  ctx = SetActivePlayers(ctx, turn.activePlayers || {});
+  ctx = SetActivePlayers(ctx, currentPlayer, turn.activePlayers || {});
 
   return ctx;
 }

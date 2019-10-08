@@ -1,0 +1,143 @@
+#turnorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px;
+}
+
+#turnorder pre {
+  font-family: monospace;
+  font-size: 12px;
+  color: #999;
+}
+
+#turnorder .description {
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+
+#turnorder .table-interior {
+  position: absolute;
+  margin-left: -3.2em;
+  margin-top: -0.85em;
+}
+
+#turnorder .player-container {
+  position: relative;
+  margin: 100px;
+  width: 16em;
+  height: 16em;
+  border-radius: 50%;
+  background: #eaeaea;
+  border: 5px solid #aaa;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.turnorder-options {
+  width: 500px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.turnorder-options div {
+  text-align: center;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 10px;
+  border: 1px solid #aaa;
+  width: 100px;
+}
+
+.turnorder-options div:hover {
+  background: #efefef;
+}
+
+.turnorder-options div.active {
+  background: #efefef;
+  font-weight: bold;
+}
+
+#turnorder .stage-label {
+  position: absolute;
+  top: 2.25em;
+  left: 50%;
+  margin-left: -3.5em;
+  width: 8em;
+  text-align: center;
+}
+
+#turnorder .controls {
+  position: absolute;
+  margin-top: 60px;
+  margin-left: -47px;
+}
+
+#turnorder .controls button {
+  width: 80px;
+  margin-bottom: 5px;
+}
+
+#turnorder .player {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -1.5em;
+  width: 3em;
+  height: 3em;
+  line-height: 2.75em;
+  border-radius: 50%;
+  border-color: #aaa;
+  border-style: solid;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  opacity: 0.3;
+}
+
+#turnorder .player.current {
+  opacity: 1;
+  background: #555;
+  color: #eee;
+}
+
+#turnorder .player.active {
+  opacity: 1;
+}
+
+#turnorder .phase,
+#turnorder .stage {
+  display: inline-block;
+  background: #555;
+  color: #eee;
+  padding: 3px 5px;
+  margin-left: 5px;
+}
+
+#turnorder .bgio-client {
+  padding: 0 !important;
+}
+
+.player-container span > .bgio-client:nth-child(1) .player-wrap {
+  transform: rotate(0deg) translate(12em) rotate(-0deg);
+}
+.player-container span > .bgio-client:nth-child(2) .player-wrap {
+  transform: rotate(60deg) translate(12em) rotate(-60deg);
+}
+.player-container span > .bgio-client:nth-child(3) .player-wrap {
+  transform: rotate(120deg) translate(12em) rotate(-120deg);
+}
+.player-container span > .bgio-client:nth-child(4) .player-wrap {
+  transform: rotate(180deg) translate(12em) rotate(-180deg);
+}
+.player-container span > .bgio-client:nth-child(5) .player-wrap {
+  transform: rotate(240deg) translate(12em) rotate(-240deg);
+}
+.player-container span > .bgio-client:nth-child(6) .player-wrap {
+  transform: rotate(300deg) translate(12em) rotate(-300deg);
+}

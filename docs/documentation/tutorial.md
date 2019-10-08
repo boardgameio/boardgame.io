@@ -5,8 +5,8 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
 ## Setup
 
 We shall use [create-react-app](https://github.com/facebookincubator/create-react-app) to create a **React** app and add
-**boardgame.io** features. The code uses ES2015 features,
-including [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import), and
+**boardgame.io** to it. The code uses ES2015 features,
+including [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) and
 the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator) syntax.
 
 ```
@@ -16,7 +16,7 @@ $ cd game
 $ npm install --save boardgame.io
 ```
 
-## Define Moves
+## Moves
 
 We create the game by providing the initial value of the
 game state `G` (through the `setup` function), and the moves
@@ -37,17 +37,16 @@ call-site of this move.
 // src/App.js
 
 import { Client } from 'boardgame.io/react';
-import { Game } from 'boardgame.io/core';
 
-const TicTacToe = Game({
+const TicTacToe = {
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
-    clickCell(G, ctx, id) {
+    clickCell: (G, ctx, id) => {
       G.cells[id] = ctx.currentPlayer;
     },
   },
-});
+};
 
 const App = Client({ game: TicTacToe });
 
@@ -64,14 +63,14 @@ npm start
 ```
 
 ```react
-<iframe class='react' src='react/example-1.html' height='800' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-1' height='800' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 Notice that we have a fully playable game that we can
-interact with via the Debug UI with just this little piece of code!
+interact with using the Debug Panel with just this little piece of code!
 
 ?> You can make a move by clicking on `clickCell` on the
-Debug UI (or pressing the keyboard shortcut `c`),
+Debug Panel (or pressing the keyboard shortcut `c`),
 entering `0` as an argument and pressing
 `Enter` to have the current player make a move on the 0-th
 cell. This `id` is available inside the move function as
@@ -80,18 +79,17 @@ the first argument after `G` and `ctx`. Notice how the
 can end the turn using `endTurn` and the next call to
 `clickCell` will result in a `1` in the chosen cell.
 
-!> The Debug UI can be turned off by passing `debug: false`
+!> The Debug Panel can be turned off by passing `debug: false`
 in the `Client` config.
 
-## Add Victory Condition
+## Victory Condition
 
 The Tic-Tac-Toe game we have so far doesn't really terminate.
 Let's keep track of a winner in case one player wins the game.
-Let's also prevent players from being able to overwrite cells.
+In order to do this, we add a game termination condition
+to `endIf`.
 
-In order to do this, we add a `flow` section to control the
-"flow" of the game. In this case, we just add a game termination
-condition to it.
+Let's also prevent players from being able to overwrite cells:
 
 ```js
 // Return true if `cells` is in a winning configuration.
@@ -104,36 +102,33 @@ function IsDraw(cells) {
   return cells.filter(c => c === null).length == 0;
 }
 
-const TicTacToe = Game({
+const TicTacToe = {
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
-    clickCell(G, ctx, id) {
-      // Ensure that we can't overwrite cells.
+    clickCell: (G, ctx, id) => {
       if (G.cells[id] === null) {
         G.cells[id] = ctx.currentPlayer;
       }
     },
   },
 
-  flow: {
-    endGameIf: (G, ctx) => {
-      if (IsVictory(G.cells)) {
-        return { winner: ctx.currentPlayer };
-      }
-      if (IsDraw(G.cells)) {
-        return { draw: true };
-      }
-    },
+  endIf: (G, ctx) => {
+    if (IsVictory(G.cells)) {
+      return { winner: ctx.currentPlayer };
+    }
+    if (IsDraw(G.cells)) {
+      return { draw: true };
+    }
   },
-});
+};
 ```
 
-!> The `endGameIf` field takes a function that determines if
+!> `endIf` takes a function that determines if
 the game is over. If it returns anything at all, the game ends and
 the return value is available at `ctx.gameover`.
 
-## Render Board
+## Game Board
 
 **React** is a great fit for board games because
 it provides a declarative API to translate objects
@@ -241,28 +236,33 @@ export default App;
 And there you have it. A basic tic-tac-toe game!
 
 ```react
-<iframe class='react' src='react/example-2.html' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-2' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 !> You can press `1` (or click on the button next to `reset`) to reset the
 state of the game and start over.
 
-## Adding AI
+## Bots
 
 In this section we will show you how easy it is to add a bot that is
 capable of playing your game. All you need to do is just tell the
-bot how to find legal moves in the game, and it will do the rest.
+bot how to find legal moves in the game, and it will find moves that
+work well.
 
-We shall first modify our flow section by adding a useful option
-called `movesPerTurn` to automatically end the player's turn after
+We shall first modify our game by adding a useful option
+called `moveLimit` to automatically end the player's turn after
 a single move has been made. That way the bot doesn't have to worry about
 issuing `endTurn` calls (which, while possible, makes the game tree
 a bit messier to search).
 
 ```js
-flow: {
-  movesPerTurn: 1,
-  ...
+const TicTacToe = {
+  setup: () => { ... },
+  moves: { ... }
+
+  turn: {
+    moveLimit: 1,
+  },
 }
 ```
 
@@ -292,19 +292,22 @@ const App = Client({
 export default App;
 ```
 
-That's it! You will notice that you now have two more options in
-the **Controls** section (`step` and `simulate`). You can use the
-keyboard shortcuts `4` and `5` to trigger them.
+That's it! Now that you have configured AI, there are two more options in
+the **Controls** section of the Debug Panel:
 
-Press `5` and just watch your game play by itself!
+- `step` causes the AI to calculate and make a single move
+  (shortcut: <kbd>4</kbd>)
 
-You can also use a combination of moves that you make yourself
-and bot moves (press `4` to have the bot make a move). You can make
+- `simulate` causes the AI to play the entire game by itself
+  (shortcut: <kbd>5</kbd>)
+
+`step` helps you combine moves that you make yourself
+and bot moves. For example, you can make
 some manual moves to get two in a row and then verify that
-the bot makes a block, for example.
+the bot makes a block.
 
 ```react
-<iframe class='react' src='react/example-3.html' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-3' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 !> The bot uses [MCTS](http://www.baeldung.com/java-monte-carlo-tree-search) under the
@@ -321,4 +324,4 @@ and it will figure out the right combination of moves to make it happen!
 Detailed documentation about all this is coming soon. Adding bots to games for actual
 networked play (as opposed to merely simulating moves) is also in the works.
 
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/x9z2z95o14)
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-xg44h)

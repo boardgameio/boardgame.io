@@ -17,7 +17,7 @@ be configured to run on a separate port.
 A config object with the following options:
 
 1. `games` (_array_): a list of game implementations
-   (each is the return value of [Game](/api/Game.md)).
+   (each should be an object conforming to the [Game API](/api/Game.md)).
 
 2. `db` (_object_): the [database connector](/storage).
    If not provided, an in-memory implementation is used.

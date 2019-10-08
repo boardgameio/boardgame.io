@@ -6,11 +6,13 @@ get done before we are ready for a v1 release.
 - _Areas that need help are marked with **[help needed]**._
 - _Stuff that [nicolodavis@](https://github.com/nicolodavis) is working on is marked with **[N]**._
 
+The issues below (and some others that are not in this document) are also available on the [v1.0 milestone](https://github.com/nicolodavis/boardgame.io/milestone/2) link.
+
 ### AI
 
 - [x] MCTS bot ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
 - [ ] ability to add priorities and objectives ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
-- [ ] run bots in multiplayer games
+- [ ] Bots in multiplayer games ([issue](https://github.com/nicolodavis/boardgame.io/issues/383))  **[help needed]**
 
 ### UI
 
@@ -20,6 +22,7 @@ get done before we are ready for a v1 release.
 
 - [x] basic `create` and `join` API
 - [x] simple web-based lobby ([issue](https://github.com/nicolodavis/boardgame.io/issues/197))
+- [ ] Lobby Improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/354))  **[help needed]**
 
 ### Storage
 
@@ -47,6 +50,7 @@ get done before we are ready for a v1 release.
 
 ### Documentation
 
-- [ ] code organization best practices
+- [ ] recipes for different game scenarios
+- [ ] code organization patterns
 - [ ] deployment tutorial
-- [ ] generate markdown from jsdoc?
+- [ ] tutorial using the vanilla JS client

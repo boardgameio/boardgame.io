@@ -1,219 +1,176 @@
 # Phases
 
 Most games beyond very simple ones tend to have different
-behaviors at various "phases". A game might have a phase
+behaviors at various phases. A game might have a phase
 at the beginning where players are drafting cards before
-playing, for example. Alternatively, an individual player's turn
-might be divided into different phases (an action phase followed by
-a buy phase in Dominion, for example).
+entering a playing phase, for example.
 
-Each phase in `boardgame.io` defines a set of options
-that are applied during that phase. This includes the
-ability to restrict moves, use a specific turn order and much more.
+Each phase in [boardgame.io](https://boardgame.io/) defines a set
+of game configuration options that are applied for the duration
+of that phase. This includes the ability to define a different
+set of moves, use a different turn order etc. Turns happen
+inside phases.
 
 #### Card Game
 
-Let us start with a contrived example of a single player
-game that has exactly two moves:
+Let us start with a contrived example of a game that has exactly
+two moves:
 
-- draw a card from the deck into your hand
-- play a card from your hand onto the deck
+- draw a card from the deck into your hand.
+- play a card from your hand onto the deck.
 
 ```js
-const game = Game({
-  setup: () => ({ deck: 5, hand: 0 }),
+function DrawCard(G, ctx) {
+  G.deck--;
+  G.hand[ctx.currentPlayer]++;
+}
 
-  moves: {
-    drawCard: G => {
-      G.deck--;
-      G.hand++;
-    },
-    playCard: G => {
-      G.deck++;
-      G.hand--;
-    },
-  },
-});
+function PlayCard(G, ctx) {
+  G.deck++;
+  G.hand[ctx.currentPlayer]--;
+}
+
+const game = {
+  setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
+  moves: { DrawCard, PlayCard },
+  turn: { moveLimit: 1 },
+};
 ```
 
-We'll ignore the rendering component of this game, but this is how it might look:
+!> Notice how we moved the moves out into standalone functions
+instead of inlining them in the game object.
+
+We'll ignore the rendering part of this game, but this is how it might look. Note that you can draw or play a card at any time, including taking a card when the deck is empty.
 
 ```react
-<iframe class='react' src='react/phases-1.html' height='800' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='plain' src='snippets/phases-1' height='350' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
 ```
-
-!> Note that you can draw or play a card at any time, including taking a card when the deck is empty.
 
 #### Phases
 
 Now let's say we want the game to work in two phases:
 
-- a first phase where the player can only draw cards (until the deck is empty).
-- a second phase where the player can only play cards (until their hand is empty).
+- a first phase where the players only draw cards (until the deck is empty).
+- a second phase where the players only play cards.
 
-In order to do this, we add a `flow` section to the game
-spec (you should already be familiar with this as the location
-where you placed `endGameIf` in the
-[tutorial](#/tutorial?id=add-victory-condition)). It can also contain a `phases` object, which defines different phases in the game. Each phase can specify a list of `allowedMoves`,
-which allows only those moves to be played during that phase.
+In order to do this, we define two `phases`. Each phase can specify its own
+list of moves, which come into effect during that phase:
 
 ```js
-const game = Game({
-  setup: () => ({ deck: 5, hand: 0 }),
+const game = {
+  setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
+  turn: { moveLimit: 1 },
 
-  moves: {
-    drawCard: G => {
-      G.deck--;
-      G.hand++;
+  phases: {
+    draw: {
+      moves: { DrawCard },
     },
-    playCard: G => {
-      G.deck++;
-      G.hand--;
+
+    play: {
+      moves: { PlayCard },
     },
-  },
-
-  flow: {
-    startingPhase: 'draw',
-
-    phases: {
-      draw: {
-        allowedMoves: ['drawCard'],
-        endPhaseIf: G => G.deck <= 0,
-        next: 'play',
-      },
-
-      play: {
-        allowedMoves: ['playCard'],
-        endPhaseIf: G => G.hand <= 0,
-        next: 'draw',
-      },
-    },
-  },
-});
-```
-
-!> Every game also has an implicit `default` phase, which is just
-a phase with no specific options, so the example above actually
-has three phases, even though we never use the `default` phase.
-
-### Terminating a phase
-
-A phase ends when one of the following happens:
-
-###### `endPhaseIf` triggers:
-
-This is a function that terminates the phase when it returns a truthy value (see the example above).
-
-###### The `endPhase` event is dispatched:
-
-This can happen either in the game logic or from the client
-directly. See the [Events API](events.md) for more details
-on how to dispatch events.
-
-### What happens when a phase terminates?
-
-The game moves to the previous phase it was in (at the beginning
-of the game this is the `default` phase). This behavior can be
-overriden by the following:
-
-1. If a phase specifies the `next` option (like our example above does), then that is chosen as the next phase.
-
-```js
-phases: {
-  A: {
-    next: 'B';
-  }
-}
-```
-
-2. The `endPhase` event accepts an argument that can specify the
-   next phase:
-
-```
-endPhase({ next: 'B' });
-```
-
-3. `endPhaseIf` can return an object specifying the next phase:
-
-```js
-endPhaseIf: () => ({ next: 'B' });
-```
-
-Watch our game in action now with phases. Notice that you can only draw cards in the first
-phase, and you can only play cards in the second phase.
-
-```react
-<iframe class='react' src='react/phases-2.html' height='1000' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
-```
-
-!> Note the additional fields in `ctx` like `phase`.
-
-#### Automatic Setup and Cleanup
-
-Phases can also specify automatic "board actions" that occur at the beginning or
-end of a phase. These are specified just like normal moves in `onPhaseBegin` and
-`onPhaseEnd`.
-
-```js
-phases: {
-  phaseA: {
-    onPhaseBegin: (G, ctx) => G,
-    onPhaseEnd: (G, ctx) => G,
   },
 };
 ```
 
-#### Triggers / Hooks
+!> A phase that doesn't specify any moves just uses moves from
+the main `moves` section in the game. However, if it does,
+then the `moves` section in the phase overrides the global
+one.
 
-The `flow` section can specify a number of automatic behaviors when a move is made
-or when the turn or phase is ended. These can also be overridden at the phase level.
-Let's take a look at some of these:
-
-!> For an authoritative set of options, take a look
-[here](https://github.com/nicolodavis/boardgame.io/blob/master/src/core/flow.js#L139).
+The game doesn't begin in any of these phases. In order to begin
+in the "draw" phase, we add a `start: true` to its config. Only
+one phase can have `start: true`.
 
 ```js
-flow: {
-  // Ends the turn if this returns a truthy value.
-  endTurnIf: (G, ctx) => boolean|object
+phases: {
+  draw: {
+    moves: { DrawCard },
++   start: true,
+  },
 
-  // Ends the game if this returns anything other than undefined.
-  endGameIf: (G, ctx) => {}
-
-  // Run at the start of a turn.
-  onTurnBegin: (G, ctx) => G
-
-  // Run at the end of a turn.
-  onTurnEnd: (G, ctx) => G
-
-  // Run at the end of a move.
-  onMove: (G, ctx) => G
-
-  phases: {
-    A: {
-      // Ends the phase if this returns a truthy value.
-      endPhaseIf: (G, ctx) => boolean|object
-
-      // Run at the beginning of a phase.
-      onPhaseBegin: (G, ctx) => G
-
-      // Run at the end of a phase.
-      onPhaseEnd:   (G, ctx) => G
-
-      // Can override the global-options here for this
-      // specific phase only.
-      endTurnIf: ...
-      endGameIf: ...
-      onTurnBegin: ...
-      onTurnEnd: ...
-      onMove:    ...
-    }
-  }
+  play: {
+    moves: { PlayCard },
+  },
 }
 ```
 
-!> An important point to note is that in a multiplayer game, all of the code under
-`flow` is executed only on the master. The code under `moves`, on the other hand, is
-run on both client and server. It is run on the client in order to effect a
-quick state transition without network lag, and run on the server to process
-the authoritative version of the state.
+Let's also end the "draw" phase automatically once the deck is
+empty.
+
+```js
+phases: {
+  draw: {
+    moves: { DrawCard },
++   endIf: G => (G.deck <= 0),
++   next: 'play',
+    start: true,
+  },
+
+  play: {
+    moves: { PlayCard },
+  },
+}
+```
+
+`endIf` ends the phase that it is defined in when it returns
+`true`. The game is returned to a state where no phase is
+active. However, for this game, we want to move to
+the "play" phase once the "draw" phase is done. We specify a
+`next` option for this, which tells the framework to go to that
+phase.
+
+Watch our game in action (now with phases). Notice that you can only draw cards in the first
+phase, and you can only play cards in the second phase.
+
+```react
+<iframe class='plain' src='snippets/phases-2' height='350' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
+```
+
+#### Setup and Cleanup hooks
+
+You can also run code automatically at the beginning or end of a phase. These are specified just like normal moves in `onBegin` and `onEnd`.
+
+```js
+phases: {
+  phaseA: {
+    onBegin: (G, ctx) => { ... },
+    onEnd: (G, ctx) => { ... },
+  },
+};
+```
+
+!> Hooks like `onBegin` and `onEnd` are run only on the server in
+multiplayer games. Moves, on the other hand, run on both client
+and server. They are run on the client in order to facilitate
+a lag-free experience, and are run on the server to calculate the
+authoritative game state.
+
+#### Moving between Phases
+
+The two primary ways of moving between phases are by calling the
+following events:
+
+1. `endPhase`: This ends the current phase and returns the game
+   to a state where no phase is active. If the phase specifies a
+   `next` option, then the game will move into that phase instead.
+   This event can also be triggered automatically by using an `endIf`
+   condition in the phase spec.
+
+2. `setPhase`: This ends the current phase and moves the game into
+   the phase specified by the argument.
+
+!> Whenever a phase ends, the current player's turn is first ended automatically.
+
+#### Override Behavior
+
+As observed above, a phase can specify its own `moves` section
+which comes into effect when the phase is active. This `moves`
+section completely replaces the global `moves` section
+for the duration of the phase. The moves may have the
+same name as their global equivalents, but they are not related
+to them in any way.
+
+A phase can similarly also override the `turn` section. You will
+typically do this if you want to use a different
+[Turn Order](turn-order.md) during the phase.
