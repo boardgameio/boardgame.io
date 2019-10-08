@@ -221,11 +221,7 @@ export class MCTSBot extends Bot {
   playout(node) {
     let state = node.state;
 
-    const playoutDepth = this.playoutDepth(
-      state.G,
-      state.ctx,
-      state.ctx.currentPlayer
-    );
+    const playoutDepth = this.playoutDepth(state.G, state.ctx);
 
     for (let i = 0; i < playoutDepth && state.ctx.gameover === undefined; i++) {
       const { G, ctx } = state;
@@ -288,7 +284,7 @@ export class MCTSBot extends Bot {
   play(state, playerID) {
     const root = this.createNode({ state, playerID });
 
-    const iterations = this.iterations(state.G, state.ctx, playerID);
+    const iterations = this.iterations(state.G, state.ctx);
 
     for (let i = 0; i < iterations; i++) {
       const leaf = this.select(root);
