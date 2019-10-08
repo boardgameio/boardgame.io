@@ -1,3 +1,14 @@
+## v0.33.2
+
+#### Features
+
+- [[18d9be5](https://github.com/nicolodavis/boardgame.io/commit/18d9be5)] Allowing support for both numbers and functions for MCTS bot iterations and playoutDepth (#475)
+- [[901c746](https://github.com/nicolodavis/boardgame.io/commit/901c746)] feat: Apply `value` argument last in `setActivePlayers` (#489)
+
+#### Bugfixes
+
+- [[bed18ce](https://github.com/nicolodavis/boardgame.io/commit/bed18ce)] reintroduce InitializeGame in boardgame.io/core
+
 ## v0.33.1
 
 #### Features
