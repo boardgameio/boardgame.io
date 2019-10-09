@@ -14,13 +14,11 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [Four in a row](https://github.com/PJohannessen/four-in-a-row) - [tutorial](https://www.lonesomecrowdedweb.com/blog/four-in-a-row-boardgameio/) - Four in a Row using boardgame.io.
 
-- [FreeBoardGame.org](https://github.com/freeboardgame/FreeBoardGame.org) - [play](https://freeboardgame.org) - PWA framework for publishing board games. Has Chess, Tic-Tac-Toe and Seabattle.
+- [FreeBoardGame.org](https://github.com/freeboardgame/FreeBoardGame.org) - [play](https://freeboardgame.org) - PWA framework for publishing board games.
 
 - [Hex game](https://github.com/Korla/hexgame) - [play](https://korla.github.io/hexgame/build/) - Simple hexagonal board game.
 
 - [Matchimals.fun](https://github.com/chrisheninger/matchimals.fun) - [play](https://www.matchimals.fun/) - An animal matching puzzle card game.
-
-- [Oasis gaming SDK](https://www.oasislabs.com/gaming) - API inspired by boardgame.io.
 
 - [Pong240's Boardgame](https://github.com/Pong420/Boardgame) - [play](http://play-boardgame.herokuapp.com) - A project for building board games with React and boardgame.io.
 
