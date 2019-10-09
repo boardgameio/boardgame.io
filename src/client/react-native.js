@@ -74,22 +74,24 @@ export function Client(opts) {
       });
     }
 
-    // eslint-disable-next-line react/no-deprecated
-    UNSAFE_componentWillReceiveProps(nextProps) {
-      if (nextProps.gameID != this.props.gameID) {
-        this.client.updateGameID(nextProps.gameID);
-      }
-      if (nextProps.playerID != this.props.playerID) {
-        this.client.updatePlayerID(nextProps.playerID);
-      }
-      if (nextProps.credentials != this.props.credentials) {
-        this.client.updateCredentials(nextProps.credentials);
-      }
-    }
-
     componentDidMount() {
       this.client.connect();
       this.client.subscribe(() => this.forceUpdate());
+    }
+
+    componentDidUpdate(prevProps) {
+      if (prevProps.gameID != this.props.gameID) {
+        this.client.updateGameID(this.props.gameID);
+        this.forceUpdate();
+      }
+      if (prevProps.playerID != this.props.playerID) {
+        this.client.updatePlayerID(this.props.playerID);
+        this.forceUpdate();
+      }
+      if (prevProps.credentials != this.props.credentials) {
+        this.client.updateCredentials(this.props.credentials);
+        this.forceUpdate();
+      }
     }
 
     render() {
