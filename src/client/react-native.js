@@ -72,8 +72,6 @@ export function Client(opts) {
         },
         enhancer,
       });
-
-      this.client.subscribe(() => this.forceUpdate());
     }
 
     // eslint-disable-next-line react/no-deprecated
@@ -89,9 +87,9 @@ export function Client(opts) {
       }
     }
 
-    // eslint-disable-next-line react/no-deprecated
-    UNSAFE_componentWillMount() {
+    componentDidMount() {
       this.client.connect();
+      this.client.subscribe(() => this.forceUpdate());
     }
 
     render() {

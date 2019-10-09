@@ -25,8 +25,6 @@
 
   client.connect();
   client.subscribe(update);
-
-  update();
 </script>
 
 <style>
