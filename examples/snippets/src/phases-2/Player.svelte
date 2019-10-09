@@ -33,6 +33,41 @@
     margin-top: 20px;
     color: #aaa;
   }
+
+  .deck {
+    width: 40px;
+    height: 60px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #ddd;
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+    margin-bottom: 50px;
+  }
+
+  .client {
+    border-radius: 5px;
+    width: 100px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    opacity: .8;
+  }
+
+  .client.active {
+    box-shadow: 0 0 5px #aaa;
+    background: #fff;
+    opacity: 1;
+  }
+
+  .client li {
+    list-style: none;
+    padding: 5px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-family: monospace;
+  }
 </style>
 
 {#if !playerID}

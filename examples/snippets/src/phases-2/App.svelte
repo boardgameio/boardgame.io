@@ -6,6 +6,12 @@
   #board {
     width: 100%;
   }
+
+  .container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
 </style>
 
 <div>
