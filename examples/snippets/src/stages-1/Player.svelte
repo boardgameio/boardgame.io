@@ -8,6 +8,8 @@
   let deck = 0;
   let c = 'client';
   let phase = '';
+  let active = false;
+  let discard = false;
 
   const client = Client({
     ...Game,
@@ -20,6 +22,8 @@
     hand = G.hand;
     deck = G.deck;
     phase = ctx.phase;
+    active = isActive;
+    discard = ctx.activePlayers && ctx.activePlayers[playerID] == 'discard';
     c = isActive ? 'client active' : 'client';
   }
 
@@ -28,25 +32,6 @@
 </script>
 
 <style>
-  .phase {
-    font-size: 1.2em;
-    margin-top: 20px;
-    color: #aaa;
-  }
-
-  .deck {
-    font-family: monospace;
-    width: 40px;
-    height: 60px;
-    margin-left: auto;
-    margin-right: auto;
-    border: 1px solid #ddd;
-    padding: 20px;
-    text-align: center;
-    border-radius: 5px;
-    margin-bottom: 50px;
-  }
-
   .client {
     border-radius: 5px;
     width: 100px;
@@ -71,23 +56,21 @@
   }
 </style>
 
-{#if !playerID}
-  <div class="deck">
-    <div>{deck}</div>
-    <div>cards</div>
-    <div class="phase">{phase}</div>
-  </div>
-{:else}
-  <div class={c}>
+<div class={c}>
+  <li>
+    <strong>Player {playerID}</strong>
+  </li>
+
+  {#if active}
     <li>
-      <strong>Player {playerID}</strong>
+    {#if discard}
+      <button on:click={() => client.moves.discard()}>Discard</button>
+    {:else}
+      <button on:click={() => client.moves.militia()}>Play Card</button>
+    {/if}
     </li>
-    <li>{hand[playerID]} cards</li>
-    <li>
-      <button on:click={client.moves.DrawCard}>Draw Card</button>
-    </li>
-    <li>
-      <button on:click={client.moves.PlayCard}>Play Card</button>
-    </li>
-  </div>
-{/if}
+  <li>
+    <button on:click={() => client.events.endTurn()}>End Turn</button>
+  </li>
+  {/if}
+</div>

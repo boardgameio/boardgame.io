@@ -5,7 +5,7 @@
     "build": "parcel build --no-source-maps --public-url /documentation/snippets src/*/index.html"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.7.0"
+    "parcel-bundler": "^1.11.0"
   },
   "alias": {
     "boardgame.io": "../../dist"
@@ -20,6 +20,6 @@
     "parcel-plugin-svelte": "^4.0.4",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "svelte": "^3.12.1"
+    "svelte": "^3.0.0"
   }
 }

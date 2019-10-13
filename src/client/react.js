@@ -100,7 +100,10 @@ export function Client(opts) {
       this.gameID = props.gameID;
       this.playerID = props.playerID;
       this.credentials = props.credentials;
+    }
 
+    componentDidMount() {
+      this.client.connect();
       this.client.subscribe(() => this.forceUpdate());
     }
 
@@ -133,10 +136,6 @@ export function Client(opts) {
       this.credentials = credentials;
       this.forceUpdate();
     };
-
-    componentDidMount() {
-      this.client.connect();
-    }
 
     overrideGameState = state => {
       this.setState({ gameStateOverride: state });

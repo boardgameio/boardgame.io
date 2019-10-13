@@ -7,7 +7,6 @@
   let hand = {};
   let deck = 0;
   let c = 'client';
-  let phase = '';
 
   const client = Client({
     ...Game,
@@ -19,7 +18,6 @@
     const { G, ctx, isActive } = client.getState();
     hand = G.hand;
     deck = G.deck;
-    phase = ctx.phase;
     c = isActive ? 'client active' : 'client';
   }
 
@@ -62,12 +60,12 @@
   }
 
   .client li {
+    font-family: monospace;
     list-style: none;
     padding: 5px;
     height: 30px;
     line-height: 30px;
     text-align: center;
-    font-family: monospace;
   }
 </style>
 
@@ -75,7 +73,6 @@
   <div class="deck">
     <div>{deck}</div>
     <div>cards</div>
-    <div class="phase">{phase}</div>
   </div>
 {:else}
   <div class={c}>

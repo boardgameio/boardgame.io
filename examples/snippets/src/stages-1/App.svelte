@@ -15,9 +15,6 @@
 </style>
 
 <div>
-  <div id="board">
-    <Player />
-  </div>
   <div class="container">
     <Player playerID="0" />
     <Player playerID="1" />
