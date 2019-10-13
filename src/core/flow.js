@@ -529,6 +529,19 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     // Reset activePlayers.
     ctx = { ...ctx, activePlayers: null };
 
+    // Remove player from playerOrder
+    if (arg && true === arg.remove) {
+      const playOrder = [...ctx.playOrder];
+
+      playOrder.splice(playOrder.indexOf(ctx.currentPlayer), 1);
+
+      ctx = { ...ctx, playOrder };
+
+      if (0 === playOrder.length) {
+        EndPhaseEvent(state);
+      }
+    }
+
     // Add log entry.
     const action = gameEvent('endTurn', arg);
     const logEntry = {
@@ -740,6 +753,18 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     ]);
   }
 
+  function PassEvent(state, _playerID, arg) {
+    return Process(state, [
+      {
+        fn: EndTurn,
+        turn: state.ctx.turn,
+        phase: state.ctx.phase,
+        force: true,
+        arg,
+      },
+    ]);
+  }
+
   function EndGameEvent(state, _playerID, arg) {
     return Process(state, [
       { fn: EndGame, turn: state.ctx.turn, phase: state.ctx.phase, arg },
@@ -750,6 +775,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     endStage: EndStageEvent,
     setStage: SetStageEvent,
     endTurn: EndTurnEvent,
+    pass: PassEvent,
     endPhase: EndPhaseEvent,
     setPhase: SetPhaseEvent,
     endGame: EndGameEvent,
@@ -760,6 +786,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
   if (events.endTurn !== false) {
     enabledEventNames.push('endTurn');
+  }
+  if (events.pass !== false) {
+    enabledEventNames.push('pass');
   }
   if (events.endPhase !== false) {
     enabledEventNames.push('endPhase');
