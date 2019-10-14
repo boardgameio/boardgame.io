@@ -13,6 +13,7 @@ import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
 import filesize from 'rollup-plugin-filesize';
+import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 import ttypescript from 'ttypescript';
@@ -23,6 +24,19 @@ const env = process.env.NODE_ENV;
 const plugins = [
   postcss(),
   babel({ exclude: '**/node_modules/**' }),
+  filesize(),
+];
+
+const clientPlugins = [
+  postcss(),
+  babel({ exclude: '**/node_modules/**' }),
+  svelte({
+    extensions: ['.svelte'],
+  }),
+  resolve({
+    browser: true,
+    only: ['svelte'],
+  }),
   filesize(),
 ];
 
@@ -56,14 +70,14 @@ export default [
     input: 'packages/react.js',
     external: Object.keys(globals),
     output: { file: 'dist/react.js', format: 'umd', name: 'Client', globals },
-    plugins,
+    plugins: clientPlugins,
   },
 
   {
     input: 'packages/client.js',
     external: Object.keys(globals),
     output: { file: 'dist/client.js', format: 'umd', name: 'Client', globals },
-    plugins,
+    plugins: clientPlugins,
   },
 
   {
@@ -75,7 +89,7 @@ export default [
       name: 'ReactNativeClient',
       globals,
     },
-    plugins,
+    plugins: clientPlugins,
   },
 
   {
@@ -144,6 +158,10 @@ export default [
       { file: pkg.module, format: 'es', globals },
     ],
     plugins: plugins.concat([
+      svelte({
+        extensions: ['.svelte'],
+      }),
+      resolve({ browser: true, only: ['svelte'] }),
       replace({ 'process.env.NODE_ENV': JSON.stringify(env) }),
     ]),
   },
@@ -162,6 +180,9 @@ export default [
     ],
     plugins: plugins.concat([
       builtins(),
+      svelte({
+        extensions: ['.svelte'],
+      }),
       resolve({ browser: true, preferBuiltins: false }),
       commonjs(),
       replace({

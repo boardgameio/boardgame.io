@@ -12,6 +12,7 @@ import * as ActionCreators from '../core/action-creators';
 import { Game } from '../core/game';
 import { error } from '../core/logger';
 import { SocketIO } from './transport/socketio';
+import Debug from './debug/Debug.svelte';
 import { Local, LocalMaster } from './transport/local';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
@@ -299,6 +300,15 @@ class _ClientImpl {
 
     this.transport.subscribeGameMetadata(metadata => {
       this.gameMetadata = metadata;
+    });
+
+    // TODO: Maybe move this to a separate run() function
+    // that also calls subsribe etc.
+    new Debug({
+      target: document.body,
+      props: {
+        id: 5,
+      },
     });
   }
 
