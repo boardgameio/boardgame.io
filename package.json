@@ -4,8 +4,8 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
-    "start": "bash ./scripts/dev.sh",
-    "dev:client": "(cd examples/react-web; npm start)",
+    "start": "node scripts/install-web.js && npx concurrently npm:dev:server npm:dev:client",
+    "dev:client": "cd examples && cd react-web && npm start",
     "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions '.ts,.js' --ignore 'src/**/*.test.ts' --presets @babel/preset-env examples/react-web/server.js",
     "build": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
     "benchmark": "babel-node --presets @babel/preset-env benchmark/index.js",
