@@ -40,6 +40,15 @@ const clientPlugins = [
   filesize(),
 ];
 
+const serverPlugins = [
+  resolve(),
+  tsPlugin({
+    typescript: ttypescript,
+  }),
+  babel({ exclude: ['**/node_modules/**'] }),
+  commonjs({ include: 'node_modules/**' }),
+];
+
 const globals = {
   immer: 'immer',
   react: 'React',
@@ -56,14 +65,7 @@ export default [
   {
     input: 'packages/server.ts',
     output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
-    plugins: [
-      resolve(),
-      tsPlugin({
-        typescript: ttypescript,
-      }),
-      babel({ exclude: ['**/node_modules/**'] }),
-      commonjs({ include: 'node_modules/**' }),
-    ],
+    plugins: serverPlugins,
   },
 
   {
