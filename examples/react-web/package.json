@@ -1,22 +1,36 @@
 {
   "name": "react-web",
   "scripts": {
-    "start": "parcel src/app.js"
+    "start": "parcel src/index.html --port 3000 --open",
+    "build": "parcel build --no-source-maps --public-url /documentation/snippets src/*/index.html"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.2",
-    "@babel/preset-env": "^7.6.2",
-    "@babel/preset-react": "^7.0.0",
-    "parcel-bundler": "^1.11.0",
-    "parcel-plugin-svelte": "^4.0.4",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "svelte": "^3.0.0"
+    "parcel-bundler": "^1.11.0"
   },
   "alias": {
     "boardgame.io": "../../dist"
   },
   "browserslist": [
     "last 1 Chrome versions"
-  ]
+  ],
+  "dependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.6.2",
+    "@babel/preset-react": "^7.0.0",
+    "chess.js": "^0.10.2",
+    "parcel-plugin-svelte": "^4.0.4",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "svelte": "^3.0.0",
+    "three": "^0.109.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-class-properties"
+    ]
+  }
 }
