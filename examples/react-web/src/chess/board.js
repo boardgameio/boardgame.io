@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Chess from 'chess.js';
+import { Chess } from 'chess.js';
 import { Checkerboard, cartesianToAlgebraic } from './checkerboard';
 import { Token } from './token';
 import Bishop from './pieces/bishop';

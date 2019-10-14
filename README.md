@@ -43,6 +43,7 @@ $ npm install --save boardgame.io
 
 ```
 $ npm install
+$ npm run build
 $ npm start
 ```
 
