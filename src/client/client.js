@@ -307,7 +307,7 @@ class _ClientImpl {
     new Debug({
       target: document.body,
       props: {
-        id: 5,
+        client: this,
       },
     });
   }

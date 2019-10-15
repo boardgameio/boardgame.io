@@ -7,7 +7,7 @@
 -->
 
 <script>
-  export let id;
+export let client;
 </script>
 
 <style>
@@ -28,4 +28,8 @@
 }
 </style>
 
-<div class="panel">Debug Panel</div>
+<div class="panel">
+  <pre>
+  {JSON.stringify($client, null, 2)}
+  </pre>
+</div>
