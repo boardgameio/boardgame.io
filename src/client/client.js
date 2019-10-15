@@ -313,6 +313,8 @@ class _ClientImpl {
   }
 
   subscribe(fn) {
+    // If we already have a subscription, then create a new
+    // callback that invokes both the old and new subscriptions.
     const prev = this.subscribeCallback;
     const callback = () => {
       prev();
@@ -323,6 +325,10 @@ class _ClientImpl {
     this.transport.subscribe(callback);
     callback();
 
+    // Return a handle that allows the caller to unsubscribe.
+    // Warning: Will revert any callbacks that were added
+    // after this current call to subscribe(), so use it to
+    // only remove the latest subscription.
     return () => {
       this.subscribeCallback = prev;
     };
