@@ -313,10 +313,21 @@ class _ClientImpl {
   }
 
   subscribe(fn) {
-    const callback = () => fn(this.getState());
-    this.transport.subscribe(callback);
+    const prev = this.subscribeCallback;
+    const callback = () => {
+      prev();
+      fn(this.getState());
+    };
+
     this.subscribeCallback = callback;
+    this.transport.subscribe(callback);
     callback();
+
+    return {
+      unsubscribe: () => {
+        this.subscribeCallback = prev;
+      },
+    };
   }
 
   getState() {
