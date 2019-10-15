@@ -323,10 +323,8 @@ class _ClientImpl {
     this.transport.subscribe(callback);
     callback();
 
-    return {
-      unsubscribe: () => {
-        this.subscribeCallback = prev;
-      },
+    return () => {
+      this.subscribeCallback = prev;
     };
   }
 
