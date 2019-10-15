@@ -608,15 +608,27 @@ describe('subscribe', () => {
     const fn2 = jest.fn();
     const unsubscribe = client.subscribe(fn2);
 
-    expect(fn).toBeCalled();
-    expect(fn2).toBeCalled();
+    expect(fn).toBeCalledWith(
+      expect.objectContaining({
+        G: { moved: true },
+      })
+    );
+    expect(fn2).toBeCalledWith(
+      expect.objectContaining({
+        G: { moved: true },
+      })
+    );
     fn.mockClear();
     fn2.mockClear();
 
     unsubscribe();
 
     client.moves.A();
-    expect(fn).toBeCalled();
+    expect(fn).toBeCalledWith(
+      expect.objectContaining({
+        G: { moved: true },
+      })
+    );
     expect(fn2).not.toBeCalled();
   });
 });
