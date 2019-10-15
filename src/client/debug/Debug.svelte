@@ -9,6 +9,14 @@
 <script>
 export let client;
 
+let G = {};
+let ctx = {};
+
+$: if ($client !== null) {
+  G = $client.G;
+  ctx = $client.ctx;
+}
+
 function SanitizeCtx(ctx) {
   let r = {};
   for (const key in ctx) {
@@ -61,13 +69,13 @@ section {
 
     <section>
       <pre class="json">
-        <strong>G</strong>: {JSON.stringify($client.G, null, 2)}
+        <strong>G</strong>: {JSON.stringify(G, null, 2)}
       </pre>
     </section>
 
     <section>
       <pre class="json">
-        <strong>ctx</strong>: {JSON.stringify(SanitizeCtx($client.ctx), null, 2)}
+        <strong>ctx</strong>: {JSON.stringify(SanitizeCtx(ctx), null, 2)}
       </pre>
     </section>
   </div>
