@@ -8,6 +8,16 @@
 
 <script>
 export let client;
+
+function SanitizeCtx(ctx) {
+  let r = {};
+  for (const key in ctx) {
+    if (!key.startsWith('_')) {
+      r[key] = ctx[key];
+    }
+  }
+  return r;
+}
 </script>
 
 <style>
@@ -26,10 +36,39 @@ export let client;
   font-family: monospace;
   font-size: 14px;
 }
+
+.pane {
+  float: left;
+  padding: 20px;
+  box-sizing: border-box;
+  min-width: 300px;
+  max-width: 400px;
+  opacity: 0.8;
+}
+
+section {
+  margin-bottom: 20px;
+}
 </style>
 
 <div class="panel">
-  <pre>
-  {JSON.stringify($client, null, 2)}
-  </pre>
+  <div class="pane">
+    <h3>Players</h3>
+
+    <h3>Moves</h3>
+
+    <h3>Events</h3>
+
+    <section>
+      <pre class="json">
+        <strong>G</strong>: {JSON.stringify($client.G, null, 2)}
+      </pre>
+    </section>
+
+    <section>
+      <pre class="json">
+        <strong>ctx</strong>: {JSON.stringify(SanitizeCtx($client.ctx), null, 2)}
+      </pre>
+    </section>
+  </div>
 </div>
