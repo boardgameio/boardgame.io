@@ -536,14 +536,11 @@ describe('log handling', () => {
 });
 
 describe('undo / redo', () => {
-  let game;
-  beforeEach(() => {
-    game = Game({
-      moves: {
-        A: (G, ctx, arg) => ({ arg }),
-      },
-    });
-  });
+  const game = {
+    moves: {
+      A: (G, ctx, arg) => ({ arg }),
+    },
+  };
 
   test('basic', () => {
     const client = Client({ game });
@@ -557,5 +554,69 @@ describe('undo / redo', () => {
 
     client.redo();
     expect(client.getState().G).toEqual({ arg: 42 });
+  });
+});
+
+describe('subscribe', () => {
+  let client;
+  let fn;
+  beforeAll(() => {
+    const game = {
+      moves: {
+        A: G => {
+          G.moved = true;
+        },
+      },
+    };
+    client = Client({ game });
+    fn = jest.fn();
+    client.subscribe(fn);
+  });
+
+  test('called at the beginning', () => {
+    expect(fn).toBeCalledWith(
+      expect.objectContaining({
+        G: {},
+        ctx: expect.objectContaining({ turn: 1 }),
+      })
+    );
+  });
+
+  test('called after a move', () => {
+    fn.mockClear();
+    client.moves.A();
+    expect(fn).toBeCalledWith(
+      expect.objectContaining({
+        G: { moved: true },
+      })
+    );
+  });
+
+  test('called after an event', () => {
+    fn.mockClear();
+    client.events.endTurn();
+    expect(fn).toBeCalledWith(
+      expect.objectContaining({
+        ctx: expect.objectContaining({ turn: 2 }),
+      })
+    );
+  });
+
+  test('multiple subscriptions', () => {
+    fn.mockClear();
+
+    const fn2 = jest.fn();
+    const unsubscribe = client.subscribe(fn2);
+
+    expect(fn).toBeCalled();
+    expect(fn2).toBeCalled();
+    fn.mockClear();
+    fn2.mockClear();
+
+    unsubscribe();
+
+    client.moves.A();
+    expect(fn).toBeCalled();
+    expect(fn2).not.toBeCalled();
   });
 });
