@@ -103,6 +103,7 @@
     "husky": "^1.3.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.0.0",
+    "jest-transform-svelte": "^2.1.0",
     "lint-staged": "^8.1.0",
     "mongo-mock": "^3.3.2",
     "mongodb": "^3.0.3",
@@ -175,6 +176,9 @@
     "setupFiles": [
       "raf/polyfill"
     ],
+    "transform": {
+      "^.+\\.svelte$": "jest-transform-svelte"
+    },
     "transformIgnorePatterns": [
       "node_modules/(?!(boardgame.io|flatted)/)"
     ],
