@@ -236,7 +236,11 @@ export class MCTSBot extends Bot {
       const score = Object.keys(objectives).reduce((score, key) => {
         const objective = objectives[key];
         if (objective.checker(G, ctx)) {
-          return score + objective.weight;
+          if (typeof objective.weight === 'number') {
+            return score + objective.weight;
+          } else {
+            return score + objective.weight(G, ctx);
+          }
         }
         return score;
       }, 0.0);

@@ -282,6 +282,31 @@ describe('MCTSBot', () => {
     }
   });
 
+  test('objectivesWithWeightFunction', () => {
+    const objectives = () => ({
+      'play-on-square-0': {
+        checker: G => G.cells[0] !== null,
+        weight: () => 10.0,
+      },
+    });
+
+    const state = InitializeGame({ game: TicTacToe });
+
+    for (let i = 0; i < 10; i++) {
+      const bot = new MCTSBot({
+        iterations: 200,
+        seed: i,
+        game: TicTacToe,
+        enumerate,
+        objectives,
+        playerID: '0',
+      });
+
+      const { action } = bot.play(state, '0');
+      expect(action.payload.args).toEqual([0]);
+    }
+  });
+
   test('iterations & playout depth settings', () => {
     const state = InitializeGame({ game: TicTacToe });
 
