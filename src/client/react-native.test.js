@@ -29,8 +29,9 @@ test('board is rendered', () => {
   const board = game.find(TestBoard);
 
   expect(board.props().isActive).toBe(true);
-
   expect(board.text()).toBe('Board');
+
+  game.unmount();
 });
 
 test('board props', () => {

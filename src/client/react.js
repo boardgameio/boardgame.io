@@ -104,11 +104,12 @@ export function Client(opts) {
 
     componentDidMount() {
       this.client.connect();
-      this.client.subscribe(() => this.forceUpdate());
+      this.unsubscribe = this.client.subscribe(() => this.forceUpdate());
       this.client.mount();
     }
 
     componentWillUnmount() {
+      this.unsubscribe();
       this.client.unmount();
     }
 
