@@ -3,8 +3,10 @@
 
   import { fly } from 'svelte/transition';
   import Menu from './Menu.svelte';
+  import Move from './Move.svelte';
   import Controls from './Controls.svelte';
   import PlayerInfo from './PlayerInfo.svelte';
+  import { AssignShortcuts } from './assign-shortcuts';
 
   let G = {};
   let ctx = {};
@@ -26,6 +28,8 @@
     return r;
   }
 
+  const shortcuts = AssignShortcuts(client.moves, client.events, 'dlit');
+
   function Keypress(e) {
     if (e.key == 'd') {
       visible = !visible;
@@ -45,8 +49,6 @@
     display: flex;
     flex-direction: row;
     text-align: left;
-    overflow-x: hidden;
-    overflow-y: scroll;
     width: 320px;
     right: 0;
     top: 0;
@@ -58,6 +60,8 @@
 
   .pane {
     flex-grow: 2;
+    overflow-x: hidden;
+    overflow-y: scroll;
     background: #fefefe;
     padding: 20px;
     border-left: 1px solid #ccc;
@@ -82,6 +86,12 @@
   h3 {
     text-transform: uppercase;
   }
+
+  li {
+    list-style: none;
+    margin: none;
+    margin-bottom: 5px;
+  }
 </style>
 
 <svelte:window on:keypress={Keypress} />
@@ -104,10 +114,16 @@
 
         <section>
           <h3>Moves</h3>
+          {#each Object.entries(client.moves) as [name, fn]}
+            <li><Move shortcut={shortcuts[name]} {fn} {name} /></li>
+          {/each}
         </section>
 
         <section>
           <h3>Events</h3>
+          {#each Object.entries(client.events) as [name, fn]}
+            <li><Move shortcut={shortcuts[name]} {fn} {name} /></li>
+          {/each}
         </section>
 
         <section>

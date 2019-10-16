@@ -39,20 +39,28 @@
   }
 </script>
 
+<style>
+  li {
+    list-style: none;
+    margin: none;
+    margin-bottom: 5px;
+  }
+</style>
+
 <section id="debug-controls" class="controls">
-  <Hotkey value="1" onPress={client.reset} label="reset" />
-  <Hotkey value="2" onPress={Save} label="save" />
-  <Hotkey value="3" onPress={Restore} label="restore" />
+  <li><Hotkey value="1" onPress={client.reset} label="reset" /></li>
+  <li><Hotkey value="2" onPress={Save} label="save" /></li>
+  <li><Hotkey value="3" onPress={Restore} label="restore" /></li>
 
   {#if client.step}
-    <Hotkey value="4" onPress={client.step} label="step" />
-    <Hotkey value="5" onPress={Simulate} label="simulate" />
+    <li><Hotkey value="4" onPress={client.step} label="step" /></li>
+    <li><Hotkey value="5" onPress={Simulate} label="simulate" /></li>
   {/if}
 
-  <Hotkey value="?" onPress={Toggle} label="show more" />
+  <li><Hotkey value="?" onPress={Toggle} label="show more" /></li>
 
   {#if expand && !dock}
-    <Hotkey value="d" disable={true} label="show/hide this pane" />
-    <Hotkey value="t" disable={true} label="dock controls" />
+    <li><Hotkey value="d" disable={true} label="show/hide this pane" /></li>
+    <li><Hotkey value="t" disable={true} label="dock controls" /></li>
   {/if}
 </section>

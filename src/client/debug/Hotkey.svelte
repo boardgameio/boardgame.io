@@ -28,11 +28,12 @@
 
 <style>
   .key {
-    margin-bottom: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
   }
 
   .key-box {
-    display: inline-block;
     cursor: pointer;
     min-width: 10px;
     padding-left: 5px;
@@ -56,9 +57,7 @@
     box-shadow: none;
   }
 
-  .key-child {
-    display: inline-block;
-    height: 20px;
+  .label {
     margin-left: 10px;
   }
 </style>
@@ -67,5 +66,7 @@
 
 <div class="key" class:active>
   <div class="key-box" on:click={Activate}>{value}</div>
-  <div class="key-child">{label}</div>
+  {#if label}
+    <div class="label">{label}</div>
+  {/if}
 </div>
