@@ -19,7 +19,7 @@
     height: 30px;
     line-height: 30px;
     background: #eee;
-    border: 3px solid #fff;
+    border: 3px solid #fefefe;
     box-sizing: content-box;
   }
 

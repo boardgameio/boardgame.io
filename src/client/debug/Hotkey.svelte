@@ -1,26 +1,27 @@
 <script>
   export let onPress;
   export let value;
-  export let child;
+  export let label;
+  export let disable = false;
 
   let active = false;
 
-  function deactivate() {
+  function Deactivate() {
     active = false;
   }
 
-  function activate() {
+  function Activate() {
     active = true;
+    setTimeout(Deactivate, 200);
     if (onPress) {
-      onPress();
-      active = false;
+      setTimeout(onPress, 1);
     }
   }
 
-  function onKeydown(e) {
-    if (e.key == value) {
+  function Keypress(e) {
+    if (!disable && e.key == value) {
       e.preventDefault();
-      activate();
+      Activate();
     }
   }
 </script>
@@ -62,11 +63,9 @@
   }
 </style>
 
-<svelte:window on:keydown={onKeydown} />
+<svelte:window on:keydown={Keypress} />
 
 <div class="key" class:active>
-  <div class="key-box" on:click={activate}>{value}</div>
-  <div class="key-child">
-    <svelte:component this={child} {active} {activate} {deactivate} />
-  </div>
+  <div class="key-box" on:click={Activate}>{value}</div>
+  <div class="key-child">{label}</div>
 </div>

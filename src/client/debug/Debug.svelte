@@ -3,8 +3,8 @@
 
   import { fly } from 'svelte/transition';
   import Menu from './Menu.svelte';
+  import Controls from './Controls.svelte';
   import PlayerInfo from './PlayerInfo.svelte';
-  import Hotkey from './Hotkey.svelte';
 
   let G = {};
   let ctx = {};
@@ -40,37 +40,47 @@
 <style>
   .debug-panel {
     position: fixed;
+    color: #555;
+    font-family: monospace;
     display: flex;
     flex-direction: row;
     text-align: left;
     overflow-x: hidden;
     overflow-y: scroll;
-    background: #fefefe;
     width: 320px;
     right: 0;
     top: 0;
     height: 100%;
-    font-family: monospace;
     font-size: 14px;
     box-sizing: border-box;
-    opacity: 0.8;
+    opacity: 0.9;
   }
 
   .pane {
     flex-grow: 2;
+    background: #fefefe;
     padding: 20px;
-    border-left: 1px solid #ddd;
-    box-shadow: -1px 0 5px #aaa;
+    border-left: 1px solid #ccc;
+    box-shadow: -1px 0 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .json {
+    font-family: monospace;
+    color: #888;
   }
 
   section {
-    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   label {
     font-weight: bold;
     font-size: 1.1em;
     display: inline;
+  }
+
+  h3 {
+    text-transform: uppercase;
   }
 </style>
 
@@ -82,13 +92,23 @@
 
     <div class="pane">
       {#if pane == 'main'}
-        <h3>Players</h3>
-        <PlayerInfo {ctx} />
+        <section>
+          <h3>Controls</h3>
+          <Controls {client} />
+        </section>
 
-        <h3>Moves</h3>
+        <section>
+          <h3>Players</h3>
+          <PlayerInfo {ctx} />
+        </section>
 
-        <h3>Events</h3>
-        <Hotkey value="A" />
+        <section>
+          <h3>Moves</h3>
+        </section>
+
+        <section>
+          <h3>Events</h3>
+        </section>
 
         <section>
           <label>G</label>
