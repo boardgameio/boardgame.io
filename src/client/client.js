@@ -87,6 +87,7 @@ class _ClientImpl {
   constructor({
     game,
     ai,
+    debug,
     numPlayers,
     multiplayer,
     socketOpts,
@@ -100,6 +101,7 @@ class _ClientImpl {
     this.gameID = gameID;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
+    this.debug = debug;
     this.subscribeCallback = () => {};
 
     this.reducer = CreateGameReducer({
@@ -302,14 +304,25 @@ class _ClientImpl {
       this.gameMetadata = metadata;
     });
 
-    // TODO: Maybe move this to a separate run() function
-    // that also calls subsribe etc.
-    new Debug({
-      target: document.body,
-      props: {
-        client: this,
-      },
-    });
+    this._debugPanel = null;
+  }
+
+  mount() {
+    if (this.debug !== false && this._debugPanel == null) {
+      this._debugPanel = new Debug({
+        target: document.body,
+        props: {
+          client: this,
+        },
+      });
+    }
+  }
+
+  unmount() {
+    if (this._debugPanel != null) {
+      this._debugPanel.$destroy();
+      this._debugPanel = null;
+    }
   }
 
   subscribe(fn) {

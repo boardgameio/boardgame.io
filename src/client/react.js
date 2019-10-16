@@ -32,7 +32,16 @@ import { Client as RawClient } from './client';
  *   UNDO and REDO.
  */
 export function Client(opts) {
-  let { game, numPlayers, loading, board, multiplayer, ai, enhancer } = opts;
+  let {
+    game,
+    numPlayers,
+    loading,
+    board,
+    multiplayer,
+    ai,
+    enhancer,
+    debug,
+  } = opts;
 
   // Component that is displayed before the client has synced
   // with the game master.
@@ -79,6 +88,7 @@ export function Client(opts) {
       this.client = RawClient({
         game,
         ai,
+        debug,
         numPlayers,
         multiplayer,
         gameID: props.gameID,
@@ -95,6 +105,11 @@ export function Client(opts) {
     componentDidMount() {
       this.client.connect();
       this.client.subscribe(() => this.forceUpdate());
+      this.client.mount();
+    }
+
+    componentWillUnmount() {
+      this.client.unmount();
     }
 
     componentDidUpdate(prevProps) {
