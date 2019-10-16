@@ -29,9 +29,10 @@ test('board is rendered', () => {
   const board = game.find(TestBoard);
 
   expect(board.props().isActive).toBe(true);
-
   expect(board.text()).toBe('Board');
   expect(game.find('.debug-ui')).toHaveLength(1);
+
+  game.unmount();
 });
 
 test('board props', () => {
