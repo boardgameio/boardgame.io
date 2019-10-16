@@ -1,11 +1,15 @@
 <script>
   export let client;
 
+  import { fly } from 'svelte/transition';
+  import Menu from './Menu.svelte';
   import PlayerInfo from './PlayerInfo.svelte';
   import Hotkey from './Hotkey.svelte';
 
   let G = {};
   let ctx = {};
+  let visible = true;
+  let pane = 'main';
 
   $: if ($client !== null) {
     G = $client.G;
@@ -21,59 +25,81 @@
     }
     return r;
   }
+
+  function Keypress(e) {
+    if (e.key == 'd') {
+      visible = !visible;
+    }
+  }
+
+  function MenuChange(e) {
+    pane = e.detail;
+  }
 </script>
 
 <style>
-  .panel {
+  .debug-panel {
+    position: fixed;
+    display: flex;
+    flex-direction: row;
     text-align: left;
     overflow-x: hidden;
     overflow-y: scroll;
     background: #fefefe;
-    border-left: 1px solid #ddd;
-    box-shadow: -1px 0 10px #aaa;
-    position: absolute;
-    width: 300px;
+    width: 320px;
     right: 0;
     top: 0;
     height: 100%;
     font-family: monospace;
     font-size: 14px;
-  }
-
-  .pane {
-    float: left;
-    padding: 20px;
     box-sizing: border-box;
-    min-width: 300px;
-    max-width: 400px;
     opacity: 0.8;
   }
 
+  .pane {
+    flex-grow: 2;
+    padding: 20px;
+    border-left: 1px solid #ddd;
+    box-shadow: -1px 0 5px #aaa;
+  }
+
   section {
-    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+
+  label {
+    font-weight: bold;
+    font-size: 1.1em;
+    display: inline;
   }
 </style>
 
-<div class="panel">
-  <div class="pane">
-    <h3>Players</h3>
-    <PlayerInfo {ctx} />
+<svelte:window on:keypress={Keypress} />
 
-    <h3>Moves</h3>
+{#if visible}
+  <div class="debug-panel" transition:fly={{ x: 400 }}>
+    <Menu on:change={MenuChange} {pane} />
 
-    <h3>Events</h3>
-    <Hotkey value="A" />
+    <div class="pane">
+      {#if pane == 'main'}
+        <h3>Players</h3>
+        <PlayerInfo {ctx} />
 
-    <section>
-      <pre class="json">
-        <strong>G</strong>: {JSON.stringify(G, null, 2)}
-      </pre>
-    </section>
+        <h3>Moves</h3>
 
-    <section>
-      <pre class="json">
-        <strong>ctx</strong>: {JSON.stringify(SanitizeCtx(ctx), null, 2)}
-      </pre>
-    </section>
+        <h3>Events</h3>
+        <Hotkey value="A" />
+
+        <section>
+          <label>G</label>
+          <pre class="json">{JSON.stringify(G, null, 2)}</pre>
+        </section>
+
+        <section>
+          <label>ctx</label>
+          <pre class="json">{JSON.stringify(SanitizeCtx(ctx), null, 2)}</pre>
+        </section>
+      {:else if pane == 'log'}Log{/if}
+    </div>
   </div>
-</div>
+{/if}

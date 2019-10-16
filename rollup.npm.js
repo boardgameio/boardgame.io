@@ -30,21 +30,14 @@ const plugins = [
 const clientPlugins = [
   postcss(),
   babel({ exclude: '**/node_modules/**' }),
-  svelte({
-    extensions: ['.svelte'],
-  }),
-  resolve({
-    browser: true,
-    only: ['svelte'],
-  }),
+  resolve({ browser: true }),
+  svelte({ extensions: ['.svelte'] }),
   filesize(),
 ];
 
 const serverPlugins = [
   resolve(),
-  tsPlugin({
-    typescript: ttypescript,
-  }),
+  tsPlugin({ typescript: ttypescript }),
   babel({ exclude: ['**/node_modules/**'] }),
   commonjs({ include: 'node_modules/**' }),
 ];
@@ -160,10 +153,8 @@ export default [
       { file: pkg.module, format: 'es', globals },
     ],
     plugins: plugins.concat([
-      svelte({
-        extensions: ['.svelte'],
-      }),
-      resolve({ browser: true, only: ['svelte'] }),
+      svelte({ extensions: ['.svelte'] }),
+      resolve({ browser: true }),
       replace({ 'process.env.NODE_ENV': JSON.stringify(env) }),
     ]),
   },
@@ -182,10 +173,8 @@ export default [
     ],
     plugins: plugins.concat([
       builtins(),
-      svelte({
-        extensions: ['.svelte'],
-      }),
       resolve({ browser: true, preferBuiltins: false }),
+      svelte({ extensions: ['.svelte'] }),
       commonjs(),
       replace({
         'process.env.NODE_ENV': JSON.stringify('production'),
