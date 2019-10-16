@@ -4,6 +4,10 @@
   export let label;
   export let disable = false;
 
+  import { getContext } from 'svelte';
+
+  const { disableHotkeys } = getContext('store');
+
   let active = false;
 
   function Deactivate() {
@@ -19,7 +23,7 @@
   }
 
   function Keypress(e) {
-    if (!disable && e.key == value) {
+    if (!$disableHotkeys && !disable && e.key == value) {
       e.preventDefault();
       Activate();
     }

@@ -1,6 +1,8 @@
 <script>
   export let client;
 
+  import {writable} from 'svelte/store';
+  import {setContext} from 'svelte';
   import { fly } from 'svelte/transition';
   import Menu from './Menu.svelte';
   import Move from './Move.svelte';
@@ -12,6 +14,9 @@
   let ctx = {};
   let visible = true;
   let pane = 'main';
+
+  const disableHotkeys = writable(false);
+  setContext('store', { disableHotkeys });
 
   $: if ($client !== null) {
     G = $client.G;

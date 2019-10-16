@@ -6,6 +6,9 @@
   import Hotkey from './Hotkey.svelte';
   import InteractiveFunction from './InteractiveFunction.svelte';
   import * as logger from '../../core/logger';
+  import {getContext} from 'svelte';
+
+  const {disableHotkeys} = getContext('store');
 
   let error = '';
   let focus = false;
@@ -13,10 +16,12 @@
   let active = false;
 
   function Activate() {
+    disableHotkeys.set(true);
     active = true;
   }
 
   function Deactivate() {
+    disableHotkeys.set(false);
     error = '';
     active = false;
   }
