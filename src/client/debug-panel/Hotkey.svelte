@@ -1,7 +1,7 @@
 <script>
   export let onPress;
   export let value;
-  export let label;
+  export let label = null;
   export let disable = false;
 
   import { getContext } from 'svelte';
