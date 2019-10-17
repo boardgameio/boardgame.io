@@ -309,8 +309,12 @@ class _ClientImpl {
 
   mount() {
     if (this.debug !== false && this._debugPanel == null) {
+      let target = document.body;
+      if (this.debug && this.debug.target) {
+        target = this.debug.target;
+      }
       this._debugPanel = new Debug({
-        target: document.body,
+        target,
         props: {
           client: this,
         },

@@ -75,6 +75,8 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
     "@firebase/app": "^0.4.16",
+    "@testing-library/jest-dom": "^4.1.2",
+    "@testing-library/svelte": "^1.9.0",
     "@types/jest": "^24.0.0",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
@@ -176,6 +178,7 @@
     "setupFiles": [
       "raf/polyfill"
     ],
+    "setupFilesAfterEnv": ["@testing-library/jest-dom/extend-expect"],
     "transform": {
       "^.+\\.svelte$": "jest-transform-svelte"
     },

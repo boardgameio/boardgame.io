@@ -1,16 +1,9 @@
 <script>
-  import Hotkey from './Hotkey.svelte';
-  import { sync } from '../../core/action-creators';
-  import { parse, stringify } from 'flatted';
-
   export let client;
-  export let dock = false;
 
-  let expand = false;
-
-  function Toggle() {
-    expand = !expand;
-  }
+  import Hotkey from './Hotkey.svelte';
+  import { sync } from '../../../core/action-creators';
+  import { parse, stringify } from 'flatted';
 
   function Simulate(iterations = 10000, sleepTimeout = 100) {
     const step = async () => {
@@ -57,10 +50,5 @@
     <li><Hotkey value="5" onPress={Simulate} label="simulate" /></li>
   {/if}
 
-  <li><Hotkey value="?" onPress={Toggle} label="show more" /></li>
-
-  {#if expand && !dock}
-    <li><Hotkey value="d" disable={true} label="show/hide this pane" /></li>
-    <li><Hotkey value="t" disable={true} label="dock controls" /></li>
-  {/if}
+  <li><Hotkey value="." disable={true} label="hide" /></li>
 </section>

@@ -5,7 +5,7 @@
 
   import Hotkey from './Hotkey.svelte';
   import InteractiveFunction from './InteractiveFunction.svelte';
-  import * as logger from '../../core/logger';
+  import * as logger from '../../../core/logger';
   import {getContext} from 'svelte';
 
   const {disableHotkeys} = getContext('store');

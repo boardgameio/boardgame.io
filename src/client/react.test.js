@@ -30,7 +30,6 @@ test('board is rendered', () => {
 
   expect(board.props().isActive).toBe(true);
   expect(board.text()).toBe('Board');
-  expect(game.find('.debug-ui')).toHaveLength(1);
 
   game.unmount();
 });
@@ -205,51 +204,4 @@ test('reset Game', () => {
   board.props.reset();
   expect(board.props.G).toEqual(initial.G);
   expect(board.props.ctx).toEqual(initial.ctx);
-});
-
-test('overrideGameState', () => {
-  const Board = Client({
-    game: {},
-    board: TestBoard,
-  });
-
-  const game = Enzyme.mount(<Board />);
-  const board = game.find('TestBoard').instance();
-
-  expect(board.props.G).toEqual({});
-  game
-    .find('Debug')
-    .props()
-    .overrideGameState({ G: 1 });
-  expect(board.props.G).toBe(1);
-});
-
-test('debug settings', () => {
-  const Board = Client({
-    game: {},
-    board: TestBoard,
-    debug: {
-      showGameInfo: false,
-      dockControls: true,
-    },
-  });
-
-  const game = Enzyme.mount(<Board />);
-
-  expect(game.find('GameInfo')).toHaveLength(0);
-  expect(game.find('Controls').html()).toContain('docktop');
-});
-
-test('pass ai section', () => {
-  const Board = Client({
-    game: {},
-    board: TestBoard,
-    ai: {
-      bot: () => {},
-      visualize: () => {},
-    },
-  });
-
-  const game = Enzyme.mount(<Board />);
-  expect(game.find('.debug-ui')).toHaveLength(1);
 });

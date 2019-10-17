@@ -1,48 +1,33 @@
 <script>
   export let client;
 
-  import {writable} from 'svelte/store';
-  import {setContext} from 'svelte';
+  import { writable } from 'svelte/store';
+  import { setContext } from 'svelte';
   import { fly } from 'svelte/transition';
   import Menu from './Menu.svelte';
-  import Move from './Move.svelte';
-  import Controls from './Controls.svelte';
-  import PlayerInfo from './PlayerInfo.svelte';
-  import { AssignShortcuts } from './assign-shortcuts';
-
-  let G = {};
-  let ctx = {};
-  let visible = true;
-  let pane = 'main';
+  import Main from './main/Main.svelte';
+  import Info from './info/Info.svelte';
+  import Log from './log/Log.svelte';
 
   const disableHotkeys = writable(false);
   setContext('store', { disableHotkeys });
 
-  $: if ($client !== null) {
-    G = $client.G;
-    ctx = $client.ctx;
-  }
+  const panes = {
+    main: { label: 'Main', component: Main },
+    log:  { label: 'Log',  component: Log },
+    info: { label: 'Info', component: Info },
+  };
 
-  function SanitizeCtx(ctx) {
-    let r = {};
-    for (const key in ctx) {
-      if (!key.startsWith('_')) {
-        r[key] = ctx[key];
-      }
-    }
-    return r;
-  }
-
-  const shortcuts = AssignShortcuts(client.moves, client.events, 'dlit');
-
-  function Keypress(e) {
-    if (e.key == 'd') {
-      visible = !visible;
-    }
-  }
-
+  let pane = 'main';
   function MenuChange(e) {
     pane = e.detail;
+  }
+
+  let visible = true;
+  function Keypress(e) {
+    if (e.key == '.') {
+      visible = !visible;
+    }
   }
 </script>
 
@@ -72,75 +57,15 @@
     border-left: 1px solid #ccc;
     box-shadow: -1px 0 5px rgba(0, 0, 0, 0.2);
   }
-
-  .json {
-    font-family: monospace;
-    color: #888;
-  }
-
-  section {
-    margin-bottom: 20px;
-  }
-
-  label {
-    font-weight: bold;
-    font-size: 1.1em;
-    display: inline;
-  }
-
-  h3 {
-    text-transform: uppercase;
-  }
-
-  li {
-    list-style: none;
-    margin: none;
-    margin-bottom: 5px;
-  }
 </style>
 
 <svelte:window on:keypress={Keypress} />
 
 {#if visible}
   <div class="debug-panel" transition:fly={{ x: 400 }}>
-    <Menu on:change={MenuChange} {pane} />
-
+    <Menu on:change={MenuChange} {panes} {pane} />
     <div class="pane">
-      {#if pane == 'main'}
-        <section>
-          <h3>Controls</h3>
-          <Controls {client} />
-        </section>
-
-        <section>
-          <h3>Players</h3>
-          <PlayerInfo {ctx} />
-        </section>
-
-        <section>
-          <h3>Moves</h3>
-          {#each Object.entries(client.moves) as [name, fn]}
-            <li><Move shortcut={shortcuts[name]} {fn} {name} /></li>
-          {/each}
-        </section>
-
-        <section>
-          <h3>Events</h3>
-          {#each Object.entries(client.events) as [name, fn]}
-            <li><Move shortcut={shortcuts[name]} {fn} {name} /></li>
-          {/each}
-        </section>
-
-        <section>
-          <label>G</label>
-          <pre class="json">{JSON.stringify(G, null, 2)}</pre>
-        </section>
-
-        <section>
-          <label>ctx</label>
-          <pre class="json">{JSON.stringify(SanitizeCtx(ctx), null, 2)}</pre>
-        </section>
-      {:else if pane == 'log'}Log{/if}
+      <svelte:component this={panes[pane].component} {client} />
     </div>
   </div>
 {/if}

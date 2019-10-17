@@ -3,7 +3,7 @@
   export let playerID;
   export let onClick = () => {};
 
-  const players = [...Array(ctx.numPlayers).keys()];
+  const players = ctx ? [...Array(ctx.numPlayers).keys()] : [];
 </script>
 
 <style>

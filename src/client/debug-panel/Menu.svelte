@@ -1,5 +1,7 @@
 <script>
   export let pane;
+  export let panes;
+
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 </script>
@@ -30,17 +32,12 @@
 </style>
 
 <div>
-  <div
-    class="menu-item"
-    class:active={pane == 'main'}
-    on:click={() => dispatch('change', 'main')}>
-    Main
-  </div>
-
-  <div
-    class="menu-item"
-    class:active={pane == 'log'}
-    on:click={() => dispatch('change', 'log')}>
-    Log
-  </div>
+  {#each Object.entries(panes) as [key, {label}]}
+    <div
+      class="menu-item"
+      class:active={pane == key}
+      on:click={() => dispatch('change', key)}>
+      {label}
+    </div>
+  {/each}
 </div>
