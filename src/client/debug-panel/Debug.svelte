@@ -18,7 +18,7 @@
     info: { label: 'Info', component: Info },
   };
 
-  let pane = 'main';
+  let pane = 'log';
   function MenuChange(e) {
     pane = e.detail;
   }

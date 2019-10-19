@@ -11,6 +11,7 @@
     cursor: pointer;
     margin-bottom: 5px;
     border: 1px solid #ccc;
+    border-radius: 3px;
     background: #eee;
     padding: 3px;
     padding-top: 15px;
@@ -22,6 +23,7 @@
 
   .menu-item.active {
     cursor: default;
+    font-weight: bold;
     border-left: 1px solid #fefefe;
     background: #fefefe;
   }
