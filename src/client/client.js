@@ -102,6 +102,7 @@ class _ClientImpl {
     this.credentials = credentials;
     this.multiplayer = multiplayer;
     this.debug = debug;
+    this.gameStateOverride = null;
     this.subscribeCallback = () => {};
 
     this.reducer = CreateGameReducer({
@@ -307,6 +308,11 @@ class _ClientImpl {
     this._debugPanel = null;
   }
 
+  overrideGameState(state) {
+    this.gameStateOverride = state;
+    this.subscribeCallback();
+  }
+
   mount() {
     if (this.debug !== false && this._debugPanel == null) {
       let target = document.body;
@@ -352,7 +358,11 @@ class _ClientImpl {
   }
 
   getState() {
-    const state = this.store.getState();
+    let state = this.store.getState();
+
+    if (this.gameStateOverride !== null) {
+      state = this.gameStateOverride;
+    }
 
     // This is the state before a sync with the game master.
     if (state === null) {
