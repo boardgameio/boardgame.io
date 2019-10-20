@@ -1,7 +1,5 @@
 <script>
   export let client;
-  export let onHover = () => {};
-  export let payloadComponent;
 
   import { onDestroy } from 'svelte';
 
@@ -33,22 +31,24 @@
     return { G: state.G, ctx: state.ctx };
   }
 
-  function onLogClick(logIndex) {
+  function OnLogClick(e) {
+    const { logIndex } = e.detail;
     const state = rewind(logIndex);
     const renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
-    const metadata = renderedLogEntries[logIndex].action.payload.metadata;
+    const meadata = renderedLogEntries[logIndex].action.payload.metadata;
     client.overrideGameState(state);
     pinned = pinned == logIndex ? null : logIndex;
   }
 
-  function onMouseEnter(logIndex) {
+  function OnMouseEnter(e) {
+    const { logIndex } = e.detail;
     if (pinned === null) {
       const state = rewind(logIndex);
       client.overrideGameState(state);
     }
   }
 
-  function onMouseLeave() {
+  function OnMouseLeave() {
     if (pinned === null) {
       client.overrideGameState(null);
     }
@@ -104,10 +104,6 @@
     grid-auto-rows: auto;
     grid-auto-flow: column;
   }
-
-  .gamelog.pinned .log-event {
-    opacity: 0.2;
-  }
 </style>
 
 <div class="gamelog" class:pinned>
@@ -121,12 +117,11 @@
     <LogEvent
       pinned={i === pinned}
       logIndex={i}
-      {onLogClick}
-      {onMouseEnter}
-      {onMouseLeave}
+      on:click={OnLogClick}
+      on:mouseenter={OnMouseEnter}
+      on:mouseleave={OnMouseLeave}
       {action}
-      {payload}
-      {payloadComponent} />
+      {payload} />
   {/each}
 
   {#each renderedLogEntries as { phase }, i}

@@ -148,7 +148,6 @@
     "koa-router": "^7.2.1",
     "koa-socket-2": "^1.0.17",
     "lru-cache": "^4.1.1",
-    "mousetrap": "^1.6.3",
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
     "redux": "^4.0.0",
@@ -178,7 +177,9 @@
     "setupFiles": [
       "raf/polyfill"
     ],
-    "setupFilesAfterEnv": ["@testing-library/jest-dom/extend-expect"],
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom/extend-expect"
+    ],
     "transform": {
       "^.+\\.svelte$": "jest-transform-svelte"
     },

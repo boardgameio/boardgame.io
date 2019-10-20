@@ -48,7 +48,6 @@ const globals = {
   redux: 'Redux',
   'react-cookies': 'Cookies',
   'prop-types': 'PropTypes',
-  mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
   flatted: 'Flatted',
 };

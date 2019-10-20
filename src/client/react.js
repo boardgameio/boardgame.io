@@ -78,10 +78,6 @@ export function Client(opts) {
       debug: true,
     };
 
-    state = {
-      gameStateOverride: null,
-    };
-
     constructor(props) {
       super(props);
 
@@ -143,28 +139,19 @@ export function Client(opts) {
       this.forceUpdate();
     };
 
-    overrideGameState = state => {
-      this.setState({ gameStateOverride: state });
-    };
-
     render() {
-      let _board = null;
-
-      let state = this.client.getState();
-      const { ...rest } = this.props;
-
-      if (this.state.gameStateOverride) {
-        state = { ...state, ...this.state.gameStateOverride };
-      }
+      const state = this.client.getState();
 
       if (state === null) {
         return React.createElement(loading);
       }
 
+      let _board = null;
+
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          ...rest,
+          ...this.props,
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
