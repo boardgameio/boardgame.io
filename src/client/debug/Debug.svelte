@@ -14,11 +14,11 @@
 
   const panes = {
     main: { label: 'Main', component: Main },
-    log:  { label: 'Log',  component: Log },
+    log: { label: 'Log', component: Log },
     info: { label: 'Info', component: Info },
   };
 
-  let pane = 'log';
+  let pane = 'main';
   function MenuChange(e) {
     pane = e.detail;
   }

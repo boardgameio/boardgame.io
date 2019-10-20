@@ -12,7 +12,7 @@ import * as ActionCreators from '../core/action-creators';
 import { Game } from '../core/game';
 import { error } from '../core/logger';
 import { SocketIO } from './transport/socketio';
-import Debug from './debug-panel/Debug.svelte';
+import Debug from './debug/Debug.svelte';
 import { Local, LocalMaster } from './transport/local';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';

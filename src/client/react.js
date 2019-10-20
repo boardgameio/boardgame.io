@@ -178,33 +178,6 @@ export function Client(opts) {
         });
       }
 
-      // if (debug !== false && debugProp) {
-      //   const showGameInfo = typeof debug === 'object' && debug.showGameInfo;
-      //   const dockControls = typeof debug === 'object' && debug.dockControls;
-      //   _debug = React.createElement(Debug, {
-      //     gamestate: state,
-      //     reducer: this.client.reducer,
-      //     store: this.client.store,
-      //     isMultiplayer: multiplayer !== undefined,
-      //     moves: this.client.moves,
-      //     events: this.client.events,
-      //     gameID: this.gameID,
-      //     playerID: this.playerID,
-      //     credentials: this.credentials,
-      //     step: this.client.step,
-      //     reset: this.client.reset,
-      //     undo: this.client.undo,
-      //     redo: this.client.redo,
-      //     visualizeAI: ai && ai.visualize,
-      //     overrideGameState: this.overrideGameState,
-      //     updateGameID: this.updateGameID,
-      //     updatePlayerID: this.updatePlayerID,
-      //     updateCredentials: this.updateCredentials,
-      //     showGameInfo,
-      //     dockControls,
-      //   });
-      // }
-
       return <div className="bgio-client">{_board}</div>;
     }
   };
