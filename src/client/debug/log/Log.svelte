@@ -3,7 +3,7 @@
 
   import { getContext, onDestroy } from 'svelte';
 
-  const { secondaryPane, metadata } = getContext('secondaryPane');
+  const { secondaryPane } = getContext('secondaryPane');
 
   import { MAKE_MOVE } from '../../../core/action-types';
   import TurnMarker from './TurnMarker.svelte';
@@ -42,12 +42,13 @@
 
     if (pinned == logIndex) {
       pinned = null;
-      metadata.set(null);
       secondaryPane.set(null);
     } else {
       pinned = logIndex;
-      metadata.set(renderedLogEntries[logIndex].action.payload.metadata);
-      secondaryPane.set(MCTS);
+      const { metadata } = renderedLogEntries[logIndex].action.payload;
+      if (metadata) {
+        secondaryPane.set({ component: MCTS, metadata });
+      }
     }
   }
 
@@ -65,9 +66,20 @@
     }
   }
 
-  onDestroy(() => {
+  function Reset() {
+    pinned = null;
     client.overrideGameState(null);
-  });
+    secondaryPane.set(null);
+  }
+
+  onDestroy(Reset);
+
+  function OnKeyDown(e) {
+    // ESC.
+    if (e.keyCode == 27) {
+      Reset();
+    }
+  }
 
   let renderedLogEntries;
   let turnBoundaries = {};
@@ -116,6 +128,8 @@
     grid-auto-flow: column;
   }
 </style>
+
+<svelte:window on:keydown={OnKeyDown}/>
 
 <div class="gamelog" class:pinned>
   {#each renderedLogEntries as { turn }, i}

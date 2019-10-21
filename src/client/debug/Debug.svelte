@@ -11,10 +11,9 @@
 
   const disableHotkeys = writable(false);
   const secondaryPane = writable(null);
-  const metadata = writable(null);
 
   setContext('hotkeys', { disableHotkeys });
-  setContext('secondaryPane', { secondaryPane, metadata });
+  setContext('secondaryPane', { secondaryPane });
 
   const panes = {
     main: { label: 'Main', component: Main },
@@ -78,7 +77,7 @@
     </div>
     {#if $secondaryPane}
       <div class="secondary-pane">
-        <svelte:component this={$secondaryPane} metadata={$metadata} />
+        <svelte:component this={$secondaryPane.component} metadata={$secondaryPane.metadata} />
       </div>
     {/if}
   </div>
