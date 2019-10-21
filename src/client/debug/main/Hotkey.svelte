@@ -6,7 +6,7 @@
 
   import { getContext } from 'svelte';
 
-  const { disableHotkeys } = getContext('store');
+  const { disableHotkeys } = getContext('hotkeys');
 
   let active = false;
 

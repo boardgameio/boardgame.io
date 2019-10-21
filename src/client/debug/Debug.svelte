@@ -10,7 +10,11 @@
   import Log from './log/Log.svelte';
 
   const disableHotkeys = writable(false);
-  setContext('store', { disableHotkeys });
+  const secondaryPane = writable(null);
+  const metadata = writable(null);
+
+  setContext('hotkeys', { disableHotkeys });
+  setContext('secondaryPane', { secondaryPane, metadata });
 
   const panes = {
     main: { label: 'Main', component: Main },
@@ -39,7 +43,6 @@
     display: flex;
     flex-direction: row;
     text-align: left;
-    width: 320px;
     right: 0;
     top: 0;
     height: 100%;
@@ -56,6 +59,12 @@
     padding: 20px;
     border-left: 1px solid #ccc;
     box-shadow: -1px 0 5px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    width: 280px;
+  }
+
+  .secondary-pane {
+    background: #fefefe;
   }
 </style>
 
@@ -67,5 +76,10 @@
     <div class="pane">
       <svelte:component this={panes[pane].component} {client} />
     </div>
+    {#if $secondaryPane}
+      <div class="secondary-pane">
+        <svelte:component this={$secondaryPane} metadata={$metadata} />
+      </div>
+    {/if}
   </div>
 {/if}

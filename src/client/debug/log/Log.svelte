@@ -1,12 +1,15 @@
 <script>
   export let client;
 
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
+
+  const { secondaryPane, metadata } = getContext('secondaryPane');
 
   import { MAKE_MOVE } from '../../../core/action-types';
   import TurnMarker from './TurnMarker.svelte';
   import PhaseMarker from './PhaseMarker.svelte';
   import LogEvent from './LogEvent.svelte';
+  import MCTS from '../mcts/MCTS.svelte';
 
   let { log, _initial: initialState } = $client;
   let pinned = null;
@@ -35,9 +38,17 @@
     const { logIndex } = e.detail;
     const state = rewind(logIndex);
     const renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
-    const meadata = renderedLogEntries[logIndex].action.payload.metadata;
     client.overrideGameState(state);
-    pinned = pinned == logIndex ? null : logIndex;
+
+    if (pinned == logIndex) {
+      pinned = null;
+      metadata.set(null);
+      secondaryPane.set(null);
+    } else {
+      pinned = logIndex;
+      metadata.set(renderedLogEntries[logIndex].action.payload.metadata);
+      secondaryPane.set(MCTS);
+    }
   }
 
   function OnMouseEnter(e) {

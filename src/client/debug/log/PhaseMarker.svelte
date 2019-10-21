@@ -23,5 +23,5 @@
 </style>
 
 <div class="phase-marker" style={style}>
-  {phase}
+  {phase || ''}
 </div>

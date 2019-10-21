@@ -8,7 +8,7 @@
   import * as logger from '../../../core/logger';
   import {getContext} from 'svelte';
 
-  const {disableHotkeys} = getContext('store');
+  const {disableHotkeys} = getContext('hotkeys');
 
   let error = '';
   let focus = false;
