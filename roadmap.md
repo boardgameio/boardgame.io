@@ -14,15 +14,12 @@ The issues below (and some others that are not in this document) are also availa
 - [ ] ability to add priorities and objectives ([issue](https://github.com/nicolodavis/boardgame.io/issues/7#issuecomment-389453032))
 - [ ] Bots in multiplayer games ([issue](https://github.com/nicolodavis/boardgame.io/issues/383))  **[help needed]**
 
-### UI
-
-- [ ] Migrate to Svelte ([issue](https://github.com/nicolodavis/boardgame.io/issues/432))  **[help needed]**
-
 ### Lobby
 
 - [x] basic `create` and `join` API
 - [x] simple web-based lobby ([issue](https://github.com/nicolodavis/boardgame.io/issues/197))
 - [ ] Lobby Improvements ([issue](https://github.com/nicolodavis/boardgame.io/issues/354))  **[help needed]**
+- [ ] Migrate to Svelte ([issue](https://github.com/nicolodavis/boardgame.io/issues/432))  **[help needed]**
 
 ### Storage
 
