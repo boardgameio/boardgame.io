@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { RandomBot, MCTSBot } from '../src/ai/bot.js';
+import { RandomBot, MCTSBot, Simulate } from '../src/ai/bot.js';
 import { AI } from '../src/ai/ai.js';
 
-export { AI, RandomBot, MCTSBot };
+export { AI, RandomBot, MCTSBot, Simulate };
