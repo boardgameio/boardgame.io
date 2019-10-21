@@ -27,11 +27,11 @@ const App = Client({
       return r;
     },
 
-    visualize: MCTSVisualizer(state => (
-      <div style={{ transform: 'scale(0.7)' }}>
-        <Board {...state} isPreview={true} moves={{}} />
-      </div>
-    )),
+    // visualize: MCTSVisualizer(state => (
+    //   <div style={{ transform: 'scale(0.7)' }}>
+    //     <Board {...state} isPreview={true} moves={{}} />
+    //   </div>
+    // )),
   }),
 });
 

@@ -42,7 +42,6 @@
     "dist/core.js",
     "dist/plugins.js",
     "dist/ai.js",
-    "dist/ai-visualize.js",
     "dist/internal.js",
     "server.js",
     "client.js",
@@ -51,8 +50,7 @@
     "react-native.js",
     "core.js",
     "plugins.js",
-    "ai.js",
-    "ai-visualize.js"
+    "ai.js"
   ],
   "keywords": [
     "react",
@@ -164,7 +162,6 @@
       "core": "./dist/core.js",
       "plugins": "./dist/plugins.js",
       "ai": "./dist/ai.js",
-      "ai-visualize": "./dist/ai-visualize.js",
       "master": "./dist/master.js"
     }
   },
