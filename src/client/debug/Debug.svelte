@@ -28,8 +28,23 @@
 
   let visible = true;
   function Keypress(e) {
-    if (e.key == '.') {
-      visible = !visible;
+    switch (e.key) {
+      case '.': {
+        visible = !visible;
+        break;
+      }
+      case 'm': {
+        pane = 'main';
+        break;
+      }
+      case 'l': {
+        pane = 'log';
+        break;
+      }
+      case 'i': {
+        pane = 'info';
+        break;
+      }
     }
   }
 </script>

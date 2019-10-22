@@ -6,7 +6,7 @@
   import PlayerInfo from './PlayerInfo.svelte';
   import { AssignShortcuts } from '../utils/shortcuts';
 
-  const shortcuts = AssignShortcuts(client.moves, client.events, '');
+  const shortcuts = AssignShortcuts(client.moves, client.events, 'mli');
 
   function SanitizeCtx(ctx) {
     let r = {};
