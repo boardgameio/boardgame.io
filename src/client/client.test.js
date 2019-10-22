@@ -632,3 +632,26 @@ describe('subscribe', () => {
     expect(fn2).not.toBeCalled();
   });
 });
+
+test('override game state', () => {
+  const game = {
+    moves: {
+      A: G => {
+        G.moved = true;
+      },
+    },
+  };
+  const client = Client({ game });
+  client.moves.A();
+  expect(client.getState().G).toEqual({ moved: true });
+  client.overrideGameState({ G: { override: true }, ctx: {} });
+  expect(client.getState().G).toEqual({ override: true });
+  client.overrideGameState(null);
+  expect(client.getState().G).toEqual({ moved: true });
+});
+
+test('mount on custom element', () => {
+  const el = document.createElement('div');
+  const client = Client({ game: {}, debug: { target: el } });
+  client.mount();
+});
