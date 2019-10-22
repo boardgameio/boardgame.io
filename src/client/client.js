@@ -12,6 +12,7 @@ import * as ActionCreators from '../core/action-creators';
 import { Game } from '../core/game';
 import { error } from '../core/logger';
 import { SocketIO } from './transport/socketio';
+import Debug from './debug/Debug.svelte';
 import { Local, LocalMaster } from './transport/local';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
@@ -86,6 +87,7 @@ class _ClientImpl {
   constructor({
     game,
     ai,
+    debug,
     numPlayers,
     multiplayer,
     socketOpts,
@@ -99,6 +101,8 @@ class _ClientImpl {
     this.gameID = gameID;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
+    this.debug = debug;
+    this.gameStateOverride = null;
     this.subscribeCallback = () => {};
 
     this.reducer = CreateGameReducer({
@@ -300,6 +304,35 @@ class _ClientImpl {
     this.transport.subscribeGameMetadata(metadata => {
       this.gameMetadata = metadata;
     });
+
+    this._debugPanel = null;
+  }
+
+  overrideGameState(state) {
+    this.gameStateOverride = state;
+    this.subscribeCallback();
+  }
+
+  mount() {
+    if (this.debug !== false && this._debugPanel == null) {
+      let target = document.body;
+      if (this.debug && this.debug.target) {
+        target = this.debug.target;
+      }
+      this._debugPanel = new Debug({
+        target,
+        props: {
+          client: this,
+        },
+      });
+    }
+  }
+
+  unmount() {
+    if (this._debugPanel != null) {
+      this._debugPanel.$destroy();
+      this._debugPanel = null;
+    }
   }
 
   subscribe(fn) {
@@ -325,7 +358,11 @@ class _ClientImpl {
   }
 
   getState() {
-    const state = this.store.getState();
+    let state = this.store.getState();
+
+    if (this.gameStateOverride !== null) {
+      state = this.gameStateOverride;
+    }
 
     // This is the state before a sync with the game master.
     if (state === null) {

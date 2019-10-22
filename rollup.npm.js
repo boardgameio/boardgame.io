@@ -13,6 +13,7 @@ import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
 import filesize from 'rollup-plugin-filesize';
+import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 import ttypescript from 'ttypescript';
@@ -26,13 +27,27 @@ const plugins = [
   filesize(),
 ];
 
+const clientPlugins = [
+  postcss(),
+  babel({ exclude: '**/node_modules/**' }),
+  resolve({ browser: true }),
+  svelte({ extensions: ['.svelte'] }),
+  filesize(),
+];
+
+const serverPlugins = [
+  resolve(),
+  tsPlugin({ typescript: ttypescript }),
+  babel({ exclude: ['**/node_modules/**'] }),
+  commonjs({ include: 'node_modules/**' }),
+];
+
 const globals = {
   immer: 'immer',
   react: 'React',
   redux: 'Redux',
   'react-cookies': 'Cookies',
   'prop-types': 'PropTypes',
-  mousetrap: 'Mousetrap',
   'socket.io-client': 'io',
   flatted: 'Flatted',
 };
@@ -42,28 +57,21 @@ export default [
   {
     input: 'packages/server.ts',
     output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
-    plugins: [
-      resolve(),
-      tsPlugin({
-        typescript: ttypescript,
-      }),
-      babel({ exclude: ['**/node_modules/**'] }),
-      commonjs({ include: 'node_modules/**' }),
-    ],
+    plugins: serverPlugins,
   },
 
   {
     input: 'packages/react.js',
     external: Object.keys(globals),
     output: { file: 'dist/react.js', format: 'umd', name: 'Client', globals },
-    plugins,
+    plugins: clientPlugins,
   },
 
   {
     input: 'packages/client.js',
     external: Object.keys(globals),
     output: { file: 'dist/client.js', format: 'umd', name: 'Client', globals },
-    plugins,
+    plugins: clientPlugins,
   },
 
   {
@@ -75,7 +83,7 @@ export default [
       name: 'ReactNativeClient',
       globals,
     },
-    plugins,
+    plugins: clientPlugins,
   },
 
   {
@@ -112,18 +120,6 @@ export default [
   },
 
   {
-    input: 'packages/ai-visualize.js',
-    external: Object.keys(globals),
-    output: {
-      file: 'dist/ai-visualize.js',
-      format: 'umd',
-      name: 'AIVisualize',
-      globals,
-    },
-    plugins,
-  },
-
-  {
     input: 'packages/internal.js',
     external: Object.keys(globals),
     output: {
@@ -144,6 +140,8 @@ export default [
       { file: pkg.module, format: 'es', globals },
     ],
     plugins: plugins.concat([
+      svelte({ extensions: ['.svelte'] }),
+      resolve({ browser: true }),
       replace({ 'process.env.NODE_ENV': JSON.stringify(env) }),
     ]),
   },
@@ -163,6 +161,7 @@ export default [
     plugins: plugins.concat([
       builtins(),
       resolve({ browser: true, preferBuiltins: false }),
+      svelte({ extensions: ['.svelte'] }),
       commonjs(),
       replace({
         'process.env.NODE_ENV': JSON.stringify('production'),
