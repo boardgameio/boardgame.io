@@ -16,7 +16,7 @@
     "pretest": "npm run lint",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --collectCoverageFrom=!src/ui/3d/** --collectCoverageFrom=!src/ui/*.js --forceExit",
+    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --collectCoverageFrom=!src/client/debug/** --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "test:integration": "bash ./scripts/integration.sh",
     "lint": "eslint .",

@@ -650,8 +650,16 @@ test('override game state', () => {
   expect(client.getState().G).toEqual({ moved: true });
 });
 
-test('mount on custom element', () => {
-  const el = document.createElement('div');
-  const client = Client({ game: {}, debug: { target: el } });
-  client.mount();
+describe('mount / unmount', () => {
+  test('mount on custom element', () => {
+    const el = document.createElement('div');
+    const client = Client({ game: {}, debug: { target: el } });
+    client.mount();
+    client.unmount();
+  });
+
+  test('unmount', () => {
+    const client = Client({ game: {} });
+    client.unmount();
+  });
 });
