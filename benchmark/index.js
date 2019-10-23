@@ -7,7 +7,7 @@
  */
 
 import Benchmark from 'benchmark';
-import { Client } from '../dist/client';
+import { Client } from '../dist/esm/client';
 import { InitializeGame } from '../src/core/initialize';
 import { CreateGameReducer } from '../src/core/reducer';
 import { makeMove, gameEvent } from '../src/core/action-creators';
