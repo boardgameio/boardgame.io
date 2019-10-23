@@ -44,6 +44,7 @@ const minifiedPlugins = [
   svelte({ extensions: ['.svelte'] }),
   commonjs(),
   replace({
+    exclude: 'src/**',
     'process.env.NODE_ENV': JSON.stringify('production'),
   }),
   filesize(),

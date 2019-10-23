@@ -314,7 +314,11 @@ class _ClientImpl {
   }
 
   mount() {
-    if (this.debug !== false && this._debugPanel == null) {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      this.debug !== false &&
+      this._debugPanel == null
+    ) {
       let target = document.body;
       if (this.debug && this.debug.target) {
         target = this.debug.target;
