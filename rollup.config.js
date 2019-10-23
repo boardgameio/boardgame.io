@@ -11,7 +11,6 @@ import resolve from 'rollup-plugin-node-resolve';
 import replace from 'rollup-plugin-replace';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
-import postcss from 'rollup-plugin-postcss';
 import filesize from 'rollup-plugin-filesize';
 import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
@@ -21,14 +20,9 @@ import tsPlugin from 'rollup-plugin-typescript2';
 
 const env = process.env.NODE_ENV;
 
-const plugins = [
-  postcss(),
-  babel({ exclude: '**/node_modules/**' }),
-  filesize(),
-];
+const plugins = [babel({ exclude: '**/node_modules/**' }), filesize()];
 
 const clientPlugins = [
-  postcss(),
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true }),
   svelte({ extensions: ['.svelte'] }),
