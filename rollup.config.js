@@ -16,17 +16,7 @@ import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 import ttypescript from 'ttypescript';
 import tsPlugin from 'rollup-plugin-typescript2';
-
-const subpackages = [
-  'client',
-  'core',
-  'react',
-  'react-native',
-  'ai',
-  'plugins',
-  'master',
-  'internal',
-];
+const subpackages = require('./subpackages');
 
 const external = [
   ...Object.keys(pkg.dependencies),

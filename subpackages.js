@@ -6,8 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-const shell = require('shelljs');
-const subpackages = require('../subpackages');
-
-shell.rm('-rf', 'dist');
-shell.rm('-rf', subpackages);
+module.exports = [
+  'client',
+  'core',
+  'react',
+  'react-native',
+  'ai',
+  'plugins',
+  'master',
+  'internal',
+];

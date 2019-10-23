@@ -21,7 +21,7 @@
     "test:integration": "bash ./scripts/integration.sh",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "prepack": "npm run build && generate-export-aliases",
+    "prepack": "npm run build && node scripts/proxy-dirs.js",
     "postpack": "npm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{js,css,md}\"",
     "changelog": "bash ./scripts/changelog.sh",
@@ -35,22 +35,16 @@
     "dist/boardgameio.min.js",
     "dist/boardgameio.es.js",
     "dist/server.js",
-    "dist/master.js",
-    "dist/client.js",
-    "dist/react.js",
-    "dist/react-native.js",
-    "dist/core.js",
-    "dist/plugins.js",
-    "dist/ai.js",
-    "dist/internal.js",
-    "server.js",
-    "client.js",
-    "master.js",
-    "react.js",
-    "react-native.js",
-    "core.js",
-    "plugins.js",
-    "ai.js"
+    "dist/esm",
+    "dist/cjs",
+    "client",
+    "core",
+    "react",
+    "react-native",
+    "ai",
+    "plugins",
+    "master",
+    "internal"
   ],
   "keywords": [
     "react",
@@ -98,7 +92,6 @@
     "firebase": "^6.6.1",
     "firebase-admin": "^8.5.0",
     "firebase-mock": "^2.2.10",
-    "generate-export-aliases": "^1.0.0",
     "graceful-fs": "https://github.com/mekwall/node-graceful-fs.git#patch-1",
     "husky": "^1.3.1",
     "identity-obj-proxy": "^3.0.0",
@@ -151,18 +144,6 @@
     "shortid": "^2.2.14",
     "socket.io": "^2.1.1",
     "uuid": "3.2.1"
-  },
-  "config": {
-    "exportAliases": {
-      "client": "./dist/client.js",
-      "react": "./dist/react.js",
-      "react-native": "./dist/react-native.js",
-      "server": "./dist/server.js",
-      "core": "./dist/core.js",
-      "plugins": "./dist/plugins.js",
-      "ai": "./dist/ai.js",
-      "master": "./dist/master.js"
-    }
   },
   "jest": {
     "preset": "ts-jest/presets/js-with-babel",
