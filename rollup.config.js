@@ -18,11 +18,18 @@ import pkg from './package.json';
 import ttypescript from 'ttypescript';
 import tsPlugin from 'rollup-plugin-typescript2';
 
-const env = process.env.NODE_ENV;
+const subpackages = [
+  'client',
+  'core',
+  'react',
+  'react-native',
+  'ai',
+  'plugins',
+  'master',
+  'internal',
+];
 
-const plugins = [babel({ exclude: '**/node_modules/**' }), filesize()];
-
-const clientPlugins = [
+const plugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true }),
   svelte({ extensions: ['.svelte'] }),
@@ -36,6 +43,19 @@ const serverPlugins = [
   commonjs({ include: 'node_modules/**' }),
 ];
 
+const minifiedPlugins = [
+  babel({ exclude: '**/node_modules/**' }),
+  builtins(),
+  resolve({ browser: true, preferBuiltins: false }),
+  svelte({ extensions: ['.svelte'] }),
+  commonjs(),
+  replace({
+    'process.env.NODE_ENV': JSON.stringify('production'),
+  }),
+  filesize(),
+  terser(),
+];
+
 const globals = {
   immer: 'immer',
   react: 'React',
@@ -47,82 +67,18 @@ const globals = {
 };
 
 export default [
-  // Sub-packages.
+  ...subpackages.map(name => ({
+    input: `packages/${name}.js`,
+    external: Object.keys(globals),
+    output: { file: `dist/${name}.js`, format: 'es' },
+    plugins,
+  })),
+
+  // Server.
   {
     input: 'packages/server.ts',
     output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
     plugins: serverPlugins,
-  },
-
-  {
-    input: 'packages/react.js',
-    external: Object.keys(globals),
-    output: { file: 'dist/react.js', format: 'umd', name: 'Client', globals },
-    plugins: clientPlugins,
-  },
-
-  {
-    input: 'packages/client.js',
-    external: Object.keys(globals),
-    output: { file: 'dist/client.js', format: 'umd', name: 'Client', globals },
-    plugins: clientPlugins,
-  },
-
-  {
-    input: 'packages/react-native.js',
-    external: Object.keys(globals),
-    output: {
-      file: 'dist/react-native.js',
-      format: 'umd',
-      name: 'ReactNativeClient',
-      globals,
-    },
-    plugins: clientPlugins,
-  },
-
-  {
-    input: 'packages/master.js',
-    external: Object.keys(globals),
-    output: { file: 'dist/master.js', format: 'umd', name: 'Master', globals },
-    plugins,
-  },
-
-  {
-    input: 'packages/core.js',
-    external: Object.keys(globals),
-    output: { file: 'dist/core.js', format: 'umd', name: 'Core', globals },
-    plugins,
-  },
-
-  {
-    input: 'packages/plugins.js',
-    external: Object.keys(globals),
-    output: {
-      file: 'dist/plugins.js',
-      format: 'umd',
-      name: 'Plugins',
-      globals,
-    },
-    plugins,
-  },
-
-  {
-    input: 'packages/ai.js',
-    external: Object.keys(globals),
-    output: { file: 'dist/ai.js', format: 'umd', name: 'AI', globals },
-    plugins,
-  },
-
-  {
-    input: 'packages/internal.js',
-    external: Object.keys(globals),
-    output: {
-      file: 'dist/internal.js',
-      format: 'umd',
-      name: 'Internal',
-      globals,
-    },
-    plugins,
   },
 
   // UMD and ES versions.
@@ -131,13 +87,9 @@ export default [
     external: Object.keys(globals),
     output: [
       { file: pkg.main, format: 'umd', name: 'BoardgameIO', globals },
-      { file: pkg.module, format: 'es', globals },
+      { file: pkg.module, format: 'es' },
     ],
-    plugins: plugins.concat([
-      svelte({ extensions: ['.svelte'] }),
-      resolve({ browser: true }),
-      replace({ 'process.env.NODE_ENV': JSON.stringify(env) }),
-    ]),
+    plugins,
   },
 
   // Browser minified version.
@@ -152,15 +104,6 @@ export default [
         globals,
       },
     ],
-    plugins: plugins.concat([
-      builtins(),
-      resolve({ browser: true, preferBuiltins: false }),
-      svelte({ extensions: ['.svelte'] }),
-      commonjs(),
-      replace({
-        'process.env.NODE_ENV': JSON.stringify('production'),
-      }),
-      terser(),
-    ]),
+    plugins: minifiedPlugins,
   },
 ];
