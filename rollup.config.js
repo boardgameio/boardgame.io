@@ -78,6 +78,19 @@ export default [
     plugins: serverPlugins,
   },
 
+  // CJS and ES versions.
+  // The subpackages are the preferred way of importing
+  // stuff from the library instead of these.
+  {
+    input: 'packages/main.js',
+    external,
+    output: [
+      { file: pkg.main, format: 'cjs' },
+      { file: pkg.module, format: 'esm' },
+    ],
+    plugins,
+  },
+
   // Browser minified version.
   {
     input: 'packages/main.js',
