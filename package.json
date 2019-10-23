@@ -47,9 +47,10 @@
     "internal"
   ],
   "keywords": [
-    "react",
-    "redux",
-    "boardgames"
+    "board games",
+    "card games",
+    "tabletop games",
+    "game engine"
   ],
   "engines": {
     "node": ">=10.0",
