@@ -6,10 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-const DEV =
-  process.env.NODE_ENV === 'development' || process.env.NODE_ENV == 'test';
-const logfn = DEV ? console.log : () => {};
-const errorfn = DEV ? console.error : () => {};
+const production = process.env.NODE_ENV === 'production';
+const logfn = production ? () => {} : console.log;
+const errorfn = console.error;
 
 export function info(msg) {
   logfn(`INFO: ${msg}`);

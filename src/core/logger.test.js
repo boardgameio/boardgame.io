@@ -52,14 +52,14 @@ describe('logging', () => {
       logging = require('./logger');
     });
 
-    test('error stripped', () => {
-      logging.error('msg1');
-      expect(console.error).not.toHaveBeenCalled();
-    });
-
     test('info stripped', () => {
       logging.info('msg2');
       expect(console.log).not.toHaveBeenCalled();
+    });
+
+    test('error not stripped', () => {
+      logging.error('msg1');
+      expect(console.error).toHaveBeenCalled();
     });
   });
 });
