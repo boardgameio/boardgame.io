@@ -182,7 +182,7 @@ describe('multiplayer', () => {
         game: { moves: { A: () => {} } },
         multiplayer: { server: host + ':' + port },
       });
-      client.connect();
+      client.start();
     });
 
     afterAll(() => {
@@ -214,7 +214,7 @@ describe('multiplayer', () => {
         game: {},
         multiplayer: true,
       });
-      client.connect();
+      client.start();
     });
 
     test('correct transport used', () => {
@@ -236,8 +236,8 @@ describe('multiplayer', () => {
       client0 = Client({ ...spec, playerID: '0' });
       client1 = Client({ ...spec, playerID: '1' });
 
-      client0.connect();
-      client1.connect();
+      client0.start();
+      client1.start();
     });
 
     test('correct transport used', () => {
@@ -650,16 +650,16 @@ test('override game state', () => {
   expect(client.getState().G).toEqual({ moved: true });
 });
 
-describe('mount / unmount', () => {
+describe('start / stop', () => {
   test('mount on custom element', () => {
     const el = document.createElement('div');
     const client = Client({ game: {}, debug: { target: el } });
-    client.mount();
-    client.unmount();
+    client.start();
+    client.stop();
   });
 
-  test('unmount', () => {
+  test('try to stop without starting', () => {
     const client = Client({ game: {} });
-    client.unmount();
+    client.stop();
   });
 });

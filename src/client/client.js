@@ -253,6 +253,7 @@ class _ClientImpl {
       subscribe: () => {},
       subscribeGameMetadata: _metadata => {}, // eslint-disable-line no-unused-vars
       connect: () => {},
+      disconnect: () => {},
       updateGameID: () => {},
       updatePlayerID: () => {},
     };
@@ -317,7 +318,9 @@ class _ClientImpl {
     this.notifySubscribers();
   }
 
-  mount() {
+  start() {
+    this.transport.connect();
+
     if (
       process.env.NODE_ENV !== 'production' &&
       this.debug !== false &&
@@ -336,7 +339,9 @@ class _ClientImpl {
     }
   }
 
-  unmount() {
+  stop() {
+    this.transport.disconnect();
+
     if (this._debugPanel != null) {
       this._debugPanel.$destroy();
       this._debugPanel = null;
@@ -406,10 +411,6 @@ class _ClientImpl {
     ret = { ...ret, isConnected };
 
     return ret;
-  }
-
-  connect() {
-    this.transport.connect();
   }
 
   createDispatchers() {

@@ -67,6 +67,7 @@ export function Client(opts) {
         gameID: props.gameID,
         playerID: props.playerID,
         credentials: props.credentials,
+        debug: false,
         socketOpts: {
           transports: ['websocket'],
         },
@@ -75,11 +76,12 @@ export function Client(opts) {
     }
 
     componentDidMount() {
-      this.client.connect();
       this.unsubscribe = this.client.subscribe(() => this.forceUpdate());
+      this.client.start();
     }
 
     componentWillUnmount() {
+      this.client.stop();
       this.unsubscribe();
     }
 

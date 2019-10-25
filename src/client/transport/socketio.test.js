@@ -26,6 +26,8 @@ class MockSocket {
   on(type, callback) {
     this.callbacks[type] = callback;
   }
+
+  close() {}
 }
 
 test('defaults', () => {
@@ -54,27 +56,43 @@ describe('update gameID / playerID', () => {
   });
 });
 
-test('connection status', () => {
-  const onChangeMock = jest.fn();
-  const mockSocket = new MockSocket();
-  const m = new SocketIO({
-    socket: mockSocket,
-    gameID: 0,
-    playerID: 0,
-    gameName: 'foo',
-    numPlayers: 2,
+describe('connection status', () => {
+  let onChangeMock;
+  let mockSocket;
+  let m;
+
+  beforeEach(() => {
+    onChangeMock = jest.fn();
+    mockSocket = new MockSocket();
+    m = new SocketIO({
+      socket: mockSocket,
+      gameID: 0,
+      playerID: 0,
+      gameName: 'foo',
+      numPlayers: 2,
+    });
+    m.subscribe(onChangeMock);
+    m.connect();
   });
-  m.subscribe(onChangeMock);
-  m.connect();
 
-  mockSocket.callbacks['connect']();
-  expect(onChangeMock).toHaveBeenCalled();
-  expect(m.isConnected).toBe(true);
+  test('connect', () => {
+    mockSocket.callbacks['connect']();
+    expect(onChangeMock).toHaveBeenCalled();
+    expect(m.isConnected).toBe(true);
+  });
 
-  onChangeMock.mockClear();
-  mockSocket.callbacks['disconnect']();
-  expect(onChangeMock).toHaveBeenCalled();
-  expect(m.isConnected).toBe(false);
+  test('disconnect', () => {
+    mockSocket.callbacks['disconnect']();
+    expect(onChangeMock).toHaveBeenCalled();
+    expect(m.isConnected).toBe(false);
+  });
+
+  test('close socket', () => {
+    mockSocket.callbacks['connect']();
+    expect(m.isConnected).toBe(true);
+    m.disconnect();
+    expect(m.isConnected).toBe(false);
+  });
 });
 
 describe('multiplayer', () => {

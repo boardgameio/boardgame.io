@@ -27,9 +27,9 @@ describe('LocalMaster', () => {
     storeB.dispatch = jest.fn();
   });
 
-  test('connect', async () => {
-    await localA.connect();
-    await localB.connect();
+  test('connect', () => {
+    localA.connect();
+    localB.connect();
     localA.subscribe();
 
     expect(storeA.dispatch).toBeCalledWith(
@@ -44,8 +44,8 @@ describe('LocalMaster', () => {
     );
   });
 
-  test('update', async () => {
-    await localA.onAction({ _stateID: 0 }, gameEvent('endTurn'));
+  test('update', () => {
+    localA.onAction({ _stateID: 0 }, gameEvent('endTurn'));
 
     expect(storeA.dispatch).toBeCalledWith(
       expect.objectContaining({
@@ -59,9 +59,14 @@ describe('LocalMaster', () => {
     );
   });
 
-  test('connect without callback', async () => {
+  test('connect without callback', () => {
     master.connect('gameID', '0', undefined);
-    await master.onSync('gameID', '0');
+    master.onSync('gameID', '0');
+  });
+
+  test('disconnect', () => {
+    localA.disconnect();
+    localB.disconnect();
   });
 });
 
@@ -71,14 +76,14 @@ describe('Local', () => {
     const store = { dispatch: () => {} };
     const m = new Local({ master, store });
 
-    test('gameID', async () => {
-      await m.updateGameID('test');
+    test('gameID', () => {
+      m.updateGameID('test');
       expect(m.gameID).toBe('default:test');
       expect(master.onSync).lastCalledWith('default:test', null, 2);
     });
 
-    test('playerID', async () => {
-      await m.updatePlayerID('player');
+    test('playerID', () => {
+      m.updatePlayerID('player');
       expect(m.playerID).toBe('player');
       expect(master.onSync).lastCalledWith('default:test', 'player', 2);
     });
