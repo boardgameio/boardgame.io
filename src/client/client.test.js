@@ -660,6 +660,31 @@ describe('subscribe', () => {
     client.transport.callback();
     expect(fn).toHaveBeenCalled();
   });
+
+  describe('multiplayer', () => {
+    test('subscribe before start', () => {
+      const fn = jest.fn();
+      const client = Client({
+        game: {},
+        multiplayer: { local: true },
+      });
+      client.subscribe(fn);
+      expect(fn).not.toBeCalled();
+      client.start();
+      expect(fn).toBeCalled();
+    });
+
+    test('subscribe after start', () => {
+      const fn = jest.fn();
+      const client = Client({
+        game: {},
+        multiplayer: { local: true },
+      });
+      client.start();
+      client.subscribe(fn);
+      expect(fn).toBeCalled();
+    });
+  });
 });
 
 test('override game state', () => {

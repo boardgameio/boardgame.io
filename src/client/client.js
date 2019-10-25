@@ -104,6 +104,7 @@ class _ClientImpl {
     this.debug = debug;
     this.gameStateOverride = null;
     this.subscribers = {};
+    this._running = false;
 
     this.reducer = CreateGameReducer({
       game: this.game,
@@ -320,6 +321,8 @@ class _ClientImpl {
 
   start() {
     this.transport.connect();
+    this.notifySubscribers();
+    this._running = true;
 
     if (
       process.env.NODE_ENV !== 'production' &&
@@ -341,6 +344,7 @@ class _ClientImpl {
 
   stop() {
     this.transport.disconnect();
+    this._running = false;
 
     if (this._debugPanel != null) {
       this._debugPanel.$destroy();
@@ -352,7 +356,10 @@ class _ClientImpl {
     const id = Object.keys(this.subscribers).length;
     this.subscribers[id] = fn;
     this.transport.subscribe(() => this.notifySubscribers());
-    fn(this.getState());
+
+    if (this._running || !this.multiplayer) {
+      fn(this.getState());
+    }
 
     // Return a handle that allows the caller to unsubscribe.
     return () => {
