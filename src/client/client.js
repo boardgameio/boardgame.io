@@ -352,7 +352,7 @@ class _ClientImpl {
     const id = Object.keys(this.subscribers).length;
     this.subscribers[id] = fn;
     this.transport.subscribe(() => this.notifySubscribers());
-    this.notifySubscribers();
+    fn(this.getState());
 
     // Return a handle that allows the caller to unsubscribe.
     return () => {

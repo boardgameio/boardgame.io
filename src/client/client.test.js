@@ -608,6 +608,20 @@ describe('subscribe', () => {
     const fn2 = jest.fn();
     const unsubscribe = client.subscribe(fn2);
 
+    // The subscriber that just subscribed is notified.
+    expect(fn).not.toBeCalled();
+    expect(fn2).toBeCalledWith(
+      expect.objectContaining({
+        G: { moved: true },
+      })
+    );
+
+    fn.mockClear();
+    fn2.mockClear();
+
+    client.moves.A();
+
+    // Both subscribers are notified.
     expect(fn).toBeCalledWith(
       expect.objectContaining({
         G: { moved: true },
@@ -618,11 +632,13 @@ describe('subscribe', () => {
         G: { moved: true },
       })
     );
-    fn.mockClear();
-    fn2.mockClear();
 
     unsubscribe();
 
+    fn.mockClear();
+    fn2.mockClear();
+
+    // The subscriber the unsubscribed is not notified.
     client.moves.A();
     expect(fn).toBeCalledWith(
       expect.objectContaining({
