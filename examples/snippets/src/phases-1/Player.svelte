@@ -1,12 +1,8 @@
 <script>
-  export let playerID;
+  export let playerID = null;
 
   import { Client } from 'boardgame.io/client';
   import Game from './game';
-
-  let hand = {};
-  let deck = 0;
-  let c = 'client';
 
   const client = Client({
     ...Game,
@@ -14,15 +10,7 @@
     playerID,
   });
 
-  function update() {
-    const { G, ctx, isActive } = client.getState();
-    hand = G.hand;
-    deck = G.deck;
-    c = isActive ? 'client active' : 'client';
-  }
-
-  client.connect();
-  client.subscribe(update);
+  client.start();
 </script>
 
 <style>
@@ -71,15 +59,15 @@
 
 {#if !playerID}
   <div class="deck">
-    <div>{deck}</div>
+    <div>{$client.G.deck}</div>
     <div>cards</div>
   </div>
 {:else}
-  <div class={c}>
+  <div class="client" class:active={$client.isActive}>
     <li>
       <strong>Player {playerID}</strong>
     </li>
-    <li>{hand[playerID]} cards</li>
+    <li>{$client.G.hand[playerID]} cards</li>
     <li>
       <button on:click={client.moves.DrawCard}>Draw Card</button>
     </li>
