@@ -103,7 +103,7 @@ class _ClientImpl {
     this.multiplayer = multiplayer;
     this.debug = debug;
     this.gameStateOverride = null;
-    this.subscribeCallback = () => {};
+    this.subscribers = {};
 
     this.reducer = CreateGameReducer({
       game: this.game,
@@ -224,7 +224,7 @@ class _ClientImpl {
      */
     const SubscriptionMiddleware = () => next => action => {
       const result = next(action);
-      this.subscribeCallback();
+      this.notifySubscribers();
       return result;
     };
 
@@ -308,9 +308,13 @@ class _ClientImpl {
     this._debugPanel = null;
   }
 
+  notifySubscribers() {
+    Object.values(this.subscribers).forEach(fn => fn(this.getState()));
+  }
+
   overrideGameState(state) {
     this.gameStateOverride = state;
-    this.subscribeCallback();
+    this.notifySubscribers();
   }
 
   mount() {
@@ -340,24 +344,14 @@ class _ClientImpl {
   }
 
   subscribe(fn) {
-    // If we already have a subscription, then create a new
-    // callback that invokes both the old and new subscriptions.
-    const prev = this.subscribeCallback;
-    const callback = () => {
-      prev();
-      fn(this.getState());
-    };
-
-    this.subscribeCallback = callback;
-    this.transport.subscribe(callback);
-    callback();
+    const id = Object.keys(this.subscribers).length;
+    this.subscribers[id] = fn;
+    this.transport.subscribe(this.notifySubscribers);
+    this.notifySubscribers();
 
     // Return a handle that allows the caller to unsubscribe.
-    // Warning: Will revert any callbacks that were added
-    // after this current call to subscribe(), so use it to
-    // only remove the latest subscription.
     return () => {
-      this.subscribeCallback = prev;
+      delete this.subscribers[id];
     };
   }
 
