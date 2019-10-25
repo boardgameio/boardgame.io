@@ -631,6 +631,19 @@ describe('subscribe', () => {
     );
     expect(fn2).not.toBeCalled();
   });
+
+  test('transport notifies subscribers', () => {
+    const client = Client({
+      game: {},
+      multiplayer: true,
+    });
+    const fn = jest.fn();
+    client.subscribe(fn);
+    client.start();
+    fn.mockClear();
+    client.transport.callback();
+    expect(fn).toHaveBeenCalled();
+  });
 });
 
 test('override game state', () => {
