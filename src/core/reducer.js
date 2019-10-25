@@ -140,6 +140,9 @@ export function CreateGameReducer({ game, multiplayer }) {
 
         // The game declared the move as invalid.
         if (G === INVALID_MOVE) {
+          error(
+            `invalid move: ${action.payload.type} args: ${action.payload.args}`
+          );
           return state;
         }
 
