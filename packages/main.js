@@ -10,7 +10,7 @@ import { Client } from '../src/client/client';
 import { Client as ReactClient } from '../src/client/react';
 import { Client as ReactNativeClient } from '../src/client/react-native';
 import { TurnOrder } from '../src/core/turn-order';
-import { AI } from '../src/ai/ai';
+import { Simulate } from '../src/ai/ai';
 import { RandomBot } from '../src/ai/random-bot';
 import { MCTSBot } from '../src/ai/mcts-bot';
 
@@ -19,7 +19,7 @@ export {
   ReactClient,
   ReactNativeClient,
   TurnOrder,
-  AI,
+  Simulate,
   RandomBot,
   MCTSBot,
 };
