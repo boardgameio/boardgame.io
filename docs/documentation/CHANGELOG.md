@@ -1,3 +1,31 @@
+## v0.34.0
+
+The main feature in this release is that the Debug Panel is now baked into the Vanilla JS client. This
+means that non-React users will have access to it as well!
+
+It is guarded by process.env.NODE_ENV !== 'production', which means that most bundlers will strip it
+out in a production build.
+
+The other big change is that the NPM package now contains both CJS and ES builds for every subpackage. This should have no user visible impact, but might break some non-standard bundler configurations.
+
+#### Features
+
+- [[e9351dc](https://github.com/nicolodavis/boardgame.io/commit/e9351dc)] log a message when INVALID_MOVE is returned
+- [[2f86d92](https://github.com/nicolodavis/boardgame.io/commit/2f86d92)] rename mount/unmount to start/stop
+- [[1ad87d0](https://github.com/nicolodavis/boardgame.io/commit/1ad87d0)] remove INFO log in production, but not ERROR logs
+- [[83810ea](https://github.com/nicolodavis/boardgame.io/commit/83810ea)] guard Debug Panel with process.env.NODE_ENV
+- [[156cf07](https://github.com/nicolodavis/boardgame.io/commit/156cf07)] generate CJS and ES version of main package
+- [[881278a](https://github.com/nicolodavis/boardgame.io/commit/881278a)] Migrate Debug Panel + Log + MCTS Visualizer to Svelte (#498)
+- [[49f5a52](https://github.com/nicolodavis/boardgame.io/commit/49f5a52)] allow multiple client subscriptions
+
+#### Bugfixes
+
+- [[3206548](https://github.com/nicolodavis/boardgame.io/commit/3206548)] don't invoke callback on subscribe in multiplayer mode unless client is already connected
+- [[9596fa4](https://github.com/nicolodavis/boardgame.io/commit/9596fa4)] only notify the latest subscriber during client.subscribe
+- [[5a13f00](https://github.com/nicolodavis/boardgame.io/commit/5a13f00)] fix bug in the way the transport notifies client subscribers of connection changes
+- [[c77ba53](https://github.com/nicolodavis/boardgame.io/commit/c77ba53)] handle multiple subscriptions correctly
+- [[b045de3](https://github.com/nicolodavis/boardgame.io/commit/b045de3)] use Parcel instead of Webpack in examples
+
 ## v0.33.2
 
 #### Features
