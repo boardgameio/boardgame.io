@@ -28,7 +28,6 @@ const plugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true, only: [/svelte/] }),
   svelte({ extensions: ['.svelte'] }),
-  filesize(),
 ];
 
 const serverPlugins = [
