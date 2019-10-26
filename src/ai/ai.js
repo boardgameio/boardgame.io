@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { MCTSBot } from './bot';
+import { MCTSBot } from './mcts-bot';
 
 export function AI({ bot, enumerate, visualize }) {
   if (!bot) {
