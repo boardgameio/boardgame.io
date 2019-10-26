@@ -21,6 +21,7 @@
     "test:integration": "bash ./scripts/integration.sh",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "prepublishOnly": "npm run clean",
     "prepack": "npm run build && node scripts/proxy-dirs.js",
     "postpack": "npm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{js,css,md}\"",
