@@ -8,14 +8,13 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
-import { AI } from 'boardgame.io/ai';
 import TicTacToe from './game';
 import Board from './board';
 
 const App = Client({
   game: TicTacToe,
   board: Board,
-  ai: AI({
+  ai: {
     enumerate: G => {
       let r = [];
       for (let i = 0; i < 9; i++) {
@@ -25,13 +24,7 @@ const App = Client({
       }
       return r;
     },
-
-    // visualize: MCTSVisualizer(state => (
-    //   <div style={{ transform: 'scale(0.7)' }}>
-    //     <Board {...state} isPreview={true} moves={{}} />
-    //   </div>
-    // )),
-  }),
+  },
 });
 
 const Singleplayer = () => (

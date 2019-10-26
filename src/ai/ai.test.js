@@ -6,11 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { AI } from './ai';
 import { InitializeGame } from '../core/initialize';
+import { Client } from '../client/client';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { makeMove } from '../core/action-creators';
-import { Simulate } from './ai';
+import { Step, Simulate } from './ai';
 import { Bot } from './bot';
 import { RandomBot } from './random-bot';
 import { MCTSBot } from './mcts-bot';
@@ -82,22 +82,68 @@ const enumerate = (G, ctx, playerID) => {
   return r;
 };
 
-describe('AI', () => {
-  test('defaults', () => {
-    const ai = AI({});
-    expect(ai.bot).toBeDefined();
+describe('Step', () => {
+  test('advances game state', async () => {
+    const client = Client({
+      game: {
+        setup: () => ({ moved: false }),
+
+        moves: {
+          clickCell(G) {
+            return { moved: !G.moved };
+          },
+        },
+
+        endIf(G) {
+          if (G.moved) return true;
+        },
+      },
+
+      ai: {
+        enumerate: () => [{ move: 'clickCell' }],
+      },
+    });
+
+    const bot = new RandomBot({ enumerate: client.ai.enumerate });
+    expect(client.getState().G).toEqual({ moved: false });
+    await Step(client, bot);
+    expect(client.getState().G).toEqual({ moved: true });
   });
 
-  test('basic', () => {
-    const bot = { bot: true };
-    const visualize = jest.fn();
-    const enumerate = jest.fn();
+  test('does not crash on empty action', async () => {
+    const client = Client({
+      game: {},
+      ai: {
+        enumerate: () => [],
+      },
+    });
+    const bot = new RandomBot({ enumerate: client.ai.enumerate });
+    await Step(client, bot);
+  });
 
-    const ai = AI({ bot, visualize, enumerate });
+  test('works with stages', async () => {
+    const client = Client({
+      game: {
+        moves: {
+          A: G => {
+            G.moved = true;
+          },
+        },
 
-    expect(ai.bot).toEqual(bot);
-    expect(ai.visualize).toEqual(visualize);
-    expect(ai.enumerate).toEqual(enumerate);
+        turn: {
+          activePlayers: { player: 'stage' },
+        },
+      },
+
+      ai: {
+        enumerate: () => [{ move: 'A' }],
+      },
+    });
+
+    const bot = new RandomBot({ enumerate: client.ai.enumerate });
+    expect(client.getState().G).not.toEqual({ moved: true });
+    await Step(client, bot);
+    expect(client.getState().G).toEqual({ moved: true });
   });
 });
 

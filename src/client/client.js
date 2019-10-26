@@ -97,6 +97,7 @@ class _ClientImpl {
     enhancer,
   }) {
     this.game = Game(game);
+    this.ai = ai;
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;
@@ -111,28 +112,6 @@ class _ClientImpl {
       numPlayers,
       multiplayer,
     });
-
-    if (ai !== undefined && multiplayer === undefined) {
-      const bot = new ai.bot({ game, enumerate: ai.enumerate });
-
-      this.step = async () => {
-        const state = this.store.getState();
-
-        let playerID = state.ctx.currentPlayer;
-        if (state.ctx.activePlayers) {
-          playerID = Object.keys(state.ctx.activePlayers)[0];
-        }
-
-        const { action, metadata } = await bot.play(state, playerID);
-
-        if (action) {
-          action.payload.metadata = metadata;
-          this.store.dispatch(action);
-        }
-
-        return action;
-      };
-    }
 
     let initialState = null;
     if (multiplayer === undefined) {

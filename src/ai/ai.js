@@ -8,14 +8,29 @@
 
 import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
-import { MCTSBot } from './mcts-bot';
 
-export function AI({ bot, enumerate, visualize }) {
-  if (!bot) {
-    bot = MCTSBot;
+/**
+ * Make a single move on the client with a bot.
+ *
+ * @param {...object} client - The game client.
+ * @param {...object} bot - The bot.
+ */
+export async function Step(client, bot) {
+  const state = client.store.getState();
+
+  let playerID = state.ctx.currentPlayer;
+  if (state.ctx.activePlayers) {
+    playerID = Object.keys(state.ctx.activePlayers)[0];
   }
 
-  return { bot, enumerate, visualize };
+  const { action, metadata } = await bot.play(state, playerID);
+
+  if (action) {
+    action.payload.metadata = metadata;
+    client.store.dispatch(action);
+  }
+
+  return action;
 }
 
 /**
