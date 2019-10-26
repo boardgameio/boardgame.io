@@ -8,18 +8,20 @@
   import Main from './main/Main.svelte';
   import Info from './info/Info.svelte';
   import Log from './log/Log.svelte';
+  import AI from './ai/AI.svelte';
+
+  const panes = {
+    main: { label: 'Main', shortcut: 'm', component: Main },
+    log: { label: 'Log', shortcut: 'l', component: Log },
+    info: { label: 'Info', shortcut: 'i', component: Info },
+    ai: { label: 'AI', shortcut: 'a', component: AI },
+  };
 
   const disableHotkeys = writable(false);
   const secondaryPane = writable(null);
 
   setContext('hotkeys', { disableHotkeys });
   setContext('secondaryPane', { secondaryPane });
-
-  const panes = {
-    main: { label: 'Main', component: Main },
-    log: { label: 'Log', component: Log },
-    info: { label: 'Info', component: Info },
-  };
 
   let pane = 'main';
   function MenuChange(e) {
@@ -28,24 +30,15 @@
 
   let visible = true;
   function Keypress(e) {
-    switch (e.key) {
-      case '.': {
-        visible = !visible;
-        break;
-      }
-      case 'm': {
-        pane = 'main';
-        break;
-      }
-      case 'l': {
-        pane = 'log';
-        break;
-      }
-      case 'i': {
-        pane = 'info';
-        break;
-      }
+    if (e.key == '.') {
+      visible = !visible;
+      return;
     }
+    Object.entries(panes).forEach(([key, { shortcut }]) => {
+      if (e.key == shortcut) {
+        pane = key;
+      }
+    });
   }
 </script>
 
@@ -92,7 +85,9 @@
     </div>
     {#if $secondaryPane}
       <div class="secondary-pane">
-        <svelte:component this={$secondaryPane.component} metadata={$secondaryPane.metadata} />
+        <svelte:component
+          this={$secondaryPane.component}
+          metadata={$secondaryPane.metadata} />
       </div>
     {/if}
   </div>

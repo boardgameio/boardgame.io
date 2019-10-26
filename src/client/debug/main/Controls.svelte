@@ -5,18 +5,6 @@
   import { sync } from '../../../core/action-creators';
   import { parse, stringify } from 'flatted';
 
-  function Simulate(iterations = 10000, sleepTimeout = 100) {
-    const step = async () => {
-      for (let i = 0; i < iterations; i++) {
-        const action = await client.step();
-        if (!action) break;
-        await new Promise(resolve => setTimeout(resolve, sleepTimeout));
-      }
-    };
-
-    return step();
-  }
-
   function Save() {
     const { G, ctx } = client.getState();
     const json = stringify({ G, ctx });
@@ -41,14 +29,16 @@
 </style>
 
 <section id="debug-controls" class="controls">
-  <li><Hotkey value="1" onPress={client.reset} label="reset" /></li>
-  <li><Hotkey value="2" onPress={Save} label="save" /></li>
-  <li><Hotkey value="3" onPress={Restore} label="restore" /></li>
-
-  {#if client.step}
-    <li><Hotkey value="4" onPress={client.step} label="step" /></li>
-    <li><Hotkey value="5" onPress={Simulate} label="simulate" /></li>
-  {/if}
-
-  <li><Hotkey value="." disable={true} label="hide" /></li>
+  <li>
+    <Hotkey value="1" onPress={client.reset} label="reset" />
+  </li>
+  <li>
+    <Hotkey value="2" onPress={Save} label="save" />
+  </li>
+  <li>
+    <Hotkey value="3" onPress={Restore} label="restore" />
+  </li>
+  <li>
+    <Hotkey value="." disable={true} label="hide" />
+  </li>
 </section>

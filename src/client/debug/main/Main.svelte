@@ -6,7 +6,7 @@
   import PlayerInfo from './PlayerInfo.svelte';
   import { AssignShortcuts } from '../utils/shortcuts';
 
-  const shortcuts = AssignShortcuts(client.moves, client.events, 'mli');
+  const shortcuts = AssignShortcuts(client.moves, client.events, 'mlia');
 
   function SanitizeCtx(ctx) {
     let r = {};
@@ -81,5 +81,7 @@
 
 <section>
   <label>ctx</label>
-  <pre class="json">{JSON.stringify(SanitizeCtx($client ? $client.ctx : {}), null, 2)}</pre>
+  <pre class="json">
+    {JSON.stringify(SanitizeCtx($client ? $client.ctx : {}), null, 2)}
+  </pre>
 </section>
