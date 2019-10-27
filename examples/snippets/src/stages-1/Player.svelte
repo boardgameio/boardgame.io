@@ -4,31 +4,15 @@
   import { Client } from 'boardgame.io/client';
   import Game from './game';
 
-  let hand = {};
-  let deck = 0;
-  let c = 'client';
-  let phase = '';
-  let active = false;
-  let discard = false;
-
   const client = Client({
     ...Game,
     gameID: 'default',
     playerID,
   });
 
-  function update() {
-    const { G, ctx, isActive } = client.getState();
-    hand = G.hand;
-    deck = G.deck;
-    phase = ctx.phase;
-    active = isActive;
-    discard = ctx.activePlayers && ctx.activePlayers[playerID] == 'discard';
-    c = isActive ? 'client active' : 'client';
-  }
+  client.start();
 
-  client.connect();
-  client.subscribe(update);
+  $: discard = $client.ctx.activePlayers && $client.ctx.activePlayers[playerID] == 'discard';
 </script>
 
 <style>
@@ -56,12 +40,12 @@
   }
 </style>
 
-<div class={c}>
+<div class="client" class:active={$client.isActive}>
   <li>
     <strong>Player {playerID}</strong>
   </li>
 
-  {#if active}
+  {#if $client.isActive}
     <li>
     {#if discard}
       <button on:click={() => client.moves.discard()}>Discard</button>

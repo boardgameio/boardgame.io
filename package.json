@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.33.2",
+  "version": "0.34.1",
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
@@ -8,20 +8,21 @@
     "dev": "node scripts/install-web.js && npx concurrently npm:build:watch npm:dev:server npm:dev:client",
     "dev:client": "cd examples && cd react-web && npm start",
     "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions '.ts,.js' --ignore 'src/**/*.test.ts' --presets @babel/preset-env examples/react-web/server.js",
-    "build": "cross-env BABEL_ENV=rollup rollup --config rollup.npm.js",
-    "build:watch": "cross-env BABEL_ENV=rollup rollup -w --config rollup.npm.js",
+    "build": "cross-env BABEL_ENV=rollup rollup --config rollup.config.js",
+    "build:watch": "cross-env BABEL_ENV=rollup rollup -w --config rollup.config.js",
     "benchmark": "babel-node --presets @babel/preset-env benchmark/index.js",
     "docs": "docsify serve docs",
     "examples": "npm run start",
     "pretest": "npm run lint",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --collectCoverageFrom=!src/ui/3d/** --collectCoverageFrom=!src/ui/*.js --forceExit",
+    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --collectCoverageFrom=!src/client/debug/** --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "test:integration": "bash ./scripts/integration.sh",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "prepack": "npm run build && generate-export-aliases",
+    "prepublishOnly": "npm run clean",
+    "prepack": "npm run build && node scripts/proxy-dirs.js",
     "postpack": "npm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{js,css,md}\"",
     "changelog": "bash ./scripts/changelog.sh",
@@ -35,29 +36,22 @@
     "dist/boardgameio.min.js",
     "dist/boardgameio.es.js",
     "dist/server.js",
-    "dist/master.js",
-    "dist/client.js",
-    "dist/react.js",
-    "dist/react-native.js",
-    "dist/core.js",
-    "dist/plugins.js",
-    "dist/ai.js",
-    "dist/ai-visualize.js",
-    "dist/internal.js",
-    "server.js",
-    "client.js",
-    "master.js",
-    "react.js",
-    "react-native.js",
-    "core.js",
-    "plugins.js",
-    "ai.js",
-    "ai-visualize.js"
+    "dist/esm",
+    "dist/cjs",
+    "client",
+    "core",
+    "react",
+    "react-native",
+    "ai",
+    "plugins",
+    "master",
+    "internal"
   ],
   "keywords": [
-    "react",
-    "redux",
-    "boardgames"
+    "board games",
+    "card games",
+    "tabletop games",
+    "game engine"
   ],
   "engines": {
     "node": ">=10.0",
@@ -75,6 +69,8 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
     "@firebase/app": "^0.4.16",
+    "@testing-library/jest-dom": "^4.1.2",
+    "@testing-library/svelte": "^1.9.0",
     "@types/jest": "^24.0.0",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
@@ -82,6 +78,7 @@
     "babel-loader": "^8.0.5",
     "babel-plugin-module-resolver": "^3.0.0",
     "benchmark": "^2.1.4",
+    "bundlewatch": "^0.2.5",
     "concurrently": "^4.1.0",
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
@@ -98,11 +95,11 @@
     "firebase": "^6.6.1",
     "firebase-admin": "^8.5.0",
     "firebase-mock": "^2.2.10",
-    "generate-export-aliases": "^1.0.0",
     "graceful-fs": "https://github.com/mekwall/node-graceful-fs.git#patch-1",
     "husky": "^1.3.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.0.0",
+    "jest-transform-svelte": "^2.1.0",
     "lint-staged": "^8.1.0",
     "mongo-mock": "^3.3.2",
     "mongodb": "^3.0.3",
@@ -121,14 +118,15 @@
     "rollup-plugin-filesize": "^6.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-resolve": "^4.0.0",
-    "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-replace": "^2.1.0",
+    "rollup-plugin-svelte": "^5.1.0",
     "rollup-plugin-terser": "^4.0.2",
     "rollup-plugin-typescript2": "^0.22.0",
     "shelljs": "^0.7.8",
     "style-loader": "^0.18.2",
     "superagent": "^3.8.3",
     "supertest": "^3.1.0",
+    "svelte": "^3.12.1",
     "ts-jest": "^24.0.2",
     "ts-transformer-imports": "^0.4.3",
     "ttypescript": "^1.5.7",
@@ -143,26 +141,12 @@
     "koa-router": "^7.2.1",
     "koa-socket-2": "^1.0.17",
     "lru-cache": "^4.1.1",
-    "mousetrap": "^1.6.3",
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
     "redux": "^4.0.0",
     "shortid": "^2.2.14",
     "socket.io": "^2.1.1",
     "uuid": "3.2.1"
-  },
-  "config": {
-    "exportAliases": {
-      "client": "./dist/client.js",
-      "react": "./dist/react.js",
-      "react-native": "./dist/react-native.js",
-      "server": "./dist/server.js",
-      "core": "./dist/core.js",
-      "plugins": "./dist/plugins.js",
-      "ai": "./dist/ai.js",
-      "ai-visualize": "./dist/ai-visualize.js",
-      "master": "./dist/master.js"
-    }
   },
   "jest": {
     "preset": "ts-jest/presets/js-with-babel",
@@ -173,6 +157,12 @@
     "setupFiles": [
       "raf/polyfill"
     ],
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom/extend-expect"
+    ],
+    "transform": {
+      "^.+\\.svelte$": "jest-transform-svelte"
+    },
     "transformIgnorePatterns": [
       "node_modules/(?!(boardgame.io|flatted)/)"
     ],
@@ -181,6 +171,19 @@
       "integration/",
       "node_modules/",
       ".npm/"
+    ]
+  },
+  "bundlewatch": {
+    "files": [
+      {
+        "path": "dist/*.js",
+        "maxSize": "100kB"
+      },
+      {
+        "path": "dist/esm/*.js",
+        "maxSize": "200kB",
+        "compression": "none"
+      }
     ]
   },
   "husky": {

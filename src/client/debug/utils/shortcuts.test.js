@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { AssignShortcuts } from './assign-shortcuts';
+import { AssignShortcuts } from './shortcuts';
 
 test('first char is used', () => {
   const moves = {

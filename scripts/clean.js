@@ -1,14 +1,13 @@
-var shell = require('shelljs');
+/*
+ * Copyright 2019 The boardgame.io Authors
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+const shell = require('shelljs');
+const subpackages = require('../subpackages');
 
 shell.rm('-rf', 'dist');
-shell.rm('-f', [
-  'server.js',
-  'client.js',
-  'core.js',
-  'plugins.js',
-  'ai.js',
-  'ai-visualize.js',
-  'master.js',
-  'react.js',
-  'react-native.js',
-]);
+shell.rm('-rf', subpackages);

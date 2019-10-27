@@ -120,6 +120,16 @@ export class SocketIO {
   }
 
   /**
+   * Disconnect from the server.
+   */
+  disconnect() {
+    this.socket.close();
+    this.socket = null;
+    this.isConnected = false;
+    this.callback();
+  }
+
+  /**
    * Subscribe to connection state changes.
    */
   subscribe(fn) {

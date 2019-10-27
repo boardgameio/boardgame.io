@@ -6,20 +6,21 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Client } from '../src/client/client.js';
-import { Client as ReactClient } from '../src/client/react.js';
-import { Client as ReactNativeClient } from '../src/client/react-native.js';
-import { TurnOrder, Pass } from '../src/core/turn-order.js';
-import { AI } from '../src/ai/ai.js';
-import { RandomBot, MCTSBot } from '../src/ai/bot.js';
+import { Client } from '../src/client/client';
+import { Client as ReactClient } from '../src/client/react';
+import { Client as ReactNativeClient } from '../src/client/react-native';
+import { TurnOrder } from '../src/core/turn-order';
+import { Step, Simulate } from '../src/ai/ai';
+import { RandomBot } from '../src/ai/random-bot';
+import { MCTSBot } from '../src/ai/mcts-bot';
 
-export default {
+export {
   Client,
   ReactClient,
   ReactNativeClient,
   TurnOrder,
-  Pass,
-  AI,
+  Step,
+  Simulate,
   RandomBot,
   MCTSBot,
 };

@@ -8,7 +8,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Debug } from './debug/debug';
 import { Client as RawClient } from './client';
 
 /**
@@ -40,8 +39,8 @@ export function Client(opts) {
     board,
     multiplayer,
     ai,
-    debug,
     enhancer,
+    debug,
   } = opts;
 
   // Component that is displayed before the client has synced
@@ -79,16 +78,13 @@ export function Client(opts) {
       debug: true,
     };
 
-    state = {
-      gameStateOverride: null,
-    };
-
     constructor(props) {
       super(props);
 
       this.client = RawClient({
         game,
         ai,
+        debug,
         numPlayers,
         multiplayer,
         gameID: props.gameID,
@@ -103,11 +99,12 @@ export function Client(opts) {
     }
 
     componentDidMount() {
-      this.client.connect();
       this.unsubscribe = this.client.subscribe(() => this.forceUpdate());
+      this.client.start();
     }
 
     componentWillUnmount() {
+      this.client.stop();
       this.unsubscribe();
     }
 
@@ -141,29 +138,19 @@ export function Client(opts) {
       this.forceUpdate();
     };
 
-    overrideGameState = state => {
-      this.setState({ gameStateOverride: state });
-    };
-
     render() {
-      let _board = null;
-      let _debug = null;
-
-      let state = this.client.getState();
-      const { debug: debugProp, ...rest } = this.props;
-
-      if (this.state.gameStateOverride) {
-        state = { ...state, ...this.state.gameStateOverride };
-      }
+      const state = this.client.getState();
 
       if (state === null) {
         return React.createElement(loading);
       }
 
+      let _board = null;
+
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          ...rest,
+          ...this.props,
           isMultiplayer: multiplayer !== undefined,
           moves: this.client.moves,
           events: this.client.events,
@@ -177,39 +164,7 @@ export function Client(opts) {
         });
       }
 
-      if (debug !== false && debugProp) {
-        const showGameInfo = typeof debug === 'object' && debug.showGameInfo;
-        const dockControls = typeof debug === 'object' && debug.dockControls;
-        _debug = React.createElement(Debug, {
-          gamestate: state,
-          reducer: this.client.reducer,
-          store: this.client.store,
-          isMultiplayer: multiplayer !== undefined,
-          moves: this.client.moves,
-          events: this.client.events,
-          gameID: this.gameID,
-          playerID: this.playerID,
-          credentials: this.credentials,
-          step: this.client.step,
-          reset: this.client.reset,
-          undo: this.client.undo,
-          redo: this.client.redo,
-          visualizeAI: ai && ai.visualize,
-          overrideGameState: this.overrideGameState,
-          updateGameID: this.updateGameID,
-          updatePlayerID: this.updatePlayerID,
-          updateCredentials: this.updateCredentials,
-          showGameInfo,
-          dockControls,
-        });
-      }
-
-      return (
-        <div className="bgio-client">
-          {_debug}
-          {_board}
-        </div>
-      );
+      return <div className="bgio-client">{_board}</div>;
     }
   };
 }

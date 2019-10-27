@@ -6,9 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Debug } from '../src/client/debug/debug.js';
 import { InitializeGame } from '../src/core/initialize.js';
 import { Game } from '../src/core/game.js';
 import { CreateGameReducer } from '../src/core/reducer.js';
 
-export { Game, InitializeGame, CreateGameReducer, Debug };
+export { Game, InitializeGame, CreateGameReducer };

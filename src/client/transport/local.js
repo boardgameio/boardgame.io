@@ -102,7 +102,7 @@ export class Local {
   }
 
   /**
-   * Connect to the server.
+   * Connect to the master.
    */
   connect() {
     this.master.connect(this.gameID, this.playerID, (type, ...args) => {
@@ -115,6 +115,11 @@ export class Local {
     });
     this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
+
+  /**
+   * Disconnect from the master.
+   */
+  disconnect() {}
 
   /**
    * Subscribe to connection state changes.

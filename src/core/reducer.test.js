@@ -51,6 +51,7 @@ test('move returns INVALID_MOVE', () => {
   };
   const reducer = CreateGameReducer({ game });
   let state = reducer(initialState, makeMove('A'));
+  expect(error).toBeCalledWith('invalid move: A args: undefined');
   expect(state._stateID).toBe(0);
 });
 

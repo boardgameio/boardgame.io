@@ -14,7 +14,7 @@ import { Game } from '../core/game';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
-import { RandomBot } from '../ai/bot';
+import { RandomBot } from '../ai/random-bot';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -105,72 +105,6 @@ test('isActive', () => {
   expect(client.getState().isActive).toBe(false);
 });
 
-describe('step', () => {
-  test('advances game state', async () => {
-    const client = Client({
-      game: {
-        setup: () => ({ moved: false }),
-
-        moves: {
-          clickCell(G) {
-            return { moved: !G.moved };
-          },
-        },
-
-        endIf(G) {
-          if (G.moved) return true;
-        },
-      },
-
-      ai: {
-        bot: RandomBot,
-        enumerate: () => [{ move: 'clickCell' }],
-      },
-    });
-
-    expect(client.getState().G).toEqual({ moved: false });
-    await client.step();
-    expect(client.getState().G).toEqual({ moved: true });
-  });
-
-  test('does not crash on empty action', () => {
-    const client = Client({
-      game: {},
-
-      ai: {
-        bot: RandomBot,
-        enumerate: () => [],
-      },
-    });
-    client.step();
-  });
-
-  test('works with stages', async () => {
-    const client = Client({
-      game: {
-        moves: {
-          A: G => {
-            G.moved = true;
-          },
-        },
-
-        turn: {
-          activePlayers: { player: 'stage' },
-        },
-      },
-
-      ai: {
-        bot: RandomBot,
-        enumerate: () => [{ move: 'A' }],
-      },
-    });
-
-    expect(client.getState().G).not.toEqual({ moved: true });
-    await client.step();
-    expect(client.getState().G).toEqual({ moved: true });
-  });
-});
-
 describe('multiplayer', () => {
   describe('socket.io master', () => {
     let host = 'host';
@@ -182,7 +116,7 @@ describe('multiplayer', () => {
         game: { moves: { A: () => {} } },
         multiplayer: { server: host + ':' + port },
       });
-      client.connect();
+      client.start();
     });
 
     afterAll(() => {
@@ -214,7 +148,7 @@ describe('multiplayer', () => {
         game: {},
         multiplayer: true,
       });
-      client.connect();
+      client.start();
     });
 
     test('correct transport used', () => {
@@ -236,8 +170,8 @@ describe('multiplayer', () => {
       client0 = Client({ ...spec, playerID: '0' });
       client1 = Client({ ...spec, playerID: '1' });
 
-      client0.connect();
-      client1.connect();
+      client0.start();
+      client1.start();
     });
 
     test('correct transport used', () => {
@@ -611,6 +545,20 @@ describe('subscribe', () => {
     const fn2 = jest.fn();
     const unsubscribe = client.subscribe(fn2);
 
+    // The subscriber that just subscribed is notified.
+    expect(fn).not.toBeCalled();
+    expect(fn2).toBeCalledWith(
+      expect.objectContaining({
+        G: { moved: true },
+      })
+    );
+
+    fn.mockClear();
+    fn2.mockClear();
+
+    client.moves.A();
+
+    // Both subscribers are notified.
     expect(fn).toBeCalledWith(
       expect.objectContaining({
         G: { moved: true },
@@ -621,11 +569,13 @@ describe('subscribe', () => {
         G: { moved: true },
       })
     );
-    fn.mockClear();
-    fn2.mockClear();
 
     unsubscribe();
 
+    fn.mockClear();
+    fn2.mockClear();
+
+    // The subscriber the unsubscribed is not notified.
     client.moves.A();
     expect(fn).toBeCalledWith(
       expect.objectContaining({
@@ -633,5 +583,74 @@ describe('subscribe', () => {
       })
     );
     expect(fn2).not.toBeCalled();
+  });
+
+  test('transport notifies subscribers', () => {
+    const client = Client({
+      game: {},
+      multiplayer: true,
+    });
+    const fn = jest.fn();
+    client.subscribe(fn);
+    client.start();
+    fn.mockClear();
+    client.transport.callback();
+    expect(fn).toHaveBeenCalled();
+  });
+
+  describe('multiplayer', () => {
+    test('subscribe before start', () => {
+      const fn = jest.fn();
+      const client = Client({
+        game: {},
+        multiplayer: { local: true },
+      });
+      client.subscribe(fn);
+      expect(fn).not.toBeCalled();
+      client.start();
+      expect(fn).toBeCalled();
+    });
+
+    test('subscribe after start', () => {
+      const fn = jest.fn();
+      const client = Client({
+        game: {},
+        multiplayer: { local: true },
+      });
+      client.start();
+      client.subscribe(fn);
+      expect(fn).toBeCalled();
+    });
+  });
+});
+
+test('override game state', () => {
+  const game = {
+    moves: {
+      A: G => {
+        G.moved = true;
+      },
+    },
+  };
+  const client = Client({ game });
+  client.moves.A();
+  expect(client.getState().G).toEqual({ moved: true });
+  client.overrideGameState({ G: { override: true }, ctx: {} });
+  expect(client.getState().G).toEqual({ override: true });
+  client.overrideGameState(null);
+  expect(client.getState().G).toEqual({ moved: true });
+});
+
+describe('start / stop', () => {
+  test('mount on custom element', () => {
+    const el = document.createElement('div');
+    const client = Client({ game: {}, debug: { target: el } });
+    client.start();
+    client.stop();
+  });
+
+  test('try to stop without starting', () => {
+    const client = Client({ game: {} });
+    client.stop();
   });
 });

@@ -12,6 +12,7 @@ import * as ActionCreators from '../core/action-creators';
 import { Game } from '../core/game';
 import { error } from '../core/logger';
 import { SocketIO } from './transport/socketio';
+import Debug from './debug/Debug.svelte';
 import { Local, LocalMaster } from './transport/local';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
@@ -86,6 +87,7 @@ class _ClientImpl {
   constructor({
     game,
     ai,
+    debug,
     numPlayers,
     multiplayer,
     socketOpts,
@@ -95,39 +97,21 @@ class _ClientImpl {
     enhancer,
   }) {
     this.game = Game(game);
+    this.ai = ai;
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
-    this.subscribeCallback = () => {};
+    this.debug = debug;
+    this.gameStateOverride = null;
+    this.subscribers = {};
+    this._running = false;
 
     this.reducer = CreateGameReducer({
       game: this.game,
       numPlayers,
       multiplayer,
     });
-
-    if (ai !== undefined && multiplayer === undefined) {
-      const bot = new ai.bot({ game, enumerate: ai.enumerate });
-
-      this.step = async () => {
-        const state = this.store.getState();
-
-        let playerID = state.ctx.currentPlayer;
-        if (state.ctx.activePlayers) {
-          playerID = Object.keys(state.ctx.activePlayers)[0];
-        }
-
-        const { action, metadata } = await bot.play(state, playerID);
-
-        if (action) {
-          action.payload.metadata = metadata;
-          this.store.dispatch(action);
-        }
-
-        return action;
-      };
-    }
 
     let initialState = null;
     if (multiplayer === undefined) {
@@ -220,7 +204,7 @@ class _ClientImpl {
      */
     const SubscriptionMiddleware = () => next => action => {
       const result = next(action);
-      this.subscribeCallback();
+      this.notifySubscribers();
       return result;
     };
 
@@ -249,6 +233,7 @@ class _ClientImpl {
       subscribe: () => {},
       subscribeGameMetadata: _metadata => {}, // eslint-disable-line no-unused-vars
       connect: () => {},
+      disconnect: () => {},
       updateGameID: () => {},
       updatePlayerID: () => {},
     };
@@ -300,32 +285,73 @@ class _ClientImpl {
     this.transport.subscribeGameMetadata(metadata => {
       this.gameMetadata = metadata;
     });
+
+    this._debugPanel = null;
+  }
+
+  notifySubscribers() {
+    Object.values(this.subscribers).forEach(fn => fn(this.getState()));
+  }
+
+  overrideGameState(state) {
+    this.gameStateOverride = state;
+    this.notifySubscribers();
+  }
+
+  start() {
+    this.transport.connect();
+    this.notifySubscribers();
+    this._running = true;
+
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      this.debug !== false &&
+      this._debugPanel == null
+    ) {
+      let target = document.body;
+      if (this.debug && this.debug.target) {
+        target = this.debug.target;
+      }
+      this._debugPanel = new Debug({
+        target,
+        props: {
+          client: this,
+        },
+      });
+    }
+  }
+
+  stop() {
+    this.transport.disconnect();
+    this._running = false;
+
+    if (this._debugPanel != null) {
+      this._debugPanel.$destroy();
+      this._debugPanel = null;
+    }
   }
 
   subscribe(fn) {
-    // If we already have a subscription, then create a new
-    // callback that invokes both the old and new subscriptions.
-    const prev = this.subscribeCallback;
-    const callback = () => {
-      prev();
-      fn(this.getState());
-    };
+    const id = Object.keys(this.subscribers).length;
+    this.subscribers[id] = fn;
+    this.transport.subscribe(() => this.notifySubscribers());
 
-    this.subscribeCallback = callback;
-    this.transport.subscribe(callback);
-    callback();
+    if (this._running || !this.multiplayer) {
+      fn(this.getState());
+    }
 
     // Return a handle that allows the caller to unsubscribe.
-    // Warning: Will revert any callbacks that were added
-    // after this current call to subscribe(), so use it to
-    // only remove the latest subscription.
     return () => {
-      this.subscribeCallback = prev;
+      delete this.subscribers[id];
     };
   }
 
   getState() {
-    const state = this.store.getState();
+    let state = this.store.getState();
+
+    if (this.gameStateOverride !== null) {
+      state = this.gameStateOverride;
+    }
 
     // This is the state before a sync with the game master.
     if (state === null) {
@@ -371,10 +397,6 @@ class _ClientImpl {
     ret = { ...ret, isConnected };
 
     return ret;
-  }
-
-  connect() {
-    this.transport.connect();
   }
 
   createDispatchers() {
