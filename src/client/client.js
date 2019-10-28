@@ -90,7 +90,6 @@ class _ClientImpl {
     debug,
     numPlayers,
     multiplayer,
-    socketOpts,
     gameID,
     playerID,
     credentials,
@@ -114,7 +113,7 @@ class _ClientImpl {
     });
 
     let initialState = null;
-    if (multiplayer === undefined) {
+    if (!multiplayer) {
       initialState = InitializeGame({ game: this.game, numPlayers });
     }
 
@@ -238,41 +237,15 @@ class _ClientImpl {
       updatePlayerID: () => {},
     };
 
-    if (multiplayer !== undefined) {
-      if (multiplayer === true) {
-        multiplayer = { server: '' };
-      }
-
-      if (multiplayer.local === true) {
-        if (localMaster_ === null || localMaster_.config !== game) {
-          localMaster_ = new LocalMaster(this.game);
-          localMaster_.config = game;
-        }
-
-        this.transport = new Local({
-          master: localMaster_,
+    if (multiplayer) {
+      if (typeof multiplayer === 'function') {
+        this.transport = multiplayer({
+          game: this.game,
+          gameMeta: game,
           store: this.store,
-          gameID: gameID,
-          playerID: playerID,
+          gameID,
+          playerID,
           gameName: this.game.name,
-          numPlayers,
-        });
-      } else if (multiplayer.server !== undefined) {
-        this.transport = new SocketIO({
-          store: this.store,
-          gameID: gameID,
-          playerID: playerID,
-          gameName: this.game.name,
-          numPlayers,
-          server: multiplayer.server,
-          socketOpts,
-        });
-      } else if (multiplayer.transport !== undefined) {
-        this.transport = new multiplayer.transport({
-          store: this.store,
-          gameID: gameID,
-          playerID: playerID,
-          gameName: game.name,
           numPlayers,
         });
       } else {
@@ -455,5 +428,44 @@ class _ClientImpl {
  *   game by dispatching moves and events.
  */
 export function Client(opts) {
+  let multiplayer = opts.multiplayer;
+
+  let transportFactory = false;
+  if (multiplayer !== undefined) {
+    if (typeof multiplayer !== 'function') {
+      if (multiplayer === true) {
+        multiplayer = { server: '' };
+      }
+
+      if (multiplayer.local === true) {
+        transportFactory = transportOpts => {
+          if (
+            localMaster_ === null ||
+            localMaster_.config !== transportOpts.gameMeta
+          ) {
+            localMaster_ = new LocalMaster(transportOpts.game);
+            localMaster_.config = transportOpts.gameMeta;
+          }
+
+          return new Local({ master: localMaster_, ...transportOpts });
+        };
+      } else if (multiplayer.server !== undefined) {
+        transportFactory = transportOpts =>
+          new SocketIO({
+            server: multiplayer.server,
+            socketOpts: opts.socketOpts,
+            ...transportOpts,
+          });
+      } else if (multiplayer.transport !== undefined) {
+        transportFactory = transportOpts =>
+          new multiplayer.transport(transportOpts);
+      } else {
+        error('invalid multiplayer spec');
+      }
+
+      opts.multiplayer = transportFactory;
+    }
+  }
+
   return new _ClientImpl(opts);
 }
