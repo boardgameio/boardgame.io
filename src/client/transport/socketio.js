@@ -8,13 +8,14 @@
 
 import * as ActionCreators from '../../core/action-creators';
 import io from 'socket.io-client';
+import { Transport } from './transport';
 
 /**
  * SocketIO
  *
  * Transport interface that interacts with the Master via socket.io.
  */
-export class SocketIO {
+export class SocketIOTransport extends Transport {
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socket - Override for unit tests.
@@ -35,15 +36,11 @@ export class SocketIO {
     numPlayers,
     server,
   } = {}) {
+    super({ store, gameName, playerID, gameID, numPlayers });
+
     this.server = server;
     this.socket = socket;
-    this.store = store;
     this.socketOpts = socketOpts;
-    this.gameName = gameName || 'default';
-    this.gameID = gameID || 'default';
-    this.playerID = playerID || null;
-    this.numPlayers = numPlayers || 2;
-    this.gameID = this.gameName + ':' + this.gameID;
     this.isConnected = false;
     this.callback = () => {};
     this.gameMetadataCallback = () => {};
@@ -169,4 +166,13 @@ export class SocketIO {
       this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
     }
   }
+}
+
+export function SocketIO({ server, socketOpts } = {}) {
+  return transportOpts =>
+    new SocketIOTransport({
+      server,
+      socketOpts,
+      ...transportOpts,
+    });
 }

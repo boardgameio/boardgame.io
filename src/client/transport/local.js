@@ -9,6 +9,7 @@
 import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { Master } from '../../master/master';
+import { Transport } from './transport';
 
 /**
  * Creates a local version of the master that the client
@@ -46,7 +47,7 @@ export function LocalMaster(game) {
  * Transport interface that embeds a GameMaster within it
  * that you can connect multiple clients to.
  */
-export class Local {
+export class LocalTransport extends Transport {
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socket - Override for unit tests.
@@ -58,13 +59,9 @@ export class Local {
    * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
    */
   constructor({ master, store, gameID, playerID, gameName, numPlayers }) {
+    super({ store, gameName, playerID, gameID, numPlayers });
+
     this.master = master;
-    this.store = store;
-    this.gameName = gameName || 'default';
-    this.gameID = gameID || 'default';
-    this.playerID = playerID || null;
-    this.numPlayers = numPlayers || 2;
-    this.gameID = this.gameName + ':' + this.gameID;
     this.isConnected = true;
   }
 
@@ -149,4 +146,20 @@ export class Local {
     this.store.dispatch(action);
     this.master.onSync(this.gameID, this.playerID, this.numPlayers);
   }
+}
+
+const localMasters = new Map();
+export function Local() {
+  return transportOpts => {
+    let master;
+
+    if (localMasters.has(transportOpts.gameKey)) {
+      master = localMasters.get(transportOpts.gameKey);
+    } else {
+      master = new LocalMaster(transportOpts.game);
+      localMasters.set(transportOpts.gameKey, master);
+    }
+
+    return new LocalTransport({ master, ...transportOpts });
+  };
 }
