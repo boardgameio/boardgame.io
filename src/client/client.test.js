@@ -14,7 +14,6 @@ import { Game } from '../core/game';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
-import { RandomBot } from '../ai/random-bot';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
