@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
+import { Local } from 'boardgame.io/multiplayer';
 import All from './example-all';
 import AllOnce from './example-all-once';
 import Others from './example-others';
@@ -103,7 +104,7 @@ class App extends React.Component {
       numPlayers: 6,
       debug: false,
       board: Board,
-      multiplayer: { local: true },
+      multiplayer: Local(),
     });
 
     if (shouldUpdate) {

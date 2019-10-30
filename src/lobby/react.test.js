@@ -58,7 +58,7 @@ describe('lobby', () => {
       lobby.instance()._startGame('GameName1', { numPlayers: 2 });
       expect(spy).toBeCalledWith(
         expect.objectContaining({
-          multiplayer: { server: 'localhost:9000' },
+          multiplayer: expect.anything(),
         })
       );
     });
@@ -428,7 +428,7 @@ describe('lobby', () => {
         expect(spyClient).toHaveBeenCalledWith({
           game: components[0].game,
           board: components[0].board,
-          multiplayer: true,
+          multiplayer: expect.anything(),
           debug: false,
         });
       });

@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Client } from 'boardgame.io/react';
-import { AI } from 'boardgame.io/ai';
 
 function IsVictory(cells) {
   const positions = [
@@ -117,7 +116,7 @@ var App = Client({
   board: TicTacToeBoard,
   game: TicTacToe,
   debug: { showGameInfo: false },
-  ai: AI({
+  ai: {
     enumerate: (G, ctx) => {
       let moves = [];
       for (let i = 0; i < 9; i++) {
@@ -127,7 +126,7 @@ var App = Client({
       }
       return moves;
     },
-  }),
+  },
 });
 
 ReactDOM.render(<App />, document.getElementById('app'));

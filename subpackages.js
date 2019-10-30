@@ -14,5 +14,6 @@ module.exports = [
   'ai',
   'plugins',
   'master',
+  'multiplayer',
   'internal',
 ];

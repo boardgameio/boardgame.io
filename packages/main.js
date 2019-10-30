@@ -13,14 +13,18 @@ import { TurnOrder } from '../src/core/turn-order';
 import { Step, Simulate } from '../src/ai/ai';
 import { RandomBot } from '../src/ai/random-bot';
 import { MCTSBot } from '../src/ai/mcts-bot';
+import { Local } from '../src/client/transport/local';
+import { SocketIO } from '../src/client/transport/socketio';
 
 export {
   Client,
+  Local,
+  MCTSBot,
+  RandomBot,
   ReactClient,
   ReactNativeClient,
-  TurnOrder,
-  Step,
   Simulate,
-  RandomBot,
-  MCTSBot,
+  SocketIO,
+  Step,
+  TurnOrder,
 };

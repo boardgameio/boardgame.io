@@ -39,7 +39,7 @@ export const INVALID_MOVE = 'INVALID_MOVE';
  * Creates the main game state reducer.
  * @param {...object} game - Return value of Game().
  * @param {...object} numPlayers - The number of players.
- * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
+ * @param {...object} multiplayer - Set to a truthy value if we are in a multiplayer client.
  */
 export function CreateGameReducer({ game, multiplayer }) {
   game = Game(game);

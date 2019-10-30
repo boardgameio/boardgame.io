@@ -7,7 +7,7 @@
  */
 
 import { createStore } from 'redux';
-import { Local, LocalMaster } from './local';
+import { LocalTransport, LocalMaster } from './local';
 import { makeMove, gameEvent } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
@@ -19,8 +19,8 @@ describe('LocalMaster', () => {
   const storeA = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
   const storeB = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
 
-  const localA = new Local({ master, store: storeA, playerID: '0' });
-  const localB = new Local({ master, store: storeB, playerID: '1' });
+  const localA = new LocalTransport({ master, store: storeA, playerID: '0' });
+  const localB = new LocalTransport({ master, store: storeB, playerID: '1' });
 
   beforeEach(() => {
     storeA.dispatch = jest.fn();
@@ -70,28 +70,32 @@ describe('LocalMaster', () => {
   });
 });
 
-describe('Local', () => {
+describe('LocalTransport', () => {
   describe('update gameID / playerID', () => {
-    const master = { onSync: jest.fn() };
+    const master = { connect: jest.fn(), onSync: jest.fn() };
     const store = { dispatch: () => {} };
-    const m = new Local({ master, store });
+    const m = new LocalTransport({ master, store });
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
 
     test('gameID', () => {
       m.updateGameID('test');
       expect(m.gameID).toBe('default:test');
-      expect(master.onSync).lastCalledWith('default:test', null, 2);
+      expect(master.connect).toBeCalled();
     });
 
     test('playerID', () => {
       m.updatePlayerID('player');
       expect(m.playerID).toBe('player');
-      expect(master.onSync).lastCalledWith('default:test', 'player', 2);
+      expect(master.connect).toBeCalled();
     });
   });
 
   describe('multiplayer', () => {
     const master = { onSync: jest.fn(), onUpdate: jest.fn() };
-    const m = new Local({ master });
+    const m = new LocalTransport({ master });
     const game = {};
     let store = null;
 

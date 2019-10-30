@@ -10,6 +10,7 @@ import React from 'react';
 import Cookies from 'react-cookies';
 import PropTypes from 'prop-types';
 import { Client } from '../client/react';
+import { SocketIO } from '../client/transport/socketio';
 import { LobbyConnection } from './connection';
 import LobbyLoginForm from './login-form';
 import LobbyRoomInstance from './room-instance';
@@ -178,9 +179,9 @@ class Lobby extends React.Component {
     let multiplayer = undefined;
     if (gameOpts.numPlayers > 1) {
       if (this.props.gameServer) {
-        multiplayer = { server: this.props.gameServer };
+        multiplayer = SocketIO({ server: this.props.gameServer });
       } else {
-        multiplayer = true;
+        multiplayer = SocketIO();
       }
     }
 
