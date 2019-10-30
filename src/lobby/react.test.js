@@ -11,6 +11,7 @@ import Cookies from 'react-cookies';
 import Lobby from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import { SocketIO } from '../client/transport/socketio';
 
 /* mock server requests */
 global.fetch = jest.fn().mockReturnValue({ status: 200, json: () => [] });
@@ -58,7 +59,7 @@ describe('lobby', () => {
       lobby.instance()._startGame('GameName1', { numPlayers: 2 });
       expect(spy).toBeCalledWith(
         expect.objectContaining({
-          multiplayer: { server: 'localhost:9000' },
+          multiplayer: expect.anything(),
         })
       );
     });
@@ -428,7 +429,7 @@ describe('lobby', () => {
         expect(spyClient).toHaveBeenCalledWith({
           game: components[0].game,
           board: components[0].board,
-          multiplayer: true,
+          multiplayer: expect.anything(),
           debug: false,
         });
       });
