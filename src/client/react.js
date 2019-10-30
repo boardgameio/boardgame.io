@@ -19,9 +19,7 @@ import { Client as RawClient } from './client';
  * @param {...object} numPlayers - The number of players.
  * @param {...object} board - The React component for the game.
  * @param {...object} loading - (optional) The React component for the loading state.
- * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
- *                                  to make a multiplayer client. The second
- *                                  syntax specifies a non-default socket server.
+ * @param {...object} multiplayer - Set to a falsy value or a transportFactory, e.g., SocketIO()
  * @param {...object} debug - Enables the Debug UI.
  * @param {...object} enhancer - Optional enhancer to send to the Redux store
  *
@@ -151,7 +149,7 @@ export function Client(opts) {
         _board = React.createElement(board, {
           ...state,
           ...this.props,
-          isMultiplayer: multiplayer !== undefined,
+          isMultiplayer: !!multiplayer,
           moves: this.client.moves,
           events: this.client.events,
           gameID: this.gameID,

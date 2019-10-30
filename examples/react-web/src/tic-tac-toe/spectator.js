@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
+import { SocketIO } from 'boardgame.io/multiplayer';
 import TicTacToe from './game';
 import Board from './board';
 
@@ -16,7 +17,7 @@ const App = Client({
   game: TicTacToe,
   board: Board,
   debug: false,
-  multiplayer: { server: `${hostname}:8000` },
+  multiplayer: SocketIO({ server: `${hostname}:8000` }),
 });
 
 const Spectator = () => (

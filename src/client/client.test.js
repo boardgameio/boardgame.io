@@ -11,8 +11,8 @@ import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Client, createMoveDispatchers } from './client';
 import { Game } from '../core/game';
-import { Local } from './transport/local';
-import { SocketIO } from './transport/socketio';
+import { LocalTransport, Local } from './transport/local';
+import { SocketIOTransport, SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
 import { error } from '../core/logger';
 
@@ -113,7 +113,7 @@ describe('multiplayer', () => {
     beforeAll(() => {
       client = Client({
         game: { moves: { A: () => {} } },
-        multiplayer: { server: host + ':' + port },
+        multiplayer: SocketIO({ server: host + ':' + port }),
       });
       client.start();
     });
@@ -123,7 +123,7 @@ describe('multiplayer', () => {
     });
 
     test('correct transport used', () => {
-      expect(client.transport instanceof SocketIO).toBe(true);
+      expect(client.transport instanceof SocketIOTransport).toBe(true);
     });
 
     test('server set when provided', () => {
@@ -145,13 +145,13 @@ describe('multiplayer', () => {
     beforeAll(() => {
       client = Client({
         game: {},
-        multiplayer: true,
+        multiplayer: SocketIO(),
       });
       client.start();
     });
 
     test('correct transport used', () => {
-      expect(client.transport instanceof SocketIO).toBe(true);
+      expect(client.transport instanceof SocketIOTransport).toBe(true);
     });
   });
 
@@ -163,7 +163,7 @@ describe('multiplayer', () => {
     beforeAll(() => {
       spec = {
         game: { moves: { A: (G, ctx) => ({ A: ctx.playerID }) } },
-        multiplayer: { local: true },
+        multiplayer: Local(),
       };
 
       client0 = Client({ ...spec, playerID: '0' });
@@ -174,8 +174,8 @@ describe('multiplayer', () => {
     });
 
     test('correct transport used', () => {
-      expect(client0.transport instanceof Local).toBe(true);
-      expect(client1.transport instanceof Local).toBe(true);
+      expect(client0.transport instanceof LocalTransport).toBe(true);
+      expect(client1.transport instanceof LocalTransport).toBe(true);
     });
 
     test('multiplayer interactions', () => {
@@ -209,13 +209,14 @@ describe('multiplayer', () => {
         this.callback = fn;
       }
     }
+    const customTransport = () => new CustomTransport();
 
     let client;
 
     beforeAll(() => {
       client = Client({
         game: { moves: { A: () => {} } },
-        multiplayer: { transport: CustomTransport },
+        multiplayer: customTransport,
       });
     });
 
@@ -227,16 +228,6 @@ describe('multiplayer', () => {
       const metadata = { m: true };
       client.transport.callback(metadata);
       expect(client.gameMetadata).toEqual(metadata);
-    });
-  });
-
-  describe('invalid spec', () => {
-    test('logs error', () => {
-      Client({
-        game: { moves: { A: () => {} } },
-        multiplayer: { blah: true },
-      });
-      expect(error).toHaveBeenCalledWith('invalid multiplayer spec');
     });
   });
 });
@@ -587,7 +578,7 @@ describe('subscribe', () => {
   test('transport notifies subscribers', () => {
     const client = Client({
       game: {},
-      multiplayer: true,
+      multiplayer: SocketIO(),
     });
     const fn = jest.fn();
     client.subscribe(fn);
@@ -602,7 +593,7 @@ describe('subscribe', () => {
       const fn = jest.fn();
       const client = Client({
         game: {},
-        multiplayer: { local: true },
+        multiplayer: Local(),
       });
       client.subscribe(fn);
       expect(fn).not.toBeCalled();
@@ -614,7 +605,7 @@ describe('subscribe', () => {
       const fn = jest.fn();
       const client = Client({
         game: {},
-        multiplayer: { local: true },
+        multiplayer: Local(),
       });
       client.start();
       client.subscribe(fn);
