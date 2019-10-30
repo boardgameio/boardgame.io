@@ -11,7 +11,6 @@ import Cookies from 'react-cookies';
 import Lobby from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { SocketIO } from '../client/transport/socketio';
 
 /* mock server requests */
 global.fetch = jest.fn().mockReturnValue({ status: 200, json: () => [] });
