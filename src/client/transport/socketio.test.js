@@ -7,7 +7,7 @@
  */
 
 import { createStore } from 'redux';
-import { SocketIO } from './socketio';
+import { SocketIOTransport } from './socketio';
 import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
@@ -31,14 +31,14 @@ class MockSocket {
 }
 
 test('defaults', () => {
-  const m = new SocketIO();
+  const m = new SocketIOTransport();
   expect(typeof m.callback).toBe('function');
   m.callback();
 });
 
 describe('update gameID / playerID', () => {
   const socket = new MockSocket();
-  const m = new SocketIO({ socket });
+  const m = new SocketIOTransport({ socket });
   m.store = { dispatch: () => {} };
 
   beforeEach(() => (socket.emit = jest.fn()));
@@ -64,7 +64,7 @@ describe('connection status', () => {
   beforeEach(() => {
     onChangeMock = jest.fn();
     mockSocket = new MockSocket();
-    m = new SocketIO({
+    m = new SocketIOTransport({
       socket: mockSocket,
       gameID: 0,
       playerID: 0,
@@ -97,7 +97,7 @@ describe('connection status', () => {
 
 describe('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const m = new SocketIO({ socket: mockSocket });
+  const m = new SocketIOTransport({ socket: mockSocket });
   m.connect();
   const game = {};
   let store = null;
@@ -155,7 +155,7 @@ describe('server option', () => {
 
   test('without protocol', () => {
     const server = hostname + ':' + port;
-    const m = new SocketIO({ server });
+    const m = new SocketIOTransport({ server });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -164,14 +164,14 @@ describe('server option', () => {
 
   test('without trailing slash', () => {
     const server = 'http://' + hostname + ':' + port;
-    const m = new SocketIO({ server });
+    const m = new SocketIOTransport({ server });
     m.connect();
     expect(m.socket.io.uri).toEqual(server + '/default');
   });
 
   test('https', () => {
     const serverWithProtocol = 'https://' + hostname + ':' + port + '/';
-    const m = new SocketIO({ server: serverWithProtocol });
+    const m = new SocketIOTransport({ server: serverWithProtocol });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -180,7 +180,7 @@ describe('server option', () => {
 
   test('http', () => {
     const serverWithProtocol = 'http://' + hostname + ':' + port + '/';
-    const m = new SocketIO({ server: serverWithProtocol });
+    const m = new SocketIOTransport({ server: serverWithProtocol });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -188,7 +188,7 @@ describe('server option', () => {
   });
 
   test('no server set', () => {
-    const m = new SocketIO();
+    const m = new SocketIOTransport();
     m.connect();
     expect(m.socket.io.engine.hostname).not.toEqual(hostname);
     expect(m.socket.io.engine.port).not.toEqual(port);
@@ -196,7 +196,7 @@ describe('server option', () => {
 });
 
 test('changing a gameID resets the state before resync', () => {
-  const m = new SocketIO();
+  const m = new SocketIOTransport();
   const game = {};
   const store = createStore(CreateGameReducer({ game }));
   m.store = store;
@@ -213,7 +213,7 @@ test('changing a gameID resets the state before resync', () => {
 });
 
 test('changing a playerID resets the state before resync', () => {
-  const m = new SocketIO();
+  const m = new SocketIOTransport();
   const game = {};
   const store = createStore(CreateGameReducer({ game }));
   m.store = store;

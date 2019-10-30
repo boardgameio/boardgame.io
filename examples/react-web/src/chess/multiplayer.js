@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
+import { SocketIO } from 'boardgame.io/multiplayer';
 import ChessGame from './game';
 import ChessBoard from './board';
 
@@ -15,7 +16,7 @@ const hostname = window.location.hostname;
 const App = Client({
   game: ChessGame,
   board: ChessBoard,
-  multiplayer: { server: `${hostname}:8000` },
+  multiplayer: SocketIO({ server: `${hostname}:8000` }),
   debug: false,
 });
 

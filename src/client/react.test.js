@@ -10,6 +10,8 @@ import React from 'react';
 import { Client } from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import { Local } from './transport/local';
+import { SocketIO } from './transport/socketio';
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -73,7 +75,7 @@ test('custom loading component', () => {
     game: {},
     loading: Loading,
     board: TestBoard,
-    multiplayer: true,
+    multiplayer: SocketIO(),
   });
   const board = Enzyme.mount(<Board />);
   expect(board.html()).toContain('custom');
@@ -134,7 +136,7 @@ test('update gameID / playerID', () => {
       },
     },
     board: TestBoard,
-    multiplayer: { local: true },
+    multiplayer: Local(),
   });
   game = Enzyme.mount(<Board gameID="a" playerID="1" credentials="foo" />);
   const m = game.instance().client.transport;

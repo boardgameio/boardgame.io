@@ -10,15 +10,9 @@ import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { Game } from '../core/game';
-import { error } from '../core/logger';
-import { SocketIO } from './transport/socketio';
 import Debug from './debug/Debug.svelte';
-import { Local, LocalMaster } from './transport/local';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
-
-// The Game Master object (if using a local one).
-let localMaster_ = null;
 
 /**
  * createDispatchers
@@ -90,7 +84,6 @@ class _ClientImpl {
     debug,
     numPlayers,
     multiplayer,
-    socketOpts,
     gameID,
     playerID,
     credentials,
@@ -114,7 +107,7 @@ class _ClientImpl {
     });
 
     let initialState = null;
-    if (multiplayer === undefined) {
+    if (!multiplayer) {
       initialState = InitializeGame({ game: this.game, numPlayers });
     }
 
@@ -238,46 +231,17 @@ class _ClientImpl {
       updatePlayerID: () => {},
     };
 
-    if (multiplayer !== undefined) {
-      if (multiplayer === true) {
-        multiplayer = { server: '' };
-      }
-
-      if (multiplayer.local === true) {
-        if (localMaster_ === null || localMaster_.config !== game) {
-          localMaster_ = new LocalMaster(this.game);
-          localMaster_.config = game;
-        }
-
-        this.transport = new Local({
-          master: localMaster_,
-          store: this.store,
-          gameID: gameID,
-          playerID: playerID,
-          gameName: this.game.name,
-          numPlayers,
-        });
-      } else if (multiplayer.server !== undefined) {
-        this.transport = new SocketIO({
-          store: this.store,
-          gameID: gameID,
-          playerID: playerID,
-          gameName: this.game.name,
-          numPlayers,
-          server: multiplayer.server,
-          socketOpts,
-        });
-      } else if (multiplayer.transport !== undefined) {
-        this.transport = new multiplayer.transport({
-          store: this.store,
-          gameID: gameID,
-          playerID: playerID,
-          gameName: game.name,
-          numPlayers,
-        });
-      } else {
-        error('invalid multiplayer spec');
-      }
+    if (multiplayer) {
+      // typeof multiplayer is 'function'
+      this.transport = multiplayer({
+        gameKey: game,
+        game: this.game,
+        store: this.store,
+        gameID,
+        playerID,
+        gameName: this.game.name,
+        numPlayers,
+      });
     }
 
     this.createDispatchers();
@@ -442,10 +406,7 @@ class _ClientImpl {
  *
  * @param {...object} game - The return value of `Game`.
  * @param {...object} numPlayers - The number of players.
- * @param {...object} multiplayer - Set to true or { server: '<host>:<port>' }
- *                                  to make a multiplayer client. The second
- *                                  syntax specifies a non-default socket server.
- * @param {...object} socketOpts - Options to pass to socket.io.
+ * @param {...object} multiplayer - Set to a falsy value or a transportFactory, e.g., SocketIO()
  * @param {...object} gameID - The gameID that you want to connect to.
  * @param {...object} playerID - The playerID associated with this client.
  * @param {...string} credentials - The authentication credentials associated with this client.

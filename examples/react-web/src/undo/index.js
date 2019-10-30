@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
+import { Local } from 'boardgame.io/multiplayer';
 import Game from './game';
 import Board from './board';
 
@@ -15,7 +16,7 @@ const App = Client({
   game: Game,
   numPlayers: 2,
   board: Board,
-  multiplayer: { local: true },
+  multiplayer: Local(),
 });
 
 const View = () => (
