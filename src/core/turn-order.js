@@ -266,7 +266,7 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
     Object.keys(endTurnArg).forEach(arg => {
       switch (arg) {
         case 'remove':
-          currentPlayer = ctx.playOrder[0];
+          currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos) || '0';
           break;
         case 'next':
           playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);

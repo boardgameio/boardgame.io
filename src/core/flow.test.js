@@ -787,6 +787,14 @@ describe('pass args', () => {
     expect(t.ctx.currentPlayer).toBe('0');
     expect(t.ctx.phase).toBe('B');
   });
+
+  test('removing a player deeper into play order returns correct updated playOrder', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass'));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.playOrderPos).toBe(1);
+    expect(t.ctx.currentPlayer).toBe('2');
+  });
 });
 
 test('undoable moves', () => {
