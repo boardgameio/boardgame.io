@@ -17,6 +17,17 @@
     }
     return r;
   }
+
+  let playerID = client.playerID;
+  let ctx = {};
+  let G = {};
+  client.subscribe((state) => {
+    if (state) {
+      G = state.G;
+      ctx = state.ctx;
+    }
+    playerID = client.playerID;
+  });
 </script>
 
 <style>
@@ -53,7 +64,11 @@
 
 <section>
   <h3>Players</h3>
-  <PlayerInfo ctx={$client ? $client.ctx : {}} playerID={client.playerID} />
+  <PlayerInfo
+    on:change={(e) => client.updatePlayerID(e.detail.playerID)}
+    ctx={ctx}
+    playerID={playerID}
+  />
 </section>
 
 <section>
@@ -76,12 +91,12 @@
 
 <section>
   <label>G</label>
-  <pre class="json">{JSON.stringify($client ? $client.G : {}, null, 2)}</pre>
+  <pre class="json">{JSON.stringify(G, null, 2)}</pre>
 </section>
 
 <section>
   <label>ctx</label>
   <pre class="json">
-    {JSON.stringify(SanitizeCtx($client ? $client.ctx : {}), null, 2)}
+    {JSON.stringify(SanitizeCtx(ctx), null, 2)}
   </pre>
 </section>

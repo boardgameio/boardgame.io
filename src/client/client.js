@@ -395,6 +395,7 @@ class _ClientImpl {
   updateCredentials(credentials) {
     this.credentials = credentials;
     this.createDispatchers();
+    this.notifySubscribers();
   }
 }
 
