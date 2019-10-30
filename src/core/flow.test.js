@@ -744,7 +744,7 @@ describe('endTurn args', () => {
   });
 });
 
-describe('passTurn args', () => {
+describe('pass args', () => {
   const flow = Flow({
     phases: { A: { start: true, next: 'B' }, B: {}, C: {} },
   });
