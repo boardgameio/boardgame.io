@@ -264,7 +264,6 @@ class _ClientImpl {
 
   start() {
     this.transport.connect();
-    this.notifySubscribers();
     this._running = true;
 
     if (
