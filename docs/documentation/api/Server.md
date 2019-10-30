@@ -8,7 +8,7 @@ broadcasts updates to those clients so that all browsers
 that are connected to the same game are kept in sync in
 realtime.
 
-The server also hosts a REST [API](/api/API) that is used for creating
+The server also hosts a REST [API](https://boardgame.io/documentation/#/api/Lobby?id=server-side-api) that is used for creating
 and joining games. This is hosted on the same port, but can
 be configured to run on a separate port.
 
