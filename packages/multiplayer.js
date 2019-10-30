@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Local } from '../src/client/transport/local.js';
-import { SocketIO } from '../src/client/transport/socketio.js';
+import { Local } from '../src/client/transport/local';
+import { SocketIO } from '../src/client/transport/socketio';
 
 export { Local, SocketIO };
