@@ -14,9 +14,4 @@ const game = {
   turn: { moveLimit: 1 },
 };
 
-export default {
-  game,
-  debug: false,
-  numPlayers: 3,
-  multiplayer: { local: true },
-};
+export default game;

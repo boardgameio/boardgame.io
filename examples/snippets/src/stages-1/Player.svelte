@@ -2,12 +2,16 @@
   export let playerID;
 
   import { Client } from 'boardgame.io/client';
+  import { Local } from 'boardgame.io/multiplayer';
   import Game from './game';
 
   const client = Client({
-    ...Game,
+    game: Game,
     gameID: 'default',
     playerID,
+    debug: false,
+    numPlayers: 3,
+    multiplayer: Local(),
   });
 
   client.start();

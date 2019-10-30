@@ -15,9 +15,4 @@ const game = {
   },
 };
 
-export default {
-  game,
-  debug: false,
-  numPlayers: 3,
-  multiplayer: { local: true },
-};
+export default game;

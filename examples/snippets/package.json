@@ -2,7 +2,8 @@
   "name": "snippets",
   "scripts": {
     "start": "parcel src/*/index.html",
-    "build": "parcel build --no-source-maps --public-url /documentation/snippets src/*/index.html"
+    "build": "parcel build --no-source-maps --public-url /documentation/snippets src/*/index.html",
+    "build:opt": "parcel build --experimental-scope-hoisting --no-source-maps --public-url /documentation/snippets src/*/index.html"
   },
   "devDependencies": {
     "parcel-bundler": "^1.11.0"
