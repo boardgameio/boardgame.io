@@ -775,7 +775,17 @@ describe('pass args', () => {
     t = flow.processEvent(t, gameEvent('pass', { remove: true }));
     expect(t.ctx.turn).toBe(1);
     expect(t.ctx.playOrderPos).toBe(0);
+    expect(t.ctx.currentPlayer).toBe('1');
+  });
+
+  test('removing all players ends phase', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.playOrderPos).toBe(0);
     expect(t.ctx.currentPlayer).toBe('0');
+    expect(t.ctx.phase).toBe('B');
   });
 });
 

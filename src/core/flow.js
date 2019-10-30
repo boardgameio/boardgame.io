@@ -537,7 +537,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx = { ...ctx, playOrder };
 
       if (0 === playOrder.length) {
-        state = EndPhaseEvent(state);
+        return EndPhaseEvent(state);
       }
     }
 

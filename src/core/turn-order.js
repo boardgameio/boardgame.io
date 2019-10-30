@@ -259,12 +259,23 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
   let endPhase = false;
 
   if (endTurnArg && endTurnArg !== true) {
-    if (ctx.playOrder.includes(endTurnArg.next)) {
-      playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
-      currentPlayer = endTurnArg.next;
-    } else {
+    if ('object' !== typeof endTurnArg) {
       logging.error(`invalid argument to endTurn: ${endTurnArg}`);
     }
+
+    Object.keys(endTurnArg).forEach(arg => {
+      switch (arg) {
+        case 'remove':
+          currentPlayer = ctx.playOrder[0];
+          break;
+        case 'next':
+          playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
+          currentPlayer = endTurnArg.next;
+          break;
+        default:
+          logging.error(`invalid argument to endTurn: ${arg}`);
+      }
+    });
   } else {
     const t = order.next(G, ctx);
 
