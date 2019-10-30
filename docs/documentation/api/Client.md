@@ -41,30 +41,22 @@ const App = Client({
   // If this is not provided, the client displays "connecting...".
   loading: LoadingComponent,
 
-  // Can be set to one of the following in order to enable multiplayer:
+  // Either false or set to a Transport factory in order to enable multiplayer:
   //
-  // 1. true
+  // Build-in Transport factories can be imported from 'boardgame.io/multiplayer'.
+  // This include SocketIO and Local Transport factories:
+  
+  // SocketIO--- which accepts an option object with 2 parameters
+  //    1. 'socketOpts' options to pass directly to socket.io-client
+  //    2. 'server' specifies the server location in the format: [http[s]://]hostname[:port];
+  //        defaults to current page host  
   //
-  // This starts sending move updates to the server via socket.io.
-  //
-  // 2. { server: 'hostname[:port]' }
-  //
-  // Same as the above, but also specifies the server location.
-  //
-  // 3. { server: 'http[s]://hostname[:port]' }
-  //
-  // Same as the above, but also specifies the server protocol (for example, HTTPS).
-  //
-  // 4. { local: true}
-  //
-  // Special local mode that uses an in-memory game master. Useful
+  // Local--- Special local mode that uses an in-memory game master. Useful
   // for testing multiplayer interactions locally without having to
   // connect to a server.
   //
-  // 5. CustomClass
-  //
-  // Your own transport implementation. See `src/client/client.js` for
-  // details on how to implement a custom transport adapter.
+  // Additionally, you can write your own transport implementation. 
+  // See `src/client/client.js` for details.
   multiplayer: false,
 
   // Set to false to disable the Debug UI.

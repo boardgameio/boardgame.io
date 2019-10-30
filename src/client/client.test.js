@@ -139,7 +139,7 @@ describe('multiplayer', () => {
     });
   });
 
-  describe('multiplayer: true', () => {
+  describe('multiplayer: SocketIO()', () => {
     let client;
 
     beforeAll(() => {
