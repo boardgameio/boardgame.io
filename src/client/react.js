@@ -65,15 +65,12 @@ export function Client(opts) {
       // This client's authentication credentials.
       // Only relevant in multiplayer.
       credentials: PropTypes.string,
-      // Enable / disable the Debug UI.
-      debug: PropTypes.any,
     };
 
     static defaultProps = {
       gameID: 'default',
       playerID: null,
       credentials: null,
-      debug: true,
     };
 
     constructor(props) {
