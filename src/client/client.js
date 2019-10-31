@@ -268,7 +268,7 @@ class _ClientImpl {
 
     if (
       process.env.NODE_ENV !== 'production' &&
-      this.debug !== false &&
+      this.debug &&
       this._debugPanel == null
     ) {
       let target = document.body;
