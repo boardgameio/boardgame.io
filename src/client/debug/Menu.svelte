@@ -7,34 +7,51 @@
 </script>
 
 <style>
-  .menu-item {
-    cursor: pointer;
-    margin-bottom: 5px;
+  .menu {
+    display: flex;
+    margin-top: -10px;
+    flex-direction: row;
     border: 1px solid #ccc;
-    border-radius: 3px;
-    background: #eee;
-    padding: 3px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    writing-mode: vertical-lr;
-    text-orientation: sideways;
-    transform: rotate(180deg);
+    border-radius: 5px 5px 0 0;
+    height: 25px;
+    line-height: 25px;
+    transform-origin: bottom right;
+    transform: rotate(-90deg);
+    font-weight: bold;
+  }
+
+  .menu-item {
+    line-height: 25px;
+    cursor: pointer;
+    background: #999;
+    color: #eee;
+    padding-left: 15px;
+    padding-right: 15px;
+    text-align: center;
+  }
+
+  .menu-item:last-child {
+    border-radius: 0 5px 0 0;
+  }
+
+  .menu-item:first-child {
+    border-radius: 5px 0 0 0;
   }
 
   .menu-item.active {
     cursor: default;
-    font-weight: bold;
-    border-left: 1px solid #fefefe;
-    background: #fefefe;
+    background: #eee;
+    color: #555;
   }
 
   .menu-item:hover {
-    background: #fff;
+    background: #eee;
+    color: #777;
   }
 </style>
 
-<div>
-  {#each Object.entries(panes) as [key, {label}]}
+<div class="menu">
+  {#each Object.entries(panes).reverse() as [key, {label}]}
     <div
       class="menu-item"
       class:active={pane == key}
