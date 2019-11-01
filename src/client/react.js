@@ -82,7 +82,7 @@ export function Client(opts) {
       this.client = RawClient({
         game,
         ai,
-        debug,
+        debug: debug === false ? false : props.debug,
         numPlayers,
         multiplayer,
         gameID: props.gameID,
