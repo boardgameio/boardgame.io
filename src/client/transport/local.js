@@ -133,7 +133,7 @@ export class LocalTransport extends Transport {
     this.gameID = this.gameName + ':' + id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
-    this.master.onSync(this.gameID, this.playerID, this.numPlayers);
+    this.connect();
   }
 
   /**
@@ -144,7 +144,7 @@ export class LocalTransport extends Transport {
     this.playerID = id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
-    this.master.onSync(this.gameID, this.playerID, this.numPlayers);
+    this.connect();
   }
 }
 

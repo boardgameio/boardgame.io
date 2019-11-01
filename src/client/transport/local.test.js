@@ -72,20 +72,24 @@ describe('LocalMaster', () => {
 
 describe('LocalTransport', () => {
   describe('update gameID / playerID', () => {
-    const master = { onSync: jest.fn() };
+    const master = { connect: jest.fn(), onSync: jest.fn() };
     const store = { dispatch: () => {} };
     const m = new LocalTransport({ master, store });
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
 
     test('gameID', () => {
       m.updateGameID('test');
       expect(m.gameID).toBe('default:test');
-      expect(master.onSync).lastCalledWith('default:test', null, 2);
+      expect(master.connect).toBeCalled();
     });
 
     test('playerID', () => {
       m.updatePlayerID('player');
       expect(m.playerID).toBe('player');
-      expect(master.onSync).lastCalledWith('default:test', 'player', 2);
+      expect(master.connect).toBeCalled();
     });
   });
 

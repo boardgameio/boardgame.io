@@ -3,7 +3,19 @@
   export let playerID;
   export let onClick = () => {};
 
-  const players = ctx ? [...Array(ctx.numPlayers).keys()] : [];
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+  function OnClick(player) {
+    if (player == playerID) {
+      dispatch("change", { playerID: null });
+    } else {
+      dispatch("change", { playerID: player });
+    }
+  }
+
+  let players;
+  $: players = ctx ? [...Array(ctx.numPlayers).keys()].map(i => i.toString()) : [];
 </script>
 
 <style>
@@ -40,7 +52,7 @@
       class="player"
       class:current={player == ctx.currentPlayer}
       class:active={player == playerID}
-      on:click={() => onClick(playerID)}>
+      on:click={() => OnClick(player)}>
       {player}
     </div>
   {/each}

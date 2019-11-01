@@ -264,7 +264,6 @@ class _ClientImpl {
 
   start() {
     this.transport.connect();
-    this.notifySubscribers();
     this._running = true;
 
     if (
@@ -396,6 +395,7 @@ class _ClientImpl {
   updateCredentials(credentials) {
     this.credentials = credentials;
     this.createDispatchers();
+    this.notifySubscribers();
   }
 }
 
