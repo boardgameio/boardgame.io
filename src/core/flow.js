@@ -509,13 +509,16 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let { G, ctx } = state;
     const conf = GetPhase(ctx);
 
-    // Prevent ending the turn if moveLimit haven't been made.
+    // Prevent ending the turn if moveLimit hasn't been reached.
     const currentPlayerMoves = ctx.numMoves || 0;
     if (
       !force &&
       conf.turn.moveLimit &&
       currentPlayerMoves < conf.turn.moveLimit
     ) {
+      logging.info(
+        `cannot end turn before making ${conf.turn.moveLimit} moves`
+      );
       return state;
     }
 
