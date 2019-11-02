@@ -36,10 +36,6 @@
     color: #888;
   }
 
-  section {
-    margin-bottom: 20px;
-  }
-
   label {
     font-weight: bold;
     font-size: 1.1em;
@@ -54,6 +50,19 @@
     list-style: none;
     margin: none;
     margin-bottom: 5px;
+  }
+
+  .events {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .events button {
+    width: 80px;
+  }
+
+  .events button:not(:last-child) {
+    margin-bottom: 10px;
   }
 </style>
 
@@ -82,11 +91,18 @@
 
 <section>
   <h3>Events</h3>
-  {#each Object.entries(client.events) as [name, fn]}
-    <li>
-      <Move shortcut={shortcuts[name]} {fn} {name} />
-    </li>
-  {/each}
+
+  <div class="events">
+  {#if client.events.endTurn}
+    <button on:click={() => client.events.endTurn()}>End Turn</button>
+  {/if}
+  {#if ctx.phase && client.events.endPhase}
+    <button on:click={() => client.events.endPhase()}>End Phase</button>
+  {/if}
+  {#if ctx.activePlayers && client.events.endStage}
+    <button on:click={() => client.events.endStage()}>End Stage</button>
+  {/if}
+  </div>
 </section>
 
 <section>
