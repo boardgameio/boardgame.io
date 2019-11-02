@@ -55,6 +55,35 @@
     margin: none;
     margin-bottom: 5px;
   }
+
+  .events {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .events button {
+    width: 80px;
+    background: #eee;
+    border: 1px solid #bbb;
+    color: #555;
+    padding: 3px;
+    border-radius: 3px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .events button:hover {
+    background: #ddd;
+  }
+
+  .events button:active {
+    background: #888;
+    color: #fff;
+  }
+
+  .events button:not(:last-child) {
+    margin-bottom: 10px;
+  }
 </style>
 
 <section>
@@ -82,11 +111,18 @@
 
 <section>
   <h3>Events</h3>
-  {#each Object.entries(client.events) as [name, fn]}
-    <li>
-      <Move shortcut={shortcuts[name]} {fn} {name} />
-    </li>
-  {/each}
+
+  <div class="events">
+  {#if client.events.endTurn}
+    <button on:click={() => client.events.endTurn()}>End Turn</button>
+  {/if}
+  {#if ctx.phase && client.events.endPhase}
+    <button on:click={() => client.events.endPhase()}>End Phase</button>
+  {/if}
+  {#if ctx.activePlayers && client.events.endStage}
+    <button on:click={() => client.events.endStage()}>End Stage</button>
+  {/if}
+  </div>
 </section>
 
 <section>
