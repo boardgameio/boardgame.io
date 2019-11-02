@@ -788,6 +788,14 @@ describe('pass args', () => {
     expect(t.ctx.phase).toBe('B');
   });
 
+  test('playOrderPos does not go out of bounds when passing at the end of the list', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass'));
+    t = flow.processEvent(t, gameEvent('pass'));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.currentPlayer).toBe('0');
+  });
+
   test('removing a player deeper into play order returns correct updated playOrder', () => {
     let t = state;
     t = flow.processEvent(t, gameEvent('pass'));
