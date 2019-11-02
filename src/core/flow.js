@@ -536,7 +536,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       const playOrder = ctx.playOrder.filter(i => i != playerID);
       ctx = { ...ctx, playOrder };
 
-      if (0 === playOrder.length) {
+      if (playOrder.length === 0) {
         return EndPhaseEvent(state);
       }
     }

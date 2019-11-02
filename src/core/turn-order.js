@@ -259,7 +259,7 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
   let endPhase = false;
 
   if (endTurnArg && endTurnArg !== true) {
-    if ('object' !== typeof endTurnArg) {
+    if (typeof endTurnArg !== 'object') {
       logging.error(`invalid argument to endTurn: ${endTurnArg}`);
     }
 
