@@ -36,10 +36,6 @@
     color: #888;
   }
 
-  section {
-    margin-bottom: 20px;
-  }
-
   label {
     font-weight: bold;
     font-size: 1.1em;
@@ -63,22 +59,6 @@
 
   .events button {
     width: 80px;
-    background: #eee;
-    border: 1px solid #bbb;
-    color: #555;
-    padding: 3px;
-    border-radius: 3px;
-    cursor: pointer;
-    outline: none;
-  }
-
-  .events button:hover {
-    background: #ddd;
-  }
-
-  .events button:active {
-    background: #888;
-    color: #fff;
   }
 
   .events button:not(:last-child) {
