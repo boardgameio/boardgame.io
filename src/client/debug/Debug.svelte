@@ -74,7 +74,7 @@
     background: #fefefe;
   }
 
-  :global(button) {
+  :global(button, select) {
     cursor: pointer;
     outline: none;
     background: #eee;
@@ -82,6 +82,11 @@
     color: #555;
     padding: 3px;
     border-radius: 3px;
+  }
+
+  :global(button) {
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   :global(button:hover) {

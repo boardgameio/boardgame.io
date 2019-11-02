@@ -4,16 +4,31 @@
   import { MAKE_MOVE } from '../../../core/action-types';
   import Hotkey from '../main/Hotkey.svelte';
   import { MCTSBot } from '../../../ai/mcts-bot';
+  import { RandomBot } from '../../../ai/random-bot';
   import MCTS from '../mcts/MCTS.svelte';
   import { Step as _Step } from '../../../ai/ai';
   import { getContext, onDestroy } from 'svelte';
 
   const { secondaryPane } = getContext('secondaryPane');
 
-  const bot = new MCTSBot({
+  const bots = {
+    'MCTS': MCTSBot,
+    'Random': RandomBot,
+  };
+
+  let bot = new MCTSBot({
     game: client.game,
     enumerate: client.ai.enumerate,
   });
+
+  let selectedBot;
+  function ChangeBot() {
+    const botConstructor = bots[selectedBot];
+    bot = new botConstructor({
+      game: client.game,
+      enumerate: client.ai.enumerate,
+    });
+  }
 
   let botAction;
   let botActionArgs;
@@ -92,9 +107,18 @@
       </li>
     </section>
 
+    <section>
+      <h3>Bot</h3>
+      <select bind:value={selectedBot} on:change={ChangeBot}>
+        {#each Object.keys(bots) as bot}
+          <option value={bot}>{bot}</option>
+        {/each}
+      </select>
+    </section>
+
     {#if botAction}
     <section>
-      <h3>Bot Action</h3>
+      <h3>Action</h3>
       <li>{botAction}</li>
       <li>Args: {JSON.stringify(botActionArgs)}</li>
       <p>
