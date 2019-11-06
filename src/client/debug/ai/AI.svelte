@@ -16,10 +16,13 @@
     'Random': RandomBot,
   };
 
-  let bot = new MCTSBot({
-    game: client.game,
-    enumerate: client.ai.enumerate,
-  });
+  let bot;
+  if (client.ai) {
+    bot = new MCTSBot({
+      game: client.game,
+      enumerate: client.ai.enumerate,
+    });
+  }
 
   let selectedBot;
   function ChangeBot() {
