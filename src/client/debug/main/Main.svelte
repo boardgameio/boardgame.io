@@ -58,7 +58,7 @@
   }
 
   .events button {
-    width: 80px;
+    width: 100px;
   }
 
   .events button:not(:last-child) {

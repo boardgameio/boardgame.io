@@ -233,12 +233,6 @@ describe('Bot', () => {
 });
 
 describe('MCTSBot', () => {
-  test('defaults', () => {
-    const b = new MCTSBot({ game: TicTacToe });
-    expect(b.iterations()).toBe(1000);
-    expect(b.playoutDepth()).toBe(50);
-  });
-
   test('game that never ends', () => {
     const game = {};
     const state = InitializeGame({ game });
@@ -351,45 +345,53 @@ describe('MCTSBot', () => {
     }
   });
 
-  test('iterations & playout depth settings', () => {
-    const state = InitializeGame({ game: TicTacToe });
-
-    // jump ahead in the game because the example iterations
-    // and playoutDepth functions are based on the turn
-    state.ctx.turn = 8;
-
-    const { turn, currentPlayer } = state.ctx;
-
-    const enumerateSpy = jest.fn(enumerate);
-
-    const bot = new MCTSBot({
-      game: TicTacToe,
-      enumerate: enumerateSpy,
-      iterations: (G, ctx) => ctx.turn * 100,
-      playoutDepth: (G, ctx) => ctx.turn * 10,
+  describe('iterations & playout depth', () => {
+    test('set opts', () => {
+      const bot = new MCTSBot({ game: TicTacToe, enumerate: jest.fn() });
+      bot.setOpt('iterations', 1);
+      expect(bot.opts()['iterations'].value).toBe(1);
     });
 
-    expect(bot.iterations(null, { turn }, currentPlayer)).toBe(turn * 100);
-    expect(bot.playoutDepth(null, { turn }, currentPlayer)).toBe(turn * 10);
+    test('functions', () => {
+      const state = InitializeGame({ game: TicTacToe });
 
-    // try the playout() function which requests the playoutDepth value
-    bot.playout({ state });
+      // jump ahead in the game because the example iterations
+      // and playoutDepth functions are based on the turn
+      state.ctx.turn = 8;
 
-    expect(enumerateSpy).toHaveBeenCalledWith(
-      state.G,
-      state.ctx,
-      currentPlayer
-    );
+      const { turn, currentPlayer } = state.ctx;
 
-    // then try the play() function which requests the iterations value
-    enumerateSpy.mockClear();
+      const enumerateSpy = jest.fn(enumerate);
 
-    bot.play(state, currentPlayer);
+      const bot = new MCTSBot({
+        game: TicTacToe,
+        enumerate: enumerateSpy,
+        iterations: (G, ctx) => ctx.turn * 100,
+        playoutDepth: (G, ctx) => ctx.turn * 10,
+      });
 
-    expect(enumerateSpy).toHaveBeenCalledWith(
-      state.G,
-      state.ctx,
-      currentPlayer
-    );
+      expect(bot.iterations(null, { turn }, currentPlayer)).toBe(turn * 100);
+      expect(bot.playoutDepth(null, { turn }, currentPlayer)).toBe(turn * 10);
+
+      // try the playout() function which requests the playoutDepth value
+      bot.playout({ state });
+
+      expect(enumerateSpy).toHaveBeenCalledWith(
+        state.G,
+        state.ctx,
+        currentPlayer
+      );
+
+      // then try the play() function which requests the iterations value
+      enumerateSpy.mockClear();
+
+      bot.play(state, currentPlayer);
+
+      expect(enumerateSpy).toHaveBeenCalledWith(
+        state.G,
+        state.ctx,
+        currentPlayer
+      );
+    });
   });
 });

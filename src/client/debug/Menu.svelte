@@ -15,8 +15,9 @@
     border-radius: 5px 5px 0 0;
     height: 25px;
     line-height: 25px;
+    margin-right: -500px;
     transform-origin: bottom right;
-    transform: rotate(-90deg);
+    transform: rotate(-90deg) translate(0, -500px);
   }
 
   .menu-item {
