@@ -902,4 +902,81 @@ describe('activePlayers', () => {
       '2': 'B',
     });
   });
+
+  test('setActivePlayers in turn.onBegin works', () => {
+    const game = {
+      turn: {
+        onBegin: (G, ctx) => {
+          console.log('turn.onBegin', ctx.currentPlayer);
+          ctx.events.setActivePlayers({ player: 'A', others: 'B' });
+        },
+        stages: { A: {}, B: {} },
+      },
+    };
+
+    const client = Client({ game, numPlayers: 3 });
+
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState().ctx.activePlayers).toEqual({
+      '0': 'A',
+      '1': 'B',
+      '2': 'B',
+    });
+
+    console.log('end turn');
+    client.events.endTurn();
+
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+    expect(client.getState().ctx.activePlayers).toEqual({
+      '0': 'B',
+      '1': 'A',
+      '2': 'B',
+    });
+
+    console.log('end turn');
+    client.events.endTurn();
+
+    expect(client.getState().ctx.currentPlayer).toBe('2');
+  });
+
+  test('setActivePlayers in phase.onBegin works', () => {
+    const game = {
+      phases: {
+        first: {
+          start: true,
+          onBegin: (G, ctx) => {
+            ctx.events.setActivePlayers({ player: 'A', others: 'B' });
+          },
+        },
+        second: {
+          onBegin: (G, ctx) => {
+            ctx.events.setActivePlayers({ player: 'B', others: 'A' });
+          },
+          turn: {
+            stages: { A: {}, B: {} },
+          },
+        },
+      },
+    };
+
+    const client = Client({ game, numPlayers: 3 });
+
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState().ctx.phase).toBe('first');
+    expect(client.getState().ctx.activePlayers).toEqual({
+      '0': 'A',
+      '1': 'B',
+      '2': 'B',
+    });
+
+    client.events.setPhase('second');
+
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState().ctx.phase).toBe('second');
+    expect(client.getState().ctx.activePlayers).toEqual({
+      '0': 'B',
+      '1': 'A',
+      '2': 'A',
+    });
+  });
 });
