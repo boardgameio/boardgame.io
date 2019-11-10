@@ -276,6 +276,8 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
     }
   }
 
+  if (ctx.events) ctx.events._setPlayerID(currentPlayer);
+
   ctx = {
     ...ctx,
     playOrderPos,

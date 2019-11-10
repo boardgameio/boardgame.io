@@ -32,6 +32,8 @@ export class Events {
       };
     }
 
+    events._setPlayerID = playerID => (this.playerID = playerID);
+
     return { ...ctx, events };
   }
 
