@@ -533,9 +533,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     ctx = { ...ctx, activePlayers: null };
 
     // Remove player from playerOrder
-    playerID = playerID || state.ctx.currentPlayer;
-
     if (arg && arg.remove) {
+      playerID = playerID || ctx.currentPlayer;
+
       const playOrder = ctx.playOrder.filter(i => i != playerID);
 
       const playOrderPos =
