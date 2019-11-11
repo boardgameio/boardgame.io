@@ -499,7 +499,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog };
   }
 
-  function EndTurn(state, { arg, next, turn, force, automatic }) {
+  function EndTurn(state, { arg, next, turn, force, automatic, playerID }) {
     // This is not the turn that EndTurn was originally
     // called for. The turn was probably ended some other way.
     if (turn !== state.ctx.turn) {
@@ -531,6 +531,23 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Reset activePlayers.
     ctx = { ...ctx, activePlayers: null };
+
+    // Remove player from playerOrder
+    if (arg && arg.remove) {
+      playerID = playerID || ctx.currentPlayer;
+
+      const playOrder = ctx.playOrder.filter(i => i != playerID);
+
+      const playOrderPos =
+        ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
+
+      ctx = { ...ctx, playOrder, playOrderPos };
+
+      if (playOrder.length === 0) {
+        next.push({ fn: EndPhase, turn: ctx.turn, phase: ctx.phase });
+        return state;
+      }
+    }
 
     // Add log entry.
     const action = gameEvent('endTurn', arg);
@@ -743,6 +760,18 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     ]);
   }
 
+  function PassEvent(state, _playerID, arg) {
+    return Process(state, [
+      {
+        fn: EndTurn,
+        turn: state.ctx.turn,
+        phase: state.ctx.phase,
+        force: true,
+        arg,
+      },
+    ]);
+  }
+
   function EndGameEvent(state, _playerID, arg) {
     return Process(state, [
       { fn: EndGame, turn: state.ctx.turn, phase: state.ctx.phase, arg },
@@ -753,6 +782,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     endStage: EndStageEvent,
     setStage: SetStageEvent,
     endTurn: EndTurnEvent,
+    pass: PassEvent,
     endPhase: EndPhaseEvent,
     setPhase: SetPhaseEvent,
     endGame: EndGameEvent,
@@ -763,6 +793,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
   if (events.endTurn !== false) {
     enabledEventNames.push('endTurn');
+  }
+  if (events.pass !== false) {
+    enabledEventNames.push('pass');
   }
   if (events.endPhase !== false) {
     enabledEventNames.push('endPhase');
