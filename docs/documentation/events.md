@@ -10,8 +10,9 @@ Here is the complete list of events:
 ##### endStage
 
 This event takes the player that called it out of the stage
-that they are in. If the stage specifies a `next` option, then
-the player is taken to the next stage. If not, the player is
+that they are in. If the definition for the current stage
+in the game object specifies a `next` option, then the player
+is taken to the next stage. If not, the player is
 returned to a state where they are not in any stage.
 
 ```js
@@ -35,7 +36,8 @@ endTurn({ next: '2' }); // Player 2 is the next player.
 
 ##### endPhase
 
-This event ends the current phase. If the phase specifies a
+This event ends the current phase. If the definition for the
+current phase in the game object specifies a
 `next` option, then the game moves to that phase. If not, the
 game returns to a state where no phase is active.
 
