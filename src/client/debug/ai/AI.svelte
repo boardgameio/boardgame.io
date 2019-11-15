@@ -1,17 +1,46 @@
 <script>
   export let client;
 
+  import { MAKE_MOVE } from '../../../core/action-types';
   import Hotkey from '../main/Hotkey.svelte';
+  import Options from './Options.svelte';
   import { MCTSBot } from '../../../ai/mcts-bot';
+  import { RandomBot } from '../../../ai/random-bot';
+  import MCTS from '../mcts/MCTS.svelte';
   import { Step as _Step } from '../../../ai/ai';
+  import { getContext, onDestroy } from 'svelte';
 
-  const bot = new MCTSBot({
-    game: client.game,
-    enumerate: client.ai.enumerate,
-  });
+  const { secondaryPane } = getContext('secondaryPane');
+
+  const bots = {
+    'MCTS': MCTSBot,
+    'Random': RandomBot,
+  };
+
+  let bot;
+  if (client.ai) {
+    bot = new MCTSBot({
+      game: client.game,
+      enumerate: client.ai.enumerate,
+    });
+  }
+
+  let selectedBot;
+  let botAction;
+  let botActionArgs;
+  function ChangeBot() {
+    const botConstructor = bots[selectedBot];
+    bot = new botConstructor({
+      game: client.game,
+      enumerate: client.ai.enumerate,
+    });
+    botAction = null;
+  }
 
   async function Step() {
-    await _Step(client, bot);
+    const t = await _Step(client, bot);
+    botAction = t.payload.type;
+    botActionArgs = t.payload.args;
   }
 
   function Simulate(iterations = 10000, sleepTimeout = 100) {
@@ -25,6 +54,33 @@
 
     return step();
   }
+
+  function DebugLastMove() {
+    const { log } = client.getState();
+    const renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
+
+    if (renderedLogEntries.length > 0) {
+      const index = renderedLogEntries.length - 1;
+      const { metadata } = renderedLogEntries[index].action.payload;
+      if (metadata) {
+        secondaryPane.set({ component: MCTS, metadata });
+      }
+    }
+  }
+
+  function Reset() {
+    client.overrideGameState(null);
+    secondaryPane.set(null);
+  }
+
+  function OnKeyDown(e) {
+    // ESC.
+    if (e.keyCode == 27) {
+      Reset();
+    }
+  }
+
+  onDestroy(Reset);
 </script>
 
 <style>
@@ -39,18 +95,49 @@
   }
 </style>
 
+<svelte:window on:keydown={OnKeyDown}/>
+
 <section>
   {#if client.ai && !client.multiplayer}
-    <h3>Controls</h3>
-    <li>
-      <Hotkey value="1" onPress={client.reset} label="reset" />
-    </li>
-    <li>
-      <Hotkey value="2" onPress={Step} label="step" />
-    </li>
-    <li>
-      <Hotkey value="3" onPress={Simulate} label="simulate" />
-    </li>
+    <section>
+      <h3>Controls</h3>
+      <li>
+        <Hotkey value="1" onPress={client.reset} label="reset" />
+      </li>
+      <li>
+        <Hotkey value="2" onPress={Step} label="step" />
+      </li>
+      <li>
+        <Hotkey value="3" onPress={Simulate} label="simulate" />
+      </li>
+    </section>
+
+    <section>
+      <h3>Bot</h3>
+      <select bind:value={selectedBot} on:change={ChangeBot}>
+        {#each Object.keys(bots) as bot}
+          <option value={bot}>{bot}</option>
+        {/each}
+      </select>
+    </section>
+
+    {#if Object.keys(bot.opts()).length}
+      <section>
+        <h3>Options</h3>
+        <Options bot={bot}/>
+      </section>
+    {/if}
+
+    {#if botAction}
+    <section>
+      <h3>Action</h3>
+      <li>{botAction}</li>
+      <li>Args: {JSON.stringify(botActionArgs)}</li>
+      <p>
+      <button on:click={DebugLastMove}>Debug</button>
+      </p>
+    </section>
+    {/if}
   {:else}
     <p>No bots available.</p>
 

@@ -73,6 +73,34 @@
   .secondary-pane {
     background: #fefefe;
   }
+
+  :global(button, select) {
+    cursor: pointer;
+    outline: none;
+    background: #eee;
+    border: 1px solid #bbb;
+    color: #555;
+    padding: 3px;
+    border-radius: 3px;
+  }
+
+  :global(button) {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  :global(button:hover) {
+    background: #ddd;
+  }
+
+  :global(button:active) {
+    background: #888;
+    color: #fff;
+  }
+
+  :global(section) {
+    margin-bottom: 20px;
+  }
 </style>
 
 <svelte:window on:keypress={Keypress} />

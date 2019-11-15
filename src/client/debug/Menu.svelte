@@ -15,16 +15,16 @@
     border-radius: 5px 5px 0 0;
     height: 25px;
     line-height: 25px;
+    margin-right: -500px;
     transform-origin: bottom right;
-    transform: rotate(-90deg);
-    font-weight: bold;
+    transform: rotate(-90deg) translate(0, -500px);
   }
 
   .menu-item {
     line-height: 25px;
     cursor: pointer;
-    background: #999;
-    color: #eee;
+    background: #fefefe;
+    color: #555;
     padding-left: 15px;
     padding-right: 15px;
     text-align: center;
@@ -40,13 +40,14 @@
 
   .menu-item.active {
     cursor: default;
-    background: #eee;
+    font-weight: bold;
+    background: #ddd;
     color: #555;
   }
 
   .menu-item:hover {
-    background: #eee;
-    color: #777;
+    background: #ddd;
+    color: #555;
   }
 </style>
 
