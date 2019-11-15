@@ -1,4 +1,6 @@
 *.bundle.js
 *.min.js
+node_modules
+dist
 Game.md
 package.json
