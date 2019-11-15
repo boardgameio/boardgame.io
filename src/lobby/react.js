@@ -33,6 +33,7 @@ const LobbyPhases = {
  * @param {string} gameServer - Address of the game server (for example 'localhost:8001').
  *                              If not set, defaults to the server that served the page.
  * @param {function} clientFactory - Function that is used to create the game clients.
+ * @param {number} refreshInterval - Interval between server updates (default: 2000ms).
  * @param {bool}   debug - Enable debug information (default: false).
  *
  * Returns:
@@ -45,11 +46,13 @@ class Lobby extends React.Component {
     gameServer: PropTypes.string,
     debug: PropTypes.bool,
     clientFactory: PropTypes.func,
+    refreshInterval: PropTypes.number,
   };
 
   static defaultProps = {
     debug: false,
     clientFactory: Client,
+    refreshInterval: 2000,
   };
 
   state = {
@@ -63,7 +66,7 @@ class Lobby extends React.Component {
   constructor(props) {
     super(props);
     this._createConnection(this.props);
-    this._updateConnection();
+    setInterval(this._updateConnection, this.props.refreshInterval);
   }
 
   componentDidMount() {
