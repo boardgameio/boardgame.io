@@ -3,6 +3,7 @@
 
   import { MAKE_MOVE } from '../../../core/action-types';
   import Hotkey from '../main/Hotkey.svelte';
+  import Options from './Options.svelte';
   import { MCTSBot } from '../../../ai/mcts-bot';
   import { RandomBot } from '../../../ai/random-bot';
   import MCTS from '../mcts/MCTS.svelte';
@@ -25,16 +26,17 @@
   }
 
   let selectedBot;
+  let botAction;
+  let botActionArgs;
   function ChangeBot() {
     const botConstructor = bots[selectedBot];
     bot = new botConstructor({
       game: client.game,
       enumerate: client.ai.enumerate,
     });
+    botAction = null;
   }
 
-  let botAction;
-  let botActionArgs;
   async function Step() {
     const t = await _Step(client, bot);
     botAction = t.payload.type;
@@ -118,6 +120,13 @@
         {/each}
       </select>
     </section>
+
+    {#if Object.keys(bot.opts()).length}
+      <section>
+        <h3>Options</h3>
+        <Options bot={bot}/>
+      </section>
+    {/if}
 
     {#if botAction}
     <section>
