@@ -523,6 +523,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       return state;
     }
 
+    if (ctx.events) ctx.events._setPlayerID(ctx.currentPlayer);
+
     // Run turn-end triggers.
     G = conf.turn.onEnd(G, ctx);
 
