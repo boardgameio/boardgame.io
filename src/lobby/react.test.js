@@ -418,6 +418,8 @@ describe('lobby', () => {
           .find('LobbyRoomInstance')
           .first()
           .find('button')
+
+          .first()
           .simulate('click');
         expect(lobby.instance().state.runningGame).toEqual({
           app: NullComponent,
@@ -466,6 +468,8 @@ describe('lobby', () => {
           .find('LobbyRoomInstance')
           .at(2)
           .find('button')
+
+          .first()
           .simulate('click');
         expect(spy).not.toHaveBeenCalledWith(expect.anything(), {
           gameID: 'gameID3',
@@ -495,6 +499,7 @@ describe('lobby', () => {
           .find('LobbyRoomInstance')
           .first()
           .find('button')
+          .first()
           .simulate('click');
         // exit game
         lobby

@@ -744,6 +744,67 @@ describe('endTurn args', () => {
   });
 });
 
+describe('pass args', () => {
+  const flow = Flow({
+    phases: { A: { start: true, next: 'B' }, B: {}, C: {} },
+  });
+
+  const state = { ctx: flow.ctx(3) };
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('no args', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass'));
+    expect(t.ctx.turn).toBe(1);
+    expect(t.ctx.playOrderPos).toBe(1);
+    expect(t.ctx.currentPlayer).toBe('1');
+  });
+
+  test('invalid arg to pass', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass', '2'));
+    expect(error).toBeCalledWith(`invalid argument to endTurn: 2`);
+    expect(t.ctx.currentPlayer).toBe('0');
+  });
+
+  test('valid args', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.turn).toBe(1);
+    expect(t.ctx.playOrderPos).toBe(0);
+    expect(t.ctx.currentPlayer).toBe('1');
+  });
+
+  test('removing all players ends phase', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.playOrderPos).toBe(0);
+    expect(t.ctx.currentPlayer).toBe('0');
+    expect(t.ctx.phase).toBe('B');
+  });
+
+  test('playOrderPos does not go out of bounds when passing at the end of the list', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass'));
+    t = flow.processEvent(t, gameEvent('pass'));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.currentPlayer).toBe('0');
+  });
+
+  test('removing a player deeper into play order returns correct updated playOrder', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass'));
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.playOrderPos).toBe(1);
+    expect(t.ctx.currentPlayer).toBe('2');
+  });
+});
+
 test('undoable moves', () => {
   const game = {
     moves: {
