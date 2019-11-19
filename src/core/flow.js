@@ -308,7 +308,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Initialize the turn order state.
     if (currentPlayer) {
-      if (ctx.events) ctx.events._setPlayerID(currentPlayer);
       ctx = { ...ctx, currentPlayer };
       if (conf.turn.activePlayers) {
         ctx = SetActivePlayers(ctx, ctx.currentPlayer, conf.turn.activePlayers);
@@ -318,6 +317,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       // when there is no currentPlayer yet.
       ctx = InitTurnOrderState(G, ctx, conf.turn);
     }
+
+    if (ctx.events) ctx.events._setPlayerID(ctx.currentPlayer);
 
     G = conf.turn.onBegin(G, ctx);
 
