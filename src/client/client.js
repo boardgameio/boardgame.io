@@ -384,12 +384,14 @@ class _ClientImpl {
     this.playerID = playerID;
     this.createDispatchers();
     this.transport.updatePlayerID(playerID);
+    this.notifySubscribers();
   }
 
   updateGameID(gameID) {
     this.gameID = gameID;
     this.createDispatchers();
     this.transport.updateGameID(gameID);
+    this.notifySubscribers();
   }
 
   updateCredentials(credentials) {
