@@ -17,11 +17,17 @@
     'Random': RandomBot,
   };
 
+  let iterationCounter = 0;
+  const iterationCallback = (counter) => {
+    iterationCounter = counter;
+  }
+
   let bot;
   if (client.ai) {
     bot = new MCTSBot({
       game: client.game,
       enumerate: client.ai.enumerate,
+      iterationCallback,
     });
   }
 
@@ -33,11 +39,14 @@
     bot = new botConstructor({
       game: client.game,
       enumerate: client.ai.enumerate,
+      iterationCallback,
     });
     botAction = null;
+    iterationCounter = 0;
   }
 
   async function Step() {
+    iterationCounter = 0;
     const t = await _Step(client, bot);
     botAction = t.payload.type;
     botActionArgs = t.payload.args;
@@ -68,9 +77,15 @@
     }
   }
 
-  function Reset() {
+  function Exit() {
     client.overrideGameState(null);
     secondaryPane.set(null);
+  }
+
+  function Reset() {
+    client.reset();
+    botAction = null;
+    iterationCounter = 0;
   }
 
   function OnKeyDown(e) {
@@ -80,7 +95,7 @@
     }
   }
 
-  onDestroy(Reset);
+  onDestroy(Exit);
 </script>
 
 <style>
@@ -102,7 +117,7 @@
     <section>
       <h3>Controls</h3>
       <li>
-        <Hotkey value="1" onPress={client.reset} label="reset" />
+        <Hotkey value="1" onPress={Reset} label="reset" />
       </li>
       <li>
         <Hotkey value="2" onPress={Step} label="step" />
@@ -128,14 +143,20 @@
       </section>
     {/if}
 
-    {#if botAction}
+    {#if botAction || iterationCounter}
     <section>
-      <h3>Action</h3>
-      <li>{botAction}</li>
-      <li>Args: {JSON.stringify(botActionArgs)}</li>
-      <p>
-      <button on:click={DebugLastMove}>Debug</button>
-      </p>
+      <h3>Result</h3>
+      {#if iterationCounter}
+        <li>Iterations: {iterationCounter}</li>
+      {/if}
+
+      {#if botAction}
+        <li>Action: {botAction}</li>
+        <li>Args: {JSON.stringify(botActionArgs)}</li>
+        <p>
+        <button on:click={DebugLastMove}>Debug</button>
+        </p>
+      {/if}
     </section>
     {/if}
   {:else}

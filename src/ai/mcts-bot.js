@@ -12,7 +12,15 @@ import { Bot } from './bot';
  * Bot that uses Monte-Carlo Tree Search to find promising moves.
  */
 export class MCTSBot extends Bot {
-  constructor({ enumerate, seed, objectives, game, iterations, playoutDepth }) {
+  constructor({
+    enumerate,
+    seed,
+    objectives,
+    game,
+    iterations,
+    playoutDepth,
+    iterationCallback,
+  }) {
     super({ enumerate, seed });
 
     if (objectives === undefined) {
@@ -20,9 +28,15 @@ export class MCTSBot extends Bot {
     }
 
     this.objectives = objectives;
+    this.iterationCallback = iterationCallback || (() => {});
     this.reducer = CreateGameReducer({ game });
     this.iterations = iterations;
     this.playoutDepth = playoutDepth;
+
+    this.addOpt({
+      key: 'async',
+      initial: false,
+    });
 
     this.addOpt({
       key: 'iterations',
@@ -195,28 +209,52 @@ export class MCTSBot extends Bot {
   play(state, playerID) {
     const root = this.createNode({ state, playerID });
 
-    let iterations = this.getOpt('iterations');
+    let numIterations = this.getOpt('iterations');
     if (typeof this.iterations === 'function') {
-      iterations = this.iterations(state.G, state.ctx);
+      numIterations = this.iterations(state.G, state.ctx);
     }
 
-    for (let i = 0; i < iterations; i++) {
-      const leaf = this.select(root);
-      const child = this.expand(leaf);
-      const result = this.playout(child);
-      this.backpropagate(child, result);
-    }
-
-    let selectedChild = null;
-    for (const child of root.children) {
-      if (selectedChild == null || child.visits > selectedChild.visits) {
-        selectedChild = child;
+    const getResult = () => {
+      let selectedChild = null;
+      for (const child of root.children) {
+        if (selectedChild == null || child.visits > selectedChild.visits) {
+          selectedChild = child;
+        }
       }
-    }
 
-    const action = selectedChild && selectedChild.parentAction;
-    const metadata = root;
+      const action = selectedChild && selectedChild.parentAction;
+      const metadata = root;
+      return { action, metadata };
+    };
 
-    return { action, metadata };
+    return new Promise(resolve => {
+      const iteration = () => {
+        const leaf = this.select(root);
+        const child = this.expand(leaf);
+        const result = this.playout(child);
+        this.backpropagate(child, result);
+        this.iterationCounter++;
+        this.iterationCallback(this.iterationCounter);
+      };
+
+      this.iterationCounter = 0;
+
+      if (this.getOpt('async')) {
+        const asyncIteration = () => {
+          if (this.iterationCounter < numIterations) {
+            iteration();
+            setTimeout(asyncIteration, 0);
+          } else {
+            resolve(getResult());
+          }
+        };
+        asyncIteration();
+      } else {
+        while (this.iterationCounter < numIterations) {
+          iteration();
+        }
+        resolve(getResult());
+      }
+    });
   }
 }

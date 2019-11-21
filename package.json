@@ -42,6 +42,7 @@
     "core",
     "react",
     "react-native",
+    "server.js",
     "ai",
     "plugins",
     "master",

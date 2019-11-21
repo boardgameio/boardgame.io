@@ -153,16 +153,20 @@ describe('Simulate', () => {
     '1': new RandomBot({ seed: 'test', enumerate }),
   };
 
-  test('multiple bots', () => {
+  test('multiple bots', async () => {
     const state = InitializeGame({ game: TicTacToe });
-    const { state: endState } = Simulate({ game: TicTacToe, bots, state });
+    const { state: endState } = await Simulate({
+      game: TicTacToe,
+      bots,
+      state,
+    });
     expect(endState.ctx.gameover).not.toBe(undefined);
   });
 
-  test('single bot', () => {
+  test('single bot', async () => {
     const bot = new RandomBot({ seed: 'test', enumerate });
     const state = InitializeGame({ game: TicTacToe });
-    const { state: endState } = Simulate({
+    const { state: endState } = await Simulate({
       game: TicTacToe,
       bots: bot,
       state,
@@ -171,7 +175,7 @@ describe('Simulate', () => {
     expect(endState.ctx.gameover).not.toBe(undefined);
   });
 
-  test('with activePlayers', () => {
+  test('with activePlayers', async () => {
     const game = Game({
       moves: {
         A: G => {
@@ -190,7 +194,7 @@ describe('Simulate', () => {
     });
 
     const state = InitializeGame({ game });
-    const { state: endState } = Simulate({
+    const { state: endState } = await Simulate({
       game,
       bots: bot,
       state,
@@ -233,15 +237,15 @@ describe('Bot', () => {
 });
 
 describe('MCTSBot', () => {
-  test('game that never ends', () => {
+  test('game that never ends', async () => {
     const game = {};
     const state = InitializeGame({ game });
     const bot = new MCTSBot({ seed: 'test', game, enumerate: () => [] });
-    const { state: endState } = Simulate({ game, bots: bot, state });
+    const { state: endState } = await Simulate({ game, bots: bot, state });
     expect(endState.ctx.turn).toBe(1);
   });
 
-  test('RandomBot vs. MCTSBot', () => {
+  test('RandomBot vs. MCTSBot', async () => {
     const bots = {
       '0': new RandomBot({ seed: 'test', enumerate, playerID: '0' }),
       '1': new MCTSBot({
@@ -257,12 +261,16 @@ describe('MCTSBot', () => {
 
     for (let i = 0; i < 5; i++) {
       const state = initialState;
-      const { state: endState } = Simulate({ game: TicTacToe, bots, state });
+      const { state: endState } = await Simulate({
+        game: TicTacToe,
+        bots,
+        state,
+      });
       expect(endState.ctx.gameover).not.toEqual({ winner: '0' });
     }
   });
 
-  test('MCTSBot vs. MCTSBot', () => {
+  test('MCTSBot vs. MCTSBot', async () => {
     const initialState = InitializeGame({ game: TicTacToe });
     const iterations = 400;
 
@@ -285,12 +293,16 @@ describe('MCTSBot', () => {
         }),
       };
       const state = initialState;
-      const { state: endState } = Simulate({ game: TicTacToe, bots, state });
+      const { state: endState } = await Simulate({
+        game: TicTacToe,
+        bots,
+        state,
+      });
       expect(endState.ctx.gameover).toEqual({ draw: true });
     }
   });
 
-  test('with activePlayers', () => {
+  test('with activePlayers', async () => {
     const game = Game({
       setup: () => ({ moves: 0 }),
       moves: {
@@ -311,7 +323,7 @@ describe('MCTSBot', () => {
     });
 
     const state = InitializeGame({ game });
-    const { state: endState } = Simulate({
+    const { state: endState } = await Simulate({
       game,
       bots: bot,
       state,
@@ -320,7 +332,7 @@ describe('MCTSBot', () => {
     expect(endState.ctx.gameover).not.toBe(undefined);
   });
 
-  test('objectives', () => {
+  test('objectives', async () => {
     const objectives = () => ({
       'play-on-square-0': {
         checker: G => G.cells[0] !== null,
@@ -340,9 +352,24 @@ describe('MCTSBot', () => {
         playerID: '0',
       });
 
-      const { action } = bot.play(state, '0');
+      const { action } = await bot.play(state, '0');
       expect(action.payload.args).toEqual([0]);
     }
+  });
+
+  test('async mode', async () => {
+    const initialState = InitializeGame({ game: TicTacToe });
+    const bot = new MCTSBot({
+      seed: '0',
+      game: TicTacToe,
+      enumerate,
+      playerID: '0',
+      iterations: 10,
+      playoutDepth: 10,
+    });
+    bot.setOpt('async', true);
+    const action = await bot.play(initialState, '0');
+    expect(action).not.toBeUndefined();
   });
 
   describe('iterations & playout depth', () => {

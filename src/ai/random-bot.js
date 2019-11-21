@@ -14,6 +14,6 @@ import { Bot } from './bot';
 export class RandomBot extends Bot {
   play({ G, ctx }, playerID) {
     const moves = this.enumerate(G, ctx, playerID);
-    return { action: this.random(moves) };
+    return Promise.resolve({ action: this.random(moves) });
   }
 }
