@@ -200,23 +200,25 @@ export class MCTSBot extends Bot {
       iterations = this.iterations(state.G, state.ctx);
     }
 
-    for (let i = 0; i < iterations; i++) {
-      const leaf = this.select(root);
-      const child = this.expand(leaf);
-      const result = this.playout(child);
-      this.backpropagate(child, result);
-    }
-
-    let selectedChild = null;
-    for (const child of root.children) {
-      if (selectedChild == null || child.visits > selectedChild.visits) {
-        selectedChild = child;
+    return new Promise(resolve => {
+      for (let i = 0; i < iterations; i++) {
+        const leaf = this.select(root);
+        const child = this.expand(leaf);
+        const result = this.playout(child);
+        this.backpropagate(child, result);
       }
-    }
 
-    const action = selectedChild && selectedChild.parentAction;
-    const metadata = root;
+      let selectedChild = null;
+      for (const child of root.children) {
+        if (selectedChild == null || child.visits > selectedChild.visits) {
+          selectedChild = child;
+        }
+      }
 
-    return { action, metadata };
+      const action = selectedChild && selectedChild.parentAction;
+      const metadata = root;
+
+      resolve({ action, metadata });
+    });
   }
 }
