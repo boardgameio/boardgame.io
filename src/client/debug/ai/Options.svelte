@@ -26,14 +26,23 @@
   .value {
     font-weight: bold;
   }
+
+  input[type='checkbox'] {
+    vertical-align: middle;
+  }
 </style>
 
 {#each Object.entries(bot.opts()) as [key, value]}
   <div class="option">
-  <label>{key}</label>
-  <span class="value">{values[key]}</span>
-  {#if value.range}
-    <input type=range bind:value={values[key]} min={value.range.min} max={value.range.max} on:change={OnChange}>
-  {/if}
+    <label>{key}</label>
+
+    {#if value.range}
+      <span class="value">{values[key]}</span>
+      <input type=range bind:value={values[key]} min={value.range.min} max={value.range.max} on:change={OnChange}>
+    {/if}
+
+    {#if typeof value.value === 'boolean'}
+      <input type=checkbox bind:checked={values[key]} on:change={OnChange}>
+    {/if}
   </div>
 {/each}

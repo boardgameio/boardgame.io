@@ -25,6 +25,11 @@ export class MCTSBot extends Bot {
     this.playoutDepth = playoutDepth;
 
     this.addOpt({
+      key: 'async',
+      initial: false,
+    });
+
+    this.addOpt({
       key: 'iterations',
       initial: typeof iterations === 'number' ? iterations : 1000,
       range: { min: 1, max: 2000 },
@@ -195,19 +200,12 @@ export class MCTSBot extends Bot {
   play(state, playerID) {
     const root = this.createNode({ state, playerID });
 
-    let iterations = this.getOpt('iterations');
+    let numIterations = this.getOpt('iterations');
     if (typeof this.iterations === 'function') {
-      iterations = this.iterations(state.G, state.ctx);
+      numIterations = this.iterations(state.G, state.ctx);
     }
 
-    return new Promise(resolve => {
-      for (let i = 0; i < iterations; i++) {
-        const leaf = this.select(root);
-        const child = this.expand(leaf);
-        const result = this.playout(child);
-        this.backpropagate(child, result);
-      }
-
+    const getResult = () => {
       let selectedChild = null;
       for (const child of root.children) {
         if (selectedChild == null || child.visits > selectedChild.visits) {
@@ -217,8 +215,36 @@ export class MCTSBot extends Bot {
 
       const action = selectedChild && selectedChild.parentAction;
       const metadata = root;
+      return { action, metadata };
+    };
 
-      resolve({ action, metadata });
+    return new Promise(resolve => {
+      const iteration = () => {
+        const leaf = this.select(root);
+        const child = this.expand(leaf);
+        const result = this.playout(child);
+        this.backpropagate(child, result);
+        this.iterationCounter++;
+      };
+
+      this.iterationCounter = 0;
+
+      if (this.getOpt('async')) {
+        const asyncIteration = () => {
+          if (this.iterationCounter < numIterations) {
+            iteration();
+            setTimeout(asyncIteration, 0);
+          } else {
+            resolve(getResult());
+          }
+        };
+        asyncIteration();
+      } else {
+        while (this.iterationCounter < numIterations) {
+          iteration();
+        }
+        resolve(getResult());
+      }
     });
   }
 }

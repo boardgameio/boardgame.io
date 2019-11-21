@@ -357,6 +357,21 @@ describe('MCTSBot', () => {
     }
   });
 
+  test('async mode', async () => {
+    const initialState = InitializeGame({ game: TicTacToe });
+    const bot = new MCTSBot({
+      seed: '0',
+      game: TicTacToe,
+      enumerate,
+      playerID: '0',
+      iterations: 10,
+      playoutDepth: 10,
+    });
+    bot.setOpt('async', true);
+    const action = await bot.play(initialState, '0');
+    expect(action).not.toBeUndefined();
+  });
+
   describe('iterations & playout depth', () => {
     test('set opts', () => {
       const bot = new MCTSBot({ game: TicTacToe, enumerate: jest.fn() });

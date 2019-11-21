@@ -16,6 +16,7 @@ export class Bot {
   constructor({ enumerate, seed }) {
     this.enumerateFn = enumerate;
     this.seed = seed;
+    this.iterationCounter = 0;
     this._opts = {};
   }
 
