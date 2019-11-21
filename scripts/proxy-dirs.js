@@ -25,3 +25,8 @@ subpackages.forEach(name => {
   mkdirSync(dir);
   writeFileSync(`${dir}/package.json`, PackageJson(name));
 });
+
+writeFileSync(
+  path.resolve(__dirname, '../server.js'),
+  "module.exports = require('./dist/server');"
+);
