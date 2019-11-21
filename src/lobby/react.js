@@ -34,6 +34,7 @@ const LobbyPhases = {
  *                              If not set, defaults to the server that served the page.
  * @param {function} clientFactory - Function that is used to create the game clients.
  * @param {bool}   debug - Enable debug information (default: false).
+ * @param {number} autoRefreshInt - Auto refresh time interval
  *
  * Returns:
  *   A React component that provides a UI to create, list, join, leave, play or spectate game instances.
@@ -45,11 +46,13 @@ class Lobby extends React.Component {
     gameServer: PropTypes.string,
     debug: PropTypes.bool,
     clientFactory: PropTypes.func,
+    autoRefreshInt: PropTypes.number,
   };
 
   static defaultProps = {
     debug: false,
     clientFactory: Client,
+    autoRefreshInt: 1000,
   };
 
   state = {
@@ -62,6 +65,7 @@ class Lobby extends React.Component {
 
   constructor(props) {
     super(props);
+    setInterval(this._updateConnection, this.props.autoRefreshInt);
     this._createConnection(this.props);
     this._updateConnection();
   }

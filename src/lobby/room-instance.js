@@ -56,17 +56,24 @@ class LobbyRoomInstance extends React.Component {
     // room is full
     if (playerSeat) {
       return (
-        <button
-          onClick={() =>
-            this.props.onClickPlay(inst.gameName, {
-              gameID: inst.gameID,
-              playerID: '' + playerSeat.id,
-              numPlayers: inst.players.length,
-            })
-          }
-        >
-          Play
-        </button>
+        <div>
+          <button
+            onClick={() =>
+              this.props.onClickPlay(inst.gameName, {
+                gameID: inst.gameID,
+                playerID: '' + playerSeat.id,
+                numPlayers: inst.players.length,
+              })
+            }
+          >
+            play
+          </button>
+          <button
+            onClick={() => this.props.onClickLeave(inst.gameName, inst.gameID)}
+          >
+            Leave
+          </button>
+        </div>
       );
     }
     // allow spectating
