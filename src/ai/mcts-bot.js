@@ -12,7 +12,15 @@ import { Bot } from './bot';
  * Bot that uses Monte-Carlo Tree Search to find promising moves.
  */
 export class MCTSBot extends Bot {
-  constructor({ enumerate, seed, objectives, game, iterations, playoutDepth }) {
+  constructor({
+    enumerate,
+    seed,
+    objectives,
+    game,
+    iterations,
+    playoutDepth,
+    iterationCallback,
+  }) {
     super({ enumerate, seed });
 
     if (objectives === undefined) {
@@ -20,6 +28,7 @@ export class MCTSBot extends Bot {
     }
 
     this.objectives = objectives;
+    this.iterationCallback = iterationCallback || (() => {});
     this.reducer = CreateGameReducer({ game });
     this.iterations = iterations;
     this.playoutDepth = playoutDepth;
@@ -225,6 +234,7 @@ export class MCTSBot extends Bot {
         const result = this.playout(child);
         this.backpropagate(child, result);
         this.iterationCounter++;
+        this.iterationCallback(this.iterationCounter);
       };
 
       this.iterationCounter = 0;
