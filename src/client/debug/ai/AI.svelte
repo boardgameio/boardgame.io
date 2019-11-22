@@ -166,15 +166,19 @@
     </section>
     {/if}
   {:else}
-    <p>No bots available.</p>
+    {#if client.multiplayer}
+      <p>The bot debugger is only available in singleplayer mode.</p>
+    {:else}
+      <p>No bots available.</p>
 
-    <p>
-      Follow the instructions
-      <a
-        href="https://boardgame.io/documentation/#/tutorial?id=bots"
-        target="_blank">
-        here</a>
-      to set up bots.
-    </p>
+      <p>
+        Follow the instructions
+        <a
+          href="https://boardgame.io/documentation/#/tutorial?id=bots"
+          target="_blank">
+          here</a>
+        to set up bots.
+      </p>
+    {/if}
   {/if}
 </section>
