@@ -41,7 +41,7 @@ export class MCTSBot extends Bot {
 
     this.addOpt({
       key: 'async',
-      initial: false,
+      initial: true,
     });
 
     this.addOpt({
@@ -246,7 +246,7 @@ export class MCTSBot extends Bot {
           this.backpropagate(child, result);
           this.iterationCounter++;
         }
-        this.iterationCallback(this.iterationCounter);
+        this.iterationCallback(this.iterationCounter, numIterations);
       };
 
       this.iterationCounter = 0;

@@ -17,9 +17,11 @@
     'Random': RandomBot,
   };
 
+  let progress = null;
   let iterationCounter = 0;
-  const iterationCallback = (counter) => {
+  const iterationCallback = (counter, numIterations) => {
     iterationCounter = counter;
+    progress = counter / numIterations;
   }
 
   let bot;
@@ -46,6 +48,7 @@
   }
 
   async function Step() {
+    botAction = null;
     iterationCounter = 0;
     const t = await _Step(client, bot);
     botAction = t.payload.type;
@@ -53,6 +56,8 @@
   }
 
   function Simulate(iterations = 10000, sleepTimeout = 100) {
+    botAction = null;
+    iterationCounter = 0;
     const step = async () => {
       for (let i = 0; i < iterations; i++) {
         const action = await _Step(client, bot);
@@ -147,8 +152,8 @@
     {#if botAction || iterationCounter}
     <section>
       <h3>Result</h3>
-      {#if iterationCounter}
-        <li>Iterations: {iterationCounter}</li>
+      {#if progress && progress < 1.0}
+        <progress value={progress}></progress>
       {/if}
 
       {#if botAction}
