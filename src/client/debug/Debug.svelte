@@ -72,6 +72,7 @@
 
   .secondary-pane {
     background: #fefefe;
+    overflow-y: scroll;
   }
 
   .debug-panel :global(button, select) {

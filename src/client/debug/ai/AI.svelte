@@ -17,11 +17,26 @@
     'Random': RandomBot,
   };
 
+  let debug = false;
   let progress = null;
   let iterationCounter = 0;
-  const iterationCallback = (counter, numIterations) => {
-    iterationCounter = counter;
-    progress = counter / numIterations;
+  let metadata = null;
+  const iterationCallback = ({ iterationCounter: c, numIterations, metadata: m }) => {
+    iterationCounter = c;
+    progress = c / numIterations;
+    metadata = m;
+
+    if (debug && metadata) {
+      secondaryPane.set({ component: MCTS, metadata });
+    }
+  }
+
+  function OnDebug() {
+    if (debug && metadata) {
+      secondaryPane.set({ component: MCTS, metadata });
+    } else {
+      secondaryPane.set(null);
+    }
   }
 
   let bot;
@@ -46,19 +61,27 @@
     });
     bot.setOpt('async', true);
     botAction = null;
+    metadata = null;
+    secondaryPane.set(null);
     iterationCounter = 0;
   }
 
   async function Step() {
     botAction = null;
+    metadata = null;
     iterationCounter = 0;
+
     const t = await _Step(client, bot);
-    botAction = t.payload.type;
-    botActionArgs = t.payload.args;
+
+    if (t) {
+      botAction = t.payload.type;
+      botActionArgs = t.payload.args;
+    }
   }
 
   function Simulate(iterations = 10000, sleepTimeout = 100) {
     botAction = null;
+    metadata = null;
     iterationCounter = 0;
     const step = async () => {
       for (let i = 0; i < iterations; i++) {
@@ -71,27 +94,16 @@
     return step();
   }
 
-  function DebugLastMove() {
-    const { log } = client.getState();
-    const renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
-
-    if (renderedLogEntries.length > 0) {
-      const index = renderedLogEntries.length - 1;
-      const { metadata } = renderedLogEntries[index].action.payload;
-      if (metadata) {
-        secondaryPane.set({ component: MCTS, metadata });
-      }
-    }
-  }
-
   function Exit() {
     client.overrideGameState(null);
     secondaryPane.set(null);
+    debug = false;
   }
 
   function Reset() {
     client.reset();
     botAction = null;
+    metadata = null;
     iterationCounter = 0;
     Exit();
   }
@@ -115,6 +127,15 @@
 
   h3 {
     text-transform: uppercase;
+  }
+
+  label {
+    font-weight: bold;
+    color: #999;
+  }
+
+  input[type='checkbox'] {
+    vertical-align: middle;
   }
 </style>
 
@@ -147,6 +168,8 @@
     {#if Object.keys(bot.opts()).length}
       <section>
         <h3>Options</h3>
+        <label>debug</label>
+        <input type=checkbox bind:checked={debug} on:change={OnDebug}>
         <Options bot={bot}/>
       </section>
     {/if}
@@ -161,9 +184,6 @@
       {#if botAction}
         <li>Action: {botAction}</li>
         <li>Args: {JSON.stringify(botActionArgs)}</li>
-        <p>
-        <button on:click={DebugLastMove}>Debug</button>
-        </p>
       {/if}
     </section>
     {/if}

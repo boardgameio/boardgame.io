@@ -32,7 +32,9 @@ export class Bot {
   }
 
   setOpt(key, value) {
-    this._opts[key].value = value;
+    if (key in this._opts) {
+      this._opts[key].value = value;
+    }
   }
 
   opts() {

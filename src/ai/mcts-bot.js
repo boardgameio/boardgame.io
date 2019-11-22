@@ -246,7 +246,11 @@ export class MCTSBot extends Bot {
           this.backpropagate(child, result);
           this.iterationCounter++;
         }
-        this.iterationCallback(this.iterationCounter, numIterations);
+        this.iterationCallback({
+          iterationCounter: this.iterationCounter,
+          numIterations,
+          metadata: root,
+        });
       };
 
       this.iterationCounter = 0;

@@ -131,6 +131,7 @@
     "superagent": "^3.8.3",
     "supertest": "^3.1.0",
     "svelte": "^3.12.1",
+    "svelte-icons": "^1.1.0",
     "ts-jest": "^24.0.2",
     "ts-transformer-imports": "^0.4.3",
     "ttypescript": "^1.5.7",
@@ -168,7 +169,7 @@
       "^.+\\.svelte$": "jest-transform-svelte"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io|flatted)/)"
+      "node_modules/(?!(boardgame.io|flatted|svelte-icons)/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
