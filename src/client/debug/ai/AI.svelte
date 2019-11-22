@@ -126,7 +126,7 @@
         <Hotkey value="1" onPress={Reset} label="reset" />
       </li>
       <li>
-        <Hotkey value="2" onPress={Step} label="step" />
+        <Hotkey value="2" onPress={Step} label="play" />
       </li>
       <li>
         <Hotkey value="3" onPress={Simulate} label="simulate" />
