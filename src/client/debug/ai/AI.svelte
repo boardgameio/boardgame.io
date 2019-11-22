@@ -86,12 +86,13 @@
     client.reset();
     botAction = null;
     iterationCounter = 0;
+    Exit();
   }
 
   function OnKeyDown(e) {
     // ESC.
     if (e.keyCode == 27) {
-      Reset();
+      Exit();
     }
   }
 

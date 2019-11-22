@@ -9,6 +9,12 @@ import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
 
 /**
+ * The number of iterations to run before yielding to
+ * the JS event loop (in async mode).
+ */
+const CHUNK_SIZE = 25;
+
+/**
  * Bot that uses Monte-Carlo Tree Search to find promising moves.
  */
 export class MCTSBot extends Bot {
@@ -229,11 +235,17 @@ export class MCTSBot extends Bot {
 
     return new Promise(resolve => {
       const iteration = () => {
-        const leaf = this.select(root);
-        const child = this.expand(leaf);
-        const result = this.playout(child);
-        this.backpropagate(child, result);
-        this.iterationCounter++;
+        for (
+          let i = 0;
+          i < CHUNK_SIZE && this.iterationCounter < numIterations;
+          i++
+        ) {
+          const leaf = this.select(root);
+          const child = this.expand(leaf);
+          const result = this.playout(child);
+          this.backpropagate(child, result);
+          this.iterationCounter++;
+        }
         this.iterationCallback(this.iterationCounter);
       };
 
