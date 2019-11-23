@@ -66,7 +66,7 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.phase).toBe('A');
     state = flow.processEvent(state, gameEvent('endPhase'));
-    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.phase).toBe('B');
   });
 
