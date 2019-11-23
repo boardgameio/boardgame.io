@@ -314,7 +314,10 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G, ctx) => ctx.playOrderPos,
+    first: (G, ctx) =>
+      ctx.turn === 0
+        ? ctx.playOrderPos
+        : (ctx.playOrderPos + 1) % ctx.playOrder.length,
     next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
