@@ -332,6 +332,16 @@ export const TurnOrder = {
   },
 
   /**
+   * CONTINUE
+   *
+   * Similar to DEFAULT, but starts with the player who ended the last phase.
+   */
+  CONTINUE: {
+    first: (G, ctx) => ctx.playOrderPos,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+  },
+
+  /**
    * ONCE
    *
    * Another round-robin turn order, but goes around just once.
