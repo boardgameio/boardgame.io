@@ -314,7 +314,10 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G, ctx) => ctx.playOrderPos,
+    first: (G, ctx) =>
+      ctx.turn === 0
+        ? ctx.playOrderPos
+        : (ctx.playOrderPos + 1) % ctx.playOrder.length,
     next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
@@ -325,6 +328,16 @@ export const TurnOrder = {
    */
   RESET: {
     first: () => 0,
+    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+  },
+
+  /**
+   * CONTINUE
+   *
+   * Similar to DEFAULT, but starts with the player who ended the last phase.
+   */
+  CONTINUE: {
+    first: (G, ctx) => ctx.playOrderPos,
     next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 

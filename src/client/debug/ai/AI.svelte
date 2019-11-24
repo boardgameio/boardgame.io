@@ -17,9 +17,11 @@
     'Random': RandomBot,
   };
 
+  let progress = null;
   let iterationCounter = 0;
-  const iterationCallback = (counter) => {
+  const iterationCallback = (counter, numIterations) => {
     iterationCounter = counter;
+    progress = counter / numIterations;
   }
 
   let bot;
@@ -29,6 +31,7 @@
       enumerate: client.ai.enumerate,
       iterationCallback,
     });
+    bot.setOpt('async', true);
   }
 
   let selectedBot;
@@ -41,11 +44,13 @@
       enumerate: client.ai.enumerate,
       iterationCallback,
     });
+    bot.setOpt('async', true);
     botAction = null;
     iterationCounter = 0;
   }
 
   async function Step() {
+    botAction = null;
     iterationCounter = 0;
     const t = await _Step(client, bot);
     botAction = t.payload.type;
@@ -53,6 +58,8 @@
   }
 
   function Simulate(iterations = 10000, sleepTimeout = 100) {
+    botAction = null;
+    iterationCounter = 0;
     const step = async () => {
       for (let i = 0; i < iterations; i++) {
         const action = await _Step(client, bot);
@@ -86,12 +93,13 @@
     client.reset();
     botAction = null;
     iterationCounter = 0;
+    Exit();
   }
 
   function OnKeyDown(e) {
     // ESC.
     if (e.keyCode == 27) {
-      Reset();
+      Exit();
     }
   }
 
@@ -120,7 +128,7 @@
         <Hotkey value="1" onPress={Reset} label="reset" />
       </li>
       <li>
-        <Hotkey value="2" onPress={Step} label="step" />
+        <Hotkey value="2" onPress={Step} label="play" />
       </li>
       <li>
         <Hotkey value="3" onPress={Simulate} label="simulate" />
@@ -146,8 +154,8 @@
     {#if botAction || iterationCounter}
     <section>
       <h3>Result</h3>
-      {#if iterationCounter}
-        <li>Iterations: {iterationCounter}</li>
+      {#if progress && progress < 1.0}
+        <progress value={progress}></progress>
       {/if}
 
       {#if botAction}
@@ -160,15 +168,19 @@
     </section>
     {/if}
   {:else}
-    <p>No bots available.</p>
+    {#if client.multiplayer}
+      <p>The bot debugger is only available in singleplayer mode.</p>
+    {:else}
+      <p>No bots available.</p>
 
-    <p>
-      Follow the instructions
-      <a
-        href="https://boardgame.io/documentation/#/tutorial?id=bots"
-        target="_blank">
-        here</a>
-      to set up bots.
-    </p>
+      <p>
+        Follow the instructions
+        <a
+          href="https://boardgame.io/documentation/#/tutorial?id=bots"
+          target="_blank">
+          here</a>
+        to set up bots.
+      </p>
+    {/if}
   {/if}
 </section>

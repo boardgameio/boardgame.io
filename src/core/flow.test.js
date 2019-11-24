@@ -137,7 +137,7 @@ describe('phases', () => {
     expect(state.ctx.phase).toBe(null);
   });
 
-  test('maintain playOrderPos on phase end', () => {
+  test('increment playOrderPos on phase end', () => {
     const flow = Flow({
       phases: { A: { start: true, next: 'B' }, B: { next: 'A' } },
     });
@@ -148,7 +148,7 @@ describe('phases', () => {
     state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.playOrderPos).toBe(1);
     state = flow.processEvent(state, gameEvent('endPhase'));
-    expect(state.ctx.playOrderPos).toBe(1);
+    expect(state.ctx.playOrderPos).toBe(2);
   });
 
   describe('setPhase', () => {
@@ -282,10 +282,11 @@ describe('turn', () => {
 
       expect(state.ctx.phase).toBe('B');
       expect(state.ctx.turn).toBe(3);
-      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.currentPlayer).toBe('0');
 
-      state = flow.processMove(state, makeMove('move', null, '1').payload);
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
       expect(state.ctx.turn).toBe(4);
+      expect(state.ctx.currentPlayer).toBe('1');
     });
   });
 
@@ -364,7 +365,7 @@ describe('turn', () => {
     state = flow.processMove(state, makeMove().payload);
 
     expect(state.ctx.phase).toBe('B');
-    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.turn).toBe(3);
   });
 });
