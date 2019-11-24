@@ -1030,11 +1030,11 @@ describe('activePlayers', () => {
 
     client.events.setPhase('second');
 
-    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState().ctx.currentPlayer).toBe('1');
     expect(client.getState().ctx.phase).toBe('second');
     expect(client.getState().ctx.activePlayers).toEqual({
-      '0': 'B',
-      '1': 'A',
+      '0': 'A',
+      '1': 'B',
       '2': 'A',
     });
   });
