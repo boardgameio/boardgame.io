@@ -63,9 +63,15 @@ specify any turn order.
 
 ##### RESET
 
-This is similar to `DEFAULT`, but instead of continuing
-from the previous position at the beginning of a phase, it
+This is similar to `DEFAULT`, but instead of incrementing
+the previous position at the beginning of a phase, it
 will always start from `0`.
+
+##### CONTINUE
+
+This is also similar to `DEFAULT`, but instead of incrementing
+the previous position at the beginning of a phase, it will
+start with the player who ended the previous phase.
 
 ##### ONCE
 
