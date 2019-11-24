@@ -969,7 +969,6 @@ describe('activePlayers', () => {
     const game = {
       turn: {
         onBegin: (G, ctx) => {
-          console.log('turn.onBegin', ctx.currentPlayer);
           ctx.events.setActivePlayers({ player: 'A', others: 'B' });
         },
         stages: { A: {}, B: {} },
@@ -985,7 +984,6 @@ describe('activePlayers', () => {
       '2': 'B',
     });
 
-    console.log('end turn');
     client.events.endTurn();
 
     expect(client.getState().ctx.currentPlayer).toBe('1');
@@ -995,7 +993,6 @@ describe('activePlayers', () => {
       '2': 'B',
     });
 
-    console.log('end turn');
     client.events.endTurn();
 
     expect(client.getState().ctx.currentPlayer).toBe('2');
