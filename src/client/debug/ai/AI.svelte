@@ -31,6 +31,7 @@
       enumerate: client.ai.enumerate,
       iterationCallback,
     });
+    bot.setOpt('async', true);
   }
 
   let selectedBot;
@@ -43,6 +44,7 @@
       enumerate: client.ai.enumerate,
       iterationCallback,
     });
+    bot.setOpt('async', true);
     botAction = null;
     iterationCounter = 0;
   }

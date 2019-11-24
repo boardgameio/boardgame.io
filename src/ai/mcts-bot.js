@@ -41,7 +41,7 @@ export class MCTSBot extends Bot {
 
     this.addOpt({
       key: 'async',
-      initial: true,
+      initial: false,
     });
 
     this.addOpt({
