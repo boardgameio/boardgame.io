@@ -522,7 +522,7 @@ describe('setActivePlayers', () => {
         },
 
         turn: {
-          activePlayers: { player: 'stage', moveLimit: 1 },
+          activePlayers: { currentPlayer: 'stage', moveLimit: 1 },
         },
       };
 
@@ -548,7 +548,7 @@ describe('setActivePlayers', () => {
           moves: {
             A: (G, ctx) => {
               ctx.events.setActivePlayers({
-                player: 'stage2',
+                currentPlayer: 'stage2',
                 moveLimit: 1,
                 revert: true,
               });
@@ -557,7 +557,7 @@ describe('setActivePlayers', () => {
           },
 
           turn: {
-            activePlayers: { player: 'stage1' },
+            activePlayers: { currentPlayer: 'stage1' },
           },
         };
 
@@ -595,7 +595,7 @@ describe('setActivePlayers', () => {
           moves: {
             A: (G, ctx) => {
               ctx.events.setActivePlayers({
-                player: 'stage2',
+                currentPlayer: 'stage2',
                 moveLimit: 1,
                 revert: true,
               });
@@ -605,7 +605,7 @@ describe('setActivePlayers', () => {
 
           turn: {
             activePlayers: {
-              player: 'stage1',
+              currentPlayer: 'stage1',
               moveLimit: 3,
             },
           },
@@ -672,13 +672,13 @@ describe('setActivePlayers', () => {
 
         turn: {
           activePlayers: {
-            player: 'stage1',
+            currentPlayer: 'stage1',
             moveLimit: 1,
             next: {
-              player: 'stage2',
+              currentPlayer: 'stage2',
               moveLimit: 1,
               next: {
-                player: 'stage3',
+                currentPlayer: 'stage3',
               },
             },
           },
@@ -692,10 +692,10 @@ describe('setActivePlayers', () => {
         activePlayers: { '0': 'stage1' },
         _prevActivePlayers: [],
         _nextActivePlayers: {
-          player: 'stage2',
+          currentPlayer: 'stage2',
           moveLimit: 1,
           next: {
-            player: 'stage3',
+            currentPlayer: 'stage3',
           },
         },
       });
@@ -706,7 +706,7 @@ describe('setActivePlayers', () => {
         activePlayers: { '0': 'stage2' },
         _prevActivePlayers: [],
         _nextActivePlayers: {
-          player: 'stage3',
+          currentPlayer: 'stage3',
         },
       });
 
@@ -772,7 +772,7 @@ describe('setActivePlayers', () => {
       const game = {
         turn: {
           activePlayers: {
-            player: { stage: 'play', moveLimit: 2 },
+            currentPlayer: { stage: 'play', moveLimit: 2 },
             others: { stage: 'play', moveLimit: 1 },
           },
           stages: {

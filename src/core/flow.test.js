@@ -488,7 +488,7 @@ describe('stage events', () => {
       let flow = Flow({
         moves: { A: () => {} },
         turn: {
-          activePlayers: { player: 'A' },
+          activePlayers: { currentPlayer: 'A' },
         },
       });
       let state = { G: {}, ctx: flow.ctx(2) };
@@ -515,7 +515,7 @@ describe('stage events', () => {
     });
 
     test('empty argument ends stage', () => {
-      let flow = Flow({ turn: { activePlayers: { player: 'A' } } });
+      let flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
       let state = { G: {}, ctx: flow.ctx(2) };
       state = flow.init(state);
 
@@ -529,7 +529,7 @@ describe('stage events', () => {
     test('basic', () => {
       let flow = Flow({
         turn: {
-          activePlayers: { player: 'A' },
+          activePlayers: { currentPlayer: 'A' },
         },
       });
       let state = { G: {}, ctx: flow.ctx(2) };
@@ -558,7 +558,7 @@ describe('stage events', () => {
       let flow = Flow({
         moves: { A: () => {} },
         turn: {
-          activePlayers: { player: 'A' },
+          activePlayers: { currentPlayer: 'A' },
         },
       });
       let state = { G: {}, ctx: flow.ctx(2) };
@@ -574,7 +574,7 @@ describe('stage events', () => {
     test('sets to next', () => {
       let flow = Flow({
         turn: {
-          activePlayers: { player: 'A1', others: 'B1' },
+          activePlayers: { currentPlayer: 'A1', others: 'B1' },
           stages: {
             A1: { next: 'A2' },
             B1: { next: 'B2' },
@@ -940,7 +940,7 @@ describe('activePlayers', () => {
       turn: {
         stages: { A: {}, B: {} },
         activePlayers: {
-          player: 'A',
+          currentPlayer: 'A',
           others: 'B',
         },
       },
