@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Client } from 'boardgame.io/react';
+import { Debug } from 'boardgame.io/debug';
 
 function IsVictory(cells) {
   const positions = [
@@ -113,7 +114,7 @@ class TicTacToeBoard extends React.Component {
 var App = Client({
   board: TicTacToeBoard,
   game: TicTacToe,
-  debug: { showGameInfo: false },
+  debug: { impl: Debug },
 });
 
 ReactDOM.render(<App />, document.getElementById('app'));
