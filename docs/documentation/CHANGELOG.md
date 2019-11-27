@@ -1,3 +1,29 @@
+## v0.35.0
+
+#### Features
+
+- [[e7d47ee](https://github.com/nicolodavis/boardgame.io/commit/e7d47ee)] export Debug Panel in boardgame.io/debug
+- [[cae05fd](https://github.com/nicolodavis/boardgame.io/commit/cae05fd)] Replace `player` with `currentPlayer` option in `setActivePlayers` (#523)
+- [[2a7435a](https://github.com/nicolodavis/boardgame.io/commit/2a7435a)] rename step to play
+- [[05572ca](https://github.com/nicolodavis/boardgame.io/commit/05572ca)] add progress bar to AI panel
+- [[ad08b8a](https://github.com/nicolodavis/boardgame.io/commit/ad08b8a)] Increment current player at start of phase in TurnOrder.DEFAULT (#521)
+- [[3cd5667](https://github.com/nicolodavis/boardgame.io/commit/3cd5667)] speed up bot async mode by running 25 iterations per chunk
+- [[f19f1de](https://github.com/nicolodavis/boardgame.io/commit/f19f1de)] add async mode to MCTS bot
+- [[7d22a47](https://github.com/nicolodavis/boardgame.io/commit/7d22a47)] make bot play functions async
+- [[4efddb4](https://github.com/nicolodavis/boardgame.io/commit/4efddb4)] lobby auto refresh + leave game ready to play (#510)
+- [[a8b7028](https://github.com/nicolodavis/boardgame.io/commit/a8b7028)] add sliders to adjust iterations and playoutDepth of MCTS bot
+- [[1687ff8](https://github.com/nicolodavis/boardgame.io/commit/1687ff8)] Add pass event (#492)
+- [[5fb3c4c](https://github.com/nicolodavis/boardgame.io/commit/5fb3c4c)] allow switching between MCTS and Random bots in AI panel
+- [[9d74966](https://github.com/nicolodavis/boardgame.io/commit/9d74966)] allow setting bot options from Debug Panel
+- [[bbfa304](https://github.com/nicolodavis/boardgame.io/commit/bbfa304)] add AI tab
+
+#### Bugfixes
+
+- [[ba9dca8](https://github.com/nicolodavis/boardgame.io/commit/ba9dca8)] add server.js to files section
+- [[457b29d](https://github.com/nicolodavis/boardgame.io/commit/457b29d)] call notifySubscribers in update{Player,Game}ID
+- [[b4edd55](https://github.com/nicolodavis/boardgame.io/commit/b4edd55)] Add server to proxy-dirs and clean scripts to fix #518 (#519)
+- [[6c0a9b7](https://github.com/nicolodavis/boardgame.io/commit/6c0a9b7)] allow switching playerID from Debug Panel
+
 ## v0.34.0
 
 The main feature in this release is that the Debug Panel is now baked into the Vanilla JS client. This
