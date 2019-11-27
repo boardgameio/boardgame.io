@@ -79,10 +79,14 @@ export function Client(opts) {
     constructor(props) {
       super(props);
 
+      if (debug === undefined) {
+        debug = props.debug;
+      }
+
       this.client = RawClient({
         game,
         ai,
-        debug: debug === false ? false : props.debug,
+        debug,
         numPlayers,
         multiplayer,
         gameID: props.gameID,
