@@ -270,13 +270,11 @@ After that, add an AI section to our `Client` call that returns a list
 of moves (one per empty cell).
 
 ```js
-import { AI } from 'boardgame.io/ai';
-
 const App = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
 
-  ai: AI({
+  ai: {
     enumerate: (G, ctx) => {
       let moves = [];
       for (let i = 0; i < 9; i++) {
@@ -286,22 +284,21 @@ const App = Client({
       }
       return moves;
     },
-  }),
+  },
 });
 
 export default App;
 ```
 
-That's it! Now that you have configured AI, there are two more options in
-the **Controls** section of the Debug Panel:
+That's it! Now that you can visit the AI section of the Debug Panel:
 
-- `step` causes the AI to calculate and make a single move
-  (shortcut: <kbd>4</kbd>)
+- `play` causes the bot to calculate and make a single move
+  (shortcut: <kbd>2</kbd>)
 
-- `simulate` causes the AI to play the entire game by itself
-  (shortcut: <kbd>5</kbd>)
+- `simulate` causes the bot to play the entire game by itself
+  (shortcut: <kbd>3</kbd>)
 
-`step` helps you combine moves that you make yourself
+`play` helps you combine moves that you make yourself
 and bot moves. For example, you can make
 some manual moves to get two in a row and then verify that
 the bot makes a block.
@@ -310,10 +307,10 @@ the bot makes a block.
 <iframe class='react' src='snippets/example-3' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
-!> The bot uses [MCTS](http://www.baeldung.com/java-monte-carlo-tree-search) under the
-hood to explore the game tree and find good moves. The default uses 1000 iterations per
-move, which isn't sufficient to create a bullet-proof tic-tac-toe player. This can be
-configured to adjust the bot strength.
+!> The bot uses [MCTS](https://nicolodavis.com/blog/tic-tac-toe/) under the
+hood to explore the game tree and find good moves. The default uses
+1000 iterations per move.  This can be configured to adjust the
+bot's playing strength.
 
 The framework will come bundled with a few different bot algorithms, and an advanced
 version of MCTS that will allow you to specify a set of objectives to optimize for.
