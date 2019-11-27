@@ -40,8 +40,7 @@ export class Events {
    * @param {object} state - The state object { G, ctx }.
    */
   update(state) {
-    const length = this.dispatch.length;
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < this.dispatch.length; i++) {
       const item = this.dispatch[i];
 
       // If the turn already ended some other way,
