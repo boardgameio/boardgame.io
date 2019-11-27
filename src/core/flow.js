@@ -310,7 +310,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     if (currentPlayer) {
       ctx = { ...ctx, currentPlayer };
       if (conf.turn.activePlayers) {
-        ctx = SetActivePlayers(ctx, ctx.currentPlayer, conf.turn.activePlayers);
+        ctx = SetActivePlayers(ctx, conf.turn.activePlayers);
       }
     } else {
       // This is only called at the beginning of the phase
