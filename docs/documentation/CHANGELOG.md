@@ -1,3 +1,9 @@
+## v0.35.1
+
+#### Bugfixes
+
+* [[26a73e4](https://github.com/nicolodavis/boardgame.io/commit/26a73e4)] fix error in AI panel
+
 ## v0.35.0
 
 #### Features
