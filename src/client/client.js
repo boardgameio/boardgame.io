@@ -266,8 +266,18 @@ class _ClientImpl {
     this.transport.connect();
     this._running = true;
 
+    let debugImpl = null;
+
+    if (process.env.NODE_ENV !== 'production') {
+      debugImpl = Debug;
+    }
+
+    if (this.debug && this.debug.impl) {
+      debugImpl = this.debug.impl;
+    }
+
     if (
-      process.env.NODE_ENV !== 'production' &&
+      debugImpl !== null &&
       this.debug !== false &&
       this._debugPanel == null
     ) {
@@ -275,7 +285,7 @@ class _ClientImpl {
       if (this.debug && this.debug.target) {
         target = this.debug.target;
       }
-      this._debugPanel = new Debug({
+      this._debugPanel = new debugImpl({
         target,
         props: {
           client: this,
