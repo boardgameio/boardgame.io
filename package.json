@@ -28,6 +28,7 @@
     "changelog": "bash ./scripts/changelog.sh",
     "clean": "node ./scripts/clean.js"
   },
+  "sideEffects": false,
   "main": "dist/boardgameio.js",
   "unpkg": "dist/boardgameio.min.js",
   "module": "dist/boardgameio.es.js",
