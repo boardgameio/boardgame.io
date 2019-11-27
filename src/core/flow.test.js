@@ -965,3 +965,32 @@ describe('activePlayers', () => {
     });
   });
 });
+
+test('events in hooks triggered by moves should be processed', () => {
+  const game = {
+    turn: {
+      onBegin: (G, ctx) => {
+        ctx.events.setActivePlayers({ currentPlayer: 'A' });
+      },
+    },
+    moves: {
+      endTurn: (G, ctx) => {
+        ctx.events.endTurn();
+      },
+    },
+  };
+
+  const client = Client({ game, numPlayers: 3 });
+
+  expect(client.getState().ctx.currentPlayer).toBe('0');
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '0': 'A',
+  });
+
+  client.moves.endTurn();
+
+  expect(client.getState().ctx.currentPlayer).toBe('1');
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '1': 'A',
+  });
+});
