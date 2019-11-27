@@ -2,12 +2,12 @@
   export let bot;
 
   let values = {};
-  for ([key, value] of Object.entries(bot.opts())) {
+  for (let [key, value] of Object.entries(bot.opts())) {
     values[key] = value.value;
   }
 
   function OnChange() {
-    for ([key, value] of Object.entries(values)) {
+    for (let [key, value] of Object.entries(values)) {
       bot.setOpt(key, value);
     }
   }
