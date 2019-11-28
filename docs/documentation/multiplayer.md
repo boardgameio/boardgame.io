@@ -31,21 +31,23 @@ The game master can run completely on the browser. This is useful to set
 up pass-and-play multiplayer or for prototyping the multiplayer experience
 without having to set up a server to test it.
 
-All you need to do is add `multiplayer: { local: true }` to your client
-config. Now you can instantiate as many of these clients in your app and you
-will notice that they're all kept in sync, playing in the same game.
+All you need to do is to add `import { Local } from 'boardgame.io/multiplayer'`,
+and in your config write `multiplayer: Local()`. Now you can instantiate as many 
+of these clients in your app and you will notice that they're all kept in sync,
+playing in the same game.
 
 ```js
 // src/App.js
 
 import { Client } from 'boardgame.io/react';
+import { Local } from 'boardgame.io/multiplayer';
 import { TicTacToe } from './game';
 import { TicTacToeBoard } from './board';
 
 const TicTacToeClient = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
-  multiplayer: { local: true },
+  multiplayer: Local(),
 });
 
 const App = () => (
@@ -95,13 +97,14 @@ client can connect to this master (whether it is a browser, an Android
 app etc.) and it will be kept in sync with other clients in realtime.
 
 In order to connect a client to a remote master, we use the `multiplayer`
-option again, but this time specify the location of the server.
+option again, but this time we add `import { SocketIO } from 'boardgame.io/multiplayer'`,
+and specify the location of the server.
 
 ```js
 const TicTacToeClient = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
-  multiplayer: { server: 'localhost:8000' },
+  multiplayer: SocketIO({ server: 'localhost:8000' }),
 });
 ```
 
@@ -111,7 +114,7 @@ You may also specify a protocol here (if you want to use SSL, for example):
 const TicTacToeClient = Client({
   game: TicTacToe,
   board: TicTacToeBoard,
-  multiplayer: { server: 'https://localhost:8000/' },
+  multiplayer: SocketIO({ server: 'https://localhost:8000/' }),
 });
 ```
 

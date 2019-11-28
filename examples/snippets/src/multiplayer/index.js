@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Client } from 'boardgame.io/react';
+import { Local } from 'boardgame.io/multiplayer';
 
 function IsVictory(cells) {
   const positions = [
@@ -120,7 +121,7 @@ var TicTacToeClient = Client({
   board: TicTacToeBoard,
   game: TicTacToe,
   debug: false,
-  multiplayer: { local: true },
+  multiplayer: Local(),
 });
 
 const App = () => (
