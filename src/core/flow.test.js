@@ -932,6 +932,40 @@ describe('infinite loops', () => {
     client.events.endPhase();
     expect(client.getState().ctx.phase).toBe('B');
   });
+
+  test('loop 3', () => {
+    const game = {
+      moves: {
+        endTurn: (G, ctx) => {
+          ctx.events.endTurn();
+        },
+      },
+      turn: {
+        onBegin: (G, ctx) => ctx.events.endTurn(),
+      },
+    };
+    const client = Client({ game });
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.endTurn();
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+  });
+
+  test('loop 4', () => {
+    const game = {
+      moves: {
+        endTurn: (G, ctx) => {
+          ctx.events.endTurn();
+        },
+      },
+      turn: {
+        endif: () => true,
+      },
+    };
+    const client = Client({ game });
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    client.moves.endTurn();
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+  });
 });
 
 describe('activePlayers', () => {
