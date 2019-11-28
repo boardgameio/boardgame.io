@@ -958,7 +958,7 @@ describe('infinite loops', () => {
         },
       },
       turn: {
-        endif: () => true,
+        endIf: () => true,
       },
     };
     const client = Client({ game });
