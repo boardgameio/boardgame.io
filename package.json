@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.34.1",
+  "version": "0.35.1",
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
@@ -28,6 +28,7 @@
     "changelog": "bash ./scripts/changelog.sh",
     "clean": "node ./scripts/clean.js"
   },
+  "sideEffects": false,
   "main": "dist/boardgameio.js",
   "unpkg": "dist/boardgameio.min.js",
   "module": "dist/boardgameio.es.js",
@@ -40,8 +41,10 @@
     "dist/cjs",
     "client",
     "core",
+    "debug",
     "react",
     "react-native",
+    "server.js",
     "ai",
     "plugins",
     "master",

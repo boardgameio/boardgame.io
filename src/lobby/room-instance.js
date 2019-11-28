@@ -26,6 +26,55 @@ class LobbyRoomInstance extends React.Component {
     return player.name || '[free]';
   };
 
+  _createButtonJoin = (inst, seatId) => (
+    <button
+      key={'button-join-' + inst.gameID}
+      onClick={() =>
+        this.props.onClickJoin(inst.gameName, inst.gameID, '' + seatId)
+      }
+    >
+      Join
+    </button>
+  );
+
+  _createButtonLeave = inst => (
+    <button
+      key={'button-leave-' + inst.gameID}
+      onClick={() => this.props.onClickLeave(inst.gameName, inst.gameID)}
+    >
+      Leave
+    </button>
+  );
+
+  _createButtonPlay = (inst, seatId) => (
+    <button
+      key={'button-play-' + inst.gameID}
+      onClick={() =>
+        this.props.onClickPlay(inst.gameName, {
+          gameID: inst.gameID,
+          playerID: '' + seatId,
+          numPlayers: inst.players.length,
+        })
+      }
+    >
+      Play
+    </button>
+  );
+
+  _createButtonSpectate = inst => (
+    <button
+      key={'button-spectate-' + inst.gameID}
+      onClick={() =>
+        this.props.onClickPlay(inst.gameName, {
+          gameID: inst.gameID,
+          numPlayers: inst.players.length,
+        })
+      }
+    >
+      Spectate
+    </button>
+  );
+
   _createInstanceButtons = inst => {
     const playerSeat = inst.players.find(
       player => player.name === this.props.playerName
@@ -33,55 +82,25 @@ class LobbyRoomInstance extends React.Component {
     const freeSeat = inst.players.find(player => !player.name);
     if (playerSeat && freeSeat) {
       // already seated: waiting for game to start
-      return (
-        <button
-          onClick={() => this.props.onClickLeave(inst.gameName, inst.gameID)}
-        >
-          Leave
-        </button>
-      );
+      return this._createButtonLeave(inst);
     }
     if (freeSeat) {
       // at least 1 seat is available
-      return (
-        <button
-          onClick={() =>
-            this.props.onClickJoin(inst.gameName, inst.gameID, '' + freeSeat.id)
-          }
-        >
-          Join
-        </button>
-      );
+      return this._createButtonJoin(inst, freeSeat.id);
     }
     // room is full
     if (playerSeat) {
       return (
-        <button
-          onClick={() =>
-            this.props.onClickPlay(inst.gameName, {
-              gameID: inst.gameID,
-              playerID: '' + playerSeat.id,
-              numPlayers: inst.players.length,
-            })
-          }
-        >
-          Play
-        </button>
+        <div>
+          {[
+            this._createButtonPlay(inst, playerSeat.id),
+            this._createButtonLeave(inst),
+          ]}
+        </div>
       );
     }
     // allow spectating
-    return (
-      <button
-        onClick={() =>
-          this.props.onClickPlay(inst.gameName, {
-            gameID: inst.gameID,
-            numPlayers: inst.players.length,
-          })
-        }
-      >
-        Spectate
-      </button>
-    );
+    return this._createButtonSpectate(inst);
   };
 
   render() {

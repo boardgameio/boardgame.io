@@ -8,12 +8,14 @@
 
 import React from 'react';
 import { Client } from 'boardgame.io/react';
+import { Debug } from 'boardgame.io/debug';
 import TicTacToe from './game';
 import Board from './board';
 
 const App = Client({
   game: TicTacToe,
   board: Board,
+  debug: { impl: Debug },
   ai: {
     enumerate: G => {
       let r = [];

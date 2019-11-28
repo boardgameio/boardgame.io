@@ -16,6 +16,27 @@ export class Bot {
   constructor({ enumerate, seed }) {
     this.enumerateFn = enumerate;
     this.seed = seed;
+    this.iterationCounter = 0;
+    this._opts = {};
+  }
+
+  addOpt({ key, range, initial }) {
+    this._opts[key] = {
+      range,
+      value: initial,
+    };
+  }
+
+  getOpt(key) {
+    return this._opts[key].value;
+  }
+
+  setOpt(key, value) {
+    this._opts[key].value = value;
+  }
+
+  opts() {
+    return this._opts;
   }
 
   enumerate = (G, ctx, playerID) => {

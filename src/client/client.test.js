@@ -14,6 +14,7 @@ import { Game } from '../core/game';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
+import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -261,6 +262,7 @@ describe('event dispatchers', () => {
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual([
       'endTurn',
+      'pass',
       'endPhase',
       'setPhase',
       'endGame',
@@ -283,6 +285,7 @@ describe('event dispatchers', () => {
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual([
       'endTurn',
+      'pass',
       'endPhase',
       'setPhase',
       'endGame',
@@ -302,6 +305,7 @@ describe('event dispatchers', () => {
         endPhase: false,
         setPhase: false,
         endTurn: false,
+        pass: false,
         setActivePlayers: false,
         endStage: false,
         setStage: false,
@@ -632,6 +636,19 @@ describe('start / stop', () => {
   test('mount on custom element', () => {
     const el = document.createElement('div');
     const client = Client({ game: {}, debug: { target: el } });
+    client.start();
+    client.stop();
+  });
+
+  test('override debug implementation', () => {
+    const client = Client({ game: {}, debug: { impl: Debug } });
+    client.start();
+    client.stop();
+  });
+
+  test('production mode', () => {
+    process.env.NODE_ENV = 'production';
+    const client = Client({ game: {} });
     client.start();
     client.stop();
   });

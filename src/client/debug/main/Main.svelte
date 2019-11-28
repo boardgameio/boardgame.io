@@ -17,16 +17,23 @@
     }
     return r;
   }
+
+  let playerID = client.playerID;
+  let ctx = {};
+  let G = {};
+  client.subscribe((state) => {
+    if (state) {
+      G = state.G;
+      ctx = state.ctx;
+    }
+    playerID = client.playerID;
+  });
 </script>
 
 <style>
   .json {
     font-family: monospace;
     color: #888;
-  }
-
-  section {
-    margin-bottom: 20px;
   }
 
   label {
@@ -44,6 +51,19 @@
     margin: none;
     margin-bottom: 5px;
   }
+
+  .events {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .events button {
+    width: 100px;
+  }
+
+  .events button:not(:last-child) {
+    margin-bottom: 10px;
+  }
 </style>
 
 <section>
@@ -53,7 +73,11 @@
 
 <section>
   <h3>Players</h3>
-  <PlayerInfo ctx={$client ? $client.ctx : {}} playerID={client.playerID} />
+  <PlayerInfo
+    on:change={(e) => client.updatePlayerID(e.detail.playerID)}
+    ctx={ctx}
+    playerID={playerID}
+  />
 </section>
 
 <section>
@@ -67,21 +91,28 @@
 
 <section>
   <h3>Events</h3>
-  {#each Object.entries(client.events) as [name, fn]}
-    <li>
-      <Move shortcut={shortcuts[name]} {fn} {name} />
-    </li>
-  {/each}
+
+  <div class="events">
+  {#if client.events.endTurn}
+    <button on:click={() => client.events.endTurn()}>End Turn</button>
+  {/if}
+  {#if ctx.phase && client.events.endPhase}
+    <button on:click={() => client.events.endPhase()}>End Phase</button>
+  {/if}
+  {#if ctx.activePlayers && client.events.endStage}
+    <button on:click={() => client.events.endStage()}>End Stage</button>
+  {/if}
+  </div>
 </section>
 
 <section>
   <label>G</label>
-  <pre class="json">{JSON.stringify($client ? $client.G : {}, null, 2)}</pre>
+  <pre class="json">{JSON.stringify(G, null, 2)}</pre>
 </section>
 
 <section>
   <label>ctx</label>
   <pre class="json">
-    {JSON.stringify(SanitizeCtx($client ? $client.ctx : {}), null, 2)}
+    {JSON.stringify(SanitizeCtx(ctx), null, 2)}
   </pre>
 </section>

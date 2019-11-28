@@ -43,6 +43,10 @@ const minifiedPlugins = [
   svelte({ extensions: ['.svelte'] }),
   commonjs(),
   replace({
+    include: 'src/**',
+    'process.env.NODE_ENV': JSON.stringify('development'),
+  }),
+  replace({
     exclude: 'src/**',
     'process.env.NODE_ENV': JSON.stringify('production'),
   }),

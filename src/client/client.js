@@ -264,11 +264,20 @@ class _ClientImpl {
 
   start() {
     this.transport.connect();
-    this.notifySubscribers();
     this._running = true;
 
+    let debugImpl = null;
+
+    if (process.env.NODE_ENV !== 'production') {
+      debugImpl = Debug;
+    }
+
+    if (this.debug && this.debug.impl) {
+      debugImpl = this.debug.impl;
+    }
+
     if (
-      process.env.NODE_ENV !== 'production' &&
+      debugImpl !== null &&
       this.debug !== false &&
       this._debugPanel == null
     ) {
@@ -276,7 +285,7 @@ class _ClientImpl {
       if (this.debug && this.debug.target) {
         target = this.debug.target;
       }
-      this._debugPanel = new Debug({
+      this._debugPanel = new debugImpl({
         target,
         props: {
           client: this,
@@ -385,17 +394,20 @@ class _ClientImpl {
     this.playerID = playerID;
     this.createDispatchers();
     this.transport.updatePlayerID(playerID);
+    this.notifySubscribers();
   }
 
   updateGameID(gameID) {
     this.gameID = gameID;
     this.createDispatchers();
     this.transport.updateGameID(gameID);
+    this.notifySubscribers();
   }
 
   updateCredentials(credentials) {
     this.credentials = credentials;
     this.createDispatchers();
+    this.notifySubscribers();
   }
 }
 

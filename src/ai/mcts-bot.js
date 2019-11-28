@@ -9,30 +9,52 @@ import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
 
 /**
+ * The number of iterations to run before yielding to
+ * the JS event loop (in async mode).
+ */
+const CHUNK_SIZE = 25;
+
+/**
  * Bot that uses Monte-Carlo Tree Search to find promising moves.
  */
 export class MCTSBot extends Bot {
-  constructor({ enumerate, seed, objectives, game, iterations, playoutDepth }) {
+  constructor({
+    enumerate,
+    seed,
+    objectives,
+    game,
+    iterations,
+    playoutDepth,
+    iterationCallback,
+  }) {
     super({ enumerate, seed });
 
     if (objectives === undefined) {
       objectives = () => ({});
     }
 
-    if (typeof iterations === 'number') {
-      const iter8ns = iterations;
-      iterations = () => iter8ns;
-    }
-
-    if (typeof playoutDepth === 'number') {
-      const depth = playoutDepth;
-      playoutDepth = () => depth;
-    }
-
     this.objectives = objectives;
+    this.iterationCallback = iterationCallback || (() => {});
     this.reducer = CreateGameReducer({ game });
-    this.iterations = iterations || (() => 1000);
-    this.playoutDepth = playoutDepth || (() => 50);
+    this.iterations = iterations;
+    this.playoutDepth = playoutDepth;
+
+    this.addOpt({
+      key: 'async',
+      initial: false,
+    });
+
+    this.addOpt({
+      key: 'iterations',
+      initial: typeof iterations === 'number' ? iterations : 1000,
+      range: { min: 1, max: 2000 },
+    });
+
+    this.addOpt({
+      key: 'playoutDepth',
+      initial: typeof playoutDepth === 'number' ? playoutDepth : 50,
+      range: { min: 1, max: 100 },
+    });
   }
 
   createNode({ state, parentAction, parent, playerID }) {
@@ -127,7 +149,10 @@ export class MCTSBot extends Bot {
   playout(node) {
     let state = node.state;
 
-    const playoutDepth = this.playoutDepth(state.G, state.ctx);
+    let playoutDepth = this.getOpt('playoutDepth');
+    if (typeof this.playoutDepth === 'function') {
+      playoutDepth = this.playoutDepth(state.G, state.ctx);
+    }
 
     for (let i = 0; i < playoutDepth && state.ctx.gameover === undefined; i++) {
       const { G, ctx } = state;
@@ -190,25 +215,58 @@ export class MCTSBot extends Bot {
   play(state, playerID) {
     const root = this.createNode({ state, playerID });
 
-    const iterations = this.iterations(state.G, state.ctx);
-
-    for (let i = 0; i < iterations; i++) {
-      const leaf = this.select(root);
-      const child = this.expand(leaf);
-      const result = this.playout(child);
-      this.backpropagate(child, result);
+    let numIterations = this.getOpt('iterations');
+    if (typeof this.iterations === 'function') {
+      numIterations = this.iterations(state.G, state.ctx);
     }
 
-    let selectedChild = null;
-    for (const child of root.children) {
-      if (selectedChild == null || child.visits > selectedChild.visits) {
-        selectedChild = child;
+    const getResult = () => {
+      let selectedChild = null;
+      for (const child of root.children) {
+        if (selectedChild == null || child.visits > selectedChild.visits) {
+          selectedChild = child;
+        }
       }
-    }
 
-    const action = selectedChild && selectedChild.parentAction;
-    const metadata = root;
+      const action = selectedChild && selectedChild.parentAction;
+      const metadata = root;
+      return { action, metadata };
+    };
 
-    return { action, metadata };
+    return new Promise(resolve => {
+      const iteration = () => {
+        for (
+          let i = 0;
+          i < CHUNK_SIZE && this.iterationCounter < numIterations;
+          i++
+        ) {
+          const leaf = this.select(root);
+          const child = this.expand(leaf);
+          const result = this.playout(child);
+          this.backpropagate(child, result);
+          this.iterationCounter++;
+        }
+        this.iterationCallback(this.iterationCounter, numIterations);
+      };
+
+      this.iterationCounter = 0;
+
+      if (this.getOpt('async')) {
+        const asyncIteration = () => {
+          if (this.iterationCounter < numIterations) {
+            iteration();
+            setTimeout(asyncIteration, 0);
+          } else {
+            resolve(getResult());
+          }
+        };
+        asyncIteration();
+      } else {
+        while (this.iterationCounter < numIterations) {
+          iteration();
+        }
+        resolve(getResult());
+      }
+    });
   }
 }

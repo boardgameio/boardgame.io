@@ -40,7 +40,7 @@ export async function Step(client, bot) {
  * @param {...object} bots - An array of bots.
  * @param {...object} state - The game state to start from.
  */
-export function Simulate({ game, bots, state, depth }) {
+export async function Simulate({ game, bots, state, depth }) {
   if (depth === undefined) depth = 10000;
   const reducer = CreateGameReducer({ game, numPlayers: state.ctx.numPlayers });
 
@@ -53,7 +53,7 @@ export function Simulate({ game, bots, state, depth }) {
     }
 
     const bot = bots instanceof Bot ? bots : bots[playerID];
-    const t = bot.play(state, playerID);
+    const t = await bot.play(state, playerID);
 
     if (!t.action) {
       break;

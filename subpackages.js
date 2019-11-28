@@ -9,6 +9,7 @@
 module.exports = [
   'client',
   'core',
+  'debug',
   'react',
   'react-native',
   'ai',

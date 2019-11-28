@@ -79,6 +79,10 @@ export function Client(opts) {
     constructor(props) {
       super(props);
 
+      if (debug === undefined) {
+        debug = props.debug;
+      }
+
       this.client = RawClient({
         game,
         ai,
@@ -90,10 +94,6 @@ export function Client(opts) {
         credentials: props.credentials,
         enhancer,
       });
-
-      this.gameID = props.gameID;
-      this.playerID = props.playerID;
-      this.credentials = props.credentials;
     }
 
     componentDidMount() {
@@ -108,33 +108,15 @@ export function Client(opts) {
 
     componentDidUpdate(prevProps) {
       if (this.props.gameID != prevProps.gameID) {
-        this.updateGameID(this.props.gameID);
+        this.client.updateGameID(this.props.gameID);
       }
       if (this.props.playerID != prevProps.playerID) {
-        this.updatePlayerID(this.props.playerID);
+        this.client.updatePlayerID(this.props.playerID);
       }
       if (this.props.credentials != prevProps.credentials) {
-        this.updateCredentials(this.props.credentials);
+        this.client.updateCredentials(this.props.credentials);
       }
     }
-
-    updateGameID = gameID => {
-      this.client.updateGameID(gameID);
-      this.gameID = gameID;
-      this.forceUpdate();
-    };
-
-    updatePlayerID = playerID => {
-      this.client.updatePlayerID(playerID);
-      this.playerID = playerID;
-      this.forceUpdate();
-    };
-
-    updateCredentials = credentials => {
-      this.client.updateCredentials(credentials);
-      this.credentials = credentials;
-      this.forceUpdate();
-    };
 
     render() {
       const state = this.client.getState();
@@ -152,8 +134,8 @@ export function Client(opts) {
           isMultiplayer: !!multiplayer,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.gameID,
-          playerID: this.playerID,
+          gameID: this.client.gameID,
+          playerID: this.client.playerID,
           step: this.client.step,
           reset: this.client.reset,
           undo: this.client.undo,

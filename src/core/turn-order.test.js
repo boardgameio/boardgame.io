@@ -66,6 +66,29 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.phase).toBe('A');
     state = flow.processEvent(state, gameEvent('endPhase'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.phase).toBe('B');
+  });
+
+  test('CONTINUE', () => {
+    const flow = Flow({
+      turn: { order: TurnOrder.CONTINUE },
+      phases: { A: { start: true, next: 'B' }, B: {} },
+    });
+
+    let state = { ctx: flow.ctx(2) };
+    state = flow.init(state);
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx).not.toHaveUndefinedProperties();
+
+    state = flow.processEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    state = flow.processEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('0');
+    state = flow.processEvent(state, gameEvent('endTurn'));
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.phase).toBe('A');
+    state = flow.processEvent(state, gameEvent('endPhase'));
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.phase).toBe('B');
   });
@@ -499,7 +522,7 @@ describe('setActivePlayers', () => {
         },
 
         turn: {
-          activePlayers: { player: 'stage', moveLimit: 1 },
+          activePlayers: { currentPlayer: 'stage', moveLimit: 1 },
         },
       };
 
@@ -525,7 +548,7 @@ describe('setActivePlayers', () => {
           moves: {
             A: (G, ctx) => {
               ctx.events.setActivePlayers({
-                player: 'stage2',
+                currentPlayer: 'stage2',
                 moveLimit: 1,
                 revert: true,
               });
@@ -534,7 +557,7 @@ describe('setActivePlayers', () => {
           },
 
           turn: {
-            activePlayers: { player: 'stage1' },
+            activePlayers: { currentPlayer: 'stage1' },
           },
         };
 
@@ -572,7 +595,7 @@ describe('setActivePlayers', () => {
           moves: {
             A: (G, ctx) => {
               ctx.events.setActivePlayers({
-                player: 'stage2',
+                currentPlayer: 'stage2',
                 moveLimit: 1,
                 revert: true,
               });
@@ -582,7 +605,7 @@ describe('setActivePlayers', () => {
 
           turn: {
             activePlayers: {
-              player: 'stage1',
+              currentPlayer: 'stage1',
               moveLimit: 3,
             },
           },
@@ -649,13 +672,13 @@ describe('setActivePlayers', () => {
 
         turn: {
           activePlayers: {
-            player: 'stage1',
+            currentPlayer: 'stage1',
             moveLimit: 1,
             next: {
-              player: 'stage2',
+              currentPlayer: 'stage2',
               moveLimit: 1,
               next: {
-                player: 'stage3',
+                currentPlayer: 'stage3',
               },
             },
           },
@@ -669,10 +692,10 @@ describe('setActivePlayers', () => {
         activePlayers: { '0': 'stage1' },
         _prevActivePlayers: [],
         _nextActivePlayers: {
-          player: 'stage2',
+          currentPlayer: 'stage2',
           moveLimit: 1,
           next: {
-            player: 'stage3',
+            currentPlayer: 'stage3',
           },
         },
       });
@@ -683,7 +706,7 @@ describe('setActivePlayers', () => {
         activePlayers: { '0': 'stage2' },
         _prevActivePlayers: [],
         _nextActivePlayers: {
-          player: 'stage3',
+          currentPlayer: 'stage3',
         },
       });
 
@@ -749,7 +772,7 @@ describe('setActivePlayers', () => {
       const game = {
         turn: {
           activePlayers: {
-            player: { stage: 'play', moveLimit: 2 },
+            currentPlayer: { stage: 'play', moveLimit: 2 },
             others: { stage: 'play', moveLimit: 1 },
           },
           stages: {
