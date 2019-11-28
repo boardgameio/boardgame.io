@@ -41,30 +41,30 @@ const App = Client({
   // If this is not provided, the client displays "connecting...".
   loading: LoadingComponent,
 
-  // Can be set to one of the following in order to enable multiplayer:
+  // Set this to one of the following to enable multiplayer:
   //
-  // 1. true
+  // SocketIO
+  //   Implementation that talks to a remote server using socket.io.
   //
-  // This starts sending move updates to the server via socket.io.
+  //   How to import:
+  //     import { SocketIO } from 'boardgame.io/multiplayer'
   //
-  // 2. { server: 'hostname[:port]' }
+  //   Arguments:
+  //     Object with 2 parameters
+  //        1. 'socketOpts' options to pass directly to socket.io client.
+  //        2. 'server' specifies the server location in the format: [http[s]://]hostname[:port];
+  //            defaults to current page host.
   //
-  // Same as the above, but also specifies the server location.
+  // Local
+  //   Special local mode that uses an in-memory game master. Useful
+  //   for testing multiplayer interactions locally without having to
+  //   connect to a server.
   //
-  // 3. { server: 'http[s]://hostname[:port]' }
+  //   How to import:
+  //     import { Local } from 'boardgame.io/multiplayer'
   //
-  // Same as the above, but also specifies the server protocol (for example, HTTPS).
-  //
-  // 4. { local: true}
-  //
-  // Special local mode that uses an in-memory game master. Useful
-  // for testing multiplayer interactions locally without having to
-  // connect to a server.
-  //
-  // 5. CustomClass
-  //
-  // Your own transport implementation. See `src/client/client.js` for
-  // details on how to implement a custom transport adapter.
+  // Additionally, you can write your own transport implementation.
+  // See `src/client/client.js` for details.
   multiplayer: false,
 
   // Set to false to disable the Debug UI.

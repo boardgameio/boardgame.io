@@ -318,10 +318,10 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       ctx = InitTurnOrderState(G, ctx, conf.turn);
     }
 
-    G = conf.turn.onBegin(G, ctx);
-
     const turn = ctx.turn + 1;
     ctx = { ...ctx, turn, numMoves: 0, _prevActivePlayers: [] };
+
+    G = conf.turn.onBegin(G, ctx);
 
     const plainCtx = ContextEnhancer.detachAllFromContext(ctx);
     const _undo = [{ G, ctx: plainCtx }];

@@ -87,7 +87,7 @@ in unit tests.
 it('multiplayer test', () => {
   const spec = {
     game: MyGame,
-    multiplayer: { local: true },
+    multiplayer: Local(),
   };
 
   const p0 = Client({ ...spec, playerID: '0' });
