@@ -88,7 +88,7 @@ export class TicTacToeBoard extends React.Component { ... };
 on the two boards. Clicking on a particular board when it is not that
 player's turn has no effect.
 
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-quouk)
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-e1zt4)
 
 ### Remote Master
 
@@ -170,7 +170,7 @@ want to take at the beginning of the game and then set the
 `playerID` prop accordingly. You can also use a URL path to
 determine the player or a matchmaking lobby.
 
-Complete code from this section is available on [CodeSandbox](https://codesandbox.io/s/boardgameio-5lbe5). To run it, click on the
+Complete code from this section is available on [CodeSandbox](https://codesandbox.io/s/boardgameio-c63fy). To run it, click on the
 download button, then run the server and client as described
 above (don't forget to run `npm install` first).
 
