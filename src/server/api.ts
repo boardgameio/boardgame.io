@@ -205,7 +205,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
       await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
     } else {
       // remove room
-      await db.remove(roomID);
+      await db.remove(namespacedGameID);
       await db.remove(GameMetadataKey(namespacedGameID));
     }
     ctx.body = {};
