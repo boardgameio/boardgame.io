@@ -194,9 +194,7 @@ describe('.createApiServer', () => {
             get: async () => {
               return {
                 players: {
-                  '0': {
-                    credentials,
-                  },
+                  '0': {},
                 },
               };
             },
@@ -206,7 +204,11 @@ describe('.createApiServer', () => {
 
         describe('when the playerID is available', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({
+              db,
+              games,
+              lobbyConfig: { uuid: () => credentials },
+            });
             response = await request(app.callback())
               .post('/games/foo/1/join')
               .send('playerID=0&playerName=alice');
@@ -488,9 +490,7 @@ describe('.createApiServer', () => {
               expect.stringMatching(':metadata'),
               expect.objectContaining({
                 players: expect.objectContaining({
-                  '0': expect.objectContaining({
-                    credentials: 'SECRET1',
-                  }),
+                  '0': expect.objectContaining({}),
                   '1': expect.objectContaining({
                     name: 'bob',
                     credentials: 'SECRET2',

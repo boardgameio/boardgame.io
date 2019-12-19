@@ -49,8 +49,7 @@ export const CreateGame = async (
   });
 
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    const credentials = lobbyConfig.uuid();
-    gameMetadata.players[playerIndex] = { id: playerIndex, credentials };
+    gameMetadata.players[playerIndex] = { id: playerIndex };
   }
 
   const gameID = lobbyConfig.uuid();
@@ -170,7 +169,8 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     }
 
     gameMetadata.players[playerID].name = playerName;
-    const playerCredentials = gameMetadata.players[playerID].credentials;
+    const playerCredentials = lobbyConfig.uuid();
+    gameMetadata.players[playerID].credentials = playerCredentials;
 
     await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
 
@@ -201,6 +201,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     }
 
     delete gameMetadata.players[playerID].name;
+    delete gameMetadata.players[playerID].credentials;
     if (Object.values(gameMetadata.players).some((val: any) => val.name)) {
       await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
     } else {
