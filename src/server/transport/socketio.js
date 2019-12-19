@@ -61,6 +61,7 @@ export function TransportAPI(gameID, socket, clientInfo, roomInfo) {
 export function SocketIO({
   clientInfo = new Map(),
   roomInfo = new Map(),
+  auth = true,
 } = {}) {
   return {
     init: (app, games) => {
@@ -83,7 +84,7 @@ export function SocketIO({
               game,
               app.context.db,
               TransportAPI(gameID, socket, clientInfo, roomInfo),
-              true
+              auth
             );
             await master.onUpdate(action, stateID, gameID, playerID);
           });
@@ -110,7 +111,7 @@ export function SocketIO({
               game,
               app.context.db,
               TransportAPI(gameID, socket, clientInfo, roomInfo),
-              true
+              auth
             );
             await master.onSync(gameID, playerID, numPlayers);
           });
