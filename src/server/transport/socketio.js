@@ -58,10 +58,10 @@ export function TransportAPI(gameID, socket, clientInfo, roomInfo) {
 /**
  * Transport interface that uses socket.io
  */
-export function SocketIO(_clientInfo, _roomInfo) {
-  const clientInfo = _clientInfo || new Map();
-  const roomInfo = _roomInfo || new Map();
-
+export function SocketIO({
+  clientInfo = new Map(),
+  roomInfo = new Map(),
+} = {}) {
   return {
     init: (app, games) => {
       const io = new IO({
