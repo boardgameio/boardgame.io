@@ -67,12 +67,13 @@ export const createApiServer = ({ db, games, lobbyConfig }) => {
 };
 
 export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
-  if (!lobbyConfig) {
-    lobbyConfig = {};
-  }
-  if (!lobbyConfig.uuid) {
-    lobbyConfig = { ...lobbyConfig, uuid };
-  }
+  if (!lobbyConfig) lobbyConfig = {};
+  lobbyConfig = {
+    ...lobbyConfig,
+    uuid: lobbyConfig.uuid || uuid,
+    generateCredentials:
+      lobbyConfig.generateCredentials || lobbyConfig.uuid || uuid,
+  };
   const router = new Router();
 
   router.get('/games', async ctx => {
@@ -169,7 +170,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     }
 
     gameMetadata.players[playerID].name = playerName;
-    const playerCredentials = lobbyConfig.uuid();
+    const playerCredentials = await lobbyConfig.generateCredentials(ctx);
     gameMetadata.players[playerID].credentials = playerCredentials;
 
     await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
