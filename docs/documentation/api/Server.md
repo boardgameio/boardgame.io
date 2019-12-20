@@ -24,6 +24,10 @@ A config object with the following options:
 
 3. `transport` (_object_): the transport implementation.
    If not provided, socket.io is used.
+   
+4. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the Lobby’s `uuid` implementation will be used.
+
+5. `authenticateCredentials` (_function_): an optional custom function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
 ### Returns
 
@@ -54,6 +58,52 @@ server.run(8000);
 
 ##### With callback
 
-```
+```js
 server.run(8000, () => console.log("server running..."));
 ```
+
+##### With custom authentication
+
+`generateCredentials` is called when a player joins a game with:
+
+- `ctx`: The Koa context object, which can be used to generate tailored credentials from request headers etc.
+
+`authenticateCredentials` is called when a player makes a move with:
+
+  - `credentials`: The credentials sent from the player’s client
+  - `playerMetadata`: The metadata object for the `playerID` making a move
+
+Below is an example of how you might implement custom authentication with a hypothetical `authService` library.
+
+The `generateCredentials` method checks for the Authorization header on incoming requests and tries to use it to decode a token. It returns an ID from the result, storing a public user ID as “credentials” in the game metadata.
+
+The `authenticateCredentials` method passed to the `Server` also expects a similar token, which when decoded matches the ID stored in game metadata.
+
+
+```js
+const { Server } = require('boardgame.io/server');
+
+const generateCredentials = async ctx => {
+  const authHeader = ctx.request.headers['authorization'];
+  const token = await authService.decodeToken(authHeader);
+  return token.uid;
+}
+
+const authenticateCredentials = async (credentials, playerMetadata) => {
+  if (credentials) {
+    const token = await authService.decodeToken(credentials);
+    if (token.uid === playerMetadata.credentials) return true;
+  }
+  return false;
+}
+
+const server = Server({
+  games: [game1, game2, ...],
+  generateCredentials,
+  authenticateCredentials,
+});
+
+server.run(8000);
+```
+
+!> N.B. This approach is not currently compatible with how the React `<Lobby>` provides credentials.
