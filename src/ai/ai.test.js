@@ -379,6 +379,11 @@ describe('MCTSBot', () => {
       expect(bot.opts()['iterations'].value).toBe(1);
     });
 
+    test('setOpt works on invalid key', () => {
+      const bot = new RandomBot({ game: TicTacToe, enumerate: jest.fn() });
+      bot.setOpt('unknown', 1);
+    });
+
     test('functions', () => {
       const state = InitializeGame({ game: TicTacToe });
 
