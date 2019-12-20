@@ -47,9 +47,18 @@ const wrapAuthFn = fn => ({ action, gameMetadata, playerID }) =>
  * @param {Array} games - The games that this server will handle.
  * @param {object} db - The interface with the database.
  * @param {object} transport - The interface with the clients.
- * @param {function} authenticateCredentials - Function to test player credentials. Optional.
+ * @param {function} authenticateCredentials - Function to test player
+ *                                             credentials. Optional.
+ * @param {function} generateCredentials - Method for API to generate player
+ *                                         credentials. Optional.
  */
-export function Server({ games, db, transport, authenticateCredentials }: any) {
+export function Server({
+  games,
+  db,
+  transport,
+  authenticateCredentials,
+  generateCredentials,
+}: any) {
   const app = new Koa();
 
   games = games.map(Game);
@@ -82,10 +91,15 @@ export function Server({ games, db, transport, authenticateCredentials }: any) {
       const lobbyConfig = serverRunConfig.lobbyConfig;
       let apiServer;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
-        addApiToServer({ app, db, games, lobbyConfig });
+        addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
       } else {
         // Run API in a separate Koa app.
-        const api = createApiServer({ db, games, lobbyConfig });
+        const api = createApiServer({
+          db,
+          games,
+          lobbyConfig,
+          generateCredentials,
+        });
         apiServer = await api.listen(
           lobbyConfig.apiPort,
           lobbyConfig.apiCallback

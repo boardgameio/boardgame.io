@@ -61,18 +61,28 @@ export const CreateGame = async (
   return gameID;
 };
 
-export const createApiServer = ({ db, games, lobbyConfig }) => {
+export const createApiServer = ({
+  db,
+  games,
+  lobbyConfig,
+  generateCredentials,
+}) => {
   const app = new Koa();
-  return addApiToServer({ app, db, games, lobbyConfig });
+  return addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
 };
 
-export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
+export const addApiToServer = ({
+  app,
+  db,
+  games,
+  lobbyConfig,
+  generateCredentials,
+}) => {
   if (!lobbyConfig) lobbyConfig = {};
   lobbyConfig = {
     ...lobbyConfig,
     uuid: lobbyConfig.uuid || uuid,
-    generateCredentials:
-      lobbyConfig.generateCredentials || lobbyConfig.uuid || uuid,
+    generateCredentials: generateCredentials || lobbyConfig.uuid || uuid,
   };
   const router = new Router();
 
