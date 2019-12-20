@@ -27,7 +27,7 @@ A config object with the following options:
    
 4. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the Lobby’s `uuid` implementation will be used.
 
-5. `authenticateCredentials` (_function_): an optional custom function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
+5. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
 ### Returns
 
