@@ -14,7 +14,7 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [Four in a row](https://github.com/PJohannessen/four-in-a-row) - [tutorial](https://www.lonesomecrowdedweb.com/blog/four-in-a-row-boardgameio/) - Four in a Row using boardgame.io.
 
-- [FreeBoardGame.org](https://github.com/freeboardgame/FreeBoardGame.org) - [play](https://freeboardgame.org) - PWA framework for publishing board games.
+- [FreeBoardGames.org](https://github.com/freeboardgames/FreeBoardGames.org) - [play](https://www.freeboardgames.org) - PWA framework for publishing board games.
 
 - [Hex game](https://github.com/Korla/hexgame) - [play](https://korla.github.io/hexgame/build/) - Simple hexagonal board game.
 
