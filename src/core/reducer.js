@@ -108,7 +108,7 @@ export function CreateGameReducer({ game, multiplayer }) {
         }
 
         // Don't run move on client if optimistic = false.
-        if (multiplayer && move.optimistic === false) {
+        if (multiplayer && move.client === false) {
           return state;
         }
 

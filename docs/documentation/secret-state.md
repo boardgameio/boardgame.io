@@ -69,3 +69,21 @@ const App = Game({
   playerView: PlayerView.STRIP_SECRETS
 });
 ```
+
+#### Disabling moves that manipulate secret state on the client
+
+Moves that manipulate secret state often cannot run on the client because
+the client doesn't have all the necessary data to process such moves.
+These can be marked as server-only by setting `client: false` on move:
+
+```js
+moves: {
+  moveThatUsesSecret: {
+    move: (G, ctx) => {
+      ...
+    },
+
+    client: false,
+  }
+}
+```

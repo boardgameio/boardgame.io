@@ -173,7 +173,7 @@ test('disable optimistic updates', () => {
     moves: {
       A: {
         move: () => ({ A: true }),
-        optimistic: false,
+        client: false,
       },
     },
   };
