@@ -130,7 +130,7 @@ export class Master {
       });
     } else {
       const gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
-      isActionAuthentic = this.auth({
+      isActionAuthentic = await this.auth({
         action,
         gameMetadata,
         gameID,

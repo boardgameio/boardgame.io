@@ -34,13 +34,31 @@ export const createServerRunConfig = (portOrConfig?: any, callback?: any) => {
 };
 
 /**
+ * Wrap a user-provided auth function to simplify external API
+ * @param  {function} fn The authentication function to wrap
+ * @return {function} Wrapped function for use by master
+ */
+const wrapAuthFn = fn => ({ action, gameMetadata, playerID }) =>
+  fn(action.payload.credentials, gameMetadata[playerID]);
+
+/**
  * Instantiate a game server.
  *
  * @param {Array} games - The games that this server will handle.
  * @param {object} db - The interface with the database.
  * @param {object} transport - The interface with the clients.
+ * @param {function} authenticateCredentials - Function to test player
+ *                                             credentials. Optional.
+ * @param {function} generateCredentials - Method for API to generate player
+ *                                         credentials. Optional.
  */
-export function Server({ games, db, transport }: any) {
+export function Server({
+  games,
+  db,
+  transport,
+  authenticateCredentials,
+  generateCredentials,
+}: any) {
   const app = new Koa();
 
   games = games.map(Game);
@@ -51,7 +69,11 @@ export function Server({ games, db, transport }: any) {
   app.context.db = db;
 
   if (transport === undefined) {
-    transport = SocketIO();
+    const auth =
+      typeof authenticateCredentials === 'function'
+        ? wrapAuthFn(authenticateCredentials)
+        : true;
+    transport = SocketIO({ auth });
   }
   transport.init(app, games);
 
@@ -69,10 +91,15 @@ export function Server({ games, db, transport }: any) {
       const lobbyConfig = serverRunConfig.lobbyConfig;
       let apiServer;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
-        addApiToServer({ app, db, games, lobbyConfig });
+        addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
       } else {
         // Run API in a separate Koa app.
-        const api = createApiServer({ db, games, lobbyConfig });
+        const api = createApiServer({
+          db,
+          games,
+          lobbyConfig,
+          generateCredentials,
+        });
         apiServer = await api.listen(
           lobbyConfig.apiPort,
           lobbyConfig.apiCallback

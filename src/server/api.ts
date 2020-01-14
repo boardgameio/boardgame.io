@@ -49,8 +49,7 @@ export const CreateGame = async (
   });
 
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    const credentials = lobbyConfig.uuid();
-    gameMetadata.players[playerIndex] = { id: playerIndex, credentials };
+    gameMetadata.players[playerIndex] = { id: playerIndex };
   }
 
   const gameID = lobbyConfig.uuid();
@@ -62,18 +61,29 @@ export const CreateGame = async (
   return gameID;
 };
 
-export const createApiServer = ({ db, games, lobbyConfig }) => {
+export const createApiServer = ({
+  db,
+  games,
+  lobbyConfig,
+  generateCredentials,
+}) => {
   const app = new Koa();
-  return addApiToServer({ app, db, games, lobbyConfig });
+  return addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
 };
 
-export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
-  if (!lobbyConfig) {
-    lobbyConfig = {};
-  }
-  if (!lobbyConfig.uuid) {
-    lobbyConfig = { ...lobbyConfig, uuid };
-  }
+export const addApiToServer = ({
+  app,
+  db,
+  games,
+  lobbyConfig,
+  generateCredentials,
+}) => {
+  if (!lobbyConfig) lobbyConfig = {};
+  lobbyConfig = {
+    ...lobbyConfig,
+    uuid: lobbyConfig.uuid || uuid,
+    generateCredentials: generateCredentials || lobbyConfig.uuid || uuid,
+  };
   const router = new Router();
 
   router.get('/games', async ctx => {
@@ -170,7 +180,8 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     }
 
     gameMetadata.players[playerID].name = playerName;
-    const playerCredentials = gameMetadata.players[playerID].credentials;
+    const playerCredentials = await lobbyConfig.generateCredentials(ctx);
+    gameMetadata.players[playerID].credentials = playerCredentials;
 
     await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
 
@@ -201,6 +212,7 @@ export const addApiToServer = ({ app, db, games, lobbyConfig }) => {
     }
 
     delete gameMetadata.players[playerID].name;
+    delete gameMetadata.players[playerID].credentials;
     if (Object.values(gameMetadata.players).some((val: any) => val.name)) {
       await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
     } else {

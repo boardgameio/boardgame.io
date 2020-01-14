@@ -69,13 +69,13 @@ jest.mock('koa-socket-2', () => {
 describe('basic', () => {
   const app = { context: {} };
   const games = [Game({ seed: 0 })];
-  let _clientInfo;
-  let _roomInfo;
+  let clientInfo;
+  let roomInfo;
 
   beforeEach(() => {
-    _clientInfo = new Map();
-    _roomInfo = new Map();
-    const transport = SocketIO(_clientInfo, _roomInfo);
+    clientInfo = new Map();
+    roomInfo = new Map();
+    const transport = SocketIO({ clientInfo, roomInfo });
     transport.init(app, games);
   });
 
@@ -93,7 +93,7 @@ describe('TransportAPI', () => {
     const games = [Game({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
-    const transport = SocketIO(clientInfo, roomInfo);
+    const transport = SocketIO({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
     api = TransportAPI('gameID', io.socket, clientInfo, roomInfo);
@@ -150,8 +150,8 @@ describe('sync / update', () => {
 describe('connect / disconnect', () => {
   const app = { context: {} };
   const games = [Game({ seed: 0 })];
-  let _clientInfo;
-  let _roomInfo;
+  let clientInfo;
+  let roomInfo;
   let io;
 
   const toObj = m => {
@@ -163,9 +163,9 @@ describe('connect / disconnect', () => {
   };
 
   beforeAll(() => {
-    _clientInfo = new Map();
-    _roomInfo = new Map();
-    const transport = SocketIO(_clientInfo, _roomInfo);
+    clientInfo = new Map();
+    roomInfo = new Map();
+    const transport = SocketIO({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
   });
@@ -176,11 +176,11 @@ describe('connect / disconnect', () => {
     io.socket.id = '1';
     await io.socket.receive('sync', 'gameID', '1', 2);
 
-    expect(toObj(_clientInfo)['0']).toMatchObject({
+    expect(toObj(clientInfo)['0']).toMatchObject({
       gameID: 'gameID',
       playerID: '0',
     });
-    expect(toObj(_clientInfo)['1']).toMatchObject({
+    expect(toObj(clientInfo)['1']).toMatchObject({
       gameID: 'gameID',
       playerID: '1',
     });
@@ -190,30 +190,30 @@ describe('connect / disconnect', () => {
     io.socket.id = '0';
     await io.socket.receive('disconnect');
 
-    expect(toObj(_clientInfo)['0']).toBeUndefined();
-    expect(toObj(_clientInfo)['1']).toMatchObject({
+    expect(toObj(clientInfo)['0']).toBeUndefined();
+    expect(toObj(clientInfo)['1']).toMatchObject({
       gameID: 'gameID',
       playerID: '1',
     });
-    expect(toObj(_roomInfo.get('gameID'))).toEqual({ '1': '1' });
+    expect(toObj(roomInfo.get('gameID'))).toEqual({ '1': '1' });
   });
 
   test('unknown player disconnects', async () => {
     io.socket.id = 'unknown';
     await io.socket.receive('disconnect');
 
-    expect(toObj(_clientInfo)['0']).toBeUndefined();
-    expect(toObj(_clientInfo)['1']).toMatchObject({
+    expect(toObj(clientInfo)['0']).toBeUndefined();
+    expect(toObj(clientInfo)['1']).toMatchObject({
       gameID: 'gameID',
       playerID: '1',
     });
-    expect(toObj(_roomInfo.get('gameID'))).toEqual({ '1': '1' });
+    expect(toObj(roomInfo.get('gameID'))).toEqual({ '1': '1' });
   });
 
   test('1 disconnects', async () => {
     io.socket.id = '1';
     await io.socket.receive('disconnect');
-    expect(toObj(_clientInfo)).toEqual({});
-    expect(toObj(_roomInfo.get('gameID'))).toEqual({});
+    expect(toObj(clientInfo)).toEqual({});
+    expect(toObj(roomInfo.get('gameID'))).toEqual({});
   });
 });
