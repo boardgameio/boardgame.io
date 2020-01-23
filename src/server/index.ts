@@ -38,7 +38,7 @@ export const createServerRunConfig = (portOrConfig?: any, callback?: any) => {
  * @param  {function} fn The authentication function to wrap
  * @return {function} Wrapped function for use by master
  */
-const wrapAuthFn = fn => ({ action, gameMetadata, playerID }) =>
+export const wrapAuthFn = fn => ({ action, gameMetadata, playerID }) =>
   fn(action.payload.credentials, gameMetadata[playerID]);
 
 /**

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server, createServerRunConfig } from '.';
+import { Server, createServerRunConfig, wrapAuthFn } from '.';
 import * as api from './api';
 
 const game = { seed: 0 };
@@ -205,4 +205,23 @@ describe('createServerRunConfig', () => {
       },
     });
   });
+});
+
+describe('wrapAuthFn', () => {
+  test('calls wrapped function with expected arguments', () => {
+    const spy = jest.fn()
+    const fn = wrapAuthFn(spy)
+    const credentials = '123456'
+    const playerMetadata = { credentials }
+    fn({
+       action: {
+         payload: { credentials },
+       },
+       gameMetadata: {
+         '0': playerMetadata,
+       },
+       playerID: '0',
+    })
+    expect(spy).toHaveBeenCalledWith(credentials, playerMetadata)
+  })
 });
