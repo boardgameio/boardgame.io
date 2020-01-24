@@ -68,8 +68,9 @@ export const doesGameRequireAuthentication = gameMetadata => {
  * Verifies that the move came from a player with the correct credentials.
  */
 export const isActionFromAuthenticPlayer = (credentials, playerMetadata) => {
-  if (credentials && credentials === playerMetadata.credentials) return true;
-  return false;
+  if (!credentials) return false;
+  if (!playerMetadata) return false;
+  return credentials === playerMetadata.credentials;
 };
 
 /**
