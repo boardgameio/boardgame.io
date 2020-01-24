@@ -125,7 +125,6 @@ export class Master {
       isActionAuthentic = this.auth({
         action,
         gameMetadata,
-        gameID,
         playerID,
       });
     } else {
@@ -133,7 +132,6 @@ export class Master {
       isActionAuthentic = await this.auth({
         action,
         gameMetadata,
-        gameID,
         playerID,
       });
     }
