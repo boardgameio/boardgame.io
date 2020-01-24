@@ -34,14 +34,6 @@ export const createServerRunConfig = (portOrConfig?: any, callback?: any) => {
 };
 
 /**
- * Wrap a user-provided auth function to simplify external API
- * @param  {function} fn The authentication function to wrap
- * @return {function} Wrapped function for use by master
- */
-export const wrapAuthFn = fn => ({ action, gameMetadata, playerID }) =>
-  fn(action.payload.credentials, gameMetadata[playerID]);
-
-/**
  * Instantiate a game server.
  *
  * @param {Array} games - The games that this server will handle.
@@ -71,7 +63,7 @@ export function Server({
   if (transport === undefined) {
     const auth =
       typeof authenticateCredentials === 'function'
-        ? wrapAuthFn(authenticateCredentials)
+        ? authenticateCredentials
         : true;
     transport = SocketIO({ auth });
   }
