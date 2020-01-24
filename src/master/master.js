@@ -53,42 +53,23 @@ export function redactLog(log, playerID) {
 }
 
 /**
- * Verifies that the move came from a player with the
- * appropriate credentials.
+ * Verifies that the game has metadata and is using credentials.
  */
-export const isActionFromAuthenticPlayer = ({
-  action,
-  gameMetadata,
-  playerID,
-}) => {
-  if (!gameMetadata) {
-    return true;
-  }
-
-  const hasCredentials = Object.keys(gameMetadata.players).some(key => {
-    return !!(
-      gameMetadata.players[key] && gameMetadata.players[key].credentials
-    );
+export const doesGameRequireAuthentication = gameMetadata => {
+  if (!gameMetadata) return false;
+  const { players } = gameMetadata;
+  const hasCredentials = Object.keys(players).some(key => {
+    return !!(players[key] && players[key].credentials);
   });
-  if (!hasCredentials) {
-    return true;
-  }
+  return hasCredentials;
+};
 
-  if (!action.payload) {
-    return false;
-  }
-
-  if (!action.payload.credentials) {
-    return false;
-  }
-
-  if (
-    action.payload.credentials !== gameMetadata.players[playerID].credentials
-  ) {
-    return false;
-  }
-
-  return true;
+/**
+ * Verifies that the move came from a player with the correct credentials.
+ */
+export const isActionFromAuthenticPlayer = (credentials, playerMetadata) => {
+  if (credentials && credentials === playerMetadata.credentials) return true;
+  return false;
 };
 
 /**
@@ -119,21 +100,17 @@ export class Master {
    */
   async onUpdate(action, stateID, gameID, playerID) {
     let isActionAuthentic;
-
+    const { credentials } = action.payload || {};
     if (this.executeSynchronously) {
       const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
-      isActionAuthentic = this.auth({
-        action,
-        gameMetadata,
-        playerID,
-      });
+      isActionAuthentic = doesGameRequireAuthentication(gameMetadata)
+        ? this.auth(credentials, gameMetadata.players[playerID])
+        : true;
     } else {
       const gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
-      isActionAuthentic = await this.auth({
-        action,
-        gameMetadata,
-        playerID,
-      });
+      isActionAuthentic = doesGameRequireAuthentication(gameMetadata)
+        ? await this.auth(credentials, gameMetadata.players[playerID])
+        : true;
     }
     if (!isActionAuthentic) {
       return { error: 'unauthorized action' };
