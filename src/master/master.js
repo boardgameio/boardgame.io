@@ -86,11 +86,13 @@ export class Master {
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
     this.auth = () => true;
+    this.shouldAuth = doesGameRequireAuthentication;
 
     if (auth === true) {
       this.auth = isActionFromAuthenticPlayer;
     } else if (typeof auth === 'function') {
       this.auth = auth;
+      this.shouldAuth = () => true;
     }
   }
 
