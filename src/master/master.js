@@ -15,7 +15,7 @@ import * as logging from '../core/logger';
 
 const GameMetadataKey = gameID => `${gameID}:metadata`;
 
-const getPlayerMetadata = (gameMetadata, playerID) => {
+export const getPlayerMetadata = (gameMetadata, playerID) => {
   if (!gameMetadata || !gameMetadata.players) return;
   return gameMetadata.players[playerID];
 };

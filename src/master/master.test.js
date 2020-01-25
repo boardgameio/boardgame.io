@@ -11,6 +11,7 @@ import { InMemory } from '../server/db/inmemory';
 import {
   Master,
   redactLog,
+  getPlayerMetadata,
   doesGameRequireAuthentication,
   isActionFromAuthenticPlayer,
 } from './master';
@@ -426,6 +427,37 @@ describe('redactLog', () => {
   });
 });
 
+describe('getPlayerMetadata', () => {
+  describe('when metadata is not found', () => {
+    test('then playerMetadata is undefined', () => {
+      expect(getPlayerMetadata(undefined, '0')).toBeUndefined();
+    });
+  });
+
+  describe('when metadata does not contain players field', () => {
+    test('then playerMetadata is undefined', () => {
+      expect(getPlayerMetadata({}, '0')).toBeUndefined();
+    });
+  });
+
+  describe('when metadata does not contain playerID', () => {
+    test('then playerMetadata is undefined', () => {
+      expect(getPlayerMetadata({ players: { '1': {} } }, '0')).toBeUndefined();
+    });
+  });
+
+  describe('when metadata contains playerID', () => {
+    test('then playerMetadata is returned', () => {
+      const playerMetadata = { credentials: 'SECRET' };
+      const result = getPlayerMetadata(
+        { players: { '0': playerMetadata } },
+        '0'
+      );
+      expect(result).toBe(playerMetadata);
+    });
+  });
+});
+
 describe('doesGameRequireAuthentication', () => {
   describe('when game metadata is not found', () => {
     test('then authentication is not required', () => {
@@ -521,6 +553,13 @@ describe('isActionFromAuthenticPlayer', () => {
       });
       test('then action is not authentic', async () => {
         const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
+        expect(result).toBe(false);
+      });
+    });
+
+    describe('when playerMetadata is not found', () => {
+      test('then action is not authentic', () => {
+        const result = isActionFromAuthenticPlayer(credentials);
         expect(result).toBe(false);
       });
     });
