@@ -15,6 +15,11 @@ import * as logging from '../core/logger';
 
 const GameMetadataKey = gameID => `${gameID}:metadata`;
 
+const getPlayerMetadata = (gameMetadata, playerID) => {
+  if (!gameMetadata || !gameMetadata.players) return;
+  return gameMetadata.players[playerID];
+};
+
 /**
  * Redact the log.
  *
@@ -106,13 +111,15 @@ export class Master {
     const { credentials } = action.payload || {};
     if (this.executeSynchronously) {
       const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
-      isActionAuthentic = doesGameRequireAuthentication(gameMetadata)
-        ? this.auth(credentials, gameMetadata.players[playerID])
+      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
+      isActionAuthentic = this.shouldAuth(gameMetadata)
+        ? this.auth(credentials, playerMetadata)
         : true;
     } else {
       const gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
-      isActionAuthentic = doesGameRequireAuthentication(gameMetadata)
-        ? await this.auth(credentials, gameMetadata.players[playerID])
+      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
+      isActionAuthentic = this.shouldAuth(gameMetadata)
+        ? await this.auth(credentials, playerMetadata)
         : true;
     }
     if (!isActionAuthentic) {
