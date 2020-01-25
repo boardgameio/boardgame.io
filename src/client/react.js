@@ -30,16 +30,7 @@ import { Client as RawClient } from './client';
  *   UNDO and REDO.
  */
 export function Client(opts) {
-  let {
-    game,
-    numPlayers,
-    loading,
-    board,
-    multiplayer,
-    ai,
-    enhancer,
-    debug,
-  } = opts;
+  let { game, numPlayers, loading, board, multiplayer, enhancer, debug } = opts;
 
   // Component that is displayed before the client has synced
   // with the game master.
@@ -85,7 +76,6 @@ export function Client(opts) {
 
       this.client = RawClient({
         game,
-        ai,
         debug,
         numPlayers,
         multiplayer,

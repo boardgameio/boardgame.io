@@ -7,10 +7,106 @@
  */
 
 import { createStore } from 'redux';
-import { LocalTransport, LocalMaster } from './local';
+import { LocalTransport, LocalMaster, Local, GetBotPlayer } from './local';
 import { makeMove, gameEvent } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
+import { Client } from '../client';
+import { RandomBot } from '../../ai/random-bot';
+import { Stage } from '../../core/turn-order';
+
+jest.useFakeTimers();
+
+describe('bots', () => {
+  const game = {
+    moves: {
+      A: G => G,
+    },
+    ai: {
+      enumerate: () => [{ move: 'A' }],
+    },
+  };
+
+  test('make bot move', async () => {
+    const client = Client({
+      game,
+      playerID: '0',
+      multiplayer: Local({ bots: { '1': RandomBot } }),
+    });
+
+    client.start();
+
+    // Make it Player 1's turn and make the bot move.
+    // There isn't a good way to test the result of this
+    // due to the setTimeout and async calls. These are
+    // run primarily to cover the lines in the test and
+    // ensure that there are no exceptions.
+    client.events.endTurn();
+    jest.runAllTimers();
+  });
+
+  test('no bot move', async () => {
+    const client = Client({
+      numPlayers: 3,
+      game,
+      playerID: '0',
+      multiplayer: Local({ bots: { '2': RandomBot } }),
+    });
+
+    client.start();
+
+    // Make it Player 1's turn. No bot move.
+    // There isn't a good way to test the result of this
+    // due to the setTimeout and async calls. These are
+    // run primarily to cover the lines in the test and
+    // ensure that there are no exceptions.
+    client.events.endTurn();
+    jest.runAllTimers();
+  });
+});
+
+describe('GetBotPlayer', () => {
+  test('stages', () => {
+    const result = GetBotPlayer(
+      {
+        ctx: {
+          stage: {
+            '1': Stage.NULL,
+          },
+        },
+      },
+      {
+        '0': {},
+        '1': {},
+      }
+    );
+    expect(result).toEqual('1');
+  });
+
+  test('no stages', () => {
+    const result = GetBotPlayer(
+      {
+        ctx: {
+          currentPlayer: '0',
+        },
+      },
+      { '0': {} }
+    );
+    expect(result).toEqual('0');
+  });
+
+  test('null', () => {
+    const result = GetBotPlayer(
+      {
+        ctx: {
+          currentPlayer: '1',
+        },
+      },
+      { '0': {} }
+    );
+    expect(result).toEqual(null);
+  });
+});
 
 describe('LocalMaster', () => {
   const game = {};

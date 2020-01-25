@@ -42,6 +42,24 @@ export function LocalMaster(game) {
 }
 
 /**
+ * Returns null if it is not a bot's turn.
+ * Otherwise, returns a playerID of a bot that may play now.
+ */
+export function GetBotPlayer(state, bots) {
+  if (state.ctx.stage) {
+    for (const key of Object.keys(bots)) {
+      if (key in state.ctx.stage) {
+        return key;
+      }
+    }
+  } else if (state.ctx.currentPlayer in bots) {
+    return state.ctx.currentPlayer;
+  }
+
+  return null;
+}
+
+/**
  * Local
  *
  * Transport interface that embeds a GameMaster within it
@@ -58,11 +76,34 @@ export class LocalTransport extends Transport {
    * @param {string} numPlayers - The number of players.
    * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
    */
-  constructor({ master, store, gameID, playerID, gameName, numPlayers }) {
+  constructor({
+    master,
+    bots,
+    game,
+    store,
+    gameID,
+    playerID,
+    gameName,
+    numPlayers,
+  }) {
     super({ store, gameName, playerID, gameID, numPlayers });
 
     this.master = master;
+    this.game = game;
     this.isConnected = true;
+
+    if (game && game.ai && bots) {
+      this.bots = {};
+
+      for (const playerID in bots) {
+        const bot = bots[playerID];
+        this.bots[playerID] = new bot({
+          game,
+          enumerate: game.ai.enumerate,
+          seed: game.seed,
+        });
+      }
+    }
   }
 
   /**
@@ -70,13 +111,33 @@ export class LocalTransport extends Transport {
    * master broadcasts the update to other clients (including
    * this one).
    */
-  onUpdate(gameID, state, deltalog) {
+  async onUpdate(gameID, state, deltalog) {
     const currentState = this.store.getState();
 
     if (gameID == this.gameID && state._stateID >= currentState._stateID) {
       const action = ActionCreators.update(state, deltalog);
       this.store.dispatch(action);
+
+      if (this.bots) {
+        const newState = this.store.getState();
+        const botPlayer = GetBotPlayer(newState, this.bots);
+        if (botPlayer !== null) {
+          setTimeout(async () => {
+            await this.makeBotMove(newState, botPlayer);
+          }, 100);
+        }
+      }
     }
+  }
+
+  async makeBotMove(state, playerID) {
+    const botAction = await this.bots[playerID].play(state, playerID);
+    await this.master.onUpdate(
+      botAction.action,
+      state._stateID,
+      this.gameID,
+      botAction.action.payload.playerID
+    );
   }
 
   /**
@@ -149,7 +210,7 @@ export class LocalTransport extends Transport {
 }
 
 const localMasters = new Map();
-export function Local() {
+export function Local(opts) {
   return transportOpts => {
     let master;
 
@@ -160,6 +221,10 @@ export function Local() {
       localMasters.set(transportOpts.gameKey, master);
     }
 
-    return new LocalTransport({ master, ...transportOpts });
+    return new LocalTransport({
+      master,
+      bots: opts && opts.bots,
+      ...transportOpts,
+    });
   };
 }
