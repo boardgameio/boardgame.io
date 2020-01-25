@@ -264,16 +264,10 @@ describe('authentication', () => {
   const sendAll = jest.fn();
   const game = { seed: 0 };
   const gameID = 'gameID';
-  const gameMetadata = {
-    players: {
-      '0': { credentials: 'SECRET' },
-    },
-  };
   const action = ActionCreators.gameEvent('endTurn');
   const storage = new InMemory();
 
   beforeAll(async () => {
-    storage.set(`${gameID}:metadata`, gameMetadata);
     const master = new Master(game, storage, TransportAPI());
     await master.onSync(gameID, '0');
   });
