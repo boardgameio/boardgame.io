@@ -15,6 +15,12 @@ import * as logging from '../core/logger';
 
 const GameMetadataKey = gameID => `${gameID}:metadata`;
 
+export const getPlayerMetadata = (gameMetadata, playerID) => {
+  if (gameMetadata && gameMetadata.players) {
+    return gameMetadata.players[playerID];
+  }
+};
+
 /**
  * Redact the log.
  *
@@ -53,42 +59,27 @@ export function redactLog(log, playerID) {
 }
 
 /**
- * Verifies that the move came from a player with the
- * appropriate credentials.
+ * Verifies that the game has metadata and is using credentials.
  */
-export const isActionFromAuthenticPlayer = ({
-  action,
-  gameMetadata,
-  playerID,
-}) => {
-  if (!gameMetadata) {
-    return true;
-  }
-
-  const hasCredentials = Object.keys(gameMetadata.players).some(key => {
-    return !!(
-      gameMetadata.players[key] && gameMetadata.players[key].credentials
-    );
+export const doesGameRequireAuthentication = gameMetadata => {
+  if (!gameMetadata) return false;
+  const { players } = gameMetadata;
+  const hasCredentials = Object.keys(players).some(key => {
+    return !!(players[key] && players[key].credentials);
   });
-  if (!hasCredentials) {
-    return true;
-  }
+  return hasCredentials;
+};
 
-  if (!action.payload) {
-    return false;
-  }
-
-  if (!action.payload.credentials) {
-    return false;
-  }
-
-  if (
-    action.payload.credentials !== gameMetadata.players[playerID].credentials
-  ) {
-    return false;
-  }
-
-  return true;
+/**
+ * Verifies that the move came from a player with the correct credentials.
+ */
+export const isActionFromAuthenticPlayer = (
+  actionCredentials,
+  playerMetadata
+) => {
+  if (!actionCredentials) return false;
+  if (!playerMetadata) return false;
+  return actionCredentials === playerMetadata.credentials;
 };
 
 /**
@@ -104,11 +95,14 @@ export class Master {
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
     this.auth = () => true;
+    this.shouldAuth = () => false;
 
     if (auth === true) {
       this.auth = isActionFromAuthenticPlayer;
+      this.shouldAuth = doesGameRequireAuthentication;
     } else if (typeof auth === 'function') {
       this.auth = auth;
+      this.shouldAuth = () => true;
     }
   }
 
@@ -119,21 +113,19 @@ export class Master {
    */
   async onUpdate(action, stateID, gameID, playerID) {
     let isActionAuthentic;
-
+    const { credentials } = action.payload || {};
     if (this.executeSynchronously) {
       const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
-      isActionAuthentic = this.auth({
-        action,
-        gameMetadata,
-        playerID,
-      });
+      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
+      isActionAuthentic = this.shouldAuth(gameMetadata)
+        ? this.auth(credentials, playerMetadata)
+        : true;
     } else {
       const gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
-      isActionAuthentic = await this.auth({
-        action,
-        gameMetadata,
-        playerID,
-      });
+      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
+      isActionAuthentic = this.shouldAuth(gameMetadata)
+        ? await this.auth(credentials, playerMetadata)
+        : true;
     }
     if (!isActionAuthentic) {
       return { error: 'unauthorized action' };

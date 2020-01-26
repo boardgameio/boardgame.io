@@ -8,7 +8,13 @@
 
 import * as ActionCreators from '../core/action-creators';
 import { InMemory } from '../server/db/inmemory';
-import { Master, redactLog, isActionFromAuthenticPlayer } from './master';
+import {
+  Master,
+  redactLog,
+  getPlayerMetadata,
+  doesGameRequireAuthentication,
+  isActionFromAuthenticPlayer,
+} from './master';
 import { error } from '../core/logger';
 
 jest.mock('../core/logger', () => ({
@@ -258,12 +264,13 @@ describe('authentication', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
   const game = { seed: 0 };
+  const gameID = 'gameID';
   const action = ActionCreators.gameEvent('endTurn');
   const storage = new InMemory();
 
   beforeAll(async () => {
     const master = new Master(game, storage, TransportAPI());
-    await master.onSync('gameID', '0');
+    await master.onSync(gameID, '0');
   });
 
   test('auth failure', async () => {
@@ -274,7 +281,7 @@ describe('authentication', () => {
       TransportAPI(send, sendAll),
       isActionFromAuthenticPlayer
     );
-    await master.onUpdate(action, 0, 'gameID', '0');
+    await master.onUpdate(action, 0, gameID, '0');
     expect(sendAll).not.toHaveBeenCalled();
   });
 
@@ -286,13 +293,13 @@ describe('authentication', () => {
       TransportAPI(send, sendAll),
       isActionFromAuthenticPlayer
     );
-    await master.onUpdate(action, 0, 'gameID', '0');
+    await master.onUpdate(action, 0, gameID, '0');
     expect(sendAll).toHaveBeenCalled();
   });
 
   test('default', async () => {
     const master = new Master(game, storage, TransportAPI(send, sendAll), true);
-    await master.onUpdate(action, 0, 'gameID', '0');
+    await master.onUpdate(action, 0, gameID, '0');
     expect(sendAll).toHaveBeenCalled();
   });
 });
@@ -420,130 +427,147 @@ describe('redactLog', () => {
   });
 });
 
+describe('getPlayerMetadata', () => {
+  describe('when metadata is not found', () => {
+    test('then playerMetadata is undefined', () => {
+      expect(getPlayerMetadata(undefined, '0')).toBeUndefined();
+    });
+  });
+
+  describe('when metadata does not contain players field', () => {
+    test('then playerMetadata is undefined', () => {
+      expect(getPlayerMetadata({}, '0')).toBeUndefined();
+    });
+  });
+
+  describe('when metadata does not contain playerID', () => {
+    test('then playerMetadata is undefined', () => {
+      expect(getPlayerMetadata({ players: { '1': {} } }, '0')).toBeUndefined();
+    });
+  });
+
+  describe('when metadata contains playerID', () => {
+    test('then playerMetadata is returned', () => {
+      const playerMetadata = { credentials: 'SECRET' };
+      const result = getPlayerMetadata(
+        { players: { '0': playerMetadata } },
+        '0'
+      );
+      expect(result).toBe(playerMetadata);
+    });
+  });
+});
+
+describe('doesGameRequireAuthentication', () => {
+  describe('when game metadata is not found', () => {
+    test('then authentication is not required', () => {
+      const result = doesGameRequireAuthentication();
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('when game has no credentials', () => {
+    test('then authentication is not required', () => {
+      const gameMetadata = {
+        players: {
+          '0': {},
+        },
+      };
+      const result = doesGameRequireAuthentication(gameMetadata);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('when game has credentials', () => {
+    test('then authentication is required', () => {
+      const gameMetadata = {
+        players: {
+          '0': {
+            credentials: 'SECRET',
+          },
+        },
+      };
+      const result = doesGameRequireAuthentication(gameMetadata);
+      expect(result).toBe(true);
+    });
+  });
+});
+
 describe('isActionFromAuthenticPlayer', () => {
   let action;
   let playerID;
   let gameMetadata;
+  let credentials;
+  let playerMetadata;
 
   beforeEach(() => {
     playerID = '0';
 
     action = {
-      payload: {
-        credentials: 'SECRET',
-      },
+      payload: { credentials: 'SECRET' },
     };
 
     gameMetadata = {
       players: {
-        '0': {
-          credentials: 'SECRET',
-        },
+        '0': { credentials: 'SECRET' },
       },
     };
-  });
 
-  describe('when game metadata is not found', () => {
-    beforeEach(() => {
-      gameMetadata = null;
-    });
-
-    test('the action is authentic', () => {
-      const result = isActionFromAuthenticPlayer({
-        action,
-        gameMetadata,
-        playerID,
-      });
-
-      expect(result).toBeTruthy();
-    });
-  });
-
-  describe('when game has no credentials', () => {
-    beforeEach(() => {
-      gameMetadata = {
-        players: {
-          '0': {},
-        },
-      };
-    });
-
-    test('then action is authentic', async () => {
-      const result = isActionFromAuthenticPlayer({
-        action,
-        gameMetadata,
-        playerID,
-      });
-
-      expect(result).toBeTruthy();
-    });
+    playerMetadata = gameMetadata.players[playerID];
+    ({ credentials } = action.payload || {});
   });
 
   describe('when game has credentials', () => {
     describe('when action contains no payload', () => {
       beforeEach(() => {
         action = {};
+        ({ credentials } = action.payload || {});
       });
 
       test('the action is not authentic', async () => {
-        const result = isActionFromAuthenticPlayer({
-          action,
-          gameMetadata,
-          playerID,
-        });
-
-        expect(result).toBeFalsy();
+        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
+        expect(result).toBe(false);
       });
     });
 
     describe('when action contains no credentials', () => {
       beforeEach(() => {
         action = {
-          payload: {
-            someStuff: 'foo',
-          },
+          payload: { someStuff: 'foo' },
         };
+        ({ credentials } = action.payload || {});
       });
 
       test('then action is not authentic', async () => {
-        const result = isActionFromAuthenticPlayer({
-          action,
-          gameMetadata,
-          playerID,
-        });
-
-        expect(result).toBeFalsy();
+        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
+        expect(result).toBe(false);
       });
     });
 
     describe('when action credentials do not match game credentials', () => {
       beforeEach(() => {
         action = {
-          payload: {
-            credentials: 'WRONG',
-          },
+          payload: { credentials: 'WRONG' },
         };
+        ({ credentials } = action.payload || {});
       });
       test('then action is not authentic', async () => {
-        const result = isActionFromAuthenticPlayer({
-          action,
-          gameMetadata,
-          playerID,
-        });
+        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
+        expect(result).toBe(false);
+      });
+    });
 
-        expect(result).toBeFalsy();
+    describe('when playerMetadata is not found', () => {
+      test('then action is not authentic', () => {
+        const result = isActionFromAuthenticPlayer(credentials);
+        expect(result).toBe(false);
       });
     });
 
     describe('when action credentials do match game credentials', () => {
       test('then action is authentic', async () => {
-        const result = isActionFromAuthenticPlayer({
-          action,
-          gameMetadata,
-          playerID,
-        });
-
-        expect(result).toBeTruthy();
+        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
+        expect(result).toBe(true);
       });
     });
   });
