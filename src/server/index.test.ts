@@ -75,6 +75,13 @@ describe('new', () => {
     Server({ games: [game], transport });
     expect(transport.init).toBeCalled();
   });
+
+  test('custom auth implementation', () => {
+    const game = {};
+    const authenticateCredentials = () => true;
+    const server = Server({ games: [game], authenticateCredentials });
+    expect(server.db).not.toBeNull();
+  });
 });
 
 describe('run', () => {

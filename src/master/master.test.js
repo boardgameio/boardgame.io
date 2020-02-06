@@ -261,46 +261,106 @@ describe('playerView', () => {
 });
 
 describe('authentication', () => {
-  const send = jest.fn();
-  const sendAll = jest.fn();
-  const game = { seed: 0 };
-  const gameID = 'gameID';
-  const action = ActionCreators.gameEvent('endTurn');
-  const storage = new InMemory();
+  describe('async', () => {
+    const send = jest.fn();
+    const sendAll = jest.fn();
+    const game = { seed: 0 };
+    const gameID = 'gameID';
+    const action = ActionCreators.gameEvent('endTurn');
+    const storage = new InMemory();
 
-  beforeAll(async () => {
-    const master = new Master(game, storage, TransportAPI());
-    await master.onSync(gameID, '0');
+    beforeAll(async () => {
+      const master = new Master(game, storage, TransportAPI());
+      await master.onSync(gameID, '0');
+    });
+
+    test('auth failure', async () => {
+      const isActionFromAuthenticPlayer = () => false;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        isActionFromAuthenticPlayer
+      );
+      await master.onUpdate(action, 0, gameID, '0');
+      expect(sendAll).not.toHaveBeenCalled();
+    });
+
+    test('auth success', async () => {
+      const isActionFromAuthenticPlayer = () => true;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        isActionFromAuthenticPlayer
+      );
+      await master.onUpdate(action, 0, gameID, '0');
+      expect(sendAll).toHaveBeenCalled();
+    });
+
+    test('default', async () => {
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        true
+      );
+      await master.onUpdate(action, 0, gameID, '0');
+      expect(sendAll).toHaveBeenCalled();
+    });
   });
 
-  test('auth failure', async () => {
-    const isActionFromAuthenticPlayer = () => false;
-    const master = new Master(
-      game,
-      storage,
-      TransportAPI(send, sendAll),
-      isActionFromAuthenticPlayer
-    );
-    await master.onUpdate(action, 0, gameID, '0');
-    expect(sendAll).not.toHaveBeenCalled();
-  });
+  describe('sync', () => {
+    const send = jest.fn();
+    const sendAll = jest.fn();
+    const game = { seed: 0 };
+    const gameID = 'gameID';
+    const action = ActionCreators.gameEvent('endTurn');
+    const storage = new InMemory();
 
-  test('auth success', async () => {
-    const isActionFromAuthenticPlayer = () => true;
-    const master = new Master(
-      game,
-      storage,
-      TransportAPI(send, sendAll),
-      isActionFromAuthenticPlayer
-    );
-    await master.onUpdate(action, 0, gameID, '0');
-    expect(sendAll).toHaveBeenCalled();
-  });
+    beforeAll(() => {
+      const master = new Master(game, storage, TransportAPI());
+      master.executeSynchronously = true;
+      master.onSync(gameID, '0');
+    });
 
-  test('default', async () => {
-    const master = new Master(game, storage, TransportAPI(send, sendAll), true);
-    await master.onUpdate(action, 0, gameID, '0');
-    expect(sendAll).toHaveBeenCalled();
+    test('auth failure', () => {
+      const isActionFromAuthenticPlayer = () => false;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        isActionFromAuthenticPlayer
+      );
+      master.executeSynchronously = true;
+      master.onUpdate(action, 0, gameID, '0');
+      expect(sendAll).not.toHaveBeenCalled();
+    });
+
+    test('auth success', () => {
+      const isActionFromAuthenticPlayer = () => true;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        isActionFromAuthenticPlayer
+      );
+      master.executeSynchronously = true;
+      master.onUpdate(action, 0, gameID, '0');
+      expect(sendAll).toHaveBeenCalled();
+    });
+
+    test('default', () => {
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        true
+      );
+      master.executeSynchronously = true;
+      master.onUpdate(action, 0, gameID, '0');
+      expect(sendAll).toHaveBeenCalled();
+    });
   });
 });
 

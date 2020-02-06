@@ -94,7 +94,7 @@ export class Master {
     this.game = Game(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
-    this.auth = () => true;
+    this.auth = null;
     this.shouldAuth = () => false;
 
     if (auth === true) {
