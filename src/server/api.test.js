@@ -95,6 +95,12 @@ describe('.createApiServer', () => {
               '0': expect.objectContaining({}),
               '1': expect.objectContaining({}),
             }),
+            setupData: expect.objectContaining({
+              colors: expect.objectContaining({
+                '0': 'green',
+                '1': 'red',
+              }),
+            }),
           })
         );
       });

@@ -112,6 +112,8 @@ Returns an array of `rooms`. Each instance has fields:
 
 `players`: the list of seats and players that have joined the game, if any.
 
+`setupData` (optional): custom object that was passed to the game `setup` function.
+
 #### Getting specific instance of a room by its ID
 
 ##### GET `/games/{name}/{id}`
@@ -123,6 +125,8 @@ Returns a room instance. Each instance has fields:
 `roomID`: the ID of the room instance.
 
 `players`: the list of seats and players that have joined the game, if any.
+
+`setupData` (optional): custom object that was passed to the game `setup` function.
 
 #### Client Authentication
 
