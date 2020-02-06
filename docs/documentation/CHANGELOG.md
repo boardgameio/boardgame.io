@@ -1,3 +1,20 @@
+## v0.36.0
+
+#### Features
+
+* [[b974260](https://github.com/nicolodavis/boardgame.io/commit/b974260)] Improve Lobby API: room instances (#542)
+* [[afdb79e](https://github.com/nicolodavis/boardgame.io/commit/afdb79e)] refactor: Harmonise Master’s auth signature with authenticateCredentials (#539)
+* [[61a45ee](https://github.com/nicolodavis/boardgame.io/commit/61a45ee)] rename optimistic to client and document it
+* [[4d33faa](https://github.com/nicolodavis/boardgame.io/commit/4d33faa)] feat(server): Lobby server improvements (#532)
+* [[08404e2](https://github.com/nicolodavis/boardgame.io/commit/08404e2)] change MCTS visualization to table format
+
+#### Bugfixes
+
+* [[2d931e9](https://github.com/nicolodavis/boardgame.io/commit/2d931e9)] fix(server): Use namespaced ID to delete persisted game data (#531)
+* [[9ce176c](https://github.com/nicolodavis/boardgame.io/commit/9ce176c)] refactor(client): Scope global CSS selectors in Debug panel (#527)
+* [[ef4f24d](https://github.com/nicolodavis/boardgame.io/commit/ef4f24d)] Fix events in hooks triggered by a move (#525)
+* [[a2c64f8](https://github.com/nicolodavis/boardgame.io/commit/a2c64f8)] increment turn before calling turn.onBegin
+
 ## v0.35.1
 
 #### Bugfixes
