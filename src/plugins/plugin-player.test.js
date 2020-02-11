@@ -100,3 +100,32 @@ describe('3 player game', () => {
     });
   });
 });
+
+describe('game with phases', () => {
+  let client;
+
+  beforeAll(() => {
+    const game = {
+      playerSetup: id => ({ id }),
+      plugins: [PluginPlayer],
+      phases: {
+        phase: {},
+      },
+    };
+
+    client = Client({ game });
+  });
+
+  test('includes playerSetup state', () => {
+    expect(client.getState().G).toEqual({
+      players: {
+        0: {
+          id: '0',
+        },
+        1: {
+          id: '1',
+        },
+      },
+    });
+  });
+});
