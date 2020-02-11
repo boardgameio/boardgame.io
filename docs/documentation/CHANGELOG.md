@@ -1,3 +1,10 @@
+## v0.37.0
+
+#### Features
+
+* [[0eff1c6](https://github.com/nicolodavis/boardgame.io/commit/0eff1c6)] make the lobby assign bots to remaining players when there is only one human player
+* [[ef8df65](https://github.com/nicolodavis/boardgame.io/commit/ef8df65)] add ability for Local multiplayer mode to run bots
+
 ## v0.36.0
 
 #### Features
