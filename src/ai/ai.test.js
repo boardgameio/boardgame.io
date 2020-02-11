@@ -97,14 +97,14 @@ describe('Step', () => {
         endIf(G) {
           if (G.moved) return true;
         },
-      },
 
-      ai: {
-        enumerate: () => [{ move: 'clickCell' }],
+        ai: {
+          enumerate: () => [{ move: 'clickCell' }],
+        },
       },
     });
 
-    const bot = new RandomBot({ enumerate: client.ai.enumerate });
+    const bot = new RandomBot({ enumerate: client.game.ai.enumerate });
     expect(client.getState().G).toEqual({ moved: false });
     await Step(client, bot);
     expect(client.getState().G).toEqual({ moved: true });
@@ -112,12 +112,13 @@ describe('Step', () => {
 
   test('does not crash on empty action', async () => {
     const client = Client({
-      game: {},
-      ai: {
-        enumerate: () => [],
+      game: {
+        ai: {
+          enumerate: () => [],
+        },
       },
     });
-    const bot = new RandomBot({ enumerate: client.ai.enumerate });
+    const bot = new RandomBot({ enumerate: client.game.ai.enumerate });
     await Step(client, bot);
   });
 
@@ -133,14 +134,14 @@ describe('Step', () => {
         turn: {
           activePlayers: { currentPlayer: 'stage' },
         },
-      },
 
-      ai: {
-        enumerate: () => [{ move: 'A' }],
+        ai: {
+          enumerate: () => [{ move: 'A' }],
+        },
       },
     });
 
-    const bot = new RandomBot({ enumerate: client.ai.enumerate });
+    const bot = new RandomBot({ enumerate: client.game.ai.enumerate });
     expect(client.getState().G).not.toEqual({ moved: true });
     await Step(client, bot);
     expect(client.getState().G).toEqual({ moved: true });

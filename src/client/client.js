@@ -80,7 +80,6 @@ export const createMoveDispatchers = createDispatchers.bind(null, 'makeMove');
 class _ClientImpl {
   constructor({
     game,
-    ai,
     debug,
     numPlayers,
     multiplayer,
@@ -90,7 +89,6 @@ class _ClientImpl {
     enhancer,
   }) {
     this.game = Game(game);
-    this.ai = ai;
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;

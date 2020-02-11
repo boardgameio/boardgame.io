@@ -266,13 +266,11 @@ const TicTacToe = {
 }
 ```
 
-After that, add an AI section to our `Client` call that returns a list
-of moves (one per empty cell).
+After that, add an `ai` section to the game config:
 
 ```js
-const App = Client({
-  game: TicTacToe,
-  board: TicTacToeBoard,
+const TicTacToe = {
+  ...
 
   ai: {
     enumerate: (G, ctx) => {
@@ -285,9 +283,7 @@ const App = Client({
       return moves;
     },
   },
-});
-
-export default App;
+};
 ```
 
 That's it! Now that you can visit the AI section of the Debug Panel:

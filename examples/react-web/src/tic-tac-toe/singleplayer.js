@@ -11,22 +11,16 @@ import { Client } from 'boardgame.io/react';
 import { Debug } from 'boardgame.io/debug';
 import TicTacToe from './game';
 import Board from './board';
+import { Local } from 'boardgame.io/multiplayer';
+import { MCTSBot } from 'boardgame.io/ai';
 
 const App = Client({
   game: TicTacToe,
   board: Board,
   debug: { impl: Debug },
-  ai: {
-    enumerate: G => {
-      let r = [];
-      for (let i = 0; i < 9; i++) {
-        if (G.cells[i] === null) {
-          r.push({ move: 'clickCell', args: [i] });
-        }
-      }
-      return r;
-    },
-  },
+  multiplayer: Local({
+    bots: { '1': MCTSBot },
+  }),
 });
 
 const Singleplayer = () => (
