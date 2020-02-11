@@ -443,8 +443,9 @@ describe('lobby', () => {
           .simulate('click');
         expect(lobby.instance().state.runningGame).toEqual({
           app: NullComponent,
+          credentials: undefined,
           gameID: 'gameID2',
-          playerID: null,
+          playerID: '0',
         });
       });
 
