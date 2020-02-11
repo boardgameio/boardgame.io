@@ -11,16 +11,11 @@ import { Client } from 'boardgame.io/react';
 import { Debug } from 'boardgame.io/debug';
 import TicTacToe from './game';
 import Board from './board';
-import { Local } from 'boardgame.io/multiplayer';
-import { MCTSBot } from 'boardgame.io/ai';
 
 const App = Client({
   game: TicTacToe,
   board: Board,
   debug: { impl: Debug },
-  multiplayer: Local({
-    bots: { '1': MCTSBot },
-  }),
 });
 
 const Singleplayer = () => (
