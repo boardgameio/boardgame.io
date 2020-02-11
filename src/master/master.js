@@ -95,6 +95,7 @@ export class Master {
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
     this.auth = null;
+    this.onUpdateCallback = () => {};
     this.shouldAuth = () => false;
 
     if (auth === true) {
@@ -198,6 +199,12 @@ export class Master {
     // Update server's version of the store.
     store.dispatch(action);
     state = store.getState();
+
+    this.onUpdateCallback({
+      state,
+      action,
+      gameID,
+    });
 
     this.transportAPI.sendAll(playerID => {
       const filteredState = {

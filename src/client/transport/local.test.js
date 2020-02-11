@@ -29,7 +29,7 @@ describe('bots', () => {
 
   test('make bot move', async () => {
     const client = Client({
-      game,
+      game: { ...game },
       playerID: '0',
       multiplayer: Local({ bots: { '1': RandomBot } }),
     });
@@ -48,7 +48,7 @@ describe('bots', () => {
   test('no bot move', async () => {
     const client = Client({
       numPlayers: 3,
-      game,
+      game: { ...game },
       playerID: '0',
       multiplayer: Local({ bots: { '2': RandomBot } }),
     });
@@ -110,7 +110,7 @@ describe('GetBotPlayer', () => {
 
 describe('LocalMaster', () => {
   const game = {};
-  const master = LocalMaster(game);
+  const master = LocalMaster({ game });
 
   const storeA = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
   const storeB = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
