@@ -33,11 +33,11 @@ export default {
 
       const players = {
         ...G.players,
-        [current]: G.player,
+        [current]: 'player' in G ? G.player : G.players[current],
       };
 
       if (other !== null) {
-        players[other] = G.opponent;
+        players[other] = 'opponent' in G ? G.opponent : G.players[other];
       }
 
       {
