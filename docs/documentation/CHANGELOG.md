@@ -1,4 +1,23 @@
+## v0.37.1
+
+#### Bugfixes
+
+* [[66021f7](https://github.com/nicolodavis/boardgame.io/commit/66021f7)] fix bug causing AI section to not activate
+* [[fd34df9](https://github.com/nicolodavis/boardgame.io/commit/fd34df9)] fix(plugins): Fix PluginPlayer setup (#543)
+
 ## v0.37.0
+
+#### Breaking Changes
+
+The `ai` section has been moved from the `Client` to the game config:
+
+```js
+const game = {
+  moves: { ... },
+  ...
+  ai: { ... }
+}
+```
 
 #### Features
 
