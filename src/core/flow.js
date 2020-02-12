@@ -145,12 +145,9 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     if (conf.onBegin === undefined) {
       conf.onBegin = G => G;
     }
-    conf.onBegin = plugin.FnWrap(conf.onBegin, plugins);
     if (conf.onEnd === undefined) {
       conf.onEnd = G => G;
     }
-    conf.onEnd = plugin.FnWrap(conf.onEnd, plugins);
-
     if (conf.turn === undefined) {
       conf.turn = turn;
     }
@@ -183,6 +180,8 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
       }
     }
 
+    conf.onBegin = plugin.FnWrap(conf.onBegin, plugins);
+    conf.onEnd = plugin.FnWrap(conf.onEnd, plugins);
     conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, plugins);
     conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, plugins);
     conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
