@@ -142,7 +142,7 @@
 <svelte:window on:keydown={OnKeyDown}/>
 
 <section>
-  {#if client.ai && !client.multiplayer}
+  {#if client.game.ai && !client.multiplayer}
     <section>
       <h3>Controls</h3>
       <li>
