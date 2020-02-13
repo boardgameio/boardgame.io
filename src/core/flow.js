@@ -289,10 +289,6 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     let { G, ctx } = state;
     const conf = GetPhase(ctx);
 
-    // Allow plugins to modify G and ctx at the beginning of a phase.
-    G = plugin.G.onPhaseBegin(G, ctx, plugins);
-    ctx = plugin.ctx.onPhaseBegin(ctx, plugins);
-
     // Run any phase setup code provided by the user.
     G = conf.onBegin(G, ctx);
 

@@ -29,7 +29,7 @@ export function InitializeGame({ game, numPlayers, setupData }) {
   ctx._random = { seed };
 
   // Pass ctx through all the plugins that want to modify it.
-  ctx = plugins.ctx.setup(ctx, game);
+  ctx = plugins.Setup.ctx(ctx, game);
 
   // Augment ctx with the enhancers (TODO: move these into plugins).
   const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
@@ -38,7 +38,7 @@ export function InitializeGame({ game, numPlayers, setupData }) {
   let initialG = game.setup(ctxWithAPI, setupData);
 
   // Pass G through all the plugins that want to modify it.
-  initialG = plugins.G.setup(initialG, ctxWithAPI, game);
+  initialG = plugins.Setup.G(initialG, ctxWithAPI, game);
 
   const initial = {
     // User managed state.

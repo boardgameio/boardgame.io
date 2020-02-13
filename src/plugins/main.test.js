@@ -22,31 +22,31 @@ describe('plugins', () => {
 
       plugins: [
         {
+          beforeMove: state => {
+            return { ...state, G: { ...state.G, beforeMove: true } };
+          },
+          beforeEvent: state => {
+            return { ...state, G: { ...state.G, beforeEvent: true } };
+          },
+          afterMove: state => {
+            return { ...state, G: { ...state.G, afterMove: true } };
+          },
+          afterEvent: state => {
+            return { ...state, G: { ...state.G, afterEvent: true } };
+          },
           fnWrap: fn => (G, ctx) => {
             G = fn(G, ctx);
             return { ...G, fnWrap: true };
           },
-          G: {
-            setup: G => ({ ...G, setup: true }),
-            preMove: G => ({ ...G, preMove: true }),
-            postMove: G => ({ ...G, postMove: true }),
-            onPhaseBegin: G => ({ ...G, onPhaseBegin: true }),
-          },
-          ctx: {
-            setup: ctx => ({ ...ctx, setup: true }),
-            preMove: ctx => ({ ...ctx, preMove: true }),
-            onPhaseBegin: ctx => ({ ...ctx, onPhaseBegin: true }),
+          setup: {
+            G: G => ({ ...G, setup: true }),
+            ctx: ctx => ({ ...ctx, setup: true }),
           },
         },
       ],
     };
 
     client = Client({ game });
-  });
-
-  test('immer works', () => {
-    client.moves.B();
-    expect(client.getState().G).toMatchObject({ immer: true });
   });
 
   test('setupG', () => {
@@ -57,24 +57,21 @@ describe('plugins', () => {
     expect(client.getState().ctx).toMatchObject({ setup: true });
   });
 
-  test('onPhaseBegin', () => {
-    expect(client.getState().G).toMatchObject({ onPhaseBegin: true });
-    expect(client.getState().ctx).toMatchObject({ onPhaseBegin: true });
-  });
-
   test('fnWrap', () => {
     client.moves.A();
     expect(client.getState().G).toMatchObject({ fnWrap: true });
+    expect(client.getState().G).toMatchObject({ beforeMove: true });
+    expect(client.getState().G).toMatchObject({ afterMove: true });
   });
 
-  test('preMove', () => {
-    client.moves.A();
-    expect(client.getState().G).toMatchObject({ preMove: true });
-    expect(client.getState().G.ctx).toMatchObject({ preMove: true });
+  test('immer works', () => {
+    client.moves.B();
+    expect(client.getState().G).toMatchObject({ immer: true });
   });
 
-  test('postMove', () => {
-    client.moves.A();
-    expect(client.getState().G).toMatchObject({ postMove: true });
+  test('event', () => {
+    client.events.endTurn();
+    expect(client.getState().G).toMatchObject({ beforeEvent: true });
+    expect(client.getState().G).toMatchObject({ afterEvent: true });
   });
 });

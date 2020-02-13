@@ -7,6 +7,7 @@
  */
 
 import * as Actions from './action-types';
+import * as plugin from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
 import { ContextEnhancer } from './context-enhancer';
@@ -80,6 +81,7 @@ export function CreateGameReducer({ game, multiplayer }) {
           return state;
         }
 
+        // Enhance ctx with API.
         const apiCtx = new ContextEnhancer(
           state.ctx,
           game,
@@ -87,8 +89,15 @@ export function CreateGameReducer({ game, multiplayer }) {
         );
         state.ctx = apiCtx.attachToContext(state.ctx);
 
+        // Execute plugins.
+        state = plugin.BeforeEvent(state, game.plugins);
+
+        // Process event.
         let newState = game.flow.processEvent(state, action);
         newState = apiCtx.updateAndDetach(newState, true);
+
+        // Execute plugins.
+        newState = plugin.AfterEvent(newState, game.plugins);
 
         return { ...newState, _stateID: state._stateID + 1 };
       }
@@ -135,6 +144,9 @@ export function CreateGameReducer({ game, multiplayer }) {
         );
         let ctxWithAPI = apiCtx.attachToContext(state.ctx);
 
+        // Execute plugins.
+        state = plugin.BeforeMove(state, game.plugins);
+
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
 
@@ -176,6 +188,9 @@ export function CreateGameReducer({ game, multiplayer }) {
         }
 
         state = { ...newState, G, ctx, _stateID: state._stateID + 1 };
+
+        // Execute plugins.
+        state = plugin.AfterMove(state, game.plugins);
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.

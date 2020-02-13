@@ -13,52 +13,39 @@ import PluginImmer from './plugin-immer';
  */
 const DEFAULT_PLUGINS = [PluginImmer];
 
-/**
- * Applies the provided plugins to ctx before processing a move / event.
- *
- * @param {object} ctx - The ctx object.
- * @param {object} plugins - The list of plugins.
- */
-const CtxPreMove = (ctx, plugins) => {
-  [...DEFAULT_PLUGINS, ...plugins]
-    .filter(plugin => plugin.ctx !== undefined)
-    .filter(plugin => plugin.ctx.preMove !== undefined)
-    .forEach(plugin => {
-      ctx = plugin.ctx.preMove(ctx, plugins);
-    });
-  return ctx;
-};
+export const Setup = {
+  /**
+   * Applies the provided plugins to G during game setup.
+   *
+   * @param {object} G - The G object.
+   * @param {object} ctx - The ctx object.
+   * @param {object} game - The game object.
+   */
+  G: (G, ctx, game) => {
+    [...DEFAULT_PLUGINS, ...game.plugins]
+      .filter(plugin => plugin.setup !== undefined)
+      .filter(plugin => plugin.setup.G !== undefined)
+      .forEach(plugin => {
+        G = plugin.setup.G(G, ctx, game);
+      });
+    return G;
+  },
 
-/**
- * Applies the provided plugins to G before processing a move / event.
- *
- * @param {object} G - The G object.
- * @param {object} plugins - The list of plugins.
- */
-const GPreMove = (G, plugins) => {
-  [...DEFAULT_PLUGINS, ...plugins]
-    .filter(plugin => plugin.G !== undefined)
-    .filter(plugin => plugin.G.preMove !== undefined)
-    .forEach(plugin => {
-      G = plugin.G.preMove(G, plugins);
-    });
-  return G;
-};
-
-/**
- * Postprocesses G after a move / event.
- *
- * @param {object} G - The G object.
- * @param {object} plugins - The list of plugins.
- */
-const GPostMove = (G, plugins) => {
-  [...DEFAULT_PLUGINS, ...plugins]
-    .filter(plugin => plugin.G !== undefined)
-    .filter(plugin => plugin.G.postMove !== undefined)
-    .forEach(plugin => {
-      G = plugin.G.postMove(G, plugins);
-    });
-  return G;
+  /**
+   * Applies the provided plugins to ctx during game setup.
+   *
+   * @param {object} ctx - The ctx object.
+   * @param {object} game - The game object.
+   */
+  ctx: (ctx, game) => {
+    [...DEFAULT_PLUGINS, ...game.plugins]
+      .filter(plugin => plugin.setup !== undefined)
+      .filter(plugin => plugin.setup.ctx !== undefined)
+      .forEach(plugin => {
+        ctx = plugin.setup.ctx(ctx, game);
+      });
+    return ctx;
+  },
 };
 
 /**
@@ -69,85 +56,67 @@ const GPostMove = (G, plugins) => {
  */
 export const FnWrap = (fn, plugins) => {
   const reducer = (acc, { fnWrap }) => fnWrap(acc, plugins);
-  const g = [...DEFAULT_PLUGINS, ...plugins]
+  return [...DEFAULT_PLUGINS, ...plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
     .reduce(reducer, fn);
-
-  return (G, ctx, ...args) => {
-    G = GPreMove(G, plugins);
-    ctx = CtxPreMove(ctx, plugins);
-    G = g(G, ctx, ...args);
-    G = GPostMove(G, plugins);
-    return G;
-  };
 };
 
-export const G = {
-  /**
-   * Applies the provided plugins to G during game setup.
-   *
-   * @param {object} G - The G object.
-   * @param {object} ctx - The ctx object.
-   * @param {object} game - The game object.
-   */
-  setup: (G, ctx, game) => {
-    [...DEFAULT_PLUGINS, ...game.plugins]
-      .filter(plugin => plugin.G !== undefined)
-      .filter(plugin => plugin.G.setup !== undefined)
-      .forEach(plugin => {
-        G = plugin.G.setup(G, ctx, game);
-      });
-    return G;
-  },
-
-  /**
-   * Applies the provided plugins to G during the beginning of the phase.
-   *
-   * @param {object} G - The G object.
-   * @param {object} ctx - The ctx object.
-   * @param {object} plugins - The list of plugins.
-   */
-  onPhaseBegin: (G, ctx, plugins) => {
-    [...DEFAULT_PLUGINS, ...plugins]
-      .filter(plugin => plugin.G !== undefined)
-      .filter(plugin => plugin.G.onPhaseBegin !== undefined)
-      .forEach(plugin => {
-        G = plugin.G.onPhaseBegin(G, ctx, plugins);
-      });
-    return G;
-  },
+/**
+ * Applies the provided plugins before a move.
+ *
+ * @param {object} state - The game state.
+ * @param {object} plugins - The list of plugins.
+ */
+export const BeforeMove = (state, plugins) => {
+  [...DEFAULT_PLUGINS, ...plugins]
+    .filter(plugin => plugin.beforeMove !== undefined)
+    .forEach(plugin => {
+      state = plugin.beforeMove(state);
+    });
+  return state;
 };
 
-export const ctx = {
-  /**
-   * Applies the provided plugins to ctx during game setup.
-   *
-   * @param {object} ctx - The ctx object.
-   * @param {object} game - The game object.
-   */
-  setup: (ctx, game) => {
-    [...DEFAULT_PLUGINS, ...game.plugins]
-      .filter(plugin => plugin.ctx !== undefined)
-      .filter(plugin => plugin.ctx.setup !== undefined)
-      .forEach(plugin => {
-        ctx = plugin.ctx.setup(ctx, game);
-      });
-    return ctx;
-  },
+/**
+ * Applies the provided plugins before an event.
+ *
+ * @param {object} state - The game state.
+ * @param {object} plugins - The list of plugins.
+ */
+export const BeforeEvent = (state, plugins) => {
+  [...DEFAULT_PLUGINS, ...plugins]
+    .filter(plugin => plugin.beforeEvent !== undefined)
+    .forEach(plugin => {
+      state = plugin.beforeEvent(state);
+    });
+  return state;
+};
 
-  /**
-   * Applies the provided plugins to ctx during the beginning of the phase.
-   *
-   * @param {object} ctx - The ctx object.
-   * @param {object} plugins - The list of plugins.
-   */
-  onPhaseBegin: (ctx, plugins) => {
-    [...DEFAULT_PLUGINS, ...plugins]
-      .filter(plugin => plugin.ctx !== undefined)
-      .filter(plugin => plugin.ctx.onPhaseBegin !== undefined)
-      .forEach(plugin => {
-        ctx = plugin.ctx.onPhaseBegin(ctx, plugins);
-      });
-    return ctx;
-  },
+/**
+ * Applies the provided plugins after a move (and it's triggers).
+ *
+ * @param {object} state - The game state.
+ * @param {object} plugins - The list of plugins.
+ */
+export const AfterMove = (state, plugins) => {
+  [...DEFAULT_PLUGINS, ...plugins]
+    .filter(plugin => plugin.afterMove !== undefined)
+    .forEach(plugin => {
+      state = plugin.afterMove(state);
+    });
+  return state;
+};
+
+/**
+ * Applies the provided plugins after an event (and it's triggers).
+ *
+ * @param {object} state - The game state.
+ * @param {object} plugins - The list of plugins.
+ */
+export const AfterEvent = (state, plugins) => {
+  [...DEFAULT_PLUGINS, ...plugins]
+    .filter(plugin => plugin.afterEvent !== undefined)
+    .forEach(plugin => {
+      state = plugin.afterEvent(state);
+    });
+  return state;
 };

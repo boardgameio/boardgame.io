@@ -48,8 +48,8 @@ export default {
     };
   },
 
-  G: {
-    setup: (G, ctx, game) => {
+  setup: {
+    G: (G, ctx, game) => {
       let players = {};
       for (let i = 0; i < ctx.numPlayers; i++) {
         let playerState = {};
