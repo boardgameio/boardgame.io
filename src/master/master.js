@@ -95,7 +95,7 @@ export class Master {
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
     this.auth = null;
-    this.onUpdateCallback = () => {};
+    this.subscribeCallback = () => {};
     this.shouldAuth = () => false;
 
     if (auth === true) {
@@ -105,6 +105,10 @@ export class Master {
       this.auth = auth;
       this.shouldAuth = () => true;
     }
+  }
+
+  subscribe(fn) {
+    this.subscribeCallback = fn;
   }
 
   /**
@@ -200,7 +204,7 @@ export class Master {
     store.dispatch(action);
     state = store.getState();
 
-    this.onUpdateCallback({
+    this.subscribeCallback({
       state,
       action,
       gameID,
@@ -268,6 +272,11 @@ export class Master {
     // TODO: Move this out of the sync call.
     if (state === undefined) {
       state = InitializeGame({ game: this.game, numPlayers });
+
+      this.subscribeCallback({
+        state,
+        gameID,
+      });
 
       if (this.executeSynchronously) {
         this.storageAPI.set(key, state);

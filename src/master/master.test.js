@@ -260,6 +260,35 @@ describe('playerView', () => {
   });
 });
 
+describe('subscribe', () => {
+  const callback = jest.fn();
+
+  let master;
+  beforeAll(() => {
+    master = new Master({}, new InMemory(), TransportAPI(jest.fn(), jest.fn()));
+    master.executeSynchronously = true;
+    master.subscribe(callback);
+  });
+
+  test('sync', async () => {
+    master.onSync('gameID', '0');
+    expect(callback).toBeCalledWith({
+      gameID: 'gameID',
+      state: expect.objectContaining({ _stateID: 0 }),
+    });
+  });
+
+  test('update', async () => {
+    const action = ActionCreators.gameEvent('endTurn');
+    master.onUpdate(action, 0, 'gameID', '0');
+    expect(callback).toBeCalledWith({
+      gameID: 'gameID',
+      action,
+      state: expect.objectContaining({ _stateID: 1 }),
+    });
+  });
+});
+
 describe('authentication', () => {
   describe('async', () => {
     const send = jest.fn();

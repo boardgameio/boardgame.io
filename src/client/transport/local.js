@@ -73,7 +73,7 @@ export function LocalMaster({ game, bots }) {
     clientCallbacks[playerID] = callback;
   };
 
-  master.onUpdateCallback = ({ state, gameID }) => {
+  master.subscribe(({ state, gameID }) => {
     if (!bots) {
       return;
     }
@@ -92,7 +92,7 @@ export function LocalMaster({ game, bots }) {
         );
       }, 100);
     }
-  };
+  });
 
   return master;
 }
