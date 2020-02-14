@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { PlayerView, TurnOrder } from 'boardgame.io/core';
+import { PlayerView, ActivePlayers } from 'boardgame.io/core';
 
 const RedactedMoves = {
   name: 'secret-state',
@@ -14,23 +14,21 @@ const RedactedMoves = {
   setup: () => ({
     other: {},
     players: {
-      0: 'player 0 state',
-      1: 'player 1 state',
+      '0': 'player 0 state',
+      '1': 'player 1 state',
     },
   }),
 
   moves: {
     clickCell: {
       /* eslint-disable no-unused-vars */
-      impl: (G, ctx, secretstuff) => {
-        return { ...G };
-      },
+      move: (G, ctx, secretstuff) => {},
       /* eslint-enable no-unused-vars */
       redact: true,
     },
   },
 
-  turn: { order: TurnOrder.ANY },
+  turn: { activePlayers: ActivePlayers.ALL },
 
   playerView: PlayerView.STRIP_SECRETS,
 };

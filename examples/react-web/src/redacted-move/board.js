@@ -20,9 +20,7 @@ const Board = ({ G, ctx, moves, playerID, log }) => (
       <pre>{JSON.stringify(log, null, 2)}</pre>
       {playerID && (
         <button
-          onClick={() =>
-            moves.clickCell({ secret: G.players[ctx.currentPlayer] })
-          }
+          onClick={() => moves.clickCell({ secret: G.players[playerID] })}
         >
           Click Cell
         </button>
