@@ -106,6 +106,19 @@ describe('GetBotPlayer', () => {
     );
     expect(result).toEqual(null);
   });
+
+  test('gameover', () => {
+    const result = GetBotPlayer(
+      {
+        ctx: {
+          currentPlayer: '0',
+          gameover: true,
+        },
+      },
+      { '0': {} }
+    );
+    expect(result).toEqual(null);
+  });
 });
 
 describe('LocalMaster', () => {
