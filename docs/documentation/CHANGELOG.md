@@ -1,3 +1,11 @@
+## v0.37.2
+
+#### Bugfixes
+
+* [[8c120d2](https://github.com/nicolodavis/boardgame.io/commit/8c120d2)] trigger bot if it needs to play at game start
+* [[aed5cd1](https://github.com/nicolodavis/boardgame.io/commit/aed5cd1)] don't run bot once game is over
+* [[7c65046](https://github.com/nicolodavis/boardgame.io/commit/7c65046)] fix redacted move example
+
 ## v0.37.1
 
 #### Bugfixes
