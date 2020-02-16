@@ -14,15 +14,6 @@ const Board = ({ G, ctx, moves, playerID }) => (
   <div className="secret-state">
     <section>
       <pre>{JSON.stringify(G, null, 2)}</pre>
-      {playerID && (
-        <button
-          onClick={() =>
-            moves.clickCell({ secret: G.players[ctx.currentPlayer] })
-          }
-        >
-          Click Cell
-        </button>
-      )}
     </section>
   </div>
 );
