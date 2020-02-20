@@ -93,8 +93,8 @@ it('multiplayer test', () => {
   const p0 = Client({ ...spec, playerID: '0' });
   const p1 = Client({ ...spec, playerID: '1' });
 
-  p0.connect();
-  p1.connect();
+  p0.start();
+  p1.start();
 
   p0.moves.moveA();
   p0.events.endTurn();
