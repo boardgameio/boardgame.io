@@ -44,6 +44,18 @@ const TicTacToe = {
       return { draw: true };
     }
   },
+
+  ai: {
+    enumerate: (G, ctx) => {
+      let moves = [];
+      for (let i = 0; i < 9; i++) {
+        if (G.cells[i] === null) {
+          moves.push({ move: 'clickCell', args: [i] });
+        }
+      }
+      return moves;
+    },
+  },
 };
 
 class TicTacToeBoard extends React.Component {
@@ -109,17 +121,6 @@ var App = Client({
   board: TicTacToeBoard,
   game: TicTacToe,
   debug: { impl: Debug },
-  ai: {
-    enumerate: (G, ctx) => {
-      let moves = [];
-      for (let i = 0; i < 9; i++) {
-        if (G.cells[i] === null) {
-          moves.push({ move: 'clickCell', args: [i] });
-        }
-      }
-      return moves;
-    },
-  },
 });
 
 ReactDOM.render(<App />, document.getElementById('app'));
