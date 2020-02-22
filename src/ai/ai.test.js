@@ -29,19 +29,12 @@ function IsVictory(cells) {
     [2, 4, 6],
   ];
 
-  for (let pos of positions) {
-    const symbol = cells[pos[0]];
-    let winner = symbol;
-    for (let i of pos) {
-      if (cells[i] != symbol) {
-        winner = null;
-        break;
-      }
-    }
-    if (winner != null) return true;
-  }
+  const isRowComplete = row => {
+    const symbols = row.map(i => cells[i]);
+    return symbols.every(i => i !== null && i === symbols[0]);
+  };
 
-  return false;
+  return positions.map(isRowComplete).some(i => i === true);
 }
 
 const TicTacToe = Game({
