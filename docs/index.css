@@ -82,6 +82,13 @@ ul {
 #topbar a {
   margin-left: 10px;
   margin-right: 10px;
+  color: #33e;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#topbar a:visited {
+  color: #33e;
 }
 
 @media screen and (max-width: 768px) {
