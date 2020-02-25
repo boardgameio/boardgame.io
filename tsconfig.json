@@ -8,8 +8,6 @@
     "strict": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "plugins": [
-      { "transform": "ts-transformer-imports" }
-    ]
+    "plugins": [{ "transform": "ts-transformer-imports" }]
   }
 }

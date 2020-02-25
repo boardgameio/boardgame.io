@@ -159,10 +159,6 @@ describe('createServerRunConfig', () => {
     const mockCallback = () => {};
     const mockApiCallback = () => {};
 
-    expect(createServerRunConfig()).toEqual({
-      port: undefined,
-      callback: undefined,
-    });
     expect(createServerRunConfig(8000)).toEqual({
       port: 8000,
       callback: undefined,

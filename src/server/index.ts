@@ -14,20 +14,30 @@ import { Game } from '../core/game';
 import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
 
+interface ServerConfig {
+  port?: Number;
+  callback?: Function;
+  lobbyConfig?: {
+    apiPort: Number;
+    apiCallback?: Function;
+  };
+}
+
 /**
  * Build config object from server run arguments.
- *
- * @param {number} portOrConfig - Either port or server config object. Optional.
- * @param {function} callback - Server run callback. Optional.
  */
-export const createServerRunConfig = (portOrConfig?: any, callback?: any) => {
-  const config: any = {};
+export const createServerRunConfig = (
+  portOrConfig: Number | ServerConfig,
+  callback?: Function
+): ServerConfig => {
+  const config: ServerConfig = {};
   if (portOrConfig && typeof portOrConfig === 'object') {
-    config.port = portOrConfig.port;
-    config.callback = portOrConfig.callback || callback;
-    config.lobbyConfig = portOrConfig.lobbyConfig;
+    const serverConfig = portOrConfig as ServerConfig;
+    config.port = serverConfig.port;
+    config.callback = serverConfig.callback || callback;
+    config.lobbyConfig = serverConfig.lobbyConfig;
   } else {
-    config.port = portOrConfig;
+    config.port = portOrConfig as Number;
     config.callback = callback;
   }
   return config;
@@ -73,7 +83,7 @@ export function Server({
     app,
     db,
 
-    run: async (portOrConfig, callback) => {
+    run: async (portOrConfig: Number | object, callback?: Function) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
 
       // DB
