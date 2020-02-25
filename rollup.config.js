@@ -27,6 +27,7 @@ const external = [
 const plugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true, only: [/svelte/] }),
+  tsPlugin({ typescript: ttypescript }),
   svelte({ extensions: ['.svelte'] }),
 ];
 
@@ -40,6 +41,7 @@ const serverPlugins = [
 const minifiedPlugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true }),
+  tsPlugin({ typescript: ttypescript }),
   svelte({ extensions: ['.svelte'] }),
   commonjs(),
   replace({
