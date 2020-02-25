@@ -19,6 +19,7 @@ import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
+import { LogEntry, GameConfig } from '../types';
 
 /**
  * Flow
@@ -93,7 +94,14 @@ import * as logging from './logger';
  *   start: false,
  * }
  */
-export function Flow({ moves, phases, endIf, turn, events, plugins }) {
+export function Flow({
+  moves,
+  phases,
+  endIf,
+  turn,
+  events,
+  plugins,
+}: GameConfig) {
   // Attach defaults.
   if (moves === undefined) {
     moves = {};
@@ -453,7 +461,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
-  function EndPhase(state, { arg, next, turn, automatic }) {
+  function EndPhase(state, { arg, next, turn, automatic }: any) {
     // End the turn first.
     state = EndTurn(state, { turn, force: true });
 
@@ -478,7 +486,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Add log entry.
     const action = gameEvent('endPhase', arg);
-    const logEntry = {
+    const logEntry: LogEntry = {
       action,
       _stateID: state._stateID,
       turn: state.ctx.turn,
@@ -494,7 +502,10 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog };
   }
 
-  function EndTurn(state, { arg, next, turn, force, automatic, playerID }) {
+  function EndTurn(
+    state,
+    { arg, next, turn, force, automatic, playerID }: any
+  ) {
     // This is not the turn that EndTurn was originally
     // called for. The turn was probably ended some other way.
     if (turn !== state.ctx.turn) {
@@ -546,7 +557,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Add log entry.
     const action = gameEvent('endTurn', arg);
-    const logEntry = {
+    const logEntry: LogEntry = {
       action,
       _stateID: state._stateID,
       turn: state.ctx.turn,
@@ -562,7 +573,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
     return { ...state, G, ctx, deltalog, _undo: [], _redo: [] };
   }
 
-  function EndStage(state, { arg, next, automatic, playerID }) {
+  function EndStage(state, { arg, next, automatic, playerID }: any) {
     playerID = playerID || state.ctx.currentPlayer;
 
     let { ctx } = state;
@@ -609,7 +620,7 @@ export function Flow({ moves, phases, endIf, turn, events, plugins }) {
 
     // Add log entry.
     const action = gameEvent('endStage', arg);
-    const logEntry = {
+    const logEntry: LogEntry = {
       action,
       _stateID: state._stateID,
       turn: state.ctx.turn,

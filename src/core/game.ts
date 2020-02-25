@@ -8,6 +8,7 @@
 
 import { FnWrap } from '../plugins/main';
 import { Flow } from './flow';
+import { GameConfig } from '../types';
 
 /**
  * Game
@@ -24,37 +25,8 @@ import { Flow } from './flow';
  * have action.type contain the name of the move, and
  * action.args contain any additional arguments as an
  * Array.
- *
- * @param {...object} setup - Function that returns the initial state of G.
- *
- * @param {...object} moves - A dictionary of move functions.
- *
- * @param {...object} playerView - A function that returns a
- *                                 derivative of G tailored for
- *                                 the specified player.
- *
- * @param {...object} seed - Seed for the PRNG.
- *
- * @param {Array} plugins - List of plugins. Each plugin is an object like the following:
- *                          {
- *                            // Optional: Wraps a move / trigger function and returns
- *                            // the wrapped function. The wrapper can do anything
- *                            // it wants, but will typically be used to customize G.
- *                            fnWrap: (fn) => {
- *                              return (G, ctx, ...args) => {
- *                                G = preprocess(G);
- *                                G = fn(G, ctx, ...args);
- *                                G = postprocess(G);
- *                                return G;
- *                              };
- *                            },
- *
- *                            // Optional: Called during setup. Can be used to
- *                            // augment G with additional state during setup.
- *                            setup: (G, ctx) => G,
- *                          }
  */
-export function Game(game) {
+export function Game(game: GameConfig) {
   // The Game() function has already been called on this
   // config object, so just pass it through.
   if (game.processMove) {

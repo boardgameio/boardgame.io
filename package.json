@@ -19,6 +19,7 @@
     "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --collectCoverageFrom=!src/client/debug/** --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "test:integration": "bash ./scripts/integration.sh",
+    "ts": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "npm run clean",
@@ -135,7 +136,7 @@
     "ts-jest": "^24.0.2",
     "ts-transformer-imports": "^0.4.3",
     "ttypescript": "^1.5.7",
-    "typescript": "^3.5.3"
+    "typescript": "^3.8.2"
   },
   "dependencies": {
     "@koa/cors": "^2.2.1",

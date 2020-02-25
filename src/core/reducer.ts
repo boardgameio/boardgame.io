@@ -11,11 +11,16 @@ import * as plugin from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
 import { ContextEnhancer } from './context-enhancer';
+import { GameConfig, LogEntry, State } from '../types';
 
 /**
  * Returns true if a move can be undone.
  */
-const CanUndoMove = (G, ctx, move) => {
+const CanUndoMove = (
+  G: object,
+  ctx: object,
+  move: { undoable: boolean | Function }
+) => {
   if (move.undoable === false) {
     return false;
   }
@@ -42,7 +47,13 @@ export const INVALID_MOVE = 'INVALID_MOVE';
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to a truthy value if we are in a multiplayer client.
  */
-export function CreateGameReducer({ game, multiplayer }) {
+export function CreateGameReducer({
+  game,
+  multiplayer,
+}: {
+  game: GameConfig;
+  multiplayer: boolean | object;
+}) {
   game = Game(game);
 
   /**
@@ -52,7 +63,7 @@ export function CreateGameReducer({ game, multiplayer }) {
    * @param {object} state - The state before the action.
    * @param {object} action - A Redux action.
    */
-  return (state = null, action) => {
+  return (state: State | null = null, action): State => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
         state = { ...state, deltalog: [] };
@@ -159,7 +170,7 @@ export function CreateGameReducer({ game, multiplayer }) {
         }
 
         // Create a log entry for this move.
-        let logEntry = {
+        let logEntry: LogEntry = {
           action,
           _stateID: state._stateID,
           turn: state.ctx.turn,

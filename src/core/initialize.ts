@@ -1,8 +1,10 @@
 import { parse, stringify } from 'flatted';
 import { Random } from './random';
 import { Game } from './game';
+import { GameConfig } from '../types';
 import * as plugins from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
+import { State, Ctx } from '../types';
 
 /**
  * InitializeGame
@@ -13,14 +15,22 @@ import { ContextEnhancer } from './context-enhancer';
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
-export function InitializeGame({ game, numPlayers, setupData }) {
+export function InitializeGame({
+  game,
+  numPlayers,
+  setupData,
+}: {
+  game: GameConfig;
+  numPlayers: number;
+  setupData: any;
+}) {
   game = Game(game);
 
   if (!numPlayers) {
     numPlayers = 2;
   }
 
-  let ctx = game.flow.ctx(numPlayers);
+  let ctx: Ctx = game.flow.ctx(numPlayers);
 
   let seed = game.seed;
   if (seed === undefined) {
@@ -40,7 +50,7 @@ export function InitializeGame({ game, numPlayers, setupData }) {
   // Pass G through all the plugins that want to modify it.
   initialG = plugins.Setup.G(initialG, ctxWithAPI, game);
 
-  const initial = {
+  const initial: State & { _initial: object } = {
     // User managed state.
     G: initialG,
     // Framework managed state.
@@ -61,7 +71,7 @@ export function InitializeGame({ game, numPlayers, setupData }) {
     _initial: {},
   };
 
-  let state = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
+  let state: State = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
 
   initial.G = state.G;
   initial._undo = state._undo;

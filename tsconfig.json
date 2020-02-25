@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
-    "declaration": true,
+    "declaration": false,
     "outDir": "built-ts",
     "strict": false,
     "allowSyntheticDefaultImports": true,
