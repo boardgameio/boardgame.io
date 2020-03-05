@@ -1,8 +1,5 @@
 <script>
   export let logIndex;
-  export let onLogClick;
-  export let onMouseEnter;
-  export let onMouseLeave;
   export let action;
   export let pinned;
   export let payload;
