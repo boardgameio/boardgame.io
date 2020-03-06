@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { ActionShape } from './action-creators'
 import * as Actions from './action-types';
 import * as plugin from '../plugins/main';
 import { Game } from './game';
@@ -63,7 +64,7 @@ export function CreateGameReducer({
    * @param {object} state - The state before the action.
    * @param {object} action - A Redux action.
    */
-  return (state: State | null = null, action): State => {
+  return (state: State | null = null, action: ActionShape.Any): State => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
         state = { ...state, deltalog: [] };
