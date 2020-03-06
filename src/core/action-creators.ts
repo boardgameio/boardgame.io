@@ -17,7 +17,7 @@ import * as Actions from './action-types';
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
 export const makeMove = (type, args, playerID, credentials) => ({
-  type: Actions.MAKE_MOVE,
+  type: Actions.MAKE_MOVE as typeof Actions.MAKE_MOVE,
   payload: { type, args, playerID, credentials },
 });
 
@@ -30,7 +30,7 @@ export const makeMove = (type, args, playerID, credentials) => ({
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
 export const gameEvent = (type, args, playerID, credentials) => ({
-  type: Actions.GAME_EVENT,
+  type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
 });
 
@@ -42,7 +42,7 @@ export const gameEvent = (type, args, playerID, credentials) => ({
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
 export const automaticGameEvent = (type, args, playerID, credentials) => ({
-  type: Actions.GAME_EVENT,
+  type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
   automatic: true,
 });
@@ -53,7 +53,7 @@ export const automaticGameEvent = (type, args, playerID, credentials) => ({
  * @param {Array} log - The log to restore.
  */
 export const sync = (state, log) => ({
-  type: Actions.SYNC,
+  type: Actions.SYNC as typeof Actions.SYNC,
   state,
   log,
   clientOnly: true,
@@ -66,7 +66,7 @@ export const sync = (state, log) => ({
  * @param {Array} deltalog - A log delta.
  */
 export const update = (state, deltalog) => ({
-  type: Actions.UPDATE,
+  type: Actions.UPDATE as typeof Actions.UPDATE,
   state,
   deltalog,
   clientOnly: true,
@@ -77,7 +77,7 @@ export const update = (state, deltalog) => ({
  * @param {object} state - The initial state.
  */
 export const reset = state => ({
-  type: Actions.RESET,
+  type: Actions.RESET as typeof Actions.RESET,
   state,
   clientOnly: true,
 });
@@ -86,12 +86,12 @@ export const reset = state => ({
  * Used to undo the last move.
  */
 export const undo = () => ({
-  type: Actions.UNDO,
+  type: Actions.UNDO as typeof Actions.UNDO,
 });
 
 /**
  * Used to redo the last undone move.
  */
 export const redo = () => ({
-  type: Actions.REDO,
+  type: Actions.REDO as typeof Actions.REDO,
 });
