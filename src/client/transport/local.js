@@ -210,7 +210,7 @@ export function Local(opts) {
   return transportOpts => {
     let master;
 
-    if (localMasters.has(transportOpts.gameKey)) {
+    if (localMasters.has(transportOpts.gameKey) & !opts) {
       master = localMasters.get(transportOpts.gameKey);
     } else {
       master = new LocalMaster({
