@@ -1,7 +1,6 @@
 <script>
   export let ctx;
   export let playerID;
-  export let onClick = () => {};
 
   import { createEventDispatcher } from 'svelte';
 
