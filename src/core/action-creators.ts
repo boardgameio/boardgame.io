@@ -110,18 +110,3 @@ export const undo = () => ({
 export const redo = () => ({
   type: Actions.REDO as typeof Actions.REDO,
 });
-
-/**
- * Export return types of action creators to use as types for action objects.
- */
-export namespace ActionShape {
-  export type MakeMove = ReturnType<typeof makeMove>
-  export type GameEvent = ReturnType<typeof gameEvent>
-  export type AutomaticGameEvent = ReturnType<typeof automaticGameEvent>
-  export type Sync = ReturnType<typeof sync>
-  export type Update = ReturnType<typeof update>
-  export type Reset = ReturnType<typeof reset>
-  export type Undo = ReturnType<typeof undo>
-  export type Redo = ReturnType<typeof redo>
-  export type Any = MakeMove | GameEvent | AutomaticGameEvent | Sync | Update | Reset | Undo | Redo
-}

@@ -6,13 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { ActionShape } from './action-creators'
 import * as Actions from './action-types';
 import * as plugin from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
 import { ContextEnhancer } from './context-enhancer';
-import { GameConfig, LogEntry, State } from '../types';
+import { ActionShape, GameConfig, LogEntry, State } from '../types';
 
 /**
  * Returns true if a move can be undone.
