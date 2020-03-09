@@ -83,6 +83,18 @@ export const isActionFromAuthenticPlayer = (
 };
 
 /**
+ * Remove player credentials from action payload
+ */
+const stripCredentialsFromAction = action => {
+  if ('payload' in action && 'credentials' in action.payload) {
+    // eslint-disable-next-line no-unused-vars
+    const { credentials, ...payload } = action.payload;
+    action = { ...action, payload };
+  }
+  return action;
+};
+
+/**
  * Master
  *
  * Class that runs the game and maintains the authoritative state.
@@ -135,6 +147,8 @@ export class Master {
     if (!isActionAuthentic) {
       return { error: 'unauthorized action' };
     }
+
+    action = stripCredentialsFromAction(action);
 
     const key = gameID;
 

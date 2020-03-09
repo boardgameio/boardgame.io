@@ -28,30 +28,24 @@ object as a parameter.
     return G;
   },
 
-  G: {
+  // Called right before a move in order to preprocess G.
+  beforeMove: G => G,
+
+  // Called right before an event in order to preprocess G.
+  beforeEvent: G => G,
+
+  // Called right after an event in order to postprocess G.
+  afterMove: G => G,
+
+  // Called right after a move in order to postprocess G.
+  afterEvent: G => G,
+
+  setup: {
     // Called during setup in order to add state to G.
-    setup: (G, ctx, game) => G,
-
-    // Called right before a move / event in order to preprocess G.
-    preMove: (G, ctx, game) => G,
-
-    // Called right after a move / event in order to postprocess G.
-    postMove: (G, ctx, game) => G,
-
-    // Called when a phase begins.
-    onPhaseBegin: (G, ctx, game) => G,
-  },
-
-  ctx: {
-    // Called during setup in order to add state to ctx.
-    setup: (ctx, game) => ctx,
-
-    // Called right before a move / event in order to preprocess ctx.
-    preMove: (ctx, game) => ctx,
-
-    // Called when a phase begins.
-    onPhaseBegin: (ctx, game) => ctx,
-  },
+    G: (G, ctx, game) => G,
+        // Called during setup in order to add state to ctx.
+    ctx: (ctx, game) => ctx
+  }
 }
 ```
 
