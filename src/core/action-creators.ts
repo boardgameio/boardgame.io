@@ -16,7 +16,12 @@ import * as Actions from './action-types';
  * @param {string}  playerID - The ID of the player making this action.
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const makeMove = (type, args, playerID, credentials) => ({
+export const makeMove = (
+  type: string,
+  args: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
   type: Actions.MAKE_MOVE as typeof Actions.MAKE_MOVE,
   payload: { type, args, playerID, credentials },
 });
@@ -29,7 +34,12 @@ export const makeMove = (type, args, playerID, credentials) => ({
  * @param {string}  playerID - The ID of the player making this action.
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const gameEvent = (type, args, playerID, credentials) => ({
+export const gameEvent = (
+  type: string,
+  args: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
   type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
 });
@@ -41,7 +51,12 @@ export const gameEvent = (type, args, playerID, credentials) => ({
  * @param {string}  playerID - The ID of the player making this action.
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const automaticGameEvent = (type, args, playerID, credentials) => ({
+export const automaticGameEvent = (
+  type: string,
+  args: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
   type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
   automatic: true,
@@ -52,7 +67,7 @@ export const automaticGameEvent = (type, args, playerID, credentials) => ({
  * @param {object} state - The state to restore.
  * @param {Array} log - The log to restore.
  */
-export const sync = (state, log) => ({
+export const sync = (state: any, log: any[]) => ({
   type: Actions.SYNC as typeof Actions.SYNC,
   state,
   log,
@@ -65,7 +80,7 @@ export const sync = (state, log) => ({
  * @param {object} state - The state to restore.
  * @param {Array} deltalog - A log delta.
  */
-export const update = (state, deltalog) => ({
+export const update = (state: any, deltalog: any[]) => ({
   type: Actions.UPDATE as typeof Actions.UPDATE,
   state,
   deltalog,
@@ -76,7 +91,7 @@ export const update = (state, deltalog) => ({
  * Used to reset the game state.
  * @param {object} state - The initial state.
  */
-export const reset = state => ({
+export const reset = (state: any) => ({
   type: Actions.RESET as typeof Actions.RESET,
   state,
   clientOnly: true,
