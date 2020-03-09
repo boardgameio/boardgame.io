@@ -71,7 +71,7 @@ export const sync = (state: any, log: any[]) => ({
   type: Actions.SYNC as typeof Actions.SYNC,
   state,
   log,
-  clientOnly: true,
+  clientOnly: true as const,
 });
 
 /**
@@ -84,7 +84,7 @@ export const update = (state: any, deltalog: any[]) => ({
   type: Actions.UPDATE as typeof Actions.UPDATE,
   state,
   deltalog,
-  clientOnly: true,
+  clientOnly: true as const,
 });
 
 /**
@@ -94,7 +94,7 @@ export const update = (state: any, deltalog: any[]) => ({
 export const reset = (state: any) => ({
   type: Actions.RESET as typeof Actions.RESET,
   state,
-  clientOnly: true,
+  clientOnly: true as const,
 });
 
 /**
