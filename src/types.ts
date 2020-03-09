@@ -19,7 +19,7 @@ export interface State {
 }
 
 export interface LogEntry {
-  action: object;
+  action: ActionShape.Any;
   _stateID: number;
   turn: number;
   phase: string;
