@@ -839,7 +839,7 @@ export function Flow({
   }
 
   return {
-    ctx: numPlayers => ({
+    ctx: (numPlayers: number) => ({
       numPlayers,
       turn: 0,
       currentPlayer: '0',
