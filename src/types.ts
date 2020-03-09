@@ -75,3 +75,9 @@ export namespace ActionShape {
   export type Redo = ReturnType<typeof ActionCreators.redo>
   export type Any = MakeMove | GameEvent | AutomaticGameEvent | Sync | Update | Reset | Undo | Redo
 }
+
+export namespace ActionPayload {
+  type GetPayload<T extends object> = Object.At<T, 'payload'>
+  export type MakeMove = GetPayload<ActionShape.MakeMove>
+  export type GameEvent = GetPayload<ActionShape.GameEvent>
+}
