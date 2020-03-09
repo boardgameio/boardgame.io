@@ -8,7 +8,7 @@
 
 import { FnWrap } from '../plugins/main';
 import { Flow } from './flow';
-import { GameConfig } from '../types';
+import { ActionPayload, GameConfig } from '../types';
 
 /**
  * Game
@@ -52,7 +52,7 @@ export function Game(game: GameConfig) {
 
     moveNames: flow.moveNames,
 
-    processMove: (G, action, ctx) => {
+    processMove: (G, action: ActionPayload.MakeMove, ctx) => {
       let moveFn = flow.getMove(ctx, action.type, action.playerID);
 
       if (moveFn instanceof Object && moveFn.move) {
