@@ -19,7 +19,7 @@ import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
-import { LogEntry, GameConfig } from '../types';
+import { ActionPayload, ActionShape, LogEntry, GameConfig } from '../types';
 
 /**
  * Flow
@@ -684,7 +684,7 @@ export function Flow({
     return null;
   }
 
-  function ProcessMove(state, action) {
+  function ProcessMove(state, action: ActionPayload.MakeMove) {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
@@ -822,7 +822,7 @@ export function Flow({
     enabledEventNames.push('setStage');
   }
 
-  function ProcessEvent(state, action) {
+  function ProcessEvent(state, action: ActionShape.GameEvent) {
     const { type, playerID, args } = action.payload;
     if (eventHandlers.hasOwnProperty(type)) {
       const eventArgs = [state, playerID].concat(args);
