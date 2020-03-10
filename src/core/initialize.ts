@@ -52,7 +52,7 @@ export function InitializeGame({
   // Pass G through all the plugins that want to modify it.
   initialG = plugins.Setup.G(initialG, ctxWithAPI, game);
 
-  const initial: State & { _initial: object } = {
+  const initial: State = {
     // User managed state.
     G: initialG,
     // Framework managed state.
