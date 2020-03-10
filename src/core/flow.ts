@@ -434,25 +434,25 @@ export function Flow({
   // ShouldEnd //
   ///////////////
 
-  function ShouldEndGame({ G, ctx }): boolean {
-    return endIf(G, ctx);
+  function ShouldEndGame(state: State): boolean {
+    return endIf(state.G, state.ctx);
   }
 
-  function ShouldEndPhase({ G, ctx }): boolean {
-    const conf = GetPhase(ctx);
-    return conf.endIf(G, ctx);
+  function ShouldEndPhase(state: State): boolean {
+    const conf = GetPhase(state.ctx);
+    return conf.endIf(state.G, state.ctx);
   }
 
-  function ShouldEndTurn({ G, ctx }): boolean {
-    const conf = GetPhase(ctx);
+  function ShouldEndTurn(state: State): boolean {
+    const conf = GetPhase(state.ctx);
 
     // End the turn if the required number of moves has been made.
-    const currentPlayerMoves = ctx.numMoves || 0;
+    const currentPlayerMoves = state.ctx.numMoves || 0;
     if (conf.turn.moveLimit && currentPlayerMoves >= conf.turn.moveLimit) {
       return true;
     }
 
-    return conf.turn.endIf(G, ctx);
+    return conf.turn.endIf(state.G, state.ctx);
   }
 
   /////////
