@@ -7,6 +7,7 @@
  */
 
 import * as Actions from './action-types';
+import { State, LogEntry } from '../types'
 
 /**
  * Generate a move to be dispatched to the game move reducer.
@@ -67,7 +68,7 @@ export const automaticGameEvent = (
  * @param {object} state - The state to restore.
  * @param {Array} log - The log to restore.
  */
-export const sync = (state: any, log: any[]) => ({
+export const sync = (state: State, log: LogEntry[]) => ({
   type: Actions.SYNC as typeof Actions.SYNC,
   state,
   log,
@@ -80,7 +81,7 @@ export const sync = (state: any, log: any[]) => ({
  * @param {object} state - The state to restore.
  * @param {Array} deltalog - A log delta.
  */
-export const update = (state: any, deltalog: any[]) => ({
+export const update = (state: State, deltalog: LogEntry[]) => ({
   type: Actions.UPDATE as typeof Actions.UPDATE,
   state,
   deltalog,
@@ -91,7 +92,7 @@ export const update = (state: any, deltalog: any[]) => ({
  * Used to reset the game state.
  * @param {object} state - The initial state.
  */
-export const reset = (state: any) => ({
+export const reset = (state: State) => ({
   type: Actions.RESET as typeof Actions.RESET,
   state,
   clientOnly: true as const,
