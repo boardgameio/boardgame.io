@@ -105,14 +105,15 @@ export function CreateGameReducer({
         state.ctx = apiCtx.attachToContext(state.ctx);
 
         // Execute plugins.
-        state = plugin.BeforeEvent(state, game.plugins);
+        state = plugin.Enhance(state, game);
+        state = plugin.BeforeEvent(state, game);
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
         newState = apiCtx.updateAndDetach(newState, true);
 
         // Execute plugins.
-        newState = plugin.AfterEvent(newState, game.plugins);
+        newState = plugin.AfterEvent(newState, game);
 
         return { ...newState, _stateID: state._stateID + 1 };
       }
@@ -160,7 +161,8 @@ export function CreateGameReducer({
         let ctxWithAPI = apiCtx.attachToContext(state.ctx);
 
         // Execute plugins.
-        state = plugin.BeforeMove(state, game.plugins);
+        state = plugin.Enhance(state, game);
+        state = plugin.BeforeMove(state, game);
 
         // Process the move.
         let G = game.processMove(state.G, action.payload, ctxWithAPI);
@@ -205,7 +207,7 @@ export function CreateGameReducer({
         state = { ...newState, G, ctx, _stateID: state._stateID + 1 };
 
         // Execute plugins.
-        state = plugin.AfterMove(state, game.plugins);
+        state = plugin.AfterMove(state, game);
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.

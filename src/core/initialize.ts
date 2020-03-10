@@ -38,23 +38,30 @@ export function InitializeGame({
   }
   ctx._random = { seed };
 
-  // Pass ctx through all the plugins that want to modify it.
-  ctx = plugins.Setup.ctx(ctx, game);
+  let state: Partial<State> = {
+    G: {},
+    ctx,
+  };
+
+  // Run plugins over initial state.
+  state = plugins.Enhance(state, game);
+  state = plugins.Setup(state, game);
 
   // Augment ctx with the enhancers (TODO: move these into plugins).
-  const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
-  let ctxWithAPI = apiCtx.attachToContext(ctx);
+  const apiCtx = new ContextEnhancer(state.ctx, game, ctx.currentPlayer);
+  state.ctx = apiCtx.attachToContext(state.ctx);
 
-  let initialG = game.setup(ctxWithAPI, setupData);
+  const initialG = game.setup(state.ctx, setupData);
 
-  // Pass G through all the plugins that want to modify it.
-  initialG = plugins.Setup.G(initialG, ctxWithAPI, game);
+  state.G = { ...state.G, ...initialG };
 
   const initial: State & { _initial: object } = {
+    ...state,
+
     // User managed state.
-    G: initialG,
+    G: state.G,
     // Framework managed state.
-    ctx: ctx,
+    ctx: state.ctx,
     // List of {G, ctx} pairs that can be undone.
     _undo: [],
     // List of {G, ctx} pairs that can be redone.
@@ -71,7 +78,7 @@ export function InitializeGame({
     _initial: {},
   };
 
-  let state: State = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
+  state = game.flow.init({ G: initial.G, ctx: initial.ctx });
 
   initial.G = state.G;
   initial._undo = state._undo;

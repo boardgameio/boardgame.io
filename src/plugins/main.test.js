@@ -38,10 +38,7 @@ describe('plugins', () => {
             G = fn(G, ctx);
             return { ...G, fnWrap: true };
           },
-          setup: {
-            G: G => ({ ...G, setup: true }),
-            ctx: ctx => ({ ...ctx, setup: true }),
-          },
+          setup: state => ({ ...state, setup: true }),
         },
       ],
     };
@@ -49,12 +46,8 @@ describe('plugins', () => {
     client = Client({ game });
   });
 
-  test('setupG', () => {
-    expect(client.getState().G).toMatchObject({ setup: true });
-  });
-
-  test('setupCtx', () => {
-    expect(client.getState().ctx).toMatchObject({ setup: true });
+  test('setup', () => {
+    expect(client.getState().setup).toBe(true);
   });
 
   test('fnWrap', () => {
@@ -73,5 +66,36 @@ describe('plugins', () => {
     client.events.endTurn();
     expect(client.getState().G).toMatchObject({ beforeEvent: true });
     expect(client.getState().G).toMatchObject({ afterEvent: true });
+  });
+});
+
+describe('enhance', () => {
+  const game = {
+    moves: {
+      A: (G, ctx) => {
+        if (ctx.enhanced !== undefined) {
+          G.enhanced = true;
+        }
+      },
+    },
+
+    plugins: [
+      {
+        enhance: state => ({ ...state, enhanced: true }),
+      },
+    ],
+  };
+
+  const client = Client({ game });
+
+  test('basic', () => {
+    expect(client.getState().enhanced).toBe(true);
+  });
+
+  test('does not make it into undo state', () => {
+    client.undo();
+    expect(client.getState()._undo[0]).not.toMatchObject({
+      enhanced: true,
+    });
   });
 });

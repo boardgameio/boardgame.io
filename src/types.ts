@@ -16,17 +16,17 @@ interface ActivePlayers {
 
 export interface Ctx {
   numPlayers: number;
-  playOrder: Array<string>;
+  playOrder: Array<PlayerID>;
   playOrderPos: number;
   activePlayers: null | ActivePlayers;
-  currentPlayer: string;
+  currentPlayer: PlayerID;
   numMoves?: number;
   gameover?: any;
   turn: number;
   phase: string;
   _activePlayersMoveLimit?: object;
   _activePlayersNumMoves?: object;
-  _prevActivePlayers?: Array<string>;
+  _prevActivePlayers?: Array<object>;
   _random?: object;
 }
 

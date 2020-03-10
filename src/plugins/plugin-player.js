@@ -48,17 +48,17 @@ export default {
     };
   },
 
-  setup: {
-    G: (G, ctx, game) => {
-      let players = {};
-      for (let i = 0; i < ctx.numPlayers; i++) {
-        let playerState = {};
-        if (game.playerSetup !== undefined) {
-          playerState = game.playerSetup(i + '');
-        }
-        players[i + ''] = playerState;
+  setup: (state, game) => {
+    let { G, ctx } = state;
+    let players = {};
+    for (let i = 0; i < ctx.numPlayers; i++) {
+      let playerState = {};
+      if (game.playerSetup !== undefined) {
+        playerState = game.playerSetup(i + '');
       }
-      return { ...G, players };
-    },
+      players[i + ''] = playerState;
+    }
+    G = { ...G, players };
+    return { ...state, G };
   },
 };
