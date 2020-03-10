@@ -30,13 +30,15 @@ export function InitializeGame({
     numPlayers = 2;
   }
 
-  let ctx: Ctx = game.flow.ctx(numPlayers);
-
   let seed = game.seed;
   if (seed === undefined) {
     seed = Random.seed();
   }
-  ctx._random = { seed };
+
+  let ctx: Ctx = {
+    ...game.flow.ctx(numPlayers),
+    _random: { seed }
+  };
 
   // Pass ctx through all the plugins that want to modify it.
   ctx = plugins.Setup.ctx(ctx, game);
