@@ -51,7 +51,7 @@ export function CreateGameReducer({
   multiplayer,
 }: {
   game: GameConfig;
-  multiplayer: boolean | object;
+  multiplayer?: boolean | object;
 }) {
   game = Game(game);
 
