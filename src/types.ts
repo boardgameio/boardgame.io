@@ -5,7 +5,9 @@ import { Flow } from './core/flow'
 export interface State {
   G: object;
   ctx: Ctx;
-  deltalog?: Array<object>;
+  log?: Array<LogEntry>;
+  deltalog?: Array<LogEntry>;
+  _initial?: {} | Omit<State, '_initial'>;
   _undo: Array<Undo>;
   _redo: Array<Undo>;
   _stateID: number;
