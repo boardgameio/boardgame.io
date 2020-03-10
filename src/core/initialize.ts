@@ -22,7 +22,7 @@ export function InitializeGame({
 }: {
   game: GameConfig;
   numPlayers: number;
-  setupData: any;
+  setupData?: any;
 }) {
   game = Game(game);
 
