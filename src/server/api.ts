@@ -14,15 +14,16 @@ const cors = require('@koa/cors');
 
 import { InitializeGame } from '../core/initialize';
 
-const isGameMetadataKey = (key, gameName) =>
+const isGameMetadataKey = (key: string, gameName: string) =>
   key.match(gameName + ':.*:metadata');
-const getNamespacedGameID = (gameID, gameName) => `${gameName}:${gameID}`;
+const getNamespacedGameID = (gameID: string, gameName: string) =>
+  `${gameName}:${gameID}`;
 const createGameMetadata = () => ({
   players: {},
   setupData: {},
 });
 
-const GameMetadataKey = gameID => `${gameID}:metadata`;
+const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
 
 /**
  * Creates a new game.
