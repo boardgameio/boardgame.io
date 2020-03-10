@@ -34,7 +34,7 @@ export interface Ctx {
 }
 
 export interface LogEntry {
-  action: ActionShape.Any;
+  action: ActionShape.MakeMove | ActionShape.GameEvent;
   _stateID: number;
   turn: number;
   phase: string;
