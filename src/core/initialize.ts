@@ -4,7 +4,7 @@ import { Game } from './game';
 import { GameConfig } from '../types';
 import * as plugins from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
-import { State, Ctx } from '../types';
+import { GameState, State, Ctx } from '../types';
 
 /**
  * InitializeGame
@@ -44,8 +44,8 @@ export function InitializeGame({
   };
 
   // Run plugins over initial state.
-  state = plugins.Enhance(state, game);
-  state = plugins.Setup(state, game);
+  state = plugins.Enhance(state as State, game);
+  state = plugins.Setup(state as GameState, game);
 
   // Augment ctx with the enhancers (TODO: move these into plugins).
   const apiCtx = new ContextEnhancer(state.ctx, game, ctx.currentPlayer);

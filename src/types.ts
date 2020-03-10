@@ -7,6 +7,8 @@ export interface State {
   _stateID: number;
 }
 
+export type GameState = Pick<State, 'G' | 'ctx'>;
+
 export type StageName = string;
 export type PlayerID = string;
 
@@ -39,7 +41,7 @@ export interface LogEntry {
   automatic?: boolean;
 }
 
-type Plugin = object;
+export type Plugin = object;
 
 export interface LongFormMove {
   move: Function;

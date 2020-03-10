@@ -7,6 +7,7 @@
  */
 
 import PluginImmer from './plugin-immer';
+import { GameState, State, GameConfig, Plugin } from '../types';
 
 /**
  * List of plugins that are always added.
@@ -19,7 +20,7 @@ const DEFAULT_PLUGINS = [PluginImmer];
  * @param {function} fn - The move function or trigger to apply the plugins to.
  * @param {object} plugins - The list of plugins.
  */
-export const FnWrap = (fn, plugins) => {
+export const FnWrap = (fn: Function, plugins: Plugin[]) => {
   const reducer = (acc, { fnWrap }) => fnWrap(acc, plugins);
   return [...DEFAULT_PLUGINS, ...plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
@@ -32,7 +33,7 @@ export const FnWrap = (fn, plugins) => {
  * @param {object} state - The game state.
  * @param {object} game - The game config.
  */
-export const Setup = (state, game) => {
+export const Setup = (state: GameState, game: GameConfig): GameState => {
   [...DEFAULT_PLUGINS, ...game.plugins]
     .filter(plugin => plugin.setup !== undefined)
     .forEach(plugin => {
@@ -48,7 +49,7 @@ export const Setup = (state, game) => {
  * @param {object} state - The game state.
  * @param {object} game - The game object.
  */
-export const Enhance = (state, game) => {
+export const Enhance = (state: State, game: GameConfig): State => {
   [...DEFAULT_PLUGINS, ...game.plugins]
     .filter(plugin => plugin.enhance !== undefined)
     .forEach(plugin => {
@@ -63,7 +64,7 @@ export const Enhance = (state, game) => {
  * @param {object} state - The game state.
  * @param {object} game - The game object.
  */
-export const BeforeMove = (state, game) => {
+export const BeforeMove = (state: State, game: GameConfig): State => {
   [...DEFAULT_PLUGINS, ...game.plugins]
     .filter(plugin => plugin.beforeMove !== undefined)
     .forEach(plugin => {
@@ -78,7 +79,7 @@ export const BeforeMove = (state, game) => {
  * @param {object} state - The game state.
  * @param {object} game - The game object.
  */
-export const BeforeEvent = (state, game) => {
+export const BeforeEvent = (state: State, game: GameConfig): State => {
   [...DEFAULT_PLUGINS, ...game.plugins]
     .filter(plugin => plugin.beforeEvent !== undefined)
     .forEach(plugin => {
@@ -93,7 +94,7 @@ export const BeforeEvent = (state, game) => {
  * @param {object} state - The game state.
  * @param {object} game - The game object.
  */
-export const AfterMove = (state, game) => {
+export const AfterMove = (state: State, game: GameConfig): State => {
   [...DEFAULT_PLUGINS, ...game.plugins]
     .filter(plugin => plugin.afterMove !== undefined)
     .forEach(plugin => {
@@ -108,7 +109,7 @@ export const AfterMove = (state, game) => {
  * @param {object} state - The game state.
  * @param {object} game - The game object.
  */
-export const AfterEvent = (state, game) => {
+export const AfterEvent = (state: State, game: GameConfig): State => {
   [...DEFAULT_PLUGINS, ...game.plugins]
     .filter(plugin => plugin.afterEvent !== undefined)
     .forEach(plugin => {
