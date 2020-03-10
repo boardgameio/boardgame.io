@@ -1,5 +1,6 @@
 import { Object } from 'ts-toolbelt'
 import * as ActionCreators from './core/action-creators'
+import { Flow } from './core/flow'
 
 export interface State {
   G: object;
@@ -113,7 +114,7 @@ export interface GameConfig {
   playerView?: Function;
   plugins?: Array<Plugin>;
   processMove?: Function;
-  flow?: any;
+  flow?: ReturnType<typeof Flow>;
 }
 
 type Undo = { G: object; ctx: Ctx; moveType?: string };
