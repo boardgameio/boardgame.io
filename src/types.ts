@@ -121,6 +121,20 @@ export interface GameConfig {
 
 type Undo = { G: object; ctx: Ctx; moveType?: string };
 
+export namespace Server {
+  export type PlayerMetadata = {
+    id: number;
+    name?: string;
+    credentials?: string;
+  }
+
+  export interface GameMetadata {
+    players: { [id: number]: PlayerMetadata };
+    setupData: any;
+    nextRoomID?: string;
+  }
+}
+
 export namespace CredentialedActionShape {
   export type MakeMove = ReturnType<typeof ActionCreators.makeMove>
   export type GameEvent = ReturnType<typeof ActionCreators.gameEvent>
