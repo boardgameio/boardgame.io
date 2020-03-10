@@ -11,25 +11,29 @@ import * as plugin from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
 import { ContextEnhancer } from './context-enhancer';
-import { GameConfig, LogEntry, State } from '../types';
+import { GameConfig, LogEntry, State, Move, LongFormMove } from '../types';
 
 /**
  * Returns true if a move can be undone.
  */
-const CanUndoMove = (
-  G: object,
-  ctx: object,
-  move: { undoable: boolean | Function }
-) => {
-  if (move.undoable === false) {
-    return false;
+const CanUndoMove = (G: object, ctx: object, move: Move): boolean => {
+  function HasUndoable(move: Move): move is LongFormMove {
+    return (move as LongFormMove).undoable !== undefined;
   }
 
-  if (move.undoable instanceof Function) {
+  function IsFunction(undoable: boolean | Function): undoable is Function {
+    return undoable instanceof Function;
+  }
+
+  if (!HasUndoable(move)) {
+    return true;
+  }
+
+  if (IsFunction(move.undoable)) {
     return move.undoable(G, ctx);
   }
 
-  return true;
+  return move.undoable;
 };
 
 /**
@@ -117,7 +121,7 @@ export function CreateGameReducer({
         state = { ...state, deltalog: [] };
 
         // Check whether the move is allowed at this time.
-        const move = game.flow.getMove(
+        const move: Move = game.flow.getMove(
           state.ctx,
           action.payload.type,
           action.payload.playerID || state.ctx.currentPlayer
@@ -128,7 +132,7 @@ export function CreateGameReducer({
         }
 
         // Don't run move on client if move says so.
-        if (multiplayer && move.client === false) {
+        if (multiplayer && (move as LongFormMove).client === false) {
           return state;
         }
 
@@ -177,7 +181,7 @@ export function CreateGameReducer({
           phase: state.ctx.phase,
         };
 
-        if (move.redact === true) {
+        if ((move as LongFormMove).redact === true) {
           logEntry.redact = true;
         }
 
@@ -239,7 +243,7 @@ export function CreateGameReducer({
         const restore = _undo[_undo.length - 2];
 
         // Only allow undoable moves to be undone.
-        const lastMove = game.flow.getMove(
+        const lastMove: Move = game.flow.getMove(
           state.ctx,
           last.moveType,
           state.ctx.currentPlayer

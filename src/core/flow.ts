@@ -19,7 +19,15 @@ import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
-import { LogEntry, GameConfig } from '../types';
+import {
+  State,
+  Ctx,
+  LogEntry,
+  GameConfig,
+  PhaseConfig,
+  PlayerID,
+  Move,
+} from '../types';
 
 /**
  * Flow
@@ -195,7 +203,7 @@ export function Flow({
     conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
   }
 
-  function GetPhase(ctx) {
+  function GetPhase(ctx: { phase: string }): PhaseConfig {
     return ctx.phase ? phaseMap[ctx.phase] : phaseMap[''];
   }
 
@@ -203,7 +211,7 @@ export function Flow({
     return s;
   }
 
-  function Process(state, events) {
+  function Process(state: State, events): State {
     const phasesEnded = new Set();
     const turnsEnded = new Set();
 
@@ -288,12 +296,12 @@ export function Flow({
   // Start //
   ///////////
 
-  function StartGame(state, { next }) {
+  function StartGame(state: State, { next }): State {
     next.push({ fn: StartPhase });
     return state;
   }
 
-  function StartPhase(state, { next }) {
+  function StartPhase(state: State, { next }): State {
     let { G, ctx } = state;
     const conf = GetPhase(ctx);
 
@@ -305,7 +313,7 @@ export function Flow({
     return { ...state, G, ctx };
   }
 
-  function StartTurn(state, { currentPlayer }) {
+  function StartTurn(state: State, { currentPlayer }): State {
     let { G, ctx } = state;
     const conf = GetPhase(ctx);
 
@@ -336,7 +344,7 @@ export function Flow({
   // Update //
   ////////////
 
-  function UpdatePhase(state, { arg, next, phase }) {
+  function UpdatePhase(state: State, { arg, next, phase }): State {
     const conf = GetPhase({ phase });
     let { ctx } = state;
 
@@ -361,7 +369,7 @@ export function Flow({
     return state;
   }
 
-  function UpdateTurn(state, { arg, currentPlayer, next }) {
+  function UpdateTurn(state: State, { arg, currentPlayer, next }): State {
     let { G, ctx } = state;
     const conf = GetPhase(ctx);
 
@@ -385,7 +393,7 @@ export function Flow({
     return state;
   }
 
-  function UpdateStage(state, { arg, playerID }) {
+  function UpdateStage(state: State, { arg, playerID }): State {
     if (typeof arg === 'string') {
       arg = { stage: arg };
     }
@@ -426,16 +434,16 @@ export function Flow({
   // ShouldEnd //
   ///////////////
 
-  function ShouldEndGame({ G, ctx }) {
+  function ShouldEndGame({ G, ctx }): boolean {
     return endIf(G, ctx);
   }
 
-  function ShouldEndPhase({ G, ctx }) {
+  function ShouldEndPhase({ G, ctx }): boolean {
     const conf = GetPhase(ctx);
     return conf.endIf(G, ctx);
   }
 
-  function ShouldEndTurn({ G, ctx }) {
+  function ShouldEndTurn({ G, ctx }): boolean {
     const conf = GetPhase(ctx);
 
     // End the turn if the required number of moves has been made.
@@ -451,7 +459,7 @@ export function Flow({
   // End //
   /////////
 
-  function EndGame(state, { arg, phase }) {
+  function EndGame(state: State, { arg, phase }): State {
     state = EndPhase(state, { phase });
 
     if (arg === undefined) {
@@ -461,7 +469,7 @@ export function Flow({
     return { ...state, ctx: { ...state.ctx, gameover: arg } };
   }
 
-  function EndPhase(state, { arg, next, turn, automatic }: any) {
+  function EndPhase(state: State, { arg, next, turn, automatic }: any): State {
     // End the turn first.
     state = EndTurn(state, { turn, force: true });
 
@@ -503,9 +511,9 @@ export function Flow({
   }
 
   function EndTurn(
-    state,
+    state: State,
     { arg, next, turn, force, automatic, playerID }: any
-  ) {
+  ): State {
     // This is not the turn that EndTurn was originally
     // called for. The turn was probably ended some other way.
     if (turn !== state.ctx.turn) {
@@ -573,7 +581,10 @@ export function Flow({
     return { ...state, G, ctx, deltalog, _undo: [], _redo: [] };
   }
 
-  function EndStage(state, { arg, next, automatic, playerID }: any) {
+  function EndStage(
+    state: State,
+    { arg, next, automatic, playerID }: any
+  ): State {
     playerID = playerID || state.ctx.currentPlayer;
 
     let { ctx } = state;
@@ -653,7 +664,7 @@ export function Flow({
    * @param {string} name
    * @param {string} playerID
    */
-  function GetMove(ctx, name, playerID) {
+  function GetMove(ctx: Ctx, name: string, playerID: PlayerID): null | Move {
     const conf = GetPhase(ctx);
     const stages = conf.turn.stages;
     const { activePlayers } = ctx;
@@ -684,7 +695,7 @@ export function Flow({
     return null;
   }
 
-  function ProcessMove(state, action) {
+  function ProcessMove(state: State, action): State {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
@@ -735,15 +746,19 @@ export function Flow({
     return Process(state, events);
   }
 
-  function SetStageEvent(state, playerID, arg) {
+  function SetStageEvent(state: State, playerID: PlayerID, arg: any): State {
     return Process(state, [{ fn: EndStage, arg, playerID }]);
   }
 
-  function EndStageEvent(state, playerID) {
+  function EndStageEvent(state: State, playerID: PlayerID): State {
     return Process(state, [{ fn: EndStage, playerID }]);
   }
 
-  function SetPhaseEvent(state, _playerID, newPhase) {
+  function SetPhaseEvent(
+    state: State,
+    _playerID: PlayerID,
+    newPhase: string
+  ): State {
     return Process(state, [
       {
         fn: EndPhase,
@@ -754,19 +769,19 @@ export function Flow({
     ]);
   }
 
-  function EndPhaseEvent(state) {
+  function EndPhaseEvent(state: State): State {
     return Process(state, [
       { fn: EndPhase, phase: state.ctx.phase, turn: state.ctx.turn },
     ]);
   }
 
-  function EndTurnEvent(state, _playerID, arg) {
+  function EndTurnEvent(state: State, _playerID: PlayerID, arg: any): State {
     return Process(state, [
       { fn: EndTurn, turn: state.ctx.turn, phase: state.ctx.phase, arg },
     ]);
   }
 
-  function PassEvent(state, _playerID, arg) {
+  function PassEvent(state: State, _playerID: PlayerID, arg: any): State {
     return Process(state, [
       {
         fn: EndTurn,
@@ -778,7 +793,7 @@ export function Flow({
     ]);
   }
 
-  function EndGameEvent(state, _playerID, arg) {
+  function EndGameEvent(state: State, _playerID: PlayerID, arg: any): State {
     return Process(state, [
       { fn: EndGame, turn: state.ctx.turn, phase: state.ctx.phase, arg },
     ]);
@@ -822,7 +837,7 @@ export function Flow({
     enabledEventNames.push('setStage');
   }
 
-  function ProcessEvent(state, action) {
+  function ProcessEvent(state: State, action): State {
     const { type, playerID, args } = action.payload;
     if (eventHandlers.hasOwnProperty(type)) {
       const eventArgs = [state, playerID].concat(args);
@@ -831,7 +846,7 @@ export function Flow({
     return state;
   }
 
-  function IsPlayerActive(_G, ctx, playerID) {
+  function IsPlayerActive(_G: object, ctx: Ctx, playerID: PlayerID): boolean {
     if (ctx.activePlayers) {
       return playerID in ctx.activePlayers;
     }
@@ -839,7 +854,7 @@ export function Flow({
   }
 
   return {
-    ctx: numPlayers => ({
+    ctx: (numPlayers: number): Ctx => ({
       numPlayers,
       turn: 0,
       currentPlayer: '0',
@@ -848,7 +863,7 @@ export function Flow({
       phase: startingPhase,
       activePlayers: null,
     }),
-    init: state => {
+    init: (state: State): State => {
       return Process(state, [{ fn: StartGame }]);
     },
     isPlayerActive: IsPlayerActive,
