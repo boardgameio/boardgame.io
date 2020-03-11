@@ -13,5 +13,6 @@ import produce from 'immer';
  * to G by just mutating it.
  */
 export default {
+  name: 'plugin-immer',
   fnWrap: move => produce(move),
 };

@@ -196,11 +196,18 @@ export function Flow({
       }
     }
 
-    conf.onBegin = plugin.FnWrap(conf.onBegin, plugins);
-    conf.onEnd = plugin.FnWrap(conf.onEnd, plugins);
-    conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, plugins);
-    conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, plugins);
-    conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
+    if (!conf._wrapped) {
+      conf.onBegin = plugin.FnWrap(conf.onBegin, plugins);
+      conf.onEnd = plugin.FnWrap(conf.onEnd, plugins);
+      conf._wrapped = true;
+    }
+
+    if (!conf.turn._wrapped) {
+      conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, plugins);
+      conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, plugins);
+      conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
+      conf.turn._wrapped = true;
+    }
   }
 
   function GetPhase(ctx: { phase: string }): PhaseConfig {
@@ -306,7 +313,7 @@ export function Flow({
     const conf = GetPhase(ctx);
 
     // Run any phase setup code provided by the user.
-    G = conf.onBegin(G, ctx);
+    G = conf.onBegin({ state });
 
     next.push({ fn: StartTurn });
 
@@ -332,7 +339,7 @@ export function Flow({
     const turn = ctx.turn + 1;
     ctx = { ...ctx, turn, numMoves: 0, _prevActivePlayers: [] };
 
-    G = conf.turn.onBegin(G, ctx);
+    G = conf.turn.onBegin({ state: { ...state, G, ctx } });
 
     const plainCtx = ContextEnhancer.detachAllFromContext(ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -487,7 +494,7 @@ export function Flow({
 
     // Run any cleanup code for the phase that is about to end.
     const conf = GetPhase(ctx);
-    G = conf.onEnd(G, ctx);
+    G = conf.onEnd({ state });
 
     // Reset the phase.
     ctx = { ...ctx, phase: null };
@@ -537,7 +544,7 @@ export function Flow({
     }
 
     // Run turn-end triggers.
-    G = conf.turn.onEnd(G, ctx);
+    G = conf.turn.onEnd({ state });
 
     if (next) {
       next.push({ fn: UpdateTurn, arg, currentPlayer: ctx.currentPlayer });
@@ -726,7 +733,7 @@ export function Flow({
       state = EndStage(state, { playerID, automatic: true });
     }
 
-    const G = conf.turn.onMove(state.G, state.ctx, action);
+    const G = conf.turn.onMove({ state });
     state = { ...state, G };
 
     // Update undo / redo state.

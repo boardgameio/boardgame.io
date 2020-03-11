@@ -7,7 +7,7 @@
  */
 
 import * as Actions from './action-types';
-import * as plugin from '../plugins/main';
+import * as plugins from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
 import { ContextEnhancer } from './context-enhancer';
@@ -105,15 +105,14 @@ export function CreateGameReducer({
         state.ctx = apiCtx.attachToContext(state.ctx);
 
         // Execute plugins.
-        state = plugin.Enhance(state, game);
-        state = plugin.BeforeEvent(state, game);
+        state = plugins.Enhance(state, { game, isClient: false });
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
         newState = apiCtx.updateAndDetach(newState, true);
 
         // Execute plugins.
-        newState = plugin.AfterEvent(newState, game);
+        newState = plugins.Flush(newState, { game, isClient: false });
 
         return { ...newState, _stateID: state._stateID + 1 };
       }
@@ -154,8 +153,10 @@ export function CreateGameReducer({
         }
 
         // Execute plugins.
-        state = plugin.Enhance(state, game);
-        state = plugin.BeforeMove(state, game);
+        state = plugins.Enhance(state, {
+          game,
+          isClient: multiplayer !== undefined,
+        });
 
         const apiCtx = new ContextEnhancer(
           state.ctx,
@@ -206,14 +207,15 @@ export function CreateGameReducer({
 
         state = { ...newState, G, ctx, _stateID: state._stateID + 1 };
 
-        // Execute plugins.
-        state = plugin.AfterMove(state, game);
-
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
         // These will be processed on the server, which
         // will send back a state update.
         if (multiplayer) {
+          state = plugins.Flush(state, {
+            game,
+            isClient: true,
+          });
           return state;
         }
 
@@ -224,6 +226,7 @@ export function CreateGameReducer({
           action.payload
         );
         state = apiCtx.updateAndDetach(state, true);
+        state = plugins.Flush(state, { game });
 
         return state;
       }

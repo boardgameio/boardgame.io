@@ -39,7 +39,7 @@ describe('basic', () => {
   test('processMove', () => {
     const G = { test: true };
     const ctx = { phase: '' };
-    const state = { G, ctx };
+    const state = { G, ctx, plugins: {} };
 
     expect(game.processMove(state, { type: 'A' })).toEqual(G);
     expect(game.processMove(state, { type: 'D' })).toEqual(G);
@@ -50,9 +50,9 @@ describe('basic', () => {
   });
 
   test('long-form move syntax', () => {
-    expect(game.processMove({ ctx: { phase: '' } }, { type: 'C' })).toEqual(
-      'C'
-    );
+    expect(
+      game.processMove({ ctx: { phase: '' }, plugins: {} }, { type: 'C' })
+    ).toEqual('C');
   });
 });
 

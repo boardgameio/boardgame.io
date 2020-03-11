@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { FnWrap } from '../plugins/main';
+import * as plugins from '../plugins/main';
 import { Flow } from './flow';
-import { GameConfig, Ctx, Move, LongFormMove, State } from '../types';
+import { GameConfig, Move, LongFormMove, State } from '../types';
 
 /**
  * Game
@@ -39,6 +39,15 @@ export function Game(game: GameConfig) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
+  game.plugins.forEach(plugin => {
+    if (plugin.name === undefined) {
+      throw new Error('Plugins must have a name.');
+    }
+    if (plugin.name.includes(' ')) {
+      throw new Error(plugin.name + ': Plugin name must not include spaces');
+    }
+  });
+
   if (game.name.includes(' ')) {
     throw new Error(game.name + ': Game name must not include spaces');
   }
@@ -60,12 +69,12 @@ export function Game(game: GameConfig) {
       }
 
       if (moveFn instanceof Function) {
-        const args = [
-          state.G,
-          { ...state.ctx, playerID: action.playerID },
-        ].concat(action.args);
-        const fn = FnWrap(moveFn, game.plugins);
-        return fn(...args);
+        const fn = plugins.FnWrap(moveFn, game.plugins);
+        return fn({
+          state,
+          extra: { playerID: action.playerID },
+          actionArgs: action.args,
+        });
       }
 
       return state.G;

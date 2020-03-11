@@ -15,7 +15,9 @@ describe('default values', () => {
       plugins: [PluginPlayer],
     };
     const client = Client({ game });
-    expect(client.getState().G).toEqual({ players: { '0': {}, '1': {} } });
+    expect(client.getState().plugins[PluginPlayer.name].data).toEqual({
+      players: { '0': {}, '1': {} },
+    });
   });
 
   test('playerState is passed', () => {
@@ -24,7 +26,7 @@ describe('default values', () => {
       plugins: [PluginPlayer],
     };
     const client = Client({ game });
-    expect(client.getState().G).toEqual({
+    expect(client.getState().plugins[PluginPlayer.name].data).toEqual({
       players: { '0': { A: 1 }, '1': { A: 1 } },
     });
   });
@@ -36,9 +38,9 @@ describe('2 player game', () => {
   beforeAll(() => {
     const game = {
       moves: {
-        A: G => {
-          G.player.field = 'A1';
-          G.opponent.field = 'A2';
+        A: (_, ctx) => {
+          ctx.player.set({ field: 'A1' });
+          ctx.player.opponent.set({ field: 'A2' });
         },
       },
 
@@ -50,7 +52,7 @@ describe('2 player game', () => {
 
   test('player 0 turn', () => {
     client.moves.A();
-    expect(client.getState().G).toEqual({
+    expect(client.getState().plugins[PluginPlayer.name].data).toEqual({
       players: {
         '0': { field: 'A1' },
         '1': { field: 'A2' },
@@ -61,7 +63,7 @@ describe('2 player game', () => {
   test('player 1 turn', () => {
     client.events.endTurn();
     client.moves.A();
-    expect(client.getState().G).toEqual({
+    expect(client.getState().plugins[PluginPlayer.name].data).toEqual({
       players: {
         '0': { field: 'A2' },
         '1': { field: 'A1' },
@@ -76,9 +78,8 @@ describe('3 player game', () => {
   beforeAll(() => {
     const game = {
       moves: {
-        A: G => {
-          G.player.field = 'A';
-          G.fields = Object.keys(G);
+        A: (_, ctx) => {
+          ctx.player.set({ field: 'A' });
         },
       },
 
@@ -90,13 +91,12 @@ describe('3 player game', () => {
 
   test('G.opponent is not created', () => {
     client.moves.A();
-    expect(client.getState().G).toEqual({
+    expect(client.getState().plugins[PluginPlayer.name].data).toEqual({
       players: {
         '0': { field: 'A' },
         '1': {},
         '2': {},
       },
-      fields: ['players', 'player'],
     });
   });
 });
@@ -117,7 +117,7 @@ describe('game with phases', () => {
   });
 
   test('includes playerSetup state', () => {
-    expect(client.getState().G).toEqual({
+    expect(client.getState().plugins[PluginPlayer.name].data).toEqual({
       players: {
         0: {
           id: '0',

@@ -38,30 +38,29 @@ export function InitializeGame({
   }
   ctx._random = { seed };
 
-  let state: Partial<State> = {
+  let state: GameState = {
+    // User managed state.
     G: {},
+    // Framework managed state.
     ctx,
+    // Plugin related state.
+    plugins: {},
   };
 
   // Run plugins over initial state.
-  state = plugins.Enhance(state as State, game);
-  state = plugins.Setup(state as GameState, game);
+  state = plugins.Setup(state, { game });
+  state = plugins.Enhance(state as State, { game });
 
   // Augment ctx with the enhancers (TODO: move these into plugins).
   const apiCtx = new ContextEnhancer(state.ctx, game, ctx.currentPlayer);
   state.ctx = apiCtx.attachToContext(state.ctx);
 
-  const initialG = game.setup(state.ctx, setupData);
+  const enhancedCtx = plugins.EnhanceCtx(state);
+  state.G = game.setup(enhancedCtx, setupData);
 
-  state.G = { ...state.G, ...initialG };
-
-  const initial: State & { _initial: object } = {
+  let initial: State = {
     ...state,
 
-    // User managed state.
-    G: state.G,
-    // Framework managed state.
-    ctx: state.ctx,
     // List of {G, ctx} pairs that can be undone.
     _undo: [],
     // List of {G, ctx} pairs that can be redone.
@@ -70,21 +69,20 @@ export function InitializeGame({
     // state updates are only allowed from clients that
     // are at the same version that the server.
     _stateID: 0,
-    // A snapshot of this object so that actions can be
-    // replayed over it to view old snapshots.
-    // TODO: This will no longer be necessary once the
-    // log stops replaying actions (but reads the actual
-    // game states instead).
+    // A copy of the initial state so that
+    // the log can replay actions on top of it.
+    // TODO: This should really be stored in a different
+    // part of the DB and not inside the state object.
     _initial: {},
   };
 
-  state = game.flow.init({ G: initial.G, ctx: initial.ctx });
+  initial = game.flow.init(initial);
+  initial = apiCtx.updateAndDetach(initial, true);
+  initial = plugins.Flush(initial, { game });
 
-  initial.G = state.G;
-  initial._undo = state._undo;
-  state = apiCtx.updateAndDetach(state, true);
-  initial.ctx = state.ctx;
-  const deepCopy = obj => parse(stringify(obj));
+  function deepCopy<T>(obj: T): T {
+    return parse(stringify(obj));
+  }
   initial._initial = deepCopy(initial);
 
   return initial;

@@ -1,13 +1,15 @@
 export interface State {
   G: object;
   ctx: Ctx;
+  plugins: object;
   deltalog?: Array<object>;
   _undo: Array<Undo>;
   _redo: Array<Undo>;
   _stateID: number;
+  _initial?: State | {};
 }
 
-export type GameState = Pick<State, 'G' | 'ctx'>;
+export type GameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 
 export type StageName = string;
 export type PlayerID = string;
@@ -41,7 +43,9 @@ export interface LogEntry {
   automatic?: boolean;
 }
 
-export type Plugin = object;
+export interface Plugin {
+  name: string;
+}
 
 export interface LongFormMove {
   move: Function;
@@ -64,6 +68,7 @@ export interface PhaseConfig {
   endIf?: Function;
   moves?: MoveMap;
   turn?: TurnConfig;
+  _wrapped?: boolean;
 }
 
 export interface StageConfig {
@@ -76,6 +81,7 @@ export interface StageMap {
 }
 
 export interface TurnConfig {
+  _wrapped?: boolean;
   activePlayers?: object;
   moveLimit?: number;
   onBegin?: Function;
