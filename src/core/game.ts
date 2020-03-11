@@ -8,7 +8,7 @@
 
 import { FnWrap } from '../plugins/main';
 import { Flow } from './flow';
-import { GameConfig, Ctx, Move, LongFormMove } from '../types';
+import { GameConfig, Ctx, Move, LongFormMove, State } from '../types';
 
 /**
  * Game
@@ -52,21 +52,23 @@ export function Game(game: GameConfig) {
 
     moveNames: flow.moveNames,
 
-    processMove: (G: object, action, ctx: Ctx) => {
-      let moveFn = flow.getMove(ctx, action.type, action.playerID);
+    processMove: (state: State, action) => {
+      let moveFn = flow.getMove(state.ctx, action.type, action.playerID);
 
       if (IsLongFormMove(moveFn)) {
         moveFn = moveFn.move;
       }
 
       if (moveFn instanceof Function) {
-        const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
-        const args = [G, ctxWithPlayerID].concat(action.args);
+        const args = [
+          state.G,
+          { ...state.ctx, playerID: action.playerID },
+        ].concat(action.args);
         const fn = FnWrap(moveFn, game.plugins);
         return fn(...args);
       }
 
-      return G;
+      return state.G;
     },
   };
 }

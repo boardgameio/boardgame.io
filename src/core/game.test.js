@@ -37,18 +37,22 @@ describe('basic', () => {
   });
 
   test('processMove', () => {
-    const testObj = { test: true };
+    const G = { test: true };
     const ctx = { phase: '' };
-    expect(game.processMove(testObj, { type: 'A' }, ctx)).toEqual(testObj);
-    expect(game.processMove(testObj, { type: 'D' }, ctx)).toEqual(testObj);
-    expect(game.processMove(testObj, { type: 'B' }, ctx)).toEqual(null);
-    expect(game.processMove(testObj, { type: 'A' }, { phase: 'PA' })).toEqual(
-      'PA.A'
-    );
+    const state = { G, ctx };
+
+    expect(game.processMove(state, { type: 'A' })).toEqual(G);
+    expect(game.processMove(state, { type: 'D' })).toEqual(G);
+    expect(game.processMove(state, { type: 'B' })).toEqual(null);
+
+    state.ctx.phase = 'PA';
+    expect(game.processMove(state, { type: 'A' })).toEqual('PA.A');
   });
 
   test('long-form move syntax', () => {
-    expect(game.processMove({}, { type: 'C' }, { phase: '' })).toEqual('C');
+    expect(game.processMove({ ctx: { phase: '' } }, { type: 'C' })).toEqual(
+      'C'
+    );
   });
 });
 

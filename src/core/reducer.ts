@@ -153,19 +153,19 @@ export function CreateGameReducer({
           return state;
         }
 
+        // Execute plugins.
+        state = plugin.Enhance(state, game);
+        state = plugin.BeforeMove(state, game);
+
         const apiCtx = new ContextEnhancer(
           state.ctx,
           game,
           action.payload.playerID
         );
-        let ctxWithAPI = apiCtx.attachToContext(state.ctx);
-
-        // Execute plugins.
-        state = plugin.Enhance(state, game);
-        state = plugin.BeforeMove(state, game);
+        state.ctx = apiCtx.attachToContext(state.ctx);
 
         // Process the move.
-        let G = game.processMove(state.G, action.payload, ctxWithAPI);
+        let G = game.processMove(state, action.payload);
 
         // The game declared the move as invalid.
         if (G === INVALID_MOVE) {
@@ -218,7 +218,7 @@ export function CreateGameReducer({
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        ctxWithAPI = apiCtx.attachToContext(state.ctx);
+        const ctxWithAPI = apiCtx.attachToContext(state.ctx);
         state = game.flow.processMove(
           { ...state, ctx: ctxWithAPI },
           action.payload
