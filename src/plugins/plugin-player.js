@@ -14,51 +14,49 @@
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
 export default {
-  fnWrap: moveFn => {
-    return (G, ctx, ...args) => {
-      const current = ctx.currentPlayer;
-      const player = G.players[current];
+  name: 'player',
 
-      G = { ...G, player };
-
-      let other = null;
-      let opponent = null;
-      if (ctx.numPlayers == 2) {
-        other = current == '0' ? '1' : '0';
-        opponent = G.players[other];
-        G.opponent = opponent;
-      }
-
-      G = moveFn(G, ctx, ...args);
-
-      const players = {
-        ...G.players,
-        [current]: 'player' in G ? G.player : G.players[current],
-      };
-
-      if (other !== null) {
-        players[other] = 'opponent' in G ? G.opponent : G.players[other];
-      }
-
-      {
-        /* eslint-disable-next-line no-unused-vars */
-        const { player, opponent, ...rest } = G;
-        return { ...rest, players };
-      }
-    };
+  flush: ({ api }) => {
+    return { players: api.state };
   },
 
-  setup: {
-    G: (G, ctx, game) => {
-      let players = {};
-      for (let i = 0; i < ctx.numPlayers; i++) {
-        let playerState = {};
-        if (game.playerSetup !== undefined) {
-          playerState = game.playerSetup(i + '');
-        }
-        players[i + ''] = playerState;
+  api: ({ ctx, data }) => {
+    let state = data.players;
+    let result = { state };
+
+    const get = () => {
+      return data.players[ctx.currentPlayer];
+    };
+    result.get = get;
+
+    const set = value => {
+      return (state[ctx.currentPlayer] = value);
+    };
+    result.set = set;
+
+    if (ctx.numPlayers === 2) {
+      const other = ctx.currentPlayer === '0' ? '1' : '0';
+      const get = () => {
+        return data.players[other];
+      };
+      const set = value => {
+        return (state[other] = value);
+      };
+      result.opponent = { get, set };
+    }
+
+    return result;
+  },
+
+  setup: ({ ctx, game }) => {
+    let players = {};
+    for (let i = 0; i < ctx.numPlayers; i++) {
+      let playerState = {};
+      if (game.playerSetup !== undefined) {
+        playerState = game.playerSetup(i + '');
       }
-      return { ...G, players };
-    },
+      players[i + ''] = playerState;
+    }
+    return { players };
   },
 };

@@ -8,6 +8,13 @@
 
 import { Game } from './game';
 import { Client } from '../client/client';
+import { error } from '../core/logger';
+import { InitializeGame } from './initialize';
+
+jest.mock('../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 describe('basic', () => {
   let game;
@@ -37,18 +44,22 @@ describe('basic', () => {
   });
 
   test('processMove', () => {
-    const testObj = { test: true };
+    const G = { test: true };
     const ctx = { phase: '' };
-    expect(game.processMove(testObj, { type: 'A' }, ctx)).toEqual(testObj);
-    expect(game.processMove(testObj, { type: 'D' }, ctx)).toEqual(testObj);
-    expect(game.processMove(testObj, { type: 'B' }, ctx)).toEqual(null);
-    expect(game.processMove(testObj, { type: 'A' }, { phase: 'PA' })).toEqual(
-      'PA.A'
-    );
+    const state = { G, ctx, plugins: {} };
+
+    expect(game.processMove(state, { type: 'A' })).toEqual(G);
+    expect(game.processMove(state, { type: 'D' })).toEqual(G);
+    expect(game.processMove(state, { type: 'B' })).toEqual(null);
+
+    state.ctx.phase = 'PA';
+    expect(game.processMove(state, { type: 'A' })).toEqual('PA.A');
   });
 
   test('long-form move syntax', () => {
-    expect(game.processMove({}, { type: 'C' }, { phase: '' })).toEqual('C');
+    expect(
+      game.processMove({ ctx: { phase: '' }, plugins: {} }, { type: 'C' })
+    ).toEqual('C');
   });
 });
 
@@ -212,9 +223,45 @@ test('serpentine setup phases', () => {
   expect(client.getState().ctx.phase).toBe('main phase');
 });
 
-test('game name with spaces should raise Error', () => {
-  const game = () => {
-    Game({ name: 'tic tac toe' });
-  };
-  expect(game).toThrow();
+describe('config errors', () => {
+  test('game name with spaces', () => {
+    const game = () => {
+      Game({ name: 'tic tac toe' });
+    };
+    expect(game).toThrow();
+  });
+
+  test('plugin name with spaces', () => {
+    const plugins = [
+      {
+        name: 'my cool plugin',
+        api: () => {},
+      },
+    ];
+    const game = () => {
+      Game({ plugins });
+    };
+    expect(game).toThrow();
+  });
+
+  test('plugin name missing', () => {
+    const plugins = [
+      {
+        api: () => {},
+      },
+    ];
+    const game = () => {
+      Game({ plugins });
+    };
+    expect(game).toThrow();
+  });
+
+  test('invalid move object', () => {
+    const game = Game({ moves: { A: 1 } });
+    const state = InitializeGame({ game });
+    game.processMove(state, {});
+    expect(error).toBeCalledWith(
+      expect.stringContaining('invalid move object')
+    );
+  });
 });

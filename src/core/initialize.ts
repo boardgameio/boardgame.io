@@ -4,7 +4,7 @@ import { Game } from './game';
 import { GameConfig } from '../types';
 import * as plugins from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
-import { State, Ctx } from '../types';
+import { GameState, State, Ctx } from '../types';
 
 /**
  * InitializeGame
@@ -40,23 +40,29 @@ export function InitializeGame({
     _random: { seed }
   };
 
-  // Pass ctx through all the plugins that want to modify it.
-  ctx = plugins.Setup.ctx(ctx, game);
+  let state: GameState = {
+    // User managed state.
+    G: {},
+    // Framework managed state.
+    ctx,
+    // Plugin related state.
+    plugins: {},
+  };
+
+  // Run plugins over initial state.
+  state = plugins.Setup(state, { game });
+  state = plugins.Enhance(state as State, { game });
 
   // Augment ctx with the enhancers (TODO: move these into plugins).
-  const apiCtx = new ContextEnhancer(ctx, game, ctx.currentPlayer);
-  let ctxWithAPI = apiCtx.attachToContext(ctx);
+  const apiCtx = new ContextEnhancer(state.ctx, game, ctx.currentPlayer);
+  state.ctx = apiCtx.attachToContext(state.ctx);
 
-  let initialG = game.setup(ctxWithAPI, setupData);
+  const enhancedCtx = plugins.EnhanceCtx(state);
+  state.G = game.setup(enhancedCtx, setupData);
 
-  // Pass G through all the plugins that want to modify it.
-  initialG = plugins.Setup.G(initialG, ctxWithAPI, game);
+  let initial: State = {
+    ...state,
 
-  const initial: State = {
-    // User managed state.
-    G: initialG,
-    // Framework managed state.
-    ctx: ctx,
     // List of {G, ctx} pairs that can be undone.
     _undo: [],
     // List of {G, ctx} pairs that can be redone.
@@ -65,21 +71,20 @@ export function InitializeGame({
     // state updates are only allowed from clients that
     // are at the same version that the server.
     _stateID: 0,
-    // A snapshot of this object so that actions can be
-    // replayed over it to view old snapshots.
-    // TODO: This will no longer be necessary once the
-    // log stops replaying actions (but reads the actual
-    // game states instead).
+    // A copy of the initial state so that
+    // the log can replay actions on top of it.
+    // TODO: This should really be stored in a different
+    // part of the DB and not inside the state object.
     _initial: {},
   };
 
-  let state: State = game.flow.init({ G: initial.G, ctx: ctxWithAPI });
+  initial = game.flow.init(initial);
+  initial = apiCtx.updateAndDetach(initial, true);
+  initial = plugins.Flush(initial, { game });
 
-  initial.G = state.G;
-  initial._undo = state._undo;
-  state = apiCtx.updateAndDetach(state, true);
-  initial.ctx = state.ctx;
-  const deepCopy = obj => parse(stringify(obj));
+  function deepCopy<T>(obj: T): T {
+    return parse(stringify(obj));
+  }
   initial._initial = deepCopy(initial);
 
   return initial;

@@ -14,33 +14,53 @@ describe('plugins', () => {
   beforeAll(() => {
     const game = {
       moves: {
-        A: (G, ctx) => ({ ...G, ctx }),
-        B: G => {
-          G.immer = true;
+        A: (G, ctx) => {
+          G.beginA = ctx.test.get();
+          ctx.test.increment();
+          G.endA = ctx.test.get();
         },
       },
 
+      endIf: (_, ctx) => {
+        if (ctx.test === undefined) {
+          throw new Error('API is not defined');
+        }
+      },
+
+      turn: {
+        onMove: (G, ctx) => {
+          G.onMove = ctx.test.get();
+          ctx.test.increment();
+        },
+
+        onEnd: (G, ctx) => {
+          G.onTurnEnd = ctx.test.get();
+          ctx.test.increment();
+        },
+      },
+
+      pluginRelated: 10,
+
       plugins: [
         {
-          beforeMove: state => {
-            return { ...state, G: { ...state.G, beforeMove: true } };
+          name: 'test',
+
+          setup: ({ game }) => ({
+            n: game.pluginRelated,
+          }),
+
+          api: ({ data }) => {
+            let state = { value: data.n };
+            const increment = () => state.value++;
+            const get = () => state.value;
+            return { increment, get };
           },
-          beforeEvent: state => {
-            return { ...state, G: { ...state.G, beforeEvent: true } };
-          },
-          afterMove: state => {
-            return { ...state, G: { ...state.G, afterMove: true } };
-          },
-          afterEvent: state => {
-            return { ...state, G: { ...state.G, afterEvent: true } };
-          },
+
+          flush: ({ api }) => ({ n: api.get() }),
+
           fnWrap: fn => (G, ctx) => {
             G = fn(G, ctx);
-            return { ...G, fnWrap: true };
-          },
-          setup: {
-            G: G => ({ ...G, setup: true }),
-            ctx: ctx => ({ ...ctx, setup: true }),
+            return { ...G, wrap: true };
           },
         },
       ],
@@ -49,29 +69,43 @@ describe('plugins', () => {
     client = Client({ game });
   });
 
-  test('setupG', () => {
-    expect(client.getState().G).toMatchObject({ setup: true });
+  test('setup', () => {
+    expect(client.getState().plugins.test.data).toEqual({
+      n: 10,
+    });
   });
 
-  test('setupCtx', () => {
-    expect(client.getState().ctx).toMatchObject({ setup: true });
-  });
-
-  test('fnWrap', () => {
+  test('make move', () => {
     client.moves.A();
-    expect(client.getState().G).toMatchObject({ fnWrap: true });
-    expect(client.getState().G).toMatchObject({ beforeMove: true });
-    expect(client.getState().G).toMatchObject({ afterMove: true });
+    expect(client.getState().G).toEqual({
+      beginA: 10,
+      endA: 11,
+      onMove: 11,
+      wrap: true,
+    });
+    expect(client.getState().plugins.test.data).toEqual({ n: 12 });
   });
 
-  test('immer works', () => {
-    client.moves.B();
-    expect(client.getState().G).toMatchObject({ immer: true });
+  test('make another move', () => {
+    client.moves.A();
+    expect(client.getState().G).toEqual({
+      beginA: 12,
+      endA: 13,
+      onMove: 13,
+      wrap: true,
+    });
+    expect(client.getState().plugins.test.data).toEqual({ n: 14 });
   });
 
   test('event', () => {
     client.events.endTurn();
-    expect(client.getState().G).toMatchObject({ beforeEvent: true });
-    expect(client.getState().G).toMatchObject({ afterEvent: true });
+    expect(client.getState().G).toMatchObject({ onTurnEnd: 14 });
+    expect(client.getState().plugins.test.data).toEqual({ n: 15 });
+  });
+
+  test('does not make it into undo state', () => {
+    client.moves.A();
+    client.undo();
+    expect(Object.keys(client.getState()._undo[0].ctx)).not.toContain('test');
   });
 });
