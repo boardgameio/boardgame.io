@@ -97,6 +97,26 @@ describe('phases', () => {
     }
   });
 
+  describe('onEnd', () => {
+    let client;
+
+    beforeAll(() => {
+      const game = {
+        endIf: () => true,
+        onEnd: G => {
+          G.onEnd = true;
+        },
+      };
+      client = Client({ game });
+    });
+
+    test('works', () => {
+      expect(client.getState().G).toEqual({
+        onEnd: true,
+      });
+    });
+  });
+
   test('end phase on move', () => {
     let endPhaseACount = 0;
     let endPhaseBCount = 0;

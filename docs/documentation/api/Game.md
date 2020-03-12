@@ -92,5 +92,9 @@
   // Ends the game if this returns anything.
   // The return value is available in `ctx.gameover`.
   endIf: (G, ctx) => obj,
+
+  // Called at the end of the game.
+  // `ctx.gameover` is available at this point.
+  onEnd: (G, ctx) => G,
 }
 ```

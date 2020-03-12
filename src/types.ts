@@ -131,6 +131,7 @@ export interface GameConfig {
     setActivePlayers?: boolean;
   };
   endIf?: Function;
+  onEnd?: Function;
   playerView?: Function;
   plugins?: Array<Plugin>;
   processMove?: Function;

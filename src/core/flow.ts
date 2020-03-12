@@ -40,6 +40,7 @@ export function Flow({
   moves,
   phases,
   endIf,
+  onEnd,
   turn,
   events,
   plugins,
@@ -59,6 +60,7 @@ export function Flow({
   }
 
   if (!endIf) endIf = () => undefined;
+  if (!onEnd) onEnd = G => G;
   if (!turn) turn = {};
 
   const phaseMap = { ...phases };
@@ -91,6 +93,7 @@ export function Flow({
   };
 
   const wrapped = {
+    onEnd: HookWrapper(onEnd),
     endIf: TriggerWrapper(endIf),
   };
 
@@ -426,7 +429,12 @@ export function Flow({
       arg = true;
     }
 
-    return { ...state, ctx: { ...state.ctx, gameover: arg } };
+    state = { ...state, ctx: { ...state.ctx, gameover: arg } };
+
+    // Run game end hook.
+    const G = wrapped.onEnd(state);
+
+    return { ...state, G };
   }
 
   function EndPhase(state: State, { arg, next, turn, automatic }: any): State {
