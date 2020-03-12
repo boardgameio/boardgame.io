@@ -134,7 +134,9 @@ describe('multiplayer', () => {
 
     test('onAction called', () => {
       jest.spyOn(client.transport, 'onAction');
-      client.store.dispatch(sync({ G: {}, ctx: { phase: '' } }, []));
+      client.store.dispatch(
+        sync({ G: {}, ctx: { phase: '' }, plugins: {} }, [])
+      );
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
     });

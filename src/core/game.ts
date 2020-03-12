@@ -6,9 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { FnWrap } from '../plugins/main';
+import * as plugins from '../plugins/main';
 import { Flow } from './flow';
-import { GameConfig, Ctx, Move, LongFormMove } from '../types';
+import { GameConfig, Move, LongFormMove, State } from '../types';
+import * as logging from './logger';
 
 /**
  * Game
@@ -39,6 +40,15 @@ export function Game(game: GameConfig) {
   if (game.playerView === undefined) game.playerView = G => G;
   if (game.plugins === undefined) game.plugins = [];
 
+  game.plugins.forEach(plugin => {
+    if (plugin.name === undefined) {
+      throw new Error('Plugin missing name attribute');
+    }
+    if (plugin.name.includes(' ')) {
+      throw new Error(plugin.name + ': Plugin name must not include spaces');
+    }
+  });
+
   if (game.name.includes(' ')) {
     throw new Error(game.name + ': Game name must not include spaces');
   }
@@ -52,21 +62,29 @@ export function Game(game: GameConfig) {
 
     moveNames: flow.moveNames,
 
-    processMove: (G: object, action, ctx: Ctx) => {
-      let moveFn = flow.getMove(ctx, action.type, action.playerID);
+    processMove: (state: State, action) => {
+      let moveFn = flow.getMove(state.ctx, action.type, action.playerID);
 
       if (IsLongFormMove(moveFn)) {
         moveFn = moveFn.move;
       }
 
       if (moveFn instanceof Function) {
-        const ctxWithPlayerID = { ...ctx, playerID: action.playerID };
-        const args = [G, ctxWithPlayerID].concat(action.args);
-        const fn = FnWrap(moveFn, game.plugins);
+        const fn = plugins.FnWrap(moveFn, game.plugins);
+        const ctxWithAPI = {
+          ...plugins.EnhanceCtx(state),
+          playerID: action.playerID,
+        };
+        let args = [state.G, ctxWithAPI];
+        if (action.args !== undefined) {
+          args = args.concat(action.args);
+        }
         return fn(...args);
       }
 
-      return G;
+      logging.error(`invalid move object: ${action.type}`);
+
+      return state.G;
     },
   };
 }

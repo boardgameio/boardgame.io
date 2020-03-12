@@ -33,74 +33,6 @@ import {
  * Flow
  *
  * Creates a reducer that updates ctx (analogous to how moves update G).
- *
- * @param {...object} endIf - The game automatically ends if this function
- *                            returns anything (checked after each move).
- *                            The return value is available at ctx.gameover.
- *                            (G, ctx) => {}
- *
- * @param {...object} turn - Customize the turn structure (see turn-order.js).
- *
- * {
- *   // The turn order.
- *   order: TurnOrder.DEFAULT,
- *
- *   // Code to run at the beginning of the turn.
- *   onBegin: (G, ctx) => G,
- *
- *   // Code to run at the end of the turn.
- *   onEnd: (G, ctx) => G,
- *
- *   // The turn automatically ends if this returns a truthy
- *   // value (checked after each move).
- *   // If the return value is { next: playerID },
- *   // then that player is the next player
- *   // instead of following the turn order.
- *   endIf: (G, ctx) => boolean|object,
- *
- *   // End the turn automatically after a certain number
- *   // of moves.
- *   moveLimit: 1,
- *
- *   // Code to run at the end of a move.
- *   onMove: (G, ctx, { type: 'moveName', args: [] }) => G
- * }
- *
- * @param {...object} events - Section that allows enabling / disabling events.
- *
- * {
- *   endTurn - Set to false to disable the `endTurn` event.
- *
- *   endPhase - Set to false to disable the `endPhase` event.
- *
- *   endGame - Set to true to enable the `endGame` event.
- * }
- *
- *
- * @param {...object} phases - A map of phases in the game.
- *
- * {
- *   // Any setup code to run before the phase begins.
- *   onBegin: (G, ctx) => G,
- *
- *   // Any cleanup code to run after the phase ends.
- *   onEnd: (G, ctx) => G,
- *
- *   // The phase ends if this function returns a truthy value.
- *   // If the return value is of the form { next: 'phase name' }
- *   // then that will be chosen as the next phase.
- *   endIf: (G, ctx) => boolean|object,
- *
- *   // A phase-specific set of moves that overrides the global.
- *   moves: { ... },
- *
- *   // A phase-specific turn structure that overrides the global.
- *   turn: { ... },
- *
- *   // Set to true to begin the game in this phase. Only one phase
- *   // can have this set to true.
- *   start: false,
- * }
  */
 export function Flow({
   moves,
@@ -140,6 +72,25 @@ export function Flow({
   let startingPhase = null;
 
   Object.keys(moves).forEach(name => moveNames.add(name));
+
+  const HookWrapper = (fn: Function) => {
+    const withPlugins = plugin.FnWrap(fn, plugins);
+    return (state: State) => {
+      const ctxWithAPI = plugin.EnhanceCtx(state);
+      return withPlugins(state.G, ctxWithAPI);
+    };
+  };
+
+  const TriggerWrapper = (endIf: Function) => {
+    return (state: State) => {
+      let ctxWithAPI = plugin.EnhanceCtx(state);
+      return endIf(state.G, ctxWithAPI);
+    };
+  };
+
+  const wrapped = {
+    endIf: TriggerWrapper(endIf),
+  };
 
   for (let phase in phaseMap) {
     const conf = phaseMap[phase];
@@ -196,11 +147,18 @@ export function Flow({
       }
     }
 
-    conf.onBegin = plugin.FnWrap(conf.onBegin, plugins);
-    conf.onEnd = plugin.FnWrap(conf.onEnd, plugins);
-    conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, plugins);
-    conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, plugins);
-    conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
+    conf.wrapped = {
+      onBegin: HookWrapper(conf.onBegin),
+      onEnd: HookWrapper(conf.onEnd),
+      endIf: TriggerWrapper(conf.endIf),
+    };
+
+    conf.turn.wrapped = {
+      onMove: HookWrapper(conf.turn.onMove),
+      onBegin: HookWrapper(conf.turn.onBegin),
+      onEnd: HookWrapper(conf.turn.onEnd),
+      endIf: TriggerWrapper(conf.turn.endIf),
+    };
   }
 
   function GetPhase(ctx: { phase: string }): PhaseConfig {
@@ -306,7 +264,7 @@ export function Flow({
     const conf = GetPhase(ctx);
 
     // Run any phase setup code provided by the user.
-    G = conf.onBegin(G, ctx);
+    G = conf.wrapped.onBegin(state);
 
     next.push({ fn: StartTurn });
 
@@ -332,7 +290,7 @@ export function Flow({
     const turn = ctx.turn + 1;
     ctx = { ...ctx, turn, numMoves: 0, _prevActivePlayers: [] };
 
-    G = conf.turn.onBegin(G, ctx);
+    G = conf.turn.wrapped.onBegin({ ...state, G, ctx });
 
     const plainCtx = ContextEnhancer.detachAllFromContext(ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -434,25 +392,25 @@ export function Flow({
   // ShouldEnd //
   ///////////////
 
-  function ShouldEndGame({ G, ctx }): boolean {
-    return endIf(G, ctx);
+  function ShouldEndGame(state: State): boolean {
+    return wrapped.endIf(state);
   }
 
-  function ShouldEndPhase({ G, ctx }): boolean {
-    const conf = GetPhase(ctx);
-    return conf.endIf(G, ctx);
+  function ShouldEndPhase(state: State): boolean {
+    const conf = GetPhase(state.ctx);
+    return conf.wrapped.endIf(state);
   }
 
-  function ShouldEndTurn({ G, ctx }): boolean {
-    const conf = GetPhase(ctx);
+  function ShouldEndTurn(state: State): boolean {
+    const conf = GetPhase(state.ctx);
 
     // End the turn if the required number of moves has been made.
-    const currentPlayerMoves = ctx.numMoves || 0;
+    const currentPlayerMoves = state.ctx.numMoves || 0;
     if (conf.turn.moveLimit && currentPlayerMoves >= conf.turn.moveLimit) {
       return true;
     }
 
-    return conf.turn.endIf(G, ctx);
+    return conf.turn.wrapped.endIf(state);
   }
 
   /////////
@@ -487,7 +445,7 @@ export function Flow({
 
     // Run any cleanup code for the phase that is about to end.
     const conf = GetPhase(ctx);
-    G = conf.onEnd(G, ctx);
+    G = conf.wrapped.onEnd(state);
 
     // Reset the phase.
     ctx = { ...ctx, phase: null };
@@ -537,7 +495,7 @@ export function Flow({
     }
 
     // Run turn-end triggers.
-    G = conf.turn.onEnd(G, ctx);
+    G = conf.turn.wrapped.onEnd(state);
 
     if (next) {
       next.push({ fn: UpdateTurn, arg, currentPlayer: ctx.currentPlayer });
@@ -726,7 +684,7 @@ export function Flow({
       state = EndStage(state, { playerID, automatic: true });
     }
 
-    const G = conf.turn.onMove(state.G, state.ctx, action);
+    const G = conf.turn.wrapped.onMove(state);
     state = { ...state, G };
 
     // Update undo / redo state.

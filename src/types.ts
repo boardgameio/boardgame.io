@@ -1,11 +1,15 @@
 export interface State {
   G: object;
   ctx: Ctx;
+  plugins: object;
   deltalog?: Array<object>;
   _undo: Array<Undo>;
   _redo: Array<Undo>;
   _stateID: number;
+  _initial?: State | {};
 }
+
+export type GameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 
 export type StageName = string;
 export type PlayerID = string;
@@ -16,17 +20,17 @@ interface ActivePlayers {
 
 export interface Ctx {
   numPlayers: number;
-  playOrder: Array<string>;
+  playOrder: Array<PlayerID>;
   playOrderPos: number;
   activePlayers: null | ActivePlayers;
-  currentPlayer: string;
+  currentPlayer: PlayerID;
   numMoves?: number;
   gameover?: any;
   turn: number;
   phase: string;
   _activePlayersMoveLimit?: object;
   _activePlayersNumMoves?: object;
-  _prevActivePlayers?: Array<string>;
+  _prevActivePlayers?: Array<object>;
   _random?: object;
 }
 
@@ -39,7 +43,9 @@ export interface LogEntry {
   automatic?: boolean;
 }
 
-type Plugin = object;
+export interface Plugin {
+  name: string;
+}
 
 export interface LongFormMove {
   move: Function;
@@ -62,6 +68,11 @@ export interface PhaseConfig {
   endIf?: Function;
   moves?: MoveMap;
   turn?: TurnConfig;
+  wrapped?: {
+    endIf?: Function;
+    onBegin?: Function;
+    onEnd?: Function;
+  };
 }
 
 export interface StageConfig {
@@ -83,6 +94,12 @@ export interface TurnConfig {
   stages?: StageMap;
   moves?: MoveMap;
   order?: object;
+  wrapped?: {
+    endIf?: Function;
+    onBegin?: Function;
+    onEnd?: Function;
+    onMove?: Function;
+  };
 }
 
 interface PhaseMap {
