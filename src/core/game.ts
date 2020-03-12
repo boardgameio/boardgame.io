@@ -70,11 +70,15 @@ export function Game(game: GameConfig) {
 
       if (moveFn instanceof Function) {
         const fn = plugins.FnWrap(moveFn, game.plugins);
-        return fn({
-          state,
-          extra: { playerID: action.playerID },
-          actionArgs: action.args,
-        });
+        const ctxWithAPI = {
+          ...plugins.EnhanceCtx(state),
+          playerID: action.playerID
+        };
+        let args = [state.G, ctxWithAPI];
+        if (action.args !== undefined) {
+          args = args.concat(action.args);
+        }
+        return fn(...args);
       }
 
       return state.G;

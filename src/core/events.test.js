@@ -60,6 +60,7 @@ test('no duplicate endTurn', () => {
   const game = {
     turn: {
       onEnd: (G, ctx) => {
+        let i = 2;
         ctx.events.endTurn();
       },
     },

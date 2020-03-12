@@ -15,6 +15,11 @@ interface PluginOpts {
 }
 
 /**
+ * List of plugins that are always added.
+ */
+const DEFAULT_PLUGINS = [PluginImmer];
+
+/**
  * The API's created by various plugins are stored in the plugins
  * section of the state object:
  *
@@ -29,32 +34,8 @@ interface PluginOpts {
  *   }
  * }
  *
- * This plugin takes these API's and stuffs them back into
+ * This function takes these API's and stuffs them back into
  * ctx for consumption inside a move function or hook.
- */
-const PluginContext = {
-  name: 'plugin-ctx',
-
-  fnWrap: fn => ({ state, actionArgs, extra }) => {
-    let ctxWithAPI = EnhanceCtx(state);
-    if (extra !== undefined) {
-      ctxWithAPI = { ...ctxWithAPI, ...extra };
-    }
-    let args = [state.G, ctxWithAPI];
-    if (actionArgs !== undefined) {
-      args = args.concat(actionArgs);
-    }
-    return fn(...args);
-  },
-};
-
-/**
- * List of plugins that are always added.
- */
-const DEFAULT_PLUGINS = [PluginImmer];
-
-/**
- * Returns an enhanced version of ctx with the plugin API's applied.
  */
 export const EnhanceCtx = (state: GameState): Ctx => {
   let ctx = { ...state.ctx };
@@ -73,7 +54,7 @@ export const EnhanceCtx = (state: GameState): Ctx => {
  */
 export const FnWrap = (fn: Function, plugins: Plugin[]) => {
   const reducer = (acc, { fnWrap }) => fnWrap(acc, plugins);
-  return [...DEFAULT_PLUGINS, ...plugins, PluginContext]
+  return [...DEFAULT_PLUGINS, ...plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
     .reduce(reducer, fn);
 };
