@@ -9,6 +9,7 @@
 import * as plugins from '../plugins/main';
 import { Flow } from './flow';
 import { GameConfig, Move, LongFormMove, State } from '../types';
+import * as logging from './logger';
 
 /**
  * Game
@@ -41,7 +42,7 @@ export function Game(game: GameConfig) {
 
   game.plugins.forEach(plugin => {
     if (plugin.name === undefined) {
-      throw new Error('Plugins must have a name.');
+      throw new Error('Plugin missing name attribute');
     }
     if (plugin.name.includes(' ')) {
       throw new Error(plugin.name + ': Plugin name must not include spaces');
@@ -72,7 +73,7 @@ export function Game(game: GameConfig) {
         const fn = plugins.FnWrap(moveFn, game.plugins);
         const ctxWithAPI = {
           ...plugins.EnhanceCtx(state),
-          playerID: action.playerID
+          playerID: action.playerID,
         };
         let args = [state.G, ctxWithAPI];
         if (action.args !== undefined) {
@@ -80,6 +81,8 @@ export function Game(game: GameConfig) {
         }
         return fn(...args);
       }
+
+      logging.error(`invalid move object: ${action.type}`);
 
       return state.G;
     },

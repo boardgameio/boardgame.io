@@ -42,6 +42,11 @@ describe('2 player game', () => {
           ctx.player.set({ field: 'A1' });
           ctx.player.opponent.set({ field: 'A2' });
         },
+
+        B: (G, ctx) => {
+          G.playerValue = ctx.player.get().field;
+          G.opponentValue = ctx.player.opponent.get().field;
+        },
       },
 
       plugins: [PluginPlayer],
@@ -68,6 +73,14 @@ describe('2 player game', () => {
         '0': { field: 'A2' },
         '1': { field: 'A1' },
       },
+    });
+  });
+
+  test('player 1 makes move B', () => {
+    client.moves.B();
+    expect(client.getState().G).toEqual({
+      playerValue: 'A1',
+      opponentValue: 'A2',
     });
   });
 });

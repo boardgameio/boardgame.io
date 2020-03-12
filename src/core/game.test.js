@@ -8,6 +8,13 @@
 
 import { Game } from './game';
 import { Client } from '../client/client';
+import { error } from '../core/logger';
+import { InitializeGame } from './initialize';
+
+jest.mock('../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 describe('basic', () => {
   let game;
@@ -216,9 +223,45 @@ test('serpentine setup phases', () => {
   expect(client.getState().ctx.phase).toBe('main phase');
 });
 
-test('game name with spaces should raise Error', () => {
-  const game = () => {
-    Game({ name: 'tic tac toe' });
-  };
-  expect(game).toThrow();
+describe('config errors', () => {
+  test('game name with spaces', () => {
+    const game = () => {
+      Game({ name: 'tic tac toe' });
+    };
+    expect(game).toThrow();
+  });
+
+  test('plugin name with spaces', () => {
+    const plugins = [
+      {
+        name: 'my cool plugin',
+        api: () => {},
+      },
+    ];
+    const game = () => {
+      Game({ plugins });
+    };
+    expect(game).toThrow();
+  });
+
+  test('plugin name missing', () => {
+    const plugins = [
+      {
+        api: () => {},
+      },
+    ];
+    const game = () => {
+      Game({ plugins });
+    };
+    expect(game).toThrow();
+  });
+
+  test('invalid move object', () => {
+    const game = Game({ moves: { A: 1 } });
+    const state = InitializeGame({ game });
+    game.processMove(state, {});
+    expect(error).toBeCalledWith(
+      expect.stringContaining('invalid move object')
+    );
+  });
 });
