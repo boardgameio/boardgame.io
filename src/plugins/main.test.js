@@ -20,6 +20,12 @@ describe('plugins', () => {
         },
       },
 
+      endIf: (_, ctx) => {
+        if (ctx.test === undefined) {
+          throw new Error('API is not defined');
+        }
+      },
+
       turn: {
         onMove: (G, ctx) => {
           G.onMove = ctx.test.get();

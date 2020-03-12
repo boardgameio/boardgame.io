@@ -141,6 +141,17 @@ export function Flow({
 
   Object.keys(moves).forEach(name => moveNames.add(name));
 
+  const EndIfWrapper = (endIf: Function) => {
+    return (state: State) => {
+      let ctxWithAPI = plugin.EnhanceCtx(state);
+      return endIf(state.G, ctxWithAPI);
+    };
+  };
+
+  const wrapped = {
+    endIf: EndIfWrapper(endIf),
+  };
+
   for (let phase in phaseMap) {
     const conf = phaseMap[phase];
 
@@ -196,18 +207,18 @@ export function Flow({
       }
     }
 
-    if (!conf._wrapped) {
-      conf.onBegin = plugin.FnWrap(conf.onBegin, plugins);
-      conf.onEnd = plugin.FnWrap(conf.onEnd, plugins);
-      conf._wrapped = true;
-    }
+    conf.wrapped = {
+      onBegin: plugin.FnWrap(conf.onBegin, plugins),
+      onEnd: plugin.FnWrap(conf.onEnd, plugins),
+      endIf: EndIfWrapper(conf.endIf),
+    };
 
-    if (!conf.turn._wrapped) {
-      conf.turn.onMove = plugin.FnWrap(conf.turn.onMove, plugins);
-      conf.turn.onBegin = plugin.FnWrap(conf.turn.onBegin, plugins);
-      conf.turn.onEnd = plugin.FnWrap(conf.turn.onEnd, plugins);
-      conf.turn._wrapped = true;
-    }
+    conf.turn.wrapped = {
+      onMove: plugin.FnWrap(conf.turn.onMove, plugins),
+      onBegin: plugin.FnWrap(conf.turn.onBegin, plugins),
+      onEnd: plugin.FnWrap(conf.turn.onEnd, plugins),
+      endIf: EndIfWrapper(conf.turn.endIf),
+    };
   }
 
   function GetPhase(ctx: { phase: string }): PhaseConfig {
@@ -313,7 +324,7 @@ export function Flow({
     const conf = GetPhase(ctx);
 
     // Run any phase setup code provided by the user.
-    G = conf.onBegin({ state });
+    G = conf.wrapped.onBegin({ state });
 
     next.push({ fn: StartTurn });
 
@@ -339,7 +350,7 @@ export function Flow({
     const turn = ctx.turn + 1;
     ctx = { ...ctx, turn, numMoves: 0, _prevActivePlayers: [] };
 
-    G = conf.turn.onBegin({ state: { ...state, G, ctx } });
+    G = conf.turn.wrapped.onBegin({ state: { ...state, G, ctx } });
 
     const plainCtx = ContextEnhancer.detachAllFromContext(ctx);
     const _undo = [{ G, ctx: plainCtx }];
@@ -442,12 +453,12 @@ export function Flow({
   ///////////////
 
   function ShouldEndGame(state: State): boolean {
-    return endIf(state.G, state.ctx);
+    return wrapped.endIf(state);
   }
 
   function ShouldEndPhase(state: State): boolean {
     const conf = GetPhase(state.ctx);
-    return conf.endIf(state.G, state.ctx);
+    return conf.wrapped.endIf(state);
   }
 
   function ShouldEndTurn(state: State): boolean {
@@ -459,7 +470,7 @@ export function Flow({
       return true;
     }
 
-    return conf.turn.endIf(state.G, state.ctx);
+    return conf.turn.wrapped.endIf(state);
   }
 
   /////////
@@ -494,7 +505,7 @@ export function Flow({
 
     // Run any cleanup code for the phase that is about to end.
     const conf = GetPhase(ctx);
-    G = conf.onEnd({ state });
+    G = conf.wrapped.onEnd({ state });
 
     // Reset the phase.
     ctx = { ...ctx, phase: null };
@@ -544,7 +555,7 @@ export function Flow({
     }
 
     // Run turn-end triggers.
-    G = conf.turn.onEnd({ state });
+    G = conf.turn.wrapped.onEnd({ state });
 
     if (next) {
       next.push({ fn: UpdateTurn, arg, currentPlayer: ctx.currentPlayer });
@@ -733,7 +744,7 @@ export function Flow({
       state = EndStage(state, { playerID, automatic: true });
     }
 
-    const G = conf.turn.onMove({ state });
+    const G = conf.turn.wrapped.onMove({ state });
     state = { ...state, G };
 
     // Update undo / redo state.

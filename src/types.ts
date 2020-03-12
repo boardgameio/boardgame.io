@@ -68,7 +68,11 @@ export interface PhaseConfig {
   endIf?: Function;
   moves?: MoveMap;
   turn?: TurnConfig;
-  _wrapped?: boolean;
+  wrapped?: {
+    endIf?: Function;
+    onBegin?: Function;
+    onEnd?: Function;
+  };
 }
 
 export interface StageConfig {
@@ -81,7 +85,6 @@ export interface StageMap {
 }
 
 export interface TurnConfig {
-  _wrapped?: boolean;
   activePlayers?: object;
   moveLimit?: number;
   onBegin?: Function;
@@ -91,6 +94,12 @@ export interface TurnConfig {
   stages?: StageMap;
   moves?: MoveMap;
   order?: object;
+  wrapped?: {
+    endIf?: Function;
+    onBegin?: Function;
+    onEnd?: Function;
+    onMove?: Function;
+  };
 }
 
 interface PhaseMap {
