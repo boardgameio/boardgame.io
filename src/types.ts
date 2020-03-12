@@ -33,7 +33,9 @@ export interface Ctx {
   _activePlayersMoveLimit?: object;
   _activePlayersNumMoves?: object;
   _prevActivePlayers?: Array<string>;
-  _random?: object;
+  _random?: {
+    seed: string | number;
+  };
 }
 
 export interface LogEntry {
