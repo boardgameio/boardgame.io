@@ -15,8 +15,9 @@ describe('plugins', () => {
     const game = {
       moves: {
         A: (G, ctx) => {
-          G.insideA = ctx.test.get();
+          G.beginA = ctx.test.get();
           ctx.test.increment();
+          G.endA = ctx.test.get();
         },
       },
 
@@ -77,7 +78,8 @@ describe('plugins', () => {
   test('make move', () => {
     client.moves.A();
     expect(client.getState().G).toEqual({
-      insideA: 10,
+      beginA: 10,
+      endA: 11,
       onMove: 11,
       wrap: true,
     });
@@ -87,7 +89,8 @@ describe('plugins', () => {
   test('make another move', () => {
     client.moves.A();
     expect(client.getState().G).toEqual({
-      insideA: 12,
+      beginA: 12,
+      endA: 13,
       onMove: 13,
       wrap: true,
     });
