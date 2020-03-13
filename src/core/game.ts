@@ -8,7 +8,7 @@
 
 import * as plugins from '../plugins/main';
 import { Flow } from './flow';
-import { GameConfig, Move, LongFormMove, State } from '../types';
+import { ActionPayload, GameConfig, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
 
 /**
@@ -62,7 +62,7 @@ export function Game(game: GameConfig) {
 
     moveNames: flow.moveNames,
 
-    processMove: (state: State, action) => {
+    processMove: (state: State, action: ActionPayload.MakeMove) => {
       let moveFn = flow.getMove(state.ctx, action.type, action.playerID);
 
       if (IsLongFormMove(moveFn)) {

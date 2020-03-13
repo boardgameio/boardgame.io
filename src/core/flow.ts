@@ -20,6 +20,8 @@ import * as plugin from '../plugins/main';
 import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
 import {
+  ActionPayload,
+  ActionShape,
   State,
   Ctx,
   LogEntry,
@@ -653,7 +655,7 @@ export function Flow({
     return null;
   }
 
-  function ProcessMove(state: State, action): State {
+  function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
     let conf = GetPhase(state.ctx);
 
     let { ctx } = state;
@@ -795,7 +797,7 @@ export function Flow({
     enabledEventNames.push('setStage');
   }
 
-  function ProcessEvent(state: State, action): State {
+  function ProcessEvent(state: State, action: ActionShape.GameEvent) {
     const { type, playerID, args } = action.payload;
     if (eventHandlers.hasOwnProperty(type)) {
       const eventArgs = [state, playerID].concat(args);

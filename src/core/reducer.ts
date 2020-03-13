@@ -11,7 +11,7 @@ import * as plugins from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
 import { ContextEnhancer } from './context-enhancer';
-import { GameConfig, LogEntry, State, Move, LongFormMove } from '../types';
+import { ActionShape, GameConfig, LogEntry, State, Move, LongFormMove } from '../types';
 
 /**
  * Returns true if a move can be undone.
@@ -48,7 +48,6 @@ export const INVALID_MOVE = 'INVALID_MOVE';
  *
  * Creates the main game state reducer.
  * @param {...object} game - Return value of Game().
- * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to a truthy value if we are in a multiplayer client.
  */
 export function CreateGameReducer({
@@ -56,7 +55,7 @@ export function CreateGameReducer({
   multiplayer,
 }: {
   game: GameConfig;
-  multiplayer: boolean | object;
+  multiplayer?: boolean | object;
 }) {
   game = Game(game);
 
@@ -67,7 +66,7 @@ export function CreateGameReducer({
    * @param {object} state - The state before the action.
    * @param {object} action - A Redux action.
    */
-  return (state: State | null = null, action): State => {
+  return (state: State | null = null, action: ActionShape.Any): State => {
     switch (action.type) {
       case Actions.GAME_EVENT: {
         state = { ...state, deltalog: [] };

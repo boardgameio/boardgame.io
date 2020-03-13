@@ -7,6 +7,7 @@
  */
 
 import * as Actions from './action-types';
+import { State, LogEntry } from '../types'
 
 /**
  * Generate a move to be dispatched to the game move reducer.
@@ -16,8 +17,13 @@ import * as Actions from './action-types';
  * @param {string}  playerID - The ID of the player making this action.
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const makeMove = (type, args, playerID, credentials) => ({
-  type: Actions.MAKE_MOVE,
+export const makeMove = (
+  type: string,
+  args: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
+  type: Actions.MAKE_MOVE as typeof Actions.MAKE_MOVE,
   payload: { type, args, playerID, credentials },
 });
 
@@ -29,8 +35,13 @@ export const makeMove = (type, args, playerID, credentials) => ({
  * @param {string}  playerID - The ID of the player making this action.
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const gameEvent = (type, args, playerID, credentials) => ({
-  type: Actions.GAME_EVENT,
+export const gameEvent = (
+  type: string,
+  args: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
+  type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
 });
 
@@ -41,8 +52,13 @@ export const gameEvent = (type, args, playerID, credentials) => ({
  * @param {string}  playerID - The ID of the player making this action.
  * @param {string}  credentials - (optional) The credentials for the player making this action.
  */
-export const automaticGameEvent = (type, args, playerID, credentials) => ({
-  type: Actions.GAME_EVENT,
+export const automaticGameEvent = (
+  type: string,
+  args: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
+  type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
   automatic: true,
 });
@@ -52,11 +68,11 @@ export const automaticGameEvent = (type, args, playerID, credentials) => ({
  * @param {object} state - The state to restore.
  * @param {Array} log - The log to restore.
  */
-export const sync = (state, log) => ({
-  type: Actions.SYNC,
+export const sync = (state: State, log: LogEntry[]) => ({
+  type: Actions.SYNC as typeof Actions.SYNC,
   state,
   log,
-  clientOnly: true,
+  clientOnly: true as const,
 });
 
 /**
@@ -65,33 +81,33 @@ export const sync = (state, log) => ({
  * @param {object} state - The state to restore.
  * @param {Array} deltalog - A log delta.
  */
-export const update = (state, deltalog) => ({
-  type: Actions.UPDATE,
+export const update = (state: State, deltalog: LogEntry[]) => ({
+  type: Actions.UPDATE as typeof Actions.UPDATE,
   state,
   deltalog,
-  clientOnly: true,
+  clientOnly: true as const,
 });
 
 /**
  * Used to reset the game state.
  * @param {object} state - The initial state.
  */
-export const reset = state => ({
-  type: Actions.RESET,
+export const reset = (state: State) => ({
+  type: Actions.RESET as typeof Actions.RESET,
   state,
-  clientOnly: true,
+  clientOnly: true as const,
 });
 
 /**
  * Used to undo the last move.
  */
 export const undo = () => ({
-  type: Actions.UNDO,
+  type: Actions.UNDO as typeof Actions.UNDO,
 });
 
 /**
  * Used to redo the last undone move.
  */
 export const redo = () => ({
-  type: Actions.REDO,
+  type: Actions.REDO as typeof Actions.REDO,
 });

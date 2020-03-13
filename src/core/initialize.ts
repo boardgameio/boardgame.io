@@ -22,7 +22,7 @@ export function InitializeGame({
 }: {
   game: GameConfig;
   numPlayers: number;
-  setupData: any;
+  setupData?: any;
 }) {
   game = Game(game);
 
@@ -30,13 +30,15 @@ export function InitializeGame({
     numPlayers = 2;
   }
 
-  let ctx: Ctx = game.flow.ctx(numPlayers);
-
   let seed = game.seed;
   if (seed === undefined) {
     seed = Random.seed();
   }
-  ctx._random = { seed };
+
+  let ctx: Ctx = {
+    ...game.flow.ctx(numPlayers),
+    _random: { seed }
+  };
 
   let state: GameState = {
     // User managed state.

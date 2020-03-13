@@ -12,10 +12,22 @@ import { Game } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
+import {
+  GameConfig,
+  Server,
+  State,
+  ActionShape,
+  CredentialedActionShape,
+  LogEntry,
+  PlayerID
+} from '../types'
 
-const GameMetadataKey = gameID => `${gameID}:metadata`;
+const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
 
-export const getPlayerMetadata = (gameMetadata, playerID) => {
+export const getPlayerMetadata = (
+  gameMetadata: Server.GameMetadata,
+  playerID: PlayerID
+) => {
   if (gameMetadata && gameMetadata.players) {
     return gameMetadata.players[playerID];
   }
@@ -28,7 +40,7 @@ export const getPlayerMetadata = (gameMetadata, playerID) => {
  * @param {String} playerID - The playerID that this log is
  *                            to be sent to.
  */
-export function redactLog(log, playerID) {
+export function redactLog(log: LogEntry[], playerID: PlayerID) {
   if (log === undefined) {
     return log;
   }
@@ -61,7 +73,7 @@ export function redactLog(log, playerID) {
 /**
  * Verifies that the game has metadata and is using credentials.
  */
-export const doesGameRequireAuthentication = gameMetadata => {
+export const doesGameRequireAuthentication = (gameMetadata: Server.GameMetadata) => {
   if (!gameMetadata) return false;
   const { players } = gameMetadata;
   const hasCredentials = Object.keys(players).some(key => {
@@ -74,8 +86,8 @@ export const doesGameRequireAuthentication = gameMetadata => {
  * Verifies that the move came from a player with the correct credentials.
  */
 export const isActionFromAuthenticPlayer = (
-  actionCredentials,
-  playerMetadata
+  actionCredentials: string,
+  playerMetadata: Server.PlayerMetadata
 ) => {
   if (!actionCredentials) return false;
   if (!playerMetadata) return false;
@@ -85,14 +97,25 @@ export const isActionFromAuthenticPlayer = (
 /**
  * Remove player credentials from action payload
  */
-const stripCredentialsFromAction = action => {
+const stripCredentialsFromAction = (action: CredentialedActionShape.Any | ActionShape.Any) => {
   if ('payload' in action && 'credentials' in action.payload) {
     // eslint-disable-next-line no-unused-vars
     const { credentials, ...payload } = action.payload;
-    action = { ...action, payload };
+    return { ...action, payload };
   }
   return action;
 };
+
+type AuthFn = (
+  actionCredentials: string,
+  playerMetadata: Server.PlayerMetadata
+) => boolean | Promise<boolean>
+
+type CallbackFn = (arg: {
+  state: State,
+  gameID: string,
+  action?: ActionShape.Any | CredentialedActionShape.Any
+}) => void
 
 /**
  * Master
@@ -102,7 +125,15 @@ const stripCredentialsFromAction = action => {
  * storageAPI to communicate with the database.
  */
 export class Master {
-  constructor(game, storageAPI, transportAPI, auth) {
+  game: ReturnType<typeof Game>
+  storageAPI
+  transportAPI
+  subscribeCallback: CallbackFn
+  auth: null | AuthFn
+  shouldAuth: typeof doesGameRequireAuthentication
+  executeSynchronously: boolean
+
+  constructor(game: GameConfig, storageAPI, transportAPI, auth: AuthFn | boolean) {
     this.game = Game(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
@@ -119,7 +150,7 @@ export class Master {
     }
   }
 
-  subscribe(fn) {
+  subscribe(fn: CallbackFn) {
     this.subscribeCallback = fn;
   }
 
@@ -128,9 +159,16 @@ export class Master {
    * Computes the new value of the game state and returns it
    * along with a deltalog.
    */
-  async onUpdate(action, stateID, gameID, playerID) {
+  async onUpdate(
+    action: CredentialedActionShape.Any | ActionShape.Any,
+    stateID: number,
+    gameID: string,
+    playerID: string,
+  ) {
     let isActionAuthentic;
-    const { credentials } = action.payload || {};
+    const credentials = 'payload' in action && 'credentials' in action.payload
+      ? action.payload.credentials
+      : undefined;
     if (this.executeSynchronously) {
       const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
       const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
@@ -152,7 +190,7 @@ export class Master {
 
     const key = gameID;
 
-    let state;
+    let state: State;
     if (this.executeSynchronously) {
       state = this.storageAPI.get(key);
     } else {
@@ -171,7 +209,6 @@ export class Master {
 
     const reducer = CreateGameReducer({
       game: this.game,
-      numPlayers: state.ctx.numPlayers,
     });
     const store = createStore(reducer, state);
 
@@ -224,7 +261,7 @@ export class Master {
       gameID,
     });
 
-    this.transportAPI.sendAll(playerID => {
+    this.transportAPI.sendAll((playerID: string) => {
       const filteredState = {
         ...state,
         G: this.game.playerView(state.G, state.ctx, playerID),
@@ -265,10 +302,12 @@ export class Master {
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
-  async onSync(gameID, playerID, numPlayers) {
+  async onSync(gameID: string, playerID: string, numPlayers: number) {
     const key = gameID;
 
-    let state, gameMetadata, filteredGameMetadata;
+    let state: State;
+    let gameMetadata: Server.GameMetadata;
+    let filteredGameMetadata: { id: number, name?: string }[];
 
     if (this.executeSynchronously) {
       state = this.storageAPI.get(key);
