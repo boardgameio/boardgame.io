@@ -164,7 +164,7 @@
       "raf/polyfill"
     ],
     "setupFilesAfterEnv": [
-      "@testing-library/jest-dom/extend-expect"
+      "@testing-library/jest-dom"
     ],
     "transform": {
       "^.+\\.svelte$": "jest-transform-svelte"
