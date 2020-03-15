@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import '@testing-library/jest-dom/extend-expect';
 import { render } from '@testing-library/svelte';
 import { Client } from '../../client';
 import Debug from '../Debug.svelte';
