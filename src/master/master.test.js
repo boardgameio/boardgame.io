@@ -76,7 +76,10 @@ describe('sync', () => {
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync('gameID', '0', 2);
 
-    const expectedMetadata = [{ id: 0, name: 'Alice' }, { id: 1, name: 'Bob' }];
+    const expectedMetadata = [
+      { id: 0, name: 'Alice' },
+      { id: 1, name: 'Bob' },
+    ];
     expect(send.mock.calls[0][0].args[3]).toMatchObject(expectedMetadata);
   });
 });

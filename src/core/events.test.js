@@ -38,7 +38,10 @@ test('dispatch', () => {
   expect(e.dispatch).toEqual([]);
   ctx.events.A();
   ctx.events.B();
-  expect(e.dispatch).toEqual([{ key: 'A', args: [] }, { key: 'B', args: [] }]);
+  expect(e.dispatch).toEqual([
+    { key: 'A', args: [] },
+    { key: 'B', args: [] },
+  ]);
 });
 
 test('update ctx', () => {
