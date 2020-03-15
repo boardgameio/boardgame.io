@@ -73,7 +73,7 @@
     "@babel/preset-env": "^7.5.4",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
-    "@firebase/app": "^0.4.26",
+    "@firebase/app": "^0.5.6",
     "@testing-library/jest-dom": "^4.1.2",
     "@testing-library/svelte": "^1.9.0",
     "@types/jest": "^24.0.0",
