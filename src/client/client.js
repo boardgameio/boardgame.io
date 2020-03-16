@@ -279,16 +279,19 @@ class _ClientImpl {
       this.debug !== false &&
       this._debugPanel == null
     ) {
-      let target = document.body;
-      if (this.debug && this.debug.target) {
+      let target = document && document.body;
+      if (this.debug && this.debug.target !== undefined) {
         target = this.debug.target;
       }
-      this._debugPanel = new debugImpl({
-        target,
-        props: {
-          client: this,
-        },
-      });
+
+      if (target) {
+        this._debugPanel = new debugImpl({
+          target,
+          props: {
+            client: this,
+          },
+        });
+      }
     }
   }
 

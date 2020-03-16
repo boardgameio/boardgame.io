@@ -642,6 +642,13 @@ describe('start / stop', () => {
     client.stop();
   });
 
+  test('no error when mounting on null element', () => {
+    const client = Client({ game: {}, debug: { target: null } });
+    client.start();
+    client.stop();
+    expect(client._debugPanel).toBe(null);
+  });
+
   test('override debug implementation', () => {
     const client = Client({ game: {}, debug: { impl: Debug } });
     client.start();
