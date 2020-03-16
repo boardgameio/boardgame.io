@@ -534,9 +534,6 @@ describe('.createApiServer', () => {
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
               expect(setSpy).toHaveBeenCalledWith(expect.stringMatching(':1'));
-              expect(setSpy).toHaveBeenCalledWith(
-                expect.stringMatching(':metadata')
-              );
             });
           });
         });

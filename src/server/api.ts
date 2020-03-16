@@ -22,8 +22,6 @@ const createGameMetadata = () => ({
   setupData: {},
 });
 
-const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
-
 /**
  * Creates a new game.
  *
@@ -226,7 +224,6 @@ export const addApiToServer = ({
     } else {
       // remove room
       await db.remove(namespacedGameID);
-      await db.remove(GameMetadataKey(namespacedGameID));
     }
     ctx.body = {};
   });
