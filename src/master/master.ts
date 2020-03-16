@@ -20,7 +20,7 @@ import {
   CredentialedActionShape,
   LogEntry,
   PlayerID
-} from '../types'
+} from '../types';
 
 const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
 

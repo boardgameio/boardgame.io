@@ -47,15 +47,13 @@ export const INVALID_MOVE = 'INVALID_MOVE';
  * CreateGameReducer
  *
  * Creates the main game state reducer.
- * @param {...object} game - Return value of Game().
- * @param {...object} multiplayer - Set to a truthy value if we are in a multiplayer client.
  */
 export function CreateGameReducer({
   game,
-  multiplayer,
+  isClient,
 }: {
   game: GameConfig;
-  multiplayer?: boolean | object;
+  isClient?: boolean;
 }) {
   game = Game(game);
 
@@ -75,7 +73,7 @@ export function CreateGameReducer({
         // These events like `endTurn` typically
         // contain code that may rely on secret state
         // and cannot be computed on the client.
-        if (multiplayer) {
+        if (isClient) {
           return state;
         }
 
@@ -131,7 +129,7 @@ export function CreateGameReducer({
         }
 
         // Don't run move on client if move says so.
-        if (multiplayer && (move as LongFormMove).client === false) {
+        if (isClient && (move as LongFormMove).client === false) {
           return state;
         }
 
@@ -154,7 +152,7 @@ export function CreateGameReducer({
         // Execute plugins.
         state = plugins.Enhance(state, {
           game,
-          isClient: multiplayer !== undefined,
+          isClient
         });
 
         const apiCtx = new ContextEnhancer(
@@ -197,7 +195,7 @@ export function CreateGameReducer({
         // Random API code was executed. If we are on the
         // client, wait for the master response instead.
         if (
-          multiplayer &&
+          isClient &&
           ctx._random !== undefined &&
           ctx._random.prngstate !== undefined
         ) {
@@ -210,7 +208,7 @@ export function CreateGameReducer({
         // and no triggers in multiplayer mode.
         // These will be processed on the server, which
         // will send back a state update.
-        if (multiplayer) {
+        if (isClient) {
           state = plugins.Flush(state, {
             game,
             isClient: true,

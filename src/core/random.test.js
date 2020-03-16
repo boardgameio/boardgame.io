@@ -140,7 +140,7 @@ test('Random API is not executed optimisitically', () => {
   }
 
   {
-    const reducer = CreateGameReducer({ game, multiplayer: () => {} });
+    const reducer = CreateGameReducer({ game, isClient: true });
     let state = InitializeGame({ game });
     expect(state.G.die).not.toBeDefined();
     state = reducer(state, makeMove('rollDie'));

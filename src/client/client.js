@@ -100,8 +100,8 @@ class _ClientImpl {
 
     this.reducer = CreateGameReducer({
       game: this.game,
+      isClient: multiplayer !== undefined,
       numPlayers,
-      multiplayer,
     });
 
     let initialState = null;

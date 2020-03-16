@@ -139,7 +139,7 @@ test('endTurn', () => {
   }
 
   {
-    const reducer = CreateGameReducer({ game, multiplayer: () => {} });
+    const reducer = CreateGameReducer({ game, isClient: true });
     let state = reducer(initialState, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(1);
   }
@@ -160,7 +160,7 @@ test('light client when multiplayer=true', () => {
   }
 
   {
-    const reducer = CreateGameReducer({ game, multiplayer: () => {} });
+    const reducer = CreateGameReducer({ game, isClient: true });
     let state = InitializeGame({ game });
     expect(state.ctx.gameover).toBe(undefined);
     state = reducer(state, makeMove('A'));
@@ -187,7 +187,7 @@ test('disable optimistic updates', () => {
   }
 
   {
-    const reducer = CreateGameReducer({ game, multiplayer: () => {} });
+    const reducer = CreateGameReducer({ game, isClient: true });
     let state = InitializeGame({ game });
     expect(state.G).not.toMatchObject({ A: true });
     state = reducer(state, makeMove('A'));
