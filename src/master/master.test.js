@@ -72,7 +72,7 @@ describe('sync', () => {
         },
       },
     };
-    db.set('gameID:metadata', dbMetadata);
+    db.setMetadata('gameID', dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync('gameID', '0', 2);
 

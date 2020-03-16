@@ -21,8 +21,7 @@ import {
   LogEntry,
   PlayerID,
 } from '../types';
-
-const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
+import StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
   gameMetadata: Server.GameMetadata,
@@ -130,7 +129,7 @@ type CallbackFn = (arg: {
  */
 export class Master {
   game: ReturnType<typeof Game>;
-  storageAPI;
+  storageAPI: StorageAPI;
   transportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
@@ -180,13 +179,13 @@ export class Master {
         ? action.payload.credentials
         : undefined;
     if (this.executeSynchronously) {
-      const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
+      const gameMetadata = this.storageAPI.getMetadata(gameID);
       const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
       isActionAuthentic = this.shouldAuth(gameMetadata)
         ? this.auth(credentials, playerMetadata)
         : true;
     } else {
-      const gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
+      const gameMetadata = await this.storageAPI.getMetadata(gameID);
       const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
       isActionAuthentic = this.shouldAuth(gameMetadata)
         ? await this.auth(credentials, playerMetadata)
@@ -202,9 +201,9 @@ export class Master {
 
     let state: State;
     if (this.executeSynchronously) {
-      state = this.storageAPI.get(key);
+      state = this.storageAPI.getState(key);
     } else {
-      state = await this.storageAPI.get(key);
+      state = await this.storageAPI.getState(key);
     }
 
     if (state === undefined) {
@@ -302,9 +301,9 @@ export class Master {
     const stateWithLog = { ...state, log };
 
     if (this.executeSynchronously) {
-      this.storageAPI.set(key, stateWithLog);
+      this.storageAPI.setState(key, stateWithLog);
     } else {
-      await this.storageAPI.set(key, stateWithLog);
+      await this.storageAPI.setState(key, stateWithLog);
     }
   }
 
@@ -320,11 +319,11 @@ export class Master {
     let filteredGameMetadata: { id: number; name?: string }[];
 
     if (this.executeSynchronously) {
-      state = this.storageAPI.get(key);
-      gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
+      state = this.storageAPI.getState(key);
+      gameMetadata = this.storageAPI.getMetadata(gameID);
     } else {
-      state = await this.storageAPI.get(key);
-      gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
+      state = await this.storageAPI.getState(key);
+      gameMetadata = await this.storageAPI.getMetadata(gameID);
     }
     if (gameMetadata) {
       filteredGameMetadata = Object.values(gameMetadata.players).map(player => {
@@ -342,11 +341,11 @@ export class Master {
       });
 
       if (this.executeSynchronously) {
-        this.storageAPI.set(key, state);
-        state = this.storageAPI.get(key);
+        this.storageAPI.setState(key, state);
+        state = this.storageAPI.getState(key);
       } else {
-        await this.storageAPI.set(key, state);
-        state = await this.storageAPI.get(key);
+        await this.storageAPI.setState(key, state);
+        state = await this.storageAPI.getState(key);
       }
     }
 

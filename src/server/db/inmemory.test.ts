@@ -7,32 +7,35 @@
  */
 
 import { InMemory } from './inmemory';
+import { State } from '../../types';
 
 test('inmemory db', async () => {
   const db = new InMemory();
-  await db.connect();
+  db.connect();
 
   // Must return undefined when no game exists.
-  let state = await db.get('gameID');
+  let state = await db.getState('gameID');
   expect(state).toEqual(undefined);
 
+  let stateEntry: unknown = { a: 1 };
+
   // Create game.
-  await db.set('gameID', { a: 1 });
+  db.setState('gameID', stateEntry as State);
   // Must return created game.
-  state = await db.get('gameID');
-  expect(state).toEqual({ a: 1 });
+  state = db.getState('gameID');
+  expect(state).toEqual(stateEntry);
 
   // Must return true if game exists
-  let has = await db.has('gameID');
+  let has = db.has('gameID');
   expect(has).toEqual(true);
 
   // Must return all keys
-  let keys = await db.list();
+  let keys = db.list();
   expect(keys).toEqual(['gameID']);
 
   // Must remove game from DB
-  await db.remove('gameID');
-  expect(await db.has('gameID')).toEqual(false);
+  db.remove('gameID');
+  expect(db.has('gameID')).toEqual(false);
   // Shall not return error
-  await db.remove('gameID');
+  db.remove('gameID');
 });
