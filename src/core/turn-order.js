@@ -9,27 +9,6 @@
 import * as logging from './logger';
 
 /**
- * Standard move that simulates passing.
- *
- * Creates two objects in G:
- * passOrder - An array of playerIDs capturing passes in the pass order.
- * allPassed - Set to true when all players have passed.
- */
-export const Pass = (G, ctx) => {
-  let passOrder = [];
-  if (G.passOrder !== undefined) {
-    passOrder = G.passOrder;
-  }
-  const playerID = ctx.playerID;
-  passOrder = [...passOrder, playerID];
-  G = { ...G, passOrder };
-  if (passOrder.length >= ctx.numPlayers) {
-    G = { ...G, allPassed: true };
-  }
-  return G;
-};
-
-/**
  * Event to change the active players (and their stages) in the current turn.
  */
 export function SetActivePlayersEvent(state, _playerID, arg) {
@@ -384,27 +363,6 @@ export const TurnOrder = {
     first: () => 0,
     next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   }),
-
-  /**
-   * SKIP
-   *
-   * Round-robin, but skips over any players that have passed.
-   * Meant to be used with Pass above.
-   */
-
-  SKIP: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => {
-      if (G.allPassed) return;
-      let playOrderPos = ctx.playOrderPos;
-      for (let i = 0; i < ctx.playOrder.length; i++) {
-        playOrderPos = (playOrderPos + 1) % ctx.playOrder.length;
-        if (!G.passOrder.includes(ctx.playOrder[playOrderPos] + '')) {
-          return playOrderPos;
-        }
-      }
-    },
-  },
 };
 
 export const Stage = {

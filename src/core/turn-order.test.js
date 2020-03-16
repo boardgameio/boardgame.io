@@ -12,7 +12,6 @@ import {
   Stage,
   TurnOrder,
   ActivePlayers,
-  Pass,
 } from './turn-order';
 import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
@@ -296,70 +295,6 @@ describe('turn orders', () => {
     state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.currentPlayer).toBe('3');
   });
-});
-
-test('passing', () => {
-  const game = {
-    moves: { pass: Pass },
-    phases: { A: { start: true, turn: { order: TurnOrder.SKIP } } },
-  };
-  const reducer = CreateGameReducer({ game });
-  let state = InitializeGame({ game, numPlayers: 3 });
-
-  expect(state.ctx.currentPlayer).toBe('0');
-  state = reducer(state, makeMove('pass', null, '0'));
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.G.allPassed).toBe(undefined);
-  expect(state.G.passOrder).toEqual(['0']);
-
-  expect(state.ctx.currentPlayer).toBe('1');
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.G.allPassed).toBe(undefined);
-  expect(state.G.passOrder).toEqual(['0']);
-
-  expect(state.ctx.currentPlayer).toBe('2');
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.G.allPassed).toBe(undefined);
-
-  expect(state.ctx.currentPlayer).toBe('1');
-  state = reducer(state, makeMove('pass', null, '1'));
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.G.allPassed).toBe(undefined);
-  expect(state.G.passOrder).toEqual(['0', '1']);
-
-  expect(state.ctx.currentPlayer).toBe('2');
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.G.allPassed).toBe(undefined);
-
-  expect(state.ctx.currentPlayer).toBe('2');
-  state = reducer(state, makeMove('pass', null, '2'));
-  expect(state.G.allPassed).toBe(true);
-  expect(state.ctx.currentPlayer).toBe('2');
-  state = reducer(state, gameEvent('endTurn'));
-  expect(state.G.allPassed).toBe(true);
-  expect(state.G.passOrder).toEqual(['0', '1', '2']);
-});
-
-test('end game after everyone passes', () => {
-  const game = {
-    endIf: G => G.allPassed,
-    turn: { activePlayers: ActivePlayers.ALL },
-    moves: { pass: Pass },
-  };
-
-  const reducer = CreateGameReducer({ game });
-  let state = InitializeGame({ game, numPlayers: 3 });
-
-  expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1', '2']);
-
-  // Passes can be made in any order with ActivePlayers.ALL.
-
-  state = reducer(state, makeMove('pass', null, '1'));
-  expect(state.ctx.gameover).toBe(undefined);
-  state = reducer(state, makeMove('pass', null, '0'));
-  expect(state.ctx.gameover).toBe(undefined);
-  state = reducer(state, makeMove('pass', null, '2'));
-  expect(state.ctx.gameover).toBe(true);
 });
 
 test('override', () => {
