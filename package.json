@@ -88,7 +88,7 @@
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
     "css-loader": "^3.1.0",
-    "docsify-cli": "^4.3.0",
+    "docsify-cli": "^4.4.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^5.6.0",
