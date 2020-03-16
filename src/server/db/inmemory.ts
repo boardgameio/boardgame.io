@@ -1,5 +1,5 @@
 import { State, Server } from '../../types';
-import StorageAPI from './base';
+import { StorageAPISync } from './base';
 
 /*
  * Copyright 2017 The boardgame.io Authors
@@ -12,7 +12,7 @@ import StorageAPI from './base';
 /**
  * InMemory data storage.
  */
-export class InMemory extends StorageAPI {
+export class InMemory extends StorageAPISync {
   private games: Map<string, State>;
   private metadata: Map<string, Server.GameMetadata>;
 

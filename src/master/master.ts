@@ -21,7 +21,7 @@ import {
   LogEntry,
   PlayerID,
 } from '../types';
-import StorageAPI from '../server/db/base';
+import { StorageAPI, StorageAPISync } from '../server/db/base';
 
 export const getPlayerMetadata = (
   gameMetadata: Server.GameMetadata,
@@ -129,7 +129,7 @@ type CallbackFn = (arg: {
  */
 export class Master {
   game: ReturnType<typeof Game>;
-  storageAPI: StorageAPI;
+  storageAPI: StorageAPI | StorageAPISync;
   transportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
@@ -179,7 +179,9 @@ export class Master {
         ? action.payload.credentials
         : undefined;
     if (this.executeSynchronously) {
-      const gameMetadata = this.storageAPI.getMetadata(gameID);
+      const gameMetadata = (this.storageAPI as StorageAPISync).getMetadata(
+        gameID
+      );
       const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
       isActionAuthentic = this.shouldAuth(gameMetadata)
         ? this.auth(credentials, playerMetadata)
@@ -201,7 +203,7 @@ export class Master {
 
     let state: State;
     if (this.executeSynchronously) {
-      state = this.storageAPI.getState(key);
+      state = (this.storageAPI as StorageAPISync).getState(key);
     } else {
       state = await this.storageAPI.getState(key);
     }
@@ -319,8 +321,9 @@ export class Master {
     let filteredGameMetadata: { id: number; name?: string }[];
 
     if (this.executeSynchronously) {
-      state = this.storageAPI.getState(key);
-      gameMetadata = this.storageAPI.getMetadata(gameID);
+      const api = this.storageAPI as StorageAPISync;
+      state = api.getState(key);
+      gameMetadata = api.getMetadata(gameID);
     } else {
       state = await this.storageAPI.getState(key);
       gameMetadata = await this.storageAPI.getMetadata(gameID);
@@ -341,8 +344,9 @@ export class Master {
       });
 
       if (this.executeSynchronously) {
-        this.storageAPI.setState(key, state);
-        state = this.storageAPI.getState(key);
+        const api = this.storageAPI as StorageAPISync;
+        api.setState(key, state);
+        state = api.getState(key);
       } else {
         await this.storageAPI.setState(key, state);
         state = await this.storageAPI.getState(key);
