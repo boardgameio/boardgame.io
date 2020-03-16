@@ -1,3 +1,26 @@
+## v0.38.0
+
+#### Breaking Changes
+
+The Plugin API is revamped. This also includes changing the way
+`PluginPlayer` works.  Please take a look at the
+[documentation](https://boardgame.io/documentation/#/plugins).  Feel free to comment on the public Gitter
+channel if you have use-cases that are not covered by the rewrite
+or need help migrating.
+
+#### Features
+
+* [[d84e6af](https://github.com/nicolodavis/boardgame.io/commit/d84e6af)] add onEnd hook for Game
+* [[94b69cb](https://github.com/nicolodavis/boardgame.io/commit/94b69cb)] Plugin API cleanup (#560)
+
+#### Bugfixes
+
+* [[aede3b6](https://github.com/nicolodavis/boardgame.io/commit/aede3b6)] check that document exists before mounting debug panel
+* [[ec7f0ad](https://github.com/nicolodavis/boardgame.io/commit/ec7f0ad)] fix(master): Remove credentials from action payloads after use (#556)
+* [[a080ce3](https://github.com/nicolodavis/boardgame.io/commit/a080ce3)] fix: #552 (#553)
+* [[79ebcc3](https://github.com/nicolodavis/boardgame.io/commit/79ebcc3)] remove graceful-fs patch
+* [[9370366](https://github.com/nicolodavis/boardgame.io/commit/9370366)] remove some unused Svelte props
+
 ## v0.37.2
 
 #### Bugfixes
