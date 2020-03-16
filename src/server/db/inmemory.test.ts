@@ -7,7 +7,7 @@
  */
 
 import { InMemory } from './inmemory';
-import { State } from '../../types';
+import { State, Server } from '../../types';
 
 test('inmemory db', async () => {
   const db = new InMemory();
@@ -20,6 +20,7 @@ test('inmemory db', async () => {
   let stateEntry: unknown = { a: 1 };
 
   // Create game.
+  db.setMetadata('gameID', {} as Server.GameMetadata);
   db.setState('gameID', stateEntry as State);
   // Must return created game.
   state = db.getState('gameID');

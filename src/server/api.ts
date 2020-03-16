@@ -13,9 +13,8 @@ const uuid = require('shortid').generate;
 const cors = require('@koa/cors');
 
 import { InitializeGame } from '../core/initialize';
+import StorageAPI from './db/base';
 
-const isGameMetadataKey = (key: string, gameName: string) =>
-  key.match(gameName + ':.*:metadata');
 const getNamespacedGameID = (gameID: string, gameName: string) =>
   `${gameName}:${gameID}`;
 const createGameMetadata = () => ({
@@ -36,7 +35,7 @@ const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
  * @param {object } lobbyConfig - Configuration options for the lobby.
  */
 export const CreateGame = async (
-  db,
+  db: StorageAPI,
   game,
   numPlayers,
   setupData,
@@ -59,8 +58,8 @@ export const CreateGame = async (
   const gameID = lobbyConfig.uuid();
   const namespacedGameID = getNamespacedGameID(gameID, game.name);
 
-  await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
-  await db.set(namespacedGameID, state);
+  await db.setMetadata(namespacedGameID, gameMetadata);
+  await db.setState(namespacedGameID, state);
 
   return gameID;
 };
@@ -81,6 +80,12 @@ export const addApiToServer = ({
   games,
   lobbyConfig,
   generateCredentials,
+}: {
+  app: any;
+  games: any;
+  lobbyConfig: any;
+  generateCredentials: any;
+  db: StorageAPI;
 }) => {
   if (!lobbyConfig) lobbyConfig = {};
   lobbyConfig = {
@@ -123,15 +128,11 @@ export const addApiToServer = ({
     const gameName = ctx.params.name;
     const gameList = await db.list();
     let rooms = [];
-    for (let key of [...gameList]) {
-      if (isGameMetadataKey(key, gameName)) {
-        const gameID = key.slice(
-          gameName.length + 1,
-          key.lastIndexOf(':metadata')
-        );
-        const metadata = await db.get(key);
+    for (let gameID of [...gameList]) {
+      if (gameID.startsWith(`${gameName}:`)) {
+        const metadata = await db.getMetadata(gameID);
         rooms.push({
-          gameID: gameID,
+          gameID,
           players: Object.values(metadata.players).map((player: any) => {
             // strip away credentials
             return { id: player.id, name: player.name };
@@ -148,12 +149,13 @@ export const addApiToServer = ({
   router.get('/games/:name/:id', async ctx => {
     const gameName = ctx.params.name;
     const gameID = ctx.params.id;
-    const room = await db.get(`${gameName}:${GameMetadataKey(gameID)}`);
+    const namespacedGameID = getNamespacedGameID(gameID, gameName);
+    const room = await db.getMetadata(namespacedGameID);
     if (!room) {
       ctx.throw(404, 'Room ' + gameID + ' not found');
     }
     const strippedRoom = {
-      roomID: gameID,
+      roomID: namespacedGameID,
       players: Object.values(room.players).map((player: any) => {
         return { id: player.id, name: player.name };
       }),
@@ -174,7 +176,7 @@ export const addApiToServer = ({
     const gameName = ctx.params.name;
     const roomID = ctx.params.id;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
-    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
+    const gameMetadata = await db.getMetadata(namespacedGameID);
     if (!gameMetadata) {
       ctx.throw(404, 'Game ' + roomID + ' not found');
     }
@@ -189,7 +191,7 @@ export const addApiToServer = ({
     const playerCredentials = await lobbyConfig.generateCredentials(ctx);
     gameMetadata.players[playerID].credentials = playerCredentials;
 
-    await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
+    await db.setMetadata(namespacedGameID, gameMetadata);
 
     ctx.body = {
       playerCredentials,
@@ -202,7 +204,7 @@ export const addApiToServer = ({
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
-    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
+    const gameMetadata = await db.getMetadata(namespacedGameID);
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
@@ -220,7 +222,7 @@ export const addApiToServer = ({
     delete gameMetadata.players[playerID].name;
     delete gameMetadata.players[playerID].credentials;
     if (Object.values(gameMetadata.players).some((val: any) => val.name)) {
-      await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
+      await db.setMetadata(namespacedGameID, gameMetadata);
     } else {
       // remove room
       await db.remove(namespacedGameID);
@@ -235,7 +237,7 @@ export const addApiToServer = ({
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
-    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
+    const gameMetadata = await db.getMetadata(namespacedGameID);
     // User-data to pass to the game setup function.
     const setupData = ctx.request.body.setupData;
     // The number of players for this game instance.
@@ -274,7 +276,7 @@ export const addApiToServer = ({
     );
     gameMetadata.nextRoomID = nextRoomID;
 
-    await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
+    await db.setMetadata(namespacedGameID, gameMetadata);
 
     ctx.body = {
       nextRoomID,
@@ -288,7 +290,7 @@ export const addApiToServer = ({
     const credentials = ctx.request.body.credentials;
     const newName = ctx.request.body.newName;
     const namespacedGameID = getNamespacedGameID(roomID, gameName);
-    const gameMetadata = await db.get(GameMetadataKey(namespacedGameID));
+    const gameMetadata = await db.getMetadata(namespacedGameID);
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
@@ -306,7 +308,7 @@ export const addApiToServer = ({
     }
 
     gameMetadata.players[playerID].name = newName;
-    await db.set(GameMetadataKey(namespacedGameID), gameMetadata);
+    await db.setMetadata(namespacedGameID, gameMetadata);
     ctx.body = {};
   });
 

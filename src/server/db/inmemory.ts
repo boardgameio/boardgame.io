@@ -72,6 +72,6 @@ export class InMemory extends StorageAPI {
    * Return all keys.
    */
   list(): string[] {
-    return [...this.games.keys()];
+    return [...this.metadata.keys()];
   }
 }

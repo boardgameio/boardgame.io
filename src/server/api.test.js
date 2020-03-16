@@ -17,19 +17,22 @@ describe('.createApiServer', () => {
   describe('creating a game', () => {
     let response;
     let setSpy;
+    let setMetadataSpy;
     let app;
     let db;
     let games;
 
     beforeEach(async () => {
       setSpy = jest.fn();
+      setMetadataSpy = jest.fn();
       db = {
-        set: async (id, state) => setSpy(id, state),
+        setState: async (id, state) => setSpy(id, state),
+        setMetadata: async (id, metadata) => setMetadataSpy(id, metadata),
       };
       games = [
         {
           name: 'foo',
-          setup: (ctx, setupData) =>
+          setup: (_, setupData) =>
             setupData
               ? {
                   colors: setupData.colors,
@@ -88,8 +91,8 @@ describe('.createApiServer', () => {
       });
 
       test('creates game metadata', () => {
-        expect(setSpy).toHaveBeenCalledWith(
-          expect.stringMatching(':metadata'),
+        expect(setMetadataSpy).toHaveBeenCalledWith(
+          expect.stringMatching('foo:'),
           expect.objectContaining({
             players: expect.objectContaining({
               '0': expect.objectContaining({}),
@@ -177,6 +180,7 @@ describe('.createApiServer', () => {
         beforeEach(async () => {
           db = {
             get: async () => null,
+            getMetadata: async () => null,
           };
 
           const app = createApiServer({ db, games });
@@ -197,14 +201,14 @@ describe('.createApiServer', () => {
         beforeEach(async () => {
           setSpy = jest.fn();
           db = {
-            get: async () => {
+            getMetadata: async () => {
               return {
                 players: {
                   '0': {},
                 },
               };
             },
-            set: async (id, state) => setSpy(id, state),
+            setMetadata: async (id, state) => setSpy(id, state),
           };
         });
 
@@ -230,7 +234,7 @@ describe('.createApiServer', () => {
 
           test('updates the player name', async () => {
             expect(setSpy).toHaveBeenCalledWith(
-              expect.stringMatching(':metadata'),
+              expect.stringMatching('foo:'),
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
@@ -285,7 +289,7 @@ describe('.createApiServer', () => {
           beforeEach(async () => {
             setSpy = jest.fn();
             db = {
-              get: async () => {
+              getMetadata: async () => {
                 return {
                   players: {
                     '0': {
@@ -295,7 +299,7 @@ describe('.createApiServer', () => {
                   },
                 };
               },
-              set: async (id, state) => setSpy(id, state),
+              setMetadata: async (id, state) => setSpy(id, state),
             };
 
             const app = createApiServer({ db, games });
@@ -329,7 +333,7 @@ describe('.createApiServer', () => {
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
           db = {
-            get: async () => null,
+            getMetadata: async () => null,
           };
           const app = createApiServer({ db, games });
           response = await request(app.callback())
@@ -345,7 +349,7 @@ describe('.createApiServer', () => {
           beforeEach(async () => {
             setSpy = jest.fn();
             db = {
-              get: async () => {
+              getMetadata: async () => {
                 return {
                   players: {
                     '0': {
@@ -359,7 +363,7 @@ describe('.createApiServer', () => {
                   },
                 };
               },
-              set: async (id, game) => setSpy(id, game),
+              setMetadata: async (id, game) => setSpy(id, game),
             };
             const app = createApiServer({ db, games });
             response = await request(app.callback())
@@ -373,7 +377,7 @@ describe('.createApiServer', () => {
 
           test('updates the players', async () => {
             expect(setSpy).toHaveBeenCalledWith(
-              expect.stringMatching(':metadata'),
+              expect.stringMatching('foo:'),
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
@@ -449,7 +453,7 @@ describe('.createApiServer', () => {
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
           db = {
-            get: async () => null,
+            getMetadata: async () => null,
           };
           const app = createApiServer({ db, games });
           response = await request(app.callback())
@@ -465,7 +469,7 @@ describe('.createApiServer', () => {
           beforeEach(async () => {
             setSpy = jest.fn();
             db = {
-              get: async () => {
+              getMetadata: async () => {
                 return {
                   players: {
                     '0': {
@@ -479,7 +483,7 @@ describe('.createApiServer', () => {
                   },
                 };
               },
-              set: async (id, game) => setSpy(id, game),
+              setMetadata: async (id, game) => setSpy(id, game),
             };
             const app = createApiServer({ db, games });
             response = await request(app.callback())
@@ -493,7 +497,7 @@ describe('.createApiServer', () => {
 
           test('updates the players', async () => {
             expect(setSpy).toHaveBeenCalledWith(
-              expect.stringMatching(':metadata'),
+              expect.stringMatching('foo:'),
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({}),
@@ -510,7 +514,7 @@ describe('.createApiServer', () => {
             test('removes the game', async () => {
               setSpy = jest.fn();
               db = {
-                get: async () => {
+                getMetadata: async () => {
                   return {
                     players: {
                       '0': {
@@ -610,7 +614,7 @@ describe('.createApiServer', () => {
       delete process.env.API_SECRET;
       setSpy = jest.fn();
       db = {
-        get: async () => {
+        getMetadata: async () => {
           return {
             players: {
               '0': {
@@ -624,7 +628,8 @@ describe('.createApiServer', () => {
             },
           };
         },
-        set: async (id, game) => setSpy(id, game),
+        setState: async (id, state) => setSpy(id, state),
+        setMetadata: async (id, metadata) => setSpy(id, metadata),
       };
     });
 
@@ -646,7 +651,7 @@ describe('.createApiServer', () => {
 
     test('fetches next id', async () => {
       db = {
-        get: async () => {
+        getMetadata: async () => {
           return {
             players: {
               '0': {
@@ -671,7 +676,7 @@ describe('.createApiServer', () => {
 
     test('when the game does not exist throws a "not found" error', async () => {
       db = {
-        get: async () => null,
+        getMetadata: async () => null,
       };
       const app = createApiServer({ db, games });
       response = await request(app.callback())
@@ -718,7 +723,7 @@ describe('.createApiServer', () => {
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = {
-        get: async () => {
+        getMetadata: async () => {
           return {
             players: {
               '0': {
@@ -732,16 +737,9 @@ describe('.createApiServer', () => {
             },
           };
         },
-        set: async () => {},
+        setMetadata: async () => {},
         list: async () => {
-          return [
-            'bar:bar-0',
-            'bar:bar-0:metadata',
-            'foo:foo-0',
-            'foo:foo-0:metadata',
-            'bar:bar-1',
-            'bar:bar-1:metadata',
-          ];
+          return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
       };
     });
@@ -760,8 +758,8 @@ describe('.createApiServer', () => {
       });
 
       test('returns room ids', async () => {
-        expect(rooms[0].gameID).toEqual('bar-0');
-        expect(rooms[1].gameID).toEqual('bar-1');
+        expect(rooms[0].gameID).toEqual('bar:bar-0');
+        expect(rooms[1].gameID).toEqual('bar:bar-1');
       });
 
       test('returns player names', async () => {
@@ -776,7 +774,7 @@ describe('.createApiServer', () => {
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = {
-        get: async () => {
+        getMetadata: async () => {
           return {
             players: {
               '0': {
@@ -790,16 +788,9 @@ describe('.createApiServer', () => {
             },
           };
         },
-        set: async () => {},
+        setMetadata: async () => {},
         list: async () => {
-          return [
-            'bar:bar-0',
-            'bar:bar-0:metadata',
-            'foo:foo-0',
-            'foo:foo-0:metadata',
-            'bar:bar-1',
-            'bar:bar-1:metadata',
-          ];
+          return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
       };
     });
@@ -815,7 +806,7 @@ describe('.createApiServer', () => {
       });
 
       test('returns game ids', async () => {
-        expect(room.roomID).toEqual('bar-0');
+        expect(room.roomID).toEqual('bar:bar-0');
       });
 
       test('returns player names', async () => {
@@ -826,7 +817,7 @@ describe('.createApiServer', () => {
     describe('when given a non-existent room ID', () => {
       let response;
       beforeEach(async () => {
-        db.get = async () => {
+        db.getMetadata = async () => {
           return null;
         };
         let games = [Game({ name: 'foo' })];
