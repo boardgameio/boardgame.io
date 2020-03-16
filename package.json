@@ -25,7 +25,7 @@
     "prepublishOnly": "npm run clean",
     "prepack": "npm run build && node scripts/proxy-dirs.js",
     "postpack": "npm run clean",
-    "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{js,css,md}\"",
+    "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,js,css,md}\"",
     "changelog": "bash ./scripts/changelog.sh",
     "clean": "node ./scripts/clean.js"
   },

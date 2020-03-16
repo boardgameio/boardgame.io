@@ -1,6 +1,6 @@
-import { Object } from 'ts-toolbelt'
-import * as ActionCreators from './core/action-creators'
-import { Flow } from './core/flow'
+import { Object } from 'ts-toolbelt';
+import * as ActionCreators from './core/action-creators';
+import { Flow } from './core/flow';
 
 export interface State {
   G: object;
@@ -145,7 +145,7 @@ export namespace Server {
     id: number;
     name?: string;
     credentials?: string;
-  }
+  };
 
   export interface GameMetadata {
     players: { [id: number]: PlayerMetadata };
@@ -155,28 +155,50 @@ export namespace Server {
 }
 
 export namespace CredentialedActionShape {
-  export type MakeMove = ReturnType<typeof ActionCreators.makeMove>
-  export type GameEvent = ReturnType<typeof ActionCreators.gameEvent>
-  export type AutomaticGameEvent = ReturnType<typeof ActionCreators.automaticGameEvent>
-  export type Any = MakeMove | GameEvent | AutomaticGameEvent | ActionShape.Sync | ActionShape.Update | ActionShape.Reset | ActionShape.Undo | ActionShape.Redo
+  export type MakeMove = ReturnType<typeof ActionCreators.makeMove>;
+  export type GameEvent = ReturnType<typeof ActionCreators.gameEvent>;
+  export type AutomaticGameEvent = ReturnType<
+    typeof ActionCreators.automaticGameEvent
+  >;
+  export type Any =
+    | MakeMove
+    | GameEvent
+    | AutomaticGameEvent
+    | ActionShape.Sync
+    | ActionShape.Update
+    | ActionShape.Reset
+    | ActionShape.Undo
+    | ActionShape.Redo;
 }
 
 export namespace ActionShape {
-  type StripCredentials<T extends object> = Object.P.Omit<T, ['payload', 'credentials']>
-  export type MakeMove = StripCredentials<CredentialedActionShape.MakeMove>
-  export type GameEvent = StripCredentials<CredentialedActionShape.GameEvent>
-  export type AutomaticGameEvent =
-    StripCredentials<CredentialedActionShape.AutomaticGameEvent>
-  export type Sync = ReturnType<typeof ActionCreators.sync>
-  export type Update = ReturnType<typeof ActionCreators.update>
-  export type Reset = ReturnType<typeof ActionCreators.reset>
-  export type Undo = ReturnType<typeof ActionCreators.undo>
-  export type Redo = ReturnType<typeof ActionCreators.redo>
-  export type Any = MakeMove | GameEvent | AutomaticGameEvent | Sync | Update | Reset | Undo | Redo
+  type StripCredentials<T extends object> = Object.P.Omit<
+    T,
+    ['payload', 'credentials']
+  >;
+  export type MakeMove = StripCredentials<CredentialedActionShape.MakeMove>;
+  export type GameEvent = StripCredentials<CredentialedActionShape.GameEvent>;
+  export type AutomaticGameEvent = StripCredentials<
+    CredentialedActionShape.AutomaticGameEvent
+  >;
+  export type Sync = ReturnType<typeof ActionCreators.sync>;
+  export type Update = ReturnType<typeof ActionCreators.update>;
+  export type Reset = ReturnType<typeof ActionCreators.reset>;
+  export type Undo = ReturnType<typeof ActionCreators.undo>;
+  export type Redo = ReturnType<typeof ActionCreators.redo>;
+  export type Any =
+    | MakeMove
+    | GameEvent
+    | AutomaticGameEvent
+    | Sync
+    | Update
+    | Reset
+    | Undo
+    | Redo;
 }
 
 export namespace ActionPayload {
-  type GetPayload<T extends object> = Object.At<T, 'payload'>
-  export type MakeMove = GetPayload<ActionShape.MakeMove>
-  export type GameEvent = GetPayload<ActionShape.GameEvent>
+  type GetPayload<T extends object> = Object.At<T, 'payload'>;
+  export type MakeMove = GetPayload<ActionShape.MakeMove>;
+  export type GameEvent = GetPayload<ActionShape.GameEvent>;
 }

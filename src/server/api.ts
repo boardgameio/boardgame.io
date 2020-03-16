@@ -55,7 +55,7 @@ export const CreateGame = async (
   }
 
   gameMetadata.setupData = setupData;
-  
+
   const gameID = lobbyConfig.uuid();
   const namespacedGameID = getNamespacedGameID(gameID, game.name);
 
@@ -136,7 +136,7 @@ export const addApiToServer = ({
             // strip away credentials
             return { id: player.id, name: player.name };
           }),
-          setupData: metadata.setupData
+          setupData: metadata.setupData,
         });
       }
     }
@@ -157,7 +157,7 @@ export const addApiToServer = ({
       players: Object.values(room.players).map((player: any) => {
         return { id: player.id, name: player.name };
       }),
-      setupData: room.setupData
+      setupData: room.setupData,
     };
     ctx.body = strippedRoom;
   });

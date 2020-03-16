@@ -7,7 +7,7 @@
  */
 
 import * as Actions from './action-types';
-import { State, LogEntry } from '../types'
+import { State, LogEntry } from '../types';
 
 /**
  * Generate a move to be dispatched to the game move reducer.

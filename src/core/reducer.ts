@@ -11,7 +11,14 @@ import * as plugins from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
 import { ContextEnhancer } from './context-enhancer';
-import { ActionShape, GameConfig, LogEntry, State, Move, LongFormMove } from '../types';
+import {
+  ActionShape,
+  GameConfig,
+  LogEntry,
+  State,
+  Move,
+  LongFormMove,
+} from '../types';
 
 /**
  * Returns true if a move can be undone.
@@ -152,7 +159,7 @@ export function CreateGameReducer({
         // Execute plugins.
         state = plugins.Enhance(state, {
           game,
-          isClient
+          isClient,
         });
 
         const apiCtx = new ContextEnhancer(

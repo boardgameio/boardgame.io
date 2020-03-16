@@ -37,7 +37,7 @@ export function InitializeGame({
 
   let ctx: Ctx = {
     ...game.flow.ctx(numPlayers),
-    _random: { seed }
+    _random: { seed },
   };
 
   let state: GameState = {

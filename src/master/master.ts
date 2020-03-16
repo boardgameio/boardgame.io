@@ -19,7 +19,7 @@ import {
   ActionShape,
   CredentialedActionShape,
   LogEntry,
-  PlayerID
+  PlayerID,
 } from '../types';
 
 const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
@@ -73,7 +73,9 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
 /**
  * Verifies that the game has metadata and is using credentials.
  */
-export const doesGameRequireAuthentication = (gameMetadata: Server.GameMetadata) => {
+export const doesGameRequireAuthentication = (
+  gameMetadata: Server.GameMetadata
+) => {
   if (!gameMetadata) return false;
   const { players } = gameMetadata;
   const hasCredentials = Object.keys(players).some(key => {
@@ -97,7 +99,9 @@ export const isActionFromAuthenticPlayer = (
 /**
  * Remove player credentials from action payload
  */
-const stripCredentialsFromAction = (action: CredentialedActionShape.Any | ActionShape.Any) => {
+const stripCredentialsFromAction = (
+  action: CredentialedActionShape.Any | ActionShape.Any
+) => {
   if ('payload' in action && 'credentials' in action.payload) {
     // eslint-disable-next-line no-unused-vars
     const { credentials, ...payload } = action.payload;
@@ -109,13 +113,13 @@ const stripCredentialsFromAction = (action: CredentialedActionShape.Any | Action
 type AuthFn = (
   actionCredentials: string,
   playerMetadata: Server.PlayerMetadata
-) => boolean | Promise<boolean>
+) => boolean | Promise<boolean>;
 
 type CallbackFn = (arg: {
-  state: State,
-  gameID: string,
-  action?: ActionShape.Any | CredentialedActionShape.Any
-}) => void
+  state: State;
+  gameID: string;
+  action?: ActionShape.Any | CredentialedActionShape.Any;
+}) => void;
 
 /**
  * Master
@@ -125,15 +129,20 @@ type CallbackFn = (arg: {
  * storageAPI to communicate with the database.
  */
 export class Master {
-  game: ReturnType<typeof Game>
-  storageAPI
-  transportAPI
-  subscribeCallback: CallbackFn
-  auth: null | AuthFn
-  shouldAuth: typeof doesGameRequireAuthentication
-  executeSynchronously: boolean
+  game: ReturnType<typeof Game>;
+  storageAPI;
+  transportAPI;
+  subscribeCallback: CallbackFn;
+  auth: null | AuthFn;
+  shouldAuth: typeof doesGameRequireAuthentication;
+  executeSynchronously: boolean;
 
-  constructor(game: GameConfig, storageAPI, transportAPI, auth: AuthFn | boolean) {
+  constructor(
+    game: GameConfig,
+    storageAPI,
+    transportAPI,
+    auth: AuthFn | boolean
+  ) {
     this.game = Game(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
@@ -163,12 +172,13 @@ export class Master {
     action: CredentialedActionShape.Any | ActionShape.Any,
     stateID: number,
     gameID: string,
-    playerID: string,
+    playerID: string
   ) {
     let isActionAuthentic;
-    const credentials = 'payload' in action && 'credentials' in action.payload
-      ? action.payload.credentials
-      : undefined;
+    const credentials =
+      'payload' in action && 'credentials' in action.payload
+        ? action.payload.credentials
+        : undefined;
     if (this.executeSynchronously) {
       const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
       const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
@@ -307,7 +317,7 @@ export class Master {
 
     let state: State;
     let gameMetadata: Server.GameMetadata;
-    let filteredGameMetadata: { id: number, name?: string }[];
+    let filteredGameMetadata: { id: number; name?: string }[];
 
     if (this.executeSynchronously) {
       state = this.storageAPI.get(key);
