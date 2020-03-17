@@ -11,6 +11,7 @@ import request from 'supertest';
 import { addApiToServer, createApiServer } from './api';
 import { Game } from '../core/game';
 import * as StorageAPI from './db/base';
+import { Server } from '../types';
 
 jest.setTimeout(2000000000);
 
@@ -96,7 +97,9 @@ describe('.createApiServer', () => {
       beforeEach(async () => {
         delete process.env.API_SECRET;
 
-        app = createApiServer({ db, games });
+        const uuid = () => 'gameID';
+        const lobbyConfig = { uuid };
+        app = createApiServer({ db, games, lobbyConfig });
 
         response = await request(app.callback())
           .post('/games/foo/create')
@@ -117,7 +120,7 @@ describe('.createApiServer', () => {
 
       test('creates game data', () => {
         expect(db.mocks.setState).toHaveBeenCalledWith(
-          expect.stringMatching('foo:'),
+          'gameID',
           expect.objectContaining({
             ctx: expect.objectContaining({
               numPlayers: 3,
@@ -128,7 +131,7 @@ describe('.createApiServer', () => {
 
       test('passes arbitrary data to game setup', () => {
         expect(db.mocks.setState).toHaveBeenCalledWith(
-          expect.stringMatching('foo:'),
+          'gameID',
           expect.objectContaining({
             G: expect.objectContaining({
               colors: {
@@ -142,7 +145,7 @@ describe('.createApiServer', () => {
 
       test('creates game metadata', () => {
         expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-          expect.stringMatching('foo:'),
+          'gameID',
           expect.objectContaining({
             players: expect.objectContaining({
               '0': expect.objectContaining({}),
@@ -169,7 +172,7 @@ describe('.createApiServer', () => {
 
         test('uses default numPlayers', () => {
           expect(db.mocks.setState).toHaveBeenCalledWith(
-            expect.stringMatching('foo:'),
+            'gameID',
             expect.objectContaining({
               ctx: expect.objectContaining({
                 numPlayers: 2,
@@ -259,7 +262,10 @@ describe('.createApiServer', () => {
             const app = createApiServer({
               db,
               games,
-              lobbyConfig: { uuid: () => credentials },
+              lobbyConfig: {
+                uuid: () => 'gameID',
+              },
+              generateCredentials: () => credentials,
             });
             response = await request(app.callback())
               .post('/games/foo/1/join')
@@ -276,7 +282,7 @@ describe('.createApiServer', () => {
 
           test('updates the player name', async () => {
             expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-              expect.stringMatching('foo:'),
+              '1',
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
@@ -414,7 +420,7 @@ describe('.createApiServer', () => {
 
           test('updates the players', async () => {
             expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-              expect.stringMatching('foo:'),
+              '1',
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
@@ -531,7 +537,7 @@ describe('.createApiServer', () => {
 
           test('updates the players', async () => {
             expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-              expect.stringMatching('foo:'),
+              '1',
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({}),
@@ -565,9 +571,7 @@ describe('.createApiServer', () => {
               response = await request(app.callback())
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
-              expect(db.mocks.remove).toHaveBeenCalledWith(
-                expect.stringMatching(':1')
-              );
+              expect(db.mocks.remove).toHaveBeenCalledWith('1');
             });
           });
         });
@@ -658,19 +662,22 @@ describe('.createApiServer', () => {
     });
 
     test('creates new game data', async () => {
-      const app = createApiServer({ db, games });
+      const lobbyConfig = {
+        uuid: () => 'newGameID',
+      };
+      const app = createApiServer({ db, games, lobbyConfig });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1&numPlayers=4');
       expect(db.mocks.setState).toHaveBeenCalledWith(
-        expect.stringMatching('foo:'),
+        'newGameID',
         expect.objectContaining({
           ctx: expect.objectContaining({
             numPlayers: 4,
           }),
         })
       );
-      expect(response.body.nextRoomID).not.toBeNull();
+      expect(response.body.nextRoomID).toBe('newGameID');
     });
 
     test('fetches next id', async () => {
@@ -830,7 +837,7 @@ describe('.createApiServer', () => {
       });
 
       test('returns game ids', async () => {
-        expect(room.roomID).toEqual('bar:bar-0');
+        expect(room.roomID).toEqual('bar-0');
       });
 
       test('returns player names', async () => {

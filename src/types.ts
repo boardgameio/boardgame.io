@@ -155,9 +155,17 @@ export namespace Server {
   };
 
   export interface GameMetadata {
+    gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData: any;
     nextRoomID?: string;
+  }
+
+  export interface LobbyConfig {
+    uuid?: Function;
+    generateCredentials?: Function;
+    apiPort?: Number;
+    apiCallback?: Function;
   }
 }
 
