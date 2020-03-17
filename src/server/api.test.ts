@@ -10,7 +10,7 @@ import request from 'supertest';
 
 import { addApiToServer, createApiServer } from './api';
 import { Game } from '../core/game';
-import { StorageAPI } from './db/base';
+import * as StorageAPI from './db/base';
 
 jest.setTimeout(2000000000);
 

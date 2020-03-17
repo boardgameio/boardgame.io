@@ -21,7 +21,7 @@ import {
   LogEntry,
   PlayerID,
 } from '../types';
-import { StorageAPI } from '../server/db/base';
+import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
   gameMetadata: Server.GameMetadata,

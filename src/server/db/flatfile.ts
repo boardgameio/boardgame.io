@@ -1,4 +1,4 @@
-import { StorageAPI } from './base';
+import * as StorageAPI from './base';
 import { State, Server } from '../../types';
 
 /*

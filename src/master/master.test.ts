@@ -17,7 +17,7 @@ import {
 } from './master';
 import { error } from '../core/logger';
 import { Server } from '../types';
-import { StorageAPI } from '../server/db/base';
+import * as StorageAPI from '../server/db/base';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),

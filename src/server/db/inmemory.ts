@@ -1,5 +1,5 @@
 import { State, Server } from '../../types';
-import { StorageAPI } from './base';
+import * as StorageAPI from './base';
 
 /*
  * Copyright 2017 The boardgame.io Authors

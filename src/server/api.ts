@@ -13,7 +13,7 @@ const uuid = require('shortid').generate;
 const cors = require('@koa/cors');
 
 import { InitializeGame } from '../core/initialize';
-import { StorageAPI } from './db/base';
+import * as StorageAPI from './db/base';
 
 const getNamespacedGameID = (gameID: string, gameName: string) =>
   `${gameName}:${gameID}`;
