@@ -7,8 +7,9 @@
  */
 
 import { Client } from '../client/client';
+import { Local } from '../client/transport/local';
 
-describe('plugins', () => {
+describe('basic', () => {
   let client;
 
   beforeAll(() => {
@@ -107,5 +108,28 @@ describe('plugins', () => {
     client.moves.A();
     client.undo();
     expect(Object.keys(client.getState()._undo[0].ctx)).not.toContain('test');
+  });
+});
+
+describe('default values', () => {
+  const pluginData = { value: true };
+
+  const plugin = {
+    name: 'test',
+    flush: () => pluginData,
+  };
+
+  const anotherPlugin = {
+    name: 'test2',
+    noClient: () => false,
+  };
+
+  const game = { moves: { A: () => {} }, plugins: [plugin, anotherPlugin] };
+
+  test('are used if no setup is present', () => {
+    const client = Client({ game, playerID: '0', multiplayer: Local() });
+    client.start();
+    client.moves.A();
+    expect(client.getState().plugins.test.data).toEqual(pluginData);
   });
 });

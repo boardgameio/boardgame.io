@@ -7,7 +7,7 @@
  */
 
 import { Events } from './events';
-import { Client } from '../client/client';
+import { Client } from '../../client/client';
 
 test('constructor', () => {
   const flow = {};
@@ -18,29 +18,17 @@ test('constructor', () => {
   expect(e.dispatch).toEqual([]);
 });
 
-test('attach / detach', () => {
-  const flow = { eventNames: ['A', 'B'] };
-  const e = new Events(flow);
-  const ctx = e.attach({});
-
-  expect(ctx.events.A).toBeDefined();
-  expect(ctx.events.B).toBeDefined();
-
-  const t = Events.detach(ctx);
-  expect(t.events).not.toBeDefined();
-});
-
 test('dispatch', () => {
   const flow = { eventNames: ['A', 'B'] };
   const e = new Events(flow);
-  const ctx = e.attach({});
+  const events = e.api({ phase: '', turn: 0 });
 
   expect(e.dispatch).toEqual([]);
-  ctx.events.A();
-  ctx.events.B();
+  events.A();
+  events.B();
   expect(e.dispatch).toEqual([
-    { key: 'A', args: [] },
-    { key: 'B', args: [] },
+    { key: 'A', args: [], phase: '', turn: 0 },
+    { key: 'B', args: [], phase: '', turn: 0 },
   ]);
 });
 

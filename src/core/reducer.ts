@@ -10,7 +10,6 @@ import * as Actions from './action-types';
 import * as plugins from '../plugins/main';
 import { Game } from './game';
 import { error } from './logger';
-import { ContextEnhancer } from './context-enhancer';
 import {
   ActionShape,
   GameConfig,
@@ -100,20 +99,11 @@ export function CreateGameReducer({
           return state;
         }
 
-        // Enhance ctx with API.
-        const apiCtx = new ContextEnhancer(
-          state.ctx,
-          game,
-          action.payload.playerID
-        );
-        state.ctx = apiCtx.attachToContext(state.ctx);
-
         // Execute plugins.
         state = plugins.Enhance(state, { game, isClient: false });
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
-        newState = apiCtx.updateAndDetach(newState, true);
 
         // Execute plugins.
         newState = plugins.Flush(newState, { game, isClient: false });
@@ -162,13 +152,6 @@ export function CreateGameReducer({
           isClient,
         });
 
-        const apiCtx = new ContextEnhancer(
-          state.ctx,
-          game,
-          action.payload.playerID
-        );
-        state.ctx = apiCtx.attachToContext(state.ctx);
-
         // Process the move.
         let G = game.processMove(state, action.payload);
 
@@ -192,12 +175,12 @@ export function CreateGameReducer({
           logEntry.redact = true;
         }
 
-        // Don't call into events here.
-        const newState = apiCtx.updateAndDetach(
-          { ...state, deltalog: [logEntry] },
-          false
-        );
-        let ctx = newState.ctx;
+        const newState = {
+          ...state,
+          G,
+          deltalog: [logEntry],
+          _stateID: state._stateID + 1,
+        };
 
         // Some plugin indicated that it is not suitable to be
         // materialized on the client (and must wait for the server
@@ -206,7 +189,7 @@ export function CreateGameReducer({
           return state;
         }
 
-        state = { ...newState, G, ctx, _stateID: state._stateID + 1 };
+        state = newState;
 
         // If we're on the client, just process the move
         // and no triggers in multiplayer mode.
@@ -221,12 +204,7 @@ export function CreateGameReducer({
         }
 
         // Allow the flow reducer to process any triggers that happen after moves.
-        const ctxWithAPI = apiCtx.attachToContext(state.ctx);
-        state = game.flow.processMove(
-          { ...state, ctx: ctxWithAPI },
-          action.payload
-        );
-        state = apiCtx.updateAndDetach(state, true);
+        state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
 
         return state;

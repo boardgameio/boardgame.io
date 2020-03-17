@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { automaticGameEvent } from './action-creators';
+import { automaticGameEvent } from '../../core/action-creators';
 
 /**
  * Events
@@ -22,7 +22,7 @@ export class Events {
    * Attaches the Events API to ctx.
    * @param {object} ctx - The ctx object to attach to.
    */
-  attach(ctx) {
+  api(ctx) {
     const events = {};
     const { phase, turn } = ctx;
 
@@ -32,7 +32,13 @@ export class Events {
       };
     }
 
-    return { ...ctx, events };
+    events._obj = this;
+
+    return events;
+  }
+
+  isUsed() {
+    return this.dispatch.length > 0;
   }
 
   /**
@@ -68,12 +74,3 @@ export class Events {
     return state;
   }
 }
-
-/**
- * Detaches the Events API from ctx.
- * @param {object} ctx - The ctx object to strip.
- */
-Events.detach = ctx => {
-  const { events, ...rest } = ctx; // eslint-disable-line no-unused-vars
-  return rest;
-};

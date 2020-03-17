@@ -358,20 +358,3 @@ test('undo / redo', () => {
   state = reducer(state, undo());
   expect(state.G).toMatchObject({ roll: 4 });
 });
-
-test('custom log messages', () => {
-  const game = {
-    moves: {
-      move: (G, ctx) => {
-        ctx.log.setPayload({ msg: 'additional msg' });
-        return { ...G };
-      },
-    },
-  };
-
-  const reducer = CreateGameReducer({ game });
-  let state = InitializeGame({ game });
-
-  const newState = reducer(state, makeMove('move'));
-  expect(newState.deltalog[0].payload).toMatchObject({ msg: 'additional msg' });
-});

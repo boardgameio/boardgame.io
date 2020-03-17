@@ -17,7 +17,6 @@ import {
 } from './turn-order';
 import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
-import { ContextEnhancer } from './context-enhancer';
 import * as logging from './logger';
 import {
   ActionPayload,
@@ -297,8 +296,7 @@ export function Flow({
 
     G = conf.turn.wrapped.onBegin({ ...state, G, ctx });
 
-    const plainCtx = ContextEnhancer.detachAllFromContext(ctx);
-    const _undo = [{ G, ctx: plainCtx }];
+    const _undo = [{ G, ctx }];
 
     return { ...state, G, ctx, _undo, _redo: [] };
   }
@@ -701,11 +699,9 @@ export function Flow({
     const undo = state._undo || [];
     const moveType = action.type;
 
-    const plainCtx = ContextEnhancer.detachAllFromContext(state.ctx);
-
     state = {
       ...state,
-      _undo: [...undo, { G: state.G, ctx: plainCtx, moveType }],
+      _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],
       _redo: [],
     };
 
