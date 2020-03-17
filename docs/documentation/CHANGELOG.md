@@ -1,3 +1,17 @@
+## v0.38.1
+
+#### Features
+
+* [[0d59c2c](https://github.com/nicolodavis/boardgame.io/commit/0d59c2c)] move Events code into plugin
+* [[4b1c135](https://github.com/nicolodavis/boardgame.io/commit/4b1c135)] move Random code into plugin
+
+#### Bugfixes
+
+* [[a624c9e](https://github.com/nicolodavis/boardgame.io/commit/a624c9e)] update @babel/preset-env
+* [[c1dba9f](https://github.com/nicolodavis/boardgame.io/commit/c1dba9f)] update prettier
+* [[60c6d88](https://github.com/nicolodavis/boardgame.io/commit/60c6d88)] update rollup-plugin-terser
+* [[6378659](https://github.com/nicolodavis/boardgame.io/commit/6378659)] npm run audit
+
 ## v0.38.0
 
 #### Breaking Changes
