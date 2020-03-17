@@ -123,7 +123,6 @@ describe('update', () => {
         _stateID: 0,
         _undo: [],
         ctx: {
-          _random: { seed: 0 },
           currentPlayer: '0',
           numPlayers: 2,
           phase: null,
@@ -136,7 +135,6 @@ describe('update', () => {
       _stateID: 1,
       _undo: [],
       ctx: {
-        _random: undefined,
         currentPlayer: '1',
         numPlayers: 2,
         phase: null,

@@ -7,7 +7,7 @@
  */
 
 import { makeMove, gameEvent } from '../core/action-creators';
-import { alea } from '../core/random.alea';
+import { alea } from '../plugins/random/random.alea';
 
 /**
  * Base class that bots can extend.

@@ -199,13 +199,10 @@ export function CreateGameReducer({
         );
         let ctx = newState.ctx;
 
-        // Random API code was executed. If we are on the
-        // client, wait for the master response instead.
-        if (
-          isClient &&
-          ctx._random !== undefined &&
-          ctx._random.prngstate !== undefined
-        ) {
+        // Some plugin indicated that it is not suitable to be
+        // materialized on the client (and must wait for the server
+        // response instead).
+        if (isClient && plugins.NoClient(newState, { game })) {
           return state;
         }
 

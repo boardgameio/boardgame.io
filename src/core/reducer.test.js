@@ -284,10 +284,6 @@ describe('Random inside setup()', () => {
     setup: ctx => ({ n: ctx.random.D6() }),
   };
 
-  const game4 = {
-    setup: ctx => ({ n: ctx.random.D6() }),
-  };
-
   test('setting seed', () => {
     const state1 = InitializeGame({ game: game1 });
     const state2 = InitializeGame({ game: game2 });
@@ -295,11 +291,6 @@ describe('Random inside setup()', () => {
 
     expect(state1.G.n).not.toBe(state2.G.n);
     expect(state2.G.n).toBe(state3.G.n);
-  });
-
-  test('not setting seed sets a default', () => {
-    const state = InitializeGame({ game: game4 });
-    expect(state.ctx._random.seed).toBeDefined();
   });
 });
 

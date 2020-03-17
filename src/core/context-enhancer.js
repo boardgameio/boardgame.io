@@ -1,4 +1,3 @@
-import { Random } from './random';
 import { Events } from './events';
 
 /**
@@ -49,29 +48,25 @@ export class GameLoggerCtxAPI {
  * all separately.
  */
 export class ContextEnhancer {
-  constructor(ctx, game, player) {
-    this.random = new Random(ctx);
+  constructor(_, game, player) {
     this.events = new Events(game.flow, player);
     this.log = new GameLoggerCtxAPI();
   }
 
   attachToContext(ctx) {
-    let ctxWithAPI = this.random.attach(ctx);
-    ctxWithAPI = this.events.attach(ctxWithAPI);
+    let ctxWithAPI = this.events.attach(ctx);
     ctxWithAPI = this.log.attach(ctxWithAPI);
     return ctxWithAPI;
   }
 
   static detachAllFromContext(ctx) {
-    let ctxWithoutAPI = Random.detach(ctx);
-    ctxWithoutAPI = Events.detach(ctxWithoutAPI);
+    let ctxWithoutAPI = Events.detach(ctx);
     ctxWithoutAPI = GameLoggerCtxAPI.detach(ctxWithoutAPI);
     return ctxWithoutAPI;
   }
 
   _update(state, updateEvents) {
     let newState = updateEvents ? this.events.update(state) : state;
-    newState = this.random.update(newState);
     newState = this.log.update(newState);
     return newState;
   }

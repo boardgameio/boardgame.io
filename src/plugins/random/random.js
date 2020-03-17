@@ -20,35 +20,29 @@ export class Random {
    * constructor
    * @param {object} ctx - The ctx object to initialize from.
    */
-  constructor(ctx) {
+  constructor(state) {
     // If we are on the client, the seed is not present.
     // Just use a temporary seed to execute the move without
     // crashing it. The move state itself is discarded,
     // so the actual value doesn't matter.
-    this.state = ctx._random || { seed: '0' };
+    this.state = state;
+    this.used = false;
   }
 
-  /**
-   * Updates ctx with the PRNG state.
-   * @param {object} ctx - The ctx object to update.
-   */
-  update(state) {
-    const ctx = { ...state.ctx, _random: this.state };
-    return { ...state, ctx };
+  isUsed() {
+    return this.used;
   }
 
-  /**
-   * Attaches the Random API to ctx.
-   * @param {object} ctx - The ctx object to attach to.
-   */
-  attach(ctx) {
-    return { ...ctx, random: this._api() };
+  getState() {
+    return this.state;
   }
 
   /**
    * Generate a random number.
    */
   _random() {
+    this.used = true;
+
     const R = this.state;
 
     let fn;
@@ -69,7 +63,7 @@ export class Random {
     return number;
   }
 
-  _api() {
+  api() {
     const random = this._random.bind(this);
 
     const SpotValue = {
@@ -161,20 +155,11 @@ export class Random {
 
         return shuffled;
       },
+
+      _obj: this,
     };
   }
 }
-
-/**
- * Removes the attached Random api from ctx.
- *
- * @param {object} ctx - The ctx object with the Random API attached.
- * @returns {object} A plain ctx object without the Random API.
- */
-Random.detach = function(ctx) {
-  const { random, ...rest } = ctx; // eslint-disable-line no-unused-vars
-  return rest;
-};
 
 /**
  * Generates a new seed from the current date / time.

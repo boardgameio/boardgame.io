@@ -7,7 +7,9 @@ export interface State {
   ctx: Ctx;
   log?: Array<LogEntry>;
   deltalog?: Array<LogEntry>;
-  plugins: object;
+  plugins: {
+    [pluginName: string]: PluginState;
+  };
   _undo: Array<Undo>;
   _redo: Array<Undo>;
   _stateID: number;
@@ -39,6 +41,11 @@ export interface Ctx {
   _random?: {
     seed: string | number;
   };
+}
+
+export interface PluginState {
+  data: object;
+  api?: object;
 }
 
 export interface LogEntry {

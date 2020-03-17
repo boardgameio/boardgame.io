@@ -1,5 +1,4 @@
 import { parse, stringify } from 'flatted';
-import { Random } from './random';
 import { Game } from './game';
 import { GameConfig } from '../types';
 import * as plugins from '../plugins/main';
@@ -30,15 +29,7 @@ export function InitializeGame({
     numPlayers = 2;
   }
 
-  let seed = game.seed;
-  if (seed === undefined) {
-    seed = Random.seed();
-  }
-
-  let ctx: Ctx = {
-    ...game.flow.ctx(numPlayers),
-    _random: { seed },
-  };
+  let ctx: Ctx = game.flow.ctx(numPlayers);
 
   let state: GameState = {
     // User managed state.

@@ -7,39 +7,13 @@
  */
 
 import { Random } from './random';
-import { makeMove } from './action-creators';
-import { CreateGameReducer } from './reducer';
-import { InitializeGame } from './initialize';
+import { makeMove } from '../../core/action-creators';
+import { CreateGameReducer } from '../../core/reducer';
+import { InitializeGame } from '../../core/initialize';
 
 function Init(seed) {
-  const ctx = { _random: { seed } };
-  return new Random(ctx);
+  return new Random({ seed });
 }
-
-test('constructor', () => {
-  const r = new Random({});
-  expect(r.state).toEqual({ seed: '0' });
-});
-
-test('attach / detach / update', () => {
-  const r = new Random({});
-  const ctx = r.attach({});
-
-  expect(ctx._random).not.toBeDefined();
-  expect(ctx.random).toBeDefined();
-
-  {
-    const t = Random.detach(ctx);
-    expect(t._random).not.toBeDefined();
-    expect(t.random).not.toBeDefined();
-  }
-
-  {
-    const t = r.update({ ctx }).ctx;
-    expect(t._random).toBeDefined();
-    expect(t.random).toBeDefined();
-  }
-});
 
 test('random', () => {
   const r = Init('hi there');
@@ -53,7 +27,7 @@ test('predefined dice values', () => {
   const r = Init(0);
 
   const rfns = [4, 6, 8, 10, 12, 20].map(v => {
-    return { fn: r._api()[`D${v}`], highest: v };
+    return { fn: r.api()[`D${v}`], highest: v };
   });
 
   rfns.forEach(pair => {
@@ -75,24 +49,24 @@ test('predefined dice values', () => {
 
 test('Random.Die', () => {
   const r = Init(0);
-  const _api = r._api();
+  const api = r.api();
 
   {
-    const result = _api.Die(123);
+    const result = api.Die(123);
     expect(result).toBeDefined();
     expect(result).toBe(74);
     expect(r.state.prngstate).toBeDefined();
   }
 
   {
-    const result = _api.Die();
+    const result = api.Die();
     expect(result).toBeDefined();
     expect(result).toBeLessThanOrEqual(6);
     expect(r.state.prngstate).toBeDefined();
   }
 
   {
-    const multiple = _api.Die(6, 3);
+    const multiple = api.Die(6, 3);
     expect(multiple).toBeDefined();
     expect(multiple).toHaveLength(3);
     multiple.forEach(m => {
@@ -105,7 +79,7 @@ test('Random.Die', () => {
 
 test('Random.Number', () => {
   const r = Init(0);
-  const result = r._api().Number();
+  const result = r.api().Number();
   expect(result).toBeDefined();
   expect(result).toBeGreaterThanOrEqual(0);
   expect(result).toBeLessThanOrEqual(1);
@@ -116,7 +90,7 @@ test('Random.Shuffle', () => {
   const r = Init(0);
   const initialTiles = ['A', 'B', 'C', 'D', 'E'];
   const tiles = [...initialTiles];
-  const result = r._api().Shuffle(tiles);
+  const result = r.api().Shuffle(tiles);
   expect(result).toHaveLength(initialTiles.length);
   expect(result).toEqual(expect.arrayContaining(initialTiles));
   expect(result.sort()).toEqual(initialTiles);
