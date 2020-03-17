@@ -75,39 +75,3 @@ export class InMemory extends StorageAPI.Sync {
     return [...this.metadata.keys()];
   }
 }
-
-/**
- * Version of the above that pretends to be async so we can test
- * certain async code paths in master.js.
- */
-export class InMemoryAsync extends StorageAPI.Async {
-  private obj: InMemory;
-
-  constructor() {
-    super();
-    this.obj = new InMemory();
-  }
-
-  async connect() {}
-  async setState(gameID: string, state: State) {
-    this.obj.setState(gameID, state);
-  }
-  async getState(gameID: string) {
-    return this.obj.getState(gameID);
-  }
-  async has(gameID: string) {
-    return this.obj.has(gameID);
-  }
-  async setMetadata(gameID: string, metadata: Server.GameMetadata) {
-    this.obj.setMetadata(gameID, metadata);
-  }
-  async getMetadata(gameID: string) {
-    return this.obj.getMetadata(gameID);
-  }
-  async remove(gameID: string) {
-    this.obj.remove(gameID);
-  }
-  async list() {
-    return this.obj.list();
-  }
-}

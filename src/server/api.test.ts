@@ -10,25 +10,75 @@ import request from 'supertest';
 
 import { addApiToServer, createApiServer } from './api';
 import { Game } from '../core/game';
+import { StorageAPI } from './db/base';
 
 jest.setTimeout(2000000000);
+
+class AsyncStorage extends StorageAPI.Async {
+  public mocks: { [key: string]: jest.Mock };
+
+  constructor(args: any = {}) {
+    super();
+    const {
+      setState,
+      getState,
+      has,
+      getMetadata,
+      setMetadata,
+      list,
+      remove,
+    } = args;
+    this.mocks = {
+      setState: setState || jest.fn(),
+      getState: getState || jest.fn(() => ({})),
+      has: has || jest.fn(() => true),
+      setMetadata: setMetadata || jest.fn(),
+      getMetadata: getMetadata || jest.fn(() => ({})),
+      list: list || jest.fn(() => []),
+      remove: remove || jest.fn(),
+    };
+  }
+
+  async connect() {}
+
+  async setState(...args) {
+    this.mocks.setState(...args);
+  }
+
+  async getState(...args) {
+    return this.mocks.getState(...args);
+  }
+
+  async has(...args) {
+    return this.mocks.has(...args);
+  }
+
+  async setMetadata(...args) {
+    this.mocks.setMetadata(...args);
+  }
+
+  async getMetadata(...args) {
+    return this.mocks.getMetadata(...args);
+  }
+
+  async remove(...args) {
+    this.mocks.remove(...args);
+  }
+
+  async list() {
+    return this.mocks.list();
+  }
+}
 
 describe('.createApiServer', () => {
   describe('creating a game', () => {
     let response;
-    let setSpy;
-    let setMetadataSpy;
     let app;
     let db;
     let games;
 
     beforeEach(async () => {
-      setSpy = jest.fn();
-      setMetadataSpy = jest.fn();
-      db = {
-        setState: async (id, state) => setSpy(id, state),
-        setMetadata: async (id, metadata) => setMetadataSpy(id, metadata),
-      };
+      db = new AsyncStorage();
       games = [
         {
           name: 'foo',
@@ -66,7 +116,7 @@ describe('.createApiServer', () => {
       });
 
       test('creates game data', () => {
-        expect(setSpy).toHaveBeenCalledWith(
+        expect(db.mocks.setState).toHaveBeenCalledWith(
           expect.stringMatching('foo:'),
           expect.objectContaining({
             ctx: expect.objectContaining({
@@ -77,7 +127,7 @@ describe('.createApiServer', () => {
       });
 
       test('passes arbitrary data to game setup', () => {
-        expect(setSpy).toHaveBeenCalledWith(
+        expect(db.mocks.setState).toHaveBeenCalledWith(
           expect.stringMatching('foo:'),
           expect.objectContaining({
             G: expect.objectContaining({
@@ -91,7 +141,7 @@ describe('.createApiServer', () => {
       });
 
       test('creates game metadata', () => {
-        expect(setMetadataSpy).toHaveBeenCalledWith(
+        expect(db.mocks.setMetadata).toHaveBeenCalledWith(
           expect.stringMatching('foo:'),
           expect.objectContaining({
             players: expect.objectContaining({
@@ -118,7 +168,7 @@ describe('.createApiServer', () => {
         });
 
         test('uses default numPlayers', () => {
-          expect(setSpy).toHaveBeenCalledWith(
+          expect(db.mocks.setState).toHaveBeenCalledWith(
             expect.stringMatching('foo:'),
             expect.objectContaining({
               ctx: expect.objectContaining({
@@ -178,11 +228,7 @@ describe('.createApiServer', () => {
 
       describe('when the game does not exist', () => {
         beforeEach(async () => {
-          db = {
-            get: async () => null,
-            getMetadata: async () => null,
-          };
-
+          db = new AsyncStorage({ getMetadata: () => null });
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
@@ -196,11 +242,8 @@ describe('.createApiServer', () => {
       });
 
       describe('when the game does exist', () => {
-        let setSpy;
-
         beforeEach(async () => {
-          setSpy = jest.fn();
-          db = {
+          db = new AsyncStorage({
             getMetadata: async () => {
               return {
                 players: {
@@ -208,8 +251,7 @@ describe('.createApiServer', () => {
                 },
               };
             },
-            setMetadata: async (id, state) => setSpy(id, state),
-          };
+          });
         });
 
         describe('when the playerID is available', () => {
@@ -233,7 +275,7 @@ describe('.createApiServer', () => {
           });
 
           test('updates the player name', async () => {
-            expect(setSpy).toHaveBeenCalledWith(
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
               expect.stringMatching('foo:'),
               expect.objectContaining({
                 players: expect.objectContaining({
@@ -287,8 +329,7 @@ describe('.createApiServer', () => {
 
         describe('when the playerID is not available', () => {
           beforeEach(async () => {
-            setSpy = jest.fn();
-            db = {
+            db = new AsyncStorage({
               getMetadata: async () => {
                 return {
                   players: {
@@ -299,8 +340,7 @@ describe('.createApiServer', () => {
                   },
                 };
               },
-              setMetadata: async (id, state) => setSpy(id, state),
-            };
+            });
 
             const app = createApiServer({ db, games });
 
@@ -332,9 +372,9 @@ describe('.createApiServer', () => {
 
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
-          db = {
+          db = new AsyncStorage({
             getMetadata: async () => null,
-          };
+          });
           const app = createApiServer({ db, games });
           response = await request(app.callback())
             .post('/games/foo/1/rename')
@@ -345,10 +385,8 @@ describe('.createApiServer', () => {
 
       describe('when the game does exist', () => {
         describe('when the playerID does exist', () => {
-          let setSpy;
           beforeEach(async () => {
-            setSpy = jest.fn();
-            db = {
+            db = new AsyncStorage({
               getMetadata: async () => {
                 return {
                   players: {
@@ -363,8 +401,7 @@ describe('.createApiServer', () => {
                   },
                 };
               },
-              setMetadata: async (id, game) => setSpy(id, game),
-            };
+            });
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/rename')
@@ -376,7 +413,7 @@ describe('.createApiServer', () => {
           });
 
           test('updates the players', async () => {
-            expect(setSpy).toHaveBeenCalledWith(
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
               expect.stringMatching('foo:'),
               expect.objectContaining({
                 players: expect.objectContaining({
@@ -452,9 +489,9 @@ describe('.createApiServer', () => {
 
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
-          db = {
+          db = new AsyncStorage({
             getMetadata: async () => null,
-          };
+          });
           const app = createApiServer({ db, games });
           response = await request(app.callback())
             .post('/games/foo/1/leave')
@@ -465,10 +502,8 @@ describe('.createApiServer', () => {
 
       describe('when the game does exist', () => {
         describe('when the playerID does exist', () => {
-          let setSpy;
           beforeEach(async () => {
-            setSpy = jest.fn();
-            db = {
+            db = new AsyncStorage({
               getMetadata: async () => {
                 return {
                   players: {
@@ -483,8 +518,7 @@ describe('.createApiServer', () => {
                   },
                 };
               },
-              setMetadata: async (id, game) => setSpy(id, game),
-            };
+            });
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
@@ -496,7 +530,7 @@ describe('.createApiServer', () => {
           });
 
           test('updates the players', async () => {
-            expect(setSpy).toHaveBeenCalledWith(
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
               expect.stringMatching('foo:'),
               expect.objectContaining({
                 players: expect.objectContaining({
@@ -512,8 +546,7 @@ describe('.createApiServer', () => {
 
           describe('when there are not players left', () => {
             test('removes the game', async () => {
-              setSpy = jest.fn();
-              db = {
+              db = new AsyncStorage({
                 getMetadata: async () => {
                   return {
                     players: {
@@ -527,13 +560,14 @@ describe('.createApiServer', () => {
                     },
                   };
                 },
-                remove: async id => setSpy(id),
-              };
+              });
               const app = createApiServer({ db, games });
               response = await request(app.callback())
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
-              expect(setSpy).toHaveBeenCalledWith(expect.stringMatching(':1'));
+              expect(db.mocks.remove).toHaveBeenCalledWith(
+                expect.stringMatching(':1')
+              );
             });
           });
         });
@@ -577,10 +611,7 @@ describe('.createApiServer', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
-      db = {
-        get: async () => {},
-        set: async () => {},
-      };
+      db = new AsyncStorage();
     });
 
     describe('when given 2 games', () => {
@@ -604,13 +635,11 @@ describe('.createApiServer', () => {
     let response;
     let db;
     let games;
-    let setSpy;
 
     beforeEach(() => {
       games = [Game({ name: 'foo' })];
       delete process.env.API_SECRET;
-      setSpy = jest.fn();
-      db = {
+      db = new AsyncStorage({
         getMetadata: async () => {
           return {
             players: {
@@ -625,9 +654,7 @@ describe('.createApiServer', () => {
             },
           };
         },
-        setState: async (id, state) => setSpy(id, state),
-        setMetadata: async (id, metadata) => setSpy(id, metadata),
-      };
+      });
     });
 
     test('creates new game data', async () => {
@@ -635,7 +662,7 @@ describe('.createApiServer', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1&numPlayers=4');
-      expect(setSpy).toHaveBeenCalledWith(
+      expect(db.mocks.setState).toHaveBeenCalledWith(
         expect.stringMatching('foo:'),
         expect.objectContaining({
           ctx: expect.objectContaining({
@@ -647,7 +674,7 @@ describe('.createApiServer', () => {
     });
 
     test('fetches next id', async () => {
-      db = {
+      db = new AsyncStorage({
         getMetadata: async () => {
           return {
             players: {
@@ -663,7 +690,7 @@ describe('.createApiServer', () => {
             nextRoomID: '12345',
           };
         },
-      };
+      });
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
@@ -672,9 +699,9 @@ describe('.createApiServer', () => {
     });
 
     test('when the game does not exist throws a "not found" error', async () => {
-      db = {
+      db = new AsyncStorage({
         getMetadata: async () => null,
-      };
+      });
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
@@ -719,7 +746,7 @@ describe('.createApiServer', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
-      db = {
+      db = new AsyncStorage({
         getMetadata: async () => {
           return {
             players: {
@@ -738,7 +765,7 @@ describe('.createApiServer', () => {
         list: async () => {
           return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
-      };
+      });
     });
     describe('when given 2 rooms', () => {
       let response;
@@ -770,7 +797,7 @@ describe('.createApiServer', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
-      db = {
+      db = new AsyncStorage({
         getMetadata: async () => {
           return {
             players: {
@@ -789,7 +816,7 @@ describe('.createApiServer', () => {
         list: async () => {
           return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
-      };
+      });
     });
 
     describe('when given room ID', () => {
@@ -814,9 +841,9 @@ describe('.createApiServer', () => {
     describe('when given a non-existent room ID', () => {
       let response;
       beforeEach(async () => {
-        db.getMetadata = async () => {
-          return null;
-        };
+        db = new AsyncStorage({
+          getMetadata: async () => null,
+        });
         let games = [Game({ name: 'foo' })];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar/doesnotexist');
@@ -831,19 +858,15 @@ describe('.createApiServer', () => {
 
 describe('.addApiToServer', () => {
   describe('when server app is provided', () => {
-    let setSpy;
     let db;
     let server;
     let useChain;
     let games;
 
     beforeEach(async () => {
-      setSpy = jest.fn();
       useChain = jest.fn(() => ({ use: useChain }));
       server = { use: useChain };
-      db = {
-        set: async (id, state) => setSpy(id, state),
-      };
+      db = new AsyncStorage();
       games = [
         {
           name: 'foo',

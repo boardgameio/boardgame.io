@@ -7,7 +7,7 @@
  */
 
 import * as ActionCreators from '../core/action-creators';
-import { InMemory, InMemoryAsync } from '../server/db/inmemory';
+import { InMemory } from '../server/db/inmemory';
 import {
   Master,
   redactLog,
@@ -296,7 +296,7 @@ describe('authentication', () => {
     const game = { seed: 0 };
     const gameID = 'gameID';
     const action = ActionCreators.gameEvent('endTurn');
-    const storage = new InMemoryAsync();
+    const storage = new InMemory();
 
     beforeAll(async () => {
       const master = new Master(game, storage, TransportAPI());
