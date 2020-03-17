@@ -71,7 +71,16 @@ export class InMemory extends StorageAPI.Sync {
   /**
    * Return all keys.
    */
-  list(): string[] {
+  listGames(gameName?: string): string[] {
+    if (gameName !== undefined) {
+      let gameIDs = [];
+      this.metadata.forEach((metadata, gameID) => {
+        if (metadata.gameName === gameName) {
+          gameIDs.push(gameID);
+        }
+      });
+      return gameIDs;
+    }
     return [...this.metadata.keys()];
   }
 }

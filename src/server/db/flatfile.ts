@@ -83,7 +83,7 @@ export class FlatFile extends StorageAPI.Async {
     this.games.removeItem(id);
   }
 
-  async list(): Promise<string[]> {
+  async listGames(): Promise<string[]> {
     const keys = await this.games.keys();
     const suffix = ':metadata';
     return keys

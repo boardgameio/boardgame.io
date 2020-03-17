@@ -67,6 +67,7 @@ describe('sync', () => {
   test('should have metadata', async () => {
     const db = new InMemory();
     const dbMetadata = {
+      gameName: 'tic-tac-toe',
       setupData: {},
       players: {
         '0': {
@@ -567,7 +568,10 @@ describe('getPlayerMetadata', () => {
   describe('when metadata does not contain playerID', () => {
     test('then playerMetadata is undefined', () => {
       expect(
-        getPlayerMetadata({ setupData: {}, players: { '1': { id: 1 } } }, '0')
+        getPlayerMetadata(
+          { gameName: '', setupData: {}, players: { '1': { id: 1 } } },
+          '0'
+        )
       ).toBeUndefined();
     });
   });
@@ -576,7 +580,7 @@ describe('getPlayerMetadata', () => {
     test('then playerMetadata is returned', () => {
       const playerMetadata = { id: 0, credentials: 'SECRET' };
       const result = getPlayerMetadata(
-        { setupData: {}, players: { '0': playerMetadata } },
+        { gameName: '', setupData: {}, players: { '0': playerMetadata } },
         '0'
       );
       expect(result).toBe(playerMetadata);
@@ -595,6 +599,7 @@ describe('doesGameRequireAuthentication', () => {
   describe('when game has no credentials', () => {
     test('then authentication is not required', () => {
       const gameMetadata = {
+        gameName: '',
         setupData: {},
         players: {
           '0': { id: 1 },
@@ -608,6 +613,7 @@ describe('doesGameRequireAuthentication', () => {
   describe('when game has credentials', () => {
     test('then authentication is required', () => {
       const gameMetadata = {
+        gameName: '',
         setupData: {},
         players: {
           '0': {

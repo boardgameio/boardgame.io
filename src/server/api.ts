@@ -128,20 +128,18 @@ export const addApiToServer = ({
 
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
-    const gameList = await db.list();
+    const gameList = await db.listGames(gameName);
     let rooms = [];
-    for (let gameID of [...gameList]) {
-      if (gameID.startsWith(`${gameName}:`)) {
-        const metadata = await db.getMetadata(gameID);
-        rooms.push({
-          gameID,
-          players: Object.values(metadata.players).map((player: any) => {
-            // strip away credentials
-            return { id: player.id, name: player.name };
-          }),
-          setupData: metadata.setupData,
-        });
-      }
+    for (let gameID of gameList) {
+      const metadata = await db.getMetadata(gameID);
+      rooms.push({
+        gameID,
+        players: Object.values(metadata.players).map((player: any) => {
+          // strip away credentials
+          return { id: player.id, name: player.name };
+        }),
+        setupData: metadata.setupData,
+      });
     }
     ctx.body = {
       rooms: rooms,

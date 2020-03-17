@@ -53,7 +53,7 @@ export abstract class Async {
   /**
    * Return all games.
    */
-  abstract list(): Promise<string[]>;
+  abstract listGames(gameName?: string): Promise<string[]>;
 }
 
 export abstract class Sync {
@@ -101,5 +101,5 @@ export abstract class Sync {
   /**
    * Return all games.
    */
-  abstract list(): Array<string>;
+  abstract listGames(gameName?: string): Array<string>;
 }

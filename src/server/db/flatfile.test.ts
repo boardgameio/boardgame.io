@@ -42,7 +42,7 @@ describe('FlatFile', () => {
     expect(has).toEqual(true);
 
     // Must return all keys
-    let keys = await db.list();
+    let keys = await db.listGames();
     expect(keys).toEqual(['gameID']);
 
     // Must remove game from DB
@@ -55,7 +55,7 @@ describe('FlatFile', () => {
     // Shall create game, then clear DB, then check whether DB is cleared
     await db.setState('game2', state as State);
     await db.clear();
-    let keys2 = await db.list();
+    let keys2 = await db.listGames();
     expect(keys2).toHaveLength(0);
   });
 });

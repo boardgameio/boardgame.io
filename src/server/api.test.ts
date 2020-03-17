@@ -11,7 +11,6 @@ import request from 'supertest';
 import { addApiToServer, createApiServer } from './api';
 import { Game } from '../core/game';
 import * as StorageAPI from './db/base';
-import { Server } from '../types';
 
 jest.setTimeout(2000000000);
 
@@ -26,7 +25,7 @@ class AsyncStorage extends StorageAPI.Async {
       has,
       getMetadata,
       setMetadata,
-      list,
+      listGames,
       remove,
     } = args;
     this.mocks = {
@@ -35,7 +34,7 @@ class AsyncStorage extends StorageAPI.Async {
       has: has || jest.fn(() => true),
       setMetadata: setMetadata || jest.fn(),
       getMetadata: getMetadata || jest.fn(() => ({})),
-      list: list || jest.fn(() => []),
+      listGames: listGames || jest.fn(() => []),
       remove: remove || jest.fn(),
     };
   }
@@ -66,8 +65,8 @@ class AsyncStorage extends StorageAPI.Async {
     this.mocks.remove(...args);
   }
 
-  async list() {
-    return this.mocks.list();
+  async listGames() {
+    return this.mocks.listGames();
   }
 }
 
@@ -768,9 +767,8 @@ describe('.createApiServer', () => {
             },
           };
         },
-        setMetadata: async () => {},
-        list: async () => {
-          return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
+        listGames: async () => {
+          return ['bar-0', 'bar-1'];
         },
       });
     });
@@ -789,8 +787,8 @@ describe('.createApiServer', () => {
       });
 
       test('returns room ids', async () => {
-        expect(rooms[0].gameID).toEqual('bar:bar-0');
-        expect(rooms[1].gameID).toEqual('bar:bar-1');
+        expect(rooms[0].gameID).toEqual('bar-0');
+        expect(rooms[1].gameID).toEqual('bar-1');
       });
 
       test('returns player names', async () => {
@@ -819,7 +817,6 @@ describe('.createApiServer', () => {
             },
           };
         },
-        setMetadata: async () => {},
         list: async () => {
           return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },

@@ -13,7 +13,7 @@ import { DBFromEnv } from './db';
 import { Game } from '../core/game';
 import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
-import { Server } from '../types';
+import { Server as ServerTypes } from '../types';
 
 interface ServerConfig {
   port?: number;
@@ -91,7 +91,7 @@ export function Server({
       await db.connect();
 
       // Lobby API
-      const lobbyConfig: Server.LobbyConfig = serverRunConfig.lobbyConfig;
+      const lobbyConfig: ServerTypes.LobbyConfig = serverRunConfig.lobbyConfig;
       let apiServer;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
         addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
