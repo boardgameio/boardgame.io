@@ -16,11 +16,19 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
+import { Server } from '../types';
+import { StorageAPI } from '../server/db/base';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
+
+class InMemoryAsync extends InMemory {
+  type() {
+    return StorageAPI.Type.ASYNC;
+  }
+}
 
 const game = { seed: 0 };
 
@@ -59,6 +67,7 @@ describe('sync', () => {
   test('should have metadata', async () => {
     const db = new InMemory();
     const dbMetadata = {
+      setupData: {},
       players: {
         '0': {
           id: 0,
@@ -96,7 +105,7 @@ describe('update', () => {
   const action = ActionCreators.gameEvent('endTurn');
 
   beforeAll(async () => {
-    await master.onSync('gameID', '0');
+    await master.onSync('gameID', '0', 2);
   });
 
   beforeEach(() => {
@@ -177,7 +186,7 @@ describe('update', () => {
 
   test('invalid playerID', async () => {
     await master.onUpdate(action, 1, 'gameID', '100');
-    await master.onUpdate(ActionCreators.makeMove(), 1, 'gameID', '100');
+    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'gameID', '100');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(`player not active - playerID=[100]`);
   });
@@ -232,7 +241,7 @@ describe('playerView', () => {
   const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
 
   beforeAll(async () => {
-    await master.onSync('gameID', '0');
+    await master.onSync('gameID', '0', 2);
   });
 
   beforeEach(() => {
@@ -242,7 +251,7 @@ describe('playerView', () => {
   });
 
   test('sync', async () => {
-    await master.onSync('gameID', '0');
+    await master.onSync('gameID', '0', 2);
     expect(sendReturn.args[1]).toMatchObject({
       G: { player: '0' },
     });
@@ -250,7 +259,7 @@ describe('playerView', () => {
 
   test('update', async () => {
     const action = ActionCreators.gameEvent('endTurn');
-    await master.onSync('gameID', '0');
+    await master.onSync('gameID', '0', 2);
     await master.onUpdate(action, 0, 'gameID', '0');
 
     const G_player0 = sendAllReturn('0').args[1].G;
@@ -296,11 +305,11 @@ describe('authentication', () => {
     const game = { seed: 0 };
     const gameID = 'gameID';
     const action = ActionCreators.gameEvent('endTurn');
-    const storage = new InMemory();
+    const storage = new InMemoryAsync();
 
     beforeAll(async () => {
       const master = new Master(game, storage, TransportAPI());
-      await master.onSync(gameID, '0');
+      await master.onSync(gameID, '0', 2);
     });
 
     test('auth failure', async () => {
@@ -349,7 +358,7 @@ describe('authentication', () => {
 
     beforeAll(() => {
       const master = new Master(game, storage, TransportAPI());
-      master.onSync(gameID, '0');
+      master.onSync(gameID, '0', 2);
     });
 
     test('auth failure', () => {
@@ -391,7 +400,14 @@ describe('authentication', () => {
 
 describe('redactLog', () => {
   test('no redactedMoves', () => {
-    const logEvents = [{ action: ActionCreators.gameEvent('endTurn') }];
+    const logEvents = [
+      {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
+        action: ActionCreators.gameEvent('endTurn'),
+      },
+    ];
     const result = redactLog(logEvents, '0');
     expect(result).toMatchObject(logEvents);
   });
@@ -399,6 +415,9 @@ describe('redactLog', () => {
   test('redacted move is only shown with args to the player that made the move', () => {
     const logEvents = [
       {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
         action: ActionCreators.makeMove('clickCell', [1, 2, 3], '0'),
         redact: true,
       },
@@ -412,6 +431,9 @@ describe('redactLog', () => {
     result = redactLog(logEvents, '1');
     expect(result).toMatchObject([
       {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
         action: {
           type: 'MAKE_MOVE',
           payload: {
@@ -426,7 +448,12 @@ describe('redactLog', () => {
 
   test('not redacted move is shown to all', () => {
     const logEvents = [
-      { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
+      {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
+        action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0'),
+      },
     ];
 
     // player that made the move
@@ -439,7 +466,12 @@ describe('redactLog', () => {
 
   test('can explicitly set showing args to true', () => {
     const logEvents = [
-      { action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0') },
+      {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
+        action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0'),
+      },
     ];
 
     // player that made the move
@@ -451,7 +483,14 @@ describe('redactLog', () => {
   });
 
   test('events are not redacted', () => {
-    const logEvents = [{ action: ActionCreators.gameEvent('endTurn') }];
+    const logEvents = [
+      {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
+        action: ActionCreators.gameEvent('endTurn'),
+      },
+    ];
 
     // player that made the move
     let result = redactLog(logEvents, '0');
@@ -521,21 +560,23 @@ describe('getPlayerMetadata', () => {
 
   describe('when metadata does not contain players field', () => {
     test('then playerMetadata is undefined', () => {
-      expect(getPlayerMetadata({}, '0')).toBeUndefined();
+      expect(getPlayerMetadata({} as Server.GameMetadata, '0')).toBeUndefined();
     });
   });
 
   describe('when metadata does not contain playerID', () => {
     test('then playerMetadata is undefined', () => {
-      expect(getPlayerMetadata({ players: { '1': {} } }, '0')).toBeUndefined();
+      expect(
+        getPlayerMetadata({ setupData: {}, players: { '1': { id: 1 } } }, '0')
+      ).toBeUndefined();
     });
   });
 
   describe('when metadata contains playerID', () => {
     test('then playerMetadata is returned', () => {
-      const playerMetadata = { credentials: 'SECRET' };
+      const playerMetadata = { id: 0, credentials: 'SECRET' };
       const result = getPlayerMetadata(
-        { players: { '0': playerMetadata } },
+        { setupData: {}, players: { '0': playerMetadata } },
         '0'
       );
       expect(result).toBe(playerMetadata);
@@ -554,8 +595,9 @@ describe('doesGameRequireAuthentication', () => {
   describe('when game has no credentials', () => {
     test('then authentication is not required', () => {
       const gameMetadata = {
+        setupData: {},
         players: {
-          '0': {},
+          '0': { id: 1 },
         },
       };
       const result = doesGameRequireAuthentication(gameMetadata);
@@ -566,8 +608,10 @@ describe('doesGameRequireAuthentication', () => {
   describe('when game has credentials', () => {
     test('then authentication is required', () => {
       const gameMetadata = {
+        setupData: {},
         players: {
           '0': {
+            id: 0,
             credentials: 'SECRET',
           },
         },

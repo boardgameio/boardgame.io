@@ -79,10 +79,10 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
  * Verifies that the game has metadata and is using credentials.
  */
 export const doesGameRequireAuthentication = (
-  gameMetadata: Server.GameMetadata
+  gameMetadata?: Server.GameMetadata
 ) => {
   if (!gameMetadata) return false;
-  const { players } = gameMetadata;
+  const { players } = gameMetadata as Server.GameMetadata;
   const hasCredentials = Object.keys(players).some(key => {
     return !!(players[key] && players[key].credentials);
   });
@@ -94,7 +94,7 @@ export const doesGameRequireAuthentication = (
  */
 export const isActionFromAuthenticPlayer = (
   actionCredentials: string,
-  playerMetadata: Server.PlayerMetadata
+  playerMetadata?: Server.PlayerMetadata
 ) => {
   if (!actionCredentials) return false;
   if (!playerMetadata) return false;
@@ -145,7 +145,7 @@ export class Master {
     game: GameConfig,
     storageAPI,
     transportAPI,
-    auth: AuthFn | boolean
+    auth?: AuthFn | boolean
   ) {
     this.game = Game(game);
     this.storageAPI = storageAPI;

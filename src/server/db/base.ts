@@ -7,7 +7,9 @@ export namespace StorageAPI {
   }
 
   export abstract class Async {
+    /* istanbul ignore next */
     type() {
+      /* istanbul ignore next */
       return Type.ASYNC;
     }
 

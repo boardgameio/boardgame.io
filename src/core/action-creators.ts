@@ -19,7 +19,7 @@ import { State, LogEntry } from '../types';
  */
 export const makeMove = (
   type: string,
-  args: any,
+  args?: any,
   playerID?: string | null,
   credentials?: string
 ) => ({
@@ -37,7 +37,7 @@ export const makeMove = (
  */
 export const gameEvent = (
   type: string,
-  args: any,
+  args?: any,
   playerID?: string | null,
   credentials?: string
 ) => ({
