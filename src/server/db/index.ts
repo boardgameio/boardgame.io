@@ -1,16 +1,14 @@
 import { InMemory } from './inmemory';
-import { Mongo } from './mongo';
 import { FlatFile } from './flatfile';
 
 const DBFromEnv = () => {
-  if (process.env.MONGO_URI && process.env.MONGO_DATABASE) {
-    return new Mongo({
-      url: process.env.MONGO_URI,
-      dbname: process.env.MONGO_DATABASE,
+  if (process.env.FLATFILE_DIR) {
+    return new FlatFile({
+      dir: process.env.FLATFILE_DIR,
     });
   } else {
     return new InMemory();
   }
 };
 
-export { InMemory, Mongo, FlatFile, DBFromEnv };
+export { InMemory, FlatFile, DBFromEnv };

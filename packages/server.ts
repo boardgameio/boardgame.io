@@ -7,6 +7,6 @@
  */
 
 import { Server } from '../src/server';
-import { Mongo, FlatFile } from '../src/server/db';
+import { FlatFile } from '../src/server/db';
 
-export { Server, Mongo, FlatFile };
+export { Server, FlatFile };

@@ -1,11 +1,8 @@
-import { DBFromEnv } from '.';
+import { DBFromEnv, FlatFile } from '.';
 
-test('MONGO_URI', () => {
-  process.env.MONGO_URI = 'test';
-  process.env.MONGO_DATABASE = 'database';
+test('FLATFILE_DIR', () => {
+  process.env.FLATFILE_DIR = 'test';
   const db = DBFromEnv();
-  expect(db.url).toBe('test');
-  expect(db.dbname).toBe('database');
-  delete process.env.MONGO_URI;
-  delete process.env.MONGO_DATABASE;
+  expect(db).toBeInstanceOf(FlatFile);
+  delete process.env.FLATFILE_DIR;
 });

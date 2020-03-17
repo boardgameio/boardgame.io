@@ -101,8 +101,6 @@
     "jest": "^24.0.0",
     "jest-transform-svelte": "^2.1.0",
     "lint-staged": "^8.1.0",
-    "mongo-mock": "^3.3.2",
-    "mongodb": "^3.0.3",
     "node-persist": "^3.0.4",
     "nodemon": "^1.18.9",
     "prettier": "^1.19.1",
