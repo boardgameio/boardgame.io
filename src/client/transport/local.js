@@ -67,7 +67,6 @@ export function LocalMaster({ game, bots }) {
   };
 
   const master = new Master(game, new InMemory(), { send, sendAll }, false);
-  master.executeSynchronously = true;
 
   master.connect = (gameID, playerID, callback) => {
     clientCallbacks[playerID] = callback;

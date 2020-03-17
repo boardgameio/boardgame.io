@@ -12,7 +12,7 @@ import { State, Server } from '../../types';
 /**
  * FlatFile data storage.
  */
-export class FlatFile extends StorageAPI {
+export class FlatFile extends StorageAPI.Async {
   private games: {
     init: (opts: object) => void;
     setItem: (id: string, value: any) => void;

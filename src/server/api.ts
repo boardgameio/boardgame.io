@@ -33,7 +33,7 @@ const createGameMetadata = () => ({
  * @param {object } lobbyConfig - Configuration options for the lobby.
  */
 export const CreateGame = async (
-  db: StorageAPI,
+  db: StorageAPI.Sync | StorageAPI.Async,
   game,
   numPlayers,
   setupData,
@@ -83,7 +83,7 @@ export const addApiToServer = ({
   games: any;
   lobbyConfig: any;
   generateCredentials: any;
-  db: StorageAPI;
+  db: StorageAPI.Sync | StorageAPI.Async;
 }) => {
   if (!lobbyConfig) lobbyConfig = {};
   lobbyConfig = {

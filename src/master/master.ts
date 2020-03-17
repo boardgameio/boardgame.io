@@ -21,7 +21,7 @@ import {
   LogEntry,
   PlayerID,
 } from '../types';
-import { StorageAPI, StorageAPISync } from '../server/db/base';
+import { StorageAPI } from '../server/db/base';
 
 export const getPlayerMetadata = (
   gameMetadata: Server.GameMetadata,
@@ -31,6 +31,12 @@ export const getPlayerMetadata = (
     return gameMetadata.players[playerID];
   }
 };
+
+function IsSynchronous(
+  storageAPI: StorageAPI.Sync | StorageAPI.Async
+): storageAPI is StorageAPI.Sync {
+  return storageAPI.type() === StorageAPI.Type.SYNC;
+}
 
 /**
  * Redact the log.
@@ -129,12 +135,11 @@ type CallbackFn = (arg: {
  */
 export class Master {
   game: ReturnType<typeof Game>;
-  storageAPI: StorageAPI | StorageAPISync;
+  storageAPI: StorageAPI.Sync | StorageAPI.Async;
   transportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
   shouldAuth: typeof doesGameRequireAuthentication;
-  executeSynchronously: boolean;
 
   constructor(
     game: GameConfig,
@@ -178,10 +183,8 @@ export class Master {
       'payload' in action && 'credentials' in action.payload
         ? action.payload.credentials
         : undefined;
-    if (this.executeSynchronously) {
-      const gameMetadata = (this.storageAPI as StorageAPISync).getMetadata(
-        gameID
-      );
+    if (IsSynchronous(this.storageAPI)) {
+      const gameMetadata = this.storageAPI.getMetadata(gameID);
       const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
       isActionAuthentic = this.shouldAuth(gameMetadata)
         ? this.auth(credentials, playerMetadata)
@@ -202,8 +205,8 @@ export class Master {
     const key = gameID;
 
     let state: State;
-    if (this.executeSynchronously) {
-      state = (this.storageAPI as StorageAPISync).getState(key);
+    if (IsSynchronous(this.storageAPI)) {
+      state = this.storageAPI.getState(key);
     } else {
       state = await this.storageAPI.getState(key);
     }
@@ -302,7 +305,7 @@ export class Master {
     log = [...log, ...state.deltalog];
     const stateWithLog = { ...state, log };
 
-    if (this.executeSynchronously) {
+    if (IsSynchronous(this.storageAPI)) {
       this.storageAPI.setState(key, stateWithLog);
     } else {
       await this.storageAPI.setState(key, stateWithLog);
@@ -320,8 +323,8 @@ export class Master {
     let gameMetadata: Server.GameMetadata;
     let filteredGameMetadata: { id: number; name?: string }[];
 
-    if (this.executeSynchronously) {
-      const api = this.storageAPI as StorageAPISync;
+    if (IsSynchronous(this.storageAPI)) {
+      const api = this.storageAPI as StorageAPI.Sync;
       state = api.getState(key);
       gameMetadata = api.getMetadata(gameID);
     } else {
@@ -343,8 +346,8 @@ export class Master {
         gameID,
       });
 
-      if (this.executeSynchronously) {
-        const api = this.storageAPI as StorageAPISync;
+      if (IsSynchronous(this.storageAPI)) {
+        const api = this.storageAPI as StorageAPI.Sync;
         api.setState(key, state);
         state = api.getState(key);
       } else {

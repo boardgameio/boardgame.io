@@ -7,7 +7,7 @@
  */
 
 import * as ActionCreators from '../core/action-creators';
-import { InMemory } from '../server/db/inmemory';
+import { InMemory, InMemoryAsync } from '../server/db/inmemory';
 import {
   Master,
   redactLog,
@@ -267,7 +267,6 @@ describe('subscribe', () => {
   let master;
   beforeAll(() => {
     master = new Master({}, new InMemory(), TransportAPI(jest.fn(), jest.fn()));
-    master.executeSynchronously = true;
     master.subscribe(callback);
   });
 
@@ -297,7 +296,7 @@ describe('authentication', () => {
     const game = { seed: 0 };
     const gameID = 'gameID';
     const action = ActionCreators.gameEvent('endTurn');
-    const storage = new InMemory();
+    const storage = new InMemoryAsync();
 
     beforeAll(async () => {
       const master = new Master(game, storage, TransportAPI());
@@ -350,7 +349,6 @@ describe('authentication', () => {
 
     beforeAll(() => {
       const master = new Master(game, storage, TransportAPI());
-      master.executeSynchronously = true;
       master.onSync(gameID, '0');
     });
 
@@ -362,7 +360,6 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         isActionFromAuthenticPlayer
       );
-      master.executeSynchronously = true;
       master.onUpdate(action, 0, gameID, '0');
       expect(sendAll).not.toHaveBeenCalled();
     });
@@ -375,7 +372,6 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         isActionFromAuthenticPlayer
       );
-      master.executeSynchronously = true;
       master.onUpdate(action, 0, gameID, '0');
       expect(sendAll).toHaveBeenCalled();
     });
@@ -387,7 +383,6 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         true
       );
-      master.executeSynchronously = true;
       master.onUpdate(action, 0, gameID, '0');
       expect(sendAll).toHaveBeenCalled();
     });
