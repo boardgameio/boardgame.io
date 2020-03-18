@@ -69,13 +69,6 @@ export class InMemory extends StorageAPI.Sync {
   }
 
   /**
-   * Check if a particular game id exists.
-   */
-  has(gameID: string): boolean {
-    return this.games.has(gameID);
-  }
-
-  /**
    * Remove the game state from the in-memory object.
    */
   remove(gameID: string) {

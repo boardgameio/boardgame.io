@@ -46,11 +46,6 @@ export abstract class Async {
   abstract fetch(gameID: string, opts: FetchOpts): Promise<FetchResult>;
 
   /**
-   * Check if a particular game id exists.
-   */
-  abstract has(gameID: string): Promise<boolean>;
-
-  /**
    * Update the game metadata.
    */
   abstract setMetadata(
@@ -90,11 +85,6 @@ export abstract class Sync {
    * Fetch the game state.
    */
   abstract fetch(gameID: string, opts: FetchOpts): FetchResult;
-
-  /**
-   * Check if a particular game id exists.
-   */
-  abstract has(gameID: string): boolean;
 
   /**
    * Update the game metadata.

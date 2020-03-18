@@ -92,15 +92,12 @@ export class FlatFile extends StorageAPI.Async {
     return await this.games.setItem(key, metadata);
   }
 
-  async has(id: string): Promise<boolean> {
-    var keys = await this.games.keys();
-    return keys.indexOf(id) > -1;
-  }
-
   async remove(id: string) {
     var keys = await this.games.keys();
     if (!(keys.indexOf(id) > -1)) return;
-    this.games.removeItem(id);
+    await this.games.removeItem(id);
+    await this.games.removeItem(LogKey(id));
+    await this.games.removeItem(MetadataKey(id));
   }
 
   async listGames(): Promise<string[]> {

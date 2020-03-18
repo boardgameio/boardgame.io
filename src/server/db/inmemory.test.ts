@@ -36,12 +36,6 @@ describe('InMemory', () => {
     expect(state).toEqual(stateEntry);
   });
 
-  test('has', () => {
-    // Must return true if game exists
-    let has = db.has('gameID');
-    expect(has).toEqual(true);
-  });
-
   test('listGames', () => {
     let keys = db.listGames();
     expect(keys).toEqual(['gameID']);
@@ -54,7 +48,7 @@ describe('InMemory', () => {
   test('remove', () => {
     // Must remove game from DB
     db.remove('gameID');
-    expect(db.has('gameID')).toEqual(false);
+    expect(db.fetch('gameID', { state: true })).toEqual({});
     // Shall not return error
     db.remove('gameID');
   });

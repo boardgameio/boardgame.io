@@ -37,16 +37,15 @@ describe('FlatFile', () => {
     expect(result.state).toEqual({ a: 1 });
     expect(result.metadata).toEqual({ metadata: true });
 
-    let has = await db.has('gameID');
-    expect(has).toEqual(true);
-
     // Must return all keys
     let keys = await db.listGames();
     expect(keys).toEqual(['gameID']);
 
     // Must remove game from DB
     await db.remove('gameID');
-    expect(await db.has('gameID')).toEqual(false);
+    expect(
+      await db.fetch('gameID', { metadata: true, state: true, log: true })
+    ).toEqual({});
 
     // Shall not return error
     await db.remove('gameID');
