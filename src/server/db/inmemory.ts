@@ -50,8 +50,11 @@ export class InMemory extends StorageAPI.Sync {
   /**
    * Fetches state for a particular gameID.
    */
-  fetch(gameID: string, opts: StorageAPI.FetchOpts): StorageAPI.FetchResult {
-    let result: StorageAPI.FetchResult = {};
+  fetch<O extends StorageAPI.FetchOpts>(
+    gameID: string,
+    opts: O
+  ): StorageAPI.FetchResult<O> {
+    let result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
       result.state = this.games.get(gameID);
@@ -65,7 +68,7 @@ export class InMemory extends StorageAPI.Sync {
       result.log = this.log.get(gameID) || [];
     }
 
-    return result;
+    return result as StorageAPI.FetchResult<O>;
   }
 
   /**

@@ -1,3 +1,4 @@
+import { Object } from 'ts-toolbelt';
 import { State, Server, LogEntry } from '../../types';
 
 export enum Type {
@@ -15,13 +16,21 @@ export interface FetchOpts {
 }
 
 /**
+ * Data that can be retrieved from a database fetch query
+ */
+export interface FetchFields {
+  state: State;
+  log: LogEntry[];
+  metadata: Server.GameMetadata;
+}
+
+/**
  * The result of the fetch operation.
  */
-export interface FetchResult {
-  state?: State;
-  log?: LogEntry[];
-  metadata?: Server.GameMetadata;
-}
+export type FetchResult<O extends FetchOpts> = Object.Pick<
+  FetchFields,
+  Object.SelectKeys<O, true>
+>;
 
 export interface ListGamesOpts {
   gameName?: string;
@@ -55,7 +64,10 @@ export abstract class Async {
   /**
    * Fetch the game state.
    */
-  abstract fetch(gameID: string, opts: FetchOpts): Promise<FetchResult>;
+  abstract fetch<O extends FetchOpts>(
+    gameID: string,
+    opts: O
+  ): Promise<FetchResult<O>>;
 
   /**
    * Remove the game state.
@@ -93,7 +105,7 @@ export abstract class Sync {
   /**
    * Fetch the game state.
    */
-  abstract fetch(gameID: string, opts: FetchOpts): FetchResult;
+  abstract fetch<O extends FetchOpts>(gameID: string, opts: O): FetchResult<O>;
 
   /**
    * Remove the game state.

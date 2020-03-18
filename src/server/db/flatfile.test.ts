@@ -23,7 +23,7 @@ describe('FlatFile', () => {
 
   test('basic', async () => {
     // Must return undefined when no game exists.
-    let result = await db.fetch('gameID', { state: true });
+    const result = await db.fetch('gameID', { state: true });
     expect(result.state).toEqual(undefined);
 
     // Create game.
@@ -33,9 +33,9 @@ describe('FlatFile', () => {
     await db.setMetadata('gameID', metadata as Server.GameMetadata);
 
     // Must return created game.
-    result = await db.fetch('gameID', { state: true, metadata: true });
-    expect(result.state).toEqual({ a: 1 });
-    expect(result.metadata).toEqual({ metadata: true });
+    const result2 = await db.fetch('gameID', { state: true, metadata: true });
+    expect(result2.state).toEqual({ a: 1 });
+    expect(result2.metadata).toEqual({ metadata: true });
 
     // Must return all keys
     let keys = await db.listGames();

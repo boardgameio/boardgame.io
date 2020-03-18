@@ -50,11 +50,11 @@ export class FlatFile extends StorageAPI.Async {
     return;
   }
 
-  async fetch(
+  async fetch<O extends StorageAPI.FetchOpts>(
     gameID: string,
-    opts: StorageAPI.FetchOpts
-  ): Promise<StorageAPI.FetchResult> {
-    let result: StorageAPI.FetchResult = {};
+    opts: O
+  ): Promise<StorageAPI.FetchResult<O>> {
+    let result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
       result.state = (await this.games.getItem(gameID)) as State;
@@ -70,7 +70,7 @@ export class FlatFile extends StorageAPI.Async {
       result.log = (await this.games.getItem(key)) as LogEntry[];
     }
 
-    return result;
+    return result as StorageAPI.FetchResult<O>;
   }
 
   async clear() {
