@@ -15,10 +15,10 @@ import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
 
 interface ServerConfig {
-  port?: Number;
+  port?: number;
   callback?: Function;
   lobbyConfig?: {
-    apiPort: Number;
+    apiPort: number;
     apiCallback?: Function;
   };
 }
@@ -27,7 +27,7 @@ interface ServerConfig {
  * Build config object from server run arguments.
  */
 export const createServerRunConfig = (
-  portOrConfig: Number | ServerConfig,
+  portOrConfig: number | ServerConfig,
   callback?: Function
 ): ServerConfig => {
   const config: ServerConfig = {};
@@ -37,7 +37,7 @@ export const createServerRunConfig = (
     config.callback = serverConfig.callback || callback;
     config.lobbyConfig = serverConfig.lobbyConfig;
   } else {
-    config.port = portOrConfig as Number;
+    config.port = portOrConfig as number;
     config.callback = callback;
   }
   return config;
@@ -83,7 +83,7 @@ export function Server({
     app,
     db,
 
-    run: async (portOrConfig: Number | object, callback?: Function) => {
+    run: async (portOrConfig: number | object, callback?: Function) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
 
       // DB
