@@ -23,6 +23,10 @@ export interface FetchResult {
   metadata?: Server.GameMetadata;
 }
 
+export interface ListGamesOpts {
+  gameName?: string;
+}
+
 export abstract class Async {
   /* istanbul ignore next */
   type() {
@@ -61,7 +65,7 @@ export abstract class Async {
   /**
    * Return all games.
    */
-  abstract listGames(gameName?: string): Promise<string[]>;
+  abstract listGames(opts: ListGamesOpts): Promise<string[]>;
 }
 
 export abstract class Sync {
@@ -99,5 +103,5 @@ export abstract class Sync {
   /**
    * Return all games.
    */
-  abstract listGames(gameName?: string): Array<string>;
+  abstract listGames(opts: ListGamesOpts): string[];
 }

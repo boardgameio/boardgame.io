@@ -37,11 +37,11 @@ describe('InMemory', () => {
   });
 
   test('listGames', () => {
-    let keys = db.listGames();
+    let keys = db.listGames({});
     expect(keys).toEqual(['gameID']);
-    keys = db.listGames('tic-tac-toe');
+    keys = db.listGames({ gameName: 'tic-tac-toe' });
     expect(keys).toEqual(['gameID']);
-    keys = db.listGames('chess');
+    keys = db.listGames({ gameName: 'chess' });
     expect(keys).toEqual([]);
   });
 
