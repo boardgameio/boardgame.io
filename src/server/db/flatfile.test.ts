@@ -7,7 +7,7 @@
  */
 
 import { FlatFile } from './flatfile';
-import { State, Server } from '../../types';
+import { State, Server, LogEntry } from '../../types';
 
 describe('FlatFile', () => {
   let db;
@@ -17,13 +17,13 @@ describe('FlatFile', () => {
     await db.connect();
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await db.clear();
   });
 
   test('basic', async () => {
     // Must return undefined when no game exists.
-    let state: unknown = await db.getState('gameID');
+    let { state } = await db.fetch('gameID', { state: true });
     expect(state).toEqual(undefined);
 
     // Create game.
@@ -33,10 +33,9 @@ describe('FlatFile', () => {
     await db.setMetadata('gameID', metadata as Server.GameMetadata);
 
     // Must return created game.
-    state = await db.getState('gameID');
-    metadata = await db.getMetadata('gameID');
-    expect(state).toEqual({ a: 1 });
-    expect(metadata).toEqual({ metadata: true });
+    const result = await db.fetch('gameID', { state: true, metadata: true });
+    expect(result.state).toEqual({ a: 1 });
+    expect(result.metadata).toEqual({ metadata: true });
 
     let has = await db.has('gameID');
     expect(has).toEqual(true);
@@ -57,5 +56,33 @@ describe('FlatFile', () => {
     await db.clear();
     let keys2 = await db.listGames();
     expect(keys2).toHaveLength(0);
+  });
+
+  test('log', async () => {
+    const logEntry1: LogEntry = {
+      _stateID: 0,
+      action: {
+        type: 'MAKE_MOVE',
+        payload: { type: '', playerID: '0', args: [] },
+      },
+      turn: 0,
+      phase: '',
+    };
+
+    const logEntry2: LogEntry = {
+      _stateID: 1,
+      action: {
+        type: 'MAKE_MOVE',
+        payload: { type: '', playerID: '0', args: [] },
+      },
+      turn: 1,
+      phase: '',
+    };
+
+    await db.setState('gameID', { deltalog: [logEntry1] });
+    await db.setState('gameID', { deltalog: [logEntry2] });
+
+    const result = await db.fetch('gameID', { log: true });
+    expect(result.log).toEqual([logEntry1, logEntry2]);
   });
 });

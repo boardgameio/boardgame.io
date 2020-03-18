@@ -131,7 +131,7 @@ export const addApiToServer = ({
     const gameList = await db.listGames(gameName);
     let rooms = [];
     for (let gameID of gameList) {
-      const metadata = await db.getMetadata(gameID);
+      const { metadata } = await db.fetch(gameID, { metadata: true });
       rooms.push({
         gameID,
         players: Object.values(metadata.players).map((player: any) => {
@@ -148,16 +148,16 @@ export const addApiToServer = ({
 
   router.get('/games/:name/:id', async ctx => {
     const gameID = ctx.params.id;
-    const room = await db.getMetadata(gameID);
-    if (!room) {
+    const { metadata } = await db.fetch(gameID, { metadata: true });
+    if (!metadata) {
       ctx.throw(404, 'Room ' + gameID + ' not found');
     }
     const strippedRoom = {
       roomID: gameID,
-      players: Object.values(room.players).map((player: any) => {
+      players: Object.values(metadata.players).map((player: any) => {
         return { id: player.id, name: player.name };
       }),
-      setupData: room.setupData,
+      setupData: metadata.setupData,
     };
     ctx.body = strippedRoom;
   });
@@ -172,22 +172,22 @@ export const addApiToServer = ({
       ctx.throw(403, 'playerName is required');
     }
     const gameID = ctx.params.id;
-    const gameMetadata = await db.getMetadata(gameID);
-    if (!gameMetadata) {
+    const { metadata } = await db.fetch(gameID, { metadata: true });
+    if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
     }
-    if (!gameMetadata.players[playerID]) {
+    if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (gameMetadata.players[playerID].name) {
+    if (metadata.players[playerID].name) {
       ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 
-    gameMetadata.players[playerID].name = playerName;
+    metadata.players[playerID].name = playerName;
     const playerCredentials = await lobbyConfig.generateCredentials(ctx);
-    gameMetadata.players[playerID].credentials = playerCredentials;
+    metadata.players[playerID].credentials = playerCredentials;
 
-    await db.setMetadata(gameID, gameMetadata);
+    await db.setMetadata(gameID, metadata);
 
     ctx.body = {
       playerCredentials,
@@ -198,25 +198,25 @@ export const addApiToServer = ({
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
-    const gameMetadata = await db.getMetadata(gameID);
+    const { metadata } = await db.fetch(gameID, { metadata: true });
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
 
-    if (!gameMetadata) {
+    if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
     }
-    if (!gameMetadata.players[playerID]) {
+    if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (credentials !== gameMetadata.players[playerID].credentials) {
+    if (credentials !== metadata.players[playerID].credentials) {
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
-    delete gameMetadata.players[playerID].name;
-    delete gameMetadata.players[playerID].credentials;
-    if (Object.values(gameMetadata.players).some((val: any) => val.name)) {
-      await db.setMetadata(gameID, gameMetadata);
+    delete metadata.players[playerID].name;
+    delete metadata.players[playerID].credentials;
+    if (Object.values(metadata.players).some((val: any) => val.name)) {
+      await db.setMetadata(gameID, metadata);
     } else {
       // remove room
       await db.remove(gameID);
@@ -229,7 +229,7 @@ export const addApiToServer = ({
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
-    const gameMetadata = await db.getMetadata(gameID);
+    const { metadata } = await db.fetch(gameID, { metadata: true });
     // User-data to pass to the game setup function.
     const setupData = ctx.request.body.setupData;
     // The number of players for this game instance.
@@ -242,19 +242,19 @@ export const addApiToServer = ({
       ctx.throw(403, 'playerID is required');
     }
 
-    if (!gameMetadata) {
+    if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
     }
-    if (!gameMetadata.players[playerID]) {
+    if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (credentials !== gameMetadata.players[playerID].credentials) {
+    if (credentials !== metadata.players[playerID].credentials) {
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
     // Check if nextRoom is already set, if so, return that id.
-    if (gameMetadata.nextRoomID) {
-      ctx.body = { nextRoomID: gameMetadata.nextRoomID };
+    if (metadata.nextRoomID) {
+      ctx.body = { nextRoomID: metadata.nextRoomID };
       return;
     }
 
@@ -266,9 +266,9 @@ export const addApiToServer = ({
       setupData,
       lobbyConfig
     );
-    gameMetadata.nextRoomID = nextRoomID;
+    metadata.nextRoomID = nextRoomID;
 
-    await db.setMetadata(gameID, gameMetadata);
+    await db.setMetadata(gameID, metadata);
 
     ctx.body = {
       nextRoomID,
@@ -280,25 +280,25 @@ export const addApiToServer = ({
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const newName = ctx.request.body.newName;
-    const gameMetadata = await db.getMetadata(gameID);
+    const { metadata } = await db.fetch(gameID, { metadata: true });
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
     if (!newName) {
       ctx.throw(403, 'newName is required');
     }
-    if (!gameMetadata) {
+    if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
     }
-    if (!gameMetadata.players[playerID]) {
+    if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (credentials !== gameMetadata.players[playerID].credentials) {
+    if (credentials !== metadata.players[playerID].credentials) {
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
-    gameMetadata.players[playerID].name = newName;
-    await db.setMetadata(gameID, gameMetadata);
+    metadata.players[playerID].name = newName;
+    await db.setMetadata(gameID, metadata);
     ctx.body = {};
   });
 

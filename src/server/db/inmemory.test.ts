@@ -19,7 +19,7 @@ describe('InMemory', () => {
 
   // Must return undefined when no game exists.
   test('must return undefined when no game exists', () => {
-    let state = db.getState('gameID');
+    const { state } = db.fetch('gameID', { state: true });
     expect(state).toEqual(undefined);
   });
 
@@ -32,7 +32,7 @@ describe('InMemory', () => {
     } as Server.GameMetadata);
     db.setState('gameID', stateEntry as State);
     // Must return created game.
-    const state = db.getState('gameID');
+    const { state } = db.fetch('gameID', { state: true });
     expect(state).toEqual(stateEntry);
   });
 

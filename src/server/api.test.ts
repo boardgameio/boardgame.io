@@ -19,27 +19,22 @@ class AsyncStorage extends StorageAPI.Async {
 
   constructor(args: any = {}) {
     super();
-    const {
-      setState,
-      getState,
-      has,
-      getMetadata,
-      setMetadata,
-      listGames,
-      remove,
-    } = args;
+    const { fetch, setState, has, setMetadata, listGames, remove } = args;
     this.mocks = {
       setState: setState || jest.fn(),
-      getState: getState || jest.fn(() => ({})),
+      fetch: fetch || jest.fn(() => ({})),
       has: has || jest.fn(() => true),
       setMetadata: setMetadata || jest.fn(),
-      getMetadata: getMetadata || jest.fn(() => ({})),
       listGames: listGames || jest.fn(() => []),
       remove: remove || jest.fn(),
     };
   }
 
   async connect() {}
+
+  async fetch(...args) {
+    return this.mocks.fetch(...args);
+  }
 
   async setState(...args) {
     this.mocks.setState(...args);
@@ -55,10 +50,6 @@ class AsyncStorage extends StorageAPI.Async {
 
   async setMetadata(...args) {
     this.mocks.setMetadata(...args);
-  }
-
-  async getMetadata(...args) {
-    return this.mocks.getMetadata(...args);
   }
 
   async remove(...args) {
@@ -230,7 +221,9 @@ describe('.createApiServer', () => {
 
       describe('when the game does not exist', () => {
         beforeEach(async () => {
-          db = new AsyncStorage({ getMetadata: () => null });
+          db = new AsyncStorage({
+            fetch: () => ({ metadata: null }),
+          });
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
@@ -246,10 +239,12 @@ describe('.createApiServer', () => {
       describe('when the game does exist', () => {
         beforeEach(async () => {
           db = new AsyncStorage({
-            getMetadata: async () => {
+            fetch: async () => {
               return {
-                players: {
-                  '0': {},
+                metadata: {
+                  players: {
+                    '0': {},
+                  },
                 },
               };
             },
@@ -335,12 +330,14 @@ describe('.createApiServer', () => {
         describe('when the playerID is not available', () => {
           beforeEach(async () => {
             db = new AsyncStorage({
-              getMetadata: async () => {
+              fetch: async () => {
                 return {
-                  players: {
-                    '0': {
-                      credentials,
-                      name: 'bob',
+                  metadata: {
+                    players: {
+                      '0': {
+                        credentials,
+                        name: 'bob',
+                      },
                     },
                   },
                 };
@@ -378,7 +375,7 @@ describe('.createApiServer', () => {
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
           db = new AsyncStorage({
-            getMetadata: async () => null,
+            fetch: async () => ({ metadata: null }),
           });
           const app = createApiServer({ db, games });
           response = await request(app.callback())
@@ -392,16 +389,18 @@ describe('.createApiServer', () => {
         describe('when the playerID does exist', () => {
           beforeEach(async () => {
             db = new AsyncStorage({
-              getMetadata: async () => {
+              fetch: async () => {
                 return {
-                  players: {
-                    '0': {
-                      name: 'alice',
-                      credentials: 'SECRET1',
-                    },
-                    '1': {
-                      name: 'bob',
-                      credentials: 'SECRET2',
+                  metadata: {
+                    players: {
+                      '0': {
+                        name: 'alice',
+                        credentials: 'SECRET1',
+                      },
+                      '1': {
+                        name: 'bob',
+                        credentials: 'SECRET2',
+                      },
                     },
                   },
                 };
@@ -495,7 +494,7 @@ describe('.createApiServer', () => {
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
           db = new AsyncStorage({
-            getMetadata: async () => null,
+            fetch: async () => ({ metadata: null }),
           });
           const app = createApiServer({ db, games });
           response = await request(app.callback())
@@ -509,16 +508,18 @@ describe('.createApiServer', () => {
         describe('when the playerID does exist', () => {
           beforeEach(async () => {
             db = new AsyncStorage({
-              getMetadata: async () => {
+              fetch: async () => {
                 return {
-                  players: {
-                    '0': {
-                      name: 'alice',
-                      credentials: 'SECRET1',
-                    },
-                    '1': {
-                      name: 'bob',
-                      credentials: 'SECRET2',
+                  metadata: {
+                    players: {
+                      '0': {
+                        name: 'alice',
+                        credentials: 'SECRET1',
+                      },
+                      '1': {
+                        name: 'bob',
+                        credentials: 'SECRET2',
+                      },
                     },
                   },
                 };
@@ -552,15 +553,17 @@ describe('.createApiServer', () => {
           describe('when there are not players left', () => {
             test('removes the game', async () => {
               db = new AsyncStorage({
-                getMetadata: async () => {
+                fetch: async () => {
                   return {
-                    players: {
-                      '0': {
-                        name: 'alice',
-                        credentials: 'SECRET1',
-                      },
-                      '1': {
-                        credentials: 'SECRET2',
+                    metadata: {
+                      players: {
+                        '0': {
+                          name: 'alice',
+                          credentials: 'SECRET1',
+                        },
+                        '1': {
+                          credentials: 'SECRET2',
+                        },
                       },
                     },
                   };
@@ -643,16 +646,18 @@ describe('.createApiServer', () => {
       games = [Game({ name: 'foo' })];
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        getMetadata: async () => {
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                name: 'alice',
-                credentials: 'SECRET1',
-              },
-              '1': {
-                name: 'bob',
-                credentials: 'SECRET2',
+            metadata: {
+              players: {
+                '0': {
+                  name: 'alice',
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  name: 'bob',
+                  credentials: 'SECRET2',
+                },
               },
             },
           };
@@ -681,19 +686,21 @@ describe('.createApiServer', () => {
 
     test('fetches next id', async () => {
       db = new AsyncStorage({
-        getMetadata: async () => {
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                name: 'alice',
-                credentials: 'SECRET1',
+            metadata: {
+              players: {
+                '0': {
+                  name: 'alice',
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  name: 'bob',
+                  credentials: 'SECRET2',
+                },
               },
-              '1': {
-                name: 'bob',
-                credentials: 'SECRET2',
-              },
+              nextRoomID: '12345',
             },
-            nextRoomID: '12345',
           };
         },
       });
@@ -706,7 +713,7 @@ describe('.createApiServer', () => {
 
     test('when the game does not exist throws a "not found" error', async () => {
       db = new AsyncStorage({
-        getMetadata: async () => null,
+        fetch: async () => ({ metadata: null }),
       });
       const app = createApiServer({ db, games });
       response = await request(app.callback())
@@ -753,16 +760,18 @@ describe('.createApiServer', () => {
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        getMetadata: async () => {
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                id: 0,
-                credentials: 'SECRET1',
-              },
-              '1': {
-                id: 1,
-                credentials: 'SECRET2',
+            metadata: {
+              players: {
+                '0': {
+                  id: 0,
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  id: 1,
+                  credentials: 'SECRET2',
+                },
               },
             },
           };
@@ -803,16 +812,18 @@ describe('.createApiServer', () => {
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        getMetadata: async () => {
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                id: 0,
-                credentials: 'SECRET1',
-              },
-              '1': {
-                id: 1,
-                credentials: 'SECRET2',
+            metadata: {
+              players: {
+                '0': {
+                  id: 0,
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  id: 1,
+                  credentials: 'SECRET2',
+                },
               },
             },
           };
@@ -846,7 +857,7 @@ describe('.createApiServer', () => {
       let response;
       beforeEach(async () => {
         db = new AsyncStorage({
-          getMetadata: async () => null,
+          fetch: async () => ({ metadata: null }),
         });
         let games = [Game({ name: 'foo' })];
         let app = createApiServer({ db, games });

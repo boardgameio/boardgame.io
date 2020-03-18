@@ -125,22 +125,6 @@ describe('update', () => {
     expect(value.args[1]).toMatchObject({
       G: {},
       deltalog: undefined,
-      log: undefined,
-      _initial: {
-        G: {},
-        _initial: {},
-        _redo: [],
-        _stateID: 0,
-        _undo: [],
-        ctx: {
-          currentPlayer: '0',
-          numPlayers: 2,
-          phase: null,
-          playOrder: ['0', '1'],
-          playOrderPos: 0,
-          turn: 1,
-        },
-      },
       _redo: [],
       _stateID: 1,
       _undo: [],
@@ -400,6 +384,11 @@ describe('authentication', () => {
 });
 
 describe('redactLog', () => {
+  test('no-op with undefined log', () => {
+    const result = redactLog(undefined, '0');
+    expect(result).toBeUndefined();
+  });
+
   test('no redactedMoves', () => {
     const logEvents = [
       {

@@ -1,4 +1,4 @@
-import { State, Server } from '../../types';
+import { State, Server, LogEntry } from '../../types';
 import * as StorageAPI from './base';
 
 /*
@@ -15,6 +15,7 @@ import * as StorageAPI from './base';
 export class InMemory extends StorageAPI.Sync {
   private games: Map<string, State>;
   private metadata: Map<string, Server.GameMetadata>;
+  private log: Map<string, LogEntry[]>;
 
   /**
    * Creates a new InMemory storage.
@@ -23,6 +24,7 @@ export class InMemory extends StorageAPI.Sync {
     super();
     this.games = new Map();
     this.metadata = new Map();
+    this.log = new Map();
   }
 
   /**
@@ -33,24 +35,37 @@ export class InMemory extends StorageAPI.Sync {
   }
 
   /**
-   * Read the game metadata from the in-memory object.
-   */
-  getMetadata(gameID: string): Server.GameMetadata {
-    return this.metadata.get(gameID);
-  }
-
-  /**
    * Write the game state to the in-memory object.
    */
   setState(gameID: string, state: State): void {
     this.games.set(gameID, state);
+
+    let log = this.log.get(gameID) || [];
+    if (state.deltalog) {
+      log = log.concat(state.deltalog);
+    }
+    this.log.set(gameID, log);
   }
 
   /**
-   * Read the game state from the in-memory object.
+   * Fetches state for a particular gameID.
    */
-  getState(gameID: string): State {
-    return this.games.get(gameID);
+  fetch(gameID: string, opts: StorageAPI.FetchOpts): StorageAPI.FetchResult {
+    let result: StorageAPI.FetchResult = {};
+
+    if (opts.state) {
+      result.state = this.games.get(gameID);
+    }
+
+    if (opts.metadata) {
+      result.metadata = this.metadata.get(gameID);
+    }
+
+    if (opts.log) {
+      result.log = this.log.get(gameID) || [];
+    }
+
+    return result;
   }
 
   /**

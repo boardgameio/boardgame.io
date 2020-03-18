@@ -1,8 +1,26 @@
-import { State, Server } from '../../types';
+import { State, Server, LogEntry } from '../../types';
 
 export enum Type {
   SYNC = 0,
   ASYNC = 1,
+}
+
+/**
+ * Indicates which fields the fetch operation should return.
+ */
+export interface FetchOpts {
+  state?: boolean;
+  log?: boolean;
+  metadata?: boolean;
+}
+
+/**
+ * The result of the fetch operation.
+ */
+export interface FetchResult {
+  state?: State;
+  log?: LogEntry[];
+  metadata?: Server.GameMetadata;
 }
 
 export abstract class Async {
@@ -23,9 +41,9 @@ export abstract class Async {
   abstract setState(gameID: string, state: State): Promise<void>;
 
   /**
-   * Read the latest game state.
+   * Fetch the game state.
    */
-  abstract getState(gameID: string): Promise<State>;
+  abstract fetch(gameID: string, opts: FetchOpts): Promise<FetchResult>;
 
   /**
    * Check if a particular game id exists.
@@ -39,11 +57,6 @@ export abstract class Async {
     gameID: string,
     metadata: Server.GameMetadata
   ): Promise<void>;
-
-  /**
-   * Fetch the game metadata.
-   */
-  abstract getMetadata(gameID: string): Promise<Server.GameMetadata>;
 
   /**
    * Remove the game state.
@@ -74,9 +87,9 @@ export abstract class Sync {
   abstract setState(gameID: string, state: State): void;
 
   /**
-   * Read the latest game state.
+   * Fetch the game state.
    */
-  abstract getState(gameID: string): State;
+  abstract fetch(gameID: string, opts: FetchOpts): FetchResult;
 
   /**
    * Check if a particular game id exists.
@@ -87,11 +100,6 @@ export abstract class Sync {
    * Update the game metadata.
    */
   abstract setMetadata(gameID: string, metadata: Server.GameMetadata): void;
-
-  /**
-   * Fetch the game metadata.
-   */
-  abstract getMetadata(gameID: string): Server.GameMetadata;
 
   /**
    * Remove the game state.

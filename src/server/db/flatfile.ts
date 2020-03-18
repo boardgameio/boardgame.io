@@ -1,5 +1,5 @@
 import * as StorageAPI from './base';
-import { State, Server } from '../../types';
+import { State, Server, LogEntry } from '../../types';
 
 /*
  * Copyright 2017 The boardgame.io Authors
@@ -16,7 +16,7 @@ export class FlatFile extends StorageAPI.Async {
   private games: {
     init: (opts: object) => void;
     setItem: (id: string, value: any) => void;
-    getItem: (id: string) => State | Server.GameMetadata;
+    getItem: (id: string) => State | Server.GameMetadata | LogEntry[];
     removeItem: (id: string) => void;
     clear: () => {};
     keys: () => string[];
@@ -50,21 +50,41 @@ export class FlatFile extends StorageAPI.Async {
     return;
   }
 
+  async fetch(
+    gameID: string,
+    opts: StorageAPI.FetchOpts
+  ): Promise<StorageAPI.FetchResult> {
+    let result: StorageAPI.FetchResult = {};
+
+    if (opts.state) {
+      result.state = (await this.games.getItem(gameID)) as State;
+    }
+
+    if (opts.metadata) {
+      const key = MetadataKey(gameID);
+      result.metadata = (await this.games.getItem(key)) as Server.GameMetadata;
+    }
+
+    if (opts.log) {
+      const key = LogKey(gameID);
+      result.log = (await this.games.getItem(key)) as LogEntry[];
+    }
+
+    return result;
+  }
+
   async clear() {
     return this.games.clear();
   }
 
   async setState(id: string, state: State) {
+    let log: LogEntry[] =
+      ((await this.games.getItem(LogKey(id))) as LogEntry[]) || [];
+    if (state.deltalog) {
+      log = log.concat(state.deltalog);
+    }
+    await this.games.setItem(LogKey(id), log);
     return await this.games.setItem(id, state);
-  }
-
-  async getState(id: string): Promise<State> {
-    return (await this.games.getItem(id)) as State;
-  }
-
-  async getMetadata(id: string): Promise<Server.GameMetadata> {
-    const key = MetadataKey(id);
-    return (await this.games.getItem(key)) as Server.GameMetadata;
   }
 
   async setMetadata(id: string, metadata: Server.GameMetadata): Promise<void> {
@@ -94,4 +114,8 @@ export class FlatFile extends StorageAPI.Async {
 
 function MetadataKey(gameID: string) {
   return `${gameID}:metadata`;
+}
+
+function LogKey(gameID: string) {
+  return `${gameID}:log`;
 }

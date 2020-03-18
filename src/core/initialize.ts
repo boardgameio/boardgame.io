@@ -57,20 +57,10 @@ export function InitializeGame({
     // state updates are only allowed from clients that
     // are at the same version that the server.
     _stateID: 0,
-    // A copy of the initial state so that
-    // the log can replay actions on top of it.
-    // TODO: This should really be stored in a different
-    // part of the DB and not inside the state object.
-    _initial: {},
   };
 
   initial = game.flow.init(initial);
   initial = plugins.Flush(initial, { game });
-
-  function deepCopy<T>(obj: T): T {
-    return parse(stringify(obj));
-  }
-  initial._initial = deepCopy(initial);
 
   return initial;
 }

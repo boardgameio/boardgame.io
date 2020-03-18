@@ -184,15 +184,17 @@ export class Master {
         ? action.payload.credentials
         : undefined;
     if (IsSynchronous(this.storageAPI)) {
-      const gameMetadata = this.storageAPI.getMetadata(gameID);
-      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
-      isActionAuthentic = this.shouldAuth(gameMetadata)
+      const { metadata } = this.storageAPI.fetch(gameID, { metadata: true });
+      const playerMetadata = getPlayerMetadata(metadata, playerID);
+      isActionAuthentic = this.shouldAuth(metadata)
         ? this.auth(credentials, playerMetadata)
         : true;
     } else {
-      const gameMetadata = await this.storageAPI.getMetadata(gameID);
-      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
-      isActionAuthentic = this.shouldAuth(gameMetadata)
+      const { metadata } = await this.storageAPI.fetch(gameID, {
+        metadata: true,
+      });
+      const playerMetadata = getPlayerMetadata(metadata, playerID);
+      isActionAuthentic = this.shouldAuth(metadata)
         ? await this.auth(credentials, playerMetadata)
         : true;
     }
@@ -205,11 +207,13 @@ export class Master {
     const key = gameID;
 
     let state: State;
+    let result: StorageAPI.FetchResult;
     if (IsSynchronous(this.storageAPI)) {
-      state = this.storageAPI.getState(key);
+      result = this.storageAPI.fetch(key, { state: true });
     } else {
-      state = await this.storageAPI.getState(key);
+      result = await this.storageAPI.fetch(key, { state: true });
     }
+    state = result.state;
 
     if (state === undefined) {
       logging.error(`game not found, gameID=[${key}]`);
@@ -263,8 +267,6 @@ export class Master {
       return;
     }
 
-    let log = store.getState().log || [];
-
     // Update server's version of the store.
     store.dispatch(action);
     state = store.getState();
@@ -279,16 +281,9 @@ export class Master {
       const filteredState = {
         ...state,
         G: this.game.playerView(state.G, state.ctx, playerID),
-        ctx: { ...state.ctx, _random: undefined },
-        log: undefined,
         deltalog: undefined,
         _undo: [],
         _redo: [],
-        _initial: {
-          ...state._initial,
-          _undo: [],
-          _redo: [],
-        },
       };
 
       const log = redactLog(state.deltalog, playerID);
@@ -299,16 +294,10 @@ export class Master {
       };
     });
 
-    // TODO: We currently attach the log back into the state
-    // object before storing it, but this should probably
-    // sit in a different part of the database eventually.
-    log = [...log, ...state.deltalog];
-    const stateWithLog = { ...state, log };
-
     if (IsSynchronous(this.storageAPI)) {
-      this.storageAPI.setState(key, stateWithLog);
+      this.storageAPI.setState(key, state);
     } else {
-      await this.storageAPI.setState(key, stateWithLog);
+      await this.storageAPI.setState(key, state);
     }
   }
 
@@ -320,22 +309,36 @@ export class Master {
     const key = gameID;
 
     let state: State;
+    let log: LogEntry[];
     let gameMetadata: Server.GameMetadata;
     let filteredGameMetadata: { id: number; name?: string }[];
+    let result: StorageAPI.FetchResult;
 
     if (IsSynchronous(this.storageAPI)) {
       const api = this.storageAPI as StorageAPI.Sync;
-      state = api.getState(key);
-      gameMetadata = api.getMetadata(gameID);
+      result = api.fetch(key, {
+        state: true,
+        metadata: true,
+        log: true,
+      });
     } else {
-      state = await this.storageAPI.getState(key);
-      gameMetadata = await this.storageAPI.getMetadata(gameID);
+      result = await this.storageAPI.fetch(key, {
+        state: true,
+        metadata: true,
+        log: true,
+      });
     }
+
+    state = result.state;
+    log = result.log;
+    gameMetadata = result.metadata;
+
     if (gameMetadata) {
       filteredGameMetadata = Object.values(gameMetadata.players).map(player => {
         return { id: player.id, name: player.name };
       });
     }
+
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
     if (state === undefined) {
@@ -349,29 +352,20 @@ export class Master {
       if (IsSynchronous(this.storageAPI)) {
         const api = this.storageAPI as StorageAPI.Sync;
         api.setState(key, state);
-        state = api.getState(key);
       } else {
         await this.storageAPI.setState(key, state);
-        state = await this.storageAPI.getState(key);
       }
     }
 
     const filteredState = {
       ...state,
       G: this.game.playerView(state.G, state.ctx, playerID),
-      ctx: { ...state.ctx, _random: undefined },
-      log: undefined,
       deltalog: undefined,
       _undo: [],
       _redo: [],
-      _initial: {
-        ...state._initial,
-        _undo: [],
-        _redo: [],
-      },
     };
 
-    const log = redactLog(state.log, playerID);
+    log = redactLog(log, playerID);
 
     this.transportAPI.send({
       playerID,

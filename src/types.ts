@@ -5,7 +5,6 @@ import { Flow } from './core/flow';
 export interface State {
   G: object;
   ctx: Ctx;
-  log?: Array<LogEntry>;
   deltalog?: Array<LogEntry>;
   plugins: {
     [pluginName: string]: PluginState;
@@ -13,7 +12,6 @@ export interface State {
   _undo: Array<Undo>;
   _redo: Array<Undo>;
   _stateID: number;
-  _initial?: Omit<State, '_initial'> | {};
 }
 
 export type GameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
