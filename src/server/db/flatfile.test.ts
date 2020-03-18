@@ -10,7 +10,7 @@ import { FlatFile } from './flatfile';
 import { State, Server, LogEntry } from '../../types';
 
 describe('FlatFile', () => {
-  let db;
+  let db: FlatFile;
 
   beforeAll(async () => {
     db = new FlatFile({ dir: './tmp', logging: false });
@@ -23,17 +23,17 @@ describe('FlatFile', () => {
 
   test('basic', async () => {
     // Must return undefined when no game exists.
-    let { state } = await db.fetch('gameID', { state: true });
-    expect(state).toEqual(undefined);
+    let result = await db.fetch('gameID', { state: true });
+    expect(result.state).toEqual(undefined);
 
     // Create game.
-    state = { a: 1 };
-    let metadata: unknown = { metadata: true };
+    const state: unknown = { a: 1 };
+    const metadata: unknown = { metadata: true };
     await db.setState('gameID', state as State);
     await db.setMetadata('gameID', metadata as Server.GameMetadata);
 
     // Must return created game.
-    const result = await db.fetch('gameID', { state: true, metadata: true });
+    result = await db.fetch('gameID', { state: true, metadata: true });
     expect(result.state).toEqual({ a: 1 });
     expect(result.metadata).toEqual({ metadata: true });
 
@@ -42,13 +42,13 @@ describe('FlatFile', () => {
     expect(keys).toEqual(['gameID']);
 
     // Must remove game from DB
-    await db.remove('gameID');
+    await db.wipe('gameID');
     expect(
       await db.fetch('gameID', { metadata: true, state: true, log: true })
     ).toEqual({});
 
     // Shall not return error
-    await db.remove('gameID');
+    await db.wipe('gameID');
 
     // Shall create game, then clear DB, then check whether DB is cleared
     await db.setState('game2', state as State);
@@ -78,8 +78,8 @@ describe('FlatFile', () => {
       phase: '',
     };
 
-    await db.setState('gameID', { deltalog: [logEntry1] });
-    await db.setState('gameID', { deltalog: [logEntry2] });
+    await db.setState('gameID', { deltalog: [logEntry1] } as State);
+    await db.setState('gameID', { deltalog: [logEntry2] } as State);
 
     const result = await db.fetch('gameID', { log: true });
     expect(result.log).toEqual([logEntry1, logEntry2]);

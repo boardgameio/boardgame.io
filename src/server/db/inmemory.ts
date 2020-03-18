@@ -71,7 +71,7 @@ export class InMemory extends StorageAPI.Sync {
   /**
    * Remove the game state from the in-memory object.
    */
-  remove(gameID: string) {
+  wipe(gameID: string) {
     this.games.delete(gameID);
     this.metadata.delete(gameID);
   }

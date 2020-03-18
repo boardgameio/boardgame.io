@@ -219,7 +219,7 @@ export const addApiToServer = ({
       await db.setMetadata(gameID, metadata);
     } else {
       // remove room
-      await db.remove(gameID);
+      await db.wipe(gameID);
     }
     ctx.body = {};
   });

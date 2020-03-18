@@ -10,7 +10,7 @@ import { InMemory } from './inmemory';
 import { State, Server } from '../../types';
 
 describe('InMemory', () => {
-  let db;
+  let db: InMemory;
 
   beforeAll(() => {
     db = new InMemory();
@@ -47,9 +47,9 @@ describe('InMemory', () => {
 
   test('remove', () => {
     // Must remove game from DB
-    db.remove('gameID');
+    db.wipe('gameID');
     expect(db.fetch('gameID', { state: true })).toEqual({});
     // Shall not return error
-    db.remove('gameID');
+    db.wipe('gameID');
   });
 });

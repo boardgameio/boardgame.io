@@ -19,13 +19,13 @@ class AsyncStorage extends StorageAPI.Async {
 
   constructor(args: any = {}) {
     super();
-    const { fetch, setState, setMetadata, listGames, remove } = args;
+    const { fetch, setState, setMetadata, listGames, wipe } = args;
     this.mocks = {
       setState: setState || jest.fn(),
       fetch: fetch || jest.fn(() => ({})),
       setMetadata: setMetadata || jest.fn(),
       listGames: listGames || jest.fn(() => []),
-      remove: remove || jest.fn(),
+      wipe: wipe || jest.fn(),
     };
   }
 
@@ -43,8 +43,8 @@ class AsyncStorage extends StorageAPI.Async {
     this.mocks.setMetadata(...args);
   }
 
-  async remove(...args) {
-    this.mocks.remove(...args);
+  async wipe(...args) {
+    this.mocks.wipe(...args);
   }
 
   async listGames() {
@@ -564,7 +564,7 @@ describe('.createApiServer', () => {
               response = await request(app.callback())
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
-              expect(db.mocks.remove).toHaveBeenCalledWith('1');
+              expect(db.mocks.wipe).toHaveBeenCalledWith('1');
             });
           });
         });

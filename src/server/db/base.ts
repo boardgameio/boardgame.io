@@ -41,11 +41,6 @@ export abstract class Async {
   abstract setState(gameID: string, state: State): Promise<void>;
 
   /**
-   * Fetch the game state.
-   */
-  abstract fetch(gameID: string, opts: FetchOpts): Promise<FetchResult>;
-
-  /**
    * Update the game metadata.
    */
   abstract setMetadata(
@@ -54,9 +49,14 @@ export abstract class Async {
   ): Promise<void>;
 
   /**
+   * Fetch the game state.
+   */
+  abstract fetch(gameID: string, opts: FetchOpts): Promise<FetchResult>;
+
+  /**
    * Remove the game state.
    */
-  abstract remove(gameID: string): Promise<void>;
+  abstract wipe(gameID: string): Promise<void>;
 
   /**
    * Return all games.
@@ -82,19 +82,19 @@ export abstract class Sync {
   abstract setState(gameID: string, state: State): void;
 
   /**
-   * Fetch the game state.
-   */
-  abstract fetch(gameID: string, opts: FetchOpts): FetchResult;
-
-  /**
    * Update the game metadata.
    */
   abstract setMetadata(gameID: string, metadata: Server.GameMetadata): void;
 
   /**
+   * Fetch the game state.
+   */
+  abstract fetch(gameID: string, opts: FetchOpts): FetchResult;
+
+  /**
    * Remove the game state.
    */
-  abstract remove(gameID: string): void;
+  abstract wipe(gameID: string): void;
 
   /**
    * Return all games.
