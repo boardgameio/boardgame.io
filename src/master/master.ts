@@ -207,7 +207,7 @@ export class Master {
     const key = gameID;
 
     let state: State;
-    let result: StorageAPI.FetchResult;
+    let result: StorageAPI.FetchResult<{ state: true }>;
     if (IsSynchronous(this.storageAPI)) {
       result = this.storageAPI.fetch(key, { state: true });
     } else {
@@ -312,7 +312,11 @@ export class Master {
     let log: LogEntry[];
     let gameMetadata: Server.GameMetadata;
     let filteredGameMetadata: { id: number; name?: string }[];
-    let result: StorageAPI.FetchResult;
+    let result: StorageAPI.FetchResult<{
+      state: true;
+      metadata: true;
+      log: true;
+    }>;
 
     if (IsSynchronous(this.storageAPI)) {
       const api = this.storageAPI as StorageAPI.Sync;

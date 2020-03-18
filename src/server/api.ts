@@ -131,7 +131,9 @@ export const addApiToServer = ({
     const gameList = await db.listGames(gameName);
     let rooms = [];
     for (let gameID of gameList) {
-      const { metadata } = await db.fetch(gameID, { metadata: true });
+      const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+        metadata: true,
+      });
       rooms.push({
         gameID,
         players: Object.values(metadata.players).map((player: any) => {
@@ -148,7 +150,9 @@ export const addApiToServer = ({
 
   router.get('/games/:name/:id', async ctx => {
     const gameID = ctx.params.id;
-    const { metadata } = await db.fetch(gameID, { metadata: true });
+    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+      metadata: true,
+    });
     if (!metadata) {
       ctx.throw(404, 'Room ' + gameID + ' not found');
     }
@@ -172,7 +176,9 @@ export const addApiToServer = ({
       ctx.throw(403, 'playerName is required');
     }
     const gameID = ctx.params.id;
-    const { metadata } = await db.fetch(gameID, { metadata: true });
+    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+      metadata: true,
+    });
     if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
     }
@@ -198,7 +204,9 @@ export const addApiToServer = ({
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
-    const { metadata } = await db.fetch(gameID, { metadata: true });
+    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+      metadata: true,
+    });
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
@@ -229,7 +237,9 @@ export const addApiToServer = ({
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
-    const { metadata } = await db.fetch(gameID, { metadata: true });
+    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+      metadata: true,
+    });
     // User-data to pass to the game setup function.
     const setupData = ctx.request.body.setupData;
     // The number of players for this game instance.
@@ -280,7 +290,9 @@ export const addApiToServer = ({
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const newName = ctx.request.body.newName;
-    const { metadata } = await db.fetch(gameID, { metadata: true });
+    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+      metadata: true,
+    });
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
