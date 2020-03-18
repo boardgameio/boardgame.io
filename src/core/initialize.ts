@@ -1,7 +1,7 @@
 import { Game } from './game';
 import { GameConfig } from '../types';
 import * as plugins from '../plugins/main';
-import { GameState, State, Ctx } from '../types';
+import { PartialGameState, State, Ctx } from '../types';
 
 /**
  * InitializeGame
@@ -29,7 +29,7 @@ export function InitializeGame({
 
   let ctx: Ctx = game.flow.ctx(numPlayers);
 
-  let state: GameState = {
+  let state: PartialGameState = {
     // User managed state.
     G: {},
     // Framework managed state.

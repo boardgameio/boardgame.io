@@ -14,7 +14,7 @@ export interface State {
   _stateID: number;
 }
 
-export type GameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
+export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 
 export type StageName = string;
 export type PlayerID = string;
