@@ -164,7 +164,7 @@ export namespace Server {
   export interface LobbyConfig {
     uuid?: Function;
     generateCredentials?: Function;
-    apiPort?: Number;
+    apiPort?: number;
     apiCallback?: Function;
   }
 }
