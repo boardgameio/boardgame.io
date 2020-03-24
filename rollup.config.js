@@ -32,6 +32,7 @@ const plugins = [
     tsconfigOverride: {
       compilerOptions: {
         declaration: true,
+        declarationDir: './dist/types',
       },
     },
     useTsconfigDeclarationDir: true,
@@ -68,7 +69,13 @@ export default [
   // Subpackages.
   {
     input: subpackages.reduce((obj, name) => {
-      obj[name] = `packages/${name}.js`;
+      obj[name] = `packages/${name}.ts`;
+
+      // The debug package can't be converted to TS
+      // yet due to the svelte import.
+      if (name == 'debug') {
+        obj[name] = 'packages/debug.js';
+      }
       return obj;
     }, {}),
     external,

@@ -14,6 +14,7 @@ function PackageJson(name) {
   return `{
   "name": "boardgame.io/${name}",
   "private": true,
+  "types": "../dist/types/packages/${name}.d.ts",
   "main": "../dist/cjs/${name}.js",
   "module": "../dist/esm/${name}.js"
 }
