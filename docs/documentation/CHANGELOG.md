@@ -1,3 +1,24 @@
+## v0.39.0
+
+#### Features
+
+* [[ca52b01](https://github.com/nicolodavis/boardgame.io/commit/ca52b01)] export some types in the NPM
+* [[6a091de](https://github.com/nicolodavis/boardgame.io/commit/6a091de)] retrieve initial state using a separate code path
+* [[62f58d2](https://github.com/nicolodavis/boardgame.io/commit/62f58d2)] add createGame to StorageAPI
+* [[21c3ef4](https://github.com/nicolodavis/boardgame.io/commit/21c3ef4)] make listGames take an opts argument
+* [[bff685d](https://github.com/nicolodavis/boardgame.io/commit/bff685d)] rename remove to wipe
+* [[d4de9e2](https://github.com/nicolodavis/boardgame.io/commit/d4de9e2)] move log out of game state
+* [[045a8f5](https://github.com/nicolodavis/boardgame.io/commit/045a8f5)] rename list to listGames
+* [[7b70cab](https://github.com/nicolodavis/boardgame.io/commit/7b70cab)] remove MongoDB
+* [[0fb67fe](https://github.com/nicolodavis/boardgame.io/commit/0fb67fe)] remove Firebase
+* [[c96e228](https://github.com/nicolodavis/boardgame.io/commit/c96e228)] separate metadata and state in storage API
+
+#### Bugfixes
+
+* [[a75605d](https://github.com/nicolodavis/boardgame.io/commit/a75605d)] remove unused has()
+* [[4157bc1](https://github.com/nicolodavis/boardgame.io/commit/4157bc1)] remove namespacing in gameIDs
+* [[8c80785](https://github.com/nicolodavis/boardgame.io/commit/8c80785)] remove namespace
+
 ## v0.38.1
 
 #### Features
