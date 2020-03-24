@@ -278,9 +278,10 @@ class _ClientImpl {
     if (
       debugImpl !== null &&
       this.debug !== false &&
-      this._debugPanel == null
+      this._debugPanel == null &&
+      typeof document !== 'undefined'
     ) {
-      let target = document && document.body;
+      let target = document.body;
       if (this.debug && this.debug.target !== undefined) {
         target = this.debug.target;
       }
