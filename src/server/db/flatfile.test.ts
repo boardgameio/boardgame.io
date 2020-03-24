@@ -29,8 +29,11 @@ describe('FlatFile', () => {
     // Create game.
     const state: unknown = { a: 1 };
     const metadata: unknown = { metadata: true };
-    await db.setState('gameID', state as State);
-    await db.setMetadata('gameID', metadata as Server.GameMetadata);
+
+    await db.createGame('gameID', {
+      initialState: state as State,
+      metadata: metadata as Server.GameMetadata,
+    });
 
     // Must return created game.
     const result2 = await db.fetch('gameID', { state: true, metadata: true });

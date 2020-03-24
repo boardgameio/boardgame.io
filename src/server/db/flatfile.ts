@@ -50,6 +50,14 @@ export class FlatFile extends StorageAPI.Async {
     return;
   }
 
+  async createGame(
+    gameID: string,
+    opts: StorageAPI.CreateGameOpts
+  ): Promise<void> {
+    await this.setState(gameID, opts.initialState);
+    await this.setMetadata(gameID, opts.metadata);
+  }
+
   async fetch<O extends StorageAPI.FetchOpts>(
     gameID: string,
     opts: O

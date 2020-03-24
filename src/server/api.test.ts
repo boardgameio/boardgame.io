@@ -19,8 +19,9 @@ class AsyncStorage extends StorageAPI.Async {
 
   constructor(args: any = {}) {
     super();
-    const { fetch, setState, setMetadata, listGames, wipe } = args;
+    const { createGame, fetch, setState, setMetadata, listGames, wipe } = args;
     this.mocks = {
+      createGame: createGame || jest.fn(),
       setState: setState || jest.fn(),
       fetch: fetch || jest.fn(() => ({})),
       setMetadata: setMetadata || jest.fn(),
@@ -30,6 +31,10 @@ class AsyncStorage extends StorageAPI.Async {
   }
 
   async connect() {}
+
+  async createGame(...args) {
+    this.mocks.createGame(...args);
+  }
 
   async fetch(...args) {
     return this.mocks.fetch(...args);

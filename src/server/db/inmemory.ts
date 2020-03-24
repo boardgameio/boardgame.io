@@ -28,6 +28,14 @@ export class InMemory extends StorageAPI.Sync {
   }
 
   /**
+   * Create a new game.
+   */
+  createGame(gameID: string, opts: StorageAPI.CreateGameOpts) {
+    this.setState(gameID, opts.initialState);
+    this.setMetadata(gameID, opts.metadata);
+  }
+
+  /**
    * Write the game metadata to the in-memory object.
    */
   setMetadata(gameID: string, metadata: Server.GameMetadata) {

@@ -27,10 +27,13 @@ describe('InMemory', () => {
     let stateEntry: unknown = { a: 1 };
 
     // Create game.
-    db.setMetadata('gameID', {
-      gameName: 'tic-tac-toe',
-    } as Server.GameMetadata);
-    db.setState('gameID', stateEntry as State);
+    db.createGame('gameID', {
+      metadata: {
+        gameName: 'tic-tac-toe',
+      } as Server.GameMetadata,
+      initialState: stateEntry as State,
+    });
+
     // Must return created game.
     const { state } = db.fetch('gameID', { state: true });
     expect(state).toEqual(stateEntry);

@@ -36,6 +36,14 @@ export interface ListGamesOpts {
   gameName?: string;
 }
 
+/**
+ * Options passed when creating a new game.
+ */
+export interface CreateGameOpts {
+  initialState: State;
+  metadata: Server.GameMetadata;
+}
+
 export abstract class Async {
   /* istanbul ignore next */
   type() {
@@ -47,6 +55,11 @@ export abstract class Async {
    * Connect.
    */
   abstract connect();
+
+  /**
+   * Create a new game.
+   */
+  abstract createGame(gameID: string, opts: CreateGameOpts): Promise<void>;
 
   /**
    * Update the game state.
@@ -91,6 +104,11 @@ export abstract class Sync {
   connect() {
     return;
   }
+
+  /**
+   * Create a new game.
+   */
+  abstract createGame(gameID: string, opts: CreateGameOpts): void;
 
   /**
    * Update the game state.
