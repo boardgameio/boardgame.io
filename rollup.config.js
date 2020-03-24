@@ -27,7 +27,15 @@ const external = [
 const plugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true, only: [/svelte/] }),
-  tsPlugin({ typescript: ttypescript }),
+  tsPlugin({
+    typescript: ttypescript,
+    tsconfigOverride: {
+      compilerOptions: {
+        declaration: true,
+      },
+    },
+    useTsconfigDeclarationDir: true,
+  }),
   svelte({ extensions: ['.svelte'] }),
 ];
 

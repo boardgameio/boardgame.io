@@ -41,6 +41,7 @@
     "dist/server.js",
     "dist/esm",
     "dist/cjs",
+    "dist/types",
     "client",
     "core",
     "debug",

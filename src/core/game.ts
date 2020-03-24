@@ -11,6 +11,18 @@ import { Flow } from './flow';
 import { ActionPayload, GameConfig, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
 
+type ProcessedGameConfig = GameConfig & {
+  flow: object;
+  moveNames: string[];
+  processMove: Function;
+};
+
+function IsProcessed(
+  game: GameConfig | ProcessedGameConfig
+): game is ProcessedGameConfig {
+  return game.processMove !== undefined;
+}
+
 /**
  * Game
  *
@@ -27,10 +39,12 @@ import * as logging from './logger';
  * action.args contain any additional arguments as an
  * Array.
  */
-export function Game(game: GameConfig) {
+export function Game(
+  game: GameConfig | ProcessedGameConfig
+): ProcessedGameConfig {
   // The Game() function has already been called on this
   // config object, so just pass it through.
-  if (game.processMove) {
+  if (IsProcessed(game)) {
     return game;
   }
 
@@ -60,7 +74,7 @@ export function Game(game: GameConfig) {
 
     flow,
 
-    moveNames: flow.moveNames,
+    moveNames: flow.moveNames as string[],
 
     processMove: (state: State, action: ActionPayload.MakeMove) => {
       let moveFn = flow.getMove(state.ctx, action.type, action.playerID);
