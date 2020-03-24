@@ -22,6 +22,27 @@ jest.mock('../core/logger', () => ({
   error: jest.fn(),
 }));
 
+describe('basic', () => {
+  let client;
+  let initial = { initial: true };
+
+  const game = {
+    setup: () => initial,
+  };
+
+  beforeAll(() => {
+    client = Client({ game });
+  });
+
+  test('getState', () => {
+    expect(client.getState().G).toEqual(initial);
+  });
+
+  test('getInitialState', () => {
+    expect(client.getInitialState().G).toEqual(initial);
+  });
+});
+
 test('move api', () => {
   const client = Client({
     game: {
