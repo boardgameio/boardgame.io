@@ -235,9 +235,9 @@ describe('LocalTransport', () => {
     test('receive sync', () => {
       const restored = { restore: true };
       expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('unknown gameID', restored);
+      m.onSync('unknown gameID', { state: restored });
       expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('default:default', restored);
+      m.onSync('default:default', { state: restored });
       expect(store.getState()).toMatchObject(restored);
     });
 

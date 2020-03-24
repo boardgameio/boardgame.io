@@ -94,10 +94,10 @@ export class SocketIOTransport extends Transport {
 
     // Called when the client first connects to the master
     // and requests the current game state.
-    this.socket.on('sync', (gameID, state, log, gameMetadata) => {
+    this.socket.on('sync', (gameID, syncInfo) => {
       if (gameID == this.gameID) {
-        const action = ActionCreators.sync(state, log);
-        this.gameMetadataCallback(gameMetadata);
+        const action = ActionCreators.sync(syncInfo);
+        this.gameMetadataCallback(syncInfo.filteredMetadata);
         this.store.dispatch(action);
       }
     });

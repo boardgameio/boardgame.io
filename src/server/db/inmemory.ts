@@ -13,7 +13,8 @@ import * as StorageAPI from './base';
  * InMemory data storage.
  */
 export class InMemory extends StorageAPI.Sync {
-  private games: Map<string, State>;
+  private state: Map<string, State>;
+  private initial: Map<string, State>;
   private metadata: Map<string, Server.GameMetadata>;
   private log: Map<string, LogEntry[]>;
 
@@ -22,7 +23,8 @@ export class InMemory extends StorageAPI.Sync {
    */
   constructor() {
     super();
-    this.games = new Map();
+    this.state = new Map();
+    this.initial = new Map();
     this.metadata = new Map();
     this.log = new Map();
   }
@@ -31,6 +33,7 @@ export class InMemory extends StorageAPI.Sync {
    * Create a new game.
    */
   createGame(gameID: string, opts: StorageAPI.CreateGameOpts) {
+    this.initial.set(gameID, opts.initialState);
     this.setState(gameID, opts.initialState);
     this.setMetadata(gameID, opts.metadata);
   }
@@ -46,7 +49,7 @@ export class InMemory extends StorageAPI.Sync {
    * Write the game state to the in-memory object.
    */
   setState(gameID: string, state: State): void {
-    this.games.set(gameID, state);
+    this.state.set(gameID, state);
 
     let log = this.log.get(gameID) || [];
     if (state.deltalog) {
@@ -65,7 +68,7 @@ export class InMemory extends StorageAPI.Sync {
     let result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
-      result.state = this.games.get(gameID);
+      result.state = this.state.get(gameID);
     }
 
     if (opts.metadata) {
@@ -76,6 +79,10 @@ export class InMemory extends StorageAPI.Sync {
       result.log = this.log.get(gameID) || [];
     }
 
+    if (opts.initialState) {
+      result.initialState = this.initial.get(gameID);
+    }
+
     return result as StorageAPI.FetchResult<O>;
   }
 
@@ -83,7 +90,7 @@ export class InMemory extends StorageAPI.Sync {
    * Remove the game state from the in-memory object.
    */
   wipe(gameID: string) {
-    this.games.delete(gameID);
+    this.state.delete(gameID);
     this.metadata.delete(gameID);
   }
 

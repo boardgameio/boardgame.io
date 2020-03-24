@@ -215,3 +215,15 @@ export namespace ActionPayload {
   export type MakeMove = GetPayload<ActionShape.MakeMove>;
   export type GameEvent = GetPayload<ActionShape.GameEvent>;
 }
+
+export type FilteredMetadata = {
+  id: number;
+  name?: string;
+}[];
+
+export interface SyncInfo {
+  state: State;
+  filteredMetadata: FilteredMetadata;
+  initialState: State;
+  log: LogEntry[];
+}

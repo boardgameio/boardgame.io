@@ -37,6 +37,10 @@ describe('InMemory', () => {
     // Must return created game.
     const { state } = db.fetch('gameID', { state: true });
     expect(state).toEqual(stateEntry);
+
+    // Fetch initial state.
+    const { initialState } = db.fetch('gameID', { initialState: true });
+    expect(initialState).toEqual(stateEntry);
   });
 
   test('listGames', () => {

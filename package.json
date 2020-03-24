@@ -20,6 +20,7 @@
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "test:integration": "bash ./scripts/integration.sh",
     "ts": "tsc --noEmit",
+    "ts:watch": "tsc --noEmit --watch",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "npm run clean",

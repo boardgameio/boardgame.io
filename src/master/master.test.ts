@@ -90,7 +90,9 @@ describe('sync', () => {
       { id: 0, name: 'Alice' },
       { id: 1, name: 'Bob' },
     ];
-    expect(send.mock.calls[0][0].args[3]).toMatchObject(expectedMetadata);
+    expect(send.mock.calls[0][0].args[1].filteredMetadata).toMatchObject(
+      expectedMetadata
+    );
   });
 });
 
@@ -237,7 +239,7 @@ describe('playerView', () => {
 
   test('sync', async () => {
     await master.onSync('gameID', '0', 2);
-    expect(sendReturn.args[1]).toMatchObject({
+    expect(sendReturn.args[1].state).toMatchObject({
       G: { player: '0' },
     });
   });
@@ -513,7 +515,7 @@ describe('redactLog', () => {
     await master.onUpdate(actionB, 1, 'gameID', '0');
     await master.onSync('gameID', '1', 2);
 
-    const log = send.mock.calls[send.mock.calls.length - 1][0].args[2];
+    const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
     expect(log).toMatchObject([
       {
         action: {

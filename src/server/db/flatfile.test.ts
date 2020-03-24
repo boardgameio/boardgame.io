@@ -36,9 +36,16 @@ describe('FlatFile', () => {
     });
 
     // Must return created game.
-    const result2 = await db.fetch('gameID', { state: true, metadata: true });
-    expect(result2.state).toEqual({ a: 1 });
-    expect(result2.metadata).toEqual({ metadata: true });
+    {
+      const result = await db.fetch('gameID', {
+        state: true,
+        metadata: true,
+        initialState: true,
+      });
+      expect(result.state).toEqual({ a: 1 });
+      expect(result.initialState).toEqual(result.state);
+      expect(result.metadata).toEqual({ metadata: true });
+    }
 
     // Must return all keys
     let keys = await db.listGames();

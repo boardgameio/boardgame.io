@@ -104,13 +104,13 @@ class _ClientImpl {
       numPlayers,
     });
 
-    let initialState = null;
+    this.initialState = null;
     if (!multiplayer) {
-      initialState = InitializeGame({ game: this.game, numPlayers });
+      this.initialState = InitializeGame({ game: this.game, numPlayers });
     }
 
     this.reset = () => {
-      this.store.dispatch(ActionCreators.reset(initialState));
+      this.store.dispatch(ActionCreators.reset(this.initialState));
     };
     this.undo = () => {
       this.store.dispatch(ActionCreators.undo());
@@ -167,6 +167,7 @@ class _ClientImpl {
         }
 
         case Actions.SYNC: {
+          this.initialState = action.initialState;
           this.log = action.log || [];
           break;
         }
@@ -216,7 +217,7 @@ class _ClientImpl {
       );
     }
 
-    this.store = createStore(this.reducer, initialState, enhancer);
+    this.store = createStore(this.reducer, this.initialState, enhancer);
 
     this.transport = {
       isConnected: true,
@@ -318,6 +319,10 @@ class _ClientImpl {
     return () => {
       delete this.subscribers[id];
     };
+  }
+
+  getInitialState() {
+    return this.initialState;
   }
 
   getState() {

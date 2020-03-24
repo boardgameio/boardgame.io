@@ -13,6 +13,7 @@ export interface FetchOpts {
   state?: boolean;
   log?: boolean;
   metadata?: boolean;
+  initialState?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export interface FetchFields {
   state: State;
   log: LogEntry[];
   metadata: Server.GameMetadata;
+  initialState: State;
 }
 
 /**
@@ -58,6 +60,14 @@ export abstract class Async {
 
   /**
    * Create a new game.
+   *
+   * This might just need to call setState and setMetadata in
+   * most implementations.
+   *
+   * However, it exists as a separate call so that the
+   * implementation can provision things differently when
+   * a game is created.  For example, it might stow away the
+   * initial game state in a separate field for easier retrieval.
    */
   abstract createGame(gameID: string, opts: CreateGameOpts): Promise<void>;
 
@@ -107,6 +117,14 @@ export abstract class Sync {
 
   /**
    * Create a new game.
+   *
+   * This might just need to call setState and setMetadata in
+   * most implementations.
+   *
+   * However, it exists as a separate call so that the
+   * implementation can provision things differently when
+   * a game is created.  For example, it might stow away the
+   * initial game state in a separate field for easier retrieval.
    */
   abstract createGame(gameID: string, opts: CreateGameOpts): void;
 

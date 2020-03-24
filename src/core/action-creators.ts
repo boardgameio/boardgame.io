@@ -7,7 +7,7 @@
  */
 
 import * as Actions from './action-types';
-import { State, LogEntry } from '../types';
+import { SyncInfo, State, LogEntry } from '../types';
 
 /**
  * Generate a move to be dispatched to the game move reducer.
@@ -63,15 +63,11 @@ export const automaticGameEvent = (
   automatic: true,
 });
 
-/**
- * Used to reset the Redux store's state on a sync.
- * @param {object} state - The state to restore.
- * @param {Array} log - The log to restore.
- */
-export const sync = (state: State, log: LogEntry[]) => ({
+export const sync = (info: SyncInfo) => ({
   type: Actions.SYNC as typeof Actions.SYNC,
-  state,
-  log,
+  state: info.state,
+  log: info.log,
+  initialState: info.initialState,
   clientOnly: true as const,
 });
 

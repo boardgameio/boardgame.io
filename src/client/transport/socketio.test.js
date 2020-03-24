@@ -129,9 +129,9 @@ describe('multiplayer', () => {
   test('receive sync', () => {
     const restored = { restore: true };
     expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('sync', 'unknown gameID', restored);
+    mockSocket.receive('sync', 'unknown gameID', { state: restored });
     expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('sync', 'default:default', restored);
+    mockSocket.receive('sync', 'default:default', { state: restored });
     expect(store.getState()).toMatchObject(restored);
   });
 

@@ -54,6 +54,10 @@ export class FlatFile extends StorageAPI.Async {
     gameID: string,
     opts: StorageAPI.CreateGameOpts
   ): Promise<void> {
+    // Store initial state separately for easy retrieval later.
+    const key = InitialStateKey(gameID);
+    await this.games.setItem(key, opts.initialState);
+
     await this.setState(gameID, opts.initialState);
     await this.setMetadata(gameID, opts.metadata);
   }
@@ -76,6 +80,11 @@ export class FlatFile extends StorageAPI.Async {
     if (opts.log) {
       const key = LogKey(gameID);
       result.log = (await this.games.getItem(key)) as LogEntry[];
+    }
+
+    if (opts.initialState) {
+      const key = InitialStateKey(gameID);
+      result.initialState = (await this.games.getItem(key)) as State;
     }
 
     return result as StorageAPI.FetchResult<O>;
@@ -115,6 +124,10 @@ export class FlatFile extends StorageAPI.Async {
       .filter(k => k.endsWith(suffix))
       .map(k => k.substring(0, k.length - suffix.length));
   }
+}
+
+function InitialStateKey(gameID: string) {
+  return `${gameID}:initial`;
 }
 
 function MetadataKey(gameID: string) {

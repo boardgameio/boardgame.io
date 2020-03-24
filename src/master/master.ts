@@ -13,6 +13,8 @@ import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 import {
+  SyncInfo,
+  FilteredMetadata,
   GameConfig,
   Server,
   State,
@@ -309,13 +311,15 @@ export class Master {
     const key = gameID;
 
     let state: State;
+    let initialState: State;
     let log: LogEntry[];
     let gameMetadata: Server.GameMetadata;
-    let filteredGameMetadata: { id: number; name?: string }[];
+    let filteredMetadata: FilteredMetadata;
     let result: StorageAPI.FetchResult<{
       state: true;
       metadata: true;
       log: true;
+      initialState: true;
     }>;
 
     if (IsSynchronous(this.storageAPI)) {
@@ -324,21 +328,24 @@ export class Master {
         state: true,
         metadata: true,
         log: true,
+        initialState: true,
       });
     } else {
       result = await this.storageAPI.fetch(key, {
         state: true,
         metadata: true,
         log: true,
+        initialState: true,
       });
     }
 
     state = result.state;
+    initialState = result.initialState;
     log = result.log;
     gameMetadata = result.metadata;
 
     if (gameMetadata) {
-      filteredGameMetadata = Object.values(gameMetadata.players).map(player => {
+      filteredMetadata = Object.values(gameMetadata.players).map(player => {
         return { id: player.id, name: player.name };
       });
     }
@@ -346,7 +353,7 @@ export class Master {
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
     if (state === undefined) {
-      state = InitializeGame({ game: this.game, numPlayers });
+      initialState = state = InitializeGame({ game: this.game, numPlayers });
 
       this.subscribeCallback({
         state,
@@ -371,10 +378,17 @@ export class Master {
 
     log = redactLog(log, playerID);
 
+    const syncInfo: SyncInfo = {
+      state: filteredState,
+      log,
+      filteredMetadata,
+      initialState,
+    };
+
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, filteredState, log, filteredGameMetadata],
+      args: [gameID, syncInfo],
     });
 
     return;
