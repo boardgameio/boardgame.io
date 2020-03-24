@@ -1,3 +1,9 @@
+## v0.39.1
+
+#### Bugfixes
+
+* [[ca3cc0f](https://github.com/nicolodavis/boardgame.io/commit/ca3cc0f)] avoid document reference error in some versions of Node
+
 ## v0.39.0
 
 #### Features
