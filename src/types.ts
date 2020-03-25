@@ -1,6 +1,9 @@
 import { Object } from 'ts-toolbelt';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
+import * as StorageAPI from './server/db/base';
+
+export { StorageAPI };
 
 export interface State {
   G: object;
