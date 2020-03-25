@@ -1,3 +1,9 @@
+## v0.39.3
+
+#### Features
+
+* [[c507cf0](https://github.com/nicolodavis/boardgame.io/commit/c507cf0)] Typescript improvements (#578)
+
 ## v0.39.1
 
 #### Bugfixes
