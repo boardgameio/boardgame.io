@@ -6,6 +6,15 @@
  * https://opensource.org/licenses/MIT.
  */
 
+export interface PlayerAPI {
+  get(): any;
+  set(value: any): any;
+  opponent?: {
+    get(): any;
+    set(value: any): any;
+  };
+}
+
 /**
  * Plugin that maintains state for each player in G.players.
  * During a turn, G.player will contain the object for the current player.

@@ -8,6 +8,17 @@
 
 import { Events } from './events/events';
 
+export interface EventsAPI {
+  endGame?(...args: any[]): any;
+  endPhase?(...args: any[]): any;
+  endStage?(...args: any[]): any;
+  endTurn?(...args: any[]): any;
+  pass?(...args: any[]): any;
+  setActivePlayers?(...args: any[]): any;
+  setPhase?(...args: any[]): any;
+  setStage?(...args: any[]): any;
+}
+
 export default {
   name: 'events',
 
