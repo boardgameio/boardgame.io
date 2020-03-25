@@ -32,19 +32,18 @@ export default {
     return { players: api.state };
   },
 
-  api: ({ ctx, data }) => {
+  api: ({ ctx, data }): PlayerAPI => {
     let state = data.players;
-    let result = { state };
 
     const get = () => {
       return data.players[ctx.currentPlayer];
     };
-    result.get = get;
 
     const set = value => {
       return (state[ctx.currentPlayer] = value);
     };
-    result.set = set;
+
+    let result: PlayerAPI = { state, get, set };
 
     if (ctx.numPlayers === 2) {
       const other = ctx.currentPlayer === '0' ? '1' : '0';
