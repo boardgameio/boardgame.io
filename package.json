@@ -34,6 +34,7 @@
   "main": "dist/boardgameio.js",
   "unpkg": "dist/boardgameio.min.js",
   "module": "dist/boardgameio.es.js",
+  "types": "dist/types/src/types.d.ts",
   "files": [
     "dist/boardgameio.js",
     "dist/boardgameio.min.js",
