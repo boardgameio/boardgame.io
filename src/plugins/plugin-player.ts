@@ -7,6 +7,9 @@
  */
 
 export interface PlayerAPI {
+  state: {
+    [playerId: string]: object;
+  };
   get(): any;
   set(value: any): any;
   opponent?: {
