@@ -14,6 +14,7 @@ import * as logging from './logger';
 type ProcessedGameConfig = GameConfig & {
   flow: object;
   moveNames: string[];
+  pluginNames: string[];
   processMove: Function;
 };
 
@@ -75,6 +76,8 @@ export function Game(
     flow,
 
     moveNames: flow.moveNames as string[],
+
+    pluginNames: game.plugins.map(p => p.name) as string[],
 
     processMove: (state: State, action: ActionPayload.MakeMove) => {
       let moveFn = flow.getMove(state.ctx, action.type, action.playerID);
