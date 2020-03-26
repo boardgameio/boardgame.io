@@ -298,8 +298,12 @@ export class Master {
 
     if (IsSynchronous(this.storageAPI)) {
       this.storageAPI.setState(key, state);
+      this.storageAPI.appendLog(key, state.deltalog);
     } else {
-      await this.storageAPI.setState(key, state);
+      await Promise.all([
+        this.storageAPI.setState(key, state),
+        this.storageAPI.appendLog(key, state.deltalog),
+      ]);
     }
   }
 

@@ -50,12 +50,14 @@ export class InMemory extends StorageAPI.Sync {
    */
   setState(gameID: string, state: State): void {
     this.state.set(gameID, state);
+  }
 
-    let log = this.log.get(gameID) || [];
-    if (state.deltalog) {
-      log = log.concat(state.deltalog);
-    }
-    this.log.set(gameID, log);
+  /**
+   * Append actions to the game log.
+   */
+  appendLog(gameID: string, deltalog: LogEntry[]) {
+    const log = this.log.get(gameID) || [];
+    this.log.set(gameID, log.concat(deltalog));
   }
 
   /**
