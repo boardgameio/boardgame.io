@@ -45,14 +45,14 @@ describe('update gameID / playerID', () => {
 
   test('gameID', () => {
     m.updateGameID('test');
-    expect(m.gameID).toBe('default:test');
-    expect(socket.emit).lastCalledWith('sync', 'default:test', null, 2);
+    expect(m.gameID).toBe('test');
+    expect(socket.emit).lastCalledWith('sync', 'test', null, 2);
   });
 
   test('playerID', () => {
     m.updatePlayerID('player');
     expect(m.playerID).toBe('player');
-    expect(socket.emit).lastCalledWith('sync', 'default:test', 'player', 2);
+    expect(socket.emit).lastCalledWith('sync', 'test', 'player', 2);
   });
 });
 
@@ -117,12 +117,12 @@ describe('multiplayer', () => {
     expect(store.getState()).not.toMatchObject(restored);
     mockSocket.receive('update', 'unknown gameID', restored);
     expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('update', 'default:default', restored);
+    mockSocket.receive('update', 'default', restored);
     expect(store.getState()).not.toMatchObject(restored);
 
     // Only if the stateID is not stale.
     restored._stateID = 1;
-    mockSocket.receive('update', 'default:default', restored);
+    mockSocket.receive('update', 'default', restored);
     expect(store.getState()).toMatchObject(restored);
   });
 
@@ -131,7 +131,7 @@ describe('multiplayer', () => {
     expect(store.getState()).not.toMatchObject(restored);
     mockSocket.receive('sync', 'unknown gameID', { state: restored });
     expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('sync', 'default:default', { state: restored });
+    mockSocket.receive('sync', 'default', { state: restored });
     expect(store.getState()).toMatchObject(restored);
   });
 
@@ -143,7 +143,7 @@ describe('multiplayer', () => {
       'update',
       action,
       state._stateID,
-      'default:default',
+      'default',
       null
     );
   });
