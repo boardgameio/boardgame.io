@@ -296,13 +296,15 @@ export class Master {
       };
     });
 
+    const { deltalog, ...stateWithoutDeltalog } = state;
+
     if (IsSynchronous(this.storageAPI)) {
-      this.storageAPI.setState(key, state);
-      this.storageAPI.appendLog(key, state.deltalog);
+      this.storageAPI.setState(key, stateWithoutDeltalog);
+      this.storageAPI.appendLog(key, deltalog);
     } else {
       await Promise.all([
-        this.storageAPI.setState(key, state),
-        this.storageAPI.appendLog(key, state.deltalog),
+        this.storageAPI.setState(key, stateWithoutDeltalog),
+        this.storageAPI.appendLog(key, deltalog),
       ]);
     }
   }
