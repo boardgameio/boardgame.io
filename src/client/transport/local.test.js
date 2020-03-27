@@ -191,7 +191,7 @@ describe('LocalTransport', () => {
 
     test('gameID', () => {
       m.updateGameID('test');
-      expect(m.gameID).toBe('default:test');
+      expect(m.gameID).toBe('test');
       expect(master.connect).toBeCalled();
     });
 
@@ -223,12 +223,12 @@ describe('LocalTransport', () => {
       expect(store.getState()).not.toMatchObject(restored);
       m.onUpdate('unknown gameID', restored);
       expect(store.getState()).not.toMatchObject(restored);
-      m.onUpdate('default:default', restored);
+      m.onUpdate('default', restored);
       expect(store.getState()).not.toMatchObject(restored);
 
       // Only if the stateID is not stale.
       restored._stateID = 1;
-      m.onUpdate('default:default', restored);
+      m.onUpdate('default', restored);
       expect(store.getState()).toMatchObject(restored);
     });
 
@@ -237,7 +237,7 @@ describe('LocalTransport', () => {
       expect(store.getState()).not.toMatchObject(restored);
       m.onSync('unknown gameID', { state: restored });
       expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('default:default', { state: restored });
+      m.onSync('default', { state: restored });
       expect(store.getState()).toMatchObject(restored);
     });
 
@@ -248,7 +248,7 @@ describe('LocalTransport', () => {
       expect(m.master.onUpdate).lastCalledWith(
         action,
         state._stateID,
-        'default:default',
+        'default',
         null
       );
     });

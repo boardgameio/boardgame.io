@@ -186,7 +186,7 @@ export class LocalTransport extends Transport {
    * @param {string} id - The new game id.
    */
   updateGameID(id) {
-    this.gameID = this.gameName + ':' + id;
+    this.gameID = id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
     this.connect();
