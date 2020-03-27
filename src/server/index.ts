@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-const Koa = require('koa');
+import Koa from 'koa';
 
 import { addApiToServer, createApiServer } from './api';
 import { DBFromEnv } from './db';
@@ -15,12 +15,14 @@ import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
 import { Server as ServerTypes } from '../types';
 
+export type KoaServer = ReturnType<Koa['listen']>;
+
 interface ServerConfig {
   port?: number;
-  callback?: Function;
+  callback?: () => void;
   lobbyConfig?: {
     apiPort: number;
-    apiCallback?: Function;
+    apiCallback?: () => void;
   };
 }
 
@@ -29,7 +31,7 @@ interface ServerConfig {
  */
 export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
-  callback?: Function
+  callback?: () => void
 ): ServerConfig => {
   const config: ServerConfig = {};
   if (portOrConfig && typeof portOrConfig === 'object') {
@@ -42,6 +44,13 @@ export const createServerRunConfig = (
     config.callback = callback;
   }
   return config;
+};
+
+const getPortFromServer = (server: KoaServer): string | number | null => {
+  const address = server.address();
+  if (typeof address === 'string') return address;
+  if (address === null) return null;
+  return address.port;
 };
 
 /**
@@ -84,7 +93,7 @@ export function Server({
     app,
     db,
 
-    run: async (portOrConfig: number | object, callback?: Function) => {
+    run: async (portOrConfig: number | object, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
 
       // DB
@@ -92,7 +101,7 @@ export function Server({
 
       // Lobby API
       const lobbyConfig: ServerTypes.LobbyConfig = serverRunConfig.lobbyConfig;
-      let apiServer;
+      let apiServer: KoaServer | undefined;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
         addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
       } else {
@@ -103,28 +112,26 @@ export function Server({
           lobbyConfig,
           generateCredentials,
         });
-        apiServer = await api.listen(
-          lobbyConfig.apiPort,
-          lobbyConfig.apiCallback
-        );
-        logger.info(`API serving on ${apiServer.address().port}...`);
+        apiServer = api.listen(lobbyConfig.apiPort, () => {
+          logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
+          lobbyConfig.apiCallback();
+        });
       }
 
       // Run Game Server (+ API, if necessary).
-      const appServer = await app.listen(
-        serverRunConfig.port,
-        serverRunConfig.callback
-      );
-      logger.info(`App serving on ${appServer.address().port}...`);
+      const appServer = app.listen(serverRunConfig.port, () => {
+        logger.info(`App serving on ${getPortFromServer(appServer)}...`);
+        serverRunConfig.callback();
+      });
 
       return { apiServer, appServer };
     },
 
-    kill: ({ apiServer, appServer }: any) => {
-      if (apiServer) {
-        apiServer.close();
+    kill: (servers: { apiServer?: KoaServer; appServer: KoaServer }) => {
+      if (servers.apiServer) {
+        servers.apiServer.close();
       }
-      appServer.close();
+      servers.appServer.close();
     },
   };
 }

@@ -1,4 +1,5 @@
 import { Object } from 'ts-toolbelt';
+import Koa from 'koa';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
 import * as StorageAPI from './server/db/base';
@@ -176,10 +177,10 @@ export namespace Server {
   }
 
   export interface LobbyConfig {
-    uuid?: Function;
-    generateCredentials?: Function;
+    uuid?: () => string;
+    generateCredentials?: (ctx: Koa.DefaultContext) => Promise<string> | string;
     apiPort?: number;
-    apiCallback?: Function;
+    apiCallback?: () => void;
   }
 }
 

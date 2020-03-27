@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server, createServerRunConfig } from '.';
+import { Server, createServerRunConfig, KoaServer } from '.';
 import * as api from './api';
 
 const game = { seed: 0 };
@@ -128,12 +128,12 @@ describe('run', () => {
 
 describe('kill', () => {
   test('call close on both servers', async () => {
-    const apiServer = {
+    const apiServer = ({
       close: jest.fn(),
-    };
-    const appServer = {
+    } as unknown) as KoaServer;
+    const appServer = ({
       close: jest.fn(),
-    };
+    } as unknown) as KoaServer;
     const server = Server({ games: [game], singlePort: true });
 
     server.kill({ appServer, apiServer });
@@ -143,9 +143,9 @@ describe('kill', () => {
   });
 
   test('do not fail if api server is not defined', async () => {
-    const appServer = {
+    const appServer = ({
       close: jest.fn(),
-    };
+    } as unknown) as KoaServer;
     const server = Server({ games: [game], singlePort: true });
 
     expect(() => server.kill({ appServer })).not.toThrowError();
