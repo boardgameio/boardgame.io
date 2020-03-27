@@ -94,13 +94,13 @@ export class FlatFile extends StorageAPI.Async {
     return this.games.clear();
   }
 
-  async setState(id: string, state: State) {
-    let log: LogEntry[] =
-      ((await this.games.getItem(LogKey(id))) as LogEntry[]) || [];
-    if (state.deltalog) {
-      log = log.concat(state.deltalog);
+  async setState(id: string, state: State, deltalog?: LogEntry[]) {
+    if (deltalog && deltalog.length > 0) {
+      const key = LogKey(id);
+      const log: LogEntry[] =
+        ((await this.games.getItem(key)) as LogEntry[]) || [];
+      await this.games.setItem(key, log.concat(deltalog));
     }
-    await this.games.setItem(LogKey(id), log);
     return await this.games.setItem(id, state);
   }
 

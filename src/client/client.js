@@ -52,27 +52,12 @@ function createDispatchers(
   }, {});
 }
 
-/**
- * createEventDispatchers
- *
- * Creates a set of dispatchers to dispatch game flow events.
- * @param {Array} eventNames - A list of event names.
- * @param {object} store - The Redux store to create dispatchers for.
- * @param {string} playerID - The ID of the player dispatching these events.
- * @param {string} credentials - A key indicating that the player is authorized to play.
- */
-export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
-
-/**
- * createMoveDispatchers
- *
- * Creates a set of dispatchers to make moves.
- * @param {Array} moveNames - A list of move names.
- * @param {object} store - The Redux store to create dispatchers for.
- * @param {string} playerID - The ID of the player dispatching these events.
- * @param {string} credentials - A key indicating that the player is authorized to play.
- */
+// Creates a set of dispatchers to make moves.
 export const createMoveDispatchers = createDispatchers.bind(null, 'makeMove');
+// Creates a set of dispatchers to dispatch game flow events.
+export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
+// Creates a set of dispatchers to dispatch actions to plugins.
+export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 /**
  * Implementation of Client (see below).
@@ -390,6 +375,14 @@ class _ClientImpl {
 
     this.events = createEventDispatchers(
       this.game.flow.enabledEventNames,
+      this.store,
+      this.playerID,
+      this.credentials,
+      this.multiplayer
+    );
+
+    this.plugins = createPluginDispatchers(
+      this.game.pluginNames,
       this.store,
       this.playerID,
       this.credentials,

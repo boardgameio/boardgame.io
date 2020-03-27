@@ -296,10 +296,12 @@ export class Master {
       };
     });
 
+    const { deltalog, ...stateWithoutDeltalog } = state;
+
     if (IsSynchronous(this.storageAPI)) {
-      this.storageAPI.setState(key, state);
+      this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
     } else {
-      await this.storageAPI.setState(key, state);
+      await this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
     }
   }
 

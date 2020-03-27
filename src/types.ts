@@ -69,6 +69,10 @@ export interface LogEntry {
 
 export interface Plugin {
   name: string;
+  setup?: Function;
+  action?: Function;
+  api?: Function;
+  flush?: Function;
 }
 
 export interface LongFormMove {
@@ -182,6 +186,7 @@ export namespace Server {
 export namespace CredentialedActionShape {
   export type MakeMove = ReturnType<typeof ActionCreators.makeMove>;
   export type GameEvent = ReturnType<typeof ActionCreators.gameEvent>;
+  export type Plugin = ReturnType<typeof ActionCreators.plugin>;
   export type AutomaticGameEvent = ReturnType<
     typeof ActionCreators.automaticGameEvent
   >;
@@ -193,7 +198,8 @@ export namespace CredentialedActionShape {
     | ActionShape.Update
     | ActionShape.Reset
     | ActionShape.Undo
-    | ActionShape.Redo;
+    | ActionShape.Redo
+    | ActionShape.Plugin;
 }
 
 export namespace ActionShape {
@@ -203,6 +209,7 @@ export namespace ActionShape {
   >;
   export type MakeMove = StripCredentials<CredentialedActionShape.MakeMove>;
   export type GameEvent = StripCredentials<CredentialedActionShape.GameEvent>;
+  export type Plugin = StripCredentials<CredentialedActionShape.Plugin>;
   export type AutomaticGameEvent = StripCredentials<
     CredentialedActionShape.AutomaticGameEvent
   >;
@@ -219,7 +226,8 @@ export namespace ActionShape {
     | Update
     | Reset
     | Undo
-    | Redo;
+    | Redo
+    | Plugin;
 }
 
 export namespace ActionPayload {

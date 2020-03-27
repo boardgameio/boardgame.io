@@ -73,8 +73,15 @@ export abstract class Async {
 
   /**
    * Update the game state.
+   *
+   * If passed a deltalog array, setState should append its contents to the
+   * existing log for this game.
    */
-  abstract setState(gameID: string, state: State): Promise<void>;
+  abstract setState(
+    gameID: string,
+    state: State,
+    deltalog?: LogEntry[]
+  ): Promise<void>;
 
   /**
    * Update the game metadata.
@@ -130,8 +137,11 @@ export abstract class Sync {
 
   /**
    * Update the game state.
+   *
+   * If passed a deltalog array, setState should append its contents to the
+   * existing log for this game.
    */
-  abstract setState(gameID: string, state: State): void;
+  abstract setState(gameID: string, state: State, deltalog?: LogEntry[]): void;
 
   /**
    * Update the game metadata.

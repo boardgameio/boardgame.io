@@ -263,6 +263,10 @@ export function CreateGameReducer({
         };
       }
 
+      case Actions.PLUGIN: {
+        return plugins.ProcessAction(state, action, { game });
+      }
+
       default: {
         return state;
       }

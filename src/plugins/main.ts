@@ -9,7 +9,14 @@
 import PluginImmer from './plugin-immer';
 import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
-import { PartialGameState, State, GameConfig, Plugin, Ctx } from '../types';
+import {
+  PartialGameState,
+  State,
+  GameConfig,
+  Plugin,
+  Ctx,
+  ActionShape,
+} from '../types';
 
 interface PluginOpts {
   game: GameConfig;
@@ -20,6 +27,33 @@ interface PluginOpts {
  * List of plugins that are always added.
  */
 const DEFAULT_PLUGINS = [PluginImmer, PluginRandom, PluginEvents];
+
+/**
+ * Allow plugins to intercept actions and process them.
+ */
+export const ProcessAction = (
+  state: State,
+  action: ActionShape.Plugin,
+  opts: PluginOpts
+): State => {
+  opts.game.plugins
+    .filter(plugin => plugin.action !== undefined)
+    .filter(plugin => plugin.name === action.payload.type)
+    .forEach(plugin => {
+      const name = plugin.name;
+      const pluginState = state.plugins[name] || { data: {} };
+      const data = plugin.action(pluginState.data, action.payload);
+
+      state = {
+        ...state,
+        plugins: {
+          ...state.plugins,
+          [name]: { ...pluginState, data },
+        },
+      };
+    });
+  return state;
+};
 
 /**
  * The API's created by various plugins are stored in the plugins
