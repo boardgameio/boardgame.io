@@ -2,6 +2,9 @@ import { Object } from 'ts-toolbelt';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
 import * as StorageAPI from './server/db/base';
+import { EventsAPI } from './plugins/plugin-events';
+import { PlayerAPI } from './plugins/plugin-player';
+import { RandomAPI } from './plugins/plugin-random';
 
 export { StorageAPI };
 
@@ -42,6 +45,12 @@ export interface Ctx {
   _random?: {
     seed: string | number;
   };
+  // enhanced by events plugin
+  events?: EventsAPI;
+  // enhanced by player plugin
+  player?: PlayerAPI;
+  // enhanced by random plugin
+  random?: RandomAPI;
 }
 
 export interface PluginState {
