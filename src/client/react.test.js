@@ -146,14 +146,14 @@ test('update gameID / playerID', () => {
   const spy2 = jest.spyOn(m, 'updatePlayerID');
   const spy3 = jest.spyOn(g, 'updateCredentials');
 
-  expect(m.gameID).toBe('default:a');
+  expect(m.gameID).toBe('a');
   expect(m.playerID).toBe('1');
 
   game.setProps({ gameID: 'a' });
   game.setProps({ playerID: '1' });
   game.setProps({ credentials: 'foo' });
 
-  expect(m.gameID).toBe('default:a');
+  expect(m.gameID).toBe('a');
   expect(m.playerID).toBe('1');
   expect(spy1).not.toHaveBeenCalled();
   expect(spy2).not.toHaveBeenCalled();
@@ -163,7 +163,7 @@ test('update gameID / playerID', () => {
   game.setProps({ playerID: 'next' });
   game.setProps({ credentials: 'bar' });
 
-  expect(m.gameID).toBe('default:next');
+  expect(m.gameID).toBe('next');
   expect(m.playerID).toBe('next');
   expect(spy1).toHaveBeenCalled();
   expect(spy2).toHaveBeenCalled();
