@@ -73,8 +73,15 @@ export abstract class Async {
 
   /**
    * Update the game state.
+   *
+   * If passed a deltalog array, setState should append its contents to the
+   * existing log for this game.
    */
-  abstract setState(gameID: string, state: State): Promise<void>;
+  abstract setState(
+    gameID: string,
+    state: State,
+    deltalog?: LogEntry[]
+  ): Promise<void>;
 
   /**
    * Update the game metadata.
@@ -83,17 +90,6 @@ export abstract class Async {
     gameID: string,
     metadata: Server.GameMetadata
   ): Promise<void>;
-
-  /**
-   * Append actions to the game log.
-   *
-   * This method will receive an array of log entry objects, which should be
-   * appended to any existing log array. This might mean reading in the log,
-   * concatenating the new entries, and persisting the result, or the
-   * implementation might be able to append the deltalog entries directly
-   * without needing to read in the existing log.
-   */
-  abstract appendLog(gameID: string, deltalog: LogEntry[]): Promise<void>;
 
   /**
    * Fetch the game state.
@@ -141,24 +137,16 @@ export abstract class Sync {
 
   /**
    * Update the game state.
+   *
+   * If passed a deltalog array, setState should append its contents to the
+   * existing log for this game.
    */
-  abstract setState(gameID: string, state: State): void;
+  abstract setState(gameID: string, state: State, deltalog?: LogEntry[]): void;
 
   /**
    * Update the game metadata.
    */
   abstract setMetadata(gameID: string, metadata: Server.GameMetadata): void;
-
-  /**
-   * Append actions to the game log.
-   *
-   * This method will receive an array of log entry objects, which should be
-   * appended to any existing log array. This might mean reading in the log,
-   * concatenating the new entries, and persisting the result, or the
-   * implementation might be able to append the deltalog entries directly
-   * without needing to read in the existing log.
-   */
-  abstract appendLog(gameID: string, deltalog: LogEntry[]): void;
 
   /**
    * Fetch the game state.

@@ -299,13 +299,9 @@ export class Master {
     const { deltalog, ...stateWithoutDeltalog } = state;
 
     if (IsSynchronous(this.storageAPI)) {
-      this.storageAPI.setState(key, stateWithoutDeltalog);
-      this.storageAPI.appendLog(key, deltalog);
+      this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
     } else {
-      await Promise.all([
-        this.storageAPI.setState(key, stateWithoutDeltalog),
-        this.storageAPI.appendLog(key, deltalog),
-      ]);
+      await this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
     }
   }
 
