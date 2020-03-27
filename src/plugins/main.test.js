@@ -133,3 +133,48 @@ describe('default values', () => {
     expect(client.getState().plugins.test.data).toEqual(pluginData);
   });
 });
+
+describe('actions', () => {
+  let client;
+
+  beforeAll(() => {
+    const game = {
+      plugins: [
+        {
+          name: 'test',
+
+          setup: () => ({
+            initial: true,
+          }),
+
+          action: (_, payload) => {
+            return payload.args[0];
+          },
+        },
+        {
+          name: 'nosetup',
+          action: () => ({ action: true }),
+        },
+      ],
+    };
+
+    client = Client({ game });
+  });
+
+  test('setup', () => {
+    expect(client.getState().plugins.test.data).toEqual({
+      initial: true,
+    });
+    expect(client.getState().plugins.nosetup).toBeUndefined();
+  });
+
+  test('take action', () => {
+    const payload = { payload: true };
+
+    client.plugins.test(payload);
+    client.plugins.nosetup(payload);
+
+    expect(client.getState().plugins.test.data).toEqual(payload);
+    expect(client.getState().plugins.nosetup.data).toEqual({ action: true });
+  });
+});

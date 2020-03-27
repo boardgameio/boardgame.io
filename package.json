@@ -16,7 +16,7 @@
     "pretest": "npm run lint",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --collectCoverageFrom=!src/**/random.alea.js --collectCoverageFrom=!src/client/debug/** --forceExit",
+    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
     "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
     "test:integration": "bash ./scripts/integration.sh",
     "ts": "tsc --noEmit",
@@ -157,6 +157,12 @@
       "\\.(css)$": "identity-obj-proxy",
       "\\.(svg)$": "<rootDir>/.empty_module.js"
     },
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "src/.*/random.alea.js",
+      "src/client/debug/.*",
+      "src/types.ts"
+    ],
     "setupFiles": [
       "raf/polyfill"
     ],

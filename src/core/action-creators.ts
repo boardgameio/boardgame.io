@@ -107,3 +107,16 @@ export const undo = () => ({
 export const redo = () => ({
   type: Actions.REDO as typeof Actions.REDO,
 });
+
+/**
+ * Allows plugins to define their own actions and intercept them.
+ */
+export const plugin = (
+  type: string,
+  args?: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
+  type: Actions.PLUGIN as typeof Actions.PLUGIN,
+  payload: { type, args, playerID, credentials },
+});
