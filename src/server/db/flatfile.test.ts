@@ -88,8 +88,8 @@ describe('FlatFile', () => {
       phase: '',
     };
 
-    await db.setState('gameID', { deltalog: [logEntry1] } as State);
-    await db.setState('gameID', { deltalog: [logEntry2] } as State);
+    await db.setState('gameID', null, [logEntry1]);
+    await db.setState('gameID', null, [logEntry2]);
 
     const result = await db.fetch('gameID', { log: true });
     expect(result.log).toEqual([logEntry1, logEntry2]);
