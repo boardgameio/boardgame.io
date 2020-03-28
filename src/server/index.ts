@@ -13,7 +13,7 @@ import { DBFromEnv } from './db';
 import { Game } from '../core/game';
 import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
-import { Server as ServerTypes } from '../types';
+import { Server as ServerTypes, GameConfig, StorageAPI } from '../types';
 
 export type KoaServer = ReturnType<Koa['listen']>;
 
@@ -53,16 +53,22 @@ const getPortFromServer = (server: KoaServer): string | number | null => {
   return address.port;
 };
 
+interface ServerOpts {
+  games: GameConfig[];
+  db?: StorageAPI.Async | StorageAPI.Sync;
+  transport?;
+  authenticateCredentials?: ServerTypes.AuthenticateCredentials;
+  generateCredentials?: ServerTypes.GenerateCredentials;
+}
+
 /**
  * Instantiate a game server.
  *
- * @param {Array} games - The games that this server will handle.
- * @param {object} db - The interface with the database.
- * @param {object} transport - The interface with the clients.
- * @param {function} authenticateCredentials - Function to test player
- *                                             credentials. Optional.
- * @param {function} generateCredentials - Method for API to generate player
- *                                         credentials. Optional.
+ * @param games - The games that this server will handle.
+ * @param db - The interface with the database.
+ * @param transport - The interface with the clients.
+ * @param authenticateCredentials - Function to test player credentials.
+ * @param generateCredentials - Method for API to generate player credentials.
  */
 export function Server({
   games,
@@ -70,7 +76,7 @@ export function Server({
   transport,
   authenticateCredentials,
   generateCredentials,
-}: any) {
+}: ServerOpts) {
   const app = new Koa();
 
   games = games.map(Game);

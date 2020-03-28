@@ -163,6 +163,15 @@ export interface GameConfig {
 type Undo = { G: object; ctx: Ctx; moveType?: string };
 
 export namespace Server {
+  export type GenerateCredentials = (
+    ctx: Koa.DefaultContext
+  ) => Promise<string> | string;
+
+  export type AuthenticateCredentials = (
+    credentials: string,
+    playerMetadata: PlayerMetadata
+  ) => Promise<boolean> | boolean;
+
   export type PlayerMetadata = {
     id: number;
     name?: string;
@@ -178,7 +187,7 @@ export namespace Server {
 
   export interface LobbyConfig {
     uuid?: () => string;
-    generateCredentials?: (ctx: Koa.DefaultContext) => Promise<string> | string;
+    generateCredentials?: GenerateCredentials;
     apiPort?: number;
     apiCallback?: () => void;
   }

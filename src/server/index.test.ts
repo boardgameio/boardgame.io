@@ -8,6 +8,7 @@
 
 import { Server, createServerRunConfig, KoaServer } from '.';
 import * as api from './api';
+import { StorageAPI } from '../types';
 
 const game = { seed: 0 };
 
@@ -70,7 +71,7 @@ jest.mock('koa', () => {
 describe('new', () => {
   test('custom db implementation', () => {
     const game = {};
-    const db = {};
+    const db = {} as StorageAPI.Sync;
     const server = Server({ games: [game], db });
     expect(server.db).toBe(db);
   });
@@ -91,14 +92,15 @@ describe('new', () => {
 });
 
 describe('run', () => {
-  let server, runningServer;
+  let server: ReturnType<typeof Server> | null;
+  let runningServer: { appServer: KoaServer; apiServer?: KoaServer } | null;
 
   beforeEach(() => {
     server = null;
     runningServer = null;
-    (api.createApiServer as any).mockClear();
-    (api.addApiToServer as any).mockClear();
-    (mockApiServerListen as any).mockClear();
+    (api.createApiServer as jest.Mock).mockClear();
+    (api.addApiToServer as jest.Mock).mockClear();
+    (mockApiServerListen as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -110,7 +112,7 @@ describe('run', () => {
 
   test('single server running', async () => {
     server = Server({ games: [game] });
-    runningServer = await server.run();
+    runningServer = await server.run(undefined);
 
     expect(server).not.toBeUndefined();
     expect(api.addApiToServer).toBeCalled();
