@@ -88,7 +88,7 @@ export const EnhanceCtx = (state: PartialGameState): Ctx => {
  * @param {function} fn - The move function or trigger to apply the plugins to.
  * @param {object} plugins - The list of plugins.
  */
-export const FnWrap = (fn: Function, plugins: Plugin[]) => {
+export const FnWrap = (fn: (...args: any[]) => any, plugins: Plugin[]) => {
   const reducer = (acc, { fnWrap }) => fnWrap(acc, plugins);
   return [...DEFAULT_PLUGINS, ...plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
