@@ -142,7 +142,7 @@ describe('kill', () => {
     const appServer = ({
       close: jest.fn(),
     } as unknown) as KoaServer;
-    const server = Server({ games: [game], singlePort: true });
+    const server = Server({ games: [game] });
 
     server.kill({ appServer, apiServer });
 
@@ -154,7 +154,7 @@ describe('kill', () => {
     const appServer = ({
       close: jest.fn(),
     } as unknown) as KoaServer;
-    const server = Server({ games: [game], singlePort: true });
+    const server = Server({ games: [game] });
 
     expect(() => server.kill({ appServer })).not.toThrowError();
     expect(appServer.close).toBeCalled();
