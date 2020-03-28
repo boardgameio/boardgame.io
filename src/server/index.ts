@@ -112,17 +112,20 @@ export function Server({
           lobbyConfig,
           generateCredentials,
         });
-        apiServer = api.listen(lobbyConfig.apiPort, () => {
-          logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
-          lobbyConfig.apiCallback();
+        await new Promise(resolve => {
+          apiServer = api.listen(lobbyConfig.apiPort, resolve);
         });
+        if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
+        logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
       }
 
       // Run Game Server (+ API, if necessary).
-      const appServer = app.listen(serverRunConfig.port, () => {
-        logger.info(`App serving on ${getPortFromServer(appServer)}...`);
-        serverRunConfig.callback();
+      let appServer: KoaServer;
+      await new Promise(resolve => {
+        appServer = app.listen(serverRunConfig.port, resolve);
       });
+      if (serverRunConfig.callback) serverRunConfig.callback();
+      logger.info(`App serving on ${getPortFromServer(appServer)}...`);
 
       return { apiServer, appServer };
     },

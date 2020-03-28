@@ -16,10 +16,13 @@ jest.mock('../core/logger', () => ({
   error: () => {},
 }));
 
-const mockApiServerListen = jest.fn(async () => ({
-  address: () => ({ port: 'mock-api-port' }),
-  close: () => {},
-}));
+const mockApiServerListen = jest.fn((port, listeningCallback?: () => void) => {
+  if (listeningCallback) listeningCallback();
+  return {
+    address: () => ({ port: 'mock-api-port' }),
+    close: () => {},
+  };
+});
 jest.mock('./api', () => ({
   createApiServer: jest.fn(() => ({
     listen: mockApiServerListen,
@@ -53,10 +56,13 @@ jest.mock('koa', () => {
     constructor() {
       (this as any).context = {};
       (this as any).callback = () => {};
-      (this as any).listen = async () => ({
-        address: () => ({ port: 'mock-api-port' }),
-        close: () => {},
-      });
+      (this as any).listen = (port, listeningCallback?: () => void) => {
+        if (listeningCallback) listeningCallback();
+        return {
+          address: () => ({ port: 'mock-api-port' }),
+          close: () => {},
+        };
+      };
     }
   };
 });
