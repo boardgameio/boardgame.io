@@ -70,7 +70,7 @@ export const createApiServer = ({
   db: any;
   games: any;
   lobbyConfig?: Server.LobbyConfig;
-  generateCredentials?: any;
+  generateCredentials?: Server.GenerateCredentials;
 }) => {
   const app = new Koa();
   return addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
@@ -86,7 +86,7 @@ export const addApiToServer = ({
   app: Koa;
   games: GameConfig[];
   lobbyConfig?: Server.LobbyConfig;
-  generateCredentials?: Server.LobbyConfig['generateCredentials'];
+  generateCredentials?: Server.GenerateCredentials;
   db: StorageAPI.Sync | StorageAPI.Async;
 }) => {
   if (!lobbyConfig) lobbyConfig = {};
