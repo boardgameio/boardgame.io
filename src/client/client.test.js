@@ -22,6 +22,27 @@ jest.mock('../core/logger', () => ({
   error: jest.fn(),
 }));
 
+describe('basic', () => {
+  let client;
+  let initial = { initial: true };
+
+  const game = {
+    setup: () => initial,
+  };
+
+  beforeAll(() => {
+    client = Client({ game });
+  });
+
+  test('getState', () => {
+    expect(client.getState().G).toEqual(initial);
+  });
+
+  test('getInitialState', () => {
+    expect(client.getInitialState().G).toEqual(initial);
+  });
+});
+
 test('move api', () => {
   const client = Client({
     game: {
@@ -134,9 +155,9 @@ describe('multiplayer', () => {
 
     test('onAction called', () => {
       jest.spyOn(client.transport, 'onAction');
-      client.store.dispatch(
-        sync({ G: {}, ctx: { phase: '' }, plugins: {} }, [])
-      );
+      const state = { G: {}, ctx: { phase: '' }, plugins: {} };
+      const filteredMetadata = [];
+      client.store.dispatch(sync({ state, filteredMetadata }));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
     });
@@ -444,7 +465,7 @@ describe('log handling', () => {
   test('sync', () => {
     const state = { restore: true };
     const log = ['0', '1'];
-    const action = sync(state, log);
+    const action = sync({ state, log });
 
     client.store.dispatch(action);
     client.store.dispatch(action);
@@ -459,7 +480,7 @@ describe('log handling', () => {
   });
 
   test('sync - log missing', () => {
-    const action = sync();
+    const action = sync({});
     client.store.dispatch(action);
     expect(client.log).toEqual([]);
   });

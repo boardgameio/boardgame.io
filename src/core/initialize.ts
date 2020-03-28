@@ -1,17 +1,18 @@
-import { parse, stringify } from 'flatted';
+/*
+ * Copyright 2020 The boardgame.io Authors
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
 import { Game } from './game';
 import { GameConfig } from '../types';
 import * as plugins from '../plugins/main';
-import { GameState, State, Ctx } from '../types';
+import { PartialGameState, State, Ctx } from '../types';
 
 /**
- * InitializeGame
- *
  * Creates the initial game state.
- *
- * @param {...object} game - Return value of Game().
- * @param {...object} numPlayers - The number of players.
- * @param {...object} multiplayer - Set to true if we are in a multiplayer client.
  */
 export function InitializeGame({
   game,
@@ -30,7 +31,7 @@ export function InitializeGame({
 
   let ctx: Ctx = game.flow.ctx(numPlayers);
 
-  let state: GameState = {
+  let state: PartialGameState = {
     // User managed state.
     G: {},
     // Framework managed state.
@@ -57,20 +58,10 @@ export function InitializeGame({
     // state updates are only allowed from clients that
     // are at the same version that the server.
     _stateID: 0,
-    // A copy of the initial state so that
-    // the log can replay actions on top of it.
-    // TODO: This should really be stored in a different
-    // part of the DB and not inside the state object.
-    _initial: {},
   };
 
   initial = game.flow.init(initial);
   initial = plugins.Flush(initial, { game });
-
-  function deepCopy<T>(obj: T): T {
-    return parse(stringify(obj));
-  }
-  initial._initial = deepCopy(initial);
 
   return initial;
 }

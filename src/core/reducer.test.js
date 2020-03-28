@@ -105,7 +105,7 @@ test('disable move by invalid playerIDs', () => {
 });
 
 test('sync', () => {
-  const state = reducer(undefined, sync({ G: 'restored' }));
+  const state = reducer(undefined, sync({ state: { G: 'restored' } }));
   expect(state).toEqual({ G: 'restored' });
 });
 

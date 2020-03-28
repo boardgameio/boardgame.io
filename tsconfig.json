@@ -4,7 +4,6 @@
     "module": "esnext",
     "moduleResolution": "node",
     "declaration": false,
-    "outDir": "built-ts",
     "strict": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

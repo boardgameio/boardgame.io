@@ -10,26 +10,65 @@ import request from 'supertest';
 
 import { addApiToServer, createApiServer } from './api';
 import { Game } from '../core/game';
+import * as StorageAPI from './db/base';
 
 jest.setTimeout(2000000000);
+
+class AsyncStorage extends StorageAPI.Async {
+  public mocks: { [key: string]: jest.Mock };
+
+  constructor(args: any = {}) {
+    super();
+    this.mocks = {
+      createGame: args.createGame || jest.fn(),
+      setState: args.setState || jest.fn(),
+      fetch: args.fetch || jest.fn(() => ({})),
+      setMetadata: args.setMetadata || jest.fn(),
+      listGames: args.listGames || jest.fn(() => []),
+      wipe: args.wipe || jest.fn(),
+    };
+  }
+
+  async connect() {}
+
+  async createGame(...args) {
+    this.mocks.createGame(...args);
+  }
+
+  async fetch(...args) {
+    return this.mocks.fetch(...args);
+  }
+
+  async setState(...args) {
+    this.mocks.setState(...args);
+  }
+
+  async setMetadata(...args) {
+    this.mocks.setMetadata(...args);
+  }
+
+  async wipe(...args) {
+    this.mocks.wipe(...args);
+  }
+
+  async listGames() {
+    return this.mocks.listGames();
+  }
+}
 
 describe('.createApiServer', () => {
   describe('creating a game', () => {
     let response;
-    let setSpy;
     let app;
     let db;
     let games;
 
     beforeEach(async () => {
-      setSpy = jest.fn();
-      db = {
-        set: async (id, state) => setSpy(id, state),
-      };
+      db = new AsyncStorage();
       games = [
         {
           name: 'foo',
-          setup: (ctx, setupData) =>
+          setup: (_, setupData) =>
             setupData
               ? {
                   colors: setupData.colors,
@@ -43,7 +82,9 @@ describe('.createApiServer', () => {
       beforeEach(async () => {
         delete process.env.API_SECRET;
 
-        app = createApiServer({ db, games });
+        const uuid = () => 'gameID';
+        const lobbyConfig = { uuid };
+        app = createApiServer({ db, games, lobbyConfig });
 
         response = await request(app.callback())
           .post('/games/foo/create')
@@ -63,8 +104,8 @@ describe('.createApiServer', () => {
       });
 
       test('creates game data', () => {
-        expect(setSpy).toHaveBeenCalledWith(
-          expect.stringMatching('foo:'),
+        expect(db.mocks.setState).toHaveBeenCalledWith(
+          'gameID',
           expect.objectContaining({
             ctx: expect.objectContaining({
               numPlayers: 3,
@@ -74,8 +115,8 @@ describe('.createApiServer', () => {
       });
 
       test('passes arbitrary data to game setup', () => {
-        expect(setSpy).toHaveBeenCalledWith(
-          expect.stringMatching('foo:'),
+        expect(db.mocks.setState).toHaveBeenCalledWith(
+          'gameID',
           expect.objectContaining({
             G: expect.objectContaining({
               colors: {
@@ -88,8 +129,8 @@ describe('.createApiServer', () => {
       });
 
       test('creates game metadata', () => {
-        expect(setSpy).toHaveBeenCalledWith(
-          expect.stringMatching(':metadata'),
+        expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+          'gameID',
           expect.objectContaining({
             players: expect.objectContaining({
               '0': expect.objectContaining({}),
@@ -115,8 +156,8 @@ describe('.createApiServer', () => {
         });
 
         test('uses default numPlayers', () => {
-          expect(setSpy).toHaveBeenCalledWith(
-            expect.stringMatching('foo:'),
+          expect(db.mocks.setState).toHaveBeenCalledWith(
+            'gameID',
             expect.objectContaining({
               ctx: expect.objectContaining({
                 numPlayers: 2,
@@ -175,10 +216,9 @@ describe('.createApiServer', () => {
 
       describe('when the game does not exist', () => {
         beforeEach(async () => {
-          db = {
-            get: async () => null,
-          };
-
+          db = new AsyncStorage({
+            fetch: () => ({ metadata: null }),
+          });
           const app = createApiServer({ db, games });
 
           response = await request(app.callback())
@@ -192,20 +232,18 @@ describe('.createApiServer', () => {
       });
 
       describe('when the game does exist', () => {
-        let setSpy;
-
         beforeEach(async () => {
-          setSpy = jest.fn();
-          db = {
-            get: async () => {
+          db = new AsyncStorage({
+            fetch: async () => {
               return {
-                players: {
-                  '0': {},
+                metadata: {
+                  players: {
+                    '0': {},
+                  },
                 },
               };
             },
-            set: async (id, state) => setSpy(id, state),
-          };
+          });
         });
 
         describe('when the playerID is available', () => {
@@ -213,7 +251,10 @@ describe('.createApiServer', () => {
             const app = createApiServer({
               db,
               games,
-              lobbyConfig: { uuid: () => credentials },
+              lobbyConfig: {
+                uuid: () => 'gameID',
+              },
+              generateCredentials: () => credentials,
             });
             response = await request(app.callback())
               .post('/games/foo/1/join')
@@ -229,8 +270,8 @@ describe('.createApiServer', () => {
           });
 
           test('updates the player name', async () => {
-            expect(setSpy).toHaveBeenCalledWith(
-              expect.stringMatching(':metadata'),
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
@@ -283,20 +324,20 @@ describe('.createApiServer', () => {
 
         describe('when the playerID is not available', () => {
           beforeEach(async () => {
-            setSpy = jest.fn();
-            db = {
-              get: async () => {
+            db = new AsyncStorage({
+              fetch: async () => {
                 return {
-                  players: {
-                    '0': {
-                      credentials,
-                      name: 'bob',
+                  metadata: {
+                    players: {
+                      '0': {
+                        credentials,
+                        name: 'bob',
+                      },
                     },
                   },
                 };
               },
-              set: async (id, state) => setSpy(id, state),
-            };
+            });
 
             const app = createApiServer({ db, games });
 
@@ -328,9 +369,9 @@ describe('.createApiServer', () => {
 
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
-          db = {
-            get: async () => null,
-          };
+          db = new AsyncStorage({
+            fetch: async () => ({ metadata: null }),
+          });
           const app = createApiServer({ db, games });
           response = await request(app.callback())
             .post('/games/foo/1/rename')
@@ -341,26 +382,25 @@ describe('.createApiServer', () => {
 
       describe('when the game does exist', () => {
         describe('when the playerID does exist', () => {
-          let setSpy;
           beforeEach(async () => {
-            setSpy = jest.fn();
-            db = {
-              get: async () => {
+            db = new AsyncStorage({
+              fetch: async () => {
                 return {
-                  players: {
-                    '0': {
-                      name: 'alice',
-                      credentials: 'SECRET1',
-                    },
-                    '1': {
-                      name: 'bob',
-                      credentials: 'SECRET2',
+                  metadata: {
+                    players: {
+                      '0': {
+                        name: 'alice',
+                        credentials: 'SECRET1',
+                      },
+                      '1': {
+                        name: 'bob',
+                        credentials: 'SECRET2',
+                      },
                     },
                   },
                 };
               },
-              set: async (id, game) => setSpy(id, game),
-            };
+            });
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/rename')
@@ -372,8 +412,8 @@ describe('.createApiServer', () => {
           });
 
           test('updates the players', async () => {
-            expect(setSpy).toHaveBeenCalledWith(
-              expect.stringMatching(':metadata'),
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
@@ -448,9 +488,9 @@ describe('.createApiServer', () => {
 
       describe('when the game does not exist', () => {
         test('throws a "not found" error', async () => {
-          db = {
-            get: async () => null,
-          };
+          db = new AsyncStorage({
+            fetch: async () => ({ metadata: null }),
+          });
           const app = createApiServer({ db, games });
           response = await request(app.callback())
             .post('/games/foo/1/leave')
@@ -461,26 +501,25 @@ describe('.createApiServer', () => {
 
       describe('when the game does exist', () => {
         describe('when the playerID does exist', () => {
-          let setSpy;
           beforeEach(async () => {
-            setSpy = jest.fn();
-            db = {
-              get: async () => {
+            db = new AsyncStorage({
+              fetch: async () => {
                 return {
-                  players: {
-                    '0': {
-                      name: 'alice',
-                      credentials: 'SECRET1',
-                    },
-                    '1': {
-                      name: 'bob',
-                      credentials: 'SECRET2',
+                  metadata: {
+                    players: {
+                      '0': {
+                        name: 'alice',
+                        credentials: 'SECRET1',
+                      },
+                      '1': {
+                        name: 'bob',
+                        credentials: 'SECRET2',
+                      },
                     },
                   },
                 };
               },
-              set: async (id, game) => setSpy(id, game),
-            };
+            });
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
@@ -492,8 +531,8 @@ describe('.createApiServer', () => {
           });
 
           test('updates the players', async () => {
-            expect(setSpy).toHaveBeenCalledWith(
-              expect.stringMatching(':metadata'),
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({}),
@@ -508,31 +547,28 @@ describe('.createApiServer', () => {
 
           describe('when there are not players left', () => {
             test('removes the game', async () => {
-              setSpy = jest.fn();
-              db = {
-                get: async () => {
+              db = new AsyncStorage({
+                fetch: async () => {
                   return {
-                    players: {
-                      '0': {
-                        name: 'alice',
-                        credentials: 'SECRET1',
-                      },
-                      '1': {
-                        credentials: 'SECRET2',
+                    metadata: {
+                      players: {
+                        '0': {
+                          name: 'alice',
+                          credentials: 'SECRET1',
+                        },
+                        '1': {
+                          credentials: 'SECRET2',
+                        },
                       },
                     },
                   };
                 },
-                remove: async id => setSpy(id),
-              };
+              });
               const app = createApiServer({ db, games });
               response = await request(app.callback())
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
-              expect(setSpy).toHaveBeenCalledWith(expect.stringMatching(':1'));
-              expect(setSpy).toHaveBeenCalledWith(
-                expect.stringMatching(':metadata')
-              );
+              expect(db.mocks.wipe).toHaveBeenCalledWith('1');
             });
           });
         });
@@ -576,10 +612,7 @@ describe('.createApiServer', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
-      db = {
-        get: async () => {},
-        set: async () => {},
-      };
+      db = new AsyncStorage();
     });
 
     describe('when given 2 games', () => {
@@ -603,65 +636,69 @@ describe('.createApiServer', () => {
     let response;
     let db;
     let games;
-    let setSpy;
 
     beforeEach(() => {
       games = [Game({ name: 'foo' })];
       delete process.env.API_SECRET;
-      setSpy = jest.fn();
-      db = {
-        get: async () => {
+      db = new AsyncStorage({
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                name: 'alice',
-                credentials: 'SECRET1',
-              },
-              '1': {
-                name: 'bob',
-                credentials: 'SECRET2',
+            metadata: {
+              players: {
+                '0': {
+                  name: 'alice',
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  name: 'bob',
+                  credentials: 'SECRET2',
+                },
               },
             },
           };
         },
-        set: async (id, game) => setSpy(id, game),
-      };
+      });
     });
 
     test('creates new game data', async () => {
-      const app = createApiServer({ db, games });
+      const lobbyConfig = {
+        uuid: () => 'newGameID',
+      };
+      const app = createApiServer({ db, games, lobbyConfig });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1&numPlayers=4');
-      expect(setSpy).toHaveBeenCalledWith(
-        expect.stringMatching('foo:'),
+      expect(db.mocks.setState).toHaveBeenCalledWith(
+        'newGameID',
         expect.objectContaining({
           ctx: expect.objectContaining({
             numPlayers: 4,
           }),
         })
       );
-      expect(response.body.nextRoomID).not.toBeNull();
+      expect(response.body.nextRoomID).toBe('newGameID');
     });
 
     test('fetches next id', async () => {
-      db = {
-        get: async () => {
+      db = new AsyncStorage({
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                name: 'alice',
-                credentials: 'SECRET1',
+            metadata: {
+              players: {
+                '0': {
+                  name: 'alice',
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  name: 'bob',
+                  credentials: 'SECRET2',
+                },
               },
-              '1': {
-                name: 'bob',
-                credentials: 'SECRET2',
-              },
+              nextRoomID: '12345',
             },
-            nextRoomID: '12345',
           };
         },
-      };
+      });
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
@@ -670,9 +707,9 @@ describe('.createApiServer', () => {
     });
 
     test('when the game does not exist throws a "not found" error', async () => {
-      db = {
-        get: async () => null,
-      };
+      db = new AsyncStorage({
+        fetch: async () => ({ metadata: null }),
+      });
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
@@ -717,33 +754,27 @@ describe('.createApiServer', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
-      db = {
-        get: async () => {
+      db = new AsyncStorage({
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                id: 0,
-                credentials: 'SECRET1',
-              },
-              '1': {
-                id: 1,
-                credentials: 'SECRET2',
+            metadata: {
+              players: {
+                '0': {
+                  id: 0,
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  id: 1,
+                  credentials: 'SECRET2',
+                },
               },
             },
           };
         },
-        set: async () => {},
-        list: async () => {
-          return [
-            'bar:bar-0',
-            'bar:bar-0:metadata',
-            'foo:foo-0',
-            'foo:foo-0:metadata',
-            'bar:bar-1',
-            'bar:bar-1:metadata',
-          ];
+        listGames: async () => {
+          return ['bar-0', 'bar-1'];
         },
-      };
+      });
     });
     describe('when given 2 rooms', () => {
       let response;
@@ -775,33 +806,27 @@ describe('.createApiServer', () => {
     let db;
     beforeEach(() => {
       delete process.env.API_SECRET;
-      db = {
-        get: async () => {
+      db = new AsyncStorage({
+        fetch: async () => {
           return {
-            players: {
-              '0': {
-                id: 0,
-                credentials: 'SECRET1',
-              },
-              '1': {
-                id: 1,
-                credentials: 'SECRET2',
+            metadata: {
+              players: {
+                '0': {
+                  id: 0,
+                  credentials: 'SECRET1',
+                },
+                '1': {
+                  id: 1,
+                  credentials: 'SECRET2',
+                },
               },
             },
           };
         },
-        set: async () => {},
         list: async () => {
-          return [
-            'bar:bar-0',
-            'bar:bar-0:metadata',
-            'foo:foo-0',
-            'foo:foo-0:metadata',
-            'bar:bar-1',
-            'bar:bar-1:metadata',
-          ];
+          return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
-      };
+      });
     });
 
     describe('when given room ID', () => {
@@ -826,9 +851,9 @@ describe('.createApiServer', () => {
     describe('when given a non-existent room ID', () => {
       let response;
       beforeEach(async () => {
-        db.get = async () => {
-          return null;
-        };
+        db = new AsyncStorage({
+          fetch: async () => ({ metadata: null }),
+        });
         let games = [Game({ name: 'foo' })];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar/doesnotexist');
@@ -843,19 +868,15 @@ describe('.createApiServer', () => {
 
 describe('.addApiToServer', () => {
   describe('when server app is provided', () => {
-    let setSpy;
     let db;
     let server;
     let useChain;
     let games;
 
     beforeEach(async () => {
-      setSpy = jest.fn();
       useChain = jest.fn(() => ({ use: useChain }));
       server = { use: useChain };
-      db = {
-        set: async (id, state) => setSpy(id, state),
-      };
+      db = new AsyncStorage();
       games = [
         {
           name: 'foo',

@@ -11,7 +11,8 @@
   import LogEvent from './LogEvent.svelte';
   import MCTS from '../mcts/MCTS.svelte';
 
-  let { log, _initial: initialState } = $client;
+  const initialState = client.getInitialState();
+  let { log } = $client;
   let pinned = null;
 
   function rewind(logIndex) {

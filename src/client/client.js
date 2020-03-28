@@ -52,27 +52,12 @@ function createDispatchers(
   }, {});
 }
 
-/**
- * createEventDispatchers
- *
- * Creates a set of dispatchers to dispatch game flow events.
- * @param {Array} eventNames - A list of event names.
- * @param {object} store - The Redux store to create dispatchers for.
- * @param {string} playerID - The ID of the player dispatching these events.
- * @param {string} credentials - A key indicating that the player is authorized to play.
- */
-export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
-
-/**
- * createMoveDispatchers
- *
- * Creates a set of dispatchers to make moves.
- * @param {Array} moveNames - A list of move names.
- * @param {object} store - The Redux store to create dispatchers for.
- * @param {string} playerID - The ID of the player dispatching these events.
- * @param {string} credentials - A key indicating that the player is authorized to play.
- */
+// Creates a set of dispatchers to make moves.
 export const createMoveDispatchers = createDispatchers.bind(null, 'makeMove');
+// Creates a set of dispatchers to dispatch game flow events.
+export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
+// Creates a set of dispatchers to dispatch actions to plugins.
+export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 /**
  * Implementation of Client (see below).
@@ -104,13 +89,13 @@ class _ClientImpl {
       numPlayers,
     });
 
-    let initialState = null;
+    this.initialState = null;
     if (!multiplayer) {
-      initialState = InitializeGame({ game: this.game, numPlayers });
+      this.initialState = InitializeGame({ game: this.game, numPlayers });
     }
 
     this.reset = () => {
-      this.store.dispatch(ActionCreators.reset(initialState));
+      this.store.dispatch(ActionCreators.reset(this.initialState));
     };
     this.undo = () => {
       this.store.dispatch(ActionCreators.undo());
@@ -167,6 +152,7 @@ class _ClientImpl {
         }
 
         case Actions.SYNC: {
+          this.initialState = action.initialState;
           this.log = action.log || [];
           break;
         }
@@ -216,7 +202,7 @@ class _ClientImpl {
       );
     }
 
-    this.store = createStore(this.reducer, initialState, enhancer);
+    this.store = createStore(this.reducer, this.initialState, enhancer);
 
     this.transport = {
       isConnected: true,
@@ -277,9 +263,10 @@ class _ClientImpl {
     if (
       debugImpl !== null &&
       this.debug !== false &&
-      this._debugPanel == null
+      this._debugPanel == null &&
+      typeof document !== 'undefined'
     ) {
-      let target = document && document.body;
+      let target = document.body;
       if (this.debug && this.debug.target !== undefined) {
         target = this.debug.target;
       }
@@ -318,6 +305,10 @@ class _ClientImpl {
     return () => {
       delete this.subscribers[id];
     };
+  }
+
+  getInitialState() {
+    return this.initialState;
   }
 
   getState() {
@@ -384,6 +375,14 @@ class _ClientImpl {
 
     this.events = createEventDispatchers(
       this.game.flow.enabledEventNames,
+      this.store,
+      this.playerID,
+      this.credentials,
+      this.multiplayer
+    );
+
+    this.plugins = createPluginDispatchers(
+      this.game.pluginNames,
       this.store,
       this.playerID,
       this.credentials,

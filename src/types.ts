@@ -1,11 +1,16 @@
 import { Object } from 'ts-toolbelt';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
+import * as StorageAPI from './server/db/base';
+import { EventsAPI } from './plugins/plugin-events';
+import { PlayerAPI } from './plugins/plugin-player';
+import { RandomAPI } from './plugins/plugin-random';
+
+export { StorageAPI };
 
 export interface State {
   G: object;
   ctx: Ctx;
-  log?: Array<LogEntry>;
   deltalog?: Array<LogEntry>;
   plugins: {
     [pluginName: string]: PluginState;
@@ -13,10 +18,9 @@ export interface State {
   _undo: Array<Undo>;
   _redo: Array<Undo>;
   _stateID: number;
-  _initial?: Omit<State, '_initial'> | {};
 }
 
-export type GameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
+export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 
 export type StageName = string;
 export type PlayerID = string;
@@ -41,6 +45,12 @@ export interface Ctx {
   _random?: {
     seed: string | number;
   };
+  // enhanced by events plugin
+  events?: EventsAPI;
+  // enhanced by player plugin
+  player?: PlayerAPI;
+  // enhanced by random plugin
+  random?: RandomAPI;
 }
 
 export interface PluginState {
@@ -59,6 +69,10 @@ export interface LogEntry {
 
 export interface Plugin {
   name: string;
+  setup?: Function;
+  action?: Function;
+  api?: Function;
+  flush?: Function;
 }
 
 export interface LongFormMove {
@@ -155,15 +169,24 @@ export namespace Server {
   };
 
   export interface GameMetadata {
+    gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData: any;
     nextRoomID?: string;
+  }
+
+  export interface LobbyConfig {
+    uuid?: Function;
+    generateCredentials?: Function;
+    apiPort?: number;
+    apiCallback?: Function;
   }
 }
 
 export namespace CredentialedActionShape {
   export type MakeMove = ReturnType<typeof ActionCreators.makeMove>;
   export type GameEvent = ReturnType<typeof ActionCreators.gameEvent>;
+  export type Plugin = ReturnType<typeof ActionCreators.plugin>;
   export type AutomaticGameEvent = ReturnType<
     typeof ActionCreators.automaticGameEvent
   >;
@@ -175,7 +198,8 @@ export namespace CredentialedActionShape {
     | ActionShape.Update
     | ActionShape.Reset
     | ActionShape.Undo
-    | ActionShape.Redo;
+    | ActionShape.Redo
+    | ActionShape.Plugin;
 }
 
 export namespace ActionShape {
@@ -185,6 +209,7 @@ export namespace ActionShape {
   >;
   export type MakeMove = StripCredentials<CredentialedActionShape.MakeMove>;
   export type GameEvent = StripCredentials<CredentialedActionShape.GameEvent>;
+  export type Plugin = StripCredentials<CredentialedActionShape.Plugin>;
   export type AutomaticGameEvent = StripCredentials<
     CredentialedActionShape.AutomaticGameEvent
   >;
@@ -201,11 +226,24 @@ export namespace ActionShape {
     | Update
     | Reset
     | Undo
-    | Redo;
+    | Redo
+    | Plugin;
 }
 
 export namespace ActionPayload {
   type GetPayload<T extends object> = Object.At<T, 'payload'>;
   export type MakeMove = GetPayload<ActionShape.MakeMove>;
   export type GameEvent = GetPayload<ActionShape.GameEvent>;
+}
+
+export type FilteredMetadata = {
+  id: number;
+  name?: string;
+}[];
+
+export interface SyncInfo {
+  state: State;
+  filteredMetadata: FilteredMetadata;
+  initialState: State;
+  log: LogEntry[];
 }

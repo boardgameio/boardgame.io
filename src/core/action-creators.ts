@@ -7,7 +7,7 @@
  */
 
 import * as Actions from './action-types';
-import { State, LogEntry } from '../types';
+import { SyncInfo, State, LogEntry } from '../types';
 
 /**
  * Generate a move to be dispatched to the game move reducer.
@@ -19,7 +19,7 @@ import { State, LogEntry } from '../types';
  */
 export const makeMove = (
   type: string,
-  args: any,
+  args?: any,
   playerID?: string | null,
   credentials?: string
 ) => ({
@@ -37,7 +37,7 @@ export const makeMove = (
  */
 export const gameEvent = (
   type: string,
-  args: any,
+  args?: any,
   playerID?: string | null,
   credentials?: string
 ) => ({
@@ -63,15 +63,11 @@ export const automaticGameEvent = (
   automatic: true,
 });
 
-/**
- * Used to reset the Redux store's state on a sync.
- * @param {object} state - The state to restore.
- * @param {Array} log - The log to restore.
- */
-export const sync = (state: State, log: LogEntry[]) => ({
+export const sync = (info: SyncInfo) => ({
   type: Actions.SYNC as typeof Actions.SYNC,
-  state,
-  log,
+  state: info.state,
+  log: info.log,
+  initialState: info.initialState,
   clientOnly: true as const,
 });
 
@@ -110,4 +106,17 @@ export const undo = () => ({
  */
 export const redo = () => ({
   type: Actions.REDO as typeof Actions.REDO,
+});
+
+/**
+ * Allows plugins to define their own actions and intercept them.
+ */
+export const plugin = (
+  type: string,
+  args?: any,
+  playerID?: string | null,
+  credentials?: string
+) => ({
+  type: Actions.PLUGIN as typeof Actions.PLUGIN,
+  payload: { type, args, playerID, credentials },
 });

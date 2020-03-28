@@ -11,7 +11,7 @@ export class Transport {
     this.store = store;
     this.gameName = gameName || 'default';
     this.playerID = playerID || null;
-    this.gameID = `${this.gameName}:${gameID || 'default'}`;
+    this.gameID = gameID || 'default';
     this.numPlayers = numPlayers || 2;
   }
 }

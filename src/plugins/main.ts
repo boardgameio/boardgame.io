@@ -9,7 +9,14 @@
 import PluginImmer from './plugin-immer';
 import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
-import { GameState, State, GameConfig, Plugin, Ctx } from '../types';
+import {
+  PartialGameState,
+  State,
+  GameConfig,
+  Plugin,
+  Ctx,
+  ActionShape,
+} from '../types';
 
 interface PluginOpts {
   game: GameConfig;
@@ -20,6 +27,33 @@ interface PluginOpts {
  * List of plugins that are always added.
  */
 const DEFAULT_PLUGINS = [PluginImmer, PluginRandom, PluginEvents];
+
+/**
+ * Allow plugins to intercept actions and process them.
+ */
+export const ProcessAction = (
+  state: State,
+  action: ActionShape.Plugin,
+  opts: PluginOpts
+): State => {
+  opts.game.plugins
+    .filter(plugin => plugin.action !== undefined)
+    .filter(plugin => plugin.name === action.payload.type)
+    .forEach(plugin => {
+      const name = plugin.name;
+      const pluginState = state.plugins[name] || { data: {} };
+      const data = plugin.action(pluginState.data, action.payload);
+
+      state = {
+        ...state,
+        plugins: {
+          ...state.plugins,
+          [name]: { ...pluginState, data },
+        },
+      };
+    });
+  return state;
+};
 
 /**
  * The API's created by various plugins are stored in the plugins
@@ -39,7 +73,7 @@ const DEFAULT_PLUGINS = [PluginImmer, PluginRandom, PluginEvents];
  * This function takes these API's and stuffs them back into
  * ctx for consumption inside a move function or hook.
  */
-export const EnhanceCtx = (state: GameState): Ctx => {
+export const EnhanceCtx = (state: PartialGameState): Ctx => {
   let ctx = { ...state.ctx };
   const plugins = state.plugins || {};
   Object.entries(plugins).forEach(([name, { api }]) => {
@@ -64,7 +98,10 @@ export const FnWrap = (fn: Function, plugins: Plugin[]) => {
 /**
  * Allows the plugin to generate its initial state.
  */
-export const Setup = (state: GameState, opts: PluginOpts): GameState => {
+export const Setup = (
+  state: PartialGameState,
+  opts: PluginOpts
+): PartialGameState => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter(plugin => plugin.setup !== undefined)
     .forEach(plugin => {

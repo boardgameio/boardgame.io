@@ -13,6 +13,8 @@ import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 import {
+  SyncInfo,
+  FilteredMetadata,
   GameConfig,
   Server,
   State,
@@ -21,8 +23,7 @@ import {
   LogEntry,
   PlayerID,
 } from '../types';
-
-const GameMetadataKey = (gameID: string) => `${gameID}:metadata`;
+import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
   gameMetadata: Server.GameMetadata,
@@ -32,6 +33,12 @@ export const getPlayerMetadata = (
     return gameMetadata.players[playerID];
   }
 };
+
+function IsSynchronous(
+  storageAPI: StorageAPI.Sync | StorageAPI.Async
+): storageAPI is StorageAPI.Sync {
+  return storageAPI.type() === StorageAPI.Type.SYNC;
+}
 
 /**
  * Redact the log.
@@ -74,10 +81,10 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
  * Verifies that the game has metadata and is using credentials.
  */
 export const doesGameRequireAuthentication = (
-  gameMetadata: Server.GameMetadata
+  gameMetadata?: Server.GameMetadata
 ) => {
   if (!gameMetadata) return false;
-  const { players } = gameMetadata;
+  const { players } = gameMetadata as Server.GameMetadata;
   const hasCredentials = Object.keys(players).some(key => {
     return !!(players[key] && players[key].credentials);
   });
@@ -89,7 +96,7 @@ export const doesGameRequireAuthentication = (
  */
 export const isActionFromAuthenticPlayer = (
   actionCredentials: string,
-  playerMetadata: Server.PlayerMetadata
+  playerMetadata?: Server.PlayerMetadata
 ) => {
   if (!actionCredentials) return false;
   if (!playerMetadata) return false;
@@ -130,18 +137,17 @@ type CallbackFn = (arg: {
  */
 export class Master {
   game: ReturnType<typeof Game>;
-  storageAPI;
+  storageAPI: StorageAPI.Sync | StorageAPI.Async;
   transportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
   shouldAuth: typeof doesGameRequireAuthentication;
-  executeSynchronously: boolean;
 
   constructor(
     game: GameConfig,
     storageAPI,
     transportAPI,
-    auth: AuthFn | boolean
+    auth?: AuthFn | boolean
   ) {
     this.game = Game(game);
     this.storageAPI = storageAPI;
@@ -179,16 +185,18 @@ export class Master {
       'payload' in action && 'credentials' in action.payload
         ? action.payload.credentials
         : undefined;
-    if (this.executeSynchronously) {
-      const gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
-      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
-      isActionAuthentic = this.shouldAuth(gameMetadata)
+    if (IsSynchronous(this.storageAPI)) {
+      const { metadata } = this.storageAPI.fetch(gameID, { metadata: true });
+      const playerMetadata = getPlayerMetadata(metadata, playerID);
+      isActionAuthentic = this.shouldAuth(metadata)
         ? this.auth(credentials, playerMetadata)
         : true;
     } else {
-      const gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
-      const playerMetadata = getPlayerMetadata(gameMetadata, playerID);
-      isActionAuthentic = this.shouldAuth(gameMetadata)
+      const { metadata } = await this.storageAPI.fetch(gameID, {
+        metadata: true,
+      });
+      const playerMetadata = getPlayerMetadata(metadata, playerID);
+      isActionAuthentic = this.shouldAuth(metadata)
         ? await this.auth(credentials, playerMetadata)
         : true;
     }
@@ -201,11 +209,13 @@ export class Master {
     const key = gameID;
 
     let state: State;
-    if (this.executeSynchronously) {
-      state = this.storageAPI.get(key);
+    let result: StorageAPI.FetchResult<{ state: true }>;
+    if (IsSynchronous(this.storageAPI)) {
+      result = this.storageAPI.fetch(key, { state: true });
     } else {
-      state = await this.storageAPI.get(key);
+      result = await this.storageAPI.fetch(key, { state: true });
     }
+    state = result.state;
 
     if (state === undefined) {
       logging.error(`game not found, gameID=[${key}]`);
@@ -259,8 +269,6 @@ export class Master {
       return;
     }
 
-    let log = store.getState().log || [];
-
     // Update server's version of the store.
     store.dispatch(action);
     state = store.getState();
@@ -275,16 +283,9 @@ export class Master {
       const filteredState = {
         ...state,
         G: this.game.playerView(state.G, state.ctx, playerID),
-        ctx: { ...state.ctx, _random: undefined },
-        log: undefined,
         deltalog: undefined,
         _undo: [],
         _redo: [],
-        _initial: {
-          ...state._initial,
-          _undo: [],
-          _redo: [],
-        },
       };
 
       const log = redactLog(state.deltalog, playerID);
@@ -295,16 +296,12 @@ export class Master {
       };
     });
 
-    // TODO: We currently attach the log back into the state
-    // object before storing it, but this should probably
-    // sit in a different part of the database eventually.
-    log = [...log, ...state.deltalog];
-    const stateWithLog = { ...state, log };
+    const { deltalog, ...stateWithoutDeltalog } = state;
 
-    if (this.executeSynchronously) {
-      this.storageAPI.set(key, stateWithLog);
+    if (IsSynchronous(this.storageAPI)) {
+      this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
     } else {
-      await this.storageAPI.set(key, stateWithLog);
+      await this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
     }
   }
 
@@ -316,61 +313,84 @@ export class Master {
     const key = gameID;
 
     let state: State;
+    let initialState: State;
+    let log: LogEntry[];
     let gameMetadata: Server.GameMetadata;
-    let filteredGameMetadata: { id: number; name?: string }[];
+    let filteredMetadata: FilteredMetadata;
+    let result: StorageAPI.FetchResult<{
+      state: true;
+      metadata: true;
+      log: true;
+      initialState: true;
+    }>;
 
-    if (this.executeSynchronously) {
-      state = this.storageAPI.get(key);
-      gameMetadata = this.storageAPI.get(GameMetadataKey(gameID));
+    if (IsSynchronous(this.storageAPI)) {
+      const api = this.storageAPI as StorageAPI.Sync;
+      result = api.fetch(key, {
+        state: true,
+        metadata: true,
+        log: true,
+        initialState: true,
+      });
     } else {
-      state = await this.storageAPI.get(key);
-      gameMetadata = await this.storageAPI.get(GameMetadataKey(gameID));
+      result = await this.storageAPI.fetch(key, {
+        state: true,
+        metadata: true,
+        log: true,
+        initialState: true,
+      });
     }
+
+    state = result.state;
+    initialState = result.initialState;
+    log = result.log;
+    gameMetadata = result.metadata;
+
     if (gameMetadata) {
-      filteredGameMetadata = Object.values(gameMetadata.players).map(player => {
+      filteredMetadata = Object.values(gameMetadata.players).map(player => {
         return { id: player.id, name: player.name };
       });
     }
+
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
     if (state === undefined) {
-      state = InitializeGame({ game: this.game, numPlayers });
+      initialState = state = InitializeGame({ game: this.game, numPlayers });
 
       this.subscribeCallback({
         state,
         gameID,
       });
 
-      if (this.executeSynchronously) {
-        this.storageAPI.set(key, state);
-        state = this.storageAPI.get(key);
+      if (IsSynchronous(this.storageAPI)) {
+        const api = this.storageAPI as StorageAPI.Sync;
+        api.setState(key, state);
       } else {
-        await this.storageAPI.set(key, state);
-        state = await this.storageAPI.get(key);
+        await this.storageAPI.setState(key, state);
       }
     }
 
     const filteredState = {
       ...state,
       G: this.game.playerView(state.G, state.ctx, playerID),
-      ctx: { ...state.ctx, _random: undefined },
-      log: undefined,
       deltalog: undefined,
       _undo: [],
       _redo: [],
-      _initial: {
-        ...state._initial,
-        _undo: [],
-        _redo: [],
-      },
     };
 
-    const log = redactLog(state.log, playerID);
+    log = redactLog(log, playerID);
+
+    const syncInfo: SyncInfo = {
+      state: filteredState,
+      log,
+      filteredMetadata,
+      initialState,
+    };
 
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, filteredState, log, filteredGameMetadata],
+      args: [gameID, syncInfo],
     });
 
     return;
