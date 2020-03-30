@@ -1,4 +1,5 @@
 import { Object } from 'ts-toolbelt';
+import Koa from 'koa';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
 import { INVALID_MOVE } from './core/reducer';
@@ -171,6 +172,15 @@ export interface GameConfig {
 type Undo = { G: object; ctx: Ctx; moveType?: string };
 
 export namespace Server {
+  export type GenerateCredentials = (
+    ctx: Koa.DefaultContext
+  ) => Promise<string> | string;
+
+  export type AuthenticateCredentials = (
+    credentials: string,
+    playerMetadata: PlayerMetadata
+  ) => Promise<boolean> | boolean;
+
   export type PlayerMetadata = {
     id: number;
     name?: string;
@@ -185,10 +195,10 @@ export namespace Server {
   }
 
   export interface LobbyConfig {
-    uuid?: Function;
-    generateCredentials?: Function;
+    uuid?: () => string;
+    generateCredentials?: GenerateCredentials;
     apiPort?: number;
-    apiCallback?: Function;
+    apiCallback?: () => void;
   }
 }
 
