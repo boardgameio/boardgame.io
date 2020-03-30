@@ -12,6 +12,7 @@ import { Game } from './game';
 import { error } from './logger';
 import {
   ActionShape,
+  Ctx,
   GameConfig,
   LogEntry,
   State,
@@ -22,12 +23,14 @@ import {
 /**
  * Returns true if a move can be undone.
  */
-const CanUndoMove = (G: object, ctx: object, move: Move): boolean => {
+const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
   function HasUndoable(move: Move): move is LongFormMove {
     return (move as LongFormMove).undoable !== undefined;
   }
 
-  function IsFunction(undoable: boolean | Function): undoable is Function {
+  function IsFunction(
+    undoable: boolean | ((...args: any[]) => any)
+  ): undoable is (...args: any[]) => any {
     return undoable instanceof Function;
   }
 

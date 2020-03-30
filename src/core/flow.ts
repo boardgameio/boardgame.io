@@ -76,7 +76,7 @@ export function Flow({
 
   Object.keys(moves).forEach(name => moveNames.add(name));
 
-  const HookWrapper = (fn: Function) => {
+  const HookWrapper = (fn: (G: any, ctx: Ctx) => any) => {
     const withPlugins = plugin.FnWrap(fn, plugins);
     return (state: State) => {
       const ctxWithAPI = plugin.EnhanceCtx(state);
@@ -84,7 +84,7 @@ export function Flow({
     };
   };
 
-  const TriggerWrapper = (endIf: Function) => {
+  const TriggerWrapper = (endIf: (G: any, ctx: Ctx) => any) => {
     return (state: State) => {
       let ctxWithAPI = plugin.EnhanceCtx(state);
       return endIf(state.G, ctxWithAPI);
@@ -399,12 +399,12 @@ export function Flow({
     return wrapped.endIf(state);
   }
 
-  function ShouldEndPhase(state: State): boolean {
+  function ShouldEndPhase(state: State): boolean | void {
     const conf = GetPhase(state.ctx);
     return conf.wrapped.endIf(state);
   }
 
-  function ShouldEndTurn(state: State): boolean {
+  function ShouldEndTurn(state: State): boolean | void {
     const conf = GetPhase(state.ctx);
 
     // End the turn if the required number of moves has been made.

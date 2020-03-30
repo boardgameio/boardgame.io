@@ -2,6 +2,7 @@ import { Object } from 'ts-toolbelt';
 import Koa from 'koa';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
+import { INVALID_MOVE } from './core/reducer';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
 import { PlayerAPI } from './plugins/plugin-player';
@@ -68,22 +69,27 @@ export interface LogEntry {
   automatic?: boolean;
 }
 
-export interface Plugin {
+export interface Plugin<API extends any = any, Data extends any = any> {
   name: string;
-  setup?: Function;
-  action?: Function;
-  api?: Function;
-  flush?: Function;
+  setup?: (setupCtx: { ctx: Ctx }) => Data;
+  action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
+  api?: (apiCtx: { G: any; ctx: Ctx; data: Data }) => API;
+  flush?: (flushCtx: { G: any; ctx: Ctx; data: Data; api: API }) => Data;
+  fnWrap?: (
+    fn: (...args: any[]) => any
+  ) => (G: any, ctx: Ctx, ...args: any[]) => any;
 }
+
+type MoveFn<A extends any[] = any[]> = (G: any, ctx: Ctx, ...args: A) => any;
 
 export interface LongFormMove {
-  move: Function;
+  move: MoveFn;
   redact?: boolean;
   client?: boolean;
-  undoable?: boolean | Function;
+  undoable?: boolean | ((G: any, ctx: Ctx) => boolean);
 }
 
-export type Move = Function | LongFormMove;
+export type Move = MoveFn | LongFormMove;
 
 export interface MoveMap {
   [moveName: string]: Move;
@@ -92,15 +98,15 @@ export interface MoveMap {
 export interface PhaseConfig {
   start?: boolean;
   next?: string;
-  onBegin?: Function;
-  onEnd?: Function;
-  endIf?: Function;
+  onBegin?: (G: any, ctx: Ctx) => any;
+  onEnd?: (G: any, ctx: Ctx) => any;
+  endIf?: (G: any, ctx: Ctx) => boolean | void;
   moves?: MoveMap;
   turn?: TurnConfig;
   wrapped?: {
-    endIf?: Function;
-    onBegin?: Function;
-    onEnd?: Function;
+    endIf?: (state: State) => boolean | void;
+    onBegin?: (state: State) => any;
+    onEnd?: (state: State) => any;
   };
 }
 
@@ -116,18 +122,18 @@ export interface StageMap {
 export interface TurnConfig {
   activePlayers?: object;
   moveLimit?: number;
-  onBegin?: Function;
-  onEnd?: Function;
-  endIf?: Function;
-  onMove?: Function;
+  onBegin?: (G: any, ctx: Ctx) => any;
+  onEnd?: (G: any, ctx: Ctx) => any;
+  endIf?: (G: any, ctx: Ctx) => boolean | void;
+  onMove?: (G: any, ctx: Ctx) => any;
   stages?: StageMap;
   moves?: MoveMap;
   order?: object;
   wrapped?: {
-    endIf?: Function;
-    onBegin?: Function;
-    onEnd?: Function;
-    onMove?: Function;
+    endIf?: (state: State) => boolean | void;
+    onBegin?: (state: State) => any;
+    onEnd?: (state: State) => any;
+    onMove?: (state: State) => any;
   };
 }
 
@@ -138,7 +144,7 @@ interface PhaseMap {
 export interface GameConfig {
   name?: string;
   seed?: string | number;
-  setup?: Function;
+  setup?: (ctx: Ctx, setupData?: any) => any;
   moves?: MoveMap;
   phases?: PhaseMap;
   turn?: TurnConfig;
@@ -152,11 +158,14 @@ export interface GameConfig {
     pass?: boolean;
     setActivePlayers?: boolean;
   };
-  endIf?: Function;
-  onEnd?: Function;
-  playerView?: Function;
+  endIf?: (G: any, ctx: Ctx) => any;
+  onEnd?: (G: any, ctx: Ctx) => any;
+  playerView?: (G: any, ctx: Ctx, playerID: PlayerID) => any;
   plugins?: Array<Plugin>;
-  processMove?: Function;
+  processMove?: (
+    state: State,
+    action: ActionPayload.MakeMove
+  ) => State | typeof INVALID_MOVE;
   flow?: ReturnType<typeof Flow>;
 }
 

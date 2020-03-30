@@ -22,7 +22,7 @@ Doing so will `console.log` on state changes. This can also hook into the [Chrom
 ```js
 export default Client({
   ...
-  enhancer: window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+  enhancer: (window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 }
 ```
 
@@ -36,7 +36,7 @@ export default Client({
   ...
   enhancer: compose(
     applyMiddleware(logger),
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+    (window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
   )
 })
 ```
