@@ -96,6 +96,7 @@ export default [
   {
     input: 'packages/server.ts',
     output: { file: 'dist/server.js', format: 'cjs', name: 'Server' },
+    external,
     plugins: serverPlugins,
   },
 
