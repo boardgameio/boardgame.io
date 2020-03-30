@@ -8,14 +8,18 @@
 
 import * as plugins from '../plugins/main';
 import { Flow } from './flow';
+import { INVALID_MOVE } from './reducer';
 import { ActionPayload, GameConfig, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
 
 type ProcessedGameConfig = GameConfig & {
-  flow: object;
+  flow: ReturnType<typeof Flow>;
   moveNames: string[];
   pluginNames: string[];
-  processMove: Function;
+  processMove: (
+    state: State,
+    action: ActionPayload.MakeMove
+  ) => State | typeof INVALID_MOVE;
 };
 
 function IsProcessed(
