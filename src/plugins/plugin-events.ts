@@ -6,26 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Plugin, State } from '../types';
-import { Events } from './events/events';
+import { Plugin } from '../types';
+import { Events, EventsAPI, PrivateEventsAPI } from './events/events';
 
-export interface EventsAPI {
-  endGame?(...args: any[]): void;
-  endPhase?(...args: any[]): void;
-  endStage?(...args: any[]): void;
-  endTurn?(...args: any[]): void;
-  pass?(...args: any[]): void;
-  setActivePlayers?(...args: any[]): void;
-  setPhase?(...args: any[]): void;
-  setStage?(...args: any[]): void;
-}
-
-interface PrivateEventsAPI {
-  _obj: {
-    isUsed(): boolean;
-    update(state: State): State;
-  };
-}
+export { EventsAPI };
 
 const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   name: 'events',
