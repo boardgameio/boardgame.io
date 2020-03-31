@@ -209,7 +209,8 @@ function getCurrentPlayer(
   playOrder: Ctx['playOrder'],
   playOrderPos: Ctx['playOrderPos']
 ) {
-  return playOrder[playOrderPos];
+  // convert to string in case playOrder is set to number[]
+  return playOrder[playOrderPos] + '';
 }
 
 /**
