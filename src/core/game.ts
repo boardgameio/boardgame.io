@@ -96,11 +96,11 @@ export function Game(
           ...plugins.EnhanceCtx(state),
           playerID: action.playerID,
         };
-        let args = [state.G, ctxWithAPI];
+        let args = [];
         if (action.args !== undefined) {
           args = args.concat(action.args);
         }
-        return fn(...args);
+        return fn(state.G, ctxWithAPI, ...args);
       }
 
       logging.error(`invalid move object: ${action.type}`);
