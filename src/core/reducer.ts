@@ -103,7 +103,11 @@ export function CreateGameReducer({
         }
 
         // Execute plugins.
-        state = plugins.Enhance(state, { game, isClient: false });
+        state = plugins.Enhance(state, {
+          game,
+          isClient: false,
+          playerID: action.payload.playerID,
+        });
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
@@ -153,6 +157,7 @@ export function CreateGameReducer({
         state = plugins.Enhance(state, {
           game,
           isClient,
+          playerID: action.payload.playerID,
         });
 
         // Process the move.

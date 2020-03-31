@@ -6,13 +6,41 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { State, Ctx, PlayerID, GameConfig } from '../../types';
 import { automaticGameEvent } from '../../core/action-creators';
+
+export interface EventsAPI {
+  endGame?(...args: any[]): void;
+  endPhase?(...args: any[]): void;
+  endStage?(...args: any[]): void;
+  endTurn?(...args: any[]): void;
+  pass?(...args: any[]): void;
+  setActivePlayers?(...args: any[]): void;
+  setPhase?(...args: any[]): void;
+  setStage?(...args: any[]): void;
+}
+
+export interface PrivateEventsAPI {
+  _obj: {
+    isUsed(): boolean;
+    update(state: State): State;
+  };
+}
 
 /**
  * Events
  */
 export class Events {
-  constructor(flow, playerID) {
+  flow: GameConfig['flow'];
+  playerID: PlayerID | undefined;
+  dispatch: Array<{
+    key: string;
+    args: any[];
+    phase: string;
+    turn: number;
+  }>;
+
+  constructor(flow: GameConfig['flow'], playerID?: PlayerID) {
     this.flow = flow;
     this.playerID = playerID;
     this.dispatch = [];
@@ -22,17 +50,17 @@ export class Events {
    * Attaches the Events API to ctx.
    * @param {object} ctx - The ctx object to attach to.
    */
-  api(ctx) {
-    const events = {};
+  api(ctx: Ctx) {
+    const events: EventsAPI & PrivateEventsAPI = {
+      _obj: this,
+    };
     const { phase, turn } = ctx;
 
     for (const key of this.flow.eventNames) {
-      events[key] = (...args) => {
+      events[key] = (...args: any[]) => {
         this.dispatch.push({ key, args, phase, turn });
       };
     }
-
-    events._obj = this;
 
     return events;
   }
@@ -45,7 +73,7 @@ export class Events {
    * Updates ctx with the triggered events.
    * @param {object} state - The state object { G, ctx }.
    */
-  update(state) {
+  update(state: State) {
     for (let i = 0; i < this.dispatch.length; i++) {
       const item = this.dispatch[i];
 

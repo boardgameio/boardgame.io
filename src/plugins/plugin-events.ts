@@ -6,27 +6,19 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Events } from './events/events';
+import { Plugin } from '../types';
+import { Events, EventsAPI, PrivateEventsAPI } from './events/events';
 
-export interface EventsAPI {
-  endGame?(...args: any[]): void;
-  endPhase?(...args: any[]): void;
-  endStage?(...args: any[]): void;
-  endTurn?(...args: any[]): void;
-  pass?(...args: any[]): void;
-  setActivePlayers?(...args: any[]): void;
-  setPhase?(...args: any[]): void;
-  setStage?(...args: any[]): void;
-}
+export { EventsAPI };
 
-export default {
+const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   name: 'events',
 
   noClient: ({ api }) => {
     return api._obj.isUsed();
   },
 
-  flushRaw: ({ state, api }) => {
+  dangerouslyFlushRawState: ({ state, api }) => {
     return api._obj.update(state);
   },
 
@@ -34,3 +26,5 @@ export default {
     return new Events(game.flow, playerID).api(ctx);
   },
 };
+
+export default EventsPlugin;
