@@ -10,6 +10,8 @@ import { RandomAPI } from './plugins/plugin-random';
 
 export { StorageAPI };
 
+export type AnyFn = (...args: any[]) => any;
+
 export interface State {
   G: object;
   ctx: Ctx;
@@ -56,8 +58,8 @@ export interface Ctx {
 }
 
 export interface PluginState {
-  data: object;
-  api?: object;
+  data: any;
+  api?: any;
 }
 
 export interface LogEntry {
@@ -69,15 +71,28 @@ export interface LogEntry {
   automatic?: boolean;
 }
 
+interface PluginContext<API extends any = any, Data extends any = any> {
+  G: any;
+  ctx: Ctx;
+  game: GameConfig;
+  api: API;
+  data: Data;
+}
+
 export interface Plugin<API extends any = any, Data extends any = any> {
   name: string;
-  setup?: (setupCtx: { ctx: Ctx }) => Data;
+  noClient?: (context: PluginContext<API, Data>) => boolean;
+  setup?: (setupCtx: { G: any; ctx: Ctx; game: GameConfig }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
-  api?: (apiCtx: { G: any; ctx: Ctx; data: Data }) => API;
-  flush?: (flushCtx: { G: any; ctx: Ctx; data: Data; api: API }) => Data;
-  fnWrap?: (
-    fn: (...args: any[]) => any
-  ) => (G: any, ctx: Ctx, ...args: any[]) => any;
+  api?: (context: { G: any; ctx: Ctx; game: GameConfig; data: Data }) => API;
+  flush?: (context: PluginContext<API, Data>) => Data;
+  flushRaw?: (flushCtx: {
+    state: State;
+    game: GameConfig;
+    api: API;
+    data: Data;
+  }) => State;
+  fnWrap?: (fn: AnyFn) => (G: any, ctx: Ctx, ...args: any[]) => any;
 }
 
 type MoveFn<A extends any[] = any[]> = (G: any, ctx: Ctx, ...args: A) => any;
@@ -167,6 +182,7 @@ export interface GameConfig {
     action: ActionPayload.MakeMove
   ) => State | typeof INVALID_MOVE;
   flow?: ReturnType<typeof Flow>;
+  [key: string]: any;
 }
 
 type Undo = { G: object; ctx: Ctx; moveType?: string };

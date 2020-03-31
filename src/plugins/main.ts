@@ -10,6 +10,7 @@ import PluginImmer from './plugin-immer';
 import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
 import {
+  AnyFn,
   PartialGameState,
   State,
   GameConfig,
@@ -88,8 +89,8 @@ export const EnhanceCtx = (state: PartialGameState): Ctx => {
  * @param {function} fn - The move function or trigger to apply the plugins to.
  * @param {object} plugins - The list of plugins.
  */
-export const FnWrap = (fn: (...args: any[]) => any, plugins: Plugin[]) => {
-  const reducer = (acc, { fnWrap }) => fnWrap(acc, plugins);
+export const FnWrap = (fn: AnyFn, plugins: Plugin[]) => {
+  const reducer = (acc: AnyFn, { fnWrap }: Plugin) => fnWrap(acc);
   return [...DEFAULT_PLUGINS, ...plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
     .reduce(reducer, fn);

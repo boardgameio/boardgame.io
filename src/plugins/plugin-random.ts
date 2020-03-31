@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { Plugin } from '../types';
 import { Random } from './random/random';
 
 export interface RandomAPI {
@@ -25,7 +26,14 @@ export interface RandomAPI {
   Shuffle<T>(deck: T[]): T[];
 }
 
-export default {
+interface PrivateRandomAPI {
+  _obj: {
+    isUsed(): boolean;
+    getState(): any;
+  };
+}
+
+const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI> = {
   name: 'random',
 
   noClient: ({ api }) => {
@@ -49,3 +57,5 @@ export default {
     return { seed };
   },
 };
+
+export default RandomPlugin;

@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { Plugin, State } from '../types';
 import { Events } from './events/events';
 
 export interface EventsAPI {
@@ -19,7 +20,14 @@ export interface EventsAPI {
   setStage?(...args: any[]): void;
 }
 
-export default {
+interface PrivateEventsAPI {
+  _obj: {
+    isUsed(): boolean;
+    update(state: State): State;
+  };
+}
+
+const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   name: 'events',
 
   noClient: ({ api }) => {
@@ -34,3 +42,5 @@ export default {
     return new Events(game.flow, playerID).api(ctx);
   },
 };
+
+export default EventsPlugin;
