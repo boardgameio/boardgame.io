@@ -10,9 +10,9 @@ const production = process.env.NODE_ENV === 'production';
 const logfn = production ? () => {} : console.log;
 const errorfn = console.error;
 
-export function info(msg) {
+export function info(msg: string) {
   logfn(`INFO: ${msg}`);
 }
-export function error(error) {
+export function error(error: string) {
   errorfn('ERROR:', error);
 }
