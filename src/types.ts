@@ -27,7 +27,19 @@ export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 export type StageName = string;
 export type PlayerID = string;
 
-interface ActivePlayers {
+export type StageArg = StageName | { stage?: StageName; moveLimit?: number };
+
+export interface ActivePlayersArg {
+  currentPlayer?: StageArg;
+  others?: StageArg;
+  all?: StageArg;
+  value?: Record<PlayerID, StageArg>;
+  moveLimit?: number;
+  revert?: boolean;
+  next?: ActivePlayersArg;
+}
+
+export interface ActivePlayers {
   [playerID: string]: StageName;
 }
 
@@ -41,9 +53,14 @@ export interface Ctx {
   gameover?: any;
   turn: number;
   phase: string;
-  _activePlayersMoveLimit?: object;
-  _activePlayersNumMoves?: object;
-  _prevActivePlayers?: Array<object>;
+  _activePlayersMoveLimit?: Record<PlayerID, number>;
+  _activePlayersNumMoves?: Record<PlayerID, number>;
+  _prevActivePlayers?: Array<{
+    activePlayers: null | ActivePlayers;
+    _activePlayersMoveLimit?: Record<PlayerID, number>;
+    _activePlayersNumMoves?: Record<PlayerID, number>;
+  }>;
+  _nextActivePlayers?: ActivePlayersArg;
   _random?: {
     seed: string | number;
   };
@@ -119,6 +136,12 @@ export interface StageMap {
   [stageName: string]: StageConfig;
 }
 
+export interface TurnOrderConfig {
+  first: (G: any, ctx: Ctx) => number;
+  next: (G: any, ctx: Ctx) => number;
+  playOrder?: (G: any, ctx: Ctx) => PlayerID[];
+}
+
 export interface TurnConfig {
   activePlayers?: object;
   moveLimit?: number;
@@ -128,7 +151,7 @@ export interface TurnConfig {
   onMove?: (G: any, ctx: Ctx) => any;
   stages?: StageMap;
   moves?: MoveMap;
-  order?: object;
+  order?: TurnOrderConfig;
   wrapped?: {
     endIf?: (state: State) => boolean | void;
     onBegin?: (state: State) => any;
