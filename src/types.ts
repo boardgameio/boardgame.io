@@ -84,7 +84,13 @@ export interface Plugin<API extends any = any, Data extends any = any> {
   noClient?: (context: PluginContext<API, Data>) => boolean;
   setup?: (setupCtx: { G: any; ctx: Ctx; game: GameConfig }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
-  api?: (context: { G: any; ctx: Ctx; game: GameConfig; data: Data }) => API;
+  api?: (context: {
+    G: any;
+    ctx: Ctx;
+    game: GameConfig;
+    data: Data;
+    playerID?: PlayerID;
+  }) => API;
   flush?: (context: PluginContext<API, Data>) => Data;
   flushRaw?: (flushCtx: {
     state: State;

@@ -17,6 +17,7 @@ import {
   Plugin,
   Ctx,
   ActionShape,
+  PlayerID,
 } from '../types';
 
 interface PluginOpts {
@@ -130,7 +131,10 @@ export const Setup = (
  * the `plugins` section of the state (which is subsequently
  * merged into ctx).
  */
-export const Enhance = (state: State, opts: PluginOpts): State => {
+export const Enhance = (
+  state: State,
+  opts: PluginOpts & { playerID: PlayerID }
+): State => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter(plugin => plugin.api !== undefined)
     .forEach(plugin => {
@@ -142,6 +146,7 @@ export const Enhance = (state: State, opts: PluginOpts): State => {
         ctx: state.ctx,
         data: pluginState.data,
         game: opts.game,
+        playerID: opts.playerID,
       });
 
       state = {

@@ -42,7 +42,7 @@ export function InitializeGame({
 
   // Run plugins over initial state.
   state = plugins.Setup(state, { game });
-  state = plugins.Enhance(state as State, { game });
+  state = plugins.Enhance(state as State, { game, playerID: undefined });
 
   const enhancedCtx = plugins.EnhanceCtx(state);
   state.G = game.setup(enhancedCtx, setupData);
