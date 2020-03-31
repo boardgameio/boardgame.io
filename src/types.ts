@@ -92,7 +92,7 @@ export interface Plugin<API extends any = any, Data extends any = any> {
     playerID?: PlayerID;
   }) => API;
   flush?: (context: PluginContext<API, Data>) => Data;
-  flushRaw?: (flushCtx: {
+  dangerouslyFlushRawState?: (flushCtx: {
     state: State;
     game: GameConfig;
     api: API;

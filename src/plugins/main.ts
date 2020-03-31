@@ -184,8 +184,8 @@ export const Flush = (state: State, opts: PluginOpts): State => {
           [plugin.name]: { data: newData },
         },
       };
-    } else if (plugin.flushRaw) {
-      state = plugin.flushRaw({
+    } else if (plugin.dangerouslyFlushRawState) {
+      state = plugin.dangerouslyFlushRawState({
         state,
         game: opts.game,
         api: pluginState.api,

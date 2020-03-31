@@ -18,7 +18,7 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
     return api._obj.isUsed();
   },
 
-  flushRaw: ({ state, api }) => {
+  dangerouslyFlushRawState: ({ state, api }) => {
     return api._obj.update(state);
   },
 
