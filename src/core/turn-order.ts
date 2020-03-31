@@ -233,6 +233,12 @@ export function InitTurnOrderState(G: any, ctx: Ctx, turn: TurnConfig) {
   }
 
   const playOrderPos = order.first(G, ctx);
+  const posType = typeof playOrderPos;
+  if (posType !== 'number') {
+    logging.error(
+      `invalid value returned by turn.order.first — expected number got ${posType} “${playOrderPos}”.`
+    );
+  }
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
@@ -281,6 +287,12 @@ export function UpdateTurnOrderState(
     });
   } else {
     const t = order.next(G, ctx);
+    const type = typeof t;
+    if (type !== 'number') {
+      logging.error(
+        `invalid value returned by turn.order.next — expected number got ${type} “${t}”.`
+      );
+    }
 
     if (t === undefined) {
       endPhase = true;
