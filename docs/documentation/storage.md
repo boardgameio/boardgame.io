@@ -47,6 +47,13 @@ Coming soon.
 Coming soon (used to be supported but is not in sync with the
 latest release).
 
+### Caching
+
+Depending on your set-up, you may want the server to cache some of the data,
+reducing the load on your database and speeding up server responses.
+[bgio-storage-cache](https://github.com/delucis/bgio-storage-cache) offers
+a basic caching model compatible with any boardgame.io database connector.
+
 ### Writing a Custom Adapter
 
 Create a class that implements the [StorageAPI.Async](https://github.com/nicolodavis/boardgame.io/blob/master/src/server/db/base.ts) interface.
