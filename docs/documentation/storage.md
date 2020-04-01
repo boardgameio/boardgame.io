@@ -34,15 +34,17 @@ const server = Server({
 server.run(8000);
 ```
 
-### Firebase
+### Other backends
+
+#### Firebase
 
 Instructions at https://github.com/delucis/bgio-firebase.
 
-### Postgres
+#### Postgres
 
 Coming soon.
 
-### MongoDB
+#### MongoDB
 
 Coming soon (used to be supported but is not in sync with the
 latest release).
