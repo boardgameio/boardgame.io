@@ -29,7 +29,9 @@ export interface PlayerAPI {
  *
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
-const PlayerPlugin: Plugin<PlayerAPI, PlayerData> = {
+const PlayerPlugin = (
+  playerSetup?: (playerID: string) => any
+): Plugin<PlayerAPI, PlayerData> => ({
   name: 'player',
 
   flush: ({ api }) => {
@@ -63,17 +65,17 @@ const PlayerPlugin: Plugin<PlayerAPI, PlayerData> = {
     return result;
   },
 
-  setup: ({ ctx, game }) => {
+  setup: ({ ctx }) => {
     let players: Record<PlayerID, any> = {};
     for (let i = 0; i < ctx.numPlayers; i++) {
       let playerState: any = {};
-      if (game.playerSetup !== undefined) {
-        playerState = game.playerSetup(i + '');
+      if (playerSetup !== undefined) {
+        playerState = playerSetup(i + '');
       }
       players[i + ''] = playerState;
     }
     return { players };
   },
-};
+});
 
 export default PlayerPlugin;

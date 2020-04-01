@@ -211,7 +211,6 @@ export interface GameConfig {
     action: ActionPayload.MakeMove
   ) => State | typeof INVALID_MOVE;
   flow?: ReturnType<typeof Flow>;
-  [key: string]: any;
 }
 
 type Undo = { G: object; ctx: Ctx; moveType?: string };
