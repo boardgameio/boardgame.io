@@ -22,7 +22,7 @@ describe('default values', () => {
   });
 
   test('playerState is passed', () => {
-    const plugin = PluginPlayer(() => ({ A: 1 }));
+    const plugin = PluginPlayer({ setup: () => ({ A: 1 }) });
     const game = {
       plugins: [plugin],
     };
@@ -120,7 +120,7 @@ describe('game with phases', () => {
 
   beforeAll(() => {
     const game = {
-      plugins: [PluginPlayer(id => ({ id }))],
+      plugins: [PluginPlayer({ setup: id => ({ id }) })],
       phases: {
         phase: {},
       },

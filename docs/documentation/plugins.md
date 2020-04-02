@@ -100,7 +100,7 @@ const playerSetup = (playerID) => ({ ... });
 const game = {
   plugins: [
     // pass your function to the player plugin
-    PluginPlayer(playerSetup),
+    PluginPlayer({ setup: playerSetup }),
   ],
 };
 ```
@@ -119,7 +119,7 @@ players: {
 }
 ```
 
-The initial values of these states are determined by the `playerSetup` function, which creates the state for a particular `playerID`.
+The initial values of these states are determined by the `setup` function in its options object, which creates the state for a particular `playerID`.
 
 The record associated with the current player can be accessed
 via `ctx.player.get()`. If this is a 2 player game,

@@ -22,6 +22,10 @@ export interface PlayerAPI {
   };
 }
 
+interface PluginPlayerOpts {
+  setup?: (playerID: string) => any;
+}
+
 /**
  * Plugin that maintains state for each player in G.players.
  * During a turn, G.player will contain the object for the current player.
@@ -29,9 +33,10 @@ export interface PlayerAPI {
  *
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
-const PlayerPlugin = (
-  playerSetup?: (playerID: string) => any
-): Plugin<PlayerAPI, PlayerData> => ({
+const PlayerPlugin = ({ setup }: PluginPlayerOpts = {}): Plugin<
+  PlayerAPI,
+  PlayerData
+> => ({
   name: 'player',
 
   flush: ({ api }) => {
@@ -69,8 +74,8 @@ const PlayerPlugin = (
     let players: Record<PlayerID, any> = {};
     for (let i = 0; i < ctx.numPlayers; i++) {
       let playerState: any = {};
-      if (playerSetup !== undefined) {
-        playerState = playerSetup(i + '');
+      if (setup !== undefined) {
+        playerState = setup(i + '');
       }
       players[i + ''] = playerState;
     }
