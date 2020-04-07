@@ -9,10 +9,10 @@
 import * as plugins from '../plugins/main';
 import { Flow } from './flow';
 import { INVALID_MOVE } from './reducer';
-import { ActionPayload, GameConfig, Move, LongFormMove, State } from '../types';
+import { ActionPayload, Game, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
 
-type ProcessedGameConfig = GameConfig & {
+type ProcessedGame = Game & {
   flow: ReturnType<typeof Flow>;
   moveNames: string[];
   pluginNames: string[];
@@ -22,15 +22,11 @@ type ProcessedGameConfig = GameConfig & {
   ) => State | typeof INVALID_MOVE;
 };
 
-function IsProcessed(
-  game: GameConfig | ProcessedGameConfig
-): game is ProcessedGameConfig {
+function IsProcessed(game: Game | ProcessedGame): game is ProcessedGame {
   return game.processMove !== undefined;
 }
 
 /**
- * Game
- *
  * Helper to generate the game move reducer. The returned
  * reducer has the following signature:
  *
@@ -44,9 +40,7 @@ function IsProcessed(
  * action.args contain any additional arguments as an
  * Array.
  */
-export function Game(
-  game: GameConfig | ProcessedGameConfig
-): ProcessedGameConfig {
+export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
   // The Game() function has already been called on this
   // config object, so just pass it through.
   if (IsProcessed(game)) {

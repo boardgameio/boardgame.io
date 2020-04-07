@@ -8,14 +8,14 @@
 
 import { InitializeGame } from '../core/initialize';
 import { CreateGameReducer } from '../core/reducer';
-import { Game } from '../core/game';
+import { ProcessGameConfig } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 import {
   SyncInfo,
   FilteredMetadata,
-  GameConfig,
+  Game,
   Server,
   State,
   ActionShape,
@@ -136,20 +136,15 @@ type CallbackFn = (arg: {
  * storageAPI to communicate with the database.
  */
 export class Master {
-  game: ReturnType<typeof Game>;
+  game: ReturnType<typeof ProcessGameConfig>;
   storageAPI: StorageAPI.Sync | StorageAPI.Async;
   transportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
   shouldAuth: typeof doesGameRequireAuthentication;
 
-  constructor(
-    game: GameConfig,
-    storageAPI,
-    transportAPI,
-    auth?: AuthFn | boolean
-  ) {
-    this.game = Game(game);
+  constructor(game: Game, storageAPI, transportAPI, auth?: AuthFn | boolean) {
+    this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
     this.auth = null;

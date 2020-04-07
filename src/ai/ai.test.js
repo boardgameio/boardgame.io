@@ -14,7 +14,7 @@ import { Step, Simulate } from './ai';
 import { Bot } from './bot';
 import { RandomBot } from './random-bot';
 import { MCTSBot } from './mcts-bot';
-import { Game } from '../core/game';
+import { ProcessGameConfig } from '../core/game';
 import { Stage } from '../core/turn-order';
 
 function IsVictory(cells) {
@@ -37,7 +37,7 @@ function IsVictory(cells) {
   return positions.map(isRowComplete).some(i => i === true);
 }
 
-const TicTacToe = Game({
+const TicTacToe = ProcessGameConfig({
   setup: () => ({
     cells: new Array(9).fill(null),
   }),
@@ -170,7 +170,7 @@ describe('Simulate', () => {
   });
 
   test('with activePlayers', async () => {
-    const game = Game({
+    const game = ProcessGameConfig({
       moves: {
         A: G => {
           G.moved = true;
@@ -297,7 +297,7 @@ describe('MCTSBot', () => {
   });
 
   test('with activePlayers', async () => {
-    const game = Game({
+    const game = ProcessGameConfig({
       setup: () => ({ moves: 0 }),
       moves: {
         A: G => {

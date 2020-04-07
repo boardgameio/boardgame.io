@@ -9,7 +9,7 @@
 import request from 'supertest';
 
 import { addApiToServer, createApiServer } from './api';
-import { Game } from '../core/game';
+import { ProcessGameConfig } from '../core/game';
 import * as StorageAPI from './db/base';
 
 jest.setTimeout(2000000000);
@@ -206,7 +206,7 @@ describe('.createApiServer', () => {
 
     beforeEach(() => {
       credentials = 'SECRET';
-      games = [Game({ name: 'foo' })];
+      games = [ProcessGameConfig({ name: 'foo' })];
     });
 
     describe('for an unprotected lobby', () => {
@@ -359,7 +359,7 @@ describe('.createApiServer', () => {
     let games;
 
     beforeEach(() => {
-      games = [Game({ name: 'foo' })];
+      games = [ProcessGameConfig({ name: 'foo' })];
     });
 
     describe('for an unprotected lobby', () => {
@@ -478,7 +478,7 @@ describe('.createApiServer', () => {
     let games;
 
     beforeEach(() => {
-      games = [Game({ name: 'foo' })];
+      games = [ProcessGameConfig({ name: 'foo' })];
     });
 
     describe('for an unprotected lobby', () => {
@@ -620,7 +620,7 @@ describe('.createApiServer', () => {
       beforeEach(async () => {
         let app;
         let games;
-        games = [Game({ name: 'foo' }), { name: 'bar' }];
+        games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         app = createApiServer({ db, games });
 
         response = await request(app.callback()).get('/games');
@@ -638,7 +638,7 @@ describe('.createApiServer', () => {
     let games;
 
     beforeEach(() => {
-      games = [Game({ name: 'foo' })];
+      games = [ProcessGameConfig({ name: 'foo' })];
       delete process.env.API_SECRET;
       db = new AsyncStorage({
         fetch: async () => {
@@ -780,7 +780,7 @@ describe('.createApiServer', () => {
       let response;
       let rooms;
       beforeEach(async () => {
-        let games = [Game({ name: 'foo' }), { name: 'bar' }];
+        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar');
         rooms = JSON.parse(response.text).rooms;
@@ -833,7 +833,7 @@ describe('.createApiServer', () => {
       let response;
       let room;
       beforeEach(async () => {
-        let games = [Game({ name: 'foo' }), { name: 'bar' }];
+        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar/bar-0');
         room = JSON.parse(response.text);
@@ -854,7 +854,7 @@ describe('.createApiServer', () => {
         db = new AsyncStorage({
           fetch: async () => ({ metadata: null }),
         });
-        let games = [Game({ name: 'foo' })];
+        let games = [ProcessGameConfig({ name: 'foo' })];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar/doesnotexist');
       });
