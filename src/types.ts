@@ -18,8 +18,8 @@ export interface State<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   plugins: {
     [pluginName: string]: PluginState;
   };
-  _undo: Array<Undo<G, CtxWithPlugins>>;
-  _redo: Array<Undo<G, CtxWithPlugins>>;
+  _undo: Array<Undo<G>>;
+  _redo: Array<Undo<G>>;
   _stateID: number;
 }
 
@@ -253,9 +253,9 @@ export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   flow?: ReturnType<typeof Flow>;
 }
 
-type Undo<G extends any = any, CtxWithPlugins extends Ctx = Ctx> = {
+type Undo<G extends any = any> = {
   G: G;
-  ctx: CtxWithPlugins;
+  ctx: Ctx;
   moveType?: string;
 };
 
