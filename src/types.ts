@@ -90,11 +90,10 @@ export interface LogEntry {
 interface PluginContext<
   API extends any = any,
   Data extends any = any,
-  G extends any = any,
-  CtxWithPlugins extends Ctx = Ctx
+  G extends any = any
 > {
   G: G;
-  ctx: Ctx | CtxWithPlugins;
+  ctx: Ctx;
   game: Game;
   api: API;
   data: Data;
@@ -103,36 +102,27 @@ interface PluginContext<
 export interface Plugin<
   API extends any = any,
   Data extends any = any,
-  G extends any = any,
-  CtxWithPlugins extends Ctx = Ctx
+  G extends any = any
 > {
   name: string;
-  noClient?: (
-    context: PluginContext<API, Data, G, Ctx | CtxWithPlugins>
-  ) => boolean;
-  setup?: (setupCtx: {
-    G: G;
-    ctx: Ctx | CtxWithPlugins;
-    game: Game<G, Ctx | CtxWithPlugins>;
-  }) => Data;
+  noClient?: (context: PluginContext<API, Data, G>) => boolean;
+  setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G, Ctx> }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
     G: G;
-    ctx: Ctx | CtxWithPlugins;
-    game: Game<G, Ctx | CtxWithPlugins>;
+    ctx: Ctx;
+    game: Game<G, Ctx>;
     data: Data;
     playerID?: PlayerID;
   }) => API;
-  flush?: (context: PluginContext<API, Data, G, Ctx | CtxWithPlugins>) => Data;
+  flush?: (context: PluginContext<API, Data, G>) => Data;
   dangerouslyFlushRawState?: (flushCtx: {
-    state: State<G, Ctx | CtxWithPlugins>;
-    game: Game<G, Ctx | CtxWithPlugins>;
+    state: State<G, Ctx>;
+    game: Game<G, Ctx>;
     api: API;
     data: Data;
-  }) => State<G, Ctx | CtxWithPlugins>;
-  fnWrap?: (
-    fn: AnyFn
-  ) => (G: G, ctx: Ctx | CtxWithPlugins, ...args: any[]) => any;
+  }) => State<G, Ctx>;
+  fnWrap?: (fn: AnyFn) => (G: G, ctx: Ctx, ...args: any[]) => any;
 }
 
 type MoveFn<G extends any = any, CtxWithPlugins extends Ctx = Ctx> = (
@@ -249,7 +239,7 @@ export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   endIf?: (G: G, ctx: Ctx | CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: Ctx | CtxWithPlugins) => any;
   playerView?: (G: G, ctx: Ctx | CtxWithPlugins, playerID: PlayerID) => any;
-  plugins?: Array<Plugin<any, any, G, Ctx | CtxWithPlugins>>;
+  plugins?: Array<Plugin<any, any, G>>;
   processMove?: (
     state: State<G, Ctx | CtxWithPlugins>,
     action: ActionPayload.MakeMove
