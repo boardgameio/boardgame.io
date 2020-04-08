@@ -65,11 +65,7 @@ export interface Ctx {
   _random?: {
     seed: string | number;
   };
-  // enhanced by events plugin
   events?: EventsAPI;
-  // enhanced by player plugin
-  player?: PlayerAPI;
-  // enhanced by random plugin
   random?: RandomAPI;
 }
 
