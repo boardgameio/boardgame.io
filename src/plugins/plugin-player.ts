@@ -12,18 +12,22 @@ interface PlayerData {
   players: Record<PlayerID, any>;
 }
 
-export interface PlayerAPI {
-  state: Record<PlayerID, any>;
-  get(): any;
-  set(value: any): any;
+export interface PlayerAPI<PlayerState extends any = any> {
+  state: Record<PlayerID, PlayerState>;
+  get(): PlayerState;
+  set(value: PlayerState): PlayerState;
   opponent?: {
-    get(): any;
-    set(value: any): any;
+    get(): PlayerState;
+    set(value: PlayerState): PlayerState;
   };
 }
 
 interface PluginPlayerOpts {
   setup?: (playerID: string) => any;
+}
+
+export interface PlayerPlugin<PlayerState extends any = any> {
+  player: PlayerAPI<PlayerState>;
 }
 
 /**
