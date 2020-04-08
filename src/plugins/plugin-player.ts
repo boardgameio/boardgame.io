@@ -39,7 +39,7 @@ export interface PlayerPlugin<PlayerState extends any = any> {
  */
 const PlayerPlugin = <PlayerState extends any = any>({
   setup,
-}: PluginPlayerOpts = {}): Plugin<
+}: PluginPlayerOpts<PlayerState> = {}): Plugin<
   PlayerAPI<PlayerState>,
   PlayerData<PlayerState>
 > => ({
