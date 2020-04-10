@@ -199,7 +199,7 @@ export namespace CredentialedActionShape {
     | ActionShape.Reset
     | ActionShape.Undo
     | ActionShape.Redo
-    | ActionShape.Plugin;
+    | Plugin;
 }
 
 export namespace ActionShape {
