@@ -190,15 +190,14 @@ export namespace CredentialedActionShape {
   export type AutomaticGameEvent = ReturnType<
     typeof ActionCreators.automaticGameEvent
   >;
+  export type Undo = ReturnType<typeof ActionCreators.undo>;
+  export type Redo = ReturnType<typeof ActionCreators.redo>;
   export type Any =
     | MakeMove
     | GameEvent
     | AutomaticGameEvent
-    | ActionShape.Sync
-    | ActionShape.Update
-    | ActionShape.Reset
-    | ActionShape.Undo
-    | ActionShape.Redo
+    | Undo
+    | Redo
     | Plugin;
 }
 
@@ -216,8 +215,8 @@ export namespace ActionShape {
   export type Sync = ReturnType<typeof ActionCreators.sync>;
   export type Update = ReturnType<typeof ActionCreators.update>;
   export type Reset = ReturnType<typeof ActionCreators.reset>;
-  export type Undo = ReturnType<typeof ActionCreators.undo>;
-  export type Redo = ReturnType<typeof ActionCreators.redo>;
+  export type Undo = StripCredentials<CredentialedActionShape.Undo>;
+  export type Redo = StripCredentials<CredentialedActionShape.Redo>;
   export type Any =
     | MakeMove
     | GameEvent
