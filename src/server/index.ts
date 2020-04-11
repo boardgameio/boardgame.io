@@ -10,10 +10,10 @@ import Koa from 'koa';
 
 import { addApiToServer, createApiServer } from './api';
 import { DBFromEnv } from './db';
-import { Game } from '../core/game';
+import { ProcessGameConfig } from '../core/game';
 import * as logger from '../core/logger';
 import { SocketIO } from './transport/socketio';
-import { Server as ServerTypes, GameConfig, StorageAPI } from '../types';
+import { Server as ServerTypes, Game, StorageAPI } from '../types';
 
 export type KoaServer = ReturnType<Koa['listen']>;
 
@@ -54,7 +54,7 @@ const getPortFromServer = (server: KoaServer): string | number | null => {
 };
 
 interface ServerOpts {
-  games: GameConfig[];
+  games: Game[];
   db?: StorageAPI.Async | StorageAPI.Sync;
   transport?;
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
@@ -79,7 +79,7 @@ export function Server({
 }: ServerOpts) {
   const app = new Koa();
 
-  games = games.map(Game);
+  games = games.map(ProcessGameConfig);
 
   if (db === undefined) {
     db = DBFromEnv();

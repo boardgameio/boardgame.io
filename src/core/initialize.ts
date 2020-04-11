@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from './game';
-import { GameConfig } from '../types';
+import { ProcessGameConfig } from './game';
+import { Game } from '../types';
 import * as plugins from '../plugins/main';
 import { PartialGameState, State, Ctx } from '../types';
 
@@ -19,11 +19,11 @@ export function InitializeGame({
   numPlayers,
   setupData,
 }: {
-  game: GameConfig;
+  game: Game;
   numPlayers: number;
   setupData?: any;
 }) {
-  game = Game(game);
+  game = ProcessGameConfig(game);
 
   if (!numPlayers) {
     numPlayers = 2;

@@ -10,7 +10,7 @@ import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Client, createMoveDispatchers } from './client';
-import { Game } from '../core/game';
+import { ProcessGameConfig } from '../core/game';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
@@ -340,7 +340,7 @@ describe('event dispatchers', () => {
 });
 
 describe('move dispatchers', () => {
-  const game = Game({
+  const game = ProcessGameConfig({
     moves: {
       A: G => G,
       B: (G, ctx) => ({ moved: ctx.playerID }),

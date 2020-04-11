@@ -8,12 +8,12 @@
 
 import * as Actions from './action-types';
 import * as plugins from '../plugins/main';
-import { Game } from './game';
+import { ProcessGameConfig } from './game';
 import { error } from './logger';
 import {
   ActionShape,
   Ctx,
-  GameConfig,
+  Game,
   LogEntry,
   State,
   Move,
@@ -61,10 +61,10 @@ export function CreateGameReducer({
   game,
   isClient,
 }: {
-  game: GameConfig;
+  game: Game;
   isClient?: boolean;
 }) {
-  game = Game(game);
+  game = ProcessGameConfig(game);
 
   /**
    * GameReducer

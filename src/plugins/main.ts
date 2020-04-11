@@ -13,7 +13,7 @@ import {
   AnyFn,
   PartialGameState,
   State,
-  GameConfig,
+  Game,
   Plugin,
   Ctx,
   ActionShape,
@@ -21,7 +21,7 @@ import {
 } from '../types';
 
 interface PluginOpts {
-  game: GameConfig;
+  game: Game;
   isClient?: boolean;
 }
 

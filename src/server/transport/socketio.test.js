@@ -7,7 +7,7 @@
  */
 
 import { TransportAPI, SocketIO } from './socketio';
-import { Game } from '../../core/game';
+import { ProcessGameConfig } from '../../core/game';
 
 jest.mock('../../master/master', () => {
   class Master {
@@ -68,7 +68,7 @@ jest.mock('koa-socket-2', () => {
 
 describe('basic', () => {
   const app = { context: {} };
-  const games = [Game({ seed: 0 })];
+  const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
 
@@ -90,7 +90,7 @@ describe('TransportAPI', () => {
 
   beforeAll(() => {
     const app = { context: {} };
-    const games = [Game({ seed: 0 })];
+    const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
     const transport = SocketIO({ clientInfo, roomInfo });
@@ -133,7 +133,7 @@ describe('TransportAPI', () => {
 
 describe('sync / update', () => {
   const app = { context: {} };
-  const games = [Game({ seed: 0 })];
+  const games = [ProcessGameConfig({ seed: 0 })];
   const transport = SocketIO();
   transport.init(app, games);
   const io = app.context.io;
@@ -149,7 +149,7 @@ describe('sync / update', () => {
 
 describe('connect / disconnect', () => {
   const app = { context: {} };
-  const games = [Game({ seed: 0 })];
+  const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
   let io;

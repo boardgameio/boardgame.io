@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { State, Ctx, PlayerID, GameConfig } from '../../types';
+import { State, Ctx, PlayerID, Game } from '../../types';
 import { automaticGameEvent } from '../../core/action-creators';
 
 export interface EventsAPI {
@@ -31,7 +31,7 @@ export interface PrivateEventsAPI {
  * Events
  */
 export class Events {
-  flow: GameConfig['flow'];
+  flow: Game['flow'];
   playerID: PlayerID | undefined;
   dispatch: Array<{
     key: string;
@@ -40,7 +40,7 @@ export class Events {
     turn: number;
   }>;
 
-  constructor(flow: GameConfig['flow'], playerID?: PlayerID) {
+  constructor(flow: Game['flow'], playerID?: PlayerID) {
     this.flow = flow;
     this.playerID = playerID;
     this.dispatch = [];

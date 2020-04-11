@@ -91,7 +91,7 @@ export interface LogEntry {
 interface PluginContext<API extends any = any, Data extends any = any> {
   G: any;
   ctx: Ctx;
-  game: GameConfig;
+  game: Game;
   api: API;
   data: Data;
 }
@@ -99,19 +99,19 @@ interface PluginContext<API extends any = any, Data extends any = any> {
 export interface Plugin<API extends any = any, Data extends any = any> {
   name: string;
   noClient?: (context: PluginContext<API, Data>) => boolean;
-  setup?: (setupCtx: { G: any; ctx: Ctx; game: GameConfig }) => Data;
+  setup?: (setupCtx: { G: any; ctx: Ctx; game: Game }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
     G: any;
     ctx: Ctx;
-    game: GameConfig;
+    game: Game;
     data: Data;
     playerID?: PlayerID;
   }) => API;
   flush?: (context: PluginContext<API, Data>) => Data;
   dangerouslyFlushRawState?: (flushCtx: {
     state: State;
-    game: GameConfig;
+    game: Game;
     api: API;
     data: Data;
   }) => State;
@@ -185,7 +185,7 @@ interface PhaseMap {
   [phaseName: string]: PhaseConfig;
 }
 
-export interface GameConfig {
+export interface Game {
   name?: string;
   seed?: string | number;
   setup?: (ctx: Ctx, setupData?: any) => any;
