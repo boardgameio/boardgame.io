@@ -159,7 +159,7 @@ export interface StageMap {
 
 export interface TurnOrderConfig {
   first: (G: any, ctx: Ctx) => number;
-  next: (G: any, ctx: Ctx) => number;
+  next: (G: any, ctx: Ctx) => number | undefined;
   playOrder?: (G: any, ctx: Ctx) => PlayerID[];
 }
 
