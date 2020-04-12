@@ -17,7 +17,9 @@ The component supports the following `props`:
 
 2. `playerID`: Associate the client with a player (multiplayer).
 
-3. `debug`: Set to `false` to disable the Debug UI.
+3. `credentials`: The `playerID`s authentication credentials (multiplayer).
+
+4. `debug`: Set to `false` to disable the Debug UI.
 
 ### Usage
 
