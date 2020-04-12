@@ -9,7 +9,7 @@
 import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
-import { Game } from '../core/game';
+import { ProcessGameConfig } from '../core/game';
 import Debug from './debug/Debug.svelte';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
@@ -73,7 +73,7 @@ class _ClientImpl {
     credentials,
     enhancer,
   }) {
-    this.game = Game(game);
+    this.game = ProcessGameConfig(game);
     this.playerID = playerID;
     this.gameID = gameID;
     this.credentials = credentials;

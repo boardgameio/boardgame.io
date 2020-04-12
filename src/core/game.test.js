@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Game } from './game';
+import { ProcessGameConfig } from './game';
 import { Client } from '../client/client';
 import { error } from '../core/logger';
 import { InitializeGame } from './initialize';
@@ -19,7 +19,7 @@ jest.mock('../core/logger', () => ({
 describe('basic', () => {
   let game;
   beforeAll(() => {
-    game = Game({
+    game = ProcessGameConfig({
       moves: {
         A: G => G,
         B: () => null,
@@ -226,7 +226,7 @@ test('serpentine setup phases', () => {
 describe('config errors', () => {
   test('game name with spaces', () => {
     const game = () => {
-      Game({ name: 'tic tac toe' });
+      ProcessGameConfig({ name: 'tic tac toe' });
     };
     expect(game).toThrow();
   });
@@ -239,7 +239,7 @@ describe('config errors', () => {
       },
     ];
     const game = () => {
-      Game({ plugins });
+      ProcessGameConfig({ plugins });
     };
     expect(game).toThrow();
   });
@@ -251,13 +251,13 @@ describe('config errors', () => {
       },
     ];
     const game = () => {
-      Game({ plugins });
+      ProcessGameConfig({ plugins });
     };
     expect(game).toThrow();
   });
 
   test('invalid move object', () => {
-    const game = Game({ moves: { A: 1 } });
+    const game = ProcessGameConfig({ moves: { A: 1 } });
     const state = InitializeGame({ game });
     game.processMove(state, {});
     expect(error).toBeCalledWith(

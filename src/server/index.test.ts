@@ -6,8 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server, createServerRunConfig } from '.';
+import { Server, createServerRunConfig, KoaServer } from '.';
 import * as api from './api';
+import { StorageAPI } from '../types';
 
 const game = { seed: 0 };
 
@@ -16,10 +17,13 @@ jest.mock('../core/logger', () => ({
   error: () => {},
 }));
 
-const mockApiServerListen = jest.fn(async () => ({
-  address: () => ({ port: 'mock-api-port' }),
-  close: () => {},
-}));
+const mockApiServerListen = jest.fn((port, listeningCallback?: () => void) => {
+  if (listeningCallback) listeningCallback();
+  return {
+    address: () => ({ port: 'mock-api-port' }),
+    close: () => {},
+  };
+});
 jest.mock('./api', () => ({
   createApiServer: jest.fn(() => ({
     listen: mockApiServerListen,
@@ -53,10 +57,13 @@ jest.mock('koa', () => {
     constructor() {
       (this as any).context = {};
       (this as any).callback = () => {};
-      (this as any).listen = async () => ({
-        address: () => ({ port: 'mock-api-port' }),
-        close: () => {},
-      });
+      (this as any).listen = (port, listeningCallback?: () => void) => {
+        if (listeningCallback) listeningCallback();
+        return {
+          address: () => ({ port: 'mock-api-port' }),
+          close: () => {},
+        };
+      };
     }
   };
 });
@@ -64,7 +71,7 @@ jest.mock('koa', () => {
 describe('new', () => {
   test('custom db implementation', () => {
     const game = {};
-    const db = {};
+    const db = {} as StorageAPI.Sync;
     const server = Server({ games: [game], db });
     expect(server.db).toBe(db);
   });
@@ -85,14 +92,15 @@ describe('new', () => {
 });
 
 describe('run', () => {
-  let server, runningServer;
+  let server: ReturnType<typeof Server> | null;
+  let runningServer: { appServer: KoaServer; apiServer?: KoaServer } | null;
 
   beforeEach(() => {
     server = null;
     runningServer = null;
-    (api.createApiServer as any).mockClear();
-    (api.addApiToServer as any).mockClear();
-    (mockApiServerListen as any).mockClear();
+    (api.createApiServer as jest.Mock).mockClear();
+    (api.addApiToServer as jest.Mock).mockClear();
+    (mockApiServerListen as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -104,7 +112,7 @@ describe('run', () => {
 
   test('single server running', async () => {
     server = Server({ games: [game] });
-    runningServer = await server.run();
+    runningServer = await server.run(undefined);
 
     expect(server).not.toBeUndefined();
     expect(api.addApiToServer).toBeCalled();
@@ -128,13 +136,13 @@ describe('run', () => {
 
 describe('kill', () => {
   test('call close on both servers', async () => {
-    const apiServer = {
+    const apiServer = ({
       close: jest.fn(),
-    };
-    const appServer = {
+    } as unknown) as KoaServer;
+    const appServer = ({
       close: jest.fn(),
-    };
-    const server = Server({ games: [game], singlePort: true });
+    } as unknown) as KoaServer;
+    const server = Server({ games: [game] });
 
     server.kill({ appServer, apiServer });
 
@@ -143,10 +151,10 @@ describe('kill', () => {
   });
 
   test('do not fail if api server is not defined', async () => {
-    const appServer = {
+    const appServer = ({
       close: jest.fn(),
-    };
-    const server = Server({ games: [game], singlePort: true });
+    } as unknown) as KoaServer;
+    const server = Server({ games: [game] });
 
     expect(() => server.kill({ appServer })).not.toThrowError();
     expect(appServer.close).toBeCalled();

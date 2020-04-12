@@ -8,11 +8,12 @@
 
 import * as Actions from './action-types';
 import * as plugins from '../plugins/main';
-import { Game } from './game';
+import { ProcessGameConfig } from './game';
 import { error } from './logger';
 import {
   ActionShape,
-  GameConfig,
+  Ctx,
+  Game,
   LogEntry,
   State,
   Move,
@@ -22,12 +23,14 @@ import {
 /**
  * Returns true if a move can be undone.
  */
-const CanUndoMove = (G: object, ctx: object, move: Move): boolean => {
+const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
   function HasUndoable(move: Move): move is LongFormMove {
     return (move as LongFormMove).undoable !== undefined;
   }
 
-  function IsFunction(undoable: boolean | Function): undoable is Function {
+  function IsFunction(
+    undoable: boolean | ((...args: any[]) => any)
+  ): undoable is (...args: any[]) => any {
     return undoable instanceof Function;
   }
 
@@ -58,10 +61,10 @@ export function CreateGameReducer({
   game,
   isClient,
 }: {
-  game: GameConfig;
+  game: Game;
   isClient?: boolean;
 }) {
-  game = Game(game);
+  game = ProcessGameConfig(game);
 
   /**
    * GameReducer
@@ -100,7 +103,11 @@ export function CreateGameReducer({
         }
 
         // Execute plugins.
-        state = plugins.Enhance(state, { game, isClient: false });
+        state = plugins.Enhance(state, {
+          game,
+          isClient: false,
+          playerID: action.payload.playerID,
+        });
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
@@ -150,6 +157,7 @@ export function CreateGameReducer({
         state = plugins.Enhance(state, {
           game,
           isClient,
+          playerID: action.payload.playerID,
         });
 
         // Process the move.

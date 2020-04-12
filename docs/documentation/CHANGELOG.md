@@ -1,3 +1,28 @@
+## v0.39.5
+
+#### Features
+
+* [[78729eb](https://github.com/nicolodavis/boardgame.io/commit/78729eb)] refactor(core): More Typescript conversion (#597)
+
+#### Bugfixes
+
+* [[3a41cf7](https://github.com/nicolodavis/boardgame.io/commit/3a41cf7)] feat(plugins): Make player plugin a factory function (#604)
+* [[1877268](https://github.com/nicolodavis/boardgame.io/commit/1877268)] fix(plugins): More Typescript & pass playerID to Enhance (#598)
+* [[5696dc4](https://github.com/nicolodavis/boardgame.io/commit/5696dc4)] fix(server): Correctly wait for server.listen event (#589)
+
+## v0.39.4
+
+#### Features
+
+* [[167690c](https://github.com/nicolodavis/boardgame.io/commit/167690c)] add plugin types to ctx interface (#579)
+* [[618618e](https://github.com/nicolodavis/boardgame.io/commit/618618e)] fix(db): Make listGames options optional (#585)
+* [[f3c62a3](https://github.com/nicolodavis/boardgame.io/commit/f3c62a3)] refactor(db): Make log handling explicit in StorageAPI.setState (#581)
+* [[c7dad76](https://github.com/nicolodavis/boardgame.io/commit/c7dad76)] add the ability for plugins to define their own actions
+
+#### Bugfixes
+
+* [[9a21fee](https://github.com/nicolodavis/boardgame.io/commit/9a21fee)] Remove namespacing in gameIDs on client side (#583)
+
 ## v0.39.3
 
 #### Features

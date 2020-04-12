@@ -6,15 +6,15 @@
  * https://opensource.org/licenses/MIT.
  */
 
-const Koa = require('koa');
-const Router = require('koa-router');
-const koaBody = require('koa-body');
-const uuid = require('shortid').generate;
-const cors = require('@koa/cors');
+import Koa from 'koa';
+import Router from 'koa-router';
+import koaBody from 'koa-body';
+import { generate as uuid } from 'shortid';
+import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
-import { Server, GameConfig } from '../types';
+import { Server, Game } from '../types';
 
 const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
   gameName,
@@ -34,7 +34,7 @@ const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
  */
 export const CreateGame = async (
   db: StorageAPI.Sync | StorageAPI.Async,
-  game: GameConfig,
+  game: Game,
   numPlayers: number,
   setupData: object,
   lobbyConfig: Server.LobbyConfig
@@ -70,7 +70,7 @@ export const createApiServer = ({
   db: any;
   games: any;
   lobbyConfig?: Server.LobbyConfig;
-  generateCredentials?: any;
+  generateCredentials?: Server.GenerateCredentials;
 }) => {
   const app = new Koa();
   return addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
@@ -83,10 +83,10 @@ export const addApiToServer = ({
   lobbyConfig,
   generateCredentials,
 }: {
-  app: any;
-  games: any;
+  app: Koa;
+  games: Game[];
   lobbyConfig?: Server.LobbyConfig;
-  generateCredentials?: Function;
+  generateCredentials?: Server.GenerateCredentials;
   db: StorageAPI.Sync | StorageAPI.Async;
 }) => {
   if (!lobbyConfig) lobbyConfig = {};

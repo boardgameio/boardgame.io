@@ -1,12 +1,16 @@
 import { Object } from 'ts-toolbelt';
+import Koa from 'koa';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
+import { INVALID_MOVE } from './core/reducer';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
 import { PlayerAPI } from './plugins/plugin-player';
 import { RandomAPI } from './plugins/plugin-random';
 
 export { StorageAPI };
+
+export type AnyFn = (...args: any[]) => any;
 
 export interface State {
   G: object;
@@ -25,7 +29,19 @@ export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 export type StageName = string;
 export type PlayerID = string;
 
-interface ActivePlayers {
+export type StageArg = StageName | { stage?: StageName; moveLimit?: number };
+
+export interface ActivePlayersArg {
+  currentPlayer?: StageArg;
+  others?: StageArg;
+  all?: StageArg;
+  value?: Record<PlayerID, StageArg>;
+  moveLimit?: number;
+  revert?: boolean;
+  next?: ActivePlayersArg;
+}
+
+export interface ActivePlayers {
   [playerID: string]: StageName;
 }
 
@@ -39,9 +55,14 @@ export interface Ctx {
   gameover?: any;
   turn: number;
   phase: string;
-  _activePlayersMoveLimit?: object;
-  _activePlayersNumMoves?: object;
-  _prevActivePlayers?: Array<object>;
+  _activePlayersMoveLimit?: Record<PlayerID, number>;
+  _activePlayersNumMoves?: Record<PlayerID, number>;
+  _prevActivePlayers?: Array<{
+    activePlayers: null | ActivePlayers;
+    _activePlayersMoveLimit?: Record<PlayerID, number>;
+    _activePlayersNumMoves?: Record<PlayerID, number>;
+  }>;
+  _nextActivePlayers?: ActivePlayersArg;
   _random?: {
     seed: string | number;
   };
@@ -54,8 +75,8 @@ export interface Ctx {
 }
 
 export interface PluginState {
-  data: object;
-  api?: object;
+  data: any;
+  api?: any;
 }
 
 export interface LogEntry {
@@ -67,22 +88,46 @@ export interface LogEntry {
   automatic?: boolean;
 }
 
-export interface Plugin {
-  name: string;
-  setup?: Function;
-  action?: Function;
-  api?: Function;
-  flush?: Function;
+interface PluginContext<API extends any = any, Data extends any = any> {
+  G: any;
+  ctx: Ctx;
+  game: Game;
+  api: API;
+  data: Data;
 }
+
+export interface Plugin<API extends any = any, Data extends any = any> {
+  name: string;
+  noClient?: (context: PluginContext<API, Data>) => boolean;
+  setup?: (setupCtx: { G: any; ctx: Ctx; game: Game }) => Data;
+  action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
+  api?: (context: {
+    G: any;
+    ctx: Ctx;
+    game: Game;
+    data: Data;
+    playerID?: PlayerID;
+  }) => API;
+  flush?: (context: PluginContext<API, Data>) => Data;
+  dangerouslyFlushRawState?: (flushCtx: {
+    state: State;
+    game: Game;
+    api: API;
+    data: Data;
+  }) => State;
+  fnWrap?: (fn: AnyFn) => (G: any, ctx: Ctx, ...args: any[]) => any;
+}
+
+type MoveFn<A extends any[] = any[]> = (G: any, ctx: Ctx, ...args: A) => any;
 
 export interface LongFormMove {
-  move: Function;
+  move: MoveFn;
   redact?: boolean;
   client?: boolean;
-  undoable?: boolean | Function;
+  undoable?: boolean | ((G: any, ctx: Ctx) => boolean);
 }
 
-export type Move = Function | LongFormMove;
+export type Move = MoveFn | LongFormMove;
 
 export interface MoveMap {
   [moveName: string]: Move;
@@ -91,15 +136,15 @@ export interface MoveMap {
 export interface PhaseConfig {
   start?: boolean;
   next?: string;
-  onBegin?: Function;
-  onEnd?: Function;
-  endIf?: Function;
+  onBegin?: (G: any, ctx: Ctx) => any;
+  onEnd?: (G: any, ctx: Ctx) => any;
+  endIf?: (G: any, ctx: Ctx) => boolean | void;
   moves?: MoveMap;
   turn?: TurnConfig;
   wrapped?: {
-    endIf?: Function;
-    onBegin?: Function;
-    onEnd?: Function;
+    endIf?: (state: State) => boolean | void;
+    onBegin?: (state: State) => any;
+    onEnd?: (state: State) => any;
   };
 }
 
@@ -112,21 +157,27 @@ export interface StageMap {
   [stageName: string]: StageConfig;
 }
 
+export interface TurnOrderConfig {
+  first: (G: any, ctx: Ctx) => number;
+  next: (G: any, ctx: Ctx) => number | undefined;
+  playOrder?: (G: any, ctx: Ctx) => PlayerID[];
+}
+
 export interface TurnConfig {
   activePlayers?: object;
   moveLimit?: number;
-  onBegin?: Function;
-  onEnd?: Function;
-  endIf?: Function;
-  onMove?: Function;
+  onBegin?: (G: any, ctx: Ctx) => any;
+  onEnd?: (G: any, ctx: Ctx) => any;
+  endIf?: (G: any, ctx: Ctx) => boolean | void;
+  onMove?: (G: any, ctx: Ctx) => any;
   stages?: StageMap;
   moves?: MoveMap;
-  order?: object;
+  order?: TurnOrderConfig;
   wrapped?: {
-    endIf?: Function;
-    onBegin?: Function;
-    onEnd?: Function;
-    onMove?: Function;
+    endIf?: (state: State) => boolean | void;
+    onBegin?: (state: State) => any;
+    onEnd?: (state: State) => any;
+    onMove?: (state: State) => any;
   };
 }
 
@@ -134,10 +185,10 @@ interface PhaseMap {
   [phaseName: string]: PhaseConfig;
 }
 
-export interface GameConfig {
+export interface Game {
   name?: string;
   seed?: string | number;
-  setup?: Function;
+  setup?: (ctx: Ctx, setupData?: any) => any;
   moves?: MoveMap;
   phases?: PhaseMap;
   turn?: TurnConfig;
@@ -151,17 +202,29 @@ export interface GameConfig {
     pass?: boolean;
     setActivePlayers?: boolean;
   };
-  endIf?: Function;
-  onEnd?: Function;
-  playerView?: Function;
+  endIf?: (G: any, ctx: Ctx) => any;
+  onEnd?: (G: any, ctx: Ctx) => any;
+  playerView?: (G: any, ctx: Ctx, playerID: PlayerID) => any;
   plugins?: Array<Plugin>;
-  processMove?: Function;
+  processMove?: (
+    state: State,
+    action: ActionPayload.MakeMove
+  ) => State | typeof INVALID_MOVE;
   flow?: ReturnType<typeof Flow>;
 }
 
 type Undo = { G: object; ctx: Ctx; moveType?: string };
 
 export namespace Server {
+  export type GenerateCredentials = (
+    ctx: Koa.DefaultContext
+  ) => Promise<string> | string;
+
+  export type AuthenticateCredentials = (
+    credentials: string,
+    playerMetadata: PlayerMetadata
+  ) => Promise<boolean> | boolean;
+
   export type PlayerMetadata = {
     id: number;
     name?: string;
@@ -176,10 +239,10 @@ export namespace Server {
   }
 
   export interface LobbyConfig {
-    uuid?: Function;
-    generateCredentials?: Function;
+    uuid?: () => string;
+    generateCredentials?: GenerateCredentials;
     apiPort?: number;
-    apiCallback?: Function;
+    apiCallback?: () => void;
   }
 }
 

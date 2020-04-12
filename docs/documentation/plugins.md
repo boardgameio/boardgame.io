@@ -16,30 +16,36 @@ A plugin is an object that contains the following fields.
   // Initialize the plugin's data.
   // This is stored in a special area of the state object
   // and not exposed to the move functions.
-  setup: ({ ctx }) => object,
+  setup: ({ G, ctx, game }) => data object,
 
   // Create an object that becomes available in `ctx`
   // under `ctx['plugin-name']`.
   // This is called at the beginning of a move or event.
   // This object will be held in memory until flush (below)
   // is called.
-  api: ({ G, ctx, data }) => object,
+  api: ({ G, ctx, game, data, playerID }) => api object,
 
   // Return an updated version of data that is persisted
   // in the game's state object.
-  flush: ({ G, ctx, data, api }) => object,
+  flush: ({ G, ctx, game, data, api }) => data object,
 
   // Function that accepts a move / trigger function
   // and returns another function that wraps it. This
   // wrapper can modify G before passing it down to
   // the wrapped function. It is a good practice to
   // undo the change at the end of the call.
-  fnWrap: (fn, game) => (G, ctx, ...args) => {
+  fnWrap: (fn) => (G, ctx, ...args) => {
     G = preprocess(G);
     G = fn(G, ctx, ...args);
     G = postprocess(G);
     return G;
   },
+  
+  // Function that allows the plugin to indicate that it
+  // should not be run on the client. If it returns true,
+  // the client will discard the state update and wait
+  // for the master instead.
+  noClient: ({ G, ctx, game, data, api }) => boolean,
 }
 ```
 
@@ -64,6 +70,23 @@ const game = {
 !> Plugins are applied one after the other in the order
 that they are specified (from left to right).
 
+##### Configuring Plugins
+
+Some plugins may need a user to provide some configuration. The recommended way to do that is to design the plugin as a factory function that takes configuration as its arguments and returns a plugin object.
+
+```js
+import { ConfigurablePlugin } from './plugins';
+
+const game = {
+  name: 'my-game',
+  plugins: [
+    ConfigurablePlugin(options),
+  ],
+}
+```
+
+?> See `PluginPlayer` below for an example of this in practice.
+
 #### Available Plugins
 
 **PluginPlayer**
@@ -71,9 +94,14 @@ that they are specified (from left to right).
 ```js
 import { PluginPlayer } from 'boardgame.io/plugins';
 
+// define a function to initialize each player’s state
+const playerSetup = (playerID) => ({ ... });
+
 const game = {
-  playerSetup: (playerID) => ({ ... }),
-  plugins: [PluginPlayer],
+  plugins: [
+    // pass your function to the player plugin
+    PluginPlayer({ setup: playerSetup }),
+  ],
 };
 ```
 
@@ -91,7 +119,7 @@ players: {
 }
 ```
 
-The initial values of these states are determined by the `playerSetup` function, which creates the state for a particular `playerID`.
+The initial values of these states are determined by the `setup` function in its options object, which creates the state for a particular `playerID`.
 
 The record associated with the current player can be accessed
 via `ctx.player.get()`. If this is a 2 player game,

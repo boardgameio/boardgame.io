@@ -7,88 +7,104 @@
  */
 
 import * as logging from './logger';
+import {
+  Ctx,
+  StageArg,
+  ActivePlayersArg,
+  PlayerID,
+  State,
+  TurnConfig,
+} from '../types';
 
 /**
  * Event to change the active players (and their stages) in the current turn.
  */
-export function SetActivePlayersEvent(state, _playerID, arg) {
+export function SetActivePlayersEvent(
+  state: State,
+  _playerID: PlayerID,
+  arg: ActivePlayersArg | PlayerID[]
+) {
   return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
 }
 
-export function SetActivePlayers(ctx, arg) {
+export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
   let { _prevActivePlayers } = ctx;
-
-  const _nextActivePlayers = arg.next || null;
-
-  if (arg.revert) {
-    _prevActivePlayers = _prevActivePlayers.concat({
-      activePlayers: ctx.activePlayers,
-      _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
-      _activePlayersNumMoves: ctx._activePlayersNumMoves,
-    });
-  } else {
-    _prevActivePlayers = [];
-  }
-
   let activePlayers = {};
+  let _nextActivePlayers: ActivePlayersArg | null = null;
   let _activePlayersMoveLimit = {};
 
   if (Array.isArray(arg)) {
+    // support a simple array of player IDs as active players
     let value = {};
     arg.forEach(v => (value[v] = Stage.NULL));
     activePlayers = value;
-  }
+  } else {
+    // process active players argument object
+    if (arg.next) {
+      _nextActivePlayers = arg.next;
+    }
 
-  if (arg.currentPlayer !== undefined) {
-    ApplyActivePlayerArgument(
-      activePlayers,
-      _activePlayersMoveLimit,
-      ctx.currentPlayer,
-      arg.currentPlayer
-    );
-  }
+    if (arg.revert) {
+      _prevActivePlayers = _prevActivePlayers.concat({
+        activePlayers: ctx.activePlayers,
+        _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
+        _activePlayersNumMoves: ctx._activePlayersNumMoves,
+      });
+    } else {
+      _prevActivePlayers = [];
+    }
 
-  if (arg.others !== undefined) {
-    for (let i = 0; i < ctx.playOrder.length; i++) {
-      const id = ctx.playOrder[i];
-      if (id !== ctx.currentPlayer) {
+    if (arg.currentPlayer !== undefined) {
+      ApplyActivePlayerArgument(
+        activePlayers,
+        _activePlayersMoveLimit,
+        ctx.currentPlayer,
+        arg.currentPlayer
+      );
+    }
+
+    if (arg.others !== undefined) {
+      for (let i = 0; i < ctx.playOrder.length; i++) {
+        const id = ctx.playOrder[i];
+        if (id !== ctx.currentPlayer) {
+          ApplyActivePlayerArgument(
+            activePlayers,
+            _activePlayersMoveLimit,
+            id,
+            arg.others
+          );
+        }
+      }
+    }
+
+    if (arg.all !== undefined) {
+      for (let i = 0; i < ctx.playOrder.length; i++) {
+        const id = ctx.playOrder[i];
         ApplyActivePlayerArgument(
           activePlayers,
           _activePlayersMoveLimit,
           id,
-          arg.others
+          arg.all
         );
       }
     }
-  }
 
-  if (arg.all !== undefined) {
-    for (let i = 0; i < ctx.playOrder.length; i++) {
-      const id = ctx.playOrder[i];
-      ApplyActivePlayerArgument(
-        activePlayers,
-        _activePlayersMoveLimit,
-        id,
-        arg.all
-      );
+    if (arg.value) {
+      for (const id in arg.value) {
+        ApplyActivePlayerArgument(
+          activePlayers,
+          _activePlayersMoveLimit,
+          id,
+          arg.value[id]
+        );
+      }
     }
-  }
 
-  if (arg.value) {
-    for (const id in arg.value) {
-      ApplyActivePlayerArgument(
-        activePlayers,
-        _activePlayersMoveLimit,
-        id,
-        arg.value[id]
-      );
-    }
-  }
-
-  if (arg.moveLimit) {
-    for (const id in activePlayers) {
-      if (_activePlayersMoveLimit[id] === undefined) {
-        _activePlayersMoveLimit[id] = arg.moveLimit;
+    if (arg.moveLimit) {
+      for (const id in activePlayers) {
+        if (_activePlayersMoveLimit[id] === undefined) {
+          _activePlayersMoveLimit[id] = arg.moveLimit;
+        }
       }
     }
   }
@@ -119,9 +135,9 @@ export function SetActivePlayers(ctx, arg) {
 /**
  * Update activePlayers, setting it to previous, next or null values
  * when it becomes empty.
- * @param {Object} ctx
+ * @param ctx
  */
-export function UpdateActivePlayersOnceEmpty(ctx) {
+export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
   let {
     activePlayers,
     _activePlayersMoveLimit,
@@ -169,13 +185,13 @@ export function UpdateActivePlayersOnceEmpty(ctx) {
  * @param {(String|Object)} arg An active player argument
  */
 function ApplyActivePlayerArgument(
-  activePlayers,
-  _activePlayersMoveLimit,
-  playerID,
-  arg
+  activePlayers: Ctx['activePlayers'],
+  _activePlayersMoveLimit: Ctx['_activePlayersMoveLimit'],
+  playerID: PlayerID,
+  arg: StageArg
 ) {
   if (typeof arg !== 'object' || arg === Stage.NULL) {
-    arg = { stage: arg };
+    arg = { stage: arg as string | null };
   }
 
   if (arg.stage !== undefined) {
@@ -189,7 +205,11 @@ function ApplyActivePlayerArgument(
  * @param {Array} playOrder - An array of player ID's.
  * @param {number} playOrderPos - An index into the above.
  */
-function getCurrentPlayer(playOrder, playOrderPos) {
+function getCurrentPlayer(
+  playOrder: Ctx['playOrder'],
+  playOrderPos: Ctx['playOrderPos']
+) {
+  // convert to string in case playOrder is set to number[]
   return playOrder[playOrderPos] + '';
 }
 
@@ -205,15 +225,21 @@ function getCurrentPlayer(playOrder, playOrderPos) {
  * @param {object} ctx - The game object ctx.
  * @param {object} turn - A turn object for this phase.
  */
-export function InitTurnOrderState(G, ctx, turn) {
+export function InitTurnOrderState(G: any, ctx: Ctx, turn: TurnConfig) {
   const order = turn.order;
 
-  let playOrder = [...new Array(ctx.numPlayers)].map((d, i) => i + '');
+  let playOrder = [...new Array(ctx.numPlayers)].map((_, i) => i + '');
   if (order.playOrder !== undefined) {
     playOrder = order.playOrder(G, ctx);
   }
 
   const playOrderPos = order.first(G, ctx);
+  const posType = typeof playOrderPos;
+  if (posType !== 'number') {
+    logging.error(
+      `invalid value returned by turn.order.first — expected number got ${posType} “${playOrderPos}”.`
+    );
+  }
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
@@ -230,7 +256,12 @@ export function InitTurnOrderState(G, ctx, turn) {
  * @param {string} endTurnArg - An optional argument to endTurn that
                                 may specify the next player.
  */
-export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
+export function UpdateTurnOrderState(
+  G: any,
+  ctx: Ctx,
+  turn: TurnConfig,
+  endTurnArg?: true | { remove: any; next: string }
+) {
   const order = turn.order;
 
   let playOrderPos = ctx.playOrderPos;
@@ -257,6 +288,12 @@ export function UpdateTurnOrderState(G, ctx, turn, endTurnArg) {
     });
   } else {
     const t = order.next(G, ctx);
+    const type = typeof t;
+    if (t !== undefined && type !== 'number') {
+      logging.error(
+        `invalid value returned by turn.order.next — expected number or undefined, got ${type} “${t}”.`
+      );
+    }
 
     if (t === undefined) {
       endPhase = true;
@@ -293,11 +330,11 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G, ctx) =>
+    first: (G: any, ctx: Ctx) =>
       ctx.turn === 0
         ? ctx.playOrderPos
         : (ctx.playOrderPos + 1) % ctx.playOrder.length,
-    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -307,7 +344,7 @@ export const TurnOrder = {
    */
   RESET: {
     first: () => 0,
-    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -316,8 +353,8 @@ export const TurnOrder = {
    * Similar to DEFAULT, but starts with the player who ended the last phase.
    */
   CONTINUE: {
-    first: (G, ctx) => ctx.playOrderPos,
-    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    first: (G: any, ctx: Ctx) => ctx.playOrderPos,
+    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -328,7 +365,7 @@ export const TurnOrder = {
    */
   ONCE: {
     first: () => 0,
-    next: (G, ctx) => {
+    next: (G: any, ctx: Ctx) => {
       if (ctx.playOrderPos < ctx.playOrder.length - 1) {
         return ctx.playOrderPos + 1;
       }
@@ -343,10 +380,10 @@ export const TurnOrder = {
    *
    * @param {Array} playOrder - The play order.
    */
-  CUSTOM: playOrder => ({
+  CUSTOM: (playOrder: string[]) => ({
     playOrder: () => playOrder,
     first: () => 0,
-    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   }),
 
   /**
@@ -358,10 +395,10 @@ export const TurnOrder = {
    *
    * @param {string} playOrderField - Field in G.
    */
-  CUSTOM_FROM: playOrderField => ({
-    playOrder: G => G[playOrderField],
+  CUSTOM_FROM: (playOrderField: string) => ({
+    playOrder: (G: any) => G[playOrderField],
     first: () => 0,
-    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   }),
 };
 

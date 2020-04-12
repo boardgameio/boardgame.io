@@ -46,17 +46,3 @@ Use the following command to preview them:
 ```
 $ npm run docs
 ```
-
-## Contributor License Agreement
-
-This project was created by a Google employee (although this is
-not an official Google project). Therefore,
-contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution,
-this simply gives Google permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
-
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.

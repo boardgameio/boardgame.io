@@ -10,16 +10,18 @@ import PluginImmer from './plugin-immer';
 import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
 import {
+  AnyFn,
   PartialGameState,
   State,
-  GameConfig,
+  Game,
   Plugin,
   Ctx,
   ActionShape,
+  PlayerID,
 } from '../types';
 
 interface PluginOpts {
-  game: GameConfig;
+  game: Game;
   isClient?: boolean;
 }
 
@@ -88,8 +90,8 @@ export const EnhanceCtx = (state: PartialGameState): Ctx => {
  * @param {function} fn - The move function or trigger to apply the plugins to.
  * @param {object} plugins - The list of plugins.
  */
-export const FnWrap = (fn: Function, plugins: Plugin[]) => {
-  const reducer = (acc, { fnWrap }) => fnWrap(acc, plugins);
+export const FnWrap = (fn: AnyFn, plugins: Plugin[]) => {
+  const reducer = (acc: AnyFn, { fnWrap }: Plugin) => fnWrap(acc);
   return [...DEFAULT_PLUGINS, ...plugins]
     .filter(plugin => plugin.fnWrap !== undefined)
     .reduce(reducer, fn);
@@ -129,7 +131,10 @@ export const Setup = (
  * the `plugins` section of the state (which is subsequently
  * merged into ctx).
  */
-export const Enhance = (state: State, opts: PluginOpts): State => {
+export const Enhance = (
+  state: State,
+  opts: PluginOpts & { playerID: PlayerID }
+): State => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter(plugin => plugin.api !== undefined)
     .forEach(plugin => {
@@ -141,6 +146,7 @@ export const Enhance = (state: State, opts: PluginOpts): State => {
         ctx: state.ctx,
         data: pluginState.data,
         game: opts.game,
+        playerID: opts.playerID,
       });
 
       state = {
@@ -178,8 +184,8 @@ export const Flush = (state: State, opts: PluginOpts): State => {
           [plugin.name]: { data: newData },
         },
       };
-    } else if (plugin.flushRaw) {
-      state = plugin.flushRaw({
+    } else if (plugin.dangerouslyFlushRawState) {
+      state = plugin.dangerouslyFlushRawState({
         state,
         game: opts.game,
         api: pluginState.api,

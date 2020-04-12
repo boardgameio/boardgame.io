@@ -6,16 +6,24 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { Plugin, PlayerID } from '../types';
+
+interface PlayerData {
+  players: Record<PlayerID, any>;
+}
+
 export interface PlayerAPI {
-  state: {
-    [playerId: string]: object;
-  };
+  state: Record<PlayerID, any>;
   get(): any;
   set(value: any): any;
   opponent?: {
     get(): any;
     set(value: any): any;
   };
+}
+
+interface PluginPlayerOpts {
+  setup?: (playerID: string) => any;
 }
 
 /**
@@ -25,7 +33,10 @@ export interface PlayerAPI {
  *
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
-export default {
+const PlayerPlugin = ({ setup }: PluginPlayerOpts = {}): Plugin<
+  PlayerAPI,
+  PlayerData
+> => ({
   name: 'player',
 
   flush: ({ api }) => {
@@ -59,15 +70,17 @@ export default {
     return result;
   },
 
-  setup: ({ ctx, game }) => {
-    let players = {};
+  setup: ({ ctx }) => {
+    let players: Record<PlayerID, any> = {};
     for (let i = 0; i < ctx.numPlayers; i++) {
-      let playerState = {};
-      if (game.playerSetup !== undefined) {
-        playerState = game.playerSetup(i + '');
+      let playerState: any = {};
+      if (setup !== undefined) {
+        playerState = setup(i + '');
       }
       players[i + ''] = playerState;
     }
     return { players };
   },
-};
+});
+
+export default PlayerPlugin;

@@ -7,12 +7,15 @@
  */
 
 import produce from 'immer';
+import { Plugin } from '../types';
 
 /**
  * Plugin that allows using Immer to make immutable changes
  * to G by just mutating it.
  */
-export default {
+const ImmerPlugin: Plugin = {
   name: 'plugin-immer',
   fnWrap: move => produce(move),
 };
+
+export default ImmerPlugin;

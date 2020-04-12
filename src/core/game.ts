@@ -8,25 +8,25 @@
 
 import * as plugins from '../plugins/main';
 import { Flow } from './flow';
-import { ActionPayload, GameConfig, Move, LongFormMove, State } from '../types';
+import { INVALID_MOVE } from './reducer';
+import { ActionPayload, Game, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
 
-type ProcessedGameConfig = GameConfig & {
-  flow: object;
+type ProcessedGame = Game & {
+  flow: ReturnType<typeof Flow>;
   moveNames: string[];
   pluginNames: string[];
-  processMove: Function;
+  processMove: (
+    state: State,
+    action: ActionPayload.MakeMove
+  ) => State | typeof INVALID_MOVE;
 };
 
-function IsProcessed(
-  game: GameConfig | ProcessedGameConfig
-): game is ProcessedGameConfig {
+function IsProcessed(game: Game | ProcessedGame): game is ProcessedGame {
   return game.processMove !== undefined;
 }
 
 /**
- * Game
- *
  * Helper to generate the game move reducer. The returned
  * reducer has the following signature:
  *
@@ -40,9 +40,7 @@ function IsProcessed(
  * action.args contain any additional arguments as an
  * Array.
  */
-export function Game(
-  game: GameConfig | ProcessedGameConfig
-): ProcessedGameConfig {
+export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
   // The Game() function has already been called on this
   // config object, so just pass it through.
   if (IsProcessed(game)) {
@@ -92,11 +90,11 @@ export function Game(
           ...plugins.EnhanceCtx(state),
           playerID: action.playerID,
         };
-        let args = [state.G, ctxWithAPI];
+        let args = [];
         if (action.args !== undefined) {
           args = args.concat(action.args);
         }
-        return fn(...args);
+        return fn(state.G, ctxWithAPI, ...args);
       }
 
       logging.error(`invalid move object: ${action.type}`);
