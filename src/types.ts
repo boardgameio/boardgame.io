@@ -190,7 +190,7 @@ export interface TurnOrderConfig<
   CtxWithPlugins extends Ctx = Ctx
 > {
   first: (G: G, ctx: CtxWithPlugins) => number;
-  next: (G: G, ctx: CtxWithPlugins) => number;
+  next: (G: G, ctx: CtxWithPlugins) => number | undefined;
   playOrder?: (G: G, ctx: CtxWithPlugins) => PlayerID[];
 }
 

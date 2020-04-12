@@ -289,9 +289,9 @@ export function UpdateTurnOrderState(
   } else {
     const t = order.next(G, ctx);
     const type = typeof t;
-    if (type !== 'number') {
+    if (t !== undefined && type !== 'number') {
       logging.error(
-        `invalid value returned by turn.order.next — expected number got ${type} “${t}”.`
+        `invalid value returned by turn.order.next — expected number or undefined, got ${type} “${t}”.`
       );
     }
 
