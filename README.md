@@ -49,8 +49,7 @@ $ npm start
 
 ## Changelog
 
-See [changelog](docs/documentation/CHANGELOG.md). Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/)
-to upgrade your code from **v0.32** to **v0.33**.
+See [changelog](docs/documentation/CHANGELOG.md).
 
 ## Contributing
 
