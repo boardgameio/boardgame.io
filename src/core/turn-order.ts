@@ -7,6 +7,7 @@
  */
 
 import * as logging from './logger';
+import * as plugin from '../plugins/main';
 import {
   Ctx,
   StageArg,
@@ -220,20 +221,18 @@ function getCurrentPlayer(
  * both UpdateTurn and StartPhase (so it's called at the beginning
  * of a new phase as well as between turns). We should probably
  * split it into two.
- *
- * @param {object} G - The game object G.
- * @param {object} ctx - The game object ctx.
- * @param {object} turn - A turn object for this phase.
  */
-export function InitTurnOrderState(G: any, ctx: Ctx, turn: TurnConfig) {
+export function InitTurnOrderState(state: State, turn: TurnConfig) {
+  let { G, ctx } = state;
+  const ctxWithAPI = plugin.EnhanceCtx(state);
   const order = turn.order;
 
   let playOrder = [...new Array(ctx.numPlayers)].map((_, i) => i + '');
   if (order.playOrder !== undefined) {
-    playOrder = order.playOrder(G, ctx);
+    playOrder = order.playOrder(G, ctxWithAPI);
   }
 
-  const playOrderPos = order.first(G, ctx);
+  const playOrderPos = order.first(G, ctxWithAPI);
   const posType = typeof playOrderPos;
   if (posType !== 'number') {
     logging.error(
@@ -257,15 +256,15 @@ export function InitTurnOrderState(G: any, ctx: Ctx, turn: TurnConfig) {
                                 may specify the next player.
  */
 export function UpdateTurnOrderState(
-  G: any,
-  ctx: Ctx,
+  state: State,
+  currentPlayer: PlayerID,
   turn: TurnConfig,
   endTurnArg?: true | { remove: any; next: string }
 ) {
   const order = turn.order;
 
+  let { G, ctx } = state;
   let playOrderPos = ctx.playOrderPos;
-  let currentPlayer = ctx.currentPlayer;
   let endPhase = false;
 
   if (endTurnArg && endTurnArg !== true) {
@@ -287,11 +286,12 @@ export function UpdateTurnOrderState(
       }
     });
   } else {
-    const t = order.next(G, ctx);
+    const ctxWithAPI = plugin.EnhanceCtx(state);
+    const t = order.next(G, ctxWithAPI);
     const type = typeof t;
-    if (t !== undefined && type !== 'number') {
+    if (type !== 'number') {
       logging.error(
-        `invalid value returned by turn.order.next — expected number or undefined, got ${type} “${t}”.`
+        `invalid value returned by turn.order.next — expected number got ${type} “${t}”.`
       );
     }
 

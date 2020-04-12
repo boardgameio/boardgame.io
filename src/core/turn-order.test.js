@@ -7,6 +7,7 @@
  */
 
 import { Flow } from './flow';
+import { Client } from '../client/client';
 import {
   UpdateTurnOrderState,
   Stage,
@@ -943,14 +944,64 @@ describe('UpdateTurnOrderState', () => {
   const turn = { order: TurnOrder.DEFAULT };
 
   test('without next player', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, turn);
+    const { ctx: t } = UpdateTurnOrderState(
+      { G, ctx },
+      ctx.currentPlayer,
+      turn
+    );
     expect(t).toMatchObject({ currentPlayer: '1' });
   });
 
   test('with next player', () => {
-    const { ctx: t } = UpdateTurnOrderState(G, ctx, turn, {
-      next: '2',
-    });
+    const { ctx: t } = UpdateTurnOrderState(
+      { G, ctx },
+      ctx.currentPlayer,
+      turn,
+      {
+        next: '2',
+      }
+    );
     expect(t).toMatchObject({ currentPlayer: '2' });
+  });
+});
+
+describe('Random API is available', () => {
+  let first;
+  let next;
+
+  const turn = {
+    order: {
+      first: (_, ctx) => {
+        if (ctx.random !== undefined) {
+          first = true;
+        }
+        return '0';
+      },
+
+      next: (_, ctx) => {
+        if (ctx.random !== undefined) {
+          next = true;
+        }
+        return '0';
+      },
+    },
+  };
+
+  const game = { turn };
+
+  beforeEach(() => {
+    first = next = false;
+  });
+
+  test('init', () => {
+    Client({ game });
+    expect(first).toBe(true);
+  });
+
+  test('end turn', () => {
+    const client = Client({ game });
+    expect(next).toBe(false);
+    client.events.endTurn();
+    expect(next).toBe(true);
   });
 });

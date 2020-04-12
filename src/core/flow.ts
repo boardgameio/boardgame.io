@@ -288,7 +288,7 @@ export function Flow({
     } else {
       // This is only called at the beginning of the phase
       // when there is no currentPlayer yet.
-      ctx = InitTurnOrderState(G, ctx, conf.turn);
+      ctx = InitTurnOrderState(state, conf.turn);
     }
 
     const turn = ctx.turn + 1;
@@ -336,8 +336,8 @@ export function Flow({
 
     // Update turn order state.
     const { endPhase, ctx: newCtx } = UpdateTurnOrderState(
-      G,
-      { ...ctx, currentPlayer },
+      state,
+      currentPlayer,
       conf.turn,
       arg
     );
