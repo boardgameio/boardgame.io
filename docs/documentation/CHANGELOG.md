@@ -1,3 +1,15 @@
+## v0.39.6
+
+#### Features
+
+* [[c5211c2](https://github.com/nicolodavis/boardgame.io/commit/c5211c2)] Typescript enhancements (#612)
+
+#### Bugfixes
+
+* [[eb1e060](https://github.com/nicolodavis/boardgame.io/commit/eb1e060)] make plugins available in turn order functions
+* [[0688f4d](https://github.com/nicolodavis/boardgame.io/commit/0688f4d)] Include credentials in undo/redo actions (#595)
+* [[f34f46b](https://github.com/nicolodavis/boardgame.io/commit/f34f46b)] fix(core): Don’t error if turn.order.next returns undefined (#614)
+
 ## v0.39.5
 
 #### Features
