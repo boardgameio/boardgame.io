@@ -8,22 +8,26 @@
 
 import { Plugin, PlayerID } from '../types';
 
-interface PlayerData {
-  players: Record<PlayerID, any>;
+interface PlayerData<PlayerState extends any = any> {
+  players: Record<PlayerID, PlayerState>;
 }
 
-export interface PlayerAPI {
-  state: Record<PlayerID, any>;
-  get(): any;
-  set(value: any): any;
+export interface PlayerAPI<PlayerState extends any = any> {
+  state: Record<PlayerID, PlayerState>;
+  get(): PlayerState;
+  set(value: PlayerState): PlayerState;
   opponent?: {
-    get(): any;
-    set(value: any): any;
+    get(): PlayerState;
+    set(value: PlayerState): PlayerState;
   };
 }
 
-interface PluginPlayerOpts {
-  setup?: (playerID: string) => any;
+interface PluginPlayerOpts<PlayerState extends any = any> {
+  setup?: (playerID: string) => PlayerState;
+}
+
+export interface PlayerPlugin<PlayerState extends any = any> {
+  player: PlayerAPI<PlayerState>;
 }
 
 /**
@@ -33,9 +37,11 @@ interface PluginPlayerOpts {
  *
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
-const PlayerPlugin = ({ setup }: PluginPlayerOpts = {}): Plugin<
-  PlayerAPI,
-  PlayerData
+const PlayerPlugin = <PlayerState extends any = any>({
+  setup,
+}: PluginPlayerOpts<PlayerState> = {}): Plugin<
+  PlayerAPI<PlayerState>,
+  PlayerData<PlayerState>
 > => ({
   name: 'player',
 
