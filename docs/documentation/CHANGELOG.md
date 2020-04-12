@@ -1,3 +1,15 @@
+## v0.39.5
+
+#### Features
+
+* [[78729eb](https://github.com/nicolodavis/boardgame.io/commit/78729eb)] refactor(core): More Typescript conversion (#597)
+
+#### Bugfixes
+
+* [[3a41cf7](https://github.com/nicolodavis/boardgame.io/commit/3a41cf7)] feat(plugins): Make player plugin a factory function (#604)
+* [[1877268](https://github.com/nicolodavis/boardgame.io/commit/1877268)] fix(plugins): More Typescript & pass playerID to Enhance (#598)
+* [[5696dc4](https://github.com/nicolodavis/boardgame.io/commit/5696dc4)] fix(server): Correctly wait for server.listen event (#589)
+
 ## v0.39.4
 
 #### Features

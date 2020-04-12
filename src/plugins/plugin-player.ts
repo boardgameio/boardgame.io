@@ -8,18 +8,26 @@
 
 import { Plugin, PlayerID } from '../types';
 
-interface PlayerData {
-  players: Record<PlayerID, any>;
+interface PlayerData<PlayerState extends any = any> {
+  players: Record<PlayerID, PlayerState>;
 }
 
-export interface PlayerAPI {
-  state: Record<PlayerID, any>;
-  get(): any;
-  set(value: any): any;
+export interface PlayerAPI<PlayerState extends any = any> {
+  state: Record<PlayerID, PlayerState>;
+  get(): PlayerState;
+  set(value: PlayerState): PlayerState;
   opponent?: {
-    get(): any;
-    set(value: any): any;
+    get(): PlayerState;
+    set(value: PlayerState): PlayerState;
   };
+}
+
+interface PluginPlayerOpts<PlayerState extends any = any> {
+  setup?: (playerID: string) => PlayerState;
+}
+
+export interface PlayerPlugin<PlayerState extends any = any> {
+  player: PlayerAPI<PlayerState>;
 }
 
 /**
@@ -29,7 +37,12 @@ export interface PlayerAPI {
  *
  * @param {function} initPlayerState - Function of type (playerID) => playerState.
  */
-const PlayerPlugin: Plugin<PlayerAPI, PlayerData> = {
+const PlayerPlugin = <PlayerState extends any = any>({
+  setup,
+}: PluginPlayerOpts<PlayerState> = {}): Plugin<
+  PlayerAPI<PlayerState>,
+  PlayerData<PlayerState>
+> => ({
   name: 'player',
 
   flush: ({ api }) => {
@@ -63,17 +76,17 @@ const PlayerPlugin: Plugin<PlayerAPI, PlayerData> = {
     return result;
   },
 
-  setup: ({ ctx, game }) => {
+  setup: ({ ctx }) => {
     let players: Record<PlayerID, any> = {};
     for (let i = 0; i < ctx.numPlayers; i++) {
       let playerState: any = {};
-      if (game.playerSetup !== undefined) {
-        playerState = game.playerSetup(i + '');
+      if (setup !== undefined) {
+        playerState = setup(i + '');
       }
       players[i + ''] = playerState;
     }
     return { players };
   },
-};
+});
 
 export default PlayerPlugin;

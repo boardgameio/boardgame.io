@@ -5,22 +5,21 @@ import { Flow } from './core/flow';
 import { INVALID_MOVE } from './core/reducer';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
-import { PlayerAPI } from './plugins/plugin-player';
 import { RandomAPI } from './plugins/plugin-random';
 
 export { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
 
-export interface State {
-  G: object;
-  ctx: Ctx;
+export interface State<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
+  G: G;
+  ctx: Ctx | CtxWithPlugins;
   deltalog?: Array<LogEntry>;
   plugins: {
     [pluginName: string]: PluginState;
   };
-  _undo: Array<Undo>;
-  _redo: Array<Undo>;
+  _undo: Array<Undo<G>>;
+  _redo: Array<Undo<G>>;
   _stateID: number;
 }
 
@@ -66,11 +65,11 @@ export interface Ctx {
   _random?: {
     seed: string | number;
   };
-  // enhanced by events plugin
+
+  // TODO public api should have these as non-optional
+  // internally there are two contexts, one is a serialized POJO and another
+  // "enhanced" context that has plugin api methods attached
   events?: EventsAPI;
-  // enhanced by player plugin
-  player?: PlayerAPI;
-  // enhanced by random plugin
   random?: RandomAPI;
 }
 
@@ -88,110 +87,145 @@ export interface LogEntry {
   automatic?: boolean;
 }
 
-interface PluginContext<API extends any = any, Data extends any = any> {
-  G: any;
+interface PluginContext<
+  API extends any = any,
+  Data extends any = any,
+  G extends any = any
+> {
+  G: G;
   ctx: Ctx;
-  game: GameConfig;
+  game: Game;
   api: API;
   data: Data;
 }
 
-export interface Plugin<API extends any = any, Data extends any = any> {
+export interface Plugin<
+  API extends any = any,
+  Data extends any = any,
+  G extends any = any
+> {
   name: string;
-  noClient?: (context: PluginContext<API, Data>) => boolean;
-  setup?: (setupCtx: { G: any; ctx: Ctx; game: GameConfig }) => Data;
+  noClient?: (context: PluginContext<API, Data, G>) => boolean;
+  setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G, Ctx> }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
-    G: any;
+    G: G;
     ctx: Ctx;
-    game: GameConfig;
+    game: Game<G, Ctx>;
     data: Data;
     playerID?: PlayerID;
   }) => API;
-  flush?: (context: PluginContext<API, Data>) => Data;
+  flush?: (context: PluginContext<API, Data, G>) => Data;
   dangerouslyFlushRawState?: (flushCtx: {
-    state: State;
-    game: GameConfig;
+    state: State<G, Ctx>;
+    game: Game<G, Ctx>;
     api: API;
     data: Data;
-  }) => State;
-  fnWrap?: (fn: AnyFn) => (G: any, ctx: Ctx, ...args: any[]) => any;
+  }) => State<G, Ctx>;
+  fnWrap?: (fn: AnyFn) => (G: G, ctx: Ctx, ...args: any[]) => any;
 }
 
-type MoveFn<A extends any[] = any[]> = (G: any, ctx: Ctx, ...args: A) => any;
+type MoveFn<G extends any = any, CtxWithPlugins extends Ctx = Ctx> = (
+  G: G,
+  ctx: CtxWithPlugins,
+  ...args: any[]
+) => any;
 
-export interface LongFormMove {
-  move: MoveFn;
+export interface LongFormMove<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
+  move: MoveFn<G, CtxWithPlugins>;
   redact?: boolean;
   client?: boolean;
-  undoable?: boolean | ((G: any, ctx: Ctx) => boolean);
+  undoable?: boolean | ((G: G, ctx: CtxWithPlugins) => boolean);
 }
 
-export type Move = MoveFn | LongFormMove;
+export type Move<G extends any = any, CtxWithPlugins extends Ctx = Ctx> =
+  | MoveFn<G, CtxWithPlugins>
+  | LongFormMove<G, CtxWithPlugins>;
 
-export interface MoveMap {
-  [moveName: string]: Move;
+export interface MoveMap<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
+  [moveName: string]: Move<G, CtxWithPlugins>;
 }
 
-export interface PhaseConfig {
+export interface PhaseConfig<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
   start?: boolean;
   next?: string;
-  onBegin?: (G: any, ctx: Ctx) => any;
-  onEnd?: (G: any, ctx: Ctx) => any;
-  endIf?: (G: any, ctx: Ctx) => boolean | void;
-  moves?: MoveMap;
-  turn?: TurnConfig;
+  onBegin?: (G: G, ctx: CtxWithPlugins) => any;
+  onEnd?: (G: G, ctx: CtxWithPlugins) => any;
+  endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void;
+  moves?: MoveMap<G, CtxWithPlugins>;
+  turn?: TurnConfig<G, CtxWithPlugins>;
   wrapped?: {
-    endIf?: (state: State) => boolean | void;
-    onBegin?: (state: State) => any;
-    onEnd?: (state: State) => any;
+    endIf?: (state: State<G, CtxWithPlugins>) => boolean | void;
+    onBegin?: (state: State<G, CtxWithPlugins>) => any;
+    onEnd?: (state: State<G, CtxWithPlugins>) => any;
   };
 }
 
-export interface StageConfig {
-  moves?: MoveMap;
+export interface StageConfig<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
+  moves?: MoveMap<G, CtxWithPlugins>;
   next?: string;
 }
 
-export interface StageMap {
-  [stageName: string]: StageConfig;
+export interface StageMap<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
+  [stageName: string]: StageConfig<G, CtxWithPlugins>;
 }
 
-export interface TurnOrderConfig {
-  first: (G: any, ctx: Ctx) => number;
-  next: (G: any, ctx: Ctx) => number;
-  playOrder?: (G: any, ctx: Ctx) => PlayerID[];
+export interface TurnOrderConfig<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
+  first: (G: G, ctx: CtxWithPlugins) => number;
+  next: (G: G, ctx: CtxWithPlugins) => number | undefined;
+  playOrder?: (G: G, ctx: CtxWithPlugins) => PlayerID[];
 }
 
-export interface TurnConfig {
+export interface TurnConfig<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
   activePlayers?: object;
   moveLimit?: number;
-  onBegin?: (G: any, ctx: Ctx) => any;
-  onEnd?: (G: any, ctx: Ctx) => any;
-  endIf?: (G: any, ctx: Ctx) => boolean | void;
-  onMove?: (G: any, ctx: Ctx) => any;
-  stages?: StageMap;
-  moves?: MoveMap;
-  order?: TurnOrderConfig;
+  onBegin?: (G: G, ctx: CtxWithPlugins) => any;
+  onEnd?: (G: G, ctx: CtxWithPlugins) => any;
+  endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void;
+  onMove?: (G: G, ctx: CtxWithPlugins) => any;
+  stages?: StageMap<G, CtxWithPlugins>;
+  moves?: MoveMap<G, CtxWithPlugins>;
+  order?: TurnOrderConfig<G, CtxWithPlugins>;
   wrapped?: {
-    endIf?: (state: State) => boolean | void;
-    onBegin?: (state: State) => any;
-    onEnd?: (state: State) => any;
-    onMove?: (state: State) => any;
+    endIf?: (state: State<G, CtxWithPlugins>) => boolean | void;
+    onBegin?: (state: State<G, CtxWithPlugins>) => any;
+    onEnd?: (state: State<G, CtxWithPlugins>) => any;
+    onMove?: (state: State<G, CtxWithPlugins>) => any;
   };
 }
 
-interface PhaseMap {
-  [phaseName: string]: PhaseConfig;
+interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
+  [phaseName: string]: PhaseConfig<G, CtxWithPlugins>;
 }
 
-export interface GameConfig {
+export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   name?: string;
   seed?: string | number;
-  setup?: (ctx: Ctx, setupData?: any) => any;
-  moves?: MoveMap;
-  phases?: PhaseMap;
-  turn?: TurnConfig;
+  setup?: (ctx: CtxWithPlugins, setupData?: any) => any;
+  moves?: MoveMap<G, CtxWithPlugins>;
+  phases?: PhaseMap<G, CtxWithPlugins>;
+  turn?: TurnConfig<G, CtxWithPlugins>;
   events?: {
     endGame?: boolean;
     endPhase?: boolean;
@@ -202,19 +236,22 @@ export interface GameConfig {
     pass?: boolean;
     setActivePlayers?: boolean;
   };
-  endIf?: (G: any, ctx: Ctx) => any;
-  onEnd?: (G: any, ctx: Ctx) => any;
-  playerView?: (G: any, ctx: Ctx, playerID: PlayerID) => any;
-  plugins?: Array<Plugin>;
+  endIf?: (G: G, ctx: CtxWithPlugins) => any;
+  onEnd?: (G: G, ctx: CtxWithPlugins) => any;
+  playerView?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID) => any;
+  plugins?: Array<Plugin<any, any, G>>;
   processMove?: (
-    state: State,
+    state: State<G, Ctx | CtxWithPlugins>,
     action: ActionPayload.MakeMove
-  ) => State | typeof INVALID_MOVE;
+  ) => State<G, CtxWithPlugins> | typeof INVALID_MOVE;
   flow?: ReturnType<typeof Flow>;
-  [key: string]: any;
 }
 
-type Undo = { G: object; ctx: Ctx; moveType?: string };
+type Undo<G extends any = any> = {
+  G: G;
+  ctx: Ctx;
+  moveType?: string;
+};
 
 export namespace Server {
   export type GenerateCredentials = (

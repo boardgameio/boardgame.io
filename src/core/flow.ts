@@ -24,7 +24,7 @@ import {
   State,
   Ctx,
   LogEntry,
-  GameConfig,
+  Game,
   PhaseConfig,
   PlayerID,
   Move,
@@ -43,7 +43,7 @@ export function Flow({
   turn,
   events,
   plugins,
-}: GameConfig) {
+}: Game) {
   // Attach defaults.
   if (moves === undefined) {
     moves = {};

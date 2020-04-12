@@ -70,6 +70,23 @@ const game = {
 !> Plugins are applied one after the other in the order
 that they are specified (from left to right).
 
+##### Configuring Plugins
+
+Some plugins may need a user to provide some configuration. The recommended way to do that is to design the plugin as a factory function that takes configuration as its arguments and returns a plugin object.
+
+```js
+import { ConfigurablePlugin } from './plugins';
+
+const game = {
+  name: 'my-game',
+  plugins: [
+    ConfigurablePlugin(options),
+  ],
+}
+```
+
+?> See `PluginPlayer` below for an example of this in practice.
+
 #### Available Plugins
 
 **PluginPlayer**
@@ -77,9 +94,14 @@ that they are specified (from left to right).
 ```js
 import { PluginPlayer } from 'boardgame.io/plugins';
 
+// define a function to initialize each player’s state
+const playerSetup = (playerID) => ({ ... });
+
 const game = {
-  playerSetup: (playerID) => ({ ... }),
-  plugins: [PluginPlayer],
+  plugins: [
+    // pass your function to the player plugin
+    PluginPlayer({ setup: playerSetup }),
+  ],
 };
 ```
 
@@ -97,7 +119,7 @@ players: {
 }
 ```
 
-The initial values of these states are determined by the `playerSetup` function, which creates the state for a particular `playerID`.
+The initial values of these states are determined by the `setup` function in its options object, which creates the state for a particular `playerID`.
 
 The record associated with the current player can be accessed
 via `ctx.player.get()`. If this is a 2 player game,

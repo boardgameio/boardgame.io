@@ -14,7 +14,7 @@ import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
-import { Server, GameConfig } from '../types';
+import { Server, Game } from '../types';
 
 const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
   gameName,
@@ -34,7 +34,7 @@ const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
  */
 export const CreateGame = async (
   db: StorageAPI.Sync | StorageAPI.Async,
-  game: GameConfig,
+  game: Game,
   numPlayers: number,
   setupData: object,
   lobbyConfig: Server.LobbyConfig
@@ -84,7 +84,7 @@ export const addApiToServer = ({
   generateCredentials,
 }: {
   app: Koa;
-  games: GameConfig[];
+  games: Game[];
   lobbyConfig?: Server.LobbyConfig;
   generateCredentials?: Server.GenerateCredentials;
   db: StorageAPI.Sync | StorageAPI.Async;
