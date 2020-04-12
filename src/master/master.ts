@@ -106,15 +106,10 @@ export const isActionFromAuthenticPlayer = (
 /**
  * Remove player credentials from action payload
  */
-const stripCredentialsFromAction = (
-  action: CredentialedActionShape.Any | ActionShape.Any
-) => {
-  if ('payload' in action && 'credentials' in action.payload) {
-    // eslint-disable-next-line no-unused-vars
-    const { credentials, ...payload } = action.payload;
-    return { ...action, payload };
-  }
-  return action;
+const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
+  // eslint-disable-next-line no-unused-vars
+  const { credentials, ...payload } = action.payload;
+  return { ...action, payload };
 };
 
 type AuthFn = (
@@ -170,16 +165,13 @@ export class Master {
    * along with a deltalog.
    */
   async onUpdate(
-    action: CredentialedActionShape.Any | ActionShape.Any,
+    credAction: CredentialedActionShape.Any,
     stateID: number,
     gameID: string,
     playerID: string
   ) {
     let isActionAuthentic;
-    const credentials =
-      'payload' in action && 'credentials' in action.payload
-        ? action.payload.credentials
-        : undefined;
+    const credentials = credAction.payload.credentials;
     if (IsSynchronous(this.storageAPI)) {
       const { metadata } = this.storageAPI.fetch(gameID, { metadata: true });
       const playerMetadata = getPlayerMetadata(metadata, playerID);
@@ -199,8 +191,7 @@ export class Master {
       return { error: 'unauthorized action' };
     }
 
-    action = stripCredentialsFromAction(action);
-
+    let action = stripCredentialsFromAction(credAction);
     const key = gameID;
 
     let state: State;
