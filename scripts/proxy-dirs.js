@@ -14,16 +14,16 @@ function PackageJson(
   name,
   { mainDir = '../dist/cjs', includeModuleField = true } = {}
 ) {
-  const package = {
+  const pkg = {
     name: `boardgame.io/${name}`,
     private: true,
     types: `../dist/types/packages/${name}.d.ts`,
     main: `${mainDir}/${name}.js`,
   };
   if (includeModuleField) {
-    package.module = `../dist/esm/${name}.js`;
+    pkg.module = `../dist/esm/${name}.js`;
   }
-  return JSON.stringify(package, null, 2) + '\n';
+  return JSON.stringify(pkg, null, 2) + '\n';
 }
 
 function makeSubpackage(name, opts) {
