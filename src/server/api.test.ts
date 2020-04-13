@@ -51,8 +51,8 @@ class AsyncStorage extends StorageAPI.Async {
     this.mocks.wipe(...args);
   }
 
-  async listGames() {
-    return this.mocks.listGames();
+  async listGames(...args) {
+    return this.mocks.listGames(...args);
   }
 }
 
@@ -771,8 +771,18 @@ describe('.createApiServer', () => {
             },
           };
         },
-        listGames: async () => {
-          return ['bar-0', 'bar-1'];
+        listGames: async opts => {
+          const metadata = {
+            'foo-0': { gameName: 'foo' },
+            'foo-1': { gameName: 'foo' },
+            'bar-2': { gameName: 'bar' },
+            'bar-3': { gameName: 'bar' },
+          };
+          const keys = Object.keys(metadata);
+          if (opts && opts.gameName) {
+            return keys.filter(key => metadata[key].gameName === opts.gameName);
+          }
+          return [...keys];
         },
       });
     });
@@ -786,13 +796,13 @@ describe('.createApiServer', () => {
         rooms = JSON.parse(response.text).rooms;
       });
 
-      test('returns instances of the selected room', async () => {
+      test('returns rooms for the selected game', async () => {
         expect(rooms).toHaveLength(2);
       });
 
       test('returns room ids', async () => {
-        expect(rooms[0].gameID).toEqual('bar-0');
-        expect(rooms[1].gameID).toEqual('bar-1');
+        expect(rooms[0].gameID).toEqual('bar-2');
+        expect(rooms[1].gameID).toEqual('bar-3');
       });
 
       test('returns player names', async () => {
