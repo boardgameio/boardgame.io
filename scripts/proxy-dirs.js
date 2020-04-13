@@ -10,18 +10,15 @@ const subpackages = require('../subpackages');
 const path = require('path');
 const { mkdirSync, writeFileSync } = require('fs');
 
-function PackageJson(
-  name,
-  { mainDir = '../dist/cjs', includeModuleField = true } = {}
-) {
+function PackageJson(name, { mainDir, esmDir } = {}) {
   const pkg = {
     name: `boardgame.io/${name}`,
     private: true,
     types: `../dist/types/packages/${name}.d.ts`,
-    main: `${mainDir}/${name}.js`,
+    main: path.join(mainDir, `${name}.js`),
   };
-  if (includeModuleField) {
-    pkg.module = `../dist/esm/${name}.js`;
+  if (esmDir) {
+    pkg.module = path.join(esmDir, `${name}.js`);
   }
   return JSON.stringify(pkg, null, 2) + '\n';
 }
@@ -32,5 +29,8 @@ function makeSubpackage(name, opts) {
   writeFileSync(`${dir}/package.json`, PackageJson(name, opts));
 }
 
-subpackages.forEach(name => makeSubpackage(name));
-makeSubpackage('server', { mainDir: '../dist', includeModuleField: false });
+subpackages.forEach(name => {
+  makeSubpackage(name, { mainDir: '../dist/cjs', esmDir: '../dist/esm' });
+});
+
+makeSubpackage('server', { mainDir: '../dist' });
