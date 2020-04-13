@@ -23,7 +23,10 @@ run the game in parallel (this is called an optimistic update and is
 an optimization that provides a lag-free experience).
 In case a particular client computes the new game state incorrectly,
 it is overridden by the master eventually, so the entire setup still
-has a single source of authority.
+has a single source of authority. If a move accesses state that is not
+accessible to the client (for instance secret state), then optimistic 
+updates may need to be disabled for that move. See the
+[secret state documentation](secret-state.md) for more details.
 
 ### Local Master
 
