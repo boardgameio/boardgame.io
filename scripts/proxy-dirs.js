@@ -10,24 +10,27 @@ const subpackages = require('../subpackages');
 const path = require('path');
 const { mkdirSync, writeFileSync } = require('fs');
 
-function PackageJson(name) {
-  return `{
-  "name": "boardgame.io/${name}",
-  "private": true,
-  "types": "../dist/types/packages/${name}.d.ts",
-  "main": "../dist/cjs/${name}.js",
-  "module": "../dist/esm/${name}.js"
-}
-`;
+function PackageJson(
+  name,
+  { mainDir = '../dist/cjs', includeModuleField = true } = {}
+) {
+  const package = {
+    name: `boardgame.io/${name}`,
+    private: true,
+    types: `../dist/types/packages/${name}.d.ts`,
+    main: `${mainDir}/${name}.js`,
+  };
+  if (includeModuleField) {
+    package.module = `../dist/esm/${name}.js`;
+  }
+  return JSON.stringify(package, null, 2) + '\n';
 }
 
-subpackages.forEach(name => {
+function makeSubpackage(name, opts) {
   const dir = path.resolve(__dirname, `../${name}`);
   mkdirSync(dir);
-  writeFileSync(`${dir}/package.json`, PackageJson(name));
-});
+  writeFileSync(`${dir}/package.json`, PackageJson(name, opts));
+}
 
-writeFileSync(
-  path.resolve(__dirname, '../server.js'),
-  "module.exports = require('./dist/server');"
-);
+subpackages.forEach(name => makeSubpackage(name));
+makeSubpackage('server', { mainDir: '../dist', includeModuleField: false });
