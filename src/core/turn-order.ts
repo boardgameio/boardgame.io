@@ -289,9 +289,9 @@ export function UpdateTurnOrderState(
     const ctxWithAPI = plugin.EnhanceCtx(state);
     const t = order.next(G, ctxWithAPI);
     const type = typeof t;
-    if (type !== 'number') {
+    if (t !== undefined && type !== 'number') {
       logging.error(
-        `invalid value returned by turn.order.next — expected number got ${type} “${t}”.`
+        `invalid value returned by turn.order.next — expected number or undefined got ${type} “${t}”.`
       );
     }
 
