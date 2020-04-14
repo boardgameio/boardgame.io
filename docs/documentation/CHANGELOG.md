@@ -1,3 +1,9 @@
+## v0.39.7
+
+#### Bugfixes
+
+* [[44d0d4f](https://github.com/nicolodavis/boardgame.io/commit/44d0d4f)] fix bad merge that undid https://github.com/nicolodavis/boardgame.io/pull/614
+
 ## v0.39.6
 
 #### Features
