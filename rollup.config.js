@@ -115,14 +115,12 @@ export default [
 
   // Browser minified version.
   {
-    input: 'packages/main.js',
-    external: ['react'],
+    input: 'packages/client.ts',
     output: [
       {
         file: pkg.unpkg,
         format: 'umd',
         name: 'BoardgameIO',
-        globals: { react: 'React' },
       },
     ],
     plugins: minifiedPlugins,
