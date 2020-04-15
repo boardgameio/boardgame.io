@@ -128,7 +128,7 @@ export const addApiToServer = ({
 
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
-    const gameList = await db.listGames(gameName);
+    const gameList = await db.listGames({ gameName });
     let rooms = [];
     for (let gameID of gameList) {
       const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
