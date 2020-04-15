@@ -14,8 +14,7 @@ import filesize from 'rollup-plugin-filesize';
 import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
-import ttypescript from 'ttypescript';
-import tsPlugin from 'rollup-plugin-typescript2';
+import typescript from 'rollup-plugin-typescript2';
 const subpackages = require('./subpackages');
 
 const external = [
@@ -27,8 +26,8 @@ const external = [
 const plugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true, only: [/svelte/] }),
-  tsPlugin({
-    typescript: ttypescript,
+  typescript({
+    typescript: require('typescript'),
     tsconfigOverride: {
       compilerOptions: {
         declaration: true,
@@ -42,7 +41,7 @@ const plugins = [
 
 const serverPlugins = [
   resolve(),
-  tsPlugin({ typescript: ttypescript }),
+  typescript({ typescript: require('typescript') }),
   babel({ exclude: ['**/node_modules/**'] }),
   commonjs({ include: 'node_modules/**' }),
 ];
@@ -50,7 +49,7 @@ const serverPlugins = [
 const minifiedPlugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true }),
-  tsPlugin({ typescript: ttypescript }),
+  typescript({ typescript: require('typescript') }),
   svelte({ extensions: ['.svelte'] }),
   commonjs(),
   replace({
