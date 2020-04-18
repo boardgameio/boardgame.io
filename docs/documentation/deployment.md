@@ -1,7 +1,8 @@
 # Deployment
 
 ## Heroku
-In order to deploy a game to [Heroku](heroku.com), the game has to be running on a single port. To do so, the [Server](/api/Server.md) has to handle both the API requests and serving the pages. Below is an example on how to achieve that.
+In order to deploy a game to [Heroku](heroku.com), the game has to be running on a single port. To do so, the [Server](/api/Server.md) has to handle both the API requests and serving the pages.  
+Below is an example on how to achieve that.
 
 ```js
 import { Server } from 'boardgame.io/server'
@@ -29,8 +30,7 @@ server.run(PORT, () => {
 })
 ``` 
 
-On Heroku, a regular heroku/nodejs buildpack is then necessary to build your app.  
-Here is an example on how the [Lobby](/api/Lobby.md) would look like.
+The [Lobby](/api/Lobby.md) would be as follow.
 
 ```js
 import React from 'react'
@@ -48,3 +48,10 @@ export default () => (
   </div>
 )
 ```
+Heroku uses 2 different ways to determine the run command of a node application. It is possible to either:
+ - Add a Procfile to the project root directory with the following line  
+ _web: node -r esm server.js_
+ - Update the start script in the package.json to  
+ start: _node -r esm server.js_
+
+On Heroku, a regular heroku/nodejs buildpack is necessary to build your app which is usually selected by default for node applications.  
