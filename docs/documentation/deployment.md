@@ -35,6 +35,12 @@ server.run(PORT, () => {
 });
 ``` 
 
+Install `koa-static` and `koa-mount`
+
+```
+npm i koa-static koa-mount
+```
+
 The [Lobby](/api/Lobby.md) might be as follows:
 
 ```jsx
