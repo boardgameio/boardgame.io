@@ -5,6 +5,13 @@
 In order to deploy a game to [Heroku](heroku.com), the game has to be running on a single port. To do so, the [Server](/api/Server.md) has to handle both the API requests and serving the pages.  
 Below is an example of how to achieve that.
 
+First install these extra dependencies: 
+
+```
+npm i koa-static koa-mount -S
+```
+Then adjust your `server.js` file like this:
+
 ```js
 // server.js
 
@@ -34,12 +41,6 @@ server.run(PORT, () => {
   )
 });
 ``` 
-
-Install `koa-static` and `koa-mount`
-
-```
-npm i koa-static koa-mount
-```
 
 The [Lobby](/api/Lobby.md) might be as follows:
 
