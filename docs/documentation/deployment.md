@@ -26,12 +26,12 @@ const static_pages = new Koa();
 static_pages.use(serve(frontEndAppBuildPath));
 server.app.use(mount('/', static_pages));
 server.run(PORT, () => {
-    server.app.use(
-        async (ctx, next) => await serve(frontEndAppBuildPath)(
-          Object.assign(ctx, { path: 'index.html' }),
-          next
-        )
+  server.app.use(
+    async (ctx, next) => await serve(frontEndAppBuildPath)(
+      Object.assign(ctx, { path: 'index.html' }),
+      next
     )
+  )
 });
 ``` 
 
