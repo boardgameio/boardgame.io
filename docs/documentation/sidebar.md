@@ -18,6 +18,7 @@
   - [Plugins](plugins.md)
   - [Debugging](debugging.md)
   - [Testing](testing.md)
+  - [Deployment](deployment.md)
 
 - Reference
 
