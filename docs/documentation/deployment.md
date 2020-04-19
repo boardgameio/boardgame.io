@@ -8,7 +8,7 @@ Below is an example of how to achieve that.
 First install these extra dependencies: 
 
 ```
-npm i koa-static koa-mount -S
+npm i --save koa-static koa-mount
 ```
 Then adjust your `server.js` file like this:
 
