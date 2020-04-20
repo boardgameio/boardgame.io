@@ -62,6 +62,7 @@ export function SocketIO({
   clientInfo = new Map(),
   roomInfo = new Map(),
   auth = true,
+  https,
 } = {}) {
   return {
     init: (app, games) => {
@@ -73,7 +74,7 @@ export function SocketIO({
       });
 
       app.context.io = io;
-      io.attach(app);
+      io.attach(app, !!https, https);
 
       for (const game of games) {
         const nsp = app._io.of(game.name);
