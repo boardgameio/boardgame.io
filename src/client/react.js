@@ -124,6 +124,7 @@ export function Client(opts) {
           isMultiplayer: !!multiplayer,
           moves: this.client.moves,
           events: this.client.events,
+          plugins: this.client.plugins,
           gameID: this.client.gameID,
           playerID: this.client.playerID,
           reset: this.client.reset,
