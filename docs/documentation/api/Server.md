@@ -62,6 +62,24 @@ server.run(8000);
 server.run(8000, () => console.log("server running..."));
 ```
 
+##### With HTTPS
+
+```js
+const { Server } = require('boardgame.io/server');
+const fs = require('fs');
+
+const server = Server({
+  games: [game1, game2, ...],
+
+  https: {
+    cert: fs.readFileSync('/path/to/cert'),
+    key: fs.readFileSync('/path/to/key'),
+  },
+});
+
+server.run(8000);
+```
+
 ##### With custom authentication
 
 `generateCredentials` is called when a player joins a game with:
