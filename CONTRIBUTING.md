@@ -4,7 +4,7 @@
 
 Please use the [Issue Tracker](https://github.com/nicolodavis/boardgame.io/issues) to discuss
 potential improvements you want to make before sending a Pull Request.
-The [roadmap](docs/roadmap.md) is probably the best place to find areas where help would
+The [roadmap](roadmap.md) is probably the best place to find areas where help would
 most be appreciated.
 
 The Issue Tracker may contain items labelled **help wanted** or **good first issue**
