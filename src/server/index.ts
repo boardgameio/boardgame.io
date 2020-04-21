@@ -26,6 +26,11 @@ interface ServerConfig {
   };
 }
 
+interface HttpsOptions {
+  cert: string;
+  key: string;
+}
+
 /**
  * Build config object from server run arguments.
  */
@@ -59,6 +64,7 @@ interface ServerOpts {
   transport?;
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
+  https?: HttpsOptions;
 }
 
 /**
@@ -69,6 +75,7 @@ interface ServerOpts {
  * @param transport - The interface with the clients.
  * @param authenticateCredentials - Function to test player credentials.
  * @param generateCredentials - Method for API to generate player credentials.
+ * @param https - HTTPS configuration options passed through to the TLS module.
  */
 export function Server({
   games,
@@ -76,6 +83,7 @@ export function Server({
   transport,
   authenticateCredentials,
   generateCredentials,
+  https,
 }: ServerOpts) {
   const app = new Koa();
 
@@ -91,7 +99,10 @@ export function Server({
       typeof authenticateCredentials === 'function'
         ? authenticateCredentials
         : true;
-    transport = SocketIO({ auth });
+    transport = SocketIO({
+      auth,
+      https,
+    });
   }
   transport.init(app, games);
 

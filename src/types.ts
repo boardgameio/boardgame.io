@@ -48,6 +48,7 @@ export interface Ctx {
   numPlayers: number;
   playOrder: Array<PlayerID>;
   playOrderPos: number;
+  playerID?: PlayerID;
   activePlayers: null | ActivePlayers;
   currentPlayer: PlayerID;
   numMoves?: number;
