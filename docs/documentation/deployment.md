@@ -83,9 +83,7 @@ import { TicTacToe } from './game';
 const server = Server({ games: [TicTacToe] });
 const PORT = process.env.PORT || 8000;
 
-server.run(PORT, () => {
-    console.log(`Serving at: https://${window.location.hostname}:${PORT}/`);
-});
+server.run(PORT);
 ```
 
 And your [Lobby](/api/Lobby.md) would now be pointing to your Heroku app url:
