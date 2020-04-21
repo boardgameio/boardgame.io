@@ -42,6 +42,12 @@ const ChatPlugin = {
   flush: ({ api }) => {
     return { messages: api.get() };
   },
+  action: (data, payload) => {
+    const message = { content: payload.args[0], playerID: payload.playerID };
+    return {
+      messages: [...data.messages, message],
+    };
+  },
 };
 
 const TicTacToe = {
@@ -51,8 +57,6 @@ const TicTacToe = {
 
   moves: {
     clickCell(G, ctx, id) {
-      debugger;
-      ctx.chat.send('hello');
       const cells = [...G.cells];
 
       if (cells[id] === null) {
@@ -133,7 +137,7 @@ class TicTacToeBoard extends React.Component {
         <pre>{JSON.stringify(this.props.plugins.chat, null, 2)}</pre>
         <button
           onClick={() => {
-            this.props.client.plugins.chat();
+            this.props.pluginsDispatcher.chat(prompt('Message?'));
           }}
         >
           Send
@@ -146,7 +150,7 @@ class TicTacToeBoard extends React.Component {
 var TicTacToeClient = Client({
   board: TicTacToeBoard,
   game: TicTacToe,
-  debug: true,
+  debug: false,
   multiplayer: Local(),
 });
 
