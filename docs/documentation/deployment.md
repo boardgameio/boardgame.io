@@ -2,7 +2,7 @@
 
 ## Heroku
 
-In order to deploy a game to [Heroku](heroku.com), the game has to be running on a single port. To do so, the [Server](/api/Server.md) has to handle both the API requests and serving the pages.  
+In order to deploy a game to [Heroku](https://heroku.com), the game has to be running on a single port. To do so, the [Server](/api/Server.md) has to handle both the API requests and serving the pages.  
 Below is an example of how to achieve that.
 
 First install these extra dependencies: 
