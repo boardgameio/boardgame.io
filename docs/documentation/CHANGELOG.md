@@ -1,3 +1,13 @@
+## v0.39.8
+
+#### Bugfixes
+
+* [[3569408](https://github.com/nicolodavis/boardgame.io/commit/3569408)] Add option to run server over HTTPS (#631)
+* [[c56d9b9](https://github.com/nicolodavis/boardgame.io/commit/c56d9b9)] Adding playerID to Ctx (#627)
+* [[882a25d](https://github.com/nicolodavis/boardgame.io/commit/882a25d)] export only the client in the browser-minified package
+* [[3d1c07c](https://github.com/nicolodavis/boardgame.io/commit/3d1c07c)] build(server): Proxy server module with package.json (#622)
+* [[bd44678](https://github.com/nicolodavis/boardgame.io/commit/bd44678)] Fix passing params to db adapter (#621)
+
 ## v0.39.7
 
 #### Bugfixes
