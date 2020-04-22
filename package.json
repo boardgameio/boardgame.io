@@ -36,6 +36,7 @@
   "module": "dist/boardgameio.es.js",
   "types": "dist/types/src/types.d.ts",
   "files": [
+    "src",
     "dist/boardgameio.js",
     "dist/boardgameio.min.js",
     "dist/boardgameio.es.js",
