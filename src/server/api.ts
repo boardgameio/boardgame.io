@@ -335,7 +335,7 @@ export const addApiToServer = ({
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
-    if ((!data || Object.keys(data).length === 0) && !newName) {
+    if (!data && !newName) {
       ctx.throw(403, 'newName or data is required');
     }
     if (!metadata) {

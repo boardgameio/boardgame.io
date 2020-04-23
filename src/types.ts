@@ -268,7 +268,7 @@ export namespace Server {
     id: number;
     name?: string;
     credentials?: string;
-    data?: { [key: string]: any };
+    data?: any;
   };
 
   export interface GameMetadata {

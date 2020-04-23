@@ -88,7 +88,7 @@ Accepts four parameters, requires at least one of the two optional parameters:
 
 `newName` (optional): the new name of the player.
 
-`data` (optional): the object containing the additional information.
+`data` (optional): additional information associated to the player.
 
 #### Leaving a room
 
