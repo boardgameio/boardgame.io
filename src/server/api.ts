@@ -171,6 +171,7 @@ export const addApiToServer = ({
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
+    const data = ctx.request.body.data;
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
@@ -191,6 +192,9 @@ export const addApiToServer = ({
       ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 
+    if (data) {
+      metadata.players[playerID].data = data;
+    }
     metadata.players[playerID].name = playerName;
     const playerCredentials = await lobbyConfig.generateCredentials(ctx);
     metadata.players[playerID].credentials = playerCredentials;
@@ -288,6 +292,9 @@ export const addApiToServer = ({
   });
 
   router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+    console.warn(
+      'This endpoint /rename is deprecated. Please use /update instead.'
+    );
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
@@ -320,15 +327,16 @@ export const addApiToServer = ({
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
-    const additionalInfo = ctx.request.body.additionalInfo;
+    const newName = ctx.request.body.newName;
+    const data = ctx.request.body.data;
     const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
       metadata: true,
     });
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
-    if (!additionalInfo || Object.keys(additionalInfo).length === 0) {
-      ctx.throw(403, 'additionalInfo is required');
+    if ((!data || Object.keys(data).length === 0) && !newName) {
+      ctx.throw(403, 'newName or data is required');
     }
     if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
@@ -339,11 +347,13 @@ export const addApiToServer = ({
     if (credentials !== metadata.players[playerID].credentials) {
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
-    if (!metadata.players[playerID].additionalInfo)
-      metadata.players[playerID].additionalInfo = {};
-    Object.keys(additionalInfo).forEach(key => {
-      metadata.players[playerID].additionalInfo[key] = additionalInfo[key];
-    });
+
+    if (newName) {
+      metadata.players[playerID].name = newName;
+    }
+    if (data) {
+      metadata.players[playerID].data = data;
+    }
     await db.setMetadata(gameID, metadata);
     ctx.body = {};
   });

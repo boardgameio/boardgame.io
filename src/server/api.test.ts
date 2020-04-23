@@ -353,7 +353,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('rename', () => {
+  describe('rename with deprecated endpoint', () => {
     let response;
     let db;
     let games;
@@ -472,6 +472,125 @@ describe('.createApiServer', () => {
     });
   });
 
+  describe('rename with update endpoint', () => {
+    let response;
+    let db;
+    let games;
+
+    beforeEach(() => {
+      games = [ProcessGameConfig({ name: 'foo' })];
+    });
+
+    describe('for an unprotected lobby', () => {
+      beforeEach(() => {
+        delete process.env.API_SECRET;
+      });
+
+      describe('when the game does not exist', () => {
+        test('throws a "not found" error', async () => {
+          db = new AsyncStorage({
+            fetch: async () => ({ metadata: null }),
+          });
+          const app = createApiServer({ db, games });
+          response = await request(app.callback())
+            .post('/games/foo/1/update')
+            .send('playerID=0&playerName=alice&newName=ali');
+          expect(response.status).toEqual(404);
+        });
+      });
+
+      describe('when the game does exist', () => {
+        describe('when the playerID does exist', () => {
+          beforeEach(async () => {
+            db = new AsyncStorage({
+              fetch: async () => {
+                return {
+                  metadata: {
+                    players: {
+                      '0': {
+                        name: 'alice',
+                        credentials: 'SECRET1',
+                      },
+                      '1': {
+                        name: 'bob',
+                        credentials: 'SECRET2',
+                      },
+                    },
+                  },
+                };
+              },
+            });
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/update')
+              .send('playerID=0&credentials=SECRET1&newName=ali');
+          });
+
+          test('is successful', async () => {
+            expect(response.status).toEqual(200);
+          });
+
+          test('updates the players', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({
+                players: expect.objectContaining({
+                  '0': expect.objectContaining({
+                    name: 'ali',
+                  }),
+                }),
+              })
+            );
+          });
+        });
+
+        describe('when the playerID does not exist', () => {
+          test('throws error 404', async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/update')
+              .send('playerID=2&credentials=SECRET1&newName=joe');
+            expect(response.status).toEqual(404);
+          });
+        });
+
+        describe('when the credentials are invalid', () => {
+          test('throws error 404', async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/update')
+              .send('playerID=0&credentials=SECRET2&newName=mike');
+            expect(response.status).toEqual(403);
+          });
+        });
+        describe('when playerID is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/update')
+              .send('credentials=foo&newName=bill');
+          });
+
+          test('throws error 403', async () => {
+            expect(response.status).toEqual(403);
+          });
+          describe('when newName is omitted', () => {
+            beforeEach(async () => {
+              const app = createApiServer({ db, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/update')
+                .send('credentials=foo&playerID=0');
+            });
+
+            test('throws error 403', async () => {
+              expect(response.status).toEqual(403);
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('updating', () => {
     let response;
     let db;
@@ -494,7 +613,7 @@ describe('.createApiServer', () => {
           const app = createApiServer({ db, games });
           response = await request(app.callback())
             .post('/games/foo/1/update')
-            .send({ playerID: 0, additionalInfo: { data: 'data' } });
+            .send({ playerID: 0, data: { subdata: 'text' } });
           expect(response.status).toEqual(404);
         });
       });
@@ -526,7 +645,7 @@ describe('.createApiServer', () => {
               .send({
                 playerID: 0,
                 credentials: 'SECRET1',
-                additionalInfo: { data: 'data' },
+                data: { subdata: 'text' },
               });
           });
 
@@ -540,8 +659,8 @@ describe('.createApiServer', () => {
               expect.objectContaining({
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
-                    additionalInfo: expect.objectContaining({
-                      data: 'data',
+                    data: expect.objectContaining({
+                      subdata: 'text',
                     }),
                   }),
                 }),
@@ -558,7 +677,7 @@ describe('.createApiServer', () => {
               .send({
                 playerID: 2,
                 credentials: 'SECRET1',
-                additionalInfo: { data: 'data' },
+                data: { subdata: 'text' },
               });
             expect(response.status).toEqual(404);
           });
@@ -572,7 +691,7 @@ describe('.createApiServer', () => {
               .send({
                 playerID: 0,
                 credentials: 'SECRET2',
-                additionalInfo: { data: 'data' },
+                data: { subdata: 'text' },
               });
             expect(response.status).toEqual(403);
           });
@@ -582,7 +701,7 @@ describe('.createApiServer', () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
-              .send({ credentials: 'foo', additionalInfo: { data: 'data' } });
+              .send({ credentials: 'foo', data: { subdata: 'text' } });
           });
 
           test('throws error 403', async () => {
