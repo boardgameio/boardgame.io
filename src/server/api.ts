@@ -138,7 +138,8 @@ export const addApiToServer = ({
         gameID,
         players: Object.values(metadata.players).map((player: any) => {
           // strip away credentials
-          return { id: player.id, name: player.name };
+          const { credentials, ...strippedInfo } = player;
+          return strippedInfo;
         }),
         setupData: metadata.setupData,
       });
@@ -159,7 +160,8 @@ export const addApiToServer = ({
     const strippedRoom = {
       roomID: gameID,
       players: Object.values(metadata.players).map((player: any) => {
-        return { id: player.id, name: player.name };
+        const { credentials, ...strippedInfo } = player;
+        return strippedInfo;
       }),
       setupData: metadata.setupData,
     };
@@ -310,6 +312,38 @@ export const addApiToServer = ({
     }
 
     metadata.players[playerID].name = newName;
+    await db.setMetadata(gameID, metadata);
+    ctx.body = {};
+  });
+
+  router.post('/games/:name/:id/update', koaBody(), async ctx => {
+    const gameID = ctx.params.id;
+    const playerID = ctx.request.body.playerID;
+    const credentials = ctx.request.body.credentials;
+    const additionalInfo = ctx.request.body.additionalInfo;
+    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+      metadata: true,
+    });
+    if (typeof playerID === 'undefined') {
+      ctx.throw(403, 'playerID is required');
+    }
+    if (!additionalInfo || Object.keys(additionalInfo).length === 0) {
+      ctx.throw(403, 'additionalInfo is required');
+    }
+    if (!metadata) {
+      ctx.throw(404, 'Game ' + gameID + ' not found');
+    }
+    if (!metadata.players[playerID]) {
+      ctx.throw(404, 'Player ' + playerID + ' not found');
+    }
+    if (credentials !== metadata.players[playerID].credentials) {
+      ctx.throw(403, 'Invalid credentials ' + credentials);
+    }
+    if (!metadata.players[playerID].additionalInfo)
+      metadata.players[playerID].additionalInfo = {};
+    Object.keys(additionalInfo).forEach(key => {
+      metadata.players[playerID].additionalInfo[key] = additionalInfo[key];
+    });
     await db.setMetadata(gameID, metadata);
     ctx.body = {};
   });

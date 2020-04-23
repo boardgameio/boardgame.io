@@ -88,6 +88,20 @@ Accepts three parameters, all required:
 
 `newName`: the new name of the player.
 
+#### Add additional information to a player
+
+##### POST `/games/{name}/{id}/update`
+
+Adds additional information to a player that will then be avaialble in the game metadata.
+
+Accepts three parameters, all required:
+
+`playerID`: the ID used by the player in the game (0,1...).
+
+`crendentials`: the authentication token of the player.
+
+`additionalInfo`: the object containing the additional information.
+
 #### Leaving a room
 
 ##### POST `/games/{name}/{id}/leave`
