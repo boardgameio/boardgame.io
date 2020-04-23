@@ -15,6 +15,7 @@ import cors from '@koa/cors';
 import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
 import { Server, Game } from '../types';
+import { update } from '../../dist/types/src/core/action-creators';
 
 const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
   gameName,
@@ -291,39 +292,7 @@ export const addApiToServer = ({
     };
   });
 
-  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
-    console.warn(
-      'This endpoint /rename is deprecated. Please use /update instead.'
-    );
-    const gameID = ctx.params.id;
-    const playerID = ctx.request.body.playerID;
-    const credentials = ctx.request.body.credentials;
-    const newName = ctx.request.body.newName;
-    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
-      metadata: true,
-    });
-    if (typeof playerID === 'undefined') {
-      ctx.throw(403, 'playerID is required');
-    }
-    if (!newName) {
-      ctx.throw(403, 'newName is required');
-    }
-    if (!metadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
-    }
-    if (!metadata.players[playerID]) {
-      ctx.throw(404, 'Player ' + playerID + ' not found');
-    }
-    if (credentials !== metadata.players[playerID].credentials) {
-      ctx.throw(403, 'Invalid credentials ' + credentials);
-    }
-
-    metadata.players[playerID].name = newName;
-    await db.setMetadata(gameID, metadata);
-    ctx.body = {};
-  });
-
-  router.post('/games/:name/:id/update', koaBody(), async ctx => {
+  const update = async ctx => {
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
@@ -356,7 +325,16 @@ export const addApiToServer = ({
     }
     await db.setMetadata(gameID, metadata);
     ctx.body = {};
+  };
+
+  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+    console.warn(
+      'This endpoint /rename is deprecated. Please use /update instead.'
+    );
+    await update(ctx);
   });
+
+  router.post('/games/:name/:id/update', koaBody(), update);
 
   app.use(cors());
 

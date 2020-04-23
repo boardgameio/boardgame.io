@@ -707,7 +707,7 @@ describe('.createApiServer', () => {
           test('throws error 403', async () => {
             expect(response.status).toEqual(403);
           });
-          describe('when additionalInfo is omitted', () => {
+          describe('when data is omitted', () => {
             beforeEach(async () => {
               const app = createApiServer({ db, games });
               response = await request(app.callback())
