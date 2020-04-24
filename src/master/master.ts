@@ -138,7 +138,12 @@ export class Master {
   auth: null | AuthFn;
   shouldAuth: typeof doesGameRequireAuthentication;
 
-  constructor(game: Game, storageAPI, transportAPI, auth?: AuthFn | boolean) {
+  constructor(
+    game: Game,
+    storageAPI: StorageAPI.Sync | StorageAPI.Async,
+    transportAPI,
+    auth?: AuthFn | boolean
+  ) {
     this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
@@ -331,8 +336,7 @@ export class Master {
     }>;
 
     if (IsSynchronous(this.storageAPI)) {
-      const api = this.storageAPI as StorageAPI.Sync;
-      result = api.fetch(key, {
+      result = this.storageAPI.fetch(key, {
         state: true,
         metadata: true,
         log: true,
@@ -369,8 +373,7 @@ export class Master {
       });
 
       if (IsSynchronous(this.storageAPI)) {
-        const api = this.storageAPI as StorageAPI.Sync;
-        api.setState(key, state);
+        this.storageAPI.setState(key, state);
       } else {
         await this.storageAPI.setState(key, state);
       }
