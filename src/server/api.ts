@@ -15,7 +15,6 @@ import cors from '@koa/cors';
 import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
 import { Server, Game } from '../types';
-import { update } from '../../dist/types/src/core/action-creators';
 
 const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
   gameName,
@@ -292,7 +291,7 @@ export const addApiToServer = ({
     };
   });
 
-  const update = async ctx => {
+  const updatePlayerMetadata = async ctx => {
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
@@ -304,8 +303,11 @@ export const addApiToServer = ({
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
-    if (!data && !newName) {
+    if (data === undefined && !newName) {
       ctx.throw(403, 'newName or data is required');
+    }
+    if (newName && typeof newName !== 'string') {
+      ctx.throw(403, `newName must be a string, got ${typeof newName}`);
     }
     if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
@@ -331,10 +333,10 @@ export const addApiToServer = ({
     console.warn(
       'This endpoint /rename is deprecated. Please use /update instead.'
     );
-    await update(ctx);
+    await updatePlayerMetadata(ctx);
   });
 
-  router.post('/games/:name/:id/update', koaBody(), update);
+  router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
 
   app.use(cors());
 
