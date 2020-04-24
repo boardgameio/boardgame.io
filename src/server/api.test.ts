@@ -258,7 +258,7 @@ describe('.createApiServer', () => {
             });
             response = await request(app.callback())
               .post('/games/foo/1/join')
-              .send('playerID=0&playerName=alice');
+              .send({ playerID: 0, playerName: 'alice', data: 99 });
           });
 
           test('is successful', async () => {
@@ -276,6 +276,18 @@ describe('.createApiServer', () => {
                 players: expect.objectContaining({
                   '0': expect.objectContaining({
                     name: 'alice',
+                  }),
+                }),
+              })
+            );
+          });
+          test('updates the player data', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({
+                players: expect.objectContaining({
+                  '0': expect.objectContaining({
+                    data: 99,
                   }),
                 }),
               })
@@ -382,18 +394,6 @@ describe('.createApiServer', () => {
 
       describe('when the game does exist', () => {
         describe('when the playerID does exist', () => {
-          describe('when the playerName is not a string', () => {
-            test('newName must be a string', async () => {
-              const app = createApiServer({ db, games });
-              response = await request(app.callback())
-                .post('/games/foo/1/rename')
-                .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
-              expect(response.text).toEqual(
-                'newName must be a string, got number'
-              );
-            });
-          });
-
           beforeEach(async () => {
             db = new AsyncStorage({
               fetch: async () => {
@@ -417,6 +417,18 @@ describe('.createApiServer', () => {
             response = await request(app.callback())
               .post('/games/foo/1/rename')
               .send('playerID=0&credentials=SECRET1&newName=ali');
+          });
+
+          describe('when the playerName is not a string', () => {
+            test('throws newName must be a string', async () => {
+              const app = createApiServer({ db, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/rename')
+                .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
+              expect(response.text).toEqual(
+                'newName must be a string, got number'
+              );
+            });
           });
 
           test('is successful', async () => {
@@ -499,7 +511,7 @@ describe('.createApiServer', () => {
       });
 
       describe('when the game does not exist', () => {
-        test('game not found', async () => {
+        test('throws game not found', async () => {
           db = new AsyncStorage({
             fetch: async () => ({ metadata: null }),
           });
@@ -513,17 +525,6 @@ describe('.createApiServer', () => {
 
       describe('when the game does exist', () => {
         describe('when the playerID does exist', () => {
-          describe('when the playerName is not a string', () => {
-            test('newName must be a string', async () => {
-              const app = createApiServer({ db, games });
-              response = await request(app.callback())
-                .post('/games/foo/1/update')
-                .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
-              expect(response.text).toEqual(
-                'newName must be a string, got number'
-              );
-            });
-          });
           beforeEach(async () => {
             db = new AsyncStorage({
               fetch: async () => {
@@ -549,6 +550,18 @@ describe('.createApiServer', () => {
               .send('playerID=0&credentials=SECRET1&newName=ali');
           });
 
+          describe('when the playerName is not a string', () => {
+            test('throws newName must be a string', async () => {
+              const app = createApiServer({ db, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/update')
+                .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
+              expect(response.text).toEqual(
+                'newName must be a string, got number'
+              );
+            });
+          });
+
           test('is successful', async () => {
             expect(response.status).toEqual(200);
           });
@@ -568,7 +581,7 @@ describe('.createApiServer', () => {
         });
 
         describe('when the playerID does not exist', () => {
-          test('player not found', async () => {
+          test('throws player not found', async () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
@@ -578,7 +591,7 @@ describe('.createApiServer', () => {
         });
 
         describe('when the credentials are invalid', () => {
-          test('invalid credentials', async () => {
+          test('throws invalid credentials', async () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
@@ -593,8 +606,7 @@ describe('.createApiServer', () => {
               .post('/games/foo/1/update')
               .send('credentials=foo&newName=bill');
           });
-
-          test('playerID is required', async () => {
+          test('throws playerID is required', async () => {
             expect(response.text).toEqual('playerID is required');
           });
           describe('when newName is omitted', () => {
@@ -605,7 +617,7 @@ describe('.createApiServer', () => {
                 .send('credentials=foo&playerID=0');
             });
 
-            test('newName is required', async () => {
+            test('throws newName is required', async () => {
               expect(response.text).toEqual('newName or data is required');
             });
           });
@@ -614,7 +626,7 @@ describe('.createApiServer', () => {
     });
   });
 
-  describe('updating', () => {
+  describe('updating player metadata', () => {
     let response;
     let db;
     let games;
@@ -627,9 +639,8 @@ describe('.createApiServer', () => {
       beforeEach(() => {
         delete process.env.API_SECRET;
       });
-
       describe('when the game does not exist', () => {
-        test('throws a "not found" error', async () => {
+        test('throws game not found', async () => {
           db = new AsyncStorage({
             fetch: async () => ({ metadata: null }),
           });
@@ -693,7 +704,7 @@ describe('.createApiServer', () => {
         });
 
         describe('when the playerID does not exist', () => {
-          test('playerID not found', async () => {
+          test('throws playerID not found', async () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
@@ -727,7 +738,7 @@ describe('.createApiServer', () => {
               .send({ credentials: 'foo', data: { subdata: 'text' } });
           });
 
-          test('playerID is required', async () => {
+          test('throws playerID is required', async () => {
             expect(response.text).toEqual('playerID is required');
           });
           describe('when data is omitted', () => {
@@ -738,7 +749,7 @@ describe('.createApiServer', () => {
                 .send({ playerID: 0, credentials: 'foo' });
             });
 
-            test('data is required', async () => {
+            test('throws data is required', async () => {
               expect(response.text).toEqual('newName or data is required');
             });
           });
