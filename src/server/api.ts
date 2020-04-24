@@ -138,7 +138,8 @@ export const addApiToServer = ({
         gameID,
         players: Object.values(metadata.players).map((player: any) => {
           // strip away credentials
-          return { id: player.id, name: player.name };
+          const { credentials, ...strippedInfo } = player;
+          return strippedInfo;
         }),
         setupData: metadata.setupData,
       });
@@ -159,7 +160,8 @@ export const addApiToServer = ({
     const strippedRoom = {
       roomID: gameID,
       players: Object.values(metadata.players).map((player: any) => {
-        return { id: player.id, name: player.name };
+        const { credentials, ...strippedInfo } = player;
+        return strippedInfo;
       }),
       setupData: metadata.setupData,
     };
@@ -169,6 +171,7 @@ export const addApiToServer = ({
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
+    const data = ctx.request.body.data;
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
@@ -189,6 +192,9 @@ export const addApiToServer = ({
       ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 
+    if (data) {
+      metadata.players[playerID].data = data;
+    }
     metadata.players[playerID].name = playerName;
     const playerCredentials = await lobbyConfig.generateCredentials(ctx);
     metadata.players[playerID].credentials = playerCredentials;
@@ -285,19 +291,23 @@ export const addApiToServer = ({
     };
   });
 
-  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+  const updatePlayerMetadata = async ctx => {
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const newName = ctx.request.body.newName;
+    const data = ctx.request.body.data;
     const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
       metadata: true,
     });
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
-    if (!newName) {
-      ctx.throw(403, 'newName is required');
+    if (data === undefined && !newName) {
+      ctx.throw(403, 'newName or data is required');
+    }
+    if (newName && typeof newName !== 'string') {
+      ctx.throw(403, `newName must be a string, got ${typeof newName}`);
     }
     if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
@@ -309,10 +319,24 @@ export const addApiToServer = ({
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
-    metadata.players[playerID].name = newName;
+    if (newName) {
+      metadata.players[playerID].name = newName;
+    }
+    if (data) {
+      metadata.players[playerID].data = data;
+    }
     await db.setMetadata(gameID, metadata);
     ctx.body = {};
+  };
+
+  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+    console.warn(
+      'This endpoint /rename is deprecated. Please use /update instead.'
+    );
+    await updatePlayerMetadata(ctx);
   });
+
+  router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
 
   app.use(cors());
 

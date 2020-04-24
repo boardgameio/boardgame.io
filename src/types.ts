@@ -268,6 +268,7 @@ export namespace Server {
     id: number;
     name?: string;
     credentials?: string;
+    data?: any;
   };
 
   export interface GameMetadata {
