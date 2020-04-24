@@ -358,7 +358,8 @@ export class Master {
 
     if (gameMetadata) {
       filteredMetadata = Object.values(gameMetadata.players).map(player => {
-        return { id: player.id, name: player.name };
+        const { credentials, ...filteredData } = player;
+        return filteredData;
       });
     }
 

@@ -74,19 +74,21 @@ Accepts two JSON body parameters, all required:
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
 
-#### Renaming a player
+#### Update a player's information
 
-##### POST `/games/{name}/{id}/rename`
+##### POST `/games/{name}/{id}/update`
 
-Rename a user in the room instance `id` of a game named `name` previously joined by the player.
+Rename and/or update additional information of a user in the room instance `id` of a game named `name` previously joined by the player.
 
-Accepts three parameters, all required:
+Accepts four parameters, requires at least one of the two optional parameters:
 
-`playerID`: the ID used by the player in the game (0, 1...).
+`playerID` (required): the ID used by the player in the game (0,1...).
 
-`credentials`: the authentication token of the player.
+`crendentials` (required): the authentication token of the player.
 
-`newName`: the new name of the player.
+`newName` (optional): the new name of the player.
+
+`data` (optional): additional information associated to the player.
 
 #### Leaving a room
 
