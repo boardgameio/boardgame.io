@@ -171,17 +171,18 @@ export class Master {
     playerID: string
   ) {
     let isActionAuthentic;
+    let metadata: Server.GameMetadata | undefined;
     const credentials = credAction.payload.credentials;
     if (IsSynchronous(this.storageAPI)) {
-      const { metadata } = this.storageAPI.fetch(gameID, { metadata: true });
+      ({ metadata } = this.storageAPI.fetch(gameID, { metadata: true }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
       isActionAuthentic = this.shouldAuth(metadata)
         ? this.auth(credentials, playerMetadata)
         : true;
     } else {
-      const { metadata } = await this.storageAPI.fetch(gameID, {
+      ({ metadata } = await this.storageAPI.fetch(gameID, {
         metadata: true,
-      });
+      }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
       isActionAuthentic = this.shouldAuth(metadata)
         ? await this.auth(credentials, playerMetadata)
@@ -284,10 +285,29 @@ export class Master {
 
     const { deltalog, ...stateWithoutDeltalog } = state;
 
+    let newMetadata: Server.GameMetadata | undefined;
+    if (
+      metadata &&
+      !('gameover' in metadata) &&
+      state.ctx.gameover !== undefined
+    ) {
+      newMetadata = {
+        ...metadata,
+        gameover: state.ctx.gameover,
+      };
+    }
+
     if (IsSynchronous(this.storageAPI)) {
       this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
+      if (newMetadata) this.storageAPI.setMetadata(key, newMetadata);
     } else {
-      await this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
+      const writes = [
+        this.storageAPI.setState(key, stateWithoutDeltalog, deltalog),
+      ];
+      if (newMetadata) {
+        writes.push(this.storageAPI.setMetadata(key, newMetadata));
+      }
+      await Promise.all(writes);
     }
   }
 
