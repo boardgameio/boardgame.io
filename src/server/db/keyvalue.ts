@@ -14,7 +14,7 @@ export class KeyValue extends StorageAPI.Async {
   private store: KeyValueStore;
   private storeInitArgs: object;
 
-  constructor(store: KeyValueStore, storeInitArgs: object) {
+  constructor(store: KeyValueStore, storeInitArgs: object = undefined) {
     super();
     this.store = store;
     this.storeInitArgs = storeInitArgs;

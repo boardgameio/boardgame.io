@@ -44,6 +44,33 @@ Instructions at https://github.com/delucis/bgio-firebase.
 
 Coming soon.
 
+#### Azure Storage
+
+First, install the necessary packages:
+
+```sh
+npm install --save @azure/storage-blob
+```
+
+Then modify your server spec to indicate that you want to connect to an [Azure Storage](https://azure.microsoft.com/en-us/services/storage/) database:
+
+```js
+const { BlobServiceClient } = require("@azure/storage-blob");
+const { Server, AzureStorage } = require('boardgame.io/server');
+const { TicTacToe } = require('./game');
+
+const server = Server({
+  games: [TicTacToe],
+
+  db: new AzureStorage({
+    client: BlobServiceClient.fromConnectionString('enter your connection string here'),
+    container: 'boardgameio',
+  }),
+});
+
+server.run(8000);
+```
+
 #### MongoDB
 
 Coming soon (used to be supported but is not in sync with the

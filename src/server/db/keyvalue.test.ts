@@ -6,11 +6,22 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { BlobServiceClient } from '@azure/storage-blob';
 import { State, Server, LogEntry } from '../../types';
+import { AzureStorage } from './azurestorage';
 import { FlatFile } from './flatfile';
 
 const tests = [
   { name: 'FlatFile', db: new FlatFile({ dir: './tmp', logging: false }) },
+  {
+    name: 'AzureStorage',
+    db: new AzureStorage({
+      client: BlobServiceClient.fromConnectionString(
+        'UseDevelopmentStorage=true'
+      ),
+      container: 'test',
+    }),
+  },
 ];
 
 for (const { name, db } of tests) {
