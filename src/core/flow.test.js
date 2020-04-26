@@ -308,6 +308,33 @@ describe('turn', () => {
       expect(state.ctx.turn).toBe(4);
       expect(state.ctx.currentPlayer).toBe('1');
     });
+
+    test('with noLimit moves', () => {
+      const flow = Flow({
+        turn: {
+          moveLimit: 2,
+        },
+        moves: {
+          A: () => {},
+          B: {
+            move: () => {},
+            noLimit: true,
+          },
+        },
+      });
+      let state = flow.init({ ctx: flow.ctx(2) });
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.numMoves).toBe(0);
+      state = flow.processMove(state, makeMove('A', null, '0').payload);
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.numMoves).toBe(1);
+      state = flow.processMove(state, makeMove('B', null, '0').payload);
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.numMoves).toBe(1);
+      state = flow.processMove(state, makeMove('A', null, '0').payload);
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.numMoves).toBe(0);
+    });
   });
 
   describe('endIf', () => {
