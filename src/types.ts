@@ -138,6 +138,7 @@ export interface LongFormMove<
 > {
   move: MoveFn<G, CtxWithPlugins>;
   redact?: boolean;
+  noLimit?: boolean;
   client?: boolean;
   undoable?: boolean | ((G: G, ctx: CtxWithPlugins) => boolean);
 }
@@ -275,6 +276,7 @@ export namespace Server {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData: any;
+    gameover?: any;
     nextRoomID?: string;
   }
 
