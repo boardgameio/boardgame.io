@@ -138,7 +138,12 @@ export class Master {
   auth: null | AuthFn;
   shouldAuth: typeof doesGameRequireAuthentication;
 
-  constructor(game: Game, storageAPI, transportAPI, auth?: AuthFn | boolean) {
+  constructor(
+    game: Game,
+    storageAPI: StorageAPI.Sync | StorageAPI.Async,
+    transportAPI,
+    auth?: AuthFn | boolean
+  ) {
     this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
@@ -171,17 +176,18 @@ export class Master {
     playerID: string
   ) {
     let isActionAuthentic;
+    let metadata: Server.GameMetadata | undefined;
     const credentials = credAction.payload.credentials;
     if (IsSynchronous(this.storageAPI)) {
-      const { metadata } = this.storageAPI.fetch(gameID, { metadata: true });
+      ({ metadata } = this.storageAPI.fetch(gameID, { metadata: true }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
       isActionAuthentic = this.shouldAuth(metadata)
         ? this.auth(credentials, playerMetadata)
         : true;
     } else {
-      const { metadata } = await this.storageAPI.fetch(gameID, {
+      ({ metadata } = await this.storageAPI.fetch(gameID, {
         metadata: true,
-      });
+      }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
       isActionAuthentic = this.shouldAuth(metadata)
         ? await this.auth(credentials, playerMetadata)
@@ -284,10 +290,29 @@ export class Master {
 
     const { deltalog, ...stateWithoutDeltalog } = state;
 
+    let newMetadata: Server.GameMetadata | undefined;
+    if (
+      metadata &&
+      !('gameover' in metadata) &&
+      state.ctx.gameover !== undefined
+    ) {
+      newMetadata = {
+        ...metadata,
+        gameover: state.ctx.gameover,
+      };
+    }
+
     if (IsSynchronous(this.storageAPI)) {
       this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
+      if (newMetadata) this.storageAPI.setMetadata(key, newMetadata);
     } else {
-      await this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
+      const writes = [
+        this.storageAPI.setState(key, stateWithoutDeltalog, deltalog),
+      ];
+      if (newMetadata) {
+        writes.push(this.storageAPI.setMetadata(key, newMetadata));
+      }
+      await Promise.all(writes);
     }
   }
 
@@ -311,8 +336,7 @@ export class Master {
     }>;
 
     if (IsSynchronous(this.storageAPI)) {
-      const api = this.storageAPI as StorageAPI.Sync;
-      result = api.fetch(key, {
+      result = this.storageAPI.fetch(key, {
         state: true,
         metadata: true,
         log: true,
@@ -350,8 +374,7 @@ export class Master {
       });
 
       if (IsSynchronous(this.storageAPI)) {
-        const api = this.storageAPI as StorageAPI.Sync;
-        api.setState(key, state);
+        this.storageAPI.setState(key, state);
       } else {
         await this.storageAPI.setState(key, state);
       }
