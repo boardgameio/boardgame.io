@@ -275,6 +275,7 @@ export namespace Server {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData: any;
+    gameover?: any;
     nextRoomID?: string;
   }
 
