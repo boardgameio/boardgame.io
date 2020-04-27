@@ -96,6 +96,7 @@ describe('.createApiServer', () => {
                 '1': 'red',
               },
             },
+            unlisted: true,
           });
       });
 
@@ -142,6 +143,7 @@ describe('.createApiServer', () => {
                 '1': 'red',
               }),
             }),
+            unlisted: true,
           })
         );
       });
@@ -1041,7 +1043,7 @@ describe('.createApiServer', () => {
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        fetch: async () => {
+        fetch: async gameID => {
           return {
             metadata: {
               players: {
@@ -1054,6 +1056,7 @@ describe('.createApiServer', () => {
                   credentials: 'SECRET2',
                 },
               },
+              unlisted: gameID === 'bar-4',
             },
           };
         },
@@ -1063,6 +1066,7 @@ describe('.createApiServer', () => {
             'foo-1': { gameName: 'foo' },
             'bar-2': { gameName: 'bar' },
             'bar-3': { gameName: 'bar' },
+            'bar-4': { gameName: 'bar' },
           };
           const keys = Object.keys(metadata);
           if (opts && opts.gameName) {

@@ -52,11 +52,13 @@ Options are:
 
 Creates a new authenticated room for a game named `name`.
 
-Accepts two parameters:
+Accepts three parameters:
 
 `numPlayers` (required): the number of players.
 
 `setupData` (optional): custom object that is passed to the game `setup` function.
+
+`unlisted` (optional): if set to `true`, the room will be excluded from the public list of room instances.
 
 Returns `roomID`, which is the ID of the newly created game instance.
 
