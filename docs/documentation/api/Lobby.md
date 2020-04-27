@@ -135,3 +135,21 @@ Returns a room instance. Each instance has fields:
 #### Client Authentication
 
 All actions for an authenticated game require an additional payload field `credentials`, which must be the given secret associated with the player.
+
+#### Playing again
+
+##### POST `/games/{name}/{id}/playAgain`
+
+`{name}` (required): the name of the game being played again.
+
+`{id}` (required): the ID of the previous finished room.
+
+Given a previous room, generates a room ID where users should go if they want to play again. Creates this new room if it didn't exist before.
+
+Accepts these parameters:
+
+`playerID` (required): the player ID of the player on the previous game.
+
+`credentials` (required): player's credentials.
+
+Returns `nextRoomID`, which is the ID of the newly created room that the user should go to play again.
