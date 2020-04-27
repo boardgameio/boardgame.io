@@ -278,6 +278,7 @@ export namespace Server {
     setupData: any;
     gameover?: any;
     nextRoomID?: string;
+    unlisted?: boolean;
   }
 
   export interface LobbyConfig {
