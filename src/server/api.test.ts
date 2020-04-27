@@ -388,7 +388,7 @@ describe('.createApiServer', () => {
           });
           const app = createApiServer({ db, games });
           response = await request(app.callback())
-            .post('/games/foo/1/rename')
+            .post('/games/foo/1/update')
             .send('playerID=0&playerName=alice&newName=ali');
           expect(response.status).toEqual(404);
         });
@@ -417,7 +417,7 @@ describe('.createApiServer', () => {
             });
             const app = createApiServer({ db, games });
             response = await request(app.callback())
-              .post('/games/foo/1/rename')
+              .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET1&newName=ali');
           });
 
@@ -425,7 +425,7 @@ describe('.createApiServer', () => {
             test('throws newName must be a string', async () => {
               const app = createApiServer({ db, games });
               response = await request(app.callback())
-                .post('/games/foo/1/rename')
+                .post('/games/foo/1/update')
                 .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
               expect(response.text).toEqual(
                 'newName must be a string, got number'
@@ -455,7 +455,7 @@ describe('.createApiServer', () => {
           test('throws error 404', async () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
-              .post('/games/foo/1/rename')
+              .post('/games/foo/1/update')
               .send('playerID=2&credentials=SECRET1&newName=joe');
             expect(response.status).toEqual(404);
           });
@@ -465,7 +465,7 @@ describe('.createApiServer', () => {
           test('throws error 404', async () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
-              .post('/games/foo/1/rename')
+              .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET2&newName=mike');
             expect(response.status).toEqual(403);
           });
@@ -474,7 +474,7 @@ describe('.createApiServer', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, games });
             response = await request(app.callback())
-              .post('/games/foo/1/rename')
+              .post('/games/foo/1/update')
               .send('credentials=foo&newName=bill');
           });
 
@@ -485,7 +485,7 @@ describe('.createApiServer', () => {
             beforeEach(async () => {
               const app = createApiServer({ db, games });
               response = await request(app.callback())
-                .post('/games/foo/1/rename')
+                .post('/games/foo/1/update')
                 .send('credentials=foo&playerID=0');
             });
 
