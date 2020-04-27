@@ -136,15 +136,15 @@ All actions for an authenticated game require an additional payload field `crede
 
 #### Playing again
 
-##### POST `/games/{name}/playAgain`
+##### POST `/games/{name}/{id}/playAgain`
+
+`{name}` (required): the name of the game being played again.
+
+`{id}` (required): the ID of the previous finished room.
 
 Given a previous room, generates a room ID where users should go if they want to play again. Creates this new room if it didn't exist before.
 
 Accepts these parameters:
-
-`name` (required): the name of the game being played again.
-
-`id` (required): the ID of the previous finished room.
 
 `playerID` (required): the player ID of the player on the previous game.
 
