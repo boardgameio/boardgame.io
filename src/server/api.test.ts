@@ -371,9 +371,12 @@ describe('.createApiServer', () => {
     let response;
     let db;
     let games;
+    const warnMsg =
+      'This endpoint /rename is deprecated. Please use /update instead.';
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
+      console.warn = jest.fn();
     });
 
     describe('for an unprotected lobby', () => {
@@ -391,6 +394,7 @@ describe('.createApiServer', () => {
             .post('/games/foo/1/rename')
             .send('playerID=0&playerName=alice&newName=ali');
           expect(response.status).toEqual(404);
+          expect(console.warn).toBeCalledWith(warnMsg);
         });
       });
 
@@ -430,11 +434,13 @@ describe('.createApiServer', () => {
               expect(response.text).toEqual(
                 'newName must be a string, got number'
               );
+              expect(console.warn).toBeCalledWith(warnMsg);
             });
           });
 
           test('is successful', async () => {
             expect(response.status).toEqual(200);
+            expect(console.warn).toBeCalledWith(warnMsg);
           });
 
           test('updates the players', async () => {
@@ -448,6 +454,7 @@ describe('.createApiServer', () => {
                 }),
               })
             );
+            expect(console.warn).toBeCalledWith(warnMsg);
           });
         });
 
@@ -458,6 +465,7 @@ describe('.createApiServer', () => {
               .post('/games/foo/1/rename')
               .send('playerID=2&credentials=SECRET1&newName=joe');
             expect(response.status).toEqual(404);
+            expect(console.warn).toBeCalledWith(warnMsg);
           });
         });
 
@@ -468,6 +476,7 @@ describe('.createApiServer', () => {
               .post('/games/foo/1/rename')
               .send('playerID=0&credentials=SECRET2&newName=mike');
             expect(response.status).toEqual(403);
+            expect(console.warn).toBeCalledWith(warnMsg);
           });
         });
         describe('when playerID is omitted', () => {
@@ -480,7 +489,9 @@ describe('.createApiServer', () => {
 
           test('throws error 403', async () => {
             expect(response.status).toEqual(403);
+            expect(console.warn).toBeCalledWith(warnMsg);
           });
+
           describe('when newName is omitted', () => {
             beforeEach(async () => {
               const app = createApiServer({ db, games });
@@ -491,6 +502,7 @@ describe('.createApiServer', () => {
 
             test('throws error 403', async () => {
               expect(response.status).toEqual(403);
+              expect(console.warn).toBeCalledWith(warnMsg);
             });
           });
         });
