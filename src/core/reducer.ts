@@ -213,6 +213,7 @@ export function CreateGameReducer({
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
+        state.ctx = plugins.EnhanceCtx(state);
         state = plugins.Flush(state, { game });
 
         return state;

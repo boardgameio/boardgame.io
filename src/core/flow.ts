@@ -79,7 +79,10 @@ export function Flow({
   const HookWrapper = (fn: (G: any, ctx: Ctx) => any) => {
     const withPlugins = plugin.FnWrap(fn, plugins);
     return (state: State) => {
-      const ctxWithAPI = plugin.EnhanceCtx(state);
+      let ctxWithAPI = plugin.EnhanceCtx(state);
+      if (!ctxWithAPI.random || !ctxWithAPI.events) {
+        ctxWithAPI = state.ctx;
+      }
       return withPlugins(state.G, ctxWithAPI);
     };
   };
