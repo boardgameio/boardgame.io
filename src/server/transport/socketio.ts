@@ -6,8 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Master } from '../../master/master';
-const IO = require('koa-socket-2');
+import { Master, AuthFn } from '../../master/master';
+import IO from 'koa-socket-2';
+import { ServerOptions as SocketOptions } from 'socket.io';
+import { ServerOptions as HttpsOptions } from 'https';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -55,6 +57,14 @@ export function TransportAPI(gameID, socket, clientInfo, roomInfo) {
   return { send, sendAll };
 }
 
+interface SocketOpts {
+  clientInfo?: Map<any, any>;
+  roomInfo?: Map<any, any>;
+  auth?: boolean | AuthFn;
+  https?: HttpsOptions;
+  socketOpts?: SocketOptions;
+}
+
 /**
  * Transport interface that uses socket.io
  */
@@ -64,7 +74,7 @@ export function SocketIO({
   auth = true,
   https,
   socketOpts,
-} = {}) {
+}: SocketOpts = {}) {
   return {
     init: (app, games) => {
       const io = new IO({
