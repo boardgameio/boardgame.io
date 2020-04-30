@@ -9,6 +9,14 @@
 import { TransportAPI, SocketIO } from './socketio';
 import { ProcessGameConfig } from '../../core/game';
 
+class SocketIOTestAdapter extends SocketIO {
+  constructor({ clientInfo = new Map(), roomInfo = new Map(), ...args } = {}) {
+    super(args);
+    this.clientInfo = clientInfo;
+    this.roomInfo = roomInfo;
+  }
+}
+
 jest.mock('../../master/master', () => {
   class Master {
     onUpdate: jest.Mock<any, any>;
@@ -88,7 +96,7 @@ describe('basic', () => {
   beforeEach(() => {
     clientInfo = new Map();
     roomInfo = new Map();
-    const transport = SocketIO({ clientInfo, roomInfo });
+    const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
   });
 
@@ -106,7 +114,7 @@ describe('TransportAPI', () => {
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
-    const transport = SocketIO({ clientInfo, roomInfo });
+    const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
     api = TransportAPI('gameID', io.socket, clientInfo, roomInfo);
@@ -147,7 +155,7 @@ describe('TransportAPI', () => {
 describe('sync / update', () => {
   const app: any = { context: {} };
   const games = [ProcessGameConfig({ seed: 0 })];
-  const transport = SocketIO();
+  const transport = new SocketIOTestAdapter();
   transport.init(app, games);
   const io = app.context.io;
 
@@ -178,7 +186,7 @@ describe('connect / disconnect', () => {
   beforeAll(() => {
     clientInfo = new Map();
     roomInfo = new Map();
-    const transport = SocketIO({ clientInfo, roomInfo });
+    const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
   });

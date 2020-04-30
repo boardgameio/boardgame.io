@@ -58,8 +58,6 @@ export function TransportAPI(gameID, socket, clientInfo, roomInfo) {
 }
 
 interface SocketOpts {
-  clientInfo?: Map<any, any>;
-  roomInfo?: Map<any, any>;
   auth?: boolean | AuthFn;
   https?: HttpsOptions;
   socketOpts?: SocketOptions;
@@ -68,76 +66,82 @@ interface SocketOpts {
 /**
  * Transport interface that uses socket.io
  */
-export function SocketIO({
-  clientInfo = new Map(),
-  roomInfo = new Map(),
-  auth = true,
-  https,
-  socketOpts,
-}: SocketOpts = {}) {
-  return {
-    init: (app, games) => {
-      const io = new IO({
-        ioOptions: {
-          pingTimeout: PING_TIMEOUT,
-          pingInterval: PING_INTERVAL,
-          ...socketOpts,
-        },
-      });
+export class SocketIO {
+  protected clientInfo: Map<any, any>;
+  protected roomInfo: Map<any, any>;
+  private auth: boolean | AuthFn;
+  private https: HttpsOptions;
+  private socketOpts: SocketOptions;
 
-      app.context.io = io;
-      io.attach(app, !!https, https);
+  constructor({ auth = true, https, socketOpts }: SocketOpts = {}) {
+    this.clientInfo = new Map();
+    this.roomInfo = new Map();
+    this.auth = auth;
+    this.https = https;
+    this.socketOpts = socketOpts;
+  }
 
-      for (const game of games) {
-        const nsp = app._io.of(game.name);
+  init(app, games) {
+    const io = new IO({
+      ioOptions: {
+        pingTimeout: PING_TIMEOUT,
+        pingInterval: PING_INTERVAL,
+        ...this.socketOpts,
+      },
+    });
 
-        nsp.on('connection', socket => {
-          socket.on('update', async (action, stateID, gameID, playerID) => {
-            const master = new Master(
-              game,
-              app.context.db,
-              TransportAPI(gameID, socket, clientInfo, roomInfo),
-              auth
-            );
-            await master.onUpdate(action, stateID, gameID, playerID);
-          });
+    app.context.io = io;
+    io.attach(app, !!this.https, this.https);
 
-          socket.on('sync', async (gameID, playerID, numPlayers) => {
-            socket.join(gameID);
+    for (const game of games) {
+      const nsp = app._io.of(game.name);
 
-            // Remove client from any previous game that it was a part of.
-            if (clientInfo.has(socket.id)) {
-              const { gameID: oldGameID } = clientInfo.get(socket.id);
-              roomInfo.get(oldGameID).delete(socket.id);
-            }
-
-            let roomClients = roomInfo.get(gameID);
-            if (roomClients === undefined) {
-              roomClients = new Set();
-              roomInfo.set(gameID, roomClients);
-            }
-            roomClients.add(socket.id);
-
-            clientInfo.set(socket.id, { gameID, playerID, socket });
-
-            const master = new Master(
-              game,
-              app.context.db,
-              TransportAPI(gameID, socket, clientInfo, roomInfo),
-              auth
-            );
-            await master.onSync(gameID, playerID, numPlayers);
-          });
-
-          socket.on('disconnect', () => {
-            if (clientInfo.has(socket.id)) {
-              const { gameID } = clientInfo.get(socket.id);
-              roomInfo.get(gameID).delete(socket.id);
-              clientInfo.delete(socket.id);
-            }
-          });
+      nsp.on('connection', socket => {
+        socket.on('update', async (action, stateID, gameID, playerID) => {
+          const master = new Master(
+            game,
+            app.context.db,
+            TransportAPI(gameID, socket, this.clientInfo, this.roomInfo),
+            this.auth
+          );
+          await master.onUpdate(action, stateID, gameID, playerID);
         });
-      }
-    },
-  };
+
+        socket.on('sync', async (gameID, playerID, numPlayers) => {
+          socket.join(gameID);
+
+          // Remove client from any previous game that it was a part of.
+          if (this.clientInfo.has(socket.id)) {
+            const { gameID: oldGameID } = this.clientInfo.get(socket.id);
+            this.roomInfo.get(oldGameID).delete(socket.id);
+          }
+
+          let roomClients = this.roomInfo.get(gameID);
+          if (roomClients === undefined) {
+            roomClients = new Set();
+            this.roomInfo.set(gameID, roomClients);
+          }
+          roomClients.add(socket.id);
+
+          this.clientInfo.set(socket.id, { gameID, playerID, socket });
+
+          const master = new Master(
+            game,
+            app.context.db,
+            TransportAPI(gameID, socket, this.clientInfo, this.roomInfo),
+            this.auth
+          );
+          await master.onSync(gameID, playerID, numPlayers);
+        });
+
+        socket.on('disconnect', () => {
+          if (this.clientInfo.has(socket.id)) {
+            const { gameID } = this.clientInfo.get(socket.id);
+            this.roomInfo.get(gameID).delete(socket.id);
+            this.clientInfo.delete(socket.id);
+          }
+        });
+      });
+    }
+  }
 }
