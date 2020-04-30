@@ -63,6 +63,7 @@ export function SocketIO({
   roomInfo = new Map(),
   auth = true,
   https,
+  socketOpts,
 } = {}) {
   return {
     init: (app, games) => {
@@ -70,6 +71,7 @@ export function SocketIO({
         ioOptions: {
           pingTimeout: PING_TIMEOUT,
           pingInterval: PING_INTERVAL,
+          ...socketOpts,
         },
       });
 
