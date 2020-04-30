@@ -4,10 +4,12 @@
   "description": "library for turn-based games",
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
-    "start": "node scripts/install-web.js && npx concurrently npm:dev:server npm:dev:client",
-    "dev": "node scripts/install-web.js && npx concurrently npm:build:watch npm:dev:server npm:dev:client",
-    "dev:client": "cd examples && cd react-web && npm start",
-    "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions '.ts,.js' --ignore 'src/**/*.test.ts' --presets @babel/preset-env examples/react-web/server.js",
+    "prestart": "node scripts/install-web.js",
+    "start": "concurrently npm:dev:server npm:dev:client",
+    "predev": "node scripts/install-web.js",
+    "dev": "concurrently npm:build:watch npm:dev:server npm:dev:client",
+    "dev:client": "node scripts/dev-client.js",
+    "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions \".ts,.js\" --ignore \"src/**/*.test.ts\" --presets @babel/preset-env examples/react-web/server.js",
     "build": "cross-env BABEL_ENV=rollup rollup --config rollup.config.js",
     "build:watch": "cross-env BABEL_ENV=rollup rollup -w --config rollup.config.js",
     "benchmark": "babel-node --extensions .ts,.js --presets @babel/preset-env,@babel/preset-typescript benchmark/index.js",
@@ -16,18 +18,19 @@
     "pretest": "npm run lint",
     "test": "cross-env NODE_ENV=test jest --no-cache",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --no-cache --coverage --collectCoverageFrom=src/** --forceExit",
-    "test:coveralls": "cat coverage/lcov.info | node node_modules/.bin/coveralls",
-    "test:integration": "bash ./scripts/integration.sh",
+    "test:coverage": "npm test -- --coverage --collectCoverageFrom=\"src/**\" --forceExit",
+    "test:coveralls": "coveralls < coverage/lcov.info",
+    "test:integration": "node ./scripts/integration.js",
     "ts": "tsc --noEmit",
     "ts:watch": "tsc --noEmit --watch",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "npm run clean",
-    "prepack": "npm run build && node scripts/proxy-dirs.js",
+    "proxydirs": "node scripts/proxy-dirs.js",
+    "prepack": "run-s build proxydirs",
     "postpack": "npm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,js,css,md}\"",
-    "changelog": "bash ./scripts/changelog.sh",
+    "changelog": "node ./scripts/changelog.js",
     "clean": "node ./scripts/clean.js"
   },
   "sideEffects": false,
@@ -110,6 +113,7 @@
     "lint-staged": "^8.1.0",
     "node-persist": "^3.0.4",
     "nodemon": "^1.18.9",
+    "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "raf": "^3.4.0",
     "react": "^16.7.0",
@@ -133,6 +137,7 @@
     "supertest": "^3.1.0",
     "svelte": "^3.12.1",
     "svelte-icons": "^1.1.0",
+    "tempy": "^0.5.0",
     "ts-jest": "^24.0.2",
     "ts-transformer-imports": "^0.4.3",
     "ttypescript": "^1.5.7",
@@ -202,7 +207,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
-      "pre-push": "npm run lint && npm run test:coverage"
+      "pre-push": "npm run test:coverage"
     }
   }
 }
