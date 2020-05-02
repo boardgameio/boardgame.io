@@ -164,7 +164,9 @@ export const Enhance = (
  * Allows plugins to update their state after a move / event.
  */
 export const Flush = (state: State, opts: PluginOpts): State => {
-  [...DEFAULT_PLUGINS, ...opts.game.plugins].forEach(plugin => {
+  // Note that we flush plugins in reverse order, to make sure that plugins
+  // that come before in the chain are still available.
+  [...DEFAULT_PLUGINS, ...opts.game.plugins].reverse().forEach(plugin => {
     const name = plugin.name;
     const pluginState = state.plugins[name] || { data: {} };
 
