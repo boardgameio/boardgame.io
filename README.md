@@ -11,9 +11,12 @@
 
 <p align="center">
   <strong><a href="https://boardgame.io/documentation/#/">Read the Documentation</a></strong>
+  
 </p>
 
-**boardgame.io** is an engine for creating turn-based games using JavaScript.
+<p align="center">
+  <strong>boardgame.io</strong> is an engine for creating turn-based games using JavaScript.
+</p>
 
 Write simple functions that describe how the game state changes
 when a particular move is made. This is automatically converted
