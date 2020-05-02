@@ -10,8 +10,10 @@
 </p>
 
 <p align="center">
-  <strong>Full Documentation: <a href="https://boardgame.io/documentation/#/">link</a></strong>
+  <strong><a href="https://boardgame.io/documentation/#/">Read the Documentation</a></strong>
 </p>
+
+**Boardgame.io** is an engine to create board games on the Web.
 
 Write simple functions that describe how the game state changes
 when a particular move is made. This is automatically converted
@@ -39,6 +41,12 @@ networking or storage code.
 $ npm install --save boardgame.io
 ```
 
+### Documentation
+
+Read our [Full Documentation](https://boardgame.io/documentation/) to learn how to
+use boardgame.io, and join the [community on gitter](https://gitter.im/boardgame-io/General)
+to ask your questions!
+
 ### Running examples in this repository
 
 ```
@@ -46,6 +54,8 @@ $ npm install
 $ npm run build
 $ npm start
 ```
+
+The examples can be found in the [examples](examples/) folder.
 
 ## Changelog
 
@@ -58,4 +68,4 @@ to find things that you could contribute to.
 
 ## License
 
-MIT
+[MIT](LICENSE)
