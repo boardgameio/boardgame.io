@@ -5,7 +5,7 @@
   "repository": "https://github.com/nicolodavis/boardgame.io",
   "scripts": {
     "prestart": "node scripts/install-web.js",
-    "start": "run-p dev:server dev:client",
+    "start": "run-p build dev:server dev:client",
     "predev": "node scripts/install-web.js",
     "dev": "run-p build:watch dev:server dev:client",
     "dev:client": "node scripts/dev-client.js",
