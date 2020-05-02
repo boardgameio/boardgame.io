@@ -218,22 +218,6 @@ either by a URL path or a lobby implementation.
 The default storage implementation is an in-memory map.
 If you want something that's more persistent, you can use one
 of the bundled connectors for various backends, or even implement
-your own connector. For example, here is how you can keep your
-game state in a MongoDB.
-
-```js
-const { Server, Mongo } = require('boardgame.io/server');
-const { TicTacToe } = require('./game');
-
-const server = Server({
-  games: [TicTacToe],
-  db: new Mongo({
-    url: 'mongodb://...',
-    dbname: 'bgio',
-  }),
-});
-
-server.run(8000);
-```
+your own connector.
 
 See [here](storage.md) for more details about how to customize storage.
