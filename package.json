@@ -87,6 +87,7 @@
     "@types/koa-router": "^7.4.0",
     "@types/koa__cors": "^3.0.1",
     "@types/shortid": "0.0.29",
+    "@types/socket.io": "^2.1.4",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^8.0.0",

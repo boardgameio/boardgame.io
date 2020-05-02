@@ -112,7 +112,7 @@ const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
   return { ...action, payload };
 };
 
-type AuthFn = (
+export type AuthFn = (
   actionCredentials: string,
   playerMetadata: Server.PlayerMetadata
 ) => boolean | Promise<boolean>;
