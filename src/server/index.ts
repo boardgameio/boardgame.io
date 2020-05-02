@@ -99,7 +99,7 @@ export function Server({
       typeof authenticateCredentials === 'function'
         ? authenticateCredentials
         : true;
-    transport = SocketIO({
+    transport = new SocketIO({
       auth,
       https,
     });

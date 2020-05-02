@@ -663,17 +663,21 @@ export function Flow({
 
   function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
     let conf = GetPhase(state.ctx);
+    const move = GetMove(state.ctx, action.type, action.playerID);
+    const shouldCount =
+      !move || typeof move === 'function' || move.noLimit !== true;
 
     let { ctx } = state;
     let { _activePlayersNumMoves } = ctx;
 
     const { playerID } = action;
 
-    if (ctx.activePlayers) _activePlayersNumMoves[playerID]++;
-
     let numMoves = state.ctx.numMoves;
-    if (playerID == state.ctx.currentPlayer) {
-      numMoves++;
+    if (shouldCount) {
+      if (playerID == state.ctx.currentPlayer) {
+        numMoves++;
+      }
+      if (ctx.activePlayers) _activePlayersNumMoves[playerID]++;
     }
 
     state = {

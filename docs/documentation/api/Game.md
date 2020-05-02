@@ -20,6 +20,7 @@
       undoable: false,  // prevents undoing the move.
       redact: true,     // prevents the move arguments from showing up in the log.
       client: false,    // prevents the move from running on the client.
+      noLimit: true,    // prevents the move counting towards a player’s number of moves.
     },
   },
 

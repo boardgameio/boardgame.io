@@ -40,6 +40,10 @@ server.run(8000);
 
 Instructions at https://github.com/delucis/bgio-firebase.
 
+#### Azure Storage
+
+Instructions at https://github.com/c-w/bgio-azure-storage.
+
 #### Postgres
 
 Coming soon.
