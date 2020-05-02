@@ -1137,6 +1137,7 @@ describe('.createApiServer', () => {
                 },
               },
               unlisted: gameID === 'bar-4',
+              gameover: gameID === 'bar-3' ? { winner: 0 } : undefined,
             },
           };
         },
@@ -1156,6 +1157,7 @@ describe('.createApiServer', () => {
         },
       });
     });
+
     describe('when given 2 rooms', () => {
       let response;
       let rooms;
@@ -1179,6 +1181,11 @@ describe('.createApiServer', () => {
         expect(rooms[0].players).toEqual([{ id: 0 }, { id: 1 }]);
         expect(rooms[1].players).toEqual([{ id: 0 }, { id: 1 }]);
       });
+
+      test('returns gameover data for ended game', async () => {
+        expect(rooms[0].gameover).toBeUndefined();
+        expect(rooms[1].gameover).toEqual({ winner: 0 });
+      });
     });
   });
 
@@ -1200,6 +1207,7 @@ describe('.createApiServer', () => {
                   credentials: 'SECRET2',
                 },
               },
+              gameover: { winner: 1 },
             },
           };
         },
@@ -1225,6 +1233,10 @@ describe('.createApiServer', () => {
 
       test('returns player names', async () => {
         expect(room.players).toEqual([{ id: 0 }, { id: 1 }]);
+      });
+
+      test('returns gameover data for ended game', async () => {
+        expect(room.gameover).toEqual({ winner: 1 });
       });
     });
 

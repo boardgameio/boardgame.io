@@ -139,6 +139,7 @@ export const addApiToServer = ({
             return strippedInfo;
           }),
           setupData: metadata.setupData,
+          gameover: metadata.gameover,
         });
       }
     }
@@ -162,6 +163,7 @@ export const addApiToServer = ({
         return strippedInfo;
       }),
       setupData: metadata.setupData,
+      gameover: metadata.gameover,
     };
     ctx.body = strippedRoom;
   });
