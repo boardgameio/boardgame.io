@@ -30,10 +30,13 @@
 
   let visible = true;
   function Keypress(e) {
+    // Toggle debugger visibilty
     if (e.key == '.') {
       visible = !visible;
       return;
     }
+    // Set displayed pane
+    if (!visible) return;
     Object.entries(panes).forEach(([key, { shortcut }]) => {
       if (e.key == shortcut) {
         pane = key;

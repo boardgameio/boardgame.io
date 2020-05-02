@@ -43,6 +43,8 @@
 
 <style>
   .move {
+    display: flex;
+    flex-direction: row;
     cursor: pointer;
     margin-left: 10px;
     color: #666;
@@ -69,10 +71,14 @@
 </style>
 
 <div class="move" class:active on:click={Activate}>
-  {name}(<span
+  <span>{name}</span>
+  <span>(</span>
+  <span
     class="arg-field"
     bind:this={span}
     on:blur={Deactivate}
+    on:keypress|stopPropagation={() => {}}
     on:keydown={OnKeyDown}
-    contentEditable />)
+    contentEditable />
+  <span>)</span>
 </div>
