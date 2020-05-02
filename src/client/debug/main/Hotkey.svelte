@@ -23,7 +23,11 @@
   }
 
   function Keypress(e) {
-    if (!$disableHotkeys && !disable && e.key == value) {
+    if (
+      !$disableHotkeys && !disable &&
+      !e.ctrlKey && !e.metaKey &&
+      e.key == value
+    ) {
       e.preventDefault();
       Activate();
     }
