@@ -148,17 +148,48 @@ authoritative game state.
 
 #### Moving between Phases
 
+##### Using events
+
 The two primary ways of moving between phases are by calling the
 following events:
 
 1. `endPhase`: This ends the current phase and returns the game
    to a state where no phase is active. If the phase specifies a
    `next` option, then the game will move into that phase instead.
-   This event can also be triggered automatically by using an `endIf`
-   condition in the phase spec.
 
 2. `setPhase`: This ends the current phase and moves the game into
    the phase specified by the argument.
+
+
+##### Using an `endIf` condition
+
+You can also end a phase by returning a truthy value from its
+`endIf` method:
+
+```js
+phases: {
+  phaseA: {
+    next: 'phaseB',
+    endIf: (G, ctx) => true,
+  },
+  phaseB: { ... },
+},
+```
+
+If you need to specify the next phase dynamically, you can return
+an object containing a `next` field from your `endIf`:
+
+```js
+phases: {
+  phaseA: {
+    endIf: (G, ctx) => {
+      return { next: G.condition ? 'phaseB' : 'phaseC' }
+    },
+  },
+  phaseB: { ... },
+  phaseC: { ... },
+},
+```
 
 !> Whenever a phase ends, the current player's turn is first ended automatically.
 
