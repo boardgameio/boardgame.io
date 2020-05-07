@@ -16,13 +16,6 @@ import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
 import { Server, Game } from '../types';
 
-const createGameMetadata = ({ gameName, unlisted }): Server.GameMetadata => ({
-  gameName,
-  unlisted,
-  players: {},
-  setupData: {},
-});
-
 /**
  * Creates a new game.
  *
@@ -38,23 +31,24 @@ export const CreateGame = async (
   db: StorageAPI.Sync | StorageAPI.Async,
   game: Game,
   numPlayers: number,
-  setupData: object,
+  setupData: any,
   lobbyConfig: Server.LobbyConfig,
   unlisted: boolean
 ) => {
-  const gameMetadata = createGameMetadata({ gameName: game.name, unlisted });
+  if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
-  const state = InitializeGame({
-    game,
-    numPlayers,
-    setupData,
-  });
+  const gameMetadata: Server.GameMetadata = {
+    gameName: game.name,
+    unlisted: !!unlisted,
+    players: {},
+  };
+  if (setupData !== undefined) gameMetadata.setupData = setupData;
+
+  const state = InitializeGame({ game, numPlayers, setupData });
 
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
     gameMetadata.players[playerIndex] = { id: playerIndex };
   }
-
-  gameMetadata.setupData = setupData;
 
   const gameID = lobbyConfig.uuid();
 
@@ -113,9 +107,6 @@ export const addApiToServer = ({
     const unlisted = ctx.request.body.unlisted;
     // The number of players for this game instance.
     let numPlayers = parseInt(ctx.request.body.numPlayers);
-    if (!numPlayers) {
-      numPlayers = 2;
-    }
 
     const game = games.find(g => g.name === gameName);
     const gameID = await CreateGame(
@@ -259,9 +250,6 @@ export const addApiToServer = ({
     const setupData = ctx.request.body.setupData;
     // The number of players for this game instance.
     let numPlayers = parseInt(ctx.request.body.numPlayers);
-    if (!numPlayers) {
-      numPlayers = 2;
-    }
 
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
