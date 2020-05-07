@@ -64,8 +64,8 @@ export const createApiServer = ({
   lobbyConfig,
   generateCredentials,
 }: {
-  db: any;
-  games: any;
+  db: StorageAPI.Sync | StorageAPI.Async;
+  games: Game[];
   lobbyConfig?: Server.LobbyConfig;
   generateCredentials?: Server.GenerateCredentials;
 }) => {
@@ -134,7 +134,7 @@ export const addApiToServer = ({
       if (!metadata.unlisted) {
         rooms.push({
           gameID,
-          players: Object.values(metadata.players).map((player: any) => {
+          players: Object.values(metadata.players).map(player => {
             // strip away credentials
             const { credentials, ...strippedInfo } = player;
             return strippedInfo;
@@ -158,7 +158,7 @@ export const addApiToServer = ({
     }
     const strippedRoom = {
       roomID: gameID,
-      players: Object.values(metadata.players).map((player: any) => {
+      players: Object.values(metadata.players).map(player => {
         const { credentials, ...strippedInfo } = player;
         return strippedInfo;
       }),
@@ -228,7 +228,7 @@ export const addApiToServer = ({
 
     delete metadata.players[playerID].name;
     delete metadata.players[playerID].credentials;
-    if (Object.values(metadata.players).some((val: any) => val.name)) {
+    if (Object.values(metadata.players).some(player => player.name)) {
       await db.setMetadata(gameID, metadata);
     } else {
       // remove room
@@ -289,7 +289,7 @@ export const addApiToServer = ({
     };
   });
 
-  const updatePlayerMetadata = async ctx => {
+  const updatePlayerMetadata = async (ctx: Koa.Context) => {
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
