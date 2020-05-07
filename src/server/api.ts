@@ -109,6 +109,8 @@ export const addApiToServer = ({
     let numPlayers = parseInt(ctx.request.body.numPlayers);
 
     const game = games.find(g => g.name === gameName);
+    if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
+
     const gameID = await CreateGame(
       db,
       game,
