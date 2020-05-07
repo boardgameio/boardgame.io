@@ -16,8 +16,9 @@ import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
 import { Server, Game } from '../types';
 
-const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
+const createGameMetadata = ({ gameName, unlisted }): Server.GameMetadata => ({
   gameName,
+  unlisted,
   players: {},
   setupData: {},
 });
@@ -31,15 +32,17 @@ const createGameMetadata = ({ gameName }): Server.GameMetadata => ({
  * @param {object} setupData - User-defined object that's available
  *                             during game setup.
  * @param {object } lobbyConfig - Configuration options for the lobby.
+ * @param {boolean} unlisted - Whether the game should be excluded from public listing.
  */
 export const CreateGame = async (
   db: StorageAPI.Sync | StorageAPI.Async,
   game: Game,
   numPlayers: number,
   setupData: object,
-  lobbyConfig: Server.LobbyConfig
+  lobbyConfig: Server.LobbyConfig,
+  unlisted: boolean
 ) => {
-  const gameMetadata = createGameMetadata({ gameName: game.name });
+  const gameMetadata = createGameMetadata({ gameName: game.name, unlisted });
 
   const state = InitializeGame({
     game,
@@ -106,6 +109,8 @@ export const addApiToServer = ({
     const gameName = ctx.params.name;
     // User-data to pass to the game setup function.
     const setupData = ctx.request.body.setupData;
+    // Whether the game should be excluded from public listing.
+    const unlisted = ctx.request.body.unlisted;
     // The number of players for this game instance.
     let numPlayers = parseInt(ctx.request.body.numPlayers);
     if (!numPlayers) {
@@ -118,7 +123,8 @@ export const addApiToServer = ({
       game,
       numPlayers,
       setupData,
-      lobbyConfig
+      lobbyConfig,
+      unlisted
     );
 
     ctx.body = {
@@ -134,14 +140,17 @@ export const addApiToServer = ({
       const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
         metadata: true,
       });
-      rooms.push({
-        gameID,
-        players: Object.values(metadata.players).map((player: any) => {
-          // strip away credentials
-          return { id: player.id, name: player.name };
-        }),
-        setupData: metadata.setupData,
-      });
+      if (!metadata.unlisted) {
+        rooms.push({
+          gameID,
+          players: Object.values(metadata.players).map((player: any) => {
+            // strip away credentials
+            const { credentials, ...strippedInfo } = player;
+            return strippedInfo;
+          }),
+          setupData: metadata.setupData,
+        });
+      }
     }
     ctx.body = {
       rooms: rooms,
@@ -159,7 +168,8 @@ export const addApiToServer = ({
     const strippedRoom = {
       roomID: gameID,
       players: Object.values(metadata.players).map((player: any) => {
-        return { id: player.id, name: player.name };
+        const { credentials, ...strippedInfo } = player;
+        return strippedInfo;
       }),
       setupData: metadata.setupData,
     };
@@ -169,6 +179,7 @@ export const addApiToServer = ({
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
+    const data = ctx.request.body.data;
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
@@ -189,6 +200,9 @@ export const addApiToServer = ({
       ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 
+    if (data) {
+      metadata.players[playerID].data = data;
+    }
     metadata.players[playerID].name = playerName;
     const playerCredentials = await lobbyConfig.generateCredentials(ctx);
     metadata.players[playerID].credentials = playerCredentials;
@@ -237,6 +251,7 @@ export const addApiToServer = ({
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
+    const unlisted = ctx.request.body.unlisted;
     const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
       metadata: true,
     });
@@ -274,7 +289,8 @@ export const addApiToServer = ({
       game,
       numPlayers,
       setupData,
-      lobbyConfig
+      lobbyConfig,
+      unlisted
     );
     metadata.nextRoomID = nextRoomID;
 
@@ -285,19 +301,23 @@ export const addApiToServer = ({
     };
   });
 
-  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+  const updatePlayerMetadata = async ctx => {
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const newName = ctx.request.body.newName;
+    const data = ctx.request.body.data;
     const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
       metadata: true,
     });
     if (typeof playerID === 'undefined') {
       ctx.throw(403, 'playerID is required');
     }
-    if (!newName) {
-      ctx.throw(403, 'newName is required');
+    if (data === undefined && !newName) {
+      ctx.throw(403, 'newName or data is required');
+    }
+    if (newName && typeof newName !== 'string') {
+      ctx.throw(403, `newName must be a string, got ${typeof newName}`);
     }
     if (!metadata) {
       ctx.throw(404, 'Game ' + gameID + ' not found');
@@ -309,10 +329,24 @@ export const addApiToServer = ({
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
-    metadata.players[playerID].name = newName;
+    if (newName) {
+      metadata.players[playerID].name = newName;
+    }
+    if (data) {
+      metadata.players[playerID].data = data;
+    }
     await db.setMetadata(gameID, metadata);
     ctx.body = {};
+  };
+
+  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+    console.warn(
+      'This endpoint /rename is deprecated. Please use /update instead.'
+    );
+    await updatePlayerMetadata(ctx);
   });
+
+  router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
 
   app.use(cors());
 

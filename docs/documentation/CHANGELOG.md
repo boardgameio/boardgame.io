@@ -1,3 +1,39 @@
+## 0.39.10
+
+#### Features
+
+* [[cf96955](https://github.com/nicolodavis/boardgame.io/commit/cf96955)] Add option to exclude games from public listing (#653)
+* [[2e5b902](https://github.com/nicolodavis/boardgame.io/commit/2e5b902)] feat(core): Support moves that don’t contribute to numMoves (#646)
+* [[e4fc7bd](https://github.com/nicolodavis/boardgame.io/commit/e4fc7bd)] feat(master): Update metadata with gameover value on game end (#645)
+* [[05eacb8](https://github.com/nicolodavis/boardgame.io/commit/05eacb8)] Enable adding additional metadata to players in Lobby (#642)
+
+#### Bugfixes
+
+* [[d2f668b](https://github.com/nicolodavis/boardgame.io/commit/d2f668b)] Fix plugins in hooks triggered by moves (#656)
+* [[334f8d6](https://github.com/nicolodavis/boardgame.io/commit/334f8d6)] [Documentation] Remove references to removed MongoDB adapter (#659)
+* [[a4c4c7c](https://github.com/nicolodavis/boardgame.io/commit/a4c4c7c)] Test warning is logged when using deprecated `/rename` API endpoint. (#655)
+* [[6aff09c](https://github.com/nicolodavis/boardgame.io/commit/6aff09c)] Add playAgain endpoint to Lobby documentation (#652)
+* [[9f4acfe](https://github.com/nicolodavis/boardgame.io/commit/9f4acfe)] Add link to Azure Storage database connector (#651)
+* [[78113aa](https://github.com/nicolodavis/boardgame.io/commit/78113aa)] Add mosaic to notable_projects.md (#649)
+* [[c51b277](https://github.com/nicolodavis/boardgame.io/commit/c51b277)] expose log as a prop in the React client (#641)
+
+## 0.39.9
+
+#### Bugfixes
+
+* [[b4bd8b7](https://github.com/nicolodavis/boardgame.io/commit/b4bd8b7)] fix(package): update npm files field for new server bundle (#639)
+* [[0552efb](https://github.com/nicolodavis/boardgame.io/commit/0552efb)] add src/ to NPM
+
+## v0.39.8
+
+#### Bugfixes
+
+* [[3569408](https://github.com/nicolodavis/boardgame.io/commit/3569408)] Add option to run server over HTTPS (#631)
+* [[c56d9b9](https://github.com/nicolodavis/boardgame.io/commit/c56d9b9)] Adding playerID to Ctx (#627)
+* [[882a25d](https://github.com/nicolodavis/boardgame.io/commit/882a25d)] export only the client in the browser-minified package
+* [[3d1c07c](https://github.com/nicolodavis/boardgame.io/commit/3d1c07c)] build(server): Proxy server module with package.json (#622)
+* [[bd44678](https://github.com/nicolodavis/boardgame.io/commit/bd44678)] Fix passing params to db adapter (#621)
+
 ## v0.39.7
 
 #### Bugfixes

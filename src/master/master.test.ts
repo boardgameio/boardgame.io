@@ -208,6 +208,44 @@ describe('update', () => {
     await master.onUpdate(event, 3, 'gameID', '0');
     expect(error).toHaveBeenCalledWith(`game over - gameID=[gameID]`);
   });
+
+  test('writes gameover to metadata', async () => {
+    const id = 'gameWithMetadata';
+    const db = new InMemory();
+    const dbMetadata = {
+      gameName: 'tic-tac-toe',
+      setupData: {},
+      players: { '0': { id: 0 }, '1': { id: 1 } },
+    };
+    db.setMetadata(id, dbMetadata);
+    const masterWithMetadata = new Master(game, db, TransportAPI(send));
+    await masterWithMetadata.onSync(id, '0', 2);
+
+    const gameOverArg = 'gameOverArg';
+    const event = ActionCreators.gameEvent('endGame', gameOverArg);
+    await masterWithMetadata.onUpdate(event, 0, id, '0');
+    const { metadata } = db.fetch(id, { metadata: true });
+    expect(metadata.gameover).toEqual(gameOverArg);
+  });
+
+  test('writes gameover to metadata with async storage API', async () => {
+    const id = 'gameWithMetadata';
+    const db = new InMemoryAsync();
+    const dbMetadata = {
+      gameName: 'tic-tac-toe',
+      setupData: {},
+      players: { '0': { id: 0 }, '1': { id: 1 } },
+    };
+    db.setMetadata(id, dbMetadata);
+    const masterWithMetadata = new Master(game, db, TransportAPI(send));
+    await masterWithMetadata.onSync(id, '0', 2);
+
+    const gameOverArg = 'gameOverArg';
+    const event = ActionCreators.gameEvent('endGame', gameOverArg);
+    await masterWithMetadata.onUpdate(event, 0, id, '0');
+    const { metadata } = db.fetch(id, { metadata: true });
+    expect(metadata.gameover).toEqual(gameOverArg);
+  });
 });
 
 describe('playerView', () => {
