@@ -111,46 +111,45 @@ describe('.createApiServer', () => {
         expect(response.status).toEqual(200);
       });
 
-      test('creates game data', () => {
-        expect(db.mocks.setState).toHaveBeenCalledWith(
+      test('creates game state and metadata', () => {
+        expect(db.mocks.createGame).toHaveBeenCalledWith(
           'gameID',
           expect.objectContaining({
-            ctx: expect.objectContaining({
-              numPlayers: 3,
+            initialState: expect.objectContaining({
+              ctx: expect.objectContaining({
+                numPlayers: 3,
+              }),
+            }),
+            metadata: expect.objectContaining({
+              gameName: 'foo',
+              players: expect.objectContaining({
+                '0': expect.objectContaining({}),
+                '1': expect.objectContaining({}),
+              }),
+              setupData: expect.objectContaining({
+                colors: expect.objectContaining({
+                  '0': 'green',
+                  '1': 'red',
+                }),
+              }),
+              unlisted: true,
             }),
           })
         );
       });
 
       test('passes arbitrary data to game setup', () => {
-        expect(db.mocks.setState).toHaveBeenCalledWith(
+        expect(db.mocks.createGame).toHaveBeenCalledWith(
           'gameID',
           expect.objectContaining({
-            G: expect.objectContaining({
-              colors: {
-                '0': 'green',
-                '1': 'red',
-              },
-            }),
-          })
-        );
-      });
-
-      test('creates game metadata', () => {
-        expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-          'gameID',
-          expect.objectContaining({
-            players: expect.objectContaining({
-              '0': expect.objectContaining({}),
-              '1': expect.objectContaining({}),
-            }),
-            setupData: expect.objectContaining({
-              colors: expect.objectContaining({
-                '0': 'green',
-                '1': 'red',
+            initialState: expect.objectContaining({
+              G: expect.objectContaining({
+                colors: {
+                  '0': 'green',
+                  '1': 'red',
+                },
               }),
             }),
-            unlisted: true,
           })
         );
       });
@@ -165,11 +164,13 @@ describe('.createApiServer', () => {
         });
 
         test('uses default numPlayers', () => {
-          expect(db.mocks.setState).toHaveBeenCalledWith(
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
             'gameID',
             expect.objectContaining({
-              ctx: expect.objectContaining({
-                numPlayers: 2,
+              initialState: expect.objectContaining({
+                ctx: expect.objectContaining({
+                  numPlayers: 2,
+                }),
               }),
             })
           );
@@ -973,11 +974,13 @@ describe('.createApiServer', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1&numPlayers=4');
-      expect(db.mocks.setState).toHaveBeenCalledWith(
+      expect(db.mocks.createGame).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
-          ctx: expect.objectContaining({
-            numPlayers: 4,
+          initialState: expect.objectContaining({
+            ctx: expect.objectContaining({
+              numPlayers: 4,
+            }),
           }),
         })
       );

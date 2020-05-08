@@ -37,23 +37,20 @@ export const CreateGame = async (
 ) => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
-  const gameMetadata: Server.GameMetadata = {
+  const metadata: Server.GameMetadata = {
     gameName: game.name,
     unlisted: !!unlisted,
     players: {},
   };
-  if (setupData !== undefined) gameMetadata.setupData = setupData;
-
-  const state = InitializeGame({ game, numPlayers, setupData });
-
+  if (setupData !== undefined) metadata.setupData = setupData;
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    gameMetadata.players[playerIndex] = { id: playerIndex };
+    metadata.players[playerIndex] = { id: playerIndex };
   }
 
   const gameID = lobbyConfig.uuid();
+  const initialState = InitializeGame({ game, numPlayers, setupData });
 
-  await db.setMetadata(gameID, gameMetadata);
-  await db.setState(gameID, state);
+  await db.createGame(gameID, { metadata, initialState });
 
   return gameID;
 };
