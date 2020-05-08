@@ -278,7 +278,7 @@ describe('.createApiServer', () => {
             });
             response = await request(app.callback())
               .post('/games/foo/1/join')
-              .send({ playerID: 0, playerName: 'alice', data: 99 });
+              .send({ playerID: 0, playerName: 'alice' });
           });
 
           test('is successful', async () => {
@@ -301,17 +301,27 @@ describe('.createApiServer', () => {
               })
             );
           });
-          test('updates the player data', async () => {
-            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-              '1',
-              expect.objectContaining({
-                players: expect.objectContaining({
-                  '0': expect.objectContaining({
-                    data: 99,
+
+          describe('when custom data is provided', () => {
+            beforeEach(async () => {
+              const app = createApiServer({ db, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/join')
+                .send({ playerID: 0, playerName: 'alice', data: 99 });
+            });
+
+            test('updates the player data', async () => {
+              expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+                '1',
+                expect.objectContaining({
+                  players: expect.objectContaining({
+                    '0': expect.objectContaining({
+                      data: 99,
+                    }),
                   }),
-                }),
-              })
-            );
+                })
+              );
+            });
           });
         });
 
