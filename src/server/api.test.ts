@@ -176,6 +176,16 @@ describe('.createApiServer', () => {
           );
         });
       });
+
+      describe('for an unknown game name', () => {
+        beforeEach(async () => {
+          response = await request(app.callback()).post('/games/bar/create');
+        });
+
+        test('returns 404 error', () => {
+          expect(response.status).toEqual(404);
+        });
+      });
     });
 
     describe('for a protected lobby', () => {
