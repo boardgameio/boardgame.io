@@ -7,17 +7,24 @@
  */
 
 import request from 'supertest';
+import Koa from 'koa';
 
 import { addApiToServer, createApiServer } from './api';
 import { ProcessGameConfig } from '../core/game';
 import * as StorageAPI from './db/base';
+import { Game } from '../types';
 
 jest.setTimeout(2000000000);
 
-class AsyncStorage extends StorageAPI.Async {
-  public mocks: { [key: string]: jest.Mock };
+type StorageMocks = Record<
+  'createGame' | 'setState' | 'fetch' | 'setMetadata' | 'listGames' | 'wipe',
+  jest.Mock | ((...args: any[]) => any)
+>;
 
-  constructor(args: any = {}) {
+class AsyncStorage extends StorageAPI.Async {
+  public mocks: StorageMocks;
+
+  constructor(args: Partial<StorageMocks> = {}) {
     super();
     this.mocks = {
       createGame: args.createGame || jest.fn(),
@@ -59,9 +66,9 @@ class AsyncStorage extends StorageAPI.Async {
 describe('.createApiServer', () => {
   describe('creating a game', () => {
     let response;
-    let app;
-    let db;
-    let games;
+    let app: Koa;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(async () => {
       db = new AsyncStorage();
@@ -202,9 +209,9 @@ describe('.createApiServer', () => {
 
   describe('joining a room', () => {
     let response;
-    let db;
-    let games;
-    let credentials;
+    let db: AsyncStorage;
+    let games: Game[];
+    let credentials: string;
 
     beforeEach(() => {
       credentials = 'SECRET';
@@ -369,8 +376,8 @@ describe('.createApiServer', () => {
 
   describe('rename with deprecated endpoint', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
     const warnMsg =
       'This endpoint /rename is deprecated. Please use /update instead.';
 
@@ -512,8 +519,8 @@ describe('.createApiServer', () => {
 
   describe('rename with update endpoint', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -642,8 +649,8 @@ describe('.createApiServer', () => {
 
   describe('updating player metadata', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -774,8 +781,8 @@ describe('.createApiServer', () => {
 
   describe('leaving a room', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -909,7 +916,7 @@ describe('.createApiServer', () => {
   });
 
   describe('requesting game list', () => {
-    let db;
+    let db: AsyncStorage;
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage();
@@ -918,10 +925,8 @@ describe('.createApiServer', () => {
     describe('when given 2 games', () => {
       let response;
       beforeEach(async () => {
-        let app;
-        let games;
-        games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        app = createApiServer({ db, games });
+        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        let app = createApiServer({ db, games });
 
         response = await request(app.callback()).get('/games');
       });
@@ -934,8 +939,8 @@ describe('.createApiServer', () => {
 
   describe('play again', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -1051,7 +1056,7 @@ describe('.createApiServer', () => {
   });
 
   describe('requesting room list', () => {
-    let db;
+    let db: AsyncStorage;
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
@@ -1115,7 +1120,7 @@ describe('.createApiServer', () => {
   });
 
   describe('requesting room', () => {
-    let db;
+    let db: AsyncStorage;
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
@@ -1135,7 +1140,7 @@ describe('.createApiServer', () => {
             },
           };
         },
-        list: async () => {
+        listGames: async () => {
           return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
       });
@@ -1180,10 +1185,10 @@ describe('.createApiServer', () => {
 
 describe('.addApiToServer', () => {
   describe('when server app is provided', () => {
-    let db;
+    let db: AsyncStorage;
     let server;
     let useChain;
-    let games;
+    let games: Game[];
 
     beforeEach(async () => {
       useChain = jest.fn(() => ({ use: useChain }));
