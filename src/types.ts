@@ -162,11 +162,13 @@ export interface PhaseConfig<
   next?: string;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
-  endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void;
+  endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void | { next: string };
   moves?: MoveMap<G, CtxWithPlugins>;
   turn?: TurnConfig<G, CtxWithPlugins>;
   wrapped?: {
-    endIf?: (state: State<G, CtxWithPlugins>) => boolean | void;
+    endIf?: (
+      state: State<G, CtxWithPlugins>
+    ) => boolean | void | { next: string };
     onBegin?: (state: State<G, CtxWithPlugins>) => any;
     onEnd?: (state: State<G, CtxWithPlugins>) => any;
   };
@@ -204,13 +206,15 @@ export interface TurnConfig<
   moveLimit?: number;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
-  endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void;
+  endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void | { next: PlayerID };
   onMove?: (G: G, ctx: CtxWithPlugins) => any;
   stages?: StageMap<G, CtxWithPlugins>;
   moves?: MoveMap<G, CtxWithPlugins>;
   order?: TurnOrderConfig<G, CtxWithPlugins>;
   wrapped?: {
-    endIf?: (state: State<G, CtxWithPlugins>) => boolean | void;
+    endIf?: (
+      state: State<G, CtxWithPlugins>
+    ) => boolean | void | { next: PlayerID };
     onBegin?: (state: State<G, CtxWithPlugins>) => any;
     onEnd?: (state: State<G, CtxWithPlugins>) => any;
     onMove?: (state: State<G, CtxWithPlugins>) => any;

@@ -399,12 +399,12 @@ export function Flow({
     return wrapped.endIf(state);
   }
 
-  function ShouldEndPhase(state: State): boolean | void {
+  function ShouldEndPhase(state: State): boolean | void | { next: string } {
     const conf = GetPhase(state.ctx);
     return conf.wrapped.endIf(state);
   }
 
-  function ShouldEndTurn(state: State): boolean | void {
+  function ShouldEndTurn(state: State): boolean | void | { next: PlayerID } {
     const conf = GetPhase(state.ctx);
 
     // End the turn if the required number of moves has been made.
