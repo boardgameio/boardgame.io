@@ -95,16 +95,7 @@ describe('.createApiServer', () => {
 
         response = await request(app.callback())
           .post('/games/foo/create')
-          .send({
-            numPlayers: 3,
-            setupData: {
-              colors: {
-                '0': 'green',
-                '1': 'red',
-              },
-            },
-            unlisted: true,
-          });
+          .send({ numPlayers: 3 });
       });
 
       test('is successful', () => {
@@ -126,29 +117,7 @@ describe('.createApiServer', () => {
                 '0': expect.objectContaining({}),
                 '1': expect.objectContaining({}),
               }),
-              setupData: expect.objectContaining({
-                colors: expect.objectContaining({
-                  '0': 'green',
-                  '1': 'red',
-                }),
-              }),
-              unlisted: true,
-            }),
-          })
-        );
-      });
-
-      test('passes arbitrary data to game setup', () => {
-        expect(db.mocks.createGame).toHaveBeenCalledWith(
-          'gameID',
-          expect.objectContaining({
-            initialState: expect.objectContaining({
-              G: expect.objectContaining({
-                colors: {
-                  '0': 'green',
-                  '1': 'red',
-                },
-              }),
+              unlisted: false,
             }),
           })
         );
@@ -184,6 +153,72 @@ describe('.createApiServer', () => {
 
         test('returns 404 error', () => {
           expect(response.status).toEqual(404);
+        });
+      });
+
+      describe('with setupData', () => {
+        beforeEach(async () => {
+          response = await request(app.callback())
+            .post('/games/foo/create')
+            .send({
+              setupData: {
+                colors: {
+                  '0': 'green',
+                  '1': 'red',
+                },
+              },
+            });
+        });
+
+        test('includes setupData in metadata', () => {
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
+            'gameID',
+            expect.objectContaining({
+              metadata: expect.objectContaining({
+                setupData: expect.objectContaining({
+                  colors: expect.objectContaining({
+                    '0': 'green',
+                    '1': 'red',
+                  }),
+                }),
+              }),
+            })
+          );
+        });
+
+        test('passes setupData to game setup function', () => {
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
+            'gameID',
+            expect.objectContaining({
+              initialState: expect.objectContaining({
+                G: expect.objectContaining({
+                  colors: {
+                    '0': 'green',
+                    '1': 'red',
+                  },
+                }),
+              }),
+            })
+          );
+        });
+      });
+
+      describe('with unlisted option', () => {
+        beforeEach(async () => {
+          response = await request(app.callback())
+            .post('/games/foo/create')
+            .send({ unlisted: true });
+        });
+
+        test('sets unlisted in metadata', () => {
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
+            'gameID',
+            expect.objectContaining({
+              metadata: expect.objectContaining({
+                unlisted: true,
+              }),
+            })
+          );
         });
       });
     });
