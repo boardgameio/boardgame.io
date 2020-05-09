@@ -67,7 +67,7 @@ export default () => (
 ```
 
 ### Backend Only
-If you only need to publish your backend to Heroku, your `server.js` can we simplified to this:
+If you only need to publish your backend to Heroku, your `server.js` can be simplified to this:
 
 ```js
 // server.js
