@@ -68,11 +68,13 @@ Returns `roomID`, which is the ID of the newly created game instance.
 
 Allows a player to join a particular room instance `id` of a game named `name`.
 
-Accepts two JSON body parameters, all required:
+Accepts three JSON body parameters:
 
-`playerID`: the ordinal player in the game that is being joined (0, 1...).
+`playerID` (required): the ordinal player in the game that is being joined (0, 1...).
 
-`playerName`: the display name of the player joining the game.
+`playerName` (required): the display name of the player joining the game.
+
+`data` (optional): additional information associated to the player.
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
 
