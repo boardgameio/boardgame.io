@@ -7,17 +7,24 @@
  */
 
 import request from 'supertest';
+import Koa from 'koa';
 
 import { addApiToServer, createApiServer } from './api';
 import { ProcessGameConfig } from '../core/game';
 import * as StorageAPI from './db/base';
+import { Game } from '../types';
 
 jest.setTimeout(2000000000);
 
-class AsyncStorage extends StorageAPI.Async {
-  public mocks: { [key: string]: jest.Mock };
+type StorageMocks = Record<
+  'createGame' | 'setState' | 'fetch' | 'setMetadata' | 'listGames' | 'wipe',
+  jest.Mock | ((...args: any[]) => any)
+>;
 
-  constructor(args: any = {}) {
+class AsyncStorage extends StorageAPI.Async {
+  public mocks: StorageMocks;
+
+  constructor(args: Partial<StorageMocks> = {}) {
     super();
     this.mocks = {
       createGame: args.createGame || jest.fn(),
@@ -59,9 +66,9 @@ class AsyncStorage extends StorageAPI.Async {
 describe('.createApiServer', () => {
   describe('creating a game', () => {
     let response;
-    let app;
-    let db;
-    let games;
+    let app: Koa;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(async () => {
       db = new AsyncStorage();
@@ -88,62 +95,30 @@ describe('.createApiServer', () => {
 
         response = await request(app.callback())
           .post('/games/foo/create')
-          .send({
-            numPlayers: 3,
-            setupData: {
-              colors: {
-                '0': 'green',
-                '1': 'red',
-              },
-            },
-            unlisted: true,
-          });
+          .send({ numPlayers: 3 });
       });
 
       test('is successful', () => {
         expect(response.status).toEqual(200);
       });
 
-      test('creates game data', () => {
-        expect(db.mocks.setState).toHaveBeenCalledWith(
+      test('creates game state and metadata', () => {
+        expect(db.mocks.createGame).toHaveBeenCalledWith(
           'gameID',
           expect.objectContaining({
-            ctx: expect.objectContaining({
-              numPlayers: 3,
-            }),
-          })
-        );
-      });
-
-      test('passes arbitrary data to game setup', () => {
-        expect(db.mocks.setState).toHaveBeenCalledWith(
-          'gameID',
-          expect.objectContaining({
-            G: expect.objectContaining({
-              colors: {
-                '0': 'green',
-                '1': 'red',
-              },
-            }),
-          })
-        );
-      });
-
-      test('creates game metadata', () => {
-        expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-          'gameID',
-          expect.objectContaining({
-            players: expect.objectContaining({
-              '0': expect.objectContaining({}),
-              '1': expect.objectContaining({}),
-            }),
-            setupData: expect.objectContaining({
-              colors: expect.objectContaining({
-                '0': 'green',
-                '1': 'red',
+            initialState: expect.objectContaining({
+              ctx: expect.objectContaining({
+                numPlayers: 3,
               }),
             }),
-            unlisted: true,
+            metadata: expect.objectContaining({
+              gameName: 'foo',
+              players: expect.objectContaining({
+                '0': expect.objectContaining({}),
+                '1': expect.objectContaining({}),
+              }),
+              unlisted: false,
+            }),
           })
         );
       });
@@ -158,11 +133,89 @@ describe('.createApiServer', () => {
         });
 
         test('uses default numPlayers', () => {
-          expect(db.mocks.setState).toHaveBeenCalledWith(
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
             'gameID',
             expect.objectContaining({
-              ctx: expect.objectContaining({
-                numPlayers: 2,
+              initialState: expect.objectContaining({
+                ctx: expect.objectContaining({
+                  numPlayers: 2,
+                }),
+              }),
+            })
+          );
+        });
+      });
+
+      describe('for an unknown game name', () => {
+        beforeEach(async () => {
+          response = await request(app.callback()).post('/games/bar/create');
+        });
+
+        test('returns 404 error', () => {
+          expect(response.status).toEqual(404);
+        });
+      });
+
+      describe('with setupData', () => {
+        beforeEach(async () => {
+          response = await request(app.callback())
+            .post('/games/foo/create')
+            .send({
+              setupData: {
+                colors: {
+                  '0': 'green',
+                  '1': 'red',
+                },
+              },
+            });
+        });
+
+        test('includes setupData in metadata', () => {
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
+            'gameID',
+            expect.objectContaining({
+              metadata: expect.objectContaining({
+                setupData: expect.objectContaining({
+                  colors: expect.objectContaining({
+                    '0': 'green',
+                    '1': 'red',
+                  }),
+                }),
+              }),
+            })
+          );
+        });
+
+        test('passes setupData to game setup function', () => {
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
+            'gameID',
+            expect.objectContaining({
+              initialState: expect.objectContaining({
+                G: expect.objectContaining({
+                  colors: {
+                    '0': 'green',
+                    '1': 'red',
+                  },
+                }),
+              }),
+            })
+          );
+        });
+      });
+
+      describe('with unlisted option', () => {
+        beforeEach(async () => {
+          response = await request(app.callback())
+            .post('/games/foo/create')
+            .send({ unlisted: true });
+        });
+
+        test('sets unlisted in metadata', () => {
+          expect(db.mocks.createGame).toHaveBeenCalledWith(
+            'gameID',
+            expect.objectContaining({
+              metadata: expect.objectContaining({
+                unlisted: true,
               }),
             })
           );
@@ -202,9 +255,9 @@ describe('.createApiServer', () => {
 
   describe('joining a room', () => {
     let response;
-    let db;
-    let games;
-    let credentials;
+    let db: AsyncStorage;
+    let games: Game[];
+    let credentials: string;
 
     beforeEach(() => {
       credentials = 'SECRET';
@@ -260,7 +313,7 @@ describe('.createApiServer', () => {
             });
             response = await request(app.callback())
               .post('/games/foo/1/join')
-              .send({ playerID: 0, playerName: 'alice', data: 99 });
+              .send({ playerID: 0, playerName: 'alice' });
           });
 
           test('is successful', async () => {
@@ -283,17 +336,27 @@ describe('.createApiServer', () => {
               })
             );
           });
-          test('updates the player data', async () => {
-            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
-              '1',
-              expect.objectContaining({
-                players: expect.objectContaining({
-                  '0': expect.objectContaining({
-                    data: 99,
+
+          describe('when custom data is provided', () => {
+            beforeEach(async () => {
+              const app = createApiServer({ db, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/join')
+                .send({ playerID: 0, playerName: 'alice', data: 99 });
+            });
+
+            test('updates the player data', async () => {
+              expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+                '1',
+                expect.objectContaining({
+                  players: expect.objectContaining({
+                    '0': expect.objectContaining({
+                      data: 99,
+                    }),
                   }),
-                }),
-              })
-            );
+                })
+              );
+            });
           });
         });
 
@@ -369,8 +432,8 @@ describe('.createApiServer', () => {
 
   describe('rename with deprecated endpoint', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
     const warnMsg =
       'This endpoint /rename is deprecated. Please use /update instead.';
 
@@ -479,6 +542,7 @@ describe('.createApiServer', () => {
             expect(console.warn).toBeCalledWith(warnMsg);
           });
         });
+
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, games });
@@ -491,19 +555,19 @@ describe('.createApiServer', () => {
             expect(response.status).toEqual(403);
             expect(console.warn).toBeCalledWith(warnMsg);
           });
+        });
 
-          describe('when newName is omitted', () => {
-            beforeEach(async () => {
-              const app = createApiServer({ db, games });
-              response = await request(app.callback())
-                .post('/games/foo/1/rename')
-                .send('credentials=foo&playerID=0');
-            });
+        describe('when newName is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/rename')
+              .send('credentials=foo&playerID=0');
+          });
 
-            test('throws error 403', async () => {
-              expect(response.status).toEqual(403);
-              expect(console.warn).toBeCalledWith(warnMsg);
-            });
+          test('throws error 403', async () => {
+            expect(response.status).toEqual(403);
+            expect(console.warn).toBeCalledWith(warnMsg);
           });
         });
       });
@@ -512,8 +576,8 @@ describe('.createApiServer', () => {
 
   describe('rename with update endpoint', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -613,6 +677,7 @@ describe('.createApiServer', () => {
             expect(response.text).toEqual('Invalid credentials SECRET2');
           });
         });
+
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, games });
@@ -623,17 +688,18 @@ describe('.createApiServer', () => {
           test('throws playerID is required', async () => {
             expect(response.text).toEqual('playerID is required');
           });
-          describe('when newName is omitted', () => {
-            beforeEach(async () => {
-              const app = createApiServer({ db, games });
-              response = await request(app.callback())
-                .post('/games/foo/1/update')
-                .send('credentials=foo&playerID=0');
-            });
+        });
 
-            test('throws newName is required', async () => {
-              expect(response.text).toEqual('newName or data is required');
-            });
+        describe('when newName is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/update')
+              .send('credentials=foo&playerID=0');
+          });
+
+          test('throws newName is required', async () => {
+            expect(response.text).toEqual('newName or data is required');
           });
         });
       });
@@ -642,8 +708,8 @@ describe('.createApiServer', () => {
 
   describe('updating player metadata', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -744,6 +810,7 @@ describe('.createApiServer', () => {
             expect(response.text).toEqual('Invalid credentials SECRET2');
           });
         });
+
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, games });
@@ -755,17 +822,18 @@ describe('.createApiServer', () => {
           test('throws playerID is required', async () => {
             expect(response.text).toEqual('playerID is required');
           });
-          describe('when data is omitted', () => {
-            beforeEach(async () => {
-              const app = createApiServer({ db, games });
-              response = await request(app.callback())
-                .post('/games/foo/1/update')
-                .send({ playerID: 0, credentials: 'foo' });
-            });
+        });
 
-            test('throws data is required', async () => {
-              expect(response.text).toEqual('newName or data is required');
-            });
+        describe('when data is omitted', () => {
+          beforeEach(async () => {
+            const app = createApiServer({ db, games });
+            response = await request(app.callback())
+              .post('/games/foo/1/update')
+              .send({ playerID: 0, credentials: 'foo' });
+          });
+
+          test('throws data is required', async () => {
+            expect(response.text).toEqual('newName or data is required');
           });
         });
       });
@@ -774,8 +842,8 @@ describe('.createApiServer', () => {
 
   describe('leaving a room', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -909,7 +977,7 @@ describe('.createApiServer', () => {
   });
 
   describe('requesting game list', () => {
-    let db;
+    let db: AsyncStorage;
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage();
@@ -918,10 +986,8 @@ describe('.createApiServer', () => {
     describe('when given 2 games', () => {
       let response;
       beforeEach(async () => {
-        let app;
-        let games;
-        games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        app = createApiServer({ db, games });
+        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        let app = createApiServer({ db, games });
 
         response = await request(app.callback()).get('/games');
       });
@@ -934,8 +1000,8 @@ describe('.createApiServer', () => {
 
   describe('play again', () => {
     let response;
-    let db;
-    let games;
+    let db: AsyncStorage;
+    let games: Game[];
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
@@ -968,11 +1034,13 @@ describe('.createApiServer', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1&numPlayers=4');
-      expect(db.mocks.setState).toHaveBeenCalledWith(
+      expect(db.mocks.createGame).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
-          ctx: expect.objectContaining({
-            numPlayers: 4,
+          initialState: expect.objectContaining({
+            ctx: expect.objectContaining({
+              numPlayers: 4,
+            }),
           }),
         })
       );
@@ -1051,7 +1119,7 @@ describe('.createApiServer', () => {
   });
 
   describe('requesting room list', () => {
-    let db;
+    let db: AsyncStorage;
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
@@ -1115,7 +1183,7 @@ describe('.createApiServer', () => {
   });
 
   describe('requesting room', () => {
-    let db;
+    let db: AsyncStorage;
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
@@ -1135,7 +1203,7 @@ describe('.createApiServer', () => {
             },
           };
         },
-        list: async () => {
+        listGames: async () => {
           return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
       });
@@ -1180,10 +1248,10 @@ describe('.createApiServer', () => {
 
 describe('.addApiToServer', () => {
   describe('when server app is provided', () => {
-    let db;
+    let db: AsyncStorage;
     let server;
     let useChain;
-    let games;
+    let games: Game[];
 
     beforeEach(async () => {
       useChain = jest.fn(() => ({ use: useChain }));

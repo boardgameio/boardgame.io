@@ -16,13 +16,6 @@ import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
 import { Server, Game } from '../types';
 
-const createGameMetadata = ({ gameName, unlisted }): Server.GameMetadata => ({
-  gameName,
-  unlisted,
-  players: {},
-  setupData: {},
-});
-
 /**
  * Creates a new game.
  *
@@ -38,28 +31,26 @@ export const CreateGame = async (
   db: StorageAPI.Sync | StorageAPI.Async,
   game: Game,
   numPlayers: number,
-  setupData: object,
+  setupData: any,
   lobbyConfig: Server.LobbyConfig,
   unlisted: boolean
 ) => {
-  const gameMetadata = createGameMetadata({ gameName: game.name, unlisted });
+  if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
-  const state = InitializeGame({
-    game,
-    numPlayers,
-    setupData,
-  });
-
+  const metadata: Server.GameMetadata = {
+    gameName: game.name,
+    unlisted: !!unlisted,
+    players: {},
+  };
+  if (setupData !== undefined) metadata.setupData = setupData;
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    gameMetadata.players[playerIndex] = { id: playerIndex };
+    metadata.players[playerIndex] = { id: playerIndex };
   }
 
-  gameMetadata.setupData = setupData;
-
   const gameID = lobbyConfig.uuid();
+  const initialState = InitializeGame({ game, numPlayers, setupData });
 
-  await db.setMetadata(gameID, gameMetadata);
-  await db.setState(gameID, state);
+  await db.createGame(gameID, { metadata, initialState });
 
   return gameID;
 };
@@ -70,8 +61,8 @@ export const createApiServer = ({
   lobbyConfig,
   generateCredentials,
 }: {
-  db: any;
-  games: any;
+  db: StorageAPI.Sync | StorageAPI.Async;
+  games: Game[];
   lobbyConfig?: Server.LobbyConfig;
   generateCredentials?: Server.GenerateCredentials;
 }) => {
@@ -113,11 +104,10 @@ export const addApiToServer = ({
     const unlisted = ctx.request.body.unlisted;
     // The number of players for this game instance.
     let numPlayers = parseInt(ctx.request.body.numPlayers);
-    if (!numPlayers) {
-      numPlayers = 2;
-    }
 
     const game = games.find(g => g.name === gameName);
+    if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
+
     const gameID = await CreateGame(
       db,
       game,
@@ -143,7 +133,7 @@ export const addApiToServer = ({
       if (!metadata.unlisted) {
         rooms.push({
           gameID,
-          players: Object.values(metadata.players).map((player: any) => {
+          players: Object.values(metadata.players).map(player => {
             // strip away credentials
             const { credentials, ...strippedInfo } = player;
             return strippedInfo;
@@ -167,7 +157,7 @@ export const addApiToServer = ({
     }
     const strippedRoom = {
       roomID: gameID,
-      players: Object.values(metadata.players).map((player: any) => {
+      players: Object.values(metadata.players).map(player => {
         const { credentials, ...strippedInfo } = player;
         return strippedInfo;
       }),
@@ -237,7 +227,7 @@ export const addApiToServer = ({
 
     delete metadata.players[playerID].name;
     delete metadata.players[playerID].credentials;
-    if (Object.values(metadata.players).some((val: any) => val.name)) {
+    if (Object.values(metadata.players).some(player => player.name)) {
       await db.setMetadata(gameID, metadata);
     } else {
       // remove room
@@ -259,9 +249,6 @@ export const addApiToServer = ({
     const setupData = ctx.request.body.setupData;
     // The number of players for this game instance.
     let numPlayers = parseInt(ctx.request.body.numPlayers);
-    if (!numPlayers) {
-      numPlayers = 2;
-    }
 
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
@@ -301,7 +288,7 @@ export const addApiToServer = ({
     };
   });
 
-  const updatePlayerMetadata = async ctx => {
+  const updatePlayerMetadata = async (ctx: Koa.Context) => {
     const gameID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;

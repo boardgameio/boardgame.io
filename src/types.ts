@@ -279,7 +279,7 @@ export namespace Server {
   export interface GameMetadata {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
-    setupData: any;
+    setupData?: any;
     gameover?: any;
     nextRoomID?: string;
     unlisted?: boolean;
