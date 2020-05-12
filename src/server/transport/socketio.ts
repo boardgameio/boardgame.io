@@ -6,10 +6,15 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Master, AuthFn } from '../../master/master';
 import IO from 'koa-socket-2';
 import { ServerOptions as SocketOptions } from 'socket.io';
 import { ServerOptions as HttpsOptions } from 'https';
+import {
+  Master,
+  TransportAPI as MasterTransport,
+  AuthFn,
+} from '../../master/master';
+import { PlayerID } from '../../types';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -18,11 +23,16 @@ const PING_INTERVAL = 10 * 1e3;
  * API that's exposed by SocketIO for the Master to send
  * information to the clients.
  */
-export function TransportAPI(gameID, socket, clientInfo, roomInfo) {
+export function TransportAPI(
+  gameID: string,
+  socket,
+  clientInfo: Map<any, any>,
+  roomInfo: Map<any, any>
+): MasterTransport {
   /**
    * Send a message to a specific client.
    */
-  const send = ({ type, playerID, args }) => {
+  const send: MasterTransport['send'] = ({ type, playerID, args }) => {
     const clients = roomInfo.get(gameID).values();
     for (const client of clients) {
       const info = clientInfo.get(client);
@@ -39,25 +49,18 @@ export function TransportAPI(gameID, socket, clientInfo, roomInfo) {
   /**
    * Send a message to all clients.
    */
-  const sendAll = arg => {
+  const sendAll: MasterTransport['sendAll'] = makePlayerData => {
     roomInfo.get(gameID).forEach(c => {
-      const playerID = clientInfo.get(c).playerID;
-
-      if (typeof arg === 'function') {
-        const t = arg(playerID);
-        t.playerID = playerID;
-        send(t);
-      } else {
-        arg.playerID = playerID;
-        send(arg);
-      }
+      const playerID: PlayerID = clientInfo.get(c).playerID;
+      const data = makePlayerData(playerID);
+      send({ playerID, ...data });
     });
   };
 
   return { send, sendAll };
 }
 
-interface SocketOpts {
+export interface SocketOpts {
   auth?: boolean | AuthFn;
   https?: HttpsOptions;
   socketOpts?: SocketOptions;

@@ -8,21 +8,29 @@
 
 import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
-import { Master } from '../../master/master';
-import { Transport } from './transport';
+import { Master, TransportAPI } from '../../master/master';
+import { Transport, TransportOpts } from './transport';
+import {
+  CredentialedActionShape,
+  Game,
+  LogEntry,
+  PlayerID,
+  State,
+  SyncInfo,
+} from '../../types';
 
 /**
  * Returns null if it is not a bot's turn.
  * Otherwise, returns a playerID of a bot that may play now.
  */
-export function GetBotPlayer(state, bots) {
+export function GetBotPlayer(state: State, bots: Record<PlayerID, any>) {
   if (state.ctx.gameover !== undefined) {
     return null;
   }
 
-  if (state.ctx.stage) {
+  if (state.ctx.activePlayers) {
     for (const key of Object.keys(bots)) {
-      if (key in state.ctx.stage) {
+      if (key in state.ctx.activePlayers) {
         return key;
       }
     }
@@ -33,68 +41,86 @@ export function GetBotPlayer(state, bots) {
   return null;
 }
 
+interface LocalMasterOpts {
+  game: Game;
+  bots: Record<PlayerID, any>;
+}
+
 /**
  * Creates a local version of the master that the client
  * can interact with.
  */
-export function LocalMaster({ game, bots }) {
-  const clientCallbacks = {};
-  const initializedBots = {};
+export class LocalMaster extends Master {
+  connect: (
+    gameID: string,
+    playerID: PlayerID,
+    callback: (...args: any[]) => void
+  ) => void;
 
-  if (game && game.ai && bots) {
-    for (const playerID in bots) {
-      const bot = bots[playerID];
-      initializedBots[playerID] = new bot({
-        game,
-        enumerate: game.ai.enumerate,
-        seed: game.seed,
-      });
+  constructor({ game, bots }: LocalMasterOpts) {
+    const clientCallbacks: Record<PlayerID, (...args: any[]) => void> = {};
+    const initializedBots = {};
+
+    if (game && game.ai && bots) {
+      for (const playerID in bots) {
+        const bot = bots[playerID];
+        initializedBots[playerID] = new bot({
+          game,
+          enumerate: game.ai.enumerate,
+          seed: game.seed,
+        });
+      }
     }
+
+    const send: TransportAPI['send'] = ({ playerID, type, args }) => {
+      const callback = clientCallbacks[playerID];
+      if (callback !== undefined) {
+        callback.apply(null, [type, ...args]);
+      }
+    };
+
+    const transportAPI: TransportAPI = {
+      send,
+      sendAll: makePlayerData => {
+        for (const playerID in clientCallbacks) {
+          const data = makePlayerData(playerID);
+          send({ playerID, ...data });
+        }
+      },
+    };
+
+    super(game, new InMemory(), transportAPI, false);
+
+    this.connect = (gameID, playerID, callback) => {
+      clientCallbacks[playerID] = callback;
+    };
+
+    this.subscribe(({ state, gameID }) => {
+      if (!bots) {
+        return;
+      }
+      const botPlayer = GetBotPlayer(state, initializedBots);
+      if (botPlayer !== null) {
+        setTimeout(async () => {
+          const botAction = await initializedBots[botPlayer].play(
+            state,
+            botPlayer
+          );
+          await this.onUpdate(
+            botAction.action,
+            state._stateID,
+            gameID,
+            botAction.action.payload.playerID
+          );
+        }, 100);
+      }
+    });
   }
-
-  const send = ({ type, playerID, args }) => {
-    const callback = clientCallbacks[playerID];
-    if (callback !== undefined) {
-      callback.apply(null, [type, ...args]);
-    }
-  };
-
-  const sendAll = arg => {
-    for (const playerID in clientCallbacks) {
-      const { type, args } = arg(playerID);
-      send({ type, playerID, args });
-    }
-  };
-
-  const master = new Master(game, new InMemory(), { send, sendAll }, false);
-
-  master.connect = (gameID, playerID, callback) => {
-    clientCallbacks[playerID] = callback;
-  };
-
-  master.subscribe(({ state, gameID }) => {
-    if (!bots) {
-      return;
-    }
-    const botPlayer = GetBotPlayer(state, initializedBots);
-    if (botPlayer !== null) {
-      setTimeout(async () => {
-        const botAction = await initializedBots[botPlayer].play(
-          state,
-          botPlayer
-        );
-        await master.onUpdate(
-          botAction.action,
-          state._stateID,
-          gameID,
-          botAction.action.payload.playerID
-        );
-      }, 100);
-    }
-  });
-
-  return master;
 }
+
+type LocalTransportOpts = TransportOpts & {
+  master?: LocalMaster;
+};
 
 /**
  * Local
@@ -103,21 +129,26 @@ export function LocalMaster({ game, bots }) {
  * that you can connect multiple clients to.
  */
 export class LocalTransport extends Transport {
+  master: LocalMaster;
+  isConnected: boolean;
+
   /**
    * Creates a new Mutiplayer instance.
-   * @param {object} socket - Override for unit tests.
-   * @param {object} socketOpts - Options to pass to socket.io.
    * @param {string} gameID - The game ID to connect to.
    * @param {string} playerID - The player ID associated with this client.
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
-   * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
    */
-  constructor({ master, game, store, gameID, playerID, gameName, numPlayers }) {
+  constructor({
+    master,
+    store,
+    gameID,
+    playerID,
+    gameName,
+    numPlayers,
+  }: LocalTransportOpts) {
     super({ store, gameName, playerID, gameID, numPlayers });
-
     this.master = master;
-    this.game = game;
     this.isConnected = true;
   }
 
@@ -126,7 +157,7 @@ export class LocalTransport extends Transport {
    * master broadcasts the update to other clients (including
    * this one).
    */
-  async onUpdate(gameID, state, deltalog) {
+  async onUpdate(gameID: string, state: State, deltalog: LogEntry[]) {
     const currentState = this.store.getState();
 
     if (gameID == this.gameID && state._stateID >= currentState._stateID) {
@@ -139,7 +170,7 @@ export class LocalTransport extends Transport {
    * Called when the client first connects to the master
    * and requests the current game state.
    */
-  onSync(gameID, syncInfo) {
+  onSync(gameID: string, syncInfo: SyncInfo) {
     if (gameID == this.gameID) {
       const action = ActionCreators.sync(syncInfo);
       this.store.dispatch(action);
@@ -150,7 +181,7 @@ export class LocalTransport extends Transport {
    * Called when an action that has to be relayed to the
    * game master is made.
    */
-  onAction(state, action) {
+  onAction(state: State, action: CredentialedActionShape.Any) {
     this.master.onUpdate(action, state._stateID, this.gameID, this.playerID);
   }
 
@@ -179,13 +210,13 @@ export class LocalTransport extends Transport {
    */
   subscribe() {}
 
-  subscribeGameMetadata(_metadata) {} // eslint-disable-line no-unused-vars
+  subscribeGameMetadata() {}
 
   /**
    * Updates the game id.
    * @param {string} id - The new game id.
    */
-  updateGameID(id) {
+  updateGameID(id: string) {
     this.gameID = id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
@@ -196,7 +227,7 @@ export class LocalTransport extends Transport {
    * Updates the player associated with this client.
    * @param {string} id - The new player id.
    */
-  updatePlayerID(id) {
+  updatePlayerID(id: PlayerID) {
     this.playerID = id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
@@ -205,11 +236,14 @@ export class LocalTransport extends Transport {
 }
 
 const localMasters = new Map();
-export function Local(opts) {
-  return transportOpts => {
-    let master;
+export function Local(opts: Pick<LocalMasterOpts, 'bots'>) {
+  return (
+    transportOpts: Pick<LocalMasterOpts, 'game'> &
+      LocalTransportOpts & { gameKey: Game }
+  ) => {
+    let master: LocalMaster;
 
-    if (localMasters.has(transportOpts.gameKey) & !opts) {
+    if (localMasters.has(transportOpts.gameKey) && !opts) {
       master = localMasters.get(transportOpts.gameKey);
     } else {
       master = new LocalMaster({
