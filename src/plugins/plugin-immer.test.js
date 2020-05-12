@@ -7,6 +7,10 @@
  */
 
 import { Client } from '../client/client';
+import { INVALID_MOVE } from '../core/reducer';
+
+// Surpress invalid move error logging
+jest.mock('../core/logger');
 
 describe('immer', () => {
   let client;
@@ -17,6 +21,10 @@ describe('immer', () => {
         moves: {
           A: G => {
             G.moveBody = true;
+          },
+          invalid: G => {
+            G.madeInvalidMove = true;
+            return INVALID_MOVE;
           },
         },
 
@@ -68,5 +76,10 @@ describe('immer', () => {
     client.moves.A();
     expect(client.getState().G.moveBody).toBe(true);
     expect(client.getState().G.onMove).toBe(true);
+  });
+
+  test('invalid move', () => {
+    client.moves.invalid();
+    expect(client.getState().G.madeInvalidMove).toBeUndefined();
   });
 });
