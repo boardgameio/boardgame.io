@@ -7,7 +7,8 @@
  */
 
 import produce from 'immer';
-import { Plugin } from '../types';
+import { AnyFn, Ctx, Plugin } from '../types';
+import { INVALID_MOVE } from '../core/reducer';
 
 /**
  * Plugin that allows using Immer to make immutable changes
@@ -15,7 +16,20 @@ import { Plugin } from '../types';
  */
 const ImmerPlugin: Plugin = {
   name: 'plugin-immer',
-  fnWrap: move => produce(move),
+
+  fnWrap: (move: AnyFn) => (G: any, ctx: Ctx, ...args: any[]) => {
+    let isInvalid = false;
+    const newG = produce(G, G => {
+      const result = move(G, ctx, ...args);
+      if (result === INVALID_MOVE) {
+        isInvalid = true;
+        return;
+      }
+      return result;
+    });
+    if (isInvalid) return INVALID_MOVE;
+    return newG;
+  },
 };
 
 export default ImmerPlugin;
