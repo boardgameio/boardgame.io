@@ -35,9 +35,10 @@ up pass-and-play multiplayer or for prototyping the multiplayer experience
 without having to set up a server to test it.
 
 All you need to do is to add `import { Local } from 'boardgame.io/multiplayer'`,
-and in your config write `multiplayer: Local()`. Now you can instantiate as many 
+and in your config write `multiplayer: Local()` or `multiplayer: Local({ persist : true })` if you want game state to be cached using `localStorage`. Now you can instantiate as many 
 of these clients in your app and you will notice that they're all kept in sync,
 playing in the same game.
+
 
 ```js
 // src/App.js

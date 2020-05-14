@@ -8,6 +8,7 @@
 
 import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
+import { LocalStorage } from '../../server/db/localstorage';
 import { Master } from '../../master/master';
 import { Transport } from './transport';
 
@@ -37,7 +38,7 @@ export function GetBotPlayer(state, bots) {
  * Creates a local version of the master that the client
  * can interact with.
  */
-export function LocalMaster({ game, bots }) {
+export function LocalMaster({ game, bots, persist }) {
   const clientCallbacks = {};
   const initializedBots = {};
 
@@ -66,7 +67,8 @@ export function LocalMaster({ game, bots }) {
     }
   };
 
-  const master = new Master(game, new InMemory(), { send, sendAll }, false);
+  const storage = persist ? new LocalStorage() : new InMemory();
+  const master = new Master(game, storage, { send, sendAll }, false);
 
   master.connect = (gameID, playerID, callback) => {
     clientCallbacks[playerID] = callback;
@@ -208,13 +210,13 @@ const localMasters = new Map();
 export function Local(opts) {
   return transportOpts => {
     let master;
-
-    if (localMasters.has(transportOpts.gameKey) & !opts) {
+    if (localMasters.has(transportOpts.gameKey)) {
       master = localMasters.get(transportOpts.gameKey);
     } else {
       master = new LocalMaster({
         game: transportOpts.game,
         bots: opts && opts.bots,
+        persist: opts && opts.persist,
       });
       localMasters.set(transportOpts.gameKey, master);
     }
