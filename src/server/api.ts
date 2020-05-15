@@ -70,6 +70,30 @@ export const createApiServer = ({
   return addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
 };
 
+/**
+ * Create a metadata object without secret credentials to return to the client.
+ *
+ * @param {string} gameID - The identifier of the game the metadata belongs to.
+ * @param {object} metadata - The game metadata object to strip credentials from.
+ * @return - A metadata object without player credentials.
+ */
+const createClientGameMetadata = (
+  gameID: string,
+  metadata: Server.GameMetadata
+) => {
+  return {
+    ...metadata,
+    gameID,
+    roomID: gameID,
+    matchID: gameID,
+    players: Object.values(metadata.players).map(player => {
+      // strip away credentials
+      const { credentials, ...strippedInfo } = player;
+      return strippedInfo;
+    }),
+  };
+};
+
 export const addApiToServer = ({
   app,
   db,
@@ -131,16 +155,7 @@ export const addApiToServer = ({
         metadata: true,
       });
       if (!metadata.unlisted) {
-        rooms.push({
-          gameID,
-          players: Object.values(metadata.players).map(player => {
-            // strip away credentials
-            const { credentials, ...strippedInfo } = player;
-            return strippedInfo;
-          }),
-          setupData: metadata.setupData,
-          gameover: metadata.gameover,
-        });
+        rooms.push(createClientGameMetadata(gameID, metadata));
       }
     }
     ctx.body = {
@@ -156,16 +171,7 @@ export const addApiToServer = ({
     if (!metadata) {
       ctx.throw(404, 'Room ' + gameID + ' not found');
     }
-    const strippedRoom = {
-      roomID: gameID,
-      players: Object.values(metadata.players).map(player => {
-        const { credentials, ...strippedInfo } = player;
-        return strippedInfo;
-      }),
-      setupData: metadata.setupData,
-      gameover: metadata.gameover,
-    };
-    ctx.body = strippedRoom;
+    ctx.body = createClientGameMetadata(gameID, metadata);
   });
 
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
