@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { CreateGameReducer, INVALID_MOVE } from './reducer';
+import { INVALID_MOVE } from './constants';
+import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
 import {
   makeMove,

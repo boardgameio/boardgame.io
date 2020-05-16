@@ -8,7 +8,7 @@
 
 import * as plugins from '../plugins/main';
 import { Flow } from './flow';
-import { INVALID_MOVE } from './reducer';
+import { INVALID_MOVE } from './constants';
 import { ActionPayload, Game, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
 

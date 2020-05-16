@@ -8,7 +8,7 @@
 
 import produce from 'immer';
 import { AnyFn, Ctx, Plugin } from '../types';
-import { INVALID_MOVE } from '../core/reducer';
+import { INVALID_MOVE } from '../core/constants';
 
 /**
  * Plugin that allows using Immer to make immutable changes

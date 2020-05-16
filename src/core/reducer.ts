@@ -10,6 +10,7 @@ import * as Actions from './action-types';
 import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
 import { error } from './logger';
+import { INVALID_MOVE } from './constants';
 import {
   ActionShape,
   Ctx,
@@ -44,13 +45,6 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
 
   return move.undoable;
 };
-
-/**
- * Moves can return this when they want to indicate
- * that the combination of arguments is illegal and
- * the move ought to be discarded.
- */
-export const INVALID_MOVE = 'INVALID_MOVE';
 
 /**
  * CreateGameReducer
