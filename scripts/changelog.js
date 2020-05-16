@@ -6,12 +6,12 @@ const shell = require('shelljs');
 const tempy = require('tempy');
 
 const CURRENT_TAG = shell
-  .exec('git tag', { silent: true })
+  .exec('git tag --sort=v:refname', { silent: true })
   .tail({ '-n': '1' })
   .stdout.trim();
 
 const PREVIOUS_TAG = shell
-  .exec('git tag', { silent: true })
+  .exec('git tag --sort=v:refname', { silent: true })
   .tail({ '-n': 2 })
   .head({ '-n': 1 })
   .stdout.trim();
