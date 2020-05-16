@@ -2,7 +2,7 @@ import { Object } from 'ts-toolbelt';
 import Koa from 'koa';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
-import { INVALID_MOVE } from './core/reducer';
+import { INVALID_MOVE } from './core/constants';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
 import { RandomAPI } from './plugins/plugin-random';
