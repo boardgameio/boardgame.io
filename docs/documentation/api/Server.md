@@ -29,6 +29,8 @@ A config object with the following options:
 
 5. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
+6. `lobbyConfig` (_object_): configuration options for the Lobby API server.
+
 ### Returns
 
 An object that contains:
@@ -39,6 +41,7 @@ An object that contains:
    _({ apiServer, appServer }) => {}_
 3. app (_object_): The Koa app.
 4. db (_object_): The `db` implementation.
+5. router (_object_): The Koa Router for the server API.
 
 ### Usage
 

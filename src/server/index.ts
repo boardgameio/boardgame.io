@@ -8,7 +8,7 @@
 
 import Koa from 'koa';
 
-import { addApiToServer, createApiServer } from './api';
+import { createRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
 import { ProcessGameConfig } from '../core/game';
 import * as logger from '../core/logger';
@@ -65,6 +65,7 @@ interface ServerOpts {
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
   https?: HttpsOptions;
+  lobbyConfig?: ServerTypes.LobbyConfig;
 }
 
 /**
@@ -76,6 +77,7 @@ interface ServerOpts {
  * @param authenticateCredentials - Function to test player credentials.
  * @param generateCredentials - Method for API to generate player credentials.
  * @param https - HTTPS configuration options passed through to the TLS module.
+ * @param lobbyConfig - Configuration options for the Lobby API server.
  */
 export function Server({
   games,
@@ -84,6 +86,7 @@ export function Server({
   authenticateCredentials,
   generateCredentials,
   https,
+  lobbyConfig,
 }: ServerOpts) {
   const app = new Koa();
 
@@ -106,29 +109,28 @@ export function Server({
   }
   transport.init(app, games);
 
+  const router = createRouter({ db, games, lobbyConfig, generateCredentials });
+
   return {
     app,
     db,
+    router,
 
-    run: async (portOrConfig: number | object, callback?: () => void) => {
+    run: async (portOrConfig: number | ServerConfig, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
 
       // DB
       await db.connect();
 
       // Lobby API
-      const lobbyConfig: ServerTypes.LobbyConfig = serverRunConfig.lobbyConfig;
+      const lobbyConfig = serverRunConfig.lobbyConfig;
       let apiServer: KoaServer | undefined;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
-        addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
+        configureApp(app, router);
       } else {
         // Run API in a separate Koa app.
-        const api = createApiServer({
-          db,
-          games,
-          lobbyConfig,
-          generateCredentials,
-        });
+        const api = new Koa();
+        configureApp(api, router);
         await new Promise(resolve => {
           apiServer = api.listen(lobbyConfig.apiPort, resolve);
         });

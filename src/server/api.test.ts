@@ -9,7 +9,7 @@
 import request from 'supertest';
 import Koa from 'koa';
 
-import { addApiToServer, createApiServer } from './api';
+import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
 import * as StorageAPI from './db/base';
 import { Game } from '../types';
@@ -62,8 +62,18 @@ class AsyncStorage extends StorageAPI.Async {
     return this.mocks.listGames(...args);
   }
 }
+describe('.createRouter', () => {
+  function addApiToServer({ app, ...args }) {
+    const router = createRouter(args as any);
+    configureApp(app, router);
+  }
 
-describe('.createApiServer', () => {
+  function createApiServer(args) {
+    const app = new Koa();
+    addApiToServer({ app, ...args });
+    return app;
+  }
+
   describe('creating a game', () => {
     let response;
     let app: Koa;
@@ -1244,9 +1254,7 @@ describe('.createApiServer', () => {
       });
     });
   });
-});
 
-describe('.addApiToServer', () => {
   describe('when server app is provided', () => {
     let db: AsyncStorage;
     let server;

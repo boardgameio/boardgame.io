@@ -55,34 +55,17 @@ export const CreateGame = async (
   return gameID;
 };
 
-export const createApiServer = ({
+export const createRouter = ({
   db,
   games,
   lobbyConfig,
   generateCredentials,
 }: {
-  db: StorageAPI.Sync | StorageAPI.Async;
-  games: Game[];
-  lobbyConfig?: Server.LobbyConfig;
-  generateCredentials?: Server.GenerateCredentials;
-}) => {
-  const app = new Koa();
-  return addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
-};
-
-export const addApiToServer = ({
-  app,
-  db,
-  games,
-  lobbyConfig,
-  generateCredentials,
-}: {
-  app: Koa;
   games: Game[];
   lobbyConfig?: Server.LobbyConfig;
   generateCredentials?: Server.GenerateCredentials;
   db: StorageAPI.Sync | StorageAPI.Async;
-}) => {
+}): Router => {
   if (!lobbyConfig) lobbyConfig = {};
   lobbyConfig = {
     ...lobbyConfig,
@@ -335,6 +318,10 @@ export const addApiToServer = ({
 
   router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
 
+  return router;
+};
+
+export const configureApp = (app: Koa, router: Router): void => {
   app.use(cors());
 
   // If API_SECRET is set, then require that requests set an
@@ -351,6 +338,4 @@ export const addApiToServer = ({
   });
 
   app.use(router.routes()).use(router.allowedMethods());
-
-  return app;
 };
