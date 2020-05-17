@@ -62,10 +62,10 @@ interface ServerOpts {
   games: Game[];
   db?: StorageAPI.Async | StorageAPI.Sync;
   transport?;
+  uuid?: () => string;
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
   https?: HttpsOptions;
-  lobbyConfig?: ServerTypes.LobbyConfig;
 }
 
 /**
@@ -86,7 +86,7 @@ export function Server({
   authenticateCredentials,
   generateCredentials,
   https,
-  lobbyConfig,
+  uuid,
 }: ServerOpts) {
   const app = new Koa();
 
@@ -109,7 +109,7 @@ export function Server({
   }
   transport.init(app, games);
 
-  const router = createRouter({ db, games, lobbyConfig, generateCredentials });
+  const router = createRouter({ db, games, uuid, generateCredentials });
 
   return {
     app,
