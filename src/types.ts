@@ -289,11 +289,6 @@ export namespace Server {
     uuid?: () => string;
     generateCredentials?: GenerateCredentials;
   }
-
-  export interface LobbyRuntimeSettings {
-    apiPort?: number;
-    apiCallback?: () => void;
-  }
 }
 
 export namespace CredentialedActionShape {
