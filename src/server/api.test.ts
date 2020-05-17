@@ -9,7 +9,7 @@
 import request from 'supertest';
 import Koa from 'koa';
 
-import { addApiToServer, createApiServer } from './api';
+import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
 import * as StorageAPI from './db/base';
 import { Game } from '../types';
@@ -63,7 +63,21 @@ class AsyncStorage extends StorageAPI.Async {
   }
 }
 
-describe('.createApiServer', () => {
+describe('.createRouter', () => {
+  function addApiToServer({
+    app,
+    ...args
+  }: { app: Koa } & Parameters<typeof createRouter>[0]) {
+    const router = createRouter(args);
+    configureApp(app, router);
+  }
+
+  function createApiServer(args: Parameters<typeof createRouter>[0]) {
+    const app = new Koa();
+    addApiToServer({ app, ...args });
+    return app;
+  }
+
   describe('creating a game', () => {
     let response;
     let app: Koa;
@@ -90,8 +104,7 @@ describe('.createApiServer', () => {
         delete process.env.API_SECRET;
 
         const uuid = () => 'gameID';
-        const lobbyConfig = { uuid };
-        app = createApiServer({ db, games, lobbyConfig });
+        app = createApiServer({ db, games, uuid });
 
         response = await request(app.callback())
           .post('/games/foo/create')
@@ -306,9 +319,7 @@ describe('.createApiServer', () => {
             const app = createApiServer({
               db,
               games,
-              lobbyConfig: {
-                uuid: () => 'gameID',
-              },
+              uuid: () => 'gameID',
               generateCredentials: () => credentials,
             });
             response = await request(app.callback())
@@ -1027,10 +1038,8 @@ describe('.createApiServer', () => {
     });
 
     test('creates new game data', async () => {
-      const lobbyConfig = {
-        uuid: () => 'newGameID',
-      };
-      const app = createApiServer({ db, games, lobbyConfig });
+      const uuid = () => 'newGameID';
+      const app = createApiServer({ db, games, uuid });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1&numPlayers=4');
@@ -1244,9 +1253,7 @@ describe('.createApiServer', () => {
       });
     });
   });
-});
 
-describe('.addApiToServer', () => {
   describe('when server app is provided', () => {
     let db: AsyncStorage;
     let server;
@@ -1272,7 +1279,7 @@ describe('.addApiToServer', () => {
 
     test('call .use method several times with uuid', async () => {
       const uuid = () => 'foo';
-      addApiToServer({ app: server, db, games, lobbyConfig: { uuid } });
+      addApiToServer({ app: server, db, games, uuid });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
   });

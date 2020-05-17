@@ -24,10 +24,12 @@ A config object with the following options:
 
 3. `transport` (_object_): the transport implementation.
    If not provided, socket.io is used.
-   
-4. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the Lobby’s `uuid` implementation will be used.
 
-5. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
+4. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [shortid](https://www.npmjs.com/package/shortid).
+
+5. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
+
+6. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
 ### Returns
 
@@ -39,6 +41,7 @@ An object that contains:
    _({ apiServer, appServer }) => {}_
 3. app (_object_): The Koa app.
 4. db (_object_): The `db` implementation.
+5. router (_object_): The Koa Router for the server API.
 
 ### Usage
 
