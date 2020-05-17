@@ -7,6 +7,7 @@
  */
 
 import Koa from 'koa';
+import Router from 'koa-router';
 
 import { createRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
@@ -17,13 +18,12 @@ import { Server as ServerTypes, Game, StorageAPI } from '../types';
 
 export type KoaServer = ReturnType<Koa['listen']>;
 
+type LobbyConfig = ServerTypes.LobbyConfig & ServerTypes.LobbyRuntimeSettings;
+
 interface ServerConfig {
   port?: number;
   callback?: () => void;
-  lobbyConfig?: {
-    apiPort: number;
-    apiCallback?: () => void;
-  };
+  lobbyConfig?: LobbyConfig;
 }
 
 interface HttpsOptions {
@@ -58,14 +58,127 @@ const getPortFromServer = (server: KoaServer): string | number | null => {
   return address.port;
 };
 
+type DB = StorageAPI.Async | StorageAPI.Sync;
+type Servers = { apiServer?: KoaServer; appServer: KoaServer };
+
 interface ServerOpts {
   games: Game[];
-  db?: StorageAPI.Async | StorageAPI.Sync;
+  db?: DB;
   transport?;
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
   https?: HttpsOptions;
   lobbyConfig?: ServerTypes.LobbyConfig;
+}
+
+class ServerInstance {
+  private _app: Koa;
+  private _db: DB;
+  private _router: Router;
+  private _games: Game[];
+  private _generateCredentials: ServerTypes.GenerateCredentials;
+
+  constructor({
+    games,
+    db,
+    transport,
+    authenticateCredentials,
+    generateCredentials,
+    https,
+    lobbyConfig,
+  }: ServerOpts) {
+    const app = new Koa();
+
+    games = games.map(ProcessGameConfig);
+
+    if (db === undefined) {
+      db = DBFromEnv();
+    }
+    app.context.db = db;
+
+    if (transport === undefined) {
+      const auth =
+        typeof authenticateCredentials === 'function'
+          ? authenticateCredentials
+          : true;
+      transport = new SocketIO({
+        auth,
+        https,
+      });
+    }
+    transport.init(app, games);
+
+    this._games = games;
+    this._generateCredentials = generateCredentials;
+    this._app = app;
+    this._db = db;
+    this.setRouter(lobbyConfig);
+  }
+
+  private setRouter(lobbyConfig: ServerTypes.LobbyConfig): void {
+    this._router = createRouter({
+      db: this._db,
+      games: this._games,
+      lobbyConfig,
+      generateCredentials: this._generateCredentials,
+    });
+  }
+
+  get app(): Koa {
+    return this._app;
+  }
+
+  get db(): DB {
+    return this._db;
+  }
+
+  get router(): Router {
+    return this._router;
+  }
+
+  async run(
+    portOrConfig: number | ServerConfig,
+    callback?: () => void
+  ): Promise<Servers> {
+    const serverRunConfig = createServerRunConfig(portOrConfig, callback);
+
+    // DB
+    await this.db.connect();
+
+    // Lobby API
+    const lobbyConfig = serverRunConfig.lobbyConfig;
+    if (lobbyConfig) this.setRouter(lobbyConfig);
+    let apiServer: KoaServer | undefined;
+    if (!lobbyConfig || !lobbyConfig.apiPort) {
+      configureApp(this.app, this.router);
+    } else {
+      // Run API in a separate Koa app.
+      const api = new Koa();
+      configureApp(api, this.router);
+      await new Promise(resolve => {
+        apiServer = api.listen(lobbyConfig.apiPort, resolve);
+      });
+      if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
+      logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
+    }
+
+    // Run Game Server (+ API, if necessary).
+    let appServer: KoaServer;
+    await new Promise(resolve => {
+      appServer = this.app.listen(serverRunConfig.port, resolve);
+    });
+    if (serverRunConfig.callback) serverRunConfig.callback();
+    logger.info(`App serving on ${getPortFromServer(appServer)}...`);
+
+    return { apiServer, appServer };
+  }
+
+  kill(servers: Servers): void {
+    if (servers.apiServer) {
+      servers.apiServer.close();
+    }
+    servers.appServer.close();
+  }
 }
 
 /**
@@ -79,81 +192,6 @@ interface ServerOpts {
  * @param https - HTTPS configuration options passed through to the TLS module.
  * @param lobbyConfig - Configuration options for the Lobby API server.
  */
-export function Server({
-  games,
-  db,
-  transport,
-  authenticateCredentials,
-  generateCredentials,
-  https,
-  lobbyConfig,
-}: ServerOpts) {
-  const app = new Koa();
-
-  games = games.map(ProcessGameConfig);
-
-  if (db === undefined) {
-    db = DBFromEnv();
-  }
-  app.context.db = db;
-
-  if (transport === undefined) {
-    const auth =
-      typeof authenticateCredentials === 'function'
-        ? authenticateCredentials
-        : true;
-    transport = new SocketIO({
-      auth,
-      https,
-    });
-  }
-  transport.init(app, games);
-
-  const router = createRouter({ db, games, lobbyConfig, generateCredentials });
-
-  return {
-    app,
-    db,
-    router,
-
-    run: async (portOrConfig: number | ServerConfig, callback?: () => void) => {
-      const serverRunConfig = createServerRunConfig(portOrConfig, callback);
-
-      // DB
-      await db.connect();
-
-      // Lobby API
-      const lobbyConfig = serverRunConfig.lobbyConfig;
-      let apiServer: KoaServer | undefined;
-      if (!lobbyConfig || !lobbyConfig.apiPort) {
-        configureApp(app, router);
-      } else {
-        // Run API in a separate Koa app.
-        const api = new Koa();
-        configureApp(api, router);
-        await new Promise(resolve => {
-          apiServer = api.listen(lobbyConfig.apiPort, resolve);
-        });
-        if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
-        logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
-      }
-
-      // Run Game Server (+ API, if necessary).
-      let appServer: KoaServer;
-      await new Promise(resolve => {
-        appServer = app.listen(serverRunConfig.port, resolve);
-      });
-      if (serverRunConfig.callback) serverRunConfig.callback();
-      logger.info(`App serving on ${getPortFromServer(appServer)}...`);
-
-      return { apiServer, appServer };
-    },
-
-    kill: (servers: { apiServer?: KoaServer; appServer: KoaServer }) => {
-      if (servers.apiServer) {
-        servers.apiServer.close();
-      }
-      servers.appServer.close();
-    },
-  };
+export function Server(opts: ServerOpts): ServerInstance {
+  return new ServerInstance(opts);
 }
