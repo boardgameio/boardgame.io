@@ -14,12 +14,12 @@ import { State, Server, LogEntry } from '../../types';
  */
 export class FlatFile extends StorageAPI.Async {
   private games: {
-    init: (opts: object) => void;
-    setItem: (id: string, value: any) => void;
-    getItem: (id: string) => State | Server.GameMetadata | LogEntry[];
-    removeItem: (id: string) => void;
+    init: (opts: object) => Promise<void>;
+    setItem: (id: string, value: any) => Promise<any>;
+    getItem: (id: string) => Promise<State | Server.GameMetadata | LogEntry[]>;
+    removeItem: (id: string) => Promise<void>;
     clear: () => {};
-    keys: () => string[];
+    keys: () => Promise<string[]>;
   };
   private dir: string;
   private logging?: boolean;
@@ -43,6 +43,13 @@ export class FlatFile extends StorageAPI.Async {
     this.requests = Promise.resolve();
   }
 
+  private async request<T extends any = any>(
+    action: () => Promise<T>
+  ): Promise<T> {
+    this.requests = this.requests.then(action, action);
+    return this.requests;
+  }
+
   async connect() {
     await this.games.init({
       dir: this.dir,
@@ -59,10 +66,7 @@ export class FlatFile extends StorageAPI.Async {
     // Store initial state separately for easy retrieval later.
     const key = InitialStateKey(gameID);
 
-    const setRequest = () => this.games.setItem(key, opts.initialState);
-    this.requests = this.requests.then(setRequest, setRequest);
-
-    await this.requests;
+    await this.request(() => this.games.setItem(key, opts.initialState));
 
     await this.setState(gameID, opts.initialState);
     await this.setMetadata(gameID, opts.metadata);
@@ -75,37 +79,30 @@ export class FlatFile extends StorageAPI.Async {
     let result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
-      const fetchRequest = () => this.games.getItem(gameID);
-      this.requests = this.requests.then(fetchRequest, fetchRequest);
-
-      result.state = (await this.requests) as State;
+      result.state = (await this.request(() =>
+        this.games.getItem(gameID)
+      )) as State;
     }
 
     if (opts.metadata) {
       const key = MetadataKey(gameID);
-
-      const fetchRequest = () => this.games.getItem(key);
-      this.requests = this.requests.then(fetchRequest, fetchRequest);
-
-      result.metadata = (await this.requests) as Server.GameMetadata;
+      result.metadata = (await this.request(() =>
+        this.games.getItem(key)
+      )) as Server.GameMetadata;
     }
 
     if (opts.log) {
       const key = LogKey(gameID);
-
-      const fetchRequest = () => this.games.getItem(key);
-      this.requests = this.requests.then(fetchRequest, fetchRequest);
-
-      result.log = (await this.requests) as LogEntry[];
+      result.log = (await this.request(() =>
+        this.games.getItem(key)
+      )) as LogEntry[];
     }
 
     if (opts.initialState) {
       const key = InitialStateKey(gameID);
-
-      const fetchRequest = () => this.games.getItem(key);
-      this.requests = this.requests.then(fetchRequest, fetchRequest);
-
-      result.initialState = (await this.requests) as State;
+      result.initialState = (await this.request(() =>
+        this.games.getItem(key)
+      )) as State;
     }
 
     return result as StorageAPI.FetchResult<O>;
@@ -118,58 +115,33 @@ export class FlatFile extends StorageAPI.Async {
   async setState(id: string, state: State, deltalog?: LogEntry[]) {
     if (deltalog && deltalog.length > 0) {
       const key = LogKey(id);
+      const log: LogEntry[] =
+        ((await this.request(() => this.games.getItem(key))) as LogEntry[]) ||
+        [];
 
-      const getRequest = () => this.games.getItem(key);
-      this.requests = this.requests.then(getRequest, getRequest);
-
-      const log: LogEntry[] = ((await this.requests) as LogEntry[]) || [];
-
-      const setRequest = () => this.games.setItem(key, log.concat(deltalog));
-      this.requests = this.requests.then(setRequest, setRequest);
-
-      await this.requests;
+      await this.request(() => this.games.setItem(key, log.concat(deltalog)));
     }
 
-    const setRequest = () => this.games.setItem(id, state);
-    this.requests = this.requests.then(setRequest, setRequest);
-
-    return await this.requests;
+    return await this.request(() => this.games.setItem(id, state));
   }
 
   async setMetadata(id: string, metadata: Server.GameMetadata): Promise<void> {
     const key = MetadataKey(id);
 
-    const setRequest = () => this.games.setItem(key, metadata);
-    this.requests = this.requests.then(setRequest, setRequest);
-
-    return await this.requests;
+    return await this.request(() => this.games.setItem(key, metadata));
   }
 
   async wipe(id: string) {
     var keys = await this.games.keys();
     if (!(keys.indexOf(id) > -1)) return;
 
-    const removeIdRequest = () => this.games.removeItem(id);
-    this.requests = this.requests.then(removeIdRequest, removeIdRequest);
-
-    await this.requests;
-
-    const removeLogRequest = () => this.games.removeItem(LogKey(id));
-    this.requests = this.requests.then(removeLogRequest, removeLogRequest);
-
-    await this.requests;
-
-    const removeMetaRequest = () => this.games.removeItem(MetadataKey(id));
-    this.requests = this.requests.then(removeMetaRequest, removeMetaRequest);
-
-    await this.requests;
+    await this.request(() => this.games.removeItem(id));
+    await this.request(() => this.games.removeItem(LogKey(id)));
+    await this.request(() => this.games.removeItem(MetadataKey(id)));
   }
 
   async listGames(): Promise<string[]> {
-    const getKeysRequest = () => this.games.keys();
-    this.requests = this.requests.then(getKeysRequest, getKeysRequest);
-
-    const keys = await this.requests;
+    const keys = await this.request(() => this.games.keys());
     const suffix = ':metadata';
     return keys
       .filter(k => k.endsWith(suffix))
