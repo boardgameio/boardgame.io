@@ -230,7 +230,7 @@ export function CreateGameReducer({
 
         // Only allow undoable moves to be undone.
         const lastMove: Move = game.flow.getMove(
-          state.ctx,
+          last.ctx,
           last.moveType,
           state.ctx.currentPlayer
         );
