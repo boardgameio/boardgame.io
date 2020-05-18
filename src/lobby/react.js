@@ -146,9 +146,9 @@ class Lobby extends React.Component {
     }
   };
 
-  _joinRoom = async (gameName, gameID, playerID) => {
+  _joinRoom = async (gameName, matchID, playerID) => {
     try {
-      await this.connection.join(gameName, gameID, playerID);
+      await this.connection.join(gameName, matchID, playerID);
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
@@ -159,9 +159,9 @@ class Lobby extends React.Component {
     }
   };
 
-  _leaveRoom = async (gameName, gameID) => {
+  _leaveRoom = async (gameName, matchID) => {
     try {
-      await this.connection.leave(gameName, gameID);
+      await this.connection.leave(gameName, matchID);
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
@@ -208,7 +208,7 @@ class Lobby extends React.Component {
 
     const game = {
       app: app,
-      gameID: gameOpts.gameID,
+      matchID: gameOpts.matchID,
       playerID: gameOpts.numPlayers > 1 ? gameOpts.playerID : '0',
       credentials: this.connection.playerCredentials,
     };
@@ -226,11 +226,11 @@ class Lobby extends React.Component {
 
   renderRooms = (matches, playerName) => {
     return matches.map(room => {
-      const { gameID, gameName, players } = room;
+      const { matchID, gameName, players } = room;
       return (
         <LobbyRoomInstance
-          key={'instance-' + gameID}
-          room={{ gameID, gameName, players: Object.values(players) }}
+          key={'instance-' + matchID}
+          room={{ matchID, gameName, players: Object.values(players) }}
           playerName={playerName}
           onClickJoin={this._joinRoom}
           onClickLeave={this._leaveRoom}
@@ -303,7 +303,7 @@ class Lobby extends React.Component {
         <div className={this._getPhaseVisibility(LobbyPhases.PLAY)}>
           {runningGame && (
             <runningGame.app
-              gameID={runningGame.gameID}
+              matchID={runningGame.matchID}
               playerID={runningGame.playerID}
               credentials={runningGame.credentials}
             />

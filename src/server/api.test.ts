@@ -1182,8 +1182,8 @@ describe('.createRouter', () => {
       });
 
       test('returns room ids', async () => {
-        expect(matches[0].gameID).toEqual('bar-2');
-        expect(matches[1].gameID).toEqual('bar-3');
+        expect(matches[0].matchID).toEqual('bar-2');
+        expect(matches[1].matchID).toEqual('bar-3');
       });
 
       test('returns player names', async () => {
@@ -1237,7 +1237,7 @@ describe('.createRouter', () => {
       });
 
       test('returns game ids', async () => {
-        expect(room.roomID).toEqual('bar-0');
+        expect(room.matchID).toEqual('bar-0');
       });
 
       test('returns player names', async () => {

@@ -131,7 +131,7 @@ describe('lobby', () => {
       beforeEach(async () => {
         lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob' },
               '1': { id: 1 },
@@ -200,7 +200,7 @@ describe('lobby', () => {
       beforeEach(async () => {
         lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: { '0': { id: 0 } },
             gameName: 'GameName1',
           },
@@ -283,12 +283,12 @@ describe('lobby', () => {
       beforeEach(async () => {
         lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: { '0': { id: 0 } },
             gameName: 'GameName1',
           },
           {
-            gameID: 'gameID2',
+            matchID: 'matchID2',
             players: { '0': { id: 0, name: 'Bob' } },
             gameName: 'GameName1',
           },
@@ -304,7 +304,7 @@ describe('lobby', () => {
           .first()
           .find('button')
           .simulate('click');
-        expect(spy).toHaveBeenCalledWith('GameName1', 'gameID1', '0');
+        expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1', '0');
       });
       test('when room is full', () => {
         // try 2nd room
@@ -338,7 +338,7 @@ describe('lobby', () => {
       beforeEach(async () => {
         lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob' },
               '1': { id: 1 },
@@ -362,7 +362,7 @@ describe('lobby', () => {
           .find('LobbyRoomInstance')
           .find('button')
           .simulate('click');
-        expect(spy).toHaveBeenCalledWith('GameName1', 'gameID1');
+        expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1');
       });
       test('when server request fails', async () => {
         lobby.instance().connection.leave = spy.mockImplementation(() => {
@@ -385,7 +385,7 @@ describe('lobby', () => {
       beforeEach(async () => {
         lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob', credentials: 'SECRET1' },
               '1': { id: 1, name: 'Charly', credentials: 'SECRET2' },
@@ -393,17 +393,17 @@ describe('lobby', () => {
             gameName: 'GameName1',
           },
           {
-            gameID: 'gameID2',
+            matchID: 'matchID2',
             players: { '0': { id: 0, name: 'Alice' } },
             gameName: 'GameName2',
           },
           {
-            gameID: 'gameID3',
+            matchID: 'matchID3',
             players: { '0': { id: 0, name: 'Bob' } },
             gameName: 'GameName3',
           },
           {
-            gameID: 'gameID4',
+            matchID: 'matchID4',
             players: { '0': { id: 0, name: 'Zoe' } },
             gameName: 'GameNameUnknown',
           },
@@ -423,7 +423,7 @@ describe('lobby', () => {
           .simulate('click');
         expect(lobby.instance().state.runningGame).toEqual({
           app: NullComponent,
-          gameID: 'gameID1',
+          matchID: 'matchID1',
           playerID: '0',
           credentials: 'SECRET1',
         });
@@ -444,7 +444,7 @@ describe('lobby', () => {
         expect(lobby.instance().state.runningGame).toEqual({
           app: NullComponent,
           credentials: undefined,
-          gameID: 'gameID2',
+          matchID: 'matchID2',
           playerID: '0',
         });
       });
@@ -473,7 +473,7 @@ describe('lobby', () => {
           .first()
           .simulate('click');
         expect(spy).not.toHaveBeenCalledWith(expect.anything(), {
-          gameID: 'gameID3',
+          matchID: 'matchID3',
         });
       });
     });
@@ -482,7 +482,7 @@ describe('lobby', () => {
       beforeEach(async () => {
         lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob', credentials: 'SECRET1' },
               '1': { id: 1, name: 'Charly', credentials: 'SECRET2' },

@@ -13,7 +13,7 @@ class LobbyRoomInstance extends React.Component {
   static propTypes = {
     room: PropTypes.shape({
       gameName: PropTypes.string.isRequired,
-      gameID: PropTypes.string.isRequired,
+      matchID: PropTypes.string.isRequired,
       players: PropTypes.array.isRequired,
     }),
     playerName: PropTypes.string.isRequired,
@@ -28,9 +28,9 @@ class LobbyRoomInstance extends React.Component {
 
   _createButtonJoin = (inst, seatId) => (
     <button
-      key={'button-join-' + inst.gameID}
+      key={'button-join-' + inst.matchID}
       onClick={() =>
-        this.props.onClickJoin(inst.gameName, inst.gameID, '' + seatId)
+        this.props.onClickJoin(inst.gameName, inst.matchID, '' + seatId)
       }
     >
       Join
@@ -39,8 +39,8 @@ class LobbyRoomInstance extends React.Component {
 
   _createButtonLeave = inst => (
     <button
-      key={'button-leave-' + inst.gameID}
-      onClick={() => this.props.onClickLeave(inst.gameName, inst.gameID)}
+      key={'button-leave-' + inst.matchID}
+      onClick={() => this.props.onClickLeave(inst.gameName, inst.matchID)}
     >
       Leave
     </button>
@@ -48,10 +48,10 @@ class LobbyRoomInstance extends React.Component {
 
   _createButtonPlay = (inst, seatId) => (
     <button
-      key={'button-play-' + inst.gameID}
+      key={'button-play-' + inst.matchID}
       onClick={() =>
         this.props.onClickPlay(inst.gameName, {
-          gameID: inst.gameID,
+          matchID: inst.matchID,
           playerID: '' + seatId,
           numPlayers: inst.players.length,
         })
@@ -63,10 +63,10 @@ class LobbyRoomInstance extends React.Component {
 
   _createButtonSpectate = inst => (
     <button
-      key={'button-spectate-' + inst.gameID}
+      key={'button-spectate-' + inst.matchID}
       onClick={() =>
         this.props.onClickPlay(inst.gameName, {
-          gameID: inst.gameID,
+          matchID: inst.matchID,
           numPlayers: inst.players.length,
         })
       }
@@ -110,13 +110,13 @@ class LobbyRoomInstance extends React.Component {
       status = 'RUNNING';
     }
     return (
-      <tr key={'line-' + room.gameID}>
-        <td key={'cell-name-' + room.gameID}>{room.gameName}</td>
-        <td key={'cell-status-' + room.gameID}>{status}</td>
-        <td key={'cell-seats-' + room.gameID}>
+      <tr key={'line-' + room.matchID}>
+        <td key={'cell-name-' + room.matchID}>{room.gameName}</td>
+        <td key={'cell-status-' + room.matchID}>{status}</td>
+        <td key={'cell-seats-' + room.matchID}>
           {room.players.map(this._createSeat).join(', ')}
         </td>
-        <td key={'cell-buttons-' + room.gameID}>
+        <td key={'cell-buttons-' + room.matchID}>
           {this._createInstanceButtons(room)}
         </td>
       </tr>

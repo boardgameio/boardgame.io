@@ -41,9 +41,9 @@ class _LobbyConnectionImpl {
     }
   }
 
-  _getGameInstance(gameID) {
+  _getGameInstance(matchID) {
     for (let inst of this.matches) {
-      if (inst['gameID'] === gameID) return inst;
+      if (inst['matchID'] === matchID) return inst;
     }
   }
 
@@ -59,18 +59,18 @@ class _LobbyConnectionImpl {
     }
   }
 
-  async join(gameName, gameID, playerID) {
+  async join(gameName, matchID, playerID) {
     try {
       let inst = this._findPlayer(this.playerName);
       if (inst) {
-        throw new Error('player has already joined ' + inst.gameID);
+        throw new Error('player has already joined ' + inst.matchID);
       }
-      inst = this._getGameInstance(gameID);
+      inst = this._getGameInstance(matchID);
       if (!inst) {
-        throw new Error('game instance ' + gameID + ' not found');
+        throw new Error('game instance ' + matchID + ' not found');
       }
       const resp = await fetch(
-        this._baseUrl() + '/' + gameName + '/' + gameID + '/join',
+        this._baseUrl() + '/' + gameName + '/' + matchID + '/join',
         {
           method: 'POST',
           body: JSON.stringify({
@@ -85,18 +85,18 @@ class _LobbyConnectionImpl {
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
     } catch (error) {
-      throw new Error('failed to join room ' + gameID + ' (' + error + ')');
+      throw new Error('failed to join room ' + matchID + ' (' + error + ')');
     }
   }
 
-  async leave(gameName, gameID) {
+  async leave(gameName, matchID) {
     try {
-      let inst = this._getGameInstance(gameID);
+      let inst = this._getGameInstance(matchID);
       if (!inst) throw new Error('game instance not found');
       for (let player of inst.players) {
         if (player.name === this.playerName) {
           const resp = await fetch(
-            this._baseUrl() + '/' + gameName + '/' + gameID + '/leave',
+            this._baseUrl() + '/' + gameName + '/' + matchID + '/leave',
             {
               method: 'POST',
               body: JSON.stringify({
@@ -116,14 +116,14 @@ class _LobbyConnectionImpl {
       }
       throw new Error('player not found in room');
     } catch (error) {
-      throw new Error('failed to leave room ' + gameID + ' (' + error + ')');
+      throw new Error('failed to leave room ' + matchID + ' (' + error + ')');
     }
   }
 
   async disconnect() {
     let inst = this._findPlayer(this.playerName);
     if (inst) {
-      await this.leave(inst.gameName, inst.gameID);
+      await this.leave(inst.gameName, inst.matchID);
     }
     this.matches = [];
     this.playerName = 'Visitor';

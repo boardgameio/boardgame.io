@@ -15,8 +15,8 @@ describe('lobby', () => {
   let nextStatus = 200;
 
   beforeEach(async () => {
-    room1 = { gameID: 'gameID_1', players: [{ id: '0' }] };
-    room2 = { gameID: 'gameID_2', players: [{ id: '1' }] };
+    room1 = { matchID: 'matchID_1', players: [{ id: '0' }] };
+    room2 = { matchID: 'matchID_2', players: [{ id: '1' }] };
     // result of connection requests
     jsonResult = [
       () => ['game1', 'game2'],
@@ -81,7 +81,7 @@ describe('lobby', () => {
         });
       });
       test('when the room exists', async () => {
-        await lobby.join('game1', 'gameID_1', '0');
+        await lobby.join('game1', 'matchID_1', '0');
         expect(fetch).toHaveBeenCalledTimes(4);
         expect(lobby.matches[0].players[0]).toEqual({
           id: '0',
@@ -91,7 +91,7 @@ describe('lobby', () => {
       });
       test('when the room does not exist', async () => {
         try {
-          await lobby.join('game1', 'gameID_3', '0');
+          await lobby.join('game1', 'matchID_3', '0');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -100,7 +100,7 @@ describe('lobby', () => {
       test('when the seat is not available', async () => {
         room1.players[0].name = 'Bob';
         try {
-          await lobby.join('game1', 'gameID_3', '0');
+          await lobby.join('game1', 'matchID_3', '0');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -108,7 +108,7 @@ describe('lobby', () => {
       test('when the server request fails', async () => {
         nextStatus = 404;
         try {
-          await lobby.join('game1', 'gameID_1', '0');
+          await lobby.join('game1', 'matchID_1', '0');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -116,7 +116,7 @@ describe('lobby', () => {
       test('when the player has already joined another game', async () => {
         room2.players[0].name = 'Bob';
         try {
-          await lobby.join('game1', 'gameID_1', '0');
+          await lobby.join('game1', 'matchID_1', '0');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -129,20 +129,20 @@ describe('lobby', () => {
         jsonResult.push(() => {
           return { playerCredentials: 'SECRET' };
         });
-        await lobby.join('game1', 'gameID_1', '0');
+        await lobby.join('game1', 'matchID_1', '0');
         // result of request 'leave'
         jsonResult.push(() => {
           return {};
         });
       });
       test('when the room exists', async () => {
-        await lobby.leave('game1', 'gameID_1');
+        await lobby.leave('game1', 'matchID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
         expect(lobby.matches).toEqual([room1, room2]);
       });
       test('when the room does not exist', async () => {
         try {
-          await lobby.leave('game1', 'gameID_3');
+          await lobby.leave('game1', 'matchID_3');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -150,10 +150,10 @@ describe('lobby', () => {
         expect(lobby.matches).toEqual([room1, room2]);
       });
       test('when the player is not in the room', async () => {
-        await lobby.leave('game1', 'gameID_1');
+        await lobby.leave('game1', 'matchID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
         try {
-          await lobby.leave('game1', 'gameID_1');
+          await lobby.leave('game1', 'matchID_1');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -161,7 +161,7 @@ describe('lobby', () => {
       test('when the server request fails', async () => {
         nextStatus = 404;
         try {
-          await lobby.leave('game1', 'gameID_1');
+          await lobby.leave('game1', 'matchID_1');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
@@ -179,7 +179,7 @@ describe('lobby', () => {
         jsonResult.push(() => {
           return { playerCredentials: 'SECRET' };
         });
-        await lobby.join('game1', 'gameID_1', '0');
+        await lobby.join('game1', 'matchID_1', '0');
         // result of request 'leave'
         jsonResult.push(() => {
           return {};

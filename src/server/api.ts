@@ -65,19 +65,17 @@ export const CreateGame = async ({
 /**
  * Create a metadata object without secret credentials to return to the client.
  *
- * @param {string} gameID - The identifier of the game the metadata belongs to.
+ * @param {string} matchID - The identifier of the game the metadata belongs to.
  * @param {object} metadata - The game metadata object to strip credentials from.
  * @return - A metadata object without player credentials.
  */
 const createClientMatchMetadata = (
-  gameID: string,
+  matchID: string,
   metadata: Server.MatchMetadata
 ) => {
   return {
     ...metadata,
-    gameID,
-    roomID: gameID,
-    matchID: gameID,
+    matchID,
     players: Object.values(metadata.players).map(player => {
       // strip away credentials
       const { credentials, ...strippedInfo } = player;
