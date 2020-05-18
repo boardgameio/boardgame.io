@@ -59,7 +59,7 @@ Accepts three parameters:
 
 `unlisted` (optional): if set to `true`, the room will be excluded from the public list of room instances.
 
-Returns `roomID`, which is the ID of the newly created game instance.
+Returns `matchID`, which is the ID of the newly created game instance.
 
 #### Joining a game
 
@@ -113,7 +113,7 @@ Returns all room instances of the game named `name`.
 
 Returns an array of `matches`. Each instance has fields:
 
-`roomID`: the ID of the room instance.
+`matchID`: the ID of the room instance.
 
 `players`: the list of seats and players that have joined the game, if any.
 
@@ -123,11 +123,11 @@ Returns an array of `matches`. Each instance has fields:
 
 ##### GET `/games/{name}/{id}`
 
-Returns a room instance given its roomID.
+Returns a room instance given its matchID.
 
 Returns a room instance. Each instance has fields:
 
-`roomID`: the ID of the room instance.
+`matchID`: the ID of the room instance.
 
 `players`: the list of seats and players that have joined the game, if any.
 

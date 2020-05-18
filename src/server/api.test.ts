@@ -103,7 +103,7 @@ describe('.createRouter', () => {
       beforeEach(async () => {
         delete process.env.API_SECRET;
 
-        const uuid = () => 'gameID';
+        const uuid = () => 'matchID';
         app = createApiServer({ db, games, uuid });
 
         response = await request(app.callback())
@@ -117,7 +117,7 @@ describe('.createRouter', () => {
 
       test('creates game state and metadata', () => {
         expect(db.mocks.createGame).toHaveBeenCalledWith(
-          'gameID',
+          'matchID',
           expect.objectContaining({
             initialState: expect.objectContaining({
               ctx: expect.objectContaining({
@@ -137,7 +137,7 @@ describe('.createRouter', () => {
       });
 
       test('returns game id', () => {
-        expect(response.body.gameID).not.toBeNull();
+        expect(response.body.matchID).not.toBeNull();
       });
 
       describe('without numPlayers', () => {
@@ -147,7 +147,7 @@ describe('.createRouter', () => {
 
         test('uses default numPlayers', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
                 ctx: expect.objectContaining({
@@ -185,7 +185,7 @@ describe('.createRouter', () => {
 
         test('includes setupData in metadata', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
                 setupData: expect.objectContaining({
@@ -201,7 +201,7 @@ describe('.createRouter', () => {
 
         test('passes setupData to game setup function', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
                 G: expect.objectContaining({
@@ -225,7 +225,7 @@ describe('.createRouter', () => {
 
         test('sets unlisted in metadata', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
                 unlisted: true,
@@ -319,7 +319,7 @@ describe('.createRouter', () => {
             const app = createApiServer({
               db,
               games,
-              uuid: () => 'gameID',
+              uuid: () => 'matchID',
               generateCredentials: () => credentials,
             });
             response = await request(app.callback())
@@ -1132,7 +1132,7 @@ describe('.createRouter', () => {
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        fetch: async gameID => {
+        fetch: async matchID => {
           return {
             metadata: {
               players: {
@@ -1145,8 +1145,8 @@ describe('.createRouter', () => {
                   credentials: 'SECRET2',
                 },
               },
-              unlisted: gameID === 'bar-4',
-              gameover: gameID === 'bar-3' ? { winner: 0 } : undefined,
+              unlisted: matchID === 'bar-4',
+              gameover: matchID === 'bar-3' ? { winner: 0 } : undefined,
             },
           };
         },
