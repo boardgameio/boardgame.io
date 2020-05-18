@@ -284,13 +284,6 @@ export namespace Server {
     nextRoomID?: string;
     unlisted?: boolean;
   }
-
-  export interface LobbyConfig {
-    uuid?: () => string;
-    generateCredentials?: GenerateCredentials;
-    apiPort?: number;
-    apiCallback?: () => void;
-  }
 }
 
 export namespace CredentialedActionShape {

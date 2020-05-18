@@ -9,7 +9,7 @@
 import Koa from 'koa';
 import Router from 'koa-router';
 import koaBody from 'koa-body';
-import { generate as uuid } from 'shortid';
+import { generate as shortid } from 'shortid';
 import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
@@ -27,14 +27,21 @@ import { Server, Game } from '../types';
  * @param {object } lobbyConfig - Configuration options for the lobby.
  * @param {boolean} unlisted - Whether the game should be excluded from public listing.
  */
-export const CreateGame = async (
-  db: StorageAPI.Sync | StorageAPI.Async,
-  game: Game,
-  numPlayers: number,
-  setupData: any,
-  lobbyConfig: Server.LobbyConfig,
-  unlisted: boolean
-) => {
+export const CreateGame = async ({
+  db,
+  game,
+  numPlayers,
+  setupData,
+  uuid,
+  unlisted,
+}: {
+  db: StorageAPI.Sync | StorageAPI.Async;
+  game: Game;
+  numPlayers: number;
+  setupData: any;
+  uuid: () => string;
+  unlisted: boolean;
+}) => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
   const metadata: Server.GameMetadata = {
@@ -47,27 +54,12 @@ export const CreateGame = async (
     metadata.players[playerIndex] = { id: playerIndex };
   }
 
-  const gameID = lobbyConfig.uuid();
+  const gameID = uuid();
   const initialState = InitializeGame({ game, numPlayers, setupData });
 
   await db.createGame(gameID, { metadata, initialState });
 
   return gameID;
-};
-
-export const createApiServer = ({
-  db,
-  games,
-  lobbyConfig,
-  generateCredentials,
-}: {
-  db: StorageAPI.Sync | StorageAPI.Async;
-  games: Game[];
-  lobbyConfig?: Server.LobbyConfig;
-  generateCredentials?: Server.GenerateCredentials;
-}) => {
-  const app = new Koa();
-  return addApiToServer({ app, db, games, lobbyConfig, generateCredentials });
 };
 
 /**
@@ -94,25 +86,19 @@ const createClientGameMetadata = (
   };
 };
 
-export const addApiToServer = ({
-  app,
+export const createRouter = ({
   db,
   games,
-  lobbyConfig,
+  uuid,
   generateCredentials,
 }: {
-  app: Koa;
   games: Game[];
-  lobbyConfig?: Server.LobbyConfig;
+  uuid?: () => string;
   generateCredentials?: Server.GenerateCredentials;
   db: StorageAPI.Sync | StorageAPI.Async;
-}) => {
-  if (!lobbyConfig) lobbyConfig = {};
-  lobbyConfig = {
-    ...lobbyConfig,
-    uuid: lobbyConfig.uuid || uuid,
-    generateCredentials: generateCredentials || lobbyConfig.uuid || uuid,
-  };
+}): Router => {
+  uuid = uuid || shortid;
+  generateCredentials = generateCredentials || uuid;
   const router = new Router();
 
   router.get('/games', async ctx => {
@@ -132,14 +118,14 @@ export const addApiToServer = ({
     const game = games.find(g => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
-    const gameID = await CreateGame(
+    const gameID = await CreateGame({
       db,
       game,
       numPlayers,
       setupData,
-      lobbyConfig,
-      unlisted
-    );
+      uuid,
+      unlisted,
+    });
 
     ctx.body = {
       gameID,
@@ -202,7 +188,7 @@ export const addApiToServer = ({
       metadata.players[playerID].data = data;
     }
     metadata.players[playerID].name = playerName;
-    const playerCredentials = await lobbyConfig.generateCredentials(ctx);
+    const playerCredentials = await generateCredentials(ctx);
     metadata.players[playerID].credentials = playerCredentials;
 
     await db.setMetadata(gameID, metadata);
@@ -279,14 +265,14 @@ export const addApiToServer = ({
     }
 
     const game = games.find(g => g.name === gameName);
-    const nextRoomID = await CreateGame(
+    const nextRoomID = await CreateGame({
       db,
       game,
       numPlayers,
       setupData,
-      lobbyConfig,
-      unlisted
-    );
+      uuid,
+      unlisted,
+    });
     metadata.nextRoomID = nextRoomID;
 
     await db.setMetadata(gameID, metadata);
@@ -343,6 +329,10 @@ export const addApiToServer = ({
 
   router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
 
+  return router;
+};
+
+export const configureApp = (app: Koa, router: Router): void => {
   app.use(cors());
 
   // If API_SECRET is set, then require that requests set an
@@ -359,6 +349,4 @@ export const addApiToServer = ({
   });
 
   app.use(router.routes()).use(router.allowedMethods());
-
-  return app;
 };
