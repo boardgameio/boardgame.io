@@ -64,6 +64,7 @@ export interface SocketOpts {
   auth?: boolean | AuthFn;
   https?: HttpsOptions;
   socketOpts?: SocketOptions;
+  socketAdapter?: any;
 }
 
 /**
@@ -74,13 +75,15 @@ export class SocketIO {
   protected roomInfo: Map<any, any>;
   private auth: boolean | AuthFn;
   private https: HttpsOptions;
+  private socketAdapter: any;
   private socketOpts: SocketOptions;
 
-  constructor({ auth = true, https, socketOpts }: SocketOpts = {}) {
+  constructor({ auth = true, https, socketAdapter, socketOpts }: SocketOpts = {}) {
     this.clientInfo = new Map();
     this.roomInfo = new Map();
     this.auth = auth;
     this.https = https;
+    this.socketAdapter = socketAdapter;
     this.socketOpts = socketOpts;
   }
 
@@ -95,6 +98,10 @@ export class SocketIO {
 
     app.context.io = io;
     io.attach(app, !!this.https, this.https);
+
+    if (this.socketAdapter) {
+      io.adapter(this.socketAdapter);
+    }
 
     for (const game of games) {
       const nsp = app._io.of(game.name);

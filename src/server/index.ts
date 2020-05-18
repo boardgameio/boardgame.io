@@ -65,6 +65,7 @@ interface ServerOpts {
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
   https?: HttpsOptions;
+  socketAdapter?;
 }
 
 /**
@@ -84,6 +85,7 @@ export function Server({
   authenticateCredentials,
   generateCredentials,
   https,
+  socketAdapter,
 }: ServerOpts) {
   const app = new Koa();
 
@@ -102,6 +104,7 @@ export function Server({
     transport = new SocketIO({
       auth,
       https,
+      socketAdapter,
     });
   }
   transport.init(app, games);
@@ -109,6 +112,7 @@ export function Server({
   return {
     app,
     db,
+    transport,
 
     run: async (portOrConfig: number | object, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);

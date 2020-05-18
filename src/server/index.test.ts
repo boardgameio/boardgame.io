@@ -50,6 +50,9 @@ jest.mock('koa-socket-2', () => {
     on(type, callback) {
       callback((this as any).socket);
     }
+    adapter(adapter) {
+      return this
+    }
   };
 });
 
@@ -90,6 +93,14 @@ describe('new', () => {
     const server = Server({ games: [game], authenticateCredentials });
     expect(server.db).not.toBeNull();
   });
+
+  test('custom socket.io adapter implementation', () => {
+    const game = {}
+    const socketAdapter = {}
+    const server = Server({ games: [game], socketAdapter })
+
+    expect(server.transport.socketAdapter).toBe(socketAdapter)
+  })
 });
 
 describe('run', () => {
