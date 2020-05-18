@@ -1146,6 +1146,7 @@ describe('.createRouter', () => {
                 },
               },
               unlisted: gameID === 'bar-4',
+              gameover: gameID === 'bar-3' ? { winner: 0 } : undefined,
             },
           };
         },
@@ -1165,6 +1166,7 @@ describe('.createRouter', () => {
         },
       });
     });
+
     describe('when given 2 rooms', () => {
       let response;
       let rooms;
@@ -1188,6 +1190,11 @@ describe('.createRouter', () => {
         expect(rooms[0].players).toEqual([{ id: 0 }, { id: 1 }]);
         expect(rooms[1].players).toEqual([{ id: 0 }, { id: 1 }]);
       });
+
+      test('returns gameover data for ended game', async () => {
+        expect(rooms[0].gameover).toBeUndefined();
+        expect(rooms[1].gameover).toEqual({ winner: 0 });
+      });
     });
   });
 
@@ -1209,6 +1216,7 @@ describe('.createRouter', () => {
                   credentials: 'SECRET2',
                 },
               },
+              gameover: { winner: 1 },
             },
           };
         },
@@ -1234,6 +1242,10 @@ describe('.createRouter', () => {
 
       test('returns player names', async () => {
         expect(room.players).toEqual([{ id: 0 }, { id: 1 }]);
+      });
+
+      test('returns gameover data for ended game', async () => {
+        expect(room.gameover).toEqual({ winner: 1 });
       });
     });
 
