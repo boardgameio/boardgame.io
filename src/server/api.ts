@@ -135,17 +135,17 @@ export const createRouter = ({
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
     const gameList = await db.listGames({ gameName });
-    let rooms = [];
+    let matches = [];
     for (let gameID of gameList) {
       const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
         metadata: true,
       });
       if (!metadata.unlisted) {
-        rooms.push(createClientMatchMetadata(gameID, metadata));
+        matches.push(createClientMatchMetadata(gameID, metadata));
       }
     }
     ctx.body = {
-      rooms: rooms,
+      matches,
     };
   });
 

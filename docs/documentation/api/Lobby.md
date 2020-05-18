@@ -21,7 +21,7 @@ import { Lobby } from 'boardgame.io/react';
 
 ### Server-side API
 
-The [Server](/api/Server) hosts the Lobby REST API that can be used to create and join rooms. It is particularly useful when you want to
+The [Server](/api/Server) hosts the Lobby REST API that can be used to create and join matches. It is particularly useful when you want to
 authenticate clients to prove that they have the right to send
 actions on behalf of a player.
 
@@ -111,7 +111,7 @@ Accepts two parameters, all required:
 
 Returns all room instances of the game named `name`.
 
-Returns an array of `rooms`. Each instance has fields:
+Returns an array of `matches`. Each instance has fields:
 
 `roomID`: the ID of the room instance.
 

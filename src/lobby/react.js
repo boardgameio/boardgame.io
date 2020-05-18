@@ -224,8 +224,8 @@ class Lobby extends React.Component {
     return this.state.phase !== phase ? 'hidden' : 'phase';
   };
 
-  renderRooms = (rooms, playerName) => {
-    return rooms.map(room => {
+  renderRooms = (matches, playerName) => {
+    return matches.map(room => {
       const { gameID, gameName, players } = room;
       return (
         <LobbyRoomInstance
@@ -248,7 +248,7 @@ class Lobby extends React.Component {
       return renderer({
         errorMsg,
         gameComponents,
-        rooms: this.connection.rooms,
+        matches: this.connection.matches,
         phase,
         playerName,
         runningGame,
@@ -287,7 +287,7 @@ class Lobby extends React.Component {
           <div id="instances">
             <table>
               <tbody>
-                {this.renderRooms(this.connection.rooms, playerName)}
+                {this.renderRooms(this.connection.matches, playerName)}
               </tbody>
             </table>
             <span className="error-msg">
