@@ -9,9 +9,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class LobbyRoomInstance extends React.Component {
+class LobbyMatchInstance extends React.Component {
   static propTypes = {
-    room: PropTypes.shape({
+    match: PropTypes.shape({
       gameName: PropTypes.string.isRequired,
       matchID: PropTypes.string.isRequired,
       players: PropTypes.array.isRequired,
@@ -81,14 +81,14 @@ class LobbyRoomInstance extends React.Component {
     );
     const freeSeat = inst.players.find(player => !player.name);
     if (playerSeat && freeSeat) {
-      // already seated: waiting for game to start
+      // already seated: waiting for match to start
       return this._createButtonLeave(inst);
     }
     if (freeSeat) {
       // at least 1 seat is available
       return this._createButtonJoin(inst, freeSeat.id);
     }
-    // room is full
+    // match is full
     if (playerSeat) {
       return (
         <div>
@@ -104,24 +104,24 @@ class LobbyRoomInstance extends React.Component {
   };
 
   render() {
-    const room = this.props.room;
+    const match = this.props.match;
     let status = 'OPEN';
-    if (!room.players.find(player => !player.name)) {
+    if (!match.players.find(player => !player.name)) {
       status = 'RUNNING';
     }
     return (
-      <tr key={'line-' + room.matchID}>
-        <td key={'cell-name-' + room.matchID}>{room.gameName}</td>
-        <td key={'cell-status-' + room.matchID}>{status}</td>
-        <td key={'cell-seats-' + room.matchID}>
-          {room.players.map(this._createSeat).join(', ')}
+      <tr key={'line-' + match.matchID}>
+        <td key={'cell-name-' + match.matchID}>{match.gameName}</td>
+        <td key={'cell-status-' + match.matchID}>{status}</td>
+        <td key={'cell-seats-' + match.matchID}>
+          {match.players.map(this._createSeat).join(', ')}
         </td>
-        <td key={'cell-buttons-' + room.matchID}>
-          {this._createInstanceButtons(room)}
+        <td key={'cell-buttons-' + match.matchID}>
+          {this._createInstanceButtons(match)}
         </td>
       </tr>
     );
   }
 }
 
-export default LobbyRoomInstance;
+export default LobbyMatchInstance;

@@ -41,7 +41,7 @@ class _LobbyConnectionImpl {
     }
   }
 
-  _getGameInstance(matchID) {
+  _getMatchInstance(matchID) {
     for (let inst of this.matches) {
       if (inst['matchID'] === matchID) return inst;
     }
@@ -65,7 +65,7 @@ class _LobbyConnectionImpl {
       if (inst) {
         throw new Error('player has already joined ' + inst.matchID);
       }
-      inst = this._getGameInstance(matchID);
+      inst = this._getMatchInstance(matchID);
       if (!inst) {
         throw new Error('game instance ' + matchID + ' not found');
       }
@@ -85,13 +85,13 @@ class _LobbyConnectionImpl {
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
     } catch (error) {
-      throw new Error('failed to join room ' + matchID + ' (' + error + ')');
+      throw new Error('failed to join match ' + matchID + ' (' + error + ')');
     }
   }
 
   async leave(gameName, matchID) {
     try {
-      let inst = this._getGameInstance(matchID);
+      let inst = this._getMatchInstance(matchID);
       if (!inst) throw new Error('game instance not found');
       for (let player of inst.players) {
         if (player.name === this.playerName) {
@@ -114,9 +114,9 @@ class _LobbyConnectionImpl {
           return;
         }
       }
-      throw new Error('player not found in room');
+      throw new Error('player not found in match');
     } catch (error) {
-      throw new Error('failed to leave room ' + matchID + ' (' + error + ')');
+      throw new Error('failed to leave match ' + matchID + ' (' + error + ')');
     }
   }
 
@@ -148,7 +148,7 @@ class _LobbyConnectionImpl {
       if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
     } catch (error) {
       throw new Error(
-        'failed to create room for ' + gameName + ' (' + error + ')'
+        'failed to create match for ' + gameName + ' (' + error + ')'
       );
     }
   }

@@ -9,10 +9,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class LobbyCreateRoomForm extends React.Component {
+class LobbyCreateMatchForm extends React.Component {
   static propTypes = {
     games: PropTypes.array.isRequired,
-    createGame: PropTypes.func.isRequired,
+    createMatch: PropTypes.func.isRequired,
   };
 
   state = {
@@ -24,14 +24,14 @@ class LobbyCreateRoomForm extends React.Component {
     super(props);
     /* fix min and max number of players */
     for (let game of props.games) {
-      let game_details = game.game;
-      if (!game_details.minPlayers) {
-        game_details.minPlayers = 1;
+      let matchDetails = game.game;
+      if (!matchDetails.minPlayers) {
+        matchDetails.minPlayers = 1;
       }
-      if (!game_details.maxPlayers) {
-        game_details.maxPlayers = 4;
+      if (!matchDetails.maxPlayers) {
+        matchDetails.maxPlayers = 4;
       }
-      console.assert(game_details.maxPlayers >= game_details.minPlayers);
+      console.assert(matchDetails.maxPlayers >= matchDetails.minPlayers);
     }
     this.state = {
       selectedGame: 0,
@@ -99,11 +99,11 @@ class LobbyCreateRoomForm extends React.Component {
   };
 
   onClickCreate = () => {
-    this.props.createGame(
+    this.props.createMatch(
       this.props.games[this.state.selectedGame].game.name,
       this.state.numPlayers
     );
   };
 }
 
-export default LobbyCreateRoomForm;
+export default LobbyCreateMatchForm;

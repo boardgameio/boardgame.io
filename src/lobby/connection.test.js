@@ -10,21 +10,21 @@ import { LobbyConnection } from './connection.js';
 
 describe('lobby', () => {
   let lobby;
-  let room1, room2;
+  let match1, match2;
   let jsonResult = [];
   let nextStatus = 200;
 
   beforeEach(async () => {
-    room1 = { matchID: 'matchID_1', players: [{ id: '0' }] };
-    room2 = { matchID: 'matchID_2', players: [{ id: '1' }] };
+    match1 = { matchID: 'matchID_1', players: [{ id: '0' }] };
+    match2 = { matchID: 'matchID_2', players: [{ id: '1' }] };
     // result of connection requests
     jsonResult = [
       () => ['game1', 'game2'],
       () => {
-        return { matches: [room1] };
+        return { matches: [match1] };
       },
       () => {
-        return { matches: [room2] };
+        return { matches: [match2] };
       },
     ];
     let nextResult = jsonResult.shift.bind(jsonResult);
@@ -60,7 +60,7 @@ describe('lobby', () => {
     describe('get list of matches', () => {
       test('when the server requests succeed', async () => {
         expect(fetch).toHaveBeenCalledTimes(3);
-        expect(lobby.matches).toEqual([room1, room2]);
+        expect(lobby.matches).toEqual([match1, match2]);
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
@@ -73,14 +73,14 @@ describe('lobby', () => {
       });
     });
 
-    describe('join a room', () => {
+    describe('join a match', () => {
       beforeEach(async () => {
         // result of request 'join'
         jsonResult.push(() => {
           return { playerCredentials: 'SECRET' };
         });
       });
-      test('when the room exists', async () => {
+      test('when the match exists', async () => {
         await lobby.join('game1', 'matchID_1', '0');
         expect(fetch).toHaveBeenCalledTimes(4);
         expect(lobby.matches[0].players[0]).toEqual({
@@ -89,16 +89,16 @@ describe('lobby', () => {
         });
         expect(lobby.playerCredentials).toEqual('SECRET');
       });
-      test('when the room does not exist', async () => {
+      test('when the match does not exist', async () => {
         try {
           await lobby.join('game1', 'matchID_3', '0');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
-        expect(lobby.matches).toEqual([room1, room2]);
+        expect(lobby.matches).toEqual([match1, match2]);
       });
       test('when the seat is not available', async () => {
-        room1.players[0].name = 'Bob';
+        match1.players[0].name = 'Bob';
         try {
           await lobby.join('game1', 'matchID_3', '0');
         } catch (error) {
@@ -114,7 +114,7 @@ describe('lobby', () => {
         }
       });
       test('when the player has already joined another game', async () => {
-        room2.players[0].name = 'Bob';
+        match2.players[0].name = 'Bob';
         try {
           await lobby.join('game1', 'matchID_1', '0');
         } catch (error) {
@@ -123,7 +123,7 @@ describe('lobby', () => {
       });
     });
 
-    describe('leave a room', () => {
+    describe('leave a match', () => {
       beforeEach(async () => {
         // result of request 'join'
         jsonResult.push(() => {
@@ -135,21 +135,21 @@ describe('lobby', () => {
           return {};
         });
       });
-      test('when the room exists', async () => {
+      test('when the match exists', async () => {
         await lobby.leave('game1', 'matchID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
-        expect(lobby.matches).toEqual([room1, room2]);
+        expect(lobby.matches).toEqual([match1, match2]);
       });
-      test('when the room does not exist', async () => {
+      test('when the match does not exist', async () => {
         try {
           await lobby.leave('game1', 'matchID_3');
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
         }
         expect(fetch).toHaveBeenCalledTimes(4);
-        expect(lobby.matches).toEqual([room1, room2]);
+        expect(lobby.matches).toEqual([match1, match2]);
       });
-      test('when the player is not in the room', async () => {
+      test('when the player is not in the match', async () => {
         await lobby.leave('game1', 'matchID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
         try {
@@ -174,7 +174,7 @@ describe('lobby', () => {
         await lobby.disconnect();
         expect(lobby.matches).toEqual([]);
       });
-      test('when the player had joined a room', async () => {
+      test('when the player had joined a match', async () => {
         // result of request 'join'
         jsonResult.push(() => {
           return { playerCredentials: 'SECRET' };
@@ -189,7 +189,7 @@ describe('lobby', () => {
       });
     });
 
-    describe('create a room', () => {
+    describe('create a match', () => {
       test('when the server request succeeds', async () => {
         await lobby.create('game1', 2);
         expect(fetch).toHaveBeenCalledTimes(4);
@@ -232,7 +232,7 @@ describe('lobby', () => {
     });
     test('get list of matches for supported games', async () => {
       expect(fetch).toHaveBeenCalledTimes(2);
-      expect(lobby.matches).toEqual([room1]);
+      expect(lobby.matches).toEqual([match1]);
     });
   });
 });
