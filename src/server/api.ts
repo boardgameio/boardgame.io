@@ -155,9 +155,9 @@ export const createRouter = ({
    */
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
-    const gameList = await db.listGames({ gameName });
+    const matchList = await db.listGames({ gameName });
     let matches = [];
-    for (let matchID of gameList) {
+    for (let matchID of matchList) {
       const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
         metadata: true,
       });
