@@ -608,7 +608,7 @@ describe('.createRouter', () => {
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send('playerID=0&playerName=alice&newName=ali');
-          expect(response.text).toEqual('Game 1 not found');
+          expect(response.text).toEqual('Match 1 not found');
         });
       });
 
@@ -739,7 +739,7 @@ describe('.createRouter', () => {
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send({ playerID: 0, data: { subdata: 'text' } });
-          expect(response.text).toEqual('Game 1 not found');
+          expect(response.text).toEqual('Match 1 not found');
         });
       });
 

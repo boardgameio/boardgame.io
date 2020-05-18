@@ -183,7 +183,7 @@ export const createRouter = ({
       metadata: true,
     });
     if (!metadata) {
-      ctx.throw(404, 'Room ' + matchID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     ctx.body = createClientMatchMetadata(matchID, metadata);
   });
@@ -213,7 +213,7 @@ export const createRouter = ({
       metadata: true,
     });
     if (!metadata) {
-      ctx.throw(404, 'Game ' + matchID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -257,7 +257,7 @@ export const createRouter = ({
     }
 
     if (!metadata) {
-      ctx.throw(404, 'Game ' + matchID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -306,7 +306,7 @@ export const createRouter = ({
     }
 
     if (!metadata) {
-      ctx.throw(404, 'Game ' + matchID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -358,7 +358,7 @@ export const createRouter = ({
       ctx.throw(403, `newName must be a string, got ${typeof newName}`);
     }
     if (!metadata) {
-      ctx.throw(404, 'Game ' + matchID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
