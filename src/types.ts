@@ -281,7 +281,7 @@ export namespace Server {
     players: { [id: number]: PlayerMetadata };
     setupData?: any;
     gameover?: any;
-    nextRoomID?: string;
+    nextMatchID?: string;
     unlisted?: boolean;
   }
 }

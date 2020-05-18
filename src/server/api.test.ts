@@ -1053,7 +1053,7 @@ describe('.createRouter', () => {
           }),
         })
       );
-      expect(response.body.nextRoomID).toBe('newGameID');
+      expect(response.body.nextMatchID).toBe('newGameID');
     });
 
     test('fetches next id', async () => {
@@ -1071,7 +1071,7 @@ describe('.createRouter', () => {
                   credentials: 'SECRET2',
                 },
               },
-              nextRoomID: '12345',
+              nextMatchID: '12345',
             },
           };
         },
@@ -1080,7 +1080,7 @@ describe('.createRouter', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
-      expect(response.body.nextRoomID).toBe('12345');
+      expect(response.body.nextMatchID).toBe('12345');
     });
 
     test('when the game does not exist throws a "not found" error', async () => {

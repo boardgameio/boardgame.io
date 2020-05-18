@@ -315,14 +315,14 @@ export const createRouter = ({
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
-    // Check if nextRoom is already set, if so, return that id.
-    if (metadata.nextRoomID) {
-      ctx.body = { nextRoomID: metadata.nextRoomID };
+    // Check if nextMatch is already set, if so, return that id.
+    if (metadata.nextMatchID) {
+      ctx.body = { nextMatchID: metadata.nextMatchID };
       return;
     }
 
     const game = games.find(g => g.name === gameName);
-    const nextRoomID = await CreateMatch({
+    const nextMatchID = await CreateMatch({
       db,
       game,
       numPlayers,
@@ -330,12 +330,12 @@ export const createRouter = ({
       uuid,
       unlisted,
     });
-    metadata.nextRoomID = nextRoomID;
+    metadata.nextMatchID = nextMatchID;
 
     await db.setMetadata(matchID, metadata);
 
     ctx.body = {
-      nextRoomID,
+      nextMatchID,
     };
   });
 
