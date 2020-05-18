@@ -27,7 +27,7 @@ import { Server, Game } from '../types';
  * @param {object } lobbyConfig - Configuration options for the lobby.
  * @param {boolean} unlisted - Whether the game should be excluded from public listing.
  */
-export const CreateGame = async ({
+export const CreateMatch = async ({
   db,
   game,
   numPlayers,
@@ -116,7 +116,7 @@ export const createRouter = ({
     const game = games.find(g => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
-    const gameID = await CreateGame({
+    const gameID = await CreateMatch({
       db,
       game,
       numPlayers,
@@ -263,7 +263,7 @@ export const createRouter = ({
     }
 
     const game = games.find(g => g.name === gameName);
-    const nextRoomID = await CreateGame({
+    const nextRoomID = await CreateMatch({
       db,
       game,
       numPlayers,
