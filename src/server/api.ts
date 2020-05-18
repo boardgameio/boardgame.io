@@ -17,7 +17,7 @@ import * as StorageAPI from './db/base';
 import { Server, Game } from '../types';
 
 /**
- * Creates a new game.
+ * Creates a new match.
  *
  * @param {object} db - The storage API.
  * @param {object} game - The game config object.
@@ -25,7 +25,7 @@ import { Server, Game } from '../types';
  * @param {object} setupData - User-defined object that's available
  *                             during game setup.
  * @param {object } lobbyConfig - Configuration options for the lobby.
- * @param {boolean} unlisted - Whether the game should be excluded from public listing.
+ * @param {boolean} unlisted - Whether the match should be excluded from public listing.
  */
 export const CreateMatch = async ({
   db,
@@ -65,8 +65,8 @@ export const CreateMatch = async ({
 /**
  * Create a metadata object without secret credentials to return to the client.
  *
- * @param {string} matchID - The identifier of the game the metadata belongs to.
- * @param {object} metadata - The game metadata object to strip credentials from.
+ * @param {string} matchID - The identifier of the match the metadata belongs to.
+ * @param {object} metadata - The match metadata object to strip credentials from.
  * @return - A metadata object without player credentials.
  */
 const createClientMatchMetadata = (
@@ -99,10 +99,25 @@ export const createRouter = ({
   generateCredentials = generateCredentials || uuid;
   const router = new Router();
 
+  /**
+   * List available games.
+   *
+   * @return - Array of game names as string.
+   */
   router.get('/games', async ctx => {
     ctx.body = games.map(game => game.name);
   });
 
+  /**
+   * Create a new match of a given game.
+   *
+   * @param {string} name - The name of the game of the new match.
+   * @param {number} numPlayers - The number of players.
+   * @param {object} setupData - User-defined object that's available
+   *                             during game setup.
+   * @param {boolean} unlisted - Whether the match should be excluded from public listing.
+   * @return - The ID of the created match.
+   */
   router.post('/games/:name/create', koaBody(), async ctx => {
     // The name of the game (for example: tic-tac-toe).
     const gameName = ctx.params.name;
@@ -130,6 +145,14 @@ export const createRouter = ({
     };
   });
 
+  /**
+   * List matches for a given game.
+   *
+   * This does not return matches that are marked as unlisted.
+   *
+   * @param {string} name - The name of the game.
+   * @return - Array of match objects.
+   */
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
     const gameList = await db.listGames({ gameName });
@@ -147,6 +170,13 @@ export const createRouter = ({
     };
   });
 
+  /**
+   * Get data about a specific match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @return - A match object.
+   */
   router.get('/games/:name/:id', async ctx => {
     const matchID = ctx.params.id;
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
@@ -158,6 +188,16 @@ export const createRouter = ({
     ctx.body = createClientMatchMetadata(matchID, metadata);
   });
 
+  /**
+   * Join a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player who joins.
+   * @param {string} playerName - The name of the player who joins.
+   * @param {object} data - The default data of the player in the match.
+   * @return - Player credentials to use when interacting in the joined match.
+   */
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
@@ -196,6 +236,15 @@ export const createRouter = ({
     };
   });
 
+  /**
+   * Leave a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player who leaves.
+   * @param {string} credentials - The credentials of the player who leaves.
+   * @return - Nothing.
+   */
   router.post('/games/:name/:id/leave', koaBody(), async ctx => {
     const matchID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
@@ -228,6 +277,16 @@ export const createRouter = ({
     ctx.body = {};
   });
 
+  /**
+   * Start a new match based on another existing match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player creating the match.
+   * @param {string} credentials - The credentials of the player creating the match.
+   * @param {boolean} unlisted - Whether the match should be excluded from public listing.
+   * @return - The ID of the new match.
+   */
   router.post('/games/:name/:id/playAgain', koaBody(), async ctx => {
     const gameName = ctx.params.name;
     const matchID = ctx.params.id;
@@ -318,6 +377,16 @@ export const createRouter = ({
     ctx.body = {};
   };
 
+  /**
+   * Change the name of a player in a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player.
+   * @param {string} credentials - The credentials of the player.
+   * @param {object} newName - The new name of the player in the match.
+   * @return - Nothing.
+   */
   router.post('/games/:name/:id/rename', koaBody(), async ctx => {
     console.warn(
       'This endpoint /rename is deprecated. Please use /update instead.'
@@ -325,6 +394,17 @@ export const createRouter = ({
     await updatePlayerMetadata(ctx);
   });
 
+  /**
+   * Update the player's data for a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player.
+   * @param {string} credentials - The credentials of the player.
+   * @param {object} newName - The new name of the player in the match.
+   * @param {object} data - The new data of the player in the match.
+   * @return - Nothing.
+   */
   router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
 
   return router;
