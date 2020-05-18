@@ -44,7 +44,7 @@ export const CreateGame = async ({
 }) => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
-  const metadata: Server.GameMetadata = {
+  const metadata: Server.MatchMetadata = {
     gameName: game.name,
     unlisted: !!unlisted,
     players: {},
@@ -69,9 +69,9 @@ export const CreateGame = async ({
  * @param {object} metadata - The game metadata object to strip credentials from.
  * @return - A metadata object without player credentials.
  */
-const createClientGameMetadata = (
+const createClientMatchMetadata = (
   gameID: string,
-  metadata: Server.GameMetadata
+  metadata: Server.MatchMetadata
 ) => {
   return {
     ...metadata,
@@ -141,7 +141,7 @@ export const createRouter = ({
         metadata: true,
       });
       if (!metadata.unlisted) {
-        rooms.push(createClientGameMetadata(gameID, metadata));
+        rooms.push(createClientMatchMetadata(gameID, metadata));
       }
     }
     ctx.body = {
@@ -157,7 +157,7 @@ export const createRouter = ({
     if (!metadata) {
       ctx.throw(404, 'Room ' + gameID + ' not found');
     }
-    ctx.body = createClientGameMetadata(gameID, metadata);
+    ctx.body = createClientMatchMetadata(gameID, metadata);
   });
 
   router.post('/games/:name/:id/join', koaBody(), async ctx => {

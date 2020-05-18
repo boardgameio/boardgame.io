@@ -276,7 +276,7 @@ export namespace Server {
     data?: any;
   };
 
-  export interface GameMetadata {
+  export interface MatchMetadata {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData?: any;

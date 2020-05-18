@@ -16,7 +16,7 @@ export class FlatFile extends StorageAPI.Async {
   private games: {
     init: (opts: object) => Promise<void>;
     setItem: (id: string, value: any) => Promise<any>;
-    getItem: (id: string) => Promise<State | Server.GameMetadata | LogEntry[]>;
+    getItem: (id: string) => Promise<State | Server.MatchMetadata | LogEntry[]>;
     removeItem: (id: string) => Promise<void>;
     clear: () => {};
     keys: () => Promise<string[]>;
@@ -88,7 +88,7 @@ export class FlatFile extends StorageAPI.Async {
       const key = MetadataKey(gameID);
       result.metadata = (await this.request(() =>
         this.games.getItem(key)
-      )) as Server.GameMetadata;
+      )) as Server.MatchMetadata;
     }
 
     if (opts.log) {
@@ -125,7 +125,7 @@ export class FlatFile extends StorageAPI.Async {
     return await this.request(() => this.games.setItem(id, state));
   }
 
-  async setMetadata(id: string, metadata: Server.GameMetadata): Promise<void> {
+  async setMetadata(id: string, metadata: Server.MatchMetadata): Promise<void> {
     const key = MetadataKey(id);
 
     return await this.request(() => this.games.setItem(key, metadata));
