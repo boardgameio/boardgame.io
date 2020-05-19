@@ -363,36 +363,48 @@ test('undo / redo', () => {
 test('undo / redo with state', () => {
   const game = {
     seed: 0,
-    setup: (ctx) => { ctx.setStage('StartingStage'); return { A: false, B: false, C: false }; },
+    setup: ctx => {
+      ctx.events.setStage('StartingStage');
+      return { A: false, B: false, C: false };
+    },
     turn: {
       stages: {
         StartingStage: {
           moves: {
             moveA: {
-              move: (G, ctx, moveAisReversible) => { ctx.setStage('Stage_a'); return { moveAisReversible, A: true, B: false, C: false }; },
-              undoable: (G, ctx) => G.moveAisReversible > 0,
-            }
-          }
+              move: (G, ctx, moveAisReversible) => {
+                ctx.events.setStage('Stage_a');
+                return { ...G, moveAisReversible, A: true };
+              },
+              undoable: G => G.moveAisReversible > 0,
+            },
+          },
         },
         Stage_a: {
           moves: {
             moveB: {
-              move: (G, ctx) => { ctx.setStage('Stage_b'); return { ...G, B: true }; },
-              undoable: false
-            }
-          }
+              move: (G, ctx) => {
+                ctx.events.setStage('Stage_b');
+                return { ...G, B: true };
+              },
+              undoable: false,
+            },
+          },
         },
         Stage_b: {
           moves: {
             moveC: {
-              move: (G, ctx) => { ctx.setStage('Stage_c'); return { ...G, C: true }; },
-              undoable: true
-            }
+              move: (G, ctx) => {
+                ctx.events.setStage('Stage_c');
+                return { ...G, C: true };
+              },
+              undoable: true,
+            },
           },
         },
         Stage_c: {
-          moves: {}
-        }
+          moves: {},
+        },
       },
     },
   };
@@ -402,50 +414,108 @@ test('undo / redo with state', () => {
   let state = InitializeGame({ game });
 
   state = reducer(state, makeMove('moveA', true));
-  expect(state.G).toMatchObject({ moveAisReversible: true, A: true, B: false, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_a");
+  expect(state.G).toMatchObject({
+    moveAisReversible: true,
+    A: true,
+    B: false,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_a');
 
   state = reducer(state, undo());
-  expect(state.G).toMatchObject({});
-  expect(state.ctx.activePlayers["0"]).toBe("StartingStage");
+  expect(state.G).toMatchObject({
+    A: false,
+    B: false,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('StartingStage');
 
   state = reducer(state, redo());
-  expect(state.G).toMatchObject({ moveAisReversible: true, A: true, B: false, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_a");
+  expect(state.G).toMatchObject({
+    moveAisReversible: true,
+    A: true,
+    B: false,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_a');
 
   state = reducer(state, undo());
-  expect(state.G).toMatchObject({});
-  expect(state.ctx.activePlayers["0"]).toBe("StartingStage");
+  expect(state.G).toMatchObject({
+    A: false,
+    B: false,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('StartingStage');
 
   state = reducer(state, makeMove('moveA', false));
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: false, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_a");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: false,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_a');
 
   state = reducer(state, makeMove('moveB'));
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: true, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_b");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: true,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
   state = reducer(state, undo());
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: true, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_b");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: true,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
   state = reducer(state, makeMove('moveC'));
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: true, C: true });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_c");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: true,
+    C: true,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_c');
 
   state = reducer(state, undo());
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: true, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_b");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: true,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
   state = reducer(state, redo());
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: true, C: true });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_c");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: true,
+    C: true,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_c');
 
   state = reducer(state, undo());
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: true, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_b");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: true,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
   state = reducer(state, undo());
-  expect(state.G).toMatchObject({ moveAisReversible: false, A: true, B: true, C: false });
-  expect(state.ctx.activePlayers["0"]).toBe("Stage_b");
+  expect(state.G).toMatchObject({
+    moveAisReversible: false,
+    A: true,
+    B: true,
+    C: false,
+  });
+  expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 });
