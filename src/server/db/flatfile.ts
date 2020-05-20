@@ -143,6 +143,7 @@ export class FlatFile extends StorageAPI.Async {
     if (!(keys.indexOf(id) > -1)) return;
 
     await this.removeItem(id);
+    await this.removeItem(InitialStateKey(id));
     await this.removeItem(LogKey(id));
     await this.removeItem(MetadataKey(id));
   }
