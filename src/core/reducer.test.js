@@ -368,6 +368,9 @@ test('undo / redo with state', () => {
       return { A: false, B: false, C: false };
     },
     turn: {
+      activePlayers: {
+        currentPlayer: 'StartingStage',
+      },
       stages: {
         StartingStage: {
           moves: {
@@ -413,7 +416,7 @@ test('undo / redo with state', () => {
 
   let state = InitializeGame({ game });
 
-  state = reducer(state, makeMove('moveA', true));
+  state = reducer(state, makeMove('moveA', true, '0'));
   expect(state.G).toMatchObject({
     moveAisReversible: true,
     A: true,
@@ -422,7 +425,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_a');
 
-  state = reducer(state, undo());
+  state = reducer(state, undo('0'));
   expect(state.G).toMatchObject({
     A: false,
     B: false,
@@ -430,7 +433,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('StartingStage');
 
-  state = reducer(state, redo());
+  state = reducer(state, redo('0'));
   expect(state.G).toMatchObject({
     moveAisReversible: true,
     A: true,
@@ -439,7 +442,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_a');
 
-  state = reducer(state, undo());
+  state = reducer(state, undo('0'));
   expect(state.G).toMatchObject({
     A: false,
     B: false,
@@ -447,7 +450,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('StartingStage');
 
-  state = reducer(state, makeMove('moveA', false));
+  state = reducer(state, makeMove('moveA', false, '0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
@@ -456,7 +459,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_a');
 
-  state = reducer(state, makeMove('moveB'));
+  state = reducer(state, makeMove('moveB', [], '0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
@@ -465,7 +468,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
-  state = reducer(state, undo());
+  state = reducer(state, undo('0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
@@ -474,7 +477,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
-  state = reducer(state, makeMove('moveC'));
+  state = reducer(state, makeMove('moveC', '0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
@@ -483,7 +486,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_c');
 
-  state = reducer(state, undo());
+  state = reducer(state, undo('0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
@@ -492,7 +495,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
-  state = reducer(state, redo());
+  state = reducer(state, redo('0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
@@ -501,7 +504,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_c');
 
-  state = reducer(state, undo());
+  state = reducer(state, undo('0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
@@ -510,7 +513,7 @@ test('undo / redo with state', () => {
   });
   expect(state.ctx.activePlayers['0']).toBe('Stage_b');
 
-  state = reducer(state, undo());
+  state = reducer(state, undo('0'));
   expect(state.G).toMatchObject({
     moveAisReversible: false,
     A: true,
