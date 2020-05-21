@@ -6,12 +6,21 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { TransportAPI, SocketIO } from './socketio';
+import { TransportAPI, SocketIO, SocketOpts } from './socketio';
 import { ProcessGameConfig } from '../../core/game';
 
+type SocketIOTestAdapterOpts = SocketOpts & {
+  clientInfo?: Map<any, any>;
+  roomInfo?: Map<any, any>;
+};
+
 class SocketIOTestAdapter extends SocketIO {
-  constructor({ clientInfo = new Map(), roomInfo = new Map(), ...args } = {}) {
-    super(args);
+  constructor({
+    clientInfo = new Map(),
+    roomInfo = new Map(),
+    ...args
+  }: SocketIOTestAdapterOpts = {}) {
+    super(Object.keys(args).length ? args : undefined);
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
@@ -137,11 +146,6 @@ describe('TransportAPI', () => {
   test('send to another player', () => {
     io.socket.id = '0';
     api.send({ type: 'A', playerID: '1', args: [] });
-    expect(io.socket.emit).toHaveBeenCalledWith('A');
-  });
-
-  test('sendAll - object', () => {
-    api.sendAll({ type: 'A', args: [] });
     expect(io.socket.emit).toHaveBeenCalledWith('A');
   });
 

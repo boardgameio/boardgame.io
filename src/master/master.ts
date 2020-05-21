@@ -123,6 +123,21 @@ type CallbackFn = (arg: {
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
+type TransportData =
+  | {
+      type: 'update';
+      args: [string, State, LogEntry[]];
+    }
+  | {
+      type: 'sync';
+      args: [string, SyncInfo];
+    };
+
+export interface TransportAPI {
+  send: (playerData: { playerID: PlayerID } & TransportData) => void;
+  sendAll: (makePlayerData: (playerID: PlayerID) => TransportData) => void;
+}
+
 /**
  * Master
  *
@@ -133,7 +148,7 @@ type CallbackFn = (arg: {
 export class Master {
   game: ReturnType<typeof ProcessGameConfig>;
   storageAPI: StorageAPI.Sync | StorageAPI.Async;
-  transportAPI;
+  transportAPI: TransportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
   shouldAuth: typeof doesGameRequireAuthentication;
@@ -141,7 +156,7 @@ export class Master {
   constructor(
     game: Game,
     storageAPI: StorageAPI.Sync | StorageAPI.Async,
-    transportAPI,
+    transportAPI: TransportAPI,
     auth?: AuthFn | boolean
   ) {
     this.game = ProcessGameConfig(game);
