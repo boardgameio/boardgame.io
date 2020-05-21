@@ -136,7 +136,7 @@ describe('.createRouter', () => {
         );
       });
 
-      test('returns game id', () => {
+      test('returns match id', () => {
         expect(response.body.matchID).not.toBeNull();
       });
 
@@ -1083,7 +1083,7 @@ describe('.createRouter', () => {
       expect(response.body.nextMatchID).toBe('12345');
     });
 
-    test('when the game does not exist throws a "not found" error', async () => {
+    test('when the match does not exist throws a "not found" error', async () => {
       db = new AsyncStorage({
         fetch: async () => ({ metadata: null }),
       });
@@ -1181,7 +1181,7 @@ describe('.createRouter', () => {
         expect(matches).toHaveLength(2);
       });
 
-      test('returns room ids', async () => {
+      test('returns match ids', async () => {
         expect(matches[0].matchID).toEqual('bar-2');
         expect(matches[1].matchID).toEqual('bar-3');
       });
@@ -1191,7 +1191,7 @@ describe('.createRouter', () => {
         expect(matches[1].players).toEqual([{ id: 0 }, { id: 1 }]);
       });
 
-      test('returns gameover data for ended game', async () => {
+      test('returns gameover data for ended match', async () => {
         expect(matches[0].gameover).toBeUndefined();
         expect(matches[1].gameover).toEqual({ winner: 0 });
       });

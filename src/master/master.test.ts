@@ -627,7 +627,7 @@ describe('doesGameRequireAuthentication', () => {
     });
   });
 
-  describe('when game has no credentials', () => {
+  describe('when match has no credentials', () => {
     test('then authentication is not required', () => {
       const matchMetadata = {
         gameName: '',
@@ -641,7 +641,7 @@ describe('doesGameRequireAuthentication', () => {
     });
   });
 
-  describe('when game has credentials', () => {
+  describe('when match has credentials', () => {
     test('then authentication is required', () => {
       const matchMetadata = {
         gameName: '',

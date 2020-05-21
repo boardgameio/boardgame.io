@@ -37,7 +37,7 @@ class _LobbyConnectionImpl {
         this.matches = this.matches.concat(gameJson.matches);
       }
     } catch (error) {
-      throw new Error('failed to retrieve list of games (' + error + ')');
+      throw new Error('failed to retrieve list of matches (' + error + ')');
     }
   }
 
@@ -92,7 +92,7 @@ class _LobbyConnectionImpl {
   async leave(gameName, matchID) {
     try {
       let inst = this._getMatchInstance(matchID);
-      if (!inst) throw new Error('game instance not found');
+      if (!inst) throw new Error('match instance not found');
       for (let player of inst.players) {
         if (player.name === this.playerName) {
           const resp = await fetch(

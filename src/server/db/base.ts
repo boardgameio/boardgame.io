@@ -144,7 +144,7 @@ export abstract class Sync {
   abstract setState(gameID: string, state: State, deltalog?: LogEntry[]): void;
 
   /**
-   * Update the game metadata.
+   * Update the match metadata.
    */
   abstract setMetadata(gameID: string, metadata: Server.MatchMetadata): void;
 

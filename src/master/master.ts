@@ -78,7 +78,7 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
 }
 
 /**
- * Verifies that the game has metadata and is using credentials.
+ * Verifies that the match has metadata and is using credentials.
  */
 export const doesGameRequireAuthentication = (
   matchMetadata?: Server.MatchMetadata

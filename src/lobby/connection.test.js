@@ -113,7 +113,7 @@ describe('lobby', () => {
           expect(error).toBeInstanceOf(Error);
         }
       });
-      test('when the player has already joined another game', async () => {
+      test('when the player has already joined another match', async () => {
         match2.players[0].name = 'Bob';
         try {
           await lobby.join('game1', 'matchID_1', '0');
