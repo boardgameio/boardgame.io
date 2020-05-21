@@ -12,7 +12,7 @@ import {
   Master,
   redactLog,
   getPlayerMetadata,
-  doesGameRequireAuthentication,
+  doesMatchRequireAuthentication,
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
@@ -619,10 +619,10 @@ describe('getPlayerMetadata', () => {
   });
 });
 
-describe('doesGameRequireAuthentication', () => {
+describe('doesMatchRequireAuthentication', () => {
   describe('when game metadata is not found', () => {
     test('then authentication is not required', () => {
-      const result = doesGameRequireAuthentication();
+      const result = doesMatchRequireAuthentication();
       expect(result).toBe(false);
     });
   });
@@ -636,7 +636,7 @@ describe('doesGameRequireAuthentication', () => {
           '0': { id: 1 },
         },
       };
-      const result = doesGameRequireAuthentication(matchMetadata);
+      const result = doesMatchRequireAuthentication(matchMetadata);
       expect(result).toBe(false);
     });
   });
@@ -653,7 +653,7 @@ describe('doesGameRequireAuthentication', () => {
           },
         },
       };
-      const result = doesGameRequireAuthentication(matchMetadata);
+      const result = doesMatchRequireAuthentication(matchMetadata);
       expect(result).toBe(true);
     });
   });

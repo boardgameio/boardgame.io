@@ -80,7 +80,7 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
 /**
  * Verifies that the match has metadata and is using credentials.
  */
-export const doesGameRequireAuthentication = (
+export const doesMatchRequireAuthentication = (
   matchMetadata?: Server.MatchMetadata
 ) => {
   if (!matchMetadata) return false;
@@ -136,7 +136,7 @@ export class Master {
   transportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
-  shouldAuth: typeof doesGameRequireAuthentication;
+  shouldAuth: typeof doesMatchRequireAuthentication;
 
   constructor(
     game: Game,
@@ -153,7 +153,7 @@ export class Master {
 
     if (auth === true) {
       this.auth = isActionFromAuthenticPlayer;
-      this.shouldAuth = doesGameRequireAuthentication;
+      this.shouldAuth = doesMatchRequireAuthentication;
     } else if (typeof auth === 'function') {
       this.auth = auth;
       this.shouldAuth = () => true;
