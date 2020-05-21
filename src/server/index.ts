@@ -109,6 +109,7 @@ export function Server({
   return {
     app,
     db,
+    transport,
 
     run: async (portOrConfig: number | object, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);

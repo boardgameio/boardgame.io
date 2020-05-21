@@ -50,6 +50,9 @@ jest.mock('koa-socket-2', () => {
     on(type, callback) {
       callback((this as any).socket);
     }
+    adapter(adapter) {
+      return this
+    }
   };
 });
 

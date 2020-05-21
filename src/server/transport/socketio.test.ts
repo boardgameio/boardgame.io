@@ -75,9 +75,14 @@ jest.mock('koa-socket-2', () => {
 
   class MockIO {
     socket: MockSocket;
+    socketAdapter: any;
 
     constructor() {
       this.socket = new MockSocket();
+    }
+
+    adapter(socketAdapter) {
+      this.socketAdapter = socketAdapter;
     }
 
     attach(app) {
@@ -113,6 +118,22 @@ describe('basic', () => {
     expect(app.context.io).toBeDefined();
   });
 });
+
+describe('socketAdapter', () => {
+  const app: any = { context: {} };
+  const games = [ProcessGameConfig({ seed: 0 })];
+
+  let socketAdapter = jest.fn();
+
+  beforeEach(() => {
+    const transport = new SocketIOTestAdapter({ socketAdapter });
+    transport.init(app, games);
+  });
+
+  test('socketAdapter is passed', () => {
+    expect(app.io.socketAdapter).toBe(socketAdapter)
+  })
+})
 
 describe('TransportAPI', () => {
   let io;
