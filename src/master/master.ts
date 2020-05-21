@@ -26,11 +26,11 @@ import {
 import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
-  gameMetadata: Server.GameMetadata,
+  matchMetadata: Server.MatchMetadata,
   playerID: PlayerID
 ) => {
-  if (gameMetadata && gameMetadata.players) {
-    return gameMetadata.players[playerID];
+  if (matchMetadata && matchMetadata.players) {
+    return matchMetadata.players[playerID];
   }
 };
 
@@ -78,13 +78,13 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
 }
 
 /**
- * Verifies that the game has metadata and is using credentials.
+ * Verifies that the match has metadata and is using credentials.
  */
-export const doesGameRequireAuthentication = (
-  gameMetadata?: Server.GameMetadata
+export const doesMatchRequireAuthentication = (
+  matchMetadata?: Server.MatchMetadata
 ) => {
-  if (!gameMetadata) return false;
-  const { players } = gameMetadata as Server.GameMetadata;
+  if (!matchMetadata) return false;
+  const { players } = matchMetadata as Server.MatchMetadata;
   const hasCredentials = Object.keys(players).some(key => {
     return !!(players[key] && players[key].credentials);
   });
@@ -136,7 +136,7 @@ export class Master {
   transportAPI;
   subscribeCallback: CallbackFn;
   auth: null | AuthFn;
-  shouldAuth: typeof doesGameRequireAuthentication;
+  shouldAuth: typeof doesMatchRequireAuthentication;
 
   constructor(
     game: Game,
@@ -153,7 +153,7 @@ export class Master {
 
     if (auth === true) {
       this.auth = isActionFromAuthenticPlayer;
-      this.shouldAuth = doesGameRequireAuthentication;
+      this.shouldAuth = doesMatchRequireAuthentication;
     } else if (typeof auth === 'function') {
       this.auth = auth;
       this.shouldAuth = () => true;
@@ -176,7 +176,7 @@ export class Master {
     playerID: string
   ) {
     let isActionAuthentic;
-    let metadata: Server.GameMetadata | undefined;
+    let metadata: Server.MatchMetadata | undefined;
     const credentials = credAction.payload.credentials;
     if (IsSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(gameID, { metadata: true }));
@@ -290,7 +290,7 @@ export class Master {
 
     const { deltalog, ...stateWithoutDeltalog } = state;
 
-    let newMetadata: Server.GameMetadata | undefined;
+    let newMetadata: Server.MatchMetadata | undefined;
     if (
       metadata &&
       !('gameover' in metadata) &&
@@ -326,7 +326,7 @@ export class Master {
     let state: State;
     let initialState: State;
     let log: LogEntry[];
-    let gameMetadata: Server.GameMetadata;
+    let matchMetadata: Server.MatchMetadata;
     let filteredMetadata: FilteredMetadata;
     let result: StorageAPI.FetchResult<{
       state: true;
@@ -354,10 +354,10 @@ export class Master {
     state = result.state;
     initialState = result.initialState;
     log = result.log;
-    gameMetadata = result.metadata;
+    matchMetadata = result.metadata;
 
-    if (gameMetadata) {
-      filteredMetadata = Object.values(gameMetadata.players).map(player => {
+    if (matchMetadata) {
+      filteredMetadata = Object.values(matchMetadata.players).map(player => {
         const { credentials, ...filteredData } = player;
         return filteredData;
       });

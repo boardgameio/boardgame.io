@@ -22,7 +22,7 @@ export interface FetchOpts {
 export interface FetchFields {
   state: State;
   log: LogEntry[];
-  metadata: Server.GameMetadata;
+  metadata: Server.MatchMetadata;
   initialState: State;
 }
 
@@ -43,7 +43,7 @@ export interface ListGamesOpts {
  */
 export interface CreateGameOpts {
   initialState: State;
-  metadata: Server.GameMetadata;
+  metadata: Server.MatchMetadata;
 }
 
 export abstract class Async {
@@ -69,7 +69,7 @@ export abstract class Async {
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
    */
-  abstract createGame(gameID: string, opts: CreateGameOpts): Promise<void>;
+  abstract createGame(matchID: string, opts: CreateGameOpts): Promise<void>;
 
   /**
    * Update the game state.
@@ -78,7 +78,7 @@ export abstract class Async {
    * existing log for this game.
    */
   abstract setState(
-    gameID: string,
+    matchID: string,
     state: State,
     deltalog?: LogEntry[]
   ): Promise<void>;
@@ -87,22 +87,22 @@ export abstract class Async {
    * Update the game metadata.
    */
   abstract setMetadata(
-    gameID: string,
-    metadata: Server.GameMetadata
+    matchID: string,
+    metadata: Server.MatchMetadata
   ): Promise<void>;
 
   /**
    * Fetch the game state.
    */
   abstract fetch<O extends FetchOpts>(
-    gameID: string,
+    matchID: string,
     opts: O
   ): Promise<FetchResult<O>>;
 
   /**
    * Remove the game state.
    */
-  abstract wipe(gameID: string): Promise<void>;
+  abstract wipe(matchID: string): Promise<void>;
 
   /**
    * Return all games.
@@ -133,7 +133,7 @@ export abstract class Sync {
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
    */
-  abstract createGame(gameID: string, opts: CreateGameOpts): void;
+  abstract createGame(matchID: string, opts: CreateGameOpts): void;
 
   /**
    * Update the game state.
@@ -141,22 +141,22 @@ export abstract class Sync {
    * If passed a deltalog array, setState should append its contents to the
    * existing log for this game.
    */
-  abstract setState(gameID: string, state: State, deltalog?: LogEntry[]): void;
+  abstract setState(matchID: string, state: State, deltalog?: LogEntry[]): void;
 
   /**
-   * Update the game metadata.
+   * Update the match metadata.
    */
-  abstract setMetadata(gameID: string, metadata: Server.GameMetadata): void;
+  abstract setMetadata(matchID: string, metadata: Server.MatchMetadata): void;
 
   /**
    * Fetch the game state.
    */
-  abstract fetch<O extends FetchOpts>(gameID: string, opts: O): FetchResult<O>;
+  abstract fetch<O extends FetchOpts>(matchID: string, opts: O): FetchResult<O>;
 
   /**
    * Remove the game state.
    */
-  abstract wipe(gameID: string): void;
+  abstract wipe(matchID: string): void;
 
   /**
    * Return all games.

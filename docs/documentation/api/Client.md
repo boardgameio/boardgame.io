@@ -113,8 +113,8 @@ The `Board` component will receive the following as `props`:
 
 11. `playerID`: The player ID associated with the client.
 
-12. `gameMetadata`: An object containing the players that have joined
-    the game from a [room](/api/Lobby.md).
+12. `matchMetadata`: An object containing the players that have joined
+    the game from a [match](/api/Lobby.md).
 
     Example:
 

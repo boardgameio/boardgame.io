@@ -17,7 +17,7 @@ import * as StorageAPI from './db/base';
 import { Server, Game } from '../types';
 
 /**
- * Creates a new game.
+ * Creates a new match.
  *
  * @param {object} db - The storage API.
  * @param {object} game - The game config object.
@@ -25,9 +25,9 @@ import { Server, Game } from '../types';
  * @param {object} setupData - User-defined object that's available
  *                             during game setup.
  * @param {object } lobbyConfig - Configuration options for the lobby.
- * @param {boolean} unlisted - Whether the game should be excluded from public listing.
+ * @param {boolean} unlisted - Whether the match should be excluded from public listing.
  */
-export const CreateGame = async ({
+export const CreateMatch = async ({
   db,
   game,
   numPlayers,
@@ -44,7 +44,7 @@ export const CreateGame = async ({
 }) => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
-  const metadata: Server.GameMetadata = {
+  const metadata: Server.MatchMetadata = {
     gameName: game.name,
     unlisted: !!unlisted,
     players: {},
@@ -54,30 +54,28 @@ export const CreateGame = async ({
     metadata.players[playerIndex] = { id: playerIndex };
   }
 
-  const gameID = uuid();
+  const matchID = uuid();
   const initialState = InitializeGame({ game, numPlayers, setupData });
 
-  await db.createGame(gameID, { metadata, initialState });
+  await db.createGame(matchID, { metadata, initialState });
 
-  return gameID;
+  return matchID;
 };
 
 /**
  * Create a metadata object without secret credentials to return to the client.
  *
- * @param {string} gameID - The identifier of the game the metadata belongs to.
- * @param {object} metadata - The game metadata object to strip credentials from.
+ * @param {string} matchID - The identifier of the match the metadata belongs to.
+ * @param {object} metadata - The match metadata object to strip credentials from.
  * @return - A metadata object without player credentials.
  */
-const createClientGameMetadata = (
-  gameID: string,
-  metadata: Server.GameMetadata
+const createClientMatchMetadata = (
+  matchID: string,
+  metadata: Server.MatchMetadata
 ) => {
   return {
     ...metadata,
-    gameID,
-    roomID: gameID,
-    matchID: gameID,
+    matchID,
     players: Object.values(metadata.players).map(player => {
       // strip away credentials
       const { credentials, ...strippedInfo } = player;
@@ -101,10 +99,25 @@ export const createRouter = ({
   generateCredentials = generateCredentials || uuid;
   const router = new Router();
 
+  /**
+   * List available games.
+   *
+   * @return - Array of game names as string.
+   */
   router.get('/games', async ctx => {
     ctx.body = games.map(game => game.name);
   });
 
+  /**
+   * Create a new match of a given game.
+   *
+   * @param {string} name - The name of the game of the new match.
+   * @param {number} numPlayers - The number of players.
+   * @param {object} setupData - User-defined object that's available
+   *                             during game setup.
+   * @param {boolean} unlisted - Whether the match should be excluded from public listing.
+   * @return - The ID of the created match.
+   */
   router.post('/games/:name/create', koaBody(), async ctx => {
     // The name of the game (for example: tic-tac-toe).
     const gameName = ctx.params.name;
@@ -118,7 +131,7 @@ export const createRouter = ({
     const game = games.find(g => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
-    const gameID = await CreateGame({
+    const matchID = await CreateMatch({
       db,
       game,
       numPlayers,
@@ -128,38 +141,63 @@ export const createRouter = ({
     });
 
     ctx.body = {
-      gameID,
+      matchID,
     };
   });
 
+  /**
+   * List matches for a given game.
+   *
+   * This does not return matches that are marked as unlisted.
+   *
+   * @param {string} name - The name of the game.
+   * @return - Array of match objects.
+   */
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
-    const gameList = await db.listGames({ gameName });
-    let rooms = [];
-    for (let gameID of gameList) {
-      const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+    const matchList = await db.listGames({ gameName });
+    let matches = [];
+    for (let matchID of matchList) {
+      const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
         metadata: true,
       });
       if (!metadata.unlisted) {
-        rooms.push(createClientGameMetadata(gameID, metadata));
+        matches.push(createClientMatchMetadata(matchID, metadata));
       }
     }
     ctx.body = {
-      rooms: rooms,
+      matches,
     };
   });
 
+  /**
+   * Get data about a specific match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @return - A match object.
+   */
   router.get('/games/:name/:id', async ctx => {
-    const gameID = ctx.params.id;
-    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+    const matchID = ctx.params.id;
+    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
-      ctx.throw(404, 'Room ' + gameID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
-    ctx.body = createClientGameMetadata(gameID, metadata);
+    ctx.body = createClientMatchMetadata(matchID, metadata);
   });
 
+  /**
+   * Join a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player who joins.
+   * @param {string} playerName - The name of the player who joins.
+   * @param {object} data - The default data of the player in the match.
+   * @return - Player credentials to use when interacting in the joined match.
+   */
   router.post('/games/:name/:id/join', koaBody(), async ctx => {
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
@@ -170,12 +208,12 @@ export const createRouter = ({
     if (!playerName) {
       ctx.throw(403, 'playerName is required');
     }
-    const gameID = ctx.params.id;
-    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+    const matchID = ctx.params.id;
+    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -191,18 +229,27 @@ export const createRouter = ({
     const playerCredentials = await generateCredentials(ctx);
     metadata.players[playerID].credentials = playerCredentials;
 
-    await db.setMetadata(gameID, metadata);
+    await db.setMetadata(matchID, metadata);
 
     ctx.body = {
       playerCredentials,
     };
   });
 
+  /**
+   * Leave a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player who leaves.
+   * @param {string} credentials - The credentials of the player who leaves.
+   * @return - Nothing.
+   */
   router.post('/games/:name/:id/leave', koaBody(), async ctx => {
-    const gameID = ctx.params.id;
+    const matchID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
-    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (typeof playerID === 'undefined' || playerID === null) {
@@ -210,7 +257,7 @@ export const createRouter = ({
     }
 
     if (!metadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -222,21 +269,31 @@ export const createRouter = ({
     delete metadata.players[playerID].name;
     delete metadata.players[playerID].credentials;
     if (Object.values(metadata.players).some(player => player.name)) {
-      await db.setMetadata(gameID, metadata);
+      await db.setMetadata(matchID, metadata);
     } else {
       // remove room
-      await db.wipe(gameID);
+      await db.wipe(matchID);
     }
     ctx.body = {};
   });
 
+  /**
+   * Start a new match based on another existing match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player creating the match.
+   * @param {string} credentials - The credentials of the player creating the match.
+   * @param {boolean} unlisted - Whether the match should be excluded from public listing.
+   * @return - The ID of the new match.
+   */
   router.post('/games/:name/:id/playAgain', koaBody(), async ctx => {
     const gameName = ctx.params.name;
-    const gameID = ctx.params.id;
+    const matchID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const unlisted = ctx.request.body.unlisted;
-    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     // User-data to pass to the game setup function.
@@ -249,7 +306,7 @@ export const createRouter = ({
     }
 
     if (!metadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -258,14 +315,14 @@ export const createRouter = ({
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
-    // Check if nextRoom is already set, if so, return that id.
-    if (metadata.nextRoomID) {
-      ctx.body = { nextRoomID: metadata.nextRoomID };
+    // Check if nextMatch is already set, if so, return that id.
+    if (metadata.nextMatchID) {
+      ctx.body = { nextMatchID: metadata.nextMatchID };
       return;
     }
 
     const game = games.find(g => g.name === gameName);
-    const nextRoomID = await CreateGame({
+    const nextMatchID = await CreateMatch({
       db,
       game,
       numPlayers,
@@ -273,22 +330,22 @@ export const createRouter = ({
       uuid,
       unlisted,
     });
-    metadata.nextRoomID = nextRoomID;
+    metadata.nextMatchID = nextMatchID;
 
-    await db.setMetadata(gameID, metadata);
+    await db.setMetadata(matchID, metadata);
 
     ctx.body = {
-      nextRoomID,
+      nextMatchID,
     };
   });
 
   const updatePlayerMetadata = async (ctx: Koa.Context) => {
-    const gameID = ctx.params.id;
+    const matchID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
     const newName = ctx.request.body.newName;
     const data = ctx.request.body.data;
-    const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
+    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (typeof playerID === 'undefined') {
@@ -301,7 +358,7 @@ export const createRouter = ({
       ctx.throw(403, `newName must be a string, got ${typeof newName}`);
     }
     if (!metadata) {
-      ctx.throw(404, 'Game ' + gameID + ' not found');
+      ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
@@ -316,10 +373,20 @@ export const createRouter = ({
     if (data) {
       metadata.players[playerID].data = data;
     }
-    await db.setMetadata(gameID, metadata);
+    await db.setMetadata(matchID, metadata);
     ctx.body = {};
   };
 
+  /**
+   * Change the name of a player in a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player.
+   * @param {string} credentials - The credentials of the player.
+   * @param {object} newName - The new name of the player in the match.
+   * @return - Nothing.
+   */
   router.post('/games/:name/:id/rename', koaBody(), async ctx => {
     console.warn(
       'This endpoint /rename is deprecated. Please use /update instead.'
@@ -327,6 +394,17 @@ export const createRouter = ({
     await updatePlayerMetadata(ctx);
   });
 
+  /**
+   * Update the player's data for a given match.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player.
+   * @param {string} credentials - The credentials of the player.
+   * @param {object} newName - The new name of the player in the match.
+   * @param {object} data - The new data of the player in the match.
+   * @return - Nothing.
+   */
   router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
 
   return router;

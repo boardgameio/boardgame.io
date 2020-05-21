@@ -55,7 +55,7 @@ describe('lobby', () => {
           gameServer="localhost:9000"
         />
       );
-      lobby.instance()._startGame('GameName1', { numPlayers: 2 });
+      lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
       expect(spy).toBeCalledWith(
         expect.objectContaining({
           multiplayer: expect.anything(),
@@ -129,9 +129,9 @@ describe('lobby', () => {
 
     describe('exiting lobby', () => {
       beforeEach(async () => {
-        lobby.instance().connection.rooms = [
+        lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob' },
               '1': { id: 1 },
@@ -171,7 +171,7 @@ describe('lobby', () => {
     });
   });
 
-  describe('rooms list', () => {
+  describe('matches list', () => {
     let spyClient = jest.fn();
     beforeEach(async () => {
       // initial state = logged-in as 'Bob'
@@ -196,11 +196,11 @@ describe('lobby', () => {
       spyClient.mockReset();
     });
 
-    describe('creating a room', () => {
+    describe('creating a match', () => {
       beforeEach(async () => {
-        lobby.instance().connection.rooms = [
+        lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: { '0': { id: 0 } },
             gameName: 'GameName1',
           },
@@ -209,30 +209,30 @@ describe('lobby', () => {
         lobby.update();
       });
 
-      test('room with default number of players', () => {
+      test('match with default number of players', () => {
         lobby.instance().connection.create = spy;
         lobby
-          .find('LobbyCreateRoomForm')
+          .find('LobbyCreateMatchForm')
           .find('button')
           .simulate('click');
         expect(spy).toHaveBeenCalledWith('GameName1', 3);
       });
-      test('room with 2 players', () => {
+      test('match with 2 players', () => {
         lobby.instance().connection.create = spy;
         lobby
-          .find('LobbyCreateRoomForm')
+          .find('LobbyCreateMatchForm')
           .find('select')
           .first()
           .props()
           .onChange({ target: { value: '1' } });
         lobby
-          .find('LobbyCreateRoomForm')
+          .find('LobbyCreateMatchForm')
           .find('select')
           .at(1)
           .props()
           .onChange({ target: { value: '2' } });
         lobby
-          .find('LobbyCreateRoomForm')
+          .find('LobbyCreateMatchForm')
           .find('button')
           .simulate('click');
         expect(spy).toHaveBeenCalledWith('GameName2', 2);
@@ -242,7 +242,7 @@ describe('lobby', () => {
           throw new Error('fail');
         });
         await lobby
-          .find('LobbyCreateRoomForm')
+          .find('LobbyCreateMatchForm')
           .find('button')
           .simulate('click');
         expect(
@@ -255,14 +255,14 @@ describe('lobby', () => {
       test('when game has no boundaries on the number of players', async () => {
         // select 2nd game
         lobby
-          .find('LobbyCreateRoomForm')
+          .find('LobbyCreateMatchForm')
           .find('select')
           .first()
           .props()
           .onChange({ target: { value: '1' } });
         expect(
           lobby
-            .find('LobbyCreateRoomForm')
+            .find('LobbyCreateMatchForm')
             .find('select')
             .at(1)
             .text()
@@ -271,7 +271,7 @@ describe('lobby', () => {
       test('when game has boundaries on the number of players', async () => {
         expect(
           lobby
-            .find('LobbyCreateRoomForm')
+            .find('LobbyCreateMatchForm')
             .find('select')
             .at(1)
             .text()
@@ -279,16 +279,16 @@ describe('lobby', () => {
       });
     });
 
-    describe('joining a room', () => {
+    describe('joining a match', () => {
       beforeEach(async () => {
-        lobby.instance().connection.rooms = [
+        lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: { '0': { id: 0 } },
             gameName: 'GameName1',
           },
           {
-            gameID: 'gameID2',
+            matchID: 'matchID2',
             players: { '0': { id: 0, name: 'Bob' } },
             gameName: 'GameName1',
           },
@@ -296,21 +296,21 @@ describe('lobby', () => {
         lobby.instance().forceUpdate();
         lobby.update();
       });
-      test('when room is empty', () => {
-        // join 1st room
+      test('when match is empty', () => {
+        // join 1st match
         lobby.instance().connection.join = spy;
         lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .first()
           .find('button')
           .simulate('click');
-        expect(spy).toHaveBeenCalledWith('GameName1', 'gameID1', '0');
+        expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1', '0');
       });
-      test('when room is full', () => {
-        // try 2nd room
+      test('when match is full', () => {
+        // try 2nd match
         expect(
           lobby
-            .find('LobbyRoomInstance')
+            .find('LobbyMatchInstance')
             .at(1)
             .text()
         ).toContain('RUNNING');
@@ -319,9 +319,9 @@ describe('lobby', () => {
         lobby.instance().connection.join = spy.mockImplementation(() => {
           throw new Error('fail');
         });
-        // join 1st room
+        // join 1st match
         await lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .first()
           .find('button')
           .simulate('click');
@@ -334,11 +334,11 @@ describe('lobby', () => {
       });
     });
 
-    describe('leaving a room', () => {
+    describe('leaving a match', () => {
       beforeEach(async () => {
-        lobby.instance().connection.rooms = [
+        lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob' },
               '1': { id: 1 },
@@ -350,26 +350,26 @@ describe('lobby', () => {
         lobby.update();
         expect(
           lobby
-            .find('LobbyRoomInstance')
+            .find('LobbyMatchInstance')
             .find('button')
             .text()
         ).toBe('Leave');
       });
-      test('shall leave a room', () => {
-        // leave room
+      test('shall leave a match', () => {
+        // leave match
         lobby.instance().connection.leave = spy;
         lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .find('button')
           .simulate('click');
-        expect(spy).toHaveBeenCalledWith('GameName1', 'gameID1');
+        expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1');
       });
       test('when server request fails', async () => {
         lobby.instance().connection.leave = spy.mockImplementation(() => {
           throw new Error('fail');
         });
         await lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .find('button')
           .simulate('click');
         expect(
@@ -383,9 +383,9 @@ describe('lobby', () => {
 
     describe('starting a game', () => {
       beforeEach(async () => {
-        lobby.instance().connection.rooms = [
+        lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob', credentials: 'SECRET1' },
               '1': { id: 1, name: 'Charly', credentials: 'SECRET2' },
@@ -393,17 +393,17 @@ describe('lobby', () => {
             gameName: 'GameName1',
           },
           {
-            gameID: 'gameID2',
+            matchID: 'matchID2',
             players: { '0': { id: 0, name: 'Alice' } },
             gameName: 'GameName2',
           },
           {
-            gameID: 'gameID3',
+            matchID: 'matchID3',
             players: { '0': { id: 0, name: 'Bob' } },
             gameName: 'GameName3',
           },
           {
-            gameID: 'gameID4',
+            matchID: 'matchID4',
             players: { '0': { id: 0, name: 'Zoe' } },
             gameName: 'GameNameUnknown',
           },
@@ -415,15 +415,15 @@ describe('lobby', () => {
       test('if player has joined the game', () => {
         lobby.instance().connection.playerCredentials = 'SECRET1';
         lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .first()
           .find('button')
 
           .first()
           .simulate('click');
-        expect(lobby.instance().state.runningGame).toEqual({
+        expect(lobby.instance().state.runningMatch).toEqual({
           app: NullComponent,
-          gameID: 'gameID1',
+          matchID: 'matchID1',
           playerID: '0',
           credentials: 'SECRET1',
         });
@@ -437,21 +437,21 @@ describe('lobby', () => {
 
       test('if player is spectator', () => {
         lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .at(1)
           .find('button')
           .simulate('click');
-        expect(lobby.instance().state.runningGame).toEqual({
+        expect(lobby.instance().state.runningMatch).toEqual({
           app: NullComponent,
           credentials: undefined,
-          gameID: 'gameID2',
+          matchID: 'matchID2',
           playerID: '0',
         });
       });
 
       test('if game is not supported', () => {
         lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .at(3)
           .find('button')
           .simulate('click');
@@ -466,23 +466,23 @@ describe('lobby', () => {
 
       test('if game is monoplayer', () => {
         lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .at(2)
           .find('button')
 
           .first()
           .simulate('click');
         expect(spy).not.toHaveBeenCalledWith(expect.anything(), {
-          gameID: 'gameID3',
+          matchID: 'matchID3',
         });
       });
     });
 
     describe('exiting during game', () => {
       beforeEach(async () => {
-        lobby.instance().connection.rooms = [
+        lobby.instance().connection.matches = [
           {
-            gameID: 'gameID1',
+            matchID: 'matchID1',
             players: {
               '0': { id: 0, name: 'Bob', credentials: 'SECRET1' },
               '1': { id: 1, name: 'Charly', credentials: 'SECRET2' },
@@ -497,17 +497,17 @@ describe('lobby', () => {
         lobby.instance().connection.playerCredentials = 'SECRET1';
         // start game
         lobby
-          .find('LobbyRoomInstance')
+          .find('LobbyMatchInstance')
           .first()
           .find('button')
           .first()
           .simulate('click');
         // exit game
         lobby
-          .find('#game-exit')
+          .find('#match-exit')
           .find('button')
           .simulate('click');
-        expect(lobby.instance().state.runningGame).toEqual(null);
+        expect(lobby.instance().state.runningMatch).toEqual(null);
         expect(lobby.instance().state.phase).toEqual('list');
       });
     });

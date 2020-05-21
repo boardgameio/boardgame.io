@@ -12,7 +12,7 @@ class _LobbyConnectionImpl {
     this.playerName = playerName || 'Visitor';
     this.playerCredentials = playerCredentials;
     this.server = server;
-    this.rooms = [];
+    this.matches = [];
   }
 
   _baseUrl() {
@@ -21,7 +21,7 @@ class _LobbyConnectionImpl {
 
   async refresh() {
     try {
-      this.rooms.length = 0;
+      this.matches.length = 0;
       const resp = await fetch(this._baseUrl());
       if (resp.status !== 200) {
         throw new Error('HTTP status ' + resp.status);
@@ -31,19 +31,19 @@ class _LobbyConnectionImpl {
         if (!this._getGameComponents(gameName)) continue;
         const gameResp = await fetch(this._baseUrl() + '/' + gameName);
         const gameJson = await gameResp.json();
-        for (let inst of gameJson.rooms) {
+        for (let inst of gameJson.matches) {
           inst.gameName = gameName;
         }
-        this.rooms = this.rooms.concat(gameJson.rooms);
+        this.matches = this.matches.concat(gameJson.matches);
       }
     } catch (error) {
-      throw new Error('failed to retrieve list of games (' + error + ')');
+      throw new Error('failed to retrieve list of matches (' + error + ')');
     }
   }
 
-  _getGameInstance(gameID) {
-    for (let inst of this.rooms) {
-      if (inst['gameID'] === gameID) return inst;
+  _getMatchInstance(matchID) {
+    for (let inst of this.matches) {
+      if (inst['matchID'] === matchID) return inst;
     }
   }
 
@@ -54,23 +54,23 @@ class _LobbyConnectionImpl {
   }
 
   _findPlayer(playerName) {
-    for (let inst of this.rooms) {
+    for (let inst of this.matches) {
       if (inst.players.some(player => player.name === playerName)) return inst;
     }
   }
 
-  async join(gameName, gameID, playerID) {
+  async join(gameName, matchID, playerID) {
     try {
       let inst = this._findPlayer(this.playerName);
       if (inst) {
-        throw new Error('player has already joined ' + inst.gameID);
+        throw new Error('player has already joined ' + inst.matchID);
       }
-      inst = this._getGameInstance(gameID);
+      inst = this._getMatchInstance(matchID);
       if (!inst) {
-        throw new Error('game instance ' + gameID + ' not found');
+        throw new Error('game instance ' + matchID + ' not found');
       }
       const resp = await fetch(
-        this._baseUrl() + '/' + gameName + '/' + gameID + '/join',
+        this._baseUrl() + '/' + gameName + '/' + matchID + '/join',
         {
           method: 'POST',
           body: JSON.stringify({
@@ -85,18 +85,18 @@ class _LobbyConnectionImpl {
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
     } catch (error) {
-      throw new Error('failed to join room ' + gameID + ' (' + error + ')');
+      throw new Error('failed to join match ' + matchID + ' (' + error + ')');
     }
   }
 
-  async leave(gameName, gameID) {
+  async leave(gameName, matchID) {
     try {
-      let inst = this._getGameInstance(gameID);
-      if (!inst) throw new Error('game instance not found');
+      let inst = this._getMatchInstance(matchID);
+      if (!inst) throw new Error('match instance not found');
       for (let player of inst.players) {
         if (player.name === this.playerName) {
           const resp = await fetch(
-            this._baseUrl() + '/' + gameName + '/' + gameID + '/leave',
+            this._baseUrl() + '/' + gameName + '/' + matchID + '/leave',
             {
               method: 'POST',
               body: JSON.stringify({
@@ -114,18 +114,18 @@ class _LobbyConnectionImpl {
           return;
         }
       }
-      throw new Error('player not found in room');
+      throw new Error('player not found in match');
     } catch (error) {
-      throw new Error('failed to leave room ' + gameID + ' (' + error + ')');
+      throw new Error('failed to leave match ' + matchID + ' (' + error + ')');
     }
   }
 
   async disconnect() {
     let inst = this._findPlayer(this.playerName);
     if (inst) {
-      await this.leave(inst.gameName, inst.gameID);
+      await this.leave(inst.gameName, inst.matchID);
     }
-    this.rooms = [];
+    this.matches = [];
     this.playerName = 'Visitor';
   }
 
@@ -148,7 +148,7 @@ class _LobbyConnectionImpl {
       if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
     } catch (error) {
       throw new Error(
-        'failed to create room for ' + gameName + ' (' + error + ')'
+        'failed to create match for ' + gameName + ' (' + error + ')'
       );
     }
   }

@@ -12,7 +12,7 @@ import {
   Master,
   redactLog,
   getPlayerMetadata,
-  doesGameRequireAuthentication,
+  doesMatchRequireAuthentication,
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
@@ -590,7 +590,9 @@ describe('getPlayerMetadata', () => {
 
   describe('when metadata does not contain players field', () => {
     test('then playerMetadata is undefined', () => {
-      expect(getPlayerMetadata({} as Server.GameMetadata, '0')).toBeUndefined();
+      expect(
+        getPlayerMetadata({} as Server.MatchMetadata, '0')
+      ).toBeUndefined();
     });
   });
 
@@ -617,31 +619,31 @@ describe('getPlayerMetadata', () => {
   });
 });
 
-describe('doesGameRequireAuthentication', () => {
+describe('doesMatchRequireAuthentication', () => {
   describe('when game metadata is not found', () => {
     test('then authentication is not required', () => {
-      const result = doesGameRequireAuthentication();
+      const result = doesMatchRequireAuthentication();
       expect(result).toBe(false);
     });
   });
 
-  describe('when game has no credentials', () => {
+  describe('when match has no credentials', () => {
     test('then authentication is not required', () => {
-      const gameMetadata = {
+      const matchMetadata = {
         gameName: '',
         setupData: {},
         players: {
           '0': { id: 1 },
         },
       };
-      const result = doesGameRequireAuthentication(gameMetadata);
+      const result = doesMatchRequireAuthentication(matchMetadata);
       expect(result).toBe(false);
     });
   });
 
-  describe('when game has credentials', () => {
+  describe('when match has credentials', () => {
     test('then authentication is required', () => {
-      const gameMetadata = {
+      const matchMetadata = {
         gameName: '',
         setupData: {},
         players: {
@@ -651,7 +653,7 @@ describe('doesGameRequireAuthentication', () => {
           },
         },
       };
-      const result = doesGameRequireAuthentication(gameMetadata);
+      const result = doesMatchRequireAuthentication(matchMetadata);
       expect(result).toBe(true);
     });
   });
@@ -660,7 +662,7 @@ describe('doesGameRequireAuthentication', () => {
 describe('isActionFromAuthenticPlayer', () => {
   let action;
   let playerID;
-  let gameMetadata;
+  let matchMetadata;
   let credentials;
   let playerMetadata;
 
@@ -671,13 +673,13 @@ describe('isActionFromAuthenticPlayer', () => {
       payload: { credentials: 'SECRET' },
     };
 
-    gameMetadata = {
+    matchMetadata = {
       players: {
         '0': { credentials: 'SECRET' },
       },
     };
 
-    playerMetadata = gameMetadata.players[playerID];
+    playerMetadata = matchMetadata.players[playerID];
     ({ credentials } = action.payload || {});
   });
 

@@ -30,7 +30,7 @@ describe('InMemory', () => {
     db.createGame('gameID', {
       metadata: {
         gameName: 'tic-tac-toe',
-      } as Server.GameMetadata,
+      } as Server.MatchMetadata,
       initialState: stateEntry as State,
     });
 

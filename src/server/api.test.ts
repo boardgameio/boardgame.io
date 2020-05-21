@@ -103,7 +103,7 @@ describe('.createRouter', () => {
       beforeEach(async () => {
         delete process.env.API_SECRET;
 
-        const uuid = () => 'gameID';
+        const uuid = () => 'matchID';
         app = createApiServer({ db, games, uuid });
 
         response = await request(app.callback())
@@ -117,7 +117,7 @@ describe('.createRouter', () => {
 
       test('creates game state and metadata', () => {
         expect(db.mocks.createGame).toHaveBeenCalledWith(
-          'gameID',
+          'matchID',
           expect.objectContaining({
             initialState: expect.objectContaining({
               ctx: expect.objectContaining({
@@ -136,8 +136,8 @@ describe('.createRouter', () => {
         );
       });
 
-      test('returns game id', () => {
-        expect(response.body.gameID).not.toBeNull();
+      test('returns match id', () => {
+        expect(response.body.matchID).not.toBeNull();
       });
 
       describe('without numPlayers', () => {
@@ -147,7 +147,7 @@ describe('.createRouter', () => {
 
         test('uses default numPlayers', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
                 ctx: expect.objectContaining({
@@ -185,7 +185,7 @@ describe('.createRouter', () => {
 
         test('includes setupData in metadata', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
                 setupData: expect.objectContaining({
@@ -201,7 +201,7 @@ describe('.createRouter', () => {
 
         test('passes setupData to game setup function', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
                 G: expect.objectContaining({
@@ -225,7 +225,7 @@ describe('.createRouter', () => {
 
         test('sets unlisted in metadata', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
                 unlisted: true,
@@ -319,7 +319,7 @@ describe('.createRouter', () => {
             const app = createApiServer({
               db,
               games,
-              uuid: () => 'gameID',
+              uuid: () => 'matchID',
               generateCredentials: () => credentials,
             });
             response = await request(app.callback())
@@ -608,7 +608,7 @@ describe('.createRouter', () => {
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send('playerID=0&playerName=alice&newName=ali');
-          expect(response.text).toEqual('Game 1 not found');
+          expect(response.text).toEqual('Match 1 not found');
         });
       });
 
@@ -739,7 +739,7 @@ describe('.createRouter', () => {
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send({ playerID: 0, data: { subdata: 'text' } });
-          expect(response.text).toEqual('Game 1 not found');
+          expect(response.text).toEqual('Match 1 not found');
         });
       });
 
@@ -1053,7 +1053,7 @@ describe('.createRouter', () => {
           }),
         })
       );
-      expect(response.body.nextRoomID).toBe('newGameID');
+      expect(response.body.nextMatchID).toBe('newGameID');
     });
 
     test('fetches next id', async () => {
@@ -1071,7 +1071,7 @@ describe('.createRouter', () => {
                   credentials: 'SECRET2',
                 },
               },
-              nextRoomID: '12345',
+              nextMatchID: '12345',
             },
           };
         },
@@ -1080,10 +1080,10 @@ describe('.createRouter', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
-      expect(response.body.nextRoomID).toBe('12345');
+      expect(response.body.nextMatchID).toBe('12345');
     });
 
-    test('when the game does not exist throws a "not found" error', async () => {
+    test('when the match does not exist throws a "not found" error', async () => {
       db = new AsyncStorage({
         fetch: async () => ({ metadata: null }),
       });
@@ -1132,7 +1132,7 @@ describe('.createRouter', () => {
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        fetch: async gameID => {
+        fetch: async matchID => {
           return {
             metadata: {
               players: {
@@ -1145,8 +1145,8 @@ describe('.createRouter', () => {
                   credentials: 'SECRET2',
                 },
               },
-              unlisted: gameID === 'bar-4',
-              gameover: gameID === 'bar-3' ? { winner: 0 } : undefined,
+              unlisted: matchID === 'bar-4',
+              gameover: matchID === 'bar-3' ? { winner: 0 } : undefined,
             },
           };
         },
@@ -1167,33 +1167,33 @@ describe('.createRouter', () => {
       });
     });
 
-    describe('when given 2 rooms', () => {
+    describe('when given 2 matches', () => {
       let response;
-      let rooms;
+      let matches;
       beforeEach(async () => {
         let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar');
-        rooms = JSON.parse(response.text).rooms;
+        matches = JSON.parse(response.text).matches;
       });
 
-      test('returns rooms for the selected game', async () => {
-        expect(rooms).toHaveLength(2);
+      test('returns matches for the selected game', async () => {
+        expect(matches).toHaveLength(2);
       });
 
-      test('returns room ids', async () => {
-        expect(rooms[0].gameID).toEqual('bar-2');
-        expect(rooms[1].gameID).toEqual('bar-3');
+      test('returns match ids', async () => {
+        expect(matches[0].matchID).toEqual('bar-2');
+        expect(matches[1].matchID).toEqual('bar-3');
       });
 
       test('returns player names', async () => {
-        expect(rooms[0].players).toEqual([{ id: 0 }, { id: 1 }]);
-        expect(rooms[1].players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(matches[0].players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(matches[1].players).toEqual([{ id: 0 }, { id: 1 }]);
       });
 
-      test('returns gameover data for ended game', async () => {
-        expect(rooms[0].gameover).toBeUndefined();
-        expect(rooms[1].gameover).toEqual({ winner: 0 });
+      test('returns gameover data for ended match', async () => {
+        expect(matches[0].gameover).toBeUndefined();
+        expect(matches[1].gameover).toEqual({ winner: 0 });
       });
     });
   });
@@ -1237,7 +1237,7 @@ describe('.createRouter', () => {
       });
 
       test('returns game ids', async () => {
-        expect(room.roomID).toEqual('bar-0');
+        expect(room.matchID).toEqual('bar-0');
       });
 
       test('returns player names', async () => {
