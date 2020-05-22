@@ -8,6 +8,7 @@
 
 import { Server, createServerRunConfig, KoaServer } from '.';
 import * as api from './api';
+import { SocketIO } from './transport/socketio';
 import { StorageAPI } from '../types';
 
 const game = { seed: 0 };
@@ -49,6 +50,9 @@ jest.mock('koa-socket-2', () => {
     on(type, callback) {
       callback((this as any).socket);
     }
+    adapter(adapter) {
+      return this
+    }
   };
 });
 
@@ -78,7 +82,7 @@ describe('new', () => {
 
   test('custom transport implementation', () => {
     const game = {};
-    const transport = { init: jest.fn() };
+    const transport = ({ init: jest.fn() } as unknown) as SocketIO;
     Server({ games: [game], transport });
     expect(transport.init).toBeCalled();
   });

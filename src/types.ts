@@ -1,7 +1,9 @@
 import { Object } from 'ts-toolbelt';
 import Koa from 'koa';
+import { Store as ReduxStore } from 'redux';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
+import { CreateGameReducer } from './core/reducer';
 import { INVALID_MOVE } from './core/constants';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
@@ -246,6 +248,9 @@ export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
   playerView?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID) => any;
   plugins?: Array<Plugin<any, any, G>>;
+  ai?: {
+    enumerate: (G: G, ctx: Ctx) => { move: string; args: any[] }[];
+  };
   processMove?: (
     state: State<G, Ctx | CtxWithPlugins>,
     action: ActionPayload.MakeMove
@@ -292,6 +297,9 @@ export namespace Server {
     apiCallback?: () => void;
   }
 }
+
+export type Reducer = ReturnType<typeof CreateGameReducer>;
+export type Store = ReduxStore<State, ActionShape.Any>;
 
 export namespace CredentialedActionShape {
   export type MakeMove = ReturnType<typeof ActionCreators.makeMove>;

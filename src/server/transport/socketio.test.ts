@@ -6,12 +6,21 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { TransportAPI, SocketIO } from './socketio';
+import { TransportAPI, SocketIO, SocketOpts } from './socketio';
 import { ProcessGameConfig } from '../../core/game';
 
+type SocketIOTestAdapterOpts = SocketOpts & {
+  clientInfo?: Map<any, any>;
+  roomInfo?: Map<any, any>;
+};
+
 class SocketIOTestAdapter extends SocketIO {
-  constructor({ clientInfo = new Map(), roomInfo = new Map(), ...args } = {}) {
-    super(args);
+  constructor({
+    clientInfo = new Map(),
+    roomInfo = new Map(),
+    ...args
+  }: SocketIOTestAdapterOpts = {}) {
+    super(Object.keys(args).length ? args : undefined);
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
@@ -66,9 +75,14 @@ jest.mock('koa-socket-2', () => {
 
   class MockIO {
     socket: MockSocket;
+    socketAdapter: any;
 
     constructor() {
       this.socket = new MockSocket();
+    }
+
+    adapter(socketAdapter) {
+      this.socketAdapter = socketAdapter;
     }
 
     attach(app) {
@@ -105,6 +119,22 @@ describe('basic', () => {
   });
 });
 
+describe('socketAdapter', () => {
+  const app: any = { context: {} };
+  const games = [ProcessGameConfig({ seed: 0 })];
+
+  let socketAdapter = jest.fn();
+
+  beforeEach(() => {
+    const transport = new SocketIOTestAdapter({ socketAdapter });
+    transport.init(app, games);
+  });
+
+  test('socketAdapter is passed', () => {
+    expect(app.io.socketAdapter).toBe(socketAdapter)
+  })
+})
+
 describe('TransportAPI', () => {
   let io;
   let api;
@@ -137,11 +167,6 @@ describe('TransportAPI', () => {
   test('send to another player', () => {
     io.socket.id = '0';
     api.send({ type: 'A', playerID: '1', args: [] });
-    expect(io.socket.emit).toHaveBeenCalledWith('A');
-  });
-
-  test('sendAll - object', () => {
-    api.sendAll({ type: 'A', args: [] });
     expect(io.socket.emit).toHaveBeenCalledWith('A');
   });
 
