@@ -205,16 +205,22 @@ export function CreateGameReducer({
           return state;
         }
 
+        const prevTurnCount = state.ctx.turn;
+
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
 
         // Update undo / redo state.
-        state._undo = state._undo.concat({
-          G: state.G,
-          ctx: state.ctx,
-          moveType: action.payload.type,
-        });
+        // Only update undo stack if the turn has not been ended
+        if (state.ctx.turn === prevTurnCount) {
+          state._undo = state._undo.concat({
+            G: state.G,
+            ctx: state.ctx,
+            moveType: action.payload.type,
+          });
+        }
+        // Always reset redo stack when making a move
         state._redo = [];
 
         return state;
