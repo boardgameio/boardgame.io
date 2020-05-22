@@ -415,7 +415,7 @@ describe('undo / redo with stages', () => {
 
   let state = InitializeGame({ game });
 
-  test('moveA sets state and stage (undoable)', () => {
+  test('moveA sets state & moves player to stage A (undoable)', () => {
     state = reducer(state, makeMove('moveA', true, '0'));
     expect(state.G).toMatchObject({
       moveAisReversible: true,
@@ -457,7 +457,7 @@ describe('undo / redo with stages', () => {
     expect(state.ctx.activePlayers['0']).toBe('start');
   });
 
-  test('moveA sets state and stage (not undoable)', () => {
+  test('moveA sets state & moves player to stage A (not undoable)', () => {
     state = reducer(state, makeMove('moveA', false, '0'));
     expect(state.G).toMatchObject({
       moveAisReversible: false,
@@ -468,7 +468,7 @@ describe('undo / redo with stages', () => {
     expect(state.ctx.activePlayers['0']).toBe('A');
   });
 
-  test('moveB sets state and stage', () => {
+  test('moveB sets state & moves player to stage B', () => {
     state = reducer(state, makeMove('moveB', [], '0'));
     expect(state.G).toMatchObject({
       moveAisReversible: false,
@@ -490,7 +490,7 @@ describe('undo / redo with stages', () => {
     expect(state.ctx.activePlayers['0']).toBe('B');
   });
 
-  test('moveC sets state and stage', () => {
+  test('moveC sets state & moves player to stage C', () => {
     state = reducer(state, makeMove('moveC', [], '0'));
     expect(state.G).toMatchObject({
       moveAisReversible: false,
