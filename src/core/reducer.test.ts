@@ -491,7 +491,7 @@ describe('undo / redo with stages', () => {
   });
 
   test('moveC sets state and stage', () => {
-    state = reducer(state, makeMove('moveC', '0'));
+    state = reducer(state, makeMove('moveC', [], '0'));
     expect(state.G).toMatchObject({
       moveAisReversible: false,
       A: true,
