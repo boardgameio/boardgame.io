@@ -209,6 +209,14 @@ export function CreateGameReducer({
         state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
 
+        // Update undo / redo state.
+        state._undo = state._undo.concat({
+          G: state.G,
+          ctx: state.ctx,
+          moveType: action.payload.type,
+        });
+        state._redo = [];
+
         return state;
       }
 
