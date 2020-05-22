@@ -240,7 +240,7 @@ export function CreateGameReducer({
         const lastMove: Move = game.flow.getMove(
           restore.ctx,
           last.moveType,
-          state.ctx.currentPlayer
+          action.payload.playerID
         );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;
