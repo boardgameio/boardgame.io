@@ -366,7 +366,6 @@ test('undo / redo', () => {
 
 describe('undo / redo with stages', () => {
   const game: Game = {
-    seed: 0,
     setup: () => ({ A: false, B: false, C: false }),
     turn: {
       activePlayers: { currentPlayer: 'start' },
