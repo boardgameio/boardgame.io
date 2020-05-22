@@ -364,6 +364,99 @@ test('undo / redo', () => {
   expect(state.G).toMatchObject({ roll: 4 });
 });
 
+describe('undo stack', () => {
+  const game: Game = {
+    moves: {
+      basic: () => {},
+      endTurn: (_, ctx) => {
+        ctx.events.endTurn();
+      },
+    },
+  };
+
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game });
+
+  test('contains initial state at start of game', () => {
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+  });
+
+  test('grows when a move is made', () => {
+    state = reducer(state, makeMove('basic'));
+    expect(state._undo).toHaveLength(2);
+    expect(state._undo[1].moveType).toBe('basic');
+    expect(state._undo[1].ctx).toEqual(state.ctx);
+  });
+
+  test('shrinks when a move is undone', () => {
+    state = reducer(state, undo());
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+  });
+
+  test('grows when a move is redone', () => {
+    state = reducer(state, redo());
+    expect(state._undo).toHaveLength(2);
+    expect(state._undo[1].moveType).toBe('basic');
+    expect(state._undo[1].ctx).toEqual(state.ctx);
+  });
+
+  test('is reset when a turn ends', () => {
+    state = reducer(state, makeMove('endTurn'));
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+    expect(state._undo[0].moveType).toBeUndefined();
+  });
+});
+
+describe('redo stack', () => {
+  const game: Game = {
+    moves: {
+      basic: () => {},
+      endTurn: (_, ctx) => {
+        ctx.events.endTurn();
+      },
+    },
+  };
+
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game });
+
+  test('is empty at start of game', () => {
+    expect(state._redo).toHaveLength(0);
+  });
+
+  test('grows when a move is undone', () => {
+    state = reducer(state, makeMove('basic'));
+    state = reducer(state, undo());
+    expect(state._redo).toHaveLength(1);
+    expect(state._redo[0].moveType).toBe('basic');
+  });
+
+  test('shrinks when a move is redone', () => {
+    state = reducer(state, redo());
+    expect(state._redo).toHaveLength(0);
+  });
+
+  test('is reset when a move is made', () => {
+    state = reducer(state, makeMove('basic'));
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    expect(state._redo).toHaveLength(2);
+    state = reducer(state, makeMove('basic'));
+    expect(state._redo).toHaveLength(0);
+  });
+
+  test('is reset when a turn ends', () => {
+    state = reducer(state, makeMove('basic'));
+    state = reducer(state, undo());
+    expect(state._redo).toHaveLength(1);
+    state = reducer(state, makeMove('endTurn'));
+    expect(state._redo).toHaveLength(0);
+  });
+});
+
 describe('undo / redo with stages', () => {
   const game: Game = {
     setup: () => ({ A: false, B: false, C: false }),
