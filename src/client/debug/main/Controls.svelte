@@ -15,7 +15,7 @@
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
       const gamestate = parse(gamestateJSON);
-      client.store.dispatch(sync(gamestate));
+      client.store.dispatch(sync({ state: gamestate }));
     }
   }
 </script>
