@@ -54,7 +54,6 @@ to ask your questions!
 
 ```
 $ npm install
-$ npm run build
 $ npm start
 ```
 
