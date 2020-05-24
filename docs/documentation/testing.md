@@ -1,6 +1,6 @@
 # Testing Strategies
 
-#### Unit Tests
+### Unit Tests
 
 Moves are just functions, so they lend themselves to easy testing. A useful strategy is
 to implement it as a standalone function before passing it to the game object:
@@ -39,7 +39,7 @@ it('should place the correct value in the cell', () => {
 });
 ```
 
-#### Scenario Tests
+### Scenario Tests
 
 Test your game logic in specific scenarios.
 
@@ -78,7 +78,7 @@ it('should declare player 1 as the winner', () => {
 !> Note that we imported the vanilla JavaScript client, not the
 one from `boardgame.io/react`.
 
-#### Multiplayer Tests
+### Multiplayer Tests
 
 Use the local multiplayer mode to simulate multiplayer interactions
 in unit tests.
@@ -109,7 +109,7 @@ it('multiplayer test', () => {
 });
 ```
 
-#### Integration Tests
+### Integration Tests
 
 Test the application end-to-end from the UI layer's point of view.
 In this case we mount our React component and look for the TicTacToe board inside of it.

@@ -24,7 +24,7 @@ an optimization that provides a lag-free experience).
 In case a particular client computes the new game state incorrectly,
 it is overridden by the master eventually, so the entire setup still
 has a single source of authority. If a move accesses state that is not
-accessible to the client (for instance secret state), then optimistic 
+accessible to the client (for instance secret state), then optimistic
 updates may need to be disabled for that move. See the
 [secret state documentation](secret-state.md) for more details.
 
@@ -35,7 +35,7 @@ up pass-and-play multiplayer or for prototyping the multiplayer experience
 without having to set up a server to test it.
 
 All you need to do is to add `import { Local } from 'boardgame.io/multiplayer'`,
-and in your config write `multiplayer: Local()`. Now you can instantiate as many 
+and in your config write `multiplayer: Local()`. Now you can instantiate as many
 of these clients in your app and you will notice that they're all kept in sync,
 playing in the same game.
 
@@ -64,7 +64,7 @@ const App = () => (
 export default App;
 ```
 
-!> You may be wondering what the `playerID` parameter is from the
+?> You may be wondering what the `playerID` parameter is from the
 example above. Clients needs to be associated with a particular player
 seat in order to make moves in a multiplayer setup (clients that aren't
 are just spectators that can see the live game state, but can't actually
@@ -178,7 +178,7 @@ Complete code from this section is available on [CodeSandbox](https://codesandbo
 download button, then run the server and client as described
 above (don't forget to run `npm install` first).
 
-!> **TIP** You can also set the `playerID` to point to any player while
+?> **TIP** You can also set the `playerID` to point to any player while
 prototyping by clicking on the box of that respective player on the debug UI.
 
 #### Multiple Game Types

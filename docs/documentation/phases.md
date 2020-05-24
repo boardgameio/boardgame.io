@@ -37,7 +37,7 @@ const game = {
 };
 ```
 
-!> Notice how we moved the moves out into standalone functions
+?> Notice how we moved the moves out into standalone functions
 instead of inlining them in the game object.
 
 We'll ignore the rendering part of this game, but this is how it might look. Note that you can draw or play a card at any time, including taking a card when the deck is empty.

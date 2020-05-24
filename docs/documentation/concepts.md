@@ -2,8 +2,7 @@
 
 ### State
 
-The framework captures the game state in two objects: `G` and
-`ctx`.
+boardgame.io captures game state in two objects: `G` and `ctx`.
 
 ```js
 {
@@ -24,7 +23,7 @@ on both client and server seamlessly. The state in `ctx` is
 incrementally adoptable, meaning that you can manage all the
 state manually in `G` if you so desire.
 
-!> `ctx` contains other fields not shown here that complex games
+?> `ctx` contains other fields not shown here that complex games
 can take advantage of, including support for game phases and complex
 turn orders.
 

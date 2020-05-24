@@ -7,7 +7,7 @@ and can be a useful feature to allow the player to experiment
 with different move combinations (and seeing what they do)
 before committing to one.
 
-#### Usage
+### Usage
 
 You can call the `undo` and `redo` functions from the client
 like this:
@@ -22,7 +22,7 @@ onClickRedoButton() {
 }
 ```
 
-##### Restricting Undoable Moves
+### Restricting Undoable Moves
 
 In case you just want specific moves to be undoable
 (to prevent peeking at cards or rerolling of dice, for example),

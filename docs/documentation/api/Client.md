@@ -3,13 +3,13 @@
 Creates a `boardgame.io` client. This is the entry point for
 the client application.
 
-### Arguments
+#### Arguments
 
-1. obj(_object_): A config object with the options shown below under 'Usage'.
+1. `opts` (_object_): A config object with the options shown below under ‘Usage’.
 
-### Returns
+#### Returns
 
-(`client`): A React component that runs the client.
+A React component that runs the client.
 
 The component supports the following `props`:
 
@@ -17,7 +17,7 @@ The component supports the following `props`:
 
 2. `playerID`: Associate the client with a player (multiplayer).
 
-3. `credentials`: The `playerID`s authentication credentials (multiplayer).
+3. `credentials`: The player’s authentication credentials (multiplayer).
 
 4. `debug`: Set to `false` to disable the Debug UI.
 

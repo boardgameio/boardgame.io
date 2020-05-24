@@ -4,7 +4,7 @@ The Plugin API allows you to create objects that expose
 custom functionality to [boardgame.io](https://boardgame.io/).
 You can create wrappers around moves, add API's to `ctx` etc.
 
-#### Creating a Plugin
+### Creating a Plugin
 
 A plugin is an object that contains the following fields.
 
@@ -40,7 +40,7 @@ A plugin is an object that contains the following fields.
     G = postprocess(G);
     return G;
   },
-  
+
   // Function that allows the plugin to indicate that it
   // should not be run on the client. If it returns true,
   // the client will discard the state update and wait
@@ -49,7 +49,7 @@ A plugin is an object that contains the following fields.
 }
 ```
 
-#### Adding Plugins to Games
+### Adding Plugins to Games
 
 The list of plugins is specified in the game spec.
 
@@ -67,10 +67,10 @@ const game = {
 };
 ```
 
-!> Plugins are applied one after the other in the order
+?> Plugins are applied one after the other in the order
 that they are specified (from left to right).
 
-##### Configuring Plugins
+### Configuring Plugins
 
 Some plugins may need a user to provide some configuration. The recommended way to do that is to design the plugin as a factory function that takes configuration as its arguments and returns a plugin object.
 
@@ -87,9 +87,9 @@ const game = {
 
 ?> See `PluginPlayer` below for an example of this in practice.
 
-#### Available Plugins
+### Available Plugins
 
-**PluginPlayer**
+#### PluginPlayer
 
 ```js
 import { PluginPlayer } from 'boardgame.io/plugins';
@@ -126,9 +126,9 @@ via `ctx.player.get()`. If this is a 2 player game,
 then the opponent's record is available using `ctx.player.opponent.get()`. These fields can be modified using their corresponding
 `set()` versions.
 
-```
-ctx.player.get() - Get the current player's record.
-ctx.player.set() - Update the current player's record.
-ctx.player.opponent.get() - Get the opponent player's record.
-ctx.player.opponent.set() - Update the opponent player's record.
+```js
+ctx.player.get() // Get the current player's record.
+ctx.player.set() // Update the current player's record.
+ctx.player.opponent.get() // Get the opponent player's record.
+ctx.player.opponent.set() // Update the opponent player's record.
 ```
