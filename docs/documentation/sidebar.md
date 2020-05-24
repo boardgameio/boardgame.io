@@ -26,3 +26,6 @@
   - [Client](api/Client.md)
   - [Server](api/Server.md)
   - [Lobby](api/Lobby.md)
+
+- [Changelog](/CHANGELOG.md)
+- [Projects](/notable_projects.md)
