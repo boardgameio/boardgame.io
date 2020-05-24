@@ -40,8 +40,8 @@ networking or storage code.
 
 ### Installation
 
-```
-$ npm install --save boardgame.io
+```sh
+npm install --save boardgame.io
 ```
 
 ### Documentation
@@ -52,9 +52,9 @@ to ask your questions!
 
 ### Running examples in this repository
 
-```
-$ npm install
-$ npm start
+```sh
+npm install
+npm start
 ```
 
 The examples can be found in the [examples](examples/) folder.
