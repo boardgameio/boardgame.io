@@ -6,9 +6,7 @@
   import { parse, stringify } from 'flatted';
 
   function Save() {
-    const { G, ctx } = client.getState();
-    const json = stringify({ G, ctx });
-    window.localStorage.setItem('gamestate', json);
+    window.localStorage.setItem('gamestate', stringify(client.getState()));
   }
 
   function Restore() {
