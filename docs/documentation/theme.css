@@ -12,6 +12,8 @@
   --border-radius-l: 1.5em;
 
   --sidebar-padding: 0 1em;
+  --sidebar-nav-link-before-content-l3: "";
+  --sidebar-nav-link-before-content-l3--active: "→";
 
   /* syntax highlighting tweaks for contrast accessibility */
   --code-theme-comment: var(--mono-shade1);
