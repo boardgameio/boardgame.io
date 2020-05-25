@@ -96,7 +96,11 @@ Note that the event is just queued up and triggered **after** the move.
 You can still have other logic at the end of the move which will be
 run before the event is triggered.
 
-### Triggering an event from a React client.
+### Triggering an event from the client
+
+<!-- tabs:start -->
+
+#### **React**
 
 Events are available through `props` inside the
 `events` object. For example:
@@ -117,6 +121,23 @@ class Board extends React.Component {
   render = () => <button onClick={this.onClick}>End Turn</button>;
 }
 ```
+
+#### **Plain JS**
+
+Events are available inside the `events` property of
+a boardgame.io client instance. For example:
+
+```js
+import { Client } from 'boardgame.io/client';
+
+const client = Client({ /* options */ });
+
+const clickHandler = () => {
+  client.events.endTurn();
+}
+```
+
+<!-- tabs:end -->
 
 ### Disabling events
 
