@@ -1,10 +1,7 @@
 - **Getting Started**
-
   - [Concepts](/)
   - [Tutorial](tutorial.md)
-
 - **Guides**
-
   - [Multiplayer](multiplayer.md)
   - [Turn Order](turn-order.md)
   - [Phases](phases.md)
@@ -19,13 +16,11 @@
   - [Debugging](debugging.md)
   - [Testing](testing.md)
   - [Deployment](deployment.md)
-
 - **Reference**
-
   - [Game](api/Game.md)
   - [Client](api/Client.md)
   - [Server](api/Server.md)
   - [Lobby](api/Lobby.md)
-
-- [Changelog](/CHANGELOG.md)
-- [Projects](/notable_projects.md)
+- **More**
+  - [Changelog](/CHANGELOG.md)
+  - [Projects](/notable_projects.md)

@@ -11,9 +11,21 @@
   --border-radius-m: .5em;
   --border-radius-l: 1.5em;
 
-  --sidebar-padding: 0 1em;
+  /* Sidebar Menu */
+  /* layout */
+  --sidebar-horizontal-padding: 1em;
+  --sidebar-padding: 0 var(--sidebar-horizontal-padding);
+  --sidebar-nav-indent: 0;
+  --sidebar-nav-link-margin: 0 calc(-1 * var(--sidebar-horizontal-padding)) 0 0;
+  --sidebar-nav-pagelink-padding: .25em 0 0 20px;
+  /* active page link styling */
+  --sidebar-nav-link-font-weight--active: bold;
   --sidebar-nav-link-before-content-l3: "";
   --sidebar-nav-link-before-content-l3--active: "→";
+  /* section headings */
+  --sidebar-nav-strong-font-size: var(--font-size-s);
+  --sidebar-nav-strong-margin: 2em calc(-1 * var(--sidebar-horizontal-padding)) .25em 0;
+  --sidebar-nav-strong-padding: .25em 0 0;
 
   /* syntax highlighting tweaks for contrast accessibility */
   --code-theme-comment: var(--mono-shade1);
@@ -26,4 +38,13 @@
 
 .markdown-section {
   padding: 2em;
+}
+
+.sidebar-nav li > strong {
+  letter-spacing: .15ch;
+}
+
+.app-sub-sidebar {
+  --sidebar-nav-indent: 1em;
+  --sidebar-nav-pagelink-padding: 0;
 }
