@@ -210,7 +210,7 @@ can end the turn using the `endTurn` button and the next call to
 `clickCell` will result in a “1” in the chosen cell instead of a “0”.
 
 ```react
-<iframe class='react' src='snippets/example-1' height='800' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-1' height='760' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 
@@ -544,7 +544,7 @@ Here are the key things to remember:
 And there you have it. A basic tic-tac-toe game!
 
 ```react
-<iframe class='react' src='snippets/example-2' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-2' height='760' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 ?> You can press <kbd>1</kbd> (or click on the button next to “reset”)
@@ -630,7 +630,7 @@ some manual moves to get two in a row and then verify that
 the bot makes a block.
 
 ```react
-<iframe class='react' src='snippets/example-3' height='850' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
+<iframe class='react' src='snippets/example-3' height='760' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
 ```
 
 ?> The bot uses [MCTS](https://nicolodavis.com/blog/tic-tac-toe/) under the
