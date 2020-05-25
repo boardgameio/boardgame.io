@@ -48,3 +48,16 @@
   --sidebar-nav-indent: 1em;
   --sidebar-nav-pagelink-padding: 0;
 }
+
+@media screen and (max-width: 768px) {
+  :root {
+    --docsifytabs-content-padding: 1rem;
+    --code-block-margin: 1em -1em;
+    --code-block-padding: 1.75em 1em 1.25em;
+    --code-block-border-radius: 0;
+  }
+
+  .markdown-section {
+    padding: 2em 1em;
+  }
+}
