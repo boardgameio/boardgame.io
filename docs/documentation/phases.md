@@ -11,7 +11,7 @@ of that phase. This includes the ability to define a different
 set of moves, use a different turn order etc. Turns happen
 inside phases.
 
-#### Card Game
+### Card Game
 
 Let us start with a contrived example of a game that has exactly
 two moves:
@@ -46,7 +46,7 @@ We'll ignore the rendering part of this game, but this is how it might look. Not
 <iframe class='plain' src='snippets/phases-1' height='350' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
 ```
 
-#### Phases
+### Phases
 
 Now let's say we want the game to work in two phases:
 
@@ -127,7 +127,7 @@ phase, and you can only play cards in the second phase.
 <iframe class='plain' src='snippets/phases-2' height='350' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true'></iframe>
 ```
 
-#### Setup and Cleanup hooks
+### Setup and Cleanup hooks
 
 You can also run code automatically at the beginning or end of a phase. These are specified just like normal moves in `onBegin` and `onEnd`.
 
@@ -140,15 +140,15 @@ phases: {
 };
 ```
 
-!> Hooks like `onBegin` and `onEnd` are run only on the server in
+?> Hooks like `onBegin` and `onEnd` are run only on the server in
 multiplayer games. Moves, on the other hand, run on both client
 and server. They are run on the client in order to facilitate
 a lag-free experience, and are run on the server to calculate the
 authoritative game state.
 
-#### Moving between Phases
+### Moving between Phases
 
-##### Using events
+#### Using events
 
 The two primary ways of moving between phases are by calling the
 following events:
@@ -161,7 +161,7 @@ following events:
    the phase specified by the argument.
 
 
-##### Using an `endIf` condition
+#### Using an `endIf` condition
 
 You can also end a phase by returning a truthy value from its
 `endIf` method:
@@ -193,7 +193,7 @@ phases: {
 
 !> Whenever a phase ends, the current player's turn is first ended automatically.
 
-#### Override Behavior
+### Override Behavior
 
 As observed above, a phase can specify its own `moves` section
 which comes into effect when the phase is active. This `moves`

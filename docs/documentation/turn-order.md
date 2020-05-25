@@ -56,34 +56,34 @@ on [Phases](phases.md) for more details.
 
 ### Presets
 
-##### DEFAULT
+#### DEFAULT
 
 This is the default round-robin. It is used if you don't
 specify any turn order.
 
-##### RESET
+#### RESET
 
 This is similar to `DEFAULT`, but instead of incrementing
 the previous position at the beginning of a phase, it
 will always start from `0`.
 
-##### CONTINUE
+#### CONTINUE
 
 This is also similar to `DEFAULT`, but instead of incrementing
 the previous position at the beginning of a phase, it will
 start with the player who ended the previous phase.
 
-##### ONCE
+#### ONCE
 
 This is another round-robin, but it goes around only once.
 After this, the phase ends automatically.
 
-##### CUSTOM
+#### CUSTOM
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the provided
 value.
 
-##### CUSTOM_FROM
+#### CUSTOM_FROM
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the value
 in a specified field in `G`.
