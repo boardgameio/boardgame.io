@@ -7,7 +7,7 @@ to the next player.
 
 Turn order state is maintained in the following fields:
 
-```
+```js
 ctx: {
   currentPlayer: '0',
   playOrder: ['0', '1', '2', ...],
@@ -83,10 +83,22 @@ After this, the phase ends automatically.
 Round-robin like `DEFAULT`, but sets `playOrder` to the provided
 value.
 
+```js
+turn: {
+  order: TurnOrder.CUSTOM(['1', '3']),
+}
+```
+
 #### CUSTOM_FROM
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the value
 in a specified field in `G`.
+
+```js
+turn: {
+  order: TurnOrder.CUSTOM_FROM('property_in_G'),
+}
+```
 
 ### Ad Hoc
 
@@ -102,8 +114,8 @@ works the same way.
 Player `3` is made the new player in both examples below:
 
 ```js
-onClickEndTurn() {
-  this.props.events.endTurn({ next: '3' });
+function Move(G, ctx) {
+  ctx.events.endTurn({ next: '3' });
 }
 ```
 
