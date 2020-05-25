@@ -1,0 +1,30 @@
+:root {
+  --theme-hue: 152;
+  --theme-lightness : 40%;
+  --mono-hue: calc(var(--theme-hue) + 180);
+  --mono-saturation: 12%;
+
+  --link-color: hsl(var(--theme-hue), var(--theme-saturation), 27%);
+
+  /* add rounded corners */
+  --border-radius-s: .25em;
+  --border-radius-m: .5em;
+  --border-radius-l: 1.5em;
+
+  --sidebar-padding: 0 1em;
+
+  /* syntax highlighting tweaks for contrast accessibility */
+  --code-theme-comment: var(--mono-shade1);
+  --code-theme-function: hsl(347, 88%, 47%);
+  --code-theme-punctuation: var(--mono-shade1);
+  --code-theme-operator: hsl(29, 30%, 40%);
+  --code-theme-selector: hsl(100, 100%, 25%);
+  --code-theme-tag: hsl(310, 100%, 30%);
+
+  /* darken active sidebar link for contrast accessibility */
+  --sidebar-nav-link-color--active: var(--link-color);
+}
+
+.markdown-section {
+  padding: 2em;
+}

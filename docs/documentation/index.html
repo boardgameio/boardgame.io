@@ -12,15 +12,16 @@
   <meta name="twitter:description" content="Open Source Game Engine for Turn-Based Games">
   <link rel="shortcut icon" href="https://raw.githubusercontent.com/nicolodavis/boardgame.io/master/docs/favicon.png" type="image/png" sizes="16x16">
   <link rel="stylesheet" href="//unpkg.com/docsify-themeable@0/dist/css/theme-simple.css">
+  <link rel="stylesheet" href="theme.css">
 
   <style>
   .app-sub-sidebar .section-link:before {
     content: "";
-    padding-right: 4px;
   }
 
   iframe {
-    box-shadow: 0 0 10px #ccc;
+    box-shadow: 0 0 10px var(--mono-tint2);
+    border-radius: var(--border-radius-l);
   }
 
   iframe.plain {
@@ -50,7 +51,6 @@
     },
     repo: 'https://github.com/nicolodavis/boardgame.io',
     logo: '../logo-optimized.svg',
-    themeColor: 'rgb(66, 185, 131)',
     homepage: 'concepts.md',
     loadSidebar: 'sidebar.md',
     subMaxLevel: 2,

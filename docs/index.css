@@ -7,7 +7,6 @@
  */
 
 body {
-  --theme-color: rgb(66, 185, 131);
   padding: 0 3em 5em;
   text-align: center;
 }
@@ -59,7 +58,6 @@ body {
 #topbar a,
 #topbar a:visited {
   margin: 0 1em;
-  color: var(--theme-color);
   text-decoration: none;
 }
 
