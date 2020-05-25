@@ -1,9 +1,9 @@
-- Getting Started
+- **Getting Started**
 
   - [Concepts](/)
   - [Tutorial](tutorial.md)
 
-- Guides
+- **Guides**
 
   - [Multiplayer](multiplayer.md)
   - [Turn Order](turn-order.md)
@@ -20,7 +20,7 @@
   - [Testing](testing.md)
   - [Deployment](deployment.md)
 
-- Reference
+- **Reference**
 
   - [Game](api/Game.md)
   - [Client](api/Client.md)
