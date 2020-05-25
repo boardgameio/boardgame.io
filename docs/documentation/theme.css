@@ -28,7 +28,7 @@
   --sidebar-nav-strong-padding: .25em 0 0;
 
   /* syntax highlighting tweaks for contrast accessibility */
-  --code-theme-comment: var(--mono-shade1);
+  --code-theme-comment: hsl(0, 0%, 44%);
   --code-theme-function: hsl(347, 88%, 47%);
   --code-theme-punctuation: var(--mono-shade1);
   --code-theme-operator: hsl(29, 30%, 40%);
