@@ -103,7 +103,7 @@ and play around with it on CodeSandbox:<br/><br/>
 
 
 
-## Defining a game
+## Defining a Game
 
 We define a game by creating an object whose contents
 tell boardgame.io how your game works. More or less everything
@@ -145,7 +145,7 @@ but we don't need that for Tic-Tac-Toe.
 
 
 
-## Adding the game to a web app
+## Creating a Client
 
 <!-- tabs:start -->
 
@@ -219,7 +219,9 @@ in the `Client` config.
 
 
 
-## Validating Moves
+## Game Improvements
+
+### Validating Moves
 
 So far, if a player calls `clickCell` for a cell that is already filled,
 it will be overwritten. Let’s prevent that by updating `clickCell`
@@ -243,9 +245,7 @@ clickCell: (G, ctx, id) => {
 }
 ```
 
-
-
-## Victory Condition
+### Victory Condition
 
 The Tic-Tac-Toe game we have so far doesn't really ever end.
 Let's keep track of a winner in case one player wins the game.
@@ -300,7 +300,7 @@ the return value is available at `ctx.gameover`.
 
 
 
-## Game Board
+## Building a Board
 
 <!-- tabs:start -->
 
