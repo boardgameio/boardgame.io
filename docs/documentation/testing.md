@@ -2,26 +2,27 @@
 
 ### Unit Tests
 
-Moves are just functions, so they lend themselves to easy testing. A useful strategy is
-to implement it as a standalone function before passing it to the game object:
+Moves are just functions, so they lend themselves to unit testing.
+A useful strategy is to implement each move as a standalone function
+before passing them to the game object:
 
-`game.js`
+`Game.js`
 
 ```js
 export function clickCell(G, ctx, id) {
   G.cells[id] = ctx.currentPlayer;
 }
 
-{
-  moves: { clickCell }
-  ...
+export const TicTacToe = {
+  moves: { clickCell },
+  // ...
 }
 ```
 
-`game.test.js`
+`Game.test.js`
 
 ```js
-import { clickCell } from './game';
+import { clickCell } from './Game';
 
 it('should place the correct value in the cell', () => {
   // original state.
@@ -45,7 +46,7 @@ Test your game logic in specific scenarios.
 
 ```js
 import { Client } from 'boardgame.io/client';
-import { TicTacToe } from './game';
+import { TicTacToe } from './Game';
 
 it('should declare player 1 as the winner', () => {
   // set up a specific board scenario
