@@ -114,7 +114,7 @@ containing the moves that make up the game.
 
 A move function receives
 the game state `G` and updates it to the desired new state.
-`ctx` is an  object managed by boardgame.io
+It also receives `ctx`, an object managed by boardgame.io
 that contains metadata like `turn` and `currentPlayer`.
 After `G` and `ctx`, moves can receive arbitrary arguments
 that you pass in when making the move.
