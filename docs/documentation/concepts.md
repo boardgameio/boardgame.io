@@ -23,7 +23,7 @@ on both client and server seamlessly. The state in `ctx` is
 incrementally adoptable, meaning that you can manage all the
 state manually in `G` if you so desire.
 
-?> `ctx` contains other fields not shown here that complex games
+?> `ctx` contains other fields not shown here that games
 can take advantage of, including support for game phases and complex
 turn orders.
 
@@ -62,7 +62,7 @@ onClick() {
 
 #### **Plain JS**
 
-You can access `moves` from an instance of  the plain JavaScript client:
+You can access `moves` from an instance of the plain JavaScript client:
 
 ```js
 function onClick() {
