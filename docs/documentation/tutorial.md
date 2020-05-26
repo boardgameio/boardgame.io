@@ -245,6 +245,34 @@ clickCell: (G, ctx, id) => {
 }
 ```
 
+### Managing Turns
+
+In the Debug Panel we clicked `endTurn` to pass the turn
+to the next player after making a move. We could do this from our
+client code too: make a move, then end the turn. This could be flexible
+because a player could choose when to end their turn, but in
+Tic-Tac-Toe we know that the turn should always end when a move is made.
+
+There are several different ways to manage turns in boardgame.io.
+We’ll use the `moveLimit` option in our game definition to tell
+the framework to automatically end a player’s turn after a single
+move has been made.
+
+```js
+export const TicTacToe = {
+  setup: () => { /* ... */ },
+
+  turn: {
+    moveLimit: 1,
+  },
+
+  moves: { /* ... */ },
+}
+```
+
+?> You can learn more in the [Turn Order](turn-order.md)
+    and [Events](events.md) guides.
+
 ### Victory Condition
 
 The Tic-Tac-Toe game we have so far doesn't really ever end.
@@ -322,7 +350,6 @@ import React from 'react';
 export class TicTacToeBoard extends React.Component {
   onClick(id) {
     this.props.moves.clickCell(id);
-    this.props.events.endTurn();
   }
 
   render() {
@@ -376,18 +403,12 @@ handler:
 
 ```js
 this.props.moves.clickCell(id);
-this.props.events.endTurn();
 ```
 
 - `props.moves` is an object passed in by the framework that
   contains functions to dispatch moves. `props.moves.clickCell`
   dispatches the `clickCell` move, and any data passed in is made
   available in the move handler.
-
-
-- `props.events` is an object that contains functions to control
-  the flow of the game, including the ability to end the turn
-  (see [Events](events.md) for more details).
 
 
 Now, we pass the board component to our `Client` in `src/App.js`:
@@ -457,7 +478,6 @@ class App {
     const handleCellClick = event => {
       const id = parseInt(event.target.dataset.id);
       this.client.moves.clickCell(id);
-      this.events.endTurn();
     };
     cells.forEach(cell => {
       cell.onclick = handleCellClick;
@@ -532,11 +552,6 @@ Here are the key things to remember:
   by calling `client.moves['moveName']`.
 
 
-- You can trigger game events to control the flow of the game
-  using the `client.events` methods. That’s how we end the turn
-  in our click handler. (See [Events](events.md) for more details.)
-
-
 - You can register callbacks for every state change using `client.subscribe`.
 
 <!-- tabs:end -->
@@ -549,40 +564,6 @@ And there you have it. A basic tic-tac-toe game!
 
 ?> You can press <kbd>1</kbd> (or click on the button next to “reset”)
    to reset the state of the game and start over.
-
-
-
-## Managing Turns
-
-You may have noticed that so far, we had to call `events.endTurn`
-each time the player clicked on a cell as well as calling `moves.clickCell`.
-Sometimes we need the flexibility of calling moves and events
-separately, but in this case we know that the turn should always
-end when a move is made.
-
-There are several different ways to manage turns in boardgame.io.
-We’ll use the `moveLimit` option in our game definition to tell
-the framework to automatically end a player’s turn after a single
-move has been made.
-
-```js
-export const TicTacToe = {
-  setup: () => { /* ... */ },
-
-  turn: {
-    moveLimit: 1,
-  },
-
-  moves: { /* ... */ },
-  endIf: (G, ctx) => { /* ... */ },
-}
-```
-
-Now you can remove the `endTurn` call in `src/App.js`.
-The turn will end automatically.
-
-?> You can learn more in the [Turn Order](turn-order.md)
-    and [Events](events.md) guides.
 
 
 
