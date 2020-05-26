@@ -80,8 +80,8 @@ for more details.
 
 ### Triggering an event from game logic.
 
-You can trigger events from a move or any code inside
-your game logic (the phase's `onBegin` hook, for example).
+You can trigger events from a move or code inside
+your game logic (a phase’s `onBegin` hook, for example).
 This is done through the `ctx.events` object:
 
 ```js
@@ -92,9 +92,9 @@ moves: {
 }
 ```
 
-Note that the event is just queued up and triggered **after** the move.
-You can still have other logic at the end of the move which will be
-run before the event is triggered.
+!> Events are queued up and triggered **after** a move.
+Any changes you make to `G` will be applied before events are
+triggered, even if the event is called first in your move function.
 
 ### Triggering an event from the client
 
@@ -152,10 +152,10 @@ the `events` section in your game config.
 const game = {
   events: {
     endGame: false,
-    ...
+    // ...
   },
 };
 ```
 
-!> This doesn't apply to events in game logic, but just the
+!> This doesn't apply to events in moves or hooks, but just the
 ability to call an event directly from a client.
