@@ -179,14 +179,14 @@ and call its `start` method to run it.
 import { Client } from 'boardgame.io/client';
 import { TicTacToe } from './Game';
 
-class App {
+class TicTacToeClient {
   constructor() {
     this.client = Client({ game: TicTacToe });
     this.client.start();
   }
 }
 
-const app = new App();
+const app = new TicTacToeClient();
 ```
 
 You can now serve the app from the command line by running:
@@ -430,27 +430,27 @@ You can build your game board with your preferred UI tools.
 This example will use basic JavaScript, but you should be able
 to adapt this approach to many other frameworks.
 
-To start with, let’s add a `createBoard` method to our `App`
-class and call it in the constructor. This will inject
+To start with, let’s add a `createBoard` method to our
+`TicTacToeClient` and call it in the constructor. This will inject
 the required DOM structure for our board into the web page.
+To know where to insert our board UI, we’ll pass in an
+element when instantiating the class.
 
 We’ll also add an `attachListeners` method. This will
 set up our board cells so that they trigger the `clickCell`
 move when they are clicked.
 
 ```js
-class App {
-  constructor() {
+class TicTacToeClient {
+  constructor(appElement) {
     this.client = Client({ game: TicTacToe });
     this.client.start();
+    this.appElement = appElement;
     this.createBoard();
     this.attachListeners();
   }
 
   createBoard() {
-    // Get our app <div>.
-    this.appElement = document.getElementById('app');
-
     // Create cells in rows for the Tic-Tac-Toe board.
     const rows = [];
     for (let i = 0; i < 3; i++) {
@@ -465,25 +465,28 @@ class App {
     // Add the HTML to our app <div>.
     // We’ll use the empty <p> to display the game winner later.
     this.appElement.innerHTML = `
-      <table id="board">${rows.join('')}</table>
-      <p id="winner"></p>
+      <table>${rows.join('')}</table>
+      <p class="winner"></p>
     `;
   }
 
   attachListeners() {
-    // Attach event listeners to the board cells.
-    const cells = this.appElement.querySelectorAll('.cell');
-    // This event handler will read the cell id from the cell’s
+    // This event handler will read the cell id from a cell’s
     // `data-id` attribute and make the `clickCell` move.
     const handleCellClick = event => {
       const id = parseInt(event.target.dataset.id);
       this.client.moves.clickCell(id);
     };
+    // Attach the event listener to each of the board cells.
+    const cells = this.appElement.querySelectorAll('.cell');
     cells.forEach(cell => {
       cell.onclick = handleCellClick;
     });
   }
 }
+
+const appElement = document.getElementById('app');
+const app = new TicTacToeClient(appElement);
 ```
 
 You probably won’t see anything just yet, because all the cells are empty.
@@ -508,11 +511,11 @@ in the Debug Panel, but the board itself doesn’t change.
 We need to add a way to refresh the board every time
 boardgame.io’s state changes.
 
-Let’s do that by writing an `update` method for our `App`
+Let’s do that by writing an `update` method for our `TicTacToeClient`
 class and subscribing to the boardgame.io state:
 
 ```js
-class App {
+class TicTacToeClient {
   constructor() {
     // As before, but we also subscribe to the client:
     this.client.subscribe(state => this.update(state));
@@ -529,10 +532,10 @@ class App {
     cells.forEach(cell => {
       const cellId = parseInt(cell.dataset.id);
       const cellValue = state.G.cells[cellId];
-      cell.textContent = cellValue !== null ? state.G.cells[cellId] : '';
+      cell.textContent = cellValue !== null ? cellValue : '';
     });
     // Get the gameover message element.
-    const messageEl = this.appElement.querySelector('#winner');
+    const messageEl = this.appElement.querySelector('.winner');
     // Update the element to show a winner if any.
     if (state.ctx.gameover) {
       messageEl.textContent =
