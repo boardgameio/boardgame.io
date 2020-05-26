@@ -42,14 +42,17 @@ moves: {
     G.hand.push(card);
   },
 
-  ...
+  // ...
 }
 ```
 
-Moves are dispatched from the client in different ways
-depending on the platform you are developing on. If you
-are using React, for example, they are dispatched via an API
-provided through `props`.
+On the client, you use a `moves` object to dispatch your
+move functions.
+
+<!-- tabs:start -->
+#### **React**
+
+Using React, `moves` is provided through your component’s `props`:
 
 ```js
 onClick() {
@@ -57,18 +60,38 @@ onClick() {
 }
 ```
 
+#### **Plain JS**
+
+You can access `moves` from an instance of  the plain JavaScript client:
+
+```js
+function onClick() {
+  client.moves.drawCard();
+}
+```
+<!-- tabs:end -->
+
 ### Events
 
 These are framework-provided functions that are analagous to moves, except that they work on `ctx`. These typically advance the game state by doing things like
 ending the turn, changing the game phase etc.
-Events are dispatched from the client in a similar way to moves. Here
-is an example in React again:
+Events are dispatched from the client in a similar way to moves.
 
+<!-- tabs:start -->
+#### **React**
 ```js
 onClick() {
   this.props.events.endTurn();
 }
 ```
+
+#### **Plain JS**
+```js
+function onClick() {
+  client.events.endTurn();
+}
+```
+<!-- tabs:end -->
 
 For more details, see the guide on [Events](events.md).
 
