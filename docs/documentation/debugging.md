@@ -9,10 +9,8 @@ with your client. For example,
 import logger from 'redux-logger';
 import { applyMiddleware } from 'redux';
 
-export default Client({
-  game,
-  numPlayers: 1,
-  board: Board,
+Client({
+  // ...
   enhancer: applyMiddleware(logger),
 });
 ```
@@ -20,7 +18,7 @@ export default Client({
 Doing so will `console.log` on state changes. This can also hook into the [Chrome Redux DevTools](http://extension.remotedev.io/) browser extension like this:
 
 ```js
-export default Client({
+Client({
   // ...
   enhancer: (
     window.__REDUX_DEVTOOLS_EXTENSION__
@@ -35,7 +33,7 @@ or both
 import logger from 'redux-logger';
 import { applyMiddleware, compose } from 'redux';
 
-export default Client({
+Client({
   // ...
   enhancer: compose(
     applyMiddleware(logger),
