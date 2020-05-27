@@ -61,7 +61,7 @@ const getPortFromServer = (server: KoaServer): string | number | null => {
 interface ServerOpts {
   games: Game[];
   db?: StorageAPI.Async | StorageAPI.Sync;
-  transport?;
+  transport?: SocketIO;
   uuid?: () => string;
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
@@ -115,6 +115,7 @@ export function Server({
     app,
     db,
     router,
+    transport,
 
     run: async (portOrConfig: number | ServerConfig, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);

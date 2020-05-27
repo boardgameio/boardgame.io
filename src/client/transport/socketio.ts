@@ -8,7 +8,24 @@
 
 import * as ActionCreators from '../../core/action-creators';
 import io from 'socket.io-client';
-import { Transport } from './transport';
+import { Transport, TransportOpts, MetadataCallback } from './transport';
+import {
+  CredentialedActionShape,
+  LogEntry,
+  PlayerID,
+  State,
+  SyncInfo,
+} from '../../types';
+
+interface SocketIOOpts {
+  server?: string;
+  socketOpts?;
+}
+
+type SocketIOTransportOpts = TransportOpts &
+  SocketIOOpts & {
+    socket?;
+  };
 
 /**
  * SocketIO
@@ -16,6 +33,13 @@ import { Transport } from './transport';
  * Transport interface that interacts with the Master via socket.io.
  */
 export class SocketIOTransport extends Transport {
+  server: string;
+  socket;
+  socketOpts;
+  isConnected: boolean;
+  callback: () => void;
+  gameMetadataCallback: MetadataCallback;
+
   /**
    * Creates a new Mutiplayer instance.
    * @param {object} socket - Override for unit tests.
@@ -35,7 +59,7 @@ export class SocketIOTransport extends Transport {
     gameName,
     numPlayers,
     server,
-  } = {}) {
+  }: SocketIOTransportOpts = {}) {
     super({ store, gameName, playerID, gameID, numPlayers });
 
     this.server = server;
@@ -50,7 +74,7 @@ export class SocketIOTransport extends Transport {
    * Called when an action that has to be relayed to the
    * game master is made.
    */
-  onAction(state, action) {
+  onAction(state: State, action: CredentialedActionShape.Any) {
     this.socket.emit(
       'update',
       action,
@@ -83,18 +107,21 @@ export class SocketIOTransport extends Transport {
     // Called when another player makes a move and the
     // master broadcasts the update to other clients (including
     // this one).
-    this.socket.on('update', (gameID, state, deltalog) => {
-      const currentState = this.store.getState();
+    this.socket.on(
+      'update',
+      (gameID: string, state: State, deltalog: LogEntry[]) => {
+        const currentState = this.store.getState();
 
-      if (gameID == this.gameID && state._stateID >= currentState._stateID) {
-        const action = ActionCreators.update(state, deltalog);
-        this.store.dispatch(action);
+        if (gameID == this.gameID && state._stateID >= currentState._stateID) {
+          const action = ActionCreators.update(state, deltalog);
+          this.store.dispatch(action);
+        }
       }
-    });
+    );
 
     // Called when the client first connects to the master
     // and requests the current game state.
-    this.socket.on('sync', (gameID, syncInfo) => {
+    this.socket.on('sync', (gameID: string, syncInfo: SyncInfo) => {
       if (gameID == this.gameID) {
         const action = ActionCreators.sync(syncInfo);
         this.gameMetadataCallback(syncInfo.filteredMetadata);
@@ -129,11 +156,11 @@ export class SocketIOTransport extends Transport {
   /**
    * Subscribe to connection state changes.
    */
-  subscribe(fn) {
+  subscribe(fn: () => void) {
     this.callback = fn;
   }
 
-  subscribeGameMetadata(fn) {
+  subscribeGameMetadata(fn: MetadataCallback) {
     this.gameMetadataCallback = fn;
   }
 
@@ -141,7 +168,7 @@ export class SocketIOTransport extends Transport {
    * Updates the game id.
    * @param {string} id - The new game id.
    */
-  updateGameID(id) {
+  updateGameID(id: string) {
     this.gameID = id;
 
     const action = ActionCreators.reset(null);
@@ -156,7 +183,7 @@ export class SocketIOTransport extends Transport {
    * Updates the player associated with this client.
    * @param {string} id - The new player id.
    */
-  updatePlayerID(id) {
+  updatePlayerID(id: PlayerID) {
     this.playerID = id;
 
     const action = ActionCreators.reset(null);
@@ -168,8 +195,8 @@ export class SocketIOTransport extends Transport {
   }
 }
 
-export function SocketIO({ server, socketOpts } = {}) {
-  return transportOpts =>
+export function SocketIO({ server, socketOpts }: SocketIOOpts = {}) {
+  return (transportOpts: SocketIOTransportOpts) =>
     new SocketIOTransport({
       server,
       socketOpts,

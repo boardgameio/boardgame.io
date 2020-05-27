@@ -19,13 +19,14 @@ import {
   redo,
 } from './action-creators';
 import { error } from '../core/logger';
+import { Ctx, Game, State, SyncInfo } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
 
-const game = {
+const game: Game = {
   moves: {
     A: G => G,
     B: () => ({ moved: true }),
@@ -106,12 +107,15 @@ test('disable move by invalid playerIDs', () => {
 });
 
 test('sync', () => {
-  const state = reducer(undefined, sync({ state: { G: 'restored' } }));
+  const state = reducer(
+    undefined,
+    sync({ state: { G: 'restored' } } as SyncInfo)
+  );
   expect(state).toEqual({ G: 'restored' });
 });
 
 test('update', () => {
-  const state = reducer(undefined, update({ G: 'restored' }));
+  const state = reducer(undefined, update({ G: 'restored' } as State, []));
   expect(state).toEqual({ G: 'restored' });
 });
 
@@ -147,7 +151,7 @@ test('endTurn', () => {
 });
 
 test('light client when multiplayer=true', () => {
-  const game = {
+  const game: Game = {
     moves: { A: () => ({ win: true }) },
     endIf: G => G.win,
   };
@@ -239,16 +243,16 @@ test('deltalog', () => {
 });
 
 describe('Events API', () => {
-  const fn = (G, ctx) => (ctx.events ? {} : { error: true });
+  const fn = (G: any, ctx: Ctx) => (ctx.events ? {} : { error: true });
 
-  const game = {
+  const game: Game = {
     setup: () => ({}),
     phases: { A: {} },
     turn: {
       onBegin: fn,
       onEnd: fn,
+      onMove: fn,
     },
-    onMove: fn,
   };
 
   const reducer = CreateGameReducer({ game });
@@ -270,17 +274,17 @@ describe('Events API', () => {
 });
 
 describe('Random inside setup()', () => {
-  const game1 = {
+  const game1: Game = {
     seed: 'seed1',
     setup: ctx => ({ n: ctx.random.D6() }),
   };
 
-  const game2 = {
+  const game2: Game = {
     seed: 'seed2',
     setup: ctx => ({ n: ctx.random.D6() }),
   };
 
-  const game3 = {
+  const game3: Game = {
     seed: 'seed2',
     setup: ctx => ({ n: ctx.random.D6() }),
   };
@@ -296,7 +300,7 @@ describe('Random inside setup()', () => {
 });
 
 test('undo / redo', () => {
-  const game = {
+  const game: Game = {
     seed: 0,
     moves: {
       move: (G, ctx, arg) => ({ ...G, [arg]: true }),
@@ -306,7 +310,7 @@ test('undo / redo', () => {
     },
   };
 
-  const reducer = CreateGameReducer({ game, numPlayers: 2 });
+  const reducer = CreateGameReducer({ game });
 
   let state = InitializeGame({ game });
 
@@ -358,4 +362,278 @@ test('undo / redo', () => {
   state = reducer(state, gameEvent('endTurn'));
   state = reducer(state, undo());
   expect(state.G).toMatchObject({ roll: 4 });
+});
+
+describe('undo stack', () => {
+  const game: Game = {
+    moves: {
+      basic: () => {},
+      endTurn: (_, ctx) => {
+        ctx.events.endTurn();
+      },
+    },
+  };
+
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game });
+
+  test('contains initial state at start of game', () => {
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+  });
+
+  test('grows when a move is made', () => {
+    state = reducer(state, makeMove('basic'));
+    expect(state._undo).toHaveLength(2);
+    expect(state._undo[1].moveType).toBe('basic');
+    expect(state._undo[1].ctx).toEqual(state.ctx);
+  });
+
+  test('shrinks when a move is undone', () => {
+    state = reducer(state, undo());
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+  });
+
+  test('grows when a move is redone', () => {
+    state = reducer(state, redo());
+    expect(state._undo).toHaveLength(2);
+    expect(state._undo[1].moveType).toBe('basic');
+    expect(state._undo[1].ctx).toEqual(state.ctx);
+  });
+
+  test('is reset when a turn ends', () => {
+    state = reducer(state, makeMove('endTurn'));
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+    expect(state._undo[0].moveType).toBeUndefined();
+  });
+});
+
+describe('redo stack', () => {
+  const game: Game = {
+    moves: {
+      basic: () => {},
+      endTurn: (_, ctx) => {
+        ctx.events.endTurn();
+      },
+    },
+  };
+
+  const reducer = CreateGameReducer({ game });
+  let state = InitializeGame({ game });
+
+  test('is empty at start of game', () => {
+    expect(state._redo).toHaveLength(0);
+  });
+
+  test('grows when a move is undone', () => {
+    state = reducer(state, makeMove('basic'));
+    state = reducer(state, undo());
+    expect(state._redo).toHaveLength(1);
+    expect(state._redo[0].moveType).toBe('basic');
+  });
+
+  test('shrinks when a move is redone', () => {
+    state = reducer(state, redo());
+    expect(state._redo).toHaveLength(0);
+  });
+
+  test('is reset when a move is made', () => {
+    state = reducer(state, makeMove('basic'));
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    expect(state._redo).toHaveLength(2);
+    state = reducer(state, makeMove('basic'));
+    expect(state._redo).toHaveLength(0);
+  });
+
+  test('is reset when a turn ends', () => {
+    state = reducer(state, makeMove('basic'));
+    state = reducer(state, undo());
+    expect(state._redo).toHaveLength(1);
+    state = reducer(state, makeMove('endTurn'));
+    expect(state._redo).toHaveLength(0);
+  });
+});
+
+describe('undo / redo with stages', () => {
+  const game: Game = {
+    setup: () => ({ A: false, B: false, C: false }),
+    turn: {
+      activePlayers: { currentPlayer: 'start' },
+      stages: {
+        start: {
+          moves: {
+            moveA: {
+              move: (G, ctx, moveAisReversible) => {
+                ctx.events.setStage('A');
+                return { ...G, moveAisReversible, A: true };
+              },
+              undoable: G => G.moveAisReversible > 0,
+            },
+          },
+        },
+        A: {
+          moves: {
+            moveB: {
+              move: (G, ctx) => {
+                ctx.events.setStage('B');
+                return { ...G, B: true };
+              },
+              undoable: false,
+            },
+          },
+        },
+        B: {
+          moves: {
+            moveC: {
+              move: (G, ctx) => {
+                ctx.events.setStage('C');
+                return { ...G, C: true };
+              },
+              undoable: true,
+            },
+          },
+        },
+        C: {
+          moves: {},
+        },
+      },
+    },
+  };
+
+  const reducer = CreateGameReducer({ game });
+
+  let state = InitializeGame({ game });
+
+  test('moveA sets state & moves player to stage A (undoable)', () => {
+    state = reducer(state, makeMove('moveA', true, '0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: true,
+      A: true,
+      B: false,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('A');
+  });
+
+  test('undo undoes last move (moveA)', () => {
+    state = reducer(state, undo('0'));
+    expect(state.G).toMatchObject({
+      A: false,
+      B: false,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('start');
+  });
+
+  test('redo redoes moveA', () => {
+    state = reducer(state, redo('0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: true,
+      A: true,
+      B: false,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('A');
+  });
+
+  test('undo undoes last move after redo (moveA)', () => {
+    state = reducer(state, undo('0'));
+    expect(state.G).toMatchObject({
+      A: false,
+      B: false,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('start');
+  });
+
+  test('moveA sets state & moves player to stage A (not undoable)', () => {
+    state = reducer(state, makeMove('moveA', false, '0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: false,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('A');
+  });
+
+  test('moveB sets state & moves player to stage B', () => {
+    state = reducer(state, makeMove('moveB', [], '0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: true,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('B');
+  });
+
+  test('undo doesn’t undo last move if not undoable (moveB)', () => {
+    state = reducer(state, undo('0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: true,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('B');
+  });
+
+  test('moveC sets state & moves player to stage C', () => {
+    state = reducer(state, makeMove('moveC', [], '0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: true,
+      C: true,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('C');
+  });
+
+  test('undo undoes last move (moveC)', () => {
+    state = reducer(state, undo('0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: true,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('B');
+  });
+
+  test('redo redoes moveC', () => {
+    state = reducer(state, redo('0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: true,
+      C: true,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('C');
+  });
+
+  test('undo undoes last move after redo (moveC)', () => {
+    state = reducer(state, undo('0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: true,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('B');
+  });
+
+  test('undo doesn’t undo last move if not undoable after undo/redo', () => {
+    state = reducer(state, undo('0'));
+    expect(state.G).toMatchObject({
+      moveAisReversible: false,
+      A: true,
+      B: true,
+      C: false,
+    });
+    expect(state.ctx.activePlayers['0']).toBe('B');
+  });
 });

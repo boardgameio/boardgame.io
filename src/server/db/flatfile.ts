@@ -24,7 +24,7 @@ export class FlatFile extends StorageAPI.Async {
   private dir: string;
   private logging?: boolean;
   private ttl?: boolean;
-  private requests: Promise<any>;
+  private fileQueues: { [key: string]: Promise<any> };
 
   constructor({
     dir,
@@ -40,14 +40,32 @@ export class FlatFile extends StorageAPI.Async {
     this.dir = dir;
     this.logging = logging || false;
     this.ttl = ttl || false;
-    this.requests = Promise.resolve();
+    this.fileQueues = {};
   }
 
-  private async request<T extends any = any>(
-    action: () => Promise<T>
-  ): Promise<T> {
-    this.requests = this.requests.then(action, action);
-    return this.requests;
+  private async chainRequest(
+    key: string,
+    request: () => Promise<any>
+  ): Promise<any> {
+    if (!(key in this.fileQueues)) this.fileQueues[key] = Promise.resolve();
+
+    this.fileQueues[key] = this.fileQueues[key].then(request, request);
+    return this.fileQueues[key];
+  }
+
+  private async getItem<T extends any = any>(key: string): Promise<T> {
+    return this.chainRequest(key, () => this.games.getItem(key));
+  }
+
+  private async setItem<T extends any = any>(
+    key: string,
+    value: T
+  ): Promise<any> {
+    return this.chainRequest(key, () => this.games.setItem(key, value));
+  }
+
+  private async removeItem(key: string): Promise<void> {
+    return this.chainRequest(key, () => this.games.removeItem(key));
   }
 
   async connect() {
@@ -66,8 +84,7 @@ export class FlatFile extends StorageAPI.Async {
     // Store initial state separately for easy retrieval later.
     const key = InitialStateKey(gameID);
 
-    await this.request(() => this.games.setItem(key, opts.initialState));
-
+    await this.setItem(key, opts.initialState);
     await this.setState(gameID, opts.initialState);
     await this.setMetadata(gameID, opts.metadata);
   }
@@ -79,30 +96,22 @@ export class FlatFile extends StorageAPI.Async {
     let result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
-      result.state = (await this.request(() =>
-        this.games.getItem(gameID)
-      )) as State;
+      result.state = (await this.getItem(gameID)) as State;
     }
 
     if (opts.metadata) {
       const key = MetadataKey(gameID);
-      result.metadata = (await this.request(() =>
-        this.games.getItem(key)
-      )) as Server.MatchMetadata;
+      result.metadata = (await this.getItem(key)) as Server.MatchMetadata;
     }
 
     if (opts.log) {
       const key = LogKey(gameID);
-      result.log = (await this.request(() =>
-        this.games.getItem(key)
-      )) as LogEntry[];
+      result.log = (await this.getItem(key)) as LogEntry[];
     }
 
     if (opts.initialState) {
       const key = InitialStateKey(gameID);
-      result.initialState = (await this.request(() =>
-        this.games.getItem(key)
-      )) as State;
+      result.initialState = (await this.getItem(key)) as State;
     }
 
     return result as StorageAPI.FetchResult<O>;
@@ -115,33 +124,32 @@ export class FlatFile extends StorageAPI.Async {
   async setState(id: string, state: State, deltalog?: LogEntry[]) {
     if (deltalog && deltalog.length > 0) {
       const key = LogKey(id);
-      const log: LogEntry[] =
-        ((await this.request(() => this.games.getItem(key))) as LogEntry[]) ||
-        [];
+      const log: LogEntry[] = ((await this.getItem(key)) as LogEntry[]) || [];
 
-      await this.request(() => this.games.setItem(key, log.concat(deltalog)));
+      await this.setItem(key, log.concat(deltalog));
     }
 
-    return await this.request(() => this.games.setItem(id, state));
+    return await this.setItem(id, state);
   }
 
   async setMetadata(id: string, metadata: Server.MatchMetadata): Promise<void> {
     const key = MetadataKey(id);
 
-    return await this.request(() => this.games.setItem(key, metadata));
+    return await this.setItem(key, metadata);
   }
 
   async wipe(id: string) {
     var keys = await this.games.keys();
     if (!(keys.indexOf(id) > -1)) return;
 
-    await this.request(() => this.games.removeItem(id));
-    await this.request(() => this.games.removeItem(LogKey(id)));
-    await this.request(() => this.games.removeItem(MetadataKey(id)));
+    await this.removeItem(id);
+    await this.removeItem(InitialStateKey(id));
+    await this.removeItem(LogKey(id));
+    await this.removeItem(MetadataKey(id));
   }
 
   async listGames(): Promise<string[]> {
-    const keys = await this.request(() => this.games.keys());
+    const keys = await this.games.keys();
     const suffix = ':metadata';
     return keys
       .filter(k => k.endsWith(suffix))

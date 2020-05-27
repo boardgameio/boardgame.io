@@ -699,16 +699,6 @@ export function Flow({
     const G = conf.turn.wrapped.onMove(state);
     state = { ...state, G };
 
-    // Update undo / redo state.
-    const undo = state._undo || [];
-    const moveType = action.type;
-
-    state = {
-      ...state,
-      _undo: [...undo, { G: state.G, ctx: state.ctx, moveType }],
-      _redo: [],
-    };
-
     let events = [{ fn: OnMove }];
 
     return Process(state, events);

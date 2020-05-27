@@ -29,3 +29,5 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 - [Mosaic Multiplayer](https://github.com/maciejmatu/mosaic) - [play](https://playmosaic.online/) - Azul board game clone you can play online with friends.
 
 - [Multibuzzer](https://github.com/wsun/multibuzzer) - [play](https://multibuzz.app) - Simple multiplayer buzzer system for trivia night or quiz bowl.
+
+- [Udaipur](https://github.com/skvrahul/UdaipurGame) - [play](https://udaipur-game.herokuapp.com/) - Clone of Jaipur, a 2 Player Card game, with online multiplayer support.

@@ -70,7 +70,7 @@ describe('GetBotPlayer', () => {
     const result = GetBotPlayer(
       {
         ctx: {
-          stage: {
+          activePlayers: {
             '1': Stage.NULL,
           },
         },
@@ -123,7 +123,7 @@ describe('GetBotPlayer', () => {
 
 describe('LocalMaster', () => {
   const game = {};
-  const master = LocalMaster({ game });
+  const master = new LocalMaster({ game });
 
   const storeA = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
   const storeB = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
