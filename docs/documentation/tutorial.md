@@ -189,10 +189,20 @@ class TicTacToeClient {
 const app = new TicTacToeClient();
 ```
 
+Let’s also add a script to `package.json` to make serving the web app simpler:
+
+```json
+{
+  "scripts": {
+    "start": "parcel index.html --open"
+  }
+}
+```
+
 You can now serve the app from the command line by running:
 
 ```
-npx parcel index.html --open
+npm start
 ```
 
 <!-- tabs:end -->
