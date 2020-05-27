@@ -2,14 +2,14 @@
 
 #### Features
 
-[[cfeaf67](https://github.com/nicolodavis/boardgame.io/commit/cfeaf67)] feat(plugins): Let moves return INVALID_MOVE after mutating G (#688)
-[[b2d6b06](https://github.com/nicolodavis/boardgame.io/commit/b2d6b06)] feat(server): Lobby API improvements (#675)
-[[dc668ec](https://github.com/nicolodavis/boardgame.io/commit/dc668ec)] feat(server): Expose SocketIO transport & convert to TS (#658)
+* [[cfeaf67](https://github.com/nicolodavis/boardgame.io/commit/cfeaf67)] feat(plugins): Let moves return INVALID_MOVE after mutating G (#688)
+* [[b2d6b06](https://github.com/nicolodavis/boardgame.io/commit/b2d6b06)] feat(server): Lobby API improvements (#675)
+* [[dc668ec](https://github.com/nicolodavis/boardgame.io/commit/dc668ec)] feat(server): Expose SocketIO transport & convert to TS (#658)
 
 #### Bugfixes
 
-[[1483a08](https://github.com/nicolodavis/boardgame.io/commit/1483a08)] fix UX issues in move debugger (#640)
-[[814621b](https://github.com/nicolodavis/boardgame.io/commit/814621b)] Make package.json scripts work on Windows (#657)
+* [[1483a08](https://github.com/nicolodavis/boardgame.io/commit/1483a08)] fix UX issues in move debugger (#640)
+* [[814621b](https://github.com/nicolodavis/boardgame.io/commit/814621b)] Make package.json scripts work on Windows (#657)
 
 ## 0.39.10
 
