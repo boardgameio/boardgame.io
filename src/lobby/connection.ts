@@ -6,8 +6,33 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { Game, LobbyAPI } from '../types';
+
+interface GameComponent {
+  game: Game;
+  board: React.ComponentType<any>;
+}
+
+interface LobbyConnectionOpts {
+  server: string;
+  playerName: string;
+  playerCredentials: string;
+  gameComponents: GameComponent[];
+}
+
 class _LobbyConnectionImpl {
-  constructor({ server, gameComponents, playerName, playerCredentials }) {
+  gameComponents: GameComponent[];
+  playerName: string;
+  playerCredentials: string;
+  server: string;
+  matches: LobbyAPI.MatchList['matches'];
+
+  constructor({
+    server,
+    gameComponents,
+    playerName,
+    playerCredentials,
+  }: LobbyConnectionOpts) {
     this.gameComponents = gameComponents;
     this.playerName = playerName || 'Visitor';
     this.playerCredentials = playerCredentials;
@@ -41,25 +66,25 @@ class _LobbyConnectionImpl {
     }
   }
 
-  _getMatchInstance(matchID) {
+  _getMatchInstance(matchID: string) {
     for (let inst of this.matches) {
       if (inst['matchID'] === matchID) return inst;
     }
   }
 
-  _getGameComponents(gameName) {
+  _getGameComponents(gameName: string) {
     for (let comp of this.gameComponents) {
       if (comp.game.name === gameName) return comp;
     }
   }
 
-  _findPlayer(playerName) {
+  _findPlayer(playerName: string) {
     for (let inst of this.matches) {
       if (inst.players.some(player => player.name === playerName)) return inst;
     }
   }
 
-  async join(gameName, matchID, playerID) {
+  async join(gameName: string, matchID: string, playerID: string) {
     try {
       let inst = this._findPlayer(this.playerName);
       if (inst) {
@@ -89,7 +114,7 @@ class _LobbyConnectionImpl {
     }
   }
 
-  async leave(gameName, matchID) {
+  async leave(gameName: string, matchID: string) {
     try {
       let inst = this._getMatchInstance(matchID);
       if (!inst) throw new Error('match instance not found');
@@ -129,7 +154,7 @@ class _LobbyConnectionImpl {
     this.playerName = 'Visitor';
   }
 
-  async create(gameName, numPlayers) {
+  async create(gameName: string, numPlayers: number) {
     try {
       const comp = this._getGameComponents(gameName);
       if (!comp) throw new Error('game not found');
@@ -167,6 +192,6 @@ class _LobbyConnectionImpl {
  * Returns:
  *   A JS object that synchronizes the list of running game instances with the server and provides an API to create/join/start instances.
  */
-export function LobbyConnection(opts) {
+export function LobbyConnection(opts: LobbyConnectionOpts) {
   return new _LobbyConnectionImpl(opts);
 }
