@@ -291,6 +291,27 @@ export namespace Server {
   }
 }
 
+export namespace LobbyAPI {
+  export type GameList = string[];
+  type PublicPlayerMetadata = Omit<Server.PlayerMetadata, 'credentials'>;
+  export type Match = Omit<Server.MatchMetadata, 'players'> & {
+    matchID: string;
+    players: PublicPlayerMetadata[];
+  };
+  export interface MatchList {
+    matches: Match[];
+  }
+  export interface CreatedMatch {
+    matchID: string;
+  }
+  export interface JoinedMatch {
+    playerCredentials: string;
+  }
+  export interface NextMatch {
+    nextMatchID: string;
+  }
+}
+
 export type Reducer = ReturnType<typeof CreateGameReducer>;
 export type Store = ReduxStore<State, ActionShape.Any>;
 

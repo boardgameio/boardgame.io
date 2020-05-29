@@ -14,7 +14,7 @@ import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
-import { Server, Game } from '../types';
+import { Server, LobbyAPI, Game } from '../types';
 
 /**
  * Creates a new match.
@@ -72,7 +72,7 @@ export const CreateMatch = async ({
 const createClientMatchMetadata = (
   matchID: string,
   metadata: Server.MatchMetadata
-) => {
+): LobbyAPI.Match => {
   return {
     ...metadata,
     matchID,
@@ -105,7 +105,8 @@ export const createRouter = ({
    * @return - Array of game names as string.
    */
   router.get('/games', async ctx => {
-    ctx.body = games.map(game => game.name);
+    const body: LobbyAPI.GameList = games.map(game => game.name);
+    ctx.body = body;
   });
 
   /**
@@ -140,9 +141,8 @@ export const createRouter = ({
       unlisted,
     });
 
-    ctx.body = {
-      matchID,
-    };
+    const body: LobbyAPI.CreatedMatch = { matchID };
+    ctx.body = body;
   });
 
   /**
@@ -165,9 +165,8 @@ export const createRouter = ({
         matches.push(createClientMatchMetadata(matchID, metadata));
       }
     }
-    ctx.body = {
-      matches,
-    };
+    const body: LobbyAPI.MatchList = { matches };
+    ctx.body = body;
   });
 
   /**
@@ -185,7 +184,8 @@ export const createRouter = ({
     if (!metadata) {
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
-    ctx.body = createClientMatchMetadata(matchID, metadata);
+    const body: LobbyAPI.Match = createClientMatchMetadata(matchID, metadata);
+    ctx.body = body;
   });
 
   /**
@@ -231,9 +231,8 @@ export const createRouter = ({
 
     await db.setMetadata(matchID, metadata);
 
-    ctx.body = {
-      playerCredentials,
-    };
+    const body: LobbyAPI.JoinedMatch = { playerCredentials };
+    ctx.body = body;
   });
 
   /**
@@ -334,9 +333,8 @@ export const createRouter = ({
 
     await db.setMetadata(matchID, metadata);
 
-    ctx.body = {
-      nextMatchID,
-    };
+    const body: LobbyAPI.NextMatch = { nextMatchID };
+    ctx.body = body;
   });
 
   const updatePlayerMetadata = async (ctx: Koa.Context) => {
