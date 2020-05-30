@@ -7,16 +7,17 @@
  */
 
 import { LobbyConnection } from './connection';
+import { LobbyAPI } from '../types';
 
 describe('lobby', () => {
-  let lobby;
-  let match1, match2;
+  let lobby: ReturnType<typeof LobbyConnection>;
+  let match1: LobbyAPI.Match, match2: LobbyAPI.Match;
   let jsonResult = [];
   let nextStatus = 200;
 
   beforeEach(async () => {
-    match1 = { matchID: 'matchID_1', players: [{ id: '0' }] };
-    match2 = { matchID: 'matchID_2', players: [{ id: '1' }] };
+    match1 = { gameName: 'game1', matchID: 'matchID_1', players: [{ id: 0 }] };
+    match2 = { gameName: 'game2', matchID: 'matchID_2', players: [{ id: 1 }] };
     // result of connection requests
     jsonResult = [
       () => ['game1', 'game2'],
@@ -29,26 +30,24 @@ describe('lobby', () => {
     ];
     let nextResult = jsonResult.shift.bind(jsonResult);
     nextStatus = 200;
-    global.fetch = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        status: nextStatus,
-        json: nextResult(),
-      })
-    );
+    (global as any).fetch = jest.fn(async () => ({
+      ok: true,
+      status: nextStatus,
+      json: nextResult(),
+    }));
   });
 
   describe('handling all games', () => {
     beforeEach(async () => {
-      lobby = new LobbyConnection({
+      lobby = LobbyConnection({
         server: 'localhost',
         gameComponents: [
           {
-            board: 'Board1',
+            board: () => null,
             game: { name: 'game1', minPlayers: 2, maxPlayers: 4 },
           },
           {
-            board: 'Board2',
+            board: () => null,
             game: { name: 'game2' },
           },
         ],
@@ -84,7 +83,7 @@ describe('lobby', () => {
         await lobby.join('game1', 'matchID_1', '0');
         expect(fetch).toHaveBeenCalledTimes(4);
         expect(lobby.matches[0].players[0]).toEqual({
-          id: '0',
+          id: 0,
           name: 'Bob',
         });
         expect(lobby.playerCredentials).toEqual('SECRET');
@@ -191,6 +190,7 @@ describe('lobby', () => {
 
     describe('create a match', () => {
       test('when the server request succeeds', async () => {
+        jsonResult.push(() => ({ matchID: 'abc' }));
         await lobby.create('game1', 2);
         expect(fetch).toHaveBeenCalledTimes(4);
       });
@@ -202,6 +202,7 @@ describe('lobby', () => {
         }
       });
       test('when the number of players has no boundaries', async () => {
+        jsonResult.push(() => ({ matchID: 'def' }));
         await lobby.create('game2', 1);
       });
       test('when the game is unknown', async () => {
@@ -224,9 +225,9 @@ describe('lobby', () => {
 
   describe('handling some games', () => {
     beforeEach(async () => {
-      lobby = new LobbyConnection({
+      lobby = LobbyConnection({
         server: 'localhost',
-        gameComponents: [{ board: 'Board1', game: { name: 'game1' } }],
+        gameComponents: [{ board: () => null, game: { name: 'game1' } }],
       });
       await lobby.refresh();
     });
