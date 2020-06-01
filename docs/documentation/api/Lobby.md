@@ -154,4 +154,8 @@ Accepts these parameters:
 
 `credentials` (required): player's credentials.
 
+`numPlayers` (optional): the number of players. Defaults to the `numPlayers` value of the previous room.
+
+`setupData` (optional): custom object that was passed to the game `setup` function. Defaults to the `setupData` object of the previous room.
+
 Returns `nextRoomID`, which is the ID of the newly created room that the user should go to play again.
