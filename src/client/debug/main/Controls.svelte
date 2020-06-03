@@ -6,8 +6,9 @@
   import { parse, stringify } from 'flatted';
 
   function Save() {
-    const { G, ctx } = client.getState();
-    const json = stringify({ G, ctx });
+    // strip deltalog, _undo, and _redo from state to persist
+    const { deltalog, _undo, _redo, ...state } = client.getState();
+    const json = stringify(state);
     window.localStorage.setItem('gamestate', json);
   }
 
@@ -15,7 +16,7 @@
     const gamestateJSON = window.localStorage.getItem('gamestate');
     if (gamestateJSON !== null) {
       const gamestate = parse(gamestateJSON);
-      client.store.dispatch(sync(gamestate));
+      client.store.dispatch(sync({ state: gamestate }));
     }
   }
 </script>
