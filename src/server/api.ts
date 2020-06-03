@@ -245,10 +245,6 @@ export const addApiToServer = ({
     const { metadata } = await (db as StorageAPI.Async).fetch(gameID, {
       metadata: true,
     });
-    // User-data to pass to the game setup function.
-    const setupData = ctx.request.body.setupData;
-    // The number of players for this game instance.
-    let numPlayers = parseInt(ctx.request.body.numPlayers);
 
     if (typeof playerID === 'undefined' || playerID === null) {
       ctx.throw(403, 'playerID is required');
@@ -269,6 +265,13 @@ export const addApiToServer = ({
       ctx.body = { nextRoomID: metadata.nextRoomID };
       return;
     }
+
+    // User-data to pass to the game setup function.
+    const setupData = ctx.request.body.setupData || metadata.setupData;
+    // The number of players for this game instance.
+    const numPlayers =
+      parseInt(ctx.request.body.numPlayers) ||
+      Object.keys(metadata.players).length;
 
     const game = games.find(g => g.name === gameName);
     const nextRoomID = await CreateGame(
