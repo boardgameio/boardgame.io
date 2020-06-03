@@ -100,32 +100,42 @@ ReactDOM.render(<App />, document.getElementById('app'));
 The component you pass as the `board` option will receive the
 following as `props`:
 
-1. `G`: The game state.
+- `G`: The game state.
 
-2. `ctx`: The game metadata.
 
-3. `moves`: An object containing functions to dispatch various
+- `ctx`: The game metadata.
+
+
+- `moves`: An object containing functions to dispatch various
    moves that you have defined. The functions are named after the
    moves you created in your [game object](/api/Game.md). Each function
    can take any number of arguments, and they are passed to the
    move function after `G` and `ctx`.
 
-4. `events`: An object containing functions to dispatch various
+
+- `events`: An object containing functions to dispatch various
    game events like `endTurn` and `endPhase`.
 
-5. `reset`: Function that resets the game.
 
-6. `undo`: Function that undoes the last move.
+- `reset`: Function that resets the game.
 
-7. `redo`: Function that redoes the previously undone move.
 
-9. `log`: The game log.
+- `undo`: Function that undoes the last move.
 
-10. `gameID`: The game ID associated with the client.
 
-11. `playerID`: The player ID associated with the client.
+- `redo`: Function that redoes the previously undone move.
 
-12. `gameMetadata`: An array containing the players that have joined
+
+- `log`: The game log.
+
+
+- `gameID`: The game ID associated with the client.
+
+
+- `playerID`: The player ID associated with the client.
+
+
+- `gameMetadata`: An array containing the players that have joined
   the game from a [room](/api/Lobby.md).
 
     Example:
@@ -137,15 +147,20 @@ following as `props`:
     ]
     ```
 
-13. `isActive`: `true` if the client is able to currently make
+
+- `isActive`: `true` if the client is able to currently make
     a move or interact with the game.
 
-14. `isMultiplayer`: `true` if it is a multiplayer game.
 
-15. `isConnected`: `true` if connection to the server is active.
+- `isMultiplayer`: `true` if it is a multiplayer game.
 
-16. `credentials`: Authentication token for this player when using
+
+- `isConnected`: `true` if connection to the server is active.
+
+
+- `credentials`: Authentication token for this player when using
     the [Lobby REST API](/api/Lobby.md#server-side-api).
+
 
 
 ### **Plain JS**
