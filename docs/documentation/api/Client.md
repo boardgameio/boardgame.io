@@ -119,9 +119,6 @@ following as `props`:
 
 7. `redo`: Function that redoes the previously undone move.
 
-8. `step`:
-   Function that will advance the game if [AI is configured](/tutorial.md#bots).
-
 9. `log`: The game log.
 
 10. `gameID`: The game ID associated with the client.
