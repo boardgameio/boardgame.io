@@ -9,6 +9,12 @@
 body {
   padding: 0 3em 5em;
   text-align: center;
+  background: var(--mono-tint3);
+}
+
+.octo-arm,
+.octo-body {
+  fill: var(--mono-tint3);
 }
 
 #summary {
@@ -40,6 +46,7 @@ body {
   width: 200px;
   height: 200px;
   padding: 20px;
+  background: var(--base-background-color);
 }
 
 #content {

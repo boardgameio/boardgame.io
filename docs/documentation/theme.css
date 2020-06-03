@@ -1,6 +1,6 @@
 :root {
   --theme-hue: 152;
-  --theme-lightness : 27%;
+  --theme-lightness : 26%;
   --mono-hue: calc(var(--theme-hue) + 180);
   --mono-saturation: 12%;
 
