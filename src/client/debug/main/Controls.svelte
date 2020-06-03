@@ -6,7 +6,10 @@
   import { parse, stringify } from 'flatted';
 
   function Save() {
-    window.localStorage.setItem('gamestate', stringify(client.getState()));
+    // strip deltalog, _undo, and _redo from state to persist
+    const { deltalog, _undo, _redo, ...state } = client.getState();
+    const json = stringify(state);
+    window.localStorage.setItem('gamestate', json);
   }
 
   function Restore() {
