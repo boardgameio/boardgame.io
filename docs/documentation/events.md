@@ -100,6 +100,21 @@ triggered, even if the event is called first in your move function.
 
 <!-- tabs:start -->
 
+#### **Plain JS**
+
+Events are available inside the `events` property of
+a boardgame.io client instance. For example:
+
+```js
+import { Client } from 'boardgame.io/client';
+
+const client = Client({ /* options */ });
+
+const clickHandler = () => {
+  client.events.endTurn();
+}
+```
+
 #### **React**
 
 Events are available through `props` inside the
@@ -121,22 +136,6 @@ class Board extends React.Component {
   render = () => <button onClick={this.onClick}>End Turn</button>;
 }
 ```
-
-#### **Plain JS**
-
-Events are available inside the `events` property of
-a boardgame.io client instance. For example:
-
-```js
-import { Client } from 'boardgame.io/client';
-
-const client = Client({ /* options */ });
-
-const clickHandler = () => {
-  client.events.endTurn();
-}
-```
-
 <!-- tabs:end -->
 
 ### Disabling events

@@ -18,27 +18,6 @@ You can follow whichever you feel most comfortable with.
 
 <!-- tabs:start -->
 
-### **React**
-
-We’ll use the [create-react-app](https://create-react-app.dev/)
-command line tool to initialize our React app and then add boardgame.io to it.
-
-```
-npx create-react-app bgio-tutorial
-cd bgio-tutorial
-npm install --save boardgame.io
-```
-
-While we’re here, let’s also create an empty JavaScript file for our game code:
-
-```
-touch src/Game.js
-```
-
-?> You can check out the complete code for this tutorial
-and play around with it on CodeSandbox:<br/><br/>
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-wlvi2)
-
 ### **Plain JS**
 
 Let’s create a new Node project from the command line:
@@ -99,6 +78,27 @@ Looking good? OK, let’s get started! 🚀
 and play around with it on CodeSandbox:<br/><br/>
 [![Edit bgio-plain-js-tutorial](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/bgio-plain-js-tutorial-ewyyt?fontsize=14&hidenavigation=1&module=%2Fsrc%2FApp.js&theme=dark)
 
+### **React**
+
+We’ll use the [create-react-app](https://create-react-app.dev/)
+command line tool to initialize our React app and then add boardgame.io to it.
+
+```
+npx create-react-app bgio-tutorial
+cd bgio-tutorial
+npm install --save boardgame.io
+```
+
+While we’re here, let’s also create an empty JavaScript file for our game code:
+
+```
+touch src/Game.js
+```
+
+?> You can check out the complete code for this tutorial
+and play around with it on CodeSandbox:<br/><br/>
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-wlvi2)
+
 <!-- tabs:end -->
 
 
@@ -149,25 +149,6 @@ but we don't need that for Tic-Tac-Toe.
 
 <!-- tabs:start -->
 
-### **React**
-
-Replace the contents of `src/App.js` with
-
-```js
-import { Client } from 'boardgame.io/react';
-import { TicTacToe } from './Game';
-
-const App = Client({ game: TicTacToe });
-
-export default App;
-```
-
-You can now serve the app from the command line by running:
-
-```
-npm start
-```
-
 ### **Plain JS**
 
 We’ll start by creating a class to manage our web app’s logic in `src/App.js`.
@@ -197,6 +178,25 @@ Let’s also add a script to `package.json` to make serving the web app simpler:
     "start": "parcel index.html --open"
   }
 }
+```
+
+You can now serve the app from the command line by running:
+
+```
+npm start
+```
+
+### **React**
+
+Replace the contents of `src/App.js` with
+
+```js
+import { Client } from 'boardgame.io/react';
+import { TicTacToe } from './Game';
+
+const App = Client({ game: TicTacToe });
+
+export default App;
 ```
 
 You can now serve the app from the command line by running:
@@ -342,98 +342,6 @@ the return value is available at `ctx.gameover`.
 
 <!-- tabs:start -->
 
-### **React**
-
-React is a great fit for board games because
-it provides a declarative API to translate objects
-to UI elements.
-
-Creating a board is a fairly mechanical process of
-translating the game state `G` into actual cells that
-are clickable.
-
-Let’s create a new file at `src/Board.js`:
-
-```js
-import React from 'react';
-
-export class TicTacToeBoard extends React.Component {
-  onClick(id) {
-    this.props.moves.clickCell(id);
-  }
-
-  render() {
-    let winner = '';
-    if (this.props.ctx.gameover) {
-      winner =
-        this.props.ctx.gameover.winner !== undefined ? (
-          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
-        ) : (
-          <div id="winner">Draw!</div>
-        );
-    }
-
-    const cellStyle = {
-      border: '1px solid #555',
-      width: '50px',
-      height: '50px',
-      lineHeight: '50px',
-      textAlign: 'center',
-    };
-
-    let tbody = [];
-    for (let i = 0; i < 3; i++) {
-      let cells = [];
-      for (let j = 0; j < 3; j++) {
-        const id = 3 * i + j;
-        cells.push(
-          <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
-            {this.props.G.cells[id]}
-          </td>
-        );
-      }
-      tbody.push(<tr key={i}>{cells}</tr>);
-    }
-
-    return (
-      <div>
-        <table id="board">
-          <tbody>{tbody}</tbody>
-        </table>
-        {winner}
-      </div>
-    );
-  }
-}
-```
-
-The important bit to pay attention to is about how to
-dispatch moves. We have the following code in our click
-handler:
-
-```js
-this.props.moves.clickCell(id);
-```
-
-- `props.moves` is an object passed in by the framework that
-  contains functions to dispatch moves. `props.moves.clickCell`
-  dispatches the `clickCell` move, and any data passed in is made
-  available in the move handler.
-
-
-Now, we pass the board component to our `Client` in `src/App.js`:
-
-```js
-import { TicTacToeBoard } from './Board';
-
-const App = Client({
-  game: TicTacToe,
-  board: TicTacToeBoard,
-});
-
-export default App;
-```
-
 ### **Plain JS**
 
 You can build your game board with your preferred UI tools.
@@ -566,6 +474,98 @@ Here are the key things to remember:
 
 
 - You can register callbacks for every state change using `client.subscribe`.
+
+### **React**
+
+React is a great fit for board games because
+it provides a declarative API to translate objects
+to UI elements.
+
+Creating a board is a fairly mechanical process of
+translating the game state `G` into actual cells that
+are clickable.
+
+Let’s create a new file at `src/Board.js`:
+
+```js
+import React from 'react';
+
+export class TicTacToeBoard extends React.Component {
+  onClick(id) {
+    this.props.moves.clickCell(id);
+  }
+
+  render() {
+    let winner = '';
+    if (this.props.ctx.gameover) {
+      winner =
+        this.props.ctx.gameover.winner !== undefined ? (
+          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
+        ) : (
+          <div id="winner">Draw!</div>
+        );
+    }
+
+    const cellStyle = {
+      border: '1px solid #555',
+      width: '50px',
+      height: '50px',
+      lineHeight: '50px',
+      textAlign: 'center',
+    };
+
+    let tbody = [];
+    for (let i = 0; i < 3; i++) {
+      let cells = [];
+      for (let j = 0; j < 3; j++) {
+        const id = 3 * i + j;
+        cells.push(
+          <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
+            {this.props.G.cells[id]}
+          </td>
+        );
+      }
+      tbody.push(<tr key={i}>{cells}</tr>);
+    }
+
+    return (
+      <div>
+        <table id="board">
+          <tbody>{tbody}</tbody>
+        </table>
+        {winner}
+      </div>
+    );
+  }
+}
+```
+
+The important bit to pay attention to is about how to
+dispatch moves. We have the following code in our click
+handler:
+
+```js
+this.props.moves.clickCell(id);
+```
+
+- `props.moves` is an object passed in by the framework that
+  contains functions to dispatch moves. `props.moves.clickCell`
+  dispatches the `clickCell` move, and any data passed in is made
+  available in the move handler.
+
+
+Now, we pass the board component to our `Client` in `src/App.js`:
+
+```js
+import { TicTacToeBoard } from './Board';
+
+const App = Client({
+  game: TicTacToe,
+  board: TicTacToeBoard,
+});
+
+export default App;
+```
 
 <!-- tabs:end -->
 

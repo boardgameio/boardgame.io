@@ -50,6 +50,16 @@ On the client, you use a `moves` object to dispatch your
 move functions.
 
 <!-- tabs:start -->
+#### **Plain JS**
+
+You can access `moves` from an instance of the plain JavaScript client:
+
+```js
+function onClick() {
+  client.moves.drawCard();
+}
+```
+
 #### **React**
 
 Using React, `moves` is provided through your component’s `props`:
@@ -60,15 +70,6 @@ onClick() {
 }
 ```
 
-#### **Plain JS**
-
-You can access `moves` from an instance of the plain JavaScript client:
-
-```js
-function onClick() {
-  client.moves.drawCard();
-}
-```
 <!-- tabs:end -->
 
 ### Events
@@ -78,17 +79,17 @@ ending the turn, changing the game phase etc.
 Events are dispatched from the client in a similar way to moves.
 
 <!-- tabs:start -->
-#### **React**
-```js
-onClick() {
-  this.props.events.endTurn();
-}
-```
-
 #### **Plain JS**
 ```js
 function onClick() {
   client.events.endTurn();
+}
+```
+
+#### **React**
+```js
+onClick() {
+  this.props.events.endTurn();
 }
 ```
 <!-- tabs:end -->

@@ -40,34 +40,6 @@ Now you can instantiate as many of these clients in your app as you like and
 you will notice that they’re all kept in sync, sharing the same state.
 
 <!-- tabs:start -->
-#### **React**
-
-```js
-// src/App.js
-
-import React from 'react';
-import { Client } from 'boardgame.io/react';
-import { Local } from 'boardgame.io/multiplayer';
-import { TicTacToe } from './Game';
-import { TicTacToeBoard } from './Board';
-
-const TicTacToeClient = Client({
-  game: TicTacToe,
-  board: TicTacToeBoard,
-  multiplayer: Local(),
-});
-
-const App = () => (
-  <div>
-    <TicTacToeClient playerID="0" />
-    <TicTacToeClient playerID="1" />
-  </div>
-);
-
-export default App;
-```
-
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-dibw3)
 
 #### **Plain JS**
 
@@ -111,6 +83,34 @@ const clients = playerIDs.map(playerID => {
 
 [![Edit bgio-plain-js-multiplayer](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/bgio-plain-js-multiplayer-re48t?fontsize=14&hidenavigation=1&module=%2Fsrc%2FApp.js&theme=dark)
 
+#### **React**
+
+```js
+// src/App.js
+
+import React from 'react';
+import { Client } from 'boardgame.io/react';
+import { Local } from 'boardgame.io/multiplayer';
+import { TicTacToe } from './Game';
+import { TicTacToeBoard } from './Board';
+
+const TicTacToeClient = Client({
+  game: TicTacToe,
+  board: TicTacToeBoard,
+  multiplayer: Local(),
+});
+
+const App = () => (
+  <div>
+    <TicTacToeClient playerID="0" />
+    <TicTacToeClient playerID="1" />
+  </div>
+);
+
+export default App;
+```
+
+[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-dibw3)
 <!-- tabs:end -->
 
 ?> You may be wondering what the `playerID` parameter is from the
@@ -138,18 +138,6 @@ option again, but this time we import `SocketIO` instead of `Local`,
 and specify the location of the server.
 
 <!-- tabs:start -->
-
-#### **React**
-
-```js
-import { SocketIO } from 'boardgame.io/multiplayer'
-
-const TicTacToeClient = Client({
-  game: TicTacToe,
-  board: TicTacToeBoard,
-  multiplayer: SocketIO({ server: 'localhost:8000' }),
-});
-```
 
 #### **Plain JS**
 
@@ -182,6 +170,18 @@ update(state) {
   if (state === null) return;
   // ...
 }
+```
+
+#### **React**
+
+```js
+import { SocketIO } from 'boardgame.io/multiplayer'
+
+const TicTacToeClient = Client({
+  game: TicTacToe,
+  board: TicTacToeBoard,
+  multiplayer: SocketIO({ server: 'localhost:8000' }),
+});
 ```
 
 <!-- tabs:end -->
@@ -236,18 +236,6 @@ setup would be to have each client just have a single (but distinct)
 player.
 
 <!-- tabs:start -->
-#### **React**
-
-You want one client to render:
-```
-<TicTacToeClient playerID="0" />
-```
-
-and another to render:
-```
-<TicTacToeClient playerID="1" />
-```
-
 #### **Plain JS**
 
 You want one client to render:
@@ -260,6 +248,17 @@ and another to render:
 new TicTacToeClient(appElement, { playerID: '1' });
 ```
 
+#### **React**
+
+You want one client to render:
+```
+<TicTacToeClient playerID="0" />
+```
+
+and another to render:
+```
+<TicTacToeClient playerID="1" />
+```
 <!-- tabs:end -->
 
 One way to do this is to ask the player which seat they
@@ -305,12 +304,6 @@ this ID will now see the same game state.
 
 <!-- tabs:start -->
 
-#### **React**
-
-```
-<TicTacToeClient gameID="gameid"/>
-```
-
 #### **Plain JS**
 
 Pass `gameID` when creating your boardgame.io client:
@@ -327,6 +320,11 @@ You an also update a `gameID` on an already instantiated client:
 client.updateGameID('newGameID');
 ```
 
+#### **React**
+
+```
+<TicTacToeClient gameID="gameid"/>
+```
 <!-- tabs:end -->
 
 The `gameID`, similar to the `playerID` can again be determined

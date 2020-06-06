@@ -12,16 +12,6 @@ before committing to one.
 You can call the `undo` and `redo` functions from the client.
 
 <!-- tabs:start -->
-
-#### **React**
-
-The methods are passed in your board component’s `props`:
-
-```js
-props.undo();
-props.redo();
-```
-
 #### **Plain JS**
 
 The methods are attached to a `Client` instance:
@@ -31,6 +21,14 @@ client.undo();
 client.redo();
 ```
 
+#### **React**
+
+The methods are passed in your board component’s `props`:
+
+```js
+props.undo();
+props.redo();
+```
 <!-- tabs:end -->
 
 ### Restricting Undoable Moves
