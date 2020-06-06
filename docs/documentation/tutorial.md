@@ -84,10 +84,10 @@ Now, let’s create the basic structure our project needs:
 
 Your project directory should now look like this:
 
-    bgio-tutorial/  
-    ├── index.html  
-    ├── node_modules/  
-    ├── package-lock.json  
+    bgio-tutorial/
+    ├── index.html
+    ├── node_modules/
+    ├── package-lock.json
     ├── package.json
     └── src/
         ├── App.js
