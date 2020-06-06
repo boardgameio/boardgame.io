@@ -80,7 +80,8 @@ export class LobbyClient {
    * @return Array of match metadata objects.
    *
    * @example
-   * lobbyClient.listMatches('tic-tac-toe').then(console.log);
+   * lobbyClient.listMatches('tic-tac-toe')
+   *   .then(data => console.log(data.matches));
    * // => [
    * //   {
    * //     matchID: 'xyz',
