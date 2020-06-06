@@ -17,13 +17,13 @@ const App = Client({
   game: ChessGame,
   board: ChessBoard,
   multiplayer: SocketIO({ server: `${hostname}:8000` }),
-  debug: false,
+  debug: true,
 });
 
-const Multiplayer = () => (
+const Multiplayer = playerID => () => (
   <div style={{ padding: 50 }}>
-    <App gameID="multi" playerID="0" />
-    <App gameID="multi" playerID="1" />
+    <App gameID="multi" playerID={playerID} />
+    PlayerID: {playerID}
   </div>
 );
 

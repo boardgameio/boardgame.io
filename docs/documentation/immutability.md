@@ -22,7 +22,7 @@ function move(G, ctx) {
 }
 ```
 
-!> The example above uses the
+?> The example above uses the
 [spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) to create a new object.
 
 [boardgame.io](https://boardgame.io/) provides a more convenient
@@ -38,13 +38,13 @@ function move(G, ctx) {
 }
 ```
 
-!> Note that in this style you do not return the new state.
+?> Note that in this style you do not return the new state.
 In fact, returning something while also mutating `G` is
 considered an error.
 
 !> `ctx` is a read-only object and is never modified in either style.
 
-#### Invalid moves
+### Invalid moves
 
 In both styles, invalid moves are indicated by returning a
 special constant. This tells the framework that the current
@@ -69,6 +69,6 @@ moves: {
 }
 ```
 
-#### Additional Reading
+### Additional Reading
 
 [Immutable Update Patterns](https://redux.js.org/recipes/structuring-reducers/immutable-update-patterns)

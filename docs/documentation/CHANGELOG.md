@@ -1,15 +1,30 @@
+## v0.39.12
+
+#### Features
+
+[[ef97441](https://github.com/nicolodavis/boardgame.io/commit/ef97441)] fix(debug): Save all state to localStorage, not just G and ctx (#716)
+[[60b32e5](https://github.com/nicolodavis/boardgame.io/commit/60b32e5)] Add support for socket.io-adapter implementations (#706)
+[[eb236df](https://github.com/nicolodavis/boardgame.io/commit/eb236df)] feat(db): FlatFile per-file request queues enhancement (#705)
+
+#### Bugfixes
+
+[[0ca1cef](https://github.com/nicolodavis/boardgame.io/commit/0ca1cef)] feat(lobby): use previous game config as defaults in playAgain (#719)
+[[4d45ff1](https://github.com/nicolodavis/boardgame.io/commit/4d45ff1)] fix(client): Fix restore in debug controls (#712)
+[[d728425](https://github.com/nicolodavis/boardgame.io/commit/d728425)] fix(core): Fix undo/redo if the move changed the stage (#701)
+[[3a622f1](https://github.com/nicolodavis/boardgame.io/commit/3a622f1)] Use Promise chaining to enforce read/write queue (#699)
+
 ## v0.39.11
 
 #### Features
 
-[[cfeaf67](https://github.com/nicolodavis/boardgame.io/commit/cfeaf67)] feat(plugins): Let moves return INVALID_MOVE after mutating G (#688)
-[[b2d6b06](https://github.com/nicolodavis/boardgame.io/commit/b2d6b06)] feat(server): Lobby API improvements (#675)
-[[dc668ec](https://github.com/nicolodavis/boardgame.io/commit/dc668ec)] feat(server): Expose SocketIO transport & convert to TS (#658)
+* [[cfeaf67](https://github.com/nicolodavis/boardgame.io/commit/cfeaf67)] feat(plugins): Let moves return INVALID_MOVE after mutating G (#688)
+* [[b2d6b06](https://github.com/nicolodavis/boardgame.io/commit/b2d6b06)] feat(server): Lobby API improvements (#675)
+* [[dc668ec](https://github.com/nicolodavis/boardgame.io/commit/dc668ec)] feat(server): Expose SocketIO transport & convert to TS (#658)
 
 #### Bugfixes
 
-[[1483a08](https://github.com/nicolodavis/boardgame.io/commit/1483a08)] fix UX issues in move debugger (#640)
-[[814621b](https://github.com/nicolodavis/boardgame.io/commit/814621b)] Make package.json scripts work on Windows (#657)
+* [[1483a08](https://github.com/nicolodavis/boardgame.io/commit/1483a08)] fix UX issues in move debugger (#640)
+* [[814621b](https://github.com/nicolodavis/boardgame.io/commit/814621b)] Make package.json scripts work on Windows (#657)
 
 ## 0.39.10
 

@@ -5,9 +5,9 @@ analogous to a move, except that while a move changes
 `G`, an event changes `ctx`. Also, events are provided by the
 framework (as opposed to moves, which are written by you).
 
-Here is the complete list of events:
+### Event Types
 
-##### endStage
+#### endStage
 
 This event takes the player that called it out of the stage
 that they are in. If the definition for the current stage
@@ -19,7 +19,7 @@ returned to a state where they are not in any stage.
 endStage();
 ```
 
-##### endTurn
+#### endTurn
 
 This event ends the turn.
 The default behavior is to increment `ctx.turn` by `1`
@@ -34,7 +34,7 @@ endTurn(); // without argument
 endTurn({ next: '2' }); // Player 2 is the next player.
 ```
 
-##### endPhase
+#### endPhase
 
 This event ends the current phase. If the definition for the
 current phase in the game object specifies a
@@ -45,7 +45,7 @@ game returns to a state where no phase is active.
 endPhase();
 ```
 
-##### endGame
+#### endGame
 
 This event ends the game. If you pass an argument to it,
 then that argument is made available in `ctx.gameover`.
@@ -56,7 +56,7 @@ After the game is over, further state changes to the game
 endGame();
 ```
 
-##### setStage
+#### setStage
 
 Takes the player that called the event into the stage specified.
 
@@ -64,7 +64,7 @@ Takes the player that called the event into the stage specified.
 setStage('stage-name');
 ```
 
-##### setPhase
+#### setPhase
 
 Takes the game into the phase specified. Ends the active phase first.
 
@@ -72,7 +72,7 @@ Takes the game into the phase specified. Ends the active phase first.
 setPhase('phase-name');
 ```
 
-##### setActivePlayers
+#### setActivePlayers
 
 Allows adding additional players to the set of "active players", and
 also any stages that you want to put them in. See the guide on [Stages](stages.md)
@@ -80,8 +80,8 @@ for more details.
 
 ### Triggering an event from game logic.
 
-You can trigger events from a move or any code inside
-your game logic (the phase's `onBegin` hook, for example).
+You can trigger events from a move or code inside
+your game logic (a phase’s `onBegin` hook, for example).
 This is done through the `ctx.events` object:
 
 ```js
@@ -92,11 +92,30 @@ moves: {
 }
 ```
 
-Note that the event is just queued up and triggered **after** the move.
-You can still have other logic at the end of the move which will be
-run before the event is triggered.
+!> Events are queued up and triggered **after** a move.
+Any changes you make to `G` will be applied before events are
+triggered, even if the event is called first in your move function.
 
-### Triggering an event from a React client.
+### Triggering an event from the client
+
+<!-- tabs:start -->
+
+#### **Plain JS**
+
+Events are available inside the `events` property of
+a boardgame.io client instance. For example:
+
+```js
+import { Client } from 'boardgame.io/client';
+
+const client = Client({ /* options */ });
+
+const clickHandler = () => {
+  client.events.endTurn();
+}
+```
+
+#### **React**
 
 Events are available through `props` inside the
 `events` object. For example:
@@ -117,6 +136,7 @@ class Board extends React.Component {
   render = () => <button onClick={this.onClick}>End Turn</button>;
 }
 ```
+<!-- tabs:end -->
 
 ### Disabling events
 
@@ -131,10 +151,10 @@ the `events` section in your game config.
 const game = {
   events: {
     endGame: false,
-    ...
+    // ...
   },
 };
 ```
 
-!> This doesn't apply to events in game logic, but just the
+!> This doesn't apply to events in moves or hooks, but just the
 ability to call an event directly from a client.

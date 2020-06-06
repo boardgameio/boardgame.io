@@ -1021,6 +1021,12 @@ describe('.createRouter', () => {
         fetch: async () => {
           return {
             metadata: {
+              setupData: {
+                colors: {
+                  '0': 'green',
+                  '1': 'red',
+                },
+              },
               players: {
                 '0': {
                   name: 'alice',
@@ -1029,6 +1035,10 @@ describe('.createRouter', () => {
                 '1': {
                   name: 'bob',
                   credentials: 'SECRET2',
+                },
+                '2': {
+                  name: 'chris',
+                  credentials: 'SECRET3',
                 },
               },
             },
@@ -1040,15 +1050,59 @@ describe('.createRouter', () => {
     test('creates new game data', async () => {
       const uuid = () => 'newGameID';
       const app = createApiServer({ db, games, uuid });
+
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
-        .send('playerID=0&credentials=SECRET1&numPlayers=4');
+        .send({
+          playerID: 0,
+          credentials: 'SECRET1',
+          numPlayers: 4,
+          setupData: {
+            colors: {
+              '3': 'blue',
+            },
+          },
+        });
       expect(db.mocks.createGame).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
           initialState: expect.objectContaining({
             ctx: expect.objectContaining({
               numPlayers: 4,
+            }),
+          }),
+          metadata: expect.objectContaining({
+            setupData: expect.objectContaining({
+              colors: expect.objectContaining({
+                '3': 'blue',
+              }),
+            }),
+          }),
+        })
+      );
+      expect(response.body.nextMatchID).toBe('newGameID');
+    });
+
+    test('when game configuration not supplied, uses previous game config', async () => {
+      const uuid = () => 'newGameID';
+      const app = createApiServer({ db, games, uuid });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('playerID=0&credentials=SECRET1');
+      expect(db.mocks.createGame).toHaveBeenCalledWith(
+        'newGameID',
+        expect.objectContaining({
+          initialState: expect.objectContaining({
+            ctx: expect.objectContaining({
+              numPlayers: 3,
+            }),
+          }),
+          metadata: expect.objectContaining({
+            setupData: expect.objectContaining({
+              colors: expect.objectContaining({
+                '0': 'green',
+                '1': 'red',
+              }),
             }),
           }),
         })
@@ -1094,7 +1148,7 @@ describe('.createRouter', () => {
       expect(response.status).toEqual(404);
     });
 
-    test('when the playerID is undefnied throws error 403', async () => {
+    test('when the playerID is undefined throws error 403', async () => {
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
@@ -1106,7 +1160,7 @@ describe('.createRouter', () => {
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
-        .send('playerID=2&credentials=SECRET1');
+        .send('playerID=3&credentials=SECRET1');
       expect(response.status).toEqual(404);
     });
 
