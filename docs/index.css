@@ -7,27 +7,18 @@
  */
 
 body {
-  padding: 50px;
-  line-height: 1.8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-y: auto !important;
-}
-
-code {
+  padding: 0 3em 5em;
   text-align: center;
+  background: var(--mono-tint3);
 }
 
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.octo-arm,
+.octo-body {
+  fill: var(--mono-tint3);
 }
 
 #summary {
-  text-align: center;
-  font-size: 1.2em;
+  font-size: 1.125em;
 }
 
 #main-content {
@@ -40,60 +31,46 @@ ul {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 20px;
+  line-height: 1.5;
 }
 
-#features label {
-  font-weight: bold;
-  display: block;
-  text-align: center;
-  margin-bottom: 10px;
-  font-size: 1.2em;
+#features h3 {
+  margin: 0 0 .5em;
+  font-size: 1em;
 }
 
 #features > div {
   border-radius: 5px;
-  box-shadow: 0 0 5px #eee;
-  border: 1px solid #ccc;
+  box-shadow: 0 0 5px var(--mono-tint2);
+  border: 1px solid var(--mono-tint2);
   width: 200px;
   height: 200px;
   padding: 20px;
-  text-align: center;
+  background: var(--base-background-color);
 }
 
 #content {
-  max-width: 700px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin: auto;
 }
 
 #topbar {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
+  margin: .5em 0;
   font-size: 1.2em;
 }
 
 #heading {
-  text-align: center;
   font-size: 1.4em;
 }
 
-#topbar a {
-  margin-left: 10px;
-  margin-right: 10px;
-  color: #33e;
-  text-decoration: none;
-  font-weight: bold;
-}
-
+#topbar a,
 #topbar a:visited {
-  color: #33e;
+  margin: 0 1em;
+  text-decoration: none;
 }
 
 @media screen and (max-width: 768px) {
-  #badges {
-    display: none;
+  body {
+    padding: 0 1em 6em;
   }
 
   #features {
@@ -101,6 +78,9 @@ ul {
   }
 
   #features > div {
+    width: 300px;
+    max-width: 100%;
+    height: auto;
     font-size: 0.8em;
   }
 
@@ -110,7 +90,8 @@ ul {
 
   #topbar,
   #heading {
-    font-size: 1.3em;
+    font-size: 1.125em;
+    font-weight: bold;
   }
 
   #content {
@@ -119,9 +100,5 @@ ul {
 
   .web-only {
     display: none;
-  }
-
-  li {
-    margin-bottom: 20px;
   }
 }

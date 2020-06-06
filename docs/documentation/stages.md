@@ -194,7 +194,7 @@ that you want in the set of active players:
 setActivePlayers(['0', '3']);
 ```
 
-!> You can check `ctx.playerID` inside a move to figure out
+?> You can check `ctx.playerID` inside a move to figure out
 which player made it. This may be necessary in situations
 where multiple players are active (and could simultaneously move).
 
@@ -223,22 +223,22 @@ turn: {
 }
 ```
 
-##### ALL
+#### ALL
 
 Equivalent to `{ all: Stage.NULL }`. Any player can play, and they
 aren't restricted to any particular stage.
 
-##### ALL_ONCE
+#### ALL_ONCE
 
 Equivalent to `{ all: Stage.NULL, moveLimit: 1 }`. Any player can make
 exactly one move before they are removed from the set of active players.
 
-##### OTHERS
+#### OTHERS
 
 Similar to `ALL`, but excludes the current player from the set
 of active players.
 
-##### OTHERS_ONCE
+#### OTHERS_ONCE
 
 Similar to `ALL_ONCE`, but excludes the current player from the set
 of active players.

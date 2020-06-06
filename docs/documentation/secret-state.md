@@ -28,7 +28,7 @@ const game = {
 !> Make sure that you associate the game clients with individual
 players (as discussed in the [Multiplayer](multiplayer.md) section).
 
-#### PlayerView.STRIP_SECRETS
+### PlayerView.STRIP_SECRETS
 
 The framework comes bundled with an implementation of `playerView`
 that does the following:
@@ -70,7 +70,7 @@ const App = Game({
 });
 ```
 
-#### Disabling moves that manipulate secret state on the client
+### Disabling moves that manipulate secret state on the client
 
 Moves that manipulate secret state often cannot run on the client because
 the client doesn't have all the necessary data to process such moves.

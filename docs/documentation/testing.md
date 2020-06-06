@@ -1,27 +1,28 @@
 # Testing Strategies
 
-#### Unit Tests
+### Unit Tests
 
-Moves are just functions, so they lend themselves to easy testing. A useful strategy is
-to implement it as a standalone function before passing it to the game object:
+Moves are just functions, so they lend themselves to unit testing.
+A useful strategy is to implement each move as a standalone function
+before passing them to the game object:
 
-`game.js`
+`Game.js`
 
 ```js
 export function clickCell(G, ctx, id) {
   G.cells[id] = ctx.currentPlayer;
 }
 
-{
-  moves: { clickCell }
-  ...
+export const TicTacToe = {
+  moves: { clickCell },
+  // ...
 }
 ```
 
-`game.test.js`
+`Game.test.js`
 
 ```js
-import { clickCell } from './game';
+import { clickCell } from './Game';
 
 it('should place the correct value in the cell', () => {
   // original state.
@@ -39,13 +40,13 @@ it('should place the correct value in the cell', () => {
 });
 ```
 
-#### Scenario Tests
+### Scenario Tests
 
 Test your game logic in specific scenarios.
 
 ```js
 import { Client } from 'boardgame.io/client';
-import { TicTacToe } from './game';
+import { TicTacToe } from './Game';
 
 it('should declare player 1 as the winner', () => {
   // set up a specific board scenario
@@ -78,7 +79,7 @@ it('should declare player 1 as the winner', () => {
 !> Note that we imported the vanilla JavaScript client, not the
 one from `boardgame.io/react`.
 
-#### Multiplayer Tests
+### Multiplayer Tests
 
 Use the local multiplayer mode to simulate multiplayer interactions
 in unit tests.
@@ -109,7 +110,7 @@ it('multiplayer test', () => {
 });
 ```
 
-#### Integration Tests
+### Integration Tests
 
 Test the application end-to-end from the UI layer's point of view.
 In this case we mount our React component and look for the TicTacToe board inside of it.

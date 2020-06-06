@@ -53,11 +53,11 @@ Creates a new authenticated match for a game named `name`.
 
 Accepts three parameters:
 
-`numPlayers` (required): the number of players.
+- `numPlayers` (required): the number of players.
 
-`setupData` (optional): custom object that is passed to the game `setup` function.
+- `setupData` (optional): custom object that is passed to the game `setup` function.
 
-`unlisted` (optional): if set to `true`, the match will be excluded from the public list of match instances.
+- `unlisted` (optional): if set to `true`, the match will be excluded from the public list of match instances.
 
 Returns `matchID`, which is the ID of the newly created game instance.
 
@@ -69,11 +69,11 @@ Allows a player to join a particular match instance `id` of a game named `name`.
 
 Accepts three JSON body parameters:
 
-`playerID` (required): the ordinal player in the game that is being joined (0, 1...).
+- `playerID` (required): the ordinal player in the game that is being joined (0, 1...).
 
-`playerName` (required): the display name of the player joining the game.
+- `playerName` (required): the display name of the player joining the game.
 
-`data` (optional): additional information associated to the player.
+- `data` (optional): additional information associated to the player.
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
 
@@ -85,13 +85,13 @@ Rename and/or update additional information of a user in the match instance `id`
 
 Accepts four parameters, requires at least one of the two optional parameters:
 
-`playerID` (required): the ID used by the player in the game (0,1...).
+- `playerID` (required): the ID used by the player in the game (0,1...).
 
-`crendentials` (required): the authentication token of the player.
+- `crendentials` (required): the authentication token of the player.
 
-`newName` (optional): the new name of the player.
+- `newName` (optional): the new name of the player.
 
-`data` (optional): additional information associated to the player.
+- `data` (optional): additional information associated to the player.
 
 #### Leaving a match
 
@@ -101,9 +101,9 @@ Leave the match instance `id` of a game named `name` previously joined by the pl
 
 Accepts two parameters, all required:
 
-`playerID`: the ID used by the player in the game (0, 1...).
+- `playerID`: the ID used by the player in the game (0, 1...).
 
-`credentials`: the authentication token of the player.
+- `credentials`: the authentication token of the player.
 
 #### Listing all match instances of a given game
 
@@ -113,11 +113,11 @@ Returns all match instances of the game named `name`.
 
 Returns an array of `matches`. Each instance has fields:
 
-`matchID`: the ID of the match instance.
+- `matchID`: the ID of the match instance.
 
-`players`: the list of seats and players that have joined the game, if any.
+- `players`: the list of seats and players that have joined the game, if any.
 
-`setupData` (optional): custom object that was passed to the game `setup` function.
+- `setupData` (optional): custom object that was passed to the game `setup` function.
 
 #### Getting specific instance of a match by its ID
 
@@ -127,11 +127,11 @@ Returns a match instance given its matchID.
 
 Returns a match instance. Each instance has fields:
 
-`matchID`: the ID of the match instance.
+- `matchID`: the ID of the match instance.
 
-`players`: the list of seats and players that have joined the game, if any.
+- `players`: the list of seats and players that have joined the game, if any.
 
-`setupData` (optional): custom object that was passed to the game `setup` function.
+- `setupData` (optional): custom object that was passed to the game `setup` function.
 
 #### Client Authentication
 
@@ -141,16 +141,20 @@ All actions for an authenticated game require an additional payload field `crede
 
 ##### POST `/games/{name}/{id}/playAgain`
 
-`{name}` (required): the name of the game being played again.
+- `{name}` (required): the name of the game being played again.
 
-`{id}` (required): the ID of the previous finished match.
+- `{id}` (required): the ID of the previous finished match.
 
 Given a previous match, generates a match ID where users should go if they want to play again. Creates this new match if it didn't exist before.
 
 Accepts these parameters:
 
-`playerID` (required): the player ID of the player on the previous game.
+- `playerID` (required): the player ID of the player on the previous game.
 
-`credentials` (required): player's credentials.
+- `credentials` (required): player's credentials.
+
+`numPlayers` (optional): the number of players. Defaults to the `numPlayers` value of the previous room.
+
+`setupData` (optional): custom object that was passed to the game `setup` function. Defaults to the `setupData` object of the previous room.
 
 Returns `nextMatchID`, which is the ID of the newly created match that the user should go to play again.
