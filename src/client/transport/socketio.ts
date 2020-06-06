@@ -129,11 +129,10 @@ export class SocketIOTransport extends Transport {
       }
     });
 
-    // Initial sync to get game state.
-    this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
-
     // Keep track of connection status.
     this.socket.on('connect', () => {
+      // Initial sync to get game state.
+      this.socket.emit('sync', this.gameID, this.playerID, this.numPlayers);
       this.isConnected = true;
       this.callback();
     });
