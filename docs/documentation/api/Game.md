@@ -90,10 +90,9 @@
     ...
   },
 
-  // The minimum number of players allowed, only enforced when using the Lobby server component
+  // The minimum and maximum number of players supported
+  // (This is only enforced when using the Lobby server component.)
   minPlayers: 1,
-
-  // The maximum number of players allowed, only enforced when using the Lobby server component
   maxPlayers: 4,
 
   // Ends the game if this returns anything.

@@ -3,29 +3,220 @@
 Creates a `boardgame.io` client. This is the entry point for
 the client application.
 
-### Arguments
+<!-- tabs:start -->
 
-1. obj(_object_): A config object with the options shown below under 'Usage'.
+### **Plain JS**
 
-### Returns
+#### Import
 
-(`client`): A React component that runs the client.
+```js
+import { Client } from 'boardgame.io/client';
+```
+
+### Creating a client
+
+#### Arguments
+
+1. `options` (_object_): An object with the following options:
+
+```js
+const client = Client({
+  // A game definition object.
+  game: game,
+
+  // The number of players.
+  numPlayers: 2,
+
+  // Set this to one of the following to enable multiplayer:
+  //
+  // SocketIO
+  //   Implementation that talks to a remote server using socket.io.
+  //
+  //   How to import:
+  //     import { SocketIO } from 'boardgame.io/multiplayer'
+  //
+  //   Arguments:
+  //     Object with 2 parameters
+  //        1. 'socketOpts' options to pass directly to socket.io client.
+  //        2. 'server' specifies the server location in the format: [http[s]://]hostname[:port];
+  //            defaults to current page host.
+  //
+  // Local
+  //   Special local mode that uses an in-memory game master. Useful
+  //   for testing multiplayer interactions locally without having to
+  //   connect to a server.
+  //
+  //   How to import:
+  //     import { Local } from 'boardgame.io/multiplayer'
+  //
+  // Additionally, you can write your own transport implementation.
+  // See `src/client/client.js` for details.
+  multiplayer: false,
+
+  // Game to connect to (multiplayer).
+  gameID: 'gameID',
+
+  // Associate the client with a player (multiplayer).
+  playerID: 'playerID',
+
+  // The player’s authentication credentials (multiplayer).
+  credentials: 'credentials',
+
+  // Set to false to disable the Debug Panel
+  debug: true/false,
+
+  // Add a Redux enhancer to the internal store.
+  // See “Debugging” guide for more details
+  enhancer: enhancer,
+});
+```
+
+### Using a client
+
+#### Properties
+
+The following properties are available on a client instance:
+
+- `moves`: An object containing functions to dispatch the
+   moves that you have defined. The functions are named after the
+   moves you created in your [game object](/api/Game.md). Each function
+   can take any number of arguments, and they are passed to the
+   move function after `G` and `ctx`.
+
+
+- `events`: An object containing functions to dispatch various
+   game events like `endTurn` and `endPhase`.
+
+
+- `log`: The game log.
+
+
+- `gameID`: The game ID associated with the client.
+
+
+- `playerID`: The player ID associated with the client.
+
+
+- `credentials`: Multiplayer authentication credentials for this player.
+
+
+- `gameMetadata`: An array containing the players that have joined
+  the game from a [room](/api/Lobby.md).
+
+  Example:
+
+  ```js
+  [
+    { id: 0, name: 'Alice' },
+    { id: 1, name: 'Bob' }
+  ]
+  ```
+
+
+#### Methods
+
+The following methods are available on a client instance:
+
+- `start()`: Start running the client. Connects to the multiplayer
+  transport and creates the Debug Panel.
+
+
+- `stop()`: Stop running the client. Disconnects the multiplayer
+  transport and unmounts the Debug Panel.
+
+
+- `getState()`: Get the current game state. Returns `null` if the client
+  still needs to sync with a remote master, otherwise an object:
+
+  ```js
+  {
+    // The game state object `G`.
+    G: { /* ... */ },
+
+    // The game `ctx` (turn, currentPlayer, etc.)
+    ctx: { /* ... */ },
+
+    // State for plugins.
+    plugins: { /* ... */ },
+
+    // The game log.
+    log: [ /* ... */ ],
+
+    // `true` if the client is able to currently make
+    // a move or interact with the game.
+    isActive: true/false,
+
+    // `true` if connection to the server is active.
+    isConnected: true/false,
+  }
+  ```
+
+
+- `subscribe(callback)`: Add a callback for every state change.
+  The passed function will be called with the same value as returned by
+  `getState`. `subscribe` returns an unsubscribe function.
+
+  ```js
+  const unsubscribe = client.subscribe(state => {
+    // use updated state
+  });
+
+  // unsubscribe from the client
+  unsubscribe();
+  ```
+
+
+- `reset()`: Function that resets the game.
+
+
+- `undo()`: Function that undoes the last move.
+
+
+- `redo()`: Function that redoes the previously undone move.
+
+
+- `updateGameID(id)`: Function to update the client’s game ID.
+
+
+- `updatePlayerID(id)`: Function to update the client’s player ID.
+
+
+- `updateCredentials(credentials)`: Function to update the client’s credentials.
+
+
+### **React**
+
+#### Import
+
+```js
+import { Client } from 'boardgame.io/react';
+```
+
+#### Arguments
+
+1. `options` (_object_): An object with the options shown below under ‘Usage’.
+
+#### Returns
+
+A React component that runs the client.
 
 The component supports the following `props`:
 
-1. `gameID`: Connect to a particular game (multiplayer).
+1. `gameID` (_string_):
+   Connect to a particular game (multiplayer).
 
-2. `playerID`: Associate the client with a player (multiplayer).
+2. `playerID` (_string_):
+   Associate the client with a player (multiplayer).
 
-3. `credentials`: The `playerID`s authentication credentials (multiplayer).
+3. `credentials` (_string_):
+   The player’s authentication credentials (multiplayer).
 
-4. `debug`: Set to `false` to disable the Debug UI.
+4. `debug` (_boolean_):
+   Set to `false` to disable the Debug UI.
 
 ### Usage
 
 ```js
-import { Client } from 'boardgame.io/react';
-
 const App = Client({
   // A game object.
   game: game,
@@ -83,62 +274,70 @@ const App = Client({
 ReactDOM.render(<App />, document.getElementById('app'));
 ```
 
-The `Board` component will receive the following as `props`:
+#### Board Props
 
-1. `G`: The game state.
+The component you pass as the `board` option will receive the
+following as `props`:
 
-2. `ctx`: The game metadata.
+- `G`: The game state.
 
-3. `moves`: An object containing functions to dispatch various
+
+- `ctx`: The game metadata.
+
+
+- `moves`: An object containing functions to dispatch various
    moves that you have defined. The functions are named after the
-   moves you created using [Game()](/api/Game.md). Each function
+   moves you created in your [game object](/api/Game.md). Each function
    can take any number of arguments, and they are passed to the
    move function after `G` and `ctx`.
 
-4. `events`: An object containing functions to dispatch various
+
+- `events`: An object containing functions to dispatch various
    game events like `endTurn` and `endPhase`.
 
-5. `reset`: Function that resets the game.
 
-6. `undo`: Function that undoes the last move.
+- `reset`: Function that resets the game.
 
-7. `redo`: Function that redoes the previously undone move.
 
-8. `step`:
-   Function that will advance the game if [AI is configured](/tutorial.md#bots).
+- `undo`: Function that undoes the last move.
 
-9. `log`: The game log.
 
-10. `gameID`: The game ID associated with the client.
+- `redo`: Function that redoes the previously undone move.
 
-11. `playerID`: The player ID associated with the client.
 
-12. `gameMetadata`: An object containing the players that have joined
-    the game from a [room](/api/Lobby.md).
+- `log`: The game log.
+
+
+- `gameID`: The game ID associated with the client.
+
+
+- `playerID`: The player ID associated with the client.
+
+
+- `gameMetadata`: An array containing the players that have joined
+  the game from a [room](/api/Lobby.md).
 
     Example:
 
-    ```json
-    {
-      "players": {
-        "0": {
-          "id": 0,
-          "name": "Alice"
-        },
-        "1": {
-          "id": 1,
-          "name": "Bob"
-        }
-      }
-    }
+    ```js
+    [
+      { id: 0, name: 'Alice' },
+      { id: 1, name: 'Bob' }
+    ]
     ```
 
-13. `isActive`: `true` if the client is able to currently make
+
+- `isActive`: `true` if the client is able to currently make
     a move or interact with the game.
 
-14. `isMultiplayer`: `true` if it is a multiplayer game.
 
-15. `isConnected`: `true` if connection to the server is active.
+- `isMultiplayer`: `true` if it is a multiplayer game.
 
-16. `credentials`: Authentication token for this player when using
+
+- `isConnected`: `true` if connection to the server is active.
+
+
+- `credentials`: Authentication token for this player when using
     the [Lobby REST API](/api/Lobby.md#server-side-api).
+
+<!-- tabs:end -->

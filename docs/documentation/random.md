@@ -31,7 +31,7 @@ This poses interesting challenges regarding the implementation.
 }
 ```
 
-!> The PRNG state is maintained inside `ctx._random` by the `Random`
+?> The PRNG state is maintained inside `ctx._random` by the `Random`
 package automatically.
 
 ### Seed
@@ -49,20 +49,20 @@ const game = {
 };
 ```
 
-### API Reference
+## API Reference
 
-#### 1. Die
+### 1. Die
 
-##### Arguments
+#### Arguments
 
 1. `spotvalue` (_number_): The die dimension (_default: 6_).
 2. `diceCount` (_number_): The number of dice to throw.
 
-##### Returns
+#### Returns
 
 The die roll value (or an array of values if `diceCount` is greater than `1`).
 
-##### Usage
+#### Usage
 
 ```js
 const game = Game({
@@ -76,11 +76,11 @@ const game = Game({
 });
 ```
 
-#### 2. Number
+### 2. Number
 
 Returns a random number between `0` and `1`.
 
-##### Usage
+#### Usage
 
 ```js
 const game = Game({
@@ -93,17 +93,17 @@ const game = Game({
 });
 ```
 
-#### 3. Shuffle
+### 3. Shuffle
 
-##### Arguments
+#### Arguments
 
 1. `deck` (_array_): An array to shuffle.
 
-##### Returns
+#### Returns
 
 The shuffled array.
 
-##### Usage
+#### Usage
 
 ```js
 const game = Game({
@@ -115,16 +115,16 @@ const game = Game({
 });
 ```
 
-#### 4. Wrappers
+### 4. Wrappers
 
 `D4`, `D6`, `D8`, `D10`, `D12` and `D20` are wrappers around
 `Die(n)`.
 
-##### Arguments
+#### Arguments
 
 1. `diceCount` (_number_): The number of dice to throw.
 
-##### Usage
+#### Usage
 
 ```js
 const game = Game({
