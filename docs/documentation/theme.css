@@ -1,0 +1,70 @@
+:root {
+  --theme-hue: 152;
+  --theme-lightness : 26%;
+  --mono-hue: calc(var(--theme-hue) + 400);
+  --mono-saturation: 5%;
+
+  --link-color: var(--theme-color);
+
+  /* add rounded corners */
+  --border-radius-s: .25em;
+  --border-radius-m: .5em;
+  --border-radius-l: 1.5em;
+
+  /* Sidebar Menu */
+  /* layout */
+  --sidebar-horizontal-padding: 1em;
+  --sidebar-padding: 0 var(--sidebar-horizontal-padding);
+  --sidebar-nav-indent: 0;
+  --sidebar-nav-link-margin: 0 calc(-1 * var(--sidebar-horizontal-padding)) 0 0;
+  --sidebar-nav-pagelink-padding: .25em 0 0 20px;
+  /* active page link styling */
+  --sidebar-nav-link-font-weight--active: bold;
+  --sidebar-nav-link-before-content-l3: "";
+  --sidebar-nav-link-before-content-l3--active: "→";
+  /* section headings */
+  --sidebar-nav-strong-font-size: var(--font-size-s);
+  --sidebar-nav-strong-margin: 2em calc(-1 * var(--sidebar-horizontal-padding)) .25em 0;
+  --sidebar-nav-strong-padding: .25em 0 0;
+
+  /* syntax highlighting tweaks for contrast accessibility */
+  --code-theme-comment: hsl(0, 0%, 44%);
+  --code-theme-function: hsl(347, 88%, 47%);
+  --code-theme-punctuation: var(--mono-shade1);
+  --code-theme-operator: hsl(29, 30%, 40%);
+  --code-theme-selector: hsl(100, 100%, 25%);
+  --code-theme-tag: hsl(310, 100%, 30%);
+}
+
+.markdown-section {
+  padding: 2em;
+  margin-bottom: 6em;
+}
+
+.sidebar-nav li > strong {
+  letter-spacing: .15ch;
+}
+
+.app-sub-sidebar {
+  --sidebar-nav-indent: 1em;
+  --sidebar-nav-pagelink-padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+  :root {
+    --docsifytabs-content-padding: 1rem;
+    --code-block-margin: 1em -1em;
+    --code-block-padding: 1.75em 1em 1.25em;
+    --code-block-border-radius: 0;
+  }
+
+  .markdown-section {
+    padding: 2em 1em;
+  }
+}
+
+@media screen and (max-width: 1250px) {
+  /* prevent transparent part of GitHub Corner intercepting clicks */
+  .github-corner { pointer-events: none; }
+  .github-corner path { pointer-events: all; }
+}

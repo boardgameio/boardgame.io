@@ -54,11 +54,11 @@ Creates a new authenticated room for a game named `name`.
 
 Accepts three parameters:
 
-`numPlayers` (required): the number of players.
+- `numPlayers` (required): the number of players.
 
-`setupData` (optional): custom object that is passed to the game `setup` function.
+- `setupData` (optional): custom object that is passed to the game `setup` function.
 
-`unlisted` (optional): if set to `true`, the room will be excluded from the public list of room instances.
+- `unlisted` (optional): if set to `true`, the room will be excluded from the public list of room instances.
 
 Returns `roomID`, which is the ID of the newly created game instance.
 
@@ -70,11 +70,11 @@ Allows a player to join a particular room instance `id` of a game named `name`.
 
 Accepts three JSON body parameters:
 
-`playerID` (required): the ordinal player in the game that is being joined (0, 1...).
+- `playerID` (required): the ordinal player in the game that is being joined (0, 1...).
 
-`playerName` (required): the display name of the player joining the game.
+- `playerName` (required): the display name of the player joining the game.
 
-`data` (optional): additional information associated to the player.
+- `data` (optional): additional information associated to the player.
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
 
@@ -86,13 +86,13 @@ Rename and/or update additional information of a user in the room instance `id` 
 
 Accepts four parameters, requires at least one of the two optional parameters:
 
-`playerID` (required): the ID used by the player in the game (0,1...).
+- `playerID` (required): the ID used by the player in the game (0,1...).
 
-`crendentials` (required): the authentication token of the player.
+- `crendentials` (required): the authentication token of the player.
 
-`newName` (optional): the new name of the player.
+- `newName` (optional): the new name of the player.
 
-`data` (optional): additional information associated to the player.
+- `data` (optional): additional information associated to the player.
 
 #### Leaving a room
 
@@ -102,9 +102,9 @@ Leave the room instance `id` of a game named `name` previously joined by the pla
 
 Accepts two parameters, all required:
 
-`playerID`: the ID used by the player in the game (0, 1...).
+- `playerID`: the ID used by the player in the game (0, 1...).
 
-`credentials`: the authentication token of the player.
+- `credentials`: the authentication token of the player.
 
 #### Listing all room instances of a given game
 
@@ -114,11 +114,11 @@ Returns all room instances of the game named `name`.
 
 Returns an array of `rooms`. Each instance has fields:
 
-`roomID`: the ID of the room instance.
+- `roomID`: the ID of the room instance.
 
-`players`: the list of seats and players that have joined the game, if any.
+- `players`: the list of seats and players that have joined the game, if any.
 
-`setupData` (optional): custom object that was passed to the game `setup` function.
+- `setupData` (optional): custom object that was passed to the game `setup` function.
 
 #### Getting specific instance of a room by its ID
 
@@ -128,11 +128,11 @@ Returns a room instance given its roomID.
 
 Returns a room instance. Each instance has fields:
 
-`roomID`: the ID of the room instance.
+- `roomID`: the ID of the room instance.
 
-`players`: the list of seats and players that have joined the game, if any.
+- `players`: the list of seats and players that have joined the game, if any.
 
-`setupData` (optional): custom object that was passed to the game `setup` function.
+- `setupData` (optional): custom object that was passed to the game `setup` function.
 
 #### Client Authentication
 
@@ -142,17 +142,17 @@ All actions for an authenticated game require an additional payload field `crede
 
 ##### POST `/games/{name}/{id}/playAgain`
 
-`{name}` (required): the name of the game being played again.
+- `{name}` (required): the name of the game being played again.
 
-`{id}` (required): the ID of the previous finished room.
+- `{id}` (required): the ID of the previous finished room.
 
 Given a previous room, generates a room ID where users should go if they want to play again. Creates this new room if it didn't exist before.
 
 Accepts these parameters:
 
-`playerID` (required): the player ID of the player on the previous game.
+- `playerID` (required): the player ID of the player on the previous game.
 
-`credentials` (required): player's credentials.
+- `credentials` (required): player's credentials.
 
 `numPlayers` (optional): the number of players. Defaults to the `numPlayers` value of the previous room.
 
