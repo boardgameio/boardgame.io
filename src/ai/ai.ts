@@ -8,6 +8,7 @@
 
 import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
+import { Game, PlayerID, State, Store } from '../types';
 
 /**
  * Make a single move on the client with a bot.
@@ -15,7 +16,7 @@ import { Bot } from './bot';
  * @param {...object} client - The game client.
  * @param {...object} bot - The bot.
  */
-export async function Step(client, bot) {
+export async function Step(client: { store: Store }, bot: Bot) {
   const state = client.store.getState();
 
   let playerID = state.ctx.currentPlayer;
@@ -26,11 +27,16 @@ export async function Step(client, bot) {
   const { action, metadata } = await bot.play(state, playerID);
 
   if (action) {
-    action.payload.metadata = metadata;
-    client.store.dispatch(action);
+    const a = {
+      ...action,
+      payload: {
+        ...action.payload,
+        metadata,
+      },
+    };
+    client.store.dispatch(a);
+    return a;
   }
-
-  return action;
 }
 
 /**
@@ -40,9 +46,19 @@ export async function Step(client, bot) {
  * @param {...object} bots - An array of bots.
  * @param {...object} state - The game state to start from.
  */
-export async function Simulate({ game, bots, state, depth }) {
+export async function Simulate({
+  game,
+  bots,
+  state,
+  depth,
+}: {
+  game: Game;
+  bots: Bot | Record<PlayerID, Bot>;
+  state: State;
+  depth?: number;
+}) {
   if (depth === undefined) depth = 10000;
-  const reducer = CreateGameReducer({ game, numPlayers: state.ctx.numPlayers });
+  const reducer = CreateGameReducer({ game });
 
   let metadata = null;
   let iter = 0;
