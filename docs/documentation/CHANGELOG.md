@@ -2,13 +2,13 @@
 
 #### Features
 
-* [[ef97441](https://github.com/nicolodavis/boardgame.io/commit/ef97441)] fix(debug): Save all state to localStorage, not just G and ctx (#716)
+* [[0ca1cef](https://github.com/nicolodavis/boardgame.io/commit/0ca1cef)] feat(lobby): use previous game config as defaults in playAgain (#719)
 * [[60b32e5](https://github.com/nicolodavis/boardgame.io/commit/60b32e5)] Add support for socket.io-adapter implementations (#706)
 * [[eb236df](https://github.com/nicolodavis/boardgame.io/commit/eb236df)] feat(db): FlatFile per-file request queues enhancement (#705)
 
 #### Bugfixes
 
-* [[0ca1cef](https://github.com/nicolodavis/boardgame.io/commit/0ca1cef)] feat(lobby): use previous game config as defaults in playAgain (#719)
+* [[ef97441](https://github.com/nicolodavis/boardgame.io/commit/ef97441)] fix(debug): Save all state to localStorage, not just G and ctx (#716)
 * [[4d45ff1](https://github.com/nicolodavis/boardgame.io/commit/4d45ff1)] fix(client): Fix restore in debug controls (#712)
 * [[d728425](https://github.com/nicolodavis/boardgame.io/commit/d728425)] fix(core): Fix undo/redo if the move changed the stage (#701)
 * [[3a622f1](https://github.com/nicolodavis/boardgame.io/commit/3a622f1)] Use Promise chaining to enforce read/write queue (#699)
