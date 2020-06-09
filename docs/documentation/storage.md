@@ -46,7 +46,7 @@ Instructions at https://github.com/c-w/bgio-azure-storage.
 
 #### Postgres
 
-Coming soon.
+Instructions at https://github.com/janKir/bgio-postgres.
 
 #### MongoDB
 
