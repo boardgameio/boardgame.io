@@ -6,7 +6,34 @@
  * https://opensource.org/licenses/MIT.
  */
 import { CreateGameReducer } from '../core/reducer';
-import { Bot } from './bot';
+import { Bot, BotAction } from './bot';
+import { Game, PlayerID, Ctx, State, Reducer } from '../types';
+
+export interface Node {
+  /** Game state at this node. */
+  state: State;
+  /** Parent of the node. */
+  parent?: Node;
+  /** Move used to get to this node. */
+  parentAction?: BotAction;
+  /** Unexplored actions. */
+  actions: BotAction[];
+  /** Current objectives. */
+  objectives: Objectives | Objectives[];
+  /** Children of the node. */
+  children: Node[];
+  /** Number of simulations that pass through this node. */
+  visits: number;
+  /** Number of wins for this node. */
+  value: number;
+}
+
+interface Objective {
+  checker: (G: any, ctx: Ctx) => boolean;
+  weight: number;
+}
+
+type Objectives = Record<string, Objective>;
 
 /**
  * The number of iterations to run before yielding to
@@ -18,6 +45,16 @@ const CHUNK_SIZE = 25;
  * Bot that uses Monte-Carlo Tree Search to find promising moves.
  */
 export class MCTSBot extends Bot {
+  private objectives: (G: any, ctx: Ctx, playerID: PlayerID) => Objectives;
+  private iterationCallback: (data: {
+    iterationCounter: number;
+    numIterations: number;
+    metadata: Node;
+  }) => void;
+  private reducer: Reducer;
+  iterations: number | ((G: any, ctx: Ctx, playerID?: PlayerID) => number);
+  playoutDepth?: number | ((G: any, ctx: Ctx, playerID?: PlayerID) => number);
+
   constructor({
     enumerate,
     seed,
@@ -26,6 +63,18 @@ export class MCTSBot extends Bot {
     iterations,
     playoutDepth,
     iterationCallback,
+  }: {
+    enumerate: Game['ai']['enumerate'];
+    seed?: string | number;
+    game: Game;
+    objectives?: (G: any, ctx: Ctx, playerID?: PlayerID) => Objectives;
+    iterations?: number | ((G: any, ctx: Ctx, playerID?: PlayerID) => number);
+    playoutDepth?: number | ((G: any, ctx: Ctx, playerID?: PlayerID) => number);
+    iterationCallback?: (data: {
+      iterationCounter: number;
+      numIterations: number;
+      metadata: Node;
+    }) => void;
   }) {
     super({ enumerate, seed });
 
@@ -57,11 +106,21 @@ export class MCTSBot extends Bot {
     });
   }
 
-  createNode({ state, parentAction, parent, playerID }) {
+  private createNode({
+    state,
+    parentAction,
+    parent,
+    playerID,
+  }: {
+    state: State;
+    parentAction?: BotAction;
+    parent?: Node;
+    playerID?: PlayerID;
+  }): Node {
     const { G, ctx } = state;
 
-    let actions = [];
-    let objectives = [];
+    let actions: BotAction[] = [];
+    let objectives: Objectives | Objectives[] = [];
 
     if (playerID !== undefined) {
       actions = this.enumerate(G, ctx, playerID);
@@ -79,26 +138,18 @@ export class MCTSBot extends Bot {
     }
 
     return {
-      // Game state at this node.
       state,
-      // Parent of the node.
       parent,
-      // Move used to get to this node.
       parentAction,
-      // Unexplored actions.
       actions,
-      // Current objectives.
       objectives,
-      // Children of the node.
       children: [],
-      // Number of simulations that pass through this node.
       visits: 0,
-      // Number of wins for this node.
       value: 0,
     };
   }
 
-  select(node) {
+  private select(node: Node) {
     // This node has unvisited children.
     if (node.actions.length > 0) {
       return node;
@@ -126,7 +177,7 @@ export class MCTSBot extends Bot {
     return this.select(selectedChild);
   }
 
-  expand(node) {
+  private expand(node: Node) {
     const actions = node.actions;
 
     if (actions.length == 0 || node.state.ctx.gameover !== undefined) {
@@ -146,9 +197,7 @@ export class MCTSBot extends Bot {
     return childNode;
   }
 
-  playout(node) {
-    let state = node.state;
-
+  playout({ state }: Node) {
     let playoutDepth = this.getOpt('playoutDepth');
     if (typeof this.playoutDepth === 'function') {
       playoutDepth = this.playoutDepth(state.G, state.ctx);
@@ -163,7 +212,7 @@ export class MCTSBot extends Bot {
       const moves = this.enumerate(G, ctx, playerID);
 
       // Check if any objectives are met.
-      const objectives = this.objectives(G, ctx);
+      const objectives = this.objectives(G, ctx, playerID);
       const score = Object.keys(objectives).reduce((score, key) => {
         const objective = objectives[key];
         if (objective.checker(G, ctx)) {
@@ -189,7 +238,10 @@ export class MCTSBot extends Bot {
     return state.ctx.gameover;
   }
 
-  backpropagate(node, result = {}) {
+  private backpropagate(
+    node: Node,
+    result: { score?: number; draw?: boolean; winner?: PlayerID } = {}
+  ) {
     node.visits++;
 
     if (result.score !== undefined) {
@@ -212,7 +264,10 @@ export class MCTSBot extends Bot {
     }
   }
 
-  play(state, playerID) {
+  play(
+    state: State,
+    playerID: PlayerID
+  ): Promise<{ action: BotAction; metadata: Node }> {
     const root = this.createNode({ state, playerID });
 
     let numIterations = this.getOpt('iterations');
@@ -221,7 +276,7 @@ export class MCTSBot extends Bot {
     }
 
     const getResult = () => {
-      let selectedChild = null;
+      let selectedChild: Node | null = null;
       for (const child of root.children) {
         if (selectedChild == null || child.visits > selectedChild.visits) {
           selectedChild = child;
