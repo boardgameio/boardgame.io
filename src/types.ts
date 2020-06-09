@@ -249,7 +249,16 @@ export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   playerView?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID) => any;
   plugins?: Array<Plugin<any, any, G>>;
   ai?: {
-    enumerate: (G: G, ctx: Ctx) => { move: string; args: any[] }[];
+    enumerate: (
+      G: G,
+      ctx: Ctx,
+      playerID: PlayerID
+    ) => Array<
+      | { event: string; args?: any[] }
+      | { move: string; args?: any[] }
+      | ActionShape.MakeMove
+      | ActionShape.GameEvent
+    >;
   };
   processMove?: (
     state: State<G, Ctx | CtxWithPlugins>,

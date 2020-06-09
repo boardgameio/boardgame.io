@@ -11,11 +11,11 @@ import { Client } from '../client/client';
 import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { makeMove } from '../core/action-creators';
 import { Step, Simulate } from './ai';
-import { Bot } from './bot';
 import { RandomBot } from './random-bot';
-import { MCTSBot } from './mcts-bot';
+import { MCTSBot, Node } from './mcts-bot';
 import { ProcessGameConfig } from '../core/game';
 import { Stage } from '../core/turn-order';
+import { Game, Ctx } from '../types';
 
 function IsVictory(cells) {
   const positions = [
@@ -200,33 +200,40 @@ describe('Simulate', () => {
 
 describe('Bot', () => {
   test('random', () => {
-    const b = new Bot({});
+    const b = new RandomBot({ enumerate: () => [] });
     expect(b.random()).toBeGreaterThanOrEqual(0);
     expect(b.random()).toBeLessThan(1);
   });
 
   test('enumerate - makeMove', () => {
     const enumerate = () => [makeMove('move')];
-    const b = new Bot({ enumerate });
-    expect(b.enumerate()[0].type).toBe(MAKE_MOVE);
+    const b = new RandomBot({ enumerate });
+    expect(b.enumerate(undefined, undefined, undefined)[0].type).toBe(
+      MAKE_MOVE
+    );
   });
 
   test('enumerate - translate to makeMove', () => {
     const enumerate = () => [{ move: 'move' }];
-    const b = new Bot({ enumerate });
-    expect(b.enumerate()[0].type).toBe(MAKE_MOVE);
+    const b = new RandomBot({ enumerate });
+    expect(b.enumerate(undefined, undefined, undefined)[0].type).toBe(
+      MAKE_MOVE
+    );
   });
 
   test('enumerate - translate to gameEvent', () => {
     const enumerate = () => [{ event: 'endTurn' }];
-    const b = new Bot({ enumerate });
-    expect(b.enumerate()[0].type).toBe(GAME_EVENT);
+    const b = new RandomBot({ enumerate });
+    expect(b.enumerate(undefined, undefined, undefined)[0].type).toBe(
+      GAME_EVENT
+    );
   });
 
   test('enumerate - unrecognized', () => {
-    const enumerate = () => [{ unknown: true }];
-    const b = new Bot({ enumerate });
-    expect(b.enumerate()).toEqual([undefined]);
+    const enumerate = (() =>
+      [{ unknown: true }] as unknown) as Game['ai']['enumerate'];
+    const b = new RandomBot({ enumerate });
+    expect(b.enumerate(undefined, undefined, undefined)).toEqual([undefined]);
   });
 });
 
@@ -241,13 +248,12 @@ describe('MCTSBot', () => {
 
   test('RandomBot vs. MCTSBot', async () => {
     const bots = {
-      '0': new RandomBot({ seed: 'test', enumerate, playerID: '0' }),
+      '0': new RandomBot({ seed: 'test', enumerate }),
       '1': new MCTSBot({
         iterations: 200,
         seed: 'test',
         game: TicTacToe,
         enumerate,
-        playerID: '1',
       }),
     };
 
@@ -274,7 +280,6 @@ describe('MCTSBot', () => {
           seed: i,
           game: TicTacToe,
           enumerate,
-          playerID: '0',
           iterations,
           playoutDepth: 50,
         }),
@@ -282,7 +287,6 @@ describe('MCTSBot', () => {
           seed: i,
           game: TicTacToe,
           enumerate,
-          playerID: '1',
           iterations,
         }),
       };
@@ -343,7 +347,6 @@ describe('MCTSBot', () => {
         game: TicTacToe,
         enumerate,
         objectives,
-        playerID: '0',
       });
 
       const { action } = await bot.play(state, '0');
@@ -357,7 +360,6 @@ describe('MCTSBot', () => {
       seed: '0',
       game: TicTacToe,
       enumerate,
-      playerID: '0',
       iterations: 10,
       playoutDepth: 10,
     });
@@ -374,7 +376,7 @@ describe('MCTSBot', () => {
     });
 
     test('setOpt works on invalid key', () => {
-      const bot = new RandomBot({ game: TicTacToe, enumerate: jest.fn() });
+      const bot = new RandomBot({ enumerate: jest.fn() });
       bot.setOpt('unknown', 1);
     });
 
@@ -396,11 +398,19 @@ describe('MCTSBot', () => {
         playoutDepth: (G, ctx) => ctx.turn * 10,
       });
 
-      expect(bot.iterations(null, { turn }, currentPlayer)).toBe(turn * 100);
-      expect(bot.playoutDepth(null, { turn }, currentPlayer)).toBe(turn * 10);
+      if (typeof bot.iterations === 'function') {
+        expect(bot.iterations(null, { turn } as Ctx, currentPlayer)).toBe(
+          turn * 100
+        );
+      }
+      if (typeof bot.playoutDepth === 'function') {
+        expect(bot.playoutDepth(null, { turn } as Ctx, currentPlayer)).toBe(
+          turn * 10
+        );
+      }
 
       // try the playout() function which requests the playoutDepth value
-      bot.playout({ state });
+      bot.playout({ state } as Node);
 
       expect(enumerateSpy).toHaveBeenCalledWith(
         state.G,

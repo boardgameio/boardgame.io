@@ -7,12 +7,13 @@
  */
 
 import { Bot } from './bot';
+import { Ctx, PlayerID } from '../types';
 
 /**
  * Bot that picks a move at random.
  */
 export class RandomBot extends Bot {
-  play({ G, ctx }, playerID) {
+  play({ G, ctx }: { G: any; ctx: Ctx }, playerID: PlayerID) {
     const moves = this.enumerate(G, ctx, playerID);
     return Promise.resolve({ action: this.random(moves) });
   }
