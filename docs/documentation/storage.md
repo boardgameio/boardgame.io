@@ -12,7 +12,7 @@ for a custom backend.
 First, install the necessary packages:
 
 ```
-npm install --save node-persist
+npm install node-persist
 ```
 
 Then modify your server spec to indicate that you want to connect to a flatfile database:

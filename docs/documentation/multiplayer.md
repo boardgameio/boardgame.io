@@ -210,7 +210,7 @@ Because `Game.js` is an ES module, we will use [esm](https://github.com/standard
 which enables us to use `import` statements in a Node environment:
 
 ```
-npm install --save esm
+npm install esm
 ```
 
 We can then add a new script to our `package.json` to simplify

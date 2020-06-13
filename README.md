@@ -41,7 +41,7 @@ networking or storage code.
 ### Installation
 
 ```sh
-npm install --save boardgame.io
+npm install boardgame.io
 ```
 
 ### Documentation
