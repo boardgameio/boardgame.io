@@ -5,7 +5,8 @@ moves in the current turn. This is a common pattern in
 games that allow a player to make multiple moves per turn,
 and can be a useful feature to allow the player to experiment
 with different move combinations (and seeing what they do)
-before committing to one.
+before committing to one. You can disable this feature by 
+setting `disableUndo` to true in the game config. 
 
 ### Usage
 

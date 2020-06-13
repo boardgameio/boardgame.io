@@ -229,6 +229,7 @@ interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
 
 export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   name?: string;
+  disableUndo?: boolean;
   seed?: string | number;
   setup?: (ctx: CtxWithPlugins, setupData?: any) => any;
   moves?: MoveMap<G, CtxWithPlugins>;
