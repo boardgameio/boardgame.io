@@ -164,10 +164,12 @@ export const createRouter = ({
     } = ctx.query;
 
     let isGameover: boolean | undefined;
-    if (isGameoverString === 'true') {
-      isGameover = true;
-    } else if (isGameoverString === 'false') {
-      isGameover = false;
+    if (isGameoverString) {
+      if (isGameoverString.toLowerCase() === 'true') {
+        isGameover = true;
+      } else if (isGameoverString.toLowerCase() === 'false') {
+        isGameover = false;
+      }
     }
     let updatedBefore: number | undefined;
     if (updatedBeforeString) {
