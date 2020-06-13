@@ -18,11 +18,16 @@ import {
 import { error } from '../core/logger';
 import { Server } from '../types';
 import * as StorageAPI from '../server/db/base';
+import * as dateMock from 'jest-date-mock';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
+
+beforeEach(() => {
+  dateMock.clear();
+});
 
 class InMemoryAsync extends InMemory {
   type() {
@@ -81,6 +86,8 @@ describe('sync', () => {
           name: 'Bob',
         },
       },
+      createdAt: 0,
+      updatedAt: 0,
     };
     db.setMetadata('gameID', dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
@@ -216,6 +223,8 @@ describe('update', () => {
       gameName: 'tic-tac-toe',
       setupData: {},
       players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
     };
     db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
@@ -235,6 +244,31 @@ describe('update', () => {
       gameName: 'tic-tac-toe',
       setupData: {},
       players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    db.setMetadata(id, dbMetadata);
+    const masterWithMetadata = new Master(game, db, TransportAPI(send));
+    await masterWithMetadata.onSync(id, '0', 2);
+
+    const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
+    dateMock.advanceTo(updatedAt);
+    const gameOverArg = 'gameOverArg';
+    const event = ActionCreators.gameEvent('endGame', gameOverArg);
+    await masterWithMetadata.onUpdate(event, 0, id, '0');
+    const { metadata } = db.fetch(id, { metadata: true });
+    expect(metadata.updatedAt).toEqual(updatedAt.getTime());
+  });
+
+  test('writes updatedAt to metadata with async storage API', async () => {
+    const id = 'gameWithMetadata';
+    const db = new InMemoryAsync();
+    const dbMetadata = {
+      gameName: 'tic-tac-toe',
+      setupData: {},
+      players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
     };
     db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
@@ -600,7 +634,13 @@ describe('getPlayerMetadata', () => {
     test('then playerMetadata is undefined', () => {
       expect(
         getPlayerMetadata(
-          { gameName: '', setupData: {}, players: { '1': { id: 1 } } },
+          {
+            gameName: '',
+            setupData: {},
+            players: { '1': { id: 1 } },
+            createdAt: 0,
+            updatedAt: 0,
+          },
           '0'
         )
       ).toBeUndefined();
@@ -611,7 +651,13 @@ describe('getPlayerMetadata', () => {
     test('then playerMetadata is returned', () => {
       const playerMetadata = { id: 0, credentials: 'SECRET' };
       const result = getPlayerMetadata(
-        { gameName: '', setupData: {}, players: { '0': playerMetadata } },
+        {
+          gameName: '',
+          setupData: {},
+          players: { '0': playerMetadata },
+          createdAt: 0,
+          updatedAt: 0,
+        },
         '0'
       );
       expect(result).toBe(playerMetadata);
@@ -635,6 +681,8 @@ describe('doesMatchRequireAuthentication', () => {
         players: {
           '0': { id: 1 },
         },
+        createdAt: 0,
+        updatedAt: 0,
       };
       const result = doesMatchRequireAuthentication(matchMetadata);
       expect(result).toBe(false);
@@ -652,6 +700,8 @@ describe('doesMatchRequireAuthentication', () => {
             credentials: 'SECRET',
           },
         },
+        createdAt: 0,
+        updatedAt: 0,
       };
       const result = doesMatchRequireAuthentication(matchMetadata);
       expect(result).toBe(true);

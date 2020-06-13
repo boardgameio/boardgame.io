@@ -36,6 +36,11 @@ export type FetchResult<O extends FetchOpts> = Object.Pick<
 
 export interface ListGamesOpts {
   gameName?: string;
+  where?: {
+    isGameover?: boolean;
+    updatedBefore?: number;
+    updatedAfter?: number;
+  };
 }
 
 /**

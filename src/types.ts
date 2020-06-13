@@ -288,6 +288,8 @@ export namespace Server {
     gameover?: any;
     nextMatchID?: string;
     unlisted?: boolean;
+    createdAt: number;
+    updatedAt: number;
   }
 }
 

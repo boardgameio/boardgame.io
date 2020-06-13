@@ -8,6 +8,7 @@
 
 import request from 'supertest';
 import Koa from 'koa';
+import * as dateMock from 'jest-date-mock';
 
 import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
@@ -15,6 +16,10 @@ import * as StorageAPI from './db/base';
 import { Game } from '../types';
 
 jest.setTimeout(2000000000);
+
+beforeEach(() => {
+  dateMock.clear();
+});
 
 type StorageMocks = Record<
   'createGame' | 'setState' | 'fetch' | 'setMetadata' | 'listGames' | 'wipe',
@@ -83,6 +88,7 @@ describe('.createRouter', () => {
     let app: Koa;
     let db: AsyncStorage;
     let games: Game[];
+    const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
 
     beforeEach(async () => {
       db = new AsyncStorage();
@@ -101,6 +107,8 @@ describe('.createRouter', () => {
 
     describe('for an unprotected lobby server', () => {
       beforeEach(async () => {
+        dateMock.advanceTo(updatedAt);
+
         delete process.env.API_SECRET;
 
         const uuid = () => 'matchID';
@@ -131,6 +139,8 @@ describe('.createRouter', () => {
                 '1': expect.objectContaining({}),
               }),
               unlisted: false,
+              createdAt: updatedAt.getTime(),
+              updatedAt: updatedAt.getTime(),
             }),
           })
         );
@@ -1183,41 +1193,43 @@ describe('.createRouter', () => {
 
   describe('requesting room list', () => {
     let db: AsyncStorage;
+    const dbFetch = jest.fn(async matchID => {
+      return {
+        metadata: {
+          players: {
+            '0': {
+              id: 0,
+              credentials: 'SECRET1',
+            },
+            '1': {
+              id: 1,
+              credentials: 'SECRET2',
+            },
+          },
+          unlisted: matchID === 'bar-4',
+          gameover: matchID === 'bar-3' ? { winner: 0 } : undefined,
+        },
+      };
+    });
+    const dbListGames = jest.fn(async opts => {
+      const metadata = {
+        'foo-0': { gameName: 'foo' },
+        'foo-1': { gameName: 'foo' },
+        'bar-2': { gameName: 'bar' },
+        'bar-3': { gameName: 'bar' },
+        'bar-4': { gameName: 'bar' },
+      };
+      const keys = Object.keys(metadata);
+      if (opts && opts.gameName) {
+        return keys.filter(key => metadata[key].gameName === opts.gameName);
+      }
+      return [...keys];
+    });
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        fetch: async matchID => {
-          return {
-            metadata: {
-              players: {
-                '0': {
-                  id: 0,
-                  credentials: 'SECRET1',
-                },
-                '1': {
-                  id: 1,
-                  credentials: 'SECRET2',
-                },
-              },
-              unlisted: matchID === 'bar-4',
-              gameover: matchID === 'bar-3' ? { winner: 0 } : undefined,
-            },
-          };
-        },
-        listGames: async opts => {
-          const metadata = {
-            'foo-0': { gameName: 'foo' },
-            'foo-1': { gameName: 'foo' },
-            'bar-2': { gameName: 'bar' },
-            'bar-3': { gameName: 'bar' },
-            'bar-4': { gameName: 'bar' },
-          };
-          const keys = Object.keys(metadata);
-          if (opts && opts.gameName) {
-            return keys.filter(key => metadata[key].gameName === opts.gameName);
-          }
-          return [...keys];
-        },
+        fetch: dbFetch,
+        listGames: dbListGames,
       });
     });
 
@@ -1248,6 +1260,85 @@ describe('.createRouter', () => {
       test('returns gameover data for ended match', async () => {
         expect(matches[0].gameover).toBeUndefined();
         expect(matches[1].gameover).toEqual({ winner: 0 });
+      });
+    });
+
+    describe('when given filter options', () => {
+      const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+      let app;
+
+      beforeEach(() => {
+        app = createApiServer({ db, games });
+        dbListGames.mockClear();
+      });
+
+      describe('isGameover query param', () => {
+        test('is undefined if not specified in request', async () => {
+          await request(app.callback()).get('/games/bar');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: undefined } })
+          );
+        });
+        test('is true', async () => {
+          await request(app.callback()).get('/games/bar?isGameover=true');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: true } })
+          );
+        });
+        test('is false', async () => {
+          await request(app.callback()).get('/games/bar?isGameover=false');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: false } })
+          );
+        });
+      });
+
+      describe('updatedBefore query param', () => {
+        test('is undefined if not specified in request', async () => {
+          await request(app.callback()).get('/games/bar');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedBefore: undefined }),
+            })
+          );
+        });
+        test('is specified', async () => {
+          const timestamp = new Date(2020, 3, 4, 5, 6, 7);
+          await request(app.callback()).get(
+            `/games/bar?updatedBefore=${timestamp.getTime()}`
+          );
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({
+                updatedBefore: timestamp.getTime(),
+              }),
+            })
+          );
+        });
+      });
+
+      describe('updatedAfter query param', () => {
+        test('is undefined if not specified in request', async () => {
+          await request(app.callback()).get('/games/bar');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedAfter: undefined }),
+            })
+          );
+        });
+        test('is specified', async () => {
+          const timestamp = new Date(2020, 3, 4, 5, 6, 7);
+          await request(app.callback()).get(
+            `/games/bar?updatedAfter=${timestamp.getTime()}`
+          );
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({
+                updatedAfter: timestamp.getTime(),
+              }),
+            })
+          );
+        });
       });
     });
   });
