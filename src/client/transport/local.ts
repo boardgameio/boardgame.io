@@ -130,7 +130,6 @@ type LocalTransportOpts = TransportOpts & {
  */
 export class LocalTransport extends Transport {
   master: LocalMaster;
-  isConnected: boolean;
 
   /**
    * Creates a new Mutiplayer instance.

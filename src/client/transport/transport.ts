@@ -30,6 +30,7 @@ export abstract class Transport {
   playerID: PlayerID | null;
   gameID: string;
   numPlayers: number;
+  isConnected: boolean;
 
   constructor({
     store,
