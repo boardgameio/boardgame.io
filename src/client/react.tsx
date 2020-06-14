@@ -8,7 +8,42 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Client as RawClient } from './client';
+import { Client as RawClient, ClientOpts, _ClientImpl } from './client';
+import { State } from '../types';
+
+type WrappedBoardDelegates = 'gameID' | 'playerID' | 'credentials';
+
+export type WrappedBoardProps = Pick<
+  ClientOpts,
+  WrappedBoardDelegates | 'debug'
+>;
+
+export type BoardProps<G extends any = any> = Partial<
+  State<G> &
+    Pick<
+      _ClientImpl<G>,
+      | 'log'
+      | 'moves'
+      | 'events'
+      | 'reset'
+      | 'undo'
+      | 'redo'
+      | 'playerID'
+      | 'gameID'
+      | 'gameMetadata'
+    > & {
+      isActive: boolean;
+      isMultiplayer: boolean;
+    }
+>;
+
+type ReactClientOpts<
+  G extends any = any,
+  P extends BoardProps<G> = BoardProps<G>
+> = Omit<ClientOpts<G>, WrappedBoardDelegates> & {
+  board?: React.ComponentType<P>;
+  loading?: React.ComponentType;
+};
 
 /**
  * Client
@@ -29,7 +64,10 @@ import { Client as RawClient } from './client';
  *   and dispatch actions such as MAKE_MOVE, GAME_EVENT, RESET,
  *   UNDO and REDO.
  */
-export function Client(opts) {
+export function Client<
+  G extends any = any,
+  P extends BoardProps<G> = BoardProps<G>
+>(opts: ReactClientOpts<G, P>) {
   let { game, numPlayers, loading, board, multiplayer, enhancer, debug } = opts;
 
   // Component that is displayed before the client has synced
@@ -39,13 +77,23 @@ export function Client(opts) {
     loading = Loading;
   }
 
+  type AdditionalProps = Omit<
+    React.ComponentProps<typeof opts['board']>,
+    keyof BoardProps<G>
+  >;
+
   /*
    * WrappedBoard
    *
    * The main React component that wraps the passed in
    * board component and adds the API to its props.
    */
-  return class WrappedBoard extends React.Component {
+  return class WrappedBoard extends React.Component<
+    WrappedBoardProps & AdditionalProps
+  > {
+    client: _ClientImpl<G>;
+    unsubscribe?: () => void;
+
     static propTypes = {
       // The ID of a game to connect to.
       // Only relevant in multiplayer.
@@ -67,7 +115,7 @@ export function Client(opts) {
       debug: true,
     };
 
-    constructor(props) {
+    constructor(props: WrappedBoardProps & AdditionalProps) {
       super(props);
 
       if (debug === undefined) {
@@ -96,7 +144,7 @@ export function Client(opts) {
       this.unsubscribe();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: WrappedBoardProps & AdditionalProps) {
       if (this.props.gameID != prevProps.gameID) {
         this.client.updateGameID(this.props.gameID);
       }
@@ -120,7 +168,7 @@ export function Client(opts) {
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          ...this.props,
+          ...(this.props as P),
           isMultiplayer: !!multiplayer,
           moves: this.client.moves,
           events: this.client.events,
