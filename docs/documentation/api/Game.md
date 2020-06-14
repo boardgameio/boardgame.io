@@ -102,5 +102,8 @@
   // Called at the end of the game.
   // `ctx.gameover` is available at this point.
   onEnd: (G, ctx) => G,
+  
+  // Disable undo feature for all the moves in the game
+  disableUndo: true,
 }
 ```

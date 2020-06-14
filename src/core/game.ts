@@ -48,6 +48,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
   }
 
   if (game.name === undefined) game.name = 'default';
+  if (game.disableUndo === undefined) game.disableUndo = false;
   if (game.setup === undefined) game.setup = () => ({});
   if (game.moves === undefined) game.moves = {};
   if (game.playerView === undefined) game.playerView = G => G;

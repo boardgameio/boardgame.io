@@ -364,6 +364,45 @@ test('undo / redo', () => {
   expect(state.G).toMatchObject({ roll: 4 });
 });
 
+test('disable undo / redo', () => {
+  const game: Game = {
+    seed: 0,
+    disableUndo: true,
+    moves: {
+      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+    },
+  };
+
+  const reducer = CreateGameReducer({ game });
+
+  let state = InitializeGame({ game });
+
+  state = reducer(state, makeMove('move', 'A'));
+  expect(state.G).toMatchObject({ A: true });
+  expect(state._undo).toEqual([]);
+  expect(state._redo).toEqual([]);
+
+  state = reducer(state, makeMove('move', 'B'));
+  expect(state.G).toMatchObject({ A: true, B: true });
+  expect(state._undo).toEqual([]);
+  expect(state._redo).toEqual([]);
+
+  state = reducer(state, undo());
+  expect(state.G).toMatchObject({ A: true, B: true });
+  expect(state._undo).toEqual([]);
+  expect(state._redo).toEqual([]);
+
+  state = reducer(state, undo());
+  expect(state.G).toMatchObject({ A: true, B: true });
+  expect(state._undo).toEqual([]);
+  expect(state._redo).toEqual([]);
+
+  state = reducer(state, redo());
+  expect(state.G).toMatchObject({ A: true, B: true });
+  expect(state._undo).toEqual([]);
+  expect(state._redo).toEqual([]);
+});
+
 describe('undo stack', () => {
   const game: Game = {
     moves: {

@@ -213,7 +213,7 @@ export function CreateGameReducer({
 
         // Update undo / redo state.
         // Only update undo stack if the turn has not been ended
-        if (state.ctx.turn === prevTurnCount) {
+        if (state.ctx.turn === prevTurnCount && !game.disableUndo) {
           state._undo = state._undo.concat({
             G: state.G,
             ctx: state.ctx,
@@ -233,6 +233,11 @@ export function CreateGameReducer({
       }
 
       case Actions.UNDO: {
+        if (game.disableUndo) {
+          error("Undo is not enabled");
+          return state;
+        }
+
         const { _undo, _redo } = state;
 
         if (_undo.length < 2) {
@@ -263,6 +268,11 @@ export function CreateGameReducer({
 
       case Actions.REDO: {
         const { _undo, _redo } = state;
+
+        if (game.disableUndo) {
+          error("Redo is not enabled");
+          return state;
+        }
 
         if (_redo.length == 0) {
           return state;

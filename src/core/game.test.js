@@ -265,3 +265,21 @@ describe('config errors', () => {
     );
   });
 });
+
+describe('disableUndo', () => {
+  test('set disableUndo to false by default', () => {
+    const game = ProcessGameConfig({
+      moves: {},
+    });
+    expect(game.disableUndo).toBeFalsy();
+  });
+
+  test('set disableUndo to true', () => {
+    const game = ProcessGameConfig({
+      moves: {},
+      disableUndo: true,
+    });
+
+    expect(game.disableUndo).toBeTruthy();
+  });
+});
