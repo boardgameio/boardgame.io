@@ -88,6 +88,7 @@
     "@types/koa-router": "^7.4.0",
     "@types/koa__cors": "^3.0.1",
     "@types/react": "^16.9.36",
+    "@types/react-dom": "^16.9.8",
     "@types/shortid": "0.0.29",
     "@types/socket.io": "^2.1.4",
     "ajv": "^6.6.2",
