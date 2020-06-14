@@ -31,7 +31,7 @@ npm init
 We’re going to add boardgame.io and also Parcel to help us build our app:
 
 ```
-npm install --save boardgame.io
+npm install boardgame.io
 npm install --save-dev parcel-bundler
 ```
 
@@ -86,7 +86,7 @@ command line tool to initialize our React app and then add boardgame.io to it.
 ```
 npx create-react-app bgio-tutorial
 cd bgio-tutorial
-npm install --save boardgame.io
+npm install boardgame.io
 ```
 
 While we’re here, let’s also create an empty JavaScript file for our game code:

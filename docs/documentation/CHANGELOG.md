@@ -1,3 +1,14 @@
+## v0.39.13
+
+#### Features
+
+* [[2b1bd19](https://github.com/nicolodavis/boardgame.io/commit/2b1bd19)] refactor(ai): Convert to Typescript (#734)
+* [[872b58b](https://github.com/nicolodavis/boardgame.io/commit/872b58b)] fix(client): Make argument optional in Local transport (#731)
+
+#### Bugfixes
+
+* [[0088cb5](https://github.com/nicolodavis/boardgame.io/commit/0088cb5)] fix: Re-sync client on reconnect, fixes #713 (#727)
+
 ## v0.39.12
 
 #### Features

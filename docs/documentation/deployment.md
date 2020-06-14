@@ -18,7 +18,7 @@ Below is an example of how to achieve that.
 First install these extra dependencies: 
 
 ```
-npm i --save koa-static
+npm i koa-static
 ```
 Then adjust your `server.js` file like this:
 
