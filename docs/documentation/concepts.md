@@ -23,6 +23,9 @@ on both client and server seamlessly. The state in `ctx` is
 incrementally adoptable, meaning that you can manage all the
 state manually in `G` if you so desire.
 
+`G` must be a JSON-serializable object; in particular, it must
+not contain classes or functions.
+
 ?> `ctx` contains other fields not shown here that games
 can take advantage of, including support for game phases and complex
 turn orders.
