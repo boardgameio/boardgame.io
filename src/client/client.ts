@@ -403,7 +403,7 @@ export class _ClientImpl<G extends any = any> {
 
     // This is the state before a sync with the game master.
     if (state === null) {
-      return state;
+      return state as null;
     }
 
     // isActive.
