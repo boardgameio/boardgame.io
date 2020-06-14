@@ -6,7 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { ProcessGameConfig } from '../../core/game';
 import {
+  Game,
   PlayerID,
   CredentialedActionShape,
   State,
@@ -19,6 +21,8 @@ export type MetadataCallback = (metadata: SyncInfo['filteredMetadata']) => void;
 export interface TransportOpts {
   store?: Store;
   gameName?: string;
+  gameKey?: Game;
+  game?: ReturnType<typeof ProcessGameConfig>;
   playerID?: PlayerID;
   gameID?: string;
   numPlayers?: number;
