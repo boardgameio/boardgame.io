@@ -43,7 +43,7 @@ declare class DebugPanel {
 }
 type Debug = {
   target?: HTMLElement;
-  impl: typeof DebugPanel;
+  impl?: typeof DebugPanel;
 };
 
 /**
