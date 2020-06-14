@@ -11,11 +11,13 @@ import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Client, createMoveDispatchers } from './client';
 import { ProcessGameConfig } from '../core/game';
+import { Transport } from './transport/transport';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
-import Debug from './debug/Debug.svelte';
+import Debug from './debug';
 import { error } from '../core/logger';
+import { LogEntry, State, SyncInfo } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -157,7 +159,7 @@ describe('multiplayer', () => {
       jest.spyOn(client.transport, 'onAction');
       const state = { G: {}, ctx: { phase: '' }, plugins: {} };
       const filteredMetadata = [];
-      client.store.dispatch(sync({ state, filteredMetadata }));
+      client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
     });
@@ -225,6 +227,8 @@ describe('multiplayer', () => {
 
   describe('custom transport', () => {
     class CustomTransport {
+      callback;
+
       constructor() {
         this.callback = null;
       }
@@ -233,7 +237,8 @@ describe('multiplayer', () => {
         this.callback = fn;
       }
     }
-    const customTransport = () => new CustomTransport();
+    const customTransport = () =>
+      (new CustomTransport() as unknown) as Transport;
 
     let client;
 
@@ -262,7 +267,7 @@ test('accepts enhancer for store', () => {
     const vanillaStore = vanillaCreateStore(...args);
     return {
       ...vanillaStore,
-      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+      dispatch: spyDispatcher = jest.fn(vanillaStore.dispatch),
     };
   };
   const client = Client({
@@ -443,7 +448,7 @@ describe('log handling', () => {
   });
 
   test('update', () => {
-    const state = { restore: true, _stateID: 0 };
+    const state = ({ restore: true, _stateID: 0 } as unknown) as State;
     const deltalog = [
       {
         action: {},
@@ -453,7 +458,7 @@ describe('log handling', () => {
         action: {},
         _stateID: 1,
       },
-    ];
+    ] as LogEntry[];
     const action = update(state, deltalog);
 
     client.store.dispatch(action);
@@ -465,7 +470,7 @@ describe('log handling', () => {
   test('sync', () => {
     const state = { restore: true };
     const log = ['0', '1'];
-    const action = sync({ state, log });
+    const action = sync(({ state, log } as unknown) as SyncInfo);
 
     client.store.dispatch(action);
     client.store.dispatch(action);
@@ -474,13 +479,13 @@ describe('log handling', () => {
   });
 
   test('update - log missing', () => {
-    const action = update();
+    const action = update(undefined, undefined);
     client.store.dispatch(action);
     expect(client.log).toEqual([]);
   });
 
   test('sync - log missing', () => {
-    const action = sync({});
+    const action = sync({} as SyncInfo);
     client.store.dispatch(action);
     expect(client.log).toEqual([]);
   });
@@ -600,15 +605,17 @@ describe('subscribe', () => {
   });
 
   test('transport notifies subscribers', () => {
-    const client = Client({
-      game: {},
-      multiplayer: SocketIO(),
-    });
+    let transport: ReturnType<ReturnType<typeof SocketIO>>;
+    const multiplayer = (opts: any) => {
+      transport = SocketIO()(opts);
+      return transport;
+    };
+    const client = Client({ game: {}, multiplayer });
     const fn = jest.fn();
     client.subscribe(fn);
     client.start();
     fn.mockClear();
-    client.transport.callback();
+    transport.callback();
     expect(fn).toHaveBeenCalled();
   });
 
@@ -664,7 +671,7 @@ describe('start / stop', () => {
   });
 
   test('no error when mounting on null element', () => {
-    const client = Client({ game: {}, debug: { target: null } });
+    const client = Client({ game: {}, debug: { target: null } }) as any;
     client.start();
     client.stop();
     expect(client._debugPanel).toBe(null);
