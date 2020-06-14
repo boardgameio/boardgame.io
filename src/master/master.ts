@@ -306,15 +306,14 @@ export class Master {
     const { deltalog, ...stateWithoutDeltalog } = state;
 
     let newMetadata: Server.MatchMetadata | undefined;
-    if (
-      metadata &&
-      !('gameover' in metadata) &&
-      state.ctx.gameover !== undefined
-    ) {
+    if (metadata && !('gameover' in metadata)) {
       newMetadata = {
         ...metadata,
-        gameover: state.ctx.gameover,
+        updatedAt: Date.now(),
       };
+      if (state.ctx.gameover !== undefined) {
+        newMetadata.gameover = state.ctx.gameover;
+      }
     }
 
     if (IsSynchronous(this.storageAPI)) {

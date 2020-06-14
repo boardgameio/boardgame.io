@@ -48,6 +48,8 @@ export const CreateMatch = async ({
     gameName: game.name,
     unlisted: !!unlisted,
     players: {},
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
   };
   if (setupData !== undefined) metadata.setupData = setupData;
   for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
@@ -155,7 +157,42 @@ export const createRouter = ({
    */
   router.get('/games/:name', async ctx => {
     const gameName = ctx.params.name;
-    const matchList = await db.listGames({ gameName });
+    const {
+      isGameover: isGameoverString,
+      updatedBefore: updatedBeforeString,
+      updatedAfter: updatedAfterString,
+    } = ctx.query;
+
+    let isGameover: boolean | undefined;
+    if (isGameoverString) {
+      if (isGameoverString.toLowerCase() === 'true') {
+        isGameover = true;
+      } else if (isGameoverString.toLowerCase() === 'false') {
+        isGameover = false;
+      }
+    }
+    let updatedBefore: number | undefined;
+    if (updatedBeforeString) {
+      const parsedNumber = Number.parseInt(updatedBeforeString, 10);
+      if (parsedNumber > 0) {
+        updatedBefore = parsedNumber;
+      }
+    }
+    let updatedAfter: number | undefined;
+    if (updatedAfterString) {
+      const parsedNumber = Number.parseInt(updatedAfterString, 10);
+      if (parsedNumber > 0) {
+        updatedAfter = parsedNumber;
+      }
+    }
+    const matchList = await db.listGames({
+      gameName,
+      where: {
+        isGameover,
+        updatedAfter,
+        updatedBefore,
+      },
+    });
     let matches = [];
     for (let matchID of matchList) {
       const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
