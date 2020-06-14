@@ -25,11 +25,11 @@ export interface TransportOpts {
 }
 
 export abstract class Transport {
-  store: Store;
-  gameName: string;
-  playerID: PlayerID | null;
-  gameID: string;
-  numPlayers: number;
+  protected store: Store;
+  protected gameName: string;
+  protected playerID: PlayerID | null;
+  protected gameID: string;
+  protected numPlayers: number;
   isConnected: boolean;
 
   constructor({
