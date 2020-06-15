@@ -18,24 +18,22 @@ export type WrappedBoardProps = Pick<
   WrappedBoardDelegates | 'debug'
 >;
 
-export type BoardProps<G extends any = any> = Partial<
-  State<G> &
-    Pick<
-      _ClientImpl<G>,
-      | 'log'
-      | 'moves'
-      | 'events'
-      | 'reset'
-      | 'undo'
-      | 'redo'
-      | 'playerID'
-      | 'gameID'
-      | 'gameMetadata'
-    > & {
-      isActive: boolean;
-      isMultiplayer: boolean;
-    }
->;
+export type BoardProps<G extends any = any> = State<G> &
+  Pick<
+    _ClientImpl<G>,
+    | 'log'
+    | 'moves'
+    | 'events'
+    | 'reset'
+    | 'undo'
+    | 'redo'
+    | 'playerID'
+    | 'gameID'
+    | 'gameMetadata'
+  > & {
+    isActive: boolean;
+    isMultiplayer: boolean;
+  };
 
 type ReactClientOpts<
   G extends any = any,
@@ -77,10 +75,7 @@ export function Client<
     loading = Loading;
   }
 
-  type AdditionalProps = Omit<
-    React.ComponentProps<typeof opts['board']>,
-    keyof BoardProps<G>
-  >;
+  type AdditionalProps = Omit<P, keyof BoardProps<G>>;
 
   /*
    * WrappedBoard
