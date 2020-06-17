@@ -76,11 +76,12 @@ export class LobbyClient {
   /**
    * Get a list of the matches for a specific game type on the server.
    * @param  gameName The game to list for, e.g. 'tic-tac-toe'.
+   * @param  where    Options to filter matches by update time or gameover state
    * @param  init     Optional RequestInit interface to override defaults.
    * @return Array of match metadata objects.
    *
    * @example
-   * lobbyClient.listMatches('tic-tac-toe')
+   * lobbyClient.listMatches('tic-tac-toe', where: { isGameover: false })
    *   .then(data => console.log(data.matches));
    * // => [
    * //   {
@@ -93,10 +94,37 @@ export class LobbyClient {
    */
   async listMatches(
     gameName: string,
+    where?: {
+      /**
+       * If true, only games that have ended will be returned.
+       * If false, only games that have not yet ended will be returned.
+       * Leave undefined to receive both finished and unfinished games.
+       */
+      isGameover?: boolean;
+      /**
+       * List matches last updated before a specific time.
+       * Value should be a timestamp in milliseconds after January 1, 1970.
+       */
+      updatedBefore?: number;
+      /**
+       * List matches last updated after a specific time.
+       * Value should be a timestamp in milliseconds after January 1, 1970.
+       */
+      updatedAfter?: number;
+    },
     init?: RequestInit
   ): Promise<LobbyAPI.MatchList> {
     assertGameName(gameName);
-    return this.request(`/games/${gameName}`, init);
+    let query = '';
+    if (where) {
+      const queries = [];
+      const { isGameover, updatedBefore, updatedAfter } = where;
+      if (isGameover !== undefined) queries.push(`isGameover=${isGameover}`);
+      if (updatedBefore) queries.push(`updatedBefore=${updatedBefore}`);
+      if (updatedAfter) queries.push(`updatedAfter=${updatedAfter}`);
+      if (queries.length) query = '?' + queries.join('&');
+    }
+    return this.request(`/games/${gameName}${query}`, init);
   }
 
   /**

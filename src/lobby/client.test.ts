@@ -101,6 +101,50 @@ describe('LobbyClient', () => {
     });
 
     test('validates gameName', throwsWithInvalidGameName(client.listMatches));
+
+    describe('builds filter queries', () => {
+      test('kitchen sink', async () => {
+        await client.listMatches('chess', {
+          isGameover: false,
+          updatedBefore: 3000,
+          updatedAfter: 1000,
+        });
+        expect(fetch).toBeCalledWith(
+          '/games/chess?isGameover=false&updatedBefore=3000&updatedAfter=1000',
+          undefined
+        );
+      });
+
+      test('isGameover', async () => {
+        await client.listMatches('chess', { isGameover: undefined });
+        expect(fetch).toBeCalledWith('/games/chess', undefined);
+        await client.listMatches('chess', { isGameover: false });
+        expect(fetch).toBeCalledWith(
+          '/games/chess?isGameover=false',
+          undefined
+        );
+        await client.listMatches('chess', { isGameover: true });
+        expect(fetch).toBeCalledWith('/games/chess?isGameover=true', undefined);
+      });
+
+      test('updatedBefore', async () => {
+        const updatedBefore = 1989;
+        await client.listMatches('chess', { updatedBefore });
+        expect(fetch).toBeCalledWith(
+          '/games/chess?updatedBefore=1989',
+          undefined
+        );
+      });
+
+      test('updatedAfter', async () => {
+        const updatedAfter = 1970;
+        await client.listMatches('chess', { updatedAfter });
+        expect(fetch).toBeCalledWith(
+          '/games/chess?updatedAfter=1970',
+          undefined
+        );
+      });
+    });
   });
 
   describe('getMatch', () => {
