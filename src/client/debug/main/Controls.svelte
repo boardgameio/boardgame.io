@@ -6,17 +6,25 @@
   import { parse, stringify } from 'flatted';
 
   function Save() {
-    // strip deltalog, _undo, and _redo from state to persist
-    const { deltalog, _undo, _redo, ...state } = client.getState();
-    const json = stringify(state);
+    // get state to persist and overwrite deltalog, _undo, and _redo
+    const state = client.getState();
+    const json = stringify({
+      ...state,
+      _undo: [],
+      _redo: [],
+      deltalog: [],
+    });
     window.localStorage.setItem('gamestate', json);
+    window.localStorage.setItem('initialState', stringify(client.initialState));
   }
 
   function Restore() {
     const gamestateJSON = window.localStorage.getItem('gamestate');
-    if (gamestateJSON !== null) {
+    const initialStateJSON = window.localStorage.getItem('initialState');
+    if (gamestateJSON !== null && initialStateJSON !== null) {
       const gamestate = parse(gamestateJSON);
-      client.store.dispatch(sync({ state: gamestate }));
+      const initialState = parse(initialStateJSON);
+      client.store.dispatch(sync({ state: gamestate, initialState }));
     }
   }
 </script>
