@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  jest:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,3 +20,4 @@ jobs:
       run: |
         npm run lint
         npm run test:coverage
+        npm run test:coveralls
