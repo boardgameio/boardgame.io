@@ -1,3 +1,13 @@
+## v0.39.14
+
+#### Features
+
+* [[c115087](https://github.com/nicolodavis/boardgame.io/commit/c115087)] feat(game): add disableUndo flag to game config (#742)
+
+#### Bugfixes
+
+* [[a6698e6](https://github.com/nicolodavis/boardgame.io/commit/a6698e6)] fix(debug): Fix save & restore in Debug panel (#746)
+
 ## v0.39.13
 
 #### Features
