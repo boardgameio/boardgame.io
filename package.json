@@ -28,7 +28,6 @@
     "lint:fix": "eslint --fix .",
     "prepublishOnly": "npm run clean",
     "proxydirs": "node scripts/proxy-dirs.js",
-    "github:deps": "npm i --no-save npm-run-all",
     "prepack": "npx --package npm-run-all run-s build proxydirs",
     "postpack": "npm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,tsx,js,jsx,css,md}\"",
