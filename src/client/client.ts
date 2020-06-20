@@ -6,13 +6,45 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { createStore, compose, applyMiddleware } from 'redux';
+import {
+  Dispatch,
+  StoreEnhancer,
+  createStore,
+  compose,
+  applyMiddleware,
+} from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { ProcessGameConfig } from '../core/game';
-import Debug from './debug/Debug.svelte';
+import Debug from './debug';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
+import { Transport, TransportOpts } from './transport/transport';
+import {
+  ActivePlayersArg,
+  ActionShape,
+  CredentialedActionShape,
+  FilteredMetadata,
+  Game,
+  PlayerID,
+  Reducer,
+  State,
+  Store,
+} from '../types';
+
+type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
+type Action = CredentialedActionShape.Any | ClientAction;
+
+// TODO: Replace these types with the full debug interface.
+// These types only specify the known interface used by a client instance.
+declare class DebugPanel {
+  constructor(opts: { target: HTMLElement; props: { client: _ClientImpl } });
+  $destroy: () => void;
+}
+type Debug = {
+  target?: HTMLElement;
+  impl?: typeof DebugPanel;
+};
 
 /**
  * createDispatchers
@@ -20,15 +52,15 @@ import { InitializeGame } from '../core/initialize';
  * Create action dispatcher wrappers with bound playerID and credentials
  */
 function createDispatchers(
-  storeActionType,
-  innerActionNames,
-  store,
-  playerID,
-  credentials,
-  multiplayer
+  storeActionType: 'makeMove' | 'gameEvent' | 'plugin',
+  innerActionNames: string[],
+  store: Store,
+  playerID: PlayerID,
+  credentials: string,
+  multiplayer?: unknown
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
-    dispatchers[name] = function(...args) {
+    dispatchers[name] = function(...args: any[]) {
       let assumedPlayerID = playerID;
 
       // In singleplayer mode, if the client does not have a playerID
@@ -49,7 +81,7 @@ function createDispatchers(
     };
 
     return dispatchers;
-  }, {});
+  }, {} as Record<string, (...args: any[]) => void>);
 }
 
 // Creates a set of dispatchers to make moves.
@@ -59,10 +91,52 @@ export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
 // Creates a set of dispatchers to dispatch actions to plugins.
 export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
+export interface ClientOpts<G extends any = any> {
+  game: Game<G>;
+  debug?: Debug | boolean;
+  numPlayers?: number;
+  multiplayer?: (opts: TransportOpts) => Transport;
+  gameID?: string;
+  playerID?: PlayerID;
+  credentials?: string;
+  enhancer?: StoreEnhancer;
+}
+
 /**
  * Implementation of Client (see below).
  */
-class _ClientImpl {
+export class _ClientImpl<G extends any = any> {
+  private debug?: Debug | boolean;
+  private _debugPanel?: DebugPanel | null;
+  private gameStateOverride?: any;
+  private initialState: State<G>;
+  private multiplayer: (opts: TransportOpts) => Transport;
+  private reducer: Reducer;
+  private _running: boolean;
+  private subscribers: Record<string, (state: State<G> | null) => void>;
+  private transport: Transport;
+  game: ReturnType<typeof ProcessGameConfig>;
+  store: Store;
+  log: State['deltalog'];
+  gameID: string;
+  playerID: PlayerID | null;
+  credentials: string;
+  gameMetadata?: FilteredMetadata;
+  moves: Record<string, (...args: any[]) => void>;
+  events: {
+    endGame?: (gameover?: any) => void;
+    endPhase?: () => void;
+    endTurn?: (arg?: { next: PlayerID }) => void;
+    setPhase?: (newPhase: string) => void;
+    endStage?: () => void;
+    setStage?: (newStage: string) => void;
+    setActivePlayers?: (arg: ActivePlayersArg) => void;
+  };
+  plugins: Record<string, (...args: any[]) => void>;
+  reset: () => void;
+  undo: () => void;
+  redo: () => void;
+
   constructor({
     game,
     debug,
@@ -72,7 +146,7 @@ class _ClientImpl {
     playerID,
     credentials,
     enhancer,
-  }) {
+  }: ClientOpts) {
     this.game = ProcessGameConfig(game);
     this.playerID = playerID;
     this.gameID = gameID;
@@ -86,7 +160,6 @@ class _ClientImpl {
     this.reducer = CreateGameReducer({
       game: this.game,
       isClient: multiplayer !== undefined,
-      numPlayers,
     });
 
     this.initialState = null;
@@ -98,10 +171,10 @@ class _ClientImpl {
       this.store.dispatch(ActionCreators.reset(this.initialState));
     };
     this.undo = () => {
-      this.store.dispatch(ActionCreators.undo(playerID, credentials));
+      this.store.dispatch(ActionCreators.undo(this.playerID, this.credentials));
     };
     this.redo = () => {
-      this.store.dispatch(ActionCreators.redo(playerID, credentials));
+      this.store.dispatch(ActionCreators.redo(this.playerID, this.credentials));
     };
 
     this.store = null;
@@ -116,7 +189,9 @@ class _ClientImpl {
      * The middleware below takes care of all these cases while
      * managing the log object.
      */
-    const LogMiddleware = store => next => action => {
+    const LogMiddleware = (store: Store) => (next: Dispatch<Action>) => (
+      action: Action
+    ) => {
       const result = next(action);
       const state = store.getState();
 
@@ -165,11 +240,13 @@ class _ClientImpl {
      * Middleware that intercepts actions and sends them to the master,
      * which keeps the authoritative version of the state.
      */
-    const TransportMiddleware = store => next => action => {
+    const TransportMiddleware = (store: Store) => (next: Dispatch<Action>) => (
+      action: Action
+    ) => {
       const baseState = store.getState();
       const result = next(action);
 
-      if (action.clientOnly != true) {
+      if (!('clientOnly' in action)) {
         this.transport.onAction(baseState, action);
       }
 
@@ -179,7 +256,9 @@ class _ClientImpl {
     /**
      * Middleware that intercepts actions and invokes the subscription callback.
      */
-    const SubscriptionMiddleware = () => next => action => {
+    const SubscriptionMiddleware = () => (next: Dispatch<Action>) => (
+      action: Action
+    ) => {
       const result = next(action);
       this.notifySubscribers();
       return result;
@@ -204,16 +283,16 @@ class _ClientImpl {
 
     this.store = createStore(this.reducer, this.initialState, enhancer);
 
-    this.transport = {
+    this.transport = ({
       isConnected: true,
       onAction: () => {},
       subscribe: () => {},
-      subscribeGameMetadata: _metadata => {}, // eslint-disable-line no-unused-vars
+      subscribeGameMetadata: () => {},
       connect: () => {},
       disconnect: () => {},
       updateGameID: () => {},
       updatePlayerID: () => {},
-    };
+    } as unknown) as Transport;
 
     if (multiplayer) {
       // typeof multiplayer is 'function'
@@ -237,11 +316,11 @@ class _ClientImpl {
     this._debugPanel = null;
   }
 
-  notifySubscribers() {
+  private notifySubscribers() {
     Object.values(this.subscribers).forEach(fn => fn(this.getState()));
   }
 
-  overrideGameState(state) {
+  overrideGameState(state: any) {
     this.gameStateOverride = state;
     this.notifySubscribers();
   }
@@ -250,13 +329,13 @@ class _ClientImpl {
     this.transport.connect();
     this._running = true;
 
-    let debugImpl = null;
+    let debugImpl: Debug['impl'] | null = null;
 
     if (process.env.NODE_ENV !== 'production') {
       debugImpl = Debug;
     }
 
-    if (this.debug && this.debug.impl) {
+    if (this.debug && this.debug !== true && this.debug.impl) {
       debugImpl = this.debug.impl;
     }
 
@@ -267,7 +346,11 @@ class _ClientImpl {
       typeof document !== 'undefined'
     ) {
       let target = document.body;
-      if (this.debug && this.debug.target !== undefined) {
+      if (
+        this.debug &&
+        this.debug !== true &&
+        this.debug.target !== undefined
+      ) {
         target = this.debug.target;
       }
 
@@ -292,7 +375,7 @@ class _ClientImpl {
     }
   }
 
-  subscribe(fn) {
+  subscribe(fn: (state: State<G>) => void) {
     const id = Object.keys(this.subscribers).length;
     this.subscribers[id] = fn;
     this.transport.subscribe(() => this.notifySubscribers());
@@ -320,7 +403,7 @@ class _ClientImpl {
 
     // This is the state before a sync with the game master.
     if (state === null) {
-      return state;
+      return state as null;
     }
 
     // isActive.
@@ -356,15 +439,16 @@ class _ClientImpl {
     const G = this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
-    let ret = { ...state, isActive, G, log: this.log };
-
-    const isConnected = this.transport.isConnected;
-    ret = { ...ret, isConnected };
-
-    return ret;
+    return {
+      ...state,
+      G,
+      log: this.log,
+      isActive,
+      isConnected: this.transport.isConnected,
+    };
   }
 
-  createDispatchers() {
+  private createDispatchers() {
     this.moves = createMoveDispatchers(
       this.game.moveNames,
       this.store,
@@ -390,21 +474,21 @@ class _ClientImpl {
     );
   }
 
-  updatePlayerID(playerID) {
+  updatePlayerID(playerID: PlayerID | null) {
     this.playerID = playerID;
     this.createDispatchers();
     this.transport.updatePlayerID(playerID);
     this.notifySubscribers();
   }
 
-  updateGameID(gameID) {
+  updateGameID(gameID: string) {
     this.gameID = gameID;
     this.createDispatchers();
     this.transport.updateGameID(gameID);
     this.notifySubscribers();
   }
 
-  updateCredentials(credentials) {
+  updateCredentials(credentials: string) {
     this.credentials = credentials;
     this.createDispatchers();
     this.notifySubscribers();
@@ -427,6 +511,6 @@ class _ClientImpl {
  *   A JS object that provides an API to interact with the
  *   game by dispatching moves and events.
  */
-export function Client(opts) {
-  return new _ClientImpl(opts);
+export function Client<G extends any = any>(opts: ClientOpts<G>) {
+  return new _ClientImpl<G>(opts);
 }

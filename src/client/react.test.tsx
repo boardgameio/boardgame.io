@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Client } from './react';
+import { Client, BoardProps } from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { Local } from './transport/local';
@@ -15,7 +15,9 @@ import { SocketIO } from './transport/socketio';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-class TestBoard extends React.Component {
+class TestBoard extends React.Component<
+  BoardProps & { doStuff?; extraValue? }
+> {
   render() {
     return <div id="board">Board</div>;
   }
@@ -101,7 +103,7 @@ test('move api', () => {
   });
 
   const game = Enzyme.mount(<Board />);
-  const board = game.find('TestBoard').instance();
+  const board = game.find('TestBoard').instance() as TestBoard;
 
   expect(board.props.G).toEqual({});
   board.props.moves.A(42);
@@ -181,7 +183,7 @@ test('local playerView', () => {
   });
 
   const game = Enzyme.mount(<Board playerID="1" />);
-  const board = game.find('TestBoard').instance();
+  const board = game.find('TestBoard').instance() as TestBoard;
   expect(board.props.G).toEqual({ stripped: '1' });
 });
 
@@ -196,7 +198,7 @@ test('reset Game', () => {
   });
 
   const game = Enzyme.mount(<Board />);
-  const board = game.find('TestBoard').instance();
+  const board = game.find('TestBoard').instance() as TestBoard;
 
   const initial = { G: { ...board.props.G }, ctx: { ...board.props.ctx } };
 

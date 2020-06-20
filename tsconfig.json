@@ -7,6 +7,7 @@
     "strict": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "jsx": "react",
     "plugins": [{ "transform": "ts-transformer-imports" }]
   }
 }
