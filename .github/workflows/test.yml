@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 
 on:
   push:
@@ -13,7 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Test
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run Tests
       run: |
         npm run lint
         npm run test:coverage
