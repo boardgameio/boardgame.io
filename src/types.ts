@@ -10,7 +10,6 @@ import { EventsAPI } from './plugins/plugin-events';
 import { RandomAPI } from './plugins/plugin-random';
 
 export { StorageAPI };
-export { BoardProps } from './client/react';
 
 export type AnyFn = (...args: any[]) => any;
 
