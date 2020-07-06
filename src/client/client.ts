@@ -35,9 +35,15 @@ import {
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
 type Action = CredentialedActionShape.Any | ClientAction;
 
-type DebugOpts = {
+// TODO: Replace these types with the full debug interface.
+// These types only specify the known interface used by a client instance.
+declare class DebugPanel {
+  constructor(opts: { target: HTMLElement; props: { client: _ClientImpl } });
+  $destroy: () => void;
+}
+type Debug = {
   target?: HTMLElement;
-  impl?: typeof Debug;
+  impl?: typeof DebugPanel;
 };
 
 /**
@@ -87,7 +93,7 @@ export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 export interface ClientOpts<G extends any = any> {
   game: Game<G>;
-  debug?: DebugOpts | boolean;
+  debug?: Debug | boolean;
   numPlayers?: number;
   multiplayer?: (opts: TransportOpts) => Transport;
   gameID?: string;
@@ -100,8 +106,8 @@ export interface ClientOpts<G extends any = any> {
  * Implementation of Client (see below).
  */
 export class _ClientImpl<G extends any = any> {
-  private debug?: DebugOpts | boolean;
-  private _debugPanel?: Debug | null;
+  private debug?: Debug | boolean;
+  private _debugPanel?: DebugPanel | null;
   private gameStateOverride?: any;
   private initialState: State<G>;
   private multiplayer: (opts: TransportOpts) => Transport;
@@ -323,7 +329,7 @@ export class _ClientImpl<G extends any = any> {
     this.transport.connect();
     this._running = true;
 
-    let debugImpl: typeof Debug | null = null;
+    let debugImpl: Debug['impl'] | null = null;
 
     if (process.env.NODE_ENV !== 'production') {
       debugImpl = Debug;
