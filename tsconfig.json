@@ -8,6 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "react",
-    "plugins": [{ "transform": "ts-transformer-imports" }]
+    "plugins": [{ "transform": "ts-transformer-imports" }],
+    "types": ["svelte", "jest"]
   }
 }

@@ -15,7 +15,7 @@ import { Transport } from './transport/transport';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
-import Debug from './debug';
+import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
 import { LogEntry, State, SyncInfo } from '../types';
 
