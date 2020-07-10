@@ -13,7 +13,9 @@ import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 /* mock server requests */
-global.fetch = jest.fn().mockReturnValue({ status: 200, json: () => [] });
+global.fetch = jest
+  .fn()
+  .mockReturnValue({ ok: true, status: 200, json: () => [] });
 
 /* mock 'Client' component */
 function NullComponent() {

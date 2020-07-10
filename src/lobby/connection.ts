@@ -6,60 +6,75 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import React from 'react';
+import { LobbyClient } from './client';
+import { Game, LobbyAPI } from '../types';
+
+interface GameComponent {
+  game: Game;
+  board: React.ComponentType<any>;
+}
+
+interface LobbyConnectionOpts {
+  server: string;
+  playerName?: string;
+  playerCredentials?: string;
+  gameComponents: GameComponent[];
+}
+
 class _LobbyConnectionImpl {
-  constructor({ server, gameComponents, playerName, playerCredentials }) {
+  client: LobbyClient;
+  gameComponents: GameComponent[];
+  playerName: string;
+  playerCredentials?: string;
+  matches: LobbyAPI.MatchList['matches'];
+
+  constructor({
+    server,
+    gameComponents,
+    playerName,
+    playerCredentials,
+  }: LobbyConnectionOpts) {
+    this.client = new LobbyClient({ server });
     this.gameComponents = gameComponents;
     this.playerName = playerName || 'Visitor';
     this.playerCredentials = playerCredentials;
-    this.server = server;
     this.matches = [];
-  }
-
-  _baseUrl() {
-    return `${this.server || ''}/games`;
   }
 
   async refresh() {
     try {
-      this.matches.length = 0;
-      const resp = await fetch(this._baseUrl());
-      if (resp.status !== 200) {
-        throw new Error('HTTP status ' + resp.status);
-      }
-      const json = await resp.json();
-      for (let gameName of json) {
-        if (!this._getGameComponents(gameName)) continue;
-        const gameResp = await fetch(this._baseUrl() + '/' + gameName);
-        const gameJson = await gameResp.json();
-        for (let inst of gameJson.matches) {
-          inst.gameName = gameName;
-        }
-        this.matches = this.matches.concat(gameJson.matches);
+      this.matches = [];
+      const games = await this.client.listGames();
+      for (const game of games) {
+        if (!this._getGameComponents(game)) continue;
+        const { matches } = await this.client.listMatches(game);
+        this.matches = this.matches.concat(matches);
       }
     } catch (error) {
       throw new Error('failed to retrieve list of matches (' + error + ')');
     }
   }
 
-  _getMatchInstance(matchID) {
+  _getMatchInstance(matchID: string) {
     for (let inst of this.matches) {
       if (inst['matchID'] === matchID) return inst;
     }
   }
 
-  _getGameComponents(gameName) {
+  _getGameComponents(gameName: string) {
     for (let comp of this.gameComponents) {
       if (comp.game.name === gameName) return comp;
     }
   }
 
-  _findPlayer(playerName) {
+  _findPlayer(playerName: string) {
     for (let inst of this.matches) {
       if (inst.players.some(player => player.name === playerName)) return inst;
     }
   }
 
-  async join(gameName, matchID, playerID) {
+  async join(gameName: string, matchID: string, playerID: string) {
     try {
       let inst = this._findPlayer(this.playerName);
       if (inst) {
@@ -69,19 +84,10 @@ class _LobbyConnectionImpl {
       if (!inst) {
         throw new Error('game instance ' + matchID + ' not found');
       }
-      const resp = await fetch(
-        this._baseUrl() + '/' + gameName + '/' + matchID + '/join',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            playerID: playerID,
-            playerName: this.playerName,
-          }),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
-      const json = await resp.json();
+      const json = await this.client.joinMatch(gameName, matchID, {
+        playerID,
+        playerName: this.playerName,
+      });
       inst.players[Number.parseInt(playerID)].name = this.playerName;
       this.playerCredentials = json.playerCredentials;
     } catch (error) {
@@ -89,26 +95,16 @@ class _LobbyConnectionImpl {
     }
   }
 
-  async leave(gameName, matchID) {
+  async leave(gameName: string, matchID: string) {
     try {
       let inst = this._getMatchInstance(matchID);
       if (!inst) throw new Error('match instance not found');
-      for (let player of inst.players) {
+      for (const player of inst.players) {
         if (player.name === this.playerName) {
-          const resp = await fetch(
-            this._baseUrl() + '/' + gameName + '/' + matchID + '/leave',
-            {
-              method: 'POST',
-              body: JSON.stringify({
-                playerID: player.id,
-                credentials: this.playerCredentials,
-              }),
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
-          if (resp.status !== 200) {
-            throw new Error('HTTP status ' + resp.status);
-          }
+          await this.client.leaveMatch(gameName, matchID, {
+            playerID: player.id.toString(),
+            credentials: this.playerCredentials,
+          });
           delete player.name;
           delete this.playerCredentials;
           return;
@@ -129,7 +125,7 @@ class _LobbyConnectionImpl {
     this.playerName = 'Visitor';
   }
 
-  async create(gameName, numPlayers) {
+  async create(gameName: string, numPlayers: number) {
     try {
       const comp = this._getGameComponents(gameName);
       if (!comp) throw new Error('game not found');
@@ -138,14 +134,7 @@ class _LobbyConnectionImpl {
         numPlayers > comp.game.maxPlayers
       )
         throw new Error('invalid number of players ' + numPlayers);
-      const resp = await fetch(this._baseUrl() + '/' + gameName + '/create', {
-        method: 'POST',
-        body: JSON.stringify({
-          numPlayers: numPlayers,
-        }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
+      await this.client.createMatch(gameName, { numPlayers });
     } catch (error) {
       throw new Error(
         'failed to create match for ' + gameName + ' (' + error + ')'
@@ -167,6 +156,6 @@ class _LobbyConnectionImpl {
  * Returns:
  *   A JS object that synchronizes the list of running game instances with the server and provides an API to create/join/start instances.
  */
-export function LobbyConnection(opts) {
+export function LobbyConnection(opts: LobbyConnectionOpts) {
   return new _LobbyConnectionImpl(opts);
 }
