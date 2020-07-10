@@ -29,7 +29,7 @@ shell
   .exec(`git log --oneline "${PREVIOUS_TAG}"..`, { silent: true })
   .sed(
     /(\w+)/,
-    '* [[$1](https://github.com/nicolodavis/boardgame.io/commit/$1)]'
+    '* [[$1](https://github.com/boardgameio/boardgame.io/commit/$1)]'
   )
   .toEnd(FILE);
 

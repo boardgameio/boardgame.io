@@ -2,7 +2,7 @@
   "name": "boardgame.io",
   "version": "0.39.14",
   "description": "library for turn-based games",
-  "repository": "https://github.com/nicolodavis/boardgame.io",
+  "repository": "https://github.com/boardgameio/boardgame.io",
   "scripts": {
     "prestart": "run-p examples:install build",
     "start": "run-p dev:server dev:client",
