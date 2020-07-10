@@ -139,7 +139,6 @@
     "style-loader": "^0.18.2",
     "superagent": "^3.8.3",
     "supertest": "^3.1.0",
-    "svelte": "^3.12.1",
     "svelte-icons": "^1.1.0",
     "tempy": "^0.5.0",
     "ts-jest": "^24.0.2",
@@ -161,6 +160,7 @@
     "redux": "^4.0.0",
     "shortid": "^2.2.14",
     "socket.io": "^2.1.1",
+    "svelte": "^3.24.0",
     "ts-toolbelt": "^6.3.6",
     "uuid": "3.2.1"
   },
