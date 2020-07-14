@@ -84,7 +84,7 @@ Returns `playerCredentials` which is the token this player will require to authe
 
 Rename and/or update additional information of a user in the room instance `id` of a game named `name` previously joined by the player.
 
-Accepts four parameters, requires at least one of the two optional parameters:
+Accepts four JSON body parameters, requires at least one of the two optional parameters:
 
 - `playerID` (required): the ID used by the player in the game (0,1...).
 
@@ -100,7 +100,7 @@ Accepts four parameters, requires at least one of the two optional parameters:
 
 Leave the room instance `id` of a game named `name` previously joined by the player.
 
-Accepts two parameters, all required:
+Accepts two JSON body parameters, all required:
 
 - `playerID`: the ID used by the player in the game (0, 1...).
 
