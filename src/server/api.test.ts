@@ -1291,6 +1291,12 @@ describe('.createRouter', () => {
             expect.objectContaining({ where: { isGameover: false } })
           );
         });
+        test('invalid value is ignored', async () => {
+          await request(app.callback()).get('/games/bar?isGameover=5');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: undefined } })
+          );
+        });
       });
 
       describe('updatedBefore query param', () => {
@@ -1315,6 +1321,12 @@ describe('.createRouter', () => {
             })
           );
         });
+        test('invalid value is ignored', async () => {
+          await request(app.callback()).get('/games/bar?updatedBefore=-5');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { updatedBefore: undefined } })
+          );
+        });
       });
 
       describe('updatedAfter query param', () => {
@@ -1337,6 +1349,12 @@ describe('.createRouter', () => {
                 updatedAfter: timestamp.getTime(),
               }),
             })
+          );
+        });
+        test('invalid value is ignored', async () => {
+          await request(app.callback()).get('/games/bar?updatedAfter=-5');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { updatedAfter: undefined } })
           );
         });
       });
