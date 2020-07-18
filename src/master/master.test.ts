@@ -251,13 +251,11 @@ describe('update', () => {
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
-    const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
-    dateMock.advanceTo(updatedAt);
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
     await masterWithMetadata.onUpdate(event, 0, id, '0');
     const { metadata } = db.fetch(id, { metadata: true });
-    expect(metadata.updatedAt).toEqual(updatedAt.getTime());
+    expect(metadata.gameover).toEqual(gameOverArg);
   });
 
   test('writes updatedAt to metadata with async storage API', async () => {
@@ -274,11 +272,12 @@ describe('update', () => {
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
-    const gameOverArg = 'gameOverArg';
-    const event = ActionCreators.gameEvent('endGame', gameOverArg);
+    const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
+    dateMock.advanceTo(updatedAt);
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
     await masterWithMetadata.onUpdate(event, 0, id, '0');
     const { metadata } = db.fetch(id, { metadata: true });
-    expect(metadata.gameover).toEqual(gameOverArg);
+    expect(metadata.updatedAt).toEqual(updatedAt.getTime());
   });
 });
 
