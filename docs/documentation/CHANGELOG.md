@@ -1,3 +1,9 @@
+## v0.39.15
+
+#### Bugfixes
+
+* [[271aecd](https://github.com/boardgameio/boardgame.io/commit/271aecd)] fix: Fix client types & move BoardProps to React package (#752)
+
 ## v0.39.14
 
 #### Features
