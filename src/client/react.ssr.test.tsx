@@ -3,10 +3,10 @@
  */
 
 import React from 'react';
-import { Client } from './react';
+import { Client, BoardProps } from './react';
 import ReactDOMServer from 'react-dom/server';
 
-class TestBoard extends React.Component {
+class TestBoard extends React.Component<BoardProps> {
   render() {
     return <div id="my-board">Board</div>;
   }

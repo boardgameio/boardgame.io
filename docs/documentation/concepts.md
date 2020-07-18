@@ -27,6 +27,10 @@ state manually in `G` if you so desire.
 can take advantage of, including support for game phases and complex
 turn orders.
 
+!> Because state can be sent between client and server,
+`G` must be a JSON-serializable object; in particular, it must
+not contain classes or functions.
+
 ### Moves
 
 These are functions that tell the framework how to change `G`

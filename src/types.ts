@@ -1,6 +1,7 @@
 import { Object } from 'ts-toolbelt';
 import Koa from 'koa';
 import { Store as ReduxStore } from 'redux';
+import 'svelte';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
 import { CreateGameReducer } from './core/reducer';
@@ -231,6 +232,7 @@ export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   name?: string;
   minPlayers?: number;
   maxPlayers?: number;
+  disableUndo?: boolean;
   seed?: string | number;
   setup?: (ctx: CtxWithPlugins, setupData?: any) => any;
   moves?: MoveMap<G, CtxWithPlugins>;

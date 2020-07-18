@@ -43,6 +43,7 @@ export function Flow({
   turn,
   events,
   plugins,
+  disableUndo,
 }: Game) {
   // Attach defaults.
   if (moves === undefined) {
@@ -296,7 +297,7 @@ export function Flow({
 
     G = conf.turn.wrapped.onBegin({ ...state, G, ctx });
 
-    const _undo = [{ G, ctx }];
+    const _undo = disableUndo ? [] : [{ G, ctx }];
 
     return { ...state, G, ctx, _undo, _redo: [] };
   }

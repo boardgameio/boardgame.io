@@ -174,7 +174,7 @@ const { playerCredentials } = await lobbyClient.joinMatch(
 
 Rename and/or update additional metadata for a player in the match instance `id` of a game named `name` previously joined by the player.
 
-Accepts four parameters, requires at least one of the two optional parameters:
+Accepts four JSON body parameters, requires at least one of the two optional parameters:
 
 - `playerID` (required): the ID used by the player in the match (0,1...).
 
@@ -200,7 +200,7 @@ await lobbyClient.updatePlayer('tic-tac-toe', 'matchID', {
 
 Leave the match instance `id` of a game named `name` previously joined by the player.
 
-Accepts two parameters, all required:
+Accepts two JSON body parameters, all required:
 
 - `playerID`: the ID used by the player in the match (0, 1...).
 

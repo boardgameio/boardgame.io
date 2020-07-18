@@ -36,7 +36,6 @@ export class SocketIOTransport extends Transport {
   server: string;
   socket;
   socketOpts;
-  isConnected: boolean;
   callback: () => void;
   gameMetadataCallback: MetadataCallback;
 

@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nicolodavis/boardgame.io/master/docs/logo-optimized.svg?sanitize=true" alt="boardgame.io" />
+  <img src="https://raw.githubusercontent.com/boardgameio/boardgame.io/master/docs/logo-optimized.svg?sanitize=true" alt="boardgame.io" />
 </p>
 
 <p align="center">
 <a href="https://www.npmjs.com/package/boardgame.io"><img src="https://badge.fury.io/js/boardgame.io.svg" alt="npm version" /></a>
-<a href='https://semaphoreci.com/nicolodavis/boardgame-io'> <img src='https://semaphoreci.com/api/v1/nicolodavis/boardgame-io/branches/master/shields_badge.svg' alt='Build Status'></a>
-<a href="https://coveralls.io/github/nicolodavis/boardgame.io?branch=master"><img src="https://img.shields.io/coveralls/nicolodavis/boardgame.io.svg" alt="Coveralls" /></a>
+<a href="https://github.com/boardgameio/boardgame.io/actions?query=workflow%3ATests"> <img src="https://github.com/boardgameio/boardgame.io/workflows/Tests/badge.svg" alt='Build Status'></a>
+<a href='https://coveralls.io/github/boardgameio/boardgame.io?branch=master'><img src='https://coveralls.io/repos/github/boardgameio/boardgame.io/badge.svg?branch=master' alt='Coverage Status' /></a>
 <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
 </p>
 
@@ -41,7 +41,7 @@ networking or storage code.
 ### Installation
 
 ```sh
-npm install --save boardgame.io
+npm install boardgame.io
 ```
 
 ### Documentation
