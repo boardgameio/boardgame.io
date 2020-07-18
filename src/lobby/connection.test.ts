@@ -16,8 +16,20 @@ describe('lobby', () => {
   let nextStatus = 200;
 
   beforeEach(async () => {
-    match1 = { gameName: 'game1', matchID: 'matchID_1', players: [{ id: 0 }] };
-    match2 = { gameName: 'game2', matchID: 'matchID_2', players: [{ id: 1 }] };
+    match1 = {
+      gameName: 'game1',
+      matchID: 'matchID_1',
+      players: [{ id: 0 }],
+      createdAt: 1,
+      updatedAt: 4,
+    };
+    match2 = {
+      gameName: 'game2',
+      matchID: 'matchID_2',
+      players: [{ id: 1 }],
+      createdAt: 2,
+      updatedAt: 3,
+    };
     // result of connection requests
     jsonResult = [
       () => ['game1', 'game2'],
