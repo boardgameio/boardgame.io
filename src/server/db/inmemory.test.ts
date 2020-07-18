@@ -46,7 +46,7 @@ describe('InMemory', () => {
 
   describe('listGames', () => {
     test('filter by gameName', () => {
-      let keys = db.listGames({});
+      let keys = db.listGames();
       expect(keys).toEqual(['gameID']);
       keys = db.listGames({ gameName: 'tic-tac-toe' });
       expect(keys).toEqual(['gameID']);
