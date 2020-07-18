@@ -16,7 +16,7 @@ import {
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { ProcessGameConfig } from '../core/game';
-import Debug from './debug';
+import Debug from './debug/Debug.svelte';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Transport, TransportOpts } from './transport/transport';
@@ -35,16 +35,10 @@ import {
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
 type Action = CredentialedActionShape.Any | ClientAction;
 
-// TODO: Replace these types with the full debug interface.
-// These types only specify the known interface used by a client instance.
-declare class DebugPanel {
-  constructor(opts: { target: HTMLElement; props: { client: _ClientImpl } });
-  $destroy: () => void;
-}
-type Debug = {
+interface DebugOpt {
   target?: HTMLElement;
-  impl?: typeof DebugPanel;
-};
+  impl?: typeof Debug;
+}
 
 /**
  * createDispatchers
@@ -93,7 +87,7 @@ export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 export interface ClientOpts<G extends any = any> {
   game: Game<G>;
-  debug?: Debug | boolean;
+  debug?: DebugOpt | boolean;
   numPlayers?: number;
   multiplayer?: (opts: TransportOpts) => Transport;
   gameID?: string;
@@ -106,8 +100,8 @@ export interface ClientOpts<G extends any = any> {
  * Implementation of Client (see below).
  */
 export class _ClientImpl<G extends any = any> {
-  private debug?: Debug | boolean;
-  private _debugPanel?: DebugPanel | null;
+  private debug?: DebugOpt | boolean;
+  private _debugPanel?: Debug | null;
   private gameStateOverride?: any;
   private initialState: State<G>;
   private multiplayer: (opts: TransportOpts) => Transport;
@@ -329,7 +323,7 @@ export class _ClientImpl<G extends any = any> {
     this.transport.connect();
     this._running = true;
 
-    let debugImpl: Debug['impl'] | null = null;
+    let debugImpl: DebugOpt['impl'] | null = null;
 
     if (process.env.NODE_ENV !== 'production') {
       debugImpl = Debug;
