@@ -299,35 +299,35 @@ const TicTacToe = {
 
 By default all client instances connect to a game with
 an ID `'default'`. To play a new game instance, you can pass
-`gameID` to your client. All clients that use
+`matchID` to your client. All clients that use
 this ID will now see the same game state.
 
 <!-- tabs:start -->
 
 #### **Plain JS**
 
-Pass `gameID` when creating your boardgame.io client:
+Pass `matchID` when creating your boardgame.io client:
 ```js
 const client = Client({
   game: TicTacToe,
-  gameID: 'gameid',
+  matchID: 'matchID',
   // ...
 });
 ```
 
-You an also update a `gameID` on an already instantiated client:
+You an also update a `matchID` on an already instantiated client:
 ```js
-client.updateGameID('newGameID');
+client.updateMatchID('newID');
 ```
 
 #### **React**
 
 ```
-<TicTacToeClient gameID="gameid"/>
+<TicTacToeClient matchID="match-id"/>
 ```
 <!-- tabs:end -->
 
-The `gameID`, similar to the `playerID` can again be determined
+The `matchID`, similar to the `playerID` can again be determined
 either by a URL path or a lobby implementation.
 
 ### Storage
