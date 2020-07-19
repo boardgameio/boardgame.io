@@ -119,7 +119,7 @@ export type AuthFn = (
 
 type CallbackFn = (arg: {
   state: State;
-  gameID: string;
+  matchID: string;
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
@@ -187,20 +187,20 @@ export class Master {
   async onUpdate(
     credAction: CredentialedActionShape.Any,
     stateID: number,
-    gameID: string,
+    matchID: string,
     playerID: string
   ) {
     let isActionAuthentic;
     let metadata: Server.MatchMetadata | undefined;
     const credentials = credAction.payload.credentials;
     if (IsSynchronous(this.storageAPI)) {
-      ({ metadata } = this.storageAPI.fetch(gameID, { metadata: true }));
+      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
       isActionAuthentic = this.shouldAuth(metadata)
         ? this.auth(credentials, playerMetadata)
         : true;
     } else {
-      ({ metadata } = await this.storageAPI.fetch(gameID, {
+      ({ metadata } = await this.storageAPI.fetch(matchID, {
         metadata: true,
       }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
@@ -213,7 +213,7 @@ export class Master {
     }
 
     let action = stripCredentialsFromAction(credAction);
-    const key = gameID;
+    const key = matchID;
 
     let state: State;
     let result: StorageAPI.FetchResult<{ state: true }>;
@@ -225,12 +225,12 @@ export class Master {
     state = result.state;
 
     if (state === undefined) {
-      logging.error(`game not found, gameID=[${key}]`);
+      logging.error(`game not found, matchID=[${key}]`);
       return { error: 'game not found' };
     }
 
     if (state.ctx.gameover !== undefined) {
-      logging.error(`game over - gameID=[${key}]`);
+      logging.error(`game over - matchID=[${key}]`);
       return;
     }
 
@@ -283,7 +283,7 @@ export class Master {
     this.subscribeCallback({
       state,
       action,
-      gameID,
+      matchID,
     });
 
     this.transportAPI.sendAll((playerID: string) => {
@@ -299,7 +299,7 @@ export class Master {
 
       return {
         type: 'update',
-        args: [gameID, filteredState, log],
+        args: [matchID, filteredState, log],
       };
     });
 
@@ -334,8 +334,8 @@ export class Master {
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
-  async onSync(gameID: string, playerID: string, numPlayers: number) {
-    const key = gameID;
+  async onSync(matchID: string, playerID: string, numPlayers: number) {
+    const key = matchID;
 
     let state: State;
     let initialState: State;
@@ -384,7 +384,7 @@ export class Master {
 
       this.subscribeCallback({
         state,
-        gameID,
+        matchID,
       });
 
       if (IsSynchronous(this.storageAPI)) {
@@ -414,7 +414,7 @@ export class Master {
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, syncInfo],
+      args: [matchID, syncInfo],
     });
 
     return;

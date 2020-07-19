@@ -162,11 +162,11 @@ describe('update', () => {
     ]);
   });
 
-  test('invalid gameID', async () => {
+  test('invalid matchID', async () => {
     await master.onUpdate(action, 1, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `game not found, gameID=[default:unknown]`
+      `game not found, matchID=[default:unknown]`
     );
   });
 
@@ -193,7 +193,7 @@ describe('update', () => {
     );
   });
 
-  test('valid gameID / stateID / playerID', async () => {
+  test('valid matchID / stateID / playerID', async () => {
     await master.onUpdate(action, 1, 'gameID', '1');
     expect(sendAll).toHaveBeenCalled();
   });
@@ -213,7 +213,7 @@ describe('update', () => {
     await master.onUpdate(event, 2, 'gameID', '0');
     event = ActionCreators.gameEvent('endTurn');
     await master.onUpdate(event, 3, 'gameID', '0');
-    expect(error).toHaveBeenCalledWith(`game over - gameID=[gameID]`);
+    expect(error).toHaveBeenCalledWith(`game over - matchID=[gameID]`);
   });
 
   test('writes gameover to metadata', async () => {
@@ -340,7 +340,7 @@ describe('subscribe', () => {
   test('sync', async () => {
     master.onSync('gameID', '0');
     expect(callback).toBeCalledWith({
-      gameID: 'gameID',
+      matchID: 'gameID',
       state: expect.objectContaining({ _stateID: 0 }),
     });
   });
@@ -349,7 +349,7 @@ describe('subscribe', () => {
     const action = ActionCreators.gameEvent('endTurn');
     master.onUpdate(action, 0, 'gameID', '0');
     expect(callback).toBeCalledWith({
-      gameID: 'gameID',
+      matchID: 'gameID',
       action,
       state: expect.objectContaining({ _stateID: 1 }),
     });

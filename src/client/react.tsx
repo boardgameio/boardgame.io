@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { Client as RawClient, ClientOpts, _ClientImpl } from './client';
 import { State } from '../types';
 
-type WrappedBoardDelegates = 'gameID' | 'playerID' | 'credentials';
+type WrappedBoardDelegates = 'matchID' | 'playerID' | 'credentials';
 
 export type WrappedBoardProps = Pick<
   ClientOpts,
@@ -28,7 +28,7 @@ export type BoardProps<G extends any = any> = State<G> &
     | 'undo'
     | 'redo'
     | 'playerID'
-    | 'gameID'
+    | 'matchID'
     | 'gameMetadata'
   > & {
     isActive: boolean;
@@ -92,7 +92,7 @@ export function Client<
     static propTypes = {
       // The ID of a game to connect to.
       // Only relevant in multiplayer.
-      gameID: PropTypes.string,
+      matchID: PropTypes.string,
       // The ID of the player associated with this client.
       // Only relevant in multiplayer.
       playerID: PropTypes.string,
@@ -104,7 +104,7 @@ export function Client<
     };
 
     static defaultProps = {
-      gameID: 'default',
+      matchID: 'default',
       playerID: null,
       credentials: null,
       debug: true,
@@ -122,7 +122,7 @@ export function Client<
         debug,
         numPlayers,
         multiplayer,
-        gameID: props.gameID,
+        matchID: props.matchID,
         playerID: props.playerID,
         credentials: props.credentials,
         enhancer,
@@ -140,8 +140,8 @@ export function Client<
     }
 
     componentDidUpdate(prevProps: WrappedBoardProps & AdditionalProps) {
-      if (this.props.gameID != prevProps.gameID) {
-        this.client.updateGameID(this.props.gameID);
+      if (this.props.matchID != prevProps.matchID) {
+        this.client.updateMatchID(this.props.matchID);
       }
       if (this.props.playerID != prevProps.playerID) {
         this.client.updatePlayerID(this.props.playerID);
@@ -167,7 +167,7 @@ export function Client<
           isMultiplayer: !!multiplayer,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.client.gameID,
+          matchID: this.client.matchID,
           playerID: this.client.playerID,
           reset: this.client.reset,
           undo: this.client.undo,

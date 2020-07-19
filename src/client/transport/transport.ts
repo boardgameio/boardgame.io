@@ -24,7 +24,7 @@ export interface TransportOpts {
   gameKey?: Game;
   game?: ReturnType<typeof ProcessGameConfig>;
   playerID?: PlayerID;
-  gameID?: string;
+  matchID?: string;
   numPlayers?: number;
 }
 
@@ -32,7 +32,7 @@ export abstract class Transport {
   protected store: Store;
   protected gameName: string;
   protected playerID: PlayerID | null;
-  protected gameID: string;
+  protected matchID: string;
   protected numPlayers: number;
   isConnected: boolean;
 
@@ -40,13 +40,13 @@ export abstract class Transport {
     store,
     gameName,
     playerID,
-    gameID,
+    matchID,
     numPlayers,
   }: TransportOpts) {
     this.store = store;
     this.gameName = gameName || 'default';
     this.playerID = playerID || null;
-    this.gameID = gameID || 'default';
+    this.matchID = matchID || 'default';
     this.numPlayers = numPlayers || 2;
   }
 
@@ -55,6 +55,6 @@ export abstract class Transport {
   abstract disconnect(): void;
   abstract subscribe(fn: () => void): void;
   abstract subscribeGameMetadata(fn: MetadataCallback): void;
-  abstract updateGameID(id: string): void;
+  abstract updateMatchID(id: string): void;
   abstract updatePlayerID(id: PlayerID): void;
 }
