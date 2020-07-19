@@ -21,7 +21,7 @@ const App = Client({
 const Singleplayer = () => (
   <div>
     <h1>Singleplayer</h1>
-    <App gameID="single" />
+    <App matchID="single" />
   </div>
 );
 
