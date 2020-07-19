@@ -37,7 +37,7 @@ export class SocketIOTransport extends Transport {
   socket;
   socketOpts;
   callback: () => void;
-  gameMetadataCallback: MetadataCallback;
+  matchMetadataCallback: MetadataCallback;
 
   /**
    * Creates a new Mutiplayer instance.
@@ -66,7 +66,7 @@ export class SocketIOTransport extends Transport {
     this.socketOpts = socketOpts;
     this.isConnected = false;
     this.callback = () => {};
-    this.gameMetadataCallback = () => {};
+    this.matchMetadataCallback = () => {};
   }
 
   /**
@@ -126,7 +126,7 @@ export class SocketIOTransport extends Transport {
     this.socket.on('sync', (matchID: string, syncInfo: SyncInfo) => {
       if (matchID == this.matchID) {
         const action = ActionCreators.sync(syncInfo);
-        this.gameMetadataCallback(syncInfo.filteredMetadata);
+        this.matchMetadataCallback(syncInfo.filteredMetadata);
         this.store.dispatch(action);
       }
     });
@@ -161,8 +161,8 @@ export class SocketIOTransport extends Transport {
     this.callback = fn;
   }
 
-  subscribeGameMetadata(fn: MetadataCallback) {
-    this.gameMetadataCallback = fn;
+  subscribeMatchMetadata(fn: MetadataCallback) {
+    this.matchMetadataCallback = fn;
   }
 
   /**

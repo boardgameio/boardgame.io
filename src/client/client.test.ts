@@ -233,7 +233,7 @@ describe('multiplayer', () => {
         this.callback = null;
       }
 
-      subscribeGameMetadata(fn) {
+      subscribeMatchMetadata(fn) {
         this.callback = fn;
       }
     }
@@ -256,7 +256,7 @@ describe('multiplayer', () => {
     test('metadata callback', () => {
       const metadata = { m: true };
       client.transport.callback(metadata);
-      expect(client.gameMetadata).toEqual(metadata);
+      expect(client.matchMetadata).toEqual(metadata);
     });
   });
 });

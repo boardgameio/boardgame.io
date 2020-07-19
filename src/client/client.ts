@@ -115,7 +115,7 @@ export class _ClientImpl<G extends any = any> {
   matchID: string;
   playerID: PlayerID | null;
   credentials: string;
-  gameMetadata?: FilteredMetadata;
+  matchMetadata?: FilteredMetadata;
   moves: Record<string, (...args: any[]) => void>;
   events: {
     endGame?: (gameover?: any) => void;
@@ -281,7 +281,7 @@ export class _ClientImpl<G extends any = any> {
       isConnected: true,
       onAction: () => {},
       subscribe: () => {},
-      subscribeGameMetadata: () => {},
+      subscribeMatchMetadata: () => {},
       connect: () => {},
       disconnect: () => {},
       updateMatchID: () => {},
@@ -303,8 +303,8 @@ export class _ClientImpl<G extends any = any> {
 
     this.createDispatchers();
 
-    this.transport.subscribeGameMetadata(metadata => {
-      this.gameMetadata = metadata;
+    this.transport.subscribeMatchMetadata(metadata => {
+      this.matchMetadata = metadata;
     });
 
     this._debugPanel = null;

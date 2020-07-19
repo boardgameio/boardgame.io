@@ -54,7 +54,7 @@ export abstract class Transport {
   abstract connect(): void;
   abstract disconnect(): void;
   abstract subscribe(fn: () => void): void;
-  abstract subscribeGameMetadata(fn: MetadataCallback): void;
+  abstract subscribeMatchMetadata(fn: MetadataCallback): void;
   abstract updateMatchID(id: string): void;
   abstract updatePlayerID(id: PlayerID): void;
 }
