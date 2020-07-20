@@ -100,7 +100,7 @@ The following properties are available on a client instance:
 - `credentials`: Multiplayer authentication credentials for this player.
 
 
-- `matchMetadata`: An array containing the players that have joined
+- `matchData`: An array containing the players that have joined
   the current match via the [Lobby API](/api/Lobby.md).
 
   Example:
@@ -314,7 +314,7 @@ following as `props`:
 - `playerID`: The player ID associated with the client.
 
 
-- `matchMetadata`: An array containing the players that have joined
+- `matchData`: An array containing the players that have joined
   the current match via the [Lobby API](/api/Lobby.md).
 
     Example:

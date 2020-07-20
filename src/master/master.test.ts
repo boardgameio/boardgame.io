@@ -674,7 +674,7 @@ describe('doesMatchRequireAuthentication', () => {
 
   describe('when match has no credentials', () => {
     test('then authentication is not required', () => {
-      const matchMetadata = {
+      const matchData = {
         gameName: '',
         setupData: {},
         players: {
@@ -683,14 +683,14 @@ describe('doesMatchRequireAuthentication', () => {
         createdAt: 0,
         updatedAt: 0,
       };
-      const result = doesMatchRequireAuthentication(matchMetadata);
+      const result = doesMatchRequireAuthentication(matchData);
       expect(result).toBe(false);
     });
   });
 
   describe('when match has credentials', () => {
     test('then authentication is required', () => {
-      const matchMetadata = {
+      const matchData = {
         gameName: '',
         setupData: {},
         players: {
@@ -702,7 +702,7 @@ describe('doesMatchRequireAuthentication', () => {
         createdAt: 0,
         updatedAt: 0,
       };
-      const result = doesMatchRequireAuthentication(matchMetadata);
+      const result = doesMatchRequireAuthentication(matchData);
       expect(result).toBe(true);
     });
   });
@@ -711,7 +711,7 @@ describe('doesMatchRequireAuthentication', () => {
 describe('isActionFromAuthenticPlayer', () => {
   let action;
   let playerID;
-  let matchMetadata;
+  let matchData;
   let credentials;
   let playerMetadata;
 
@@ -722,13 +722,13 @@ describe('isActionFromAuthenticPlayer', () => {
       payload: { credentials: 'SECRET' },
     };
 
-    matchMetadata = {
+    matchData = {
       players: {
         '0': { credentials: 'SECRET' },
       },
     };
 
-    playerMetadata = matchMetadata.players[playerID];
+    playerMetadata = matchData.players[playerID];
     ({ credentials } = action.payload || {});
   });
 

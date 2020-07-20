@@ -111,7 +111,7 @@ export function Client(opts) {
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
-          matchMetadata: this.client.matchMetadata,
+          matchData: this.client.matchData,
         });
       }
 

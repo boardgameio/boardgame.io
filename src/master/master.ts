@@ -26,11 +26,11 @@ import {
 import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
-  matchMetadata: Server.MatchMetadata,
+  matchData: Server.MatchMetadata,
   playerID: PlayerID
 ) => {
-  if (matchMetadata && matchMetadata.players) {
-    return matchMetadata.players[playerID];
+  if (matchData && matchData.players) {
+    return matchData.players[playerID];
   }
 };
 
@@ -81,10 +81,10 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
  * Verifies that the match has metadata and is using credentials.
  */
 export const doesMatchRequireAuthentication = (
-  matchMetadata?: Server.MatchMetadata
+  matchData?: Server.MatchMetadata
 ) => {
-  if (!matchMetadata) return false;
-  const { players } = matchMetadata as Server.MatchMetadata;
+  if (!matchData) return false;
+  const { players } = matchData as Server.MatchMetadata;
   const hasCredentials = Object.keys(players).some(key => {
     return !!(players[key] && players[key].credentials);
   });
@@ -340,7 +340,7 @@ export class Master {
     let state: State;
     let initialState: State;
     let log: LogEntry[];
-    let matchMetadata: Server.MatchMetadata;
+    let matchData: Server.MatchMetadata;
     let filteredMetadata: FilteredMetadata;
     let result: StorageAPI.FetchResult<{
       state: true;
@@ -368,10 +368,10 @@ export class Master {
     state = result.state;
     initialState = result.initialState;
     log = result.log;
-    matchMetadata = result.metadata;
+    matchData = result.metadata;
 
-    if (matchMetadata) {
-      filteredMetadata = Object.values(matchMetadata.players).map(player => {
+    if (matchData) {
+      filteredMetadata = Object.values(matchData.players).map(player => {
         const { credentials, ...filteredData } = player;
         return filteredData;
       });

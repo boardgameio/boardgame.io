@@ -209,7 +209,7 @@ export class LocalTransport extends Transport {
    */
   subscribe() {}
 
-  subscribeMatchMetadata() {}
+  subscribeMatchData() {}
 
   /**
    * Updates the game id.

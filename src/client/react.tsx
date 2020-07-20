@@ -29,7 +29,7 @@ export type BoardProps<G extends any = any> = State<G> &
     | 'redo'
     | 'playerID'
     | 'matchID'
-    | 'matchMetadata'
+    | 'matchData'
   > & {
     isActive: boolean;
     isMultiplayer: boolean;
@@ -173,7 +173,7 @@ export function Client<
           undo: this.client.undo,
           redo: this.client.redo,
           log: this.client.log,
-          matchMetadata: this.client.matchMetadata,
+          matchData: this.client.matchData,
         });
       }
 
