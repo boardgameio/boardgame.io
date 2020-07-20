@@ -44,7 +44,7 @@ export const CreateMatch = async ({
 }) => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
-  const metadata: Server.MatchMetadata = {
+  const metadata: Server.MatchData = {
     gameName: game.name,
     unlisted: !!unlisted,
     players: {},
@@ -71,9 +71,9 @@ export const CreateMatch = async ({
  * @param {object} metadata - The match metadata object to strip credentials from.
  * @return - A metadata object without player credentials.
  */
-const createClientMatchMetadata = (
+const createClientMatchData = (
   matchID: string,
-  metadata: Server.MatchMetadata
+  metadata: Server.MatchData
 ): LobbyAPI.Match => {
   return {
     ...metadata,
@@ -199,7 +199,7 @@ export const createRouter = ({
         metadata: true,
       });
       if (!metadata.unlisted) {
-        matches.push(createClientMatchMetadata(matchID, metadata));
+        matches.push(createClientMatchData(matchID, metadata));
       }
     }
     const body: LobbyAPI.MatchList = { matches };
@@ -221,7 +221,7 @@ export const createRouter = ({
     if (!metadata) {
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
-    const body: LobbyAPI.Match = createClientMatchMetadata(matchID, metadata);
+    const body: LobbyAPI.Match = createClientMatchData(matchID, metadata);
     ctx.body = body;
   });
 

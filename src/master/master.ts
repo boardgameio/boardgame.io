@@ -26,7 +26,7 @@ import {
 import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
-  matchData: Server.MatchMetadata,
+  matchData: Server.MatchData,
   playerID: PlayerID
 ) => {
   if (matchData && matchData.players) {
@@ -81,10 +81,10 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
  * Verifies that the match has metadata and is using credentials.
  */
 export const doesMatchRequireAuthentication = (
-  matchData?: Server.MatchMetadata
+  matchData?: Server.MatchData
 ) => {
   if (!matchData) return false;
-  const { players } = matchData as Server.MatchMetadata;
+  const { players } = matchData as Server.MatchData;
   const hasCredentials = Object.keys(players).some(key => {
     return !!(players[key] && players[key].credentials);
   });
@@ -191,7 +191,7 @@ export class Master {
     playerID: string
   ) {
     let isActionAuthentic;
-    let metadata: Server.MatchMetadata | undefined;
+    let metadata: Server.MatchData | undefined;
     const credentials = credAction.payload.credentials;
     if (IsSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
@@ -305,7 +305,7 @@ export class Master {
 
     const { deltalog, ...stateWithoutDeltalog } = state;
 
-    let newMetadata: Server.MatchMetadata | undefined;
+    let newMetadata: Server.MatchData | undefined;
     if (metadata && !('gameover' in metadata)) {
       newMetadata = {
         ...metadata,
@@ -340,7 +340,7 @@ export class Master {
     let state: State;
     let initialState: State;
     let log: LogEntry[];
-    let matchData: Server.MatchMetadata;
+    let matchData: Server.MatchData;
     let filteredMetadata: FilteredMetadata;
     let result: StorageAPI.FetchResult<{
       state: true;

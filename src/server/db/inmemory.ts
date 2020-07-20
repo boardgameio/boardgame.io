@@ -15,7 +15,7 @@ import * as StorageAPI from './base';
 export class InMemory extends StorageAPI.Sync {
   private state: Map<string, State>;
   private initial: Map<string, State>;
-  private metadata: Map<string, Server.MatchMetadata>;
+  private metadata: Map<string, Server.MatchData>;
   private log: Map<string, LogEntry[]>;
 
   /**
@@ -41,7 +41,7 @@ export class InMemory extends StorageAPI.Sync {
   /**
    * Write the game metadata to the in-memory object.
    */
-  setMetadata(matchID: string, metadata: Server.MatchMetadata) {
+  setMetadata(matchID: string, metadata: Server.MatchData) {
     this.metadata.set(matchID, metadata);
   }
 

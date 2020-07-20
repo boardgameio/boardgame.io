@@ -294,7 +294,7 @@ export namespace Server {
     data?: any;
   };
 
-  export interface MatchMetadata {
+  export interface MatchData {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData?: any;
@@ -309,7 +309,7 @@ export namespace Server {
 export namespace LobbyAPI {
   export type GameList = string[];
   type PublicPlayerMetadata = Omit<Server.PlayerMetadata, 'credentials'>;
-  export type Match = Omit<Server.MatchMetadata, 'players'> & {
+  export type Match = Omit<Server.MatchData, 'players'> & {
     matchID: string;
     players: PublicPlayerMetadata[];
   };

@@ -31,7 +31,7 @@ describe('InMemory', () => {
       metadata: {
         gameName: 'tic-tac-toe',
         updatedAt: new Date(2020, 1).getTime(),
-      } as Server.MatchMetadata,
+      } as Server.MatchData,
       initialState: stateEntry as State,
     });
 
@@ -61,7 +61,7 @@ describe('InMemory', () => {
           gameName: 'tic-tac-toe',
           gameover: 'gameover',
           updatedAt: new Date(2020, 3).getTime(),
-        } as Server.MatchMetadata,
+        } as Server.MatchData,
         initialState: stateEntry as State,
       });
 
@@ -79,7 +79,7 @@ describe('InMemory', () => {
         metadata: {
           gameName: 'tic-tac-toe',
           updatedAt: new Date(2020, 5).getTime(),
-        } as Server.MatchMetadata,
+        } as Server.MatchData,
         initialState: stateEntry as State,
       });
       const timestamp = new Date(2020, 4);

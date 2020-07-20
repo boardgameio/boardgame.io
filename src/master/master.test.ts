@@ -623,9 +623,7 @@ describe('getPlayerMetadata', () => {
 
   describe('when metadata does not contain players field', () => {
     test('then playerMetadata is undefined', () => {
-      expect(
-        getPlayerMetadata({} as Server.MatchMetadata, '0')
-      ).toBeUndefined();
+      expect(getPlayerMetadata({} as Server.MatchData, '0')).toBeUndefined();
     });
   });
 
