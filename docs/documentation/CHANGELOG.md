@@ -1,3 +1,10 @@
+## v0.39.16
+
+#### Bugfixes
+
+* [[84e93b4](https://github.com/boardgameio/boardgame.io/commit/84e93b4)] build: Exclude svelte from Rollup’s external module list (#767)
+* [[72ed591](https://github.com/boardgameio/boardgame.io/commit/72ed591)] fix: Tidy up type provision (#764)
+
 ## v0.39.15
 
 #### Bugfixes
