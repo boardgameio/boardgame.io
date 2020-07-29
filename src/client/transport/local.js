@@ -38,7 +38,7 @@ export function GetBotPlayer(state, bots) {
  * Creates a local version of the master that the client
  * can interact with.
  */
-export function LocalMaster({ game, bots, persist }) {
+export function LocalMaster({ game, bots, persist, storageKey }) {
   const clientCallbacks = {};
   const initializedBots = {};
 
@@ -67,7 +67,7 @@ export function LocalMaster({ game, bots, persist }) {
     }
   };
 
-  const storage = persist ? new LocalStorage() : new InMemory();
+  const storage = persist ? new LocalStorage(storageKey) : new InMemory();
   const master = new Master(game, storage, { send, sendAll }, false);
 
   master.connect = (gameID, playerID, callback) => {
@@ -217,6 +217,7 @@ export function Local(opts) {
         game: transportOpts.game,
         bots: opts && opts.bots,
         persist: opts && opts.persist,
+        storageKey: opts && opts.storageKey,
       });
       localMasters.set(transportOpts.gameKey, master);
     }

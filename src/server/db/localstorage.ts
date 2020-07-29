@@ -11,10 +11,7 @@ class WithLocalStorageMap<Tkey, Tvalue> extends Map {
     this.key = getStorageKey(key);
   }
   sync(): void {
-    globalAny.localStorage.setItem(
-      this.key,
-      JSON.stringify(Array.from(this.entries()))
-    );
+    localStorage.setItem(this.key, JSON.stringify(Array.from(this.entries())));
   }
   set(key: Tkey, value: Tvalue): this {
     super.set(key, value);
@@ -33,12 +30,21 @@ class WithLocalStorageMap<Tkey, Tvalue> extends Map {
  */
 
 export class LocalStorage extends InMemory {
-  constructor() {
+  constructor(storageKey) {
     super();
-    this.state = new WithLocalStorageMap('state');
-    this.initial = new WithLocalStorageMap('initial');
-    this.metadata = new WithLocalStorageMap('metadata');
-    this.log = new WithLocalStorageMap('log');
+    // little curry would be nicer here
+    this.state = new WithLocalStorageMap(
+      appendStorageKeyPrefix(storageKey, 'state')
+    );
+    this.initial = new WithLocalStorageMap(
+      appendStorageKeyPrefix(storageKey, 'initial')
+    );
+    this.metadata = new WithLocalStorageMap(
+      appendStorageKeyPrefix(storageKey, 'metadata')
+    );
+    this.log = new WithLocalStorageMap(
+      appendStorageKeyPrefix(storageKey, 'log')
+    );
   }
 }
 
@@ -48,4 +54,8 @@ function initFromCache(key: string): any[] {
 
 function getStorageKey(key: string) {
   return `bgio_${key}`;
+}
+
+function appendStorageKeyPrefix(prefix: string, key: string) {
+  return prefix ? `${prefix}_${key}` : key;
 }
