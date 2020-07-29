@@ -1,7 +1,5 @@
 import { InMemory } from './inmemory';
 
-const globalAny: any = global;
-
 class WithLocalStorageMap<Tkey, Tvalue> extends Map {
   key: string;
   constructor(key: string) {
@@ -45,7 +43,7 @@ export class LocalStorage extends InMemory {
 }
 
 function initFromCache(key: string): any[] {
-  return JSON.parse(globalAny.localStorage.getItem(getStorageKey(key))) || [];
+  return JSON.parse(localStorage.getItem(getStorageKey(key))) || [];
 }
 
 function getStorageKey(key: string) {
