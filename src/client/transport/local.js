@@ -207,10 +207,11 @@ export class LocalTransport extends Transport {
 }
 
 const localMasters = new Map();
-export function Local(opts) {
+export function Local(opts = {}) {
   return transportOpts => {
     let master;
-    if (localMasters.has(transportOpts.gameKey)) {
+    // See the #522 for te context of why !opts.bots is here
+    if (localMasters.has(transportOpts.gameKey) && !opts.bots) {
       master = localMasters.get(transportOpts.gameKey);
     } else {
       master = new LocalMaster({
