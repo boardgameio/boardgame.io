@@ -69,8 +69,10 @@ function onClick() {
 Using React, `moves` is provided through your component’s `props`:
 
 ```js
-onClick() {
-  this.props.moves.drawCard();
+const GameBoard = ({moves}) =>{
+  const onClick = () =>{
+    moves.drawCard();
+  }
 }
 ```
 
@@ -91,9 +93,14 @@ function onClick() {
 ```
 
 #### **React**
+
+Using React, `events` are also provided through your component’s `props`:
+
 ```js
-onClick() {
-  this.props.events.endTurn();
+const GameBoard = ({events}) =>{
+  const onClick = () =>{
+    events.endTurn();
+  }
 }
 ```
 <!-- tabs:end -->

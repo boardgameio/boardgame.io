@@ -490,53 +490,42 @@ Let’s create a new file at `src/Board.js`:
 ```js
 import React from 'react';
 
-export class TicTacToeBoard extends React.Component {
-  onClick(id) {
-    this.props.moves.clickCell(id);
-  }
+export const TicTacToeBoard = ({G, ctx, moves})=>{
 
-  render() {
-    let winner = '';
-    if (this.props.ctx.gameover) {
-      winner =
-        this.props.ctx.gameover.winner !== undefined ? (
-          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
-        ) : (
-          <div id="winner">Draw!</div>
-        );
-    }
-
-    const cellStyle = {
+  const onClick = React.useCallback(id=> moves.clickCell(id), [moves])
+  
+  const renderWinner = () => !ctx.gameover ? '' : (<div id="winner">{ctx.gameover.winner !== undefined ? `Winner: ${ctx.gameover.winner}` : `Draw!`}</div>)
+  
+  const cellStyle = {
       border: '1px solid #555',
       width: '50px',
       height: '50px',
       lineHeight: '50px',
       textAlign: 'center',
-    };
+  };
 
-    let tbody = [];
-    for (let i = 0; i < 3; i++) {
-      let cells = [];
-      for (let j = 0; j < 3; j++) {
-        const id = 3 * i + j;
-        cells.push(
-          <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
-            {this.props.G.cells[id]}
-          </td>
-        );
-      }
-      tbody.push(<tr key={i}>{cells}</tr>);
+  let tbody = [];
+  for (let i = 0; i < 3; i++) {
+    let cells = [];
+    for (let j = 0; j < 3; j++) {
+      const id = 3 * i + j;
+      cells.push(
+        <td style={cellStyle} key={id} onClick={() => onClick(id)}>
+          {G.cells[id]}
+        </td>
+      );
     }
-
-    return (
-      <div>
-        <table id="board">
-          <tbody>{tbody}</tbody>
-        </table>
-        {winner}
-      </div>
-    );
+    tbody.push(<tr key={i}>{cells}</tr>);
   }
+
+  return (
+    <div>
+      <table id="board">
+        <tbody>{tbody}</tbody>
+      </table>
+      {renderWinner()}
+    </div>
+  );
 }
 ```
 
@@ -545,11 +534,12 @@ dispatch moves. We have the following code in our click
 handler:
 
 ```js
-this.props.moves.clickCell(id);
+moves.clickCell(id);
 ```
 
-- `props.moves` is an object passed in by the framework that
-  contains functions to dispatch moves. `props.moves.clickCell`
+- `moves` is an object passed in the 
+  board components props by the framework that
+  contains functions to dispatch moves. `moves.clickCell`
   dispatches the `clickCell` move, and any data passed in is made
   available in the move handler.
 

@@ -124,17 +124,18 @@ Events are available through `props` inside the
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class Board extends React.Component {
-  static propTypes = {
-    events: PropTypes.any.isRequired,
-  };
+const Board  = ({events}) =>{
 
-  onClick = () => {
-    this.props.events.endTurn();
-  };
+  const onClick = React.useCallback(() => {
+    events.endTurn();
+  }, [events]);
 
-  render = () => <button onClick={this.onClick}>End Turn</button>;
+  return <button onClick={onClick}>End Turn</button>;
 }
+
+Board.propTypes = {
+  events: PropTypes.any.isRequired,
+};
 ```
 <!-- tabs:end -->
 
