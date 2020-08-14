@@ -22,7 +22,7 @@ export interface FetchOpts {
 export interface FetchFields {
   state: State;
   log: LogEntry[];
-  metadata: Server.MatchMetadata;
+  metadata: Server.MatchData;
   initialState: State;
 }
 
@@ -48,7 +48,7 @@ export interface ListGamesOpts {
  */
 export interface CreateGameOpts {
   initialState: State;
-  metadata: Server.MatchMetadata;
+  metadata: Server.MatchData;
 }
 
 export abstract class Async {
@@ -93,7 +93,7 @@ export abstract class Async {
    */
   abstract setMetadata(
     matchID: string,
-    metadata: Server.MatchMetadata
+    metadata: Server.MatchData
   ): Promise<void>;
 
   /**
@@ -151,7 +151,7 @@ export abstract class Sync {
   /**
    * Update the match metadata.
    */
-  abstract setMetadata(matchID: string, metadata: Server.MatchMetadata): void;
+  abstract setMetadata(matchID: string, metadata: Server.MatchData): void;
 
   /**
    * Fetch the game state.

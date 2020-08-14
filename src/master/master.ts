@@ -26,11 +26,11 @@ import {
 import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
-  matchMetadata: Server.MatchMetadata,
+  matchData: Server.MatchData,
   playerID: PlayerID
 ) => {
-  if (matchMetadata && matchMetadata.players) {
-    return matchMetadata.players[playerID];
+  if (matchData && matchData.players) {
+    return matchData.players[playerID];
   }
 };
 
@@ -81,10 +81,10 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
  * Verifies that the match has metadata and is using credentials.
  */
 export const doesMatchRequireAuthentication = (
-  matchMetadata?: Server.MatchMetadata
+  matchData?: Server.MatchData
 ) => {
-  if (!matchMetadata) return false;
-  const { players } = matchMetadata as Server.MatchMetadata;
+  if (!matchData) return false;
+  const { players } = matchData as Server.MatchData;
   const hasCredentials = Object.keys(players).some(key => {
     return !!(players[key] && players[key].credentials);
   });
@@ -119,7 +119,7 @@ export type AuthFn = (
 
 type CallbackFn = (arg: {
   state: State;
-  gameID: string;
+  matchID: string;
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
@@ -187,20 +187,20 @@ export class Master {
   async onUpdate(
     credAction: CredentialedActionShape.Any,
     stateID: number,
-    gameID: string,
+    matchID: string,
     playerID: string
   ) {
     let isActionAuthentic;
-    let metadata: Server.MatchMetadata | undefined;
+    let metadata: Server.MatchData | undefined;
     const credentials = credAction.payload.credentials;
     if (IsSynchronous(this.storageAPI)) {
-      ({ metadata } = this.storageAPI.fetch(gameID, { metadata: true }));
+      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
       isActionAuthentic = this.shouldAuth(metadata)
         ? this.auth(credentials, playerMetadata)
         : true;
     } else {
-      ({ metadata } = await this.storageAPI.fetch(gameID, {
+      ({ metadata } = await this.storageAPI.fetch(matchID, {
         metadata: true,
       }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
@@ -213,7 +213,7 @@ export class Master {
     }
 
     let action = stripCredentialsFromAction(credAction);
-    const key = gameID;
+    const key = matchID;
 
     let state: State;
     let result: StorageAPI.FetchResult<{ state: true }>;
@@ -225,12 +225,12 @@ export class Master {
     state = result.state;
 
     if (state === undefined) {
-      logging.error(`game not found, gameID=[${key}]`);
+      logging.error(`game not found, matchID=[${key}]`);
       return { error: 'game not found' };
     }
 
     if (state.ctx.gameover !== undefined) {
-      logging.error(`game over - gameID=[${key}]`);
+      logging.error(`game over - matchID=[${key}]`);
       return;
     }
 
@@ -283,7 +283,7 @@ export class Master {
     this.subscribeCallback({
       state,
       action,
-      gameID,
+      matchID,
     });
 
     this.transportAPI.sendAll((playerID: string) => {
@@ -299,13 +299,13 @@ export class Master {
 
       return {
         type: 'update',
-        args: [gameID, filteredState, log],
+        args: [matchID, filteredState, log],
       };
     });
 
     const { deltalog, ...stateWithoutDeltalog } = state;
 
-    let newMetadata: Server.MatchMetadata | undefined;
+    let newMetadata: Server.MatchData | undefined;
     if (metadata && !('gameover' in metadata)) {
       newMetadata = {
         ...metadata,
@@ -334,13 +334,13 @@ export class Master {
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
-  async onSync(gameID: string, playerID: string, numPlayers: number) {
-    const key = gameID;
+  async onSync(matchID: string, playerID: string, numPlayers: number) {
+    const key = matchID;
 
     let state: State;
     let initialState: State;
     let log: LogEntry[];
-    let matchMetadata: Server.MatchMetadata;
+    let matchData: Server.MatchData;
     let filteredMetadata: FilteredMetadata;
     let result: StorageAPI.FetchResult<{
       state: true;
@@ -368,10 +368,10 @@ export class Master {
     state = result.state;
     initialState = result.initialState;
     log = result.log;
-    matchMetadata = result.metadata;
+    matchData = result.metadata;
 
-    if (matchMetadata) {
-      filteredMetadata = Object.values(matchMetadata.players).map(player => {
+    if (matchData) {
+      filteredMetadata = Object.values(matchData.players).map(player => {
         const { credentials, ...filteredData } = player;
         return filteredData;
       });
@@ -384,7 +384,7 @@ export class Master {
 
       this.subscribeCallback({
         state,
-        gameID,
+        matchID,
       });
 
       if (IsSynchronous(this.storageAPI)) {
@@ -414,7 +414,7 @@ export class Master {
     this.transportAPI.send({
       playerID,
       type: 'sync',
-      args: [gameID, syncInfo],
+      args: [matchID, syncInfo],
     });
 
     return;

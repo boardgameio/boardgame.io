@@ -22,7 +22,7 @@ const App = Client({
 
 const Multiplayer = playerID => () => (
   <div style={{ padding: 50 }}>
-    <App gameID="multi" playerID={playerID} />
+    <App matchID="multi" playerID={playerID} />
     PlayerID: {playerID}
   </div>
 );

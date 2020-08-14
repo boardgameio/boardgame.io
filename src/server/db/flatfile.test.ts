@@ -32,7 +32,7 @@ describe('FlatFile', () => {
 
     await db.createGame('gameID', {
       initialState: state as State,
-      metadata: metadata as Server.MatchMetadata,
+      metadata: metadata as Server.MatchData,
     });
 
     // Must return created game.

@@ -53,8 +53,8 @@ const client = Client({
   // See `src/client/client.js` for details.
   multiplayer: false,
 
-  // Game to connect to (multiplayer).
-  gameID: 'gameID',
+  // Match to connect to (multiplayer).
+  matchID: 'matchID',
 
   // Associate the client with a player (multiplayer).
   playerID: 'playerID',
@@ -91,7 +91,7 @@ The following properties are available on a client instance:
 - `log`: The game log.
 
 
-- `gameID`: The game ID associated with the client.
+- `matchID`: The match ID associated with the client.
 
 
 - `playerID`: The player ID associated with the client.
@@ -100,8 +100,8 @@ The following properties are available on a client instance:
 - `credentials`: Multiplayer authentication credentials for this player.
 
 
-- `matchMetadata`: An array containing the players that have joined
-  the match from a [room](/api/Lobby.md).
+- `matchData`: An array containing the players that have joined
+  the current match via the [Lobby API](/api/Lobby.md).
 
   Example:
 
@@ -175,7 +175,7 @@ The following methods are available on a client instance:
 - `redo()`: Function that redoes the previously undone move.
 
 
-- `updateGameID(id)`: Function to update the client’s game ID.
+- `updateMatchID(id)`: Function to update the client’s match ID.
 
 
 - `updatePlayerID(id)`: Function to update the client’s player ID.
@@ -202,8 +202,8 @@ A React component that runs the client.
 
 The component supports the following `props`:
 
-1. `gameID` (_string_):
-   Connect to a particular game (multiplayer).
+1. `matchID` (_string_):
+   Connect to a particular match (multiplayer).
 
 2. `playerID` (_string_):
    Associate the client with a player (multiplayer).
@@ -308,14 +308,14 @@ following as `props`:
 - `log`: The game log.
 
 
-- `gameID`: The game ID associated with the client.
+- `matchID`: The match ID associated with the client.
 
 
 - `playerID`: The player ID associated with the client.
 
 
-- `matchMetadata`: An array containing the players that have joined
-  the game from a [room](/api/Lobby.md).
+- `matchData`: An array containing the players that have joined
+  the current match via the [Lobby API](/api/Lobby.md).
 
     Example:
 

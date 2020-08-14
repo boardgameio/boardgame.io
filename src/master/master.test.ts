@@ -162,11 +162,11 @@ describe('update', () => {
     ]);
   });
 
-  test('invalid gameID', async () => {
+  test('invalid matchID', async () => {
     await master.onUpdate(action, 1, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `game not found, gameID=[default:unknown]`
+      `game not found, matchID=[default:unknown]`
     );
   });
 
@@ -193,7 +193,7 @@ describe('update', () => {
     );
   });
 
-  test('valid gameID / stateID / playerID', async () => {
+  test('valid matchID / stateID / playerID', async () => {
     await master.onUpdate(action, 1, 'gameID', '1');
     expect(sendAll).toHaveBeenCalled();
   });
@@ -213,7 +213,7 @@ describe('update', () => {
     await master.onUpdate(event, 2, 'gameID', '0');
     event = ActionCreators.gameEvent('endTurn');
     await master.onUpdate(event, 3, 'gameID', '0');
-    expect(error).toHaveBeenCalledWith(`game over - gameID=[gameID]`);
+    expect(error).toHaveBeenCalledWith(`game over - matchID=[gameID]`);
   });
 
   test('writes gameover to metadata', async () => {
@@ -340,7 +340,7 @@ describe('subscribe', () => {
   test('sync', async () => {
     master.onSync('gameID', '0');
     expect(callback).toBeCalledWith({
-      gameID: 'gameID',
+      matchID: 'gameID',
       state: expect.objectContaining({ _stateID: 0 }),
     });
   });
@@ -349,7 +349,7 @@ describe('subscribe', () => {
     const action = ActionCreators.gameEvent('endTurn');
     master.onUpdate(action, 0, 'gameID', '0');
     expect(callback).toBeCalledWith({
-      gameID: 'gameID',
+      matchID: 'gameID',
       action,
       state: expect.objectContaining({ _stateID: 1 }),
     });
@@ -623,9 +623,7 @@ describe('getPlayerMetadata', () => {
 
   describe('when metadata does not contain players field', () => {
     test('then playerMetadata is undefined', () => {
-      expect(
-        getPlayerMetadata({} as Server.MatchMetadata, '0')
-      ).toBeUndefined();
+      expect(getPlayerMetadata({} as Server.MatchData, '0')).toBeUndefined();
     });
   });
 
@@ -674,7 +672,7 @@ describe('doesMatchRequireAuthentication', () => {
 
   describe('when match has no credentials', () => {
     test('then authentication is not required', () => {
-      const matchMetadata = {
+      const matchData = {
         gameName: '',
         setupData: {},
         players: {
@@ -683,14 +681,14 @@ describe('doesMatchRequireAuthentication', () => {
         createdAt: 0,
         updatedAt: 0,
       };
-      const result = doesMatchRequireAuthentication(matchMetadata);
+      const result = doesMatchRequireAuthentication(matchData);
       expect(result).toBe(false);
     });
   });
 
   describe('when match has credentials', () => {
     test('then authentication is required', () => {
-      const matchMetadata = {
+      const matchData = {
         gameName: '',
         setupData: {},
         players: {
@@ -702,7 +700,7 @@ describe('doesMatchRequireAuthentication', () => {
         createdAt: 0,
         updatedAt: 0,
       };
-      const result = doesMatchRequireAuthentication(matchMetadata);
+      const result = doesMatchRequireAuthentication(matchData);
       expect(result).toBe(true);
     });
   });
@@ -711,7 +709,7 @@ describe('doesMatchRequireAuthentication', () => {
 describe('isActionFromAuthenticPlayer', () => {
   let action;
   let playerID;
-  let matchMetadata;
+  let matchData;
   let credentials;
   let playerMetadata;
 
@@ -722,13 +720,13 @@ describe('isActionFromAuthenticPlayer', () => {
       payload: { credentials: 'SECRET' },
     };
 
-    matchMetadata = {
+    matchData = {
       players: {
         '0': { credentials: 'SECRET' },
       },
     };
 
-    playerMetadata = matchMetadata.players[playerID];
+    playerMetadata = matchData.players[playerID];
     ({ credentials } = action.payload || {});
   });
 
