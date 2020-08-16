@@ -51,19 +51,6 @@
     margin: none;
     margin-bottom: 5px;
   }
-
-  .events {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .events button {
-    width: 100px;
-  }
-
-  .events button:not(:last-child) {
-    margin-bottom: 10px;
-  }
 </style>
 
 <section>
@@ -93,14 +80,20 @@
   <h3>Events</h3>
 
   <div class="events">
+  {#if ctx.activePlayers && client.events.endStage}
+    <li>
+      <Move name="endStage" shortcut={7} fn={client.events.endStage} />
+    </li>
+  {/if}
   {#if client.events.endTurn}
-    <button on:click={() => client.events.endTurn()}>End Turn</button>
+    <li>
+      <Move name="endTurn" shortcut={8} fn={client.events.endTurn} />
+    </li>
   {/if}
   {#if ctx.phase && client.events.endPhase}
-    <button on:click={() => client.events.endPhase()}>End Phase</button>
-  {/if}
-  {#if ctx.activePlayers && client.events.endStage}
-    <button on:click={() => client.events.endStage()}>End Stage</button>
+    <li>
+      <Move name="endPhase" shortcut={9} fn={client.events.endPhase} />
+    </li>
   {/if}
   </div>
 </section>
