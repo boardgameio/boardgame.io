@@ -6,8 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import * as ioNamespace from 'socket.io-client';
+const io = ioNamespace.default;
+
 import * as ActionCreators from '../../core/action-creators';
-import io from 'socket.io-client';
 import { Transport, TransportOpts, MetadataCallback } from './transport';
 import {
   CredentialedActionShape,

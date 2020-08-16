@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import 'svelte';
 import {
   Dispatch,
   StoreEnhancer,

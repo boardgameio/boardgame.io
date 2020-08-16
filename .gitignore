@@ -12,3 +12,4 @@ npm
 .idea/
 .vscode/*
 .rpt2_cache/
+.rush/

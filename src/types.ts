@@ -1,7 +1,6 @@
 import { Object } from 'ts-toolbelt';
 import Koa from 'koa';
 import { Store as ReduxStore } from 'redux';
-import 'svelte';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
 import { CreateGameReducer } from './core/reducer';
