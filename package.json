@@ -192,7 +192,7 @@
       "^.+\\.svelte$": "jest-transform-svelte"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io|flatted|svelte-icons|svelte-json-tree-auto)/)"
+      "node_modules/(?!(boardgame.io|flatted|svelte-icons|svelte-json-tree-auto|sveslte-json-tree)/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
