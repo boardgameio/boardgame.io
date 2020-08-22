@@ -11,7 +11,7 @@ The issues below (and some others that are not in this document) are also availa
 ### AI
 
 - [x] MCTS bot ([issue](https://github.com/boardgameio/boardgame.io/issues/7#issuecomment-389453032))
-- [ ] ability to add priorities and objectives ([issue](https://github.com/boardgameio/boardgame.io/issues/7#issuecomment-389453032))
+- [x] ability to add priorities and objectives ([issue](https://github.com/boardgameio/boardgame.io/issues/7#issuecomment-389453032))
 - [ ] Bots in multiplayer games ([issue](https://github.com/boardgameio/boardgame.io/issues/383)) **[help needed]**
 
 ### Lobby
@@ -36,8 +36,8 @@ The issues below (and some others that are not in this document) are also availa
 ### Core
 
 - [x] phases -> turns -> stages
-- [ ] turn order improvements ([issue](https://github.com/boardgameio/boardgame.io/issues/154))
-- [ ] log improvements ([issue](https://github.com/boardgameio/boardgame.io/issues/227))
+- [x] turn order improvements ([issue](https://github.com/boardgameio/boardgame.io/issues/154))
+- [x] log improvements ([issue](https://github.com/boardgameio/boardgame.io/issues/227))
 - [x] add immutability helper (Immer) ([issue](https://github.com/boardgameio/boardgame.io/issues/295))
 
 ### Server
@@ -49,5 +49,5 @@ The issues below (and some others that are not in this document) are also availa
 
 - [ ] recipes for different game scenarios
 - [ ] code organization patterns
-- [ ] deployment tutorial
-- [ ] tutorial using the vanilla JS client
+- [x] deployment tutorial
+- [x] tutorial using the vanilla JS client
