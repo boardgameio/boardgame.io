@@ -17,11 +17,10 @@ from that specific player.
 
 ```js
 const game = {
-  ...
-
+  // ...
   playerView: (G, ctx, playerID) => {
     return StripSecrets(G, playerID);
-  }
+  },
 };
 ```
 
@@ -37,7 +36,7 @@ that does the following:
 - If `G` contains a `players` object, it removes all keys except
   for the one that matches `playerID`.
 
-```
+```js
 G: {
   secret: { ... },
 
@@ -51,7 +50,7 @@ G: {
 
 becomes the following for player `1`:
 
-```
+```js
 G: {
   players: {
     '1': { ... },
@@ -62,12 +61,12 @@ G: {
 Usage:
 
 ```js
-import { Game, PlayerView } from 'boardgame.io/core';
+import { PlayerView } from 'boardgame.io/core';
 
-const App = Game({
-  ...
-  playerView: PlayerView.STRIP_SECRETS
-});
+const game = {
+  // ...
+  playerView: PlayerView.STRIP_SECRETS,
+};
 ```
 
 ### Disabling moves that manipulate secret state on the client
