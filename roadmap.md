@@ -25,9 +25,11 @@ The issues below (and some others that are not in this document) are also availa
 
 - ##### Databases
 
-  - [x] add Mongo support
-  - [x] add Firebase support
-  - [ ] add Postgres support
+  We encourage developers to contribute third-party storage connectors, implementing
+  [the `StorageAPI.Async` interface](https://github.com/boardgameio/boardgame.io/blob/master/src/server/db/base.ts).
+
+  See the [Storage docs](https://boardgame.io/documentation/#/storage) for
+  examples and details of the backends currently available.
 
 - ##### Size / Performance
 
