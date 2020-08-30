@@ -32,11 +32,6 @@
 </script>
 
 <style>
-  .json {
-    font-family: monospace;
-    color: #888;
-  }
-
   .tree {
     --json-tree-font-family: monospace;
     --json-tree-font-size: 14px;
@@ -111,16 +106,12 @@
   </div>
 </section>
 
-<section>
+<section class="tree">
   <label>G</label>
-  <div class="json tree">
-    <JSONTree value={G} />
-  </div>
+  <JSONTree value={G} />
 </section>
 
-<section>
+<section class="tree">
   <label>ctx</label>
-  <div class="json tree">
-    <JSONTree value={SanitizeCtx(ctx)} />
-  </div>
+  <JSONTree value={SanitizeCtx(ctx)} />
 </section>
