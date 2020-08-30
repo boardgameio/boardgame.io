@@ -59,6 +59,8 @@
     font-size: 14px;
     box-sizing: border-box;
     opacity: 0.9;
+    /* we want the debug panel to be above any other elements */
+    z-index: 99999;
   }
 
   .pane {

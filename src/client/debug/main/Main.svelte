@@ -1,6 +1,7 @@
 <script>
   export let client;
 
+  const JSONTree = require('svelte-json-tree-auto');
   import Move from './Move.svelte';
   import Controls from './Controls.svelte';
   import PlayerInfo from './PlayerInfo.svelte';
@@ -31,9 +32,9 @@
 </script>
 
 <style>
-  .json {
-    font-family: monospace;
-    color: #888;
+  .tree {
+    --json-tree-font-family: monospace;
+    --json-tree-font-size: 14px;
   }
 
   label {
@@ -98,14 +99,12 @@
   </div>
 </section>
 
-<section>
+<section class="tree">
   <label>G</label>
-  <pre class="json">{JSON.stringify(G, null, 2)}</pre>
+  <JSONTree value={G} />
 </section>
 
-<section>
+<section class="tree">
   <label>ctx</label>
-  <pre class="json">
-    {JSON.stringify(SanitizeCtx(ctx), null, 2)}
-  </pre>
+  <JSONTree value={SanitizeCtx(ctx)} />
 </section>

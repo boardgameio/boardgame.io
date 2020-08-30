@@ -65,7 +65,7 @@ The die roll value (or an array of values if `diceCount` is greater than `1`).
 #### Usage
 
 ```js
-const game = Game({
+const game = {
   moves: {
     move(G, ctx) {
       const die = ctx.random.Die(6);      // die = 1-6
@@ -73,7 +73,7 @@ const game = Game({
       ...
     },
   }
-});
+};
 ```
 
 ### 2. Number
@@ -83,14 +83,14 @@ Returns a random number between `0` and `1`.
 #### Usage
 
 ```js
-const game = Game({
+const game = {
   moves: {
     move(G, ctx) {
       const n = ctx.random.Number();
       ...
     },
   }
-});
+};
 ```
 
 ### 3. Shuffle
@@ -106,13 +106,13 @@ The shuffled array.
 #### Usage
 
 ```js
-const game = Game({
+const game = {
   moves: {
     move(G, ctx) {
       G.deck = ctx.random.Shuffle(G.deck);
     },
   },
-});
+};
 ```
 
 ### 4. Wrappers
@@ -127,12 +127,12 @@ const game = Game({
 #### Usage
 
 ```js
-const game = Game({
+const game = {
   moves: {
     move(G, ctx) {
       const die = ctx.random.D6();
       ...
     },
   }
-});
+};
 ```
