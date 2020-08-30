@@ -165,7 +165,6 @@
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.3.0",
     "svelte": "^3.24.0",
-    "svelte-json-tree": "^0.1.0",
     "svelte-json-tree-auto": "^0.1.0",
     "ts-toolbelt": "^6.3.6",
     "uuid": "3.2.1"
@@ -192,7 +191,7 @@
       "^.+\\.svelte$": "jest-transform-svelte"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io|flatted|svelte-icons|svelte-json-tree-auto|sveslte-json-tree)/)"
+      "node_modules/(?!(boardgame.io|flatted|svelte-icons)/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
