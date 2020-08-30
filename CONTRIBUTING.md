@@ -7,8 +7,10 @@ potential improvements you want to make before sending a Pull Request.
 The [roadmap](roadmap.md) is probably the best place to find areas where help would
 most be appreciated.
 
-The Issue Tracker may contain items labelled **help wanted** or **good first issue**
-from time to time.
+The Issue Tracker may contain items labelled [**good first issue**][gfi] or [**help wanted**][hw] from time to time.
+
+[hw]: https://github.com/boardgameio/boardgame.io/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22+
+[gfi]: https://github.com/boardgameio/boardgame.io/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
 
 ## Pull Requests
 
