@@ -80,7 +80,8 @@
     overflow-y: scroll;
   }
 
-  .debug-panel :global(button, select) {
+  .debug-panel :global(button),
+  .debug-panel :global(select) {
     cursor: pointer;
     outline: none;
     background: #eee;
