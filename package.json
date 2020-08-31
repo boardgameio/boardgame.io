@@ -173,7 +173,8 @@
     "preset": "ts-jest/presets/js-with-babel",
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
-      "\\.(svg)$": "<rootDir>/.empty_module.js"
+      "\\.(svg)$": "<rootDir>/.empty_module.js",
+      "svelte-json-tree-auto": "<rootDir>/src/client/debug/tests/JSONTree.mock.svelte"
     },
     "coveragePathIgnorePatterns": [
       "/node_modules/",
