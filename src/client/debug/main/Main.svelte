@@ -1,7 +1,7 @@
 <script>
   export let client;
 
-  const JSONTree = require('svelte-json-tree-auto');
+  import JSONTree from 'svelte-json-tree-auto/src/Root.svelte';
   import Move from './Move.svelte';
   import Controls from './Controls.svelte';
   import PlayerInfo from './PlayerInfo.svelte';
