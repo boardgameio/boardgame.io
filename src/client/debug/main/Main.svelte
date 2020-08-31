@@ -35,6 +35,7 @@
   .tree {
     --json-tree-font-family: monospace;
     --json-tree-font-size: 14px;
+    --json-tree-null-color: #757575;
   }
 
   label {
