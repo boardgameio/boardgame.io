@@ -80,7 +80,7 @@ class TicTacToeBoard extends React.Component {
         );
     }
 
-    const cellStyle = {
+    const cellStyle = id => ({
       cursor: 'pointer',
       border: '1px solid #555',
       width: '50px',
@@ -90,7 +90,8 @@ class TicTacToeBoard extends React.Component {
       fontFamily: 'monospace',
       fontSize: '20px',
       fontWeight: 'bold',
-    };
+      background: this.isActive(id) ? '#eeffe9' : 'transparent',
+    });
 
     let tbody = [];
     for (let i = 0; i < 3; i++) {
@@ -98,7 +99,7 @@ class TicTacToeBoard extends React.Component {
       for (let j = 0; j < 3; j++) {
         const id = 3 * i + j;
         cells.push(
-          <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
+          <td style={cellStyle(id)} key={id} onClick={() => this.onClick(id)}>
             {this.props.G.cells[id]}
           </td>
         );
@@ -108,6 +109,10 @@ class TicTacToeBoard extends React.Component {
 
     return (
       <div>
+        Player {this.props.playerID}
+        {this.props.isActive && (
+          <span style={{ float: 'right' }}>Your turn!</span>
+        )}
         <table id="board">
           <tbody>{tbody}</tbody>
         </table>
@@ -127,12 +132,10 @@ var TicTacToeClient = Client({
 const App = () => (
   <div>
     <div style={{ float: 'left' }}>
-      Player 0
       <TicTacToeClient playerID="0" />
     </div>
 
     <div style={{ float: 'right' }}>
-      Player 1
       <TicTacToeClient playerID="1" />
     </div>
   </div>
