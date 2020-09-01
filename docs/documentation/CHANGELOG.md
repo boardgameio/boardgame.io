@@ -1,3 +1,24 @@
+## v0.40.0
+
+#### Breaking Changes
+
+See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) for a full list and migration guide.
+
+#### Features
+
+* [[43c7fbb](https://github.com/boardgameio/boardgame.io/commit/43c7fbb)] Add plain JS lobby client ([#728](https://github.com/boardgameio/boardgame.io/pull/728))
+* [[adb251d](https://github.com/boardgameio/boardgame.io/commit/adb251d)] [[6fcf695](https://github.com/boardgameio/boardgame.io/commit/6fcf695)] Use “match” instead of “game”/“room” in Lobby API ([#704](https://github.com/boardgameio/boardgame.io/pull/704), [#765](https://github.com/boardgameio/boardgame.io/pull/765))
+* [[88b0ee7](https://github.com/boardgameio/boardgame.io/commit/88b0ee7)] **debug:** Display live object view in debug panel ([#781](https://github.com/boardgameio/boardgame.io/pull/781), [#790](https://github.com/boardgameio/boardgame.io/pull/790))
+* [[3984ee7](https://github.com/boardgameio/boardgame.io/commit/3984ee7)] **debug:** Events shortcuts, stages support & minor fixes ([#791](https://github.com/boardgameio/boardgame.io/pull/791))
+* [[3c8777b](https://github.com/boardgameio/boardgame.io/commit/3c8777b)] **server:** Timestamp metadata and match filtering in the Lobby API ([#740](https://github.com/boardgameio/boardgame.io/pull/740))
+* [[a0c34fd](https://github.com/boardgameio/boardgame.io/commit/a0c34fd)] **server:** Expose API router ([#698](https://github.com/boardgameio/boardgame.io/pull/698))
+
+#### Bugfixes
+
+* [[2586022](https://github.com/boardgameio/boardgame.io/commit/2586022)] **debug:** Keep debug panel above other page elements ([#780](https://github.com/boardgameio/boardgame.io/pull/780))
+* [[f32dc76](https://github.com/boardgameio/boardgame.io/commit/f32dc76)] **api:** Expose gameover metadata in lobby endpoints ([#666](https://github.com/boardgameio/boardgame.io/pull/666))
+* [[fa865da](https://github.com/boardgameio/boardgame.io/commit/fa865da)] fixes build in rushjs monorepo context ([#550](https://github.com/boardgameio/boardgame.io/pull/550))
+
 ## v0.39.16
 
 #### Bugfixes
