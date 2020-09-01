@@ -76,6 +76,7 @@
   <span
     class="arg-field"
     bind:this={span}
+    on:focus={Activate}
     on:blur={Deactivate}
     on:keypress|stopPropagation={() => {}}
     on:keydown={OnKeyDown}
