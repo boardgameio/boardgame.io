@@ -32,6 +32,7 @@
     background: #eee;
     border: 3px solid #fefefe;
     box-sizing: content-box;
+    padding: 0;
   }
 
   .player.current {
@@ -47,12 +48,12 @@
 
 <div class="player-box">
   {#each players as player}
-    <div
+    <button
       class="player"
       class:current={player == ctx.currentPlayer}
       class:active={player == playerID}
       on:click={() => OnClick(player)}>
       {player}
-    </div>
+    </button>
   {/each}
 </div>

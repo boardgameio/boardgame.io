@@ -80,28 +80,19 @@
     overflow-y: scroll;
   }
 
-  .debug-panel :global(button, select) {
+  .debug-panel :global(button),
+  .debug-panel :global(select) {
     cursor: pointer;
-    outline: none;
+    font-size: 14px;
+    font-family: monospace;
+  }
+
+  .debug-panel :global(select) {
     background: #eee;
     border: 1px solid #bbb;
     color: #555;
     padding: 3px;
     border-radius: 3px;
-  }
-
-  .debug-panel :global(button) {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  .debug-panel :global(button:hover) {
-    background: #ddd;
-  }
-
-  .debug-panel :global(button:active) {
-    background: #888;
-    color: #fff;
   }
 
   .debug-panel :global(section) {
