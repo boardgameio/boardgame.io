@@ -11,7 +11,7 @@
 </style>
 
 <section class="gameinfo">
-  <Item name="gameID" value={client.gameID} />
+  <Item name="matchID" value={client.matchID} />
   <Item name="playerID" value={client.playerID} />
   <Item name="isActive" value={$client.isActive} />
   {#if client.multiplayer}

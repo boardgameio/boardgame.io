@@ -229,6 +229,8 @@ interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
 
 export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   name?: string;
+  minPlayers?: number;
+  maxPlayers?: number;
   disableUndo?: boolean;
   seed?: string | number;
   setup?: (ctx: CtxWithPlugins, setupData?: any) => any;
@@ -291,20 +293,36 @@ export namespace Server {
     data?: any;
   };
 
-  export interface GameMetadata {
+  export interface MatchData {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData?: any;
     gameover?: any;
-    nextRoomID?: string;
+    nextMatchID?: string;
     unlisted?: boolean;
+    createdAt: number;
+    updatedAt: number;
   }
+}
 
-  export interface LobbyConfig {
-    uuid?: () => string;
-    generateCredentials?: GenerateCredentials;
-    apiPort?: number;
-    apiCallback?: () => void;
+export namespace LobbyAPI {
+  export type GameList = string[];
+  type PublicPlayerMetadata = Omit<Server.PlayerMetadata, 'credentials'>;
+  export type Match = Omit<Server.MatchData, 'players'> & {
+    matchID: string;
+    players: PublicPlayerMetadata[];
+  };
+  export interface MatchList {
+    matches: Match[];
+  }
+  export interface CreatedMatch {
+    matchID: string;
+  }
+  export interface JoinedMatch {
+    playerCredentials: string;
+  }
+  export interface NextMatch {
+    nextMatchID: string;
   }
 }
 

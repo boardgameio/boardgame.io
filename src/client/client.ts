@@ -91,7 +91,7 @@ export interface ClientOpts<G extends any = any> {
   debug?: DebugOpt | boolean;
   numPlayers?: number;
   multiplayer?: (opts: TransportOpts) => Transport;
-  gameID?: string;
+  matchID?: string;
   playerID?: PlayerID;
   credentials?: string;
   enhancer?: StoreEnhancer;
@@ -113,10 +113,10 @@ export class _ClientImpl<G extends any = any> {
   game: ReturnType<typeof ProcessGameConfig>;
   store: Store;
   log: State['deltalog'];
-  gameID: string;
+  matchID: string;
   playerID: PlayerID | null;
   credentials: string;
-  gameMetadata?: FilteredMetadata;
+  matchData?: FilteredMetadata;
   moves: Record<string, (...args: any[]) => void>;
   events: {
     endGame?: (gameover?: any) => void;
@@ -137,14 +137,14 @@ export class _ClientImpl<G extends any = any> {
     debug,
     numPlayers,
     multiplayer,
-    gameID,
+    matchID: matchID,
     playerID,
     credentials,
     enhancer,
   }: ClientOpts) {
     this.game = ProcessGameConfig(game);
     this.playerID = playerID;
-    this.gameID = gameID;
+    this.matchID = matchID;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
     this.debug = debug;
@@ -282,10 +282,10 @@ export class _ClientImpl<G extends any = any> {
       isConnected: true,
       onAction: () => {},
       subscribe: () => {},
-      subscribeGameMetadata: () => {},
+      subscribeMatchData: () => {},
       connect: () => {},
       disconnect: () => {},
-      updateGameID: () => {},
+      updateMatchID: () => {},
       updatePlayerID: () => {},
     } as unknown) as Transport;
 
@@ -295,7 +295,7 @@ export class _ClientImpl<G extends any = any> {
         gameKey: game,
         game: this.game,
         store: this.store,
-        gameID,
+        matchID,
         playerID,
         gameName: this.game.name,
         numPlayers,
@@ -304,8 +304,8 @@ export class _ClientImpl<G extends any = any> {
 
     this.createDispatchers();
 
-    this.transport.subscribeGameMetadata(metadata => {
-      this.gameMetadata = metadata;
+    this.transport.subscribeMatchData(metadata => {
+      this.matchData = metadata;
     });
 
     this._debugPanel = null;
@@ -476,10 +476,10 @@ export class _ClientImpl<G extends any = any> {
     this.notifySubscribers();
   }
 
-  updateGameID(gameID: string) {
-    this.gameID = gameID;
+  updateMatchID(matchID: string) {
+    this.matchID = matchID;
     this.createDispatchers();
-    this.transport.updateGameID(gameID);
+    this.transport.updateMatchID(matchID);
     this.notifySubscribers();
   }
 
@@ -498,7 +498,7 @@ export class _ClientImpl<G extends any = any> {
  * @param {...object} game - The return value of `Game`.
  * @param {...object} numPlayers - The number of players.
  * @param {...object} multiplayer - Set to a falsy value or a transportFactory, e.g., SocketIO()
- * @param {...object} gameID - The gameID that you want to connect to.
+ * @param {...object} matchID - The matchID that you want to connect to.
  * @param {...object} playerID - The playerID associated with this client.
  * @param {...string} credentials - The authentication credentials associated with this client.
  *

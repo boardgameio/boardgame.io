@@ -118,7 +118,7 @@ class App extends React.Component {
 
     let players = [];
     for (let i = 0; i < 6; i++) {
-      players.push(<App key={i} gameID={this.type} playerID={i + ''} />);
+      players.push(<App key={i} matchID={this.type} playerID={i + ''} />);
     }
 
     return (
@@ -152,7 +152,7 @@ class App extends React.Component {
 
         <div className="turnorder-content">
           <div className="player-container">
-            <App gameID={this.type} />
+            <App matchID={this.type} />
             <span>{players}</span>
           </div>
           <div className="description">

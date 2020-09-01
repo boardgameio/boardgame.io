@@ -7,7 +7,7 @@
 
   const client = Client({
     game: Game,
-    gameID: 'default',
+    matchID: 'default',
     playerID,
     debug: false,
     numPlayers: 3,

@@ -131,9 +131,9 @@ describe('socketAdapter', () => {
   });
 
   test('socketAdapter is passed', () => {
-    expect(app.io.socketAdapter).toBe(socketAdapter)
-  })
-})
+    expect(app.io.socketAdapter).toBe(socketAdapter);
+  });
+});
 
 describe('TransportAPI', () => {
   let io;
@@ -223,11 +223,11 @@ describe('connect / disconnect', () => {
     await io.socket.receive('sync', 'gameID', '1', 2);
 
     expect(toObj(clientInfo)['0']).toMatchObject({
-      gameID: 'gameID',
+      matchID: 'gameID',
       playerID: '0',
     });
     expect(toObj(clientInfo)['1']).toMatchObject({
-      gameID: 'gameID',
+      matchID: 'gameID',
       playerID: '1',
     });
   });
@@ -238,7 +238,7 @@ describe('connect / disconnect', () => {
 
     expect(toObj(clientInfo)['0']).toBeUndefined();
     expect(toObj(clientInfo)['1']).toMatchObject({
-      gameID: 'gameID',
+      matchID: 'gameID',
       playerID: '1',
     });
     expect(toObj(roomInfo.get('gameID'))).toEqual({ '1': '1' });
@@ -250,7 +250,7 @@ describe('connect / disconnect', () => {
 
     expect(toObj(clientInfo)['0']).toBeUndefined();
     expect(toObj(clientInfo)['1']).toMatchObject({
-      gameID: 'gameID',
+      matchID: 'gameID',
       playerID: '1',
     });
     expect(toObj(roomInfo.get('gameID'))).toEqual({ '1': '1' });

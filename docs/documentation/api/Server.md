@@ -25,9 +25,11 @@ A config object with the following options:
 3. `transport` (_object_): the transport implementation.
    If not provided, socket.io is used.
 
-4. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the Lobby’s `uuid` implementation will be used.
+4. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [shortid](https://www.npmjs.com/package/shortid).
 
-5. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
+5. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
+
+6. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
 #### Returns
 
@@ -42,6 +44,8 @@ An object that contains:
 3. `app` (_object_): The Koa app.
 
 4. `db` (_object_): The database implementation.
+
+5. router (_object_): The Koa Router for the server API.
 
 ### Usage
 
@@ -64,6 +68,27 @@ server.run(8000);
 ```js
 server.run(8000, () => console.log("server running..."));
 ```
+
+#### With custom Lobby settings
+
+You can pass `lobbyConfig` to configure the Lobby API during server startup:
+
+```js
+const lobbyConfig = {
+  apiPort: 8080,
+  apiCallback: () => console.log('Running Lobby API on port 8080...'),
+};
+
+server.run({ port: 8000, lobbyConfig });
+```
+
+Options are:
+
+- `apiPort`: If specified, it runs the Lobby API in a separate Koa server on
+this port. Otherwise, it shares the same Koa server running on the default
+boardgame.io `port`.
+- `apiCallback`: Called when the Koa server is ready. Only applicable if
+`apiPort` is specified.
 
 #### With HTTPS
 

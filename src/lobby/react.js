@@ -15,8 +15,8 @@ import { Local } from '../client/transport/local';
 import { SocketIO } from '../client/transport/socketio';
 import { LobbyConnection } from './connection';
 import LobbyLoginForm from './login-form';
-import LobbyRoomInstance from './room-instance';
-import LobbyCreateRoomForm from './create-room-form';
+import LobbyMatchInstance from './match-instance';
+import LobbyCreateMatchForm from './create-match-form';
 
 const LobbyPhases = {
   ENTER: 'enter',
@@ -39,7 +39,8 @@ const LobbyPhases = {
  * @param {bool}   debug - Enable debug information (default: false).
  *
  * Returns:
- *   A React component that provides a UI to create, list, join, leave, play or spectate game instances.
+ *   A React component that provides a UI to create, list, join, leave, play or
+ *   spectate matches (game instances).
  */
 class Lobby extends React.Component {
   static propTypes = {
@@ -60,7 +61,7 @@ class Lobby extends React.Component {
   state = {
     phase: LobbyPhases.ENTER,
     playerName: 'Visitor',
-    runningGame: null,
+    runningMatch: null,
     errorMsg: '',
     credentialStore: {},
   };
@@ -135,7 +136,7 @@ class Lobby extends React.Component {
     this.setState({ phase: LobbyPhases.ENTER, errorMsg: '' });
   };
 
-  _createRoom = async (gameName, numPlayers) => {
+  _createMatch = async (gameName, numPlayers) => {
     try {
       await this.connection.create(gameName, numPlayers);
       await this.connection.refresh();
@@ -146,9 +147,9 @@ class Lobby extends React.Component {
     }
   };
 
-  _joinRoom = async (gameName, gameID, playerID) => {
+  _joinMatch = async (gameName, matchID, playerID) => {
     try {
-      await this.connection.join(gameName, gameID, playerID);
+      await this.connection.join(gameName, matchID, playerID);
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
@@ -159,9 +160,9 @@ class Lobby extends React.Component {
     }
   };
 
-  _leaveRoom = async (gameName, gameID) => {
+  _leaveMatch = async (gameName, matchID) => {
     try {
-      await this.connection.leave(gameName, gameID);
+      await this.connection.leave(gameName, matchID);
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
@@ -172,7 +173,7 @@ class Lobby extends React.Component {
     }
   };
 
-  _startGame = (gameName, gameOpts) => {
+  _startMatch = (gameName, matchOpts) => {
     const gameCode = this.connection._getGameComponents(gameName);
     if (!gameCode) {
       this.setState({
@@ -182,7 +183,7 @@ class Lobby extends React.Component {
     }
 
     let multiplayer = undefined;
-    if (gameOpts.numPlayers > 1) {
+    if (matchOpts.numPlayers > 1) {
       if (this.props.gameServer) {
         multiplayer = SocketIO({ server: this.props.gameServer });
       } else {
@@ -190,7 +191,7 @@ class Lobby extends React.Component {
       }
     }
 
-    if (gameOpts.numPlayers == 1) {
+    if (matchOpts.numPlayers == 1) {
       const maxPlayers = gameCode.game.maxPlayers;
       let bots = {};
       for (let i = 1; i < maxPlayers; i++) {
@@ -206,35 +207,35 @@ class Lobby extends React.Component {
       multiplayer,
     });
 
-    const game = {
+    const match = {
       app: app,
-      gameID: gameOpts.gameID,
-      playerID: gameOpts.numPlayers > 1 ? gameOpts.playerID : '0',
+      matchID: matchOpts.matchID,
+      playerID: matchOpts.numPlayers > 1 ? matchOpts.playerID : '0',
       credentials: this.connection.playerCredentials,
     };
 
-    this.setState({ phase: LobbyPhases.PLAY, runningGame: game });
+    this.setState({ phase: LobbyPhases.PLAY, runningMatch: match });
   };
 
-  _exitRoom = () => {
-    this.setState({ phase: LobbyPhases.LIST, runningGame: null });
+  _exitMatch = () => {
+    this.setState({ phase: LobbyPhases.LIST, runningMatch: null });
   };
 
   _getPhaseVisibility = phase => {
     return this.state.phase !== phase ? 'hidden' : 'phase';
   };
 
-  renderRooms = (rooms, playerName) => {
-    return rooms.map(room => {
-      const { gameID, gameName, players } = room;
+  renderMatches = (matches, playerName) => {
+    return matches.map(match => {
+      const { matchID, gameName, players } = match;
       return (
-        <LobbyRoomInstance
-          key={'instance-' + gameID}
-          room={{ gameID, gameName, players: Object.values(players) }}
+        <LobbyMatchInstance
+          key={'instance-' + matchID}
+          match={{ matchID, gameName, players: Object.values(players) }}
           playerName={playerName}
-          onClickJoin={this._joinRoom}
-          onClickLeave={this._leaveRoom}
-          onClickPlay={this._startGame}
+          onClickJoin={this._joinMatch}
+          onClickLeave={this._leaveMatch}
+          onClickPlay={this._startMatch}
         />
       );
     });
@@ -242,24 +243,24 @@ class Lobby extends React.Component {
 
   render() {
     const { gameComponents, renderer } = this.props;
-    const { errorMsg, playerName, phase, runningGame } = this.state;
+    const { errorMsg, playerName, phase, runningMatch } = this.state;
 
     if (renderer) {
       return renderer({
         errorMsg,
         gameComponents,
-        rooms: this.connection.rooms,
+        matches: this.connection.matches,
         phase,
         playerName,
-        runningGame,
+        runningMatch,
         handleEnterLobby: this._enterLobby,
         handleExitLobby: this._exitLobby,
-        handleCreateRoom: this._createRoom,
-        handleJoinRoom: this._joinRoom,
-        handleLeaveRoom: this._leaveRoom,
-        handleExitRoom: this._exitRoom,
-        handleRefreshRooms: this._updateConnection,
-        handleStartGame: this._startGame,
+        handleCreateMatch: this._createMatch,
+        handleJoinMatch: this._joinMatch,
+        handleLeaveMatch: this._leaveMatch,
+        handleExitMatch: this._exitMatch,
+        handleRefreshMatches: this._updateConnection,
+        handleStartMatch: this._startMatch,
       });
     }
 
@@ -276,18 +277,18 @@ class Lobby extends React.Component {
         <div className={this._getPhaseVisibility(LobbyPhases.LIST)}>
           <p>Welcome, {playerName}</p>
 
-          <div className="phase-title" id="game-creation">
-            <span>Create a room:</span>
-            <LobbyCreateRoomForm
+          <div className="phase-title" id="match-creation">
+            <span>Create a match:</span>
+            <LobbyCreateMatchForm
               games={gameComponents}
-              createGame={this._createRoom}
+              createMatch={this._createMatch}
             />
           </div>
-          <p className="phase-title">Join a room:</p>
+          <p className="phase-title">Join a match:</p>
           <div id="instances">
             <table>
               <tbody>
-                {this.renderRooms(this.connection.rooms, playerName)}
+                {this.renderMatches(this.connection.matches, playerName)}
               </tbody>
             </table>
             <span className="error-msg">
@@ -296,20 +297,20 @@ class Lobby extends React.Component {
             </span>
           </div>
           <p className="phase-title">
-            Rooms that become empty are automatically deleted.
+            Matches that become empty are automatically deleted.
           </p>
         </div>
 
         <div className={this._getPhaseVisibility(LobbyPhases.PLAY)}>
-          {runningGame && (
-            <runningGame.app
-              gameID={runningGame.gameID}
-              playerID={runningGame.playerID}
-              credentials={runningGame.credentials}
+          {runningMatch && (
+            <runningMatch.app
+              matchID={runningMatch.matchID}
+              playerID={runningMatch.playerID}
+              credentials={runningMatch.credentials}
             />
           )}
-          <div className="buttons" id="game-exit">
-            <button onClick={this._exitRoom}>Exit game</button>
+          <div className="buttons" id="match-exit">
+            <button onClick={this._exitMatch}>Exit match</button>
           </div>
         </div>
 

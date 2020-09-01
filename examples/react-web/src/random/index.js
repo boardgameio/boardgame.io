@@ -19,7 +19,7 @@ const App = Client({
 
 const SingleView = () => (
   <div style={{ padding: 50 }}>
-    <App gameID="Random" />
+    <App matchID="Random" />
   </div>
 );
 

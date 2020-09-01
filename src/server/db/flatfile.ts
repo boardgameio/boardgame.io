@@ -16,7 +16,7 @@ export class FlatFile extends StorageAPI.Async {
   private games: {
     init: (opts: object) => Promise<void>;
     setItem: (id: string, value: any) => Promise<any>;
-    getItem: (id: string) => Promise<State | Server.GameMetadata | LogEntry[]>;
+    getItem: (id: string) => Promise<State | Server.MatchData | LogEntry[]>;
     removeItem: (id: string) => Promise<void>;
     clear: () => {};
     keys: () => Promise<string[]>;
@@ -78,39 +78,39 @@ export class FlatFile extends StorageAPI.Async {
   }
 
   async createGame(
-    gameID: string,
+    matchID: string,
     opts: StorageAPI.CreateGameOpts
   ): Promise<void> {
     // Store initial state separately for easy retrieval later.
-    const key = InitialStateKey(gameID);
+    const key = InitialStateKey(matchID);
 
     await this.setItem(key, opts.initialState);
-    await this.setState(gameID, opts.initialState);
-    await this.setMetadata(gameID, opts.metadata);
+    await this.setState(matchID, opts.initialState);
+    await this.setMetadata(matchID, opts.metadata);
   }
 
   async fetch<O extends StorageAPI.FetchOpts>(
-    gameID: string,
+    matchID: string,
     opts: O
   ): Promise<StorageAPI.FetchResult<O>> {
     let result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
-      result.state = (await this.getItem(gameID)) as State;
+      result.state = (await this.getItem(matchID)) as State;
     }
 
     if (opts.metadata) {
-      const key = MetadataKey(gameID);
-      result.metadata = (await this.getItem(key)) as Server.GameMetadata;
+      const key = MetadataKey(matchID);
+      result.metadata = (await this.getItem(key)) as Server.MatchData;
     }
 
     if (opts.log) {
-      const key = LogKey(gameID);
+      const key = LogKey(matchID);
       result.log = (await this.getItem(key)) as LogEntry[];
     }
 
     if (opts.initialState) {
-      const key = InitialStateKey(gameID);
+      const key = InitialStateKey(matchID);
       result.initialState = (await this.getItem(key)) as State;
     }
 
@@ -132,7 +132,7 @@ export class FlatFile extends StorageAPI.Async {
     return await this.setItem(id, state);
   }
 
-  async setMetadata(id: string, metadata: Server.GameMetadata): Promise<void> {
+  async setMetadata(id: string, metadata: Server.MatchData): Promise<void> {
     const key = MetadataKey(id);
 
     return await this.setItem(key, metadata);
@@ -157,14 +157,14 @@ export class FlatFile extends StorageAPI.Async {
   }
 }
 
-function InitialStateKey(gameID: string) {
-  return `${gameID}:initial`;
+function InitialStateKey(matchID: string) {
+  return `${matchID}:initial`;
 }
 
-function MetadataKey(gameID: string) {
-  return `${gameID}:metadata`;
+function MetadataKey(matchID: string) {
+  return `${matchID}:metadata`;
 }
 
-function LogKey(gameID: string) {
-  return `${gameID}:log`;
+function LogKey(matchID: string) {
+  return `${matchID}:log`;
 }

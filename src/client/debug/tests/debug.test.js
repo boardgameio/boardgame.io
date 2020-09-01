@@ -29,7 +29,7 @@ test('switching panels', async () => {
   // switch to info tab
   const InfoTab = getByText('Info');
   await fireEvent.click(InfoTab);
-  expect(getByText('gameID')).toBeInTheDocument();
+  expect(getByText('matchID')).toBeInTheDocument();
   expect(getByText('playerID')).toBeInTheDocument();
   expect(getByText('isActive')).toBeInTheDocument();
 

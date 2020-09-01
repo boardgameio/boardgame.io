@@ -52,7 +52,7 @@ interface LocalMasterOpts {
  */
 export class LocalMaster extends Master {
   connect: (
-    gameID: string,
+    matchID: string,
     playerID: PlayerID,
     callback: (...args: any[]) => void
   ) => void;
@@ -91,11 +91,11 @@ export class LocalMaster extends Master {
 
     super(game, new InMemory(), transportAPI, false);
 
-    this.connect = (gameID, playerID, callback) => {
+    this.connect = (matchID, playerID, callback) => {
       clientCallbacks[playerID] = callback;
     };
 
-    this.subscribe(({ state, gameID }) => {
+    this.subscribe(({ state, matchID }) => {
       if (!bots) {
         return;
       }
@@ -109,7 +109,7 @@ export class LocalMaster extends Master {
           await this.onUpdate(
             botAction.action,
             state._stateID,
-            gameID,
+            matchID,
             botAction.action.payload.playerID
           );
         }, 100);
@@ -133,7 +133,7 @@ export class LocalTransport extends Transport {
 
   /**
    * Creates a new Mutiplayer instance.
-   * @param {string} gameID - The game ID to connect to.
+   * @param {string} matchID - The game ID to connect to.
    * @param {string} playerID - The player ID associated with this client.
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
@@ -141,12 +141,12 @@ export class LocalTransport extends Transport {
   constructor({
     master,
     store,
-    gameID,
+    matchID,
     playerID,
     gameName,
     numPlayers,
   }: LocalTransportOpts) {
-    super({ store, gameName, playerID, gameID, numPlayers });
+    super({ store, gameName, playerID, matchID, numPlayers });
     this.master = master;
     this.isConnected = true;
   }
@@ -156,10 +156,10 @@ export class LocalTransport extends Transport {
    * master broadcasts the update to other clients (including
    * this one).
    */
-  async onUpdate(gameID: string, state: State, deltalog: LogEntry[]) {
+  async onUpdate(matchID: string, state: State, deltalog: LogEntry[]) {
     const currentState = this.store.getState();
 
-    if (gameID == this.gameID && state._stateID >= currentState._stateID) {
+    if (matchID == this.matchID && state._stateID >= currentState._stateID) {
       const action = ActionCreators.update(state, deltalog);
       this.store.dispatch(action);
     }
@@ -169,8 +169,8 @@ export class LocalTransport extends Transport {
    * Called when the client first connects to the master
    * and requests the current game state.
    */
-  onSync(gameID: string, syncInfo: SyncInfo) {
-    if (gameID == this.gameID) {
+  onSync(matchID: string, syncInfo: SyncInfo) {
+    if (matchID == this.matchID) {
       const action = ActionCreators.sync(syncInfo);
       this.store.dispatch(action);
     }
@@ -181,14 +181,14 @@ export class LocalTransport extends Transport {
    * game master is made.
    */
   onAction(state: State, action: CredentialedActionShape.Any) {
-    this.master.onUpdate(action, state._stateID, this.gameID, this.playerID);
+    this.master.onUpdate(action, state._stateID, this.matchID, this.playerID);
   }
 
   /**
    * Connect to the master.
    */
   connect() {
-    this.master.connect(this.gameID, this.playerID, (type, ...args) => {
+    this.master.connect(this.matchID, this.playerID, (type, ...args) => {
       if (type == 'sync') {
         this.onSync.apply(this, args);
       }
@@ -196,7 +196,7 @@ export class LocalTransport extends Transport {
         this.onUpdate.apply(this, args);
       }
     });
-    this.master.onSync(this.gameID, this.playerID, this.numPlayers);
+    this.master.onSync(this.matchID, this.playerID, this.numPlayers);
   }
 
   /**
@@ -209,14 +209,14 @@ export class LocalTransport extends Transport {
    */
   subscribe() {}
 
-  subscribeGameMetadata() {}
+  subscribeMatchData() {}
 
   /**
    * Updates the game id.
    * @param {string} id - The new game id.
    */
-  updateGameID(id: string) {
-    this.gameID = id;
+  updateMatchID(id: string) {
+    this.matchID = id;
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
     this.connect();
