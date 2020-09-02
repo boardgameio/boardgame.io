@@ -33,3 +33,5 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 - [Udaipur](https://github.com/skvrahul/UdaipurGame) - [play](https://udaipur-game.herokuapp.com/) - Clone of Jaipur, a 2 Player Card game, with online multiplayer support.
 
 - [Thinktank](https://github.com/averycrespi/thinktank) - [play](https://thinktank.crespi.dev) - A 2-player strategy game inspired by Conundrum.
+
+- [Splendor](http://bestboards.ir) - A minimal splendor game you can play with up to 4 players.
