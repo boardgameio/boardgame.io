@@ -423,7 +423,7 @@ describe('turn', () => {
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.turn).toBe(2);
 
-    state.G.endPhase = true;
+    state.G = { endPhase: true };
 
     state = flow.processMove(state, makeMove().payload);
 
@@ -696,7 +696,7 @@ describe('endIf', () => {
     state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.gameover).toBe(undefined);
 
-    state.G.win = 'A';
+    state.G = { win: 'A' };
 
     {
       const t = flow.processEvent(state, gameEvent('endTurn'));
