@@ -31,6 +31,7 @@ import {
   Reducer,
   State,
   Store,
+  Ctx,
 } from '../types';
 
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
@@ -86,8 +87,8 @@ export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
 // Creates a set of dispatchers to dispatch actions to plugins.
 export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
-export interface ClientOpts<G extends any = any> {
-  game: Game<G>;
+export interface ClientOpts<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
+  game: Game<G, CtxWithPlugins>;
   debug?: DebugOpt | boolean;
   numPlayers?: number;
   multiplayer?: (opts: TransportOpts) => Transport;

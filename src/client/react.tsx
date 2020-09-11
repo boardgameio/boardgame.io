@@ -9,7 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Client as RawClient, ClientOpts, _ClientImpl } from './client';
-import { State } from '../types';
+import { State, Ctx } from '../types';
 
 type WrappedBoardDelegates = 'matchID' | 'playerID' | 'credentials';
 
@@ -18,7 +18,10 @@ export type WrappedBoardProps = Pick<
   WrappedBoardDelegates | 'debug'
 >;
 
-export type BoardProps<G extends any = any> = State<G> &
+export type BoardProps<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> = State<G, CtxWithPlugins> &
   Pick<
     _ClientImpl<G>,
     | 'log'
@@ -30,9 +33,11 @@ export type BoardProps<G extends any = any> = State<G> &
     | 'playerID'
     | 'matchID'
     | 'matchData'
+    | 'credentials'
   > & {
     isActive: boolean;
     isMultiplayer: boolean;
+    isConnected: boolean;
   };
 
 type ReactClientOpts<
