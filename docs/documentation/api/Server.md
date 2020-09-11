@@ -45,7 +45,7 @@ An object that contains:
 
 4. `db` (_object_): The database implementation.
 
-5. router (_object_): The Koa Router for the server API.
+5. `router` (_object_): The Koa Router for the server API.
 
 ### Usage
 
