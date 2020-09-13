@@ -9,7 +9,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Client as RawClient, ClientOpts, _ClientImpl } from './client';
-import { State } from '../types';
 
 type WrappedBoardDelegates = 'matchID' | 'playerID' | 'credentials';
 
@@ -18,20 +17,23 @@ export type WrappedBoardProps = Pick<
   WrappedBoardDelegates | 'debug'
 >;
 
-export type BoardProps<G extends any = any> = State<G> &
-  Pick<
-    _ClientImpl<G>,
-    | 'log'
-    | 'moves'
-    | 'events'
-    | 'reset'
-    | 'undo'
-    | 'redo'
-    | 'playerID'
-    | 'matchID'
-    | 'matchData'
-  > & {
-    isActive: boolean;
+type ClientState<G extends any = any> = ReturnType<_ClientImpl<G>['getState']>;
+type ExposedClientProps<G extends any = any> = Pick<
+  _ClientImpl<G>,
+  | 'log'
+  | 'moves'
+  | 'events'
+  | 'reset'
+  | 'undo'
+  | 'redo'
+  | 'playerID'
+  | 'matchID'
+  | 'matchData'
+>;
+
+export type BoardProps<G extends any = any> = ClientState<G> &
+  Omit<WrappedBoardProps, keyof ExposedClientProps<G>> &
+  ExposedClientProps<G> & {
     isMultiplayer: boolean;
   };
 
