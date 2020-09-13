@@ -9,16 +9,22 @@ import { State, Server, LogEntry } from '../../types';
  * https://opensource.org/licenses/MIT.
  */
 
+interface InitOptions {
+  dir: string;
+  logging?: boolean;
+  ttl?: boolean;
+}
+
 /**
  * FlatFile data storage.
  */
 export class FlatFile extends StorageAPI.Async {
   private games: {
-    init: (opts: object) => Promise<void>;
+    init: (opts: InitOptions) => Promise<void>;
     setItem: (id: string, value: any) => Promise<any>;
     getItem: (id: string) => Promise<State | Server.MatchData | LogEntry[]>;
     removeItem: (id: string) => Promise<void>;
-    clear: () => {};
+    clear: () => void;
     keys: () => Promise<string[]>;
   };
   private dir: string;
@@ -26,15 +32,7 @@ export class FlatFile extends StorageAPI.Async {
   private ttl?: boolean;
   private fileQueues: { [key: string]: Promise<any> };
 
-  constructor({
-    dir,
-    logging,
-    ttl,
-  }: {
-    dir: string;
-    logging?: boolean;
-    ttl?: boolean;
-  }) {
+  constructor({ dir, logging, ttl }: InitOptions) {
     super();
     this.games = require('node-persist');
     this.dir = dir;
@@ -93,7 +91,7 @@ export class FlatFile extends StorageAPI.Async {
     matchID: string,
     opts: O
   ): Promise<StorageAPI.FetchResult<O>> {
-    let result = {} as StorageAPI.FetchFields;
+    const result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
       result.state = (await this.getItem(matchID)) as State;
@@ -139,7 +137,7 @@ export class FlatFile extends StorageAPI.Async {
   }
 
   async wipe(id: string) {
-    var keys = await this.games.keys();
+    const keys = await this.games.keys();
     if (!(keys.indexOf(id) > -1)) return;
 
     await this.removeItem(id);
@@ -148,12 +146,53 @@ export class FlatFile extends StorageAPI.Async {
     await this.removeItem(MetadataKey(id));
   }
 
-  async listGames(): Promise<string[]> {
+  async listGames(opts?: StorageAPI.ListGamesOpts): Promise<string[]> {
     const keys = await this.games.keys();
     const suffix = ':metadata';
-    return keys
-      .filter(k => k.endsWith(suffix))
-      .map(k => k.substring(0, k.length - suffix.length));
+
+    const metadata = await Promise.all(
+      keys.map(async k => {
+        if (k.endsWith(suffix)) {
+          const matchID = k.substring(0, k.length - suffix.length);
+
+          if (opts) {
+            const game = await this.fetch(matchID, {
+              state: true,
+              metadata: true,
+            });
+
+            if (opts.gameName && opts.gameName !== game.metadata.gameName) {
+              return false;
+            }
+
+            if (
+              typeof opts.where?.isGameover !== 'undefined' &&
+              opts.where.isGameover !== !!game.state.ctx.gameover
+            ) {
+              return false;
+            }
+
+            if (
+              typeof opts.where?.updatedAfter === 'number' &&
+              opts.where.updatedAfter > game.metadata.updatedAt
+            ) {
+              return false;
+            }
+
+            if (
+              typeof opts.where?.updatedBefore === 'number' &&
+              opts.where.updatedBefore < game.metadata.updatedAt
+            ) {
+              return false;
+            }
+          }
+
+          return matchID;
+        }
+      })
+    );
+
+    return metadata.filter((r): r is string => typeof r === 'string');
   }
 }
 
