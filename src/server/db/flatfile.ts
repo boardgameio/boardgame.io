@@ -150,49 +150,55 @@ export class FlatFile extends StorageAPI.Async {
     const keys = await this.games.keys();
     const suffix = ':metadata';
 
-    const metadata = await Promise.all(
+    const arr = await Promise.all(
       keys.map(async k => {
-        if (k.endsWith(suffix)) {
-          const matchID = k.substring(0, k.length - suffix.length);
+        if (!k.endsWith(suffix)) {
+          return false;
+        }
 
-          if (opts) {
-            const game = await this.fetch(matchID, {
-              state: true,
-              metadata: true,
-            });
+        const matchID = k.substring(0, k.length - suffix.length);
 
-            if (opts.gameName && opts.gameName !== game.metadata.gameName) {
-              return false;
-            }
+        if (!opts) {
+          return matchID;
+        }
 
-            if (
-              typeof opts.where?.isGameover !== 'undefined' &&
-              opts.where.isGameover !== !!game.state.ctx.gameover
-            ) {
-              return false;
-            }
+        const game = await this.fetch(matchID, {
+          state: true,
+          metadata: true,
+        });
 
-            if (
-              typeof opts.where?.updatedAfter === 'number' &&
-              opts.where.updatedAfter > game.metadata.updatedAt
-            ) {
-              return false;
-            }
+        if (opts.gameName && opts.gameName !== game.metadata.gameName) {
+          return false;
+        }
 
-            if (
-              typeof opts.where?.updatedBefore === 'number' &&
-              opts.where.updatedBefore < game.metadata.updatedAt
-            ) {
+        if (opts.where !== undefined) {
+          if (typeof opts.where.isGameover !== 'undefined') {
+            const isGameover = typeof game.metadata.gameover !== 'undefined';
+            if (isGameover !== opts.where.isGameover) {
               return false;
             }
           }
 
-          return matchID;
+          if (
+            typeof opts.where.updatedBefore !== 'undefined' &&
+            game.metadata.updatedAt >= opts.where.updatedBefore
+          ) {
+            return false;
+          }
+
+          if (
+            typeof opts.where.updatedAfter !== 'undefined' &&
+            game.metadata.updatedAt <= opts.where.updatedAfter
+          ) {
+            return false;
+          }
         }
+
+        return matchID;
       })
     );
 
-    return metadata.filter((r): r is string => typeof r === 'string');
+    return arr.filter((r): r is string => typeof r === 'string');
   }
 }
 
