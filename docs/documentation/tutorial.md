@@ -176,9 +176,11 @@ Let’s also add a script to `package.json` to make serving the web app simpler:
 {
   "scripts": {
     "start": "parcel index.html --open"
-  }
+  },
+  "browserslist": "> 0.4% and not ie 11",
 }
 ```
+?> The `browserslist` parameter addresses a compatibility issue with Chrome
 
 You can now serve the app from the command line by running:
 
