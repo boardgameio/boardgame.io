@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 type StorageMocks = Record<
-  'createGame' | 'setState' | 'fetch' | 'setMetadata' | 'listGames' | 'wipe',
+  'createMatch' | 'setState' | 'fetch' | 'setMetadata' | 'listMatches' | 'wipe',
   jest.Mock | ((...args: any[]) => any)
 >;
 
@@ -32,19 +32,19 @@ class AsyncStorage extends StorageAPI.Async {
   constructor(args: Partial<StorageMocks> = {}) {
     super();
     this.mocks = {
-      createGame: args.createGame || jest.fn(),
+      createMatch: args.createMatch || jest.fn(),
       setState: args.setState || jest.fn(),
       fetch: args.fetch || jest.fn(() => ({})),
       setMetadata: args.setMetadata || jest.fn(),
-      listGames: args.listGames || jest.fn(() => []),
+      listMatches: args.listMatches || jest.fn(() => []),
       wipe: args.wipe || jest.fn(),
     };
   }
 
   async connect() {}
 
-  async createGame(...args) {
-    this.mocks.createGame(...args);
+  async createMatch(...args) {
+    this.mocks.createMatch(...args);
   }
 
   async fetch(...args) {
@@ -63,8 +63,8 @@ class AsyncStorage extends StorageAPI.Async {
     this.mocks.wipe(...args);
   }
 
-  async listGames(...args) {
-    return this.mocks.listGames(...args);
+  async listMatches(...args) {
+    return this.mocks.listMatches(...args);
   }
 }
 
@@ -124,7 +124,7 @@ describe('.createRouter', () => {
       });
 
       test('creates game state and metadata', () => {
-        expect(db.mocks.createGame).toHaveBeenCalledWith(
+        expect(db.mocks.createMatch).toHaveBeenCalledWith(
           'matchID',
           expect.objectContaining({
             initialState: expect.objectContaining({
@@ -156,7 +156,7 @@ describe('.createRouter', () => {
         });
 
         test('uses default numPlayers', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
@@ -194,7 +194,7 @@ describe('.createRouter', () => {
         });
 
         test('includes setupData in metadata', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
@@ -210,7 +210,7 @@ describe('.createRouter', () => {
         });
 
         test('passes setupData to game setup function', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
@@ -234,7 +234,7 @@ describe('.createRouter', () => {
         });
 
         test('sets unlisted in metadata', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
@@ -1073,7 +1073,7 @@ describe('.createRouter', () => {
             },
           },
         });
-      expect(db.mocks.createGame).toHaveBeenCalledWith(
+      expect(db.mocks.createMatch).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
           initialState: expect.objectContaining({
@@ -1099,7 +1099,7 @@ describe('.createRouter', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
-      expect(db.mocks.createGame).toHaveBeenCalledWith(
+      expect(db.mocks.createMatch).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
           initialState: expect.objectContaining({
@@ -1229,7 +1229,7 @@ describe('.createRouter', () => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
         fetch: dbFetch,
-        listGames: dbListGames,
+        listMatches: dbListGames,
       });
     });
 
@@ -1383,7 +1383,7 @@ describe('.createRouter', () => {
             },
           };
         },
-        listGames: async () => {
+        listMatches: async () => {
           return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
       });

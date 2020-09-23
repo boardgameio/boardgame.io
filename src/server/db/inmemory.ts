@@ -30,23 +30,23 @@ export class InMemory extends StorageAPI.Sync {
   }
 
   /**
-   * Create a new game.
+   * Create a new match.
    */
-  createGame(matchID: string, opts: StorageAPI.CreateGameOpts) {
+  createMatch(matchID: string, opts: StorageAPI.CreateGameOpts) {
     this.initial.set(matchID, opts.initialState);
     this.setState(matchID, opts.initialState);
     this.setMetadata(matchID, opts.metadata);
   }
 
   /**
-   * Write the game metadata to the in-memory object.
+   * Write the match metadata to the in-memory object.
    */
   setMetadata(matchID: string, metadata: Server.MatchData) {
     this.metadata.set(matchID, metadata);
   }
 
   /**
-   * Write the game state to the in-memory object.
+   * Write the match state to the in-memory object.
    */
   setState(matchID: string, state: State, deltalog?: LogEntry[]): void {
     if (deltalog && deltalog.length > 0) {
@@ -85,7 +85,7 @@ export class InMemory extends StorageAPI.Sync {
   }
 
   /**
-   * Remove the game state from the in-memory object.
+   * Remove the match state from the in-memory object.
    */
   wipe(matchID: string) {
     this.state.delete(matchID);
@@ -95,7 +95,7 @@ export class InMemory extends StorageAPI.Sync {
   /**
    * Return all keys.
    */
-  listGames(opts?: StorageAPI.ListGamesOpts): string[] {
+  listMatches(opts?: StorageAPI.ListGamesOpts): string[] {
     return [...this.metadata.entries()]
       .filter(([key, metadata]) => {
         if (!opts) {

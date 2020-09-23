@@ -75,7 +75,7 @@ export class FlatFile extends StorageAPI.Async {
     return;
   }
 
-  async createGame(
+  async createMatch(
     matchID: string,
     opts: StorageAPI.CreateGameOpts
   ): Promise<void> {
@@ -146,7 +146,7 @@ export class FlatFile extends StorageAPI.Async {
     await this.removeItem(MetadataKey(id));
   }
 
-  async listGames(opts?: StorageAPI.ListGamesOpts): Promise<string[]> {
+  async listMatches(opts?: StorageAPI.ListGamesOpts): Promise<string[]> {
     const keys = await this.games.keys();
     const suffix = ':metadata';
 

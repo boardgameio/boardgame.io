@@ -74,7 +74,7 @@ export abstract class Async {
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
    */
-  abstract createGame(matchID: string, opts: CreateGameOpts): Promise<void>;
+  abstract createMatch(matchID: string, opts: CreateGameOpts): Promise<void>;
 
   /**
    * Update the game state.
@@ -110,9 +110,9 @@ export abstract class Async {
   abstract wipe(matchID: string): Promise<void>;
 
   /**
-   * Return all games.
+   * Return all matches.
    */
-  abstract listGames(opts?: ListGamesOpts): Promise<string[]>;
+  abstract listMatches(opts?: ListGamesOpts): Promise<string[]>;
 }
 
 export abstract class Sync {
@@ -128,23 +128,23 @@ export abstract class Sync {
   }
 
   /**
-   * Create a new game.
+   * Create a new match.
    *
    * This might just need to call setState and setMetadata in
    * most implementations.
    *
    * However, it exists as a separate call so that the
    * implementation can provision things differently when
-   * a game is created.  For example, it might stow away the
-   * initial game state in a separate field for easier retrieval.
+   * a match is created.  For example, it might stow away the
+   * initial match state in a separate field for easier retrieval.
    */
-  abstract createGame(matchID: string, opts: CreateGameOpts): void;
+  abstract createMatch(matchID: string, opts: CreateGameOpts): void;
 
   /**
-   * Update the game state.
+   * Update the match state.
    *
    * If passed a deltalog array, setState should append its contents to the
-   * existing log for this game.
+   * existing log for this match.
    */
   abstract setState(matchID: string, state: State, deltalog?: LogEntry[]): void;
 
@@ -154,17 +154,17 @@ export abstract class Sync {
   abstract setMetadata(matchID: string, metadata: Server.MatchData): void;
 
   /**
-   * Fetch the game state.
+   * Fetch the match state.
    */
   abstract fetch<O extends FetchOpts>(matchID: string, opts: O): FetchResult<O>;
 
   /**
-   * Remove the game state.
+   * Remove the match state.
    */
   abstract wipe(matchID: string): void;
 
   /**
-   * Return all games.
+   * Return all matches.
    */
-  abstract listGames(opts?: ListGamesOpts): string[];
+  abstract listMatches(opts?: ListGamesOpts): string[];
 }

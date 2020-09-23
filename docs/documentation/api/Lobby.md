@@ -72,7 +72,7 @@ Returns an array of names for the games this server is running.
 #### Using a LobbyClient instance
 
 ```js
-const games = await lobbyClient.listGames();
+const games = await lobbyClient.listMatches();
 ```
 
 ### Listing all matches for a given game
