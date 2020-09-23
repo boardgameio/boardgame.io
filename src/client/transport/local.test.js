@@ -70,7 +70,7 @@ describe('GetBotPlayer', () => {
     const result = GetBotPlayer(
       {
         ctx: {
-          stage: {
+          activePlayers: {
             '1': Stage.NULL,
           },
         },
@@ -123,7 +123,7 @@ describe('GetBotPlayer', () => {
 
 describe('LocalMaster', () => {
   const game = {};
-  const master = LocalMaster({ game });
+  const master = new LocalMaster({ game });
 
   const storeA = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
   const storeB = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
@@ -169,8 +169,8 @@ describe('LocalMaster', () => {
   });
 
   test('connect without callback', () => {
-    master.connect('gameID', '0', undefined);
-    master.onSync('gameID', '0');
+    master.connect('matchID', '0', undefined);
+    master.onSync('matchID', '0');
   });
 
   test('disconnect', () => {
@@ -180,7 +180,7 @@ describe('LocalMaster', () => {
 });
 
 describe('LocalTransport', () => {
-  describe('update gameID / playerID', () => {
+  describe('update matchID / playerID', () => {
     const master = { connect: jest.fn(), onSync: jest.fn() };
     const store = { dispatch: () => {} };
     const m = new LocalTransport({ master, store });
@@ -189,9 +189,9 @@ describe('LocalTransport', () => {
       jest.resetAllMocks();
     });
 
-    test('gameID', () => {
-      m.updateGameID('test');
-      expect(m.gameID).toBe('test');
+    test('matchID', () => {
+      m.updateMatchID('test');
+      expect(m.matchID).toBe('test');
       expect(master.connect).toBeCalled();
     });
 
@@ -221,7 +221,7 @@ describe('LocalTransport', () => {
     test('receive update', () => {
       const restored = { restore: true };
       expect(store.getState()).not.toMatchObject(restored);
-      m.onUpdate('unknown gameID', restored);
+      m.onUpdate('unknown matchID', restored);
       expect(store.getState()).not.toMatchObject(restored);
       m.onUpdate('default', restored);
       expect(store.getState()).not.toMatchObject(restored);
@@ -235,7 +235,7 @@ describe('LocalTransport', () => {
     test('receive sync', () => {
       const restored = { restore: true };
       expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('unknown gameID', { state: restored });
+      m.onSync('unknown matchID', { state: restored });
       expect(store.getState()).not.toMatchObject(restored);
       m.onSync('default', { state: restored });
       expect(store.getState()).toMatchObject(restored);

@@ -15,7 +15,7 @@ import * as StorageAPI from './base';
 export class InMemory extends StorageAPI.Sync {
   private state: Map<string, State>;
   private initial: Map<string, State>;
-  private metadata: Map<string, Server.GameMetadata>;
+  private metadata: Map<string, Server.MatchData>;
   private log: Map<string, LogEntry[]>;
 
   /**
@@ -32,53 +32,53 @@ export class InMemory extends StorageAPI.Sync {
   /**
    * Create a new game.
    */
-  createGame(gameID: string, opts: StorageAPI.CreateGameOpts) {
-    this.initial.set(gameID, opts.initialState);
-    this.setState(gameID, opts.initialState);
-    this.setMetadata(gameID, opts.metadata);
+  createGame(matchID: string, opts: StorageAPI.CreateGameOpts) {
+    this.initial.set(matchID, opts.initialState);
+    this.setState(matchID, opts.initialState);
+    this.setMetadata(matchID, opts.metadata);
   }
 
   /**
    * Write the game metadata to the in-memory object.
    */
-  setMetadata(gameID: string, metadata: Server.GameMetadata) {
-    this.metadata.set(gameID, metadata);
+  setMetadata(matchID: string, metadata: Server.MatchData) {
+    this.metadata.set(matchID, metadata);
   }
 
   /**
    * Write the game state to the in-memory object.
    */
-  setState(gameID: string, state: State, deltalog?: LogEntry[]): void {
+  setState(matchID: string, state: State, deltalog?: LogEntry[]): void {
     if (deltalog && deltalog.length > 0) {
-      const log = this.log.get(gameID) || [];
-      this.log.set(gameID, log.concat(deltalog));
+      const log = this.log.get(matchID) || [];
+      this.log.set(matchID, log.concat(deltalog));
     }
-    this.state.set(gameID, state);
+    this.state.set(matchID, state);
   }
 
   /**
-   * Fetches state for a particular gameID.
+   * Fetches state for a particular matchID.
    */
   fetch<O extends StorageAPI.FetchOpts>(
-    gameID: string,
+    matchID: string,
     opts: O
   ): StorageAPI.FetchResult<O> {
     let result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
-      result.state = this.state.get(gameID);
+      result.state = this.state.get(matchID);
     }
 
     if (opts.metadata) {
-      result.metadata = this.metadata.get(gameID);
+      result.metadata = this.metadata.get(matchID);
     }
 
     if (opts.log) {
-      result.log = this.log.get(gameID) || [];
+      result.log = this.log.get(matchID) || [];
     }
 
     if (opts.initialState) {
-      result.initialState = this.initial.get(gameID);
+      result.initialState = this.initial.get(matchID);
     }
 
     return result as StorageAPI.FetchResult<O>;
@@ -87,24 +87,53 @@ export class InMemory extends StorageAPI.Sync {
   /**
    * Remove the game state from the in-memory object.
    */
-  wipe(gameID: string) {
-    this.state.delete(gameID);
-    this.metadata.delete(gameID);
+  wipe(matchID: string) {
+    this.state.delete(matchID);
+    this.metadata.delete(matchID);
   }
 
   /**
    * Return all keys.
    */
   listGames(opts?: StorageAPI.ListGamesOpts): string[] {
-    if (opts && opts.gameName !== undefined) {
-      let gameIDs = [];
-      this.metadata.forEach((metadata, gameID) => {
-        if (metadata.gameName === opts.gameName) {
-          gameIDs.push(gameID);
+    return [...this.metadata.entries()]
+      .filter(([key, metadata]) => {
+        if (!opts) {
+          return true;
         }
-      });
-      return gameIDs;
-    }
-    return [...this.metadata.keys()];
+
+        if (
+          opts.gameName !== undefined &&
+          metadata.gameName !== opts.gameName
+        ) {
+          return false;
+        }
+
+        if (opts.where !== undefined) {
+          if (opts.where.isGameover !== undefined) {
+            const isGameover = metadata.gameover !== undefined;
+            if (isGameover !== opts.where.isGameover) {
+              return false;
+            }
+          }
+
+          if (
+            opts.where.updatedBefore !== undefined &&
+            metadata.updatedAt >= opts.where.updatedBefore
+          ) {
+            return false;
+          }
+
+          if (
+            opts.where.updatedAfter !== undefined &&
+            metadata.updatedAt <= opts.where.updatedAfter
+          ) {
+            return false;
+          }
+        }
+
+        return true;
+      })
+      .map(([key]) => key);
   }
 }

@@ -40,7 +40,7 @@ export function Client(opts) {
     static propTypes = {
       // The ID of a game to connect to.
       // Only relevant in multiplayer.
-      gameID: PropTypes.string,
+      matchID: PropTypes.string,
       // The ID of the player associated with this client.
       // Only relevant in multiplayer.
       playerID: PropTypes.string,
@@ -50,7 +50,7 @@ export function Client(opts) {
     };
 
     static defaultProps = {
-      gameID: 'default',
+      matchID: 'default',
       playerID: null,
       credentials: null,
     };
@@ -62,7 +62,7 @@ export function Client(opts) {
         game,
         numPlayers,
         multiplayer,
-        gameID: props.gameID,
+        matchID: props.matchID,
         playerID: props.playerID,
         credentials: props.credentials,
         debug: false,
@@ -81,8 +81,8 @@ export function Client(opts) {
     }
 
     componentDidUpdate(prevProps) {
-      if (prevProps.gameID != this.props.gameID) {
-        this.client.updateGameID(this.props.gameID);
+      if (prevProps.matchID != this.props.matchID) {
+        this.client.updateMatchID(this.props.matchID);
       }
       if (prevProps.playerID != this.props.playerID) {
         this.client.updatePlayerID(this.props.playerID);
@@ -96,13 +96,13 @@ export function Client(opts) {
       let _board = null;
 
       const state = this.client.getState();
-      const { gameID, playerID, ...rest } = this.props;
+      const { matchID, playerID, ...rest } = this.props;
 
       if (board) {
         _board = React.createElement(board, {
           ...state,
           ...rest,
-          gameID,
+          matchID,
           playerID,
           isMultiplayer: !!multiplayer,
           moves: this.client.moves,
@@ -111,7 +111,7 @@ export function Client(opts) {
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
-          gameMetadata: this.client.gameMetadata,
+          matchData: this.client.matchData,
         });
       }
 

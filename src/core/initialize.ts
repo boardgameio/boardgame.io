@@ -20,7 +20,7 @@ export function InitializeGame({
   setupData,
 }: {
   game: Game;
-  numPlayers: number;
+  numPlayers?: number;
   setupData?: any;
 }) {
   game = ProcessGameConfig(game);

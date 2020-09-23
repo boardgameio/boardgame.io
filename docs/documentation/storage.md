@@ -12,7 +12,7 @@ for a custom backend.
 First, install the necessary packages:
 
 ```
-npm install --save node-persist
+npm install node-persist
 ```
 
 Then modify your server spec to indicate that you want to connect to a flatfile database:
@@ -46,7 +46,7 @@ Instructions at https://github.com/c-w/bgio-azure-storage.
 
 #### Postgres
 
-Coming soon.
+Instructions at https://github.com/janKir/bgio-postgres.
 
 #### MongoDB
 
@@ -62,4 +62,4 @@ a basic caching model compatible with any boardgame.io database connector.
 
 ### Writing a Custom Adapter
 
-Create a class that implements the [StorageAPI.Async](https://github.com/nicolodavis/boardgame.io/blob/master/src/server/db/base.ts) interface.
+Create a class that implements the [StorageAPI.Async](https://github.com/boardgameio/boardgame.io/blob/master/src/server/db/base.ts) interface.

@@ -8,13 +8,18 @@
 
 import request from 'supertest';
 import Koa from 'koa';
+import * as dateMock from 'jest-date-mock';
 
-import { addApiToServer, createApiServer } from './api';
+import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
 import * as StorageAPI from './db/base';
 import { Game } from '../types';
 
 jest.setTimeout(2000000000);
+
+beforeEach(() => {
+  dateMock.clear();
+});
 
 type StorageMocks = Record<
   'createGame' | 'setState' | 'fetch' | 'setMetadata' | 'listGames' | 'wipe',
@@ -63,12 +68,27 @@ class AsyncStorage extends StorageAPI.Async {
   }
 }
 
-describe('.createApiServer', () => {
+describe('.createRouter', () => {
+  function addApiToServer({
+    app,
+    ...args
+  }: { app: Koa } & Parameters<typeof createRouter>[0]) {
+    const router = createRouter(args);
+    configureApp(app, router);
+  }
+
+  function createApiServer(args: Parameters<typeof createRouter>[0]) {
+    const app = new Koa();
+    addApiToServer({ app, ...args });
+    return app;
+  }
+
   describe('creating a game', () => {
     let response;
     let app: Koa;
     let db: AsyncStorage;
     let games: Game[];
+    const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
 
     beforeEach(async () => {
       db = new AsyncStorage();
@@ -87,11 +107,12 @@ describe('.createApiServer', () => {
 
     describe('for an unprotected lobby server', () => {
       beforeEach(async () => {
+        dateMock.advanceTo(updatedAt);
+
         delete process.env.API_SECRET;
 
-        const uuid = () => 'gameID';
-        const lobbyConfig = { uuid };
-        app = createApiServer({ db, games, lobbyConfig });
+        const uuid = () => 'matchID';
+        app = createApiServer({ db, games, uuid });
 
         response = await request(app.callback())
           .post('/games/foo/create')
@@ -104,7 +125,7 @@ describe('.createApiServer', () => {
 
       test('creates game state and metadata', () => {
         expect(db.mocks.createGame).toHaveBeenCalledWith(
-          'gameID',
+          'matchID',
           expect.objectContaining({
             initialState: expect.objectContaining({
               ctx: expect.objectContaining({
@@ -118,13 +139,15 @@ describe('.createApiServer', () => {
                 '1': expect.objectContaining({}),
               }),
               unlisted: false,
+              createdAt: updatedAt.getTime(),
+              updatedAt: updatedAt.getTime(),
             }),
           })
         );
       });
 
-      test('returns game id', () => {
-        expect(response.body.gameID).not.toBeNull();
+      test('returns match id', () => {
+        expect(response.body.matchID).not.toBeNull();
       });
 
       describe('without numPlayers', () => {
@@ -134,7 +157,7 @@ describe('.createApiServer', () => {
 
         test('uses default numPlayers', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
                 ctx: expect.objectContaining({
@@ -172,7 +195,7 @@ describe('.createApiServer', () => {
 
         test('includes setupData in metadata', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
                 setupData: expect.objectContaining({
@@ -188,7 +211,7 @@ describe('.createApiServer', () => {
 
         test('passes setupData to game setup function', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
                 G: expect.objectContaining({
@@ -212,7 +235,7 @@ describe('.createApiServer', () => {
 
         test('sets unlisted in metadata', () => {
           expect(db.mocks.createGame).toHaveBeenCalledWith(
-            'gameID',
+            'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
                 unlisted: true,
@@ -306,9 +329,7 @@ describe('.createApiServer', () => {
             const app = createApiServer({
               db,
               games,
-              lobbyConfig: {
-                uuid: () => 'gameID',
-              },
+              uuid: () => 'matchID',
               generateCredentials: () => credentials,
             });
             response = await request(app.callback())
@@ -597,7 +618,7 @@ describe('.createApiServer', () => {
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send('playerID=0&playerName=alice&newName=ali');
-          expect(response.text).toEqual('Game 1 not found');
+          expect(response.text).toEqual('Match 1 not found');
         });
       });
 
@@ -728,7 +749,7 @@ describe('.createApiServer', () => {
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send({ playerID: 0, data: { subdata: 'text' } });
-          expect(response.text).toEqual('Game 1 not found');
+          expect(response.text).toEqual('Match 1 not found');
         });
       });
 
@@ -1010,6 +1031,12 @@ describe('.createApiServer', () => {
         fetch: async () => {
           return {
             metadata: {
+              setupData: {
+                colors: {
+                  '0': 'green',
+                  '1': 'red',
+                },
+              },
               players: {
                 '0': {
                   name: 'alice',
@@ -1019,6 +1046,10 @@ describe('.createApiServer', () => {
                   name: 'bob',
                   credentials: 'SECRET2',
                 },
+                '2': {
+                  name: 'chris',
+                  credentials: 'SECRET3',
+                },
               },
             },
           };
@@ -1027,13 +1058,21 @@ describe('.createApiServer', () => {
     });
 
     test('creates new game data', async () => {
-      const lobbyConfig = {
-        uuid: () => 'newGameID',
-      };
-      const app = createApiServer({ db, games, lobbyConfig });
+      const uuid = () => 'newGameID';
+      const app = createApiServer({ db, games, uuid });
+
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
-        .send('playerID=0&credentials=SECRET1&numPlayers=4');
+        .send({
+          playerID: 0,
+          credentials: 'SECRET1',
+          numPlayers: 4,
+          setupData: {
+            colors: {
+              '3': 'blue',
+            },
+          },
+        });
       expect(db.mocks.createGame).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
@@ -1042,9 +1081,43 @@ describe('.createApiServer', () => {
               numPlayers: 4,
             }),
           }),
+          metadata: expect.objectContaining({
+            setupData: expect.objectContaining({
+              colors: expect.objectContaining({
+                '3': 'blue',
+              }),
+            }),
+          }),
         })
       );
-      expect(response.body.nextRoomID).toBe('newGameID');
+      expect(response.body.nextMatchID).toBe('newGameID');
+    });
+
+    test('when game configuration not supplied, uses previous game config', async () => {
+      const uuid = () => 'newGameID';
+      const app = createApiServer({ db, games, uuid });
+      response = await request(app.callback())
+        .post('/games/foo/1/playAgain')
+        .send('playerID=0&credentials=SECRET1');
+      expect(db.mocks.createGame).toHaveBeenCalledWith(
+        'newGameID',
+        expect.objectContaining({
+          initialState: expect.objectContaining({
+            ctx: expect.objectContaining({
+              numPlayers: 3,
+            }),
+          }),
+          metadata: expect.objectContaining({
+            setupData: expect.objectContaining({
+              colors: expect.objectContaining({
+                '0': 'green',
+                '1': 'red',
+              }),
+            }),
+          }),
+        })
+      );
+      expect(response.body.nextMatchID).toBe('newGameID');
     });
 
     test('fetches next id', async () => {
@@ -1062,7 +1135,7 @@ describe('.createApiServer', () => {
                   credentials: 'SECRET2',
                 },
               },
-              nextRoomID: '12345',
+              nextMatchID: '12345',
             },
           };
         },
@@ -1071,10 +1144,10 @@ describe('.createApiServer', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
-      expect(response.body.nextRoomID).toBe('12345');
+      expect(response.body.nextMatchID).toBe('12345');
     });
 
-    test('when the game does not exist throws a "not found" error', async () => {
+    test('when the match does not exist throws a "not found" error', async () => {
       db = new AsyncStorage({
         fetch: async () => ({ metadata: null }),
       });
@@ -1085,7 +1158,7 @@ describe('.createApiServer', () => {
       expect(response.status).toEqual(404);
     });
 
-    test('when the playerID is undefnied throws error 403', async () => {
+    test('when the playerID is undefined throws error 403', async () => {
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
@@ -1097,7 +1170,7 @@ describe('.createApiServer', () => {
       const app = createApiServer({ db, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
-        .send('playerID=2&credentials=SECRET1');
+        .send('playerID=3&credentials=SECRET1');
       expect(response.status).toEqual(404);
     });
 
@@ -1120,64 +1193,170 @@ describe('.createApiServer', () => {
 
   describe('requesting room list', () => {
     let db: AsyncStorage;
+    const dbFetch = jest.fn(async matchID => {
+      return {
+        metadata: {
+          players: {
+            '0': {
+              id: 0,
+              credentials: 'SECRET1',
+            },
+            '1': {
+              id: 1,
+              credentials: 'SECRET2',
+            },
+          },
+          unlisted: matchID === 'bar-4',
+          gameover: matchID === 'bar-3' ? { winner: 0 } : undefined,
+        },
+      };
+    });
+    const dbListGames = jest.fn(async opts => {
+      const metadata = {
+        'foo-0': { gameName: 'foo' },
+        'foo-1': { gameName: 'foo' },
+        'bar-2': { gameName: 'bar' },
+        'bar-3': { gameName: 'bar' },
+        'bar-4': { gameName: 'bar' },
+      };
+      const keys = Object.keys(metadata);
+      if (opts && opts.gameName) {
+        return keys.filter(key => metadata[key].gameName === opts.gameName);
+      }
+      return [...keys];
+    });
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
-        fetch: async gameID => {
-          return {
-            metadata: {
-              players: {
-                '0': {
-                  id: 0,
-                  credentials: 'SECRET1',
-                },
-                '1': {
-                  id: 1,
-                  credentials: 'SECRET2',
-                },
-              },
-              unlisted: gameID === 'bar-4',
-            },
-          };
-        },
-        listGames: async opts => {
-          const metadata = {
-            'foo-0': { gameName: 'foo' },
-            'foo-1': { gameName: 'foo' },
-            'bar-2': { gameName: 'bar' },
-            'bar-3': { gameName: 'bar' },
-            'bar-4': { gameName: 'bar' },
-          };
-          const keys = Object.keys(metadata);
-          if (opts && opts.gameName) {
-            return keys.filter(key => metadata[key].gameName === opts.gameName);
-          }
-          return [...keys];
-        },
+        fetch: dbFetch,
+        listGames: dbListGames,
       });
     });
-    describe('when given 2 rooms', () => {
+
+    describe('when given 2 matches', () => {
       let response;
-      let rooms;
+      let matches;
       beforeEach(async () => {
         let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         let app = createApiServer({ db, games });
         response = await request(app.callback()).get('/games/bar');
-        rooms = JSON.parse(response.text).rooms;
+        matches = JSON.parse(response.text).matches;
       });
 
-      test('returns rooms for the selected game', async () => {
-        expect(rooms).toHaveLength(2);
+      test('returns matches for the selected game', async () => {
+        expect(matches).toHaveLength(2);
       });
 
-      test('returns room ids', async () => {
-        expect(rooms[0].gameID).toEqual('bar-2');
-        expect(rooms[1].gameID).toEqual('bar-3');
+      test('returns match ids', async () => {
+        expect(matches[0].matchID).toEqual('bar-2');
+        expect(matches[1].matchID).toEqual('bar-3');
       });
 
       test('returns player names', async () => {
-        expect(rooms[0].players).toEqual([{ id: 0 }, { id: 1 }]);
-        expect(rooms[1].players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(matches[0].players).toEqual([{ id: 0 }, { id: 1 }]);
+        expect(matches[1].players).toEqual([{ id: 0 }, { id: 1 }]);
+      });
+
+      test('returns gameover data for ended match', async () => {
+        expect(matches[0].gameover).toBeUndefined();
+        expect(matches[1].gameover).toEqual({ winner: 0 });
+      });
+    });
+
+    describe('when given filter options', () => {
+      const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+      let app;
+
+      beforeEach(() => {
+        app = createApiServer({ db, games });
+        dbListGames.mockClear();
+      });
+
+      describe('isGameover query param', () => {
+        test('is undefined if not specified in request', async () => {
+          await request(app.callback()).get('/games/bar');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: undefined } })
+          );
+        });
+        test('is true', async () => {
+          await request(app.callback()).get('/games/bar?isGameover=true');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: true } })
+          );
+        });
+        test('is false', async () => {
+          await request(app.callback()).get('/games/bar?isGameover=false');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: false } })
+          );
+        });
+        test('invalid value is ignored', async () => {
+          await request(app.callback()).get('/games/bar?isGameover=5');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: undefined } })
+          );
+        });
+      });
+
+      describe('updatedBefore query param', () => {
+        test('is undefined if not specified in request', async () => {
+          await request(app.callback()).get('/games/bar');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedBefore: undefined }),
+            })
+          );
+        });
+        test('is specified', async () => {
+          const timestamp = new Date(2020, 3, 4, 5, 6, 7);
+          await request(app.callback()).get(
+            `/games/bar?updatedBefore=${timestamp.getTime()}`
+          );
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({
+                updatedBefore: timestamp.getTime(),
+              }),
+            })
+          );
+        });
+        test('invalid value is ignored', async () => {
+          await request(app.callback()).get('/games/bar?updatedBefore=-5');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { updatedBefore: undefined } })
+          );
+        });
+      });
+
+      describe('updatedAfter query param', () => {
+        test('is undefined if not specified in request', async () => {
+          await request(app.callback()).get('/games/bar');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedAfter: undefined }),
+            })
+          );
+        });
+        test('is specified', async () => {
+          const timestamp = new Date(2020, 3, 4, 5, 6, 7);
+          await request(app.callback()).get(
+            `/games/bar?updatedAfter=${timestamp.getTime()}`
+          );
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({
+                updatedAfter: timestamp.getTime(),
+              }),
+            })
+          );
+        });
+        test('invalid value is ignored', async () => {
+          await request(app.callback()).get('/games/bar?updatedAfter=-5');
+          expect(dbListGames).toBeCalledWith(
+            expect.objectContaining({ where: { updatedAfter: undefined } })
+          );
+        });
       });
     });
   });
@@ -1200,6 +1379,7 @@ describe('.createApiServer', () => {
                   credentials: 'SECRET2',
                 },
               },
+              gameover: { winner: 1 },
             },
           };
         },
@@ -1220,11 +1400,15 @@ describe('.createApiServer', () => {
       });
 
       test('returns game ids', async () => {
-        expect(room.roomID).toEqual('bar-0');
+        expect(room.matchID).toEqual('bar-0');
       });
 
       test('returns player names', async () => {
         expect(room.players).toEqual([{ id: 0 }, { id: 1 }]);
+      });
+
+      test('returns gameover data for ended game', async () => {
+        expect(room.gameover).toEqual({ winner: 1 });
       });
     });
 
@@ -1244,9 +1428,7 @@ describe('.createApiServer', () => {
       });
     });
   });
-});
 
-describe('.addApiToServer', () => {
   describe('when server app is provided', () => {
     let db: AsyncStorage;
     let server;
@@ -1272,7 +1454,7 @@ describe('.addApiToServer', () => {
 
     test('call .use method several times with uuid', async () => {
       const uuid = () => 'foo';
-      addApiToServer({ app: server, db, games, lobbyConfig: { uuid } });
+      addApiToServer({ app: server, db, games, uuid });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
   });

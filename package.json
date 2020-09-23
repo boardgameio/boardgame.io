@@ -1,8 +1,8 @@
 {
   "name": "boardgame.io",
-  "version": "0.39.11",
+  "version": "0.40.0",
   "description": "library for turn-based games",
-  "repository": "https://github.com/nicolodavis/boardgame.io",
+  "repository": "https://github.com/boardgameio/boardgame.io",
   "scripts": {
     "prestart": "run-p examples:install build",
     "start": "run-p dev:server dev:client",
@@ -10,7 +10,7 @@
     "dev": "run-p build:watch dev:server dev:client",
     "dev:client": "node scripts/dev-client.js",
     "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions \".ts,.js\" --ignore \"src/**/*.test.ts\" --presets @babel/preset-env examples/react-web/server.js",
-    "build": "cross-env BABEL_ENV=rollup rollup --config rollup.config.js",
+    "build": "cross-env BABEL_ENV=rollup rollup --config rollup.config.js  --silent",
     "build:watch": "cross-env BABEL_ENV=rollup rollup -w --config rollup.config.js",
     "benchmark": "babel-node --extensions .ts,.js --presets @babel/preset-env,@babel/preset-typescript benchmark/index.js",
     "docs": "docsify serve docs",
@@ -30,7 +30,7 @@
     "proxydirs": "node scripts/proxy-dirs.js",
     "prepack": "run-s build proxydirs",
     "postpack": "npm run clean",
-    "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,js,css,md}\"",
+    "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,tsx,js,jsx,css,md}\"",
     "changelog": "node ./scripts/changelog.js",
     "clean": "node ./scripts/clean.js"
   },
@@ -72,22 +72,27 @@
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.5.4",
-    "@babel/node": "^7.2.2",
-    "@babel/plugin-proposal-class-properties": "^7.5.0",
-    "@babel/plugin-transform-modules-commonjs": "^7.2.0",
-    "@babel/preset-env": "^7.8.7",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/preset-typescript": "^7.3.3",
+    "@babel/cli": "^7.10.3",
+    "@babel/core": "^7.10.3",
+    "@babel/node": "^7.10.3",
+    "@babel/plugin-proposal-class-properties": "^7.10.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
+    "@babel/plugin-transform-modules-commonjs": "^7.10.1",
+    "@babel/preset-env": "^7.10.3",
+    "@babel/preset-react": "^7.10.1",
+    "@babel/preset-typescript": "^7.10.1",
     "@testing-library/jest-dom": "^4.1.2",
     "@testing-library/svelte": "^1.9.0",
+    "@types/enzyme": "^3.10.5",
     "@types/jest": "^24.0.0",
-    "@types/koa": "^2.11.3",
     "@types/koa-router": "^7.4.0",
     "@types/koa__cors": "^3.0.1",
+    "@types/node": "^14.0.24",
+    "@types/react": "^16.9.36",
+    "@types/react-dom": "^16.9.8",
     "@types/shortid": "0.0.29",
     "@types/socket.io": "^2.1.4",
+    "@types/socket.io-client": "^1.4.33",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^8.0.0",
@@ -110,6 +115,7 @@
     "husky": "^1.3.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.0.0",
+    "jest-date-mock": "^1.0.8",
     "jest-transform-svelte": "^2.1.0",
     "lint-staged": "^8.1.0",
     "node-persist": "^3.0.4",
@@ -136,7 +142,6 @@
     "style-loader": "^0.18.2",
     "superagent": "^3.8.3",
     "supertest": "^3.1.0",
-    "svelte": "^3.12.1",
     "svelte-icons": "^1.1.0",
     "tempy": "^0.5.0",
     "ts-jest": "^24.0.2",
@@ -146,8 +151,9 @@
   },
   "dependencies": {
     "@koa/cors": "^2.2.1",
+    "@types/koa": "^2.11.3",
     "flatted": "^0.2.3",
-    "immer": "^1.8.0",
+    "immer": "^7.0.8",
     "koa": "^2.7.0",
     "koa-body": "^4.1.0",
     "koa-router": "^7.2.1",
@@ -158,6 +164,9 @@
     "redux": "^4.0.0",
     "shortid": "^2.2.14",
     "socket.io": "^2.1.1",
+    "socket.io-client": "^2.3.0",
+    "svelte": "^3.24.0",
+    "svelte-json-tree-auto": "^0.1.0",
     "ts-toolbelt": "^6.3.6",
     "uuid": "3.2.1"
   },
@@ -165,7 +174,8 @@
     "preset": "ts-jest/presets/js-with-babel",
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
-      "\\.(svg)$": "<rootDir>/.empty_module.js"
+      "\\.(svg)$": "<rootDir>/.empty_module.js",
+      "svelte-json-tree-auto": "<rootDir>/src/client/debug/tests/JSONTree.mock.svelte"
     },
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -174,7 +184,8 @@
       "src/types.ts"
     ],
     "setupFiles": [
-      "raf/polyfill"
+      "raf/polyfill",
+      "jest-date-mock"
     ],
     "setupFilesAfterEnv": [
       "@testing-library/jest-dom/extend-expect"

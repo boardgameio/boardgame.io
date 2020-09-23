@@ -9,36 +9,61 @@ import { State, Server, LogEntry } from '../../types';
  * https://opensource.org/licenses/MIT.
  */
 
+interface InitOptions {
+  dir: string;
+  logging?: boolean;
+  ttl?: boolean;
+}
+
 /**
  * FlatFile data storage.
  */
 export class FlatFile extends StorageAPI.Async {
   private games: {
-    init: (opts: object) => void;
-    setItem: (id: string, value: any) => void;
-    getItem: (id: string) => State | Server.GameMetadata | LogEntry[];
-    removeItem: (id: string) => void;
-    clear: () => {};
-    keys: () => string[];
+    init: (opts: InitOptions) => Promise<void>;
+    setItem: (id: string, value: any) => Promise<any>;
+    getItem: (id: string) => Promise<State | Server.MatchData | LogEntry[]>;
+    removeItem: (id: string) => Promise<void>;
+    clear: () => void;
+    keys: () => Promise<string[]>;
   };
   private dir: string;
   private logging?: boolean;
   private ttl?: boolean;
+  private fileQueues: { [key: string]: Promise<any> };
 
-  constructor({
-    dir,
-    logging,
-    ttl,
-  }: {
-    dir: string;
-    logging?: boolean;
-    ttl?: boolean;
-  }) {
+  constructor({ dir, logging, ttl }: InitOptions) {
     super();
     this.games = require('node-persist');
     this.dir = dir;
     this.logging = logging || false;
     this.ttl = ttl || false;
+    this.fileQueues = {};
+  }
+
+  private async chainRequest(
+    key: string,
+    request: () => Promise<any>
+  ): Promise<any> {
+    if (!(key in this.fileQueues)) this.fileQueues[key] = Promise.resolve();
+
+    this.fileQueues[key] = this.fileQueues[key].then(request, request);
+    return this.fileQueues[key];
+  }
+
+  private async getItem<T extends any = any>(key: string): Promise<T> {
+    return this.chainRequest(key, () => this.games.getItem(key));
+  }
+
+  private async setItem<T extends any = any>(
+    key: string,
+    value: T
+  ): Promise<any> {
+    return this.chainRequest(key, () => this.games.setItem(key, value));
+  }
+
+  private async removeItem(key: string): Promise<void> {
+    return this.chainRequest(key, () => this.games.removeItem(key));
   }
 
   async connect() {
@@ -51,40 +76,40 @@ export class FlatFile extends StorageAPI.Async {
   }
 
   async createGame(
-    gameID: string,
+    matchID: string,
     opts: StorageAPI.CreateGameOpts
   ): Promise<void> {
     // Store initial state separately for easy retrieval later.
-    const key = InitialStateKey(gameID);
-    await this.games.setItem(key, opts.initialState);
+    const key = InitialStateKey(matchID);
 
-    await this.setState(gameID, opts.initialState);
-    await this.setMetadata(gameID, opts.metadata);
+    await this.setItem(key, opts.initialState);
+    await this.setState(matchID, opts.initialState);
+    await this.setMetadata(matchID, opts.metadata);
   }
 
   async fetch<O extends StorageAPI.FetchOpts>(
-    gameID: string,
+    matchID: string,
     opts: O
   ): Promise<StorageAPI.FetchResult<O>> {
-    let result = {} as StorageAPI.FetchFields;
+    const result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
-      result.state = (await this.games.getItem(gameID)) as State;
+      result.state = (await this.getItem(matchID)) as State;
     }
 
     if (opts.metadata) {
-      const key = MetadataKey(gameID);
-      result.metadata = (await this.games.getItem(key)) as Server.GameMetadata;
+      const key = MetadataKey(matchID);
+      result.metadata = (await this.getItem(key)) as Server.MatchData;
     }
 
     if (opts.log) {
-      const key = LogKey(gameID);
-      result.log = (await this.games.getItem(key)) as LogEntry[];
+      const key = LogKey(matchID);
+      result.log = (await this.getItem(key)) as LogEntry[];
     }
 
     if (opts.initialState) {
-      const key = InitialStateKey(gameID);
-      result.initialState = (await this.games.getItem(key)) as State;
+      const key = InitialStateKey(matchID);
+      result.initialState = (await this.getItem(key)) as State;
     }
 
     return result as StorageAPI.FetchResult<O>;
@@ -97,43 +122,94 @@ export class FlatFile extends StorageAPI.Async {
   async setState(id: string, state: State, deltalog?: LogEntry[]) {
     if (deltalog && deltalog.length > 0) {
       const key = LogKey(id);
-      const log: LogEntry[] =
-        ((await this.games.getItem(key)) as LogEntry[]) || [];
-      await this.games.setItem(key, log.concat(deltalog));
+      const log: LogEntry[] = ((await this.getItem(key)) as LogEntry[]) || [];
+
+      await this.setItem(key, log.concat(deltalog));
     }
-    return await this.games.setItem(id, state);
+
+    return await this.setItem(id, state);
   }
 
-  async setMetadata(id: string, metadata: Server.GameMetadata): Promise<void> {
+  async setMetadata(id: string, metadata: Server.MatchData): Promise<void> {
     const key = MetadataKey(id);
-    return await this.games.setItem(key, metadata);
+
+    return await this.setItem(key, metadata);
   }
 
   async wipe(id: string) {
-    var keys = await this.games.keys();
+    const keys = await this.games.keys();
     if (!(keys.indexOf(id) > -1)) return;
-    await this.games.removeItem(id);
-    await this.games.removeItem(LogKey(id));
-    await this.games.removeItem(MetadataKey(id));
+
+    await this.removeItem(id);
+    await this.removeItem(InitialStateKey(id));
+    await this.removeItem(LogKey(id));
+    await this.removeItem(MetadataKey(id));
   }
 
-  async listGames(): Promise<string[]> {
+  async listGames(opts?: StorageAPI.ListGamesOpts): Promise<string[]> {
     const keys = await this.games.keys();
     const suffix = ':metadata';
-    return keys
-      .filter(k => k.endsWith(suffix))
-      .map(k => k.substring(0, k.length - suffix.length));
+
+    const arr = await Promise.all(
+      keys.map(async k => {
+        if (!k.endsWith(suffix)) {
+          return false;
+        }
+
+        const matchID = k.substring(0, k.length - suffix.length);
+
+        if (!opts) {
+          return matchID;
+        }
+
+        const game = await this.fetch(matchID, {
+          state: true,
+          metadata: true,
+        });
+
+        if (opts.gameName && opts.gameName !== game.metadata.gameName) {
+          return false;
+        }
+
+        if (opts.where !== undefined) {
+          if (typeof opts.where.isGameover !== 'undefined') {
+            const isGameover = typeof game.metadata.gameover !== 'undefined';
+            if (isGameover !== opts.where.isGameover) {
+              return false;
+            }
+          }
+
+          if (
+            typeof opts.where.updatedBefore !== 'undefined' &&
+            game.metadata.updatedAt >= opts.where.updatedBefore
+          ) {
+            return false;
+          }
+
+          if (
+            typeof opts.where.updatedAfter !== 'undefined' &&
+            game.metadata.updatedAt <= opts.where.updatedAfter
+          ) {
+            return false;
+          }
+        }
+
+        return matchID;
+      })
+    );
+
+    return arr.filter((r): r is string => typeof r === 'string');
   }
 }
 
-function InitialStateKey(gameID: string) {
-  return `${gameID}:initial`;
+function InitialStateKey(matchID: string) {
+  return `${matchID}:initial`;
 }
 
-function MetadataKey(gameID: string) {
-  return `${gameID}:metadata`;
+function MetadataKey(matchID: string) {
+  return `${matchID}:metadata`;
 }
 
-function LogKey(gameID: string) {
-  return `${gameID}:log`;
+function LogKey(matchID: string) {
+  return `${matchID}:log`;
 }

@@ -26,7 +26,7 @@ class AuthenticatedClient extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      gameID: 'gameID',
+      matchID: 'matchID',
       players: {
         '0': {
           credentials: 'credentials',
@@ -46,13 +46,13 @@ class AuthenticatedClient extends React.Component {
       .post(`http://${hostname}:${PORT}/games/${gameName}/create`)
       .send({ numPlayers: 2 });
 
-    const gameID = newGame.body.gameID;
+    const matchID = newGame.body.matchID;
 
     let playerCredentials = [];
 
     for (let playerID of [0, 1]) {
       const player = await request
-        .post(`http://${hostname}:${PORT}/games/${gameName}/${gameID}/join`)
+        .post(`http://${hostname}:${PORT}/games/${gameName}/${matchID}/join`)
         .send({
           gameName,
           playerID,
@@ -63,7 +63,7 @@ class AuthenticatedClient extends React.Component {
     }
 
     this.setState({
-      gameID,
+      matchID,
       players: {
         '0': {
           credentials: playerCredentials[0],
@@ -77,7 +77,7 @@ class AuthenticatedClient extends React.Component {
 
   onPlayerCredentialsChange(playerID, credentials) {
     this.setState({
-      gameID: this.state.gameID,
+      matchID: this.state.matchID,
       players: {
         ...this.state.players,
         [playerID]: {
@@ -90,7 +90,7 @@ class AuthenticatedClient extends React.Component {
   render() {
     return (
       <AuthenticatedExample
-        gameID={this.state.gameID}
+        matchID={this.state.matchID}
         players={this.state.players}
         onPlayerCredentialsChange={this.onPlayerCredentialsChange.bind(this)}
       />
@@ -100,7 +100,7 @@ class AuthenticatedClient extends React.Component {
 
 class AuthenticatedExample extends React.Component {
   static propTypes = {
-    gameID: PropTypes.string,
+    matchID: PropTypes.string,
     players: PropTypes.any,
     onPlayerCredentialsChange: PropTypes.func,
   };
@@ -118,7 +118,7 @@ class AuthenticatedExample extends React.Component {
         <div className="runner">
           <div className="run">
             <App
-              gameID={this.props.gameID}
+              matchID={this.props.matchID}
               playerID="0"
               credentials={this.props.players['0'].credentials}
             />
@@ -132,7 +132,7 @@ class AuthenticatedExample extends React.Component {
           </div>
           <div className="run">
             <App
-              gameID={this.props.gameID}
+              matchID={this.props.matchID}
               playerID="1"
               credentials={this.props.players['1'].credentials}
             />

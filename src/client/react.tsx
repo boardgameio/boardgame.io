@@ -8,7 +8,42 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Client as RawClient } from './client';
+import { Client as RawClient, ClientOpts, _ClientImpl } from './client';
+
+type WrappedBoardDelegates = 'matchID' | 'playerID' | 'credentials';
+
+export type WrappedBoardProps = Pick<
+  ClientOpts,
+  WrappedBoardDelegates | 'debug'
+>;
+
+type ClientState<G extends any = any> = ReturnType<_ClientImpl<G>['getState']>;
+type ExposedClientProps<G extends any = any> = Pick<
+  _ClientImpl<G>,
+  | 'log'
+  | 'moves'
+  | 'events'
+  | 'reset'
+  | 'undo'
+  | 'redo'
+  | 'playerID'
+  | 'matchID'
+  | 'matchData'
+>;
+
+export type BoardProps<G extends any = any> = ClientState<G> &
+  Omit<WrappedBoardProps, keyof ExposedClientProps<G>> &
+  ExposedClientProps<G> & {
+    isMultiplayer: boolean;
+  };
+
+type ReactClientOpts<
+  G extends any = any,
+  P extends BoardProps<G> = BoardProps<G>
+> = Omit<ClientOpts<G>, WrappedBoardDelegates> & {
+  board?: React.ComponentType<P>;
+  loading?: React.ComponentType;
+};
 
 /**
  * Client
@@ -29,7 +64,10 @@ import { Client as RawClient } from './client';
  *   and dispatch actions such as MAKE_MOVE, GAME_EVENT, RESET,
  *   UNDO and REDO.
  */
-export function Client(opts) {
+export function Client<
+  G extends any = any,
+  P extends BoardProps<G> = BoardProps<G>
+>(opts: ReactClientOpts<G, P>) {
   let { game, numPlayers, loading, board, multiplayer, enhancer, debug } = opts;
 
   // Component that is displayed before the client has synced
@@ -39,17 +77,24 @@ export function Client(opts) {
     loading = Loading;
   }
 
+  type AdditionalProps = Omit<P, keyof BoardProps<G>>;
+
   /*
    * WrappedBoard
    *
    * The main React component that wraps the passed in
    * board component and adds the API to its props.
    */
-  return class WrappedBoard extends React.Component {
+  return class WrappedBoard extends React.Component<
+    WrappedBoardProps & AdditionalProps
+  > {
+    client: _ClientImpl<G>;
+    unsubscribe?: () => void;
+
     static propTypes = {
       // The ID of a game to connect to.
       // Only relevant in multiplayer.
-      gameID: PropTypes.string,
+      matchID: PropTypes.string,
       // The ID of the player associated with this client.
       // Only relevant in multiplayer.
       playerID: PropTypes.string,
@@ -61,13 +106,13 @@ export function Client(opts) {
     };
 
     static defaultProps = {
-      gameID: 'default',
+      matchID: 'default',
       playerID: null,
       credentials: null,
       debug: true,
     };
 
-    constructor(props) {
+    constructor(props: WrappedBoardProps & AdditionalProps) {
       super(props);
 
       if (debug === undefined) {
@@ -79,7 +124,7 @@ export function Client(opts) {
         debug,
         numPlayers,
         multiplayer,
-        gameID: props.gameID,
+        matchID: props.matchID,
         playerID: props.playerID,
         credentials: props.credentials,
         enhancer,
@@ -96,9 +141,9 @@ export function Client(opts) {
       this.unsubscribe();
     }
 
-    componentDidUpdate(prevProps) {
-      if (this.props.gameID != prevProps.gameID) {
-        this.client.updateGameID(this.props.gameID);
+    componentDidUpdate(prevProps: WrappedBoardProps & AdditionalProps) {
+      if (this.props.matchID != prevProps.matchID) {
+        this.client.updateMatchID(this.props.matchID);
       }
       if (this.props.playerID != prevProps.playerID) {
         this.client.updatePlayerID(this.props.playerID);
@@ -120,17 +165,17 @@ export function Client(opts) {
       if (board) {
         _board = React.createElement(board, {
           ...state,
-          ...this.props,
+          ...(this.props as P),
           isMultiplayer: !!multiplayer,
           moves: this.client.moves,
           events: this.client.events,
-          gameID: this.client.gameID,
+          matchID: this.client.matchID,
           playerID: this.client.playerID,
           reset: this.client.reset,
           undo: this.client.undo,
           redo: this.client.redo,
           log: this.client.log,
-          gameMetadata: this.client.gameMetadata,
+          matchData: this.client.matchData,
         });
       }
 

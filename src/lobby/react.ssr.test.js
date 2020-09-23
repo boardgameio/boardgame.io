@@ -7,7 +7,9 @@ import Lobby from './react';
 import ReactDOMServer from 'react-dom/server';
 
 /* mock server requests */
-global.fetch = jest.fn().mockReturnValue({ status: 200, json: () => [] });
+global.fetch = jest
+  .fn()
+  .mockReturnValue({ ok: true, status: 200, json: () => [] });
 
 describe('lobby', () => {
   test('is rendered', () => {

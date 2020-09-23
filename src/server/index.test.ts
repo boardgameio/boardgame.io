@@ -7,7 +7,7 @@
  */
 
 import { Server, createServerRunConfig, KoaServer } from '.';
-import * as api from './api';
+import { SocketIO } from './transport/socketio';
 import { StorageAPI } from '../types';
 
 const game = { seed: 0 };
@@ -15,20 +15,6 @@ const game = { seed: 0 };
 jest.mock('../core/logger', () => ({
   info: () => {},
   error: () => {},
-}));
-
-const mockApiServerListen = jest.fn((port, listeningCallback?: () => void) => {
-  if (listeningCallback) listeningCallback();
-  return {
-    address: () => ({ port: 'mock-api-port' }),
-    close: () => {},
-  };
-});
-jest.mock('./api', () => ({
-  createApiServer: jest.fn(() => ({
-    listen: mockApiServerListen,
-  })),
-  addApiToServer: jest.fn(),
 }));
 
 jest.mock('koa-socket-2', () => {
@@ -49,6 +35,9 @@ jest.mock('koa-socket-2', () => {
     on(type, callback) {
       callback((this as any).socket);
     }
+    adapter(adapter) {
+      return this;
+    }
   };
 });
 
@@ -56,6 +45,7 @@ jest.mock('koa', () => {
   return class {
     constructor() {
       (this as any).context = {};
+      (this as any).use = () => this;
       (this as any).callback = () => {};
       (this as any).listen = (port, listeningCallback?: () => void) => {
         if (listeningCallback) listeningCallback();
@@ -78,7 +68,7 @@ describe('new', () => {
 
   test('custom transport implementation', () => {
     const game = {};
-    const transport = { init: jest.fn() };
+    const transport = ({ init: jest.fn() } as unknown) as SocketIO;
     Server({ games: [game], transport });
     expect(transport.init).toBeCalled();
   });
@@ -98,9 +88,6 @@ describe('run', () => {
   beforeEach(() => {
     server = null;
     runningServer = null;
-    (api.createApiServer as jest.Mock).mockClear();
-    (api.addApiToServer as jest.Mock).mockClear();
-    (mockApiServerListen as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -115,9 +102,8 @@ describe('run', () => {
     runningServer = await server.run(undefined);
 
     expect(server).not.toBeUndefined();
-    expect(api.addApiToServer).toBeCalled();
-    expect(api.createApiServer).not.toBeCalled();
-    expect(mockApiServerListen).not.toBeCalled();
+    expect(runningServer.appServer).not.toBeUndefined();
+    expect(runningServer.apiServer).toBeUndefined();
   });
 
   test('multiple servers running', async () => {
@@ -128,9 +114,8 @@ describe('run', () => {
     });
 
     expect(server).not.toBeUndefined();
-    expect(api.addApiToServer).not.toBeCalled();
-    expect(api.createApiServer).toBeCalled();
-    expect(mockApiServerListen).toBeCalled();
+    expect(runningServer.appServer).not.toBeUndefined();
+    expect(runningServer.apiServer).not.toBeUndefined();
   });
 });
 

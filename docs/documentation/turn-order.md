@@ -7,7 +7,7 @@ to the next player.
 
 Turn order state is maintained in the following fields:
 
-```
+```js
 ctx: {
   currentPlayer: '0',
   playOrder: ['0', '1', '2', ...],
@@ -56,37 +56,49 @@ on [Phases](phases.md) for more details.
 
 ### Presets
 
-##### DEFAULT
+#### DEFAULT
 
 This is the default round-robin. It is used if you don't
 specify any turn order.
 
-##### RESET
+#### RESET
 
 This is similar to `DEFAULT`, but instead of incrementing
 the previous position at the beginning of a phase, it
 will always start from `0`.
 
-##### CONTINUE
+#### CONTINUE
 
 This is also similar to `DEFAULT`, but instead of incrementing
 the previous position at the beginning of a phase, it will
 start with the player who ended the previous phase.
 
-##### ONCE
+#### ONCE
 
 This is another round-robin, but it goes around only once.
 After this, the phase ends automatically.
 
-##### CUSTOM
+#### CUSTOM
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the provided
 value.
 
-##### CUSTOM_FROM
+```js
+turn: {
+  order: TurnOrder.CUSTOM(['1', '3']),
+}
+```
+
+#### CUSTOM_FROM
 
 Round-robin like `DEFAULT`, but sets `playOrder` to the value
 in a specified field in `G`.
+
+```js
+turn: {
+  order: TurnOrder.CUSTOM_FROM('property_in_G'),
+}
+```
 
 ### Ad Hoc
 
@@ -102,8 +114,8 @@ works the same way.
 Player `3` is made the new player in both examples below:
 
 ```js
-onClickEndTurn() {
-  this.props.events.endTurn({ next: '3' });
+function Move(G, ctx) {
+  ctx.events.endTurn({ next: '3' });
 }
 ```
 

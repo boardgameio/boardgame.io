@@ -1,28 +1,38 @@
 # Undo / Redo
 
-The framework comes with built-in support to undo / redo
+boardgame.io comes with built-in support to undo / redo
 moves in the current turn. This is a common pattern in
 games that allow a player to make multiple moves per turn,
 and can be a useful feature to allow the player to experiment
 with different move combinations (and seeing what they do)
-before committing to one.
+before committing to one. You can disable this feature by 
+setting `disableUndo` to true in the game config. 
 
-#### Usage
+### Usage
 
-You can call the `undo` and `redo` functions from the client
-like this:
+You can call the `undo` and `redo` functions from the client.
 
+<!-- tabs:start -->
+#### **Plain JS**
+
+The methods are attached to a `Client` instance:
+
+```js
+client.undo();
+client.redo();
 ```
-onClickUndoButton() {
-  this.props.undo();
-}
 
-onClickRedoButton() {
-  this.props.redo();
-}
+#### **React**
+
+The methods are passed in your board component’s `props`:
+
+```js
+props.undo();
+props.redo();
 ```
+<!-- tabs:end -->
 
-##### Restricting Undoable Moves
+### Restricting Undoable Moves
 
 In case you just want specific moves to be undoable
 (to prevent peeking at cards or rerolling of dice, for example),

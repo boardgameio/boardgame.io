@@ -205,9 +205,23 @@ export function CreateGameReducer({
           return state;
         }
 
+        const prevTurnCount = state.ctx.turn;
+
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
+
+        // Update undo / redo state.
+        // Only update undo stack if the turn has not been ended
+        if (state.ctx.turn === prevTurnCount && !game.disableUndo) {
+          state._undo = state._undo.concat({
+            G: state.G,
+            ctx: state.ctx,
+            moveType: action.payload.type,
+          });
+        }
+        // Always reset redo stack when making a move
+        state._redo = [];
 
         return state;
       }
@@ -219,6 +233,11 @@ export function CreateGameReducer({
       }
 
       case Actions.UNDO: {
+        if (game.disableUndo) {
+          error("Undo is not enabled");
+          return state;
+        }
+
         const { _undo, _redo } = state;
 
         if (_undo.length < 2) {
@@ -230,9 +249,9 @@ export function CreateGameReducer({
 
         // Only allow undoable moves to be undone.
         const lastMove: Move = game.flow.getMove(
-          state.ctx,
+          restore.ctx,
           last.moveType,
-          state.ctx.currentPlayer
+          action.payload.playerID
         );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;
@@ -249,6 +268,11 @@ export function CreateGameReducer({
 
       case Actions.REDO: {
         const { _undo, _redo } = state;
+
+        if (game.disableUndo) {
+          error("Redo is not enabled");
+          return state;
+        }
 
         if (_redo.length == 0) {
           return state;
