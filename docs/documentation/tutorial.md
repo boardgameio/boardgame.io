@@ -170,7 +170,9 @@ class TicTacToeClient {
 const app = new TicTacToeClient();
 ```
 
-Let’s also add a script to `package.json` to make serving the web app simpler:
+Let’s also add a script to `package.json` to make serving the web app simpler
+and a [browserslist string](https://github.com/browserslist/browserslist) to
+indicate the browsers we want to support:
 
 ```json
 {
@@ -180,7 +182,10 @@ Let’s also add a script to `package.json` to make serving the web app simpler:
   "browserslist": "> 0.4% and not ie 11"
 }
 ```
-?> The `browserslist` parameter addresses a compatibility issue with Chrome
+?> By dropping support for older browsers, we don’t need to worry about
+   including polyfills like `regenerator-runtime`. If you need to support IE11
+   or some of the other browsers excluded here, you can skip adding
+   `browserslist`, but may need to include some polyfills manually.
 
 You can now serve the app from the command line by running:
 
