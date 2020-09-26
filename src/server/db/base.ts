@@ -34,7 +34,7 @@ export type FetchResult<O extends FetchOpts> = Object.Pick<
   Object.SelectKeys<O, true>
 >;
 
-export interface ListGamesOpts {
+export interface ListMatchesOpts {
   gameName?: string;
   where?: {
     isGameover?: boolean;
@@ -46,7 +46,7 @@ export interface ListGamesOpts {
 /**
  * Options passed when creating a new game.
  */
-export interface CreateGameOpts {
+export interface CreateMatchOpts {
   initialState: State;
   metadata: Server.MatchData;
 }
@@ -64,6 +64,32 @@ export abstract class Async {
   abstract connect();
 
   /**
+   * Create a new match.
+   *
+   * This might just need to call setState and setMetadata in
+   * most implementations.
+   *
+   * However, it exists as a separate call so that the
+   * implementation can provision things differently when
+   * a match is created.  For example, it might stow away the
+   * initial match state in a separate field for easier retrieval.
+   */
+  /* istanbul ignore next */
+  async createMatch(matchID: string, opts: CreateMatchOpts): Promise<void> {
+    if (this.createGame) {
+      console.warn(
+        'The database connector does not implement a createMatch method.',
+        '\nUsing the deprecated createGame method instead.'
+      );
+      return this.createGame(matchID, opts);
+    } else {
+      console.error(
+        'The database connector does not implement a createMatch method.'
+      );
+    }
+  }
+
+  /**
    * Create a new game.
    *
    * This might just need to call setState and setMetadata in
@@ -73,8 +99,10 @@ export abstract class Async {
    * implementation can provision things differently when
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
+   *
+   * @deprecated
    */
-  abstract createMatch(matchID: string, opts: CreateGameOpts): Promise<void>;
+  async createGame?(matchID: string, opts: CreateMatchOpts): Promise<void>;
 
   /**
    * Update the game state.
@@ -112,7 +140,27 @@ export abstract class Async {
   /**
    * Return all matches.
    */
-  abstract listMatches(opts?: ListGamesOpts): Promise<string[]>;
+  /* istanbul ignore next */
+  async listMatches(opts?: ListMatchesOpts): Promise<string[]> {
+    if (this.listGames) {
+      console.warn(
+        'The database connector does not implement a listMatches method.',
+        '\nUsing the deprecated listGames method instead.'
+      );
+      return this.listGames(opts);
+    } else {
+      console.error(
+        'The database connector does not implement a listMatches method.'
+      );
+    }
+  }
+
+  /**
+   * Return all games.
+   *
+   * @deprecated
+   */
+  async listGames?(opts?: ListMatchesOpts): Promise<string[]>;
 }
 
 export abstract class Sync {
@@ -138,7 +186,35 @@ export abstract class Sync {
    * a match is created.  For example, it might stow away the
    * initial match state in a separate field for easier retrieval.
    */
-  abstract createMatch(matchID: string, opts: CreateGameOpts): void;
+  /* istanbul ignore next */
+  createMatch(matchID: string, opts: CreateMatchOpts): void {
+    if (this.createGame) {
+      console.warn(
+        'The database connector does not implement a createMatch method.',
+        '\nUsing the deprecated createGame method instead.'
+      );
+      return this.createGame(matchID, opts);
+    } else {
+      console.error(
+        'The database connector does not implement a createMatch method.'
+      );
+    }
+  }
+
+  /**
+   * Create a new game.
+   *
+   * This might just need to call setState and setMetadata in
+   * most implementations.
+   *
+   * However, it exists as a separate call so that the
+   * implementation can provision things differently when
+   * a game is created.  For example, it might stow away the
+   * initial game state in a separate field for easier retrieval.
+   *
+   * @deprecated
+   */
+  createGame?(matchID: string, opts: CreateMatchOpts): void;
 
   /**
    * Update the match state.
@@ -166,5 +242,25 @@ export abstract class Sync {
   /**
    * Return all matches.
    */
-  abstract listMatches(opts?: ListGamesOpts): string[];
+  /* istanbul ignore next */
+  listMatches(opts?: ListMatchesOpts): string[] {
+    if (this.listGames) {
+      console.warn(
+        'The database connector does not implement a listMatches method.',
+        '\nUsing the deprecated listGames method instead.'
+      );
+      return this.listGames(opts);
+    } else {
+      console.error(
+        'The database connector does not implement a listMatches method.'
+      );
+    }
+  }
+
+  /**
+   * Return all games.
+   *
+   * @deprecated
+   */
+  listGames?(opts?: ListMatchesOpts): string[];
 }

@@ -107,7 +107,7 @@ describe('FlatFile', () => {
         } as Server.MatchData,
       });
 
-      await db.createMatch('gameID2', {
+      await db.createMatch('matchID2', {
         initialState: state as State,
         metadata: {
           gameName: 'game1',
@@ -116,7 +116,7 @@ describe('FlatFile', () => {
         } as Server.MatchData,
       });
 
-      await db.createMatch('gameID3', {
+      await db.createMatch('matchID3', {
         initialState: state as State,
         metadata: {
           gameName: 'game2',
@@ -128,28 +128,28 @@ describe('FlatFile', () => {
     test('filter by gameName', async () => {
       let keys = await db.listMatches();
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'gameID2', 'gameID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
       );
 
       keys = await db.listMatches({ gameName: 'game1' });
-      expect(keys).toEqual(expect.arrayContaining(['matchID', 'gameID2']));
+      expect(keys).toEqual(expect.arrayContaining(['matchID', 'matchID2']));
 
       keys = await db.listMatches({ gameName: 'game2' });
-      expect(keys).toEqual(['gameID3']);
+      expect(keys).toEqual(['matchID3']);
     });
 
     test('filter by isGameover', async () => {
       let keys = await db.listMatches({});
 
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'gameID2', 'gameID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
       );
 
       keys = await db.listMatches({ where: { isGameover: true } });
-      expect(keys).toEqual(['gameID2']);
+      expect(keys).toEqual(['matchID2']);
 
       keys = await db.listMatches({ where: { isGameover: false } });
-      expect(keys).toEqual(expect.arrayContaining(['matchID', 'gameID3']));
+      expect(keys).toEqual(expect.arrayContaining(['matchID', 'matchID3']));
     });
 
     test('filter by updatedBefore', async () => {
@@ -157,7 +157,7 @@ describe('FlatFile', () => {
 
       let keys = await db.listMatches({});
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'gameID2', 'gameID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
       );
 
       keys = await db.listMatches({
@@ -171,13 +171,13 @@ describe('FlatFile', () => {
 
       let keys = await db.listMatches({});
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'gameID2', 'gameID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
       );
 
       keys = await db.listMatches({
         where: { updatedAfter: timestamp.getTime() },
       });
-      expect(keys).toEqual(['gameID2']);
+      expect(keys).toEqual(['matchID2']);
     });
 
     test('filter combined', async () => {
@@ -202,7 +202,7 @@ describe('FlatFile', () => {
       keys = await db.listMatches({
         where: { isGameover: true, updatedAfter: timestamp.getTime() },
       });
-      expect(keys).toEqual(['gameID2']);
+      expect(keys).toEqual(['matchID2']);
 
       keys = await db.listMatches({
         where: { isGameover: false, updatedAfter: timestamp.getTime() },

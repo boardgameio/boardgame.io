@@ -23,10 +23,10 @@ describe('InMemory', () => {
     expect(state).toEqual(undefined);
   });
 
-  test('create game', () => {
+  test('createMatch', () => {
     let stateEntry: unknown = { a: 1 };
 
-    // Create game.
+    // Create match.
     db.createMatch('matchID', {
       metadata: {
         gameName: 'tic-tac-toe',
@@ -56,7 +56,7 @@ describe('InMemory', () => {
 
     test('filter by isGameover', () => {
       const stateEntry: unknown = { a: 1 };
-      db.createMatch('gameID2', {
+      db.createMatch('matchID2', {
         metadata: {
           gameName: 'tic-tac-toe',
           gameover: 'gameover',
@@ -66,16 +66,16 @@ describe('InMemory', () => {
       });
 
       let keys = db.listMatches({});
-      expect(keys).toEqual(['matchID', 'gameID2']);
+      expect(keys).toEqual(['matchID', 'matchID2']);
       keys = db.listMatches({ where: { isGameover: true } });
-      expect(keys).toEqual(['gameID2']);
+      expect(keys).toEqual(['matchID2']);
       keys = db.listMatches({ where: { isGameover: false } });
       expect(keys).toEqual(['matchID']);
     });
 
     test('filter by updatedBefore', () => {
       const stateEntry: unknown = { a: 1 };
-      db.createMatch('gameID3', {
+      db.createMatch('matchID3', {
         metadata: {
           gameName: 'tic-tac-toe',
           updatedAt: new Date(2020, 5).getTime(),
@@ -85,18 +85,18 @@ describe('InMemory', () => {
       const timestamp = new Date(2020, 4);
 
       let keys = db.listMatches({});
-      expect(keys).toEqual(['matchID', 'gameID2', 'gameID3']);
+      expect(keys).toEqual(['matchID', 'matchID2', 'matchID3']);
       keys = db.listMatches({ where: { updatedBefore: timestamp.getTime() } });
-      expect(keys).toEqual(['matchID', 'gameID2']);
+      expect(keys).toEqual(['matchID', 'matchID2']);
     });
 
     test('filter by updatedAfter', () => {
       const timestamp = new Date(2020, 4);
 
       let keys = db.listMatches({});
-      expect(keys).toEqual(['matchID', 'gameID2', 'gameID3']);
+      expect(keys).toEqual(['matchID', 'matchID2', 'matchID3']);
       keys = db.listMatches({ where: { updatedAfter: timestamp.getTime() } });
-      expect(keys).toEqual(['gameID3']);
+      expect(keys).toEqual(['matchID3']);
     });
 
     test('filter combined', () => {
@@ -110,7 +110,7 @@ describe('InMemory', () => {
       keys = db.listMatches({
         where: { isGameover: true, updatedBefore: timestamp.getTime() },
       });
-      expect(keys).toEqual(['gameID2']);
+      expect(keys).toEqual(['matchID2']);
       keys = db.listMatches({
         where: { isGameover: false, updatedBefore: timestamp.getTime() },
       });
@@ -122,14 +122,14 @@ describe('InMemory', () => {
       keys = db.listMatches({
         where: { isGameover: false, updatedAfter: timestamp.getTime() },
       });
-      expect(keys).toEqual(['gameID3']);
+      expect(keys).toEqual(['matchID3']);
       keys = db.listMatches({
         where: {
           updatedBefore: timestamp.getTime(),
           updatedAfter: timestamp2.getTime(),
         },
       });
-      expect(keys).toEqual(['gameID2']);
+      expect(keys).toEqual(['matchID2']);
     });
   });
 

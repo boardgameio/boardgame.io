@@ -31,8 +31,10 @@ export class InMemory extends StorageAPI.Sync {
 
   /**
    * Create a new match.
+   *
+   * @override
    */
-  createMatch(matchID: string, opts: StorageAPI.CreateGameOpts) {
+  createMatch(matchID: string, opts: StorageAPI.CreateMatchOpts) {
     this.initial.set(matchID, opts.initialState);
     this.setState(matchID, opts.initialState);
     this.setMetadata(matchID, opts.metadata);
@@ -94,8 +96,10 @@ export class InMemory extends StorageAPI.Sync {
 
   /**
    * Return all keys.
+   *
+   * @override
    */
-  listMatches(opts?: StorageAPI.ListGamesOpts): string[] {
+  listMatches(opts?: StorageAPI.ListMatchesOpts): string[] {
     return [...this.metadata.entries()]
       .filter(([key, metadata]) => {
         if (!opts) {

@@ -1211,7 +1211,7 @@ describe('.createRouter', () => {
         },
       };
     });
-    const dbListGames = jest.fn(async opts => {
+    const dblistMatches = jest.fn(async opts => {
       const metadata = {
         'foo-0': { gameName: 'foo' },
         'foo-1': { gameName: 'foo' },
@@ -1229,7 +1229,7 @@ describe('.createRouter', () => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
         fetch: dbFetch,
-        listMatches: dbListGames,
+        listMatches: dblistMatches,
       });
     });
 
@@ -1269,31 +1269,31 @@ describe('.createRouter', () => {
 
       beforeEach(() => {
         app = createApiServer({ db, games });
-        dbListGames.mockClear();
+        dblistMatches.mockClear();
       });
 
       describe('isGameover query param', () => {
         test('is undefined if not specified in request', async () => {
           await request(app.callback()).get('/games/bar');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
         test('is true', async () => {
           await request(app.callback()).get('/games/bar?isGameover=true');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: true } })
           );
         });
         test('is false', async () => {
           await request(app.callback()).get('/games/bar?isGameover=false');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: false } })
           );
         });
         test('invalid value is ignored', async () => {
           await request(app.callback()).get('/games/bar?isGameover=5');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
@@ -1302,7 +1302,7 @@ describe('.createRouter', () => {
       describe('updatedBefore query param', () => {
         test('is undefined if not specified in request', async () => {
           await request(app.callback()).get('/games/bar');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({ updatedBefore: undefined }),
             })
@@ -1313,7 +1313,7 @@ describe('.createRouter', () => {
           await request(app.callback()).get(
             `/games/bar?updatedBefore=${timestamp.getTime()}`
           );
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({
                 updatedBefore: timestamp.getTime(),
@@ -1323,7 +1323,7 @@ describe('.createRouter', () => {
         });
         test('invalid value is ignored', async () => {
           await request(app.callback()).get('/games/bar?updatedBefore=-5');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { updatedBefore: undefined } })
           );
         });
@@ -1332,7 +1332,7 @@ describe('.createRouter', () => {
       describe('updatedAfter query param', () => {
         test('is undefined if not specified in request', async () => {
           await request(app.callback()).get('/games/bar');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({ updatedAfter: undefined }),
             })
@@ -1343,7 +1343,7 @@ describe('.createRouter', () => {
           await request(app.callback()).get(
             `/games/bar?updatedAfter=${timestamp.getTime()}`
           );
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({
                 updatedAfter: timestamp.getTime(),
@@ -1353,7 +1353,7 @@ describe('.createRouter', () => {
         });
         test('invalid value is ignored', async () => {
           await request(app.callback()).get('/games/bar?updatedAfter=-5');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { updatedAfter: undefined } })
           );
         });
