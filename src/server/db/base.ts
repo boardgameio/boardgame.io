@@ -34,6 +34,9 @@ export type FetchResult<O extends FetchOpts> = Object.Pick<
   Object.SelectKeys<O, true>
 >;
 
+/**
+ * Options passed when listing matches.
+ */
 export interface ListMatchesOpts {
   gameName?: string;
   where?: {
@@ -44,9 +47,29 @@ export interface ListMatchesOpts {
 }
 
 /**
- * Options passed when creating a new game.
+ * @deprecated
+ */
+export interface ListGamesOpts {
+  gameName?: string;
+  where?: {
+    isGameover?: boolean;
+    updatedBefore?: number;
+    updatedAfter?: number;
+  };
+}
+
+/**
+ * Options passed when creating a new match.
  */
 export interface CreateMatchOpts {
+  initialState: State;
+  metadata: Server.MatchData;
+}
+
+/**
+ * @deprecated
+ */
+export interface CreateGameOpts {
   initialState: State;
   metadata: Server.MatchData;
 }
@@ -102,7 +125,7 @@ export abstract class Async {
    *
    * @deprecated
    */
-  async createGame?(matchID: string, opts: CreateMatchOpts): Promise<void>;
+  async createGame?(matchID: string, opts: CreateGameOpts): Promise<void>;
 
   /**
    * Update the game state.
@@ -160,7 +183,7 @@ export abstract class Async {
    *
    * @deprecated
    */
-  async listGames?(opts?: ListMatchesOpts): Promise<string[]>;
+  async listGames?(opts?: ListGamesOpts): Promise<string[]>;
 }
 
 export abstract class Sync {
@@ -214,7 +237,7 @@ export abstract class Sync {
    *
    * @deprecated
    */
-  createGame?(matchID: string, opts: CreateMatchOpts): void;
+  createGame?(matchID: string, opts: CreateGameOpts): void;
 
   /**
    * Update the match state.
@@ -262,5 +285,5 @@ export abstract class Sync {
    *
    * @deprecated
    */
-  listGames?(opts?: ListMatchesOpts): string[];
+  listGames?(opts?: ListGamesOpts): string[];
 }
