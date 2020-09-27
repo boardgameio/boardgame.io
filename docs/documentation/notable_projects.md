@@ -22,7 +22,7 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [Hex game](https://github.com/Korla/hexgame) - [play](https://korla.github.io/hexgame/build/) - Simple hexagonal board game.
 
-- [Pong240's Boardgame](https://github.com/Pong420/Boardgame) - [play](http://play-boardgame.herokuapp.com) - A project for building board games with React and boardgame.io.
+- [Pong420's Boardgame](https://github.com/Pong420/Boardgame) - [play](http://play-boardgame.herokuapp.com) - A project for building board games with React and boardgame.io.
 
 - [Territories](https://github.com/lehaSVV2009/territories) - [play](https://lehasvv2009.github.io/territories/) - Simple board game Territories.
 

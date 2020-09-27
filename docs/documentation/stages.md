@@ -93,10 +93,10 @@ setActivePlayers({
   currentPlayer: 'stage-name',
 
   // Move every other player to a stage.
-  others: 'stage-name'
+  others: 'stage-name',
 
   // Move all players to a stage.
-  all: 'stage-name'
+  all: 'stage-name',
 
   // Enumerate the set of players and the stages that they
   // are in.
