@@ -438,7 +438,7 @@ export function Flow({
 
   function EndPhase(state: State, { arg, next, turn, automatic }: any): State {
     // End the turn first.
-    state = EndTurn(state, { turn, force: true });
+    state = EndTurn(state, { turn, force: true, automatic: true });
 
     let G = state.G;
     let ctx = state.ctx;

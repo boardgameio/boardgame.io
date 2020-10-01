@@ -7,7 +7,7 @@
  */
 
 import IO from 'koa-socket-2';
-import { ServerOptions as SocketOptions } from 'socket.io';
+import { Socket, ServerOptions as SocketOptions } from 'socket.io';
 import { ServerOptions as HttpsOptions } from 'https';
 import {
   Master,
@@ -25,9 +25,9 @@ const PING_INTERVAL = 10 * 1e3;
  */
 export function TransportAPI(
   matchID: string,
-  socket,
-  clientInfo: Map<any, any>,
-  roomInfo: Map<any, any>
+  socket: Socket,
+  clientInfo: SocketIO['clientInfo'],
+  roomInfo: SocketIO['roomInfo']
 ): MasterTransport {
   /**
    * Send a message to a specific client.
@@ -36,8 +36,8 @@ export function TransportAPI(
     const clients = roomInfo.get(matchID).values();
     for (const client of clients) {
       const info = clientInfo.get(client);
-      if (info.playerID == playerID) {
-        if (socket.id == client) {
+      if (info.playerID === playerID) {
+        if (socket.id === client) {
           socket.emit.apply(socket, [type, ...args]);
         } else {
           socket.to(info.socket.id).emit.apply(socket, [type, ...args]);
@@ -67,12 +67,18 @@ export interface SocketOpts {
   socketAdapter?: any;
 }
 
+interface Client {
+  matchID: string;
+  playerID: string;
+  socket: Socket;
+}
+
 /**
  * Transport interface that uses socket.io
  */
 export class SocketIO {
-  protected clientInfo: Map<any, any>;
-  protected roomInfo: Map<any, any>;
+  protected clientInfo: Map<string, Client>;
+  protected roomInfo: Map<string, Set<string>>;
   private auth: boolean | AuthFn;
   private https: HttpsOptions;
   private socketAdapter: any;
@@ -111,8 +117,9 @@ export class SocketIO {
     for (const game of games) {
       const nsp = app._io.of(game.name);
 
-      nsp.on('connection', socket => {
-        socket.on('update', async (action, stateID, matchID, playerID) => {
+      nsp.on('connection', (socket: Socket) => {
+        socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
+          const [action, stateID, matchID, playerID] = args;
           const master = new Master(
             game,
             app.context.db,
@@ -122,7 +129,8 @@ export class SocketIO {
           await master.onUpdate(action, stateID, matchID, playerID);
         });
 
-        socket.on('sync', async (matchID, playerID, numPlayers) => {
+        socket.on('sync', async (...args: Parameters<Master['onSync']>) => {
+          const [matchID, playerID, numPlayers] = args;
           socket.join(matchID);
 
           // Remove client from any previous game that it was a part of.
@@ -133,7 +141,7 @@ export class SocketIO {
 
           let roomClients = this.roomInfo.get(matchID);
           if (roomClients === undefined) {
-            roomClients = new Set();
+            roomClients = new Set<string>();
             this.roomInfo.set(matchID, roomClients);
           }
           roomClients.add(socket.id);

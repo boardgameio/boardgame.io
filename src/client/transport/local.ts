@@ -236,10 +236,7 @@ export class LocalTransport extends Transport {
 
 const localMasters = new Map();
 export function Local(opts?: Pick<LocalMasterOpts, 'bots'>) {
-  return (
-    transportOpts: Pick<LocalMasterOpts, 'game'> &
-      LocalTransportOpts & { gameKey: Game }
-  ) => {
+  return (transportOpts: TransportOpts) => {
     let master: LocalMaster;
 
     if (localMasters.has(transportOpts.gameKey) && !opts) {
