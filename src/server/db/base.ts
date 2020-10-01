@@ -47,7 +47,7 @@ export interface ListMatchesOpts {
 }
 
 /**
- * @deprecated
+ * @deprecated Use ListMatchesOpts instead
  */
 export interface ListGamesOpts {
   gameName?: string;
@@ -67,7 +67,7 @@ export interface CreateMatchOpts {
 }
 
 /**
- * @deprecated
+ * @deprecated Use CreateMatchOpts instead
  */
 export interface CreateGameOpts {
   initialState: State;
@@ -123,7 +123,7 @@ export abstract class Async {
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
    *
-   * @deprecated
+   * @deprecated Use createMatch instead, if implemented
    */
   async createGame?(matchID: string, opts: CreateGameOpts): Promise<void>;
 
@@ -181,7 +181,7 @@ export abstract class Async {
   /**
    * Return all games.
    *
-   * @deprecated
+   * @deprecated Use listMatches instead, if implemented
    */
   async listGames?(opts?: ListGamesOpts): Promise<string[]>;
 }
@@ -235,7 +235,7 @@ export abstract class Sync {
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
    *
-   * @deprecated
+   * @deprecated Use createMatch instead, if implemented
    */
   createGame?(matchID: string, opts: CreateGameOpts): void;
 
@@ -283,7 +283,7 @@ export abstract class Sync {
   /**
    * Return all games.
    *
-   * @deprecated
+   * @deprecated Use listMatches instead, if implemented
    */
   listGames?(opts?: ListGamesOpts): string[];
 }
