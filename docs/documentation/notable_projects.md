@@ -2,7 +2,7 @@
 
 List of notable projects using boardgame.io. This list is not exhaustive. Feel free to send a PR to add your project to this list, but please have a demo that's accessible via a URL.
 
-- [Camelot](https://www.playcamelot.com/) - Play the Camelot board game online.
+- [Camelot](https://github.com/blunket/camelot) - [play](https://www.playcamelot.com/) - Play the Camelot board game online.
 
 - [Matchimals.fun](https://github.com/chrisheninger/matchimals.fun) - [play](https://www.matchimals.fun/) - An animal matching puzzle card game.
 
