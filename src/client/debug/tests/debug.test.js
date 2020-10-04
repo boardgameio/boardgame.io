@@ -7,34 +7,33 @@
  */
 
 import '@testing-library/jest-dom/extend-expect';
-import { render, fireEvent } from '@testing-library/svelte';
+import { screen, fireEvent } from '@testing-library/svelte';
 import { Client } from '../../client';
-import Debug from '../Debug.svelte';
 
 test('sanity', () => {
-  const game = {};
-  const client = Client({ game });
-  const { getByText } = render(Debug, { props: { client } });
-  expect(getByText('Controls')).toBeInTheDocument();
-  expect(getByText('Players')).toBeInTheDocument();
-  expect(getByText('G')).toBeInTheDocument();
-  expect(getByText('ctx')).toBeInTheDocument();
+  const client = Client({ game: {} });
+  client.start();
+  expect(screen.getByText('Controls')).toBeInTheDocument();
+  expect(screen.getByText('Players')).toBeInTheDocument();
+  expect(screen.getByText('G')).toBeInTheDocument();
+  expect(screen.getByText('ctx')).toBeInTheDocument();
+  client.stop();
 });
 
 test('switching panels', async () => {
-  const game = {};
-  const client = Client({ game });
-  const { getByText } = render(Debug, { props: { client } });
+  const client = Client({ game: {} });
+  client.start();
 
   // switch to info tab
-  const InfoTab = getByText('Info');
+  const InfoTab = screen.getByText('Info');
   await fireEvent.click(InfoTab);
-  expect(getByText('matchID')).toBeInTheDocument();
-  expect(getByText('playerID')).toBeInTheDocument();
-  expect(getByText('isActive')).toBeInTheDocument();
+  expect(screen.getByText('matchID')).toBeInTheDocument();
+  expect(screen.getByText('playerID')).toBeInTheDocument();
+  expect(screen.getByText('isActive')).toBeInTheDocument();
 
   // switch to AI tab
-  const AITab = getByText('AI');
+  const AITab = screen.getByText('AI');
   await fireEvent.click(AITab);
-  expect(getByText('No bots available.')).toBeInTheDocument();
+  expect(screen.getByText('No bots available.')).toBeInTheDocument();
+  client.stop();
 });
