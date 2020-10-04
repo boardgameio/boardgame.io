@@ -1,5 +1,6 @@
 <script>
   export let client;
+  export let clientManager;
 
   import { MAKE_MOVE } from '../../../core/action-types';
   import Hotkey from '../main/Hotkey.svelte';
