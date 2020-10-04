@@ -74,11 +74,6 @@ export class ClientManager {
    * Switch to a client with a matching playerID.
    */
   switchPlayerID(playerID: string): void {
-    // Bail if the client is already set to use the requested playerID.
-    if (this.currentClient && this.currentClient.playerID === playerID) {
-      return;
-    }
-
     // For multiplayer clients, try switching control to a different client
     // that is using the same transport layer.
     if (this.currentClient.multiplayer) {
@@ -175,10 +170,8 @@ export class ClientManager {
    * Unmount the debug panel.
    */
   private unmountDebug(): void {
-    if (this.debugPanel !== null) {
-      this.debugPanel.$destroy();
-      this.debugPanel = null;
-    }
+    this.debugPanel.$destroy();
+    this.debugPanel = null;
     this.currentClient = null;
   }
 }
