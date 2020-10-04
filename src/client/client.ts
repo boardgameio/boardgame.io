@@ -21,6 +21,7 @@ import Debug from './debug/Debug.svelte';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Transport, TransportOpts } from './transport/transport';
+import { ClientManager } from './manager';
 import {
   ActivePlayersArg,
   ActionShape,
@@ -41,6 +42,11 @@ interface DebugOpt {
   target?: HTMLElement;
   impl?: typeof Debug;
 }
+
+/**
+ * Global client manager instance that all clients register with.
+ */
+const GlobalClientManager = new ClientManager();
 
 /**
  * createDispatchers
@@ -105,17 +111,17 @@ export interface ClientOpts<
  * Implementation of Client (see below).
  */
 export class _ClientImpl<G extends any = any> {
-  private debug?: DebugOpt | boolean;
-  private _debugPanel?: Debug | null;
   private gameStateOverride?: any;
   private initialState: State<G>;
-  private multiplayer: (opts: TransportOpts) => Transport;
+  readonly multiplayer: (opts: TransportOpts) => Transport;
   private reducer: Reducer;
   private _running: boolean;
   private subscribers: Record<string, (state: State<G> | null) => void>;
   private transport: Transport;
-  game: ReturnType<typeof ProcessGameConfig>;
-  store: Store;
+  private manager: ClientManager;
+  readonly debugOpt?: DebugOpt | boolean;
+  readonly game: ReturnType<typeof ProcessGameConfig>;
+  readonly store: Store;
   log: State['deltalog'];
   matchID: string;
   playerID: PlayerID | null;
@@ -151,7 +157,8 @@ export class _ClientImpl<G extends any = any> {
     this.matchID = matchID;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
-    this.debug = debug;
+    this.debugOpt = debug;
+    this.manager = GlobalClientManager;
     this.gameStateOverride = null;
     this.subscribers = {};
     this._running = false;
@@ -176,7 +183,6 @@ export class _ClientImpl<G extends any = any> {
       this.store.dispatch(ActionCreators.redo(this.playerID, this.credentials));
     };
 
-    this.store = null;
     this.log = [];
 
     /**
@@ -311,8 +317,6 @@ export class _ClientImpl<G extends any = any> {
     this.transport.subscribeMatchData(metadata => {
       this.matchData = metadata;
     });
-
-    this._debugPanel = null;
   }
 
   private notifySubscribers() {
@@ -327,51 +331,13 @@ export class _ClientImpl<G extends any = any> {
   start() {
     this.transport.connect();
     this._running = true;
-
-    let debugImpl: DebugOpt['impl'] | null = null;
-
-    if (process.env.NODE_ENV !== 'production') {
-      debugImpl = Debug;
-    }
-
-    if (this.debug && this.debug !== true && this.debug.impl) {
-      debugImpl = this.debug.impl;
-    }
-
-    if (
-      debugImpl !== null &&
-      this.debug !== false &&
-      this._debugPanel == null &&
-      typeof document !== 'undefined'
-    ) {
-      let target = document.body;
-      if (
-        this.debug &&
-        this.debug !== true &&
-        this.debug.target !== undefined
-      ) {
-        target = this.debug.target;
-      }
-
-      if (target) {
-        this._debugPanel = new debugImpl({
-          target,
-          props: {
-            client: this,
-          },
-        });
-      }
-    }
+    this.manager.register(this);
   }
 
   stop() {
     this.transport.disconnect();
     this._running = false;
-
-    if (this._debugPanel != null) {
-      this._debugPanel.$destroy();
-      this._debugPanel = null;
-    }
+    this.manager.unregister(this);
   }
 
   subscribe(fn: (state: State<G>) => void) {
