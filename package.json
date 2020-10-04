@@ -116,6 +116,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.0.0",
     "jest-date-mock": "^1.0.8",
+    "jest-environment-jsdom-fifteen": "^1.0.2",
     "jest-transform-svelte": "^2.1.0",
     "lint-staged": "^8.1.0",
     "node-persist": "^3.0.4",
@@ -172,6 +173,7 @@
   },
   "jest": {
     "preset": "ts-jest/presets/js-with-babel",
+    "testEnvironment": "jest-environment-jsdom-fifteen",
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
       "\\.(svg)$": "<rootDir>/.empty_module.js",
