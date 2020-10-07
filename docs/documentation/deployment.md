@@ -15,7 +15,7 @@ On Heroku, a regular heroku/nodejs buildpack is necessary to build your app whic
 In order to deploy a game to Heroku, the game has to be running on a single port. To do so, the [Server](/api/Server.md) has to handle both the API requests and serving the pages.  
 Below is an example of how to achieve that.
 
-First install these extra dependencies: 
+First install these extra dependencies:
 
 ```
 npm i koa-static
@@ -45,7 +45,7 @@ server.run(PORT, () => {
     )
   )
 });
-``` 
+```
 
 The [Lobby](/api/Lobby.md) might be as follows:
 
@@ -66,6 +66,17 @@ export default () => (
 );
 ```
 
+Or, without the lobby, pass the server address when calling `SocketIO`:
+
+```js
+import { SocketIO } from 'boardgame.io/multiplayer';
+
+const GameClient = Client({
+  // ...
+  multiplayer: SocketIO({ server: `https://${window.location.hostname}` }),
+});
+```
+
 ### Backend Only
 If you only need to publish your backend to Heroku, your `server.js` can be simplified to this:
 
@@ -81,7 +92,7 @@ const PORT = process.env.PORT || 8000;
 server.run(PORT);
 ```
 
-And your [Lobby](/api/Lobby.md) would now be pointing to your Heroku app url:
+And your [Lobby](/api/Lobby.md) would now be pointing to your Heroku app URL:
 ```jsx
 import React from 'react';
 import { Lobby } from 'boardgame.io/react';
@@ -97,4 +108,15 @@ export default () => (
     <Lobby gameServer={server} lobbyServer={server} gameComponents={importedGames} />
   </div>
 );
+```
+
+Or, without the lobby, pass the Heroku app URL when calling `SocketIO`:
+
+```js
+import { SocketIO } from 'boardgame.io/multiplayer';
+
+const GameClient = Client({
+  // ...
+  multiplayer: SocketIO({ server: 'https://yourapplication.herokuapp.com' }),
+});
 ```
