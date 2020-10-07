@@ -1,5 +1,26 @@
 # Debugging
 
+### Using the Debug Panel in production
+
+boardgame.io comes bundled with a debug panel that lets you
+interact with your game and game clients. When you build your app
+for production (i.e. when `NODE_ENV === 'production'`) this is stripped
+out from the final bundle.
+
+If you want to include the debug panel in a production build you can
+do so explicitly when creating your client:
+
+```js
+import { Debug } from 'boardgame.io/debug';
+
+const client = Client({
+  // ...
+  debug: { impl: Debug },
+});
+```
+
+### Redux
+
 The framework uses Redux under the hood.
 You may sometimes want to debug this Redux store directly.
 In order to do so, you can pass along a Redux store enhancer
