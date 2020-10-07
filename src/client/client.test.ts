@@ -294,6 +294,11 @@ describe('strip secret only on server', () => {
     expect(client0.getState().G).toEqual({ sum: 10 });
     expect(client1.getState().G).toEqual({ sum: 10 });
   });
+
+  afterAll(() => {
+    client0.stop();
+    client1.stop();
+  });
 });
 
 test('accepts enhancer for store', () => {

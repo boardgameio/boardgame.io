@@ -435,14 +435,11 @@ export class _ClientImpl<G extends any = any> {
     // Secrets are normally stripped on the server,
     // but we also strip them here so that game developers
     // can see their effects while prototyping.
-    let G;
-    if (!this.multiplayer) {
-      G = this.game.playerView(state.G, state.ctx, this.playerID);
-    } else {
-      // Do not strip again if this is a multiplayer game
-      // since the server has already stripped secret info.
-      G = state.G;
-    }
+    // Do not strip again if this is a multiplayer game
+    // since the server has already stripped secret info. (issue #818)
+    const G = this.multiplayer
+      ? state.G
+      : this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
     return {
