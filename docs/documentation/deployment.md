@@ -55,7 +55,8 @@ import { Lobby } from 'boardgame.io/react';
 import { TicTacToeBoard } from './board';
 import { TicTacToe } from './game';
 
-const server = `https://${window.location.hostname}`;
+const { protocol, hostname, port } = window.location;
+const server = `${protocol}//${hostname}:${port}`;
 const importedGames = [{ game: TicTacToe, board: TicTacToeBoard }];
 
 export default () => (
@@ -71,9 +72,12 @@ Or, without the lobby, pass the server address when calling `SocketIO`:
 ```js
 import { SocketIO } from 'boardgame.io/multiplayer';
 
+const { protocol, hostname, port } = window.location;
+const server = `${protocol}//${hostname}:${port}`;
+
 const GameClient = Client({
   // ...
-  multiplayer: SocketIO({ server: `https://${window.location.hostname}` }),
+  multiplayer: SocketIO({ server }),
 });
 ```
 
