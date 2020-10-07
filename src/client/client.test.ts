@@ -261,6 +261,41 @@ describe('multiplayer', () => {
   });
 });
 
+describe('strip secret only on server', () => {
+  let client0;
+  let client1;
+  let spec;
+  let initial = { secret: [1, 2, 3, 4], sum: 0 };
+  beforeAll(() => {
+    spec = {
+      game: {
+        setup: () => initial,
+        playerView: (G, ctx, playerID) => {
+          let r = { ...G };
+          r.sum = r.secret.reduce((prev, curr) => {
+            return prev + curr;
+          });
+          delete r.secret;
+          return r;
+        },
+        moves: { A: (G, ctx) => ({ A: ctx.playerID }) },
+      },
+      multiplayer: Local(),
+    };
+
+    client0 = Client({ ...spec, playerID: '0' });
+    client1 = Client({ ...spec, playerID: '1' });
+
+    client0.start();
+    client1.start();
+  });
+
+  test('secret stripped', () => {
+    expect(client0.getState().G).toEqual({ sum: 10 });
+    expect(client1.getState().G).toEqual({ sum: 10 });
+  });
+});
+
 test('accepts enhancer for store', () => {
   let spyDispatcher;
   const spyEnhancer = vanillaCreateStore => (...args) => {
