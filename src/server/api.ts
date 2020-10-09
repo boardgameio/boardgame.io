@@ -49,7 +49,7 @@ export const CreateMatch = async ({
   const matchID = uuid();
   const initialState = InitializeGame({ game, numPlayers, setupData });
 
-  await db.createGame(matchID, { metadata, initialState });
+  await db.createMatch(matchID, { metadata, initialState });
 
   return matchID;
 };
@@ -175,7 +175,7 @@ export const createRouter = ({
         updatedAfter = parsedNumber;
       }
     }
-    const matchList = await db.listGames({
+    const matchList = await db.listMatches({
       gameName,
       where: {
         isGameover,
