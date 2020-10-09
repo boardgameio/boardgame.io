@@ -7,6 +7,7 @@
  */
 
 import * as ActionCreators from '../core/action-creators';
+import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import {
   Master,
@@ -16,7 +17,7 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server } from '../types';
+import { Server, State } from '../types';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 
@@ -43,7 +44,8 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 
 describe('sync', () => {
   const send = jest.fn();
-  const master = new Master(game, new InMemory(), TransportAPI(send));
+  const db = new InMemory();
+  const master = new Master(game, db, TransportAPI(send));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,19 +61,21 @@ describe('sync', () => {
   });
 
   test('sync a second time does not create a game', async () => {
+    const fetchResult = db.fetch('matchID', { metadata: true });
     await master.onSync('matchID', '0', 2);
-    expect(send).toHaveBeenCalled();
+    expect(db.fetch('matchID', { metadata: true })).toMatchObject(fetchResult);
   });
 
   test('should not have metadata', async () => {
-    await master.onSync('matchID', '0', 2);
+    db.setState('oldGameID', {} as State);
+    await master.onSync('oldGameID', '0');
     // [0][0] = first call, first argument
-    expect(send.mock.calls[0][0].args[3]).toBeUndefined();
+    expect(send.mock.calls[0][0].args[1].filteredMetadata).toBeUndefined();
   });
 
   test('should have metadata', async () => {
     const db = new InMemory();
-    const dbMetadata = {
+    const metadata = {
       gameName: 'tic-tac-toe',
       setupData: {},
       players: {
@@ -89,7 +93,7 @@ describe('sync', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata('matchID', dbMetadata);
+    db.createMatch('matchID', { metadata, initialState: {} as State });
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync('matchID', '0', 2);
 
@@ -278,6 +282,42 @@ describe('update', () => {
     await masterWithMetadata.onUpdate(event, 0, id, '0');
     const { metadata } = db.fetch(id, { metadata: true });
     expect(metadata.updatedAt).toEqual(updatedAt.getTime());
+  });
+
+  test('processes update if there is no metadata', async () => {
+    const id = 'gameWithoutMetadata';
+    const db = new InMemory();
+    const masterWithoutMetadata = new Master(game, db, TransportAPI(send));
+    // Store state manually to bypass automatic metadata initialization on sync.
+    let state = InitializeGame({ game });
+    expect(state.ctx.turn).toBe(1);
+    db.setState(id, state);
+    // Dispatch update to end the turn.
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
+    await masterWithoutMetadata.onUpdate(event, 0, id, '0');
+    // Confirm the turn ended.
+    let metadata: undefined | Server.MatchData;
+    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    expect(state.ctx.turn).toBe(2);
+    expect(metadata).toBeUndefined();
+  });
+
+  test('processes update if there is no metadata with async DB', async () => {
+    const id = 'gameWithoutMetadata';
+    const db = new InMemoryAsync();
+    const masterWithoutMetadata = new Master(game, db, TransportAPI(send));
+    // Store state manually to bypass automatic metadata initialization on sync.
+    let state = InitializeGame({ game });
+    expect(state.ctx.turn).toBe(1);
+    db.setState(id, state);
+    // Dispatch update to end the turn.
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
+    await masterWithoutMetadata.onUpdate(event, 0, id, '0');
+    // Confirm the turn ended.
+    let metadata: undefined | Server.MatchData;
+    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    expect(state.ctx.turn).toBe(2);
+    expect(metadata).toBeUndefined();
   });
 });
 

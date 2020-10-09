@@ -15,6 +15,7 @@ import cors from '@koa/cors';
 import { InitializeGame } from '../core/initialize';
 import * as StorageAPI from './db/base';
 import { Server, LobbyAPI, Game } from '../types';
+import { createMetadata } from './util';
 
 /**
  * Creates a new match.
@@ -44,18 +45,7 @@ export const CreateMatch = async ({
 }) => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
-  const metadata: Server.MatchData = {
-    gameName: game.name,
-    unlisted: !!unlisted,
-    players: {},
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  };
-  if (setupData !== undefined) metadata.setupData = setupData;
-  for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-    metadata.players[playerIndex] = { id: playerIndex };
-  }
-
+  const metadata = createMetadata({ game, numPlayers, setupData, unlisted });
   const matchID = uuid();
   const initialState = InitializeGame({ game, numPlayers, setupData });
 
