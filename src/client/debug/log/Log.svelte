@@ -34,7 +34,7 @@
         logIndex--;
       }
     }
-    return { G: state.G, ctx: state.ctx };
+    return { G: state.G, ctx: state.ctx, plugins: state.plugins };
   }
 
   function OnLogClick(e) {
