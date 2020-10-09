@@ -7,6 +7,7 @@
  */
 
 import * as ActionCreators from '../core/action-creators';
+import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import {
   Master,
@@ -281,6 +282,42 @@ describe('update', () => {
     await masterWithMetadata.onUpdate(event, 0, id, '0');
     const { metadata } = db.fetch(id, { metadata: true });
     expect(metadata.updatedAt).toEqual(updatedAt.getTime());
+  });
+
+  test('processes update if there is no metadata', async () => {
+    const id = 'gameWithoutMetadata';
+    const db = new InMemory();
+    const masterWithoutMetadata = new Master(game, db, TransportAPI(send));
+    // Store state manually to bypass automatic metadata initialization on sync.
+    let state = InitializeGame({ game });
+    expect(state.ctx.turn).toBe(1);
+    db.setState(id, state);
+    // Dispatch update to end the turn.
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
+    await masterWithoutMetadata.onUpdate(event, 0, id, '0');
+    // Confirm the turn ended.
+    let metadata: undefined | Server.MatchData;
+    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    expect(state.ctx.turn).toBe(2);
+    expect(metadata).toBeUndefined();
+  });
+
+  test('processes update if there is no metadata with async DB', async () => {
+    const id = 'gameWithoutMetadata';
+    const db = new InMemoryAsync();
+    const masterWithoutMetadata = new Master(game, db, TransportAPI(send));
+    // Store state manually to bypass automatic metadata initialization on sync.
+    let state = InitializeGame({ game });
+    expect(state.ctx.turn).toBe(1);
+    db.setState(id, state);
+    // Dispatch update to end the turn.
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
+    await masterWithoutMetadata.onUpdate(event, 0, id, '0');
+    // Confirm the turn ended.
+    let metadata: undefined | Server.MatchData;
+    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    expect(state.ctx.turn).toBe(2);
+    expect(metadata).toBeUndefined();
   });
 });
 
