@@ -16,7 +16,7 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server } from '../types';
+import { Server, State } from '../types';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 
@@ -43,7 +43,8 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 
 describe('sync', () => {
   const send = jest.fn();
-  const master = new Master(game, new InMemory(), TransportAPI(send));
+  const db = new InMemory();
+  const master = new Master(game, db, TransportAPI(send));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,19 +60,21 @@ describe('sync', () => {
   });
 
   test('sync a second time does not create a game', async () => {
+    const fetchResult = db.fetch('gameID', { metadata: true });
     await master.onSync('gameID', '0', 2);
-    expect(send).toHaveBeenCalled();
+    expect(db.fetch('gameID', { metadata: true })).toMatchObject(fetchResult);
   });
 
   test('should not have metadata', async () => {
-    await master.onSync('gameID', '0', 2);
+    db.setState('oldGameID', {} as State);
+    await master.onSync('oldGameID', '0');
     // [0][0] = first call, first argument
-    expect(send.mock.calls[0][0].args[3]).toBeUndefined();
+    expect(send.mock.calls[0][0].args[1].filteredMetadata).toBeUndefined();
   });
 
   test('should have metadata', async () => {
     const db = new InMemory();
-    const dbMetadata = {
+    const metadata = {
       gameName: 'tic-tac-toe',
       setupData: {},
       players: {
@@ -89,7 +92,7 @@ describe('sync', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata('gameID', dbMetadata);
+    db.createGame('gameID', { metadata, initialState: {} as State });
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync('gameID', '0', 2);
 
