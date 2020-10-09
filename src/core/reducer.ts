@@ -165,24 +165,7 @@ export function CreateGameReducer({
           return state;
         }
 
-        // Create a log entry for this move.
-        let logEntry: LogEntry = {
-          action,
-          _stateID: state._stateID,
-          turn: state.ctx.turn,
-          phase: state.ctx.phase,
-        };
-
-        if ((move as LongFormMove).redact === true) {
-          logEntry.redact = true;
-        }
-
-        const newState = {
-          ...state,
-          G,
-          deltalog: [logEntry],
-          _stateID: state._stateID + 1,
-        };
+        const newState = { ...state, G };
 
         // Some plugin indicated that it is not suitable to be
         // materialized on the client (and must wait for the server
@@ -202,8 +185,27 @@ export function CreateGameReducer({
             game,
             isClient: true,
           });
-          return state;
+          return {
+            ...state,
+            _stateID: state._stateID + 1,
+          };
         }
+
+        // On the server, construct the deltalog.
+        // Create a log entry for this move.
+        let logEntry: LogEntry = {
+          action,
+          _stateID: state._stateID,
+          turn: state.ctx.turn,
+          phase: state.ctx.phase,
+        };
+
+        if ((move as LongFormMove).redact === true) {
+          logEntry.redact = true;
+        }
+
+        // Add the deltalog to state.
+        state.deltalog = [logEntry];
 
         const prevTurnCount = state.ctx.turn;
 
@@ -223,7 +225,10 @@ export function CreateGameReducer({
         // Always reset redo stack when making a move
         state._redo = [];
 
-        return state;
+        return {
+          ...state,
+          _stateID: state._stateID + 1,
+        };
       }
 
       case Actions.RESET:
@@ -234,7 +239,7 @@ export function CreateGameReducer({
 
       case Actions.UNDO: {
         if (game.disableUndo) {
-          error("Undo is not enabled");
+          error('Undo is not enabled');
           return state;
         }
 
@@ -270,7 +275,7 @@ export function CreateGameReducer({
         const { _undo, _redo } = state;
 
         if (game.disableUndo) {
-          error("Redo is not enabled");
+          error('Redo is not enabled');
           return state;
         }
 
