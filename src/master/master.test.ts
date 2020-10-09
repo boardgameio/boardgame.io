@@ -61,9 +61,9 @@ describe('sync', () => {
   });
 
   test('sync a second time does not create a game', async () => {
-    const fetchResult = db.fetch('gameID', { metadata: true });
-    await master.onSync('gameID', '0', 2);
-    expect(db.fetch('gameID', { metadata: true })).toMatchObject(fetchResult);
+    const fetchResult = db.fetch('matchID', { metadata: true });
+    await master.onSync('matchID', '0', 2);
+    expect(db.fetch('matchID', { metadata: true })).toMatchObject(fetchResult);
   });
 
   test('should not have metadata', async () => {
@@ -93,7 +93,7 @@ describe('sync', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.createGame('gameID', { metadata, initialState: {} as State });
+    db.createMatch('matchID', { metadata, initialState: {} as State });
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync('matchID', '0', 2);
 

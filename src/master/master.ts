@@ -366,9 +366,9 @@ export class Master {
       this.subscribeCallback({ state, matchID });
 
       if (IsSynchronous(this.storageAPI)) {
-        this.storageAPI.createGame(key, { initialState, metadata });
+        this.storageAPI.createMatch(key, { initialState, metadata });
       } else {
-        await this.storageAPI.createGame(key, { initialState, metadata });
+        await this.storageAPI.createMatch(key, { initialState, metadata });
       }
     }
 
