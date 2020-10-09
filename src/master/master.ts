@@ -334,7 +334,7 @@ export class Master {
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
-  async onSync(matchID: string, playerID: string, numPlayers: number) {
+  async onSync(matchID: string, playerID: string, numPlayers = 2) {
     const key = matchID;
 
     let state: State;
