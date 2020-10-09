@@ -23,6 +23,7 @@ import {
   LogEntry,
   PlayerID,
 } from '../types';
+import { createMetadata } from '../server/util';
 import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
@@ -387,10 +388,16 @@ export class Master {
         matchID,
       });
 
+      const metadata: Server.MatchData = createMetadata({
+        game: this.game,
+        unlisted: true,
+        numPlayers,
+      });
+
       if (IsSynchronous(this.storageAPI)) {
-        this.storageAPI.setState(key, state);
+        this.storageAPI.createGame(key, { initialState, metadata });
       } else {
-        await this.storageAPI.setState(key, state);
+        await this.storageAPI.createGame(key, { initialState, metadata });
       }
     }
 
