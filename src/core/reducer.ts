@@ -19,6 +19,7 @@ import {
   State,
   Move,
   LongFormMove,
+  Undo,
 } from '../types';
 
 /**
@@ -45,6 +46,36 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
 
   return move.undoable;
 };
+
+/**
+ * Update the undo and redo stacks for a move or event.
+ */
+function updateUndoRedoState(
+  state: State,
+  opts: {
+    game: Game;
+    action: ActionShape.GameEvent | ActionShape.MakeMove;
+  }
+): State {
+  if (opts.game.disableUndo) return state;
+
+  const undoEntry: Undo = {
+    G: state.G,
+    ctx: state.ctx,
+    plugins: state.plugins,
+  };
+
+  if (opts.action.type === 'MAKE_MOVE') {
+    undoEntry.moveType = opts.action.payload.type;
+  }
+
+  return {
+    ...state,
+    _undo: [...state._undo, undoEntry],
+    // Always reset redo stack when making a move or event
+    _redo: [],
+  };
+}
 
 /**
  * CreateGameReducer
@@ -108,6 +139,9 @@ export function CreateGameReducer({
 
         // Execute plugins.
         newState = plugins.Flush(newState, { game, isClient: false });
+
+        // Update undo / redo state.
+        newState = updateUndoRedoState(newState, { game, action });
 
         return { ...newState, _stateID: state._stateID + 1 };
       }
@@ -207,23 +241,12 @@ export function CreateGameReducer({
         // Add the deltalog to state.
         state.deltalog = [logEntry];
 
-        const prevTurnCount = state.ctx.turn;
-
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
 
         // Update undo / redo state.
-        // Only update undo stack if the turn has not been ended
-        if (state.ctx.turn === prevTurnCount && !game.disableUndo) {
-          state._undo = state._undo.concat({
-            G: state.G,
-            ctx: state.ctx,
-            moveType: action.payload.type,
-          });
-        }
-        // Always reset redo stack when making a move
-        state._redo = [];
+        state = updateUndoRedoState(state, { game, action });
 
         return {
           ...state,

@@ -419,6 +419,7 @@ describe('undo stack', () => {
   test('contains initial state at start of game', () => {
     expect(state._undo).toHaveLength(1);
     expect(state._undo[0].ctx).toEqual(state.ctx);
+    expect(state._undo[0].plugins).toEqual(state.plugins);
   });
 
   test('grows when a move is made', () => {
@@ -426,12 +427,14 @@ describe('undo stack', () => {
     expect(state._undo).toHaveLength(2);
     expect(state._undo[1].moveType).toBe('basic');
     expect(state._undo[1].ctx).toEqual(state.ctx);
+    expect(state._undo[1].plugins).toEqual(state.plugins);
   });
 
   test('shrinks when a move is undone', () => {
     state = reducer(state, undo());
     expect(state._undo).toHaveLength(1);
     expect(state._undo[0].ctx).toEqual(state.ctx);
+    expect(state._undo[0].plugins).toEqual(state.plugins);
   });
 
   test('grows when a move is redone', () => {
@@ -439,13 +442,20 @@ describe('undo stack', () => {
     expect(state._undo).toHaveLength(2);
     expect(state._undo[1].moveType).toBe('basic');
     expect(state._undo[1].ctx).toEqual(state.ctx);
+    expect(state._undo[1].plugins).toEqual(state.plugins);
   });
 
   test('is reset when a turn ends', () => {
     state = reducer(state, makeMove('endTurn'));
     expect(state._undo).toHaveLength(1);
     expect(state._undo[0].ctx).toEqual(state.ctx);
-    expect(state._undo[0].moveType).toBeUndefined();
+    expect(state._undo[0].plugins).toEqual(state.plugins);
+    expect(state._undo[0].moveType).toBe('endTurn');
+  });
+
+  test('can’t undo at the start of a turn', () => {
+    const newState = reducer(state, undo());
+    expect(state).toEqual(newState);
   });
 });
 
