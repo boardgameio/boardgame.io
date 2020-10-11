@@ -318,6 +318,15 @@ export function CreateGameReducer({
 
         const first = _redo[0];
 
+        // Only allow players to redo their own undos.
+        if (
+          action.payload.playerID !== null &&
+          action.payload.playerID !== undefined &&
+          action.payload.playerID !== first.playerID
+        ) {
+          return state;
+        }
+
         return {
           ...state,
           G: first.G,

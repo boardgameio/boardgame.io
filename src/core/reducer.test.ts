@@ -510,6 +510,15 @@ describe('redo stack', () => {
     state = reducer(state, makeMove('endTurn'));
     expect(state._redo).toHaveLength(0);
   });
+
+  test('can’t redo another player’s undo', () => {
+    state = reducer(state, makeMove('basic', null, '1'));
+    state = reducer(state, undo('1'));
+    expect(state._redo).toHaveLength(1);
+    const newState = reducer(state, redo('0'));
+    expect(state._redo).toHaveLength(1);
+    expect(newState).toEqual(state);
+  });
 });
 
 describe('undo / redo with stages', () => {
