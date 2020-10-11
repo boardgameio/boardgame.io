@@ -63,6 +63,7 @@ function updateUndoRedoState(
     G: state.G,
     ctx: state.ctx,
     plugins: state.plugins,
+    playerID: opts.action.payload.playerID || state.ctx.currentPlayer,
   };
 
   if (opts.action.type === 'MAKE_MOVE') {
@@ -279,7 +280,7 @@ export function CreateGameReducer({
         const lastMove: Move = game.flow.getMove(
           restore.ctx,
           last.moveType,
-          action.payload.playerID
+          last.playerID
         );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;

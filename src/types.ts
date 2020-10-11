@@ -277,6 +277,7 @@ export type Undo<G extends any = any> = {
     [pluginName: string]: PluginState;
   };
   moveType?: string;
+  playerID?: PlayerID;
 };
 
 export namespace Server {

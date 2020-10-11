@@ -314,10 +314,10 @@ test('undo / redo', () => {
 
   let state = InitializeGame({ game });
 
-  state = reducer(state, makeMove('move', 'A'));
+  state = reducer(state, makeMove('move', 'A', '0'));
   expect(state.G).toMatchObject({ A: true });
 
-  state = reducer(state, makeMove('move', 'B'));
+  state = reducer(state, makeMove('move', 'B', '0'));
   expect(state.G).toMatchObject({ A: true, B: true });
   expect(state._undo[1].ctx.events).toBeUndefined();
   expect(state._undo[1].ctx.random).toBeUndefined();
@@ -340,7 +340,7 @@ test('undo / redo', () => {
   expect(state.G).toEqual({});
 
   state = reducer(state, redo());
-  state = reducer(state, makeMove('move', 'C'));
+  state = reducer(state, makeMove('move', 'C', '0'));
   expect(state.G).toMatchObject({ A: true, C: true });
 
   state = reducer(state, undo());
@@ -351,7 +351,7 @@ test('undo / redo', () => {
 
   state = reducer(state, undo());
   state = reducer(state, undo());
-  state = reducer(state, makeMove('roll'));
+  state = reducer(state, makeMove('roll', null, '0'));
   expect(state.G).toMatchObject({ roll: 4 });
 
   state = reducer(state, undo());
@@ -377,12 +377,12 @@ test('disable undo / redo', () => {
 
   let state = InitializeGame({ game });
 
-  state = reducer(state, makeMove('move', 'A'));
+  state = reducer(state, makeMove('move', 'A', '0'));
   expect(state.G).toMatchObject({ A: true });
   expect(state._undo).toEqual([]);
   expect(state._redo).toEqual([]);
 
-  state = reducer(state, makeMove('move', 'B'));
+  state = reducer(state, makeMove('move', 'B', '0'));
   expect(state.G).toMatchObject({ A: true, B: true });
   expect(state._undo).toEqual([]);
   expect(state._redo).toEqual([]);
@@ -423,7 +423,7 @@ describe('undo stack', () => {
   });
 
   test('grows when a move is made', () => {
-    state = reducer(state, makeMove('basic'));
+    state = reducer(state, makeMove('basic', null, '0'));
     expect(state._undo).toHaveLength(2);
     expect(state._undo[1].moveType).toBe('basic');
     expect(state._undo[1].ctx).toEqual(state.ctx);
@@ -477,7 +477,7 @@ describe('redo stack', () => {
   });
 
   test('grows when a move is undone', () => {
-    state = reducer(state, makeMove('basic'));
+    state = reducer(state, makeMove('basic', null, '0'));
     state = reducer(state, undo());
     expect(state._redo).toHaveLength(1);
     expect(state._redo[0].moveType).toBe('basic');
@@ -489,16 +489,16 @@ describe('redo stack', () => {
   });
 
   test('is reset when a move is made', () => {
-    state = reducer(state, makeMove('basic'));
+    state = reducer(state, makeMove('basic', null, '0'));
     state = reducer(state, undo());
     state = reducer(state, undo());
     expect(state._redo).toHaveLength(2);
-    state = reducer(state, makeMove('basic'));
+    state = reducer(state, makeMove('basic', null, '0'));
     expect(state._redo).toHaveLength(0);
   });
 
   test('is reset when a turn ends', () => {
-    state = reducer(state, makeMove('basic'));
+    state = reducer(state, makeMove('basic', null, '0'));
     state = reducer(state, undo());
     expect(state._redo).toHaveLength(1);
     state = reducer(state, makeMove('endTurn'));
