@@ -23,6 +23,17 @@ import {
 } from '../types';
 
 /**
+ * Check if the payload for the passed action contains a playerID.
+ */
+const actionHasPlayerID = (
+  action:
+    | ActionShape.MakeMove
+    | ActionShape.GameEvent
+    | ActionShape.Undo
+    | ActionShape.Redo
+) => action.payload.playerID !== null && action.payload.playerID !== undefined;
+
+/**
  * Returns true if a move can be undone.
  */
 const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
@@ -120,8 +131,7 @@ export function CreateGameReducer({
 
         // Ignore the event if the player isn't active.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed event: ${action.payload.type}`);
@@ -174,8 +184,7 @@ export function CreateGameReducer({
 
         // Ignore the move if the player isn't active.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed move: ${action.payload.type}`);
@@ -278,8 +287,7 @@ export function CreateGameReducer({
 
         // Only allow players to undo their own moves.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           action.payload.playerID !== last.playerID
         ) {
           return state;
@@ -320,8 +328,7 @@ export function CreateGameReducer({
 
         // Only allow players to redo their own undos.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           action.payload.playerID !== first.playerID
         ) {
           return state;
