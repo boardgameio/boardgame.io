@@ -276,6 +276,15 @@ export function CreateGameReducer({
         const last = _undo[_undo.length - 1];
         const restore = _undo[_undo.length - 2];
 
+        // Only allow players to undo their own moves.
+        if (
+          action.payload.playerID !== null &&
+          action.payload.playerID !== undefined &&
+          action.payload.playerID !== last.playerID
+        ) {
+          return state;
+        }
+
         // Only allow undoable moves to be undone.
         const lastMove: Move = game.flow.getMove(
           restore.ctx,

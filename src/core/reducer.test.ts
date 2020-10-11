@@ -457,6 +457,12 @@ describe('undo stack', () => {
     const newState = reducer(state, undo());
     expect(state).toEqual(newState);
   });
+
+  test('can’t undo another player’s move', () => {
+    state = reducer(state, makeMove('basic', null, '1'));
+    const newState = reducer(state, undo('0'));
+    expect(state).toEqual(newState);
+  });
 });
 
 describe('redo stack', () => {
