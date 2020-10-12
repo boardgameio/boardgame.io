@@ -90,6 +90,32 @@ function updateUndoRedoState(
 }
 
 /**
+ * Process state, adding the initial deltalog for this action.
+ */
+function initializeDeltalog(
+  state: State,
+  action: ActionShape.MakeMove | ActionShape.Undo | ActionShape.Redo,
+  move?: Move
+): State {
+  // Create a log entry for this action.
+  const logEntry: LogEntry = {
+    action,
+    _stateID: state._stateID,
+    turn: state.ctx.turn,
+    phase: state.ctx.phase,
+  };
+
+  if (typeof move === 'object' && move.redact === true) {
+    logEntry.redact = true;
+  }
+
+  return {
+    ...state,
+    deltalog: [logEntry],
+  };
+}
+
+/**
  * CreateGameReducer
  *
  * Creates the main game state reducer.
@@ -236,20 +262,7 @@ export function CreateGameReducer({
         }
 
         // On the server, construct the deltalog.
-        // Create a log entry for this move.
-        let logEntry: LogEntry = {
-          action,
-          _stateID: state._stateID,
-          turn: state.ctx.turn,
-          phase: state.ctx.phase,
-        };
-
-        if ((move as LongFormMove).redact === true) {
-          logEntry.redact = true;
-        }
-
-        // Add the deltalog to state.
-        state.deltalog = [logEntry];
+        state = initializeDeltalog(state, action, move);
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);

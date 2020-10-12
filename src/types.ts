@@ -82,7 +82,11 @@ export interface PluginState {
 }
 
 export interface LogEntry {
-  action: ActionShape.MakeMove | ActionShape.GameEvent;
+  action:
+    | ActionShape.MakeMove
+    | ActionShape.GameEvent
+    | ActionShape.Undo
+    | ActionShape.Redo;
   _stateID: number;
   turn: number;
   phase: string;
