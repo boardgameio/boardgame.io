@@ -11,7 +11,11 @@ class WithLocalStorageMap<Tkey, Tvalue> extends Map {
     this.key = getStorageKey(key);
   }
   sync(): void {
-    localStorage.setItem(this.key, JSON.stringify(Array.from(this.entries())));
+    !!this.key &&
+      localStorage.setItem(
+        this.key,
+        JSON.stringify(Array.from(this.entries()))
+      );
   }
   set(key: Tkey, value: Tvalue): this {
     super.set(key, value);
