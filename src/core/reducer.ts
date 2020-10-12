@@ -19,7 +19,19 @@ import {
   State,
   Move,
   LongFormMove,
+  Undo,
 } from '../types';
+
+/**
+ * Check if the payload for the passed action contains a playerID.
+ */
+const actionHasPlayerID = (
+  action:
+    | ActionShape.MakeMove
+    | ActionShape.GameEvent
+    | ActionShape.Undo
+    | ActionShape.Redo
+) => action.payload.playerID !== null && action.payload.playerID !== undefined;
 
 /**
  * Returns true if a move can be undone.
@@ -45,6 +57,37 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
 
   return move.undoable;
 };
+
+/**
+ * Update the undo and redo stacks for a move or event.
+ */
+function updateUndoRedoState(
+  state: State,
+  opts: {
+    game: Game;
+    action: ActionShape.GameEvent | ActionShape.MakeMove;
+  }
+): State {
+  if (opts.game.disableUndo) return state;
+
+  const undoEntry: Undo = {
+    G: state.G,
+    ctx: state.ctx,
+    plugins: state.plugins,
+    playerID: opts.action.payload.playerID || state.ctx.currentPlayer,
+  };
+
+  if (opts.action.type === 'MAKE_MOVE') {
+    undoEntry.moveType = opts.action.payload.type;
+  }
+
+  return {
+    ...state,
+    _undo: [...state._undo, undoEntry],
+    // Always reset redo stack when making a move or event
+    _redo: [],
+  };
+}
 
 /**
  * CreateGameReducer
@@ -88,8 +131,7 @@ export function CreateGameReducer({
 
         // Ignore the event if the player isn't active.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed event: ${action.payload.type}`);
@@ -108,6 +150,9 @@ export function CreateGameReducer({
 
         // Execute plugins.
         newState = plugins.Flush(newState, { game, isClient: false });
+
+        // Update undo / redo state.
+        newState = updateUndoRedoState(newState, { game, action });
 
         return { ...newState, _stateID: state._stateID + 1 };
       }
@@ -139,8 +184,7 @@ export function CreateGameReducer({
 
         // Ignore the move if the player isn't active.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed move: ${action.payload.type}`);
@@ -207,23 +251,12 @@ export function CreateGameReducer({
         // Add the deltalog to state.
         state.deltalog = [logEntry];
 
-        const prevTurnCount = state.ctx.turn;
-
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
 
         // Update undo / redo state.
-        // Only update undo stack if the turn has not been ended
-        if (state.ctx.turn === prevTurnCount && !game.disableUndo) {
-          state._undo = state._undo.concat({
-            G: state.G,
-            ctx: state.ctx,
-            moveType: action.payload.type,
-          });
-        }
-        // Always reset redo stack when making a move
-        state._redo = [];
+        state = updateUndoRedoState(state, { game, action });
 
         return {
           ...state,
@@ -252,11 +285,19 @@ export function CreateGameReducer({
         const last = _undo[_undo.length - 1];
         const restore = _undo[_undo.length - 2];
 
+        // Only allow players to undo their own moves.
+        if (
+          actionHasPlayerID(action) &&
+          action.payload.playerID !== last.playerID
+        ) {
+          return state;
+        }
+
         // Only allow undoable moves to be undone.
         const lastMove: Move = game.flow.getMove(
           restore.ctx,
           last.moveType,
-          action.payload.playerID
+          last.playerID
         );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;
@@ -284,6 +325,14 @@ export function CreateGameReducer({
         }
 
         const first = _redo[0];
+
+        // Only allow players to redo their own undos.
+        if (
+          actionHasPlayerID(action) &&
+          action.payload.playerID !== first.playerID
+        ) {
+          return state;
+        }
 
         return {
           ...state,

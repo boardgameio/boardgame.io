@@ -242,9 +242,16 @@ export class Master {
     // that can make moves right now and the person doing the
     // action is that player.
     if (action.type == UNDO || action.type == REDO) {
+      const hasActivePlayers = state.ctx.activePlayers !== null;
+      const isCurrentPlayer = state.ctx.currentPlayer === playerID;
+
       if (
-        state.ctx.currentPlayer !== playerID ||
-        state.ctx.activePlayers !== null
+        // If activePlayers is empty, non-current players can’t undo.
+        (!hasActivePlayers && !isCurrentPlayer) ||
+        // If player is not active or multiple players are active, can’t undo.
+        (hasActivePlayers &&
+          (state.ctx.activePlayers[playerID] === undefined ||
+            Object.keys(state.ctx.activePlayers).length > 1))
       ) {
         logging.error(`playerID=[${playerID}] cannot undo / redo right now`);
         return;

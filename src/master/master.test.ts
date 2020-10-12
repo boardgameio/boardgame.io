@@ -202,21 +202,49 @@ describe('update', () => {
     expect(sendAll).toHaveBeenCalled();
   });
 
-  test('undo / redo', async () => {
-    await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
-    expect(error).not.toBeCalled();
+  describe('undo / redo', () => {
+    test('player 0 can undo', async () => {
+      await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
+      expect(error).not.toBeCalled();
+    });
 
-    await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '1');
-    expect(error).toHaveBeenCalledWith(
-      `playerID=[1] cannot undo / redo right now`
-    );
+    test('player 1 can’t undo', async () => {
+      await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '1');
+      expect(error).toHaveBeenCalledWith(
+        `playerID=[1] cannot undo / redo right now`
+      );
+    });
+
+    test('player can’t undo with multiple active players', async () => {
+      const setActivePlayers = ActionCreators.gameEvent(
+        'setActivePlayers',
+        [{ all: 'A' }],
+        '0'
+      );
+      await master.onUpdate(setActivePlayers, 2, 'matchID', '0');
+      await master.onUpdate(ActionCreators.undo('0'), 3, 'matchID', '0');
+      expect(error).toHaveBeenCalledWith(
+        `playerID=[0] cannot undo / redo right now`
+      );
+    });
+
+    test('player can undo if they are the only active player', async () => {
+      const endStage = ActionCreators.gameEvent('endStage', undefined, '0');
+      await master.onUpdate(endStage, 3, 'matchID', '0');
+      await master.onUpdate(ActionCreators.undo('1'), 4, 'matchID', '1');
+      expect(error).not.toBeCalled();
+
+      // Clean-up active players.
+      const endStage2 = ActionCreators.gameEvent('endStage', undefined, '1');
+      await master.onUpdate(endStage2, 4, 'matchID', '1');
+    });
   });
 
   test('game over', async () => {
     let event = ActionCreators.gameEvent('endGame');
-    await master.onUpdate(event, 2, 'matchID', '0');
+    await master.onUpdate(event, 5, 'matchID', '0');
     event = ActionCreators.gameEvent('endTurn');
-    await master.onUpdate(event, 3, 'matchID', '0');
+    await master.onUpdate(event, 6, 'matchID', '0');
     expect(error).toHaveBeenCalledWith(`game over - matchID=[matchID]`);
   });
 

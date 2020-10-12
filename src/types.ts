@@ -270,10 +270,14 @@ export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   flow?: ReturnType<typeof Flow>;
 }
 
-type Undo<G extends any = any> = {
+export type Undo<G extends any = any> = {
   G: G;
   ctx: Ctx;
+  plugins: {
+    [pluginName: string]: PluginState;
+  };
   moveType?: string;
+  playerID?: PlayerID;
 };
 
 export namespace Server {
