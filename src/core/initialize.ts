@@ -63,5 +63,16 @@ export function InitializeGame({
   initial = game.flow.init(initial);
   initial = plugins.Flush(initial, { game });
 
+  // Initialize undo stack.
+  if (!game.disableUndo) {
+    initial._undo = [
+      {
+        G: initial.G,
+        ctx: initial.ctx,
+        plugins: initial.plugins,
+      },
+    ];
+  }
+
   return initial;
 }
