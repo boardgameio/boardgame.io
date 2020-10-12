@@ -179,20 +179,18 @@ export class _ClientImpl<G extends any = any> {
       this.store.dispatch(ActionCreators.reset(this.initialState));
     };
     this.undo = () => {
-      const playerID = assumedPlayerID(
-        this.playerID,
-        this.store,
-        this.multiplayer
+      const undo = ActionCreators.undo(
+        assumedPlayerID(this.playerID, this.store, this.multiplayer),
+        this.credentials
       );
-      this.store.dispatch(ActionCreators.undo(playerID, this.credentials));
+      this.store.dispatch(undo);
     };
     this.redo = () => {
-      const playerID = assumedPlayerID(
-        this.playerID,
-        this.store,
-        this.multiplayer
+      const redo = ActionCreators.redo(
+        assumedPlayerID(this.playerID, this.store, this.multiplayer),
+        this.credentials
       );
-      this.store.dispatch(ActionCreators.redo(playerID, this.credentials));
+      this.store.dispatch(redo);
     };
 
     this.store = null;
