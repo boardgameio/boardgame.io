@@ -10,6 +10,7 @@ import * as Actions from './action-types';
 import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
 import { error } from './logger';
+import { INVALID_MOVE } from './constants';
 import {
   ActionShape,
   Ctx,
@@ -44,13 +45,6 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
 
   return move.undoable;
 };
-
-/**
- * Moves can return this when they want to indicate
- * that the combination of arguments is illegal and
- * the move ought to be discarded.
- */
-export const INVALID_MOVE = 'INVALID_MOVE';
 
 /**
  * CreateGameReducer
@@ -171,24 +165,7 @@ export function CreateGameReducer({
           return state;
         }
 
-        // Create a log entry for this move.
-        let logEntry: LogEntry = {
-          action,
-          _stateID: state._stateID,
-          turn: state.ctx.turn,
-          phase: state.ctx.phase,
-        };
-
-        if ((move as LongFormMove).redact === true) {
-          logEntry.redact = true;
-        }
-
-        const newState = {
-          ...state,
-          G,
-          deltalog: [logEntry],
-          _stateID: state._stateID + 1,
-        };
+        const newState = { ...state, G };
 
         // Some plugin indicated that it is not suitable to be
         // materialized on the client (and must wait for the server
@@ -208,14 +185,50 @@ export function CreateGameReducer({
             game,
             isClient: true,
           });
-          return state;
+          return {
+            ...state,
+            _stateID: state._stateID + 1,
+          };
         }
+
+        // On the server, construct the deltalog.
+        // Create a log entry for this move.
+        let logEntry: LogEntry = {
+          action,
+          _stateID: state._stateID,
+          turn: state.ctx.turn,
+          phase: state.ctx.phase,
+        };
+
+        if ((move as LongFormMove).redact === true) {
+          logEntry.redact = true;
+        }
+
+        // Add the deltalog to state.
+        state.deltalog = [logEntry];
+
+        const prevTurnCount = state.ctx.turn;
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
 
-        return state;
+        // Update undo / redo state.
+        // Only update undo stack if the turn has not been ended
+        if (state.ctx.turn === prevTurnCount && !game.disableUndo) {
+          state._undo = state._undo.concat({
+            G: state.G,
+            ctx: state.ctx,
+            moveType: action.payload.type,
+          });
+        }
+        // Always reset redo stack when making a move
+        state._redo = [];
+
+        return {
+          ...state,
+          _stateID: state._stateID + 1,
+        };
       }
 
       case Actions.RESET:
@@ -225,6 +238,11 @@ export function CreateGameReducer({
       }
 
       case Actions.UNDO: {
+        if (game.disableUndo) {
+          error('Undo is not enabled');
+          return state;
+        }
+
         const { _undo, _redo } = state;
 
         if (_undo.length < 2) {
@@ -236,9 +254,9 @@ export function CreateGameReducer({
 
         // Only allow undoable moves to be undone.
         const lastMove: Move = game.flow.getMove(
-          state.ctx,
+          restore.ctx,
           last.moveType,
-          state.ctx.currentPlayer
+          action.payload.playerID
         );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;
@@ -255,6 +273,11 @@ export function CreateGameReducer({
 
       case Actions.REDO: {
         const { _undo, _redo } = state;
+
+        if (game.disableUndo) {
+          error('Redo is not enabled');
+          return state;
+        }
 
         if (_redo.length == 0) {
           return state;

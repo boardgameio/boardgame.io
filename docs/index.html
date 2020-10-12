@@ -10,42 +10,46 @@
   <meta name="twitter:title" content="boardgame.io">
   <meta name="twitter:image" content="https://res.cloudinary.com/dyfmhmho5/image/upload/v1543585150/logo_w1snck.png">
   <meta name="twitter:description" content="Open Source Game Engine for Turn-Based Games">
-  <link rel="shortcut icon" href="https://raw.githubusercontent.com/nicolodavis/boardgame.io/master/docs/favicon.png" type="image/png" sizes="16x16">
-  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+  <link rel="shortcut icon" href="https://raw.githubusercontent.com/boardgameio/boardgame.io/master/docs/favicon.png" type="image/png" sizes="16x16">
+  <link rel="stylesheet" href="//unpkg.com/docsify-themeable@0/dist/css/theme-simple.css">
+  <link rel="stylesheet" href="documentation/theme.css">
   <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
-  <a href="https://github.com/nicolodavis/boardgame.io" class="github-corner" aria-label="View source on Github"><svg viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+  <a href="https://github.com/boardgameio/boardgame.io" class="github-corner" aria-label="View source on Github"><svg viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" class="octo-body"></path></svg></a>
 
-  <div id="content">
-    <p>
-      <img src="https://raw.githubusercontent.com/nicolodavis/boardgame.io/master/docs/logo-optimized.svg?sanitize=true" alt="boardgame.io" />
-    </p>
+  <div id="content" class="markdown-section">
+    <header>
+      <p>
+        <img src="/logo-optimized.svg?sanitize=true" alt="boardgame.io" />
+      </p>
 
-    <div id="badges">
-    <a href="https://www.npmjs.com/package/boardgame.io"><img src="https://badge.fury.io/js/boardgame.io.svg" alt="npm version" /></a>
-    <a href='https://semaphoreci.com/nicolodavis/boardgame-io'> <img src='https://semaphoreci.com/api/v1/nicolodavis/boardgame-io/branches/master/shields_badge.svg' alt='Build Status'></a>
-    <a href="https://coveralls.io/github/nicolodavis/boardgame.io?branch=master"><img src="https://img.shields.io/coveralls/nicolodavis/boardgame.io.svg" alt="Coveralls" /></a>
-    <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
-    </div>
+      <div id="badges" class="web-only">
+      <a href="https://www.npmjs.com/package/boardgame.io"><img src="https://badge.fury.io/js/boardgame.io.svg" alt="npm version" /></a>
+      <a href="https://github.com/boardgameio/boardgame.io/actions?query=workflow%3ATests"> <img src="https://github.com/boardgameio/boardgame.io/workflows/Tests/badge.svg" alt='Build Status'></a>
+      <a href='https://coveralls.io/github/boardgameio/boardgame.io?branch=master'><img src='https://coveralls.io/repos/github/boardgameio/boardgame.io/badge.svg?branch=master' alt='Coverage Status' /></a>
+      <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
+      </div>
 
-    <h1 id="heading">
-    Open Source Game Engine for Turn-Based Games
-    </h1>
+      <h1 id="heading">
+      Open Source Game Engine for Turn-Based Games
+      </h1>
+    </header>
 
-    <div id="topbar">
+    <nav id="topbar">
       <a href="/documentation">Documentation</a>
 
       <span class="web-only">
-        |
+        •
         <a href="/documentation/#/CHANGELOG">Changelog</a>
-        |
+        •
         <a href="/documentation/#/notable_projects">Projects</a>
       </span>
-    </div>
+    </nav>
 
-    <div id="main-content">
+
+    <main id="main-content">
       <p id="summary">
       Write simple functions that describe how the game state changes
       when a particular move is made. This is automatically converted
@@ -58,39 +62,39 @@
 
       <div id="features">
       <div>
-        <label>State Management</label>
+        <h3>State Management</h3>
         <div>Game state is managed seamlessly across clients, server and storage automatically.</div>
       </div>
       <div>
-        <label>Multiplayer</label>
+        <h3>Multiplayer</h3>
         <div>Game state is kept in sync in realtime and across platforms.</div>
       </div>
       <div>
-        <label>AI</label>
+        <h3>AI</h3>
         <div>Automatically generated bots that can play your game.</div>
       </div>
       <div>
-        <label>Game Phases</label>
+        <h3>Game Phases</h3>
         <div>with different game rules and turn orders per phase.</div>
       </div>
       <div>
-        <label>Lobby</label>
+        <h3>Lobby</h3>
         <div>Player matchmaking and game creation.</div>
       </div>
       <div>
-        <label>Prototyping</label>
+        <h3>Prototyping</h3>
         <div>Interface to simulate moves even before you render the game.</div>
       </div>
       <div>
-        <label>Extendable</label>
+        <h3>Extendable</h3>
         <div>Plugin system that allows creating new abstractions.</div>
       </div>
       <div>
-        <label>View-layer Agnostic</label>
+        <h3>View-layer Agnostic</h3>
         <div>Use the vanilla JS client or the bindings for React.</div>
       </div>
       <div>
-        <label>Logs</label>
+        <h3>Logs</h3>
         <div>Game logs with the ability to time travel (viewing the board at an earlier state).</div>
       </div>
       </div>
@@ -98,13 +102,13 @@
       <h2>Installation</h2>
 
       <code>
-      npm install --save boardgame.io
+      npm install boardgame.io
       </code>
 
       <h2>License</h2>
 
       MIT
-    </div>
+    </main>
   </div>
 </body>
 

@@ -1,0 +1,7 @@
+{
+  "name": "boardgame.io/react-native",
+  "private": true,
+  "types": "../dist/types/packages/react-native.d.ts",
+  "main": "../dist/cjs/react-native.js",
+  "module": "../dist/esm/react-native.js"
+}

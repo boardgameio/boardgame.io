@@ -2,8 +2,7 @@
 
 ### State
 
-The framework captures the game state in two objects: `G` and
-`ctx`.
+boardgame.io captures game state in two objects: `G` and `ctx`.
 
 ```js
 {
@@ -24,9 +23,13 @@ on both client and server seamlessly. The state in `ctx` is
 incrementally adoptable, meaning that you can manage all the
 state manually in `G` if you so desire.
 
-!> `ctx` contains other fields not shown here that complex games
+?> `ctx` contains other fields not shown here that games
 can take advantage of, including support for game phases and complex
 turn orders.
+
+!> Because state can be sent between client and server,
+`G` must be a JSON-serializable object; in particular, it must
+not contain classes or functions.
 
 ### Moves
 
@@ -43,14 +46,27 @@ moves: {
     G.hand.push(card);
   },
 
-  ...
+  // ...
 }
 ```
 
-Moves are dispatched from the client in different ways
-depending on the platform you are developing on. If you
-are using React, for example, they are dispatched via an API
-provided through `props`.
+On the client, you use a `moves` object to dispatch your
+move functions.
+
+<!-- tabs:start -->
+#### **Plain JS**
+
+You can access `moves` from an instance of the plain JavaScript client:
+
+```js
+function onClick() {
+  client.moves.drawCard();
+}
+```
+
+#### **React**
+
+Using React, `moves` is provided through your component’s `props`:
 
 ```js
 onClick() {
@@ -58,18 +74,29 @@ onClick() {
 }
 ```
 
+<!-- tabs:end -->
+
 ### Events
 
 These are framework-provided functions that are analagous to moves, except that they work on `ctx`. These typically advance the game state by doing things like
 ending the turn, changing the game phase etc.
-Events are dispatched from the client in a similar way to moves. Here
-is an example in React again:
+Events are dispatched from the client in a similar way to moves.
 
+<!-- tabs:start -->
+#### **Plain JS**
+```js
+function onClick() {
+  client.events.endTurn();
+}
+```
+
+#### **React**
 ```js
 onClick() {
   this.props.events.endTurn();
 }
 ```
+<!-- tabs:end -->
 
 For more details, see the guide on [Events](events.md).
 

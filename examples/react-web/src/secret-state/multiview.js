@@ -25,19 +25,19 @@ const Multiview = () => (
     <h1>Secret Info</h1>
     <div className="runner">
       <div className="run">
-        <App gameID="secret-state" playerID="0" />
+        <App matchID="secret-state" playerID="0" />
         &lt;App playerID=&quot;0&quot;/&gt;
       </div>
       <div className="run">
-        <App gameID="secret-state" playerID="1" />
+        <App matchID="secret-state" playerID="1" />
         &lt;App playerID=&quot;1&quot;/&gt;
       </div>
       <div className="run">
-        <App gameID="secret-state" playerID="2" />
+        <App matchID="secret-state" playerID="2" />
         &lt;App playerID=&quot;2&quot;/&gt;
       </div>
       <div className="run">
-        <App gameID="secret-state" />
+        <App matchID="secret-state" />
         &lt;App/&gt;
       </div>
     </div>

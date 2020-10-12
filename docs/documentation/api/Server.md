@@ -12,7 +12,7 @@ The server also hosts a REST [API](https://boardgame.io/documentation/#/api/Lobb
 and joining games. This is hosted on the same port, but can
 be configured to run on a separate port.
 
-### Arguments
+#### Arguments
 
 A config object with the following options:
 
@@ -24,25 +24,32 @@ A config object with the following options:
 
 3. `transport` (_object_): the transport implementation.
    If not provided, socket.io is used.
-   
-4. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the Lobby’s `uuid` implementation will be used.
 
-5. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
+4. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [shortid](https://www.npmjs.com/package/shortid).
 
-### Returns
+5. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
+
+6. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
+
+#### Returns
 
 An object that contains:
 
-1. run (_function_): A function to run the server.
-   _(portOrConfig, callback) => ({ apiServer, appServer })_
-2. kill (_function_): A function to stop the server.
-   _({ apiServer, appServer }) => {}_
-3. app (_object_): The Koa app.
-4. db (_object_): The `db` implementation.
+1. `run` (_function_): A function to run the server.
+    `(portOrConfig, callback) => ({ apiServer, appServer })`
+
+2. `kill` (_function_): A function to stop the server.
+    `({ apiServer, appServer }) => void`
+
+3. `app` (_object_): The Koa app.
+
+4. `db` (_object_): The database implementation.
+
+5. `router` (_object_): The Koa Router for the server API.
 
 ### Usage
 
-##### Basic
+#### Basic
 
 ```js
 const Server = require('boardgame.io/server').Server;
@@ -56,13 +63,34 @@ const server = Server({
 server.run(8000);
 ```
 
-##### With callback
+#### With callback
 
 ```js
 server.run(8000, () => console.log("server running..."));
 ```
 
-##### With HTTPS
+#### With custom Lobby settings
+
+You can pass `lobbyConfig` to configure the Lobby API during server startup:
+
+```js
+const lobbyConfig = {
+  apiPort: 8080,
+  apiCallback: () => console.log('Running Lobby API on port 8080...'),
+};
+
+server.run({ port: 8000, lobbyConfig });
+```
+
+Options are:
+
+- `apiPort`: If specified, it runs the Lobby API in a separate Koa server on
+this port. Otherwise, it shares the same Koa server running on the default
+boardgame.io `port`.
+- `apiCallback`: Called when the Koa server is ready. Only applicable if
+`apiPort` is specified.
+
+#### With HTTPS
 
 ```js
 const { Server } = require('boardgame.io/server');
@@ -80,7 +108,7 @@ const server = Server({
 server.run(8000);
 ```
 
-##### With custom authentication
+#### With custom authentication
 
 `generateCredentials` is called when a player joins a game with:
 

@@ -1,12 +1,13 @@
 <script>
   export let client;
 
+  import JSONTree from 'svelte-json-tree-auto/src/Root.svelte';
   import Move from './Move.svelte';
   import Controls from './Controls.svelte';
   import PlayerInfo from './PlayerInfo.svelte';
   import { AssignShortcuts } from '../utils/shortcuts';
 
-  const shortcuts = AssignShortcuts(client.moves, client.events, 'mlia');
+  const shortcuts = AssignShortcuts(client.moves, 'mlia');
 
   function SanitizeCtx(ctx) {
     let r = {};
@@ -18,22 +19,20 @@
     return r;
   }
 
-  let playerID = client.playerID;
+  let { playerID, moves, events } = client;
   let ctx = {};
   let G = {};
   client.subscribe((state) => {
-    if (state) {
-      G = state.G;
-      ctx = state.ctx;
-    }
-    playerID = client.playerID;
+    if (state) ({ G, ctx } = state);
+    ({ playerID, moves, events } = client);
   });
 </script>
 
 <style>
-  .json {
-    font-family: monospace;
-    color: #888;
+  .tree {
+    --json-tree-font-family: monospace;
+    --json-tree-font-size: 14px;
+    --json-tree-null-color: #757575;
   }
 
   label {
@@ -50,19 +49,6 @@
     list-style: none;
     margin: none;
     margin-bottom: 5px;
-  }
-
-  .events {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .events button {
-    width: 100px;
-  }
-
-  .events button:not(:last-child) {
-    margin-bottom: 10px;
   }
 </style>
 
@@ -82,7 +68,7 @@
 
 <section>
   <h3>Moves</h3>
-  {#each Object.entries(client.moves) as [name, fn]}
+  {#each Object.entries(moves) as [name, fn]}
     <li>
       <Move shortcut={shortcuts[name]} {fn} {name} />
     </li>
@@ -93,26 +79,30 @@
   <h3>Events</h3>
 
   <div class="events">
-  {#if client.events.endTurn}
-    <button on:click={() => client.events.endTurn()}>End Turn</button>
+  {#if ctx.activePlayers && events.endStage}
+    <li>
+      <Move name="endStage" shortcut={7} fn={events.endStage} />
+    </li>
   {/if}
-  {#if ctx.phase && client.events.endPhase}
-    <button on:click={() => client.events.endPhase()}>End Phase</button>
+  {#if events.endTurn}
+    <li>
+      <Move name="endTurn" shortcut={8} fn={events.endTurn} />
+    </li>
   {/if}
-  {#if ctx.activePlayers && client.events.endStage}
-    <button on:click={() => client.events.endStage()}>End Stage</button>
+  {#if ctx.phase && events.endPhase}
+    <li>
+      <Move name="endPhase" shortcut={9} fn={events.endPhase} />
+    </li>
   {/if}
   </div>
 </section>
 
-<section>
+<section class="tree">
   <label>G</label>
-  <pre class="json">{JSON.stringify(G, null, 2)}</pre>
+  <JSONTree value={G} />
 </section>
 
-<section>
+<section class="tree">
   <label>ctx</label>
-  <pre class="json">
-    {JSON.stringify(SanitizeCtx(ctx), null, 2)}
-  </pre>
+  <JSONTree value={SanitizeCtx(ctx)} />
 </section>

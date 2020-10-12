@@ -36,16 +36,16 @@ test('defaults', () => {
   m.callback();
 });
 
-describe('update gameID / playerID', () => {
+describe('update matchID / playerID', () => {
   const socket = new MockSocket();
   const m = new SocketIOTransport({ socket });
   m.store = { dispatch: () => {} };
 
   beforeEach(() => (socket.emit = jest.fn()));
 
-  test('gameID', () => {
-    m.updateGameID('test');
-    expect(m.gameID).toBe('test');
+  test('matchID', () => {
+    m.updateMatchID('test');
+    expect(m.matchID).toBe('test');
     expect(socket.emit).lastCalledWith('sync', 'test', null, 2);
   });
 
@@ -66,7 +66,7 @@ describe('connection status', () => {
     mockSocket = new MockSocket();
     m = new SocketIOTransport({
       socket: mockSocket,
-      gameID: 0,
+      matchID: 0,
       playerID: 0,
       gameName: 'foo',
       numPlayers: 2,
@@ -115,7 +115,7 @@ describe('multiplayer', () => {
   test('receive update', () => {
     const restored = { restore: true };
     expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('update', 'unknown gameID', restored);
+    mockSocket.receive('update', 'unknown matchID', restored);
     expect(store.getState()).not.toMatchObject(restored);
     mockSocket.receive('update', 'default', restored);
     expect(store.getState()).not.toMatchObject(restored);
@@ -129,7 +129,7 @@ describe('multiplayer', () => {
   test('receive sync', () => {
     const restored = { restore: true };
     expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('sync', 'unknown gameID', { state: restored });
+    mockSocket.receive('sync', 'unknown matchID', { state: restored });
     expect(store.getState()).not.toMatchObject(restored);
     mockSocket.receive('sync', 'default', { state: restored });
     expect(store.getState()).toMatchObject(restored);
@@ -195,14 +195,14 @@ describe('server option', () => {
   });
 });
 
-test('changing a gameID resets the state before resync', () => {
+test('changing a matchID resets the state before resync', () => {
   const m = new SocketIOTransport();
   const game = {};
   const store = createStore(CreateGameReducer({ game }));
   m.store = store;
   const dispatchSpy = jest.spyOn(store, 'dispatch');
 
-  m.updateGameID('foo');
+  m.updateMatchID('foo');
 
   expect(dispatchSpy).toHaveBeenCalledWith(
     expect.objectContaining({

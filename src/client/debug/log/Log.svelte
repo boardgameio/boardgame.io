@@ -6,11 +6,13 @@
   const { secondaryPane } = getContext('secondaryPane');
 
   import { MAKE_MOVE } from '../../../core/action-types';
+  import { CreateGameReducer } from '../../../core/reducer';
   import TurnMarker from './TurnMarker.svelte';
   import PhaseMarker from './PhaseMarker.svelte';
   import LogEvent from './LogEvent.svelte';
   import MCTS from '../mcts/MCTS.svelte';
 
+  const reducer = CreateGameReducer({ game: client.game });
   const initialState = client.getInitialState();
   let { log } = $client;
   let pinned = null;
@@ -21,7 +23,7 @@
       const { action, automatic } = log[i];
 
       if (!automatic) {
-        state = client.reducer(state, action);
+        state = reducer(state, action);
       }
 
       if (action.type == MAKE_MOVE) {
@@ -32,7 +34,7 @@
         logIndex--;
       }
     }
-    return { G: state.G, ctx: state.ctx };
+    return { G: state.G, ctx: state.ctx, plugins: state.plugins };
   }
 
   function OnLogClick(e) {

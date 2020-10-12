@@ -16,9 +16,19 @@ const routes = [
     component: Singleplayer,
   },
   {
+    path: '/chess/multiplayer0',
+    text: 'Multiplayer (Player 0)',
+    component: Multiplayer('0'),
+  },
+  {
+    path: '/chess/multiplayer1',
+    text: 'Multiplayer (Player 1)',
+    component: Multiplayer('1'),
+  },
+  {
     path: '/chess/multiplayer',
-    text: 'Multiplayer',
-    component: Multiplayer,
+    text: 'Multiplayer (Spectator)',
+    component: Multiplayer(),
   },
 ];
 

@@ -14,7 +14,7 @@ test('first char is used', () => {
     playCard: () => {},
   };
 
-  const shortcuts = AssignShortcuts(moves, {}, '');
+  const shortcuts = AssignShortcuts(moves, '');
 
   expect(shortcuts).toEqual({
     clickCell: 'c',
@@ -28,7 +28,7 @@ test('a-z if cannot use first char', () => {
     takeToken: () => {},
   };
 
-  const shortcuts = AssignShortcuts(moves, {}, '');
+  const shortcuts = AssignShortcuts(moves, '');
 
   expect(shortcuts).toEqual({
     takeCard: 'a',
@@ -41,7 +41,7 @@ test('a-z if blacklist prevents using first char', () => {
     clickCell: () => {},
   };
 
-  const shortcuts = AssignShortcuts(moves, {}, 'c');
+  const shortcuts = AssignShortcuts(moves, 'c');
 
   expect(shortcuts).toEqual({
     clickCell: 'a',

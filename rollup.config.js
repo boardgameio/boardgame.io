@@ -17,8 +17,9 @@ import pkg from './package.json';
 import typescript from 'rollup-plugin-typescript2';
 const subpackages = require('./subpackages');
 
+const internalDeps = ['svelte'];
 const external = [
-  ...Object.keys(pkg.dependencies),
+  ...Object.keys(pkg.dependencies).filter(name => !internalDeps.includes(name)),
   'react',
   'socket.io-client',
 ];
@@ -69,12 +70,6 @@ export default [
   {
     input: subpackages.reduce((obj, name) => {
       obj[name] = `packages/${name}.ts`;
-
-      // The debug package can't be converted to TS
-      // yet due to the svelte import.
-      if (name == 'debug') {
-        obj[name] = 'packages/debug.js';
-      }
       return obj;
     }, {}),
     external,

@@ -7,22 +7,28 @@
  */
 
 import * as ActionCreators from '../core/action-creators';
+import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import {
   Master,
   redactLog,
   getPlayerMetadata,
-  doesGameRequireAuthentication,
+  doesMatchRequireAuthentication,
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server } from '../types';
+import { Server, State } from '../types';
 import * as StorageAPI from '../server/db/base';
+import * as dateMock from 'jest-date-mock';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
+
+beforeEach(() => {
+  dateMock.clear();
+});
 
 class InMemoryAsync extends InMemory {
   type() {
@@ -38,14 +44,15 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 
 describe('sync', () => {
   const send = jest.fn();
-  const master = new Master(game, new InMemory(), TransportAPI(send));
+  const db = new InMemory();
+  const master = new Master(game, db, TransportAPI(send));
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('causes server to respond', async () => {
-    await master.onSync('gameID', '0', 2);
+    await master.onSync('matchID', '0', 2);
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'sync',
@@ -54,19 +61,21 @@ describe('sync', () => {
   });
 
   test('sync a second time does not create a game', async () => {
-    await master.onSync('gameID', '0', 2);
-    expect(send).toHaveBeenCalled();
+    const fetchResult = db.fetch('matchID', { metadata: true });
+    await master.onSync('matchID', '0', 2);
+    expect(db.fetch('matchID', { metadata: true })).toMatchObject(fetchResult);
   });
 
   test('should not have metadata', async () => {
-    await master.onSync('gameID', '0', 2);
+    db.setState('oldGameID', {} as State);
+    await master.onSync('oldGameID', '0');
     // [0][0] = first call, first argument
-    expect(send.mock.calls[0][0].args[3]).toBeUndefined();
+    expect(send.mock.calls[0][0].args[1].filteredMetadata).toBeUndefined();
   });
 
   test('should have metadata', async () => {
     const db = new InMemory();
-    const dbMetadata = {
+    const metadata = {
       gameName: 'tic-tac-toe',
       setupData: {},
       players: {
@@ -81,10 +90,12 @@ describe('sync', () => {
           name: 'Bob',
         },
       },
+      createdAt: 0,
+      updatedAt: 0,
     };
-    db.setMetadata('gameID', dbMetadata);
+    db.createMatch('matchID', { metadata, initialState: {} as State });
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync('gameID', '0', 2);
+    await masterWithMetadata.onSync('matchID', '0', 2);
 
     const expectedMetadata = [
       { id: 0, name: 'Alice' },
@@ -108,7 +119,7 @@ describe('update', () => {
   const action = ActionCreators.gameEvent('endTurn');
 
   beforeAll(async () => {
-    await master.onSync('gameID', '0', 2);
+    await master.onSync('matchID', '0', 2);
   });
 
   beforeEach(() => {
@@ -117,13 +128,13 @@ describe('update', () => {
   });
 
   test('basic', async () => {
-    await master.onUpdate(action, 0, 'gameID', '0');
+    await master.onUpdate(action, 0, 'matchID', '0');
     expect(sendAll).toBeCalled();
     expect(sendAllReturn).not.toBeUndefined();
 
     let value = sendAllReturn('0');
     expect(value.type).toBe('update');
-    expect(value.args[0]).toBe('gameID');
+    expect(value.args[0]).toBe('matchID');
     expect(value.args[1]).toMatchObject({
       G: {},
       deltalog: undefined,
@@ -155,16 +166,16 @@ describe('update', () => {
     ]);
   });
 
-  test('invalid gameID', async () => {
+  test('invalid matchID', async () => {
     await master.onUpdate(action, 1, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `game not found, gameID=[default:unknown]`
+      `game not found, matchID=[default:unknown]`
     );
   });
 
   test('invalid stateID', async () => {
-    await master.onUpdate(action, 100, 'gameID', '1');
+    await master.onUpdate(action, 100, 'matchID', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
       `invalid stateID, was=[100], expected=[1]`
@@ -172,30 +183,30 @@ describe('update', () => {
   });
 
   test('invalid playerID', async () => {
-    await master.onUpdate(action, 1, 'gameID', '100');
-    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'gameID', '100');
+    await master.onUpdate(action, 1, 'matchID', '100');
+    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '100');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(`player not active - playerID=[100]`);
   });
 
   test('invalid move', async () => {
-    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'gameID', '1');
+    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
       `move not processed - canPlayerMakeMove=false, playerID=[1]`
     );
   });
 
-  test('valid gameID / stateID / playerID', async () => {
-    await master.onUpdate(action, 1, 'gameID', '1');
+  test('valid matchID / stateID / playerID', async () => {
+    await master.onUpdate(action, 1, 'matchID', '1');
     expect(sendAll).toHaveBeenCalled();
   });
 
   test('undo / redo', async () => {
-    await master.onUpdate(ActionCreators.undo(), 2, 'gameID', '0');
+    await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
     expect(error).not.toBeCalled();
 
-    await master.onUpdate(ActionCreators.undo(), 2, 'gameID', '1');
+    await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '1');
     expect(error).toHaveBeenCalledWith(
       `playerID=[1] cannot undo / redo right now`
     );
@@ -203,10 +214,10 @@ describe('update', () => {
 
   test('game over', async () => {
     let event = ActionCreators.gameEvent('endGame');
-    await master.onUpdate(event, 2, 'gameID', '0');
+    await master.onUpdate(event, 2, 'matchID', '0');
     event = ActionCreators.gameEvent('endTurn');
-    await master.onUpdate(event, 3, 'gameID', '0');
-    expect(error).toHaveBeenCalledWith(`game over - gameID=[gameID]`);
+    await master.onUpdate(event, 3, 'matchID', '0');
+    expect(error).toHaveBeenCalledWith(`game over - matchID=[matchID]`);
   });
 
   test('writes gameover to metadata', async () => {
@@ -216,6 +227,8 @@ describe('update', () => {
       gameName: 'tic-tac-toe',
       setupData: {},
       players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
     };
     db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
@@ -235,6 +248,8 @@ describe('update', () => {
       gameName: 'tic-tac-toe',
       setupData: {},
       players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
     };
     db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
@@ -245,6 +260,64 @@ describe('update', () => {
     await masterWithMetadata.onUpdate(event, 0, id, '0');
     const { metadata } = db.fetch(id, { metadata: true });
     expect(metadata.gameover).toEqual(gameOverArg);
+  });
+
+  test('writes updatedAt to metadata with async storage API', async () => {
+    const id = 'gameWithMetadata';
+    const db = new InMemoryAsync();
+    const dbMetadata = {
+      gameName: 'tic-tac-toe',
+      setupData: {},
+      players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    db.setMetadata(id, dbMetadata);
+    const masterWithMetadata = new Master(game, db, TransportAPI(send));
+    await masterWithMetadata.onSync(id, '0', 2);
+
+    const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
+    dateMock.advanceTo(updatedAt);
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
+    await masterWithMetadata.onUpdate(event, 0, id, '0');
+    const { metadata } = db.fetch(id, { metadata: true });
+    expect(metadata.updatedAt).toEqual(updatedAt.getTime());
+  });
+
+  test('processes update if there is no metadata', async () => {
+    const id = 'gameWithoutMetadata';
+    const db = new InMemory();
+    const masterWithoutMetadata = new Master(game, db, TransportAPI(send));
+    // Store state manually to bypass automatic metadata initialization on sync.
+    let state = InitializeGame({ game });
+    expect(state.ctx.turn).toBe(1);
+    db.setState(id, state);
+    // Dispatch update to end the turn.
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
+    await masterWithoutMetadata.onUpdate(event, 0, id, '0');
+    // Confirm the turn ended.
+    let metadata: undefined | Server.MatchData;
+    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    expect(state.ctx.turn).toBe(2);
+    expect(metadata).toBeUndefined();
+  });
+
+  test('processes update if there is no metadata with async DB', async () => {
+    const id = 'gameWithoutMetadata';
+    const db = new InMemoryAsync();
+    const masterWithoutMetadata = new Master(game, db, TransportAPI(send));
+    // Store state manually to bypass automatic metadata initialization on sync.
+    let state = InitializeGame({ game });
+    expect(state.ctx.turn).toBe(1);
+    db.setState(id, state);
+    // Dispatch update to end the turn.
+    const event = ActionCreators.gameEvent('endTurn', null, '0');
+    await masterWithoutMetadata.onUpdate(event, 0, id, '0');
+    // Confirm the turn ended.
+    let metadata: undefined | Server.MatchData;
+    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    expect(state.ctx.turn).toBe(2);
+    expect(metadata).toBeUndefined();
   });
 });
 
@@ -266,7 +339,7 @@ describe('playerView', () => {
   const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
 
   beforeAll(async () => {
-    await master.onSync('gameID', '0', 2);
+    await master.onSync('matchID', '0', 2);
   });
 
   beforeEach(() => {
@@ -276,7 +349,7 @@ describe('playerView', () => {
   });
 
   test('sync', async () => {
-    await master.onSync('gameID', '0', 2);
+    await master.onSync('matchID', '0', 2);
     expect(sendReturn.args[1].state).toMatchObject({
       G: { player: '0' },
     });
@@ -284,8 +357,8 @@ describe('playerView', () => {
 
   test('update', async () => {
     const action = ActionCreators.gameEvent('endTurn');
-    await master.onSync('gameID', '0', 2);
-    await master.onUpdate(action, 0, 'gameID', '0');
+    await master.onSync('matchID', '0', 2);
+    await master.onUpdate(action, 0, 'matchID', '0');
 
     const G_player0 = sendAllReturn('0').args[1].G;
     const G_player1 = sendAllReturn('1').args[1].G;
@@ -305,18 +378,18 @@ describe('subscribe', () => {
   });
 
   test('sync', async () => {
-    master.onSync('gameID', '0');
+    master.onSync('matchID', '0');
     expect(callback).toBeCalledWith({
-      gameID: 'gameID',
+      matchID: 'matchID',
       state: expect.objectContaining({ _stateID: 0 }),
     });
   });
 
   test('update', async () => {
     const action = ActionCreators.gameEvent('endTurn');
-    master.onUpdate(action, 0, 'gameID', '0');
+    master.onUpdate(action, 0, 'matchID', '0');
     expect(callback).toBeCalledWith({
-      gameID: 'gameID',
+      matchID: 'matchID',
       action,
       state: expect.objectContaining({ _stateID: 1 }),
     });
@@ -328,13 +401,13 @@ describe('authentication', () => {
     const send = jest.fn();
     const sendAll = jest.fn();
     const game = { seed: 0 };
-    const gameID = 'gameID';
+    const matchID = 'matchID';
     const action = ActionCreators.gameEvent('endTurn');
     const storage = new InMemoryAsync();
 
     beforeAll(async () => {
       const master = new Master(game, storage, TransportAPI());
-      await master.onSync(gameID, '0', 2);
+      await master.onSync(matchID, '0', 2);
     });
 
     test('auth failure', async () => {
@@ -345,7 +418,7 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         isActionFromAuthenticPlayer
       );
-      await master.onUpdate(action, 0, gameID, '0');
+      await master.onUpdate(action, 0, matchID, '0');
       expect(sendAll).not.toHaveBeenCalled();
     });
 
@@ -357,7 +430,7 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         isActionFromAuthenticPlayer
       );
-      await master.onUpdate(action, 0, gameID, '0');
+      await master.onUpdate(action, 0, matchID, '0');
       expect(sendAll).toHaveBeenCalled();
     });
 
@@ -368,7 +441,7 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         true
       );
-      await master.onUpdate(action, 0, gameID, '0');
+      await master.onUpdate(action, 0, matchID, '0');
       expect(sendAll).toHaveBeenCalled();
     });
   });
@@ -377,13 +450,13 @@ describe('authentication', () => {
     const send = jest.fn();
     const sendAll = jest.fn();
     const game = { seed: 0 };
-    const gameID = 'gameID';
+    const matchID = 'matchID';
     const action = ActionCreators.gameEvent('endTurn');
     const storage = new InMemory();
 
     beforeAll(() => {
       const master = new Master(game, storage, TransportAPI());
-      master.onSync(gameID, '0', 2);
+      master.onSync(matchID, '0', 2);
     });
 
     test('auth failure', () => {
@@ -394,7 +467,7 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         isActionFromAuthenticPlayer
       );
-      master.onUpdate(action, 0, gameID, '0');
+      master.onUpdate(action, 0, matchID, '0');
       expect(sendAll).not.toHaveBeenCalled();
     });
 
@@ -406,7 +479,7 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         isActionFromAuthenticPlayer
       );
-      master.onUpdate(action, 0, gameID, '0');
+      master.onUpdate(action, 0, matchID, '0');
       expect(sendAll).toHaveBeenCalled();
     });
 
@@ -417,7 +490,7 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         true
       );
-      master.onUpdate(action, 0, gameID, '0');
+      master.onUpdate(action, 0, matchID, '0');
       expect(sendAll).toHaveBeenCalled();
     });
   });
@@ -548,10 +621,10 @@ describe('redactLog', () => {
     const actionB = ActionCreators.makeMove('B', ['redacted'], '0');
 
     // test: ping-pong two moves, then sync and check the log
-    await master.onSync('gameID', '0', 2);
-    await master.onUpdate(actionA, 0, 'gameID', '0');
-    await master.onUpdate(actionB, 1, 'gameID', '0');
-    await master.onSync('gameID', '1', 2);
+    await master.onSync('matchID', '0', 2);
+    await master.onUpdate(actionA, 0, 'matchID', '0');
+    await master.onUpdate(actionB, 1, 'matchID', '0');
+    await master.onSync('matchID', '1', 2);
 
     const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
     expect(log).toMatchObject([
@@ -590,7 +663,7 @@ describe('getPlayerMetadata', () => {
 
   describe('when metadata does not contain players field', () => {
     test('then playerMetadata is undefined', () => {
-      expect(getPlayerMetadata({} as Server.GameMetadata, '0')).toBeUndefined();
+      expect(getPlayerMetadata({} as Server.MatchData, '0')).toBeUndefined();
     });
   });
 
@@ -598,7 +671,13 @@ describe('getPlayerMetadata', () => {
     test('then playerMetadata is undefined', () => {
       expect(
         getPlayerMetadata(
-          { gameName: '', setupData: {}, players: { '1': { id: 1 } } },
+          {
+            gameName: '',
+            setupData: {},
+            players: { '1': { id: 1 } },
+            createdAt: 0,
+            updatedAt: 0,
+          },
           '0'
         )
       ).toBeUndefined();
@@ -609,7 +688,13 @@ describe('getPlayerMetadata', () => {
     test('then playerMetadata is returned', () => {
       const playerMetadata = { id: 0, credentials: 'SECRET' };
       const result = getPlayerMetadata(
-        { gameName: '', setupData: {}, players: { '0': playerMetadata } },
+        {
+          gameName: '',
+          setupData: {},
+          players: { '0': playerMetadata },
+          createdAt: 0,
+          updatedAt: 0,
+        },
         '0'
       );
       expect(result).toBe(playerMetadata);
@@ -617,31 +702,33 @@ describe('getPlayerMetadata', () => {
   });
 });
 
-describe('doesGameRequireAuthentication', () => {
+describe('doesMatchRequireAuthentication', () => {
   describe('when game metadata is not found', () => {
     test('then authentication is not required', () => {
-      const result = doesGameRequireAuthentication();
+      const result = doesMatchRequireAuthentication();
       expect(result).toBe(false);
     });
   });
 
-  describe('when game has no credentials', () => {
+  describe('when match has no credentials', () => {
     test('then authentication is not required', () => {
-      const gameMetadata = {
+      const matchData = {
         gameName: '',
         setupData: {},
         players: {
           '0': { id: 1 },
         },
+        createdAt: 0,
+        updatedAt: 0,
       };
-      const result = doesGameRequireAuthentication(gameMetadata);
+      const result = doesMatchRequireAuthentication(matchData);
       expect(result).toBe(false);
     });
   });
 
-  describe('when game has credentials', () => {
+  describe('when match has credentials', () => {
     test('then authentication is required', () => {
-      const gameMetadata = {
+      const matchData = {
         gameName: '',
         setupData: {},
         players: {
@@ -650,8 +737,10 @@ describe('doesGameRequireAuthentication', () => {
             credentials: 'SECRET',
           },
         },
+        createdAt: 0,
+        updatedAt: 0,
       };
-      const result = doesGameRequireAuthentication(gameMetadata);
+      const result = doesMatchRequireAuthentication(matchData);
       expect(result).toBe(true);
     });
   });
@@ -660,7 +749,7 @@ describe('doesGameRequireAuthentication', () => {
 describe('isActionFromAuthenticPlayer', () => {
   let action;
   let playerID;
-  let gameMetadata;
+  let matchData;
   let credentials;
   let playerMetadata;
 
@@ -671,13 +760,13 @@ describe('isActionFromAuthenticPlayer', () => {
       payload: { credentials: 'SECRET' },
     };
 
-    gameMetadata = {
+    matchData = {
       players: {
         '0': { credentials: 'SECRET' },
       },
     };
 
-    playerMetadata = gameMetadata.players[playerID];
+    playerMetadata = matchData.players[playerID];
     ({ credentials } = action.payload || {});
   });
 

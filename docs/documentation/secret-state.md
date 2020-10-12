@@ -17,18 +17,17 @@ from that specific player.
 
 ```js
 const game = {
-  ...
-
+  // ...
   playerView: (G, ctx, playerID) => {
     return StripSecrets(G, playerID);
-  }
+  },
 };
 ```
 
 !> Make sure that you associate the game clients with individual
 players (as discussed in the [Multiplayer](multiplayer.md) section).
 
-#### PlayerView.STRIP_SECRETS
+### PlayerView.STRIP_SECRETS
 
 The framework comes bundled with an implementation of `playerView`
 that does the following:
@@ -37,7 +36,7 @@ that does the following:
 - If `G` contains a `players` object, it removes all keys except
   for the one that matches `playerID`.
 
-```
+```js
 G: {
   secret: { ... },
 
@@ -51,7 +50,7 @@ G: {
 
 becomes the following for player `1`:
 
-```
+```js
 G: {
   players: {
     '1': { ... },
@@ -62,15 +61,15 @@ G: {
 Usage:
 
 ```js
-import { Game, PlayerView } from 'boardgame.io/core';
+import { PlayerView } from 'boardgame.io/core';
 
-const App = Game({
-  ...
-  playerView: PlayerView.STRIP_SECRETS
-});
+const game = {
+  // ...
+  playerView: PlayerView.STRIP_SECRETS,
+};
 ```
 
-#### Disabling moves that manipulate secret state on the client
+### Disabling moves that manipulate secret state on the client
 
 Moves that manipulate secret state often cannot run on the client because
 the client doesn't have all the necessary data to process such moves.

@@ -6,16 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-export function AssignShortcuts(moveNames, eventNames, blacklist) {
+export function AssignShortcuts(moveNames, blacklist) {
   let shortcuts = {};
-
-  const events = {};
-  for (let name in moveNames) {
-    events[name] = name;
-  }
-  for (let name in eventNames) {
-    events[name] = name;
-  }
 
   let taken = {};
   for (let i = 0; i < blacklist.length; i++) {
@@ -26,7 +18,7 @@ export function AssignShortcuts(moveNames, eventNames, blacklist) {
   // Try assigning the first char of each move as the shortcut.
   let t = taken;
   let canUseFirstChar = true;
-  for (let name in events) {
+  for (const name in moveNames) {
     let shortcut = name[0];
     if (t[shortcut]) {
       canUseFirstChar = false;
@@ -44,7 +36,7 @@ export function AssignShortcuts(moveNames, eventNames, blacklist) {
   t = taken;
   let next = 97;
   shortcuts = {};
-  for (let name in events) {
+  for (const name in moveNames) {
     let shortcut = String.fromCharCode(next);
 
     while (t[shortcut]) {

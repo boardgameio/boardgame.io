@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Client } from 'boardgame.io/react';
 import { Debug } from 'boardgame.io/debug';
+import { INVALID_MOVE } from 'boardgame.io/core';
 
 function IsVictory(cells) {
   const positions = [
@@ -28,9 +29,10 @@ const TicTacToe = {
 
   moves: {
     clickCell(G, ctx, id) {
-      if (G.cells[id] === null) {
-        G.cells[id] = ctx.currentPlayer;
+      if (G.cells[id] !== null) {
+        return INVALID_MOVE;
       }
+      G.cells[id] = ctx.currentPlayer;
     },
   },
 
@@ -60,13 +62,7 @@ const TicTacToe = {
 
 class TicTacToeBoard extends React.Component {
   onClick(id) {
-    if (this.isActive(id)) {
-      this.props.moves.clickCell(id);
-    }
-  }
-
-  isActive(id) {
-    return this.props.isActive && this.props.G.cells[id] == null;
+    this.props.moves.clickCell(id);
   }
 
   render() {

@@ -22,7 +22,7 @@ const App = Client({
 const Singleplayer = () => (
   <View style={styles.container}>
     <Image source={logo} style={styles.logo} />
-    <App gameID="single" />
+    <App matchID="single" />
   </View>
 );
 

@@ -1,8 +1,10 @@
 import { Object } from 'ts-toolbelt';
 import Koa from 'koa';
+import { Store as ReduxStore } from 'redux';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
-import { INVALID_MOVE } from './core/reducer';
+import { CreateGameReducer } from './core/reducer';
+import { INVALID_MOVE } from './core/constants';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
 import { RandomAPI } from './plugins/plugin-random';
@@ -227,6 +229,9 @@ interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
 
 export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   name?: string;
+  minPlayers?: number;
+  maxPlayers?: number;
+  disableUndo?: boolean;
   seed?: string | number;
   setup?: (ctx: CtxWithPlugins, setupData?: any) => any;
   moves?: MoveMap<G, CtxWithPlugins>;
@@ -246,6 +251,18 @@ export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
   playerView?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID) => any;
   plugins?: Array<Plugin<any, any, G>>;
+  ai?: {
+    enumerate: (
+      G: G,
+      ctx: Ctx,
+      playerID: PlayerID
+    ) => Array<
+      | { event: string; args?: any[] }
+      | { move: string; args?: any[] }
+      | ActionShape.MakeMove
+      | ActionShape.GameEvent
+    >;
+  };
   processMove?: (
     state: State<G, Ctx | CtxWithPlugins>,
     action: ActionPayload.MakeMove
@@ -276,22 +293,41 @@ export namespace Server {
     data?: any;
   };
 
-  export interface GameMetadata {
+  export interface MatchData {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
     setupData?: any;
     gameover?: any;
-    nextRoomID?: string;
+    nextMatchID?: string;
     unlisted?: boolean;
-  }
-
-  export interface LobbyConfig {
-    uuid?: () => string;
-    generateCredentials?: GenerateCredentials;
-    apiPort?: number;
-    apiCallback?: () => void;
+    createdAt: number;
+    updatedAt: number;
   }
 }
+
+export namespace LobbyAPI {
+  export type GameList = string[];
+  type PublicPlayerMetadata = Omit<Server.PlayerMetadata, 'credentials'>;
+  export type Match = Omit<Server.MatchData, 'players'> & {
+    matchID: string;
+    players: PublicPlayerMetadata[];
+  };
+  export interface MatchList {
+    matches: Match[];
+  }
+  export interface CreatedMatch {
+    matchID: string;
+  }
+  export interface JoinedMatch {
+    playerCredentials: string;
+  }
+  export interface NextMatch {
+    nextMatchID: string;
+  }
+}
+
+export type Reducer = ReturnType<typeof CreateGameReducer>;
+export type Store = ReduxStore<State, ActionShape.Any>;
 
 export namespace CredentialedActionShape {
   export type MakeMove = ReturnType<typeof ActionCreators.makeMove>;

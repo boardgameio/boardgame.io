@@ -24,11 +24,11 @@ const Multiplayer = () => (
     <h1>Multiplayer</h1>
     <div className="runner">
       <div className="run">
-        <App gameID="multi" playerID="0" />
+        <App matchID="multi" playerID="0" />
         &lt;App playerID=&quot;0&quot;/&gt;
       </div>
       <div className="run">
-        <App gameID="multi" playerID="1" />
+        <App matchID="multi" playerID="1" />
         &lt;App playerID=&quot;1&quot;/&gt;
       </div>
     </div>

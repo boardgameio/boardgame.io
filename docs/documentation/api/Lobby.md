@@ -1,157 +1,247 @@
 # Lobby
 
-### React components
+The [Server](/api/Server) hosts the Lobby REST API that can be used to create
+and join matches. It is particularly useful when you want to
+authenticate clients to prove that they have the right to send
+actions on behalf of a player.
 
-You can use the lobby component with the code below:
+Authenticated matches are created with server-side tokens for each player.
+You can create a match with the `create` API call, and join a player to a
+match with the `join` API call.
+
+A match that is authenticated will not accept moves from a client on behalf
+of a player without the appropriate credential token.
+
+Use the `create` API call to create a match that requires credential tokens.
+When you call the `join` API, you can retrieve the credential token for a
+particular player.
+
+## Clients
+
+<!-- tabs:start -->
+### **Plain JS**
+
+boardgame.io provides a lightweight wrapper around the Fetch API to simplify
+using a Lobby API server from the client.
+
+
+```js
+import { LobbyClient } from 'boardgame.io/client';
+
+const lobbyClient = new LobbyClient({ server: 'http://localhost:8000' });
+
+lobbyClient.listGames()
+  .then(console.log) // => ['chess', 'tic-tac-toe']
+  .catch(console.error);
+```
+
+### **React**
+
+The React lobby component provides a more high-level client, including UI
+for listing, joining, and creating matches.
 
 ```js
 import { Lobby } from 'boardgame.io/react';
+import { TicTacToe } from './Game';
+import { TicTacToeBoard } from './Board';
 
 <Lobby
   gameServer={`https://${window.location.hostname}:8000`}
   lobbyServer={`https://${window.location.hostname}:8000`}
-  gameComponents={importedGames}
+  gameComponents={[
+    { game: TicTacToe, board: TicTacToeBoard }
+  ]}
 />;
 ```
 
-`importedGames` is an array of objects with these fields:
+`gameComponents` expects an array of objects with these fields:
 
-- `game`: The boardgame.io `Game` definition.
+- `game`: A boardgame.io `Game` definition.
 - `board`: The React component that will render the board.
 
-### Server-side API
+<!-- tabs:end -->
 
-The [Server](/api/Server) hosts the Lobby REST API that can be used to create and join rooms. It is particularly useful when you want to
-authenticate clients to prove that they have the right to send
-actions on behalf of a player.
+## REST API
 
-Authenticated games are created with server-side tokens for each player. You can create a room with the `create` API call, and join a player to a room with the `join` API call.
+### Listing available game types
 
-A game that is authenticated will not accept moves from a client on behalf of a player without the appropriate credential token.
+#### GET `/games`
 
-Use the `create` API call to create a room that requires credential tokens. When you call the `join` API, you can retrieve the credential token for a particular player.
+Returns an array of names for the games this server is running.
 
-#### Configuration
-
-You can pass `lobbyConfig` to configure the Lobby API
-during server startup:
+#### Using a LobbyClient instance
 
 ```js
-server.run({ port: 8000, lobbyConfig });
+const games = await lobbyClient.listGames();
 ```
 
-Options are:
+### Listing all matches for a given game
 
-- `apiPort`: If specified, it runs the Lobby API in a separate Koa server on this port. Otherwise, it shares the same Koa server runnning on the default boardgame.io `port`.
-- `apiCallback`: Called when the Koa server is ready. Only applicable if `apiPort` is specified.
-- `uuid`: Function that returns an unique identifier, needed for creating new game ID codes. If not specified, uses [shortid](https://www.npmjs.com/package/shortid).
+#### GET `/games/{name}`
 
-#### Creating a room
+Returns all match instances of the game named `name`.
 
-##### POST `/games/{name}/create`
+Returns an array of `matches`. Each instance has fields:
 
-Creates a new authenticated room for a game named `name`.
+- `matchID`: the ID of the match instance.
+
+- `players`: the list of seats and players that have joined the game, if any.
+
+- `setupData` (optional): custom object that was passed to the game `setup` function.
+
+#### Using a LobbyClient instance
+
+```js
+const { matches } = await lobbyClient.listMatches('tic-tac-toe');
+```
+
+### Getting a specific match by its ID
+
+#### GET `/games/{name}/{id}`
+
+Returns a match instance given its matchID.
+
+Returns a match instance. Each instance has fields:
+
+- `matchID`: the ID of the match instance.
+
+- `players`: the list of seats and players that have joined the match, if any.
+
+- `setupData` (optional): custom object that was passed to the game `setup` function.
+
+#### Using a LobbyClient instance
+
+```js
+const match = await lobbyClient.getMatch('tic-tac-toe', 'matchID');
+```
+
+### Creating a match
+
+#### POST `/games/{name}/create`
+
+Creates a new authenticated match for a game named `name`.
 
 Accepts three parameters:
 
-`numPlayers` (required): the number of players.
+- `numPlayers` (required): the number of players.
 
-`setupData` (optional): custom object that is passed to the game `setup` function.
+- `setupData` (optional): custom object that is passed to the game `setup` function.
 
-`unlisted` (optional): if set to `true`, the room will be excluded from the public list of room instances.
+- `unlisted` (optional): if set to `true`, the match will be excluded from the public list of match instances.
 
-Returns `roomID`, which is the ID of the newly created game instance.
+Returns `matchID`, which is the ID of the newly created game instance.
 
-#### Joining a game
+#### Using a LobbyClient instance
 
-##### POST `/games/{name}/{id}/join`
+```js
+const { matchID } = await lobbyClient.createMatch('tic-tac-toe', {
+  numPlayers: 2
+});
+```
 
-Allows a player to join a particular room instance `id` of a game named `name`.
+### Joining a match
+
+#### POST `/games/{name}/{id}/join`
+
+Allows a player to join a particular match instance `id` of a game named `name`.
 
 Accepts three JSON body parameters:
 
-`playerID` (required): the ordinal player in the game that is being joined (0, 1...).
+- `playerID` (required): the ordinal player in the match that is being joined (`'0'`, `'1'`...).
 
-`playerName` (required): the display name of the player joining the game.
+- `playerName` (required): the display name of the player joining the match.
 
-`data` (optional): additional information associated to the player.
+- `data` (optional): additional metadata to associate with the player.
 
 Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
 
-#### Update a player's information
+#### Using a LobbyClient instance
 
-##### POST `/games/{name}/{id}/update`
+```js
+const { playerCredentials } = await lobbyClient.joinMatch(
+  'tic-tac-toe',
+  'matchID',
+  {
+    playerID: '0',
+    playerName: 'Alice',
+  }
+);
+```
 
-Rename and/or update additional information of a user in the room instance `id` of a game named `name` previously joined by the player.
+### Updating a player’s metadata
 
-Accepts four parameters, requires at least one of the two optional parameters:
+#### POST `/games/{name}/{id}/update`
 
-`playerID` (required): the ID used by the player in the game (0,1...).
+Rename and/or update additional metadata for a player in the match instance `id` of a game named `name` previously joined by the player.
 
-`crendentials` (required): the authentication token of the player.
+Accepts four JSON body parameters, requires at least one of the two optional parameters:
 
-`newName` (optional): the new name of the player.
+- `playerID` (required): the ID used by the player in the match (0,1...).
 
-`data` (optional): additional information associated to the player.
+- `credentials` (required): the authentication token of the player.
 
-#### Leaving a room
+- `newName` (optional): the new name of the player.
 
-##### POST `/games/{name}/{id}/leave`
+- `data` (optional): additional metadata to associate with the player.
 
-Leave the room instance `id` of a game named `name` previously joined by the player.
+#### Using a LobbyClient instance
 
-Accepts two parameters, all required:
+```js
+await lobbyClient.updatePlayer('tic-tac-toe', 'matchID', {
+  playerID: '0',
+  credentials: 'playerCredentials',
+  newName: 'Al',
+});
+```
 
-`playerID`: the ID used by the player in the game (0, 1...).
+### Leaving a match
 
-`credentials`: the authentication token of the player.
+#### POST `/games/{name}/{id}/leave`
 
-#### Listing all room instances of a given game
+Leave the match instance `id` of a game named `name` previously joined by the player.
 
-##### GET `/games/{name}`
+Accepts two JSON body parameters, all required:
 
-Returns all room instances of the game named `name`.
+- `playerID`: the ID used by the player in the match (0, 1...).
 
-Returns an array of `rooms`. Each instance has fields:
+- `credentials`: the authentication token of the player.
 
-`roomID`: the ID of the room instance.
+#### Using a LobbyClient instance
 
-`players`: the list of seats and players that have joined the game, if any.
+```js
+await lobbyClient.leaveMatch('tic-tac-toe', 'matchID', {
+  playerID: '0',
+  credentials: 'playerCredentials',
+});
+```
 
-`setupData` (optional): custom object that was passed to the game `setup` function.
+### Playing again
 
-#### Getting specific instance of a room by its ID
+#### POST `/games/{name}/{id}/playAgain`
 
-##### GET `/games/{name}/{id}`
+- `{name}` (required): the name of the game being played again.
 
-Returns a room instance given its roomID.
+- `{id}` (required): the ID of the previous finished match.
 
-Returns a room instance. Each instance has fields:
-
-`roomID`: the ID of the room instance.
-
-`players`: the list of seats and players that have joined the game, if any.
-
-`setupData` (optional): custom object that was passed to the game `setup` function.
-
-#### Client Authentication
-
-All actions for an authenticated game require an additional payload field `credentials`, which must be the given secret associated with the player.
-
-#### Playing again
-
-##### POST `/games/{name}/{id}/playAgain`
-
-`{name}` (required): the name of the game being played again.
-
-`{id}` (required): the ID of the previous finished room.
-
-Given a previous room, generates a room ID where users should go if they want to play again. Creates this new room if it didn't exist before.
+Given a previous match, generates a match ID where users should go if they want to play again. Creates this new match if it didn't exist before.
 
 Accepts these parameters:
 
-`playerID` (required): the player ID of the player on the previous game.
+- `playerID` (required): the player ID of the player in the previous match.
 
-`credentials` (required): player's credentials.
+- `credentials` (required): player's credentials.
 
-Returns `nextRoomID`, which is the ID of the newly created room that the user should go to play again.
+- `numPlayers` (optional): the number of players. Defaults to the `numPlayers` value of the previous match.
+
+- `setupData` (optional): custom object that was passed to the game `setup` function. Defaults to the `setupData` object of the previous room.
+
+Returns `nextMatchID`, which is the ID of the newly created match that the user should go to play again.
+
+#### Using a LobbyClient instance
+
+```js
+const { nextMatchID } = await lobbyClient.playAgain('tic-tac-toe', 'matchID', {
+  playerID: '0',
+  credentials: 'playerCredentials',
+});
+```

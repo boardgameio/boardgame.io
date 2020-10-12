@@ -6,12 +6,12 @@ const shell = require('shelljs');
 const tempy = require('tempy');
 
 const CURRENT_TAG = shell
-  .exec('git tag', { silent: true })
+  .exec('git tag --sort=v:refname', { silent: true })
   .tail({ '-n': '1' })
   .stdout.trim();
 
 const PREVIOUS_TAG = shell
-  .exec('git tag', { silent: true })
+  .exec('git tag --sort=v:refname', { silent: true })
   .tail({ '-n': 2 })
   .head({ '-n': 1 })
   .stdout.trim();
@@ -27,7 +27,10 @@ shell.echo(EOL).toEnd(FILE);
 
 shell
   .exec(`git log --oneline "${PREVIOUS_TAG}"..`, { silent: true })
-  .sed(/(\w+)/, '[[$1](https://github.com/nicolodavis/boardgame.io/commit/$1)]')
+  .sed(
+    /(\w+)/,
+    '* [[$1](https://github.com/boardgameio/boardgame.io/commit/$1)]'
+  )
   .toEnd(FILE);
 
 shell.echo(EOL).toEnd(FILE);

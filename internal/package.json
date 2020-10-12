@@ -1,0 +1,7 @@
+{
+  "name": "boardgame.io/internal",
+  "private": true,
+  "types": "../dist/types/packages/internal.d.ts",
+  "main": "../dist/cjs/internal.js",
+  "module": "../dist/esm/internal.js"
+}
