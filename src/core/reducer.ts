@@ -284,6 +284,8 @@ export function CreateGameReducer({
       }
 
       case Actions.UNDO: {
+        state = { ...state, deltalog: [] };
+
         if (game.disableUndo) {
           error('Undo is not enabled');
           return state;
@@ -316,23 +318,28 @@ export function CreateGameReducer({
           return state;
         }
 
+        state = initializeDeltalog(state, action);
+
         return {
           ...state,
           G: restore.G,
           ctx: restore.ctx,
           plugins: restore.plugins,
+          _stateID: state._stateID + 1,
           _undo: _undo.slice(0, _undo.length - 1),
           _redo: [last, ..._redo],
         };
       }
 
       case Actions.REDO: {
-        const { _undo, _redo } = state;
+        state = { ...state, deltalog: [] };
 
         if (game.disableUndo) {
           error('Redo is not enabled');
           return state;
         }
+
+        const { _undo, _redo } = state;
 
         if (_redo.length == 0) {
           return state;
@@ -348,11 +355,14 @@ export function CreateGameReducer({
           return state;
         }
 
+        state = initializeDeltalog(state, action);
+
         return {
           ...state,
           G: first.G,
           ctx: first.ctx,
           plugins: first.plugins,
+          _stateID: state._stateID + 1,
           _undo: [..._undo, first],
           _redo: _redo.slice(1),
         };
