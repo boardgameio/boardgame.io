@@ -196,7 +196,9 @@ export class _ClientImpl<G extends any = any> {
 
       switch (action.type) {
         case Actions.MAKE_MOVE:
-        case Actions.GAME_EVENT: {
+        case Actions.GAME_EVENT:
+        case Actions.UNDO:
+        case Actions.REDO: {
           const deltalog = state.deltalog;
           this.log = [...this.log, ...deltalog];
           break;
