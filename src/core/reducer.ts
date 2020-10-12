@@ -307,6 +307,7 @@ export function CreateGameReducer({
           ...state,
           G: restore.G,
           ctx: restore.ctx,
+          plugins: restore.plugins,
           _undo: _undo.slice(0, _undo.length - 1),
           _redo: [last, ..._redo],
         };
@@ -338,6 +339,7 @@ export function CreateGameReducer({
           ...state,
           G: first.G,
           ctx: first.ctx,
+          plugins: first.plugins,
           _undo: [..._undo, first],
           _redo: _redo.slice(1),
         };
