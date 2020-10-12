@@ -387,9 +387,9 @@ describe('undo / redo', () => {
     expect(state.G).toMatchObject({ A: true, C: true });
   });
 
-  test('redo has no effect if nothing to redo', () => {
+  test('redo only resets deltalog if nothing to redo', () => {
     const state = reducer(initialState, makeMove('move', 'A', '0'));
-    expect(reducer(state, redo())).toEqual(state);
+    expect(reducer(state, redo())).toEqual({ ...state, deltalog: [] });
   });
 });
 
@@ -484,13 +484,13 @@ describe('undo stack', () => {
 
   test('can’t undo at the start of a turn', () => {
     const newState = reducer(state, undo());
-    expect(state).toEqual(newState);
+    expect(newState).toEqual({ ...state, deltalog: [] });
   });
 
   test('can’t undo another player’s move', () => {
     state = reducer(state, makeMove('basic', null, '1'));
     const newState = reducer(state, undo('0'));
-    expect(state).toEqual(newState);
+    expect(newState).toEqual({ ...state, deltalog: [] });
   });
 });
 
@@ -546,7 +546,7 @@ describe('redo stack', () => {
     expect(state._redo).toHaveLength(1);
     const newState = reducer(state, redo('0'));
     expect(state._redo).toHaveLength(1);
-    expect(newState).toEqual(state);
+    expect(newState).toEqual({ ...state, deltalog: [] });
   });
 });
 

@@ -5,7 +5,6 @@
 
   const { secondaryPane } = getContext('secondaryPane');
 
-  import { MAKE_MOVE } from '../../../core/action-types';
   import { CreateGameReducer } from '../../../core/reducer';
   import TurnMarker from './TurnMarker.svelte';
   import PhaseMarker from './PhaseMarker.svelte';
@@ -24,9 +23,7 @@
 
       if (!automatic) {
         state = reducer(state, action);
-      }
 
-      if (action.type == MAKE_MOVE) {
         if (logIndex == 0) {
           break;
         }
@@ -40,7 +37,7 @@
   function OnLogClick(e) {
     const { logIndex } = e.detail;
     const state = rewind(logIndex);
-    const renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
+    const renderedLogEntries = log.filter(e => !e.automatic);
     client.overrideGameState(state);
 
     if (pinned == logIndex) {
@@ -90,7 +87,7 @@
 
   $: {
     log = $client.log;
-    renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
+    renderedLogEntries = log.filter(e => !e.automatic);
 
     let eventsInCurrentPhase = 0;
     let eventsInCurrentTurn = 0;
