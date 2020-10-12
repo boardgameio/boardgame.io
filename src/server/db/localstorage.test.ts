@@ -26,10 +26,10 @@ describe('LocaLStorage', () => {
     let stateEntry: unknown = { a: 1 };
 
     // Create game.
-    db.createGame('gameID', {
+    db.createMatch('gameID', {
       metadata: {
         gameName: 'tic-tac-toe',
-      } as Server.GameMetadata,
+      } as Server.MatchData,
       initialState: stateEntry as State,
     });
 
@@ -43,11 +43,11 @@ describe('LocaLStorage', () => {
   });
 
   test('listGames', () => {
-    let keys = db.listGames({});
+    let keys = db.listMatches({});
     expect(keys).toEqual(['gameID']);
-    keys = db.listGames({ gameName: 'tic-tac-toe' });
+    keys = db.listMatches({ gameName: 'tic-tac-toe' });
     expect(keys).toEqual(['gameID']);
-    keys = db.listGames({ gameName: 'chess' });
+    keys = db.listMatches({ gameName: 'chess' });
     expect(keys).toEqual([]);
   });
 
@@ -65,10 +65,10 @@ describe('LocaLStorage', () => {
     let stateEntry: unknown = { a: 1 };
 
     // create game in db
-    db.createGame('gameID', {
+    db.createMatch('gameID', {
       metadata: {
         gameName: 'tic-tac-toe',
-      } as Server.GameMetadata,
+      } as Server.MatchData,
       initialState: stateEntry as State,
     });
 
