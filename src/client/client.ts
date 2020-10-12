@@ -43,6 +43,24 @@ interface DebugOpt {
 }
 
 /**
+ * Standardise the passed playerID, using currentPlayer if appropriate.
+ */
+function assumedPlayerID(
+  playerID: PlayerID | null | undefined,
+  store: Store,
+  multiplayer?: unknown
+): PlayerID {
+  // In singleplayer mode, if the client does not have a playerID
+  // associated with it, we attach the currentPlayer as playerID.
+  if (!multiplayer && (playerID === null || playerID === undefined)) {
+    const state = store.getState();
+    playerID = state.ctx.currentPlayer;
+  }
+
+  return playerID;
+}
+
+/**
  * createDispatchers
  *
  * Create action dispatcher wrappers with bound playerID and credentials
@@ -57,20 +75,11 @@ function createDispatchers(
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
     dispatchers[name] = function(...args: any[]) {
-      let assumedPlayerID = playerID;
-
-      // In singleplayer mode, if the client does not have a playerID
-      // associated with it, we attach the currentPlayer as playerID.
-      if (!multiplayer && (playerID === null || playerID === undefined)) {
-        const state = store.getState();
-        assumedPlayerID = state.ctx.currentPlayer;
-      }
-
       store.dispatch(
         ActionCreators[storeActionType](
           name,
           args,
-          assumedPlayerID,
+          assumedPlayerID(playerID, store, multiplayer),
           credentials
         )
       );
