@@ -201,34 +201,6 @@ describe('phases', () => {
 });
 
 describe('turn', () => {
-  test('onBegin with undoable feature', () => {
-    const onBegin = jest.fn(G => G);
-    const flow = Flow({
-      turn: { onBegin },
-      disableUndo: false,
-    });
-    const state = { ctx: flow.ctx(2) };
-
-    expect(onBegin).not.toHaveBeenCalled();
-    const updatedState = flow.init(state);
-    expect(onBegin).toHaveBeenCalled();
-    expect(updatedState._undo).toHaveLength(1);
-  });
-
-  test('onBegin without undoable feature', () => {
-    const onBegin = jest.fn(G => G);
-    const flow = Flow({
-      turn: { onBegin },
-      disableUndo: true,
-    });
-    const state = { ctx: flow.ctx(2) };
-
-    expect(onBegin).not.toHaveBeenCalled();
-    const updatedState = flow.init(state);
-    expect(onBegin).toHaveBeenCalled();
-    expect(updatedState._undo).toHaveLength(0);
-  });
-
   test('onEnd', () => {
     const onEnd = jest.fn(G => G);
     const flow = Flow({

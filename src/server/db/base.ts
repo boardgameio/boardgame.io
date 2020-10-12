@@ -34,6 +34,21 @@ export type FetchResult<O extends FetchOpts> = Object.Pick<
   Object.SelectKeys<O, true>
 >;
 
+/**
+ * Options passed when listing matches.
+ */
+export interface ListMatchesOpts {
+  gameName?: string;
+  where?: {
+    isGameover?: boolean;
+    updatedBefore?: number;
+    updatedAfter?: number;
+  };
+}
+
+/**
+ * @deprecated Use ListMatchesOpts instead
+ */
 export interface ListGamesOpts {
   gameName?: string;
   where?: {
@@ -44,7 +59,15 @@ export interface ListGamesOpts {
 }
 
 /**
- * Options passed when creating a new game.
+ * Options passed when creating a new match.
+ */
+export interface CreateMatchOpts {
+  initialState: State;
+  metadata: Server.MatchData;
+}
+
+/**
+ * @deprecated Use CreateMatchOpts instead
  */
 export interface CreateGameOpts {
   initialState: State;
@@ -64,6 +87,32 @@ export abstract class Async {
   abstract connect();
 
   /**
+   * Create a new match.
+   *
+   * This might just need to call setState and setMetadata in
+   * most implementations.
+   *
+   * However, it exists as a separate call so that the
+   * implementation can provision things differently when
+   * a match is created.  For example, it might stow away the
+   * initial match state in a separate field for easier retrieval.
+   */
+  /* istanbul ignore next */
+  async createMatch(matchID: string, opts: CreateMatchOpts): Promise<void> {
+    if (this.createGame) {
+      console.warn(
+        'The database connector does not implement a createMatch method.',
+        '\nUsing the deprecated createGame method instead.'
+      );
+      return this.createGame(matchID, opts);
+    } else {
+      console.error(
+        'The database connector does not implement a createMatch method.'
+      );
+    }
+  }
+
+  /**
    * Create a new game.
    *
    * This might just need to call setState and setMetadata in
@@ -73,8 +122,10 @@ export abstract class Async {
    * implementation can provision things differently when
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
+   *
+   * @deprecated Use createMatch instead, if implemented
    */
-  abstract createGame(matchID: string, opts: CreateGameOpts): Promise<void>;
+  async createGame?(matchID: string, opts: CreateGameOpts): Promise<void>;
 
   /**
    * Update the game state.
@@ -110,9 +161,29 @@ export abstract class Async {
   abstract wipe(matchID: string): Promise<void>;
 
   /**
-   * Return all games.
+   * Return all matches.
    */
-  abstract listGames(opts?: ListGamesOpts): Promise<string[]>;
+  /* istanbul ignore next */
+  async listMatches(opts?: ListMatchesOpts): Promise<string[]> {
+    if (this.listGames) {
+      console.warn(
+        'The database connector does not implement a listMatches method.',
+        '\nUsing the deprecated listGames method instead.'
+      );
+      return this.listGames(opts);
+    } else {
+      console.error(
+        'The database connector does not implement a listMatches method.'
+      );
+    }
+  }
+
+  /**
+   * Return all games.
+   *
+   * @deprecated Use listMatches instead, if implemented
+   */
+  async listGames?(opts?: ListGamesOpts): Promise<string[]>;
 }
 
 export abstract class Sync {
@@ -128,6 +199,32 @@ export abstract class Sync {
   }
 
   /**
+   * Create a new match.
+   *
+   * This might just need to call setState and setMetadata in
+   * most implementations.
+   *
+   * However, it exists as a separate call so that the
+   * implementation can provision things differently when
+   * a match is created.  For example, it might stow away the
+   * initial match state in a separate field for easier retrieval.
+   */
+  /* istanbul ignore next */
+  createMatch(matchID: string, opts: CreateMatchOpts): void {
+    if (this.createGame) {
+      console.warn(
+        'The database connector does not implement a createMatch method.',
+        '\nUsing the deprecated createGame method instead.'
+      );
+      return this.createGame(matchID, opts);
+    } else {
+      console.error(
+        'The database connector does not implement a createMatch method.'
+      );
+    }
+  }
+
+  /**
    * Create a new game.
    *
    * This might just need to call setState and setMetadata in
@@ -137,14 +234,16 @@ export abstract class Sync {
    * implementation can provision things differently when
    * a game is created.  For example, it might stow away the
    * initial game state in a separate field for easier retrieval.
+   *
+   * @deprecated Use createMatch instead, if implemented
    */
-  abstract createGame(matchID: string, opts: CreateGameOpts): void;
+  createGame?(matchID: string, opts: CreateGameOpts): void;
 
   /**
-   * Update the game state.
+   * Update the match state.
    *
    * If passed a deltalog array, setState should append its contents to the
-   * existing log for this game.
+   * existing log for this match.
    */
   abstract setState(matchID: string, state: State, deltalog?: LogEntry[]): void;
 
@@ -154,17 +253,37 @@ export abstract class Sync {
   abstract setMetadata(matchID: string, metadata: Server.MatchData): void;
 
   /**
-   * Fetch the game state.
+   * Fetch the match state.
    */
   abstract fetch<O extends FetchOpts>(matchID: string, opts: O): FetchResult<O>;
 
   /**
-   * Remove the game state.
+   * Remove the match state.
    */
   abstract wipe(matchID: string): void;
 
   /**
-   * Return all games.
+   * Return all matches.
    */
-  abstract listGames(opts?: ListGamesOpts): string[];
+  /* istanbul ignore next */
+  listMatches(opts?: ListMatchesOpts): string[] {
+    if (this.listGames) {
+      console.warn(
+        'The database connector does not implement a listMatches method.',
+        '\nUsing the deprecated listGames method instead.'
+      );
+      return this.listGames(opts);
+    } else {
+      console.error(
+        'The database connector does not implement a listMatches method.'
+      );
+    }
+  }
+
+  /**
+   * Return all games.
+   *
+   * @deprecated Use listMatches instead, if implemented
+   */
+  listGames?(opts?: ListGamesOpts): string[];
 }

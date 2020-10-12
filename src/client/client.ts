@@ -49,6 +49,24 @@ interface DebugOpt {
 const GlobalClientManager = new ClientManager();
 
 /**
+ * Standardise the passed playerID, using currentPlayer if appropriate.
+ */
+function assumedPlayerID(
+  playerID: PlayerID | null | undefined,
+  store: Store,
+  multiplayer?: unknown
+): PlayerID {
+  // In singleplayer mode, if the client does not have a playerID
+  // associated with it, we attach the currentPlayer as playerID.
+  if (!multiplayer && (playerID === null || playerID === undefined)) {
+    const state = store.getState();
+    playerID = state.ctx.currentPlayer;
+  }
+
+  return playerID;
+}
+
+/**
  * createDispatchers
  *
  * Create action dispatcher wrappers with bound playerID and credentials
@@ -63,20 +81,11 @@ function createDispatchers(
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
     dispatchers[name] = function(...args: any[]) {
-      let assumedPlayerID = playerID;
-
-      // In singleplayer mode, if the client does not have a playerID
-      // associated with it, we attach the currentPlayer as playerID.
-      if (!multiplayer && (playerID === null || playerID === undefined)) {
-        const state = store.getState();
-        assumedPlayerID = state.ctx.currentPlayer;
-      }
-
       store.dispatch(
         ActionCreators[storeActionType](
           name,
           args,
-          assumedPlayerID,
+          assumedPlayerID(playerID, store, multiplayer),
           credentials
         )
       );
@@ -177,10 +186,18 @@ export class _ClientImpl<G extends any = any> {
       this.store.dispatch(ActionCreators.reset(this.initialState));
     };
     this.undo = () => {
-      this.store.dispatch(ActionCreators.undo(this.playerID, this.credentials));
+      const undo = ActionCreators.undo(
+        assumedPlayerID(this.playerID, this.store, this.multiplayer),
+        this.credentials
+      );
+      this.store.dispatch(undo);
     };
     this.redo = () => {
-      this.store.dispatch(ActionCreators.redo(this.playerID, this.credentials));
+      const redo = ActionCreators.redo(
+        assumedPlayerID(this.playerID, this.store, this.multiplayer),
+        this.credentials
+      );
+      this.store.dispatch(redo);
     };
 
     this.log = [];
@@ -202,7 +219,9 @@ export class _ClientImpl<G extends any = any> {
 
       switch (action.type) {
         case Actions.MAKE_MOVE:
-        case Actions.GAME_EVENT: {
+        case Actions.GAME_EVENT:
+        case Actions.UNDO:
+        case Actions.REDO: {
           const deltalog = state.deltalog;
           this.log = [...this.log, ...deltalog];
           break;
@@ -401,7 +420,11 @@ export class _ClientImpl<G extends any = any> {
     // Secrets are normally stripped on the server,
     // but we also strip them here so that game developers
     // can see their effects while prototyping.
-    const G = this.game.playerView(state.G, state.ctx, this.playerID);
+    // Do not strip again if this is a multiplayer game
+    // since the server has already stripped secret info. (issue #818)
+    const G = this.multiplayer
+      ? state.G
+      : this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
     return {

@@ -23,6 +23,7 @@ import {
   LogEntry,
   PlayerID,
 } from '../types';
+import { createMetadata } from '../server/util';
 import * as StorageAPI from '../server/db/base';
 
 export const getPlayerMetadata = (
@@ -216,13 +217,11 @@ export class Master {
     const key = matchID;
 
     let state: State;
-    let result: StorageAPI.FetchResult<{ state: true }>;
     if (IsSynchronous(this.storageAPI)) {
-      result = this.storageAPI.fetch(key, { state: true });
+      ({ state } = this.storageAPI.fetch(key, { state: true }));
     } else {
-      result = await this.storageAPI.fetch(key, { state: true });
+      ({ state } = await this.storageAPI.fetch(key, { state: true }));
     }
-    state = result.state;
 
     if (state === undefined) {
       logging.error(`game not found, matchID=[${key}]`);
@@ -243,9 +242,16 @@ export class Master {
     // that can make moves right now and the person doing the
     // action is that player.
     if (action.type == UNDO || action.type == REDO) {
+      const hasActivePlayers = state.ctx.activePlayers !== null;
+      const isCurrentPlayer = state.ctx.currentPlayer === playerID;
+
       if (
-        state.ctx.currentPlayer !== playerID ||
-        state.ctx.activePlayers !== null
+        // If activePlayers is empty, non-current players can’t undo.
+        (!hasActivePlayers && !isCurrentPlayer) ||
+        // If player is not active or multiple players are active, can’t undo.
+        (hasActivePlayers &&
+          (state.ctx.activePlayers[playerID] === undefined ||
+            Object.keys(state.ctx.activePlayers).length > 1))
       ) {
         logging.error(`playerID=[${playerID}] cannot undo / redo right now`);
         return;
@@ -334,64 +340,51 @@ export class Master {
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
-  async onSync(matchID: string, playerID: string, numPlayers: number) {
+  async onSync(matchID: string, playerID: string, numPlayers = 2) {
     const key = matchID;
 
-    let state: State;
-    let initialState: State;
-    let log: LogEntry[];
-    let matchData: Server.MatchData;
-    let filteredMetadata: FilteredMetadata;
-    let result: StorageAPI.FetchResult<{
-      state: true;
-      metadata: true;
-      log: true;
-      initialState: true;
-    }>;
+    const fetchOpts = {
+      state: true,
+      metadata: true,
+      log: true,
+      initialState: true,
+    } as const;
+
+    let fetchResult: StorageAPI.FetchResult<typeof fetchOpts>;
 
     if (IsSynchronous(this.storageAPI)) {
-      result = this.storageAPI.fetch(key, {
-        state: true,
-        metadata: true,
-        log: true,
-        initialState: true,
-      });
+      fetchResult = this.storageAPI.fetch(key, fetchOpts);
     } else {
-      result = await this.storageAPI.fetch(key, {
-        state: true,
-        metadata: true,
-        log: true,
-        initialState: true,
-      });
+      fetchResult = await this.storageAPI.fetch(key, fetchOpts);
     }
 
-    state = result.state;
-    initialState = result.initialState;
-    log = result.log;
-    matchData = result.metadata;
-
-    if (matchData) {
-      filteredMetadata = Object.values(matchData.players).map(player => {
-        const { credentials, ...filteredData } = player;
-        return filteredData;
-      });
-    }
+    let { state, initialState, log, metadata } = fetchResult;
 
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
     if (state === undefined) {
       initialState = state = InitializeGame({ game: this.game, numPlayers });
-
-      this.subscribeCallback({
-        state,
-        matchID,
+      metadata = createMetadata({
+        game: this.game,
+        unlisted: true,
+        numPlayers,
       });
 
+      this.subscribeCallback({ state, matchID });
+
       if (IsSynchronous(this.storageAPI)) {
-        this.storageAPI.setState(key, state);
+        this.storageAPI.createMatch(key, { initialState, metadata });
       } else {
-        await this.storageAPI.setState(key, state);
+        await this.storageAPI.createMatch(key, { initialState, metadata });
       }
+    }
+
+    let filteredMetadata: FilteredMetadata;
+    if (metadata) {
+      filteredMetadata = Object.values(metadata.players).map(player => {
+        const { credentials, ...filteredData } = player;
+        return filteredData;
+      });
     }
 
     const filteredState = {
