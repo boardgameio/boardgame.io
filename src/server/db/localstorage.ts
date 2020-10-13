@@ -1,28 +1,27 @@
 import { InMemory } from './inmemory';
 
-class WithLocalStorageMap<Tkey, Tvalue> extends Map {
+class WithLocalStorageMap<Key, Value> extends Map {
   key: string;
+
   constructor(key: string) {
     super();
-    const inCache = initFromCache(key);
-    inCache.forEach((pair: any[]) => {
-      this.set(pair[0], pair[1]);
-    });
-    this.key = getStorageKey(key);
+    this.key = key;
+    const cache = JSON.parse(localStorage.getItem(this.key)) || [];
+    cache.forEach((entry: [Key, Value]) => this.set(...entry));
   }
+
   sync(): void {
-    !!this.key &&
-      localStorage.setItem(
-        this.key,
-        JSON.stringify(Array.from(this.entries()))
-      );
+    const entries = [...this.entries()];
+    localStorage.setItem(this.key, JSON.stringify(entries));
   }
-  set(key: Tkey, value: Tvalue): this {
+
+  set(key: Key, value: Value): this {
     super.set(key, value);
     this.sync();
     return this;
   }
-  delete(key: Tkey): boolean {
+
+  delete(key: Key): boolean {
     const result = super.delete(key);
     this.sync();
     return result;
@@ -32,34 +31,14 @@ class WithLocalStorageMap<Tkey, Tvalue> extends Map {
 /**
  * locaStorage data storage.
  */
-
 export class LocalStorage extends InMemory {
-  constructor(storageKey) {
+  constructor(storagePrefix: string = 'bgio') {
     super();
-    // little curry would be nicer here
-    this.state = new WithLocalStorageMap(
-      appendStorageKeyPrefix(storageKey, 'state')
-    );
-    this.initial = new WithLocalStorageMap(
-      appendStorageKeyPrefix(storageKey, 'initial')
-    );
-    this.metadata = new WithLocalStorageMap(
-      appendStorageKeyPrefix(storageKey, 'metadata')
-    );
-    this.log = new WithLocalStorageMap(
-      appendStorageKeyPrefix(storageKey, 'log')
-    );
+    const StorageMap = (stateKey: string) =>
+      new WithLocalStorageMap(`${storagePrefix}_${stateKey}`);
+    this.state = StorageMap('state');
+    this.initial = StorageMap('initial');
+    this.metadata = StorageMap('metadata');
+    this.log = StorageMap('log');
   }
-}
-
-function initFromCache(key: string): any[] {
-  return JSON.parse(localStorage.getItem(getStorageKey(key))) || [];
-}
-
-function getStorageKey(key: string) {
-  return `bgio_${key}`;
-}
-
-function appendStorageKeyPrefix(prefix: string, key: string) {
-  return prefix ? `${prefix}_${key}` : key;
 }
