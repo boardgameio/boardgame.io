@@ -1,7 +1,6 @@
 import { Object } from 'ts-toolbelt';
 import Koa from 'koa';
 import { Store as ReduxStore } from 'redux';
-import Debug from './client/debug/Debug.svelte';
 import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
 import { CreateGameReducer } from './core/reducer';
@@ -400,9 +399,4 @@ export interface SyncInfo {
   filteredMetadata: FilteredMetadata;
   initialState: State;
   log: LogEntry[];
-}
-
-export interface DebugOpt {
-  target?: HTMLElement;
-  impl?: typeof Debug;
 }
