@@ -7,26 +7,34 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { LobbyAPI } from '../types';
 
-class LobbyMatchInstance extends React.Component {
-  static propTypes = {
-    match: PropTypes.shape({
-      gameName: PropTypes.string.isRequired,
-      matchID: PropTypes.string.isRequired,
-      players: PropTypes.array.isRequired,
-    }),
-    playerName: PropTypes.string.isRequired,
-    onClickJoin: PropTypes.func.isRequired,
-    onClickLeave: PropTypes.func.isRequired,
-    onClickPlay: PropTypes.func.isRequired,
-  };
+export type MatchOpts = {
+  numPlayers: number;
+  matchID: string;
+  playerID?: string;
+};
 
-  _createSeat = player => {
+type Match = {
+  gameName: string;
+  matchID: string;
+  players: LobbyAPI.Match['players'];
+};
+
+type MatchInstanceProps = {
+  match: Match;
+  playerName: string;
+  onClickJoin: (gameName: string, matchID: string, playerID: string) => void;
+  onClickLeave: (gameName: string, matchID: string) => void;
+  onClickPlay: (gameName: string, matchOpts: MatchOpts) => void;
+};
+
+class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
+  _createSeat = (player: { name?: string; }) => {
     return player.name || '[free]';
   };
 
-  _createButtonJoin = (inst, seatId) => (
+  _createButtonJoin = (inst: Match, seatId: number) => (
     <button
       key={'button-join-' + inst.matchID}
       onClick={() =>
@@ -37,7 +45,7 @@ class LobbyMatchInstance extends React.Component {
     </button>
   );
 
-  _createButtonLeave = inst => (
+  _createButtonLeave = (inst: Match) => (
     <button
       key={'button-leave-' + inst.matchID}
       onClick={() => this.props.onClickLeave(inst.gameName, inst.matchID)}
@@ -46,7 +54,7 @@ class LobbyMatchInstance extends React.Component {
     </button>
   );
 
-  _createButtonPlay = (inst, seatId) => (
+  _createButtonPlay = (inst: Match, seatId: number) => (
     <button
       key={'button-play-' + inst.matchID}
       onClick={() =>
@@ -61,7 +69,7 @@ class LobbyMatchInstance extends React.Component {
     </button>
   );
 
-  _createButtonSpectate = inst => (
+  _createButtonSpectate = (inst: Match) => (
     <button
       key={'button-spectate-' + inst.matchID}
       onClick={() =>
@@ -75,7 +83,7 @@ class LobbyMatchInstance extends React.Component {
     </button>
   );
 
-  _createInstanceButtons = inst => {
+  _createInstanceButtons = (inst: Match) => {
     const playerSeat = inst.players.find(
       player => player.name === this.props.playerName
     );

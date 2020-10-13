@@ -7,13 +7,18 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
-class LobbyLoginForm extends React.Component {
-  static propTypes = {
-    playerName: PropTypes.string,
-    onEnter: PropTypes.func.isRequired,
-  };
+type LoginFormProps = {
+  playerName?: string;
+  onEnter: (playerName: string) => void;
+};
+
+type LoginFormState = {
+  playerName?: string;
+  nameErrorMsg: string;
+};
+
+class LobbyLoginForm extends React.Component<LoginFormProps, LoginFormState> {
   static defaultProps = {
     playerName: '',
   };
@@ -52,13 +57,13 @@ class LobbyLoginForm extends React.Component {
     this.props.onEnter(this.state.playerName);
   };
 
-  onKeyPress = event => {
+  onKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       this.onClickEnter();
     }
   };
 
-  onChangePlayerName = event => {
+  onChangePlayerName = (event: React.ChangeEvent<HTMLInputElement>) => {
     const name = event.target.value.trim();
     this.setState({
       playerName: name,

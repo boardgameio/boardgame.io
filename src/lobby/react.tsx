@@ -8,20 +8,64 @@
 
 import React from 'react';
 import Cookies from 'react-cookies';
-import PropTypes from 'prop-types';
 import { Client } from '../client/react';
 import { MCTSBot } from '../ai/mcts-bot';
 import { Local } from '../client/transport/local';
 import { SocketIO } from '../client/transport/socketio';
-import { LobbyConnection } from './connection';
+import { GameComponent, LobbyConnection } from './connection';
 import LobbyLoginForm from './login-form';
-import LobbyMatchInstance from './match-instance';
+import LobbyMatchInstance, { MatchOpts } from './match-instance';
 import LobbyCreateMatchForm from './create-match-form';
+import { LobbyAPI } from '../types';
 
-const LobbyPhases = {
-  ENTER: 'enter',
-  PLAY: 'play',
-  LIST: 'list',
+enum LobbyPhases {
+  ENTER = 'enter',
+  PLAY = 'play',
+  LIST = 'list',
+}
+
+type RunningMatch = {
+  app: ReturnType<typeof Client>;
+  matchID: string;
+  playerID: string;
+  credentials?: string;
+};
+
+type LobbyProps = {
+  gameComponents: GameComponent[];
+  lobbyServer?: string;
+  gameServer?: string;
+  debug?: boolean;
+  clientFactory?: typeof Client;
+  refreshInterval?: number;
+  renderer?: (args: {
+    errorMsg: string;
+    gameComponents: GameComponent[];
+    matches: LobbyAPI.MatchList['matches'];
+    phase: LobbyPhases;
+    playerName: string;
+    runningMatch?: RunningMatch;
+    handleEnterLobby: (playerName: string) => void;
+    handleExitLobby: () => Promise<void>;
+    handleCreateMatch: (gameName: string, numPlayers: number) => Promise<void>;
+    handleJoinMatch: (
+      gameName: string,
+      matchID: string,
+      playerID: string
+    ) => Promise<void>;
+    handleLeaveMatch: (gameName: string, matchID: string) => Promise<void>;
+    handleExitMatch: () => void;
+    handleRefreshMatches: () => Promise<void>;
+    handleStartMatch: (gameName: string, matchOpts: MatchOpts) => void;
+  }) => JSX.Element;
+};
+
+type LobbyState = {
+  phase: LobbyPhases;
+  playerName: string;
+  runningMatch?: RunningMatch;
+  errorMsg: string;
+  credentialStore?: { [playerName: string]: string };
 };
 
 /**
@@ -42,16 +86,7 @@ const LobbyPhases = {
  *   A React component that provides a UI to create, list, join, leave, play or
  *   spectate matches (game instances).
  */
-class Lobby extends React.Component {
-  static propTypes = {
-    gameComponents: PropTypes.array.isRequired,
-    lobbyServer: PropTypes.string,
-    gameServer: PropTypes.string,
-    debug: PropTypes.bool,
-    clientFactory: PropTypes.func,
-    refreshInterval: PropTypes.number,
-  };
-
+class Lobby extends React.Component<LobbyProps, LobbyState> {
   static defaultProps = {
     debug: false,
     clientFactory: Client,
@@ -66,7 +101,9 @@ class Lobby extends React.Component {
     credentialStore: {},
   };
 
-  constructor(props) {
+  private connection?: ReturnType<typeof LobbyConnection>;
+
+  constructor(props: LobbyProps) {
     super(props);
     this._createConnection(this.props);
     setInterval(this._updateConnection, this.props.refreshInterval);
@@ -84,7 +121,7 @@ class Lobby extends React.Component {
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: LobbyProps, prevState: LobbyState) {
     let name = this.state.playerName;
     let creds = this.state.credentialStore[name];
     if (
@@ -103,7 +140,7 @@ class Lobby extends React.Component {
     }
   }
 
-  _createConnection = props => {
+  _createConnection = (props: LobbyProps) => {
     const name = this.state.playerName;
     this.connection = LobbyConnection({
       server: props.lobbyServer,
@@ -113,11 +150,11 @@ class Lobby extends React.Component {
     });
   };
 
-  _updateCredentials = (playerName, credentials) => {
+  _updateCredentials = (playerName: string, credentials: string) => {
     this.setState(prevState => {
       // clone store or componentDidUpdate will not be triggered
       const store = Object.assign({}, prevState.credentialStore);
-      store[[playerName]] = credentials;
+      store[playerName] = credentials;
       return { credentialStore: store };
     });
   };
@@ -127,7 +164,7 @@ class Lobby extends React.Component {
     this.forceUpdate();
   };
 
-  _enterLobby = playerName => {
+  _enterLobby = (playerName: string) => {
     this.setState({ playerName, phase: LobbyPhases.LIST });
   };
 
@@ -136,7 +173,7 @@ class Lobby extends React.Component {
     this.setState({ phase: LobbyPhases.ENTER, errorMsg: '' });
   };
 
-  _createMatch = async (gameName, numPlayers) => {
+  _createMatch = async (gameName: string, numPlayers: number) => {
     try {
       await this.connection.create(gameName, numPlayers);
       await this.connection.refresh();
@@ -147,7 +184,7 @@ class Lobby extends React.Component {
     }
   };
 
-  _joinMatch = async (gameName, matchID, playerID) => {
+  _joinMatch = async (gameName: string, matchID: string, playerID: string) => {
     try {
       await this.connection.join(gameName, matchID, playerID);
       await this.connection.refresh();
@@ -160,7 +197,7 @@ class Lobby extends React.Component {
     }
   };
 
-  _leaveMatch = async (gameName, matchID) => {
+  _leaveMatch = async (gameName: string, matchID: string) => {
     try {
       await this.connection.leave(gameName, matchID);
       await this.connection.refresh();
@@ -173,7 +210,7 @@ class Lobby extends React.Component {
     }
   };
 
-  _startMatch = (gameName, matchOpts) => {
+  _startMatch = (gameName: string, matchOpts: MatchOpts) => {
     const gameCode = this.connection._getGameComponents(gameName);
     if (!gameCode) {
       this.setState({
@@ -221,11 +258,14 @@ class Lobby extends React.Component {
     this.setState({ phase: LobbyPhases.LIST, runningMatch: null });
   };
 
-  _getPhaseVisibility = phase => {
+  _getPhaseVisibility = (phase: LobbyPhases) => {
     return this.state.phase !== phase ? 'hidden' : 'phase';
   };
 
-  renderMatches = (matches, playerName) => {
+  renderMatches = (
+    matches: LobbyAPI.MatchList['matches'],
+    playerName: string
+  ) => {
     return matches.map(match => {
       const { matchID, gameName, players } = match;
       return (

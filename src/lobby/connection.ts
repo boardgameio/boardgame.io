@@ -10,7 +10,7 @@ import React from 'react';
 import { LobbyClient } from './client';
 import { Game, LobbyAPI } from '../types';
 
-interface GameComponent {
+export interface GameComponent {
   game: Game;
   board: React.ComponentType<any>;
 }
