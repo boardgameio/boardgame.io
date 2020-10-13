@@ -16,7 +16,7 @@ import { GameComponent, LobbyConnection } from './connection';
 import LobbyLoginForm from './login-form';
 import LobbyMatchInstance, { MatchOpts } from './match-instance';
 import LobbyCreateMatchForm from './create-match-form';
-import { LobbyAPI } from '../types';
+import { DebugOpt, LobbyAPI } from '../types';
 
 enum LobbyPhases {
   ENTER = 'enter',
@@ -35,7 +35,7 @@ type LobbyProps = {
   gameComponents: GameComponent[];
   lobbyServer?: string;
   gameServer?: string;
-  debug?: boolean;
+  debug?: DebugOpt | boolean;
   clientFactory?: typeof Client;
   refreshInterval?: number;
   renderer?: (args: {

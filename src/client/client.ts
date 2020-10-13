@@ -32,15 +32,11 @@ import {
   State,
   Store,
   Ctx,
+  DebugOpt,
 } from '../types';
 
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
 type Action = CredentialedActionShape.Any | ClientAction;
-
-interface DebugOpt {
-  target?: HTMLElement;
-  impl?: typeof Debug;
-}
 
 /**
  * Standardise the passed playerID, using currentPlayer if appropriate.
