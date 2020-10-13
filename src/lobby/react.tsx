@@ -9,6 +9,7 @@
 import React from 'react';
 import Cookies from 'react-cookies';
 import PropTypes from 'prop-types';
+import { DebugOpt } from '../client/client';
 import { Client } from '../client/react';
 import { MCTSBot } from '../ai/mcts-bot';
 import { Local } from '../client/transport/local';
@@ -36,7 +37,7 @@ type LobbyProps = {
   gameComponents: GameComponent[];
   lobbyServer?: string;
   gameServer?: string;
-  debug?: boolean;
+  debug?: DebugOpt | boolean;
   clientFactory?: typeof Client;
   refreshInterval?: number;
   renderer?: (args: {

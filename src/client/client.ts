@@ -37,7 +37,7 @@ import {
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
 type Action = CredentialedActionShape.Any | ClientAction;
 
-interface DebugOpt {
+export interface DebugOpt {
   target?: HTMLElement;
   impl?: typeof Debug;
 }
