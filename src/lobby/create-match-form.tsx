@@ -7,20 +7,29 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Game } from '../types';
+import { GameComponent } from './connection';
 
-class LobbyCreateMatchForm extends React.Component {
-  static propTypes = {
-    games: PropTypes.array.isRequired,
-    createMatch: PropTypes.func.isRequired,
-  };
+type CreateMatchProps = {
+  games: GameComponent[];
+  createMatch: (gameName: string, numPlayers: number) => Promise<void>;
+};
 
+type CreateMatchState = {
+  selectedGame: number;
+  numPlayers: number;
+};
+
+class LobbyCreateMatchForm extends React.Component<
+  CreateMatchProps,
+  CreateMatchState
+> {
   state = {
     selectedGame: 0,
     numPlayers: 2,
   };
 
-  constructor(props) {
+  constructor(props: CreateMatchProps) {
     super(props);
     /* fix min and max number of players */
     for (let game of props.games) {
@@ -39,7 +48,7 @@ class LobbyCreateMatchForm extends React.Component {
     };
   }
 
-  _createGameNameOption = (game, idx) => {
+  _createGameNameOption = (game: GameComponent, idx: number) => {
     return (
       <option key={'name-option-' + idx} value={idx}>
         {game.game.name}
@@ -47,7 +56,7 @@ class LobbyCreateMatchForm extends React.Component {
     );
   };
 
-  _createNumPlayersOption = idx => {
+  _createNumPlayersOption = (idx: number) => {
     return (
       <option key={'num-option-' + idx} value={idx}>
         {idx}
@@ -55,7 +64,7 @@ class LobbyCreateMatchForm extends React.Component {
     );
   };
 
-  _createNumPlayersRange = game => {
+  _createNumPlayersRange = (game: Game) => {
     return [...new Array(game.maxPlayers + 1).keys()].slice(game.minPlayers);
   };
 
@@ -84,13 +93,13 @@ class LobbyCreateMatchForm extends React.Component {
     );
   }
 
-  onChangeNumPlayers = event => {
+  onChangeNumPlayers = (event: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({
       numPlayers: Number.parseInt(event.target.value),
     });
   };
 
-  onChangeSelectedGame = event => {
+  onChangeSelectedGame = (event: React.ChangeEvent<HTMLSelectElement>) => {
     let idx = Number.parseInt(event.target.value);
     this.setState({
       selectedGame: idx,

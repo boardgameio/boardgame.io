@@ -27,7 +27,7 @@ Enzyme.configure({ adapter: new Adapter() });
 describe('lobby', () => {
   let lobby;
   let spy = jest.fn();
-  let components;
+  let components: any[];
 
   beforeEach(async () => {
     components = [
@@ -50,7 +50,7 @@ describe('lobby', () => {
   describe('specify servers', () => {
     test('gameServer', () => {
       const spy = jest.fn();
-      const lobby = Enzyme.mount(
+      const lobby: any = Enzyme.mount(
         <Lobby
           gameComponents={components}
           clientFactory={spy.mockReturnValue(NullComponent)}
@@ -524,7 +524,7 @@ describe('lobby', () => {
       });
 
       test('should render custom lobby with games list', () => {
-        const components = [
+        const components: any[] = [
           { game: { name: 'GameName1' } },
           { game: { name: 'GameName2' } },
         ];
@@ -553,7 +553,7 @@ describe('lobby', () => {
           <button onClick={() => onEnterLobby('Alex')}>Enter</button>
         );
 
-        const lobby = Enzyme.mount(
+        const lobby: any = Enzyme.mount(
           <Lobby
             gameComponents={[]}
             renderer={({ handleEnterLobby }) => (
