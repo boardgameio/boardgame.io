@@ -30,7 +30,7 @@ type MatchInstanceProps = {
 };
 
 class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
-  _createSeat = (player: { name?: string; }) => {
+  _createSeat = (player: { name?: string }) => {
     return player.name || '[free]';
   };
 
