@@ -8,6 +8,7 @@
 
 import React from 'react';
 import Cookies from 'react-cookies';
+import PropTypes from 'prop-types';
 import { Client } from '../client/react';
 import { MCTSBot } from '../ai/mcts-bot';
 import { Local } from '../client/transport/local';
@@ -87,6 +88,15 @@ type LobbyState = {
  *   spectate matches (game instances).
  */
 class Lobby extends React.Component<LobbyProps, LobbyState> {
+  static propTypes = {
+    gameComponents: PropTypes.array.isRequired,
+    lobbyServer: PropTypes.string,
+    gameServer: PropTypes.string,
+    debug: PropTypes.bool,
+    clientFactory: PropTypes.func,
+    refreshInterval: PropTypes.number,
+  };
+
   static defaultProps = {
     debug: false,
     clientFactory: Client,
