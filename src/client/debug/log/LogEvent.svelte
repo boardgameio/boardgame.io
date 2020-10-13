@@ -12,6 +12,19 @@
 
   const args = action.payload.args || [];
   const playerID = action.payload.playerID;
+  let actionType; 
+  switch (action.type) {
+    case 'UNDO':
+      actionType = 'undo';
+      break;
+    case 'REDO':
+      actionType = 'redo';
+    case 'GAME_EVENT':
+    case 'MAKE_MOVE':
+    default:
+      actionType = action.payload.type;
+      break;
+  }
 </script>
 
 <style>
@@ -115,7 +128,7 @@
   on:click={() => dispatch('click', { logIndex })}
   on:mouseenter={() => dispatch('mouseenter', { logIndex })}
   on:mouseleave={() => dispatch('mouseleave')}>
-  <div>{action.payload.type}({args.join(',')})</div>
+  <div>{actionType}({args.join(',')})</div>
 
   {#if payloadComponent}
     <svelte:component this={payloadComponent} {payload} />

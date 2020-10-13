@@ -299,7 +299,7 @@ describe('Random inside setup()', () => {
   });
 });
 
-test('undo / redo', () => {
+describe('undo / redo', () => {
   const game: Game = {
     seed: 0,
     moves: {
@@ -312,56 +312,85 @@ test('undo / redo', () => {
 
   const reducer = CreateGameReducer({ game });
 
-  let state = InitializeGame({ game });
+  const initialState = InitializeGame({ game });
 
-  state = reducer(state, makeMove('move', 'A', '0'));
-  expect(state.G).toMatchObject({ A: true });
+  test('plugin APIs are not included in undo state', () => {
+    let state = reducer(initialState, makeMove('move', 'A', '0'));
+    state = reducer(state, makeMove('move', 'B', '0'));
+    expect(state.G).toMatchObject({ A: true, B: true });
+    expect(state._undo[1].ctx.events).toBeUndefined();
+    expect(state._undo[1].ctx.random).toBeUndefined();
+  });
 
-  state = reducer(state, makeMove('move', 'B', '0'));
-  expect(state.G).toMatchObject({ A: true, B: true });
-  expect(state._undo[1].ctx.events).toBeUndefined();
-  expect(state._undo[1].ctx.random).toBeUndefined();
+  test('undo restores previous state', () => {
+    let state = reducer(initialState, makeMove('move', 'A', '0'));
+    const { G, ctx, plugins } = state;
+    state = reducer(state, makeMove('roll', null, '0'));
+    state = reducer(state, undo());
+    expect(state.G).toEqual(G);
+    expect(state.ctx).toEqual(ctx);
+    expect(state.plugins).toEqual(plugins);
+  });
 
-  state = reducer(state, undo());
-  expect(state.G).toMatchObject({ A: true });
+  test('redo restores undone state', () => {
+    let state = initialState;
+    // Make two moves.
+    const state1 = (state = reducer(state, makeMove('move', 'A', '0')));
+    const state2 = (state = reducer(state, makeMove('roll', null, '0')));
+    // Undo both of them.
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    // Redo one of them.
+    state = reducer(state, redo());
+    expect(state.G).toEqual(state1.G);
+    expect(state.ctx).toEqual(state1.ctx);
+    expect(state.plugins).toEqual(state1.plugins);
+    // Redo a second time.
+    state = reducer(state, redo());
+    expect(state.G).toEqual(state2.G);
+    expect(state.ctx).toEqual(state2.ctx);
+    expect(state.plugins).toEqual(state2.plugins);
+  });
 
-  state = reducer(state, redo());
-  expect(state.G).toMatchObject({ A: true, B: true });
+  test('can undo redone state', () => {
+    let state = reducer(initialState, makeMove('move', 'A', '0'));
+    state = reducer(state, undo());
+    state = reducer(state, redo());
+    state = reducer(state, undo());
+    expect(state.G).toMatchObject(initialState.G);
+    expect(state.ctx).toMatchObject(initialState.ctx);
+    expect(state.plugins).toMatchObject(initialState.plugins);
+  });
 
-  state = reducer(state, redo());
-  expect(state.G).toMatchObject({ A: true, B: true });
+  test('undo has no effect if nothing to undo', () => {
+    let state = reducer(initialState, undo());
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    expect(state.G).toMatchObject(initialState.G);
+    expect(state.ctx).toMatchObject(initialState.ctx);
+    expect(state.plugins).toMatchObject(initialState.plugins);
+  });
 
-  state = reducer(state, undo());
-  expect(state.G).toMatchObject({ A: true });
+  test('redo works after multiple undos', () => {
+    let state = reducer(initialState, makeMove('move', 'A', '0'));
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    state = reducer(state, undo());
+    state = reducer(state, redo());
+    state = reducer(state, makeMove('move', 'C', '0'));
+    expect(state.G).toMatchObject({ A: true, C: true });
 
-  state = reducer(state, undo());
-  state = reducer(state, undo());
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
+    state = reducer(state, undo());
+    expect(state.G).toMatchObject({ A: true });
 
-  state = reducer(state, redo());
-  state = reducer(state, makeMove('move', 'C', '0'));
-  expect(state.G).toMatchObject({ A: true, C: true });
+    state = reducer(state, redo());
+    expect(state.G).toMatchObject({ A: true, C: true });
+  });
 
-  state = reducer(state, undo());
-  expect(state.G).toMatchObject({ A: true });
-
-  state = reducer(state, redo());
-  expect(state.G).toMatchObject({ A: true, C: true });
-
-  state = reducer(state, undo());
-  state = reducer(state, undo());
-  state = reducer(state, makeMove('roll', null, '0'));
-  expect(state.G).toMatchObject({ roll: 4 });
-
-  state = reducer(state, undo());
-  expect(state.G).toEqual({});
-  state = reducer(state, redo());
-  expect(state.G).toMatchObject({ roll: 4 });
-
-  state = reducer(state, gameEvent('endTurn'));
-  state = reducer(state, undo());
-  expect(state.G).toMatchObject({ roll: 4 });
+  test('redo only resets deltalog if nothing to redo', () => {
+    const state = reducer(initialState, makeMove('move', 'A', '0'));
+    expect(reducer(state, redo())).toEqual({ ...state, deltalog: [] });
+  });
 });
 
 test('disable undo / redo', () => {
@@ -455,13 +484,13 @@ describe('undo stack', () => {
 
   test('can’t undo at the start of a turn', () => {
     const newState = reducer(state, undo());
-    expect(state).toEqual(newState);
+    expect(newState).toEqual({ ...state, deltalog: [] });
   });
 
   test('can’t undo another player’s move', () => {
     state = reducer(state, makeMove('basic', null, '1'));
     const newState = reducer(state, undo('0'));
-    expect(state).toEqual(newState);
+    expect(newState).toEqual({ ...state, deltalog: [] });
   });
 });
 
@@ -517,7 +546,7 @@ describe('redo stack', () => {
     expect(state._redo).toHaveLength(1);
     const newState = reducer(state, redo('0'));
     expect(state._redo).toHaveLength(1);
-    expect(newState).toEqual(state);
+    expect(newState).toEqual({ ...state, deltalog: [] });
   });
 });
 

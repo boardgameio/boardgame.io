@@ -90,6 +90,32 @@ function updateUndoRedoState(
 }
 
 /**
+ * Process state, adding the initial deltalog for this action.
+ */
+function initializeDeltalog(
+  state: State,
+  action: ActionShape.MakeMove | ActionShape.Undo | ActionShape.Redo,
+  move?: Move
+): State {
+  // Create a log entry for this action.
+  const logEntry: LogEntry = {
+    action,
+    _stateID: state._stateID,
+    turn: state.ctx.turn,
+    phase: state.ctx.phase,
+  };
+
+  if (typeof move === 'object' && move.redact === true) {
+    logEntry.redact = true;
+  }
+
+  return {
+    ...state,
+    deltalog: [logEntry],
+  };
+}
+
+/**
  * CreateGameReducer
  *
  * Creates the main game state reducer.
@@ -236,20 +262,7 @@ export function CreateGameReducer({
         }
 
         // On the server, construct the deltalog.
-        // Create a log entry for this move.
-        let logEntry: LogEntry = {
-          action,
-          _stateID: state._stateID,
-          turn: state.ctx.turn,
-          phase: state.ctx.phase,
-        };
-
-        if ((move as LongFormMove).redact === true) {
-          logEntry.redact = true;
-        }
-
-        // Add the deltalog to state.
-        state.deltalog = [logEntry];
+        state = initializeDeltalog(state, action, move);
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
@@ -271,6 +284,8 @@ export function CreateGameReducer({
       }
 
       case Actions.UNDO: {
+        state = { ...state, deltalog: [] };
+
         if (game.disableUndo) {
           error('Undo is not enabled');
           return state;
@@ -303,22 +318,28 @@ export function CreateGameReducer({
           return state;
         }
 
+        state = initializeDeltalog(state, action);
+
         return {
           ...state,
           G: restore.G,
           ctx: restore.ctx,
+          plugins: restore.plugins,
+          _stateID: state._stateID + 1,
           _undo: _undo.slice(0, _undo.length - 1),
           _redo: [last, ..._redo],
         };
       }
 
       case Actions.REDO: {
-        const { _undo, _redo } = state;
+        state = { ...state, deltalog: [] };
 
         if (game.disableUndo) {
           error('Redo is not enabled');
           return state;
         }
+
+        const { _undo, _redo } = state;
 
         if (_redo.length == 0) {
           return state;
@@ -334,10 +355,14 @@ export function CreateGameReducer({
           return state;
         }
 
+        state = initializeDeltalog(state, action);
+
         return {
           ...state,
           G: first.G,
           ctx: first.ctx,
+          plugins: first.plugins,
+          _stateID: state._stateID + 1,
           _undo: [..._undo, first],
           _redo: _redo.slice(1),
         };
