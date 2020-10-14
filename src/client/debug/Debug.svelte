@@ -98,6 +98,16 @@
   .debug-panel :global(section) {
     margin-bottom: 20px;
   }
+
+  .debug-panel :global(.screen-reader-only) {
+    clip: rect(0 0 0 0); 
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap; 
+    width: 1px;
+  }
 </style>
 
 <svelte:window on:keypress={Keypress} />

@@ -9,6 +9,7 @@
   const { disableHotkeys } = getContext('hotkeys');
 
   let active = false;
+  let id = `key-${value}`;
 
   function Deactivate() {
     active = false;
@@ -41,7 +42,7 @@
     align-items: center;
   }
 
-  .key-box {
+  button {
     cursor: pointer;
     min-width: 10px;
     padding-left: 5px;
@@ -55,17 +56,17 @@
     color: #444;
   }
 
-  .key-box:hover {
+  button:hover {
     background: #ddd;
   }
 
-  .key.active .key-box {
+  .key.active button {
     background: #ddd;
     border: 1px solid #999;
     box-shadow: none;
   }
 
-  .label {
+  label {
     margin-left: 10px;
   }
 </style>
@@ -73,8 +74,11 @@
 <svelte:window on:keydown={Keypress} />
 
 <div class="key" class:active>
-  <div class="key-box" on:click={Activate}>{value}</div>
+  <button {id} on:click={Activate} disabled={disable}>{value}</button>
   {#if label}
-    <div class="label">{label}</div>
+    <label for={id}>
+      {label}
+      <span class="screen-reader-only">{`(shortcut: ${value})`}</span>
+    </label>
   {/if}
 </div>
