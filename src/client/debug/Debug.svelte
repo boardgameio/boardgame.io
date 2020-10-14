@@ -23,9 +23,11 @@
   setContext('hotkeys', { disableHotkeys });
   setContext('secondaryPane', { secondaryPane });
 
+  let paneDiv;
   let pane = 'main';
   function MenuChange(e) {
     pane = e.detail;
+    paneDiv.focus();
   }
 
   let visible = true;
@@ -115,7 +117,13 @@
 {#if visible}
   <div class="debug-panel" transition:fly={{ x: 400 }}>
     <Menu on:change={MenuChange} {panes} {pane} />
-    <div class="pane">
+    <div
+      bind:this={paneDiv}
+      class="pane"
+      role="region"
+      aria-label={pane}
+      tabindex="-1"
+    >
       <svelte:component this={panes[pane].component} {client} />
     </div>
     {#if $secondaryPane}
