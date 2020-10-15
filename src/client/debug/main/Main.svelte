@@ -35,10 +35,9 @@
     --json-tree-null-color: #757575;
   }
 
-  label {
-    font-weight: bold;
-    font-size: 1.1em;
-    display: inline;
+  .label {
+    margin-bottom: 0;
+    text-transform: none;
   }
 
   h3 {
@@ -98,11 +97,11 @@
 </section>
 
 <section class="tree">
-  <label>G</label>
+  <h3 class="label">G</h3>
   <JSONTree value={G} />
 </section>
 
 <section class="tree">
-  <label>ctx</label>
+  <h3 class="label">ctx</h3>
   <JSONTree value={SanitizeCtx(ctx)} />
 </section>
