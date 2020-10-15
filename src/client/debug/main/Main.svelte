@@ -44,6 +44,10 @@
     text-transform: uppercase;
   }
 
+  ul {
+    padding-left: 0;
+  }
+
   li {
     list-style: none;
     margin: 0;
@@ -67,17 +71,19 @@
 
 <section>
   <h3>Moves</h3>
-  {#each Object.entries(moves) as [name, fn]}
+  <ul>
+    {#each Object.entries(moves) as [name, fn]}
     <li>
       <Move shortcut={shortcuts[name]} {fn} {name} />
     </li>
-  {/each}
+    {/each}
+  </ul>
 </section>
 
 <section>
   <h3>Events</h3>
 
-  <div class="events">
+  <ul>
   {#if ctx.activePlayers && events.endStage}
     <li>
       <Move name="endStage" shortcut={7} fn={events.endStage} />
@@ -93,7 +99,7 @@
       <Move name="endPhase" shortcut={9} fn={events.endPhase} />
     </li>
   {/if}
-  </div>
+  </ul>
 </section>
 
 <section class="tree">
