@@ -134,8 +134,7 @@
   }
 
   label {
-    font-weight: bold;
-    color: #999;
+    color: #666;
   }
 
   input[type='checkbox'] {

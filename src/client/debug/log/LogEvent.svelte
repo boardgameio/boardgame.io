@@ -40,7 +40,7 @@
     border-left: 5px solid #ccc;
     padding: 5px;
     text-align: center;
-    color: #888;
+    color: #666;
     font-size: 14px;
     min-height: 25px;
     line-height: 25px;
