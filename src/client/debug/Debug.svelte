@@ -115,7 +115,7 @@
 <svelte:window on:keypress={Keypress} />
 
 {#if visible}
-  <div class="debug-panel" transition:fly={{ x: 400 }}>
+  <section aria-label="boardgame.io Debug Panel" class="debug-panel" transition:fly={{ x: 400 }}>
     <Menu on:change={MenuChange} {panes} {pane} />
     <div
       bind:this={paneDiv}
@@ -133,5 +133,5 @@
           metadata={$secondaryPane.metadata} />
       </div>
     {/if}
-  </div>
+  </section>
 {/if}
