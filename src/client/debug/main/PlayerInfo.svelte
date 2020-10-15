@@ -13,6 +13,15 @@
     }
   }
 
+  function playerLabel(player) {
+    const properties = [];
+    if (player == ctx.currentPlayer) properties.push('current');
+    if (player == playerID) properties.push('active');
+    let label = `Player ${player}`;
+    if (properties.length) label += ` (${properties.join(', ')})`;
+    return label;
+  }
+
   let players;
   $: players = ctx ? [...Array(ctx.numPlayers).keys()].map(i => i.toString()) : [];
 </script>
@@ -52,7 +61,9 @@
       class="player"
       class:current={player == ctx.currentPlayer}
       class:active={player == playerID}
-      on:click={() => OnClick(player)}>
+      on:click={() => OnClick(player)}
+      aria-label={playerLabel(player)}
+    >
       {player}
     </button>
   {/each}

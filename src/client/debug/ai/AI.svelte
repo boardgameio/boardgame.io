@@ -120,6 +120,10 @@
 </script>
 
 <style>
+  ul {
+    padding-left: 0;
+  }
+
   li {
     list-style: none;
     margin: none;
@@ -131,8 +135,7 @@
   }
 
   label {
-    font-weight: bold;
-    color: #999;
+    color: #666;
   }
 
   input[type='checkbox'] {
@@ -146,15 +149,17 @@
   {#if client.game.ai && !client.multiplayer}
     <section>
       <h3>Controls</h3>
-      <li>
-        <Hotkey value="1" onPress={Reset} label="reset" />
-      </li>
-      <li>
-        <Hotkey value="2" onPress={Step} label="play" />
-      </li>
-      <li>
-        <Hotkey value="3" onPress={Simulate} label="simulate" />
-      </li>
+      <ul>
+        <li>
+          <Hotkey value="1" onPress={Reset} label="reset" />
+        </li>
+        <li>
+          <Hotkey value="2" onPress={Step} label="play" />
+        </li>
+        <li>
+          <Hotkey value="3" onPress={Simulate} label="simulate" />
+        </li>
+      </ul>
     </section>
 
     <section>
@@ -183,8 +188,10 @@
       {/if}
 
       {#if botAction}
-        <li>Action: {botAction}</li>
-        <li>Args: {JSON.stringify(botActionArgs)}</li>
+        <ul>
+          <li>Action: {botAction}</li>
+          <li>Args: {JSON.stringify(botActionArgs)}</li>
+        </ul>
       {/if}
     </section>
     {/if}

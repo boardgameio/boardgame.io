@@ -13,9 +13,9 @@ global.fetch = jest
 
 describe('lobby', () => {
   test('is rendered', () => {
-    const components = [{ board: 'Board', game: { name: 'GameName' } }];
+    const components: any[] = [{ board: 'Board', game: { name: 'GameName' } }];
     const ssrRender = ReactDOMServer.renderToString(
-      <Lobby server="localhost" port={8001} gameComponents={components} />
+      <Lobby gameServer="localhost" gameComponents={components} />
     );
     expect(ssrRender).toContain('lobby-view');
   });
