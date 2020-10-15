@@ -96,7 +96,7 @@ describe('multiple clients', () => {
   test('switching playerID for a solo client', async () => {
     expect(client0.playerID).toBe('0');
     // Toggle to playerID 1 by clicking on the “1” button.
-    await fireEvent.click(screen.getByRole('button', { name: '1' }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Player 1' }));
     // Check client0’s playerID was updated.
     expect(
       screen.getByDisplayValue('0 — playerID: "1", matchID: "A" (game1)')
@@ -115,7 +115,7 @@ describe('multiple clients', () => {
       screen.getByDisplayValue('1 — playerID: "0", matchID: "B" (game2)')
     ).toBeInTheDocument();
     // Toggle to playerID 1 by clicking on the “1” button.
-    await fireEvent.click(screen.getByRole('button', { name: '1' }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Player 1' }));
     // Check the client switcher now shows details for client2.
     expect(
       screen.getByDisplayValue('2 — playerID: "1", matchID: "B" (game2)')
