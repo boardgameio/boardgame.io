@@ -46,7 +46,7 @@
 
   li {
     list-style: none;
-    margin: none;
+    margin: 0;
     margin-bottom: 5px;
   }
 </style>
