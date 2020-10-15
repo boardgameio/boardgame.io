@@ -35,19 +35,22 @@
     --json-tree-null-color: #757575;
   }
 
-  label {
-    font-weight: bold;
-    font-size: 1.1em;
-    display: inline;
+  .label {
+    margin-bottom: 0;
+    text-transform: none;
   }
 
   h3 {
     text-transform: uppercase;
   }
 
+  ul {
+    padding-left: 0;
+  }
+
   li {
     list-style: none;
-    margin: none;
+    margin: 0;
     margin-bottom: 5px;
   }
 </style>
@@ -68,17 +71,19 @@
 
 <section>
   <h3>Moves</h3>
-  {#each Object.entries(moves) as [name, fn]}
+  <ul>
+    {#each Object.entries(moves) as [name, fn]}
     <li>
       <Move shortcut={shortcuts[name]} {fn} {name} />
     </li>
-  {/each}
+    {/each}
+  </ul>
 </section>
 
 <section>
   <h3>Events</h3>
 
-  <div class="events">
+  <ul>
   {#if ctx.activePlayers && events.endStage}
     <li>
       <Move name="endStage" shortcut={7} fn={events.endStage} />
@@ -94,15 +99,15 @@
       <Move name="endPhase" shortcut={9} fn={events.endPhase} />
     </li>
   {/if}
-  </div>
+  </ul>
 </section>
 
 <section class="tree">
-  <label>G</label>
+  <h3 class="label">G</h3>
   <JSONTree value={G} />
 </section>
 
 <section class="tree">
-  <label>ctx</label>
+  <h3 class="label">ctx</h3>
   <JSONTree value={SanitizeCtx(ctx)} />
 </section>

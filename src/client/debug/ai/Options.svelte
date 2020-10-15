@@ -15,8 +15,7 @@
 
 <style>
   label {
-    font-weight: bold;
-    color: #999;
+    color: #666;
   }
 
   .option {
@@ -25,6 +24,7 @@
 
   .value {
     font-weight: bold;
+    color: #000;
   }
 
   input[type='checkbox'] {
