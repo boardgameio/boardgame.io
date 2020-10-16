@@ -1,3 +1,27 @@
+## v0.41.0
+
+#### Features
+
+* [[c8c648e](https://github.com/boardgameio/boardgame.io/commit/c8c648e)] feat: Add global manager to track client & debug panel instances (#816)
+* [[af43561](https://github.com/boardgameio/boardgame.io/commit/af43561)] feat: Add log entries for undo/redo actions (#825)
+* [[2595399](https://github.com/boardgameio/boardgame.io/commit/2595399)] feat: Improve undo/redo (#823)
+* [[3d2131e](https://github.com/boardgameio/boardgame.io/commit/3d2131e)] fix(master): Use `createMatch` for implicit match creation (#821)
+* [[f74f953](https://github.com/boardgameio/boardgame.io/commit/f74f953)] feat: Improve match term consistency (#806)
+
+#### Bugfixes
+
+* [[f5d3a97](https://github.com/boardgameio/boardgame.io/commit/f5d3a97)] fix(debug): Improve debug panel accessibility (#827)
+* [[0040a5d](https://github.com/boardgameio/boardgame.io/commit/0040a5d)] fix(reducer): Restore plugin state on undo/redo
+* [[4f2ffc4](https://github.com/boardgameio/boardgame.io/commit/4f2ffc4)] fix(debug): Include plugin data in log rewind gamestate override
+* [[197a9bb](https://github.com/boardgameio/boardgame.io/commit/197a9bb)] fix(reducer): Fix stateID increment & build deltalog on server only (#817)
+* [[600caa8](https://github.com/boardgameio/boardgame.io/commit/600caa8)] fix(debug): Use local reducer in Log rewind
+* [[3c2aadd](https://github.com/boardgameio/boardgame.io/commit/3c2aadd)] fix(client): Don’t run playerView locally on multiplayer clients (#819)
+* [[abd9695](https://github.com/boardgameio/boardgame.io/commit/abd9695)] fix: Simplify local transport typing
+* [[9a2a609](https://github.com/boardgameio/boardgame.io/commit/9a2a609)] fix: improve socketio.ts typings (#811)
+* [[0f8882a](https://github.com/boardgameio/boardgame.io/commit/0f8882a)] fix(core): Fix EndPhase deltalog (#812)
+* [[4bd283c](https://github.com/boardgameio/boardgame.io/commit/4bd283c)] fix: FlatFile.listGames filter (#802)
+* [[0062e55](https://github.com/boardgameio/boardgame.io/commit/0062e55)] fix(client): Improve client types (#801)
+
 ## v0.40.0
 
 #### Breaking Changes
