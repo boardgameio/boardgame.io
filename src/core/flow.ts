@@ -43,7 +43,6 @@ export function Flow({
   turn,
   events,
   plugins,
-  disableUndo,
 }: Game) {
   // Attach defaults.
   if (moves === undefined) {
@@ -297,9 +296,7 @@ export function Flow({
 
     G = conf.turn.wrapped.onBegin({ ...state, G, ctx });
 
-    const _undo = disableUndo ? [] : [{ G, ctx }];
-
-    return { ...state, G, ctx, _undo, _redo: [] };
+    return { ...state, G, ctx, _undo: [], _redo: [] } as State;
   }
 
   ////////////
@@ -438,7 +435,7 @@ export function Flow({
 
   function EndPhase(state: State, { arg, next, turn, automatic }: any): State {
     // End the turn first.
-    state = EndTurn(state, { turn, force: true });
+    state = EndTurn(state, { turn, force: true, automatic: true });
 
     let G = state.G;
     let ctx = state.ctx;

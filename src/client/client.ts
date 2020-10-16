@@ -21,6 +21,7 @@ import Debug from './debug/Debug.svelte';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Transport, TransportOpts } from './transport/transport';
+import { ClientManager } from './manager';
 import {
   ActivePlayersArg,
   ActionShape,
@@ -37,9 +38,32 @@ import {
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
 type Action = CredentialedActionShape.Any | ClientAction;
 
-interface DebugOpt {
+export interface DebugOpt {
   target?: HTMLElement;
   impl?: typeof Debug;
+}
+
+/**
+ * Global client manager instance that all clients register with.
+ */
+const GlobalClientManager = new ClientManager();
+
+/**
+ * Standardise the passed playerID, using currentPlayer if appropriate.
+ */
+function assumedPlayerID(
+  playerID: PlayerID | null | undefined,
+  store: Store,
+  multiplayer?: unknown
+): PlayerID {
+  // In singleplayer mode, if the client does not have a playerID
+  // associated with it, we attach the currentPlayer as playerID.
+  if (!multiplayer && (playerID === null || playerID === undefined)) {
+    const state = store.getState();
+    playerID = state.ctx.currentPlayer;
+  }
+
+  return playerID;
 }
 
 /**
@@ -57,20 +81,11 @@ function createDispatchers(
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
     dispatchers[name] = function(...args: any[]) {
-      let assumedPlayerID = playerID;
-
-      // In singleplayer mode, if the client does not have a playerID
-      // associated with it, we attach the currentPlayer as playerID.
-      if (!multiplayer && (playerID === null || playerID === undefined)) {
-        const state = store.getState();
-        assumedPlayerID = state.ctx.currentPlayer;
-      }
-
       store.dispatch(
         ActionCreators[storeActionType](
           name,
           args,
-          assumedPlayerID,
+          assumedPlayerID(playerID, store, multiplayer),
           credentials
         )
       );
@@ -105,17 +120,17 @@ export interface ClientOpts<
  * Implementation of Client (see below).
  */
 export class _ClientImpl<G extends any = any> {
-  private debug?: DebugOpt | boolean;
-  private _debugPanel?: Debug | null;
   private gameStateOverride?: any;
   private initialState: State<G>;
-  private multiplayer: (opts: TransportOpts) => Transport;
+  readonly multiplayer: (opts: TransportOpts) => Transport;
   private reducer: Reducer;
   private _running: boolean;
   private subscribers: Record<string, (state: State<G> | null) => void>;
   private transport: Transport;
-  game: ReturnType<typeof ProcessGameConfig>;
-  store: Store;
+  private manager: ClientManager;
+  readonly debugOpt?: DebugOpt | boolean;
+  readonly game: ReturnType<typeof ProcessGameConfig>;
+  readonly store: Store;
   log: State['deltalog'];
   matchID: string;
   playerID: PlayerID | null;
@@ -151,7 +166,8 @@ export class _ClientImpl<G extends any = any> {
     this.matchID = matchID;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
-    this.debug = debug;
+    this.debugOpt = debug;
+    this.manager = GlobalClientManager;
     this.gameStateOverride = null;
     this.subscribers = {};
     this._running = false;
@@ -170,13 +186,20 @@ export class _ClientImpl<G extends any = any> {
       this.store.dispatch(ActionCreators.reset(this.initialState));
     };
     this.undo = () => {
-      this.store.dispatch(ActionCreators.undo(this.playerID, this.credentials));
+      const undo = ActionCreators.undo(
+        assumedPlayerID(this.playerID, this.store, this.multiplayer),
+        this.credentials
+      );
+      this.store.dispatch(undo);
     };
     this.redo = () => {
-      this.store.dispatch(ActionCreators.redo(this.playerID, this.credentials));
+      const redo = ActionCreators.redo(
+        assumedPlayerID(this.playerID, this.store, this.multiplayer),
+        this.credentials
+      );
+      this.store.dispatch(redo);
     };
 
-    this.store = null;
     this.log = [];
 
     /**
@@ -196,7 +219,9 @@ export class _ClientImpl<G extends any = any> {
 
       switch (action.type) {
         case Actions.MAKE_MOVE:
-        case Actions.GAME_EVENT: {
+        case Actions.GAME_EVENT:
+        case Actions.UNDO:
+        case Actions.REDO: {
           const deltalog = state.deltalog;
           this.log = [...this.log, ...deltalog];
           break;
@@ -311,8 +336,6 @@ export class _ClientImpl<G extends any = any> {
     this.transport.subscribeMatchData(metadata => {
       this.matchData = metadata;
     });
-
-    this._debugPanel = null;
   }
 
   private notifySubscribers() {
@@ -327,51 +350,13 @@ export class _ClientImpl<G extends any = any> {
   start() {
     this.transport.connect();
     this._running = true;
-
-    let debugImpl: DebugOpt['impl'] | null = null;
-
-    if (process.env.NODE_ENV !== 'production') {
-      debugImpl = Debug;
-    }
-
-    if (this.debug && this.debug !== true && this.debug.impl) {
-      debugImpl = this.debug.impl;
-    }
-
-    if (
-      debugImpl !== null &&
-      this.debug !== false &&
-      this._debugPanel == null &&
-      typeof document !== 'undefined'
-    ) {
-      let target = document.body;
-      if (
-        this.debug &&
-        this.debug !== true &&
-        this.debug.target !== undefined
-      ) {
-        target = this.debug.target;
-      }
-
-      if (target) {
-        this._debugPanel = new debugImpl({
-          target,
-          props: {
-            client: this,
-          },
-        });
-      }
-    }
+    this.manager.register(this);
   }
 
   stop() {
     this.transport.disconnect();
     this._running = false;
-
-    if (this._debugPanel != null) {
-      this._debugPanel.$destroy();
-      this._debugPanel = null;
-    }
+    this.manager.unregister(this);
   }
 
   subscribe(fn: (state: State<G>) => void) {
@@ -435,7 +420,11 @@ export class _ClientImpl<G extends any = any> {
     // Secrets are normally stripped on the server,
     // but we also strip them here so that game developers
     // can see their effects while prototyping.
-    const G = this.game.playerView(state.G, state.ctx, this.playerID);
+    // Do not strip again if this is a multiplayer game
+    // since the server has already stripped secret info. (issue #818)
+    const G = this.multiplayer
+      ? state.G
+      : this.game.playerView(state.G, state.ctx, this.playerID);
 
     // Combine into return value.
     return {

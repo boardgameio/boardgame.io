@@ -75,9 +75,16 @@ export class FlatFile extends StorageAPI.Async {
     return;
   }
 
-  async createGame(
+  /**
+   * Create new match.
+   *
+   * @param matchID
+   * @param opts
+   * @override
+   */
+  async createMatch(
     matchID: string,
-    opts: StorageAPI.CreateGameOpts
+    opts: StorageAPI.CreateMatchOpts
   ): Promise<void> {
     // Store initial state separately for easy retrieval later.
     const key = InitialStateKey(matchID);
@@ -146,7 +153,13 @@ export class FlatFile extends StorageAPI.Async {
     await this.removeItem(MetadataKey(id));
   }
 
-  async listGames(opts?: StorageAPI.ListGamesOpts): Promise<string[]> {
+  /**
+   * List matches IDs.
+   *
+   * @param opts
+   * @override
+   */
+  async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
     const keys = await this.games.keys();
     const suffix = ':metadata';
 

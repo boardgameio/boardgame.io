@@ -15,14 +15,13 @@ import Board from './board';
 const App = Client({
   game: TicTacToe,
   board: Board,
-  debug: false,
   multiplayer: Local(),
 });
 
 const Multiplayer = () => (
   <div>
     <h1>Multiplayer</h1>
-    <div className="runner">
+    <div className="runner" style={{ maxWidth: '600px' }}>
       <div className="run">
         <App matchID="multi" playerID="0" />
         &lt;App playerID=&quot;0&quot;/&gt;

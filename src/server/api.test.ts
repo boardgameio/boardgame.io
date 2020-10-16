@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 type StorageMocks = Record<
-  'createGame' | 'setState' | 'fetch' | 'setMetadata' | 'listGames' | 'wipe',
+  'createMatch' | 'setState' | 'fetch' | 'setMetadata' | 'listMatches' | 'wipe',
   jest.Mock | ((...args: any[]) => any)
 >;
 
@@ -32,19 +32,19 @@ class AsyncStorage extends StorageAPI.Async {
   constructor(args: Partial<StorageMocks> = {}) {
     super();
     this.mocks = {
-      createGame: args.createGame || jest.fn(),
+      createMatch: args.createMatch || jest.fn(),
       setState: args.setState || jest.fn(),
       fetch: args.fetch || jest.fn(() => ({})),
       setMetadata: args.setMetadata || jest.fn(),
-      listGames: args.listGames || jest.fn(() => []),
+      listMatches: args.listMatches || jest.fn(() => []),
       wipe: args.wipe || jest.fn(),
     };
   }
 
   async connect() {}
 
-  async createGame(...args) {
-    this.mocks.createGame(...args);
+  async createMatch(...args) {
+    this.mocks.createMatch(...args);
   }
 
   async fetch(...args) {
@@ -63,8 +63,8 @@ class AsyncStorage extends StorageAPI.Async {
     this.mocks.wipe(...args);
   }
 
-  async listGames(...args) {
-    return this.mocks.listGames(...args);
+  async listMatches(...args) {
+    return this.mocks.listMatches(...args);
   }
 }
 
@@ -124,7 +124,7 @@ describe('.createRouter', () => {
       });
 
       test('creates game state and metadata', () => {
-        expect(db.mocks.createGame).toHaveBeenCalledWith(
+        expect(db.mocks.createMatch).toHaveBeenCalledWith(
           'matchID',
           expect.objectContaining({
             initialState: expect.objectContaining({
@@ -156,7 +156,7 @@ describe('.createRouter', () => {
         });
 
         test('uses default numPlayers', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
@@ -194,7 +194,7 @@ describe('.createRouter', () => {
         });
 
         test('includes setupData in metadata', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
@@ -210,7 +210,7 @@ describe('.createRouter', () => {
         });
 
         test('passes setupData to game setup function', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               initialState: expect.objectContaining({
@@ -234,7 +234,7 @@ describe('.createRouter', () => {
         });
 
         test('sets unlisted in metadata', () => {
-          expect(db.mocks.createGame).toHaveBeenCalledWith(
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
             'matchID',
             expect.objectContaining({
               metadata: expect.objectContaining({
@@ -1073,7 +1073,7 @@ describe('.createRouter', () => {
             },
           },
         });
-      expect(db.mocks.createGame).toHaveBeenCalledWith(
+      expect(db.mocks.createMatch).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
           initialState: expect.objectContaining({
@@ -1099,7 +1099,7 @@ describe('.createRouter', () => {
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
-      expect(db.mocks.createGame).toHaveBeenCalledWith(
+      expect(db.mocks.createMatch).toHaveBeenCalledWith(
         'newGameID',
         expect.objectContaining({
           initialState: expect.objectContaining({
@@ -1211,7 +1211,7 @@ describe('.createRouter', () => {
         },
       };
     });
-    const dbListGames = jest.fn(async opts => {
+    const dblistMatches = jest.fn(async opts => {
       const metadata = {
         'foo-0': { gameName: 'foo' },
         'foo-1': { gameName: 'foo' },
@@ -1229,7 +1229,7 @@ describe('.createRouter', () => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
         fetch: dbFetch,
-        listGames: dbListGames,
+        listMatches: dblistMatches,
       });
     });
 
@@ -1269,31 +1269,31 @@ describe('.createRouter', () => {
 
       beforeEach(() => {
         app = createApiServer({ db, games });
-        dbListGames.mockClear();
+        dblistMatches.mockClear();
       });
 
       describe('isGameover query param', () => {
         test('is undefined if not specified in request', async () => {
           await request(app.callback()).get('/games/bar');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
         test('is true', async () => {
           await request(app.callback()).get('/games/bar?isGameover=true');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: true } })
           );
         });
         test('is false', async () => {
           await request(app.callback()).get('/games/bar?isGameover=false');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: false } })
           );
         });
         test('invalid value is ignored', async () => {
           await request(app.callback()).get('/games/bar?isGameover=5');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
@@ -1302,7 +1302,7 @@ describe('.createRouter', () => {
       describe('updatedBefore query param', () => {
         test('is undefined if not specified in request', async () => {
           await request(app.callback()).get('/games/bar');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({ updatedBefore: undefined }),
             })
@@ -1313,7 +1313,7 @@ describe('.createRouter', () => {
           await request(app.callback()).get(
             `/games/bar?updatedBefore=${timestamp.getTime()}`
           );
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({
                 updatedBefore: timestamp.getTime(),
@@ -1323,7 +1323,7 @@ describe('.createRouter', () => {
         });
         test('invalid value is ignored', async () => {
           await request(app.callback()).get('/games/bar?updatedBefore=-5');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { updatedBefore: undefined } })
           );
         });
@@ -1332,7 +1332,7 @@ describe('.createRouter', () => {
       describe('updatedAfter query param', () => {
         test('is undefined if not specified in request', async () => {
           await request(app.callback()).get('/games/bar');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({ updatedAfter: undefined }),
             })
@@ -1343,7 +1343,7 @@ describe('.createRouter', () => {
           await request(app.callback()).get(
             `/games/bar?updatedAfter=${timestamp.getTime()}`
           );
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({
                 updatedAfter: timestamp.getTime(),
@@ -1353,7 +1353,7 @@ describe('.createRouter', () => {
         });
         test('invalid value is ignored', async () => {
           await request(app.callback()).get('/games/bar?updatedAfter=-5');
-          expect(dbListGames).toBeCalledWith(
+          expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { updatedAfter: undefined } })
           );
         });
@@ -1383,7 +1383,7 @@ describe('.createRouter', () => {
             },
           };
         },
-        listGames: async () => {
+        listMatches: async () => {
           return ['bar:bar-0', 'foo:foo-0', 'bar:bar-1'];
         },
       });

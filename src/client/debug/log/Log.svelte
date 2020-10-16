@@ -5,12 +5,13 @@
 
   const { secondaryPane } = getContext('secondaryPane');
 
-  import { MAKE_MOVE } from '../../../core/action-types';
+  import { CreateGameReducer } from '../../../core/reducer';
   import TurnMarker from './TurnMarker.svelte';
   import PhaseMarker from './PhaseMarker.svelte';
   import LogEvent from './LogEvent.svelte';
   import MCTS from '../mcts/MCTS.svelte';
 
+  const reducer = CreateGameReducer({ game: client.game });
   const initialState = client.getInitialState();
   let { log } = $client;
   let pinned = null;
@@ -21,10 +22,8 @@
       const { action, automatic } = log[i];
 
       if (!automatic) {
-        state = client.reducer(state, action);
-      }
+        state = reducer(state, action);
 
-      if (action.type == MAKE_MOVE) {
         if (logIndex == 0) {
           break;
         }
@@ -32,13 +31,13 @@
         logIndex--;
       }
     }
-    return { G: state.G, ctx: state.ctx };
+    return { G: state.G, ctx: state.ctx, plugins: state.plugins };
   }
 
   function OnLogClick(e) {
     const { logIndex } = e.detail;
     const state = rewind(logIndex);
-    const renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
+    const renderedLogEntries = log.filter(e => !e.automatic);
     client.overrideGameState(state);
 
     if (pinned == logIndex) {
@@ -88,7 +87,7 @@
 
   $: {
     log = $client.log;
-    renderedLogEntries = log.filter(e => e.action.type == MAKE_MOVE);
+    renderedLogEntries = log.filter(e => !e.automatic);
 
     let eventsInCurrentPhase = 0;
     let eventsInCurrentTurn = 0;

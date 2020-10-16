@@ -30,6 +30,10 @@
 </script>
 
 <style>
+  ul {
+    padding-left: 0;
+  }
+
   li {
     list-style: none;
     margin: none;
@@ -37,7 +41,7 @@
   }
 </style>
 
-<section id="debug-controls" class="controls">
+<ul id="debug-controls" class="controls">
   <li>
     <Hotkey value="1" onPress={client.reset} label="reset" />
   </li>
@@ -50,4 +54,4 @@
   <li>
     <Hotkey value="." disable={true} label="hide" />
   </li>
-</section>
+</ul>

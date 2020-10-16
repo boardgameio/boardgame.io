@@ -143,6 +143,7 @@ describe('multiplayer', () => {
     });
 
     afterAll(() => {
+      client.stop();
       jest.restoreAllMocks();
     });
 
@@ -176,6 +177,10 @@ describe('multiplayer', () => {
       client.start();
     });
 
+    afterAll(() => {
+      client.stop();
+    });
+
     test('correct transport used', () => {
       expect(client.transport instanceof SocketIOTransport).toBe(true);
     });
@@ -197,6 +202,11 @@ describe('multiplayer', () => {
 
       client0.start();
       client1.start();
+    });
+
+    afterAll(() => {
+      client0.stop();
+      client1.stop();
     });
 
     test('correct transport used', () => {
@@ -258,6 +268,46 @@ describe('multiplayer', () => {
       client.transport.callback(metadata);
       expect(client.matchData).toEqual(metadata);
     });
+  });
+});
+
+describe('strip secret only on server', () => {
+  let client0;
+  let client1;
+  let spec;
+  let initial = { secret: [1, 2, 3, 4], sum: 0 };
+  beforeAll(() => {
+    spec = {
+      game: {
+        setup: () => initial,
+        playerView: (G, ctx, playerID) => {
+          let r = { ...G };
+          r.sum = r.secret.reduce((prev, curr) => {
+            return prev + curr;
+          });
+          delete r.secret;
+          return r;
+        },
+        moves: { A: (G, ctx) => ({ A: ctx.playerID }) },
+      },
+      multiplayer: Local(),
+    };
+
+    client0 = Client({ ...spec, playerID: '0' });
+    client1 = Client({ ...spec, playerID: '1' });
+
+    client0.start();
+    client1.start();
+  });
+
+  test('secret stripped', () => {
+    expect(client0.getState().G).toEqual({ sum: 10 });
+    expect(client1.getState().G).toEqual({ sum: 10 });
+  });
+
+  afterAll(() => {
+    client0.stop();
+    client1.stop();
   });
 });
 
@@ -617,6 +667,7 @@ describe('subscribe', () => {
     fn.mockClear();
     transport.callback();
     expect(fn).toHaveBeenCalled();
+    client.stop();
   });
 
   describe('multiplayer', () => {
@@ -630,6 +681,7 @@ describe('subscribe', () => {
       expect(fn).not.toBeCalled();
       client.start();
       expect(fn).toBeCalled();
+      client.stop();
     });
 
     test('subscribe after start', () => {
@@ -641,6 +693,7 @@ describe('subscribe', () => {
       client.start();
       client.subscribe(fn);
       expect(fn).toBeCalled();
+      client.stop();
     });
   });
 });
@@ -674,7 +727,7 @@ describe('start / stop', () => {
     const client = Client({ game: {}, debug: { target: null } }) as any;
     client.start();
     client.stop();
-    expect(client._debugPanel).toBe(null);
+    expect(client.manager.debugPanel).toBe(null);
   });
 
   test('override debug implementation', () => {

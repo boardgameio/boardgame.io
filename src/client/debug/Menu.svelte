@@ -10,7 +10,7 @@
   .menu {
     display: flex;
     margin-top: -10px;
-    flex-direction: row;
+    flex-direction: row-reverse;
     border: 1px solid #ccc;
     border-radius: 5px 5px 0 0;
     height: 25px;
@@ -23,6 +23,7 @@
   .menu-item {
     line-height: 25px;
     cursor: pointer;
+    border: 0;
     background: #fefefe;
     color: #555;
     padding-left: 15px;
@@ -30,11 +31,11 @@
     text-align: center;
   }
 
-  .menu-item:last-child {
+  .menu-item:first-child {
     border-radius: 0 5px 0 0;
   }
 
-  .menu-item:first-child {
+  .menu-item:last-child {
     border-radius: 5px 0 0 0;
   }
 
@@ -45,19 +46,20 @@
     color: #555;
   }
 
-  .menu-item:hover {
-    background: #ddd;
+  .menu-item:hover,
+  .menu-item:focus {
+    background: #eee;
     color: #555;
   }
 </style>
 
-<div class="menu">
-  {#each Object.entries(panes).reverse() as [key, {label}]}
-    <div
+<nav class="menu">
+  {#each Object.entries(panes) as [key, {label}]}
+    <button
       class="menu-item"
       class:active={pane == key}
       on:click={() => dispatch('change', key)}>
       {label}
-    </div>
+    </button>
   {/each}
-</div>
+</nav>

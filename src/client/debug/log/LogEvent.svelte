@@ -12,6 +12,19 @@
 
   const args = action.payload.args || [];
   const playerID = action.payload.playerID;
+  let actionType; 
+  switch (action.type) {
+    case 'UNDO':
+      actionType = 'undo';
+      break;
+    case 'REDO':
+      actionType = 'redo';
+    case 'GAME_EVENT':
+    case 'MAKE_MOVE':
+    default:
+      actionType = action.payload.type;
+      break;
+  }
 </script>
 
 <style>
@@ -27,13 +40,14 @@
     border-left: 5px solid #ccc;
     padding: 5px;
     text-align: center;
-    color: #888;
+    color: #666;
     font-size: 14px;
     min-height: 25px;
     line-height: 25px;
   }
 
-  .log-event:hover {
+  .log-event:hover,
+  .log-event:focus {
     border-style: solid;
     background: #eee;
   }
@@ -109,17 +123,20 @@
   }
 </style>
 
-<div
+<button
   class="log-event player{playerID}"
   class:pinned
   on:click={() => dispatch('click', { logIndex })}
   on:mouseenter={() => dispatch('mouseenter', { logIndex })}
-  on:mouseleave={() => dispatch('mouseleave')}>
-  <div>{action.payload.type}({args.join(',')})</div>
+  on:focus={() => dispatch('mouseenter', { logIndex })}
+  on:mouseleave={() => dispatch('mouseleave')}
+  on:blur={() => dispatch('mouseleave')}
+>
+  <div>{actionType}({args.join(',')})</div>
 
   {#if payloadComponent}
     <svelte:component this={payloadComponent} {payload} />
   {:else}
     <CustomPayload {payload} />
   {/if}
-</div>
+</button>

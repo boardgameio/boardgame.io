@@ -19,7 +19,19 @@ import {
   State,
   Move,
   LongFormMove,
+  Undo,
 } from '../types';
+
+/**
+ * Check if the payload for the passed action contains a playerID.
+ */
+const actionHasPlayerID = (
+  action:
+    | ActionShape.MakeMove
+    | ActionShape.GameEvent
+    | ActionShape.Undo
+    | ActionShape.Redo
+) => action.payload.playerID !== null && action.payload.playerID !== undefined;
 
 /**
  * Returns true if a move can be undone.
@@ -45,6 +57,63 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
 
   return move.undoable;
 };
+
+/**
+ * Update the undo and redo stacks for a move or event.
+ */
+function updateUndoRedoState(
+  state: State,
+  opts: {
+    game: Game;
+    action: ActionShape.GameEvent | ActionShape.MakeMove;
+  }
+): State {
+  if (opts.game.disableUndo) return state;
+
+  const undoEntry: Undo = {
+    G: state.G,
+    ctx: state.ctx,
+    plugins: state.plugins,
+    playerID: opts.action.payload.playerID || state.ctx.currentPlayer,
+  };
+
+  if (opts.action.type === 'MAKE_MOVE') {
+    undoEntry.moveType = opts.action.payload.type;
+  }
+
+  return {
+    ...state,
+    _undo: [...state._undo, undoEntry],
+    // Always reset redo stack when making a move or event
+    _redo: [],
+  };
+}
+
+/**
+ * Process state, adding the initial deltalog for this action.
+ */
+function initializeDeltalog(
+  state: State,
+  action: ActionShape.MakeMove | ActionShape.Undo | ActionShape.Redo,
+  move?: Move
+): State {
+  // Create a log entry for this action.
+  const logEntry: LogEntry = {
+    action,
+    _stateID: state._stateID,
+    turn: state.ctx.turn,
+    phase: state.ctx.phase,
+  };
+
+  if (typeof move === 'object' && move.redact === true) {
+    logEntry.redact = true;
+  }
+
+  return {
+    ...state,
+    deltalog: [logEntry],
+  };
+}
 
 /**
  * CreateGameReducer
@@ -88,8 +157,7 @@ export function CreateGameReducer({
 
         // Ignore the event if the player isn't active.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed event: ${action.payload.type}`);
@@ -108,6 +176,9 @@ export function CreateGameReducer({
 
         // Execute plugins.
         newState = plugins.Flush(newState, { game, isClient: false });
+
+        // Update undo / redo state.
+        newState = updateUndoRedoState(newState, { game, action });
 
         return { ...newState, _stateID: state._stateID + 1 };
       }
@@ -139,8 +210,7 @@ export function CreateGameReducer({
 
         // Ignore the move if the player isn't active.
         if (
-          action.payload.playerID !== null &&
-          action.payload.playerID !== undefined &&
+          actionHasPlayerID(action) &&
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed move: ${action.payload.type}`);
@@ -165,24 +235,7 @@ export function CreateGameReducer({
           return state;
         }
 
-        // Create a log entry for this move.
-        let logEntry: LogEntry = {
-          action,
-          _stateID: state._stateID,
-          turn: state.ctx.turn,
-          phase: state.ctx.phase,
-        };
-
-        if ((move as LongFormMove).redact === true) {
-          logEntry.redact = true;
-        }
-
-        const newState = {
-          ...state,
-          G,
-          deltalog: [logEntry],
-          _stateID: state._stateID + 1,
-        };
+        const newState = { ...state, G };
 
         // Some plugin indicated that it is not suitable to be
         // materialized on the client (and must wait for the server
@@ -202,28 +255,26 @@ export function CreateGameReducer({
             game,
             isClient: true,
           });
-          return state;
+          return {
+            ...state,
+            _stateID: state._stateID + 1,
+          };
         }
 
-        const prevTurnCount = state.ctx.turn;
+        // On the server, construct the deltalog.
+        state = initializeDeltalog(state, action, move);
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
         state = plugins.Flush(state, { game });
 
         // Update undo / redo state.
-        // Only update undo stack if the turn has not been ended
-        if (state.ctx.turn === prevTurnCount && !game.disableUndo) {
-          state._undo = state._undo.concat({
-            G: state.G,
-            ctx: state.ctx,
-            moveType: action.payload.type,
-          });
-        }
-        // Always reset redo stack when making a move
-        state._redo = [];
+        state = updateUndoRedoState(state, { game, action });
 
-        return state;
+        return {
+          ...state,
+          _stateID: state._stateID + 1,
+        };
       }
 
       case Actions.RESET:
@@ -233,8 +284,10 @@ export function CreateGameReducer({
       }
 
       case Actions.UNDO: {
+        state = { ...state, deltalog: [] };
+
         if (game.disableUndo) {
-          error("Undo is not enabled");
+          error('Undo is not enabled');
           return state;
         }
 
@@ -247,32 +300,46 @@ export function CreateGameReducer({
         const last = _undo[_undo.length - 1];
         const restore = _undo[_undo.length - 2];
 
+        // Only allow players to undo their own moves.
+        if (
+          actionHasPlayerID(action) &&
+          action.payload.playerID !== last.playerID
+        ) {
+          return state;
+        }
+
         // Only allow undoable moves to be undone.
         const lastMove: Move = game.flow.getMove(
           restore.ctx,
           last.moveType,
-          action.payload.playerID
+          last.playerID
         );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
           return state;
         }
 
+        state = initializeDeltalog(state, action);
+
         return {
           ...state,
           G: restore.G,
           ctx: restore.ctx,
+          plugins: restore.plugins,
+          _stateID: state._stateID + 1,
           _undo: _undo.slice(0, _undo.length - 1),
           _redo: [last, ..._redo],
         };
       }
 
       case Actions.REDO: {
-        const { _undo, _redo } = state;
+        state = { ...state, deltalog: [] };
 
         if (game.disableUndo) {
-          error("Redo is not enabled");
+          error('Redo is not enabled');
           return state;
         }
+
+        const { _undo, _redo } = state;
 
         if (_redo.length == 0) {
           return state;
@@ -280,10 +347,22 @@ export function CreateGameReducer({
 
         const first = _redo[0];
 
+        // Only allow players to redo their own undos.
+        if (
+          actionHasPlayerID(action) &&
+          action.payload.playerID !== first.playerID
+        ) {
+          return state;
+        }
+
+        state = initializeDeltalog(state, action);
+
         return {
           ...state,
           G: first.G,
           ctx: first.ctx,
+          plugins: first.plugins,
+          _stateID: state._stateID + 1,
           _undo: [..._undo, first],
           _redo: _redo.slice(1),
         };
