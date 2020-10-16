@@ -1,7 +1,9 @@
 <script>
   export let client;
+  export let clientManager;
 
   import JSONTree from 'svelte-json-tree-auto/src/Root.svelte';
+  import ClientSwitcher from './ClientSwitcher.svelte';
   import Move from './Move.svelte';
   import Controls from './Controls.svelte';
   import PlayerInfo from './PlayerInfo.svelte';
@@ -63,7 +65,7 @@
 <section>
   <h3>Players</h3>
   <PlayerInfo
-    on:change={(e) => client.updatePlayerID(e.detail.playerID)}
+    on:change={(e) => clientManager.switchPlayerID(e.detail.playerID)}
     ctx={ctx}
     playerID={playerID}
   />
@@ -111,3 +113,5 @@
   <h3 class="label">ctx</h3>
   <JSONTree value={SanitizeCtx(ctx)} />
 </section>
+
+<ClientSwitcher {clientManager} />

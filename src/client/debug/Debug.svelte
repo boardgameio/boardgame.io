@@ -1,5 +1,6 @@
 <script>
-  export let client;
+  export let clientManager;
+  $: client = $clientManager.client;
 
   import { writable } from 'svelte/store';
   import { setContext } from 'svelte';
@@ -124,7 +125,7 @@
       aria-label={pane}
       tabindex="-1"
     >
-      <svelte:component this={panes[pane].component} {client} />
+      <svelte:component this={panes[pane].component} {client} {clientManager} />
     </div>
     {#if $secondaryPane}
       <div class="secondary-pane">
