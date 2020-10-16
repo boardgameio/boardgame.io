@@ -1,3 +1,7 @@
+## v0.41.1
+
+Push another release to fix NPM weirdness.
+
 ## v0.41.0
 
 #### Features
