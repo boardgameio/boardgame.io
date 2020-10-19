@@ -8,7 +8,7 @@
 
 import { InitializeGame } from '../core/initialize';
 import { CreateGameReducer } from '../core/reducer';
-import { ProcessGameConfig } from '../core/game';
+import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
@@ -275,7 +275,16 @@ export class Master {
       return;
     }
 
-    if (state._stateID !== stateID) {
+    // Get move to check ignoreStateState option
+    const move =
+      action.type == MAKE_MOVE
+        ? this.game.flow.getMove(state.ctx, action.payload.type, playerID)
+        : null;
+
+    if (
+      state._stateID !== stateID &&
+      !(move && IsLongFormMove(move) && move.ignoreStateState)
+    ) {
       logging.error(
         `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
       );

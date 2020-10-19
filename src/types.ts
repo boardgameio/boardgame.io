@@ -147,6 +147,7 @@ export interface LongFormMove<
   noLimit?: boolean;
   client?: boolean;
   undoable?: boolean | ((G: G, ctx: CtxWithPlugins) => boolean);
+  ignoreStateState?: boolean;
 }
 
 export type Move<G extends any = any, CtxWithPlugins extends Ctx = Ctx> =

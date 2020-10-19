@@ -202,6 +202,72 @@ describe('update', () => {
     expect(sendAll).toHaveBeenCalled();
   });
 
+  test('allow execution of moves with ignoreStateState truthy', async () => {
+    const game = {
+      moves: {
+        A: G => G,
+        B: {
+          move: G => G,
+          ignoreStateState: true,
+        },
+      },
+    };
+
+    const send = jest.fn();
+    const master = new Master(game, new InMemory(), TransportAPI(send));
+
+    const actionA = ActionCreators.makeMove(
+      'A',
+      ['not ignore stale state'],
+      '0'
+    );
+    const actionB = ActionCreators.makeMove('B', ['ignore stale state'], '0');
+
+    // test: ping-pong two moves, then sync and check the log
+    await master.onSync('matchID', '0', 2);
+    await master.onUpdate(actionA, 0, 'matchID', '0');
+    await master.onUpdate(actionB, 0, 'matchID', '0');
+    await master.onUpdate(actionB, 2, 'matchID', '0');
+    await master.onSync('matchID', '1', 2);
+
+    const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
+    expect(log).toMatchObject([
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            type: 'A',
+            args: ['not ignore stale state'],
+            playerID: '0',
+          },
+        },
+        _stateID: 0,
+      },
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            type: 'B',
+            args: ['ignore stale state'],
+            playerID: '0',
+          },
+        },
+        _stateID: 1,
+      },
+      {
+        action: {
+          type: 'MAKE_MOVE',
+          payload: {
+            type: 'B',
+            args: ['ignore stale state'],
+            playerID: '0',
+          },
+        },
+        _stateID: 2,
+      },
+    ]);
+  });
+
   describe('undo / redo', () => {
     test('player 0 can undo', async () => {
       await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
