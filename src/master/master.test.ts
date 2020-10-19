@@ -202,13 +202,13 @@ describe('update', () => {
     expect(sendAll).toHaveBeenCalled();
   });
 
-  test('allow execution of moves with ignoreStateState truthy', async () => {
+  test('allow execution of moves with ignoreStaleStateID truthy', async () => {
     const game = {
       moves: {
         A: G => G,
         B: {
           move: G => G,
-          ignoreStateState: true,
+          ignoreStaleStateID: true,
         },
       },
     };

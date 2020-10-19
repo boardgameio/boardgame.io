@@ -283,7 +283,7 @@ export class Master {
 
     if (
       state._stateID !== stateID &&
-      !(move && IsLongFormMove(move) && move.ignoreStateState)
+      !(move && IsLongFormMove(move) && move.ignoreStaleStateID)
     ) {
       logging.error(
         `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
