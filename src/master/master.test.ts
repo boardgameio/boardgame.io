@@ -17,9 +17,10 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server, State } from '../types';
+import { Server, State, Ctx } from '../types';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
+import { PlayerView } from '../core/player-view';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -204,68 +205,92 @@ describe('update', () => {
 
   test('allow execution of moves with ignoreStaleStateID truthy', async () => {
     const game = {
-      moves: {
-        A: G => G,
-        B: {
-          move: G => G,
-          ignoreStaleStateID: true,
+      setup: () => {
+        const G = {
+          players: {
+            '0': {
+              cards: ['card3'],
+            },
+            '1': {
+              cards: [],
+            },
+          },
+          cards: ['card0', 'card1', 'card2'],
+          discardedCards: [],
+        };
+        return G;
+      },
+      playerView: PlayerView.STRIP_SECRETS,
+      turn: {
+        activePlayers: { currentPlayer: { stage: 'A' } },
+        stages: {
+          A: {
+            moves: {
+              A: (G, ctx: Ctx) => {
+                const card = G.players[ctx.playerID].cards.shift();
+                G.discardedCards.push(card);
+              },
+              B: {
+                move: (G, ctx: Ctx) => {
+                  const card = G.cards.pop();
+                  G.players[ctx.playerID].cards.push(card);
+                },
+                ignoreStaleStateID: true,
+              },
+            },
+          },
         },
       },
     };
 
     const send = jest.fn();
-    const master = new Master(game, new InMemory(), TransportAPI(send));
+    const master = new Master(
+      game,
+      new InMemory(),
+      TransportAPI(send, sendAll)
+    );
 
-    const actionA = ActionCreators.makeMove(
-      'A',
-      ['not ignore stale state'],
+    const setActivePlayers = ActionCreators.gameEvent(
+      'setActivePlayers',
+      [{ all: 'A' }],
       '0'
     );
-    const actionB = ActionCreators.makeMove('B', ['ignore stale state'], '0');
+    const actionA = ActionCreators.makeMove('A', null, '0');
+    const actionB = ActionCreators.makeMove('B', null, '1');
+    const actionC = ActionCreators.makeMove('B', null, '0');
 
-    // test: ping-pong two moves, then sync and check the log
+    // test: simultaneous moves
     await master.onSync('matchID', '0', 2);
-    await master.onUpdate(actionA, 0, 'matchID', '0');
-    await master.onUpdate(actionB, 0, 'matchID', '0');
-    await master.onUpdate(actionB, 2, 'matchID', '0');
+    await master.onUpdate(actionA, 0, 'matchID', '0'),
+      await master.onUpdate(setActivePlayers, 1, 'matchID', '0');
+    await Promise.all([
+      master.onUpdate(actionB, 2, 'matchID', '1'),
+      master.onUpdate(actionC, 2, 'matchID', '0'),
+    ]);
+    await master.onSync('matchID', '0', 2);
     await master.onSync('matchID', '1', 2);
 
-    const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
-    expect(log).toMatchObject([
-      {
-        action: {
-          type: 'MAKE_MOVE',
-          payload: {
-            type: 'A',
-            args: ['not ignore stale state'],
-            playerID: '0',
-          },
+    const G_player0 = sendAllReturn('0').args[1].G;
+    const G_player1 = sendAllReturn('1').args[1].G;
+
+    expect(G_player0).toMatchObject({
+      players: {
+        '0': {
+          cards: ['card1'],
         },
-        _stateID: 0,
       },
-      {
-        action: {
-          type: 'MAKE_MOVE',
-          payload: {
-            type: 'B',
-            args: ['ignore stale state'],
-            playerID: '0',
-          },
+      cards: ['card0'],
+      discardedCards: ['card3'],
+    });
+    expect(G_player1).toMatchObject({
+      players: {
+        '1': {
+          cards: ['card2'],
         },
-        _stateID: 1,
       },
-      {
-        action: {
-          type: 'MAKE_MOVE',
-          payload: {
-            type: 'B',
-            args: ['ignore stale state'],
-            playerID: '0',
-          },
-        },
-        _stateID: 2,
-      },
-    ]);
+      cards: ['card0'],
+      discardedCards: ['card3'],
+    });
   });
 
   describe('undo / redo', () => {

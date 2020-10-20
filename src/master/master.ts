@@ -264,23 +264,22 @@ export class Master {
       return;
     }
 
-    // Check whether the player is allowed to make the move.
-    if (
-      action.type == MAKE_MOVE &&
-      !this.game.flow.getMove(state.ctx, action.payload.type, playerID)
-    ) {
-      logging.error(
-        `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`
-      );
-      return;
-    }
-
     // Get move to check ignoreStateState option
     const move =
       action.type == MAKE_MOVE
         ? this.game.flow.getMove(state.ctx, action.payload.type, playerID)
         : null;
 
+    // Check whether the player is allowed to make the move.
+    if (action.type == MAKE_MOVE && !move) {
+      logging.error(
+        `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`
+      );
+      return;
+    }
+
+    // Check if action's stateID is different than store's stateID
+    // and if move does not have ignoreStaleStateID truthy.
     if (
       state._stateID !== stateID &&
       !(move && IsLongFormMove(move) && move.ignoreStaleStateID)
