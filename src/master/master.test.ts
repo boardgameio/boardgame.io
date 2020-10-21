@@ -17,7 +17,7 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server, State, Ctx } from '../types';
+import { Server, State, Ctx, LogEntry } from '../types';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 import { PlayerView } from '../core/player-view';
@@ -31,9 +31,62 @@ beforeEach(() => {
   dateMock.clear();
 });
 
-class InMemoryAsync extends InMemory {
-  type() {
-    return StorageAPI.Type.ASYNC;
+class InMemoryAsync extends StorageAPI.Async {
+  db: InMemory;
+
+  constructor() {
+    super();
+    this.db = new InMemory();
+  }
+
+  async connect() {
+    await this.sleep(100);
+  }
+
+  private sleep(interval: number): Promise<void> {
+    return new Promise(resolve => void setTimeout(resolve, interval));
+  }
+
+  /**
+   * @param id
+   * @param opts
+   * @override
+   */
+  async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
+    await this.sleep(100);
+    this.db.createMatch(id, opts);
+  }
+
+  async setMetadata(matchID: string, metadata: Server.MatchData) {
+    await this.sleep(100);
+    this.db.setMetadata(matchID, metadata);
+  }
+
+  async setState(matchID: string, state: State, deltalog?: LogEntry[]) {
+    await this.sleep(100);
+    this.db.setState(matchID, state, deltalog);
+  }
+
+  async fetch<O extends StorageAPI.FetchOpts>(
+    matchID: string,
+    opts: O
+  ): Promise<StorageAPI.FetchResult<O>> {
+    await this.sleep(100);
+    return this.db.fetch(matchID, opts);
+  }
+
+  async wipe(matchID: string) {
+    await this.sleep(100);
+    this.db.wipe(matchID);
+  }
+
+  /**
+   * @param opts
+   * @override
+   */
+  async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
+    await this.sleep(100);
+    return this.db.listMatches(opts);
   }
 }
 
@@ -246,7 +299,7 @@ describe('update', () => {
     const send = jest.fn();
     const master = new Master(
       game,
-      new InMemory(),
+      new InMemoryAsync(),
       TransportAPI(send, sendAll)
     );
 
@@ -267,8 +320,10 @@ describe('update', () => {
       master.onUpdate(actionB, 2, 'matchID', '1'),
       master.onUpdate(actionC, 2, 'matchID', '0'),
     ]);
-    await master.onSync('matchID', '0', 2);
-    await master.onSync('matchID', '1', 2);
+    await Promise.all([
+      master.onSync('matchID', '0', 2),
+      master.onSync('matchID', '1', 2),
+    ]);
 
     const G_player0 = sendAllReturn('0').args[1].G;
     const G_player1 = sendAllReturn('1').args[1].G;
@@ -370,14 +425,14 @@ describe('update', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata(id, dbMetadata);
+    await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
     await masterWithMetadata.onUpdate(event, 0, id, '0');
-    const { metadata } = db.fetch(id, { metadata: true });
+    const { metadata } = await db.fetch(id, { metadata: true });
     expect(metadata.gameover).toEqual(gameOverArg);
   });
 
@@ -391,7 +446,7 @@ describe('update', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata(id, dbMetadata);
+    await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
@@ -399,7 +454,7 @@ describe('update', () => {
     dateMock.advanceTo(updatedAt);
     const event = ActionCreators.gameEvent('endTurn', null, '0');
     await masterWithMetadata.onUpdate(event, 0, id, '0');
-    const { metadata } = db.fetch(id, { metadata: true });
+    const { metadata } = await db.fetch(id, { metadata: true });
     expect(metadata.updatedAt).toEqual(updatedAt.getTime());
   });
 
@@ -428,13 +483,13 @@ describe('update', () => {
     // Store state manually to bypass automatic metadata initialization on sync.
     let state = InitializeGame({ game });
     expect(state.ctx.turn).toBe(1);
-    db.setState(id, state);
+    await db.setState(id, state);
     // Dispatch update to end the turn.
     const event = ActionCreators.gameEvent('endTurn', null, '0');
     await masterWithoutMetadata.onUpdate(event, 0, id, '0');
     // Confirm the turn ended.
     let metadata: undefined | Server.MatchData;
-    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    ({ state, metadata } = await db.fetch(id, { state: true, metadata: true }));
     expect(state.ctx.turn).toBe(2);
     expect(metadata).toBeUndefined();
   });
