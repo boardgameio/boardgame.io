@@ -10,6 +10,12 @@
   // passed through the Game Creation API.
   setup: (ctx, setupData) => G,
 
+  // Optional function to validate the setupData before
+  // matches are created. If this returns a value,
+  // an error will be reported to the user and match
+  // creation is aborted.
+  validateSetupData: (setupData, numPlayers) => 'setupData is not valid!',
+
   moves: {
     // short-form move.
     A: (G, ctx) => {},
