@@ -9,6 +9,7 @@
 import IO from 'koa-socket-2';
 import { Socket, ServerOptions as SocketOptions } from 'socket.io';
 import { ServerOptions as HttpsOptions } from 'https';
+import PQueue from 'p-queue';
 import {
   Master,
   TransportAPI as MasterTransport,
@@ -79,6 +80,7 @@ interface Client {
 export class SocketIO {
   protected clientInfo: Map<string, Client>;
   protected roomInfo: Map<string, Set<string>>;
+  protected perMatchQueue: Map<string, PQueue>;
   private auth: boolean | AuthFn;
   private https: HttpsOptions;
   private socketAdapter: any;
@@ -92,6 +94,7 @@ export class SocketIO {
   }: SocketOpts = {}) {
     this.clientInfo = new Map();
     this.roomInfo = new Map();
+    this.perMatchQueue = new Map();
     this.auth = auth;
     this.https = https;
     this.socketAdapter = socketAdapter;
@@ -126,7 +129,11 @@ export class SocketIO {
             TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
             this.auth
           );
-          await master.onUpdate(action, stateID, matchID, playerID);
+
+          this.createMatchQueue(matchID);
+          await this.perMatchQueue[matchID].add(() =>
+            master.onUpdate(action, stateID, matchID, playerID)
+          );
         });
 
         socket.on('sync', async (...args: Parameters<Master['onSync']>) => {
@@ -162,9 +169,33 @@ export class SocketIO {
             const { matchID } = this.clientInfo.get(socket.id);
             this.roomInfo.get(matchID).delete(socket.id);
             this.clientInfo.delete(socket.id);
+
+            if (!this.roomInfo.get(matchID).size) {
+              this.deleteMatchQueue(matchID);
+            }
           }
         });
       });
+    }
+  }
+
+  /**
+   * Create a PQueue for a given matchID.
+   * @param matchID
+   */
+  createMatchQueue(matchID: string): void {
+    if (!this.perMatchQueue.get(matchID)) {
+      this.perMatchQueue.set(matchID, new PQueue({ concurrency: 1 }));
+    }
+  }
+
+  /**
+   * Delete a PQueue for a given matchID.
+   * @param matchID
+   */
+  deleteMatchQueue(matchID: string): void {
+    if (this.perMatchQueue.get(matchID)) {
+      this.perMatchQueue.delete(matchID);
     }
   }
 }

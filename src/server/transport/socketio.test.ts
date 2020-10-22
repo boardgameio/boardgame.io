@@ -24,6 +24,10 @@ class SocketIOTestAdapter extends SocketIO {
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
+
+  public get getPerMatchQueue() {
+    return this.perMatchQueue;
+  }
 }
 
 jest.mock('../../master/master', () => {
@@ -138,13 +142,14 @@ describe('socketAdapter', () => {
 describe('TransportAPI', () => {
   let io;
   let api;
+  let transport;
 
   beforeAll(() => {
     const app: any = { context: {} };
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
-    const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
+    transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
     api = TransportAPI('matchID', io.socket, clientInfo, roomInfo);
@@ -196,6 +201,7 @@ describe('sync / update', () => {
 describe('connect / disconnect', () => {
   const app: any = { context: {} };
   const games = [ProcessGameConfig({ seed: 0 })];
+  let transport: SocketIOTestAdapter;
   let clientInfo;
   let roomInfo;
   let io;
@@ -211,7 +217,7 @@ describe('connect / disconnect', () => {
   beforeAll(() => {
     clientInfo = new Map();
     roomInfo = new Map();
-    const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
+    transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
   });
@@ -261,5 +267,6 @@ describe('connect / disconnect', () => {
     await io.socket.receive('disconnect');
     expect(toObj(clientInfo)).toEqual({});
     expect(toObj(roomInfo.get('matchID'))).toEqual({});
+    expect(transport.getPerMatchQueue.get('matchID')).toBeUndefined();
   });
 });
