@@ -7,7 +7,7 @@
  */
 
 import { Server } from '../src/server';
-import { FlatFile } from '../src/server/db';
+import { FlatFile, InMemory } from '../src/server/db';
 import { SocketIO } from '../src/server/transport/socketio';
 
-export { Server, FlatFile, SocketIO };
+export { Server, FlatFile, InMemory, SocketIO };
