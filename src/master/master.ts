@@ -264,7 +264,7 @@ export class Master {
       return;
     }
 
-    // Get move to check ignoreStateState option
+    // Get move for further checkings
     const move =
       action.type == MAKE_MOVE
         ? this.game.flow.getMove(state.ctx, action.payload.type, playerID)
