@@ -232,7 +232,7 @@ describe('update', () => {
     await master.onUpdate(action, 100, 'matchID', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `invalid stateID, was=[100], expected=[1]`
+      `invalid stateID, was=[100], expected=[1] - playerID=[1] - action[endTurn]`
     );
   });
 
@@ -240,14 +240,16 @@ describe('update', () => {
     await master.onUpdate(action, 1, 'matchID', '100');
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '100');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(error).toHaveBeenCalledWith(`player not active - playerID=[100]`);
+    expect(error).toHaveBeenCalledWith(
+      `player not active - playerID=[100] - action[move]`
+    );
   });
 
   test('invalid move', async () => {
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `move not processed - canPlayerMakeMove=false, playerID=[1]`
+      `move not processed - canPlayerMakeMove=false - playerID=[1] - action[move]`
     );
   });
 
@@ -391,7 +393,9 @@ describe('update', () => {
     await master.onUpdate(event, 5, 'matchID', '0');
     event = ActionCreators.gameEvent('endTurn');
     await master.onUpdate(event, 6, 'matchID', '0');
-    expect(error).toHaveBeenCalledWith(`game over - matchID=[matchID]`);
+    expect(error).toHaveBeenCalledWith(
+      `game over - matchID=[matchID] - playerID=[0] - action[endTurn]`
+    );
   });
 
   test('writes gameover to metadata', async () => {
