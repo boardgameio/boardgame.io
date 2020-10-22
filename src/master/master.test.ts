@@ -17,7 +17,7 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server, State, Ctx } from '../types';
+import { Server, State, Ctx, LogEntry } from '../types';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 import { PlayerView } from '../core/player-view';
@@ -31,9 +31,62 @@ beforeEach(() => {
   dateMock.clear();
 });
 
-class InMemoryAsync extends InMemory {
-  type() {
-    return StorageAPI.Type.ASYNC;
+class InMemoryAsync extends StorageAPI.Async {
+  db: InMemory;
+
+  constructor() {
+    super();
+    this.db = new InMemory();
+  }
+
+  async connect() {
+    await this.sleep(100);
+  }
+
+  private sleep(interval: number): Promise<void> {
+    return new Promise(resolve => void setTimeout(resolve, interval));
+  }
+
+  /**
+   * @param id
+   * @param opts
+   * @override
+   */
+  async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
+    await this.sleep(100);
+    this.db.createMatch(id, opts);
+  }
+
+  async setMetadata(matchID: string, metadata: Server.MatchData) {
+    await this.sleep(100);
+    this.db.setMetadata(matchID, metadata);
+  }
+
+  async setState(matchID: string, state: State, deltalog?: LogEntry[]) {
+    await this.sleep(100);
+    this.db.setState(matchID, state, deltalog);
+  }
+
+  async fetch<O extends StorageAPI.FetchOpts>(
+    matchID: string,
+    opts: O
+  ): Promise<StorageAPI.FetchResult<O>> {
+    await this.sleep(100);
+    return this.db.fetch(matchID, opts);
+  }
+
+  async wipe(matchID: string) {
+    await this.sleep(100);
+    this.db.wipe(matchID);
+  }
+
+  /**
+   * @param opts
+   * @override
+   */
+  async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
+    await this.sleep(100);
+    return this.db.listMatches(opts);
   }
 }
 
@@ -379,7 +432,7 @@ describe('update', () => {
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
     await masterWithMetadata.onUpdate(event, 0, id, '0');
-    const { metadata } = db.fetch(id, { metadata: true });
+    const { metadata } = await db.fetch(id, { metadata: true });
     expect(metadata.gameover).toEqual(gameOverArg);
   });
 
@@ -401,7 +454,7 @@ describe('update', () => {
     dateMock.advanceTo(updatedAt);
     const event = ActionCreators.gameEvent('endTurn', null, '0');
     await masterWithMetadata.onUpdate(event, 0, id, '0');
-    const { metadata } = db.fetch(id, { metadata: true });
+    const { metadata } = await db.fetch(id, { metadata: true });
     expect(metadata.updatedAt).toEqual(updatedAt.getTime());
   });
 
@@ -436,7 +489,7 @@ describe('update', () => {
     await masterWithoutMetadata.onUpdate(event, 0, id, '0');
     // Confirm the turn ended.
     let metadata: undefined | Server.MatchData;
-    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    ({ state, metadata } = await db.fetch(id, { state: true, metadata: true }));
     expect(state.ctx.turn).toBe(2);
     expect(metadata).toBeUndefined();
   });
