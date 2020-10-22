@@ -184,7 +184,7 @@ export class SocketIO {
    * @param matchID
    */
   createMatchQueue(matchID: string): void {
-    if (!this.perMatchQueue.get(matchID)) {
+    if (!this.perMatchQueue.has(matchID)) {
       this.perMatchQueue.set(matchID, new PQueue({ concurrency: 1 }));
     }
   }
