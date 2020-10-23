@@ -232,13 +232,21 @@ interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   [phaseName: string]: PhaseConfig<G, CtxWithPlugins>;
 }
 
-export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
+export interface Game<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx,
+  SetupData extends any = any
+> {
   name?: string;
   minPlayers?: number;
   maxPlayers?: number;
   disableUndo?: boolean;
   seed?: string | number;
-  setup?: (ctx: CtxWithPlugins, setupData?: any) => any;
+  setup?: (ctx: CtxWithPlugins, setupData?: SetupData) => any;
+  validateSetupData?: (
+    setupData: SetupData | undefined,
+    numPlayers: number
+  ) => string | undefined;
   moves?: MoveMap<G, CtxWithPlugins>;
   phases?: PhaseMap<G, CtxWithPlugins>;
   turn?: TurnConfig<G, CtxWithPlugins>;
