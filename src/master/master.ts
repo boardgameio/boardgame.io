@@ -35,7 +35,7 @@ export const getPlayerMetadata = (
   }
 };
 
-function IsSynchronous(
+export function IsSynchronous(
   storageAPI: StorageAPI.Sync | StorageAPI.Async
 ): storageAPI is StorageAPI.Sync {
   return storageAPI.type() === StorageAPI.Type.SYNC;

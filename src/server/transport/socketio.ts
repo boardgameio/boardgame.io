@@ -14,6 +14,7 @@ import {
   Master,
   TransportAPI as MasterTransport,
   AuthFn,
+  IsSynchronous,
 } from '../../master/master';
 import { PlayerID } from '../../types';
 
@@ -130,7 +131,8 @@ export class SocketIO {
             this.auth
           );
 
-          const matchQueue = this.getMatchQueue(matchID);
+          const queueInterval = IsSynchronous(app.context.db) ? 300 : 0;
+          const matchQueue = this.getMatchQueue(matchID, queueInterval);
           await matchQueue.add(() =>
             master.onUpdate(action, stateID, matchID, playerID)
           );
@@ -184,9 +186,9 @@ export class SocketIO {
    * @param matchID
    * @returns
    */
-  getMatchQueue(matchID: string): PQueue {
+  getMatchQueue(matchID: string, interval: number): PQueue {
     if (!this.perMatchQueue.has(matchID)) {
-      this.perMatchQueue.set(matchID, new PQueue({ concurrency: 1 }));
+      this.perMatchQueue.set(matchID, new PQueue({ concurrency: 1, interval }));
     }
     return this.perMatchQueue.get(matchID);
   }

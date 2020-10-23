@@ -40,7 +40,7 @@ class InMemoryAsync extends StorageAPI.Async {
   }
 
   async connect() {
-    await this.sleep(100);
+    await this.sleep(300);
   }
 
   private sleep(interval: number): Promise<void> {
