@@ -36,7 +36,7 @@ type SocketIOTransportOpts = TransportOpts &
  */
 export class SocketIOTransport extends Transport {
   server: string;
-  socket;
+  socket: SocketIOClient.Socket;
   socketOpts;
   callback: () => void;
   matchDataCallback: MetadataCallback;
@@ -143,6 +143,17 @@ export class SocketIOTransport extends Transport {
     this.socket.on('disconnect', () => {
       this.isConnected = false;
       this.callback();
+    });
+
+    /** @FIXME This is just for testing purposes. */
+    this.socket.on('connect_error', function(data) {
+      console.log(data || 'connect_error');
+    });
+    this.socket.on('reconnect_error', function(data) {
+      console.log(data || 'connect_error');
+    });
+    this.socket.on('connect_failed', function(data) {
+      console.log(data || 'connect_failed');
     });
   }
 

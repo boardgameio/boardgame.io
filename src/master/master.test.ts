@@ -53,17 +53,17 @@ class InMemoryAsync extends StorageAPI.Async {
    * @override
    */
   async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
-    await this.sleep(100);
+    await this.sleep(300);
     this.db.createMatch(id, opts);
   }
 
   async setMetadata(matchID: string, metadata: Server.MatchData) {
-    await this.sleep(100);
+    await this.sleep(300);
     this.db.setMetadata(matchID, metadata);
   }
 
   async setState(matchID: string, state: State, deltalog?: LogEntry[]) {
-    await this.sleep(100);
+    await this.sleep(300);
     this.db.setState(matchID, state, deltalog);
   }
 
@@ -71,12 +71,12 @@ class InMemoryAsync extends StorageAPI.Async {
     matchID: string,
     opts: O
   ): Promise<StorageAPI.FetchResult<O>> {
-    await this.sleep(100);
+    await this.sleep(300);
     return this.db.fetch(matchID, opts);
   }
 
   async wipe(matchID: string) {
-    await this.sleep(100);
+    await this.sleep(300);
     this.db.wipe(matchID);
   }
 
@@ -85,7 +85,7 @@ class InMemoryAsync extends StorageAPI.Async {
    * @override
    */
   async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
-    await this.sleep(100);
+    await this.sleep(300);
     return this.db.listMatches(opts);
   }
 }
