@@ -131,7 +131,7 @@ describe('simultaneous moves', async () => {
     if (client1 && client1.stop) client1.stop();
   });
 
-  test('two clients playing', async () => {
+  xtest('two clients playing', async () => {
     expect(server).not.toBeUndefined();
     expect(runningServer.appServer).not.toBeUndefined();
     expect(runningServer.apiServer).toBeUndefined();
