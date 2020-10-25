@@ -9,7 +9,7 @@ import { sync } from '../../core/action-creators';
 import { CreateMatch } from '../api';
 import { InMemory } from '../db/inmemory';
 
-describe('simultaneous moves', async () => {
+describe('simultaneous moves', () => {
   const game = {
     name: 'test',
     setup: () => {
@@ -89,22 +89,8 @@ describe('simultaneous moves', async () => {
     //   playerName: 'Player 1',
     // });
 
-    client0 = Client({
-      ...clientConfig,
-      playerID: '0',
-      // credentials: p0Auth.playerCredentials,
-    });
-    client1 = Client({
-      ...clientConfig,
-      playerID: '1',
-      // credentials: p1Auth.playerCredentials,
-    });
-
     // client0.updateMatchID('test');
     // client1.updateMatchID('test');
-
-    client0.start();
-    client1.start();
 
     // client0.updateMatchID(match.matchID);
     // client1.updateMatchID(match.matchID);
@@ -132,6 +118,20 @@ describe('simultaneous moves', async () => {
   });
 
   test('two clients playing', async () => {
+    client0 = Client({
+      ...clientConfig,
+      playerID: '0',
+      // credentials: p0Auth.playerCredentials,
+    });
+    client1 = Client({
+      ...clientConfig,
+      playerID: '1',
+      // credentials: p1Auth.playerCredentials,
+    });
+
+    client0.start();
+    client1.start();
+
     expect(server).not.toBeUndefined();
     expect(runningServer.appServer).not.toBeUndefined();
     expect(runningServer.apiServer).toBeUndefined();
