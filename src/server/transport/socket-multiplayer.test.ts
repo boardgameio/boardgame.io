@@ -12,7 +12,7 @@ import { InMemory } from '../db/inmemory';
 describe('simultaneous moves', () => {
   const game = {
     name: 'test',
-    setup: () => {
+    setup: ctx => {
       const G = {
         players: {
           '0': {
@@ -33,16 +33,20 @@ describe('simultaneous moves', () => {
       stages: {
         A: {
           moves: {
-            A: (G, ctx: Ctx) => {
-              const card = G.players[ctx.playerID].cards.shift();
-              G.discardedCards.push(card);
+            A: {
+              client: false,
+              move: (G, ctx: Ctx) => {
+                const card = G.players[ctx.playerID].cards.shift();
+                G.discardedCards.push(card);
+              },
             },
             B: {
+              client: false,
+              ignoreStaleStateID: true,
               move: (G, ctx: Ctx) => {
                 const card = G.cards.pop();
                 G.players[ctx.playerID].cards.push(card);
               },
-              ignoreStaleStateID: true,
             },
           },
         },
@@ -55,56 +59,26 @@ describe('simultaneous moves', () => {
   let httpAppAddr;
   let client0: _ClientImpl<any>;
   let client1: _ClientImpl<any>;
-  let lobbyClient: LobbyClient;
 
   beforeEach(async () => {
     server = Server({ games: [game], db: new InMemory() });
     runningServer = await server.run(undefined);
     httpAppAddr = runningServer.appServer.address();
 
-    // lobbyClient = new LobbyClient({ server: `http://[${httpAppAddr.address}]:${httpAppAddr.port}` });
-
     clientConfig = {
       game: game,
       multiplayer: SocketIOClient({
-        server: `http://127.0.0.1:${httpAppAddr.port}`,
+        server: `http://${httpAppAddr.address}:${httpAppAddr.port}`,
         socketOpts: {
-          forceNode: true,
-          reconnectionDelay: 0,
+          reconnection: true,
+          reconnectionDelay: 5,
+          forceNew: true,
           transports: ['websocket'],
         },
       }),
       numPlayers: 2,
       matchID: 'test',
     };
-
-    // const match = await lobbyClient.createMatch('test', { numPlayers: 2 });
-
-    // const p0Auth = await lobbyClient.joinMatch('test', match.matchID, {
-    //   playerID: '0',
-    //   playerName: 'Player 0',
-    // });
-    // const p1Auth = await lobbyClient.joinMatch('test', match.matchID, {
-    //   playerID: '1',
-    //   playerName: 'Player 1',
-    // });
-
-    // client0.updateMatchID('test');
-    // client1.updateMatchID('test');
-
-    // client0.updateMatchID(match.matchID);
-    // client1.updateMatchID(match.matchID);
-
-    // const state = { G: {}, ctx: { phase: '' }, plugins: {} };
-    // const filteredMetadata = [];
-    // client0.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
-    // client1.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
-
-    // const state = { restore: true };
-    // const log = ['0', '1'];
-    // const action = sync(({ state, log } as unknown) as SyncInfo);
-    // client0.store.dispatch(action);
-    // client1.store.dispatch(action);
   });
 
   afterEach(() => {
@@ -117,7 +91,7 @@ describe('simultaneous moves', () => {
     if (client1 && client1.stop) client1.stop();
   });
 
-  test('two clients playing', async () => {
+  xtest('two clients playing', () => {
     client0 = Client({
       ...clientConfig,
       playerID: '0',
@@ -131,6 +105,9 @@ describe('simultaneous moves', () => {
 
     client0.start();
     client1.start();
+
+    client0.updateMatchID('test');
+    client1.updateMatchID('test');
 
     expect(server).not.toBeUndefined();
     expect(runningServer.appServer).not.toBeUndefined();

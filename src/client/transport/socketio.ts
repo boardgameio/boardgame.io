@@ -144,17 +144,6 @@ export class SocketIOTransport extends Transport {
       this.isConnected = false;
       this.callback();
     });
-
-    /** @FIXME This is just for testing purposes. */
-    this.socket.on('connect_error', function(data) {
-      console.log(data || 'connect_error');
-    });
-    this.socket.on('reconnect_error', function(data) {
-      console.log(data || 'connect_error');
-    });
-    this.socket.on('connect_failed', function(data) {
-      console.log(data || 'connect_failed');
-    });
   }
 
   /**
