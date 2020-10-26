@@ -43,7 +43,7 @@ export function GetBotPlayer(state: State, bots: Record<PlayerID, any>) {
 
 interface LocalMasterOpts {
   game: Game;
-  bots: Record<PlayerID, any>;
+  bots?: Record<PlayerID, any>;
 }
 
 /**
@@ -234,19 +234,32 @@ export class LocalTransport extends Transport {
   }
 }
 
-const localMasters = new Map();
-export function Local(opts?: Pick<LocalMasterOpts, 'bots'>) {
+/**
+ * Global map storing local master instances.
+ */
+const localMasters: Map<
+  Game,
+  { master: LocalMaster; bots: LocalMasterOpts['bots'] }
+> = new Map();
+
+/**
+ * Create a local transport.
+ */
+export function Local({ bots }: Pick<LocalMasterOpts, 'bots'> = {}) {
   return (transportOpts: TransportOpts) => {
+    const { gameKey, game } = transportOpts;
     let master: LocalMaster;
 
-    if (localMasters.has(transportOpts.gameKey) && !opts) {
-      master = localMasters.get(transportOpts.gameKey);
-    } else {
-      master = new LocalMaster({
-        game: transportOpts.game,
-        bots: opts && opts.bots,
-      });
-      localMasters.set(transportOpts.gameKey, master);
+    if (localMasters.has(gameKey)) {
+      const instance = localMasters.get(gameKey);
+      if (bots === instance.bots) {
+        master = instance.master;
+      }
+    }
+
+    if (!master) {
+      master = new LocalMaster({ game, bots });
+      localMasters.set(gameKey, { master, bots });
     }
 
     return new LocalTransport({ master, ...transportOpts });
