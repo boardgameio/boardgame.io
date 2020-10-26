@@ -35,3 +35,5 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 - [Thinktank](https://github.com/averycrespi/thinktank) - [play](https://thinktank.crespi.dev) - A 2-player strategy game inspired by Conundrum.
 
 - [Splendor](http://bestboards.ir) - A minimal splendor game you can play with up to 4 players.
+
+- [Steel Civilizations](https://play.google.com/store/apps/details?id=com.hydra.steelcivs) - Turn-based mobile strategy game for Android with real-time online multiplayer ranking ladder system.
