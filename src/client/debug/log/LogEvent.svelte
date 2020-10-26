@@ -40,13 +40,14 @@
     border-left: 5px solid #ccc;
     padding: 5px;
     text-align: center;
-    color: #888;
+    color: #666;
     font-size: 14px;
     min-height: 25px;
     line-height: 25px;
   }
 
-  .log-event:hover {
+  .log-event:hover,
+  .log-event:focus {
     border-style: solid;
     background: #eee;
   }
@@ -122,12 +123,15 @@
   }
 </style>
 
-<div
+<button
   class="log-event player{playerID}"
   class:pinned
   on:click={() => dispatch('click', { logIndex })}
   on:mouseenter={() => dispatch('mouseenter', { logIndex })}
-  on:mouseleave={() => dispatch('mouseleave')}>
+  on:focus={() => dispatch('mouseenter', { logIndex })}
+  on:mouseleave={() => dispatch('mouseleave')}
+  on:blur={() => dispatch('mouseleave')}
+>
   <div>{actionType}({args.join(',')})</div>
 
   {#if payloadComponent}
@@ -135,4 +139,4 @@
   {:else}
     <CustomPayload {payload} />
   {/if}
-</div>
+</button>

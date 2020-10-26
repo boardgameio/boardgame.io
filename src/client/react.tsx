@@ -8,7 +8,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Client as RawClient, ClientOpts, _ClientImpl } from './client';
+import {
+  Client as RawClient,
+  ClientOpts,
+  ClientState,
+  _ClientImpl,
+} from './client';
 
 type WrappedBoardDelegates = 'matchID' | 'playerID' | 'credentials';
 
@@ -17,7 +22,6 @@ export type WrappedBoardProps = Pick<
   WrappedBoardDelegates | 'debug'
 >;
 
-type ClientState<G extends any = any> = ReturnType<_ClientImpl<G>['getState']>;
 type ExposedClientProps<G extends any = any> = Pick<
   _ClientImpl<G>,
   | 'log'

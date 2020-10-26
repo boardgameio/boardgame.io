@@ -1,5 +1,6 @@
 <script>
-  export let client;
+  export let clientManager;
+  $: client = $clientManager.client;
 
   import { writable } from 'svelte/store';
   import { setContext } from 'svelte';
@@ -23,9 +24,11 @@
   setContext('hotkeys', { disableHotkeys });
   setContext('secondaryPane', { secondaryPane });
 
+  let paneDiv;
   let pane = 'main';
   function MenuChange(e) {
     pane = e.detail;
+    paneDiv.focus();
   }
 
   let visible = true;
@@ -98,15 +101,31 @@
   .debug-panel :global(section) {
     margin-bottom: 20px;
   }
+
+  .debug-panel :global(.screen-reader-only) {
+    clip: rect(0 0 0 0); 
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap; 
+    width: 1px;
+  }
 </style>
 
 <svelte:window on:keypress={Keypress} />
 
 {#if visible}
-  <div class="debug-panel" transition:fly={{ x: 400 }}>
+  <section aria-label="boardgame.io Debug Panel" class="debug-panel" transition:fly={{ x: 400 }}>
     <Menu on:change={MenuChange} {panes} {pane} />
-    <div class="pane">
-      <svelte:component this={panes[pane].component} {client} />
+    <div
+      bind:this={paneDiv}
+      class="pane"
+      role="region"
+      aria-label={pane}
+      tabindex="-1"
+    >
+      <svelte:component this={panes[pane].component} {client} {clientManager} />
     </div>
     {#if $secondaryPane}
       <div class="secondary-pane">
@@ -115,5 +134,5 @@
           metadata={$secondaryPane.metadata} />
       </div>
     {/if}
-  </div>
+  </section>
 {/if}

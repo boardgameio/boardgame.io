@@ -1,5 +1,6 @@
 <script>
   export let client;
+  export let clientManager;
 
   import Item from './Item.svelte';
 </script>
