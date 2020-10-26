@@ -252,7 +252,7 @@ export function Local({ bots }: Pick<LocalMasterOpts, 'bots'> = {}) {
 
     if (localMasters.has(gameKey)) {
       const instance = localMasters.get(gameKey);
-      if (bots === instance.bots) {
+      if (instance.bots === bots) {
         master = instance.master;
       }
     }
