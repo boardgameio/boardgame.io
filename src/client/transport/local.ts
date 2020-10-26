@@ -42,12 +42,15 @@ export function GetBotPlayer(state: State, bots: Record<PlayerID, any>) {
   return null;
 }
 
-interface LocalMasterOpts {
-  game: Game;
+interface LocalOpts {
   bots?: Record<PlayerID, any>;
   persist?: boolean;
   storageKey?: string;
 }
+
+type LocalMasterOpts = LocalOpts & {
+  game: Game;
+};
 
 /**
  * Creates a local version of the master that the client
@@ -242,17 +245,13 @@ export class LocalTransport extends Transport {
  */
 const localMasters: Map<
   Game,
-  { master: LocalMaster; bots: LocalMasterOpts['bots'] }
+  { master: LocalMaster; bots: LocalOpts['bots'] }
 > = new Map();
 
 /**
  * Create a local transport.
  */
-export function Local({
-  bots,
-  persist,
-  storageKey,
-}: Pick<LocalMasterOpts, 'bots' | 'persist' | 'storageKey'> = {}) {
+export function Local({ bots, persist, storageKey }: LocalOpts = {}) {
   return (transportOpts: TransportOpts) => {
     const { gameKey, game } = transportOpts;
     let master: LocalMaster;
