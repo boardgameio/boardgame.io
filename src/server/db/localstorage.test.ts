@@ -1,18 +1,12 @@
+import { generate as uuid } from 'shortid';
 import { LocalStorage } from './localstorage';
 import { State, Server } from '../../types';
-
-// this is not best place for fake string generator
-
-const getRandomString = () =>
-  Math.random()
-    .toString(36)
-    .substring(7);
 
 describe('LocaLStorage', () => {
   let db: LocalStorage;
 
   beforeAll(() => {
-    db = new LocalStorage(getRandomString());
+    db = new LocalStorage(uuid());
     db.connect();
   });
 
@@ -61,7 +55,7 @@ describe('LocaLStorage', () => {
 
   test('must create new empty db if other localstorage key is used', () => {
     // create another localstorage with anothr key
-    let db2 = new LocalStorage(getRandomString());
+    let db2 = new LocalStorage(uuid());
     let stateEntry: unknown = { a: 1 };
 
     // create game in db
