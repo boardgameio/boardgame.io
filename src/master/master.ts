@@ -231,7 +231,7 @@ export class Master {
     if (state.ctx.gameover !== undefined) {
       logging.error(
         `game over - matchID=[${key}] - playerID=[${playerID}]` +
-          ` - action[${action.payload.type || action.type}]`
+          ` - action[${action.payload.type}]`
       );
       return;
     }
@@ -265,7 +265,7 @@ export class Master {
     if (!this.game.flow.isPlayerActive(state.G, state.ctx, playerID)) {
       logging.error(
         `player not active - playerID=[${playerID}]` +
-          ` - action[${action.payload.type || action.type}]`
+          ` - action[${action.payload.type}]`
       );
       return;
     }
@@ -280,7 +280,7 @@ export class Master {
     if (action.type == MAKE_MOVE && !move) {
       logging.error(
         `move not processed - canPlayerMakeMove=false - playerID=[${playerID}]` +
-          ` - action[${action.payload.type || action.type}]`
+          ` - action[${action.payload.type}]`
       );
       return;
     }
@@ -293,8 +293,7 @@ export class Master {
     ) {
       logging.error(
         `invalid stateID, was=[${stateID}], expected=[${state._stateID}]` +
-          ` - playerID=[${playerID}] - action[${action.payload.type ||
-            action.type}]`
+          ` - playerID=[${playerID}] - action[${action.payload.type}]`
       );
       return;
     }
