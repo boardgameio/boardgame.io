@@ -10,6 +10,7 @@ import { createStore } from 'redux';
 import { LocalTransport, LocalMaster, Local, GetBotPlayer } from './local';
 import { makeMove, gameEvent } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
+import { ProcessGameConfig } from '../../core/game';
 import { InitializeGame } from '../../core/initialize';
 import { Client } from '../client';
 import { RandomBot } from '../../ai/random-bot';
@@ -118,6 +119,33 @@ describe('GetBotPlayer', () => {
       { '0': {} }
     );
     expect(result).toEqual(null);
+  });
+});
+
+describe('Local', () => {
+  test('transports for same game use shared master', () => {
+    const gameKey = {};
+    const game = ProcessGameConfig(gameKey);
+    const transport1 = Local()({ game, gameKey });
+    const transport2 = Local()({ game, gameKey });
+    expect(transport1.master).toBe(transport2.master);
+  });
+
+  test('transports use shared master with bots', () => {
+    const gameKey = {};
+    const game = ProcessGameConfig(gameKey);
+    const bots = {};
+    const transport1 = Local({ bots })({ game, gameKey });
+    const transport2 = Local({ bots })({ game, gameKey });
+    expect(transport1.master).toBe(transport2.master);
+  });
+
+  test('transports use different master for different bots', () => {
+    const gameKey = {};
+    const game = ProcessGameConfig(gameKey);
+    const transport1 = Local({ bots: {} })({ game, gameKey });
+    const transport2 = Local({ bots: {} })({ game, gameKey });
+    expect(transport1.master).not.toBe(transport2.master);
   });
 });
 
