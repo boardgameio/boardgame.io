@@ -10,6 +10,8 @@ import Singleplayer from './singleplayer';
 import Multiplayer from './multiplayer';
 import Spectator from './spectator';
 import Authenticated from './authenticated';
+import Bots from './bots';
+import AdvancedAI from './advanced-ai';
 
 const routes = [
   {
@@ -31,6 +33,16 @@ const routes = [
     path: '/spectator',
     text: 'Spectator',
     component: Spectator,
+  },
+  {
+    path: '/bots',
+    text: 'Singleplayer vs AI',
+    component: Bots,
+  },
+  {
+    path: '/advanced-ai',
+    text: 'Advanced AI',
+    component: AdvancedAI,
   },
 ];
 
