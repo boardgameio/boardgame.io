@@ -132,6 +132,10 @@ type TransportData =
   | {
       type: 'sync';
       args: [string, SyncInfo];
+    }
+  | {
+      type: 'matchData';
+      args: [string, FilteredMetadata];
     };
 
 export interface TransportAPI {
@@ -411,5 +415,53 @@ export class Master {
     });
 
     return;
+  }
+
+  async onConnectionChange(
+    matchID: string,
+    playerID: string,
+    connected: boolean
+  ) {
+    const key = matchID;
+
+    let metadata: Server.MatchData | undefined;
+    if (IsSynchronous(this.storageAPI)) {
+      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
+    } else {
+      ({ metadata } = await this.storageAPI.fetch(matchID, {
+        metadata: true,
+      }));
+    }
+
+    if (metadata === undefined) {
+      logging.error(`metadata not found for matchID=[${key}]`);
+      return { error: 'metadata not found' };
+    }
+
+    if (metadata.players[playerID] === undefined) {
+      logging.error(
+        `Player not in the match, matchID=[${key}] playerID=[${playerID}]`
+      );
+      return { error: 'player not in the match' };
+    }
+
+    metadata.players[playerID].isConnected = connected;
+
+    let filteredMetadata: FilteredMetadata;
+    filteredMetadata = Object.values(metadata.players).map(player => {
+      const { credentials, ...filteredData } = player;
+      return filteredData;
+    });
+
+    this.transportAPI.sendAll(() => ({
+      type: 'matchData',
+      args: [matchID, filteredMetadata],
+    }));
+
+    if (IsSynchronous(this.storageAPI)) {
+      this.storageAPI.setMetadata(key, metadata);
+    } else {
+      await this.storageAPI.setMetadata(key, metadata);
+    }
   }
 }
