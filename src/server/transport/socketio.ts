@@ -131,7 +131,7 @@ export class SocketIO {
             this.auth
           );
 
-          const queueInterval = IsSynchronous(app.context.db) ? 300 : 0;
+          const queueInterval = IsSynchronous(app.context.db) ? 50 : 0;
           const matchQueue = this.getMatchQueue(matchID, queueInterval);
           await matchQueue.add(() =>
             master.onUpdate(action, stateID, matchID, playerID)
