@@ -35,6 +35,15 @@ export const getPlayerMetadata = (
   }
 };
 
+/**
+ * Filter match data to get a player metadata object with credentials stripped.
+ */
+const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
+  Object.values(matchData.players).map(player => {
+    const { credentials, ...filteredData } = player;
+    return filteredData;
+  });
+
 function IsSynchronous(
   storageAPI: StorageAPI.Sync | StorageAPI.Async
 ): storageAPI is StorageAPI.Sync {
@@ -383,13 +392,7 @@ export class Master {
       }
     }
 
-    let filteredMetadata: FilteredMetadata;
-    if (metadata) {
-      filteredMetadata = Object.values(metadata.players).map(player => {
-        const { credentials, ...filteredData } = player;
-        return filteredData;
-      });
-    }
+    const filteredMetadata = metadata ? filterMatchData(metadata) : undefined;
 
     const filteredState = {
       ...state,
@@ -447,11 +450,7 @@ export class Master {
 
     metadata.players[playerID].isConnected = connected;
 
-    let filteredMetadata: FilteredMetadata;
-    filteredMetadata = Object.values(metadata.players).map(player => {
-      const { credentials, ...filteredData } = player;
-      return filteredData;
-    });
+    const filteredMetadata = filterMatchData(metadata);
 
     this.transportAPI.sendAll(() => ({
       type: 'matchData',
