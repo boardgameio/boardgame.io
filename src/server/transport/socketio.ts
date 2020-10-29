@@ -155,13 +155,22 @@ export class SocketIO {
             this.auth
           );
           await master.onSync(matchID, playerID, numPlayers);
+          await master.onConnectionChange(matchID, playerID, true);
         });
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', async () => {
           if (this.clientInfo.has(socket.id)) {
-            const { matchID } = this.clientInfo.get(socket.id);
+            const { matchID, playerID } = this.clientInfo.get(socket.id);
             this.roomInfo.get(matchID).delete(socket.id);
             this.clientInfo.delete(socket.id);
+
+            const master = new Master(
+              game,
+              app.context.db,
+              TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+              this.auth
+            );
+            await master.onConnectionChange(matchID, playerID, false);
           }
         });
       });

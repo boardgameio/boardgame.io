@@ -344,6 +344,7 @@ export class _ClientImpl<G extends any = any> {
 
     this.transport.subscribeMatchData(metadata => {
       this.matchData = metadata;
+      this.notifySubscribers();
     });
   }
 
