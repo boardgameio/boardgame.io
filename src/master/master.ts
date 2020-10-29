@@ -420,6 +420,10 @@ export class Master {
     return;
   }
 
+  /**
+   * Called when a client connects or disconnects.
+   * Updates and sends out metadata to reflect the player’s connection status.
+   */
   async onConnectionChange(
     matchID: string,
     playerID: string,
