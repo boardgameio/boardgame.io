@@ -499,6 +499,95 @@ describe('update', () => {
   });
 });
 
+describe('connectionChange', () => {
+  let sendAllReturn;
+
+  const send = jest.fn();
+  const sendAll = jest.fn(arg => {
+    sendAllReturn = arg;
+  });
+
+  const db = new InMemory();
+  const master = new Master(game, db, TransportAPI(send, sendAll));
+
+  const metadata = {
+    gameName: 'tic-tac-toe',
+    setupData: {},
+    players: {
+      '0': {
+        id: 0,
+        credentials: 'qS2m4Ujb_',
+        name: 'Alice',
+      },
+      '1': {
+        id: 1,
+        credentials: 'nIQtXFybDD',
+        name: 'Bob',
+        isConnected: true,
+      },
+    },
+    createdAt: 0,
+    updatedAt: 0,
+  };
+  db.createMatch('matchID', { metadata, initialState: {} as State });
+
+  beforeEach(() => {
+    sendAllReturn = undefined;
+    jest.clearAllMocks();
+  });
+
+  test('changes players metadata', async () => {
+    await master.onConnectionChange('matchID', '0', true);
+
+    const expectedPlayerData = { id: 0, name: 'Alice', isConnected: true };
+    const {
+      metadata: { players },
+    } = db.fetch('matchID', { metadata: true });
+    expect(players['0']).toMatchObject(expectedPlayerData);
+  });
+
+  test('sends metadata to all', async () => {
+    await master.onConnectionChange('matchID', '1', false);
+    const expectedMetadata = [
+      { id: 0, name: 'Alice', isConnected: true },
+      { id: 1, name: 'Bob', isConnected: false },
+    ];
+    const sentMessage = sendAllReturn('0');
+    expect(sentMessage.type).toEqual('matchData');
+    expect(sentMessage.args[1]).toMatchObject(expectedMetadata);
+  });
+
+  test('invalid matchID', async () => {
+    const result = await master.onConnectionChange('invalidMatchID', '0', true);
+    expect(error).toHaveBeenCalledWith(
+      'metadata not found for matchID=[invalidMatchID]'
+    );
+    expect(result.error).toEqual('metadata not found');
+  });
+
+  test('invalid playerID', async () => {
+    const result = await master.onConnectionChange('matchID', '3', true);
+    expect(error).toHaveBeenCalledWith(
+      'Player not in the match, matchID=[matchID] playerID=[3]'
+    );
+    expect(result.error).toEqual('player not in the match');
+  });
+
+  test('processes connection change with an async db', async () => {
+    const asyncDb = new InMemoryAsync();
+    const masterWithAsyncDb = new Master(
+      game,
+      asyncDb,
+      TransportAPI(send, sendAll)
+    );
+    asyncDb.createMatch('matchID', { metadata, initialState: {} as State });
+
+    await masterWithAsyncDb.onConnectionChange('matchID', '0', true);
+
+    expect(sendAll).toHaveBeenCalled();
+  });
+});
+
 describe('playerView', () => {
   let sendAllReturn;
   let sendReturn;

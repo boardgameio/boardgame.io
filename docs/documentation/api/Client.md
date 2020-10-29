@@ -108,7 +108,7 @@ The following properties are available on a client instance:
   ```js
   [
     { id: 0, name: 'Alice' },
-    { id: 1, name: 'Bob' }
+    { id: 1, name: 'Bob', isConnected: true }
   ]
   ```
 
@@ -322,7 +322,7 @@ following as `props`:
     ```js
     [
       { id: 0, name: 'Alice' },
-      { id: 1, name: 'Bob' }
+      { id: 1, name: 'Bob', isConnected: true }
     ]
     ```
 

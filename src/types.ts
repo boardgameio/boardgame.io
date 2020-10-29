@@ -308,6 +308,7 @@ export namespace Server {
     name?: string;
     credentials?: string;
     data?: any;
+    isConnected?: boolean;
   };
 
   export interface MatchData {
