@@ -85,7 +85,6 @@ const clients = playerIDs.map(playerID => {
 
 #### **React**
 
-
 ```js
 // src/App.js
 
