@@ -35,7 +35,9 @@ up pass-and-play multiplayer or for prototyping the multiplayer experience
 without having to set up a server to test it.
 
 To do this `import { Local } from 'boardgame.io/multiplayer'`,
-and add `multiplayer: Local()` to the client options. Or `multiplayer: Local({ persist : true })` if you want game state to be cached using `localStorage`. Now you can instantiate as many of these clients in your app as you like and you will notice that they’re all kept in sync, sharing the same state.
+and add `multiplayer: Local()` to the client options.
+Now you can instantiate as many of these clients in your app as you like and
+you will notice that they’re all kept in sync, sharing the same state.
 
 <!-- tabs:start -->
 
@@ -125,6 +127,21 @@ actually make any moves.)
 In the example above you can play as Player 0 and Player 1 alternately
 on the two boards. Clicking on a particular board when it is not that
 player's turn has no effect.
+
+### Storing state in the browser
+
+If you want game state to be saved in the browser using `localStorage`,
+you can pass additional options when creating a local master:
+
+```js
+Local({
+  // Enable localStorage cache.
+  persist: true,
+
+  // Set custom prefix to store data under. Default: 'bgio'.
+  storageKey: 'bgio',
+});
+```
 
 ## Remote Master
 
