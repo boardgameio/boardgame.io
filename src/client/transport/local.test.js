@@ -207,6 +207,64 @@ describe('LocalMaster', () => {
   });
 });
 
+describe('LocalMaster with persist', () => {
+  const game = {};
+  const master = new LocalMaster({ game, persist: true });
+
+  const storeA = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
+  const storeB = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
+
+  const localA = new LocalTransport({ master, store: storeA, playerID: '0' });
+  const localB = new LocalTransport({ master, store: storeB, playerID: '1' });
+
+  beforeEach(() => {
+    storeA.dispatch = jest.fn();
+    storeB.dispatch = jest.fn();
+  });
+
+  test('connect', () => {
+    localA.connect();
+    localB.connect();
+    localA.subscribe();
+
+    expect(storeA.dispatch).toBeCalledWith(
+      expect.objectContaining({
+        type: 'SYNC',
+      })
+    );
+    expect(storeB.dispatch).toBeCalledWith(
+      expect.objectContaining({
+        type: 'SYNC',
+      })
+    );
+  });
+
+  test('update', () => {
+    localA.onAction({ _stateID: 0 }, gameEvent('endTurn'));
+
+    expect(storeA.dispatch).toBeCalledWith(
+      expect.objectContaining({
+        type: 'UPDATE',
+      })
+    );
+    expect(storeB.dispatch).toBeCalledWith(
+      expect.objectContaining({
+        type: 'UPDATE',
+      })
+    );
+  });
+
+  test('connect without callback', () => {
+    master.connect('matchID', '0', undefined);
+    master.onSync('matchID', '0');
+  });
+
+  test('disconnect', () => {
+    localA.disconnect();
+    localB.disconnect();
+  });
+});
+
 describe('LocalTransport', () => {
   describe('update matchID / playerID', () => {
     const master = { connect: jest.fn(), onSync: jest.fn() };
