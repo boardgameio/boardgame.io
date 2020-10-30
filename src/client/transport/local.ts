@@ -243,10 +243,7 @@ export class LocalTransport extends Transport {
 /**
  * Global map storing local master instances.
  */
-const localMasters: Map<
-  Game,
-  { master: LocalMaster; bots: LocalOpts['bots'] }
-> = new Map();
+const localMasters: Map<Game, { master: LocalMaster } & LocalOpts> = new Map();
 
 /**
  * Create a local transport.
@@ -256,16 +253,19 @@ export function Local({ bots, persist, storageKey }: LocalOpts = {}) {
     const { gameKey, game } = transportOpts;
     let master: LocalMaster;
 
-    if (localMasters.has(gameKey)) {
-      const instance = localMasters.get(gameKey);
-      if (instance.bots === bots) {
-        master = instance.master;
-      }
+    const instance = localMasters.get(gameKey);
+    if (
+      instance &&
+      instance.bots === bots &&
+      instance.storageKey === storageKey &&
+      instance.persist === persist
+    ) {
+      master = instance.master;
     }
 
     if (!master) {
       master = new LocalMaster({ game, bots, persist, storageKey });
-      localMasters.set(gameKey, { master, bots });
+      localMasters.set(gameKey, { master, bots, persist, storageKey });
     }
 
     return new LocalTransport({ master, ...transportOpts });
