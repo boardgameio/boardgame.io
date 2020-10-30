@@ -13,6 +13,7 @@ import * as ActionCreators from '../../core/action-creators';
 import { Transport, TransportOpts, MetadataCallback } from './transport';
 import {
   CredentialedActionShape,
+  FilteredMetadata,
   LogEntry,
   PlayerID,
   State,
@@ -132,6 +133,17 @@ export class SocketIOTransport extends Transport {
         this.store.dispatch(action);
       }
     });
+
+    // Called when new player joins the match or changes
+    // it's connection status
+    this.socket.on(
+      'matchData',
+      (matchID: string, matchData: FilteredMetadata) => {
+        if (matchID == this.matchID) {
+          this.matchDataCallback(matchData);
+        }
+      }
+    );
 
     // Keep track of connection status.
     this.socket.on('connect', () => {
