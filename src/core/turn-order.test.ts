@@ -964,6 +964,18 @@ describe('UpdateTurnOrderState', () => {
     );
     expect(t).toMatchObject({ currentPlayer: '2' });
   });
+
+  test('errors if turn.order.next doesn’t return a number', () => {
+    UpdateTurnOrderState({ G, ctx } as State, ctx.currentPlayer, {
+      order: {
+        first: () => 0,
+        next: () => ('2' as unknown) as number,
+      },
+    });
+    expect(error).toHaveBeenCalledWith(
+      `invalid value returned by turn.order.next — expected number or undefined got string “2”.`
+    );
+  });
 });
 
 describe('Random API is available', () => {
