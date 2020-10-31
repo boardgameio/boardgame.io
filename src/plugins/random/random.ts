@@ -84,19 +84,14 @@ export class Random {
 
     const R = this.state;
 
-    let fn: ReturnType<typeof alea>;
-    if (R.prngstate === undefined) {
-      // No call to a random function has been made.
-      fn = alea(R.seed, { state: true });
-    } else {
-      fn = alea('', { state: R.prngstate });
-    }
+    const seed = R.prngstate ? '' : R.seed;
+    const rand = alea(seed, R.prngstate);
 
-    const number = fn();
+    const number = rand();
 
     this.state = {
       ...R,
-      prngstate: fn.state(),
+      prngstate: rand.state(),
     };
 
     return number;

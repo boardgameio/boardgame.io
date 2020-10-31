@@ -98,15 +98,11 @@ export abstract class Bot {
     let number: number;
 
     if (this.seed !== undefined) {
-      let r = null;
-      if (this.prngstate) {
-        r = alea('', { state: this.prngstate });
-      } else {
-        r = alea(this.seed, { state: true });
-      }
+      const seed = this.prngstate ? '' : this.seed;
+      const rand = alea(seed, this.prngstate);
 
-      number = r();
-      this.prngstate = r.state();
+      number = rand();
+      this.prngstate = rand.state();
     } else {
       number = Math.random();
     }

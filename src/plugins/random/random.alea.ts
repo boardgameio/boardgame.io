@@ -100,18 +100,10 @@ function copy(f: AleaState, t: Partial<AleaState>) {
 
 type PRNG = Alea['next'] & { state?: () => AleaState };
 
-export function alea(
-  seed: string | number,
-  opts?: { state?: boolean | AleaState }
-): PRNG {
+export function alea(seed: string | number, state?: AleaState): PRNG {
   const xg = new Alea(seed);
   const prng = xg.next.bind(xg) as PRNG;
-  const state = opts && opts.state;
-  if (state) {
-    if (typeof state == 'object') copy(state, xg);
-    prng.state = function() {
-      return copy(xg, {});
-    };
-  }
+  if (state) copy(state, xg);
+  prng.state = () => copy(xg, {});
   return prng;
 }
