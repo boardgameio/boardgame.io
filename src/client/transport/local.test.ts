@@ -15,13 +15,14 @@ import { InitializeGame } from '../../core/initialize';
 import { Client } from '../client';
 import { RandomBot } from '../../ai/random-bot';
 import { Stage } from '../../core/turn-order';
+import { State, Store, SyncInfo } from '../../types';
 
 jest.useFakeTimers();
 
 describe('bots', () => {
   const game = {
     moves: {
-      A: G => G,
+      A: (G: any) => G,
     },
     ai: {
       enumerate: () => [{ move: 'A' }],
@@ -69,13 +70,13 @@ describe('bots', () => {
 describe('GetBotPlayer', () => {
   test('stages', () => {
     const result = GetBotPlayer(
-      {
+      ({
         ctx: {
           activePlayers: {
             '1': Stage.NULL,
           },
         },
-      },
+      } as unknown) as State,
       {
         '0': {},
         '1': {},
@@ -86,11 +87,11 @@ describe('GetBotPlayer', () => {
 
   test('no stages', () => {
     const result = GetBotPlayer(
-      {
+      ({
         ctx: {
           currentPlayer: '0',
         },
-      },
+      } as unknown) as State,
       { '0': {} }
     );
     expect(result).toEqual('0');
@@ -98,11 +99,11 @@ describe('GetBotPlayer', () => {
 
   test('null', () => {
     const result = GetBotPlayer(
-      {
+      ({
         ctx: {
           currentPlayer: '1',
         },
-      },
+      } as unknown) as State,
       { '0': {} }
     );
     expect(result).toEqual(null);
@@ -110,12 +111,12 @@ describe('GetBotPlayer', () => {
 
   test('gameover', () => {
     const result = GetBotPlayer(
-      {
+      ({
         ctx: {
           currentPlayer: '0',
           gameover: true,
         },
-      },
+      } as unknown) as State,
       { '0': {} }
     );
     expect(result).toEqual(null);
@@ -152,7 +153,7 @@ describe('Local', () => {
     const game = {
       setup: () => ({ count: 0 }),
       moves: {
-        A: G => {
+        A: (G: any) => {
           G.count++;
         },
       },
@@ -201,8 +202,14 @@ describe('LocalMaster', () => {
   const game = {};
   const master = new LocalMaster({ game });
 
-  const storeA = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
-  const storeB = { dispatch: jest.fn(), getState: () => ({ _stateID: 0 }) };
+  const storeA = ({
+    dispatch: jest.fn(),
+    getState: () => ({ _stateID: 0 }),
+  } as unknown) as Store;
+  const storeB = ({
+    dispatch: jest.fn(),
+    getState: () => ({ _stateID: 0 }),
+  } as unknown) as Store;
 
   const localA = new LocalTransport({ master, store: storeA, playerID: '0' });
   const localB = new LocalTransport({ master, store: storeB, playerID: '1' });
@@ -230,7 +237,10 @@ describe('LocalMaster', () => {
   });
 
   test('update', () => {
-    localA.onAction({ _stateID: 0 }, gameEvent('endTurn'));
+    localA.onAction(
+      ({ _stateID: 0 } as unknown) as State,
+      gameEvent('endTurn')
+    );
 
     expect(storeA.dispatch).toBeCalledWith(
       expect.objectContaining({
@@ -257,9 +267,20 @@ describe('LocalMaster', () => {
 
 describe('LocalTransport', () => {
   describe('update matchID / playerID', () => {
-    const master = { connect: jest.fn(), onSync: jest.fn() };
-    const store = { dispatch: () => {} };
-    const m = new LocalTransport({ master, store });
+    const master = ({
+      connect: jest.fn(),
+      onSync: jest.fn(),
+    } as unknown) as LocalMaster;
+    const store = ({ dispatch: () => {} } as unknown) as Store;
+    class WrappedLocalTransport extends LocalTransport {
+      getMatchID() {
+        return this.matchID;
+      }
+      getPlayerID() {
+        return this.playerID;
+      }
+    }
+    const m = new WrappedLocalTransport({ master, store });
 
     beforeEach(() => {
       jest.resetAllMocks();
@@ -267,27 +288,36 @@ describe('LocalTransport', () => {
 
     test('matchID', () => {
       m.updateMatchID('test');
-      expect(m.matchID).toBe('test');
+      expect(m.getMatchID()).toBe('test');
       expect(master.connect).toBeCalled();
     });
 
     test('playerID', () => {
       m.updatePlayerID('player');
-      expect(m.playerID).toBe('player');
+      expect(m.getPlayerID()).toBe('player');
       expect(master.connect).toBeCalled();
     });
   });
 
   describe('multiplayer', () => {
-    const master = { onSync: jest.fn(), onUpdate: jest.fn() };
-    const m = new LocalTransport({ master });
+    const master = ({
+      onSync: jest.fn(),
+      onUpdate: jest.fn(),
+    } as unknown) as LocalMaster;
+    class WrappedLocalTransport extends LocalTransport {
+      setStore(store: Store) {
+        this.store = store;
+      }
+    }
+    const m = new WrappedLocalTransport({ master });
     const game = {};
-    let store = null;
+    let store: Store | null = null;
 
     beforeEach(() => {
       const reducer = CreateGameReducer({ game });
       const initialState = InitializeGame({ game });
-      m.store = store = createStore(reducer, initialState);
+      store = createStore(reducer, initialState);
+      m.setStore(store);
     });
 
     test('returns a valid store', () => {
@@ -295,31 +325,31 @@ describe('LocalTransport', () => {
     });
 
     test('receive update', () => {
-      const restored = { restore: true };
+      const restored = ({ restore: true } as unknown) as State;
       expect(store.getState()).not.toMatchObject(restored);
-      m.onUpdate('unknown matchID', restored);
+      m.onUpdate('unknown matchID', restored, []);
       expect(store.getState()).not.toMatchObject(restored);
-      m.onUpdate('default', restored);
+      m.onUpdate('default', restored, []);
       expect(store.getState()).not.toMatchObject(restored);
 
       // Only if the stateID is not stale.
       restored._stateID = 1;
-      m.onUpdate('default', restored);
+      m.onUpdate('default', restored, []);
       expect(store.getState()).toMatchObject(restored);
     });
 
     test('receive sync', () => {
-      const restored = { restore: true };
+      const restored = ({ restore: true } as unknown) as State;
       expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('unknown matchID', { state: restored });
+      m.onSync('unknown matchID', { state: restored } as SyncInfo);
       expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('default', { state: restored });
+      m.onSync('default', { state: restored } as SyncInfo);
       expect(store.getState()).toMatchObject(restored);
     });
 
     test('send update', () => {
-      const action = makeMove();
-      const state = { _stateID: 0 };
+      const action = makeMove('move');
+      const state = ({ _stateID: 0 } as unknown) as State;
       m.onAction(state, action);
       expect(m.master.onUpdate).lastCalledWith(
         action,

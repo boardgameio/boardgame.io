@@ -259,7 +259,7 @@ export function UpdateTurnOrderState(
   state: State,
   currentPlayer: PlayerID,
   turn: TurnConfig,
-  endTurnArg?: true | { remove: any; next: string }
+  endTurnArg?: true | { remove?: any; next?: string }
 ) {
   const order = turn.order;
 
