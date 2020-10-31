@@ -147,6 +147,54 @@ describe('Local', () => {
     const transport2 = Local({ bots: {} })({ game, gameKey });
     expect(transport1.master).not.toBe(transport2.master);
   });
+
+  describe('with localStorage persistence', () => {
+    const game = {
+      setup: () => ({ count: 0 }),
+      moves: {
+        A: G => {
+          G.count++;
+        },
+      },
+    };
+
+    afterEach(() => {
+      localStorage.clear();
+    });
+
+    test('writes to localStorage', () => {
+      const matchID = 'persists-to-ls';
+      const multiplayer = Local({ persist: true });
+      const client = Client({ playerID: '0', matchID, game, multiplayer });
+      client.start();
+      expect(client.getState().G).toEqual({ count: 0 });
+      client.moves.A();
+      expect(client.getState().G).toEqual({ count: 1 });
+      client.stop();
+      const stored = JSON.parse(localStorage.getItem('bgio_state'));
+      const [id, state] = stored.find(([id]) => id === matchID);
+      expect(id).toBe(matchID);
+      expect(state.G).toEqual({ count: 1 });
+    });
+
+    test('reads from localStorage', () => {
+      const matchID = 'reads-from-ls';
+      const storageKey = 'rfls';
+      const stateMap = {
+        [matchID]: {
+          G: { count: 'foo' },
+          ctx: {},
+        },
+      };
+      const entriesString = JSON.stringify(Object.entries(stateMap));
+      localStorage.setItem(`${storageKey}_state`, entriesString);
+      const multiplayer = Local({ persist: true, storageKey });
+      const client = Client({ playerID: '0', matchID, game, multiplayer });
+      client.start();
+      expect(client.getState().G).toEqual({ count: 'foo' });
+      client.stop();
+    });
+  });
 });
 
 describe('LocalMaster', () => {

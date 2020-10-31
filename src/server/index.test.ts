@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server, createServerRunConfig, KoaServer } from '.';
+import { Server, createServerRunConfig, KoaServer, getPortFromServer } from '.';
 import { SocketIO } from './transport/socketio';
 import { StorageAPI } from '../types';
 
@@ -117,6 +117,22 @@ describe('run', () => {
     expect(runningServer.appServer).not.toBeUndefined();
     expect(runningServer.apiServer).not.toBeUndefined();
   });
+
+  test('calls app callback', async () => {
+    const callback = jest.fn();
+    server = Server({ games: [game] });
+    runningServer = await server.run({ callback });
+    expect(callback).toHaveBeenCalled();
+  });
+
+  test('calls API callback', async () => {
+    const apiCallback = jest.fn();
+    server = Server({ games: [game] });
+    runningServer = await server.run({
+      lobbyConfig: { apiPort: 9999, apiCallback },
+    });
+    expect(apiCallback).toHaveBeenCalled();
+  });
 });
 
 describe('kill', () => {
@@ -200,5 +216,31 @@ describe('createServerRunConfig', () => {
         apiCallback: mockApiCallback,
       },
     });
+  });
+});
+
+describe('getPortFromServer', () => {
+  test('returns null', () => {
+    expect(
+      getPortFromServer({
+        address: () => null,
+      } as KoaServer)
+    ).toBeNull();
+  });
+
+  test('returns port', () => {
+    expect(
+      getPortFromServer({
+        address: () => '8000',
+      } as KoaServer)
+    ).toBe('8000');
+  });
+
+  test('returns port from address object', () => {
+    expect(
+      getPortFromServer(({
+        address: () => ({ port: '8000' }),
+      } as unknown) as KoaServer)
+    ).toBe('8000');
   });
 });
