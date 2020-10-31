@@ -38,17 +38,14 @@ export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
   callback?: () => void
 ): ServerConfig => {
-  const config: ServerConfig = {};
   if (portOrConfig && typeof portOrConfig === 'object') {
-    const serverConfig = portOrConfig as ServerConfig;
-    config.port = serverConfig.port;
-    config.callback = serverConfig.callback || callback;
-    config.lobbyConfig = serverConfig.lobbyConfig;
+    return {
+      ...portOrConfig,
+      callback: portOrConfig.callback || callback,
+    };
   } else {
-    config.port = portOrConfig as number;
-    config.callback = callback;
+    return { port: portOrConfig as number, callback };
   }
-  return config;
 };
 
 export const getPortFromServer = (
