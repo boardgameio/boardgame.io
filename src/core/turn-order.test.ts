@@ -18,6 +18,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
 import { error } from '../core/logger';
+import { State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -53,7 +54,7 @@ describe('turn orders', () => {
       phases: { A: { start: true, next: 'B' }, B: {} },
     });
 
-    let state = { ctx: flow.ctx(2) };
+    let state = { ctx: flow.ctx(2) } as State;
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx).not.toHaveUndefinedProperties();
@@ -76,7 +77,7 @@ describe('turn orders', () => {
       phases: { A: { start: true, next: 'B' }, B: {} },
     });
 
-    let state = { ctx: flow.ctx(2) };
+    let state = { ctx: flow.ctx(2) } as State;
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx).not.toHaveUndefinedProperties();
@@ -99,7 +100,7 @@ describe('turn orders', () => {
       phases: { A: { start: true, next: 'B' }, B: {} },
     });
 
-    let state = { ctx: flow.ctx(2) };
+    let state = { ctx: flow.ctx(2) } as State;
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx).not.toHaveUndefinedProperties();
@@ -122,7 +123,7 @@ describe('turn orders', () => {
       phases: { A: { start: true, next: 'B' }, B: {} },
     });
 
-    let state = { ctx: flow.ctx(2) };
+    let state = { ctx: flow.ctx(2) } as State;
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx).not.toHaveUndefinedProperties();
@@ -139,7 +140,7 @@ describe('turn orders', () => {
       turn: { activePlayers: ActivePlayers.ALL },
     });
 
-    let state = { ctx: flow.ctx(2) };
+    let state = { ctx: flow.ctx(2) } as State;
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.activePlayers).toEqual({
@@ -163,7 +164,7 @@ describe('turn orders', () => {
       },
     });
 
-    let state = { ctx: flow.ctx(2) };
+    let state = { ctx: flow.ctx(2) } as State;
     state = flow.init(state);
 
     expect(state.ctx.phase).toBe('A');
@@ -196,7 +197,7 @@ describe('turn orders', () => {
       turn: { activePlayers: ActivePlayers.OTHERS },
     });
 
-    let state = { ctx: flow.ctx(3) };
+    let state = { ctx: flow.ctx(3) } as State;
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('0');
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['1', '2']);
@@ -213,7 +214,7 @@ describe('turn orders', () => {
       phases: { A: { start: true } },
     });
 
-    let state = { ctx: flow.ctx(3) };
+    let state = { ctx: flow.ctx(3) } as State;
     state = flow.init(state);
 
     expect(state.ctx.phase).toBe('A');
@@ -246,7 +247,7 @@ describe('turn orders', () => {
       turn: { order: TurnOrder.CUSTOM(['1', '0']) },
     });
 
-    let state = { ctx: flow.ctx(2) };
+    let state = { ctx: flow.ctx(2) } as State;
     state = flow.init(state);
 
     expect(state.ctx.currentPlayer).toBe('1');
@@ -261,7 +262,7 @@ describe('turn orders', () => {
       turn: { order: TurnOrder.CUSTOM_FROM('order') },
     });
 
-    let state = { G: { order: ['2', '1', '0'] }, ctx: flow.ctx(3) };
+    let state = { G: { order: ['2', '1', '0'] }, ctx: flow.ctx(3) } as State;
     state = flow.init(state);
 
     expect(state.ctx.currentPlayer).toBe('2');
@@ -288,7 +289,7 @@ describe('turn orders', () => {
       },
     });
 
-    let state = { ctx: flow.ctx(10) };
+    let state = { ctx: flow.ctx(10) } as State;
     state = flow.init(state);
     expect(state.ctx.currentPlayer).toBe('9');
     expect(state.ctx).not.toHaveUndefinedProperties();
@@ -300,13 +301,13 @@ describe('turn orders', () => {
 
 test('override', () => {
   const even = {
-    first: () => '0',
-    next: (G, ctx) => ((+ctx.currentPlayer + 2) % ctx.numPlayers) + '',
+    first: () => 0,
+    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
   };
 
   const odd = {
-    first: () => '1',
-    next: (G, ctx) => ((+ctx.currentPlayer + 2) % ctx.numPlayers) + '',
+    first: () => 1,
+    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
   };
 
   let flow = Flow({
@@ -314,7 +315,7 @@ test('override', () => {
     phases: { A: { start: true, next: 'B' }, B: { turn: { order: odd } } },
   });
 
-  let state = { ctx: flow.ctx(10) };
+  let state = { ctx: flow.ctx(10) } as State;
   state = flow.init(state);
 
   expect(state.ctx.currentPlayer).toBe('0');
@@ -341,7 +342,7 @@ test('playOrder', () => {
   state.ctx = {
     ...state.ctx,
     currentPlayer: '2',
-    playOrder: [2, 0, 1],
+    playOrder: ['2', '0', '1'],
   };
 
   state = reducer(state, gameEvent('endTurn'));
@@ -354,7 +355,7 @@ test('playOrder', () => {
 
 describe('setActivePlayers', () => {
   const flow = Flow({});
-  const state = { ctx: flow.ctx(2) };
+  const state = { ctx: flow.ctx(2) } as State;
 
   test('basic', () => {
     const newState = flow.processEvent(
@@ -872,7 +873,7 @@ describe('setActivePlayers', () => {
     });
 
     beforeEach(() => {
-      error.mockClear();
+      (error as jest.Mock).mockClear();
     });
 
     test('sanity', () => {
@@ -945,7 +946,7 @@ describe('UpdateTurnOrderState', () => {
 
   test('without next player', () => {
     const { ctx: t } = UpdateTurnOrderState(
-      { G, ctx },
+      { G, ctx } as State,
       ctx.currentPlayer,
       turn
     );
@@ -954,7 +955,7 @@ describe('UpdateTurnOrderState', () => {
 
   test('with next player', () => {
     const { ctx: t } = UpdateTurnOrderState(
-      { G, ctx },
+      { G, ctx } as State,
       ctx.currentPlayer,
       turn,
       {
@@ -975,14 +976,14 @@ describe('Random API is available', () => {
         if (ctx.random !== undefined) {
           first = true;
         }
-        return '0';
+        return 0;
       },
 
       next: (_, ctx) => {
         if (ctx.random !== undefined) {
           next = true;
         }
-        return '0';
+        return 0;
       },
     },
   };
