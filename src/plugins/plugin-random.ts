@@ -7,9 +7,14 @@
  */
 
 import { Plugin } from '../types';
-import { Random, RandomAPI, PrivateRandomAPI } from './random/random';
+import {
+  Random,
+  RandomAPI,
+  PrivateRandomAPI,
+  RandomState,
+} from './random/random';
 
-const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI> = {
+const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI, RandomState> = {
   name: 'random',
 
   noClient: ({ api }) => {
@@ -26,7 +31,7 @@ const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI> = {
   },
 
   setup: ({ game }) => {
-    let seed = game.seed;
+    let { seed } = game;
     if (seed === undefined) {
       seed = Random.seed();
     }
