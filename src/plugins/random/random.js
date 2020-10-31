@@ -48,9 +48,9 @@ export class Random {
     let fn;
     if (R.prngstate === undefined) {
       // No call to a random function has been made.
-      fn = new alea(R.seed, { state: true });
+      fn = alea(R.seed, { state: true });
     } else {
-      fn = new alea('', { state: R.prngstate });
+      fn = alea('', { state: R.prngstate });
     }
 
     const number = fn();

@@ -1,4 +1,5 @@
 // Inlined version of Alea from https://github.com/davidbau/seedrandom.
+// Converted to Typescript October 2020.
 
 /*
  * Copyright 2015 David Bau.
@@ -25,52 +26,56 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-function Alea(seed) {
-  var me = this,
-    mash = Mash();
-
-  me.next = function() {
-    var t = 2091639 * me.s0 + me.c * 2.3283064365386963e-10; // 2^-32
-    me.s0 = me.s1;
-    me.s1 = me.s2;
-    return (me.s2 = t - (me.c = t | 0));
-  };
-
-  // Apply the seeding algorithm from Baagoe.
-  me.c = 1;
-  me.s0 = mash(' ');
-  me.s1 = mash(' ');
-  me.s2 = mash(' ');
-  me.s0 -= mash(seed);
-  if (me.s0 < 0) {
-    me.s0 += 1;
-  }
-  me.s1 -= mash(seed);
-  if (me.s1 < 0) {
-    me.s1 += 1;
-  }
-  me.s2 -= mash(seed);
-  if (me.s2 < 0) {
-    me.s2 += 1;
-  }
-  mash = null;
+interface AleaState {
+  c: number;
+  s0: number;
+  s1: number;
+  s2: number;
 }
 
-function copy(f, t) {
-  t.c = f.c;
-  t.s0 = f.s0;
-  t.s1 = f.s1;
-  t.s2 = f.s2;
-  return t;
+class Alea {
+  c: number;
+  s0: number;
+  s1: number;
+  s2: number;
+
+  constructor(seed: string | number) {
+    const mash = Mash();
+
+    // Apply the seeding algorithm from Baagoe.
+    this.c = 1;
+    this.s0 = mash(' ');
+    this.s1 = mash(' ');
+    this.s2 = mash(' ');
+    this.s0 -= mash(seed);
+    if (this.s0 < 0) {
+      this.s0 += 1;
+    }
+    this.s1 -= mash(seed);
+    if (this.s1 < 0) {
+      this.s1 += 1;
+    }
+    this.s2 -= mash(seed);
+    if (this.s2 < 0) {
+      this.s2 += 1;
+    }
+  }
+
+  next() {
+    const t = 2091639 * this.s0 + this.c * 2.3283064365386963e-10; // 2^-32
+    this.s0 = this.s1;
+    this.s1 = this.s2;
+    return (this.s2 = t - (this.c = t | 0));
+  }
 }
 
 function Mash() {
   var n = 0xefc8249d;
 
-  var mash = function(data) {
-    data = data.toString();
-    for (var i = 0; i < data.length; i++) {
-      n += data.charCodeAt(i);
+  var mash = function(data: string | number) {
+    const str = data.toString();
+    for (var i = 0; i < str.length; i++) {
+      n += str.charCodeAt(i);
       var h = 0.02519603282416938 * n;
       n = h >>> 0;
       h -= n;
@@ -85,11 +90,23 @@ function Mash() {
   return mash;
 }
 
-export function alea(seed, opts) {
-  var xg = new Alea(seed),
-    state = opts && opts.state,
-    prng = xg.next;
-  prng.quick = prng;
+function copy(f: AleaState, t: Partial<AleaState>) {
+  t.c = f.c;
+  t.s0 = f.s0;
+  t.s1 = f.s1;
+  t.s2 = f.s2;
+  return t as AleaState;
+}
+
+type PRNG = Alea['next'] & { state?: () => AleaState };
+
+export function alea(
+  seed: string | number,
+  opts?: { state?: boolean | AleaState }
+): PRNG {
+  const xg = new Alea(seed);
+  const prng = xg.next.bind(xg) as PRNG;
+  const state = opts && opts.state;
   if (state) {
     if (typeof state == 'object') copy(state, xg);
     prng.state = function() {

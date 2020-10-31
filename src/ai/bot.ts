@@ -100,9 +100,9 @@ export abstract class Bot {
     if (this.seed !== undefined) {
       let r = null;
       if (this.prngstate) {
-        r = new alea('', { state: this.prngstate });
+        r = alea('', { state: this.prngstate });
       } else {
-        r = new alea(this.seed, { state: true });
+        r = alea(this.seed, { state: true });
       }
 
       number = r();
