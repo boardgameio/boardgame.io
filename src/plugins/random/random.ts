@@ -6,7 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { alea } from './random.alea';
+import { alea, AleaState } from './random.alea';
+
+export interface RandomState {
+  seed: string | number;
+  prngstate?: AleaState;
+}
 
 /**
  * Random
@@ -16,11 +21,21 @@ import { alea } from './random.alea';
  * state in ctx so that moves can stay pure.
  */
 export class Random {
+  state: RandomState;
+  used: boolean;
+
+  /**
+   * Generates a new seed from the current date / time.
+   */
+  static seed() {
+    return (+new Date()).toString(36).slice(-10);
+  }
+
   /**
    * constructor
    * @param {object} ctx - The ctx object to initialize from.
    */
-  constructor(state) {
+  constructor(state: RandomState) {
     // If we are on the client, the seed is not present.
     // Just use a temporary seed to execute the move without
     // crashing it. The move state itself is discarded,
@@ -45,7 +60,7 @@ export class Random {
 
     const R = this.state;
 
-    let fn;
+    let fn: ReturnType<typeof alea>;
     if (R.prngstate === undefined) {
       // No call to a random function has been made.
       fn = alea(R.seed, { state: true });
@@ -64,7 +79,7 @@ export class Random {
   }
 
   api() {
-    const random = this._random.bind(this);
+    const random: Random['_random'] = this._random.bind(this);
 
     const SpotValue = {
       D4: 4,
@@ -75,11 +90,16 @@ export class Random {
       D20: 20,
     };
 
+    type DieFn = {
+      (): number;
+      (diceCount: number): number[];
+    };
+
     // Generate functions for predefined dice values D4 - D20.
-    const predefined = {};
+    const predefined = {} as Record<keyof typeof SpotValue, DieFn>;
     for (const key in SpotValue) {
       const spotvalue = SpotValue[key];
-      predefined[key] = diceCount => {
+      predefined[key] = (diceCount?: number) => {
         if (diceCount === undefined) {
           return Math.floor(random() * spotvalue) + 1;
         } else {
@@ -88,6 +108,18 @@ export class Random {
           );
         }
       };
+    }
+
+    function Die(spotValue?: number): number;
+    function Die(spotValue: number, diceCount: number): number[];
+    function Die(spotvalue: number = 6, diceCount?: number) {
+      if (diceCount === undefined) {
+        return Math.floor(random() * spotvalue) + 1;
+      } else {
+        return [...new Array(diceCount).keys()].map(
+          () => Math.floor(random() * spotvalue) + 1
+        );
+      }
     }
 
     return {
@@ -114,19 +146,7 @@ export class Random {
        *                             if not defined, defaults to 1 and returns the value directly.
        *                             if defined, returns an array containing the random dice values.
        */
-      Die: (spotvalue, diceCount) => {
-        if (spotvalue === undefined) {
-          spotvalue = 6;
-        }
-
-        if (diceCount === undefined) {
-          return Math.floor(random() * spotvalue) + 1;
-        } else {
-          return [...new Array(diceCount).keys()].map(
-            () => Math.floor(random() * spotvalue) + 1
-          );
-        }
-      },
+      Die,
 
       /**
        * Generate a random number between 0 and 1.
@@ -141,11 +161,11 @@ export class Random {
        * @param {Array} deck - The array to shuffle. Does not mutate
        *                       the input, but returns the shuffled array.
        */
-      Shuffle: deck => {
-        let clone = deck.slice(0);
+      Shuffle: <T extends any>(deck: T[]) => {
+        const clone = deck.slice(0);
         let srcIndex = deck.length;
         let dstIndex = 0;
-        let shuffled = new Array(srcIndex);
+        const shuffled = new Array<T>(srcIndex);
 
         while (srcIndex) {
           let randIndex = (srcIndex * random()) | 0;
@@ -160,10 +180,3 @@ export class Random {
     };
   }
 }
-
-/**
- * Generates a new seed from the current date / time.
- */
-Random.seed = function() {
-  return (+new Date()).toString(36).slice(-10);
-};

@@ -26,7 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-interface AleaState {
+export interface AleaState {
   c: number;
   s0: number;
   s1: number;

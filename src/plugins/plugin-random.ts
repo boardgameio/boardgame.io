@@ -7,7 +7,7 @@
  */
 
 import { Plugin } from '../types';
-import { Random } from './random/random';
+import { Random, RandomState } from './random/random';
 
 export interface RandomAPI {
   D4(): number;
@@ -29,7 +29,7 @@ export interface RandomAPI {
 interface PrivateRandomAPI {
   _obj: {
     isUsed(): boolean;
-    getState(): any;
+    getState(): RandomState;
   };
 }
 
