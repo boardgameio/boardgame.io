@@ -7,7 +7,7 @@ import { CreateGameReducer } from './core/reducer';
 import { INVALID_MOVE } from './core/constants';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
-import { RandomAPI } from './plugins/plugin-random';
+import { RandomAPI } from './plugins/random/random';
 
 export { StorageAPI };
 

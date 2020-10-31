@@ -13,6 +13,30 @@ export interface RandomState {
   prngstate?: AleaState;
 }
 
+export interface RandomAPI {
+  D4(): number;
+  D4(diceCount: number): number[];
+  D6(): number;
+  D6(diceCount: number): number[];
+  D10(): number;
+  D10(diceCount: number): number[];
+  D12(): number;
+  D12(diceCount: number): number[];
+  D20(): number;
+  D20(diceCount: number): number[];
+  Die(spotvalue?: number): number;
+  Die(spotvalue: number, diceCount: number): number[];
+  Number(): number;
+  Shuffle<T>(deck: T[]): T[];
+}
+
+export interface PrivateRandomAPI {
+  _obj: {
+    isUsed(): boolean;
+    getState(): RandomState;
+  };
+}
+
 /**
  * Random
  *
@@ -78,7 +102,7 @@ export class Random {
     return number;
   }
 
-  api() {
+  api(): RandomAPI & PrivateRandomAPI {
     const random: Random['_random'] = this._random.bind(this);
 
     const SpotValue = {
