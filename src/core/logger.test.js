@@ -12,8 +12,8 @@ describe('logging', () => {
   const oldNodeEnv = process.env.NODE_ENV;
 
   beforeEach(() => {
-    (console.log as jest.Mock).mockReset();
-    (console.error as jest.Mock).mockReset();
+    console.log.mockReset();
+    console.error.mockReset();
   });
 
   afterAll(() => {
