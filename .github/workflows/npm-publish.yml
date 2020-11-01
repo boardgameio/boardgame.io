@@ -25,17 +25,17 @@ jobs:
           npm run test
 
       - name: Publish to NPM
-        id: npm_publish
+        id: publish
         uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
 
       - name: Version already published
-        if: steps.npm_publish.outputs.type == 'none'
+        if: steps.publish.outputs.type == 'none'
         run: |
-          echo "Version ${{ steps.npm_publish.outputs.old-version }} already exists."
+          echo "Version ${{ steps.publish.outputs.old-version }} already exists."
 
       - name: New version published
-        if: steps.npm_publish.outputs.type != 'none'
+        if: steps.publish.outputs.type != 'none'
         run: |
-          echo "New ${{ steps.npm_publish.outputs.type }} version ${{ steps.publish.outputs.version }} published. Was ${{ steps.npm_publish.outputs.old-version }}."
+          echo "New ${{ steps.publish.outputs.type }} version ${{ steps.publish.outputs.version }} published. Was ${{ steps.publish.outputs.old-version }}."
