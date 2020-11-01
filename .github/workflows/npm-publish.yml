@@ -10,31 +10,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Use Node v12
         uses: actions/setup-node@v1
         with:
           node-version: 12
-      
+
       - name: Install Dependencies
         run: npm ci
-      
+
       - name: Run Tests
         run: |
           npm run lint
           npm run test
-      
+
       - name: Publish to NPM
         id: npm_publish
         uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
-          
+
       - name: Version already published
         if: steps.npm_publish.outputs.type == 'none'
         run: |
           echo "Version ${{ steps.npm_publish.outputs.old-version }} already exists."
-          
+
       - name: New version published
         if: steps.npm_publish.outputs.type != 'none'
         run: |
