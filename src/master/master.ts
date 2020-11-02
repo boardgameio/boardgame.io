@@ -352,8 +352,12 @@ export class Master {
     }
 
     if (IsSynchronous(this.storageAPI)) {
+      console.info(`setState [${matchID}] playerID [${playerID}]`);
       this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
-      if (newMetadata) this.storageAPI.setMetadata(key, newMetadata);
+      if (newMetadata) {
+        console.info(`setMetadata [${matchID}] playerID [${playerID}]`);
+        this.storageAPI.setMetadata(key, newMetadata);
+      }
     } else {
       const writes = [
         this.storageAPI.setState(key, stateWithoutDeltalog, deltalog),
@@ -402,6 +406,7 @@ export class Master {
       this.subscribeCallback({ state, matchID });
 
       if (IsSynchronous(this.storageAPI)) {
+        console.info(`createMatch [${matchID}] playerID [${playerID}]`);
         this.storageAPI.createMatch(key, { initialState, metadata });
       } else {
         await this.storageAPI.createMatch(key, { initialState, metadata });
@@ -478,6 +483,7 @@ export class Master {
     }));
 
     if (IsSynchronous(this.storageAPI)) {
+      console.info(`setMetadata [${matchID}] playerID [${playerID}]`);
       this.storageAPI.setMetadata(key, metadata);
     } else {
       await this.storageAPI.setMetadata(key, metadata);

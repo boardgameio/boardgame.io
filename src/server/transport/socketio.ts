@@ -131,7 +131,7 @@ export class SocketIO {
             this.auth
           );
 
-          const queueInterval = IsSynchronous(app.context.db) ? 50 : 0;
+          const queueInterval = 0; // IsSynchronous(app.context.db) ? 50 : 0;
           const matchQueue = this.getMatchQueue(matchID, queueInterval);
           await matchQueue.add(() =>
             master.onUpdate(action, stateID, matchID, playerID)
@@ -176,7 +176,7 @@ export class SocketIO {
             if (!this.roomInfo.get(matchID).size) {
               this.deleteMatchQueue(matchID);
             }
-            
+
             const master = new Master(
               game,
               app.context.db,
