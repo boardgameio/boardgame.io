@@ -10,7 +10,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { Flow } from './flow';
 import { error } from '../core/logger';
-import { Ctx, State } from '../types';
+import { Ctx, Game, State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -31,24 +31,24 @@ describe('phases', () => {
       phases: {
         A: {
           start: true,
-          onBegin: s => ({ ...s, setupA: true }),
-          onEnd: s => ({ ...s, cleanupA: true }),
+          onBegin: ({ G }) => ({ ...G, setupA: true }),
+          onEnd: ({ G }) => ({ ...G, cleanupA: true }),
           next: 'B',
         },
         B: {
-          onBegin: s => ({ ...s, setupB: true }),
-          onEnd: s => ({ ...s, cleanupB: true }),
+          onBegin: ({ G }) => ({ ...G, setupB: true }),
+          onEnd: ({ G }) => ({ ...G, cleanupB: true }),
           next: 'A',
         },
       },
 
       turn: {
         order: {
-          first: G => {
+          first: ({ G }) => {
             if (G.setupB && !G.cleanupB) return 1;
             return 0;
           },
-          next: (_, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+          next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
         },
       },
     });
@@ -103,9 +103,9 @@ describe('phases', () => {
     let client: ReturnType<typeof Client>;
 
     beforeAll(() => {
-      const game = {
+      const game: Game = {
         endIf: () => true,
-        onEnd: G => {
+        onEnd: ({ G }) => {
           G.onEnd = true;
         },
       };
@@ -204,7 +204,7 @@ describe('phases', () => {
 
 describe('turn', () => {
   test('onEnd', () => {
-    const onEnd = jest.fn(G => G);
+    const onEnd = jest.fn(({ G }) => G);
     const flow = Flow({
       turn: { onEnd },
     });
@@ -329,12 +329,12 @@ describe('turn', () => {
 
   describe('endIf', () => {
     test('global', () => {
-      const game = {
+      const game: Game = {
         moves: {
           A: () => ({ endTurn: true }),
-          B: G => G,
+          B: ({ G }) => G,
         },
-        turn: { endIf: G => G.endTurn },
+        turn: { endIf: ({ G }) => G.endTurn },
       };
       const client = Client({ game });
 
@@ -346,13 +346,13 @@ describe('turn', () => {
     });
 
     test('phase specific', () => {
-      const game = {
+      const game: Game = {
         moves: {
           A: () => ({ endTurn: true }),
-          B: G => G,
+          B: ({ G }) => G,
         },
         phases: {
-          A: { start: true, turn: { endIf: G => G.endTurn } },
+          A: { start: true, turn: { endIf: ({ G }) => G.endTurn } },
         },
       };
       const client = Client({ game });
@@ -365,9 +365,9 @@ describe('turn', () => {
     });
 
     test('return value', () => {
-      const game = {
+      const game: Game = {
         moves: {
-          A: G => G,
+          A: ({ G }) => G,
         },
         turn: { endIf: () => ({ next: '2' }) },
       };
@@ -382,7 +382,10 @@ describe('turn', () => {
   test('endTurn is not called twice in one move', () => {
     const flow = Flow({
       turn: { endIf: () => true },
-      phases: { A: { start: true, endIf: G => G.endPhase, next: 'B' }, B: {} },
+      phases: {
+        A: { start: true, endIf: ({ G }) => G.endPhase, next: 'B' },
+        B: {},
+      },
     });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
@@ -414,7 +417,7 @@ describe('stages', () => {
     const A = () => {};
     const B = () => {};
 
-    const game = {
+    const game: Game = {
       moves: { A },
       turn: {
         stages: {
@@ -664,7 +667,7 @@ test('init', () => {
 
 describe('endIf', () => {
   test('basic', () => {
-    const flow = Flow({ endIf: G => G.win });
+    const flow = Flow({ endIf: ({ G }) => G.win });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
     state = flow.processEvent(state, gameEvent('endTurn'));
@@ -684,17 +687,17 @@ describe('endIf', () => {
   });
 
   test('phase automatically ends', () => {
-    const game = {
+    const game: Game = {
       phases: {
         A: {
           start: true,
           moves: {
             A: () => ({ win: 'A' }),
-            B: G => G,
+            B: ({ G }) => G,
           },
         },
       },
-      endIf: G => G.win,
+      endIf: ({ G }) => G.win,
     };
     const client = Client({ game });
 
@@ -732,7 +735,7 @@ test('isPlayerActive', () => {
 describe('endGame', () => {
   let client: ReturnType<typeof Client>;
   beforeEach(() => {
-    const game = {
+    const game: Game = {
       events: { endGame: true },
     };
     client = Client({ game });
@@ -846,11 +849,11 @@ describe('pass args', () => {
 });
 
 test('undoable moves', () => {
-  const game = {
+  const game: Game = {
     moves: {
       A: {
         move: () => ({ A: true }),
-        undoable: (G, ctx) => {
+        undoable: (_, ctx) => {
           return ctx.phase == 'A';
         },
       },
@@ -901,7 +904,7 @@ test('undoable moves', () => {
 });
 
 describe('moveMap', () => {
-  const game = {
+  const game: Game = {
     moves: { A: () => {} },
 
     turn: {
@@ -942,7 +945,7 @@ describe('moveMap', () => {
 describe('infinite loops', () => {
   test('loop 1', () => {
     const endIf = () => true;
-    const game = {
+    const game: Game = {
       phases: {
         A: { endIf, next: 'B', start: true },
         B: { endIf, next: 'A' },
@@ -953,10 +956,10 @@ describe('infinite loops', () => {
   });
 
   test('loop 2', () => {
-    const game = {
+    const game: Game = {
       turn: {
-        onEnd: (G, ctx) => {
-          ctx.events.endPhase();
+        onEnd: ({ events }) => {
+          events.endPhase();
         },
       },
       phases: {
@@ -973,14 +976,14 @@ describe('infinite loops', () => {
   });
 
   test('loop 3', () => {
-    const game = {
+    const game: Game = {
       moves: {
-        endTurn: (G, ctx) => {
-          ctx.events.endTurn();
+        endTurn: ({ events }) => {
+          events.endTurn();
         },
       },
       turn: {
-        onBegin: (G, ctx) => ctx.events.endTurn(),
+        onBegin: ({ events }) => events.endTurn(),
       },
     };
     const client = Client({ game });
@@ -990,10 +993,10 @@ describe('infinite loops', () => {
   });
 
   test('loop 4', () => {
-    const game = {
+    const game: Game = {
       moves: {
-        endTurn: (G, ctx) => {
-          ctx.events.endTurn();
+        endTurn: ({ events }) => {
+          events.endTurn();
         },
       },
       turn: {
@@ -1009,7 +1012,7 @@ describe('infinite loops', () => {
 
 describe('activePlayers', () => {
   test('sets activePlayers at each turn', () => {
-    const game = {
+    const game: Game = {
       turn: {
         stages: { A: {}, B: {} },
         activePlayers: {
@@ -1040,15 +1043,15 @@ describe('activePlayers', () => {
 });
 
 test('events in hooks triggered by moves should be processed', () => {
-  const game = {
+  const game: Game = {
     turn: {
-      onBegin: (G, ctx) => {
-        ctx.events.setActivePlayers({ currentPlayer: 'A' });
+      onBegin: ({ events }) => {
+        events.setActivePlayers({ currentPlayer: 'A' });
       },
     },
     moves: {
-      endTurn: (G, ctx) => {
-        ctx.events.endTurn();
+      endTurn: ({ events }) => {
+        events.endTurn();
       },
     },
   };

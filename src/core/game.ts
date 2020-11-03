@@ -87,15 +87,17 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
 
       if (moveFn instanceof Function) {
         const fn = plugins.FnWrap(moveFn, game.plugins);
-        const ctxWithAPI = {
-          ...plugins.EnhanceCtx(state),
-          playerID: action.playerID,
-        };
         let args = [];
         if (action.args !== undefined) {
           args = args.concat(action.args);
         }
-        return fn(state.G, ctxWithAPI, ...args);
+        const context = {
+          ...plugins.GetAPIs(state),
+          G: state.G,
+          ctx: state.ctx,
+          playerID: action.playerID,
+        };
+        return fn(context, ...args);
       }
 
       logging.error(`invalid move object: ${action.type}`);

@@ -11,6 +11,7 @@ import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
 import {
   AnyFn,
+  DefaultPluginAPIs,
   PartialGameState,
   State,
   Game,
@@ -58,7 +59,7 @@ export const ProcessAction = (
 };
 
 /**
- * The API's created by various plugins are stored in the plugins
+ * The APIs created by various plugins are stored in the plugins
  * section of the state object:
  *
  * {
@@ -72,17 +73,14 @@ export const ProcessAction = (
  *   }
  * }
  *
- * This function takes these API's and stuffs them back into
- * ctx for consumption inside a move function or hook.
+ * This function retrieves plugin APIs and returns them as an object
+ * for consumption as used by move contexts.
  */
-export const EnhanceCtx = (state: PartialGameState): Ctx => {
-  let ctx = { ...state.ctx };
-  const plugins = state.plugins || {};
-  Object.entries(plugins).forEach(([name, { api }]) => {
-    ctx[name] = api;
-  });
-  return ctx;
-};
+export const GetAPIs = ({ plugins }: PartialGameState) =>
+  Object.entries(plugins || {}).reduce((apis, [name, { api }]) => {
+    apis[name] = api;
+    return apis;
+  }, {} as DefaultPluginAPIs);
 
 /**
  * Applies the provided plugins to the given move / flow function.
@@ -131,10 +129,10 @@ export const Setup = (
  * the `plugins` section of the state (which is subsequently
  * merged into ctx).
  */
-export const Enhance = (
-  state: State,
+export const Enhance = <S extends State | PartialGameState>(
+  state: S,
   opts: PluginOpts & { playerID: PlayerID }
-): State => {
+): S => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter(plugin => plugin.api !== undefined)
     .forEach(plugin => {

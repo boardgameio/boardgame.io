@@ -8,9 +8,9 @@
 
 import { Server, createServerRunConfig, KoaServer, getPortFromServer } from '.';
 import { SocketIO } from './transport/socketio';
-import { StorageAPI } from '../types';
+import { Game, StorageAPI } from '../types';
 
-const game = { seed: 0 };
+const game: Game = { seed: 0 };
 
 jest.mock('../core/logger', () => ({
   info: () => {},
@@ -60,21 +60,21 @@ jest.mock('koa', () => {
 
 describe('new', () => {
   test('custom db implementation', () => {
-    const game = {};
+    const game: Game = {};
     const db = {} as StorageAPI.Sync;
     const server = Server({ games: [game], db });
     expect(server.db).toBe(db);
   });
 
   test('custom transport implementation', () => {
-    const game = {};
+    const game: Game = {};
     const transport = ({ init: jest.fn() } as unknown) as SocketIO;
     Server({ games: [game], transport });
     expect(transport.init).toBeCalled();
   });
 
   test('custom auth implementation', () => {
-    const game = {};
+    const game: Game = {};
     const authenticateCredentials = () => true;
     const server = Server({ games: [game], authenticateCredentials });
     expect(server.db).not.toBeNull();

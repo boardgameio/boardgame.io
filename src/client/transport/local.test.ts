@@ -15,14 +15,14 @@ import { InitializeGame } from '../../core/initialize';
 import { Client } from '../client';
 import { RandomBot } from '../../ai/random-bot';
 import { Stage } from '../../core/turn-order';
-import { State, Store, SyncInfo } from '../../types';
+import { Game, State, Store, SyncInfo } from '../../types';
 
 jest.useFakeTimers();
 
 describe('bots', () => {
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G: any) => G,
+      A: ({ G }) => G,
     },
     ai: {
       enumerate: () => [{ move: 'A' }],
@@ -150,10 +150,10 @@ describe('Local', () => {
   });
 
   describe('with localStorage persistence', () => {
-    const game = {
+    const game: Game = {
       setup: () => ({ count: 0 }),
       moves: {
-        A: (G: any) => {
+        A: ({ G }) => {
           G.count++;
         },
       },
@@ -199,7 +199,7 @@ describe('Local', () => {
 });
 
 describe('LocalMaster', () => {
-  const game = {};
+  const game: Game = {};
   const master = new LocalMaster({ game });
 
   const storeA = ({
@@ -310,7 +310,7 @@ describe('LocalTransport', () => {
       }
     }
     const m = new WrappedLocalTransport({ master });
-    const game = {};
+    const game: Game = {};
     let store: Store | null = null;
 
     beforeEach(() => {

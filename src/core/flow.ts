@@ -23,6 +23,7 @@ import {
   ActionShape,
   State,
   Ctx,
+  FnContext,
   LogEntry,
   Game,
   PhaseConfig,
@@ -59,7 +60,7 @@ export function Flow({
   }
 
   if (!endIf) endIf = () => undefined;
-  if (!onEnd) onEnd = G => G;
+  if (!onEnd) onEnd = ({ G }) => G;
   if (!turn) turn = {};
 
   const phaseMap = { ...phases };
@@ -76,18 +77,30 @@ export function Flow({
 
   Object.keys(moves).forEach(name => moveNames.add(name));
 
-  const HookWrapper = (fn: (G: any, ctx: Ctx) => any) => {
+  const HookWrapper = (fn: (context: FnContext) => any) => {
     const withPlugins = plugin.FnWrap(fn, plugins);
     return (state: State) => {
-      const ctxWithAPI = plugin.EnhanceCtx(state);
-      return withPlugins(state.G, ctxWithAPI);
+      const pluginAPIs = plugin.GetAPIs(state);
+      // TODO: what should happend with playerID here?
+      return withPlugins({
+        ...pluginAPIs,
+        G: state.G,
+        ctx: state.ctx,
+        playerID: undefined,
+      });
     };
   };
 
-  const TriggerWrapper = (endIf: (G: any, ctx: Ctx) => any) => {
+  const TriggerWrapper = (endIf: (context: FnContext) => any) => {
     return (state: State) => {
-      let ctxWithAPI = plugin.EnhanceCtx(state);
-      return endIf(state.G, ctxWithAPI);
+      const pluginAPIs = plugin.GetAPIs(state);
+      // TODO: what should happend with playerID here?
+      return endIf({
+        ...pluginAPIs,
+        G: state.G,
+        ctx: state.ctx,
+        playerID: undefined,
+      });
     };
   };
 
@@ -114,10 +127,10 @@ export function Flow({
       conf.endIf = () => undefined;
     }
     if (conf.onBegin === undefined) {
-      conf.onBegin = G => G;
+      conf.onBegin = ({ G }) => G;
     }
     if (conf.onEnd === undefined) {
-      conf.onEnd = G => G;
+      conf.onEnd = ({ G }) => G;
     }
     if (conf.turn === undefined) {
       conf.turn = turn;
@@ -126,16 +139,16 @@ export function Flow({
       conf.turn.order = TurnOrder.DEFAULT;
     }
     if (conf.turn.onBegin === undefined) {
-      conf.turn.onBegin = G => G;
+      conf.turn.onBegin = ({ G }) => G;
     }
     if (conf.turn.onEnd === undefined) {
-      conf.turn.onEnd = G => G;
+      conf.turn.onEnd = ({ G }) => G;
     }
     if (conf.turn.endIf === undefined) {
       conf.turn.endIf = () => false;
     }
     if (conf.turn.onMove === undefined) {
-      conf.turn.onMove = G => G;
+      conf.turn.onMove = ({ G }) => G;
     }
     if (conf.turn.stages === undefined) {
       conf.turn.stages = {};
@@ -169,11 +182,22 @@ export function Flow({
     return ctx.phase ? phaseMap[ctx.phase] : phaseMap[''];
   }
 
-  function OnMove(s) {
-    return s;
+  function OnMove(state: State) {
+    return state;
   }
 
-  function Process(state: State, events): State {
+  function Process(
+    state: State,
+    events: {
+      fn: (state: State, opts: any) => State;
+      arg?: any;
+      turn?: Ctx['turn'];
+      phase?: Ctx['phase'];
+      automatic?: boolean;
+      playerID?: PlayerID;
+      force?: boolean;
+    }[]
+  ): State {
     const phasesEnded = new Set();
     const turnsEnded = new Set();
 
@@ -666,11 +690,11 @@ export function Flow({
       !move || typeof move === 'function' || move.noLimit !== true;
 
     let { ctx } = state;
-    let { _activePlayersNumMoves } = ctx;
 
     const { playerID } = action;
 
     let numMoves = state.ctx.numMoves;
+    const _activePlayersNumMoves = { ...ctx._activePlayersNumMoves };
     if (shouldCount) {
       if (playerID == state.ctx.currentPlayer) {
         numMoves++;

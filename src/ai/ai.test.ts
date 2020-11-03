@@ -43,7 +43,7 @@ const TicTacToe = ProcessGameConfig({
   }),
 
   moves: {
-    clickCell(G, ctx, id) {
+    clickCell({ G, ctx }, id: number) {
       const cells = [...G.cells];
       if (cells[id] === null) {
         cells[id] = ctx.currentPlayer;
@@ -54,7 +54,7 @@ const TicTacToe = ProcessGameConfig({
 
   turn: { moveLimit: 1 },
 
-  endIf: (G, ctx) => {
+  endIf: ({ G, ctx }) => {
     if (IsVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }
@@ -65,7 +65,7 @@ const TicTacToe = ProcessGameConfig({
   },
 });
 
-const enumerate = (G, ctx, playerID) => {
+const enumerate = (G: any, ctx: Ctx, playerID: string) => {
   let r = [];
   for (let i = 0; i < 9; i++) {
     if (G.cells[i] === null) {
@@ -77,17 +77,17 @@ const enumerate = (G, ctx, playerID) => {
 
 describe('Step', () => {
   test('advances game state', async () => {
-    const client = Client({
+    const client = Client<{ moved: boolean }>({
       game: {
         setup: () => ({ moved: false }),
 
         moves: {
-          clickCell(G) {
+          clickCell({ G }) {
             return { moved: !G.moved };
           },
         },
 
-        endIf(G) {
+        endIf({ G }) {
           if (G.moved) return true;
         },
 
@@ -119,7 +119,7 @@ describe('Step', () => {
     const client = Client({
       game: {
         moves: {
-          A: G => {
+          A: ({ G }) => {
             G.moved = true;
           },
         },
@@ -172,14 +172,14 @@ describe('Simulate', () => {
   test('with activePlayers', async () => {
     const game = ProcessGameConfig({
       moves: {
-        A: G => {
+        A: ({ G }) => {
           G.moved = true;
         },
       },
       turn: {
         activePlayers: { currentPlayer: Stage.NULL },
       },
-      endIf: G => G.moved,
+      endIf: ({ G }) => G.moved,
     });
 
     const bot = new RandomBot({
@@ -239,7 +239,7 @@ describe('Bot', () => {
 
 describe('MCTSBot', () => {
   test('game that never ends', async () => {
-    const game = {};
+    const game: Game = {};
     const state = InitializeGame({ game });
     const bot = new MCTSBot({ seed: 'test', game, enumerate: () => [] });
     const { state: endState } = await Simulate({ game, bots: bot, state });
@@ -304,14 +304,14 @@ describe('MCTSBot', () => {
     const game = ProcessGameConfig({
       setup: () => ({ moves: 0 }),
       moves: {
-        A: G => {
+        A: ({ G }) => {
           G.moves++;
         },
       },
       turn: {
         activePlayers: { currentPlayer: Stage.NULL },
       },
-      endIf: G => G.moves > 5,
+      endIf: ({ G }) => G.moves > 5,
     });
 
     const bot = new MCTSBot({

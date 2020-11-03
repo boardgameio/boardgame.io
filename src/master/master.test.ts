@@ -17,7 +17,7 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server, State } from '../types';
+import { Game, Server, State } from '../types';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 
@@ -36,7 +36,7 @@ class InMemoryAsync extends InMemory {
   }
 }
 
-const game = { seed: 0 };
+const game: Game = { seed: 0 };
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
@@ -448,8 +448,8 @@ describe('playerView', () => {
   const sendAll = jest.fn(arg => {
     sendAllReturn = arg;
   });
-  const game = {
-    playerView: (G, ctx, player) => {
+  const game: Game = {
+    playerView: (G, _ctx, player) => {
       return { ...G, player };
     },
   };
@@ -517,7 +517,7 @@ describe('authentication', () => {
   describe('async', () => {
     const send = jest.fn();
     const sendAll = jest.fn();
-    const game = { seed: 0 };
+    const game: Game = { seed: 0 };
     const matchID = 'matchID';
     const action = ActionCreators.gameEvent('endTurn');
     const storage = new InMemoryAsync();
@@ -566,7 +566,7 @@ describe('authentication', () => {
   describe('sync', () => {
     const send = jest.fn();
     const sendAll = jest.fn();
-    const game = { seed: 0 };
+    const game: Game = { seed: 0 };
     const matchID = 'matchID';
     const action = ActionCreators.gameEvent('endTurn');
     const storage = new InMemory();
@@ -721,11 +721,11 @@ describe('redactLog', () => {
   });
 
   test('make sure sync redacts the log', async () => {
-    const game = {
+    const game: Game = {
       moves: {
-        A: G => G,
+        A: ({ G }) => G,
         B: {
-          move: G => G,
+          move: ({ G }) => G,
           redact: true,
         },
       },
