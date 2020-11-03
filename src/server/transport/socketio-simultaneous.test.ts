@@ -15,9 +15,7 @@ import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
 import { _ClientImpl } from '../../client/client';
-import * as Masters from '../../master/master';
-import { Ctx, StorageAPI } from '../../types';
-import { IsSynchronous } from '../../master/master';
+import { Ctx } from '../../types';
 
 type SocketIOTestAdapterOpts = SocketOpts & {
   clientInfo?: Map<any, any>;
@@ -177,7 +175,6 @@ describe('simultaneous moves on server game', () => {
       SocketIOTestAdapter.prototype,
       'deleteMatchQueue'
     );
-    const spyMasterIsSync = jest.spyOn(Masters, 'IsSynchronous');
 
     db.createMatch('matchID', {
       initialState: InitializeGame({ game, numPlayers: 2 }),
@@ -211,8 +208,7 @@ describe('simultaneous moves on server game', () => {
     );
 
     // Assertions for match queue creation
-    // expect(spyMasterIsSync).toHaveBeenCalledWith(app.context.db);
-    expect(spyGetMatchQueue).toHaveBeenCalledWith('matchID', 0);
+    expect(spyGetMatchQueue).toHaveBeenCalledWith('matchID');
 
     // Set all players active
     await io.socket.receive(
@@ -305,7 +301,6 @@ describe('simultaneous moves on server game', () => {
       SocketIOTestAdapter.prototype,
       'deleteMatchQueue'
     );
-    const spyMasterIsSync = jest.spyOn(Masters, 'IsSynchronous');
 
     await db.createMatch('matchID', {
       initialState: InitializeGame({ game, numPlayers: 2 }),
@@ -339,8 +334,7 @@ describe('simultaneous moves on server game', () => {
     );
 
     // Assertions for match queue creation
-    // expect(spyMasterIsSync).toHaveBeenCalledWith(app.context.db);
-    expect(spyGetMatchQueue).toHaveBeenCalledWith('matchID', 0);
+    expect(spyGetMatchQueue).toHaveBeenCalledWith('matchID');
 
     // Set all players active
     await io.socket.receive(
