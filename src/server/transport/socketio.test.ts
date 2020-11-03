@@ -34,12 +34,6 @@ class SocketIOTestAdapter extends SocketIO {
 }
 
 jest.mock('../../master/master', () => {
-  function IsSynchronous(
-    storageAPI: StorageAPI.Sync | StorageAPI.Async
-  ): storageAPI is StorageAPI.Sync {
-    return false;
-  }
-
   class Master {
     onUpdate: jest.Mock<any, any>;
     onSync: jest.Mock<any, any>;
@@ -52,7 +46,7 @@ jest.mock('../../master/master', () => {
     }
   }
 
-  return { Master, IsSynchronous };
+  return { Master };
 });
 
 jest.mock('koa-socket-2', () => {
