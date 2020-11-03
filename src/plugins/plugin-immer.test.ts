@@ -13,7 +13,7 @@ import { INVALID_MOVE } from '../core/constants';
 jest.mock('../core/logger');
 
 describe('immer', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
 
   beforeAll(() => {
     client = Client({

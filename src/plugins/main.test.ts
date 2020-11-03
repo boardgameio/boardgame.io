@@ -10,7 +10,7 @@ import { Client } from '../client/client';
 import { Local } from '../client/transport/local';
 
 describe('basic', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
 
   beforeAll(() => {
     const game = {

@@ -8,9 +8,10 @@
 
 import { Events } from './events';
 import { Client } from '../../client/client';
+import { Game, Ctx } from '../../types';
 
 test('constructor', () => {
-  const flow = {};
+  const flow = {} as Game['flow'];
   const playerID = '0';
   const e = new Events(flow, playerID);
   expect(e.flow).toBe(flow);
@@ -19,13 +20,13 @@ test('constructor', () => {
 });
 
 test('dispatch', () => {
-  const flow = { eventNames: ['A', 'B'] };
+  const flow = { eventNames: ['A', 'B'] } as Game['flow'];
   const e = new Events(flow);
-  const events = e.api({ phase: '', turn: 0 });
+  const events = e.api({ phase: '', turn: 0 } as Ctx);
 
   expect(e.dispatch).toEqual([]);
-  events.A();
-  events.B();
+  ((events as unknown) as { A(): void }).A();
+  ((events as unknown) as { B(): void }).B();
   expect(e.dispatch).toEqual([
     { key: 'A', args: [], phase: '', turn: 0 },
     { key: 'B', args: [], phase: '', turn: 0 },
