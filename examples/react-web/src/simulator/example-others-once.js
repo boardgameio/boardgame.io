@@ -10,8 +10,8 @@ import React from 'react';
 
 const code = `{
   moves: {
-    play: (G, ctx) => {
-      ctx.events.setActivePlayers({
+    play: ({ G, events }) => {
+      events.setActivePlayers({
         others: 'discard',
         moveLimit: 1
       });
@@ -23,7 +23,7 @@ const code = `{
     stages: {
       discard: {
         moves: {
-          discard: G => G,
+          discard: ({ G }) => G,
         },
       },
     },
@@ -46,8 +46,8 @@ export default {
     },
 
     moves: {
-      play: (G, ctx) => {
-        ctx.events.setActivePlayers({ others: 'discard', moveLimit: 1 });
+      play: ({ G, events }) => {
+        events.setActivePlayers({ others: 'discard', moveLimit: 1 });
         return G;
       },
     },
@@ -56,7 +56,7 @@ export default {
       stages: {
         discard: {
           moves: {
-            discard: G => G,
+            discard: ({ G }) => G,
           },
         },
       },
