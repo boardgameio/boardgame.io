@@ -684,31 +684,23 @@ export function Flow({
   }
 
   function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
-    let conf = GetPhase(state.ctx);
-    const move = GetMove(state.ctx, action.type, action.playerID);
+    const { ctx } = state;
+    const { type, playerID } = action;
+    const conf = GetPhase(ctx);
+    const move = GetMove(ctx, type, playerID);
     const shouldCount =
       !move || typeof move === 'function' || move.noLimit !== true;
 
-    let { ctx } = state;
-
-    const { playerID } = action;
-
-    let numMoves = state.ctx.numMoves;
     const _activePlayersNumMoves = { ...ctx._activePlayersNumMoves };
+    let { numMoves } = ctx;
     if (shouldCount) {
-      if (playerID == state.ctx.currentPlayer) {
-        numMoves++;
-      }
+      if (playerID == ctx.currentPlayer) numMoves++;
       if (ctx.activePlayers) _activePlayersNumMoves[playerID]++;
     }
 
     state = {
       ...state,
-      ctx: {
-        ...ctx,
-        numMoves,
-        _activePlayersNumMoves,
-      },
+      ctx: { ...ctx, numMoves, _activePlayersNumMoves },
     };
 
     if (
@@ -721,7 +713,7 @@ export function Flow({
     const G = conf.turn.wrapped.onMove(state);
     state = { ...state, G };
 
-    let events = [{ fn: OnMove }];
+    const events = [{ fn: OnMove }];
 
     return Process(state, events);
   }
