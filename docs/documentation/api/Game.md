@@ -8,7 +8,7 @@
   // Function that returns the initial value of G.
   // setupData is an optional custom object that is
   // passed through the Game Creation API.
-  setup: (ctx, setupData) => G,
+  setup: ({ ctx, ...plugins }, setupData) => G,
 
   // Optional function to validate the setupData before
   // matches are created. If this returns a value,
@@ -18,11 +18,11 @@
 
   moves: {
     // short-form move.
-    A: (G, ctx) => {},
+    A: ({ G, ctx, playerID, events, random, ...plugins }, ...args) => {},
 
     // long-form move.
     B: {
-      move: (G, ctx) => {},
+      move: ({ G, ctx, playerID, events, random, ...plugins }, ...args) => {},
       undoable: false,  // prevents undoing the move.
       redact: true,     // prevents the move arguments from showing up in the log.
       client: false,    // prevents the move from running on the client.
@@ -43,16 +43,19 @@
     order: TurnOrder.DEFAULT,
 
     // Called at the beginning of a turn.
-    onBegin: (G, ctx) => G,
+    onBegin: ({ G, ctx, playerID, events, random, ...plugins }) => G,
 
     // Called at the end of a turn.
-    onEnd: (G, ctx) => G,
+    onEnd: ({ G, ctx, playerID, events, random, ...plugins }) => G,
 
     // Ends the turn if this returns true.
-    endIf: (G, ctx) => true,
+    // Returning { next }, sets next playerID.
+    endIf: ({ G, ctx, playerID, events, random, ...plugins }) => (
+      true | { next: '0' }
+    ),
 
     // Called at the end of each move.
-    onMove: (G, ctx) => G,
+    onMove: ({ G, ctx, playerID, events, random, ...plugins }) => G,
 
     // Ends the turn automatically after a number of moves.
     moveLimit: 1,
@@ -78,13 +81,13 @@
   phases: {
     A: {
       // Called at the beginning of a phase.
-      onBegin: (G, ctx) => G,
+      onBegin: ({ G, ctx, playerID, events, random, ...plugins }) => G,
 
       // Called at the end of a phase.
-      onEnd: (G, ctx) => G,
+      onEnd: ({ G, ctx, playerID, events, random, ...plugins }) => G,
 
       // Ends the phase if this returns true.
-      endIf: (G, ctx) => true,
+      endIf: ({ G, ctx, playerID, events, random, ...plugins }) => true,
 
       // Overrides `moves` for the duration of this phase.
       moves: { ... },
@@ -103,12 +106,12 @@
 
   // Ends the game if this returns anything.
   // The return value is available in `ctx.gameover`.
-  endIf: (G, ctx) => obj,
+  endIf: ({ G, ctx, playerID, events, random, ...plugins }) => obj,
 
   // Called at the end of the game.
   // `ctx.gameover` is available at this point.
-  onEnd: (G, ctx) => G,
-  
+  onEnd: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+
   // Disable undo feature for all the moves in the game
   disableUndo: true,
 }

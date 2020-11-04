@@ -78,8 +78,8 @@ These can be marked as server-only by setting `client: false` on move:
 ```js
 moves: {
   moveThatUsesSecret: {
-    move: (G, ctx) => {
-      ...
+    move: ({ G, random }) => {
+      G.secret.value = random.Number();
     },
 
     client: false,
