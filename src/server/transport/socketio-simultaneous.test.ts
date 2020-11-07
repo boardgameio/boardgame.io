@@ -15,12 +15,71 @@ import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
 import { _ClientImpl } from '../../client/client';
-import { Ctx } from '../../types';
+import { Ctx, LogEntry, Server, State, StorageAPI } from '../../types';
 
 type SocketIOTestAdapterOpts = SocketOpts & {
   clientInfo?: Map<any, any>;
   roomInfo?: Map<any, any>;
 };
+
+class InMemoryAsync extends StorageAPI.Async {
+  db: InMemory;
+
+  constructor() {
+    super();
+    this.db = new InMemory();
+  }
+
+  async connect() {
+    await this.sleep();
+  }
+
+  private sleep(interval: number = 50): Promise<void> {
+    return new Promise(resolve => void setTimeout(resolve, interval));
+  }
+
+  /**
+   * @param id
+   * @param opts
+   * @override
+   */
+  async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
+    await this.sleep();
+    this.db.createMatch(id, opts);
+  }
+
+  async setMetadata(matchID: string, metadata: Server.MatchData) {
+    await this.sleep();
+    this.db.setMetadata(matchID, metadata);
+  }
+
+  async setState(matchID: string, state: State, deltalog?: LogEntry[]) {
+    await this.sleep();
+    this.db.setState(matchID, state, deltalog);
+  }
+
+  async fetch<O extends StorageAPI.FetchOpts>(
+    matchID: string,
+    opts: O
+  ): Promise<StorageAPI.FetchResult<O>> {
+    await this.sleep();
+    return this.db.fetch(matchID, opts);
+  }
+
+  async wipe(matchID: string) {
+    await this.sleep();
+    this.db.wipe(matchID);
+  }
+
+  /**
+   * @param opts
+   * @override
+   */
+  async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
+    await this.sleep();
+    return this.db.listMatches(opts);
+  }
+}
 
 class SocketIOTestAdapter extends SocketIO {
   constructor({
@@ -280,7 +339,7 @@ describe('simultaneous moves on server game', () => {
   });
 
   test('two clients playing using async storage', async () => {
-    let db = new FlatFile({ dir: './tmp', logging: false });
+    let db = new InMemoryAsync();
     await db.connect();
 
     app = { context: { db: db } };
@@ -403,6 +462,5 @@ describe('simultaneous moves on server game', () => {
     expect(spyDeleteMatchQueue).toHaveBeenCalledWith('matchID');
 
     await db.wipe('matchID');
-    await db.clear();
   });
 });

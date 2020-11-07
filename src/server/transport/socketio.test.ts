@@ -8,9 +8,6 @@
 
 import { TransportAPI, SocketIO, SocketOpts } from './socketio';
 import { ProcessGameConfig } from '../../core/game';
-import { _ClientImpl } from '../../client/client';
-import { StorageAPI } from '../../types';
-import { InMemory } from '../db/inmemory';
 
 type SocketIOTestAdapterOpts = SocketOpts & {
   clientInfo?: Map<any, any>;
@@ -26,10 +23,6 @@ class SocketIOTestAdapter extends SocketIO {
     super(Object.keys(args).length ? args : undefined);
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
-  }
-
-  public get getPerMatchQueue() {
-    return this.perMatchQueue;
   }
 }
 
@@ -147,14 +140,13 @@ describe('socketAdapter', () => {
 describe('TransportAPI', () => {
   let io;
   let api;
-  let transport;
 
   beforeAll(() => {
     const app: any = { context: {} };
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
-    transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
+    const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
     api = TransportAPI('matchID', io.socket, clientInfo, roomInfo);
@@ -188,7 +180,7 @@ describe('TransportAPI', () => {
 });
 
 describe('sync / update', () => {
-  const app: any = { context: { db: new InMemory() } };
+  const app: any = { context: {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
@@ -206,7 +198,6 @@ describe('sync / update', () => {
 describe('connect / disconnect', () => {
   const app: any = { context: {} };
   const games = [ProcessGameConfig({ seed: 0 })];
-  let transport: SocketIOTestAdapter;
   let clientInfo;
   let roomInfo;
   let io;
@@ -222,7 +213,7 @@ describe('connect / disconnect', () => {
   beforeAll(() => {
     clientInfo = new Map();
     roomInfo = new Map();
-    transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
+    const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
   });
@@ -272,6 +263,5 @@ describe('connect / disconnect', () => {
     await io.socket.receive('disconnect');
     expect(toObj(clientInfo)).toEqual({});
     expect(toObj(roomInfo.get('matchID'))).toEqual({});
-    expect(transport.getPerMatchQueue.get('matchID')).toBeUndefined();
   });
 });

@@ -40,10 +40,10 @@ class InMemoryAsync extends StorageAPI.Async {
   }
 
   async connect() {
-    await this.sleep(300);
+    await this.sleep(50);
   }
 
-  private sleep(interval: number): Promise<void> {
+  private sleep(interval: number = 50): Promise<void> {
     return new Promise(resolve => void setTimeout(resolve, interval));
   }
 
@@ -53,17 +53,17 @@ class InMemoryAsync extends StorageAPI.Async {
    * @override
    */
   async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
-    await this.sleep(300);
+    await this.sleep();
     this.db.createMatch(id, opts);
   }
 
   async setMetadata(matchID: string, metadata: Server.MatchData) {
-    await this.sleep(300);
+    await this.sleep();
     this.db.setMetadata(matchID, metadata);
   }
 
   async setState(matchID: string, state: State, deltalog?: LogEntry[]) {
-    await this.sleep(300);
+    await this.sleep();
     this.db.setState(matchID, state, deltalog);
   }
 
@@ -71,12 +71,12 @@ class InMemoryAsync extends StorageAPI.Async {
     matchID: string,
     opts: O
   ): Promise<StorageAPI.FetchResult<O>> {
-    await this.sleep(300);
+    await this.sleep();
     return this.db.fetch(matchID, opts);
   }
 
   async wipe(matchID: string) {
-    await this.sleep(300);
+    await this.sleep();
     this.db.wipe(matchID);
   }
 
@@ -85,7 +85,7 @@ class InMemoryAsync extends StorageAPI.Async {
    * @override
    */
   async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
-    await this.sleep(300);
+    await this.sleep();
     return this.db.listMatches(opts);
   }
 }
@@ -429,7 +429,7 @@ describe('update', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata(id, dbMetadata);
+    await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
@@ -450,7 +450,7 @@ describe('update', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata(id, dbMetadata);
+    await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
@@ -487,7 +487,7 @@ describe('update', () => {
     // Store state manually to bypass automatic metadata initialization on sync.
     let state = InitializeGame({ game });
     expect(state.ctx.turn).toBe(1);
-    db.setState(id, state);
+    await db.setState(id, state);
     // Dispatch update to end the turn.
     const event = ActionCreators.gameEvent('endTurn', null, '0');
     await masterWithoutMetadata.onUpdate(event, 0, id, '0');
@@ -580,7 +580,10 @@ describe('connectionChange', () => {
       asyncDb,
       TransportAPI(send, sendAll)
     );
-    asyncDb.createMatch('matchID', { metadata, initialState: {} as State });
+    await asyncDb.createMatch('matchID', {
+      metadata,
+      initialState: {} as State,
+    });
 
     await masterWithAsyncDb.onConnectionChange('matchID', '0', true);
 

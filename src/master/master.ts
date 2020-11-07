@@ -44,7 +44,7 @@ const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
     return filteredData;
   });
 
-export function IsSynchronous(
+function IsSynchronous(
   storageAPI: StorageAPI.Sync | StorageAPI.Async
 ): storageAPI is StorageAPI.Sync {
   return storageAPI.type() === StorageAPI.Type.SYNC;

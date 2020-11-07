@@ -206,8 +206,6 @@ export class SocketIO {
    * @param matchID
    */
   deleteMatchQueue(matchID: string): void {
-    if (this.perMatchQueue.has(matchID)) {
-      this.perMatchQueue.delete(matchID);
-    }
+    this.perMatchQueue.delete(matchID);
   }
 }
