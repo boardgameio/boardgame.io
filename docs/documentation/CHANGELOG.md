@@ -1,3 +1,16 @@
+## v0.42.0
+
+#### Features
+
+* [[6ba5536](https://github.com/boardgameio/boardgame.io/commit/6ba5536)] Add localStorage support to Local master ([#691](https://github.com/boardgameio/boardgame.io/pull/691))
+* [[257a735](https://github.com/boardgameio/boardgame.io/commit/257a735)] Track players connection status ([#839](https://github.com/boardgameio/boardgame.io/pull/839))
+* [[d071e98](https://github.com/boardgameio/boardgame.io/commit/d071e98)] Add game method to validate setup data ([#831](https://github.com/boardgameio/boardgame.io/pull/831))
+
+#### Bugfixes
+
+* [[ace1144](https://github.com/boardgameio/boardgame.io/commit/ace1144)] local: Use shared local master with bots ([#838](https://github.com/boardgameio/boardgame.io/pull/838))
+* [[9fcbed7](https://github.com/boardgameio/boardgame.io/commit/9fcbed7)] client: Correctly type state returned by client to subscribers
+
 ## v0.41.1
 
 Push another release to fix NPM weirdness.
@@ -6,25 +19,25 @@ Push another release to fix NPM weirdness.
 
 #### Features
 
-* [[c8c648e](https://github.com/boardgameio/boardgame.io/commit/c8c648e)] feat: Add global manager to track client & debug panel instances (#816)
-* [[af43561](https://github.com/boardgameio/boardgame.io/commit/af43561)] feat: Add log entries for undo/redo actions (#825)
-* [[2595399](https://github.com/boardgameio/boardgame.io/commit/2595399)] feat: Improve undo/redo (#823)
-* [[3d2131e](https://github.com/boardgameio/boardgame.io/commit/3d2131e)] fix(master): Use `createMatch` for implicit match creation (#821)
-* [[f74f953](https://github.com/boardgameio/boardgame.io/commit/f74f953)] feat: Improve match term consistency (#806)
+* [[c8c648e](https://github.com/boardgameio/boardgame.io/commit/c8c648e)] Add global manager to track client & debug panel instances ([#816](https://github.com/boardgameio/boardgame.io/pull/816))
+* [[af43561](https://github.com/boardgameio/boardgame.io/commit/af43561)] Add log entries for undo/redo actions ([#825](https://github.com/boardgameio/boardgame.io/pull/825))
+* [[2595399](https://github.com/boardgameio/boardgame.io/commit/2595399)] Improve undo/redo ([#823](https://github.com/boardgameio/boardgame.io/pull/823))
+* [[3d2131e](https://github.com/boardgameio/boardgame.io/commit/3d2131e)] master: Use `createMatch` for implicit match creation ([#821](https://github.com/boardgameio/boardgame.io/pull/821))
+* [[f74f953](https://github.com/boardgameio/boardgame.io/commit/f74f953)] Improve match term consistency ([#806](https://github.com/boardgameio/boardgame.io/pull/806))
 
 #### Bugfixes
 
-* [[f5d3a97](https://github.com/boardgameio/boardgame.io/commit/f5d3a97)] fix(debug): Improve debug panel accessibility (#827)
-* [[0040a5d](https://github.com/boardgameio/boardgame.io/commit/0040a5d)] fix(reducer): Restore plugin state on undo/redo
-* [[4f2ffc4](https://github.com/boardgameio/boardgame.io/commit/4f2ffc4)] fix(debug): Include plugin data in log rewind gamestate override
-* [[197a9bb](https://github.com/boardgameio/boardgame.io/commit/197a9bb)] fix(reducer): Fix stateID increment & build deltalog on server only (#817)
-* [[600caa8](https://github.com/boardgameio/boardgame.io/commit/600caa8)] fix(debug): Use local reducer in Log rewind
-* [[3c2aadd](https://github.com/boardgameio/boardgame.io/commit/3c2aadd)] fix(client): Don’t run playerView locally on multiplayer clients (#819)
+* [[f5d3a97](https://github.com/boardgameio/boardgame.io/commit/f5d3a97)] debug: Improve debug panel accessibility ([#827](https://github.com/boardgameio/boardgame.io/pull/827))
+* [[0040a5d](https://github.com/boardgameio/boardgame.io/commit/0040a5d)] reducer: Restore plugin state on undo/redo
+* [[4f2ffc4](https://github.com/boardgameio/boardgame.io/commit/4f2ffc4)] debug: Include plugin data in log rewind gamestate override
+* [[197a9bb](https://github.com/boardgameio/boardgame.io/commit/197a9bb)] reducer: Fix stateID increment & build deltalog on server only ([#817](https://github.com/boardgameio/boardgame.io/pull/817))
+* [[600caa8](https://github.com/boardgameio/boardgame.io/commit/600caa8)] debug: Use local reducer in Log rewind
+* [[3c2aadd](https://github.com/boardgameio/boardgame.io/commit/3c2aadd)] client: Don’t run playerView locally on multiplayer clients ([#819](https://github.com/boardgameio/boardgame.io/pull/819))
 * [[abd9695](https://github.com/boardgameio/boardgame.io/commit/abd9695)] fix: Simplify local transport typing
-* [[9a2a609](https://github.com/boardgameio/boardgame.io/commit/9a2a609)] fix: improve socketio.ts typings (#811)
-* [[0f8882a](https://github.com/boardgameio/boardgame.io/commit/0f8882a)] fix(core): Fix EndPhase deltalog (#812)
-* [[4bd283c](https://github.com/boardgameio/boardgame.io/commit/4bd283c)] fix: FlatFile.listGames filter (#802)
-* [[0062e55](https://github.com/boardgameio/boardgame.io/commit/0062e55)] fix(client): Improve client types (#801)
+* [[9a2a609](https://github.com/boardgameio/boardgame.io/commit/9a2a609)] fix: improve socketio.ts typings ([#811](https://github.com/boardgameio/boardgame.io/pull/811))
+* [[0f8882a](https://github.com/boardgameio/boardgame.io/commit/0f8882a)] core: Fix EndPhase deltalog ([#812](https://github.com/boardgameio/boardgame.io/pull/812))
+* [[4bd283c](https://github.com/boardgameio/boardgame.io/commit/4bd283c)] fix: FlatFile.listGames filter ([#802](https://github.com/boardgameio/boardgame.io/pull/802))
+* [[0062e55](https://github.com/boardgameio/boardgame.io/commit/0062e55)] client: Improve client types ([#801](https://github.com/boardgameio/boardgame.io/pull/801))
 
 ## v0.40.0
 
@@ -36,15 +49,15 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 * [[43c7fbb](https://github.com/boardgameio/boardgame.io/commit/43c7fbb)] Add plain JS lobby client ([#728](https://github.com/boardgameio/boardgame.io/pull/728))
 * [[adb251d](https://github.com/boardgameio/boardgame.io/commit/adb251d)] [[6fcf695](https://github.com/boardgameio/boardgame.io/commit/6fcf695)] Use “match” instead of “game”/“room” in Lobby API ([#704](https://github.com/boardgameio/boardgame.io/pull/704), [#765](https://github.com/boardgameio/boardgame.io/pull/765))
-* [[88b0ee7](https://github.com/boardgameio/boardgame.io/commit/88b0ee7)] **debug:** Display live object view in debug panel ([#781](https://github.com/boardgameio/boardgame.io/pull/781), [#790](https://github.com/boardgameio/boardgame.io/pull/790))
-* [[3984ee7](https://github.com/boardgameio/boardgame.io/commit/3984ee7)] **debug:** Events shortcuts, stages support & minor fixes ([#791](https://github.com/boardgameio/boardgame.io/pull/791))
-* [[3c8777b](https://github.com/boardgameio/boardgame.io/commit/3c8777b)] **server:** Timestamp metadata and match filtering in the Lobby API ([#740](https://github.com/boardgameio/boardgame.io/pull/740))
-* [[a0c34fd](https://github.com/boardgameio/boardgame.io/commit/a0c34fd)] **server:** Expose API router ([#698](https://github.com/boardgameio/boardgame.io/pull/698))
+* [[88b0ee7](https://github.com/boardgameio/boardgame.io/commit/88b0ee7)] debug: Display live object view in debug panel ([#781](https://github.com/boardgameio/boardgame.io/pull/781), [#790](https://github.com/boardgameio/boardgame.io/pull/790))
+* [[3984ee7](https://github.com/boardgameio/boardgame.io/commit/3984ee7)] debug: Events shortcuts, stages support & minor fixes ([#791](https://github.com/boardgameio/boardgame.io/pull/791))
+* [[3c8777b](https://github.com/boardgameio/boardgame.io/commit/3c8777b)] server: Timestamp metadata and match filtering in the Lobby API ([#740](https://github.com/boardgameio/boardgame.io/pull/740))
+* [[a0c34fd](https://github.com/boardgameio/boardgame.io/commit/a0c34fd)] server: Expose API router ([#698](https://github.com/boardgameio/boardgame.io/pull/698))
 
 #### Bugfixes
 
-* [[2586022](https://github.com/boardgameio/boardgame.io/commit/2586022)] **debug:** Keep debug panel above other page elements ([#780](https://github.com/boardgameio/boardgame.io/pull/780))
-* [[f32dc76](https://github.com/boardgameio/boardgame.io/commit/f32dc76)] **api:** Expose gameover metadata in lobby endpoints ([#666](https://github.com/boardgameio/boardgame.io/pull/666))
+* [[2586022](https://github.com/boardgameio/boardgame.io/commit/2586022)] debug: Keep debug panel above other page elements ([#780](https://github.com/boardgameio/boardgame.io/pull/780))
+* [[f32dc76](https://github.com/boardgameio/boardgame.io/commit/f32dc76)] api: Expose gameover metadata in lobby endpoints ([#666](https://github.com/boardgameio/boardgame.io/pull/666))
 * [[fa865da](https://github.com/boardgameio/boardgame.io/commit/fa865da)] fixes build in rushjs monorepo context ([#550](https://github.com/boardgameio/boardgame.io/pull/550))
 
 ## v0.39.16
@@ -64,18 +77,18 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 #### Features
 
-* [[c115087](https://github.com/boardgameio/boardgame.io/commit/c115087)] feat(game): add disableUndo flag to game config (#742)
+* [[c115087](https://github.com/boardgameio/boardgame.io/commit/c115087)] game: add disableUndo flag to game config (#742)
 
 #### Bugfixes
 
-* [[a6698e6](https://github.com/boardgameio/boardgame.io/commit/a6698e6)] fix(debug): Fix save & restore in Debug panel (#746)
+* [[a6698e6](https://github.com/boardgameio/boardgame.io/commit/a6698e6)] debug: Fix save & restore in Debug panel (#746)
 
 ## v0.39.13
 
 #### Features
 
-* [[2b1bd19](https://github.com/boardgameio/boardgame.io/commit/2b1bd19)] refactor(ai): Convert to Typescript (#734)
-* [[872b58b](https://github.com/boardgameio/boardgame.io/commit/872b58b)] fix(client): Make argument optional in Local transport (#731)
+* [[2b1bd19](https://github.com/boardgameio/boardgame.io/commit/2b1bd19)] ai: Convert to Typescript (#734)
+* [[872b58b](https://github.com/boardgameio/boardgame.io/commit/872b58b)] client: Make argument optional in Local transport (#731)
 
 #### Bugfixes
 
@@ -85,24 +98,24 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 #### Features
 
-* [[0ca1cef](https://github.com/boardgameio/boardgame.io/commit/0ca1cef)] feat(lobby): use previous game config as defaults in playAgain (#719)
+* [[0ca1cef](https://github.com/boardgameio/boardgame.io/commit/0ca1cef)] lobby: use previous game config as defaults in playAgain (#719)
 * [[60b32e5](https://github.com/boardgameio/boardgame.io/commit/60b32e5)] Add support for socket.io-adapter implementations (#706)
-* [[eb236df](https://github.com/boardgameio/boardgame.io/commit/eb236df)] feat(db): FlatFile per-file request queues enhancement (#705)
+* [[eb236df](https://github.com/boardgameio/boardgame.io/commit/eb236df)] db: FlatFile per-file request queues enhancement (#705)
 
 #### Bugfixes
 
-* [[ef97441](https://github.com/boardgameio/boardgame.io/commit/ef97441)] fix(debug): Save all state to localStorage, not just G and ctx (#716)
-* [[4d45ff1](https://github.com/boardgameio/boardgame.io/commit/4d45ff1)] fix(client): Fix restore in debug controls (#712)
-* [[d728425](https://github.com/boardgameio/boardgame.io/commit/d728425)] fix(core): Fix undo/redo if the move changed the stage (#701)
+* [[ef97441](https://github.com/boardgameio/boardgame.io/commit/ef97441)] debug: Save all state to localStorage, not just G and ctx (#716)
+* [[4d45ff1](https://github.com/boardgameio/boardgame.io/commit/4d45ff1)] client: Fix restore in debug controls (#712)
+* [[d728425](https://github.com/boardgameio/boardgame.io/commit/d728425)] core: Fix undo/redo if the move changed the stage (#701)
 * [[3a622f1](https://github.com/boardgameio/boardgame.io/commit/3a622f1)] Use Promise chaining to enforce read/write queue (#699)
 
 ## v0.39.11
 
 #### Features
 
-* [[cfeaf67](https://github.com/boardgameio/boardgame.io/commit/cfeaf67)] feat(plugins): Let moves return INVALID_MOVE after mutating G (#688)
-* [[b2d6b06](https://github.com/boardgameio/boardgame.io/commit/b2d6b06)] feat(server): Lobby API improvements (#675)
-* [[dc668ec](https://github.com/boardgameio/boardgame.io/commit/dc668ec)] feat(server): Expose SocketIO transport & convert to TS (#658)
+* [[cfeaf67](https://github.com/boardgameio/boardgame.io/commit/cfeaf67)] plugins: Let moves return INVALID_MOVE after mutating G (#688)
+* [[b2d6b06](https://github.com/boardgameio/boardgame.io/commit/b2d6b06)] server: Lobby API improvements (#675)
+* [[dc668ec](https://github.com/boardgameio/boardgame.io/commit/dc668ec)] server: Expose SocketIO transport & convert to TS (#658)
 
 #### Bugfixes
 
@@ -114,8 +127,8 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 #### Features
 
 * [[cf96955](https://github.com/boardgameio/boardgame.io/commit/cf96955)] Add option to exclude games from public listing (#653)
-* [[2e5b902](https://github.com/boardgameio/boardgame.io/commit/2e5b902)] feat(core): Support moves that don’t contribute to numMoves (#646)
-* [[e4fc7bd](https://github.com/boardgameio/boardgame.io/commit/e4fc7bd)] feat(master): Update metadata with gameover value on game end (#645)
+* [[2e5b902](https://github.com/boardgameio/boardgame.io/commit/2e5b902)] core: Support moves that don’t contribute to numMoves (#646)
+* [[e4fc7bd](https://github.com/boardgameio/boardgame.io/commit/e4fc7bd)] master: Update metadata with gameover value on game end (#645)
 * [[05eacb8](https://github.com/boardgameio/boardgame.io/commit/05eacb8)] Enable adding additional metadata to players in Lobby (#642)
 
 #### Bugfixes
@@ -132,7 +145,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 #### Bugfixes
 
-* [[b4bd8b7](https://github.com/boardgameio/boardgame.io/commit/b4bd8b7)] fix(package): update npm files field for new server bundle (#639)
+* [[b4bd8b7](https://github.com/boardgameio/boardgame.io/commit/b4bd8b7)] package: update npm files field for new server bundle (#639)
 * [[0552efb](https://github.com/boardgameio/boardgame.io/commit/0552efb)] add src/ to NPM
 
 ## v0.39.8
@@ -142,7 +155,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[3569408](https://github.com/boardgameio/boardgame.io/commit/3569408)] Add option to run server over HTTPS (#631)
 * [[c56d9b9](https://github.com/boardgameio/boardgame.io/commit/c56d9b9)] Adding playerID to Ctx (#627)
 * [[882a25d](https://github.com/boardgameio/boardgame.io/commit/882a25d)] export only the client in the browser-minified package
-* [[3d1c07c](https://github.com/boardgameio/boardgame.io/commit/3d1c07c)] build(server): Proxy server module with package.json (#622)
+* [[3d1c07c](https://github.com/boardgameio/boardgame.io/commit/3d1c07c)] server: Proxy server module with package.json (#622)
 * [[bd44678](https://github.com/boardgameio/boardgame.io/commit/bd44678)] Fix passing params to db adapter (#621)
 
 ## v0.39.7
@@ -161,27 +174,27 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 * [[eb1e060](https://github.com/boardgameio/boardgame.io/commit/eb1e060)] make plugins available in turn order functions
 * [[0688f4d](https://github.com/boardgameio/boardgame.io/commit/0688f4d)] Include credentials in undo/redo actions (#595)
-* [[f34f46b](https://github.com/boardgameio/boardgame.io/commit/f34f46b)] fix(core): Don’t error if turn.order.next returns undefined (#614)
+* [[f34f46b](https://github.com/boardgameio/boardgame.io/commit/f34f46b)] core: Don’t error if turn.order.next returns undefined (#614)
 
 ## v0.39.5
 
 #### Features
 
-* [[78729eb](https://github.com/boardgameio/boardgame.io/commit/78729eb)] refactor(core): More Typescript conversion (#597)
+* [[78729eb](https://github.com/boardgameio/boardgame.io/commit/78729eb)] core: More Typescript conversion (#597)
+* [[3a41cf7](https://github.com/boardgameio/boardgame.io/commit/3a41cf7)] plugins: Make player plugin a factory function (#604)
 
 #### Bugfixes
 
-* [[3a41cf7](https://github.com/boardgameio/boardgame.io/commit/3a41cf7)] feat(plugins): Make player plugin a factory function (#604)
-* [[1877268](https://github.com/boardgameio/boardgame.io/commit/1877268)] fix(plugins): More Typescript & pass playerID to Enhance (#598)
-* [[5696dc4](https://github.com/boardgameio/boardgame.io/commit/5696dc4)] fix(server): Correctly wait for server.listen event (#589)
+* [[1877268](https://github.com/boardgameio/boardgame.io/commit/1877268)] plugins: More Typescript & pass playerID to Enhance (#598)
+* [[5696dc4](https://github.com/boardgameio/boardgame.io/commit/5696dc4)] server: Correctly wait for server.listen event (#589)
 
 ## v0.39.4
 
 #### Features
 
 * [[167690c](https://github.com/boardgameio/boardgame.io/commit/167690c)] add plugin types to ctx interface (#579)
-* [[618618e](https://github.com/boardgameio/boardgame.io/commit/618618e)] fix(db): Make listGames options optional (#585)
-* [[f3c62a3](https://github.com/boardgameio/boardgame.io/commit/f3c62a3)] refactor(db): Make log handling explicit in StorageAPI.setState (#581)
+* [[618618e](https://github.com/boardgameio/boardgame.io/commit/618618e)] db: Make listGames options optional (#585)
+* [[f3c62a3](https://github.com/boardgameio/boardgame.io/commit/f3c62a3)] db: Make log handling explicit in StorageAPI.setState (#581)
 * [[c7dad76](https://github.com/boardgameio/boardgame.io/commit/c7dad76)] add the ability for plugins to define their own actions
 
 #### Bugfixes
@@ -253,7 +266,7 @@ or need help migrating.
 #### Bugfixes
 
 * [[aede3b6](https://github.com/boardgameio/boardgame.io/commit/aede3b6)] check that document exists before mounting debug panel
-* [[ec7f0ad](https://github.com/boardgameio/boardgame.io/commit/ec7f0ad)] fix(master): Remove credentials from action payloads after use (#556)
+* [[ec7f0ad](https://github.com/boardgameio/boardgame.io/commit/ec7f0ad)] master: Remove credentials from action payloads after use (#556)
 * [[a080ce3](https://github.com/boardgameio/boardgame.io/commit/a080ce3)] fix: #552 (#553)
 * [[79ebcc3](https://github.com/boardgameio/boardgame.io/commit/79ebcc3)] remove graceful-fs patch
 * [[9370366](https://github.com/boardgameio/boardgame.io/commit/9370366)] remove some unused Svelte props
@@ -271,7 +284,7 @@ or need help migrating.
 #### Bugfixes
 
 * [[66021f7](https://github.com/boardgameio/boardgame.io/commit/66021f7)] fix bug causing AI section to not activate
-* [[fd34df9](https://github.com/boardgameio/boardgame.io/commit/fd34df9)] fix(plugins): Fix PluginPlayer setup (#543)
+* [[fd34df9](https://github.com/boardgameio/boardgame.io/commit/fd34df9)] plugins: Fix PluginPlayer setup (#543)
 
 ## v0.37.0
 
@@ -299,13 +312,13 @@ const game = {
 * [[b974260](https://github.com/boardgameio/boardgame.io/commit/b974260)] Improve Lobby API: room instances (#542)
 * [[afdb79e](https://github.com/boardgameio/boardgame.io/commit/afdb79e)] refactor: Harmonise Master’s auth signature with authenticateCredentials (#539)
 * [[61a45ee](https://github.com/boardgameio/boardgame.io/commit/61a45ee)] rename optimistic to client and document it
-* [[4d33faa](https://github.com/boardgameio/boardgame.io/commit/4d33faa)] feat(server): Lobby server improvements (#532)
+* [[4d33faa](https://github.com/boardgameio/boardgame.io/commit/4d33faa)] server: Lobby server improvements (#532)
 * [[08404e2](https://github.com/boardgameio/boardgame.io/commit/08404e2)] change MCTS visualization to table format
 
 #### Bugfixes
 
-* [[2d931e9](https://github.com/boardgameio/boardgame.io/commit/2d931e9)] fix(server): Use namespaced ID to delete persisted game data (#531)
-* [[9ce176c](https://github.com/boardgameio/boardgame.io/commit/9ce176c)] refactor(client): Scope global CSS selectors in Debug panel (#527)
+* [[2d931e9](https://github.com/boardgameio/boardgame.io/commit/2d931e9)] server: Use namespaced ID to delete persisted game data (#531)
+* [[9ce176c](https://github.com/boardgameio/boardgame.io/commit/9ce176c)] client: Scope global CSS selectors in Debug panel (#527)
 * [[ef4f24d](https://github.com/boardgameio/boardgame.io/commit/ef4f24d)] Fix events in hooks triggered by a move (#525)
 * [[a2c64f8](https://github.com/boardgameio/boardgame.io/commit/a2c64f8)] increment turn before calling turn.onBegin
 
