@@ -226,8 +226,7 @@ function getCurrentPlayer(
 export function InitTurnOrderState(state: State, turn: TurnConfig) {
   let { G, ctx } = state;
   const pluginAPIs = plugin.GetAPIs(state);
-  // TODO: Decide if playerID should be included here, or if undefined is acceptable.
-  const context = { ...pluginAPIs, G, ctx, playerID: undefined };
+  const context = { ...pluginAPIs, G, ctx };
   const order = turn.order;
 
   let playOrder = [...new Array(ctx.numPlayers)].map((_, i) => i + '');
@@ -290,8 +289,7 @@ export function UpdateTurnOrderState(
     });
   } else {
     const pluginAPIs = plugin.GetAPIs(state);
-    // TODO: Decide if playerID should be included here, or if undefined is acceptable.
-    const context = { ...pluginAPIs, G, ctx, playerID: undefined };
+    const context = { ...pluginAPIs, G, ctx };
     const t = order.next(context);
     const type = typeof t;
     if (t !== undefined && type !== 'number') {

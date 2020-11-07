@@ -51,19 +51,19 @@
     order: TurnOrder.DEFAULT,
 
     // Called at the beginning of a turn.
-    onBegin: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+    onBegin: ({ G, ctx, events, random, ...plugins }) => G,
 
     // Called at the end of a turn.
-    onEnd: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+    onEnd: ({ G, ctx, events, random, ...plugins }) => G,
 
     // Ends the turn if this returns true.
     // Returning { next }, sets next playerID.
-    endIf: ({ G, ctx, playerID, events, random, ...plugins }) => (
+    endIf: ({ G, ctx, events, random, ...plugins }) => (
       true | { next: '0' }
     ),
 
     // Called at the end of each move.
-    onMove: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+    onMove: ({ G, ctx, events, random, ...plugins }) => G,
 
     // Ends the turn automatically after a number of moves.
     moveLimit: 1,
@@ -89,13 +89,13 @@
   phases: {
     A: {
       // Called at the beginning of a phase.
-      onBegin: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+      onBegin: ({ G, ctx, events, random, ...plugins }) => G,
 
       // Called at the end of a phase.
-      onEnd: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+      onEnd: ({ G, ctx, events, random, ...plugins }) => G,
 
       // Ends the phase if this returns true.
-      endIf: ({ G, ctx, playerID, events, random, ...plugins }) => true,
+      endIf: ({ G, ctx, events, random, ...plugins }) => true,
 
       // Overrides `moves` for the duration of this phase.
       moves: { ... },
@@ -114,11 +114,11 @@
 
   // Ends the game if this returns anything.
   // The return value is available in `ctx.gameover`.
-  endIf: ({ G, ctx, playerID, events, random, ...plugins }) => obj,
+  endIf: ({ G, ctx, events, random, ...plugins }) => obj,
 
   // Called at the end of the game.
   // `ctx.gameover` is available at this point.
-  onEnd: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+  onEnd: ({ G, ctx, events, random, ...plugins }) => G,
 
   // Disable undo feature for all the moves in the game
   disableUndo: true,

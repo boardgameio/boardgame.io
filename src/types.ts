@@ -139,12 +139,11 @@ export type FnContext<
   DefaultPluginAPIs & {
     G: G;
     ctx: Ctx;
-    playerID: PlayerID;
   };
 
 type SerializableAny = Misc.JSON.Value;
 type MoveFn<G extends any = any, PluginAPIs extends {} = {}> = (
-  context: FnContext<G, PluginAPIs>,
+  context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
   ...args: SerializableAny[]
 ) => void | G | typeof INVALID_MOVE;
 
@@ -235,7 +234,7 @@ export interface Game<
   disableUndo?: boolean;
   seed?: string | number;
   setup?: (
-    context: Omit<FnContext<any, PluginAPIs>, 'G' | 'playerID'>,
+    context: Omit<FnContext<any, PluginAPIs>, 'G'>,
     setupData?: SetupData
   ) => G;
   validateSetupData?: (

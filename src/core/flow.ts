@@ -81,12 +81,10 @@ export function Flow({
     const withPlugins = plugin.FnWrap(fn, plugins);
     return (state: State) => {
       const pluginAPIs = plugin.GetAPIs(state);
-      // TODO: what should happend with playerID here?
       return withPlugins({
         ...pluginAPIs,
         G: state.G,
         ctx: state.ctx,
-        playerID: undefined,
       });
     };
   };
@@ -94,12 +92,10 @@ export function Flow({
   const TriggerWrapper = (endIf: (context: FnContext) => any) => {
     return (state: State) => {
       const pluginAPIs = plugin.GetAPIs(state);
-      // TODO: what should happend with playerID here?
       return endIf({
         ...pluginAPIs,
         G: state.G,
         ctx: state.ctx,
-        playerID: undefined,
       });
     };
   };
