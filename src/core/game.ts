@@ -107,6 +107,6 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
   };
 }
 
-function IsLongFormMove(move: Move): move is LongFormMove {
+export function IsLongFormMove(move: Move): move is LongFormMove {
   return move instanceof Object && (move as LongFormMove).move !== undefined;
 }

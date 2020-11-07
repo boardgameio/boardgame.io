@@ -22,11 +22,19 @@
 
     // long-form move.
     B: {
+      // The move function.
       move: ({ G, ctx, playerID, events, random, ...plugins }, ...args) => {},
-      undoable: false,  // prevents undoing the move.
-      redact: true,     // prevents the move arguments from showing up in the log.
-      client: false,    // prevents the move from running on the client.
-      noLimit: true,    // prevents the move counting towards a player’s number of moves.
+      // Prevents undoing the move.
+      undoable: false,
+      // Prevents the move arguments from showing up in the log.
+      redact: true,
+      // Prevents the move from running on the client.
+      client: false,
+      // Prevents the move counting towards a player’s number of moves.
+      noLimit: true,
+      // Processes the move even if it was dispatched from an out-of-date client.
+      // This can be risky; check the validity of the state update in your move.
+      ignoreStaleStateID: true,
     },
   },
 

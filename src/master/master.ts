@@ -8,7 +8,7 @@
 
 import { InitializeGame } from '../core/initialize';
 import { CreateGameReducer } from '../core/reducer';
-import { ProcessGameConfig } from '../core/game';
+import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
@@ -242,7 +242,10 @@ export class Master {
     }
 
     if (state.ctx.gameover !== undefined) {
-      logging.error(`game over - matchID=[${key}]`);
+      logging.error(
+        `game over - matchID=[${key}] - playerID=[${playerID}]` +
+          ` - action[${action.payload.type}]`
+      );
       return;
     }
 
@@ -273,24 +276,37 @@ export class Master {
 
     // Check whether the player is active.
     if (!this.game.flow.isPlayerActive(state.G, state.ctx, playerID)) {
-      logging.error(`player not active - playerID=[${playerID}]`);
-      return;
-    }
-
-    // Check whether the player is allowed to make the move.
-    if (
-      action.type == MAKE_MOVE &&
-      !this.game.flow.getMove(state.ctx, action.payload.type, playerID)
-    ) {
       logging.error(
-        `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`
+        `player not active - playerID=[${playerID}]` +
+          ` - action[${action.payload.type}]`
       );
       return;
     }
 
-    if (state._stateID !== stateID) {
+    // Get move for further checkings
+    const move =
+      action.type == MAKE_MOVE
+        ? this.game.flow.getMove(state.ctx, action.payload.type, playerID)
+        : null;
+
+    // Check whether the player is allowed to make the move.
+    if (action.type == MAKE_MOVE && !move) {
       logging.error(
-        `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
+        `move not processed - canPlayerMakeMove=false - playerID=[${playerID}]` +
+          ` - action[${action.payload.type}]`
+      );
+      return;
+    }
+
+    // Check if action's stateID is different than store's stateID
+    // and if move does not have ignoreStaleStateID truthy.
+    if (
+      state._stateID !== stateID &&
+      !(move && IsLongFormMove(move) && move.ignoreStaleStateID)
+    ) {
+      logging.error(
+        `invalid stateID, was=[${stateID}], expected=[${state._stateID}]` +
+          ` - playerID=[${playerID}] - action[${action.payload.type}]`
       );
       return;
     }

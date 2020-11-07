@@ -154,6 +154,7 @@ export interface LongFormMove<G extends any = any, PluginAPIs extends {} = {}> {
   noLimit?: boolean;
   client?: boolean;
   undoable?: boolean | ((G: G, ctx: Ctx) => boolean);
+  ignoreStaleStateID?: boolean;
 }
 
 export type Move<G extends any = any, PluginAPIs extends {} = {}> =
