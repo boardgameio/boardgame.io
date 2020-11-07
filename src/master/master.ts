@@ -353,9 +353,7 @@ export class Master {
 
     if (IsSynchronous(this.storageAPI)) {
       this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
-      if (newMetadata) {
-        this.storageAPI.setMetadata(key, newMetadata);
-      }
+      if (newMetadata) this.storageAPI.setMetadata(key, newMetadata);
     } else {
       const writes = [
         this.storageAPI.setState(key, stateWithoutDeltalog, deltalog),
