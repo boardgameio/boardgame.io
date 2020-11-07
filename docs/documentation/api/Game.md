@@ -18,15 +18,23 @@
 
   moves: {
     // short-form move.
-    A: (G, ctx) => {},
+    A: (G, ctx, ...args) => {},
 
     // long-form move.
     B: {
-      move: (G, ctx) => {},
-      undoable: false,  // prevents undoing the move.
-      redact: true,     // prevents the move arguments from showing up in the log.
-      client: false,    // prevents the move from running on the client.
-      noLimit: true,    // prevents the move counting towards a player’s number of moves.
+      // The move function.
+      move: (G, ctx, ...args) => {},
+      // Prevents undoing the move.
+      undoable: false,
+      // Prevents the move arguments from showing up in the log.
+      redact: true,
+      // Prevents the move from running on the client.
+      client: false,
+      // Prevents the move counting towards a player’s number of moves.
+      noLimit: true,
+      // Processes the move even if it was dispatched from an out-of-date client.
+      // This can be risky; check the validity of the state update in your move.
+      ignoreStaleStateID: true,
     },
   },
 
@@ -108,7 +116,7 @@
   // Called at the end of the game.
   // `ctx.gameover` is available at this point.
   onEnd: (G, ctx) => G,
-  
+
   // Disable undo feature for all the moves in the game
   disableUndo: true,
 }
