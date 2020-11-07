@@ -8,7 +8,7 @@
 
 import IO from 'koa-socket-2';
 import { SocketIO, SocketOpts } from './socketio';
-import { InMemory, FlatFile } from '../db';
+import { InMemory } from '../db';
 import { createMetadata } from '../util';
 import { ProcessGameConfig } from '../../core/game';
 import * as ActionCreators from '../../core/action-creators';
