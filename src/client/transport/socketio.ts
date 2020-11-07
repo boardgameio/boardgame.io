@@ -37,7 +37,7 @@ type SocketIOTransportOpts = TransportOpts &
  */
 export class SocketIOTransport extends Transport {
   server: string;
-  socket;
+  socket: SocketIOClient.Socket;
   socketOpts;
   callback: () => void;
   matchDataCallback: MetadataCallback;

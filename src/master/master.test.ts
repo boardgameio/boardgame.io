@@ -17,9 +17,10 @@ import {
   isActionFromAuthenticPlayer,
 } from './master';
 import { error } from '../core/logger';
-import { Server, State } from '../types';
+import { Server, State, Ctx, LogEntry } from '../types';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
+import { PlayerView } from '../core/player-view';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -30,9 +31,54 @@ beforeEach(() => {
   dateMock.clear();
 });
 
-class InMemoryAsync extends InMemory {
-  type() {
-    return StorageAPI.Type.ASYNC;
+class InMemoryAsync extends StorageAPI.Async {
+  db: InMemory;
+
+  constructor() {
+    super();
+    this.db = new InMemory();
+  }
+
+  async connect() {
+    await this.sleep();
+  }
+
+  private sleep(): Promise<void> {
+    const interval = Math.round(Math.random() * 50 + 50);
+    return new Promise(resolve => void setTimeout(resolve, interval));
+  }
+
+  async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
+    await this.sleep();
+    this.db.createMatch(id, opts);
+  }
+
+  async setMetadata(matchID: string, metadata: Server.MatchData) {
+    await this.sleep();
+    this.db.setMetadata(matchID, metadata);
+  }
+
+  async setState(matchID: string, state: State, deltalog?: LogEntry[]) {
+    await this.sleep();
+    this.db.setState(matchID, state, deltalog);
+  }
+
+  async fetch<O extends StorageAPI.FetchOpts>(
+    matchID: string,
+    opts: O
+  ): Promise<StorageAPI.FetchResult<O>> {
+    await this.sleep();
+    return this.db.fetch(matchID, opts);
+  }
+
+  async wipe(matchID: string) {
+    await this.sleep();
+    this.db.wipe(matchID);
+  }
+
+  async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
+    await this.sleep();
+    return this.db.listMatches(opts);
   }
 }
 
@@ -178,7 +224,7 @@ describe('update', () => {
     await master.onUpdate(action, 100, 'matchID', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `invalid stateID, was=[100], expected=[1]`
+      `invalid stateID, was=[100], expected=[1] - playerID=[1] - action[endTurn]`
     );
   });
 
@@ -186,20 +232,114 @@ describe('update', () => {
     await master.onUpdate(action, 1, 'matchID', '100');
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '100');
     expect(sendAll).not.toHaveBeenCalled();
-    expect(error).toHaveBeenCalledWith(`player not active - playerID=[100]`);
+    expect(error).toHaveBeenCalledWith(
+      `player not active - playerID=[100] - action[move]`
+    );
   });
 
   test('invalid move', async () => {
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `move not processed - canPlayerMakeMove=false, playerID=[1]`
+      `move not processed - canPlayerMakeMove=false - playerID=[1] - action[move]`
     );
   });
 
   test('valid matchID / stateID / playerID', async () => {
     await master.onUpdate(action, 1, 'matchID', '1');
     expect(sendAll).toHaveBeenCalled();
+  });
+
+  test('allow execution of moves with ignoreStaleStateID truthy', async () => {
+    const game = {
+      setup: () => {
+        const G = {
+          players: {
+            '0': {
+              cards: ['card3'],
+            },
+            '1': {
+              cards: [],
+            },
+          },
+          cards: ['card0', 'card1', 'card2'],
+          discardedCards: [],
+        };
+        return G;
+      },
+      playerView: PlayerView.STRIP_SECRETS,
+      turn: {
+        activePlayers: { currentPlayer: { stage: 'A' } },
+        stages: {
+          A: {
+            moves: {
+              A: (G, ctx: Ctx) => {
+                const card = G.players[ctx.playerID].cards.shift();
+                G.discardedCards.push(card);
+              },
+              B: {
+                move: (G, ctx: Ctx) => {
+                  const card = G.cards.pop();
+                  G.players[ctx.playerID].cards.push(card);
+                },
+                ignoreStaleStateID: true,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const send = jest.fn();
+    const master = new Master(
+      game,
+      new InMemory(),
+      TransportAPI(send, sendAll)
+    );
+
+    const setActivePlayers = ActionCreators.gameEvent(
+      'setActivePlayers',
+      [{ all: 'A' }],
+      '0'
+    );
+    const actionA = ActionCreators.makeMove('A', null, '0');
+    const actionB = ActionCreators.makeMove('B', null, '1');
+    const actionC = ActionCreators.makeMove('B', null, '0');
+
+    // test: simultaneous moves
+    await master.onSync('matchID', '0', 2);
+    await master.onUpdate(actionA, 0, 'matchID', '0');
+    await master.onUpdate(setActivePlayers, 1, 'matchID', '0');
+    await Promise.all([
+      master.onUpdate(actionB, 2, 'matchID', '1'),
+      master.onUpdate(actionC, 2, 'matchID', '0'),
+    ]);
+    await Promise.all([
+      master.onSync('matchID', '0', 2),
+      master.onSync('matchID', '1', 2),
+    ]);
+
+    const G_player0 = sendAllReturn('0').args[1].G;
+    const G_player1 = sendAllReturn('1').args[1].G;
+
+    expect(G_player0).toMatchObject({
+      players: {
+        '0': {
+          cards: ['card1'],
+        },
+      },
+      cards: ['card0'],
+      discardedCards: ['card3'],
+    });
+    expect(G_player1).toMatchObject({
+      players: {
+        '1': {
+          cards: ['card2'],
+        },
+      },
+      cards: ['card0'],
+      discardedCards: ['card3'],
+    });
   });
 
   describe('undo / redo', () => {
@@ -245,7 +385,9 @@ describe('update', () => {
     await master.onUpdate(event, 5, 'matchID', '0');
     event = ActionCreators.gameEvent('endTurn');
     await master.onUpdate(event, 6, 'matchID', '0');
-    expect(error).toHaveBeenCalledWith(`game over - matchID=[matchID]`);
+    expect(error).toHaveBeenCalledWith(
+      `game over - matchID=[matchID] - playerID=[0] - action[endTurn]`
+    );
   });
 
   test('writes gameover to metadata', async () => {
@@ -279,14 +421,14 @@ describe('update', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata(id, dbMetadata);
+    await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
     await masterWithMetadata.onUpdate(event, 0, id, '0');
-    const { metadata } = db.fetch(id, { metadata: true });
+    const { metadata } = await db.fetch(id, { metadata: true });
     expect(metadata.gameover).toEqual(gameOverArg);
   });
 
@@ -300,7 +442,7 @@ describe('update', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    db.setMetadata(id, dbMetadata);
+    await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
     await masterWithMetadata.onSync(id, '0', 2);
 
@@ -308,7 +450,7 @@ describe('update', () => {
     dateMock.advanceTo(updatedAt);
     const event = ActionCreators.gameEvent('endTurn', null, '0');
     await masterWithMetadata.onUpdate(event, 0, id, '0');
-    const { metadata } = db.fetch(id, { metadata: true });
+    const { metadata } = await db.fetch(id, { metadata: true });
     expect(metadata.updatedAt).toEqual(updatedAt.getTime());
   });
 
@@ -337,13 +479,13 @@ describe('update', () => {
     // Store state manually to bypass automatic metadata initialization on sync.
     let state = InitializeGame({ game });
     expect(state.ctx.turn).toBe(1);
-    db.setState(id, state);
+    await db.setState(id, state);
     // Dispatch update to end the turn.
     const event = ActionCreators.gameEvent('endTurn', null, '0');
     await masterWithoutMetadata.onUpdate(event, 0, id, '0');
     // Confirm the turn ended.
     let metadata: undefined | Server.MatchData;
-    ({ state, metadata } = db.fetch(id, { state: true, metadata: true }));
+    ({ state, metadata } = await db.fetch(id, { state: true, metadata: true }));
     expect(state.ctx.turn).toBe(2);
     expect(metadata).toBeUndefined();
   });
@@ -430,7 +572,10 @@ describe('connectionChange', () => {
       asyncDb,
       TransportAPI(send, sendAll)
     );
-    asyncDb.createMatch('matchID', { metadata, initialState: {} as State });
+    await asyncDb.createMatch('matchID', {
+      metadata,
+      initialState: {} as State,
+    });
 
     await masterWithAsyncDb.onConnectionChange('matchID', '0', true);
 
