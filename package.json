@@ -17,7 +17,7 @@
     "examples": "npm run start",
     "examples:install": "node scripts/install-examples.js",
     "pretest": "npm run lint",
-    "test": "cross-env NODE_ENV=test jest --no-cache",
+    "test": "cross-env NODE_ENV=test jest --no-cache --forceExit",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:coverage": "npm test -- --coverage --collectCoverageFrom=\"src/**\" --forceExit",
     "test:coveralls": "coveralls < coverage/lcov.info",
