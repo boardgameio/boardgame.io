@@ -34,15 +34,11 @@ class InMemoryAsync extends StorageAPI.Async {
     await this.sleep();
   }
 
-  private sleep(interval: number = 50): Promise<void> {
+  private sleep(): Promise<void> {
+    const interval = Math.round(Math.random() * 50 + 50);
     return new Promise(resolve => void setTimeout(resolve, interval));
   }
 
-  /**
-   * @param id
-   * @param opts
-   * @override
-   */
   async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
     await this.sleep();
     this.db.createMatch(id, opts);
@@ -71,10 +67,6 @@ class InMemoryAsync extends StorageAPI.Async {
     this.db.wipe(matchID);
   }
 
-  /**
-   * @param opts
-   * @override
-   */
   async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
     await this.sleep();
     return this.db.listMatches(opts);
