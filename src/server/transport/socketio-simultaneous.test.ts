@@ -15,7 +15,7 @@ import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
 import { _ClientImpl } from '../../client/client';
-import { Ctx, LogEntry, Server, State, StorageAPI } from '../../types';
+import { Game, LogEntry, Server, State, StorageAPI } from '../../types';
 
 type SocketIOTestAdapterOpts = SocketOpts & {
   clientInfo?: Map<any, any>;
@@ -150,23 +150,20 @@ jest.mock('koa-socket-2', () => {
   return MockIO;
 });
 
-const game = {
+const game: Game = {
   name: 'test',
-  setup: ctx => {
-    const G = {
-      players: {
-        '0': {
-          cards: ['card3'],
-        },
-        '1': {
-          cards: [],
-        },
+  setup: () => ({
+    players: {
+      '0': {
+        cards: ['card3'],
       },
-      cards: ['card0', 'card1', 'card2'],
-      discardedCards: [],
-    };
-    return G;
-  },
+      '1': {
+        cards: [],
+      },
+    },
+    cards: ['card0', 'card1', 'card2'],
+    discardedCards: [],
+  }),
   playerView: PlayerView.STRIP_SECRETS,
   turn: {
     activePlayers: { currentPlayer: { stage: 'A' } },
@@ -175,17 +172,17 @@ const game = {
         moves: {
           A: {
             client: false,
-            move: (G, ctx: Ctx) => {
-              const card = G.players[ctx.playerID].cards.shift();
+            move: ({ G, playerID }) => {
+              const card = G.players[playerID].cards.shift();
               G.discardedCards.push(card);
             },
           },
           B: {
             client: false,
             ignoreStaleStateID: true,
-            move: (G, ctx: Ctx) => {
+            move: ({ G, playerID }) => {
               const card = G.cards.pop();
-              G.players[ctx.playerID].cards.push(card);
+              G.players[playerID].cards.push(card);
             },
           },
         },
