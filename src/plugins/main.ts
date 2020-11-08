@@ -16,7 +16,6 @@ import {
   State,
   Game,
   Plugin,
-  Ctx,
   ActionShape,
   PlayerID,
 } from '../types';
