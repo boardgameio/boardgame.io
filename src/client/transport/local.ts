@@ -218,14 +218,21 @@ export class LocalTransport extends Transport {
   subscribeMatchData() {}
 
   /**
+   * Dispatches a reset action, then requests a fresh sync from the master.
+   */
+  private resetAndSync() {
+    const action = ActionCreators.reset(null);
+    this.store.dispatch(action);
+    this.connect();
+  }
+
+  /**
    * Updates the game id.
    * @param {string} id - The new game id.
    */
   updateMatchID(id: string) {
     this.matchID = id;
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-    this.connect();
+    this.resetAndSync();
   }
 
   /**
@@ -234,9 +241,7 @@ export class LocalTransport extends Transport {
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-    this.connect();
+    this.resetAndSync();
   }
 }
 
