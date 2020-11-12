@@ -180,12 +180,9 @@ export class SocketIOTransport extends Transport {
   }
 
   /**
-   * Updates the game id.
-   * @param {string} id - The new game id.
+   * Dispatches a reset action, then requests a fresh sync from the server.
    */
-  updateMatchID(id: string) {
-    this.matchID = id;
-
+  private resetAndSync() {
     const action = ActionCreators.reset(null);
     this.store.dispatch(action);
 
@@ -195,18 +192,21 @@ export class SocketIOTransport extends Transport {
   }
 
   /**
+   * Updates the game id.
+   * @param {string} id - The new game id.
+   */
+  updateMatchID(id: string) {
+    this.matchID = id;
+    this.resetAndSync();
+  }
+
+  /**
    * Updates the player associated with this client.
    * @param {string} id - The new player id.
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
-
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-
-    if (this.socket) {
-      this.socket.emit('sync', this.matchID, this.playerID, this.numPlayers);
-    }
+    this.resetAndSync();
   }
 }
 
