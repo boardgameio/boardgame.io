@@ -7,6 +7,13 @@ export enum Type {
 }
 
 /**
+ * Type guard that checks if a storage implementation is synchronous.
+ */
+export function isSynchronous(storageAPI: Sync | Async): storageAPI is Sync {
+  return storageAPI.type() === Type.SYNC;
+}
+
+/**
  * Indicates which fields the fetch operation should return.
  */
 export interface FetchOpts {

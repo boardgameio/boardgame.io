@@ -44,12 +44,6 @@ const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
     return filteredData;
   });
 
-function IsSynchronous(
-  storageAPI: StorageAPI.Sync | StorageAPI.Async
-): storageAPI is StorageAPI.Sync {
-  return storageAPI.type() === StorageAPI.Type.SYNC;
-}
-
 /**
  * Redact the log.
  *
@@ -207,7 +201,7 @@ export class Master {
     let isActionAuthentic;
     let metadata: Server.MatchData | undefined;
     const credentials = credAction.payload.credentials;
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
       const playerMetadata = getPlayerMetadata(metadata, playerID);
       isActionAuthentic = this.shouldAuth(metadata)
@@ -230,7 +224,7 @@ export class Master {
     const key = matchID;
 
     let state: State;
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ state } = this.storageAPI.fetch(key, { state: true }));
     } else {
       ({ state } = await this.storageAPI.fetch(key, { state: true }));
@@ -351,7 +345,7 @@ export class Master {
       }
     }
 
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
       if (newMetadata) this.storageAPI.setMetadata(key, newMetadata);
     } else {
@@ -381,7 +375,7 @@ export class Master {
 
     let fetchResult: StorageAPI.FetchResult<typeof fetchOpts>;
 
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       fetchResult = this.storageAPI.fetch(key, fetchOpts);
     } else {
       fetchResult = await this.storageAPI.fetch(key, fetchOpts);
@@ -401,7 +395,7 @@ export class Master {
 
       this.subscribeCallback({ state, matchID });
 
-      if (IsSynchronous(this.storageAPI)) {
+      if (StorageAPI.isSynchronous(this.storageAPI)) {
         this.storageAPI.createMatch(key, { initialState, metadata });
       } else {
         await this.storageAPI.createMatch(key, { initialState, metadata });
@@ -448,7 +442,7 @@ export class Master {
     const key = matchID;
 
     let metadata: Server.MatchData | undefined;
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
     } else {
       ({ metadata } = await this.storageAPI.fetch(matchID, {
@@ -477,7 +471,7 @@ export class Master {
       args: [matchID, filteredMetadata],
     }));
 
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       this.storageAPI.setMetadata(key, metadata);
     } else {
       await this.storageAPI.setMetadata(key, metadata);
