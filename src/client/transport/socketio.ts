@@ -58,11 +58,12 @@ export class SocketIOTransport extends Transport {
     store,
     matchID,
     playerID,
+    credentials,
     gameName,
     numPlayers,
     server,
   }: SocketIOTransportOpts = {}) {
-    super({ store, gameName, playerID, matchID, numPlayers });
+    super({ store, gameName, playerID, matchID, credentials, numPlayers });
 
     this.server = server;
     this.socket = socket;
@@ -206,6 +207,15 @@ export class SocketIOTransport extends Transport {
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
+    this.resetAndSync();
+  }
+
+  /**
+   * Updates the credentials associated with this client.
+   * @param {string|undefined} credentials - The new credentials to use.
+   */
+  updateCredentials(credentials?: string) {
+    this.credentials = credentials;
     this.resetAndSync();
   }
 }

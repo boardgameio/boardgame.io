@@ -149,10 +149,11 @@ export class LocalTransport extends Transport {
     store,
     matchID,
     playerID,
+    credentials,
     gameName,
     numPlayers,
   }: LocalTransportOpts) {
-    super({ store, gameName, playerID, matchID, numPlayers });
+    super({ store, gameName, playerID, matchID, credentials, numPlayers });
     this.master = master;
     this.isConnected = true;
   }
@@ -241,6 +242,15 @@ export class LocalTransport extends Transport {
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
+    this.resetAndSync();
+  }
+
+  /**
+   * Updates the credentials associated with this client.
+   * @param {string|undefined} credentials - The new credentials to use.
+   */
+  updateCredentials(credentials?: string) {
+    this.credentials = credentials;
     this.resetAndSync();
   }
 }
