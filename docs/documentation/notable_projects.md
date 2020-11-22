@@ -37,3 +37,5 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 - [Splendor](http://bestboards.ir) - A minimal splendor game you can play with up to 4 players.
 
 - [Steel Civilizations](https://play.google.com/store/apps/details?id=com.hydra.steelcivs) - Turn-based mobile strategy game for Android with real-time online multiplayer ranking ladder system.
+
+- [Yatzy](https://github.com/pjohannessen/yatzy) - [play](https://www.lonesomecrowdedweb.com/yatzy/) - [tutorial](https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/) - A 1-4 player dice game played locally.
