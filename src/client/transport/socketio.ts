@@ -22,7 +22,7 @@ import {
 
 interface SocketIOOpts {
   server?: string;
-  socketOpts?;
+  socketOpts?: SocketIOClient.ConnectOpts;
 }
 
 type SocketIOTransportOpts = TransportOpts &
@@ -38,7 +38,7 @@ type SocketIOTransportOpts = TransportOpts &
 export class SocketIOTransport extends Transport {
   server: string;
   socket: SocketIOClient.Socket;
-  socketOpts;
+  socketOpts: SocketIOClient.ConnectOpts;
   callback: () => void;
   matchDataCallback: MetadataCallback;
 
