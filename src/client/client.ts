@@ -335,6 +335,7 @@ export class _ClientImpl<G extends any = any> {
         store: this.store,
         matchID,
         playerID,
+        credentials,
         gameName: this.game.name,
         numPlayers,
       });
