@@ -12,6 +12,8 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [boardgame.io-angular](https://github.com/turn-based/boardgame.io-angular) - [demo](https://turn-based-209306.firebaseapp.com/) - Unofficial Angular client for boardgame.io.
 
+- [Can't Stop!](https://github.com/simlmx/cantstop) - [play](https://cantstop.fun) - The classic "push your luck" dice game.
+
 - [Cardman Multiplayer](https://github.com/VengelStudio/cardman-multiplayer) - [play](http://cardman-multiplayer.herokuapp.com) - A cross between Hangman and a card game.
 
 - [Elevation of Privilege](https://github.com/dehydr8/elevation-of-privilege) - [play](https://elevation-of-privilege.herokuapp.com/) - An online multiplayer version of the threat modeling card game.
