@@ -95,7 +95,7 @@ export class LocalMaster extends Master {
       },
     };
     const storage = persist ? new LocalStorage(storageKey) : new InMemory();
-    super(game, storage, transportAPI, false);
+    super(game, storage, transportAPI);
 
     this.connect = (matchID, playerID, callback) => {
       clientCallbacks[playerID] = callback;

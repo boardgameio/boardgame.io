@@ -24,16 +24,8 @@ import {
   PlayerID,
 } from '../types';
 import { createMetadata } from '../server/util';
+import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
-
-export const getPlayerMetadata = (
-  matchData: Server.MatchData,
-  playerID: PlayerID
-) => {
-  if (matchData && matchData.players) {
-    return matchData.players[playerID];
-  }
-};
 
 /**
  * Filter match data to get a player metadata object with credentials stripped.
@@ -82,32 +74,6 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
 }
 
 /**
- * Verifies that the match has metadata and is using credentials.
- */
-export const doesMatchRequireAuthentication = (
-  matchData?: Server.MatchData
-) => {
-  if (!matchData) return false;
-  const { players } = matchData as Server.MatchData;
-  const hasCredentials = Object.keys(players).some(key => {
-    return !!(players[key] && players[key].credentials);
-  });
-  return hasCredentials;
-};
-
-/**
- * Verifies that the move came from a player with the correct credentials.
- */
-export const isActionFromAuthenticPlayer = (
-  actionCredentials: string,
-  playerMetadata?: Server.PlayerMetadata
-) => {
-  if (!actionCredentials) return false;
-  if (!playerMetadata) return false;
-  return actionCredentials === playerMetadata.credentials;
-};
-
-/**
  * Remove player credentials from action payload
  */
 const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
@@ -115,11 +81,6 @@ const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
   const { credentials, ...payload } = action.payload;
   return { ...action, payload };
 };
-
-export type AuthFn = (
-  actionCredentials: string,
-  playerMetadata: Server.PlayerMetadata
-) => boolean | Promise<boolean>;
 
 type CallbackFn = (arg: {
   state: State;
@@ -158,29 +119,19 @@ export class Master {
   storageAPI: StorageAPI.Sync | StorageAPI.Async;
   transportAPI: TransportAPI;
   subscribeCallback: CallbackFn;
-  auth: null | AuthFn;
-  shouldAuth: typeof doesMatchRequireAuthentication;
+  auth: Auth;
 
   constructor(
     game: Game,
     storageAPI: StorageAPI.Sync | StorageAPI.Async,
     transportAPI: TransportAPI,
-    auth?: AuthFn | boolean
+    auth = new Auth({ authenticateCredentials: () => true })
   ) {
     this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
-    this.auth = null;
     this.subscribeCallback = () => {};
-    this.shouldAuth = () => false;
-
-    if (auth === true) {
-      this.auth = isActionFromAuthenticPlayer;
-      this.shouldAuth = doesMatchRequireAuthentication;
-    } else if (typeof auth === 'function') {
-      this.auth = auth;
-      this.shouldAuth = () => true;
-    }
+    this.auth = auth;
   }
 
   subscribe(fn: CallbackFn) {
@@ -200,22 +151,20 @@ export class Master {
   ) {
     let isActionAuthentic;
     let metadata: Server.MatchData | undefined;
-    const credentials = credAction.payload.credentials;
+    const { credentials } = credAction.payload;
+    const authenticate = (metadata: Server.MatchData | undefined) =>
+      this.auth.authenticateCredentials({ playerID, credentials, metadata });
+
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
-      const playerMetadata = getPlayerMetadata(metadata, playerID);
-      isActionAuthentic = this.shouldAuth(metadata)
-        ? this.auth(credentials, playerMetadata)
-        : true;
+      isActionAuthentic = authenticate(metadata);
     } else {
       ({ metadata } = await this.storageAPI.fetch(matchID, {
         metadata: true,
       }));
-      const playerMetadata = getPlayerMetadata(metadata, playerID);
-      isActionAuthentic = this.shouldAuth(metadata)
-        ? await this.auth(credentials, playerMetadata)
-        : true;
+      isActionAuthentic = await authenticate(metadata);
     }
+
     if (!isActionAuthentic) {
       return { error: 'unauthorized action' };
     }
