@@ -127,7 +127,9 @@ export function Server({
         configureApp(app, router);
       } else {
         // Run API in a separate Koa app.
-        const api = new Koa();
+        const api: ServerTypes.App = new Koa();
+        api.context.db = db;
+        api.context.auth = auth;
         configureApp(api, router);
         await new Promise(resolve => {
           apiServer = api.listen(lobbyConfig.apiPort, resolve);
