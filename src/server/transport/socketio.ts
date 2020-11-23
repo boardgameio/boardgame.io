@@ -7,7 +7,7 @@
  */
 
 import IO from 'koa-socket-2';
-import { Socket, ServerOptions as SocketOptions } from 'socket.io';
+import IOTypes from 'socket.io';
 import { ServerOptions as HttpsOptions } from 'https';
 import PQueue from 'p-queue';
 import {
@@ -26,7 +26,7 @@ const PING_INTERVAL = 10 * 1e3;
  */
 export function TransportAPI(
   matchID: string,
-  socket: Socket,
+  socket: IOTypes.Socket,
   clientInfo: SocketIO['clientInfo'],
   roomInfo: SocketIO['roomInfo']
 ): MasterTransport {
@@ -64,14 +64,14 @@ export function TransportAPI(
 export interface SocketOpts {
   auth?: boolean | AuthFn;
   https?: HttpsOptions;
-  socketOpts?: SocketOptions;
+  socketOpts?: IOTypes.ServerOptions;
   socketAdapter?: any;
 }
 
 interface Client {
   matchID: string;
   playerID: string;
-  socket: Socket;
+  socket: IOTypes.Socket;
 }
 
 /**
@@ -84,7 +84,7 @@ export class SocketIO {
   private auth: boolean | AuthFn;
   private https: HttpsOptions;
   private socketAdapter: any;
-  private socketOpts: SocketOptions;
+  private socketOpts: IOTypes.ServerOptions;
 
   constructor({
     auth = true,
