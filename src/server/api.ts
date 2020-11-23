@@ -86,10 +86,10 @@ export const createRouter = ({
   uuid?: () => string;
   generateCredentials?: Server.GenerateCredentials;
   db: StorageAPI.Sync | StorageAPI.Async;
-}): Router => {
+}): Router<any, Server.AppCtx> => {
   uuid = uuid || shortid;
   generateCredentials = generateCredentials || uuid;
-  const router = new Router();
+  const router = new Router<any, Server.AppCtx>();
 
   /**
    * List available games.
@@ -442,7 +442,10 @@ export const createRouter = ({
   return router;
 };
 
-export const configureApp = (app: Koa, router: Router): void => {
+export const configureApp = (
+  app: Server.App,
+  router: Router<any, Server.AppCtx>
+): void => {
   app.use(cors());
 
   // If API_SECRET is set, then require that requests set an

@@ -87,7 +87,7 @@ export function Server({
   https,
   uuid,
 }: ServerOpts) {
-  const app = new Koa();
+  const app: ServerTypes.App = new Koa();
 
   games = games.map(ProcessGameConfig);
 
