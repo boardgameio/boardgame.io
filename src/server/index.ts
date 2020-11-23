@@ -12,6 +12,7 @@ import { createRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
 import { ProcessGameConfig } from '../core/game';
 import * as logger from '../core/logger';
+import { Auth } from './auth';
 import { SocketIO } from './transport/socketio';
 import { Server as ServerTypes, Game, StorageAPI } from '../types';
 
@@ -82,10 +83,10 @@ export function Server({
   games,
   db,
   transport,
-  authenticateCredentials,
-  generateCredentials,
   https,
   uuid,
+  generateCredentials = uuid,
+  authenticateCredentials,
 }: ServerOpts) {
   const app: ServerTypes.App = new Koa();
 
@@ -96,23 +97,20 @@ export function Server({
   }
   app.context.db = db;
 
+  const auth = new Auth({ authenticateCredentials, generateCredentials });
+  app.context.auth = auth;
+
   if (transport === undefined) {
-    const auth =
-      typeof authenticateCredentials === 'function'
-        ? authenticateCredentials
-        : true;
-    transport = new SocketIO({
-      auth,
-      https,
-    });
+    transport = new SocketIO({ https });
   }
   transport.init(app, games);
 
-  const router = createRouter({ db, games, uuid, generateCredentials });
+  const router = createRouter({ db, games, uuid, auth });
 
   return {
     app,
     db,
+    auth,
     router,
     transport,
 
