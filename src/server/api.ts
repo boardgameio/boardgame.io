@@ -13,6 +13,7 @@ import { generate as shortid } from 'shortid';
 import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
+import { Auth } from './auth';
 import * as StorageAPI from './db/base';
 import { Server, LobbyAPI, Game } from '../types';
 import { createMetadata } from './util';
@@ -78,17 +79,15 @@ const createClientMatchData = (
 
 export const createRouter = ({
   db,
+  auth,
   games,
-  uuid,
-  generateCredentials,
+  uuid = shortid,
 }: {
+  auth: Auth;
   games: Game[];
   uuid?: () => string;
-  generateCredentials?: Server.GenerateCredentials;
   db: StorageAPI.Sync | StorageAPI.Async;
 }): Router<any, Server.AppCtx> => {
-  uuid = uuid || shortid;
-  generateCredentials = generateCredentials || uuid;
   const router = new Router<any, Server.AppCtx>();
 
   /**
@@ -257,7 +256,7 @@ export const createRouter = ({
       metadata.players[playerID].data = data;
     }
     metadata.players[playerID].name = playerName;
-    const playerCredentials = await generateCredentials(ctx);
+    const playerCredentials = await auth.generateCredentials(ctx);
     metadata.players[playerID].credentials = playerCredentials;
 
     await db.setMetadata(matchID, metadata);
@@ -292,7 +291,12 @@ export const createRouter = ({
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (credentials !== metadata.players[playerID].credentials) {
+    const isAuthorized = await auth.authenticateCredentials({
+      playerID,
+      credentials,
+      metadata,
+    });
+    if (!isAuthorized) {
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
@@ -337,7 +341,12 @@ export const createRouter = ({
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (credentials !== metadata.players[playerID].credentials) {
+    const isAuthorized = await auth.authenticateCredentials({
+      playerID,
+      credentials,
+      metadata,
+    });
+    if (!isAuthorized) {
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
@@ -395,7 +404,12 @@ export const createRouter = ({
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
-    if (credentials !== metadata.players[playerID].credentials) {
+    const isAuthorized = await auth.authenticateCredentials({
+      playerID,
+      credentials,
+      metadata,
+    });
+    if (!isAuthorized) {
       ctx.throw(403, 'Invalid credentials ' + credentials);
     }
 
