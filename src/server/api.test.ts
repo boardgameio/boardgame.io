@@ -12,8 +12,9 @@ import * as dateMock from 'jest-date-mock';
 
 import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
+import { Auth } from './auth';
 import * as StorageAPI from './db/base';
-import { Game } from '../types';
+import { Game, Server } from '../types';
 
 jest.setTimeout(2000000000);
 
@@ -72,13 +73,13 @@ describe('.createRouter', () => {
   function addApiToServer({
     app,
     ...args
-  }: { app: Koa } & Parameters<typeof createRouter>[0]) {
+  }: { app: Server.App } & Parameters<typeof createRouter>[0]) {
     const router = createRouter(args);
     configureApp(app, router);
   }
 
   function createApiServer(args: Parameters<typeof createRouter>[0]) {
-    const app = new Koa();
+    const app: Server.App = new Koa();
     addApiToServer({ app, ...args });
     return app;
   }
@@ -87,6 +88,7 @@ describe('.createRouter', () => {
     let response;
     let app: Koa;
     let db: AsyncStorage;
+    const auth = new Auth();
     let games: Game[];
     const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
 
@@ -125,7 +127,7 @@ describe('.createRouter', () => {
         delete process.env.API_SECRET;
 
         const uuid = () => 'matchID';
-        app = createApiServer({ db, games, uuid });
+        app = createApiServer({ db, auth, games, uuid });
 
         response = await request(app.callback())
           .post('/games/foo/create')
@@ -290,7 +292,7 @@ describe('.createRouter', () => {
     describe('for a protected lobby', () => {
       beforeEach(() => {
         process.env.API_SECRET = 'protected';
-        app = createApiServer({ db, games });
+        app = createApiServer({ db, auth, games });
       });
 
       describe('without the lobby token', () => {
@@ -320,6 +322,7 @@ describe('.createRouter', () => {
   describe('joining a room', () => {
     let response;
     let db: AsyncStorage;
+    const auth = new Auth();
     let games: Game[];
     let credentials: string;
 
@@ -338,7 +341,7 @@ describe('.createRouter', () => {
           db = new AsyncStorage({
             fetch: () => ({ metadata: null }),
           });
-          const app = createApiServer({ db, games });
+          const app = createApiServer({ db, auth, games });
 
           response = await request(app.callback())
             .post('/games/foo/1/join')
@@ -369,9 +372,9 @@ describe('.createRouter', () => {
           beforeEach(async () => {
             const app = createApiServer({
               db,
+              auth: new Auth({ generateCredentials: () => credentials }),
               games,
               uuid: () => 'matchID',
-              generateCredentials: () => credentials,
             });
             response = await request(app.callback())
               .post('/games/foo/1/join')
@@ -401,7 +404,7 @@ describe('.createRouter', () => {
 
           describe('when custom data is provided', () => {
             beforeEach(async () => {
-              const app = createApiServer({ db, games });
+              const app = createApiServer({ db, auth, games });
               response = await request(app.callback())
                 .post('/games/foo/1/join')
                 .send({ playerID: 0, playerName: 'alice', data: 99 });
@@ -424,7 +427,7 @@ describe('.createRouter', () => {
 
         describe('when the playerID does not exist', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/join')
               .send('playerID=1&playerName=alice');
@@ -437,7 +440,7 @@ describe('.createRouter', () => {
 
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/join')
               .send('playerName=1');
@@ -450,7 +453,7 @@ describe('.createRouter', () => {
 
         describe('when playerName is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/join')
               .send('playerID=1');
@@ -478,7 +481,7 @@ describe('.createRouter', () => {
               },
             });
 
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
 
             response = await request(app.callback())
               .post('/games/foo/1/join')
@@ -495,6 +498,7 @@ describe('.createRouter', () => {
   describe('rename with deprecated endpoint', () => {
     let response;
     let db: AsyncStorage;
+    const auth = new Auth();
     let games: Game[];
     const warnMsg =
       'This endpoint /rename is deprecated. Please use /update instead.';
@@ -514,7 +518,7 @@ describe('.createRouter', () => {
           db = new AsyncStorage({
             fetch: async () => ({ metadata: null }),
           });
-          const app = createApiServer({ db, games });
+          const app = createApiServer({ db, auth, games });
           response = await request(app.callback())
             .post('/games/foo/1/rename')
             .send('playerID=0&playerName=alice&newName=ali');
@@ -544,7 +548,7 @@ describe('.createRouter', () => {
                 };
               },
             });
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/rename')
               .send('playerID=0&credentials=SECRET1&newName=ali');
@@ -552,7 +556,7 @@ describe('.createRouter', () => {
 
           describe('when the playerName is not a string', () => {
             test('throws newName must be a string', async () => {
-              const app = createApiServer({ db, games });
+              const app = createApiServer({ db, auth, games });
               response = await request(app.callback())
                 .post('/games/foo/1/rename')
                 .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
@@ -585,7 +589,7 @@ describe('.createRouter', () => {
 
         describe('when the playerID does not exist', () => {
           test('throws error 404', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/rename')
               .send('playerID=2&credentials=SECRET1&newName=joe');
@@ -596,7 +600,7 @@ describe('.createRouter', () => {
 
         describe('when the credentials are invalid', () => {
           test('throws error 404', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/rename')
               .send('playerID=0&credentials=SECRET2&newName=mike');
@@ -607,7 +611,7 @@ describe('.createRouter', () => {
 
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/rename')
               .send('credentials=foo&newName=bill');
@@ -621,7 +625,7 @@ describe('.createRouter', () => {
 
         describe('when newName is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/rename')
               .send('credentials=foo&playerID=0');
@@ -639,6 +643,7 @@ describe('.createRouter', () => {
   describe('rename with update endpoint', () => {
     let response;
     let db: AsyncStorage;
+    const auth = new Auth();
     let games: Game[];
 
     beforeEach(() => {
@@ -655,7 +660,7 @@ describe('.createRouter', () => {
           db = new AsyncStorage({
             fetch: async () => ({ metadata: null }),
           });
-          const app = createApiServer({ db, games });
+          const app = createApiServer({ db, auth, games });
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send('playerID=0&playerName=alice&newName=ali');
@@ -684,7 +689,7 @@ describe('.createRouter', () => {
                 };
               },
             });
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET1&newName=ali');
@@ -692,7 +697,7 @@ describe('.createRouter', () => {
 
           describe('when the playerName is not a string', () => {
             test('throws newName must be a string', async () => {
-              const app = createApiServer({ db, games });
+              const app = createApiServer({ db, auth, games });
               response = await request(app.callback())
                 .post('/games/foo/1/update')
                 .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
@@ -722,7 +727,7 @@ describe('.createRouter', () => {
 
         describe('when the playerID does not exist', () => {
           test('throws player not found', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send('playerID=2&credentials=SECRET1&newName=joe');
@@ -732,7 +737,7 @@ describe('.createRouter', () => {
 
         describe('when the credentials are invalid', () => {
           test('throws invalid credentials', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET2&newName=mike');
@@ -742,7 +747,7 @@ describe('.createRouter', () => {
 
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send('credentials=foo&newName=bill');
@@ -754,7 +759,7 @@ describe('.createRouter', () => {
 
         describe('when newName is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send('credentials=foo&playerID=0');
@@ -771,6 +776,7 @@ describe('.createRouter', () => {
   describe('updating player metadata', () => {
     let response;
     let db: AsyncStorage;
+    const auth = new Auth();
     let games: Game[];
 
     beforeEach(() => {
@@ -786,7 +792,7 @@ describe('.createRouter', () => {
           db = new AsyncStorage({
             fetch: async () => ({ metadata: null }),
           });
-          const app = createApiServer({ db, games });
+          const app = createApiServer({ db, auth, games });
           response = await request(app.callback())
             .post('/games/foo/1/update')
             .send({ playerID: 0, data: { subdata: 'text' } });
@@ -815,7 +821,7 @@ describe('.createRouter', () => {
                 };
               },
             });
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send({
@@ -847,7 +853,7 @@ describe('.createRouter', () => {
 
         describe('when the playerID does not exist', () => {
           test('throws playerID not found', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send({
@@ -861,7 +867,7 @@ describe('.createRouter', () => {
 
         describe('when the credentials are invalid', () => {
           test('invalid credentials', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send({
@@ -875,7 +881,7 @@ describe('.createRouter', () => {
 
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send({ credentials: 'foo', data: { subdata: 'text' } });
@@ -888,7 +894,7 @@ describe('.createRouter', () => {
 
         describe('when data is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/update')
               .send({ playerID: 0, credentials: 'foo' });
@@ -905,6 +911,7 @@ describe('.createRouter', () => {
   describe('leaving a room', () => {
     let response;
     let db: AsyncStorage;
+    const auth = new Auth();
     let games: Game[];
 
     beforeEach(() => {
@@ -921,7 +928,7 @@ describe('.createRouter', () => {
           db = new AsyncStorage({
             fetch: async () => ({ metadata: null }),
           });
-          const app = createApiServer({ db, games });
+          const app = createApiServer({ db, auth, games });
           response = await request(app.callback())
             .post('/games/foo/1/leave')
             .send('playerID=0&playerName=alice');
@@ -950,7 +957,7 @@ describe('.createRouter', () => {
                 };
               },
             });
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
               .send('playerID=0&credentials=SECRET1');
@@ -994,7 +1001,7 @@ describe('.createRouter', () => {
                   };
                 },
               });
-              const app = createApiServer({ db, games });
+              const app = createApiServer({ db, auth, games });
               response = await request(app.callback())
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
@@ -1005,7 +1012,7 @@ describe('.createRouter', () => {
 
         describe('when the playerID does not exist', () => {
           test('throws error 404', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
               .send('playerID=2&credentials=SECRET1');
@@ -1015,7 +1022,7 @@ describe('.createRouter', () => {
 
         describe('when the credentials are invalid', () => {
           test('throws error 404', async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
               .send('playerID=0&credentials=SECRET2');
@@ -1024,7 +1031,7 @@ describe('.createRouter', () => {
         });
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, games });
+            const app = createApiServer({ db, auth, games });
             response = await request(app.callback())
               .post('/games/foo/1/leave')
               .send('credentials=foo');
@@ -1040,6 +1047,7 @@ describe('.createRouter', () => {
 
   describe('requesting game list', () => {
     let db: AsyncStorage;
+    const auth = new Auth();
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage();
@@ -1049,7 +1057,7 @@ describe('.createRouter', () => {
       let response;
       beforeEach(async () => {
         let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, games });
+        let app = createApiServer({ db, auth, games });
 
         response = await request(app.callback()).get('/games');
       });
@@ -1063,6 +1071,7 @@ describe('.createRouter', () => {
   describe('play again', () => {
     let response;
     let db: AsyncStorage;
+    const auth = new Auth();
     let games: Game[];
 
     beforeEach(() => {
@@ -1100,7 +1109,7 @@ describe('.createRouter', () => {
 
     test('creates new game data', async () => {
       const uuid = () => 'newGameID';
-      const app = createApiServer({ db, games, uuid });
+      const app = createApiServer({ db, auth, games, uuid });
 
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
@@ -1136,7 +1145,7 @@ describe('.createRouter', () => {
 
     test('when game configuration not supplied, uses previous game config', async () => {
       const uuid = () => 'newGameID';
-      const app = createApiServer({ db, games, uuid });
+      const app = createApiServer({ db, auth, games, uuid });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
@@ -1181,7 +1190,7 @@ describe('.createRouter', () => {
           };
         },
       });
-      const app = createApiServer({ db, games });
+      const app = createApiServer({ db, auth, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
@@ -1192,7 +1201,7 @@ describe('.createRouter', () => {
       db = new AsyncStorage({
         fetch: async () => ({ metadata: null }),
       });
-      const app = createApiServer({ db, games });
+      const app = createApiServer({ db, auth, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&playerName=alice');
@@ -1200,7 +1209,7 @@ describe('.createRouter', () => {
     });
 
     test('when the playerID is undefined throws error 403', async () => {
-      const app = createApiServer({ db, games });
+      const app = createApiServer({ db, auth, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('credentials=SECRET1');
@@ -1208,7 +1217,7 @@ describe('.createRouter', () => {
     });
 
     test('when the playerID does not exist throws error 404', async () => {
-      const app = createApiServer({ db, games });
+      const app = createApiServer({ db, auth, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=3&credentials=SECRET1');
@@ -1216,7 +1225,7 @@ describe('.createRouter', () => {
     });
 
     test('when the credentials are invalid throws error 404', async () => {
-      const app = createApiServer({ db, games });
+      const app = createApiServer({ db, auth, games });
       response = await request(app.callback())
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET2');
@@ -1224,7 +1233,7 @@ describe('.createRouter', () => {
     });
 
     test('when playerID is omitted throws error 403', async () => {
-      const app = createApiServer({ db, games });
+      const app = createApiServer({ db, auth, games });
       response = await request(app.callback())
         .post('/games/foo/1/leave')
         .send('credentials=foo');
@@ -1234,6 +1243,7 @@ describe('.createRouter', () => {
 
   describe('requesting room list', () => {
     let db: AsyncStorage;
+    const auth = new Auth();
     const dbFetch = jest.fn(async matchID => {
       return {
         metadata: {
@@ -1279,7 +1289,7 @@ describe('.createRouter', () => {
       let matches;
       beforeEach(async () => {
         let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, games });
+        let app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar');
         matches = JSON.parse(response.text).matches;
       });
@@ -1309,7 +1319,7 @@ describe('.createRouter', () => {
       let app;
 
       beforeEach(() => {
-        app = createApiServer({ db, games });
+        app = createApiServer({ db, auth, games });
         dblistMatches.mockClear();
       });
 
@@ -1404,6 +1414,7 @@ describe('.createRouter', () => {
 
   describe('requesting room', () => {
     let db: AsyncStorage;
+    const auth = new Auth();
     beforeEach(() => {
       delete process.env.API_SECRET;
       db = new AsyncStorage({
@@ -1435,7 +1446,7 @@ describe('.createRouter', () => {
       let room;
       beforeEach(async () => {
         let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, games });
+        let app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar/bar-0');
         room = JSON.parse(response.text);
       });
@@ -1460,7 +1471,7 @@ describe('.createRouter', () => {
           fetch: async () => ({ metadata: null }),
         });
         let games = [ProcessGameConfig({ name: 'foo' })];
-        let app = createApiServer({ db, games });
+        let app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar/doesnotexist');
       });
 
@@ -1472,6 +1483,7 @@ describe('.createRouter', () => {
 
   describe('when server app is provided', () => {
     let db: AsyncStorage;
+    const auth = new Auth();
     let server;
     let useChain;
     let games: Game[];
@@ -1489,13 +1501,13 @@ describe('.createRouter', () => {
     });
 
     test('call .use method several times', async () => {
-      addApiToServer({ app: server, db, games });
+      addApiToServer({ app: server, db, auth, games });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
 
     test('call .use method several times with uuid', async () => {
       const uuid = () => 'foo';
-      addApiToServer({ app: server, db, games, uuid });
+      addApiToServer({ app: server, db, auth, games, uuid });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
     });
   });
