@@ -10,12 +10,8 @@ import IO from 'koa-socket-2';
 import IOTypes from 'socket.io';
 import { ServerOptions as HttpsOptions } from 'https';
 import PQueue from 'p-queue';
-import {
-  Master,
-  TransportAPI as MasterTransport,
-  AuthFn,
-} from '../../master/master';
-import { PlayerID } from '../../types';
+import { Master, TransportAPI as MasterTransport } from '../../master/master';
+import { Game, PlayerID, Server } from '../../types';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -62,7 +58,6 @@ export function TransportAPI(
 }
 
 export interface SocketOpts {
-  auth?: boolean | AuthFn;
   https?: HttpsOptions;
   socketOpts?: IOTypes.ServerOptions;
   socketAdapter?: any;
@@ -81,27 +76,20 @@ export class SocketIO {
   protected clientInfo: Map<string, Client>;
   protected roomInfo: Map<string, Set<string>>;
   protected perMatchQueue: Map<string, PQueue>;
-  private auth: boolean | AuthFn;
   private https: HttpsOptions;
   private socketAdapter: any;
   private socketOpts: IOTypes.ServerOptions;
 
-  constructor({
-    auth = true,
-    https,
-    socketAdapter,
-    socketOpts,
-  }: SocketOpts = {}) {
+  constructor({ https, socketAdapter, socketOpts }: SocketOpts = {}) {
     this.clientInfo = new Map();
     this.roomInfo = new Map();
     this.perMatchQueue = new Map();
-    this.auth = auth;
     this.https = https;
     this.socketAdapter = socketAdapter;
     this.socketOpts = socketOpts;
   }
 
-  init(app, games) {
+  init(app: Server.App & { _io?: IOTypes.Server }, games: Game[]) {
     const io = new IO({
       ioOptions: {
         pingTimeout: PING_TIMEOUT,
@@ -120,14 +108,14 @@ export class SocketIO {
     for (const game of games) {
       const nsp = app._io.of(game.name);
 
-      nsp.on('connection', (socket: Socket) => {
+      nsp.on('connection', (socket: IOTypes.Socket) => {
         socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
           const [action, stateID, matchID, playerID] = args;
           const master = new Master(
             game,
             app.context.db,
             TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
-            this.auth
+            app.context.auth
           );
 
           const matchQueue = this.getMatchQueue(matchID);
