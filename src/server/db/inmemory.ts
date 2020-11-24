@@ -13,10 +13,10 @@ import * as StorageAPI from './base';
  * InMemory data storage.
  */
 export class InMemory extends StorageAPI.Sync {
-  private state: Map<string, State>;
-  private initial: Map<string, State>;
-  private metadata: Map<string, Server.MatchData>;
-  private log: Map<string, LogEntry[]>;
+  protected state: Map<string, State>;
+  protected initial: Map<string, State>;
+  protected metadata: Map<string, Server.MatchData>;
+  protected log: Map<string, LogEntry[]>;
 
   /**
    * Creates a new InMemory storage.

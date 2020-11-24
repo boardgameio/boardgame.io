@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.41.1",
+  "version": "0.42.0",
   "description": "library for turn-based games",
   "repository": "https://github.com/boardgameio/boardgame.io",
   "scripts": {
@@ -17,7 +17,7 @@
     "examples": "npm run start",
     "examples:install": "node scripts/install-examples.js",
     "pretest": "npm run lint",
-    "test": "cross-env NODE_ENV=test jest --no-cache",
+    "test": "cross-env NODE_ENV=test jest --no-cache --forceExit",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:coverage": "npm test -- --coverage --collectCoverageFrom=\"src/**\" --forceExit",
     "test:coveralls": "coveralls < coverage/lcov.info",
@@ -160,6 +160,7 @@
     "koa-router": "^7.2.1",
     "koa-socket-2": "^1.0.17",
     "lru-cache": "^4.1.1",
+    "p-queue": "^6.6.2",
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
     "redux": "^4.0.0",

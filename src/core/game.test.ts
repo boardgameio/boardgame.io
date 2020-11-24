@@ -10,6 +10,7 @@ import { ProcessGameConfig } from './game';
 import { Client } from '../client/client';
 import { error } from '../core/logger';
 import { InitializeGame } from './initialize';
+import { Game } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -251,15 +252,15 @@ describe('config errors', () => {
       },
     ];
     const game = () => {
-      ProcessGameConfig({ plugins });
+      ProcessGameConfig(({ plugins } as unknown) as Game);
     };
     expect(game).toThrow();
   });
 
   test('invalid move object', () => {
-    const game = ProcessGameConfig({ moves: { A: 1 } });
+    const game = ProcessGameConfig(({ moves: { A: 1 } } as unknown) as Game);
     const state = InitializeGame({ game });
-    game.processMove(state, {});
+    game.processMove(state, { type: 'A', args: null, playerID: '0' });
     expect(error).toBeCalledWith(
       expect.stringContaining('invalid move object')
     );

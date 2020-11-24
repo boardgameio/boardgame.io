@@ -135,6 +135,16 @@ describe('multiplayer', () => {
     expect(store.getState()).toMatchObject(restored);
   });
 
+  test('receive matchData', () => {
+    let receivedMatchData;
+    m.subscribeMatchData(data => (receivedMatchData = data));
+    const matchData = [{ id: '0', name: 'Alice' }];
+    mockSocket.receive('matchData', 'unknown matchID', matchData);
+    expect(receivedMatchData).toBe(undefined);
+    mockSocket.receive('matchData', 'default', matchData);
+    expect(receivedMatchData).toMatchObject(matchData);
+  });
+
   test('send update', () => {
     const action = makeMove();
     const state = { _stateID: 0 };

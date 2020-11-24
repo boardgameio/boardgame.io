@@ -28,6 +28,7 @@ import {
   CredentialedActionShape,
   FilteredMetadata,
   Game,
+  LogEntry,
   PlayerID,
   Reducer,
   State,
@@ -115,6 +116,14 @@ export interface ClientOpts<
   credentials?: string;
   enhancer?: StoreEnhancer;
 }
+
+export type ClientState<G extends any = any> =
+  | null
+  | (State<G> & {
+      isActive: boolean;
+      isConnected: boolean;
+      log: LogEntry[];
+    });
 
 /**
  * Implementation of Client (see below).
@@ -335,6 +344,7 @@ export class _ClientImpl<G extends any = any> {
 
     this.transport.subscribeMatchData(metadata => {
       this.matchData = metadata;
+      this.notifySubscribers();
     });
   }
 
@@ -359,7 +369,7 @@ export class _ClientImpl<G extends any = any> {
     this.manager.unregister(this);
   }
 
-  subscribe(fn: (state: State<G>) => void) {
+  subscribe(fn: (state: ClientState<G>) => void) {
     const id = Object.keys(this.subscribers).length;
     this.subscribers[id] = fn;
     this.transport.subscribe(() => this.notifySubscribers());
@@ -378,7 +388,7 @@ export class _ClientImpl<G extends any = any> {
     return this.initialState;
   }
 
-  getState() {
+  getState(): ClientState<G> {
     let state = this.store.getState();
 
     if (this.gameStateOverride !== null) {

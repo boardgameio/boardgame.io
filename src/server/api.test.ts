@@ -102,6 +102,19 @@ describe('.createRouter', () => {
                 }
               : {},
         },
+        {
+          name: 'validate',
+          setup: (_, setupData) =>
+            setupData
+              ? {
+                  numTokens: setupData.tokens,
+                }
+              : {},
+          validateSetupData: (setupData, numPlayers) =>
+            numPlayers == 2 && setupData.tokens !== 2
+              ? 'Two player games must use two tokens'
+              : undefined,
+        },
       ];
     });
 
@@ -223,6 +236,34 @@ describe('.createRouter', () => {
               }),
             })
           );
+        });
+      });
+
+      describe('with setupData validation', () => {
+        test('creates game if validation passes', async () => {
+          response = await request(app.callback())
+            .post('/games/validate/create')
+            .send({
+              numPlayers: 2,
+              setupData: {
+                tokens: 2,
+              },
+            });
+
+          expect(response.status).toEqual(200);
+        });
+
+        test('returns error if validation fails', async () => {
+          response = await request(app.callback())
+            .post('/games/validate/create')
+            .send({
+              numPlayers: 2,
+              setupData: {
+                tokens: 3,
+              },
+            });
+
+          expect(response.status).toEqual(400);
         });
       });
 

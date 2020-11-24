@@ -127,6 +127,21 @@ In the example above you can play as Player 0 and Player 1 alternately
 on the two boards. Clicking on a particular board when it is not that
 player's turn has no effect.
 
+### Storing state in the browser
+
+If you want game state to be saved in the browser using `localStorage`,
+you can pass additional options when creating a local master:
+
+```js
+Local({
+  // Enable localStorage cache.
+  persist: true,
+
+  // Set custom prefix to store data under. Default: 'bgio'.
+  storageKey: 'bgio',
+});
+```
+
 ## Remote Master
 
 You can also run the game master on a separate server. Any boardgame.io

@@ -30,10 +30,12 @@ jest.mock('../../master/master', () => {
   class Master {
     onUpdate: jest.Mock<any, any>;
     onSync: jest.Mock<any, any>;
+    onConnectionChange: jest.Mock<any, any>;
 
     constructor() {
       this.onUpdate = jest.fn();
       this.onSync = jest.fn();
+      this.onConnectionChange = jest.fn();
     }
   }
 

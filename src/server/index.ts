@@ -38,20 +38,19 @@ export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
   callback?: () => void
 ): ServerConfig => {
-  const config: ServerConfig = {};
   if (portOrConfig && typeof portOrConfig === 'object') {
-    const serverConfig = portOrConfig as ServerConfig;
-    config.port = serverConfig.port;
-    config.callback = serverConfig.callback || callback;
-    config.lobbyConfig = serverConfig.lobbyConfig;
+    return {
+      ...portOrConfig,
+      callback: portOrConfig.callback || callback,
+    };
   } else {
-    config.port = portOrConfig as number;
-    config.callback = callback;
+    return { port: portOrConfig as number, callback };
   }
-  return config;
 };
 
-const getPortFromServer = (server: KoaServer): string | number | null => {
+export const getPortFromServer = (
+  server: KoaServer
+): string | number | null => {
   const address = server.address();
   if (typeof address === 'string') return address;
   if (address === null) return null;

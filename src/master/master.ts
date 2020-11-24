@@ -8,7 +8,7 @@
 
 import { InitializeGame } from '../core/initialize';
 import { CreateGameReducer } from '../core/reducer';
-import { ProcessGameConfig } from '../core/game';
+import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
@@ -34,6 +34,15 @@ export const getPlayerMetadata = (
     return matchData.players[playerID];
   }
 };
+
+/**
+ * Filter match data to get a player metadata object with credentials stripped.
+ */
+const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
+  Object.values(matchData.players).map(player => {
+    const { credentials, ...filteredData } = player;
+    return filteredData;
+  });
 
 function IsSynchronous(
   storageAPI: StorageAPI.Sync | StorageAPI.Async
@@ -132,6 +141,10 @@ type TransportData =
   | {
       type: 'sync';
       args: [string, SyncInfo];
+    }
+  | {
+      type: 'matchData';
+      args: [string, FilteredMetadata];
     };
 
 export interface TransportAPI {
@@ -229,7 +242,10 @@ export class Master {
     }
 
     if (state.ctx.gameover !== undefined) {
-      logging.error(`game over - matchID=[${key}]`);
+      logging.error(
+        `game over - matchID=[${key}] - playerID=[${playerID}]` +
+          ` - action[${action.payload.type}]`
+      );
       return;
     }
 
@@ -260,24 +276,37 @@ export class Master {
 
     // Check whether the player is active.
     if (!this.game.flow.isPlayerActive(state.G, state.ctx, playerID)) {
-      logging.error(`player not active - playerID=[${playerID}]`);
-      return;
-    }
-
-    // Check whether the player is allowed to make the move.
-    if (
-      action.type == MAKE_MOVE &&
-      !this.game.flow.getMove(state.ctx, action.payload.type, playerID)
-    ) {
       logging.error(
-        `move not processed - canPlayerMakeMove=false, playerID=[${playerID}]`
+        `player not active - playerID=[${playerID}]` +
+          ` - action[${action.payload.type}]`
       );
       return;
     }
 
-    if (state._stateID !== stateID) {
+    // Get move for further checkings
+    const move =
+      action.type == MAKE_MOVE
+        ? this.game.flow.getMove(state.ctx, action.payload.type, playerID)
+        : null;
+
+    // Check whether the player is allowed to make the move.
+    if (action.type == MAKE_MOVE && !move) {
       logging.error(
-        `invalid stateID, was=[${stateID}], expected=[${state._stateID}]`
+        `move not processed - canPlayerMakeMove=false - playerID=[${playerID}]` +
+          ` - action[${action.payload.type}]`
+      );
+      return;
+    }
+
+    // Check if action's stateID is different than store's stateID
+    // and if move does not have ignoreStaleStateID truthy.
+    if (
+      state._stateID !== stateID &&
+      !(move && IsLongFormMove(move) && move.ignoreStaleStateID)
+    ) {
+      logging.error(
+        `invalid stateID, was=[${stateID}], expected=[${state._stateID}]` +
+          ` - playerID=[${playerID}] - action[${action.payload.type}]`
       );
       return;
     }
@@ -379,13 +408,7 @@ export class Master {
       }
     }
 
-    let filteredMetadata: FilteredMetadata;
-    if (metadata) {
-      filteredMetadata = Object.values(metadata.players).map(player => {
-        const { credentials, ...filteredData } = player;
-        return filteredData;
-      });
-    }
+    const filteredMetadata = metadata ? filterMatchData(metadata) : undefined;
 
     const filteredState = {
       ...state,
@@ -411,5 +434,53 @@ export class Master {
     });
 
     return;
+  }
+
+  /**
+   * Called when a client connects or disconnects.
+   * Updates and sends out metadata to reflect the player’s connection status.
+   */
+  async onConnectionChange(
+    matchID: string,
+    playerID: string,
+    connected: boolean
+  ) {
+    const key = matchID;
+
+    let metadata: Server.MatchData | undefined;
+    if (IsSynchronous(this.storageAPI)) {
+      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
+    } else {
+      ({ metadata } = await this.storageAPI.fetch(matchID, {
+        metadata: true,
+      }));
+    }
+
+    if (metadata === undefined) {
+      logging.error(`metadata not found for matchID=[${key}]`);
+      return { error: 'metadata not found' };
+    }
+
+    if (metadata.players[playerID] === undefined) {
+      logging.error(
+        `Player not in the match, matchID=[${key}] playerID=[${playerID}]`
+      );
+      return { error: 'player not in the match' };
+    }
+
+    metadata.players[playerID].isConnected = connected;
+
+    const filteredMetadata = filterMatchData(metadata);
+
+    this.transportAPI.sendAll(() => ({
+      type: 'matchData',
+      args: [matchID, filteredMetadata],
+    }));
+
+    if (IsSynchronous(this.storageAPI)) {
+      this.storageAPI.setMetadata(key, metadata);
+    } else {
+      await this.storageAPI.setMetadata(key, metadata);
+    }
   }
 }

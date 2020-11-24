@@ -7,7 +7,7 @@ import { CreateGameReducer } from './core/reducer';
 import { INVALID_MOVE } from './core/constants';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
-import { RandomAPI } from './plugins/plugin-random';
+import { RandomAPI } from './plugins/random/random';
 
 export { StorageAPI };
 
@@ -147,6 +147,7 @@ export interface LongFormMove<
   noLimit?: boolean;
   client?: boolean;
   undoable?: boolean | ((G: G, ctx: CtxWithPlugins) => boolean);
+  ignoreStaleStateID?: boolean;
 }
 
 export type Move<G extends any = any, CtxWithPlugins extends Ctx = Ctx> =
@@ -231,13 +232,21 @@ interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   [phaseName: string]: PhaseConfig<G, CtxWithPlugins>;
 }
 
-export interface Game<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
+export interface Game<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx,
+  SetupData extends any = any
+> {
   name?: string;
   minPlayers?: number;
   maxPlayers?: number;
   disableUndo?: boolean;
   seed?: string | number;
-  setup?: (ctx: CtxWithPlugins, setupData?: any) => any;
+  setup?: (ctx: CtxWithPlugins, setupData?: SetupData) => any;
+  validateSetupData?: (
+    setupData: SetupData | undefined,
+    numPlayers: number
+  ) => string | undefined;
   moves?: MoveMap<G, CtxWithPlugins>;
   phases?: PhaseMap<G, CtxWithPlugins>;
   turn?: TurnConfig<G, CtxWithPlugins>;
@@ -299,6 +308,7 @@ export namespace Server {
     name?: string;
     credentials?: string;
     data?: any;
+    isConnected?: boolean;
   };
 
   export interface MatchData {

@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v0.[0-9]+.[0-9]+' ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node v12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: |
+          npm run lint
+          npm run test
+
+      - name: Publish to NPM
+        id: publish
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Version already published
+        if: steps.publish.outputs.type == 'none'
+        run: |
+          echo "Version ${{ steps.publish.outputs.old-version }} already exists."
+
+      - name: New version published
+        if: steps.publish.outputs.type != 'none'
+        run: |
+          echo "New ${{ steps.publish.outputs.type }} version ${{ steps.publish.outputs.version }} published. Was ${{ steps.publish.outputs.old-version }}."

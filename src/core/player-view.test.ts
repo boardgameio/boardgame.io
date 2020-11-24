@@ -7,16 +7,17 @@
  */
 
 import { PlayerView } from './player-view';
+import { Ctx } from '../types';
 
 test('no change', () => {
   const G = { test: true };
-  const newG = PlayerView.STRIP_SECRETS(G);
+  const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '0');
   expect(newG).toEqual(G);
 });
 
 test('secret', () => {
   const G = { secret: true };
-  const newG = PlayerView.STRIP_SECRETS(G);
+  const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '0');
   expect(newG).toEqual({});
 });
 
@@ -29,12 +30,12 @@ test('players', () => {
   };
 
   {
-    const newG = PlayerView.STRIP_SECRETS(G, {}, '0');
+    const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '0');
     expect(newG.players).toEqual({ '0': {} });
   }
 
   {
-    const newG = PlayerView.STRIP_SECRETS(G, {}, '1');
+    const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '1');
     expect(newG.players).toEqual({ '1': {} });
   }
 });

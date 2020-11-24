@@ -8,6 +8,7 @@
 
 import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
+import { LocalStorage } from '../../server/db/localstorage';
 import { Master, TransportAPI } from '../../master/master';
 import { Transport, TransportOpts } from './transport';
 import {
@@ -41,10 +42,15 @@ export function GetBotPlayer(state: State, bots: Record<PlayerID, any>) {
   return null;
 }
 
-interface LocalMasterOpts {
-  game: Game;
-  bots: Record<PlayerID, any>;
+interface LocalOpts {
+  bots?: Record<PlayerID, any>;
+  persist?: boolean;
+  storageKey?: string;
 }
+
+type LocalMasterOpts = LocalOpts & {
+  game: Game;
+};
 
 /**
  * Creates a local version of the master that the client
@@ -57,7 +63,7 @@ export class LocalMaster extends Master {
     callback: (...args: any[]) => void
   ) => void;
 
-  constructor({ game, bots }: LocalMasterOpts) {
+  constructor({ game, bots, storageKey, persist }: LocalMasterOpts) {
     const clientCallbacks: Record<PlayerID, (...args: any[]) => void> = {};
     const initializedBots = {};
 
@@ -88,8 +94,8 @@ export class LocalMaster extends Master {
         }
       },
     };
-
-    super(game, new InMemory(), transportAPI, false);
+    const storage = persist ? new LocalStorage(storageKey) : new InMemory();
+    super(game, storage, transportAPI, false);
 
     this.connect = (matchID, playerID, callback) => {
       clientCallbacks[playerID] = callback;
@@ -234,19 +240,32 @@ export class LocalTransport extends Transport {
   }
 }
 
-const localMasters = new Map();
-export function Local(opts?: Pick<LocalMasterOpts, 'bots'>) {
+/**
+ * Global map storing local master instances.
+ */
+const localMasters: Map<Game, { master: LocalMaster } & LocalOpts> = new Map();
+
+/**
+ * Create a local transport.
+ */
+export function Local({ bots, persist, storageKey }: LocalOpts = {}) {
   return (transportOpts: TransportOpts) => {
+    const { gameKey, game } = transportOpts;
     let master: LocalMaster;
 
-    if (localMasters.has(transportOpts.gameKey) && !opts) {
-      master = localMasters.get(transportOpts.gameKey);
-    } else {
-      master = new LocalMaster({
-        game: transportOpts.game,
-        bots: opts && opts.bots,
-      });
-      localMasters.set(transportOpts.gameKey, master);
+    const instance = localMasters.get(gameKey);
+    if (
+      instance &&
+      instance.bots === bots &&
+      instance.storageKey === storageKey &&
+      instance.persist === persist
+    ) {
+      master = instance.master;
+    }
+
+    if (!master) {
+      master = new LocalMaster({ game, bots, persist, storageKey });
+      localMasters.set(gameKey, { master, bots, persist, storageKey });
     }
 
     return new LocalTransport({ master, ...transportOpts });

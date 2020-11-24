@@ -12,6 +12,8 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [boardgame.io-angular](https://github.com/turn-based/boardgame.io-angular) - [demo](https://turn-based-209306.firebaseapp.com/) - Unofficial Angular client for boardgame.io.
 
+- [Can't Stop!](https://github.com/simlmx/cantstop) - [play](https://cantstop.fun) - The classic "push your luck" dice game.
+
 - [Cardman Multiplayer](https://github.com/VengelStudio/cardman-multiplayer) - [play](http://cardman-multiplayer.herokuapp.com) - A cross between Hangman and a card game.
 
 - [Elevation of Privilege](https://github.com/dehydr8/elevation-of-privilege) - [play](https://elevation-of-privilege.herokuapp.com/) - An online multiplayer version of the threat modeling card game.
@@ -35,3 +37,7 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 - [Thinktank](https://github.com/averycrespi/thinktank) - [play](https://thinktank.crespi.dev) - A 2-player strategy game inspired by Conundrum.
 
 - [Splendor](http://bestboards.ir) - A minimal splendor game you can play with up to 4 players.
+
+- [Steel Civilizations](https://play.google.com/store/apps/details?id=com.hydra.steelcivs) - Turn-based mobile strategy game for Android with real-time online multiplayer ranking ladder system.
+
+- [Yatzy](https://github.com/pjohannessen/yatzy) - [play](https://www.lonesomecrowdedweb.com/yatzy/) - [tutorial](https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/) - A 1-4 player dice game played locally.

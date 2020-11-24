@@ -10,6 +10,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { Flow } from './flow';
 import { error } from '../core/logger';
+import { Ctx, State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -21,7 +22,7 @@ describe('phases', () => {
     const flow = Flow({
       phases: { '': {} },
     });
-    flow.init({ ctx: flow.ctx(2) });
+    flow.init({ ctx: flow.ctx(2) } as State);
     expect(error).toHaveBeenCalledWith('cannot specify phase with empty name');
   });
 
@@ -44,14 +45,15 @@ describe('phases', () => {
       turn: {
         order: {
           first: G => {
-            if (G.setupB && !G.cleanupB) return '1';
-            return '0';
+            if (G.setupB && !G.cleanupB) return 1;
+            return 0;
           },
+          next: (_, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
         },
       },
     });
 
-    let state = { G: {}, ctx: flow.ctx(2) };
+    let state = { G: {}, ctx: flow.ctx(2) } as State;
     state = flow.init(state);
     expect(state.G).toMatchObject({ setupA: true });
     expect(state.ctx.currentPlayer).toBe('0');
@@ -79,7 +81,7 @@ describe('phases', () => {
       phases: { A: { start: true, endIf: () => true, next: 'B' }, B: {} },
     });
 
-    const state = { ctx: flow.ctx(2) };
+    const state = { ctx: flow.ctx(2) } as State;
 
     {
       const t = flow.processEvent(state, gameEvent('endPhase'));
@@ -92,13 +94,13 @@ describe('phases', () => {
     }
 
     {
-      const t = flow.processMove(state, makeMove().payload);
+      const t = flow.processMove(state, makeMove('').payload);
       expect(t.ctx.phase).toBe('B');
     }
   });
 
   describe('onEnd', () => {
-    let client;
+    let client: ReturnType<typeof Client>;
 
     beforeAll(() => {
       const game = {
@@ -135,10 +137,10 @@ describe('phases', () => {
         },
       },
     });
-    let state = { G: {}, ctx: flow.ctx(2) };
+    let state = { G: {}, ctx: flow.ctx(2) } as State;
 
     expect(state.ctx.phase).toBe('A');
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('').payload);
     expect(state.ctx.phase).toBe('B');
 
     expect(endPhaseACount).toEqual(1);
@@ -149,7 +151,7 @@ describe('phases', () => {
     const flow = Flow({
       phases: { A: { start: true }, B: {}, C: {} },
     });
-    let state = { G: {}, ctx: flow.ctx(2) };
+    let state = { G: {}, ctx: flow.ctx(2) } as State;
     state = flow.init(state);
 
     expect(state.ctx.phase).toBe('A');
@@ -161,7 +163,7 @@ describe('phases', () => {
     const flow = Flow({
       phases: { A: { start: true, next: 'B' }, B: { next: 'A' } },
     });
-    let state = { G: {}, ctx: flow.ctx(3) };
+    let state = { G: {}, ctx: flow.ctx(3) } as State;
     state = flow.init(state);
 
     expect(state.ctx.playOrderPos).toBe(0);
@@ -172,7 +174,7 @@ describe('phases', () => {
   });
 
   describe('setPhase', () => {
-    let flow;
+    let flow: ReturnType<typeof Flow>;
     beforeEach(() => {
       flow = Flow({
         phases: { A: { start: true }, B: {} },
@@ -180,7 +182,7 @@ describe('phases', () => {
     });
 
     test('basic', () => {
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx.phase).toBe('A');
@@ -189,7 +191,7 @@ describe('phases', () => {
     });
 
     test('invalid arg', () => {
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx.phase).toBe('A');
@@ -206,7 +208,7 @@ describe('turn', () => {
     const flow = Flow({
       turn: { onEnd },
     });
-    const state = { ctx: flow.ctx(2) };
+    const state = { ctx: flow.ctx(2) } as State;
     flow.init(state);
 
     expect(onEnd).not.toHaveBeenCalled();
@@ -219,8 +221,8 @@ describe('turn', () => {
 
     {
       const flow = Flow({ turn: { onMove } });
-      let state = { G: {}, ctx: flow.ctx(2) };
-      state = flow.processMove(state, makeMove().payload);
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.processMove(state, makeMove('').payload);
       expect(state.G).toEqual({ A: true });
     }
 
@@ -229,11 +231,11 @@ describe('turn', () => {
         turn: { onMove },
         phases: { B: { turn: { onMove: () => ({ B: true }) } } },
       });
-      let state = { G: {}, ctx: flow.ctx(2) };
-      state = flow.processMove(state, makeMove().payload);
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.processMove(state, makeMove('').payload);
       expect(state.G).toEqual({ A: true });
       state = flow.processEvent(state, gameEvent('setPhase', 'B'));
-      state = flow.processMove(state, makeMove().payload);
+      state = flow.processMove(state, makeMove('').payload);
       expect(state.G).toEqual({ B: true });
     }
   });
@@ -245,7 +247,7 @@ describe('turn', () => {
           moveLimit: 2,
         },
       });
-      let state = flow.init({ ctx: flow.ctx(2) });
+      let state = flow.init({ ctx: flow.ctx(2) } as State);
       expect(state.ctx.turn).toBe(1);
       state = flow.processMove(state, makeMove('move', null, '0').payload);
       expect(state.ctx.turn).toBe(1);
@@ -266,7 +268,7 @@ describe('turn', () => {
           },
         },
       });
-      let state = flow.init({ ctx: flow.ctx(2) });
+      let state = flow.init({ ctx: flow.ctx(2) } as State);
 
       expect(state.ctx.turn).toBe(1);
       expect(state.ctx.currentPlayer).toBe('0');
@@ -310,7 +312,7 @@ describe('turn', () => {
           },
         },
       });
-      let state = flow.init({ ctx: flow.ctx(2) });
+      let state = flow.init({ ctx: flow.ctx(2) } as State);
       expect(state.ctx.turn).toBe(1);
       expect(state.ctx.numMoves).toBe(0);
       state = flow.processMove(state, makeMove('A', null, '0').payload);
@@ -383,13 +385,13 @@ describe('turn', () => {
       phases: { A: { start: true, endIf: G => G.endPhase, next: 'B' }, B: {} },
     });
 
-    let state = flow.init({ G: {}, ctx: flow.ctx(2) });
+    let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
 
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.currentPlayer).toBe('0');
     expect(state.ctx.turn).toBe(1);
 
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('').payload);
 
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.currentPlayer).toBe('1');
@@ -397,7 +399,7 @@ describe('turn', () => {
 
     state.G = { endPhase: true };
 
-    state = flow.processMove(state, makeMove().payload);
+    state = flow.processMove(state, makeMove('').payload);
 
     expect(state.ctx.phase).toBe('B');
     expect(state.ctx.currentPlayer).toBe('0');
@@ -406,7 +408,7 @@ describe('turn', () => {
 });
 
 describe('stages', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
 
   beforeAll(() => {
     const A = () => {};
@@ -478,7 +480,7 @@ describe('stage events', () => {
   describe('setStage', () => {
     test('basic', () => {
       let flow = Flow({});
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toBeNull();
@@ -488,7 +490,7 @@ describe('stage events', () => {
 
     test('object syntax', () => {
       let flow = Flow({});
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toBeNull();
@@ -502,7 +504,7 @@ describe('stage events', () => {
           activePlayers: { all: 'A', moveLimit: 5 },
         },
       });
-      let state = { G: {}, ctx: flow.ctx(3) };
+      let state = { G: {}, ctx: flow.ctx(3) } as State;
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
@@ -526,7 +528,7 @@ describe('stage events', () => {
           activePlayers: { currentPlayer: 'A' },
         },
       });
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 0 });
@@ -538,7 +540,7 @@ describe('stage events', () => {
 
     test('with move limit', () => {
       let flow = Flow({});
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx._activePlayersMoveLimit).toBeNull();
@@ -551,7 +553,7 @@ describe('stage events', () => {
 
     test('empty argument ends stage', () => {
       let flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
@@ -567,7 +569,7 @@ describe('stage events', () => {
           activePlayers: { currentPlayer: 'A' },
         },
       });
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
@@ -581,7 +583,7 @@ describe('stage events', () => {
           activePlayers: { all: 'A', moveLimit: 5 },
         },
       });
-      let state = { G: {}, ctx: flow.ctx(3) };
+      let state = { G: {}, ctx: flow.ctx(3) } as State;
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
@@ -596,7 +598,7 @@ describe('stage events', () => {
           activePlayers: { currentPlayer: 'A' },
         },
       });
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 0 });
@@ -616,7 +618,7 @@ describe('stage events', () => {
           },
         },
       });
-      let state = { G: {}, ctx: flow.ctx(2) };
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
       expect(state.ctx.activePlayers).toMatchObject({
@@ -647,7 +649,7 @@ test('init', () => {
   });
 
   const orig = flow.ctx(2);
-  let state = { G: {}, ctx: orig };
+  let state = { G: {}, ctx: orig } as State;
   state = flow.processEvent(state, gameEvent('init'));
   expect(state).toEqual({ G: {}, ctx: orig });
 
@@ -655,7 +657,7 @@ test('init', () => {
     phases: { A: { start: true, onBegin: () => ({ done: true }) } },
   });
 
-  state = { ctx: orig };
+  state = { ctx: orig } as State;
   state = flow.init(state);
   expect(state.G).toMatchObject({ done: true });
 });
@@ -664,7 +666,7 @@ describe('endIf', () => {
   test('basic', () => {
     const flow = Flow({ endIf: G => G.win });
 
-    let state = flow.init({ G: {}, ctx: flow.ctx(2) });
+    let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
     state = flow.processEvent(state, gameEvent('endTurn'));
     expect(state.ctx.gameover).toBe(undefined);
 
@@ -714,19 +716,21 @@ test('isPlayerActive', () => {
   const playerID = '0';
 
   const flow = Flow({});
-  expect(flow.isPlayerActive({}, {}, playerID)).toBe(false);
+  expect(flow.isPlayerActive({}, {} as Ctx, playerID)).toBe(false);
   expect(
     flow.isPlayerActive(
       {},
-      { currentPlayer: '0', activePlayers: { '1': '' } },
+      ({ currentPlayer: '0', activePlayers: { '1': '' } } as unknown) as Ctx,
       playerID
     )
   ).toBe(false);
-  expect(flow.isPlayerActive({}, { currentPlayer: '0' }, playerID)).toBe(true);
+  expect(flow.isPlayerActive({}, { currentPlayer: '0' } as Ctx, playerID)).toBe(
+    true
+  );
 });
 
 describe('endGame', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
   beforeEach(() => {
     const game = {
       events: { endGame: true },
@@ -750,7 +754,7 @@ describe('endTurn args', () => {
     phases: { A: { start: true, next: 'B' }, B: {}, C: {} },
   });
 
-  const state = { ctx: flow.ctx(3) };
+  const state = { ctx: flow.ctx(3) } as State;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -785,7 +789,7 @@ describe('pass args', () => {
     phases: { A: { start: true, next: 'B' }, B: {}, C: {} },
   });
 
-  const state = { ctx: flow.ctx(3) };
+  const state = { ctx: flow.ctx(3) } as State;
 
   beforeEach(() => {
     jest.resetAllMocks();

@@ -7,33 +7,14 @@
  */
 
 import { Plugin } from '../types';
-import { Random } from './random/random';
+import {
+  Random,
+  RandomAPI,
+  PrivateRandomAPI,
+  RandomState,
+} from './random/random';
 
-export interface RandomAPI {
-  D4(): number;
-  D4(diceCount: number): number[];
-  D6(): number;
-  D6(diceCount: number): number[];
-  D10(): number;
-  D10(diceCount: number): number[];
-  D12(): number;
-  D12(diceCount: number): number[];
-  D20(): number;
-  D20(diceCount: number): number[];
-  Die(spotvalue?: number): number;
-  Die(spotvalue: number, diceCount: number): number[];
-  Number(): number;
-  Shuffle<T>(deck: T[]): T[];
-}
-
-interface PrivateRandomAPI {
-  _obj: {
-    isUsed(): boolean;
-    getState(): any;
-  };
-}
-
-const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI> = {
+const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI, RandomState> = {
   name: 'random',
 
   noClient: ({ api }) => {
@@ -50,7 +31,7 @@ const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI> = {
   },
 
   setup: ({ game }) => {
-    let seed = game.seed;
+    let { seed } = game;
     if (seed === undefined) {
       seed = Random.seed();
     }
