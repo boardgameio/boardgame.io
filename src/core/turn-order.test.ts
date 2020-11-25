@@ -451,7 +451,7 @@ describe('setActivePlayers', () => {
     expect(state.ctx.activePlayers).toBeNull();
   });
 
-  test('setActivePlayers and setStage', () => {
+  test('set stages to Stage.NULL', () => {
     const game = {
       moves: {
         A: G => G,
