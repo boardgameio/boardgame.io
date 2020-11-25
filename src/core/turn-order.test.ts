@@ -488,6 +488,8 @@ describe('setActivePlayers', () => {
     expect(state.ctx.currentPlayer).toBe('0');
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1', '2']);
     expect(state.ctx.activePlayers['0']).toEqual('start');
+    expect(state.ctx.activePlayers['1']).toEqual(Stage.NULL);
+    expect(state.ctx.activePlayers['2']).toEqual(Stage.NULL);
 
     state = reducer(state, makeMove('S', null, '0'));
     expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1', '2']);
