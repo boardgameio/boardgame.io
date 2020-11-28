@@ -126,7 +126,7 @@ export class SocketIO {
         });
 
         socket.on('sync', async (...args: Parameters<Master['onSync']>) => {
-          const [matchID, playerID, numPlayers] = args;
+          const [matchID, playerID, credentials] = args;
           socket.join(matchID);
 
           // Remove client from any previous game that it was a part of.
@@ -153,15 +153,16 @@ export class SocketIO {
             game,
             app.context.db,
             TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
-            this.auth
+            app.context.auth
           );
-          await master.onSync(matchID, playerID, numPlayers);
-          await master.onConnectionChange(matchID, playerID, true);
+          await master.onSync(...args);
+          await master.onConnectionChange(matchID, playerID, credentials, true);
         });
 
         socket.on('disconnect', async () => {
-          if (this.clientInfo.has(socket.id)) {
-            const { matchID, playerID } = this.clientInfo.get(socket.id);
+          const client = this.clientInfo.get(socket.id);
+          if (client) {
+            const { matchID, playerID, credentials } = client;
             this.roomInfo.get(matchID).delete(socket.id);
             this.clientInfo.delete(socket.id);
 
@@ -173,9 +174,14 @@ export class SocketIO {
               game,
               app.context.db,
               TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
-              this.auth
+              app.context.auth
             );
-            await master.onConnectionChange(matchID, playerID, false);
+            await master.onConnectionChange(
+              matchID,
+              playerID,
+              credentials,
+              false
+            );
           }
         });
       });
