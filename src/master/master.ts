@@ -312,7 +312,12 @@ export class Master {
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
-  async onSync(matchID: string, playerID: string, numPlayers = 2) {
+  async onSync(
+    matchID: string,
+    playerID: string | null | undefined,
+    credentials?: string,
+    numPlayers = 2
+  ) {
     const key = matchID;
 
     const fetchOpts = {
@@ -322,12 +327,24 @@ export class Master {
       initialState: true,
     } as const;
 
+    let isAuthentic;
     let fetchResult: StorageAPI.FetchResult<typeof fetchOpts>;
+    const authenticate = (metadata: Server.MatchData | undefined) =>
+      // Don’t authenticate spectators.
+      playerID === undefined ||
+      playerID === null ||
+      this.auth.authenticateCredentials({ playerID, credentials, metadata });
 
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       fetchResult = this.storageAPI.fetch(key, fetchOpts);
+      isAuthentic = authenticate(fetchResult.metadata);
     } else {
       fetchResult = await this.storageAPI.fetch(key, fetchOpts);
+      isAuthentic = await authenticate(fetchResult.metadata);
+    }
+
+    if (!isAuthentic) {
+      return { error: 'unauthorized' };
     }
 
     let { state, initialState, log, metadata } = fetchResult;
@@ -385,18 +402,28 @@ export class Master {
    */
   async onConnectionChange(
     matchID: string,
-    playerID: string,
+    playerID: string | null | undefined,
+    credentials: string | undefined,
     connected: boolean
-  ) {
+  ): Promise<void | { error: string }> {
     const key = matchID;
 
+    // Ignore changes for clients without a playerID, e.g. spectators.
+    if (playerID === undefined || playerID === null) {
+      return;
+    }
+
+    let isAuthentic;
     let metadata: Server.MatchData | undefined;
+    const authenticate = (metadata: Server.MatchData | undefined) =>
+      this.auth.authenticateCredentials({ playerID, credentials, metadata });
+
     if (StorageAPI.isSynchronous(this.storageAPI)) {
-      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
+      ({ metadata } = this.storageAPI.fetch(key, { metadata: true }));
+      isAuthentic = authenticate(metadata);
     } else {
-      ({ metadata } = await this.storageAPI.fetch(matchID, {
-        metadata: true,
-      }));
+      ({ metadata } = await this.storageAPI.fetch(key, { metadata: true }));
+      isAuthentic = await authenticate(metadata);
     }
 
     if (metadata === undefined) {
@@ -409,6 +436,10 @@ export class Master {
         `Player not in the match, matchID=[${key}] playerID=[${playerID}]`
       );
       return { error: 'player not in the match' };
+    }
+
+    if (!isAuthentic) {
+      return { error: 'unauthorized' };
     }
 
     metadata.players[playerID].isConnected = connected;

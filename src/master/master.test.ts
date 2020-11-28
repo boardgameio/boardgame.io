@@ -93,7 +93,7 @@ describe('sync', () => {
   });
 
   test('causes server to respond', async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'sync',
@@ -103,7 +103,7 @@ describe('sync', () => {
 
   test('sync a second time does not create a game', async () => {
     const fetchResult = db.fetch('matchID', { metadata: true });
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     expect(db.fetch('matchID', { metadata: true })).toMatchObject(fetchResult);
   });
 
@@ -136,7 +136,7 @@ describe('sync', () => {
     };
     db.createMatch('matchID', { metadata, initialState: {} as State });
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync('matchID', '0', 2);
+    await masterWithMetadata.onSync('matchID', '0', undefined, 2);
 
     const expectedMetadata = [
       { id: 0, name: 'Alice' },
@@ -160,7 +160,7 @@ describe('update', () => {
   const action = ActionCreators.gameEvent('endTurn');
 
   beforeAll(async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
   });
 
   beforeEach(() => {
@@ -302,7 +302,7 @@ describe('update', () => {
     const actionC = ActionCreators.makeMove('B', null, '0');
 
     // test: simultaneous moves
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(actionA, 0, 'matchID', '0');
     await master.onUpdate(setActivePlayers, 1, 'matchID', '0');
     await Promise.all([
@@ -310,8 +310,8 @@ describe('update', () => {
       master.onUpdate(actionC, 2, 'matchID', '0'),
     ]);
     await Promise.all([
-      master.onSync('matchID', '0', 2),
-      master.onSync('matchID', '1', 2),
+      master.onSync('matchID', '0', undefined, 2),
+      master.onSync('matchID', '1', undefined, 2),
     ]);
 
     const G_player0 = sendAllReturn('0').args[1].G;
@@ -397,7 +397,7 @@ describe('update', () => {
     };
     db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync(id, '0', 2);
+    await masterWithMetadata.onSync(id, '0', undefined, 2);
 
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
@@ -418,7 +418,7 @@ describe('update', () => {
     };
     await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync(id, '0', 2);
+    await masterWithMetadata.onSync(id, '0', undefined, 2);
 
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
@@ -439,7 +439,7 @@ describe('update', () => {
     };
     await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync(id, '0', 2);
+    await masterWithMetadata.onSync(id, '0', undefined, 2);
 
     const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
     dateMock.advanceTo(updatedAt);
@@ -524,7 +524,7 @@ describe('connectionChange', () => {
   });
 
   test('changes players metadata', async () => {
-    await master.onConnectionChange('matchID', '0', true);
+    await master.onConnectionChange('matchID', '0', undefined, true);
 
     const expectedPlayerData = { id: 0, name: 'Alice', isConnected: true };
     const {
@@ -534,7 +534,7 @@ describe('connectionChange', () => {
   });
 
   test('sends metadata to all', async () => {
-    await master.onConnectionChange('matchID', '1', false);
+    await master.onConnectionChange('matchID', '1', undefined, false);
     const expectedMetadata = [
       { id: 0, name: 'Alice', isConnected: true },
       { id: 1, name: 'Bob', isConnected: false },
@@ -545,19 +545,29 @@ describe('connectionChange', () => {
   });
 
   test('invalid matchID', async () => {
-    const result = await master.onConnectionChange('invalidMatchID', '0', true);
+    const result = await master.onConnectionChange(
+      'invalidMatchID',
+      '0',
+      undefined,
+      true
+    );
     expect(error).toHaveBeenCalledWith(
       'metadata not found for matchID=[invalidMatchID]'
     );
-    expect(result.error).toEqual('metadata not found');
+    expect(result && result.error).toEqual('metadata not found');
   });
 
   test('invalid playerID', async () => {
-    const result = await master.onConnectionChange('matchID', '3', true);
+    const result = await master.onConnectionChange(
+      'matchID',
+      '3',
+      undefined,
+      true
+    );
     expect(error).toHaveBeenCalledWith(
       'Player not in the match, matchID=[matchID] playerID=[3]'
     );
-    expect(result.error).toEqual('player not in the match');
+    expect(result && result.error).toEqual('player not in the match');
   });
 
   test('processes connection change with an async db', async () => {
@@ -572,7 +582,7 @@ describe('connectionChange', () => {
       initialState: {} as State,
     });
 
-    await masterWithAsyncDb.onConnectionChange('matchID', '0', true);
+    await masterWithAsyncDb.onConnectionChange('matchID', '0', undefined, true);
 
     expect(sendAll).toHaveBeenCalled();
   });
@@ -596,7 +606,7 @@ describe('playerView', () => {
   const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
 
   beforeAll(async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
   });
 
   beforeEach(() => {
@@ -606,7 +616,7 @@ describe('playerView', () => {
   });
 
   test('sync', async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     expect(sendReturn.args[1].state).toMatchObject({
       G: { player: '0' },
     });
@@ -614,7 +624,7 @@ describe('playerView', () => {
 
   test('update', async () => {
     const action = ActionCreators.gameEvent('endTurn');
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(action, 0, 'matchID', '0');
 
     const G_player0 = sendAllReturn('0').args[1].G;
@@ -664,7 +674,7 @@ describe('authentication', () => {
 
     beforeAll(async () => {
       const master = new Master(game, storage, TransportAPI());
-      await master.onSync(matchID, '0', 2);
+      await master.onSync(matchID, '0', undefined, 2);
     });
 
     test('auth failure', async () => {
@@ -713,7 +723,7 @@ describe('authentication', () => {
 
     beforeAll(() => {
       const master = new Master(game, storage, TransportAPI());
-      master.onSync(matchID, '0', 2);
+      master.onSync(matchID, '0', undefined, 2);
     });
 
     test('auth failure', () => {
@@ -878,10 +888,10 @@ describe('redactLog', () => {
     const actionB = ActionCreators.makeMove('B', ['redacted'], '0');
 
     // test: ping-pong two moves, then sync and check the log
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(actionA, 0, 'matchID', '0');
     await master.onUpdate(actionB, 1, 'matchID', '0');
-    await master.onSync('matchID', '1', 2);
+    await master.onSync('matchID', '1', undefined, 2);
 
     const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
     expect(log).toMatchObject([

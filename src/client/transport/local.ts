@@ -203,7 +203,12 @@ export class LocalTransport extends Transport {
         this.onUpdate.apply(this, args);
       }
     });
-    this.master.onSync(this.matchID, this.playerID, this.numPlayers);
+    this.master.onSync(
+      this.matchID,
+      this.playerID,
+      this.credentials,
+      this.numPlayers
+    );
   }
 
   /**
