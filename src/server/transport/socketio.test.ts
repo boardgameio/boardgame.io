@@ -7,6 +7,7 @@
  */
 
 import { TransportAPI, SocketIO, SocketOpts } from './socketio';
+import { Auth } from '../auth';
 import { ProcessGameConfig } from '../../core/game';
 import { Master } from '../../master/master';
 
@@ -23,7 +24,7 @@ class SocketIOTestAdapter extends SocketIO {
     roomInfo = new Map(),
     ...args
   }: SocketIOTestAdapterOpts = {}) {
-    super(Object.keys(args).length ? args : undefined);
+    super(Object.keys(args).length > 0 ? args : undefined);
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
@@ -107,7 +108,8 @@ jest.mock('koa-socket-2', () => {
 });
 
 describe('basic', () => {
-  const app: any = { context: {} };
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
@@ -125,7 +127,8 @@ describe('basic', () => {
 });
 
 describe('socketAdapter', () => {
-  const app: any = { context: {} };
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
 
   let socketAdapter = jest.fn();
@@ -145,7 +148,8 @@ describe('TransportAPI', () => {
   let api;
 
   beforeAll(() => {
-    const app: any = { context: {} };
+    const auth = new Auth({ authenticateCredentials: () => true });
+    const app: any = { context: { auth } };
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
@@ -185,7 +189,8 @@ describe('TransportAPI', () => {
 });
 
 describe('sync / update', () => {
-  const app: any = { context: {} };
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
@@ -201,7 +206,8 @@ describe('sync / update', () => {
 });
 
 describe('connect / disconnect', () => {
-  const app: any = { context: {} };
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
