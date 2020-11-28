@@ -67,6 +67,7 @@ interface Client {
   matchID: string;
   playerID: string;
   socket: IOTypes.Socket;
+  credentials: string | undefined;
 }
 
 /**
@@ -141,7 +142,12 @@ export class SocketIO {
           }
           roomClients.add(socket.id);
 
-          this.clientInfo.set(socket.id, { matchID, playerID, socket });
+          this.clientInfo.set(socket.id, {
+            matchID,
+            playerID,
+            socket,
+            credentials,
+          });
 
           const master = new Master(
             game,
