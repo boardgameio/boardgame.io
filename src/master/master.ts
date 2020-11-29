@@ -119,13 +119,13 @@ export class Master {
   storageAPI: StorageAPI.Sync | StorageAPI.Async;
   transportAPI: TransportAPI;
   subscribeCallback: CallbackFn;
-  auth: Auth;
+  auth?: Auth;
 
   constructor(
     game: Game,
     storageAPI: StorageAPI.Sync | StorageAPI.Async,
     transportAPI: TransportAPI,
-    auth = new Auth({ authenticateCredentials: () => true })
+    auth?: Auth
   ) {
     this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
@@ -149,24 +149,22 @@ export class Master {
     matchID: string,
     playerID: string
   ) {
-    let isActionAuthentic;
     let metadata: Server.MatchData | undefined;
-    const { credentials } = credAction.payload;
-    const authenticate = (metadata: Server.MatchData | undefined) =>
-      this.auth.authenticateCredentials({ playerID, credentials, metadata });
-
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
-      isActionAuthentic = authenticate(metadata);
     } else {
-      ({ metadata } = await this.storageAPI.fetch(matchID, {
-        metadata: true,
-      }));
-      isActionAuthentic = await authenticate(metadata);
+      ({ metadata } = await this.storageAPI.fetch(matchID, { metadata: true }));
     }
 
-    if (!isActionAuthentic) {
-      return { error: 'unauthorized action' };
+    if (this.auth) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials: credAction.payload.credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized action' };
+      }
     }
 
     let action = stripCredentialsFromAction(credAction);
@@ -326,28 +324,26 @@ export class Master {
       log: true,
       initialState: true,
     } as const;
-
-    let isAuthentic;
     let fetchResult: StorageAPI.FetchResult<typeof fetchOpts>;
-    const authenticate = (metadata: Server.MatchData | undefined) =>
-      // Don’t authenticate spectators.
-      playerID === undefined ||
-      playerID === null ||
-      this.auth.authenticateCredentials({ playerID, credentials, metadata });
 
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       fetchResult = this.storageAPI.fetch(key, fetchOpts);
-      isAuthentic = authenticate(fetchResult.metadata);
     } else {
       fetchResult = await this.storageAPI.fetch(key, fetchOpts);
-      isAuthentic = await authenticate(fetchResult.metadata);
-    }
-
-    if (!isAuthentic) {
-      return { error: 'unauthorized' };
     }
 
     let { state, initialState, log, metadata } = fetchResult;
+
+    if (this.auth && playerID !== undefined && playerID !== null) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
+    }
 
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
@@ -413,17 +409,12 @@ export class Master {
       return;
     }
 
-    let isAuthentic;
     let metadata: Server.MatchData | undefined;
-    const authenticate = (metadata: Server.MatchData | undefined) =>
-      this.auth.authenticateCredentials({ playerID, credentials, metadata });
 
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(key, { metadata: true }));
-      isAuthentic = authenticate(metadata);
     } else {
       ({ metadata } = await this.storageAPI.fetch(key, { metadata: true }));
-      isAuthentic = await authenticate(metadata);
     }
 
     if (metadata === undefined) {
@@ -438,8 +429,15 @@ export class Master {
       return { error: 'player not in the match' };
     }
 
-    if (!isAuthentic) {
-      return { error: 'unauthorized' };
+    if (this.auth) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
     }
 
     metadata.players[playerID].isConnected = connected;
