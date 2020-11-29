@@ -148,7 +148,7 @@ export class Master {
     stateID: number,
     matchID: string,
     playerID: string
-  ) {
+  ): Promise<void | { error: string }> {
     let metadata: Server.MatchData | undefined;
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
@@ -315,7 +315,7 @@ export class Master {
     playerID: string | null | undefined,
     credentials?: string,
     numPlayers = 2
-  ) {
+  ): Promise<void | { error: string }> {
     const key = matchID;
 
     const fetchOpts = {
