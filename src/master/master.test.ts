@@ -664,18 +664,24 @@ describe('subscribe', () => {
 });
 
 describe('authentication', () => {
-  describe('async', () => {
-    const send = jest.fn();
-    const sendAll = jest.fn();
-    const game = { seed: 0 };
-    const matchID = 'matchID';
-    const action = ActionCreators.gameEvent('endTurn');
-    const storage = new InMemoryAsync();
+  const send = jest.fn();
+  const sendAll = jest.fn();
+  const game = { seed: 0 };
+  const matchID = 'matchID';
+  let storage = new InMemoryAsync();
 
-    beforeAll(async () => {
-      const master = new Master(game, storage, TransportAPI());
-      await master.onSync(matchID, '0', undefined, 2);
-    });
+  const resetTestEnvironment = async () => {
+    send.mockReset();
+    sendAll.mockReset();
+    storage = new InMemoryAsync();
+    const master = new Master(game, storage, TransportAPI());
+    await master.onSync(matchID, '0', undefined, 2);
+  };
+
+  describe('onUpdate', () => {
+    const action = ActionCreators.gameEvent('endTurn');
+
+    beforeEach(resetTestEnvironment);
 
     test('auth failure', async () => {
       const authenticateCredentials = () => false;
@@ -685,7 +691,8 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         new Auth({ authenticateCredentials })
       );
-      await master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onUpdate(action, 0, matchID, '0');
+      expect(ret && ret.error).toBe('unauthorized action');
       expect(sendAll).not.toHaveBeenCalled();
     });
 
@@ -697,7 +704,8 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         new Auth({ authenticateCredentials })
       );
-      await master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onUpdate(action, 0, matchID, '0');
+      expect(ret).toBeUndefined();
       expect(sendAll).toHaveBeenCalled();
     });
 
@@ -708,25 +716,16 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         new Auth()
       );
-      await master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onUpdate(action, 0, matchID, '0');
+      expect(ret).toBeUndefined();
       expect(sendAll).toHaveBeenCalled();
     });
   });
 
-  describe('sync', () => {
-    const send = jest.fn();
-    const sendAll = jest.fn();
-    const game = { seed: 0 };
-    const matchID = 'matchID';
-    const action = ActionCreators.gameEvent('endTurn');
-    const storage = new InMemory();
+  describe('onSync', () => {
+    beforeEach(resetTestEnvironment);
 
-    beforeAll(() => {
-      const master = new Master(game, storage, TransportAPI());
-      master.onSync(matchID, '0', undefined, 2);
-    });
-
-    test('auth failure', () => {
+    test('auth failure', async () => {
       const authenticateCredentials = () => false;
       const master = new Master(
         game,
@@ -734,11 +733,12 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         new Auth({ authenticateCredentials })
       );
-      master.onUpdate(action, 0, matchID, '0');
-      expect(sendAll).not.toHaveBeenCalled();
+      const ret = await master.onSync(matchID, '0');
+      expect(ret && ret.error).toBe('unauthorized');
+      expect(send).not.toHaveBeenCalled();
     });
 
-    test('auth success', () => {
+    test('auth success', async () => {
       const authenticateCredentials = () => true;
       const master = new Master(
         game,
@@ -746,19 +746,66 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         new Auth({ authenticateCredentials })
       );
-      master.onUpdate(action, 0, matchID, '0');
-      expect(sendAll).toHaveBeenCalled();
+      const ret = await master.onSync(matchID, '0');
+      expect(ret).toBeUndefined();
+      expect(send).toHaveBeenCalled();
     });
 
-    test('default', () => {
+    test('spectators don’t need to authenticate', async () => {
+      const authenticateCredentials = () => false;
       const master = new Master(
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth()
+        new Auth({ authenticateCredentials })
       );
-      master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onSync(matchID, null);
+      expect(ret).toBeUndefined();
+      expect(send).toHaveBeenCalled();
+    });
+  });
+
+  describe('onConnectionChange', () => {
+    beforeEach(resetTestEnvironment);
+
+    test('auth failure', async () => {
+      const authenticateCredentials = () => false;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onConnectionChange(matchID, '0', null, true);
+      expect(ret && ret.error).toBe('unauthorized');
+      expect(sendAll).not.toHaveBeenCalled();
+    });
+
+    test('auth success', async () => {
+      const authenticateCredentials = () => true;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onConnectionChange(matchID, '0', null, true);
+      expect(ret).toBeUndefined();
       expect(sendAll).toHaveBeenCalled();
+    });
+
+    test('spectators are ignored', async () => {
+      const authenticateCredentials = jest.fn();
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onConnectionChange(matchID, null, null, true);
+      expect(ret).toBeUndefined();
+      expect(authenticateCredentials).not.toHaveBeenCalled();
+      expect(sendAll).not.toHaveBeenCalled();
     });
   });
 });
