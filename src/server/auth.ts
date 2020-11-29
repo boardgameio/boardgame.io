@@ -9,9 +9,9 @@ export const doesMatchRequireAuthentication = (
 ) => {
   if (!matchData) return false;
   const { players } = matchData;
-  const hasCredentials = Object.keys(players).some(key => {
-    return !!(players[key] && players[key].credentials);
-  });
+  const hasCredentials = Object.values(players).some(
+    player => !!(player && player.credentials)
+  );
   return hasCredentials;
 };
 
