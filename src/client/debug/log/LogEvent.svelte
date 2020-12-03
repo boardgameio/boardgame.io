@@ -10,7 +10,8 @@
 
   const dispatch = createEventDispatcher();
 
-  const args = action.payload.args || [];
+  const args = action.payload.args;
+  const renderedArgs = typeof args === 'string' ? args : (args || []).join(',');
   const playerID = action.payload.playerID;
   let actionType; 
   switch (action.type) {
@@ -132,7 +133,7 @@
   on:mouseleave={() => dispatch('mouseleave')}
   on:blur={() => dispatch('mouseleave')}
 >
-  <div>{actionType}({args.join(',')})</div>
+  <div>{actionType}({renderedArgs})</div>
 
   {#if payloadComponent}
     <svelte:component this={payloadComponent} {payload} />
