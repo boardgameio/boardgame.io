@@ -10,6 +10,7 @@ import { Random } from './random';
 import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
+import { Client } from '../../client/client';
 
 function Init(seed) {
   return new Random({ seed });
@@ -138,4 +139,9 @@ test('turn.onBegin has ctx APIs at the beginning of the game', () => {
   InitializeGame({ game });
   expect(random).not.toBe(null);
   expect(events).not.toBe(null);
+});
+
+test('PRNG state is not sent to the client', () => {
+  const client = Client({ game: {} });
+  expect(client.getState().plugins.random.data).toBeUndefined();
 });

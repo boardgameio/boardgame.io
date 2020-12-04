@@ -37,6 +37,8 @@ const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI, RandomState> = {
     }
     return { seed };
   },
+
+  playerView: () => undefined,
 };
 
 export default RandomPlugin;
