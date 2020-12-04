@@ -235,3 +235,27 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
     })
     .some(value => value === true);
 };
+
+/**
+ * Allows plugins to customize their data for specific players.
+ * For example, a plugin may want to share no data with the client, or
+ * want to keep some player data secret from opponents.
+ */
+export const PlayerView = (
+  { G, ctx, plugins = {} }: State,
+  { game, playerID }: PluginOpts & { playerID: PlayerID }
+) => {
+  [...DEFAULT_PLUGINS, ...game.plugins].forEach(({ name, playerView }) => {
+    if (!playerView) return;
+
+    const { data } = plugins[name] || { data: {} };
+    const newData = playerView({ G, ctx, game, data, playerID });
+
+    plugins = {
+      ...plugins,
+      [name]: { data: newData },
+    };
+  });
+
+  return plugins;
+};

@@ -130,6 +130,13 @@ export interface Plugin<
     data: Data;
   }) => State<G, Ctx>;
   fnWrap?: (fn: AnyFn) => (G: G, ctx: Ctx, ...args: any[]) => any;
+  playerView?: (context: {
+    G: G;
+    ctx: Ctx;
+    game: Game<G, Ctx>;
+    data: Data;
+    playerID?: PlayerID | null;
+  }) => any;
 }
 
 type MoveFn<G extends any = any, CtxWithPlugins extends Ctx = Ctx> = (
