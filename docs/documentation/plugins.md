@@ -97,10 +97,18 @@ import { PluginPlayer } from 'boardgame.io/plugins';
 // define a function to initialize each player’s state
 const playerSetup = (playerID) => ({ ... });
 
+// filter data returned to each client to hide secret state (OPTIONAL)
+const playerView = (players, playerID) => ({
+  [playerID]: players[playerID],
+});
+
 const game = {
   plugins: [
     // pass your function to the player plugin
-    PluginPlayer({ setup: playerSetup }),
+    PluginPlayer({
+      setup: playerSetup,
+      playerView: playerView,
+    }),
   ],
 };
 ```

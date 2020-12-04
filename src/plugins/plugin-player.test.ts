@@ -142,3 +142,29 @@ describe('game with phases', () => {
     });
   });
 });
+
+describe('with playerView', () => {
+  const plugin = PluginPlayer({
+    setup: id => ({ id }),
+    playerView: (players, playerID) => ({
+      [playerID]: players[playerID],
+    }),
+  });
+  const game = {
+    plugins: [plugin],
+  };
+
+  test('spectator doesn’t see player state', () => {
+    const spectator = Client({ game });
+    expect(spectator.getState().plugins[plugin.name].data).toEqual({
+      players: {},
+    });
+  });
+
+  test('player only sees own state', () => {
+    const client = Client({ game, playerID: '0' });
+    expect(client.getState().plugins[plugin.name].data).toEqual({
+      players: { '0': { id: '0' } },
+    });
+  });
+});
