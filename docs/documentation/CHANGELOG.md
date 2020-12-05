@@ -1,3 +1,13 @@
+## v0.42.2
+
+#### Features
+
+* [[8f8d30e](https://github.com/boardgameio/boardgame.io/commit/8f8d30e)] plugins: Add `playerView` option to plugin API (closes [#671](https://github.com/boardgameio/boardgame.io/issues/671)) ([#857](https://github.com/boardgameio/boardgame.io/pull/857))
+
+#### Bugfixes
+
+* [[c51bc09](https://github.com/boardgameio/boardgame.io/commit/c51bc09)] debug: prevent `endStage` event crashing debug log panel ([#856](https://github.com/boardgameio/boardgame.io/pull/856))
+
 ## v0.42.1
 
 #### Features
