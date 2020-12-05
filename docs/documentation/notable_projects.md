@@ -42,4 +42,4 @@ List of notable projects using boardgame.io. This list is not exhaustive. Feel f
 
 - [Yatzy](https://github.com/pjohannessen/yatzy) - [play](https://www.lonesomecrowdedweb.com/yatzy/) - [tutorial](https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/) - A 1-4 player dice game played locally.
 
-- [Arknights: The Card Game(明日方舟: 采掘行动)](https://github.com/dadiaogames/arknights-card-game) - [play](https://dadiaogames.github.io/arknights-card-game/) - A challenging single player roguelike card game that is played locally, in Chinese.
+- [Arknights: The Card Game (明日方舟: 采掘行动)](https://github.com/dadiaogames/arknights-card-game) - [play](https://dadiaogames.github.io/arknights-card-game/) - A challenging single-player roguelike card game that is played locally, in Chinese.
