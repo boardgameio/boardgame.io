@@ -46,6 +46,11 @@ A plugin is an object that contains the following fields.
   // the client will discard the state update and wait
   // for the master instead.
   noClient: ({ G, ctx, game, data, api }) => boolean,
+
+  // Function that can filter `data` to hide secret state
+  // before sending it to a specific client.
+  // `playerID` could also be null or undefined for spectators.
+  playerView: ({ G, ctx, game, data, playerID }) => filtered data object,
 }
 ```
 
@@ -97,10 +102,18 @@ import { PluginPlayer } from 'boardgame.io/plugins';
 // define a function to initialize each player’s state
 const playerSetup = (playerID) => ({ ... });
 
+// filter data returned to each client to hide secret state (OPTIONAL)
+const playerView = (players, playerID) => ({
+  [playerID]: players[playerID],
+});
+
 const game = {
   plugins: [
     // pass your function to the player plugin
-    PluginPlayer({ setup: playerSetup }),
+    PluginPlayer({
+      setup: playerSetup,
+      playerView: playerView,
+    }),
   ],
 };
 ```

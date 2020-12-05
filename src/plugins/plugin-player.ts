@@ -24,6 +24,10 @@ export interface PlayerAPI<PlayerState extends any = any> {
 
 interface PluginPlayerOpts<PlayerState extends any = any> {
   setup?: (playerID: string) => PlayerState;
+  playerView?: (
+    players: Record<PlayerID, PlayerState>,
+    playerID?: string | null
+  ) => any;
 }
 
 export interface PlayerPlugin<PlayerState extends any = any> {
@@ -39,6 +43,7 @@ export interface PlayerPlugin<PlayerState extends any = any> {
  */
 const PlayerPlugin = <PlayerState extends any = any>({
   setup,
+  playerView,
 }: PluginPlayerOpts<PlayerState> = {}): Plugin<
   PlayerAPI<PlayerState>,
   PlayerData<PlayerState>
@@ -87,6 +92,9 @@ const PlayerPlugin = <PlayerState extends any = any>({
     }
     return { players };
   },
+
+  playerView: ({ data, playerID }) =>
+    playerView ? { players: playerView(data.players, playerID) } : data,
 });
 
 export default PlayerPlugin;

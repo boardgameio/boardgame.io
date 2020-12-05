@@ -20,6 +20,7 @@ import { ProcessGameConfig } from '../core/game';
 import Debug from './debug/Debug.svelte';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
+import { PlayerView } from '../plugins/main';
 import { Transport, TransportOpts } from './transport/transport';
 import { ClientManager } from './manager';
 import {
@@ -432,14 +433,17 @@ export class _ClientImpl<G extends any = any> {
     // can see their effects while prototyping.
     // Do not strip again if this is a multiplayer game
     // since the server has already stripped secret info. (issue #818)
-    const G = this.multiplayer
-      ? state.G
-      : this.game.playerView(state.G, state.ctx, this.playerID);
+    if (!this.multiplayer) {
+      state = {
+        ...state,
+        G: this.game.playerView(state.G, state.ctx, this.playerID),
+        plugins: PlayerView(state, this),
+      };
+    }
 
     // Combine into return value.
     return {
       ...state,
-      G,
       log: this.log,
       isActive,
       isConnected: this.transport.isConnected,

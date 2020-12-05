@@ -12,6 +12,7 @@ import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
+import { PlayerView } from '../plugins/main';
 import {
   SyncInfo,
   FilteredMetadata,
@@ -325,6 +326,7 @@ export class Master {
       const filteredState = {
         ...state,
         G: this.game.playerView(state.G, state.ctx, playerID),
+        plugins: PlayerView(state, { playerID, game: this.game }),
         deltalog: undefined,
         _undo: [],
         _redo: [],
@@ -413,6 +415,7 @@ export class Master {
     const filteredState = {
       ...state,
       G: this.game.playerView(state.G, state.ctx, playerID),
+      plugins: PlayerView(state, { playerID, game: this.game }),
       deltalog: undefined,
       _undo: [],
       _redo: [],
