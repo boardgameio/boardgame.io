@@ -41,6 +41,10 @@
   margin-bottom: 6em;
 }
 
+img[alt*="github stars" i] {
+  vertical-align: middle;
+}
+
 .sidebar-nav li > strong {
   letter-spacing: .15ch;
 }
