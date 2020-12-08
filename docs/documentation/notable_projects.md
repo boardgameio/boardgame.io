@@ -3,7 +3,7 @@
 Nonexhaustive list of notable projects using boardgame.io. Feel free to send a PR to add your project to this list, but please have a demo that's accessible via a URL.
 
 
-### [![GitHub stars][b-ark]][c-ark] [Arknights: The Card Game (明日方舟: 采掘行动)][p-ark] \[[code][c-ark]\]
+#### [![GitHub stars][b-ark]][c-ark] [Arknights: The Card Game (明日方舟: 采掘行动)][p-ark] \[[code][c-ark]\]
 &nbsp;&nbsp;
 A challenging single-player roguelike card game that is played locally, in Chinese.
 
@@ -11,7 +11,7 @@ A challenging single-player roguelike card game that is played locally, in Chine
 [p-ark]: https://dadiaogames.github.io/arknights-card-game/
 [c-ark]: https://github.com/dadiaogames/arknights-card-game
 
-### [![GitHub stars][b1]][c1] Bad Flamingo \[[code][c1]\]
+#### [![GitHub stars][b1]][c1] Bad Flamingo \[[code][c1]\]
 &nbsp;&nbsp;
 Fool the computer, but not your friends! Adversarial "Quick, Draw".
 
@@ -19,7 +19,7 @@ Fool the computer, but not your friends! Adversarial "Quick, Draw".
 [c1]: https://github.com/jayelm/bad-flamingo
 
 
-### [![GitHub stars][b2]][c2] boardgame.io-angular \[[code][c2] | [demo][d2]\]
+#### [![GitHub stars][b2]][c2] boardgame.io-angular \[[code][c2] | [demo][d2]\]
 &nbsp;&nbsp;
 Unofficial Angular client for boardgame.io.
 
@@ -28,7 +28,7 @@ Unofficial Angular client for boardgame.io.
 [d2]: https://turn-based-209306.firebaseapp.com/
 
 
-### [![GitHub stars][b3]][c3]  [Camelot][p3] \[[code][c3]\]
+#### [![GitHub stars][b3]][c3]  [Camelot][p3] \[[code][c3]\]
 &nbsp;&nbsp;
 Play the Camelot board game online.
 
@@ -37,7 +37,7 @@ Play the Camelot board game online.
 [p3]: https://www.playcamelot.com
 
 
-### [![GitHub stars][b4]][c4] [Can't Stop!][p4] \[[code][c4]\]
+#### [![GitHub stars][b4]][c4] [Can't Stop!][p4] \[[code][c4]\]
 &nbsp;&nbsp;
 The classic "push your luck" dice game.
 
@@ -46,7 +46,7 @@ The classic "push your luck" dice game.
 [p4]: https://cantstop.fun
 
 
-### [![GitHub stars][b5]][c5] [Cardman Multiplayer][p5] \[[code][c5]\]
+#### [![GitHub stars][b5]][c5] [Cardman Multiplayer][p5] \[[code][c5]\]
 &nbsp;&nbsp;
 A cross between Hangman and a card game.
 
@@ -55,7 +55,7 @@ A cross between Hangman and a card game.
 [b5]: https://img.shields.io/github/stars/VengelStudio/cardman-multiplayer?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b6]][c6] [Elevation of Privilege][p6] \[[code][c6]\]
+#### [![GitHub stars][b6]][c6] [Elevation of Privilege][p6] \[[code][c6]\]
 &nbsp;&nbsp;
 An online multiplayer version of the threat modeling card game.
 
@@ -64,7 +64,7 @@ An online multiplayer version of the threat modeling card game.
 [c6]: https://github.com/dehydr8/elevation-of-privilege
 
 
-### [![GitHub stars][b7]][c7] [Fields of Arle simulator][p7] \[[code][c7]\]
+#### [![GitHub stars][b7]][c7] [Fields of Arle simulator][p7] \[[code][c7]\]
 &nbsp;&nbsp;
 Open source simulator of Fields of Arle.
 
@@ -73,7 +73,7 @@ Open source simulator of Fields of Arle.
 [c7]: https://github.com/philihp/fields-of-arle
 
 
-### [![GitHub stars][b8]][c8] Four in a row \[[code][c8] | [tutorial][t8]\]
+#### [![GitHub stars][b8]][c8] Four in a row \[[code][c8] | [tutorial][t8]\]
 &nbsp;&nbsp;
 Four in a Row using boardgame.io.
 
@@ -82,7 +82,7 @@ Four in a Row using boardgame.io.
 [b8]: https://img.shields.io/github/stars/PJohannessen/four-in-a-row?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b9]][c9] [FreeBoardGames.org][p9] \[[code][c9]\]
+#### [![GitHub stars][b9]][c9] [FreeBoardGames.org][p9] \[[code][c9]\]
 &nbsp;&nbsp;
 PWA framework for publishing board games.
 
@@ -91,7 +91,7 @@ PWA framework for publishing board games.
 [b9]: https://img.shields.io/github/stars/freeboardgames/FreeBoardGames.org?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b10]][c10] [Hex game][p10] \[[code][c10]\]
+#### [![GitHub stars][b10]][c10] [Hex game][p10] \[[code][c10]\]
 &nbsp;&nbsp;
 Simple hexagonal board game.
 
@@ -100,7 +100,7 @@ Simple hexagonal board game.
 [b10]: https://img.shields.io/github/stars/Korla/hexgame?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b11]][c11] [Matchimals.fun][p11] \[[code][c11]\]
+#### [![GitHub stars][b11]][c11] [Matchimals.fun][p11] \[[code][c11]\]
 &nbsp;&nbsp;
 An animal matching puzzle card game.
 
@@ -109,7 +109,7 @@ An animal matching puzzle card game.
 [b11]: https://img.shields.io/github/stars/chrisheninger/matchimals.fun?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b12]][c12] [Mosaic Multiplayer][p12] \[[code][c12]\]
+#### [![GitHub stars][b12]][c12] [Mosaic Multiplayer][p12] \[[code][c12]\]
 &nbsp;&nbsp;
 Azul board game clone you can play online with friends.
 
@@ -118,7 +118,7 @@ Azul board game clone you can play online with friends.
 [b12]: https://img.shields.io/github/stars/maciejmatu/mosaic?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b13]][c13] [Multibuzzer][p13] \[[code][c13]\]
+#### [![GitHub stars][b13]][c13] [Multibuzzer][p13] \[[code][c13]\]
 &nbsp;&nbsp;
 Simple multiplayer buzzer system for trivia night or quiz bowl.
 
@@ -127,7 +127,7 @@ Simple multiplayer buzzer system for trivia night or quiz bowl.
 [b13]: https://img.shields.io/github/stars/wsun/multibuzzer?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b14]][c14] [Pong420's Boardgame][p14] \[[code][c14]\]
+#### [![GitHub stars][b14]][c14] [Pong420's Boardgame][p14] \[[code][c14]\]
 &nbsp;&nbsp;
 A project for building board games with React and boardgame.io.
 
@@ -136,21 +136,21 @@ A project for building board games with React and boardgame.io.
 [b14]: https://img.shields.io/github/stars/Pong420/Boardgame?label=%E2%98%85&logo=github
 
 
-### [Splendor][p15]
+#### [Splendor][p15]
 &nbsp;&nbsp;
 A minimal splendor game you can play with up to 4 players.
 
 [p15]: http://bestboards.ir
 
 
-### [Steel Civilizations][p16]
+#### [Steel Civilizations][p16]
 &nbsp;&nbsp;
 Turn-based mobile strategy game for Android with real-time online multiplayer ranking ladder system.
 
 [p16]: https://play.google.com/store/apps/details?id=com.hydra.steelcivs
 
 
-### [![GitHub stars][b17]][c17] [Territories][p17] \[[code][c17]\]
+#### [![GitHub stars][b17]][c17] [Territories][p17] \[[code][c17]\]
 &nbsp;&nbsp;
 Simple board game Territories.
 
@@ -159,7 +159,7 @@ Simple board game Territories.
 [b17]: https://img.shields.io/github/stars/lehaSVV2009/territories?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b18]][c18] [Thinktank][p18] \[[code][c18]\]
+#### [![GitHub stars][b18]][c18] [Thinktank][p18] \[[code][c18]\]
 &nbsp;&nbsp;
 A 2-player strategy game inspired by Conundrum.
 
@@ -168,7 +168,7 @@ A 2-player strategy game inspired by Conundrum.
 [b18]: https://img.shields.io/github/stars/averycrespi/thinktank?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b19]][c19] [Udaipur][p19] \[[code][c19]\]
+#### [![GitHub stars][b19]][c19] [Udaipur][p19] \[[code][c19]\]
 &nbsp;&nbsp;
 Clone of Jaipur, a 2 Player Card game, with online multiplayer support.
 
@@ -177,7 +177,7 @@ Clone of Jaipur, a 2 Player Card game, with online multiplayer support.
 [b19]:https://img.shields.io/github/stars/skvrahul/UdaipurGame?label=%E2%98%85&logo=github
 
 
-### [![GitHub stars][b20]][c20] [Yatzy][p20] \[[code][c20] | [tutorial][t20]\]
+#### [![GitHub stars][b20]][c20] [Yatzy][p20] \[[code][c20] | [tutorial][t20]\]
 &nbsp;&nbsp;
 A 1-4 player dice game played locally.
 
