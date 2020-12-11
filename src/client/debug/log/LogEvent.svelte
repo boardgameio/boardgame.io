@@ -3,9 +3,9 @@
   export let action;
   export let pinned;
   export let payload;
-  export let payloadComponent;
+  export let metadataComponent;
 
-  import CustomPayload from './CustomPayload.svelte';
+  import LogMetadata from './LogMetadata.svelte';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
@@ -13,7 +13,8 @@
   const args = action.payload.args;
   const renderedArgs = typeof args === 'string' ? args : (args || []).join(',');
   const playerID = action.payload.playerID;
-  let actionType; 
+  const metadata = action.payload.metadata
+  let actionType;
   switch (action.type) {
     case 'UNDO':
       actionType = 'undo';
@@ -134,10 +135,9 @@
   on:blur={() => dispatch('mouseleave')}
 >
   <div>{actionType}({renderedArgs})</div>
-
-  {#if payloadComponent}
-    <svelte:component this={payloadComponent} {payload} />
+  {#if metadataComponent}
+    <svelte:component this={metadataComponent} {metadata} />
   {:else}
-    <CustomPayload {payload} />
+    <LogMetadata {metadata} />
   {/if}
 </button>
