@@ -7,6 +7,5 @@
  */
 
 import PluginPlayer from '../src/plugins/plugin-player';
-import PluginLogMetadata from '../src/plugins/plugin-log-metadata';
 
-export { PluginPlayer, PluginLogMetadata };
+export { PluginPlayer };
