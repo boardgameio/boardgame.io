@@ -9,6 +9,7 @@
 import PluginImmer from './plugin-immer';
 import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
+import PluginLogMetadata from './plugin-log-metadata';
 import {
   AnyFn,
   PartialGameState,
@@ -28,7 +29,12 @@ interface PluginOpts {
 /**
  * List of plugins that are always added.
  */
-const DEFAULT_PLUGINS = [PluginImmer, PluginRandom, PluginEvents];
+const DEFAULT_PLUGINS = [
+  PluginImmer,
+  PluginRandom,
+  PluginEvents,
+  PluginLogMetadata,
+];
 
 /**
  * Allow plugins to intercept actions and process them.
