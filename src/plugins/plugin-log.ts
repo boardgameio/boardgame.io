@@ -26,16 +26,15 @@ const LogPlugin: Plugin<LogMetadataAPI, LogMetadataData> = {
 
   flush: () => ({}),
 
-  api: ({ ctx: Ctx, data }) => {
-    const setMetadata = metadata => {
-      data.metadata = metadata;
-    };
+  api: ({ data }) => {
     return {
-      setMetadata,
+      setMetadata: metadata => {
+        data.metadata = metadata;
+      },
     };
   },
 
-  setup: ({ G, ctx }) => ({}),
+  setup: () => ({}),
 };
 
 export default LogPlugin;

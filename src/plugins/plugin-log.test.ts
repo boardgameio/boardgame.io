@@ -18,9 +18,7 @@ describe('log-metadata', () => {
             message: 'test',
           });
         },
-        doNothing: (G, ctx) => {
-          return G;
-        },
+        doNothing: G => G,
       },
     };
     const client = Client({ game });
