@@ -9,11 +9,11 @@
 import { AnyFn, Ctx, Plugin } from '../types';
 
 interface LogMetadataData {
-  metadata: object;
+  metadata?: any;
 }
 
 interface LogMetadataAPI {
-  setMetadata(metadata: object): object;
+  setMetadata(metadata: any): void;
 }
 
 /**
@@ -21,24 +21,21 @@ interface LogMetadataAPI {
  * During a move, you can set metadata using ctx.log.setMetadata and it will be
  * available on the log entry for that move.
  */
-const LogMetadataPlugin: Plugin = {
+const LogMetadataPlugin: Plugin<LogMetadataAPI, LogMetadataData> = {
   name: 'log',
 
-  flush: () => {
-    return { metadata: null };
-  },
+  flush: () => ({}),
 
-  api: ({ ctx: Ctx, data }): LogMetadataAPI => {
+  api: ({ ctx: Ctx, data }) => {
     const setMetadata = metadata => {
       data.metadata = metadata;
-      return metadata;
     };
     return {
       setMetadata,
     };
   },
 
-  setup: ({ G, ctx }) => ({ metadata: null }),
+  setup: ({ G, ctx }) => ({}),
 };
 
 export default LogMetadataPlugin;
