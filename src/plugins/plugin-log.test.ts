@@ -7,7 +7,6 @@
  */
 
 import { Client } from '../client/client';
-import PluginLogMetadata from './plugin-log';
 
 describe('log-metadata', () => {
   test('It sets metadata in a move and then clears the metadata', () => {

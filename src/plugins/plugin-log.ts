@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { AnyFn, Ctx, Plugin } from '../types';
+import { Plugin } from '../types';
 
 interface LogMetadataData {
   metadata?: any;
