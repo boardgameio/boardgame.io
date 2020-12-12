@@ -97,11 +97,6 @@ function initializeDeltalog(
   action: ActionShape.MakeMove | ActionShape.Undo | ActionShape.Redo,
   move?: Move
 ): State {
-  if (state.plugins.log) {
-    const pluginLogMetadata = state.plugins.log.data.metadata;
-    action.payload['metadata'] = pluginLogMetadata;
-  }
-
   // Create a log entry for this action.
   const logEntry: LogEntry = {
     action,
@@ -109,6 +104,11 @@ function initializeDeltalog(
     turn: state.ctx.turn,
     phase: state.ctx.phase,
   };
+
+  const pluginLogMetadata = state.plugins.log.data.metadata;
+  if (pluginLogMetadata !== undefined) {
+    logEntry.metadata = pluginLogMetadata;
+  }
 
   if (typeof move === 'object' && move.redact === true) {
     logEntry.redact = true;
