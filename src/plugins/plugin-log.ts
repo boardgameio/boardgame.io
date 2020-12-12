@@ -21,7 +21,7 @@ interface LogMetadataAPI {
  * During a move, you can set metadata using ctx.log.setMetadata and it will be
  * available on the log entry for that move.
  */
-const LogMetadataPlugin: Plugin<LogMetadataAPI, LogMetadataData> = {
+const LogPlugin: Plugin<LogMetadataAPI, LogMetadataData> = {
   name: 'log',
 
   flush: () => ({}),
@@ -38,4 +38,4 @@ const LogMetadataPlugin: Plugin<LogMetadataAPI, LogMetadataData> = {
   setup: ({ G, ctx }) => ({}),
 };
 
-export default LogMetadataPlugin;
+export default LogPlugin;
