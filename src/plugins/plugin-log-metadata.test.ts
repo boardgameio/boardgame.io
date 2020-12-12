@@ -11,7 +11,6 @@ import PluginLogMetadata from './plugin-log-metadata';
 
 describe('log-metadata', () => {
   test('It sets metadata in a move and then clears the metadata', () => {
-    const plugin = PluginLogMetadata;
     const game = {
       moves: {
         setMetadataMove: (G, ctx) => {
@@ -23,19 +22,18 @@ describe('log-metadata', () => {
           return G;
         },
       },
-      plugins: [plugin],
     };
     const client = Client({ game });
     client.moves.setMetadataMove();
 
-    expect(client.getState().plugins[plugin.name].data).toEqual({});
+    expect(client.getState().plugins.log.data).toEqual({});
     expect(client.getState().log[0].metadata).toEqual({
       message: 'test',
     });
 
     client.moves.doNothing();
 
-    expect(client.getState().plugins[plugin.name].data).toEqual({});
+    expect(client.getState().plugins.log.data).toEqual({});
     expect(client.getState().log[1].metadata).toEqual(undefined);
   });
 });
