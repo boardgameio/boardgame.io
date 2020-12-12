@@ -28,30 +28,14 @@ describe('log-metadata', () => {
     const client = Client({ game });
     client.moves.setMetadataMove();
 
-    expect(client.getState().plugins[plugin.name].data).toEqual({
-      metadata: null,
-    });
-    expect(client.getState().log[0].action.payload).toEqual({
-      args: [],
-      credentials: undefined,
-      playerID: '0',
-      type: 'setMetadataMove',
-      metadata: {
-        message: 'test',
-      },
+    expect(client.getState().plugins[plugin.name].data).toEqual({});
+    expect(client.getState().log[0].metadata).toEqual({
+      message: 'test',
     });
 
     client.moves.doNothing();
 
-    expect(client.getState().plugins[plugin.name].data).toEqual({
-      metadata: null,
-    });
-    expect(client.getState().log[1].action.payload).toEqual({
-      args: [],
-      credentials: undefined,
-      playerID: '0',
-      type: 'doNothing',
-      metadata: null,
-    });
+    expect(client.getState().plugins[plugin.name].data).toEqual({});
+    expect(client.getState().log[1].metadata).toEqual(undefined);
   });
 });
