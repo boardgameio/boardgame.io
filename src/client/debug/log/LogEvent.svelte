@@ -2,7 +2,7 @@
   export let logIndex;
   export let action;
   export let pinned;
-  export let payload;
+  export let metadata;
   export let metadataComponent;
 
   import LogMetadata from './LogMetadata.svelte';
@@ -13,7 +13,6 @@
   const args = action.payload.args;
   const renderedArgs = typeof args === 'string' ? args : (args || []).join(',');
   const playerID = action.payload.playerID;
-  const metadata = action.payload.metadata
   let actionType;
   switch (action.type) {
     case 'UNDO':
