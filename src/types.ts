@@ -92,6 +92,7 @@ export interface LogEntry {
   phase: string;
   redact?: boolean;
   automatic?: boolean;
+  metadata?: any;
 }
 
 interface PluginContext<
