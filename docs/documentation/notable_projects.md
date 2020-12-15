@@ -185,3 +185,12 @@ A 1-4 player dice game played locally.
 [c20]: https://github.com/pjohannessen/yatzy
 [t20]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
 [b20]:https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
+
+
+#### [![GitHub stars][b21]][c21] [Coup][p21] \[[code][c21]\]
+&nbsp;&nbsp;
+Online multiplayer version of Coup, a strategy board game.
+
+[p21]: https://online-coup.herokuapp.com/
+[c21]: https://github.com/vyang1222/online-coup
+[b21]: https://img.shields.io/github/stars/vyang1222/online-coup?label=%E2%98%85&logo=github
