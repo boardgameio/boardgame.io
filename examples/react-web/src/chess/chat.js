@@ -9,12 +9,18 @@ const Chat = ({ onSend, messages }) => {
 
   const triggerSend = () => {
     onSend(message);
+    setMessage('');
   };
 
   return (
     <div>
       <div
-        style={{ height: 200, overflow: 'scroll', border: '1px solid black' }}
+        style={{
+          height: 200,
+          maxWidth: 400,
+          overflow: 'scroll',
+          border: '1px solid black',
+        }}
       >
         {messages.map((message, index) => (
           <div key={index}>

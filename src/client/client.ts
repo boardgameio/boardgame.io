@@ -183,7 +183,6 @@ export class _ClientImpl<G extends any = any> {
     this.manager = GlobalClientManager;
     this.gameStateOverride = null;
     this.subscribers = {};
-    this.chatMessages = [];
     this._running = false;
 
     this.reducer = CreateGameReducer({
@@ -215,13 +214,6 @@ export class _ClientImpl<G extends any = any> {
     };
 
     this.log = [];
-
-    this.sendChatMessage = payload => {
-      this.transport.onChatMessage(this.matchID, {
-        sender: this.playerID,
-        payload: payload,
-      });
-    };
 
     /**
      * Middleware that manages the log object.
@@ -361,10 +353,19 @@ export class _ClientImpl<G extends any = any> {
       this.notifySubscribers();
     });
 
-    this.transport.subscribeChatMessage(message => {
-      this.chatMessages = [...this.chatMessages, message];
-      this.notifySubscribers();
-    });
+    if (this.transport.onChatMessage) {
+      this.chatMessages = [];
+      this.sendChatMessage = payload => {
+        this.transport.onChatMessage(this.matchID, {
+          sender: this.playerID,
+          payload: payload,
+        });
+      };
+      this.transport.subscribeChatMessage(message => {
+        this.chatMessages = [...this.chatMessages, message];
+        this.notifySubscribers();
+      });
+    }
   }
 
   private notifySubscribers() {

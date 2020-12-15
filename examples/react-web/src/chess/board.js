@@ -67,10 +67,12 @@ class Board extends React.Component {
 
         {this._getStatus()}
         {disconnected}
-        <Chat
-          onSend={this.props.sendChatMessage}
-          messages={this.props.chatMessages}
-        />
+        {this.props.sendChatMessage && this.props.chatMessages && (
+          <Chat
+            onSend={this.props.sendChatMessage}
+            messages={this.props.chatMessages}
+          />
+        )}
       </div>
     );
   }
