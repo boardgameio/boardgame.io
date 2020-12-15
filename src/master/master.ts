@@ -23,6 +23,7 @@ import {
   CredentialedActionShape,
   LogEntry,
   PlayerID,
+  ChatMessage,
 } from '../types';
 import { createMetadata } from '../server/util';
 import { Auth } from '../server/auth';
@@ -101,6 +102,10 @@ type TransportData =
   | {
       type: 'matchData';
       args: [string, FilteredMetadata];
+    }
+  | {
+      type: 'chat-message';
+      args: [string, ChatMessage];
     };
 
 export interface TransportAPI {
@@ -457,5 +462,12 @@ export class Master {
     } else {
       await this.storageAPI.setMetadata(key, metadata);
     }
+  }
+
+  async onChatMessage(matchID, chatMessage) {
+    this.transportAPI.sendAll(() => ({
+      type: 'chat-message',
+      args: [matchID, chatMessage],
+    }));
   }
 }

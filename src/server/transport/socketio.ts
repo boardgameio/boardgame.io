@@ -184,6 +184,15 @@ export class SocketIO {
             );
           }
         });
+        socket.on('chat-message', async (matchID, chatMessage) => {
+          const master = new Master(
+            game,
+            app.context.db,
+            TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+            this.auth
+          );
+          master.onChatMessage(matchID, chatMessage);
+        });
       });
     }
   }

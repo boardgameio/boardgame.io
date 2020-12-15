@@ -112,6 +112,7 @@ export function Client(opts) {
           undo: this.client.undo,
           redo: this.client.redo,
           matchData: this.client.matchData,
+          sendChatMessage: this.client.sendChatMessage,
         });
       }
 

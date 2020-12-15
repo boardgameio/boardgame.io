@@ -14,9 +14,12 @@ import {
   State,
   Store,
   SyncInfo,
+  ChatMessage,
 } from '../../types';
 
 export type MetadataCallback = (metadata: SyncInfo['filteredMetadata']) => void;
+
+export type ChatCallback = (message: ChatMessage) => void;
 
 export interface TransportOpts {
   store?: Store;
@@ -62,4 +65,6 @@ export abstract class Transport {
   abstract updateMatchID(id: string): void;
   abstract updatePlayerID(id: PlayerID): void;
   abstract updateCredentials(credentials?: string): void;
+  abstract onChatMessage(matchID: string, chatMessage: ChatMessage): void;
+  abstract subscribeChatMessage(fn: ChatCallback): void;
 }

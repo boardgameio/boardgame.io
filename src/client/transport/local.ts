@@ -158,6 +158,10 @@ export class LocalTransport extends Transport {
     this.isConnected = true;
   }
 
+  onChatMessage(matchID, chatMessage) {
+    this.master.onChatMessage(matchID, chatMessage);
+  }
+
   /**
    * Called when another player makes a move and the
    * master broadcasts the update to other clients (including
@@ -222,6 +226,8 @@ export class LocalTransport extends Transport {
   subscribe() {}
 
   subscribeMatchData() {}
+
+  subscribeChatMessage() {}
 
   /**
    * Dispatches a reset action, then requests a fresh sync from the master.

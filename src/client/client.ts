@@ -35,6 +35,7 @@ import {
   State,
   Store,
   Ctx,
+  ChatMessage,
 } from '../types';
 
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
@@ -160,6 +161,8 @@ export class _ClientImpl<G extends any = any> {
   reset: () => void;
   undo: () => void;
   redo: () => void;
+  sendChatMessage: (message: ChatMessage) => void;
+  chatMessages: ChatMessage[];
 
   constructor({
     game,
@@ -180,6 +183,7 @@ export class _ClientImpl<G extends any = any> {
     this.manager = GlobalClientManager;
     this.gameStateOverride = null;
     this.subscribers = {};
+    this.chatMessages = [];
     this._running = false;
 
     this.reducer = CreateGameReducer({
@@ -211,6 +215,13 @@ export class _ClientImpl<G extends any = any> {
     };
 
     this.log = [];
+
+    this.sendChatMessage = payload => {
+      this.transport.onChatMessage(this.matchID, {
+        sender: this.playerID,
+        payload: payload,
+      });
+    };
 
     /**
      * Middleware that manages the log object.
@@ -322,6 +333,7 @@ export class _ClientImpl<G extends any = any> {
       onAction: () => {},
       subscribe: () => {},
       subscribeMatchData: () => {},
+      subscribeChatMessage: () => {},
       connect: () => {},
       disconnect: () => {},
       updateMatchID: () => {},
@@ -346,6 +358,11 @@ export class _ClientImpl<G extends any = any> {
 
     this.transport.subscribeMatchData(metadata => {
       this.matchData = metadata;
+      this.notifySubscribers();
+    });
+
+    this.transport.subscribeChatMessage(message => {
+      this.chatMessages = [...this.chatMessages, message];
       this.notifySubscribers();
     });
   }
