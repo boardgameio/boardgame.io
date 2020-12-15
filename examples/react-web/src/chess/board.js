@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import { Chess } from 'chess.js';
 import { Checkerboard, cartesianToAlgebraic } from './checkerboard';
 import { Token } from './token';
+import Chat from './chat';
 import Bishop from './pieces/bishop';
 import King from './pieces/king';
 import Knight from './pieces/knight';
@@ -31,6 +32,8 @@ class Board extends React.Component {
     isActive: PropTypes.bool,
     isMultiplayer: PropTypes.bool,
     isConnected: PropTypes.bool,
+    sendChatMessage: PropTypes.func,
+    chatMessages: PropTypes.array,
   };
 
   constructor(props) {
@@ -64,6 +67,10 @@ class Board extends React.Component {
 
         {this._getStatus()}
         {disconnected}
+        <Chat
+          onSend={this.props.sendChatMessage}
+          messages={this.props.chatMessages}
+        />
       </div>
     );
   }
