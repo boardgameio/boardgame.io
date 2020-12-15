@@ -55,6 +55,15 @@ A cross between Hangman and a card game.
 [b5]: https://img.shields.io/github/stars/VengelStudio/cardman-multiplayer?label=%E2%98%85&logo=github
 
 
+#### [![GitHub stars][b21]][c21] [Coup][p21] \[[code][c21]\]
+&nbsp;&nbsp;
+Online multiplayer version of Coup, a strategy board game.
+
+[p21]: https://online-coup.herokuapp.com/
+[c21]: https://github.com/vyang1222/online-coup
+[b21]: https://img.shields.io/github/stars/vyang1222/online-coup?label=%E2%98%85&logo=github
+
+
 #### [![GitHub stars][b6]][c6] [Elevation of Privilege][p6] \[[code][c6]\]
 &nbsp;&nbsp;
 An online multiplayer version of the threat modeling card game.
@@ -185,12 +194,3 @@ A 1-4 player dice game played locally.
 [c20]: https://github.com/pjohannessen/yatzy
 [t20]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
 [b20]:https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
-
-
-#### [![GitHub stars][b21]][c21] [Coup][p21] \[[code][c21]\]
-&nbsp;&nbsp;
-Online multiplayer version of Coup, a strategy board game.
-
-[p21]: https://online-coup.herokuapp.com/
-[c21]: https://github.com/vyang1222/online-coup
-[b21]: https://img.shields.io/github/stars/vyang1222/online-coup?label=%E2%98%85&logo=github
