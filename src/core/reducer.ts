@@ -105,6 +105,11 @@ function initializeDeltalog(
     phase: state.ctx.phase,
   };
 
+  const pluginLogMetadata = state.plugins.log.data.metadata;
+  if (pluginLogMetadata !== undefined) {
+    logEntry.metadata = pluginLogMetadata;
+  }
+
   if (typeof move === 'object' && move.redact === true) {
     logEntry.redact = true;
   }
