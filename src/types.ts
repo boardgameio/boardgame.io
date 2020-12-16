@@ -428,6 +428,7 @@ export interface SyncInfo {
 }
 
 export interface ChatMessage {
+  id: string;
   sender: PlayerID;
   payload: any;
 }

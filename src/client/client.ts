@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import shortid from 'shortid';
 import 'svelte';
 import {
   Dispatch,
@@ -357,6 +358,7 @@ export class _ClientImpl<G extends any = any> {
       this.chatMessages = [];
       this.sendChatMessage = payload => {
         this.transport.onChatMessage(this.matchID, {
+          id: shortid(),
           sender: this.playerID,
           payload: payload,
         });

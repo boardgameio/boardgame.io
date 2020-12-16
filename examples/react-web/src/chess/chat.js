@@ -22,8 +22,8 @@ const Chat = ({ onSend, messages }) => {
           border: '1px solid black',
         }}
       >
-        {messages.map((message, index) => (
-          <div key={index}>
+        {messages.map(message => (
+          <div key={message.id}>
             <div>{message.sender}</div>
             <div>{JSON.stringify(message.payload)}</div>
           </div>
