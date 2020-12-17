@@ -336,6 +336,7 @@ export class _ClientImpl<G extends any = any> {
         store: this.store,
         matchID,
         playerID,
+        credentials,
         gameName: this.game.name,
         numPlayers,
       });
@@ -493,6 +494,7 @@ export class _ClientImpl<G extends any = any> {
   updateCredentials(credentials: string) {
     this.credentials = credentials;
     this.createDispatchers();
+    this.transport.updateCredentials(credentials);
     this.notifySubscribers();
   }
 }

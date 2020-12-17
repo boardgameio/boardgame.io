@@ -10,6 +10,7 @@ import * as ioNamespace from 'socket.io-client';
 const io = ioNamespace.default;
 
 import * as ActionCreators from '../../core/action-creators';
+import { Master } from '../../master/master';
 import { Transport, TransportOpts, MetadataCallback } from './transport';
 import {
   CredentialedActionShape,
@@ -22,7 +23,7 @@ import {
 
 interface SocketIOOpts {
   server?: string;
-  socketOpts?;
+  socketOpts?: SocketIOClient.ConnectOpts;
 }
 
 type SocketIOTransportOpts = TransportOpts &
@@ -38,7 +39,7 @@ type SocketIOTransportOpts = TransportOpts &
 export class SocketIOTransport extends Transport {
   server: string;
   socket: SocketIOClient.Socket;
-  socketOpts;
+  socketOpts: SocketIOClient.ConnectOpts;
   callback: () => void;
   matchDataCallback: MetadataCallback;
 
@@ -58,11 +59,12 @@ export class SocketIOTransport extends Transport {
     store,
     matchID,
     playerID,
+    credentials,
     gameName,
     numPlayers,
     server,
   }: SocketIOTransportOpts = {}) {
-    super({ store, gameName, playerID, matchID, numPlayers });
+    super({ store, gameName, playerID, matchID, credentials, numPlayers });
 
     this.server = server;
     this.socket = socket;
@@ -77,13 +79,13 @@ export class SocketIOTransport extends Transport {
    * game master is made.
    */
   onAction(state: State, action: CredentialedActionShape.Any) {
-    this.socket.emit(
-      'update',
+    const args: Parameters<Master['onUpdate']> = [
       action,
       state._stateID,
       this.matchID,
-      this.playerID
-    );
+      this.playerID,
+    ];
+    this.socket.emit('update', ...args);
   }
 
   /**
@@ -148,7 +150,7 @@ export class SocketIOTransport extends Transport {
     // Keep track of connection status.
     this.socket.on('connect', () => {
       // Initial sync to get game state.
-      this.socket.emit('sync', this.matchID, this.playerID, this.numPlayers);
+      this.sync();
       this.isConnected = true;
       this.callback();
     });
@@ -180,18 +182,36 @@ export class SocketIOTransport extends Transport {
   }
 
   /**
+   * Send a “sync” event to the server.
+   */
+  private sync() {
+    if (this.socket) {
+      const args: Parameters<Master['onSync']> = [
+        this.matchID,
+        this.playerID,
+        this.credentials,
+        this.numPlayers,
+      ];
+      this.socket.emit('sync', ...args);
+    }
+  }
+
+  /**
+   * Dispatches a reset action, then requests a fresh sync from the server.
+   */
+  private resetAndSync() {
+    const action = ActionCreators.reset(null);
+    this.store.dispatch(action);
+    this.sync();
+  }
+
+  /**
    * Updates the game id.
    * @param {string} id - The new game id.
    */
   updateMatchID(id: string) {
     this.matchID = id;
-
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-
-    if (this.socket) {
-      this.socket.emit('sync', this.matchID, this.playerID, this.numPlayers);
-    }
+    this.resetAndSync();
   }
 
   /**
@@ -200,13 +220,16 @@ export class SocketIOTransport extends Transport {
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
+    this.resetAndSync();
+  }
 
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-
-    if (this.socket) {
-      this.socket.emit('sync', this.matchID, this.playerID, this.numPlayers);
-    }
+  /**
+   * Updates the credentials associated with this client.
+   * @param {string|undefined} credentials - The new credentials to use.
+   */
+  updateCredentials(credentials?: string) {
+    this.credentials = credentials;
+    this.resetAndSync();
   }
 }
 

@@ -12,6 +12,7 @@ import { createRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
 import { ProcessGameConfig } from '../core/game';
 import * as logger from '../core/logger';
+import { Auth } from './auth';
 import { SocketIO } from './transport/socketio';
 import { Server as ServerTypes, Game, StorageAPI } from '../types';
 
@@ -82,12 +83,12 @@ export function Server({
   games,
   db,
   transport,
-  authenticateCredentials,
-  generateCredentials,
   https,
   uuid,
+  generateCredentials = uuid,
+  authenticateCredentials,
 }: ServerOpts) {
-  const app = new Koa();
+  const app: ServerTypes.App = new Koa();
 
   games = games.map(ProcessGameConfig);
 
@@ -96,23 +97,20 @@ export function Server({
   }
   app.context.db = db;
 
+  const auth = new Auth({ authenticateCredentials, generateCredentials });
+  app.context.auth = auth;
+
   if (transport === undefined) {
-    const auth =
-      typeof authenticateCredentials === 'function'
-        ? authenticateCredentials
-        : true;
-    transport = new SocketIO({
-      auth,
-      https,
-    });
+    transport = new SocketIO({ https });
   }
   transport.init(app, games);
 
-  const router = createRouter({ db, games, uuid, generateCredentials });
+  const router = createRouter({ db, games, uuid, auth });
 
   return {
     app,
     db,
+    auth,
     router,
     transport,
 
@@ -129,7 +127,9 @@ export function Server({
         configureApp(app, router);
       } else {
         // Run API in a separate Koa app.
-        const api = new Koa();
+        const api: ServerTypes.App = new Koa();
+        api.context.db = db;
+        api.context.auth = auth;
         configureApp(api, router);
         await new Promise(resolve => {
           apiServer = api.listen(lobbyConfig.apiPort, resolve);

@@ -25,16 +25,8 @@ import {
   PlayerID,
 } from '../types';
 import { createMetadata } from '../server/util';
+import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
-
-export const getPlayerMetadata = (
-  matchData: Server.MatchData,
-  playerID: PlayerID
-) => {
-  if (matchData && matchData.players) {
-    return matchData.players[playerID];
-  }
-};
 
 /**
  * Filter match data to get a player metadata object with credentials stripped.
@@ -44,12 +36,6 @@ const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
     const { credentials, ...filteredData } = player;
     return filteredData;
   });
-
-function IsSynchronous(
-  storageAPI: StorageAPI.Sync | StorageAPI.Async
-): storageAPI is StorageAPI.Sync {
-  return storageAPI.type() === StorageAPI.Type.SYNC;
-}
 
 /**
  * Redact the log.
@@ -89,32 +75,6 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
 }
 
 /**
- * Verifies that the match has metadata and is using credentials.
- */
-export const doesMatchRequireAuthentication = (
-  matchData?: Server.MatchData
-) => {
-  if (!matchData) return false;
-  const { players } = matchData as Server.MatchData;
-  const hasCredentials = Object.keys(players).some(key => {
-    return !!(players[key] && players[key].credentials);
-  });
-  return hasCredentials;
-};
-
-/**
- * Verifies that the move came from a player with the correct credentials.
- */
-export const isActionFromAuthenticPlayer = (
-  actionCredentials: string,
-  playerMetadata?: Server.PlayerMetadata
-) => {
-  if (!actionCredentials) return false;
-  if (!playerMetadata) return false;
-  return actionCredentials === playerMetadata.credentials;
-};
-
-/**
  * Remove player credentials from action payload
  */
 const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
@@ -122,11 +82,6 @@ const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
   const { credentials, ...payload } = action.payload;
   return { ...action, payload };
 };
-
-export type AuthFn = (
-  actionCredentials: string,
-  playerMetadata: Server.PlayerMetadata
-) => boolean | Promise<boolean>;
 
 type CallbackFn = (arg: {
   state: State;
@@ -165,29 +120,19 @@ export class Master {
   storageAPI: StorageAPI.Sync | StorageAPI.Async;
   transportAPI: TransportAPI;
   subscribeCallback: CallbackFn;
-  auth: null | AuthFn;
-  shouldAuth: typeof doesMatchRequireAuthentication;
+  auth?: Auth;
 
   constructor(
     game: Game,
     storageAPI: StorageAPI.Sync | StorageAPI.Async,
     transportAPI: TransportAPI,
-    auth?: AuthFn | boolean
+    auth?: Auth
   ) {
     this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
     this.transportAPI = transportAPI;
-    this.auth = null;
     this.subscribeCallback = () => {};
-    this.shouldAuth = () => false;
-
-    if (auth === true) {
-      this.auth = isActionFromAuthenticPlayer;
-      this.shouldAuth = doesMatchRequireAuthentication;
-    } else if (typeof auth === 'function') {
-      this.auth = auth;
-      this.shouldAuth = () => true;
-    }
+    this.auth = auth;
   }
 
   subscribe(fn: CallbackFn) {
@@ -204,34 +149,30 @@ export class Master {
     stateID: number,
     matchID: string,
     playerID: string
-  ) {
-    let isActionAuthentic;
+  ): Promise<void | { error: string }> {
     let metadata: Server.MatchData | undefined;
-    const credentials = credAction.payload.credentials;
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
-      const playerMetadata = getPlayerMetadata(metadata, playerID);
-      isActionAuthentic = this.shouldAuth(metadata)
-        ? this.auth(credentials, playerMetadata)
-        : true;
     } else {
-      ({ metadata } = await this.storageAPI.fetch(matchID, {
-        metadata: true,
-      }));
-      const playerMetadata = getPlayerMetadata(metadata, playerID);
-      isActionAuthentic = this.shouldAuth(metadata)
-        ? await this.auth(credentials, playerMetadata)
-        : true;
+      ({ metadata } = await this.storageAPI.fetch(matchID, { metadata: true }));
     }
-    if (!isActionAuthentic) {
-      return { error: 'unauthorized action' };
+
+    if (this.auth) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials: credAction.payload.credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized action' };
+      }
     }
 
     let action = stripCredentialsFromAction(credAction);
     const key = matchID;
 
     let state: State;
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ state } = this.storageAPI.fetch(key, { state: true }));
     } else {
       ({ state } = await this.storageAPI.fetch(key, { state: true }));
@@ -353,7 +294,7 @@ export class Master {
       }
     }
 
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
       if (newMetadata) this.storageAPI.setMetadata(key, newMetadata);
     } else {
@@ -371,7 +312,12 @@ export class Master {
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
-  async onSync(matchID: string, playerID: string, numPlayers = 2) {
+  async onSync(
+    matchID: string,
+    playerID: string | null | undefined,
+    credentials?: string,
+    numPlayers = 2
+  ): Promise<void | { error: string }> {
     const key = matchID;
 
     const fetchOpts = {
@@ -380,16 +326,26 @@ export class Master {
       log: true,
       initialState: true,
     } as const;
-
     let fetchResult: StorageAPI.FetchResult<typeof fetchOpts>;
 
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       fetchResult = this.storageAPI.fetch(key, fetchOpts);
     } else {
       fetchResult = await this.storageAPI.fetch(key, fetchOpts);
     }
 
     let { state, initialState, log, metadata } = fetchResult;
+
+    if (this.auth && playerID !== undefined && playerID !== null) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
+    }
 
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
@@ -403,7 +359,7 @@ export class Master {
 
       this.subscribeCallback({ state, matchID });
 
-      if (IsSynchronous(this.storageAPI)) {
+      if (StorageAPI.isSynchronous(this.storageAPI)) {
         this.storageAPI.createMatch(key, { initialState, metadata });
       } else {
         await this.storageAPI.createMatch(key, { initialState, metadata });
@@ -445,18 +401,23 @@ export class Master {
    */
   async onConnectionChange(
     matchID: string,
-    playerID: string,
+    playerID: string | null | undefined,
+    credentials: string | undefined,
     connected: boolean
-  ) {
+  ): Promise<void | { error: string }> {
     const key = matchID;
 
+    // Ignore changes for clients without a playerID, e.g. spectators.
+    if (playerID === undefined || playerID === null) {
+      return;
+    }
+
     let metadata: Server.MatchData | undefined;
-    if (IsSynchronous(this.storageAPI)) {
-      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
+
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      ({ metadata } = this.storageAPI.fetch(key, { metadata: true }));
     } else {
-      ({ metadata } = await this.storageAPI.fetch(matchID, {
-        metadata: true,
-      }));
+      ({ metadata } = await this.storageAPI.fetch(key, { metadata: true }));
     }
 
     if (metadata === undefined) {
@@ -471,6 +432,17 @@ export class Master {
       return { error: 'player not in the match' };
     }
 
+    if (this.auth) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
+    }
+
     metadata.players[playerID].isConnected = connected;
 
     const filteredMetadata = filterMatchData(metadata);
@@ -480,7 +452,7 @@ export class Master {
       args: [matchID, filteredMetadata],
     }));
 
-    if (IsSynchronous(this.storageAPI)) {
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
       this.storageAPI.setMetadata(key, metadata);
     } else {
       await this.storageAPI.setMetadata(key, metadata);

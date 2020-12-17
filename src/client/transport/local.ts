@@ -95,7 +95,7 @@ export class LocalMaster extends Master {
       },
     };
     const storage = persist ? new LocalStorage(storageKey) : new InMemory();
-    super(game, storage, transportAPI, false);
+    super(game, storage, transportAPI);
 
     this.connect = (matchID, playerID, callback) => {
       clientCallbacks[playerID] = callback;
@@ -149,10 +149,11 @@ export class LocalTransport extends Transport {
     store,
     matchID,
     playerID,
+    credentials,
     gameName,
     numPlayers,
   }: LocalTransportOpts) {
-    super({ store, gameName, playerID, matchID, numPlayers });
+    super({ store, gameName, playerID, matchID, credentials, numPlayers });
     this.master = master;
     this.isConnected = true;
   }
@@ -202,7 +203,12 @@ export class LocalTransport extends Transport {
         this.onUpdate.apply(this, args);
       }
     });
-    this.master.onSync(this.matchID, this.playerID, this.numPlayers);
+    this.master.onSync(
+      this.matchID,
+      this.playerID,
+      this.credentials,
+      this.numPlayers
+    );
   }
 
   /**
@@ -218,14 +224,21 @@ export class LocalTransport extends Transport {
   subscribeMatchData() {}
 
   /**
+   * Dispatches a reset action, then requests a fresh sync from the master.
+   */
+  private resetAndSync() {
+    const action = ActionCreators.reset(null);
+    this.store.dispatch(action);
+    this.connect();
+  }
+
+  /**
    * Updates the game id.
    * @param {string} id - The new game id.
    */
   updateMatchID(id: string) {
     this.matchID = id;
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-    this.connect();
+    this.resetAndSync();
   }
 
   /**
@@ -234,9 +247,16 @@ export class LocalTransport extends Transport {
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-    this.connect();
+    this.resetAndSync();
+  }
+
+  /**
+   * Updates the credentials associated with this client.
+   * @param {string|undefined} credentials - The new credentials to use.
+   */
+  updateCredentials(credentials?: string) {
+    this.credentials = credentials;
+    this.resetAndSync();
   }
 }
 
