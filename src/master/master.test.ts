@@ -967,3 +967,25 @@ describe('redactLog', () => {
     ]);
   });
 });
+
+describe('chat', () => {
+  let sendAllReturn;
+  const send = jest.fn();
+  const sendAll = jest.fn(arg => {
+    sendAllReturn = arg;
+  });
+  const db = new InMemory();
+  const master = new Master(game, db, TransportAPI(send, sendAll));
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Sends chat messages to all', async () => {
+    master.onChatMessage('matchID', { message: 'foo' });
+    expect(sendAllReturn('0')).toEqual({
+      type: 'chat-message',
+      args: ['matchID', { message: 'foo' }],
+    });
+  });
+});

@@ -113,6 +113,7 @@ export function Client(opts) {
           redo: this.client.redo,
           matchData: this.client.matchData,
           sendChatMessage: this.client.sendChatMessage,
+          chatMessages: this.client.chatMessages,
         });
       }
 
