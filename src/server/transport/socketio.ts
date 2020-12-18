@@ -189,7 +189,7 @@ export class SocketIO {
             game,
             app.context.db,
             TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
-            this.auth
+            app.context.auth
           );
           master.onChatMessage(matchID, chatMessage);
         });
