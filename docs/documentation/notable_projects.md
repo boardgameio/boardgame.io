@@ -194,11 +194,11 @@ Clone of Jaipur, a 2 Player Card game, with online multiplayer support.
 [b20]:https://img.shields.io/github/stars/skvrahul/UdaipurGame?label=%E2%98%85&logo=github
 
 
-#### [![GitHub stars][b21]][c21] [Yatzy][p21] \[[code][c21] | [tutorial][t21]\]
+#### [![GitHub stars][b22]][c22] [Yatzy][p22] \[[code][c22] | [tutorial][t22]\]
 &nbsp;&nbsp;
 A 1-4 player dice game played locally.
 
-[p21]: https://www.lonesomecrowdedweb.com/yatzy/
-[c21]: https://github.com/pjohannessen/yatzy
-[t21]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
-[b21]:https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
+[p22]: https://www.lonesomecrowdedweb.com/yatzy/
+[c22]: https://github.com/pjohannessen/yatzy
+[t22]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
+[b22]:https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
