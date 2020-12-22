@@ -104,7 +104,7 @@ type TransportData =
       args: [string, FilteredMetadata];
     }
   | {
-      type: 'chat-message';
+      type: 'chat';
       args: [string, ChatMessage];
     };
 
@@ -466,7 +466,7 @@ export class Master {
 
   async onChatMessage(matchID, chatMessage) {
     this.transportAPI.sendAll(() => ({
-      type: 'chat-message',
+      type: 'chat',
       args: [matchID, chatMessage],
     }));
   }

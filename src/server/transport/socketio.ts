@@ -184,7 +184,7 @@ export class SocketIO {
             );
           }
         });
-        socket.on('chat-message', async (matchID, chatMessage) => {
+        socket.on('chat', async (matchID, chatMessage) => {
           const master = new Master(
             game,
             app.context.db,

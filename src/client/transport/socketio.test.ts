@@ -197,15 +197,15 @@ describe('multiplayer', () => {
     let receivedChatData;
     m.subscribeChatMessage(data => (receivedChatData = data));
     const chatData = { message: 'foo' };
-    mockSocket.receive('chat-message', 'unknown matchID', chatData);
+    mockSocket.receive('chat', 'unknown matchID', chatData);
     expect(receivedChatData).toBe(undefined);
-    mockSocket.receive('chat-message', 'default', chatData);
+    mockSocket.receive('chat', 'default', chatData);
     expect(receivedChatData).toMatchObject(receivedChatData);
   });
 
   test('send chat-message', () => {
     m.onChatMessage('matchID', { message: 'foo' });
-    expect(mockSocket.emit).lastCalledWith('chat-message', 'matchID', {
+    expect(mockSocket.emit).lastCalledWith('chat', 'matchID', {
       message: 'foo',
     });
   });

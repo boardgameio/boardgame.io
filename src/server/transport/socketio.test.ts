@@ -215,7 +215,7 @@ describe('chat', () => {
   const io = app.context.io;
 
   test('chat message', async () => {
-    await io.socket.receive('chat-message', 'matchID', { message: 'foo' });
+    await io.socket.receive('chat', 'matchID', { message: 'foo' });
   });
 });
 

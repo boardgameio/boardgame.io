@@ -984,7 +984,7 @@ describe('chat', () => {
   test('Sends chat messages to all', async () => {
     master.onChatMessage('matchID', { message: 'foo' });
     expect(sendAllReturn('0')).toEqual({
-      type: 'chat-message',
+      type: 'chat',
       args: ['matchID', { message: 'foo' }],
     });
   });

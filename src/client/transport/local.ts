@@ -207,7 +207,7 @@ export class LocalTransport extends Transport {
       if (type == 'update') {
         this.onUpdate.apply(this, args);
       }
-      if (type == 'chat-message') {
+      if (type == 'chat') {
         const [matchID, message] = args;
         this.chatMessageCallback.apply(this, [message]);
       }

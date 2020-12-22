@@ -11,7 +11,12 @@ const io = ioNamespace.default;
 
 import * as ActionCreators from '../../core/action-creators';
 import { Master } from '../../master/master';
-import { Transport, TransportOpts, MetadataCallback, ChatCallback } from './transport';
+import {
+  Transport,
+  TransportOpts,
+  MetadataCallback,
+  ChatCallback,
+} from './transport';
 import {
   CredentialedActionShape,
   FilteredMetadata,
@@ -92,7 +97,7 @@ export class SocketIOTransport extends Transport {
   }
 
   onChatMessage(matchID, chatMessage) {
-    this.socket.emit('chat-message', matchID, chatMessage);
+    this.socket.emit('chat', matchID, chatMessage);
   }
 
   /**
@@ -154,14 +159,11 @@ export class SocketIOTransport extends Transport {
       }
     );
 
-    this.socket.on(
-      'chat-message',
-      (matchID: string, chatMessage: ChatMessage) => {
-        if (matchID === this.matchID) {
-          this.chatMessageCallback(chatMessage);
-        }
+    this.socket.on('chat', (matchID: string, chatMessage: ChatMessage) => {
+      if (matchID === this.matchID) {
+        this.chatMessageCallback(chatMessage);
       }
-    );
+    });
 
     // Keep track of connection status.
     this.socket.on('connect', () => {
