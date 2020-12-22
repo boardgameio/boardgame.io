@@ -426,3 +426,9 @@ export interface SyncInfo {
   initialState: State;
   log: LogEntry[];
 }
+
+export interface ChatMessage {
+  id: string;
+  sender: PlayerID;
+  payload: any;
+}

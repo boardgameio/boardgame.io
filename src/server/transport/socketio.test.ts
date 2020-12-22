@@ -35,11 +35,13 @@ jest.mock('../../master/master', () => {
     onUpdate: jest.Mock<any, any>;
     onSync: jest.Mock<any, any>;
     onConnectionChange: jest.Mock<any, any>;
+    onChatMessage: jest.Mock<any, any>;
 
     constructor() {
       this.onUpdate = jest.fn();
       this.onSync = jest.fn();
       this.onConnectionChange = jest.fn();
+      this.onChatMessage = jest.fn();
     }
   }
 
@@ -202,6 +204,18 @@ describe('sync / update', () => {
 
   test('update', () => {
     io.socket.receive('update');
+  });
+});
+
+describe('chat', () => {
+  const app: any = { context: {} };
+  const games = [ProcessGameConfig({ seed: 0 })];
+  const transport = new SocketIOTestAdapter();
+  transport.init(app, games);
+  const io = app.context.io;
+
+  test('chat message', async () => {
+    await io.socket.receive('chat', 'matchID', { message: 'foo' });
   });
 });
 

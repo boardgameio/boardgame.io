@@ -10,7 +10,7 @@ import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { LocalStorage } from '../../server/db/localstorage';
 import { Master, TransportAPI } from '../../master/master';
-import { Transport, TransportOpts } from './transport';
+import { Transport, TransportOpts, ChatCallback } from './transport';
 import {
   CredentialedActionShape,
   Game,
@@ -136,6 +136,7 @@ type LocalTransportOpts = TransportOpts & {
  */
 export class LocalTransport extends Transport {
   master: LocalMaster;
+  chatMessageCallback: ChatCallback;
 
   /**
    * Creates a new Mutiplayer instance.
@@ -156,6 +157,10 @@ export class LocalTransport extends Transport {
     super({ store, gameName, playerID, matchID, credentials, numPlayers });
     this.master = master;
     this.isConnected = true;
+  }
+
+  onChatMessage(matchID, chatMessage) {
+    this.master.onChatMessage(matchID, chatMessage);
   }
 
   /**
@@ -202,6 +207,10 @@ export class LocalTransport extends Transport {
       if (type == 'update') {
         this.onUpdate.apply(this, args);
       }
+      if (type == 'chat') {
+        const [matchID, message] = args;
+        this.chatMessageCallback.apply(this, [message]);
+      }
     });
     this.master.onSync(
       this.matchID,
@@ -222,6 +231,10 @@ export class LocalTransport extends Transport {
   subscribe() {}
 
   subscribeMatchData() {}
+
+  subscribeChatMessage(fn: ChatCallback) {
+    this.chatMessageCallback = fn;
+  }
 
   /**
    * Dispatches a reset action, then requests a fresh sync from the master.

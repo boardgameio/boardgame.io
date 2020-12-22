@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import shortid from 'shortid';
 import 'svelte';
 import {
   Dispatch,
@@ -35,6 +36,7 @@ import {
   State,
   Store,
   Ctx,
+  ChatMessage,
 } from '../types';
 
 type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
@@ -160,6 +162,8 @@ export class _ClientImpl<G extends any = any> {
   reset: () => void;
   undo: () => void;
   redo: () => void;
+  sendChatMessage: (message: ChatMessage) => void;
+  chatMessages: ChatMessage[];
 
   constructor({
     game,
@@ -322,6 +326,7 @@ export class _ClientImpl<G extends any = any> {
       onAction: () => {},
       subscribe: () => {},
       subscribeMatchData: () => {},
+      subscribeChatMessage: () => {},
       connect: () => {},
       disconnect: () => {},
       updateMatchID: () => {},
@@ -348,6 +353,21 @@ export class _ClientImpl<G extends any = any> {
       this.matchData = metadata;
       this.notifySubscribers();
     });
+
+    if (this.transport.onChatMessage) {
+      this.chatMessages = [];
+      this.sendChatMessage = payload => {
+        this.transport.onChatMessage(this.matchID, {
+          id: shortid(),
+          sender: this.playerID,
+          payload: payload,
+        });
+      };
+      this.transport.subscribeChatMessage(message => {
+        this.chatMessages = [...this.chatMessages, message];
+        this.notifySubscribers();
+      });
+    }
   }
 
   private notifySubscribers() {

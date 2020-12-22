@@ -192,6 +192,23 @@ describe('multiplayer', () => {
     const args: UpdateArgs = [action, state._stateID, 'default', null];
     expect(mockSocket.emit).lastCalledWith('update', ...args);
   });
+
+  test('receive chat-message', () => {
+    let receivedChatData;
+    m.subscribeChatMessage(data => (receivedChatData = data));
+    const chatData = { message: 'foo' };
+    mockSocket.receive('chat', 'unknown matchID', chatData);
+    expect(receivedChatData).toBe(undefined);
+    mockSocket.receive('chat', 'default', chatData);
+    expect(receivedChatData).toMatchObject(receivedChatData);
+  });
+
+  test('send chat-message', () => {
+    m.onChatMessage('matchID', { message: 'foo' });
+    expect(mockSocket.emit).lastCalledWith('chat', 'matchID', {
+      message: 'foo',
+    });
+  });
 });
 
 describe('server option', () => {

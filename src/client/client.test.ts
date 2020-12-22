@@ -164,6 +164,21 @@ describe('multiplayer', () => {
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
     });
+
+    test('Sends and receives chat messages', () => {
+      const fn = jest.fn();
+      jest.spyOn(client.transport, 'onAction');
+      client.updatePlayerID('0');
+      client.updateMatchID('matchID');
+      jest.spyOn(client.transport, 'onChatMessage');
+
+      client.sendChatMessage({ message: 'foo' });
+
+      expect(client.transport.onChatMessage).toHaveBeenCalledWith(
+        'matchID',
+        expect.objectContaining({ payload: { message: 'foo' }, sender: '0' })
+      );
+    });
   });
 
   describe('multiplayer: SocketIO()', () => {
@@ -232,6 +247,25 @@ describe('multiplayer', () => {
 
       expect(client0.getState().G).toEqual({ A: '1' });
       expect(client1.getState().G).toEqual({ A: '1' });
+
+      client0.sendChatMessage({ message: 'foo' });
+
+      expect(client0.chatMessages).toEqual([
+        expect.objectContaining({ sender: '0', payload: { message: 'foo' } }),
+      ]);
+      expect(client1.chatMessages).toEqual([
+        expect.objectContaining({ sender: '0', payload: { message: 'foo' } }),
+      ]);
+
+      client1.sendChatMessage({ message: 'bar' });
+      expect(client0.chatMessages).toEqual([
+        expect.objectContaining({ sender: '0', payload: { message: 'foo' } }),
+        expect.objectContaining({ sender: '1', payload: { message: 'bar' } }),
+      ]);
+      expect(client1.chatMessages).toEqual([
+        expect.objectContaining({ sender: '0', payload: { message: 'foo' } }),
+        expect.objectContaining({ sender: '1', payload: { message: 'bar' } }),
+      ]);
     });
   });
 

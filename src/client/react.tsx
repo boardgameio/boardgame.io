@@ -33,6 +33,7 @@ type ExposedClientProps<G extends any = any> = Pick<
   | 'playerID'
   | 'matchID'
   | 'matchData'
+  | 'sendChatMessage'
 >;
 
 export type BoardProps<G extends any = any> = ClientState<G> &
@@ -180,6 +181,8 @@ export function Client<
           redo: this.client.redo,
           log: this.client.log,
           matchData: this.client.matchData,
+          sendChatMessage: this.client.sendChatMessage,
+          chatMessages: this.client.chatMessages
         });
       }
 
