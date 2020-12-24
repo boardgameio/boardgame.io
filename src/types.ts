@@ -8,6 +8,7 @@ import { INVALID_MOVE } from './core/constants';
 import { Auth } from './server/auth';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
+import { LogAPI } from './plugins/plugin-log';
 import { RandomAPI } from './plugins/random/random';
 
 export { StorageAPI };
@@ -74,6 +75,7 @@ export interface Ctx {
   // internally there are two contexts, one is a serialized POJO and another
   // "enhanced" context that has plugin api methods attached
   events?: EventsAPI;
+  log?: LogAPI;
   random?: RandomAPI;
 }
 

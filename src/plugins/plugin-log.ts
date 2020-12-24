@@ -8,11 +8,11 @@
 
 import { Plugin } from '../types';
 
-interface LogMetadataData {
+interface LogData {
   metadata?: any;
 }
 
-interface LogMetadataAPI {
+export interface LogAPI {
   setMetadata(metadata: any): void;
 }
 
@@ -21,7 +21,7 @@ interface LogMetadataAPI {
  * During a move, you can set metadata using ctx.log.setMetadata and it will be
  * available on the log entry for that move.
  */
-const LogPlugin: Plugin<LogMetadataAPI, LogMetadataData> = {
+const LogPlugin: Plugin<LogAPI, LogData> = {
   name: 'log',
 
   flush: () => ({}),
