@@ -10,8 +10,7 @@ export function AssignShortcuts(moveNames, blacklist) {
   let shortcuts = {};
 
   let taken = {};
-  for (let i = 0; i < blacklist.length; i++) {
-    const c = blacklist[i];
+  for (const c of blacklist) {
     taken[c] = true;
   }
 

@@ -16,7 +16,11 @@
   "parser": "babel-eslint",
   "rules": {
     "no-console": "off",
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    "unicorn/prevent-abbreviations": "off",
+    "unicorn/no-reduce": "off",
+    "unicorn/no-null": "off",
+    "unicorn/no-fn-reference-in-iterator": "off"
   },
   "settings": {
     "react": {
