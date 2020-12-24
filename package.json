@@ -74,6 +74,7 @@
   "devDependencies": {
     "@babel/cli": "^7.10.3",
     "@babel/core": "^7.10.3",
+    "@babel/eslint-parser": "^7.12.1",
     "@babel/node": "^7.10.3",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
     "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
@@ -95,7 +96,6 @@
     "@types/socket.io-client": "^1.4.33",
     "ajv": "^6.6.2",
     "babel-core": "^7.0.0-bridge.0",
-    "babel-eslint": "^10.1.0",
     "babel-loader": "^8.0.5",
     "babel-plugin-module-resolver": "^3.0.0",
     "benchmark": "^2.1.4",
