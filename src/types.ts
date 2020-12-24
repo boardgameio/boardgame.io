@@ -78,7 +78,7 @@ export interface DefaultPluginAPIs {
 }
 
 export interface PluginState {
-  data: SerializableAny;
+  data: any;
   api?: any;
 }
 
