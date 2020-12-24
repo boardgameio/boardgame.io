@@ -8,6 +8,7 @@
 
 import IO from 'koa-socket-2';
 import { SocketIO, SocketOpts } from './socketio';
+import { Auth } from '../auth';
 import { InMemory } from '../db';
 import { createMetadata } from '../util';
 import { ProcessGameConfig } from '../../core/game';
@@ -15,7 +16,11 @@ import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
 import { _ClientImpl } from '../../client/client';
+import { Master } from '../../master/master';
 import { Game, LogEntry, Server, State, StorageAPI } from '../../types';
+
+type SyncArgs = Parameters<Master['onSync']>;
+type UpdateArgs = Parameters<Master['onUpdate']>;
 
 type SocketIOTestAdapterOpts = SocketOpts & {
   clientInfo?: Map<any, any>;
@@ -92,20 +97,19 @@ class SocketIOTestAdapter extends SocketIO {
 jest.mock('koa-socket-2', () => {
   class MockSocket {
     id: string;
-    callbacks: {};
+    callbacks: Record<string, (...args: any[]) => Promise<void>>;
     emit: jest.Mock<any, any>;
     broadcast: { emit: jest.Mock<any, any> };
 
-    constructor() {
-      this.id = 'id';
+    constructor({ id }: { id: string }) {
+      this.id = id;
       this.callbacks = {};
       this.emit = jest.fn();
       this.broadcast = { emit: jest.fn() };
     }
 
     async receive(type, ...args) {
-      await this.callbacks[type](args[0], args[1], args[2], args[3], args[4]);
-      return;
+      await this.callbacks[type](...args);
     }
 
     on(type, callback) {
@@ -123,11 +127,13 @@ jest.mock('koa-socket-2', () => {
   }
 
   class MockIO {
-    socket: MockSocket;
+    sockets: Map<string, MockSocket>;
     socketAdapter: any;
 
     constructor() {
-      this.socket = new MockSocket();
+      this.sockets = new Map(
+        ['0', '1'].map(id => [id, new MockSocket({ id })])
+      );
     }
 
     adapter(socketAdapter) {
@@ -142,8 +148,8 @@ jest.mock('koa-socket-2', () => {
       return this;
     }
 
-    on(type, callback) {
-      callback(this.socket);
+    on(_event, callback) {
+      this.sockets.forEach(socket => void callback(socket));
     }
   }
 
@@ -205,14 +211,16 @@ describe('simultaneous moves on server game', () => {
 
   test('two clients playing using sync storage', async () => {
     let db = new InMemory();
-    app = { context: { db: db } };
+    let auth = new Auth();
+    app = { context: { db, auth } };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
-      auth: () => true,
     });
     transport.init(app, [ProcessGameConfig(game)]);
     io = app.context.io;
+    const socket0 = io.sockets.get('0');
+    const socket1 = io.sockets.get('1');
     let fetchResult;
 
     const spyGetMatchQueue = jest.spyOn(
@@ -236,58 +244,57 @@ describe('simultaneous moves on server game', () => {
     // Call sync for both players
     await Promise.all([
       (async () => {
-        io.socket.id = '0';
-        await io.socket.receive('sync', 'matchID', '0', 2);
+        const args0: SyncArgs = ['matchID', '0', undefined, 2];
+        await socket0.receive('sync', ...args0);
       })(),
       (async () => {
-        io.socket.id = '1';
-        await io.socket.receive('sync', 'matchID', '1', 2);
+        const args1: SyncArgs = ['matchID', '1', undefined, 2];
+        await socket1.receive('sync', ...args1);
       })(),
     ]);
 
-    // Call normal move
-    io.socket.id = '0';
-    await io.socket.receive(
-      'update',
+    const moveAArgs: UpdateArgs = [
       ActionCreators.makeMove('A', null, '0'),
       0,
       'matchID',
-      '0'
-    );
+      '0',
+    ];
+
+    // Call normal move
+    await socket0.receive('update', ...moveAArgs);
 
     // Assertions for match queue creation
     expect(spyGetMatchQueue).toHaveBeenCalledWith('matchID');
 
-    // Set all players active
-    await io.socket.receive(
-      'update',
+    const activePlayersArgs: UpdateArgs = [
       ActionCreators.gameEvent('setActivePlayers', [{ all: 'A' }], '0'),
       1,
       'matchID',
-      '0'
-    );
+      '0',
+    ];
+
+    // Set all players active
+    await socket0.receive('update', ...activePlayersArgs);
 
     // Call actions simultaeously
     await Promise.all([
       (async () => {
-        io.socket.id = '1';
-        await io.socket.receive(
-          'update',
+        const moveBArgs: UpdateArgs = [
           ActionCreators.makeMove('B', null, '1'),
           2,
           'matchID',
-          '1'
-        );
+          '1',
+        ];
+        await socket1.receive('update', ...moveBArgs);
       })(),
       (async () => {
-        io.socket.id = '0';
-        await io.socket.receive(
-          'update',
+        const moveBArgs: UpdateArgs = [
           ActionCreators.makeMove('B', null, '0'),
           2,
           'matchID',
-          '0'
-        );
+          '0',
+        ];
+        await socket0.receive('update', ...moveBArgs);
       })(),
     ]);
 
@@ -313,12 +320,10 @@ describe('simultaneous moves on server game', () => {
     // Call disconnect for both players
     await Promise.all([
       (async () => {
-        io.socket.id = '0';
-        await io.socket.receive('disconnect', 'matchID', '0', 2);
+        await socket0.receive('disconnect');
       })(),
       (async () => {
-        io.socket.id = '1';
-        await io.socket.receive('disconnect', 'matchID', '1', 2);
+        await socket1.receive('disconnect');
       })(),
     ]);
 
@@ -330,15 +335,17 @@ describe('simultaneous moves on server game', () => {
   test('two clients playing using async storage', async () => {
     let db = new InMemoryAsync();
     await db.connect();
+    let auth = new Auth();
 
-    app = { context: { db: db } };
+    app = { context: { db, auth } };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
-      auth: () => true,
     });
     transport.init(app, [ProcessGameConfig(game)]);
     io = app.context.io;
+    const socket0 = io.sockets.get('0');
+    const socket1 = io.sockets.get('1');
     let fetchResult;
 
     const spyGetMatchQueue = jest.spyOn(
@@ -362,58 +369,55 @@ describe('simultaneous moves on server game', () => {
     // Call sync for both players
     await Promise.all([
       (async () => {
-        io.socket.id = '0';
-        await io.socket.receive('sync', 'matchID', '0', 2);
+        await socket0.receive('sync', 'matchID', '0', 2);
       })(),
       (async () => {
-        io.socket.id = '1';
-        await io.socket.receive('sync', 'matchID', '1', 2);
+        await socket1.receive('sync', 'matchID', '1', 2);
       })(),
     ]);
 
-    // Call normal move
-    io.socket.id = '0';
-    await io.socket.receive(
-      'update',
+    const moveAArgs: UpdateArgs = [
       ActionCreators.makeMove('A', null, '0'),
       0,
       'matchID',
-      '0'
-    );
+      '0',
+    ];
+
+    // Call normal move
+    await socket0.receive('update', ...moveAArgs);
 
     // Assertions for match queue creation
     expect(spyGetMatchQueue).toHaveBeenCalledWith('matchID');
 
-    // Set all players active
-    await io.socket.receive(
-      'update',
+    const activePlayersArgs: UpdateArgs = [
       ActionCreators.gameEvent('setActivePlayers', [{ all: 'A' }], '0'),
       1,
       'matchID',
-      '0'
-    );
+      '0',
+    ];
+
+    // Set all players active
+    await socket0.receive('update', ...activePlayersArgs);
 
     // Call actions simultaeously
     await Promise.all([
       (async () => {
-        io.socket.id = '1';
-        await io.socket.receive(
-          'update',
+        const moveBArgs: UpdateArgs = [
           ActionCreators.makeMove('B', null, '1'),
           2,
           'matchID',
-          '1'
-        );
+          '1',
+        ];
+        await socket1.receive('update', ...moveBArgs);
       })(),
       (async () => {
-        io.socket.id = '0';
-        await io.socket.receive(
-          'update',
+        const moveBArgs: UpdateArgs = [
           ActionCreators.makeMove('B', null, '0'),
           2,
           'matchID',
-          '0'
-        );
+          '0',
+        ];
+        await socket0.receive('update', ...moveBArgs);
       })(),
     ]);
 
@@ -439,12 +443,10 @@ describe('simultaneous moves on server game', () => {
     // Call disconnect for both players
     await Promise.all([
       (async () => {
-        io.socket.id = '0';
-        await io.socket.receive('disconnect', 'matchID', '0', 2);
+        await socket0.receive('disconnect');
       })(),
       (async () => {
-        io.socket.id = '1';
-        await io.socket.receive('disconnect', 'matchID', '1', 2);
+        await socket1.receive('disconnect');
       })(),
     ]);
 

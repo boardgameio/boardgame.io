@@ -9,15 +9,10 @@
 import * as ActionCreators from '../core/action-creators';
 import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
-import {
-  Master,
-  redactLog,
-  getPlayerMetadata,
-  doesMatchRequireAuthentication,
-  isActionFromAuthenticPlayer,
-} from './master';
+import { Master, redactLog } from './master';
 import { error } from '../core/logger';
 import { Game, Server, State, LogEntry } from '../types';
+import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 import { PlayerView } from '../core/player-view';
@@ -98,7 +93,7 @@ describe('sync', () => {
   });
 
   test('causes server to respond', async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'sync',
@@ -108,7 +103,7 @@ describe('sync', () => {
 
   test('sync a second time does not create a game', async () => {
     const fetchResult = db.fetch('matchID', { metadata: true });
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     expect(db.fetch('matchID', { metadata: true })).toMatchObject(fetchResult);
   });
 
@@ -141,7 +136,7 @@ describe('sync', () => {
     };
     db.createMatch('matchID', { metadata, initialState: {} as State });
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync('matchID', '0', 2);
+    await masterWithMetadata.onSync('matchID', '0', undefined, 2);
 
     const expectedMetadata = [
       { id: 0, name: 'Alice' },
@@ -165,7 +160,7 @@ describe('update', () => {
   const action = ActionCreators.gameEvent('endTurn');
 
   beforeAll(async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
   });
 
   beforeEach(() => {
@@ -307,7 +302,7 @@ describe('update', () => {
     const actionC = ActionCreators.makeMove('B', null, '0');
 
     // test: simultaneous moves
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(actionA, 0, 'matchID', '0');
     await master.onUpdate(setActivePlayers, 1, 'matchID', '0');
     await Promise.all([
@@ -315,8 +310,8 @@ describe('update', () => {
       master.onUpdate(actionC, 2, 'matchID', '0'),
     ]);
     await Promise.all([
-      master.onSync('matchID', '0', 2),
-      master.onSync('matchID', '1', 2),
+      master.onSync('matchID', '0', undefined, 2),
+      master.onSync('matchID', '1', undefined, 2),
     ]);
 
     const G_player0 = sendAllReturn('0').args[1].G;
@@ -402,7 +397,7 @@ describe('update', () => {
     };
     db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync(id, '0', 2);
+    await masterWithMetadata.onSync(id, '0', undefined, 2);
 
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
@@ -423,7 +418,7 @@ describe('update', () => {
     };
     await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync(id, '0', 2);
+    await masterWithMetadata.onSync(id, '0', undefined, 2);
 
     const gameOverArg = 'gameOverArg';
     const event = ActionCreators.gameEvent('endGame', gameOverArg);
@@ -444,7 +439,7 @@ describe('update', () => {
     };
     await db.setMetadata(id, dbMetadata);
     const masterWithMetadata = new Master(game, db, TransportAPI(send));
-    await masterWithMetadata.onSync(id, '0', 2);
+    await masterWithMetadata.onSync(id, '0', undefined, 2);
 
     const updatedAt = new Date(2020, 3, 4, 5, 6, 7);
     dateMock.advanceTo(updatedAt);
@@ -529,7 +524,7 @@ describe('connectionChange', () => {
   });
 
   test('changes players metadata', async () => {
-    await master.onConnectionChange('matchID', '0', true);
+    await master.onConnectionChange('matchID', '0', undefined, true);
 
     const expectedPlayerData = { id: 0, name: 'Alice', isConnected: true };
     const {
@@ -539,7 +534,7 @@ describe('connectionChange', () => {
   });
 
   test('sends metadata to all', async () => {
-    await master.onConnectionChange('matchID', '1', false);
+    await master.onConnectionChange('matchID', '1', undefined, false);
     const expectedMetadata = [
       { id: 0, name: 'Alice', isConnected: true },
       { id: 1, name: 'Bob', isConnected: false },
@@ -550,19 +545,29 @@ describe('connectionChange', () => {
   });
 
   test('invalid matchID', async () => {
-    const result = await master.onConnectionChange('invalidMatchID', '0', true);
+    const result = await master.onConnectionChange(
+      'invalidMatchID',
+      '0',
+      undefined,
+      true
+    );
     expect(error).toHaveBeenCalledWith(
       'metadata not found for matchID=[invalidMatchID]'
     );
-    expect(result.error).toEqual('metadata not found');
+    expect(result && result.error).toEqual('metadata not found');
   });
 
   test('invalid playerID', async () => {
-    const result = await master.onConnectionChange('matchID', '3', true);
+    const result = await master.onConnectionChange(
+      'matchID',
+      '3',
+      undefined,
+      true
+    );
     expect(error).toHaveBeenCalledWith(
       'Player not in the match, matchID=[matchID] playerID=[3]'
     );
-    expect(result.error).toEqual('player not in the match');
+    expect(result && result.error).toEqual('player not in the match');
   });
 
   test('processes connection change with an async db', async () => {
@@ -577,7 +582,7 @@ describe('connectionChange', () => {
       initialState: {} as State,
     });
 
-    await masterWithAsyncDb.onConnectionChange('matchID', '0', true);
+    await masterWithAsyncDb.onConnectionChange('matchID', '0', undefined, true);
 
     expect(sendAll).toHaveBeenCalled();
   });
@@ -601,7 +606,7 @@ describe('playerView', () => {
   const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
 
   beforeAll(async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
   });
 
   beforeEach(() => {
@@ -611,7 +616,7 @@ describe('playerView', () => {
   });
 
   test('sync', async () => {
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     expect(sendReturn.args[1].state).toMatchObject({
       G: { player: '0' },
     });
@@ -619,7 +624,7 @@ describe('playerView', () => {
 
   test('update', async () => {
     const action = ActionCreators.gameEvent('endTurn');
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(action, 0, 'matchID', '0');
 
     const G_player0 = sendAllReturn('0').args[1].G;
@@ -659,40 +664,48 @@ describe('subscribe', () => {
 });
 
 describe('authentication', () => {
-  describe('async', () => {
-    const send = jest.fn();
-    const sendAll = jest.fn();
-    const game: Game = { seed: 0 };
-    const matchID = 'matchID';
-    const action = ActionCreators.gameEvent('endTurn');
-    const storage = new InMemoryAsync();
+  const send = jest.fn();
+  const sendAll = jest.fn();
+  const game = { seed: 0 };
+  const matchID = 'matchID';
+  let storage = new InMemoryAsync();
 
-    beforeAll(async () => {
-      const master = new Master(game, storage, TransportAPI());
-      await master.onSync(matchID, '0', 2);
-    });
+  const resetTestEnvironment = async () => {
+    send.mockReset();
+    sendAll.mockReset();
+    storage = new InMemoryAsync();
+    const master = new Master(game, storage, TransportAPI());
+    await master.onSync(matchID, '0', undefined, 2);
+  };
+
+  describe('onUpdate', () => {
+    const action = ActionCreators.gameEvent('endTurn');
+
+    beforeEach(resetTestEnvironment);
 
     test('auth failure', async () => {
-      const isActionFromAuthenticPlayer = () => false;
+      const authenticateCredentials = () => false;
       const master = new Master(
         game,
         storage,
         TransportAPI(send, sendAll),
-        isActionFromAuthenticPlayer
+        new Auth({ authenticateCredentials })
       );
-      await master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onUpdate(action, 0, matchID, '0');
+      expect(ret && ret.error).toBe('unauthorized action');
       expect(sendAll).not.toHaveBeenCalled();
     });
 
     test('auth success', async () => {
-      const isActionFromAuthenticPlayer = () => true;
+      const authenticateCredentials = () => true;
       const master = new Master(
         game,
         storage,
         TransportAPI(send, sendAll),
-        isActionFromAuthenticPlayer
+        new Auth({ authenticateCredentials })
       );
-      await master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onUpdate(action, 0, matchID, '0');
+      expect(ret).toBeUndefined();
       expect(sendAll).toHaveBeenCalled();
     });
 
@@ -701,59 +714,98 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        true
+        new Auth()
       );
-      await master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onUpdate(action, 0, matchID, '0');
+      expect(ret).toBeUndefined();
       expect(sendAll).toHaveBeenCalled();
     });
   });
 
-  describe('sync', () => {
-    const send = jest.fn();
-    const sendAll = jest.fn();
-    const game: Game = { seed: 0 };
-    const matchID = 'matchID';
-    const action = ActionCreators.gameEvent('endTurn');
-    const storage = new InMemory();
+  describe('onSync', () => {
+    beforeEach(resetTestEnvironment);
 
-    beforeAll(() => {
-      const master = new Master(game, storage, TransportAPI());
-      master.onSync(matchID, '0', 2);
-    });
-
-    test('auth failure', () => {
-      const isActionFromAuthenticPlayer = () => false;
+    test('auth failure', async () => {
+      const authenticateCredentials = () => false;
       const master = new Master(
         game,
         storage,
         TransportAPI(send, sendAll),
-        isActionFromAuthenticPlayer
+        new Auth({ authenticateCredentials })
       );
-      master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onSync(matchID, '0');
+      expect(ret && ret.error).toBe('unauthorized');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    test('auth success', async () => {
+      const authenticateCredentials = () => true;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onSync(matchID, '0');
+      expect(ret).toBeUndefined();
+      expect(send).toHaveBeenCalled();
+    });
+
+    test('spectators don’t need to authenticate', async () => {
+      const authenticateCredentials = () => false;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onSync(matchID, null);
+      expect(ret).toBeUndefined();
+      expect(send).toHaveBeenCalled();
+    });
+  });
+
+  describe('onConnectionChange', () => {
+    beforeEach(resetTestEnvironment);
+
+    test('auth failure', async () => {
+      const authenticateCredentials = () => false;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onConnectionChange(matchID, '0', null, true);
+      expect(ret && ret.error).toBe('unauthorized');
       expect(sendAll).not.toHaveBeenCalled();
     });
 
-    test('auth success', () => {
-      const isActionFromAuthenticPlayer = () => true;
+    test('auth success', async () => {
+      const authenticateCredentials = () => true;
       const master = new Master(
         game,
         storage,
         TransportAPI(send, sendAll),
-        isActionFromAuthenticPlayer
+        new Auth({ authenticateCredentials })
       );
-      master.onUpdate(action, 0, matchID, '0');
+      const ret = await master.onConnectionChange(matchID, '0', null, true);
+      expect(ret).toBeUndefined();
       expect(sendAll).toHaveBeenCalled();
     });
 
-    test('default', () => {
+    test('spectators are ignored', async () => {
+      const authenticateCredentials = jest.fn();
       const master = new Master(
         game,
         storage,
         TransportAPI(send, sendAll),
-        true
+        new Auth({ authenticateCredentials })
       );
-      master.onUpdate(action, 0, matchID, '0');
-      expect(sendAll).toHaveBeenCalled();
+      const ret = await master.onConnectionChange(matchID, null, null, true);
+      expect(ret).toBeUndefined();
+      expect(authenticateCredentials).not.toHaveBeenCalled();
+      expect(sendAll).not.toHaveBeenCalled();
     });
   });
 });
@@ -883,10 +935,10 @@ describe('redactLog', () => {
     const actionB = ActionCreators.makeMove('B', ['redacted'], '0');
 
     // test: ping-pong two moves, then sync and check the log
-    await master.onSync('matchID', '0', 2);
+    await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(actionA, 0, 'matchID', '0');
     await master.onUpdate(actionB, 1, 'matchID', '0');
-    await master.onSync('matchID', '1', 2);
+    await master.onSync('matchID', '1', undefined, 2);
 
     const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
     expect(log).toMatchObject([
@@ -916,174 +968,24 @@ describe('redactLog', () => {
   });
 });
 
-describe('getPlayerMetadata', () => {
-  describe('when metadata is not found', () => {
-    test('then playerMetadata is undefined', () => {
-      expect(getPlayerMetadata(undefined, '0')).toBeUndefined();
-    });
+describe('chat', () => {
+  let sendAllReturn;
+  const send = jest.fn();
+  const sendAll = jest.fn(arg => {
+    sendAllReturn = arg;
   });
-
-  describe('when metadata does not contain players field', () => {
-    test('then playerMetadata is undefined', () => {
-      expect(getPlayerMetadata({} as Server.MatchData, '0')).toBeUndefined();
-    });
-  });
-
-  describe('when metadata does not contain playerID', () => {
-    test('then playerMetadata is undefined', () => {
-      expect(
-        getPlayerMetadata(
-          {
-            gameName: '',
-            setupData: {},
-            players: { '1': { id: 1 } },
-            createdAt: 0,
-            updatedAt: 0,
-          },
-          '0'
-        )
-      ).toBeUndefined();
-    });
-  });
-
-  describe('when metadata contains playerID', () => {
-    test('then playerMetadata is returned', () => {
-      const playerMetadata = { id: 0, credentials: 'SECRET' };
-      const result = getPlayerMetadata(
-        {
-          gameName: '',
-          setupData: {},
-          players: { '0': playerMetadata },
-          createdAt: 0,
-          updatedAt: 0,
-        },
-        '0'
-      );
-      expect(result).toBe(playerMetadata);
-    });
-  });
-});
-
-describe('doesMatchRequireAuthentication', () => {
-  describe('when game metadata is not found', () => {
-    test('then authentication is not required', () => {
-      const result = doesMatchRequireAuthentication();
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('when match has no credentials', () => {
-    test('then authentication is not required', () => {
-      const matchData = {
-        gameName: '',
-        setupData: {},
-        players: {
-          '0': { id: 1 },
-        },
-        createdAt: 0,
-        updatedAt: 0,
-      };
-      const result = doesMatchRequireAuthentication(matchData);
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('when match has credentials', () => {
-    test('then authentication is required', () => {
-      const matchData = {
-        gameName: '',
-        setupData: {},
-        players: {
-          '0': {
-            id: 0,
-            credentials: 'SECRET',
-          },
-        },
-        createdAt: 0,
-        updatedAt: 0,
-      };
-      const result = doesMatchRequireAuthentication(matchData);
-      expect(result).toBe(true);
-    });
-  });
-});
-
-describe('isActionFromAuthenticPlayer', () => {
-  let action;
-  let playerID;
-  let matchData;
-  let credentials;
-  let playerMetadata;
+  const db = new InMemory();
+  const master = new Master(game, db, TransportAPI(send, sendAll));
 
   beforeEach(() => {
-    playerID = '0';
-
-    action = {
-      payload: { credentials: 'SECRET' },
-    };
-
-    matchData = {
-      players: {
-        '0': { credentials: 'SECRET' },
-      },
-    };
-
-    playerMetadata = matchData.players[playerID];
-    ({ credentials } = action.payload || {});
+    jest.clearAllMocks();
   });
 
-  describe('when game has credentials', () => {
-    describe('when action contains no payload', () => {
-      beforeEach(() => {
-        action = {};
-        ({ credentials } = action.payload || {});
-      });
-
-      test('the action is not authentic', async () => {
-        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('when action contains no credentials', () => {
-      beforeEach(() => {
-        action = {
-          payload: { someStuff: 'foo' },
-        };
-        ({ credentials } = action.payload || {});
-      });
-
-      test('then action is not authentic', async () => {
-        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('when action credentials do not match game credentials', () => {
-      beforeEach(() => {
-        action = {
-          payload: { credentials: 'WRONG' },
-        };
-        ({ credentials } = action.payload || {});
-      });
-      test('then action is not authentic', async () => {
-        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('when playerMetadata is not found', () => {
-      test('then action is not authentic', () => {
-        const result = isActionFromAuthenticPlayer(credentials);
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('when action credentials do match game credentials', () => {
-      test('then action is authentic', async () => {
-        const result = isActionFromAuthenticPlayer(credentials, playerMetadata);
-        expect(result).toBe(true);
-      });
+  test('Sends chat messages to all', async () => {
+    master.onChatMessage('matchID', { message: 'foo' });
+    expect(sendAllReturn('0')).toEqual({
+      type: 'chat',
+      args: ['matchID', { message: 'foo' }],
     });
   });
 });

@@ -10,7 +10,7 @@ import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { LocalStorage } from '../../server/db/localstorage';
 import { Master, TransportAPI } from '../../master/master';
-import { Transport, TransportOpts } from './transport';
+import { Transport, TransportOpts, ChatCallback } from './transport';
 import {
   CredentialedActionShape,
   Game,
@@ -95,7 +95,7 @@ export class LocalMaster extends Master {
       },
     };
     const storage = persist ? new LocalStorage(storageKey) : new InMemory();
-    super(game, storage, transportAPI, false);
+    super(game, storage, transportAPI);
 
     this.connect = (matchID, playerID, callback) => {
       clientCallbacks[playerID] = callback;
@@ -136,6 +136,7 @@ type LocalTransportOpts = TransportOpts & {
  */
 export class LocalTransport extends Transport {
   master: LocalMaster;
+  chatMessageCallback: ChatCallback;
 
   /**
    * Creates a new Mutiplayer instance.
@@ -149,12 +150,17 @@ export class LocalTransport extends Transport {
     store,
     matchID,
     playerID,
+    credentials,
     gameName,
     numPlayers,
   }: LocalTransportOpts) {
-    super({ store, gameName, playerID, matchID, numPlayers });
+    super({ store, gameName, playerID, matchID, credentials, numPlayers });
     this.master = master;
     this.isConnected = true;
+  }
+
+  onChatMessage(matchID, chatMessage) {
+    this.master.onChatMessage(matchID, chatMessage);
   }
 
   /**
@@ -201,8 +207,17 @@ export class LocalTransport extends Transport {
       if (type == 'update') {
         this.onUpdate.apply(this, args);
       }
+      if (type == 'chat') {
+        const [matchID, message] = args;
+        this.chatMessageCallback.apply(this, [message]);
+      }
     });
-    this.master.onSync(this.matchID, this.playerID, this.numPlayers);
+    this.master.onSync(
+      this.matchID,
+      this.playerID,
+      this.credentials,
+      this.numPlayers
+    );
   }
 
   /**
@@ -217,15 +232,26 @@ export class LocalTransport extends Transport {
 
   subscribeMatchData() {}
 
+  subscribeChatMessage(fn: ChatCallback) {
+    this.chatMessageCallback = fn;
+  }
+
+  /**
+   * Dispatches a reset action, then requests a fresh sync from the master.
+   */
+  private resetAndSync() {
+    const action = ActionCreators.reset(null);
+    this.store.dispatch(action);
+    this.connect();
+  }
+
   /**
    * Updates the game id.
    * @param {string} id - The new game id.
    */
   updateMatchID(id: string) {
     this.matchID = id;
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-    this.connect();
+    this.resetAndSync();
   }
 
   /**
@@ -234,9 +260,16 @@ export class LocalTransport extends Transport {
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-    this.connect();
+    this.resetAndSync();
+  }
+
+  /**
+   * Updates the credentials associated with this client.
+   * @param {string|undefined} credentials - The new credentials to use.
+   */
+  updateCredentials(credentials?: string) {
+    this.credentials = credentials;
+    this.resetAndSync();
   }
 }
 

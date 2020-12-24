@@ -1,3 +1,23 @@
+## v0.42.2
+
+#### Features
+
+* [[8f8d30e](https://github.com/boardgameio/boardgame.io/commit/8f8d30e)] plugins: Add `playerView` option to plugin API (closes [#671](https://github.com/boardgameio/boardgame.io/issues/671)) ([#857](https://github.com/boardgameio/boardgame.io/pull/857))
+
+#### Bugfixes
+
+* [[c51bc09](https://github.com/boardgameio/boardgame.io/commit/c51bc09)] debug: prevent `endStage` event crashing debug log panel ([#856](https://github.com/boardgameio/boardgame.io/pull/856))
+
+## v0.42.1
+
+#### Features
+
+* [[6c4e94f](https://github.com/boardgameio/boardgame.io/commit/6c4e94f)] Add option to long-form move to ignore stale `stateID` (closes [#828](https://github.com/boardgameio/boardgame.io/issues/828)) ([#832](https://github.com/boardgameio/boardgame.io/pull/832))
+
+#### Bugfixes
+
+* [[5207be5](https://github.com/boardgameio/boardgame.io/commit/5207be5)] core: `setStage(Stage.NULL)` makes player active (closes [#848](https://github.com/boardgameio/boardgame.io/issues/848)) ([#849](https://github.com/boardgameio/boardgame.io/pull/849))
+
 ## v0.42.0
 
 #### Features

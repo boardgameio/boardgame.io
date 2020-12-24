@@ -5,6 +5,7 @@ import * as ActionCreators from './core/action-creators';
 import { Flow } from './core/flow';
 import { CreateGameReducer } from './core/reducer';
 import { INVALID_MOVE } from './core/constants';
+import { Auth } from './server/auth';
 import * as StorageAPI from './server/db/base';
 import { EventsAPI } from './plugins/plugin-events';
 import { RandomAPI } from './plugins/random/random';
@@ -90,6 +91,7 @@ export interface LogEntry {
   phase: string;
   redact?: boolean;
   automatic?: boolean;
+  metadata?: any;
 }
 
 interface PluginContext<
@@ -130,6 +132,13 @@ export interface Plugin<
   fnWrap?: (
     fn: (context: FnContext<G>, ...args: SerializableAny[]) => any
   ) => (context: FnContext<G>, ...args: SerializableAny[]) => any;
+  playerView?: (context: {
+    G: G;
+    ctx: Ctx;
+    game: Game<G, Ctx>;
+    data: Data;
+    playerID?: PlayerID | null;
+  }) => any;
 }
 
 export type FnContext<
@@ -315,6 +324,13 @@ export namespace Server {
     createdAt: number;
     updatedAt: number;
   }
+
+  export type AppCtx = Koa.DefaultContext & {
+    db: StorageAPI.Async | StorageAPI.Sync;
+    auth: Auth;
+  };
+
+  export type App = Koa<Koa.DefaultState, AppCtx>;
 }
 
 export namespace LobbyAPI {
@@ -403,4 +419,10 @@ export interface SyncInfo {
   filteredMetadata: FilteredMetadata;
   initialState: State;
   log: LogEntry[];
+}
+
+export interface ChatMessage {
+  id: string;
+  sender: PlayerID;
+  payload: any;
 }

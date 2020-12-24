@@ -303,6 +303,7 @@ describe('LocalTransport', () => {
     const master = ({
       onSync: jest.fn(),
       onUpdate: jest.fn(),
+      onChatMessage: jest.fn(),
     } as unknown) as LocalMaster;
     class WrappedLocalTransport extends LocalTransport {
       setStore(store: Store) {
@@ -357,6 +358,13 @@ describe('LocalTransport', () => {
         'default',
         null
       );
+    });
+
+    test('send chat-message', () => {
+      m.onChatMessage('matchID', { message: 'foo' });
+      expect(m.master.onChatMessage).lastCalledWith('matchID', {
+        message: 'foo',
+      });
     });
   });
 });

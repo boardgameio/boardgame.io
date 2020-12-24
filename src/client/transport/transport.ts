@@ -14,9 +14,12 @@ import {
   State,
   Store,
   SyncInfo,
+  ChatMessage,
 } from '../../types';
 
 export type MetadataCallback = (metadata: SyncInfo['filteredMetadata']) => void;
+
+export type ChatCallback = (message: ChatMessage) => void;
 
 export interface TransportOpts {
   store?: Store;
@@ -25,6 +28,7 @@ export interface TransportOpts {
   game?: ReturnType<typeof ProcessGameConfig>;
   playerID?: PlayerID;
   matchID?: string;
+  credentials?: string;
   numPlayers?: number;
 }
 
@@ -33,6 +37,7 @@ export abstract class Transport {
   protected gameName: string;
   protected playerID: PlayerID | null;
   protected matchID: string;
+  protected credentials?: string;
   protected numPlayers: number;
   isConnected: boolean;
 
@@ -41,12 +46,14 @@ export abstract class Transport {
     gameName,
     playerID,
     matchID,
+    credentials,
     numPlayers,
   }: TransportOpts) {
     this.store = store;
     this.gameName = gameName || 'default';
     this.playerID = playerID || null;
     this.matchID = matchID || 'default';
+    this.credentials = credentials;
     this.numPlayers = numPlayers || 2;
   }
 
@@ -57,4 +64,7 @@ export abstract class Transport {
   abstract subscribeMatchData(fn: MetadataCallback): void;
   abstract updateMatchID(id: string): void;
   abstract updatePlayerID(id: PlayerID): void;
+  abstract updateCredentials(credentials?: string): void;
+  abstract onChatMessage(matchID: string, chatMessage: ChatMessage): void;
+  abstract subscribeChatMessage(fn: ChatCallback): void;
 }

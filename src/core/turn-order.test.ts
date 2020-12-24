@@ -451,6 +451,55 @@ describe('setActivePlayers', () => {
     expect(state.ctx.activePlayers).toBeNull();
   });
 
+  test('set stages to Stage.NULL', () => {
+    const game = {
+      moves: {
+        A: G => G,
+        B: (G, ctx) => {
+          ctx.events.setActivePlayers({
+            moveLimit: 1,
+            currentPlayer: 'start',
+          });
+          return G;
+        },
+      },
+      turn: {
+        activePlayers: {
+          currentPlayer: {
+            stage: 'start',
+          },
+          others: Stage.NULL,
+        },
+        stages: {
+          start: {
+            moves: {
+              S: (G, ctx) => {
+                ctx.events.setStage(Stage.NULL);
+                return G;
+              },
+            },
+          },
+        },
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1', '2']);
+    expect(state.ctx.activePlayers['0']).toEqual('start');
+    expect(state.ctx.activePlayers['1']).toEqual(Stage.NULL);
+    expect(state.ctx.activePlayers['2']).toEqual(Stage.NULL);
+
+    state = reducer(state, makeMove('S', null, '0'));
+    expect(Object.keys(state.ctx.activePlayers)).toEqual(['0', '1', '2']);
+    expect(state.ctx.activePlayers['0']).toEqual(Stage.NULL);
+
+    state = reducer(state, makeMove('B', null, '0'));
+    expect(Object.keys(state.ctx.activePlayers)).toEqual(['0']);
+    expect(state.ctx.activePlayers['0']).toEqual('start');
+  });
+
   describe('reset behavior', () => {
     test('start of turn', () => {
       const game: Game = {

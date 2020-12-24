@@ -2,17 +2,18 @@
   export let logIndex;
   export let action;
   export let pinned;
-  export let payload;
-  export let payloadComponent;
+  export let metadata;
+  export let metadataComponent;
 
-  import CustomPayload from './CustomPayload.svelte';
+  import LogMetadata from './LogMetadata.svelte';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
 
-  const args = action.payload.args || [];
+  const args = action.payload.args;
+  const renderedArgs = typeof args === 'string' ? args : (args || []).join(',');
   const playerID = action.payload.playerID;
-  let actionType; 
+  let actionType;
   switch (action.type) {
     case 'UNDO':
       actionType = 'undo';
@@ -132,11 +133,10 @@
   on:mouseleave={() => dispatch('mouseleave')}
   on:blur={() => dispatch('mouseleave')}
 >
-  <div>{actionType}({args.join(',')})</div>
-
-  {#if payloadComponent}
-    <svelte:component this={payloadComponent} {payload} />
+  <div>{actionType}({renderedArgs})</div>
+  {#if metadataComponent}
+    <svelte:component this={metadataComponent} {metadata} />
   {:else}
-    <CustomPayload {payload} />
+    <LogMetadata {metadata} />
   {/if}
 </button>

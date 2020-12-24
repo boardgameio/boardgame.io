@@ -138,7 +138,7 @@
     {/if}
   {/each}
 
-  {#each renderedLogEntries as { action, payload }, i}
+  {#each renderedLogEntries as { action, metadata }, i}
     <LogEvent
       pinned={i === pinned}
       logIndex={i}
@@ -146,7 +146,7 @@
       on:mouseenter={OnMouseEnter}
       on:mouseleave={OnMouseLeave}
       {action}
-      {payload} />
+      {metadata} />
   {/each}
 
   {#each renderedLogEntries as { phase }, i}

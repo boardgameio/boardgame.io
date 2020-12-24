@@ -7,7 +7,11 @@
  */
 
 import { TransportAPI, SocketIO, SocketOpts } from './socketio';
+import { Auth } from '../auth';
 import { ProcessGameConfig } from '../../core/game';
+import { Master } from '../../master/master';
+
+type SyncArgs = Parameters<Master['onSync']>;
 
 type SocketIOTestAdapterOpts = SocketOpts & {
   clientInfo?: Map<any, any>;
@@ -20,7 +24,7 @@ class SocketIOTestAdapter extends SocketIO {
     roomInfo = new Map(),
     ...args
   }: SocketIOTestAdapterOpts = {}) {
-    super(Object.keys(args).length ? args : undefined);
+    super(Object.keys(args).length > 0 ? args : undefined);
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
@@ -31,11 +35,13 @@ jest.mock('../../master/master', () => {
     onUpdate: jest.Mock<any, any>;
     onSync: jest.Mock<any, any>;
     onConnectionChange: jest.Mock<any, any>;
+    onChatMessage: jest.Mock<any, any>;
 
     constructor() {
       this.onUpdate = jest.fn();
       this.onSync = jest.fn();
       this.onConnectionChange = jest.fn();
+      this.onChatMessage = jest.fn();
     }
   }
 
@@ -104,7 +110,8 @@ jest.mock('koa-socket-2', () => {
 });
 
 describe('basic', () => {
-  const app: any = { context: {} };
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
@@ -122,7 +129,8 @@ describe('basic', () => {
 });
 
 describe('socketAdapter', () => {
-  const app: any = { context: {} };
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
 
   let socketAdapter = jest.fn();
@@ -142,7 +150,8 @@ describe('TransportAPI', () => {
   let api;
 
   beforeAll(() => {
-    const app: any = { context: {} };
+    const auth = new Auth({ authenticateCredentials: () => true });
+    const app: any = { context: { auth } };
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
@@ -155,9 +164,11 @@ describe('TransportAPI', () => {
   beforeEach(async () => {
     io.socket.emit = jest.fn();
     io.socket.id = '0';
-    await io.socket.receive('sync', 'matchID', '0', 2);
+    const args0: SyncArgs = ['matchID', '0', undefined, 2];
+    await io.socket.receive('sync', ...args0);
     io.socket.id = '1';
-    await io.socket.receive('sync', 'matchID', '1', 2);
+    const args1: SyncArgs = ['matchID', '1', undefined, 2];
+    await io.socket.receive('sync', ...args1);
   });
 
   test('send', () => {
@@ -180,7 +191,8 @@ describe('TransportAPI', () => {
 });
 
 describe('sync / update', () => {
-  const app: any = { context: {} };
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
@@ -195,8 +207,21 @@ describe('sync / update', () => {
   });
 });
 
-describe('connect / disconnect', () => {
+describe('chat', () => {
   const app: any = { context: {} };
+  const games = [ProcessGameConfig({ seed: 0 })];
+  const transport = new SocketIOTestAdapter();
+  transport.init(app, games);
+  const io = app.context.io;
+
+  test('chat message', async () => {
+    await io.socket.receive('chat', 'matchID', { message: 'foo' });
+  });
+});
+
+describe('connect / disconnect', () => {
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
@@ -220,9 +245,11 @@ describe('connect / disconnect', () => {
 
   test('0 and 1 connect', async () => {
     io.socket.id = '0';
-    await io.socket.receive('sync', 'matchID', '0', 2);
+    const args0: SyncArgs = ['matchID', '0', undefined, 2];
+    await io.socket.receive('sync', ...args0);
     io.socket.id = '1';
-    await io.socket.receive('sync', 'matchID', '1', 2);
+    const args1: SyncArgs = ['matchID', '1', undefined, 2];
+    await io.socket.receive('sync', ...args1);
 
     expect(toObj(clientInfo)['0']).toMatchObject({
       matchID: 'matchID',

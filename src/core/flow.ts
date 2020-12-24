@@ -373,7 +373,7 @@ export function Flow({
   }
 
   function UpdateStage(state: State, { arg, playerID }): State {
-    if (typeof arg === 'string') {
+    if (typeof arg === 'string' || arg === Stage.NULL) {
       arg = { stage: arg };
     }
 
@@ -384,7 +384,8 @@ export function Flow({
       _activePlayersNumMoves,
     } = ctx;
 
-    if (arg.stage) {
+    // Checking if stage is valid, even Stage.NULL
+    if (arg.stage !== undefined) {
       if (activePlayers === null) {
         activePlayers = {};
       }
@@ -582,7 +583,8 @@ export function Flow({
       if (stage && stage.next) arg = stage.next;
     }
 
-    if (next && arg) {
+    // Checking if arg is a valid stage, even Stage.NULL
+    if (next && arg !== undefined) {
       next.push({ fn: UpdateStage, arg, playerID });
     }
 
