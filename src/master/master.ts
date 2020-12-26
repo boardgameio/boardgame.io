@@ -69,7 +69,6 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
       action: { ...logEvent.action, payload },
     };
 
-    /* eslint-disable-next-line no-unused-vars */
     const { redact, ...remaining } = filteredEvent;
     return remaining;
   });
@@ -79,7 +78,6 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
  * Remove player credentials from action payload
  */
 const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
-  // eslint-disable-next-line no-unused-vars
   const { credentials, ...payload } = action.payload;
   return { ...action, payload };
 };
