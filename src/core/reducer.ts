@@ -331,7 +331,7 @@ export function CreateGameReducer({
           ctx: restore.ctx,
           plugins: restore.plugins,
           _stateID: state._stateID + 1,
-          _undo: _undo.slice(0, _undo.length - 1),
+          _undo: _undo.slice(0, -1),
           _redo: [last, ..._redo],
         };
       }
