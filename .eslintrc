@@ -23,9 +23,6 @@ rules:
   # eslint
   no-console: off
 
-  # plugin:react
-  react/prop-types: off
-
   # plugin:unicorn
   unicorn/no-fn-reference-in-iterator: off
   unicorn/no-null: off

@@ -528,7 +528,7 @@ describe('lobby', () => {
           { game: { name: 'GameName1' } },
           { game: { name: 'GameName2' } },
         ];
-        const CustomLobbyUI = ({ gameComponents }) => (
+        const CustomLobbyUI = ({ gameComponents }: any) => (
           <div>
             {gameComponents
               .map(gameComponent => gameComponent.game.name)
@@ -549,7 +549,7 @@ describe('lobby', () => {
       });
 
       test('should change lobby phase when click on custom enter button', () => {
-        const CustomLobbyUI = ({ onEnterLobby }) => (
+        const CustomLobbyUI = ({ onEnterLobby }: any) => (
           <button onClick={() => onEnterLobby('Alex')}>Enter</button>
         );
 
