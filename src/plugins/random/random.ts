@@ -119,26 +119,22 @@ export class Random {
     for (const key in SpotValue) {
       const spotvalue = SpotValue[key];
       predefined[key] = (diceCount?: number) => {
-        if (diceCount === undefined) {
-          return Math.floor(random() * spotvalue) + 1;
-        } else {
-          return [...new Array(diceCount).keys()].map(
-            () => Math.floor(random() * spotvalue) + 1
-          );
-        }
+        return diceCount === undefined
+          ? Math.floor(random() * spotvalue) + 1
+          : [...new Array(diceCount).keys()].map(
+              () => Math.floor(random() * spotvalue) + 1
+            );
       };
     }
 
     function Die(spotValue?: number): number;
     function Die(spotValue: number, diceCount: number): number[];
-    function Die(spotvalue: number = 6, diceCount?: number) {
-      if (diceCount === undefined) {
-        return Math.floor(random() * spotvalue) + 1;
-      } else {
-        return [...new Array(diceCount).keys()].map(
-          () => Math.floor(random() * spotvalue) + 1
-        );
-      }
+    function Die(spotvalue = 6, diceCount?: number) {
+      return diceCount === undefined
+        ? Math.floor(random() * spotvalue) + 1
+        : [...new Array(diceCount).keys()].map(
+            () => Math.floor(random() * spotvalue) + 1
+          );
     }
 
     return {

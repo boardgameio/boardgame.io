@@ -45,15 +45,13 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
       _nextActivePlayers = arg.next;
     }
 
-    if (arg.revert) {
-      _prevActivePlayers = _prevActivePlayers.concat({
-        activePlayers: ctx.activePlayers,
-        _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
-        _activePlayersNumMoves: ctx._activePlayersNumMoves,
-      });
-    } else {
-      _prevActivePlayers = [];
-    }
+    _prevActivePlayers = arg.revert
+      ? _prevActivePlayers.concat({
+          activePlayers: ctx.activePlayers,
+          _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
+          _activePlayersNumMoves: ctx._activePlayersNumMoves,
+        })
+      : [];
 
     if (arg.currentPlayer !== undefined) {
       ApplyActivePlayerArgument(

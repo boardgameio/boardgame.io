@@ -302,12 +302,9 @@ export const createRouter = ({
 
     delete metadata.players[playerID].name;
     delete metadata.players[playerID].credentials;
-    if (Object.values(metadata.players).some(player => player.name)) {
-      await db.setMetadata(matchID, metadata);
-    } else {
-      // remove room
-      await db.wipe(matchID);
-    }
+    await (Object.values(metadata.players).some(player => player.name)
+      ? db.setMetadata(matchID, metadata)
+      : db.wipe(matchID));
     ctx.body = {};
   });
 

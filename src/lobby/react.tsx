@@ -232,11 +232,9 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
 
     let multiplayer = undefined;
     if (matchOpts.numPlayers > 1) {
-      if (this.props.gameServer) {
-        multiplayer = SocketIO({ server: this.props.gameServer });
-      } else {
-        multiplayer = SocketIO();
-      }
+      multiplayer = this.props.gameServer
+        ? SocketIO({ server: this.props.gameServer })
+        : SocketIO();
     }
 
     if (matchOpts.numPlayers == 1) {

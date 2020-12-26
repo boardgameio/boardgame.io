@@ -329,13 +329,10 @@ export class Master {
       log: true,
       initialState: true,
     } as const;
-    let fetchResult: StorageAPI.FetchResult<typeof fetchOpts>;
 
-    if (StorageAPI.isSynchronous(this.storageAPI)) {
-      fetchResult = this.storageAPI.fetch(key, fetchOpts);
-    } else {
-      fetchResult = await this.storageAPI.fetch(key, fetchOpts);
-    }
+    const fetchResult = StorageAPI.isSynchronous(this.storageAPI)
+      ? this.storageAPI.fetch(key, fetchOpts)
+      : await this.storageAPI.fetch(key, fetchOpts);
 
     let { state, initialState, log, metadata } = fetchResult;
 

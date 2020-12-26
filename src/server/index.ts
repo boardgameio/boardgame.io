@@ -38,16 +38,13 @@ interface HttpsOptions {
 export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
   callback?: () => void
-): ServerConfig => {
-  if (portOrConfig && typeof portOrConfig === 'object') {
-    return {
-      ...portOrConfig,
-      callback: portOrConfig.callback || callback,
-    };
-  } else {
-    return { port: portOrConfig as number, callback };
-  }
-};
+): ServerConfig =>
+  portOrConfig && typeof portOrConfig === 'object'
+    ? {
+        ...portOrConfig,
+        callback: portOrConfig.callback || callback,
+      }
+    : { port: portOrConfig as number, callback };
 
 export const getPortFromServer = (
   server: KoaServer
