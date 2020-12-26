@@ -81,7 +81,7 @@ export class LocalMaster extends Master {
     const send: TransportAPI['send'] = ({ playerID, type, args }) => {
       const callback = clientCallbacks[playerID];
       if (callback !== undefined) {
-        callback.apply(null, [type, ...args]);
+        callback(type, ...args);
       }
     };
 
