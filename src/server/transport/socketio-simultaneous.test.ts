@@ -15,7 +15,6 @@ import { ProcessGameConfig } from '../../core/game';
 import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
-import { _ClientImpl } from '../../client/client';
 import { Master } from '../../master/master';
 import { Ctx, LogEntry, Server, State, StorageAPI } from '../../types';
 
@@ -158,7 +157,7 @@ jest.mock('koa-socket-2', () => {
 
 const game = {
   name: 'test',
-  setup: ctx => {
+  setup: () => {
     const G = {
       players: {
         '0': {

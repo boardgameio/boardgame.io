@@ -192,6 +192,6 @@ test('can receive enhancer', () => {
     enhancer,
   });
 
-  const game = Enzyme.mount(<Board />); // eslint-disable-line no-unused-vars
+  Enzyme.mount(<Board />);
   expect(enhancer).toBeCalled();
 });

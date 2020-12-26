@@ -166,7 +166,6 @@ describe('multiplayer', () => {
     });
 
     test('Sends and receives chat messages', () => {
-      const fn = jest.fn();
       jest.spyOn(client.transport, 'onAction');
       client.updatePlayerID('0');
       client.updateMatchID('matchID');
@@ -314,8 +313,8 @@ describe('strip secret only on server', () => {
     spec = {
       game: {
         setup: () => initial,
-        playerView: (G, ctx, playerID) => {
-          let r = { ...G };
+        playerView: G => {
+          const r = { ...G };
           r.sum = r.secret.reduce((prev, curr) => {
             return prev + curr;
           });
