@@ -118,7 +118,7 @@ export const createRouter = ({
     // Whether the game should be excluded from public listing.
     const unlisted = ctx.request.body.unlisted;
     // The number of players for this game instance.
-    let numPlayers = parseInt(ctx.request.body.numPlayers);
+    const numPlayers = Number.parseInt(ctx.request.body.numPlayers);
 
     const game = games.find(g => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
@@ -357,7 +357,7 @@ export const createRouter = ({
     const setupData = ctx.request.body.setupData || metadata.setupData;
     // The number of players for this game instance.
     const numPlayers =
-      parseInt(ctx.request.body.numPlayers) ||
+      Number.parseInt(ctx.request.body.numPlayers) ||
       Object.keys(metadata.players).length;
 
     const game = games.find(g => g.name === gameName);
