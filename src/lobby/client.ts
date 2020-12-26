@@ -119,7 +119,7 @@ export class LobbyClient {
       if (isGameover !== undefined) queries.push(`isGameover=${isGameover}`);
       if (updatedBefore) queries.push(`updatedBefore=${updatedBefore}`);
       if (updatedAfter) queries.push(`updatedAfter=${updatedAfter}`);
-      if (queries.length) query = '?' + queries.join('&');
+      if (queries.length > 0) query = '?' + queries.join('&');
     }
     return this.request(`/games/${gameName}${query}`, init);
   }

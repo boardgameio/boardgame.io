@@ -83,7 +83,7 @@ class SocketIOTestAdapter extends SocketIO {
     roomInfo = new Map(),
     ...args
   }: SocketIOTestAdapterOpts = {}) {
-    super(Object.keys(args).length ? args : undefined);
+    super(Object.keys(args).length > 0 ? args : undefined);
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
