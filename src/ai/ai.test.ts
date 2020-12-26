@@ -334,7 +334,7 @@ describe('MCTSBot', () => {
     const objectives = () => ({
       'play-on-square-0': {
         checker: G => G.cells[0] !== null,
-        weight: 10.0,
+        weight: 10,
       },
     });
 

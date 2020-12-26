@@ -161,7 +161,7 @@ export class MCTSBot extends Bot {
     }
 
     let selectedChild = null;
-    let best = 0.0;
+    let best = 0;
 
     for (const child of node.children) {
       const childVisits = child.visits + Number.EPSILON;
@@ -219,7 +219,7 @@ export class MCTSBot extends Bot {
           return score + objective.weight;
         }
         return score;
-      }, 0.0);
+      }, 0);
 
       // If so, stop and return the score.
       if (score > 0) {
