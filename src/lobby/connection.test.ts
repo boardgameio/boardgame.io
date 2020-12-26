@@ -75,11 +75,7 @@ describe('lobby', () => {
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        try {
-          await lobby.refresh();
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.refresh()).rejects.toThrow();
         expect(lobby.matches).toEqual([]);
       });
     });
@@ -101,36 +97,20 @@ describe('lobby', () => {
         expect(lobby.playerCredentials).toEqual('SECRET');
       });
       test('when the match does not exist', async () => {
-        try {
-          await lobby.join('game1', 'matchID_3', '0');
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.join('game1', 'matchID_3', '0')).rejects.toThrow();
         expect(lobby.matches).toEqual([match1, match2]);
       });
       test('when the seat is not available', async () => {
         match1.players[0].name = 'Bob';
-        try {
-          await lobby.join('game1', 'matchID_3', '0');
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.join('game1', 'matchID_3', '0')).rejects.toThrow();
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        try {
-          await lobby.join('game1', 'matchID_1', '0');
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.join('game1', 'matchID_1', '0')).rejects.toThrow();
       });
       test('when the player has already joined another match', async () => {
         match2.players[0].name = 'Bob';
-        try {
-          await lobby.join('game1', 'matchID_1', '0');
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.join('game1', 'matchID_1', '0')).rejects.toThrow();
       });
     });
 
@@ -152,30 +132,18 @@ describe('lobby', () => {
         expect(lobby.matches).toEqual([match1, match2]);
       });
       test('when the match does not exist', async () => {
-        try {
-          await lobby.leave('game1', 'matchID_3');
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.leave('game1', 'matchID_3')).rejects.toThrow();
         expect(fetch).toHaveBeenCalledTimes(4);
         expect(lobby.matches).toEqual([match1, match2]);
       });
       test('when the player is not in the match', async () => {
         await lobby.leave('game1', 'matchID_1');
         expect(fetch).toHaveBeenCalledTimes(5);
-        try {
-          await lobby.leave('game1', 'matchID_1');
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.leave('game1', 'matchID_1')).rejects.toThrow();
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        try {
-          await lobby.leave('game1', 'matchID_1');
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.leave('game1', 'matchID_1')).rejects.toThrow();
       });
     });
 
@@ -207,30 +175,18 @@ describe('lobby', () => {
         expect(fetch).toHaveBeenCalledTimes(4);
       });
       test('when the number of players is off boundaries', async () => {
-        try {
-          await lobby.create('game1', 1);
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.create('game1', 1)).rejects.toThrow();
       });
       test('when the number of players has no boundaries', async () => {
         jsonResult.push(() => ({ matchID: 'def' }));
         await lobby.create('game2', 1);
       });
       test('when the game is unknown', async () => {
-        try {
-          await lobby.create('game3', 2);
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.create('game3', 2)).rejects.toThrow();
       });
       test('when the server request fails', async () => {
         nextStatus = 404;
-        try {
-          await lobby.create('game1', 2);
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-        }
+        await expect(lobby.create('game1', 2)).rejects.toThrow();
       });
     });
   });
