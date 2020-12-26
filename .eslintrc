@@ -31,6 +31,17 @@ rules:
   unicorn/no-useless-undefined: off
   unicorn/prevent-abbreviations: off
 
+  # plugin:@typescript-eslint
+  "@typescript-eslint/explicit-module-boundary-types": off
+  "@typescript-eslint/no-empty-function": off
+  "@typescript-eslint/no-explicit-any": off
+  "@typescript-eslint/no-namespace": off
+  "@typescript-eslint/no-unused-vars":
+    - warn
+    - args: after-used
+      ignoreRestSiblings: true
+  "@typescript-eslint/no-var-requires": off
+
 settings:
   react:
     version: '16.3'
