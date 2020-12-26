@@ -42,10 +42,7 @@ export class LobbyClient {
     return response.json();
   }
 
-  private async post(
-    route: string,
-    opts: { body?: object; init?: RequestInit }
-  ) {
+  private async post(route: string, opts: { body?: any; init?: RequestInit }) {
     let init: RequestInit = {
       method: 'post',
       body: JSON.stringify(opts.body),

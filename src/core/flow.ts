@@ -804,7 +804,7 @@ export function Flow({
     return state;
   }
 
-  function IsPlayerActive(_G: object, ctx: Ctx, playerID: PlayerID): boolean {
+  function IsPlayerActive(_G: any, ctx: Ctx, playerID: PlayerID): boolean {
     if (ctx.activePlayers) {
       return playerID in ctx.activePlayers;
     }

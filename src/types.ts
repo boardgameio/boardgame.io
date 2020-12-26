@@ -220,7 +220,7 @@ export interface TurnConfig<
   G extends any = any,
   CtxWithPlugins extends Ctx = Ctx
 > {
-  activePlayers?: object;
+  activePlayers?: ActivePlayersArg;
   moveLimit?: number;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
@@ -384,7 +384,7 @@ export namespace CredentialedActionShape {
 }
 
 export namespace ActionShape {
-  type StripCredentials<T extends object> = Object.P.Omit<
+  type StripCredentials<T extends CredentialedActionShape.Any> = Object.P.Omit<
     T,
     ['payload', 'credentials']
   >;
@@ -412,7 +412,7 @@ export namespace ActionShape {
 }
 
 export namespace ActionPayload {
-  type GetPayload<T extends object> = Object.At<T, 'payload'>;
+  type GetPayload<T extends ActionShape.Any> = Object.At<T, 'payload'>;
   export type MakeMove = GetPayload<ActionShape.MakeMove>;
   export type GameEvent = GetPayload<ActionShape.GameEvent>;
 }

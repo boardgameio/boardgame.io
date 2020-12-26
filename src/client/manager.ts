@@ -15,7 +15,7 @@ export class ClientManager {
   private debugPanel: Debug | null;
   private currentClient: _ClientImpl | null;
   private clients: Map<_ClientImpl, _ClientImpl>;
-  private subscribers: Map<Symbol, SubscribeCallback>;
+  private subscribers: Map<symbol, SubscribeCallback>;
 
   constructor() {
     this.debugPanel = null;
