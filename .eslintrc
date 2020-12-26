@@ -1,30 +1,37 @@
-{
-  "extends": [
-    "eslint:recommended",
-    "plugin:jest/recommended",
-    "plugin:unicorn/recommended",
-    "plugin:react/recommended",
-    "plugin:prettier/recommended",
-    "prettier/react",
-    "prettier/unicorn"
-  ],
-  "env": {
-    "node": true,
-    "browser": true,
-    "es6": true
-  },
-  "parser": "babel-eslint",
-  "rules": {
-    "no-console": "off",
-    "react/prop-types": "off",
-    "unicorn/prevent-abbreviations": "off",
-    "unicorn/no-reduce": "off",
-    "unicorn/no-null": "off",
-    "unicorn/no-fn-reference-in-iterator": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "16.3"
-    }
-  }
-}
+extends:
+- eslint:recommended
+- plugin:jest/recommended
+- plugin:unicorn/recommended
+- plugin:react/recommended
+- plugin:prettier/recommended
+- plugin:@typescript-eslint/recommended
+- prettier/react
+- prettier/unicorn
+- prettier/@typescript-eslint
+
+plugins:
+- "@typescript-eslint"
+
+parser: "@typescript-eslint/parser"
+
+env:
+  node: true
+  browser: true
+  es6: true
+
+rules:
+  # eslint
+  no-console: off
+
+  # plugin:react
+  react/prop-types: off
+
+  # plugin:unicorn
+  unicorn/no-fn-reference-in-iterator: off
+  unicorn/no-null: off
+  unicorn/no-reduce: off
+  unicorn/prevent-abbreviations: off
+
+settings:
+  react:
+    version: '16.3'
