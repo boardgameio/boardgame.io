@@ -182,7 +182,7 @@ export function Client<
           log: this.client.log,
           matchData: this.client.matchData,
           sendChatMessage: this.client.sendChatMessage,
-          chatMessages: this.client.chatMessages
+          chatMessages: this.client.chatMessages,
         });
       }
 
