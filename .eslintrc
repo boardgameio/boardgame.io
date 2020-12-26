@@ -22,6 +22,9 @@ env:
 rules:
   # eslint
   no-console: off
+  prefer-const:
+    - error
+    - destructuring: all
 
   # plugin:unicorn
   unicorn/consistent-function-scoping: off
