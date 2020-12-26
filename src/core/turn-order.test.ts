@@ -310,7 +310,7 @@ test('override', () => {
     next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
   };
 
-  let flow = Flow({
+  const flow = Flow({
     turn: { order: even },
     phases: { A: { start: true, next: 'B' }, B: { turn: { order: odd } } },
   });
@@ -809,7 +809,7 @@ describe('setActivePlayers', () => {
         },
       };
 
-      let state = InitializeGame({ game, numPlayers: 2 });
+      const state = InitializeGame({ game, numPlayers: 2 });
 
       expect(state.ctx._activePlayersMoveLimit).toEqual({
         '0': 2,

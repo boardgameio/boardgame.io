@@ -77,7 +77,7 @@ export const ProcessAction = (
  * ctx for consumption inside a move function or hook.
  */
 export const EnhanceCtx = (state: PartialGameState): Ctx => {
-  let ctx = { ...state.ctx };
+  const ctx = { ...state.ctx };
   const plugins = state.plugins || {};
   Object.entries(plugins).forEach(([name, { api }]) => {
     ctx[name] = api;

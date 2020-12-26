@@ -230,7 +230,7 @@ export function CreateGameReducer({
         });
 
         // Process the move.
-        let G = game.processMove(state, action.payload);
+        const G = game.processMove(state, action.payload);
 
         // The game declared the move as invalid.
         if (G === INVALID_MOVE) {

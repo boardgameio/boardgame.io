@@ -36,7 +36,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
 
   if (Array.isArray(arg)) {
     // support a simple array of player IDs as active players
-    let value = {};
+    const value = {};
     arg.forEach(v => (value[v] = Stage.NULL));
     activePlayers = value;
   } else {
@@ -118,7 +118,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
     _activePlayersMoveLimit = null;
   }
 
-  let _activePlayersNumMoves = {};
+  const _activePlayersNumMoves = {};
   for (const id in activePlayers) {
     _activePlayersNumMoves[id] = 0;
   }

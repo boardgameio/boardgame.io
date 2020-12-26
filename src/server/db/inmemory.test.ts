@@ -24,7 +24,7 @@ describe('InMemory', () => {
   });
 
   test('createMatch', () => {
-    let stateEntry: unknown = { a: 1 };
+    const stateEntry: unknown = { a: 1 };
 
     // Create match.
     db.createMatch('matchID', {

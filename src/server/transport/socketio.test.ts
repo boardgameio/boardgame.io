@@ -133,7 +133,7 @@ describe('socketAdapter', () => {
   const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
 
-  let socketAdapter = jest.fn();
+  const socketAdapter = jest.fn();
 
   beforeEach(() => {
     const transport = new SocketIOTestAdapter({ socketAdapter });
@@ -228,7 +228,7 @@ describe('connect / disconnect', () => {
   let io;
 
   const toObj = m => {
-    let o = {};
+    const o = {};
     m.forEach((value, key) => {
       o[key] = value;
     });

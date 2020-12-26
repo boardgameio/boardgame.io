@@ -52,7 +52,7 @@ test('move returns INVALID_MOVE', () => {
     },
   };
   const reducer = CreateGameReducer({ game });
-  let state = reducer(initialState, makeMove('A'));
+  const state = reducer(initialState, makeMove('A'));
   expect(error).toBeCalledWith('invalid move: A args: undefined');
   expect(state._stateID).toBe(0);
 });
@@ -139,13 +139,13 @@ test('victory', () => {
 
 test('endTurn', () => {
   {
-    let state = reducer(initialState, gameEvent('endTurn'));
+    const state = reducer(initialState, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(2);
   }
 
   {
     const reducer = CreateGameReducer({ game, isClient: true });
-    let state = reducer(initialState, gameEvent('endTurn'));
+    const state = reducer(initialState, gameEvent('endTurn'));
     expect(state.ctx.turn).toBe(1);
   }
 });

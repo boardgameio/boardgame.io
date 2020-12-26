@@ -20,7 +20,7 @@ export const PlayerView = {
    * corresponding to the current playerID.
    */
   STRIP_SECRETS: (G: any, ctx: Ctx, playerID: PlayerID) => {
-    let r = { ...G };
+    const r = { ...G };
 
     if (r.secret !== undefined) {
       delete r.secret;

@@ -26,7 +26,7 @@ jest.mock('../core/logger', () => ({
 
 describe('basic', () => {
   let client;
-  let initial = { initial: true };
+  const initial = { initial: true };
 
   const game = {
     setup: () => initial,
@@ -130,8 +130,8 @@ test('isActive', () => {
 
 describe('multiplayer', () => {
   describe('socket.io master', () => {
-    let host = 'host';
-    let port = '4321';
+    const host = 'host';
+    const port = '4321';
     let client;
 
     beforeAll(() => {
@@ -309,7 +309,7 @@ describe('strip secret only on server', () => {
   let client0;
   let client1;
   let spec;
-  let initial = { secret: [1, 2, 3, 4], sum: 0 };
+  const initial = { secret: [1, 2, 3, 4], sum: 0 };
   beforeAll(() => {
     spec = {
       game: {

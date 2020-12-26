@@ -65,7 +65,7 @@ export class InMemory extends StorageAPI.Sync {
     matchID: string,
     opts: O
   ): StorageAPI.FetchResult<O> {
-    let result = {} as StorageAPI.FetchFields;
+    const result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
       result.state = this.state.get(matchID);

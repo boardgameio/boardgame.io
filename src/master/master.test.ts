@@ -173,7 +173,7 @@ describe('update', () => {
     expect(sendAll).toBeCalled();
     expect(sendAllReturn).not.toBeUndefined();
 
-    let value = sendAllReturn('0');
+    const value = sendAllReturn('0');
     expect(value.type).toBe('update');
     expect(value.args[0]).toBe('matchID');
     expect(value.args[1]).toMatchObject({

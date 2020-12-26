@@ -55,7 +55,7 @@ const PlayerPlugin = <PlayerState extends any = any>({
   },
 
   api: ({ ctx, data }): PlayerAPI => {
-    let state = data.players;
+    const state = data.players;
 
     const get = () => {
       return data.players[ctx.currentPlayer];
@@ -65,7 +65,7 @@ const PlayerPlugin = <PlayerState extends any = any>({
       return (state[ctx.currentPlayer] = value);
     };
 
-    let result: PlayerAPI = { state, get, set };
+    const result: PlayerAPI = { state, get, set };
 
     if (ctx.numPlayers === 2) {
       const other = ctx.currentPlayer === '0' ? '1' : '0';
@@ -82,7 +82,7 @@ const PlayerPlugin = <PlayerState extends any = any>({
   },
 
   setup: ({ ctx }) => {
-    let players: Record<PlayerID, any> = {};
+    const players: Record<PlayerID, any> = {};
     for (let i = 0; i < ctx.numPlayers; i++) {
       let playerState: any = {};
       if (setup !== undefined) {

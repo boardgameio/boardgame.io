@@ -186,8 +186,8 @@ export const createRouter = ({
         updatedBefore,
       },
     });
-    let matches = [];
-    for (let matchID of matchList) {
+    const matches = [];
+    for (const matchID of matchList) {
       const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
         metadata: true,
       });

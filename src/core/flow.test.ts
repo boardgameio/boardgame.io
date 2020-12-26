@@ -479,7 +479,7 @@ describe('stages', () => {
 describe('stage events', () => {
   describe('setStage', () => {
     test('basic', () => {
-      let flow = Flow({});
+      const flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -489,7 +489,7 @@ describe('stage events', () => {
     });
 
     test('object syntax', () => {
-      let flow = Flow({});
+      const flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -499,7 +499,7 @@ describe('stage events', () => {
     });
 
     test('with multiple active players', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { all: 'A', moveLimit: 5 },
         },
@@ -522,7 +522,7 @@ describe('stage events', () => {
     });
 
     test('resets move count', () => {
-      let flow = Flow({
+      const flow = Flow({
         moves: { A: () => {} },
         turn: {
           activePlayers: { currentPlayer: 'A' },
@@ -539,7 +539,7 @@ describe('stage events', () => {
     });
 
     test('with move limit', () => {
-      let flow = Flow({});
+      const flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -552,7 +552,7 @@ describe('stage events', () => {
     });
 
     test('empty argument ends stage', () => {
-      let flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
+      const flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -564,7 +564,7 @@ describe('stage events', () => {
 
   describe('endStage', () => {
     test('basic', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { currentPlayer: 'A' },
         },
@@ -578,7 +578,7 @@ describe('stage events', () => {
     });
 
     test('with multiple active players', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { all: 'A', moveLimit: 5 },
         },
@@ -592,7 +592,7 @@ describe('stage events', () => {
     });
 
     test('maintains move count', () => {
-      let flow = Flow({
+      const flow = Flow({
         moves: { A: () => {} },
         turn: {
           activePlayers: { currentPlayer: 'A' },
@@ -609,7 +609,7 @@ describe('stage events', () => {
     });
 
     test('sets to next', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { currentPlayer: 'A1', others: 'B1' },
           stages: {

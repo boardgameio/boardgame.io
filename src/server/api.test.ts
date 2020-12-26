@@ -1056,8 +1056,8 @@ describe('.createRouter', () => {
     describe('when given 2 games', () => {
       let response;
       beforeEach(async () => {
-        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        const app = createApiServer({ db, auth, games });
 
         response = await request(app.callback()).get('/games');
       });
@@ -1288,8 +1288,8 @@ describe('.createRouter', () => {
       let response;
       let matches;
       beforeEach(async () => {
-        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        const app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar');
         matches = JSON.parse(response.text).matches;
       });
@@ -1445,8 +1445,8 @@ describe('.createRouter', () => {
       let response;
       let room;
       beforeEach(async () => {
-        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        const app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar/bar-0');
         room = JSON.parse(response.text);
       });
@@ -1470,8 +1470,8 @@ describe('.createRouter', () => {
         db = new AsyncStorage({
           fetch: async () => ({ metadata: null }),
         });
-        let games = [ProcessGameConfig({ name: 'foo' })];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' })];
+        const app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar/doesnotexist');
       });
 

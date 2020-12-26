@@ -126,7 +126,7 @@ export class MCTSBot extends Bot {
       actions = this.enumerate(G, ctx, playerID);
       objectives = this.objectives(G, ctx, playerID);
     } else if (ctx.activePlayers) {
-      for (let playerID in ctx.activePlayers) {
+      for (const playerID in ctx.activePlayers) {
         actions = actions.concat(this.enumerate(G, ctx, playerID));
         objectives = objectives.concat(this.objectives(G, ctx, playerID));
       }

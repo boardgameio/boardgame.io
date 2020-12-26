@@ -51,7 +51,7 @@ describe('basic', () => {
           }),
 
           api: ({ data }) => {
-            let state = { value: data.n };
+            const state = { value: data.n };
             const increment = () => state.value++;
             const get = () => state.value;
             return { increment, get };

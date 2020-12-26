@@ -66,7 +66,7 @@ const TicTacToe = ProcessGameConfig({
 });
 
 const enumerate = (G, ctx, playerID) => {
-  let r = [];
+  const r = [];
   for (let i = 0; i < 9; i++) {
     if (G.cells[i] === null) {
       r.push(makeMove('clickCell', [i], playerID));

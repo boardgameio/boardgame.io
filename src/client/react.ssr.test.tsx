@@ -17,7 +17,7 @@ test('board is rendered - ssr', () => {
     game: {},
     board: TestBoard,
   });
-  let ssrRender = ReactDOMServer.renderToString(<Board />);
+  const ssrRender = ReactDOMServer.renderToString(<Board />);
   expect(ssrRender).toContain('bgio-client');
   expect(ssrRender).toContain('my-board');
 });

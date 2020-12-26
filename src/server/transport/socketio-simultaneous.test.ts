@@ -213,8 +213,8 @@ describe('simultaneous moves on server game', () => {
   });
 
   test('two clients playing using sync storage', async () => {
-    let db = new InMemory();
-    let auth = new Auth();
+    const db = new InMemory();
+    const auth = new Auth();
     app = { context: { db, auth } };
     transport = new SocketIOTestAdapter({
       clientInfo,
@@ -224,7 +224,6 @@ describe('simultaneous moves on server game', () => {
     io = app.context.io;
     const socket0 = io.sockets.get('0');
     const socket1 = io.sockets.get('1');
-    let fetchResult;
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
@@ -301,7 +300,7 @@ describe('simultaneous moves on server game', () => {
       })(),
     ]);
 
-    fetchResult = db.fetch('matchID', {
+    const fetchResult = db.fetch('matchID', {
       state: true,
       metadata: true,
       log: true,
@@ -336,9 +335,9 @@ describe('simultaneous moves on server game', () => {
   });
 
   test('two clients playing using async storage', async () => {
-    let db = new InMemoryAsync();
+    const db = new InMemoryAsync();
     await db.connect();
-    let auth = new Auth();
+    const auth = new Auth();
 
     app = { context: { db, auth } };
     transport = new SocketIOTestAdapter({
@@ -349,7 +348,6 @@ describe('simultaneous moves on server game', () => {
     io = app.context.io;
     const socket0 = io.sockets.get('0');
     const socket1 = io.sockets.get('1');
-    let fetchResult;
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
@@ -424,7 +422,7 @@ describe('simultaneous moves on server game', () => {
       })(),
     ]);
 
-    fetchResult = await db.fetch('matchID', {
+    const fetchResult = await db.fetch('matchID', {
       state: true,
       metadata: true,
       log: true,

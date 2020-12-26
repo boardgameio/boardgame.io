@@ -32,8 +32,8 @@ class LobbyCreateMatchForm extends React.Component<
   constructor(props: CreateMatchProps) {
     super(props);
     /* fix min and max number of players */
-    for (let game of props.games) {
-      let matchDetails = game.game;
+    for (const game of props.games) {
+      const matchDetails = game.game;
       if (!matchDetails.minPlayers) {
         matchDetails.minPlayers = 1;
       }
@@ -100,7 +100,7 @@ class LobbyCreateMatchForm extends React.Component<
   };
 
   onChangeSelectedGame = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    let idx = Number.parseInt(event.target.value);
+    const idx = Number.parseInt(event.target.value);
     this.setState({
       selectedGame: idx,
       numPlayers: this.props.games[idx].game.minPlayers,

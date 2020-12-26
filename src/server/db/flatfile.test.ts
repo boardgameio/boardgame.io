@@ -48,7 +48,7 @@ describe('FlatFile', () => {
     }
 
     // Must return all keys
-    let keys = await db.listMatches();
+    const keys = await db.listMatches();
     expect(keys).toEqual(['matchID']);
 
     // Must remove match from DB
@@ -63,7 +63,7 @@ describe('FlatFile', () => {
     // Shall create match, then clear DB, then check whether DB is cleared
     await db.setState('game2', state as State);
     await db.clear();
-    let keys2 = await db.listMatches();
+    const keys2 = await db.listMatches();
     expect(keys2).toHaveLength(0);
   });
 

@@ -29,7 +29,7 @@ export function InitializeGame({
     numPlayers = 2;
   }
 
-  let ctx: Ctx = game.flow.ctx(numPlayers);
+  const ctx: Ctx = game.flow.ctx(numPlayers);
 
   let state: PartialGameState = {
     // User managed state.

@@ -70,8 +70,8 @@ export function Flow({
 
   phaseMap[''] = {};
 
-  let moveMap = {};
-  let moveNames = new Set();
+  const moveMap = {};
+  const moveNames = new Set();
   let startingPhase = null;
 
   Object.keys(moves).forEach(name => moveNames.add(name));
@@ -86,7 +86,7 @@ export function Flow({
 
   const TriggerWrapper = (endIf: (G: any, ctx: Ctx) => any) => {
     return (state: State) => {
-      let ctxWithAPI = plugin.EnhanceCtx(state);
+      const ctxWithAPI = plugin.EnhanceCtx(state);
       return endIf(state.G, ctxWithAPI);
     };
   };
@@ -96,7 +96,7 @@ export function Flow({
     endIf: TriggerWrapper(endIf),
   };
 
-  for (let phase in phaseMap) {
+  for (const phase in phaseMap) {
     const conf = phaseMap[phase];
 
     if (conf.start === true) {
@@ -104,7 +104,7 @@ export function Flow({
     }
 
     if (conf.moves !== undefined) {
-      for (let move of Object.keys(conf.moves)) {
+      for (const move of Object.keys(conf.moves)) {
         moveMap[phase + '.' + move] = conf.moves[move];
         moveNames.add(move);
       }
@@ -144,8 +144,8 @@ export function Flow({
     for (const stage in conf.turn.stages) {
       const stageConfig = conf.turn.stages[stage];
       const moves = stageConfig.moves || {};
-      for (let move of Object.keys(moves)) {
-        let key = phase + '.' + stage + '.' + move;
+      for (const move of Object.keys(moves)) {
+        const key = phase + '.' + stage + '.' + move;
         moveMap[key] = moves[move];
         moveNames.add(move);
       }
@@ -196,7 +196,7 @@ export function Flow({
       }
 
       // Process event.
-      let next = [];
+      const next = [];
       state = fn(state, {
         ...rest,
         arg,
@@ -662,13 +662,13 @@ export function Flow({
   }
 
   function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
-    let conf = GetPhase(state.ctx);
+    const conf = GetPhase(state.ctx);
     const move = GetMove(state.ctx, action.type, action.playerID);
     const shouldCount =
       !move || typeof move === 'function' || move.noLimit !== true;
 
-    let { ctx } = state;
-    let { _activePlayersNumMoves } = ctx;
+    const { ctx } = state;
+    const { _activePlayersNumMoves } = ctx;
 
     const { playerID } = action;
 
@@ -699,7 +699,7 @@ export function Flow({
     const G = conf.turn.wrapped.onMove(state);
     state = { ...state, G };
 
-    let events = [{ fn: OnMove }];
+    const events = [{ fn: OnMove }];
 
     return Process(state, events);
   }
@@ -768,7 +768,7 @@ export function Flow({
     setActivePlayers: SetActivePlayersEvent,
   };
 
-  let enabledEventNames = [];
+  const enabledEventNames = [];
 
   if (events.endTurn !== false) {
     enabledEventNames.push('endTurn');

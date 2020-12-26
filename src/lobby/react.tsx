@@ -121,7 +121,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   componentDidMount() {
-    let cookie = Cookies.load('lobbyState') || {};
+    const cookie = Cookies.load('lobbyState') || {};
     if (cookie.phase && cookie.phase === LobbyPhases.PLAY) {
       cookie.phase = LobbyPhases.LIST;
     }
@@ -133,8 +133,8 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   componentDidUpdate(prevProps: LobbyProps, prevState: LobbyState) {
-    let name = this.state.playerName;
-    let creds = this.state.credentialStore[name];
+    const name = this.state.playerName;
+    const creds = this.state.credentialStore[name];
     if (
       prevState.phase !== this.state.phase ||
       prevState.credentialStore[name] !== creds ||
@@ -142,7 +142,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     ) {
       this._createConnection(this.props);
       this._updateConnection();
-      let cookie = {
+      const cookie = {
         phase: this.state.phase,
         playerName: name,
         credentialStore: this.state.credentialStore,
@@ -241,7 +241,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
 
     if (matchOpts.numPlayers == 1) {
       const maxPlayers = gameCode.game.maxPlayers;
-      let bots = {};
+      const bots = {};
       for (let i = 1; i < maxPlayers; i++) {
         bots[i + ''] = MCTSBot;
       }

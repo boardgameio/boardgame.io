@@ -40,7 +40,7 @@ describe('lobby', () => {
         return { matches: [match2] };
       },
     ];
-    let nextResult = jsonResult.shift.bind(jsonResult);
+    const nextResult = jsonResult.shift.bind(jsonResult);
     nextStatus = 200;
     (global as any).fetch = jest.fn(async () => ({
       ok: true,

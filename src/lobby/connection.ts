@@ -57,19 +57,19 @@ class _LobbyConnectionImpl {
   }
 
   _getMatchInstance(matchID: string) {
-    for (let inst of this.matches) {
+    for (const inst of this.matches) {
       if (inst['matchID'] === matchID) return inst;
     }
   }
 
   _getGameComponents(gameName: string) {
-    for (let comp of this.gameComponents) {
+    for (const comp of this.gameComponents) {
       if (comp.game.name === gameName) return comp;
     }
   }
 
   _findPlayer(playerName: string) {
-    for (let inst of this.matches) {
+    for (const inst of this.matches) {
       if (inst.players.some(player => player.name === playerName)) return inst;
     }
   }
@@ -97,7 +97,7 @@ class _LobbyConnectionImpl {
 
   async leave(gameName: string, matchID: string) {
     try {
-      let inst = this._getMatchInstance(matchID);
+      const inst = this._getMatchInstance(matchID);
       if (!inst) throw new Error('match instance not found');
       for (const player of inst.players) {
         if (player.name === this.playerName) {
@@ -117,7 +117,7 @@ class _LobbyConnectionImpl {
   }
 
   async disconnect() {
-    let inst = this._findPlayer(this.playerName);
+    const inst = this._findPlayer(this.playerName);
     if (inst) {
       await this.leave(inst.gameName, inst.matchID);
     }

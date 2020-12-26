@@ -26,7 +26,7 @@ Enzyme.configure({ adapter: new Adapter() });
 
 describe('lobby', () => {
   let lobby;
-  let spy = jest.fn();
+  const spy = jest.fn();
   let components: any[];
 
   beforeEach(async () => {
@@ -174,7 +174,7 @@ describe('lobby', () => {
   });
 
   describe('matches list', () => {
-    let spyClient = jest.fn();
+    const spyClient = jest.fn();
     beforeEach(async () => {
       // initial state = logged-in as 'Bob'
       Cookies.save(

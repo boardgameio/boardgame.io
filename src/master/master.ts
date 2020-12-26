@@ -173,7 +173,7 @@ export class Master {
       }
     }
 
-    let action = stripCredentialsFromAction(credAction);
+    const action = stripCredentialsFromAction(credAction);
     const key = matchID;
 
     let state: State;
