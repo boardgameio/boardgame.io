@@ -51,7 +51,7 @@ jest.mock('../../master/master', () => {
 jest.mock('koa-socket-2', () => {
   class MockSocket {
     id: string;
-    callbacks: {};
+    callbacks: Record<string, (...args: any[]) => any>;
     emit: jest.Mock<any, any>;
     broadcast: { emit: jest.Mock<any, any> };
 
