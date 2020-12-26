@@ -65,7 +65,7 @@ class Alea {
     const t = 2091639 * this.s0 + this.c * 2.3283064365386963e-10; // 2^-32
     this.s0 = this.s1;
     this.s1 = this.s2;
-    return (this.s2 = t - (this.c = t | 0));
+    return (this.s2 = t - (this.c = Math.trunc(t)));
   }
 }
 

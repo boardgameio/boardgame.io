@@ -183,7 +183,7 @@ export class Random {
         const shuffled = new Array<T>(srcIndex);
 
         while (srcIndex) {
-          let randIndex = (srcIndex * random()) | 0;
+          const randIndex = Math.trunc(srcIndex * random());
           shuffled[dstIndex++] = clone[randIndex];
           clone[randIndex] = clone[--srcIndex];
         }
