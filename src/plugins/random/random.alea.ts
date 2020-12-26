@@ -70,13 +70,13 @@ class Alea {
 }
 
 function Mash() {
-  var n = 0xefc8249d;
+  let n = 0xefc8249d;
 
   const mash = function(data: string | number) {
     const str = data.toString();
-    for (var i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i++) {
       n += str.charCodeAt(i);
-      var h = 0.02519603282416938 * n;
+      let h = 0.02519603282416938 * n;
       n = h >>> 0;
       h -= n;
       h *= n;
