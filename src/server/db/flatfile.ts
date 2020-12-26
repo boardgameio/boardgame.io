@@ -169,7 +169,7 @@ export class FlatFile extends StorageAPI.Async {
           return false;
         }
 
-        const matchID = k.substring(0, k.length - suffix.length);
+        const matchID = k.slice(0, k.length - suffix.length);
 
         if (!opts) {
           return matchID;

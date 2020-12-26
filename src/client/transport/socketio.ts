@@ -110,7 +110,7 @@ export class SocketIOTransport extends Transport {
         if (server.search(/^https?:\/\//) == -1) {
           server = 'http://' + this.server;
         }
-        if (server.substr(-1) != '/') {
+        if (server.slice(-1) != '/') {
           // add trailing slash if not already present
           server = server + '/';
         }
