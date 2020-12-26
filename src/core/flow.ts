@@ -797,7 +797,7 @@ export function Flow({
 
   function ProcessEvent(state: State, action: ActionShape.GameEvent) {
     const { type, playerID, args } = action.payload;
-    if (eventHandlers.hasOwnProperty(type)) {
+    if (Object.prototype.hasOwnProperty.call(eventHandlers, type)) {
       const eventArgs = [state, playerID].concat(args);
       return eventHandlers[type].apply({}, eventArgs);
     }
