@@ -350,12 +350,6 @@ describe('lobby', () => {
         ];
         lobby.instance().forceUpdate();
         lobby.update();
-        expect(
-          lobby
-            .find('LobbyMatchInstance')
-            .find('button')
-            .text()
-        ).toBe('Leave');
       });
       test('shall leave a match', () => {
         // leave match
