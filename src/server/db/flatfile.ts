@@ -145,7 +145,7 @@ export class FlatFile extends StorageAPI.Async {
 
   async wipe(id: string) {
     const keys = await this.games.keys();
-    if (!(keys.indexOf(id) > -1)) return;
+    if (!keys.includes(id)) return;
 
     await this.removeItem(id);
     await this.removeItem(InitialStateKey(id));
