@@ -17,7 +17,7 @@ const validateBody = (
     const type = schema[key];
     const received = body[key];
     if (typeof received !== type) {
-      throw new Error(
+      throw new TypeError(
         `Expected body.${key} to be of type ${type}, got “${received}”.`
       );
     }
