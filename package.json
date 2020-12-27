@@ -123,7 +123,7 @@
     "node-persist": "^3.0.4",
     "nodemon": "^1.18.9",
     "npm-run-all": "^4.1.5",
-    "prettier": "^1.19.1",
+    "prettier": "^2.2.1",
     "raf": "^3.4.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
