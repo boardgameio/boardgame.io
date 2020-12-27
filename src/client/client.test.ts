@@ -11,13 +11,13 @@ import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Client, createMoveDispatchers } from './client';
 import { ProcessGameConfig } from '../core/game';
-import { Transport } from './transport/transport';
+import type { Transport } from './transport/transport';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
 import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
-import { LogEntry, State, SyncInfo } from '../types';
+import type { LogEntry, State, SyncInfo } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),

@@ -10,7 +10,7 @@ import PluginImmer from './plugin-immer';
 import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
 import PluginLog from './plugin-log';
-import {
+import type {
   AnyFn,
   PartialGameState,
   State,

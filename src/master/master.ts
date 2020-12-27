@@ -13,7 +13,7 @@ import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 import { PlayerView } from '../plugins/main';
-import {
+import type {
   SyncInfo,
   FilteredMetadata,
   Game,
@@ -26,7 +26,7 @@ import {
   ChatMessage,
 } from '../types';
 import { createMetadata } from '../server/util';
-import { Auth } from '../server/auth';
+import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 
 /**

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { State, Ctx, PlayerID, Game } from '../../types';
+import type { State, Ctx, PlayerID, Game } from '../../types';
 import { automaticGameEvent } from '../../core/action-creators';
 
 export interface EventsAPI {

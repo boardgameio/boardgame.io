@@ -9,16 +9,18 @@
 import React from 'react';
 import Cookies from 'react-cookies';
 import PropTypes from 'prop-types';
-import { DebugOpt } from '../client/client';
+import type { DebugOpt } from '../client/client';
 import { Client } from '../client/react';
 import { MCTSBot } from '../ai/mcts-bot';
 import { Local } from '../client/transport/local';
 import { SocketIO } from '../client/transport/socketio';
-import { GameComponent, LobbyConnection } from './connection';
+import type { GameComponent } from './connection';
+import { LobbyConnection } from './connection';
 import LobbyLoginForm from './login-form';
-import LobbyMatchInstance, { MatchOpts } from './match-instance';
+import type { MatchOpts } from './match-instance';
+import LobbyMatchInstance from './match-instance';
 import LobbyCreateMatchForm from './create-match-form';
-import { LobbyAPI } from '../types';
+import type { LobbyAPI } from '../types';
 
 enum LobbyPhases {
   ENTER = 'enter',

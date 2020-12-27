@@ -1,5 +1,5 @@
 import { generate as shortid } from 'shortid';
-import { Server, PlayerID } from '../types';
+import type { Server, PlayerID } from '../types';
 
 /**
  * Verifies that a match has metadata and is using credentials.

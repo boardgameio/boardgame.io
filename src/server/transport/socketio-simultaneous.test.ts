@@ -6,17 +6,18 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import IO from 'koa-socket-2';
-import { SocketIO, SocketOpts } from './socketio';
+import type { SocketOpts } from './socketio';
+import { SocketIO } from './socketio';
 import { Auth } from '../auth';
 import { InMemory } from '../db';
+import { Async } from '../db/base';
 import { createMetadata } from '../util';
 import { ProcessGameConfig } from '../../core/game';
 import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
-import { Master } from '../../master/master';
-import { Ctx, LogEntry, Server, State, StorageAPI } from '../../types';
+import type { Master } from '../../master/master';
+import type { Ctx, LogEntry, Server, State, StorageAPI } from '../../types';
 
 type SyncArgs = Parameters<Master['onSync']>;
 type UpdateArgs = Parameters<Master['onUpdate']>;
@@ -26,7 +27,7 @@ type SocketIOTestAdapterOpts = SocketOpts & {
   roomInfo?: Map<any, any>;
 };
 
-class InMemoryAsync extends StorageAPI.Async {
+class InMemoryAsync extends Async {
   db: InMemory;
 
   constructor() {
@@ -204,7 +205,7 @@ describe('simultaneous moves on server game', () => {
   let transport: SocketIOTestAdapter;
   let clientInfo;
   let roomInfo;
-  let io: IO;
+  let io;
 
   beforeEach(async () => {
     clientInfo = new Map();

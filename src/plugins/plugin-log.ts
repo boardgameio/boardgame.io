@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Plugin } from '../types';
+import type { Plugin } from '../types';
 
 interface LogData {
   metadata?: any;

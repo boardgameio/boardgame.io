@@ -8,7 +8,7 @@
 
 import * as logging from './logger';
 import * as plugin from '../plugins/main';
-import {
+import type {
   Ctx,
   StageArg,
   ActivePlayersArg,

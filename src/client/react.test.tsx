@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { Client, BoardProps } from './react';
+import type { BoardProps } from './react';
+import { Client } from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { Local } from './transport/local';

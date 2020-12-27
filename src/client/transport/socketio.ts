@@ -10,14 +10,14 @@ import * as ioNamespace from 'socket.io-client';
 const io = ioNamespace.default;
 
 import * as ActionCreators from '../../core/action-creators';
-import { Master } from '../../master/master';
-import {
-  Transport,
+import type { Master } from '../../master/master';
+import { Transport } from './transport';
+import type {
   TransportOpts,
   MetadataCallback,
   ChatCallback,
 } from './transport';
-import {
+import type {
   CredentialedActionShape,
   FilteredMetadata,
   LogEntry,

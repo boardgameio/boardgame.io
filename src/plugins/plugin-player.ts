@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Plugin, PlayerID } from '../types';
+import type { Plugin, PlayerID } from '../types';
 
 interface PlayerData<PlayerState extends any = any> {
   players: Record<PlayerID, PlayerState>;

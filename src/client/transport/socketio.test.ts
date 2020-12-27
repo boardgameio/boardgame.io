@@ -12,8 +12,8 @@ import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
 import * as Actions from '../../core/action-types';
-import { Master } from '../../master/master';
-import { State, Store } from '../../types';
+import type { Master } from '../../master/master';
+import type { State, Store } from '../../types';
 
 type UpdateArgs = Parameters<Master['onUpdate']>;
 type SyncArgs = Parameters<Master['onSync']>;

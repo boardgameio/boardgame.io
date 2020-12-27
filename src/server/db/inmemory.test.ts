@@ -7,7 +7,7 @@
  */
 
 import { InMemory } from './inmemory';
-import { State, Server } from '../../types';
+import type { State, Server } from '../../types';
 
 describe('InMemory', () => {
   let db: InMemory;

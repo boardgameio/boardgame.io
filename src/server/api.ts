@@ -6,16 +6,15 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Koa from 'koa';
+import type Koa from 'koa';
 import Router from 'koa-router';
 import koaBody from 'koa-body';
 import { generate as shortid } from 'shortid';
 import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
-import { Auth } from './auth';
-import * as StorageAPI from './db/base';
-import { Server, LobbyAPI, Game } from '../types';
+import type { Auth } from './auth';
+import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 import { createMetadata } from './util';
 
 /**

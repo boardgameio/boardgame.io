@@ -7,7 +7,7 @@
  */
 
 import { PlayerView } from './player-view';
-import { Ctx } from '../types';
+import type { Ctx } from '../types';
 
 test('no change', () => {
   const G = { test: true };

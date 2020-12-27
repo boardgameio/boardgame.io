@@ -7,7 +7,7 @@
  */
 
 import { FlatFile } from './flatfile';
-import { State, Server, LogEntry } from '../../types';
+import type { State, Server, LogEntry } from '../../types';
 
 describe('FlatFile', () => {
   let db: FlatFile;

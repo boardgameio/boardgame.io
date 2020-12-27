@@ -6,10 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { TransportAPI, SocketIO, SocketOpts } from './socketio';
+import type { SocketOpts } from './socketio';
+import { TransportAPI, SocketIO } from './socketio';
 import { Auth } from '../auth';
 import { ProcessGameConfig } from '../../core/game';
-import { Master } from '../../master/master';
+import type { Master } from '../../master/master';
 
 type SyncArgs = Parameters<Master['onSync']>;
 

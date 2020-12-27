@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { alea, AleaState } from './random.alea';
+import type { AleaState } from './random.alea';
+import { alea } from './random.alea';
 
 export interface RandomState {
   seed: string | number;

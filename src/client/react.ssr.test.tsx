@@ -3,7 +3,8 @@
  */
 
 import React from 'react';
-import { Client, BoardProps } from './react';
+import type { BoardProps } from './react';
+import { Client } from './react';
 import ReactDOMServer from 'react-dom/server';
 
 class TestBoard extends React.Component<BoardProps> {

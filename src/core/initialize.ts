@@ -7,9 +7,9 @@
  */
 
 import { ProcessGameConfig } from './game';
-import { Game } from '../types';
+import type { Game } from '../types';
 import * as plugins from '../plugins/main';
-import { PartialGameState, State, Ctx } from '../types';
+import type { PartialGameState, State, Ctx } from '../types';
 
 /**
  * Creates the initial game state.

@@ -7,7 +7,7 @@
  */
 
 import { LobbyConnection } from './connection';
-import { LobbyAPI } from '../types';
+import type { LobbyAPI } from '../types';
 
 describe('lobby', () => {
   let lobby: ReturnType<typeof LobbyConnection>;

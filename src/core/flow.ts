@@ -18,7 +18,7 @@ import {
 import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import * as logging from './logger';
-import {
+import type {
   ActionPayload,
   ActionShape,
   State,

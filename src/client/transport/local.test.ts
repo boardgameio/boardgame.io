@@ -15,7 +15,7 @@ import { InitializeGame } from '../../core/initialize';
 import { Client } from '../client';
 import { RandomBot } from '../../ai/random-bot';
 import { Stage } from '../../core/turn-order';
-import { State, Store, SyncInfo } from '../../types';
+import type { State, Store, SyncInfo } from '../../types';
 
 jest.useFakeTimers();
 

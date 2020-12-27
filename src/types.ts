@@ -1,17 +1,17 @@
-import { Object } from 'ts-toolbelt';
-import Koa from 'koa';
-import { Store as ReduxStore } from 'redux';
-import * as ActionCreators from './core/action-creators';
-import { Flow } from './core/flow';
-import { CreateGameReducer } from './core/reducer';
-import { INVALID_MOVE } from './core/constants';
-import { Auth } from './server/auth';
-import * as StorageAPI from './server/db/base';
-import { EventsAPI } from './plugins/plugin-events';
-import { LogAPI } from './plugins/plugin-log';
-import { RandomAPI } from './plugins/random/random';
+import type { Object } from 'ts-toolbelt';
+import type Koa from 'koa';
+import type { Store as ReduxStore } from 'redux';
+import type * as ActionCreators from './core/action-creators';
+import type { Flow } from './core/flow';
+import type { CreateGameReducer } from './core/reducer';
+import type { INVALID_MOVE } from './core/constants';
+import type { Auth } from './server/auth';
+import type * as StorageAPI from './server/db/base';
+import type { EventsAPI } from './plugins/plugin-events';
+import type { LogAPI } from './plugins/plugin-log';
+import type { RandomAPI } from './plugins/random/random';
 
-export { StorageAPI };
+export type { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
 

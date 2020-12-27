@@ -1,6 +1,6 @@
 import { generate as uuid } from 'shortid';
 import { LocalStorage } from './localstorage';
-import { State, Server } from '../../types';
+import type { State, Server } from '../../types';
 
 describe('LocaLStorage', () => {
   let db: LocalStorage;

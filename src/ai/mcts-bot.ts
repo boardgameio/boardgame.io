@@ -6,8 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 import { CreateGameReducer } from '../core/reducer';
-import { Bot, BotAction } from './bot';
-import { Game, PlayerID, Ctx, State, Reducer } from '../types';
+import { Bot } from './bot';
+import type { BotAction } from './bot';
+import type { Game, PlayerID, Ctx, State, Reducer } from '../types';
 
 export interface Node {
   /** Game state at this node. */

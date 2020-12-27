@@ -18,7 +18,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
 import { error } from '../core/logger';
-import { State } from '../types';
+import type { State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),

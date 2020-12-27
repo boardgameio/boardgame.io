@@ -6,9 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server, createServerRunConfig, KoaServer, getPortFromServer } from '.';
-import { SocketIO } from './transport/socketio';
-import { StorageAPI } from '../types';
+import { Server, createServerRunConfig, getPortFromServer } from '.';
+import type { KoaServer } from '.';
+import type { SocketIO } from './transport/socketio';
+import type { StorageAPI } from '../types';
 
 const game = { seed: 0 };
 

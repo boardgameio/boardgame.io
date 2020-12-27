@@ -9,9 +9,11 @@
 import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { LocalStorage } from '../../server/db/localstorage';
-import { Master, TransportAPI, TransportData } from '../../master/master';
-import { Transport, TransportOpts, ChatCallback } from './transport';
-import {
+import { Master } from '../../master/master';
+import type { TransportAPI, TransportData } from '../../master/master';
+import { Transport } from './transport';
+import type { TransportOpts, ChatCallback } from './transport';
+import type {
   CredentialedActionShape,
   Game,
   LogEntry,

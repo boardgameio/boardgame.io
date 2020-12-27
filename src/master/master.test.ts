@@ -11,7 +11,7 @@ import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import { Master, redactLog } from './master';
 import { error } from '../core/logger';
-import { Server, State, Ctx, LogEntry } from '../types';
+import type { Server, State, Ctx, LogEntry } from '../types';
 import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';

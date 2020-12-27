@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Ctx, PlayerID } from '../types';
+import type { Ctx, PlayerID } from '../types';
 
 /**
  * PlayerView reducers.

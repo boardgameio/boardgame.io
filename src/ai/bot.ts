@@ -8,7 +8,7 @@
 
 import { makeMove, gameEvent } from '../core/action-creators';
 import { alea } from '../plugins/random/random.alea';
-import { ActionShape, Game, Ctx, PlayerID, State } from '../types';
+import type { ActionShape, Game, Ctx, PlayerID, State } from '../types';
 
 export type BotAction = ActionShape.GameEvent | ActionShape.MakeMove;
 

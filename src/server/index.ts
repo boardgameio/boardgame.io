@@ -14,7 +14,7 @@ import { ProcessGameConfig } from '../core/game';
 import * as logger from '../core/logger';
 import { Auth } from './auth';
 import { SocketIO } from './transport/socketio';
-import { Server as ServerTypes, Game, StorageAPI } from '../types';
+import type { Server as ServerTypes, Game, StorageAPI } from '../types';
 
 export type KoaServer = ReturnType<Koa['listen']>;
 

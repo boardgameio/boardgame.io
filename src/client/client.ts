@@ -8,23 +8,18 @@
 
 import shortid from 'shortid';
 import 'svelte';
-import {
-  Dispatch,
-  StoreEnhancer,
-  createStore,
-  compose,
-  applyMiddleware,
-} from 'redux';
+import type { Dispatch, StoreEnhancer } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { ProcessGameConfig } from '../core/game';
-import Debug from './debug/Debug.svelte';
+import type Debug from './debug/Debug.svelte';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { PlayerView } from '../plugins/main';
-import { Transport, TransportOpts } from './transport/transport';
+import type { Transport, TransportOpts } from './transport/transport';
 import { ClientManager } from './manager';
-import {
+import type {
   ActivePlayersArg,
   ActionShape,
   CredentialedActionShape,

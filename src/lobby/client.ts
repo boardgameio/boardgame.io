@@ -1,4 +1,4 @@
-import { LobbyAPI } from '../types';
+import type { LobbyAPI } from '../types';
 
 const assertString = (str: unknown, label: string) => {
   if (!str || typeof str !== 'string') {

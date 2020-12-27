@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { Game } from '../types';
-import { GameComponent } from './connection';
+import type { Game } from '../types';
+import type { GameComponent } from './connection';
 
 type CreateMatchProps = {
   games: GameComponent[];

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { LobbyAPI } from '../types';
+import type { LobbyAPI } from '../types';
 
 export type MatchOpts = {
   numPlayers: number;

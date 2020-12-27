@@ -11,7 +11,7 @@ import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
 import { error } from './logger';
 import { INVALID_MOVE } from './constants';
-import {
+import type {
   ActionShape,
   Ctx,
   Game,

@@ -19,7 +19,7 @@ import {
   redo,
 } from './action-creators';
 import { error } from '../core/logger';
-import { Ctx, Game, State, SyncInfo } from '../types';
+import type { Ctx, Game, State, SyncInfo } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),

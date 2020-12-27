@@ -7,7 +7,7 @@
  */
 
 import produce from 'immer';
-import { AnyFn, Ctx, Plugin } from '../types';
+import type { AnyFn, Ctx, Plugin } from '../types';
 import { INVALID_MOVE } from '../core/constants';
 
 /**

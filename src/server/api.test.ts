@@ -14,7 +14,7 @@ import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
 import { Auth } from './auth';
 import * as StorageAPI from './db/base';
-import { Game, Server } from '../types';
+import type { Game, Server } from '../types';
 
 jest.setTimeout(2000000000);
 

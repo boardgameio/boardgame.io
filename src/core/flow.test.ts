@@ -10,7 +10,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { Flow } from './flow';
 import { error } from '../core/logger';
-import { Ctx, State } from '../types';
+import type { Ctx, State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
