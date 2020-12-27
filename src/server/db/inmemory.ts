@@ -101,7 +101,7 @@ export class InMemory extends StorageAPI.Sync {
    */
   listMatches(opts?: StorageAPI.ListMatchesOpts): string[] {
     return [...this.metadata.entries()]
-      .filter(([key, metadata]) => {
+      .filter(([, metadata]) => {
         if (!opts) {
           return true;
         }
