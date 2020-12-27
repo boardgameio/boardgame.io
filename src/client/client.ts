@@ -302,21 +302,14 @@ export class _ClientImpl<G extends any = any> {
       return result;
     };
 
+    const middleware = applyMiddleware(
+      SubscriptionMiddleware,
+      TransportMiddleware,
+      LogMiddleware
+    );
+
     enhancer =
-      enhancer !== undefined
-        ? compose(
-            applyMiddleware(
-              SubscriptionMiddleware,
-              TransportMiddleware,
-              LogMiddleware
-            ),
-            enhancer
-          )
-        : applyMiddleware(
-            SubscriptionMiddleware,
-            TransportMiddleware,
-            LogMiddleware
-          );
+      enhancer !== undefined ? compose(middleware, enhancer) : middleware;
 
     this.store = createStore(this.reducer, this.initialState, enhancer);
 
