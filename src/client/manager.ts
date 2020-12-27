@@ -109,7 +109,7 @@ export class ClientManager {
    */
   private notifySubscribers(): void {
     const arg = this.getState();
-    this.subscribers.forEach(cb => {
+    this.subscribers.forEach((cb) => {
       cb(arg);
     });
   }
@@ -129,7 +129,7 @@ export class ClientManager {
    */
   private getDebuggableClients(): _ClientImpl[] {
     return [...this.clients.values()].filter(
-      client => client.debugOpt !== false
+      (client) => client.debugOpt !== false
     );
   }
 

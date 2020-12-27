@@ -46,8 +46,8 @@ export function TransportAPI(
   /**
    * Send a message to all clients.
    */
-  const sendAll: MasterTransport['sendAll'] = makePlayerData => {
-    roomInfo.get(matchID).forEach(c => {
+  const sendAll: MasterTransport['sendAll'] = (makePlayerData) => {
+    roomInfo.get(matchID).forEach((c) => {
       const playerID: PlayerID = clientInfo.get(c).playerID;
       const data = makePlayerData(playerID);
       send({ playerID, ...data });

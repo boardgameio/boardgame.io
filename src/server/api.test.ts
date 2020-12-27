@@ -1244,7 +1244,7 @@ describe('.createRouter', () => {
   describe('requesting room list', () => {
     let db: AsyncStorage;
     const auth = new Auth();
-    const dbFetch = jest.fn(async matchID => {
+    const dbFetch = jest.fn(async (matchID) => {
       return {
         metadata: {
           players: {
@@ -1262,7 +1262,7 @@ describe('.createRouter', () => {
         },
       };
     });
-    const dblistMatches = jest.fn(async opts => {
+    const dblistMatches = jest.fn(async (opts) => {
       const metadata = {
         'foo-0': { gameName: 'foo' },
         'foo-1': { gameName: 'foo' },
@@ -1272,7 +1272,7 @@ describe('.createRouter', () => {
       };
       const keys = Object.keys(metadata);
       if (opts && opts.gameName) {
-        return keys.filter(key => metadata[key].gameName === opts.gameName);
+        return keys.filter((key) => metadata[key].gameName === opts.gameName);
       }
       return [...keys];
     });

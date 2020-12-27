@@ -84,7 +84,7 @@ function createDispatchers(
   multiplayer?: unknown
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
-    dispatchers[name] = function(...args: any[]) {
+    dispatchers[name] = function (...args: any[]) {
       store.dispatch(
         ActionCreators[storeActionType](
           name,
@@ -258,7 +258,7 @@ export class _ClientImpl<G extends any = any> {
           // in the current log. This may occur when the
           // client adds an entry to the log followed by
           // the update from the master here.
-          deltalog = deltalog.filter(l => l._stateID > id);
+          deltalog = deltalog.filter((l) => l._stateID > id);
 
           this.log = [...this.log, ...deltalog];
           break;
@@ -341,21 +341,21 @@ export class _ClientImpl<G extends any = any> {
 
     this.createDispatchers();
 
-    this.transport.subscribeMatchData(metadata => {
+    this.transport.subscribeMatchData((metadata) => {
       this.matchData = metadata;
       this.notifySubscribers();
     });
 
     if (this.transport.onChatMessage) {
       this.chatMessages = [];
-      this.sendChatMessage = payload => {
+      this.sendChatMessage = (payload) => {
         this.transport.onChatMessage(this.matchID, {
           id: shortid(),
           sender: this.playerID,
           payload: payload,
         });
       };
-      this.transport.subscribeChatMessage(message => {
+      this.transport.subscribeChatMessage((message) => {
         this.chatMessages = [...this.chatMessages, message];
         this.notifySubscribers();
       });
@@ -363,7 +363,7 @@ export class _ClientImpl<G extends any = any> {
   }
 
   private notifySubscribers() {
-    Object.values(this.subscribers).forEach(fn => fn(this.getState()));
+    Object.values(this.subscribers).forEach((fn) => fn(this.getState()));
   }
 
   overrideGameState(state: any) {

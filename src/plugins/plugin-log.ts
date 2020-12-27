@@ -28,7 +28,7 @@ const LogPlugin: Plugin<LogAPI, LogData> = {
 
   api: ({ data }) => {
     return {
-      setMetadata: metadata => {
+      setMetadata: (metadata) => {
         data.metadata = metadata;
       },
     };

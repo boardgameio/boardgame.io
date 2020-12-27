@@ -40,7 +40,7 @@ class InMemoryAsync extends StorageAPI.Async {
 
   private sleep(): Promise<void> {
     const interval = Math.round(Math.random() * 50 + 50);
-    return new Promise(resolve => void setTimeout(resolve, interval));
+    return new Promise((resolve) => void setTimeout(resolve, interval));
   }
 
   async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
@@ -131,7 +131,7 @@ jest.mock('koa-socket-2', () => {
 
     constructor() {
       this.sockets = new Map(
-        ['0', '1'].map(id => [id, new MockSocket({ id })])
+        ['0', '1'].map((id) => [id, new MockSocket({ id })])
       );
     }
 
@@ -148,7 +148,7 @@ jest.mock('koa-socket-2', () => {
     }
 
     on(_event, callback) {
-      this.sockets.forEach(socket => void callback(socket));
+      this.sockets.forEach((socket) => void callback(socket));
     }
   }
 

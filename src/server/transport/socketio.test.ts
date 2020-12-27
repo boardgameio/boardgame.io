@@ -184,7 +184,7 @@ describe('TransportAPI', () => {
   });
 
   test('sendAll - function', () => {
-    api.sendAll(playerID => ({ type: 'A', args: [playerID] }));
+    api.sendAll((playerID) => ({ type: 'A', args: [playerID] }));
     expect(io.socket.emit).toHaveBeenCalledWith('A', '0');
     expect(io.socket.emit).toHaveBeenCalledWith('A', '1');
   });
@@ -227,7 +227,7 @@ describe('connect / disconnect', () => {
   let roomInfo;
   let io;
 
-  const toObj = m => {
+  const toObj = (m) => {
     const o = {};
     m.forEach((value, key) => {
       o[key] = value;

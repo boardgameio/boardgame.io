@@ -37,7 +37,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
   if (Array.isArray(arg)) {
     // support a simple array of player IDs as active players
     const value = {};
-    arg.forEach(v => (value[v] = Stage.NULL));
+    arg.forEach((v) => (value[v] = Stage.NULL));
     activePlayers = value;
   } else {
     // process active players argument object
@@ -270,7 +270,7 @@ export function UpdateTurnOrderState(
       logging.error(`invalid argument to endTurn: ${endTurnArg}`);
     }
 
-    Object.keys(endTurnArg).forEach(arg => {
+    Object.keys(endTurnArg).forEach((arg) => {
       switch (arg) {
         case 'remove':
           currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);

@@ -51,10 +51,10 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
   if (game.disableUndo === undefined) game.disableUndo = false;
   if (game.setup === undefined) game.setup = () => ({});
   if (game.moves === undefined) game.moves = {};
-  if (game.playerView === undefined) game.playerView = G => G;
+  if (game.playerView === undefined) game.playerView = (G) => G;
   if (game.plugins === undefined) game.plugins = [];
 
-  game.plugins.forEach(plugin => {
+  game.plugins.forEach((plugin) => {
     if (plugin.name === undefined) {
       throw new Error('Plugin missing name attribute');
     }
@@ -76,7 +76,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
 
     moveNames: flow.moveNames as string[],
 
-    pluginNames: game.plugins.map(p => p.name) as string[],
+    pluginNames: game.plugins.map((p) => p.name) as string[],
 
     processMove: (state: State, action: ActionPayload.MakeMove) => {
       let moveFn = flow.getMove(state.ctx, action.type, action.playerID);

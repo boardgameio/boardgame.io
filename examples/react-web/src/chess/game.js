@@ -42,7 +42,7 @@ const ChessGame = {
 
   turn: { moveLimit: 1 },
 
-  endIf: G => {
+  endIf: (G) => {
     const chess = Load(G.pgn);
     if (chess.game_over()) {
       if (

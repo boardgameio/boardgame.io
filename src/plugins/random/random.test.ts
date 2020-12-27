@@ -27,11 +27,11 @@ test('random', () => {
 test('predefined dice values', () => {
   const r = Init(0);
 
-  const rfns = [4, 6, 8, 10, 12, 20].map(v => {
+  const rfns = [4, 6, 8, 10, 12, 20].map((v) => {
     return { fn: r.api()[`D${v}`], highest: v };
   });
 
-  rfns.forEach(pair => {
+  rfns.forEach((pair) => {
     const result = pair.fn();
     expect(result).toBeDefined();
     expect(result).toBeGreaterThanOrEqual(1);
@@ -41,7 +41,7 @@ test('predefined dice values', () => {
     const multiple = pair.fn(5);
     expect(multiple).toBeDefined();
     expect(multiple).toHaveLength(5);
-    multiple.forEach(m => {
+    multiple.forEach((m) => {
       expect(m).toBeGreaterThanOrEqual(1);
       expect(m).toBeLessThanOrEqual(pair.highest);
     });
@@ -70,7 +70,7 @@ test('Random.Die', () => {
     const multiple = api.Die(6, 3);
     expect(multiple).toBeDefined();
     expect(multiple).toHaveLength(3);
-    multiple.forEach(m => {
+    multiple.forEach((m) => {
       expect(m).toBeGreaterThanOrEqual(1);
       expect(m).toBeLessThanOrEqual(6);
     });

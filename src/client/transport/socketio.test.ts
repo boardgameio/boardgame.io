@@ -177,7 +177,7 @@ describe('multiplayer', () => {
 
   test('receive matchData', () => {
     let receivedMatchData: any;
-    m.subscribeMatchData(data => (receivedMatchData = data));
+    m.subscribeMatchData((data) => (receivedMatchData = data));
     const matchData = [{ id: '0', name: 'Alice' }];
     mockSocket.receive('matchData', 'unknown matchID', matchData);
     expect(receivedMatchData).toBe(undefined);
@@ -195,7 +195,7 @@ describe('multiplayer', () => {
 
   test('receive chat-message', () => {
     let receivedChatData;
-    m.subscribeChatMessage(data => (receivedChatData = data));
+    m.subscribeChatMessage((data) => (receivedChatData = data));
     const chatData = { message: 'foo' };
     mockSocket.receive('chat', 'unknown matchID', chatData);
     expect(receivedChatData).toBe(undefined);

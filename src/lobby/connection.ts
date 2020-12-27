@@ -70,7 +70,8 @@ class _LobbyConnectionImpl {
 
   _findPlayer(playerName: string) {
     for (const inst of this.matches) {
-      if (inst.players.some(player => player.name === playerName)) return inst;
+      if (inst.players.some((player) => player.name === playerName))
+        return inst;
     }
   }
 

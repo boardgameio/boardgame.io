@@ -77,7 +77,7 @@ export abstract class Bot {
 
   enumerate(G: any, ctx: Ctx, playerID: PlayerID) {
     const actions = this.enumerateFn(G, ctx, playerID);
-    return actions.map(a => {
+    return actions.map((a) => {
       if ('payload' in a) {
         return a;
       }

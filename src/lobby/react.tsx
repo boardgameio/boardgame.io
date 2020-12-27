@@ -162,7 +162,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   };
 
   _updateCredentials = (playerName: string, credentials: string) => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       // clone store or componentDidUpdate will not be triggered
       const store = Object.assign({}, prevState.credentialStore);
       store[playerName] = credentials;
@@ -275,7 +275,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     matches: LobbyAPI.MatchList['matches'],
     playerName: string
   ) => {
-    return matches.map(match => {
+    return matches.map((match) => {
       const { matchID, gameName, players } = match;
       return (
         <LobbyMatchInstance

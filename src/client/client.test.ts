@@ -117,7 +117,7 @@ test('isActive', () => {
         A: (G, ctx, arg) => ({ arg }),
       },
 
-      endIf: G => G.arg == 42,
+      endIf: (G) => G.arg == 42,
     },
   });
 
@@ -313,7 +313,7 @@ describe('strip secret only on server', () => {
     spec = {
       game: {
         setup: () => initial,
-        playerView: G => {
+        playerView: (G) => {
           const r = { ...G };
           r.sum = r.secret.reduce((prev, curr) => {
             return prev + curr;
@@ -346,11 +346,11 @@ describe('strip secret only on server', () => {
 
 test('accepts enhancer for store', () => {
   let spyDispatcher;
-  const spyEnhancer = vanillaCreateStore => (...args) => {
+  const spyEnhancer = (vanillaCreateStore) => (...args) => {
     const vanillaStore = vanillaCreateStore(...args);
     return {
       ...vanillaStore,
-      dispatch: spyDispatcher = jest.fn(vanillaStore.dispatch),
+      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
     };
   };
   const client = Client({
@@ -430,7 +430,7 @@ describe('event dispatchers', () => {
 describe('move dispatchers', () => {
   const game = ProcessGameConfig({
     moves: {
-      A: G => G,
+      A: (G) => G,
       B: (G, ctx) => ({ moved: ctx.playerID }),
       C: () => ({ victory: true }),
     },
@@ -602,7 +602,7 @@ describe('subscribe', () => {
   beforeAll(() => {
     const game = {
       moves: {
-        A: G => {
+        A: (G) => {
           G.moved = true;
         },
       },
@@ -734,7 +734,7 @@ describe('subscribe', () => {
 test('override game state', () => {
   const game = {
     moves: {
-      A: G => {
+      A: (G) => {
         G.moved = true;
       },
     },

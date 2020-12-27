@@ -164,7 +164,7 @@ export class FlatFile extends StorageAPI.Async {
     const suffix = ':metadata';
 
     const arr = await Promise.all(
-      keys.map(async k => {
+      keys.map(async (k) => {
         if (!k.endsWith(suffix)) {
           return false;
         }

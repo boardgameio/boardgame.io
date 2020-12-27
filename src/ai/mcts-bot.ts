@@ -288,7 +288,7 @@ export class MCTSBot extends Bot {
       return { action, metadata };
     };
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const iteration = () => {
         for (
           let i = 0;

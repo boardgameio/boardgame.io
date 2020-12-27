@@ -59,7 +59,7 @@ export function Flow({
   }
 
   if (!endIf) endIf = () => undefined;
-  if (!onEnd) onEnd = G => G;
+  if (!onEnd) onEnd = (G) => G;
   if (!turn) turn = {};
 
   const phaseMap = { ...phases };
@@ -74,7 +74,7 @@ export function Flow({
   const moveNames = new Set();
   let startingPhase = null;
 
-  Object.keys(moves).forEach(name => moveNames.add(name));
+  Object.keys(moves).forEach((name) => moveNames.add(name));
 
   const HookWrapper = (fn: (G: any, ctx: Ctx) => any) => {
     const withPlugins = plugin.FnWrap(fn, plugins);
@@ -114,10 +114,10 @@ export function Flow({
       conf.endIf = () => undefined;
     }
     if (conf.onBegin === undefined) {
-      conf.onBegin = G => G;
+      conf.onBegin = (G) => G;
     }
     if (conf.onEnd === undefined) {
-      conf.onEnd = G => G;
+      conf.onEnd = (G) => G;
     }
     if (conf.turn === undefined) {
       conf.turn = turn;
@@ -126,16 +126,16 @@ export function Flow({
       conf.turn.order = TurnOrder.DEFAULT;
     }
     if (conf.turn.onBegin === undefined) {
-      conf.turn.onBegin = G => G;
+      conf.turn.onBegin = (G) => G;
     }
     if (conf.turn.onEnd === undefined) {
-      conf.turn.onEnd = G => G;
+      conf.turn.onEnd = (G) => G;
     }
     if (conf.turn.endIf === undefined) {
       conf.turn.endIf = () => false;
     }
     if (conf.turn.onMove === undefined) {
-      conf.turn.onMove = G => G;
+      conf.turn.onMove = (G) => G;
     }
     if (conf.turn.stages === undefined) {
       conf.turn.stages = {};
@@ -515,7 +515,7 @@ export function Flow({
     if (arg && arg.remove) {
       playerID = playerID || ctx.currentPlayer;
 
-      const playOrder = ctx.playOrder.filter(i => i != playerID);
+      const playOrder = ctx.playOrder.filter((i) => i != playerID);
 
       const playOrderPos =
         ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
@@ -573,7 +573,7 @@ export function Flow({
 
     // Remove player from activePlayers.
     activePlayers = Object.keys(activePlayers)
-      .filter(id => id !== playerID)
+      .filter((id) => id !== playerID)
       .reduce((obj, key) => {
         obj[key] = activePlayers[key];
         return obj;
@@ -582,7 +582,7 @@ export function Flow({
     if (_activePlayersMoveLimit) {
       // Remove player from _activePlayersMoveLimit.
       _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
-        .filter(id => id !== playerID)
+        .filter((id) => id !== playerID)
         .reduce((obj, key) => {
           obj[key] = _activePlayersMoveLimit[key];
           return obj;

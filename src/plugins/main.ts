@@ -40,9 +40,9 @@ export const ProcessAction = (
   opts: PluginOpts
 ): State => {
   opts.game.plugins
-    .filter(plugin => plugin.action !== undefined)
-    .filter(plugin => plugin.name === action.payload.type)
-    .forEach(plugin => {
+    .filter((plugin) => plugin.action !== undefined)
+    .filter((plugin) => plugin.name === action.payload.type)
+    .forEach((plugin) => {
       const name = plugin.name;
       const pluginState = state.plugins[name] || { data: {} };
       const data = plugin.action(pluginState.data, action.payload);
@@ -94,7 +94,7 @@ export const EnhanceCtx = (state: PartialGameState): Ctx => {
 export const FnWrap = (fn: AnyFn, plugins: Plugin[]) => {
   const reducer = (acc: AnyFn, { fnWrap }: Plugin) => fnWrap(acc);
   return [...DEFAULT_PLUGINS, ...plugins]
-    .filter(plugin => plugin.fnWrap !== undefined)
+    .filter((plugin) => plugin.fnWrap !== undefined)
     .reduce(reducer, fn);
 };
 
@@ -106,8 +106,8 @@ export const Setup = (
   opts: PluginOpts
 ): PartialGameState => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
-    .filter(plugin => plugin.setup !== undefined)
-    .forEach(plugin => {
+    .filter((plugin) => plugin.setup !== undefined)
+    .forEach((plugin) => {
       const name = plugin.name;
       const data = plugin.setup({
         G: state.G,
@@ -137,8 +137,8 @@ export const Enhance = (
   opts: PluginOpts & { playerID: PlayerID }
 ): State => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
-    .filter(plugin => plugin.api !== undefined)
-    .forEach(plugin => {
+    .filter((plugin) => plugin.api !== undefined)
+    .forEach((plugin) => {
       const name = plugin.name;
       const pluginState = state.plugins[name] || { data: {} };
 
@@ -167,7 +167,7 @@ export const Enhance = (
 export const Flush = (state: State, opts: PluginOpts): State => {
   // Note that we flush plugins in reverse order, to make sure that plugins
   // that come before in the chain are still available.
-  [...DEFAULT_PLUGINS, ...opts.game.plugins].reverse().forEach(plugin => {
+  [...DEFAULT_PLUGINS, ...opts.game.plugins].reverse().forEach((plugin) => {
     const name = plugin.name;
     const pluginState = state.plugins[name] || { data: {} };
 
@@ -217,8 +217,8 @@ export const Flush = (state: State, opts: PluginOpts): State => {
  */
 export const NoClient = (state: State, opts: PluginOpts): boolean => {
   return [...DEFAULT_PLUGINS, ...opts.game.plugins]
-    .filter(plugin => plugin.noClient !== undefined)
-    .map(plugin => {
+    .filter((plugin) => plugin.noClient !== undefined)
+    .map((plugin) => {
       const name = plugin.name;
       const pluginState = state.plugins[name];
 
@@ -234,7 +234,7 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
 
       return false;
     })
-    .some(value => value === true);
+    .some((value) => value === true);
 };
 
 /**

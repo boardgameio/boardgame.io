@@ -33,7 +33,7 @@ import * as StorageAPI from '../server/db/base';
  * Filter match data to get a player metadata object with credentials stripped.
  */
 const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
-  Object.values(matchData.players).map(player => {
+  Object.values(matchData.players).map((player) => {
     const { credentials, ...filteredData } = player;
     return filteredData;
   });
@@ -50,7 +50,7 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
     return log;
   }
 
-  return log.map(logEvent => {
+  return log.map((logEvent) => {
     // filter for all other players and spectators.
     if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
       return logEvent;

@@ -22,7 +22,7 @@ describe('basic', () => {
   beforeAll(() => {
     game = ProcessGameConfig({
       moves: {
-        A: G => G,
+        A: (G) => G,
         B: () => null,
         C: {
           move: () => 'C',
@@ -80,7 +80,7 @@ test('rounds with starting player token', () => {
         start: true,
         turn: {
           order: {
-            first: G => G.startingPlayerToken,
+            first: (G) => G.startingPlayerToken,
             next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },

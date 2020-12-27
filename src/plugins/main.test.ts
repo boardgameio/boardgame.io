@@ -59,7 +59,7 @@ describe('basic', () => {
 
           flush: ({ api }) => ({ n: api.get() }),
 
-          fnWrap: fn => (G, ctx) => {
+          fnWrap: (fn) => (G, ctx) => {
             G = fn(G, ctx);
             return { ...G, wrap: true };
           },

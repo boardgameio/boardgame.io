@@ -28,7 +28,7 @@ jest.mock('../core/logger', () => ({
 
 const game: Game = {
   moves: {
-    A: G => G,
+    A: (G) => G,
     B: () => ({ moved: true }),
     C: () => ({ victory: true }),
   },
@@ -153,7 +153,7 @@ test('endTurn', () => {
 test('light client when multiplayer=true', () => {
   const game: Game = {
     moves: { A: () => ({ win: true }) },
-    endIf: G => G.win,
+    endIf: (G) => G.win,
   };
 
   {
@@ -276,17 +276,17 @@ describe('Events API', () => {
 describe('Random inside setup()', () => {
   const game1: Game = {
     seed: 'seed1',
-    setup: ctx => ({ n: ctx.random.D6() }),
+    setup: (ctx) => ({ n: ctx.random.D6() }),
   };
 
   const game2: Game = {
     seed: 'seed2',
-    setup: ctx => ({ n: ctx.random.D6() }),
+    setup: (ctx) => ({ n: ctx.random.D6() }),
   };
 
   const game3: Game = {
     seed: 'seed2',
-    setup: ctx => ({ n: ctx.random.D6() }),
+    setup: (ctx) => ({ n: ctx.random.D6() }),
   };
 
   test('setting seed', () => {
@@ -563,7 +563,7 @@ describe('undo / redo with stages', () => {
                 ctx.events.setStage('A');
                 return { ...G, moveAisReversible, A: true };
               },
-              undoable: G => G.moveAisReversible > 0,
+              undoable: (G) => G.moveAisReversible > 0,
             },
           },
         },

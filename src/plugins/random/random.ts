@@ -52,9 +52,7 @@ export class Random {
    * Generates a new seed from the current date / time.
    */
   static seed() {
-    return Date.now()
-      .toString(36)
-      .slice(-10);
+    return Date.now().toString(36).slice(-10);
   }
 
   /**

@@ -185,7 +185,7 @@ test('reset Game', () => {
 });
 
 test('can receive enhancer', () => {
-  const enhancer = jest.fn().mockImplementation(next => next);
+  const enhancer = jest.fn().mockImplementation((next) => next);
   const Board = Client({
     game: {},
     board: TestBoard,

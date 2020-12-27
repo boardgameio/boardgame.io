@@ -87,7 +87,7 @@ export class LocalMaster extends Master {
 
     const transportAPI: TransportAPI = {
       send,
-      sendAll: makePlayerData => {
+      sendAll: (makePlayerData) => {
         for (const playerID in clientCallbacks) {
           const data = makePlayerData(playerID);
           send({ playerID, ...data });
@@ -200,7 +200,7 @@ export class LocalTransport extends Transport {
    * Connect to the master.
    */
   connect() {
-    this.master.connect(this.matchID, this.playerID, data => {
+    this.master.connect(this.matchID, this.playerID, (data) => {
       switch (data.type) {
         case 'sync':
           return this.onSync(...data.args);

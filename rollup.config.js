@@ -19,7 +19,7 @@ const subpackages = require('./subpackages');
 
 const internalDeps = new Set(['svelte']);
 const external = [
-  ...Object.keys(pkg.dependencies).filter(name => !internalDeps.has(name)),
+  ...Object.keys(pkg.dependencies).filter((name) => !internalDeps.has(name)),
   'react',
   'socket.io-client',
 ];

@@ -29,12 +29,12 @@ function IsVictory(cells) {
     [2, 4, 6],
   ];
 
-  const isRowComplete = row => {
-    const symbols = row.map(i => cells[i]);
-    return symbols.every(i => i !== null && i === symbols[0]);
+  const isRowComplete = (row) => {
+    const symbols = row.map((i) => cells[i]);
+    return symbols.every((i) => i !== null && i === symbols[0]);
   };
 
-  return positions.map(isRowComplete).some(i => i === true);
+  return positions.map(isRowComplete).some((i) => i === true);
 }
 
 const TicTacToe = ProcessGameConfig({
@@ -59,7 +59,7 @@ const TicTacToe = ProcessGameConfig({
       return { winner: ctx.currentPlayer };
     }
 
-    if (G.cells.filter(t => t == null).length == 0) {
+    if (G.cells.filter((t) => t == null).length == 0) {
       return { draw: true };
     }
   },
@@ -119,7 +119,7 @@ describe('Step', () => {
     const client = Client({
       game: {
         moves: {
-          A: G => {
+          A: (G) => {
             G.moved = true;
           },
         },
@@ -172,14 +172,14 @@ describe('Simulate', () => {
   test('with activePlayers', async () => {
     const game = ProcessGameConfig({
       moves: {
-        A: G => {
+        A: (G) => {
           G.moved = true;
         },
       },
       turn: {
         activePlayers: { currentPlayer: Stage.NULL },
       },
-      endIf: G => G.moved,
+      endIf: (G) => G.moved,
     });
 
     const bot = new RandomBot({
@@ -304,14 +304,14 @@ describe('MCTSBot', () => {
     const game = ProcessGameConfig({
       setup: () => ({ moves: 0 }),
       moves: {
-        A: G => {
+        A: (G) => {
           G.moves++;
         },
       },
       turn: {
         activePlayers: { currentPlayer: Stage.NULL },
       },
-      endIf: G => G.moves > 5,
+      endIf: (G) => G.moves > 5,
     });
 
     const bot = new MCTSBot({
@@ -333,7 +333,7 @@ describe('MCTSBot', () => {
   test('objectives', async () => {
     const objectives = () => ({
       'play-on-square-0': {
-        checker: G => G.cells[0] !== null,
+        checker: (G) => G.cells[0] !== null,
         weight: 10,
       },
     });

@@ -31,20 +31,20 @@ describe('phases', () => {
       phases: {
         A: {
           start: true,
-          onBegin: s => ({ ...s, setupA: true }),
-          onEnd: s => ({ ...s, cleanupA: true }),
+          onBegin: (s) => ({ ...s, setupA: true }),
+          onEnd: (s) => ({ ...s, cleanupA: true }),
           next: 'B',
         },
         B: {
-          onBegin: s => ({ ...s, setupB: true }),
-          onEnd: s => ({ ...s, cleanupB: true }),
+          onBegin: (s) => ({ ...s, setupB: true }),
+          onEnd: (s) => ({ ...s, cleanupB: true }),
           next: 'A',
         },
       },
 
       turn: {
         order: {
-          first: G => {
+          first: (G) => {
             if (G.setupB && !G.cleanupB) return 1;
             return 0;
           },
@@ -105,7 +105,7 @@ describe('phases', () => {
     beforeAll(() => {
       const game = {
         endIf: () => true,
-        onEnd: G => {
+        onEnd: (G) => {
           G.onEnd = true;
         },
       };
@@ -204,7 +204,7 @@ describe('phases', () => {
 
 describe('turn', () => {
   test('onEnd', () => {
-    const onEnd = jest.fn(G => G);
+    const onEnd = jest.fn((G) => G);
     const flow = Flow({
       turn: { onEnd },
     });
@@ -332,9 +332,9 @@ describe('turn', () => {
       const game = {
         moves: {
           A: () => ({ endTurn: true }),
-          B: G => G,
+          B: (G) => G,
         },
-        turn: { endIf: G => G.endTurn },
+        turn: { endIf: (G) => G.endTurn },
       };
       const client = Client({ game });
 
@@ -349,10 +349,10 @@ describe('turn', () => {
       const game = {
         moves: {
           A: () => ({ endTurn: true }),
-          B: G => G,
+          B: (G) => G,
         },
         phases: {
-          A: { start: true, turn: { endIf: G => G.endTurn } },
+          A: { start: true, turn: { endIf: (G) => G.endTurn } },
         },
       };
       const client = Client({ game });
@@ -367,7 +367,7 @@ describe('turn', () => {
     test('return value', () => {
       const game = {
         moves: {
-          A: G => G,
+          A: (G) => G,
         },
         turn: { endIf: () => ({ next: '2' }) },
       };
@@ -382,7 +382,10 @@ describe('turn', () => {
   test('endTurn is not called twice in one move', () => {
     const flow = Flow({
       turn: { endIf: () => true },
-      phases: { A: { start: true, endIf: G => G.endPhase, next: 'B' }, B: {} },
+      phases: {
+        A: { start: true, endIf: (G) => G.endPhase, next: 'B' },
+        B: {},
+      },
     });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
@@ -664,7 +667,7 @@ test('init', () => {
 
 describe('endIf', () => {
   test('basic', () => {
-    const flow = Flow({ endIf: G => G.win });
+    const flow = Flow({ endIf: (G) => G.win });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
     state = flow.processEvent(state, gameEvent('endTurn'));
@@ -690,11 +693,11 @@ describe('endIf', () => {
           start: true,
           moves: {
             A: () => ({ win: 'A' }),
-            B: G => G,
+            B: (G) => G,
           },
         },
       },
-      endIf: G => G.win,
+      endIf: (G) => G.win,
     };
     const client = Client({ game });
 

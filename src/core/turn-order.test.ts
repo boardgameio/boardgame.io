@@ -30,7 +30,7 @@ describe('turn orders', () => {
   // Identifies which property is undefined.
   expect.extend({
     toHaveUndefinedProperties(ctx) {
-      const undefinedEntry = Object.entries(ctx).find(entry => {
+      const undefinedEntry = Object.entries(ctx).find((entry) => {
         const [, value] = entry;
         return value === undefined;
       });
@@ -405,7 +405,7 @@ describe('setActivePlayers', () => {
           });
           return G;
         },
-        A: G => G,
+        A: (G) => G,
       },
     };
 
@@ -430,7 +430,7 @@ describe('setActivePlayers', () => {
           });
           return G;
         },
-        A: G => G,
+        A: (G) => G,
       },
     };
 
@@ -454,7 +454,7 @@ describe('setActivePlayers', () => {
   test('set stages to Stage.NULL', () => {
     const game = {
       moves: {
-        A: G => G,
+        A: (G) => G,
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
             moveLimit: 1,
@@ -910,7 +910,7 @@ describe('setActivePlayers', () => {
           stages: {
             discard: {
               moves: {
-                discard: G => G,
+                discard: (G) => G,
               },
             },
           },

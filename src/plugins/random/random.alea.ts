@@ -72,7 +72,7 @@ class Alea {
 function Mash() {
   let n = 0xefc8249d;
 
-  const mash = function(data: string | number) {
+  const mash = function (data: string | number) {
     const str = data.toString();
     for (let i = 0; i < str.length; i++) {
       n += str.charCodeAt(i);

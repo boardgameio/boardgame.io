@@ -73,7 +73,7 @@ class LobbyCreateMatchForm extends React.Component<
       <div>
         <select
           value={this.state.selectedGame}
-          onChange={evt => this.onChangeSelectedGame(evt)}
+          onChange={(evt) => this.onChangeSelectedGame(evt)}
         >
           {this.props.games.map(this._createGameNameOption)}
         </select>

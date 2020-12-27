@@ -128,7 +128,7 @@ export function Server({
         api.context.db = db;
         api.context.auth = auth;
         configureApp(api, router);
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           apiServer = api.listen(lobbyConfig.apiPort, resolve);
         });
         if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
@@ -137,7 +137,7 @@ export function Server({
 
       // Run Game Server (+ API, if necessary).
       let appServer: KoaServer;
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         appServer = app.listen(serverRunConfig.port, resolve);
       });
       if (serverRunConfig.callback) serverRunConfig.callback();
