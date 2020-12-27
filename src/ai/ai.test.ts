@@ -15,7 +15,7 @@ import { RandomBot } from './random-bot';
 import { MCTSBot, Node } from './mcts-bot';
 import { ProcessGameConfig } from '../core/game';
 import { Stage } from '../core/turn-order';
-import { Game, Ctx } from '../types';
+import { AnyFn, Game, Ctx } from '../types';
 
 function IsVictory(cells) {
   const positions = [
@@ -398,16 +398,12 @@ describe('MCTSBot', () => {
         playoutDepth: (G, ctx) => ctx.turn * 10,
       });
 
-      if (typeof bot.iterations === 'function') {
-        expect(bot.iterations(null, { turn } as Ctx, currentPlayer)).toBe(
-          turn * 100
-        );
-      }
-      if (typeof bot.playoutDepth === 'function') {
-        expect(bot.playoutDepth(null, { turn } as Ctx, currentPlayer)).toBe(
-          turn * 10
-        );
-      }
+      expect(
+        (bot.iterations as AnyFn)(null, { turn } as Ctx, currentPlayer)
+      ).toBe(turn * 100);
+      expect(
+        (bot.playoutDepth as AnyFn)(null, { turn } as Ctx, currentPlayer)
+      ).toBe(turn * 10);
 
       // try the playout() function which requests the playoutDepth value
       bot.playout({ state } as Node);
