@@ -88,7 +88,7 @@ type CallbackFn = (arg: {
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
-type TransportData =
+export type TransportData =
   | {
       type: 'update';
       args: [string, State, LogEntry[]];

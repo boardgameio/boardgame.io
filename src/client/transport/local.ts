@@ -9,7 +9,7 @@
 import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { LocalStorage } from '../../server/db/localstorage';
-import { Master, TransportAPI } from '../../master/master';
+import { Master, TransportAPI, TransportData } from '../../master/master';
 import { Transport, TransportOpts, ChatCallback } from './transport';
 import {
   CredentialedActionShape,
@@ -60,11 +60,11 @@ export class LocalMaster extends Master {
   connect: (
     matchID: string,
     playerID: PlayerID,
-    callback: (...args: any[]) => void
+    callback: (data: TransportData) => void
   ) => void;
 
   constructor({ game, bots, storageKey, persist }: LocalMasterOpts) {
-    const clientCallbacks: Record<PlayerID, (...args: any[]) => void> = {};
+    const clientCallbacks: Record<PlayerID, (data: TransportData) => void> = {};
     const initializedBots = {};
 
     if (game && game.ai && bots) {
@@ -78,10 +78,11 @@ export class LocalMaster extends Master {
       }
     }
 
-    const send: TransportAPI['send'] = ({ playerID, type, args }) => {
+    const send: TransportAPI['send'] = arg => {
+      const { playerID, ...data } = arg;
       const callback = clientCallbacks[playerID];
       if (callback !== undefined) {
-        callback(type, ...args);
+        callback(data);
       }
     };
 
@@ -200,16 +201,14 @@ export class LocalTransport extends Transport {
    * Connect to the master.
    */
   connect() {
-    this.master.connect(this.matchID, this.playerID, (type, ...args) => {
-      if (type == 'sync') {
-        this.onSync.apply(this, args);
-      }
-      if (type == 'update') {
-        this.onUpdate.apply(this, args);
-      }
-      if (type == 'chat') {
-        const [matchID, message] = args;
-        this.chatMessageCallback.apply(this, [message]);
+    this.master.connect(this.matchID, this.playerID, data => {
+      switch (data.type) {
+        case 'sync':
+          return this.onSync(...data.args);
+        case 'update':
+          return this.onUpdate(...data.args);
+        case 'chat':
+          return this.chatMessageCallback(data.args[1]);
       }
     });
     this.master.onSync(
