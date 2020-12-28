@@ -212,12 +212,9 @@ export class LocalTransport extends Transport {
         this.chatMessageCallback.apply(this, [message]);
       }
     });
-    this.master.onSync(
-      this.matchID,
-      this.playerID,
-      this.credentials,
-      this.numPlayers
-    );
+    this.master.onSync(this.matchID, this.playerID, this.credentials, {
+      numPlayers: this.numPlayers,
+    });
   }
 
   /**

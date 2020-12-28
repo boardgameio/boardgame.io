@@ -212,7 +212,7 @@ export class SocketIOTransport extends Transport {
         this.matchID,
         this.playerID,
         this.credentials,
-        this.numPlayers,
+        { numPlayers: this.numPlayers },
       ];
       this.socket.emit('sync', ...args);
     }

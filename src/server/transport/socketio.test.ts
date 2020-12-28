@@ -164,10 +164,10 @@ describe('TransportAPI', () => {
   beforeEach(async () => {
     io.socket.emit = jest.fn();
     io.socket.id = '0';
-    const args0: SyncArgs = ['matchID', '0', undefined, 2];
+    const args0: SyncArgs = ['matchID', '0', undefined, { numPlayers: 2 }];
     await io.socket.receive('sync', ...args0);
     io.socket.id = '1';
-    const args1: SyncArgs = ['matchID', '1', undefined, 2];
+    const args1: SyncArgs = ['matchID', '1', undefined, { numPlayers: 2 }];
     await io.socket.receive('sync', ...args1);
   });
 
@@ -245,10 +245,10 @@ describe('connect / disconnect', () => {
 
   test('0 and 1 connect', async () => {
     io.socket.id = '0';
-    const args0: SyncArgs = ['matchID', '0', undefined, 2];
+    const args0: SyncArgs = ['matchID', '0', undefined, { numPlayers: 2 }];
     await io.socket.receive('sync', ...args0);
     io.socket.id = '1';
-    const args1: SyncArgs = ['matchID', '1', undefined, 2];
+    const args1: SyncArgs = ['matchID', '1', undefined, { numPlayers: 2 }];
     await io.socket.receive('sync', ...args1);
 
     expect(toObj(clientInfo)['0']).toMatchObject({

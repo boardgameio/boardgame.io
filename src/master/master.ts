@@ -321,7 +321,7 @@ export class Master {
     matchID: string,
     playerID: string | null | undefined,
     credentials?: string,
-    numPlayers = 2
+    { numPlayers, setupData }: { numPlayers?: number; setupData?: any } = {}
   ): Promise<void | { error: string }> {
     const key = matchID;
 

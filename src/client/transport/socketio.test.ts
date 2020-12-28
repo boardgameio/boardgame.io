@@ -76,21 +76,21 @@ describe('update matchID / playerID / credentials', () => {
   test('matchID', () => {
     m.updateMatchID('test');
     expect(m.getMatchID()).toBe('test');
-    const args: SyncArgs = ['test', null, undefined, 2];
+    const args: SyncArgs = ['test', null, undefined, { numPlayers: 2 }];
     expect(socket.emit).lastCalledWith('sync', ...args);
   });
 
   test('playerID', () => {
     m.updatePlayerID('player');
     expect(m.getPlayerID()).toBe('player');
-    const args: SyncArgs = ['test', 'player', undefined, 2];
+    const args: SyncArgs = ['test', 'player', undefined, { numPlayers: 2 }];
     expect(socket.emit).lastCalledWith('sync', ...args);
   });
 
   test('credentials', () => {
     m.updateCredentials('1234');
     expect(m.getCredentials()).toBe('1234');
-    const args: SyncArgs = ['test', 'player', '1234', 2];
+    const args: SyncArgs = ['test', 'player', '1234', { numPlayers: 2 }];
     expect(socket.emit).lastCalledWith('sync', ...args);
   });
 });

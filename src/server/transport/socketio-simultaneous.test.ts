@@ -247,11 +247,11 @@ describe('simultaneous moves on server game', () => {
     // Call sync for both players
     await Promise.all([
       (async () => {
-        const args0: SyncArgs = ['matchID', '0', undefined, 2];
+        const args0: SyncArgs = ['matchID', '0', undefined, { numPlayers: 2 }];
         await socket0.receive('sync', ...args0);
       })(),
       (async () => {
-        const args1: SyncArgs = ['matchID', '1', undefined, 2];
+        const args1: SyncArgs = ['matchID', '1', undefined, { numPlayers: 2 }];
         await socket1.receive('sync', ...args1);
       })(),
     ]);
