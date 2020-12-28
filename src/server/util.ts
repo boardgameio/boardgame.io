@@ -1,4 +1,5 @@
-import { Server, Game } from '../types';
+import { InitializeGame } from '../core/initialize';
+import { Server, State, Game } from '../types';
 
 /**
  * Creates a new match metadata object.
@@ -29,4 +30,37 @@ export const createMetadata = ({
   }
 
   return metadata;
+};
+
+/**
+ * Creates matchID, initial state and metadata for a new match.
+ * If the provided `setupData` doesn’t pass the game’s validation,
+ * an error object is returned instead.
+ */
+export const createMatch = ({
+  game,
+  numPlayers,
+  setupData,
+  uuid,
+  unlisted,
+}: {
+  game: Game;
+  numPlayers: number;
+  setupData: any;
+  uuid: () => string;
+  unlisted: boolean;
+}):
+  | { matchID: string; metadata: Server.MatchData; initialState: State }
+  | { setupDataError: string } => {
+  if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
+
+  const setupDataError =
+    game.validateSetupData && game.validateSetupData(setupData, numPlayers);
+  if (setupDataError !== undefined) return { setupDataError };
+
+  const metadata = createMetadata({ game, numPlayers, setupData, unlisted });
+  const initialState = InitializeGame({ game, numPlayers, setupData });
+  const matchID = uuid();
+
+  return { matchID, metadata, initialState };
 };
