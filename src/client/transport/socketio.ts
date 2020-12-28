@@ -58,6 +58,7 @@ export class SocketIOTransport extends Transport {
    * @param {string} playerID - The player ID associated with this client.
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
+   * @param {object} setupData - Data to pass to the game setup function.
    * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
    */
   constructor({
@@ -207,7 +208,7 @@ export class SocketIOTransport extends Transport {
         this.matchID,
         this.playerID,
         this.credentials,
-        { numPlayers: this.numPlayers },
+        { numPlayers: this.numPlayers, setupData: this.setupData },
       ];
       this.socket.emit('sync', ...args);
     }
@@ -246,6 +247,15 @@ export class SocketIOTransport extends Transport {
    */
   updateCredentials(credentials?: string) {
     this.credentials = credentials;
+    this.resetAndSync();
+  }
+
+  /**
+   * Updates the game setup data associated with this client.
+   * @param setupData - The new setupData to use.
+   */
+  updateSetupData(setupData?: any) {
+    this.setupData = setupData;
     this.resetAndSync();
   }
 }
