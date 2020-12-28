@@ -63,15 +63,10 @@ export class SocketIOTransport extends Transport {
   constructor({
     socket,
     socketOpts,
-    store,
-    matchID,
-    playerID,
-    credentials,
-    gameName,
-    numPlayers,
     server,
+    ...opts
   }: SocketIOTransportOpts = {}) {
-    super({ store, gameName, playerID, matchID, credentials, numPlayers });
+    super(opts);
 
     this.server = server;
     this.socket = socket;
