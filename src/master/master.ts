@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { InitializeGame } from '../core/initialize';
 import { CreateGameReducer } from '../core/reducer';
 import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
@@ -25,7 +24,7 @@ import {
   PlayerID,
   ChatMessage,
 } from '../types';
-import { createMetadata } from '../server/util';
+import { createMatch } from '../server/util';
 import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 
@@ -355,12 +354,20 @@ export class Master {
     // If the game doesn't exist, then create one on demand.
     // TODO: Move this out of the sync call.
     if (state === undefined) {
-      initialState = state = InitializeGame({ game: this.game, numPlayers });
-      metadata = createMetadata({
+      const match = createMatch({
         game: this.game,
         unlisted: true,
         numPlayers,
+        setupData,
+        uuid: () => key,
       });
+
+      if ('setupDataError' in match) {
+        return { error: 'setupData is invalid' };
+      }
+
+      ({ initialState, metadata } = match);
+      state = initialState;
 
       this.subscribeCallback({ state, matchID });
 
