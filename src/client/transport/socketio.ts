@@ -97,7 +97,7 @@ export class SocketIOTransport extends Transport {
   }
 
   onChatMessage(matchID, chatMessage) {
-    this.socket.emit('chat', matchID, chatMessage);
+    this.socket.emit('chat', matchID, chatMessage, this.credentials);
   }
 
   /**

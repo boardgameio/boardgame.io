@@ -464,7 +464,30 @@ export class Master {
     }
   }
 
-  async onChatMessage(matchID, chatMessage) {
+  async onChatMessage(
+    matchID: string,
+    chatMessage: ChatMessage,
+    credentials: string | undefined
+  ): Promise<void | { error: string }> {
+    const key = matchID;
+    let metadata: Server.MatchData | undefined;
+
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      ({ metadata } = this.storageAPI.fetch(key, { metadata: true }));
+    } else {
+      ({ metadata } = await this.storageAPI.fetch(key, { metadata: true }));
+    }
+    if (this.auth && chatMessage.sender !== undefined) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID: chatMessage.sender,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
+    }
+
     this.transportAPI.sendAll(() => ({
       type: 'chat',
       args: [matchID, chatMessage],

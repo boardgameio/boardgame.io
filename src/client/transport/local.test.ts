@@ -362,9 +362,13 @@ describe('LocalTransport', () => {
 
     test('send chat-message', () => {
       m.onChatMessage('matchID', { message: 'foo' });
-      expect(m.master.onChatMessage).lastCalledWith('matchID', {
-        message: 'foo',
-      });
+      expect(m.master.onChatMessage).lastCalledWith(
+        'matchID',
+        {
+          message: 'foo',
+        },
+        undefined
+      );
     });
   });
 });

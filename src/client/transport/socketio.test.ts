@@ -205,9 +205,14 @@ describe('multiplayer', () => {
 
   test('send chat-message', () => {
     m.onChatMessage('matchID', { message: 'foo' });
-    expect(mockSocket.emit).lastCalledWith('chat', 'matchID', {
-      message: 'foo',
-    });
+    expect(mockSocket.emit).lastCalledWith(
+      'chat',
+      'matchID',
+      {
+        message: 'foo',
+      },
+      m.getCredentials()
+    );
   });
 });
 

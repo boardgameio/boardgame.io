@@ -159,8 +159,13 @@ export class LocalTransport extends Transport {
     this.isConnected = true;
   }
 
+  /**
+   * Called when any player sends a chat message and the
+   * master broadcasts the update to other clients (including
+   * this one).
+   */
   onChatMessage(matchID, chatMessage) {
-    this.master.onChatMessage(matchID, chatMessage);
+    this.master.onChatMessage(matchID, chatMessage, this.credentials);
   }
 
   /**
