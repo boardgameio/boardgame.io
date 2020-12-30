@@ -29,7 +29,7 @@ Unofficial Angular client for boardgame.io.
 
 #### [![GitHub stars][b-bri]][c-bri] [Briscola][p-bri] \[[code][c-bri] | [demo][d-bri]\]
 &nbsp;&nbsp;
-Online 2-player veriant of the Briscola card game.
+Online 2-player variant of the Briscola card game.
 
 [p-bri]: https://instant-briscola.herokuapp.com/
 [c-bri]: https://github.com/aflorj/briscola
