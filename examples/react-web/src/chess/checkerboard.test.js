@@ -33,10 +33,7 @@ test('position', () => {
 test('click', () => {
   const onClick = jest.fn();
   const grid = Enzyme.mount(<Checkerboard onClick={onClick} />);
-  grid
-    .find('rect')
-    .at(5)
-    .simulate('click');
+  grid.find('rect').at(5).simulate('click');
   expect(onClick).toHaveBeenCalledWith({ square: 'a3' });
 });
 
@@ -53,10 +50,5 @@ test('colorMap', () => {
   const grid = Enzyme.mount(
     <Checkerboard highlightedSquares={{ a5: 'blue' }} />
   );
-  expect(
-    grid
-      .find('rect')
-      .at(3)
-      .html()
-  ).toContain('blue');
+  expect(grid.find('rect').at(3).html()).toContain('blue');
 });

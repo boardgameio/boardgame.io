@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { Game } from '../types';
-import { GameComponent } from './connection';
+import type { Game } from '../types';
+import type { GameComponent } from './connection';
 
 type CreateMatchProps = {
   games: GameComponent[];
@@ -32,8 +32,8 @@ class LobbyCreateMatchForm extends React.Component<
   constructor(props: CreateMatchProps) {
     super(props);
     /* fix min and max number of players */
-    for (let game of props.games) {
-      let matchDetails = game.game;
+    for (const game of props.games) {
+      const matchDetails = game.game;
       if (!matchDetails.minPlayers) {
         matchDetails.minPlayers = 1;
       }
@@ -73,7 +73,7 @@ class LobbyCreateMatchForm extends React.Component<
       <div>
         <select
           value={this.state.selectedGame}
-          onChange={evt => this.onChangeSelectedGame(evt)}
+          onChange={(evt) => this.onChangeSelectedGame(evt)}
         >
           {this.props.games.map(this._createGameNameOption)}
         </select>
@@ -100,7 +100,7 @@ class LobbyCreateMatchForm extends React.Component<
   };
 
   onChangeSelectedGame = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    let idx = Number.parseInt(event.target.value);
+    const idx = Number.parseInt(event.target.value);
     this.setState({
       selectedGame: idx,
       numPlayers: this.props.games[idx].game.minPlayers,

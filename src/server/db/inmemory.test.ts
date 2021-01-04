@@ -7,7 +7,7 @@
  */
 
 import { InMemory } from './inmemory';
-import { State, Server } from '../../types';
+import type { State, Server } from '../../types';
 
 describe('InMemory', () => {
   let db: InMemory;
@@ -24,7 +24,7 @@ describe('InMemory', () => {
   });
 
   test('createMatch', () => {
-    let stateEntry: unknown = { a: 1 };
+    const stateEntry: unknown = { a: 1 };
 
     // Create match.
     db.createMatch('matchID', {

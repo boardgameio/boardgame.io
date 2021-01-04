@@ -6,10 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { TransportAPI, SocketIO, SocketOpts } from './socketio';
+import type { SocketOpts } from './socketio';
+import { TransportAPI, SocketIO } from './socketio';
 import { Auth } from '../auth';
 import { ProcessGameConfig } from '../../core/game';
-import { Master } from '../../master/master';
+import type { Master } from '../../master/master';
 
 type SyncArgs = Parameters<Master['onSync']>;
 
@@ -51,7 +52,7 @@ jest.mock('../../master/master', () => {
 jest.mock('koa-socket-2', () => {
   class MockSocket {
     id: string;
-    callbacks: {};
+    callbacks: Record<string, (...args: any[]) => any>;
     emit: jest.Mock<any, any>;
     broadcast: { emit: jest.Mock<any, any> };
 
@@ -133,7 +134,7 @@ describe('socketAdapter', () => {
   const app: any = { context: { auth } };
   const games = [ProcessGameConfig({ seed: 0 })];
 
-  let socketAdapter = jest.fn();
+  const socketAdapter = jest.fn();
 
   beforeEach(() => {
     const transport = new SocketIOTestAdapter({ socketAdapter });
@@ -184,7 +185,7 @@ describe('TransportAPI', () => {
   });
 
   test('sendAll - function', () => {
-    api.sendAll(playerID => ({ type: 'A', args: [playerID] }));
+    api.sendAll((playerID) => ({ type: 'A', args: [playerID] }));
     expect(io.socket.emit).toHaveBeenCalledWith('A', '0');
     expect(io.socket.emit).toHaveBeenCalledWith('A', '1');
   });
@@ -227,8 +228,8 @@ describe('connect / disconnect', () => {
   let roomInfo;
   let io;
 
-  const toObj = m => {
-    let o = {};
+  const toObj = (m) => {
+    const o = {};
     m.forEach((value, key) => {
       o[key] = value;
     });

@@ -9,9 +9,8 @@
 export function AssignShortcuts(moveNames, blacklist) {
   let shortcuts = {};
 
-  let taken = {};
-  for (let i = 0; i < blacklist.length; i++) {
-    const c = blacklist[i];
+  const taken = {};
+  for (const c of blacklist) {
     taken[c] = true;
   }
 
@@ -19,7 +18,7 @@ export function AssignShortcuts(moveNames, blacklist) {
   let t = taken;
   let canUseFirstChar = true;
   for (const name in moveNames) {
-    let shortcut = name[0];
+    const shortcut = name[0];
     if (t[shortcut]) {
       canUseFirstChar = false;
       break;

@@ -87,7 +87,7 @@ export class Token extends React.Component {
     };
   }
 
-  _startDrag = e => {
+  _startDrag = (e) => {
     if (this.props.draggable && this.props.shouldDrag(this.getCoords())) {
       e.preventDefault(); // Required for Safari/iOs.
       e = e.touches ? e.touches[0] : e;
@@ -99,7 +99,7 @@ export class Token extends React.Component {
     }
   };
 
-  _drag = e => {
+  _drag = (e) => {
     if (this.state.dragged) {
       e.preventDefault(); // Required for Safari/iOs.
       e = e.touches ? e.touches[0] : e;
@@ -128,7 +128,7 @@ export class Token extends React.Component {
     }
   };
 
-  _endDrag = e => {
+  _endDrag = (e) => {
     if (this.state.dragged) {
       e.preventDefault();
       // Whether this is a drop or a click depends if the mouse moved after drag.
@@ -156,7 +156,7 @@ export class Token extends React.Component {
     }
   };
 
-  _onClick = param => {
+  _onClick = (param) => {
     // Ignore onClick if the element is draggable, because desktops will
     // send both onClick and touch events, leading to duplication.
     // Whether this will be a click or a drop will be defined in _endDrag.

@@ -1,5 +1,5 @@
-import { Object } from 'ts-toolbelt';
-import { State, Server, LogEntry } from '../../types';
+import type { Object } from 'ts-toolbelt';
+import type { State, Server, LogEntry } from '../../types';
 
 export enum Type {
   SYNC = 0,

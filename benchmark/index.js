@@ -14,7 +14,7 @@ import { makeMove, gameEvent } from '../src/core/action-creators';
 
 const game = {
   moves: {
-    A: G => G,
+    A: (G) => G,
   },
   endIf: () => false,
 };
@@ -24,22 +24,22 @@ const state = InitializeGame({ game });
 const client = Client({ game });
 
 new Benchmark.Suite()
-  .add('reducer::makeMove', function() {
+  .add('reducer::makeMove', function () {
     reducer(state, makeMove('A'));
   })
-  .add('reducer::endTurn', function() {
+  .add('reducer::endTurn', function () {
     reducer(state, gameEvent('endTurn'));
   })
-  .add('client::move', function() {
+  .add('client::move', function () {
     client.moves.A();
   })
-  .add('client::endTurn', function() {
+  .add('client::endTurn', function () {
     client.events.endTurn();
   })
-  .on('cycle', function(event) {
+  .on('cycle', function (event) {
     console.log(String(event.target));
   })
-  .on('complete', function() {
+  .on('complete', function () {
     console.log('Fastest is ' + this.filter('fastest').map('name'));
   })
   .run({ async: true });

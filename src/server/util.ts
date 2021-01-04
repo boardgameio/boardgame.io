@@ -1,4 +1,4 @@
-import { Server, Game } from '../types';
+import type { Server, Game } from '../types';
 
 /**
  * Creates a new match metadata object.

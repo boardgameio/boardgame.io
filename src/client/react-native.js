@@ -28,7 +28,7 @@ import { Client as RawClient } from './client';
  *   and dispatch actions such as MAKE_MOVE.
  */
 export function Client(opts) {
-  let { game, numPlayers, board, multiplayer, enhancer } = opts;
+  const { game, numPlayers, board, multiplayer, enhancer } = opts;
 
   /*
    * WrappedBoard

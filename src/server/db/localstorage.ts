@@ -32,7 +32,7 @@ class WithLocalStorageMap<Key, Value> extends Map {
  * locaStorage data storage.
  */
 export class LocalStorage extends InMemory {
-  constructor(storagePrefix: string = 'bgio') {
+  constructor(storagePrefix = 'bgio') {
     super();
     const StorageMap = (stateKey: string) =>
       new WithLocalStorageMap(`${storagePrefix}_${stateKey}`);

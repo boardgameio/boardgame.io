@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { alea, AleaState } from './random.alea';
+import type { AleaState } from './random.alea';
+import { alea } from './random.alea';
 
 export interface RandomState {
   seed: string | number;
@@ -52,7 +53,7 @@ export class Random {
    * Generates a new seed from the current date / time.
    */
   static seed() {
-    return (+new Date()).toString(36).slice(-10);
+    return Date.now().toString(36).slice(-10);
   }
 
   /**
@@ -119,26 +120,22 @@ export class Random {
     for (const key in SpotValue) {
       const spotvalue = SpotValue[key];
       predefined[key] = (diceCount?: number) => {
-        if (diceCount === undefined) {
-          return Math.floor(random() * spotvalue) + 1;
-        } else {
-          return [...new Array(diceCount).keys()].map(
-            () => Math.floor(random() * spotvalue) + 1
-          );
-        }
+        return diceCount === undefined
+          ? Math.floor(random() * spotvalue) + 1
+          : [...new Array(diceCount).keys()].map(
+              () => Math.floor(random() * spotvalue) + 1
+            );
       };
     }
 
     function Die(spotValue?: number): number;
     function Die(spotValue: number, diceCount: number): number[];
-    function Die(spotvalue: number = 6, diceCount?: number) {
-      if (diceCount === undefined) {
-        return Math.floor(random() * spotvalue) + 1;
-      } else {
-        return [...new Array(diceCount).keys()].map(
-          () => Math.floor(random() * spotvalue) + 1
-        );
-      }
+    function Die(spotvalue = 6, diceCount?: number) {
+      return diceCount === undefined
+        ? Math.floor(random() * spotvalue) + 1
+        : [...new Array(diceCount).keys()].map(
+            () => Math.floor(random() * spotvalue) + 1
+          );
     }
 
     return {
@@ -187,7 +184,7 @@ export class Random {
         const shuffled = new Array<T>(srcIndex);
 
         while (srcIndex) {
-          let randIndex = (srcIndex * random()) | 0;
+          const randIndex = Math.trunc(srcIndex * random());
           shuffled[dstIndex++] = clone[randIndex];
           clone[randIndex] = clone[--srcIndex];
         }

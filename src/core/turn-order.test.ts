@@ -18,7 +18,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
 import { error } from '../core/logger';
-import { State } from '../types';
+import type { State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -30,7 +30,7 @@ describe('turn orders', () => {
   // Identifies which property is undefined.
   expect.extend({
     toHaveUndefinedProperties(ctx) {
-      const undefinedEntry = Object.entries(ctx).find(entry => {
+      const undefinedEntry = Object.entries(ctx).find((entry) => {
         const [, value] = entry;
         return value === undefined;
       });
@@ -310,7 +310,7 @@ test('override', () => {
     next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
   };
 
-  let flow = Flow({
+  const flow = Flow({
     turn: { order: even },
     phases: { A: { start: true, next: 'B' }, B: { turn: { order: odd } } },
   });
@@ -405,7 +405,7 @@ describe('setActivePlayers', () => {
           });
           return G;
         },
-        A: G => G,
+        A: (G) => G,
       },
     };
 
@@ -430,7 +430,7 @@ describe('setActivePlayers', () => {
           });
           return G;
         },
-        A: G => G,
+        A: (G) => G,
       },
     };
 
@@ -454,7 +454,7 @@ describe('setActivePlayers', () => {
   test('set stages to Stage.NULL', () => {
     const game = {
       moves: {
-        A: G => G,
+        A: (G) => G,
         B: (G, ctx) => {
           ctx.events.setActivePlayers({
             moveLimit: 1,
@@ -809,7 +809,7 @@ describe('setActivePlayers', () => {
         },
       };
 
-      let state = InitializeGame({ game, numPlayers: 2 });
+      const state = InitializeGame({ game, numPlayers: 2 });
 
       expect(state.ctx._activePlayersMoveLimit).toEqual({
         '0': 2,
@@ -910,7 +910,7 @@ describe('setActivePlayers', () => {
           stages: {
             discard: {
               moves: {
-                discard: G => G,
+                discard: (G) => G,
               },
             },
           },

@@ -18,7 +18,7 @@ import {
 import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import * as logging from './logger';
-import {
+import type {
   ActionPayload,
   ActionShape,
   State,
@@ -59,7 +59,7 @@ export function Flow({
   }
 
   if (!endIf) endIf = () => undefined;
-  if (!onEnd) onEnd = G => G;
+  if (!onEnd) onEnd = (G) => G;
   if (!turn) turn = {};
 
   const phaseMap = { ...phases };
@@ -70,11 +70,11 @@ export function Flow({
 
   phaseMap[''] = {};
 
-  let moveMap = {};
-  let moveNames = new Set();
+  const moveMap = {};
+  const moveNames = new Set();
   let startingPhase = null;
 
-  Object.keys(moves).forEach(name => moveNames.add(name));
+  Object.keys(moves).forEach((name) => moveNames.add(name));
 
   const HookWrapper = (fn: (G: any, ctx: Ctx) => any) => {
     const withPlugins = plugin.FnWrap(fn, plugins);
@@ -86,7 +86,7 @@ export function Flow({
 
   const TriggerWrapper = (endIf: (G: any, ctx: Ctx) => any) => {
     return (state: State) => {
-      let ctxWithAPI = plugin.EnhanceCtx(state);
+      const ctxWithAPI = plugin.EnhanceCtx(state);
       return endIf(state.G, ctxWithAPI);
     };
   };
@@ -96,7 +96,7 @@ export function Flow({
     endIf: TriggerWrapper(endIf),
   };
 
-  for (let phase in phaseMap) {
+  for (const phase in phaseMap) {
     const conf = phaseMap[phase];
 
     if (conf.start === true) {
@@ -104,7 +104,7 @@ export function Flow({
     }
 
     if (conf.moves !== undefined) {
-      for (let move of Object.keys(conf.moves)) {
+      for (const move of Object.keys(conf.moves)) {
         moveMap[phase + '.' + move] = conf.moves[move];
         moveNames.add(move);
       }
@@ -114,10 +114,10 @@ export function Flow({
       conf.endIf = () => undefined;
     }
     if (conf.onBegin === undefined) {
-      conf.onBegin = G => G;
+      conf.onBegin = (G) => G;
     }
     if (conf.onEnd === undefined) {
-      conf.onEnd = G => G;
+      conf.onEnd = (G) => G;
     }
     if (conf.turn === undefined) {
       conf.turn = turn;
@@ -126,16 +126,16 @@ export function Flow({
       conf.turn.order = TurnOrder.DEFAULT;
     }
     if (conf.turn.onBegin === undefined) {
-      conf.turn.onBegin = G => G;
+      conf.turn.onBegin = (G) => G;
     }
     if (conf.turn.onEnd === undefined) {
-      conf.turn.onEnd = G => G;
+      conf.turn.onEnd = (G) => G;
     }
     if (conf.turn.endIf === undefined) {
       conf.turn.endIf = () => false;
     }
     if (conf.turn.onMove === undefined) {
-      conf.turn.onMove = G => G;
+      conf.turn.onMove = (G) => G;
     }
     if (conf.turn.stages === undefined) {
       conf.turn.stages = {};
@@ -144,8 +144,8 @@ export function Flow({
     for (const stage in conf.turn.stages) {
       const stageConfig = conf.turn.stages[stage];
       const moves = stageConfig.moves || {};
-      for (let move of Object.keys(moves)) {
-        let key = phase + '.' + stage + '.' + move;
+      for (const move of Object.keys(moves)) {
+        const key = phase + '.' + stage + '.' + move;
         moveMap[key] = moves[move];
         moveNames.add(move);
       }
@@ -196,7 +196,7 @@ export function Flow({
       }
 
       // Process event.
-      let next = [];
+      const next = [];
       state = fn(state, {
         ...rest,
         arg,
@@ -515,7 +515,7 @@ export function Flow({
     if (arg && arg.remove) {
       playerID = playerID || ctx.currentPlayer;
 
-      const playOrder = ctx.playOrder.filter(i => i != playerID);
+      const playOrder = ctx.playOrder.filter((i) => i != playerID);
 
       const playOrderPos =
         ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
@@ -573,7 +573,7 @@ export function Flow({
 
     // Remove player from activePlayers.
     activePlayers = Object.keys(activePlayers)
-      .filter(id => id !== playerID)
+      .filter((id) => id !== playerID)
       .reduce((obj, key) => {
         obj[key] = activePlayers[key];
         return obj;
@@ -582,7 +582,7 @@ export function Flow({
     if (_activePlayersMoveLimit) {
       // Remove player from _activePlayersMoveLimit.
       _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
-        .filter(id => id !== playerID)
+        .filter((id) => id !== playerID)
         .reduce((obj, key) => {
           obj[key] = _activePlayersMoveLimit[key];
           return obj;
@@ -662,13 +662,13 @@ export function Flow({
   }
 
   function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
-    let conf = GetPhase(state.ctx);
+    const conf = GetPhase(state.ctx);
     const move = GetMove(state.ctx, action.type, action.playerID);
     const shouldCount =
       !move || typeof move === 'function' || move.noLimit !== true;
 
-    let { ctx } = state;
-    let { _activePlayersNumMoves } = ctx;
+    const { ctx } = state;
+    const { _activePlayersNumMoves } = ctx;
 
     const { playerID } = action;
 
@@ -699,7 +699,7 @@ export function Flow({
     const G = conf.turn.wrapped.onMove(state);
     state = { ...state, G };
 
-    let events = [{ fn: OnMove }];
+    const events = [{ fn: OnMove }];
 
     return Process(state, events);
   }
@@ -768,7 +768,7 @@ export function Flow({
     setActivePlayers: SetActivePlayersEvent,
   };
 
-  let enabledEventNames = [];
+  const enabledEventNames = [];
 
   if (events.endTurn !== false) {
     enabledEventNames.push('endTurn');
@@ -797,14 +797,14 @@ export function Flow({
 
   function ProcessEvent(state: State, action: ActionShape.GameEvent) {
     const { type, playerID, args } = action.payload;
-    if (eventHandlers.hasOwnProperty(type)) {
+    if (Object.prototype.hasOwnProperty.call(eventHandlers, type)) {
       const eventArgs = [state, playerID].concat(args);
       return eventHandlers[type].apply({}, eventArgs);
     }
     return state;
   }
 
-  function IsPlayerActive(_G: object, ctx: Ctx, playerID: PlayerID): boolean {
+  function IsPlayerActive(_G: any, ctx: Ctx, playerID: PlayerID): boolean {
     if (ctx.activePlayers) {
       return playerID in ctx.activePlayers;
     }

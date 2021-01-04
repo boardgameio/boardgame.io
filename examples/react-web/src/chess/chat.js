@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const Chat = ({ onSend, messages }) => {
   const [message, setMessage] = useState('');
 
-  const onChange = event => {
+  const onChange = (event) => {
     setMessage(event.target.value);
   };
 
@@ -22,7 +22,7 @@ const Chat = ({ onSend, messages }) => {
           border: '1px solid black',
         }}
       >
-        {messages.map(message => (
+        {messages.map((message) => (
           <div key={message.id}>
             <div>{message.sender}</div>
             <div>{JSON.stringify(message.payload)}</div>

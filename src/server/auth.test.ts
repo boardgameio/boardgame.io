@@ -5,7 +5,7 @@ import {
   Auth,
 } from './auth';
 
-import { Server } from '../types';
+import type { Server } from '../types';
 
 describe('extractPlayerMetadata', () => {
   describe('when metadata is not found', () => {

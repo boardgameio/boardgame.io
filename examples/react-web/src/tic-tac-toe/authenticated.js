@@ -28,10 +28,10 @@ class AuthenticatedClient extends React.Component {
     this.state = {
       matchID: 'matchID',
       players: {
-        '0': {
+        0: {
           credentials: 'credentials',
         },
-        '1': {
+        1: {
           credentials: 'credentials',
         },
       },
@@ -65,10 +65,10 @@ class AuthenticatedClient extends React.Component {
     this.setState({
       matchID,
       players: {
-        '0': {
+        0: {
           credentials: playerCredentials[0],
         },
-        '1': {
+        1: {
           credentials: playerCredentials[1],
         },
       },
@@ -125,7 +125,7 @@ class AuthenticatedExample extends React.Component {
             <input
               type="text"
               value={this.props.players['0'].credentials}
-              onChange={event =>
+              onChange={(event) =>
                 this.props.onPlayerCredentialsChange('0', event.target.value)
               }
             />
@@ -139,7 +139,7 @@ class AuthenticatedExample extends React.Component {
             <input
               type="text"
               value={this.props.players['1'].credentials}
-              onChange={event =>
+              onChange={(event) =>
                 this.props.onPlayerCredentialsChange('1', event.target.value)
               }
             />

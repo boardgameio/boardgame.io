@@ -260,7 +260,7 @@ class Board extends React.Component {
 
   _tryMove(from, to) {
     const moves = this._getMoves();
-    const move = moves.find(move => move.from == from && move.to == to);
+    const move = moves.find((move) => move.from == from && move.to == to);
     if (move) {
       this.props.moves.move(move.san);
     }

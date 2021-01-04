@@ -9,16 +9,18 @@
 import React from 'react';
 import Cookies from 'react-cookies';
 import PropTypes from 'prop-types';
-import { DebugOpt } from '../client/client';
+import type { DebugOpt } from '../client/client';
 import { Client } from '../client/react';
 import { MCTSBot } from '../ai/mcts-bot';
 import { Local } from '../client/transport/local';
 import { SocketIO } from '../client/transport/socketio';
-import { GameComponent, LobbyConnection } from './connection';
+import type { GameComponent } from './connection';
+import { LobbyConnection } from './connection';
 import LobbyLoginForm from './login-form';
-import LobbyMatchInstance, { MatchOpts } from './match-instance';
+import type { MatchOpts } from './match-instance';
+import LobbyMatchInstance from './match-instance';
 import LobbyCreateMatchForm from './create-match-form';
-import { LobbyAPI } from '../types';
+import type { LobbyAPI } from '../types';
 
 enum LobbyPhases {
   ENTER = 'enter',
@@ -121,7 +123,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   componentDidMount() {
-    let cookie = Cookies.load('lobbyState') || {};
+    const cookie = Cookies.load('lobbyState') || {};
     if (cookie.phase && cookie.phase === LobbyPhases.PLAY) {
       cookie.phase = LobbyPhases.LIST;
     }
@@ -133,8 +135,8 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   componentDidUpdate(prevProps: LobbyProps, prevState: LobbyState) {
-    let name = this.state.playerName;
-    let creds = this.state.credentialStore[name];
+    const name = this.state.playerName;
+    const creds = this.state.credentialStore[name];
     if (
       prevState.phase !== this.state.phase ||
       prevState.credentialStore[name] !== creds ||
@@ -142,7 +144,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     ) {
       this._createConnection(this.props);
       this._updateConnection();
-      let cookie = {
+      const cookie = {
         phase: this.state.phase,
         playerName: name,
         credentialStore: this.state.credentialStore,
@@ -162,7 +164,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   };
 
   _updateCredentials = (playerName: string, credentials: string) => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       // clone store or componentDidUpdate will not be triggered
       const store = Object.assign({}, prevState.credentialStore);
       store[playerName] = credentials;
@@ -232,16 +234,14 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
 
     let multiplayer = undefined;
     if (matchOpts.numPlayers > 1) {
-      if (this.props.gameServer) {
-        multiplayer = SocketIO({ server: this.props.gameServer });
-      } else {
-        multiplayer = SocketIO();
-      }
+      multiplayer = this.props.gameServer
+        ? SocketIO({ server: this.props.gameServer })
+        : SocketIO();
     }
 
     if (matchOpts.numPlayers == 1) {
       const maxPlayers = gameCode.game.maxPlayers;
-      let bots = {};
+      const bots = {};
       for (let i = 1; i < maxPlayers; i++) {
         bots[i + ''] = MCTSBot;
       }
@@ -277,7 +277,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     matches: LobbyAPI.MatchList['matches'],
     playerName: string
   ) => {
-    return matches.map(match => {
+    return matches.map((match) => {
       const { matchID, gameName, players } = match;
       return (
         <LobbyMatchInstance

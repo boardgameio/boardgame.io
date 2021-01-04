@@ -1,26 +1,51 @@
-{
-  "extends": [
-    "eslint:recommended",
-    "plugin:jest/recommended",
-    "plugin:unicorn/recommended",
-    "plugin:react/recommended",
-    "plugin:prettier/recommended",
-    "prettier/react",
-    "prettier/unicorn"
-  ],
-  "env": {
-    "node": true,
-    "browser": true,
-    "es6": true
-  },
-  "parser": "babel-eslint",
-  "rules": {
-    "no-console": "off",
-    "react/prop-types": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "16.3"
-    }
-  }
-}
+extends:
+- eslint:recommended
+- plugin:jest/recommended
+- plugin:unicorn/recommended
+- plugin:react/recommended
+- plugin:prettier/recommended
+- plugin:@typescript-eslint/recommended
+- prettier/react
+- prettier/unicorn
+- prettier/@typescript-eslint
+
+plugins:
+- "@typescript-eslint"
+
+parser: "@typescript-eslint/parser"
+
+env:
+  node: true
+  browser: true
+  es6: true
+
+rules:
+  # eslint
+  no-console: off
+  prefer-const:
+    - error
+    - destructuring: all
+
+  # plugin:unicorn
+  unicorn/consistent-function-scoping: off
+  unicorn/no-fn-reference-in-iterator: off
+  unicorn/no-null: off
+  unicorn/no-reduce: off
+  unicorn/no-useless-undefined: off
+  unicorn/prevent-abbreviations: off
+
+  # plugin:@typescript-eslint
+  "@typescript-eslint/consistent-type-imports": error
+  "@typescript-eslint/explicit-module-boundary-types": off
+  "@typescript-eslint/no-empty-function": off
+  "@typescript-eslint/no-explicit-any": off
+  "@typescript-eslint/no-namespace": off
+  "@typescript-eslint/no-unused-vars":
+    - warn
+    - args: after-used
+      ignoreRestSiblings: true
+  "@typescript-eslint/no-var-requires": off
+
+settings:
+  react:
+    version: detect

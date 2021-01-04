@@ -14,7 +14,7 @@ import { ProcessGameConfig } from '../core/game';
 import * as logger from '../core/logger';
 import { Auth } from './auth';
 import { SocketIO } from './transport/socketio';
-import { Server as ServerTypes, Game, StorageAPI } from '../types';
+import type { Server as ServerTypes, Game, StorageAPI } from '../types';
 
 export type KoaServer = ReturnType<Koa['listen']>;
 
@@ -38,16 +38,13 @@ interface HttpsOptions {
 export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
   callback?: () => void
-): ServerConfig => {
-  if (portOrConfig && typeof portOrConfig === 'object') {
-    return {
-      ...portOrConfig,
-      callback: portOrConfig.callback || callback,
-    };
-  } else {
-    return { port: portOrConfig as number, callback };
-  }
-};
+): ServerConfig =>
+  portOrConfig && typeof portOrConfig === 'object'
+    ? {
+        ...portOrConfig,
+        callback: portOrConfig.callback || callback,
+      }
+    : { port: portOrConfig as number, callback };
 
 export const getPortFromServer = (
   server: KoaServer
@@ -131,7 +128,7 @@ export function Server({
         api.context.db = db;
         api.context.auth = auth;
         configureApp(api, router);
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           apiServer = api.listen(lobbyConfig.apiPort, resolve);
         });
         if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
@@ -140,7 +137,7 @@ export function Server({
 
       // Run Game Server (+ API, if necessary).
       let appServer: KoaServer;
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         appServer = app.listen(serverRunConfig.port, resolve);
       });
       if (serverRunConfig.callback) serverRunConfig.callback();

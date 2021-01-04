@@ -7,7 +7,7 @@
  */
 
 import { Bot } from './bot';
-import { Ctx, PlayerID } from '../types';
+import type { Ctx, PlayerID } from '../types';
 
 /**
  * Bot that picks a move at random.
