@@ -27,6 +27,14 @@ Unofficial Angular client for boardgame.io.
 [c2]: https://github.com/turn-based/boardgame.io-angular
 [d2]: https://turn-based-209306.firebaseapp.com/
 
+#### [![GitHub stars][b-bri]][c-bri] [Briscola][p-bri] \[[code][c-bri] | [demo][d-bri]\]
+&nbsp;&nbsp;
+Online 2-player variant of the Briscola card game.
+
+[p-bri]: https://instant-briscola.herokuapp.com/
+[c-bri]: https://github.com/aflorj/briscola
+[d-bri]: https://instant-briscola.herokuapp.com/demo
+[b-bri]: https://img.shields.io/github/stars/aflorj/briscola?label=%E2%98%85&logo=github
 
 #### [![GitHub stars][b3]][c3]  [Camelot][p3] \[[code][c3]\]
 &nbsp;&nbsp;
