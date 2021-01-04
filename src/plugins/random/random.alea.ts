@@ -65,18 +65,18 @@ class Alea {
     const t = 2091639 * this.s0 + this.c * 2.3283064365386963e-10; // 2^-32
     this.s0 = this.s1;
     this.s1 = this.s2;
-    return (this.s2 = t - (this.c = t | 0));
+    return (this.s2 = t - (this.c = Math.trunc(t)));
   }
 }
 
 function Mash() {
-  var n = 0xefc8249d;
+  let n = 0xefc8249d;
 
-  var mash = function(data: string | number) {
+  const mash = function (data: string | number) {
     const str = data.toString();
-    for (var i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i++) {
       n += str.charCodeAt(i);
-      var h = 0.02519603282416938 * n;
+      let h = 0.02519603282416938 * n;
       n = h >>> 0;
       h -= n;
       h *= n;

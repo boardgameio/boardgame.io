@@ -59,7 +59,7 @@ const BotControls = ({ playerID, matchID }) => {
     if (!client) return;
     // Subscribe to the client with a function that will run AI on a bot
     // player’s turn.
-    return client.subscribe(state => {
+    return client.subscribe((state) => {
       if (!state) return;
       if (state.ctx.currentPlayer === playerID) {
         const { iterations, playoutDepth } = difficulties[difficulty];

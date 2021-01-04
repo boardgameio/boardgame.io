@@ -1,6 +1,6 @@
 import { generate as uuid } from 'shortid';
 import { LocalStorage } from './localstorage';
-import { State, Server } from '../../types';
+import type { State, Server } from '../../types';
 
 describe('LocaLStorage', () => {
   let db: LocalStorage;
@@ -17,7 +17,7 @@ describe('LocaLStorage', () => {
   });
 
   test('create game', () => {
-    let stateEntry: unknown = { a: 1 };
+    const stateEntry: unknown = { a: 1 };
 
     // Create game.
     db.createMatch('gameID', {
@@ -55,8 +55,8 @@ describe('LocaLStorage', () => {
 
   test('must create new empty db if other localstorage key is used', () => {
     // create another localstorage with anothr key
-    let db2 = new LocalStorage(uuid());
-    let stateEntry: unknown = { a: 1 };
+    const db2 = new LocalStorage(uuid());
+    const stateEntry: unknown = { a: 1 };
 
     // create game in db
     db.createMatch('gameID', {

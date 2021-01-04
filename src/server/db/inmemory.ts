@@ -1,4 +1,4 @@
-import { State, Server, LogEntry } from '../../types';
+import type { State, Server, LogEntry } from '../../types';
 import * as StorageAPI from './base';
 
 /*
@@ -65,7 +65,7 @@ export class InMemory extends StorageAPI.Sync {
     matchID: string,
     opts: O
   ): StorageAPI.FetchResult<O> {
-    let result = {} as StorageAPI.FetchFields;
+    const result = {} as StorageAPI.FetchFields;
 
     if (opts.state) {
       result.state = this.state.get(matchID);
@@ -101,7 +101,7 @@ export class InMemory extends StorageAPI.Sync {
    */
   listMatches(opts?: StorageAPI.ListMatchesOpts): string[] {
     return [...this.metadata.entries()]
-      .filter(([key, metadata]) => {
+      .filter(([, metadata]) => {
         if (!opts) {
           return true;
         }

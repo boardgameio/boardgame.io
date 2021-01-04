@@ -10,7 +10,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { Flow } from './flow';
 import { error } from '../core/logger';
-import { Ctx, State } from '../types';
+import type { Ctx, State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -31,20 +31,20 @@ describe('phases', () => {
       phases: {
         A: {
           start: true,
-          onBegin: s => ({ ...s, setupA: true }),
-          onEnd: s => ({ ...s, cleanupA: true }),
+          onBegin: (s) => ({ ...s, setupA: true }),
+          onEnd: (s) => ({ ...s, cleanupA: true }),
           next: 'B',
         },
         B: {
-          onBegin: s => ({ ...s, setupB: true }),
-          onEnd: s => ({ ...s, cleanupB: true }),
+          onBegin: (s) => ({ ...s, setupB: true }),
+          onEnd: (s) => ({ ...s, cleanupB: true }),
           next: 'A',
         },
       },
 
       turn: {
         order: {
-          first: G => {
+          first: (G) => {
             if (G.setupB && !G.cleanupB) return 1;
             return 0;
           },
@@ -105,7 +105,7 @@ describe('phases', () => {
     beforeAll(() => {
       const game = {
         endIf: () => true,
-        onEnd: G => {
+        onEnd: (G) => {
           G.onEnd = true;
         },
       };
@@ -204,7 +204,7 @@ describe('phases', () => {
 
 describe('turn', () => {
   test('onEnd', () => {
-    const onEnd = jest.fn(G => G);
+    const onEnd = jest.fn((G) => G);
     const flow = Flow({
       turn: { onEnd },
     });
@@ -332,9 +332,9 @@ describe('turn', () => {
       const game = {
         moves: {
           A: () => ({ endTurn: true }),
-          B: G => G,
+          B: (G) => G,
         },
-        turn: { endIf: G => G.endTurn },
+        turn: { endIf: (G) => G.endTurn },
       };
       const client = Client({ game });
 
@@ -349,10 +349,10 @@ describe('turn', () => {
       const game = {
         moves: {
           A: () => ({ endTurn: true }),
-          B: G => G,
+          B: (G) => G,
         },
         phases: {
-          A: { start: true, turn: { endIf: G => G.endTurn } },
+          A: { start: true, turn: { endIf: (G) => G.endTurn } },
         },
       };
       const client = Client({ game });
@@ -367,7 +367,7 @@ describe('turn', () => {
     test('return value', () => {
       const game = {
         moves: {
-          A: G => G,
+          A: (G) => G,
         },
         turn: { endIf: () => ({ next: '2' }) },
       };
@@ -382,7 +382,10 @@ describe('turn', () => {
   test('endTurn is not called twice in one move', () => {
     const flow = Flow({
       turn: { endIf: () => true },
-      phases: { A: { start: true, endIf: G => G.endPhase, next: 'B' }, B: {} },
+      phases: {
+        A: { start: true, endIf: (G) => G.endPhase, next: 'B' },
+        B: {},
+      },
     });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
@@ -479,7 +482,7 @@ describe('stages', () => {
 describe('stage events', () => {
   describe('setStage', () => {
     test('basic', () => {
-      let flow = Flow({});
+      const flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -489,7 +492,7 @@ describe('stage events', () => {
     });
 
     test('object syntax', () => {
-      let flow = Flow({});
+      const flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -499,7 +502,7 @@ describe('stage events', () => {
     });
 
     test('with multiple active players', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { all: 'A', moveLimit: 5 },
         },
@@ -522,7 +525,7 @@ describe('stage events', () => {
     });
 
     test('resets move count', () => {
-      let flow = Flow({
+      const flow = Flow({
         moves: { A: () => {} },
         turn: {
           activePlayers: { currentPlayer: 'A' },
@@ -539,7 +542,7 @@ describe('stage events', () => {
     });
 
     test('with move limit', () => {
-      let flow = Flow({});
+      const flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -552,7 +555,7 @@ describe('stage events', () => {
     });
 
     test('empty argument ends stage', () => {
-      let flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
+      const flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -564,7 +567,7 @@ describe('stage events', () => {
 
   describe('endStage', () => {
     test('basic', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { currentPlayer: 'A' },
         },
@@ -578,7 +581,7 @@ describe('stage events', () => {
     });
 
     test('with multiple active players', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { all: 'A', moveLimit: 5 },
         },
@@ -592,7 +595,7 @@ describe('stage events', () => {
     });
 
     test('maintains move count', () => {
-      let flow = Flow({
+      const flow = Flow({
         moves: { A: () => {} },
         turn: {
           activePlayers: { currentPlayer: 'A' },
@@ -609,7 +612,7 @@ describe('stage events', () => {
     });
 
     test('sets to next', () => {
-      let flow = Flow({
+      const flow = Flow({
         turn: {
           activePlayers: { currentPlayer: 'A1', others: 'B1' },
           stages: {
@@ -664,7 +667,7 @@ test('init', () => {
 
 describe('endIf', () => {
   test('basic', () => {
-    const flow = Flow({ endIf: G => G.win });
+    const flow = Flow({ endIf: (G) => G.win });
 
     let state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
     state = flow.processEvent(state, gameEvent('endTurn'));
@@ -690,11 +693,11 @@ describe('endIf', () => {
           start: true,
           moves: {
             A: () => ({ win: 'A' }),
-            B: G => G,
+            B: (G) => G,
           },
         },
       },
-      endIf: G => G.win,
+      endIf: (G) => G.win,
     };
     const client = Client({ game });
 

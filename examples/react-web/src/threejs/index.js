@@ -71,15 +71,15 @@ function Init(root) {
     const { G } = client.getState();
 
     cubes
-      .filter(c => G.cells[c.userData.i] == '0')
-      .forEach(c => {
+      .filter((c) => G.cells[c.userData.i] == '0')
+      .forEach((c) => {
         c.material.color.setHex(0xff0000);
         c.rotation.x = rotation;
       });
 
     cubes
-      .filter(c => G.cells[c.userData.i] == '1')
-      .forEach(c => {
+      .filter((c) => G.cells[c.userData.i] == '1')
+      .forEach((c) => {
         c.material.color.setHex(0x00ff00);
         c.rotation.y = -rotation;
       });
@@ -108,11 +108,11 @@ function Init(root) {
     raycaster.setFromCamera(mouse, camera);
     const highlightedCubes = raycaster.intersectObjects(cubes);
 
-    cubes.forEach(c => {
+    cubes.forEach((c) => {
       c.material.color.setHex(0xcccccc);
     });
 
-    highlightedCubes.forEach(c => {
+    highlightedCubes.forEach((c) => {
       c.object.material.color.setHex(0xaaaaaa);
     });
 
@@ -125,7 +125,7 @@ function Init(root) {
 
   function onMouseDown() {
     raycaster.setFromCamera(mouse, camera);
-    raycaster.intersectObjects(cubes).forEach(cube => {
+    raycaster.intersectObjects(cubes).forEach((cube) => {
       client.moves.clickCell(cube.object.userData.i);
     });
   }
@@ -148,7 +148,7 @@ const routes = [
       render() {
         return (
           <div
-            ref={el => {
+            ref={(el) => {
               this.ref = el;
             }}
           />

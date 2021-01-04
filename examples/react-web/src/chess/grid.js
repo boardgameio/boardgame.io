@@ -92,26 +92,26 @@ export class Grid extends React.Component {
     return squares;
   }
 
-  onClick = args => {
+  onClick = (args) => {
     if (this.props.onClick) {
       this.props.onClick(args);
     }
   };
 
-  onMouseOver = args => {
+  onMouseOver = (args) => {
     if (this.props.onMouseOver) {
       this.props.onMouseOver(args);
     }
   };
 
-  onMouseOut = args => {
+  onMouseOut = (args) => {
     if (this.props.onMouseOut) {
       this.props.onMouseOut(args);
     }
   };
 
   render() {
-    const tokens = React.Children.map(this.props.children, child => {
+    const tokens = React.Children.map(this.props.children, (child) => {
       return React.cloneElement(child, {
         template: Square,
         // Overwrites Token's onClick, onMouseOver, onMouseOut
@@ -178,15 +178,15 @@ export class Square extends React.Component {
 
   _gRef = React.createRef();
 
-  onClick = e => {
+  onClick = (e) => {
     this.props.onClick(this.getCoords(), e);
   };
 
-  onMouseOver = e => {
+  onMouseOver = (e) => {
     this.props.onMouseOver(this.getCoords(), e);
   };
 
-  onMouseOut = e => {
+  onMouseOut = (e) => {
     this.props.onMouseOut(this.getCoords(), e);
   };
 

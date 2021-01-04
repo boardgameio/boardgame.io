@@ -51,7 +51,7 @@ describe('basic', () => {
           }),
 
           api: ({ data }) => {
-            let state = { value: data.n };
+            const state = { value: data.n };
             const increment = () => state.value++;
             const get = () => state.value;
             return { increment, get };
@@ -59,7 +59,7 @@ describe('basic', () => {
 
           flush: ({ api }) => ({ n: api.get() }),
 
-          fnWrap: fn => (G, ctx) => {
+          fnWrap: (fn) => (G, ctx) => {
             G = fn(G, ctx);
             return { ...G, wrap: true };
           },

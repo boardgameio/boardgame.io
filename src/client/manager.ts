@@ -1,5 +1,5 @@
 import Debug from './debug/Debug.svelte';
-import { _ClientImpl } from './client';
+import type { _ClientImpl } from './client';
 
 type SubscriptionState = {
   client: _ClientImpl;
@@ -15,7 +15,7 @@ export class ClientManager {
   private debugPanel: Debug | null;
   private currentClient: _ClientImpl | null;
   private clients: Map<_ClientImpl, _ClientImpl>;
-  private subscribers: Map<Symbol, SubscribeCallback>;
+  private subscribers: Map<symbol, SubscribeCallback>;
 
   constructor() {
     this.debugPanel = null;
@@ -109,7 +109,7 @@ export class ClientManager {
    */
   private notifySubscribers(): void {
     const arg = this.getState();
-    this.subscribers.forEach(cb => {
+    this.subscribers.forEach((cb) => {
       cb(arg);
     });
   }
@@ -129,7 +129,7 @@ export class ClientManager {
    */
   private getDebuggableClients(): _ClientImpl[] {
     return [...this.clients.values()].filter(
-      client => client.debugOpt !== false
+      (client) => client.debugOpt !== false
     );
   }
 

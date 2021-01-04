@@ -56,7 +56,7 @@ export default {
       stages: {
         discard: {
           moves: {
-            discard: G => G,
+            discard: (G) => G,
           },
         },
       },

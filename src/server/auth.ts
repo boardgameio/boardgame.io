@@ -1,5 +1,5 @@
 import { generate as shortid } from 'shortid';
-import { Server, PlayerID } from '../types';
+import type { Server, PlayerID } from '../types';
 
 /**
  * Verifies that a match has metadata and is using credentials.
@@ -10,7 +10,7 @@ export const doesMatchRequireAuthentication = (
   if (!matchData) return false;
   const { players } = matchData;
   const hasCredentials = Object.values(players).some(
-    player => !!(player && player.credentials)
+    (player) => !!(player && player.credentials)
   );
   return hasCredentials;
 };

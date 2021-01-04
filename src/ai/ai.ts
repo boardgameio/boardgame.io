@@ -8,7 +8,7 @@
 
 import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
-import { Game, PlayerID, State, Store } from '../types';
+import type { Game, PlayerID, State, Store } from '../types';
 
 /**
  * Make a single move on the client with a bot.

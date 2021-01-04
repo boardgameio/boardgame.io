@@ -12,10 +12,11 @@ import { MAKE_MOVE, GAME_EVENT } from '../core/action-types';
 import { makeMove } from '../core/action-creators';
 import { Step, Simulate } from './ai';
 import { RandomBot } from './random-bot';
-import { MCTSBot, Node } from './mcts-bot';
+import { MCTSBot } from './mcts-bot';
+import type { Node } from './mcts-bot';
 import { ProcessGameConfig } from '../core/game';
 import { Stage } from '../core/turn-order';
-import { Game, Ctx } from '../types';
+import type { AnyFn, Game, Ctx } from '../types';
 
 function IsVictory(cells) {
   const positions = [
@@ -29,12 +30,12 @@ function IsVictory(cells) {
     [2, 4, 6],
   ];
 
-  const isRowComplete = row => {
-    const symbols = row.map(i => cells[i]);
-    return symbols.every(i => i !== null && i === symbols[0]);
+  const isRowComplete = (row) => {
+    const symbols = row.map((i) => cells[i]);
+    return symbols.every((i) => i !== null && i === symbols[0]);
   };
 
-  return positions.map(isRowComplete).some(i => i === true);
+  return positions.map(isRowComplete).some((i) => i === true);
 }
 
 const TicTacToe = ProcessGameConfig({
@@ -59,14 +60,14 @@ const TicTacToe = ProcessGameConfig({
       return { winner: ctx.currentPlayer };
     }
 
-    if (G.cells.filter(t => t == null).length == 0) {
+    if (G.cells.filter((t) => t == null).length == 0) {
       return { draw: true };
     }
   },
 });
 
 const enumerate = (G, ctx, playerID) => {
-  let r = [];
+  const r = [];
   for (let i = 0; i < 9; i++) {
     if (G.cells[i] === null) {
       r.push(makeMove('clickCell', [i], playerID));
@@ -119,7 +120,7 @@ describe('Step', () => {
     const client = Client({
       game: {
         moves: {
-          A: G => {
+          A: (G) => {
             G.moved = true;
           },
         },
@@ -172,14 +173,14 @@ describe('Simulate', () => {
   test('with activePlayers', async () => {
     const game = ProcessGameConfig({
       moves: {
-        A: G => {
+        A: (G) => {
           G.moved = true;
         },
       },
       turn: {
         activePlayers: { currentPlayer: Stage.NULL },
       },
-      endIf: G => G.moved,
+      endIf: (G) => G.moved,
     });
 
     const bot = new RandomBot({
@@ -304,14 +305,14 @@ describe('MCTSBot', () => {
     const game = ProcessGameConfig({
       setup: () => ({ moves: 0 }),
       moves: {
-        A: G => {
+        A: (G) => {
           G.moves++;
         },
       },
       turn: {
         activePlayers: { currentPlayer: Stage.NULL },
       },
-      endIf: G => G.moves > 5,
+      endIf: (G) => G.moves > 5,
     });
 
     const bot = new MCTSBot({
@@ -333,8 +334,8 @@ describe('MCTSBot', () => {
   test('objectives', async () => {
     const objectives = () => ({
       'play-on-square-0': {
-        checker: G => G.cells[0] !== null,
-        weight: 10.0,
+        checker: (G) => G.cells[0] !== null,
+        weight: 10,
       },
     });
 
@@ -398,16 +399,12 @@ describe('MCTSBot', () => {
         playoutDepth: (G, ctx) => ctx.turn * 10,
       });
 
-      if (typeof bot.iterations === 'function') {
-        expect(bot.iterations(null, { turn } as Ctx, currentPlayer)).toBe(
-          turn * 100
-        );
-      }
-      if (typeof bot.playoutDepth === 'function') {
-        expect(bot.playoutDepth(null, { turn } as Ctx, currentPlayer)).toBe(
-          turn * 10
-        );
-      }
+      expect(
+        (bot.iterations as AnyFn)(null, { turn } as Ctx, currentPlayer)
+      ).toBe(turn * 100);
+      expect(
+        (bot.playoutDepth as AnyFn)(null, { turn } as Ctx, currentPlayer)
+      ).toBe(turn * 10);
 
       // try the playout() function which requests the playoutDepth value
       bot.playout({ state } as Node);

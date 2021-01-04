@@ -1,17 +1,17 @@
-import { Object } from 'ts-toolbelt';
-import Koa from 'koa';
-import { Store as ReduxStore } from 'redux';
-import * as ActionCreators from './core/action-creators';
-import { Flow } from './core/flow';
-import { CreateGameReducer } from './core/reducer';
-import { INVALID_MOVE } from './core/constants';
-import { Auth } from './server/auth';
-import * as StorageAPI from './server/db/base';
-import { EventsAPI } from './plugins/plugin-events';
-import { LogAPI } from './plugins/plugin-log';
-import { RandomAPI } from './plugins/random/random';
+import type { Object } from 'ts-toolbelt';
+import type Koa from 'koa';
+import type { Store as ReduxStore } from 'redux';
+import type * as ActionCreators from './core/action-creators';
+import type { Flow } from './core/flow';
+import type { CreateGameReducer } from './core/reducer';
+import type { INVALID_MOVE } from './core/constants';
+import type { Auth } from './server/auth';
+import type * as StorageAPI from './server/db/base';
+import type { EventsAPI } from './plugins/plugin-events';
+import type { LogAPI } from './plugins/plugin-log';
+import type { RandomAPI } from './plugins/random/random';
 
-export { StorageAPI };
+export type { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
 
@@ -220,7 +220,7 @@ export interface TurnConfig<
   G extends any = any,
   CtxWithPlugins extends Ctx = Ctx
 > {
-  activePlayers?: object;
+  activePlayers?: ActivePlayersArg;
   moveLimit?: number;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
@@ -384,16 +384,14 @@ export namespace CredentialedActionShape {
 }
 
 export namespace ActionShape {
-  type StripCredentials<T extends object> = Object.P.Omit<
+  type StripCredentials<T extends CredentialedActionShape.Any> = Object.P.Omit<
     T,
     ['payload', 'credentials']
   >;
   export type MakeMove = StripCredentials<CredentialedActionShape.MakeMove>;
   export type GameEvent = StripCredentials<CredentialedActionShape.GameEvent>;
   export type Plugin = StripCredentials<CredentialedActionShape.Plugin>;
-  export type AutomaticGameEvent = StripCredentials<
-    CredentialedActionShape.AutomaticGameEvent
-  >;
+  export type AutomaticGameEvent = StripCredentials<CredentialedActionShape.AutomaticGameEvent>;
   export type Sync = ReturnType<typeof ActionCreators.sync>;
   export type Update = ReturnType<typeof ActionCreators.update>;
   export type Reset = ReturnType<typeof ActionCreators.reset>;
@@ -412,7 +410,7 @@ export namespace ActionShape {
 }
 
 export namespace ActionPayload {
-  type GetPayload<T extends object> = Object.At<T, 'payload'>;
+  type GetPayload<T extends ActionShape.Any> = Object.At<T, 'payload'>;
   export type MakeMove = GetPayload<ActionShape.MakeMove>;
   export type GameEvent = GetPayload<ActionShape.GameEvent>;
 }

@@ -6,16 +6,15 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Koa from 'koa';
+import type Koa from 'koa';
 import Router from 'koa-router';
 import koaBody from 'koa-body';
 import { generate as shortid } from 'shortid';
 import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
-import { Auth } from './auth';
-import * as StorageAPI from './db/base';
-import { Server, LobbyAPI, Game } from '../types';
+import type { Auth } from './auth';
+import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 import { createMetadata } from './util';
 
 /**
@@ -69,7 +68,7 @@ const createClientMatchData = (
   return {
     ...metadata,
     matchID,
-    players: Object.values(metadata.players).map(player => {
+    players: Object.values(metadata.players).map((player) => {
       // strip away credentials
       const { credentials, ...strippedInfo } = player;
       return strippedInfo;
@@ -95,8 +94,8 @@ export const createRouter = ({
    *
    * @return - Array of game names as string.
    */
-  router.get('/games', async ctx => {
-    const body: LobbyAPI.GameList = games.map(game => game.name);
+  router.get('/games', async (ctx) => {
+    const body: LobbyAPI.GameList = games.map((game) => game.name);
     ctx.body = body;
   });
 
@@ -110,7 +109,7 @@ export const createRouter = ({
    * @param {boolean} unlisted - Whether the match should be excluded from public listing.
    * @return - The ID of the created match.
    */
-  router.post('/games/:name/create', koaBody(), async ctx => {
+  router.post('/games/:name/create', koaBody(), async (ctx) => {
     // The name of the game (for example: tic-tac-toe).
     const gameName = ctx.params.name;
     // User-data to pass to the game setup function.
@@ -118,9 +117,9 @@ export const createRouter = ({
     // Whether the game should be excluded from public listing.
     const unlisted = ctx.request.body.unlisted;
     // The number of players for this game instance.
-    let numPlayers = parseInt(ctx.request.body.numPlayers);
+    const numPlayers = Number.parseInt(ctx.request.body.numPlayers);
 
-    const game = games.find(g => g.name === gameName);
+    const game = games.find((g) => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
     const setupDataError =
@@ -148,7 +147,7 @@ export const createRouter = ({
    * @param {string} name - The name of the game.
    * @return - Array of match objects.
    */
-  router.get('/games/:name', async ctx => {
+  router.get('/games/:name', async (ctx) => {
     const gameName = ctx.params.name;
     const {
       isGameover: isGameoverString,
@@ -186,8 +185,8 @@ export const createRouter = ({
         updatedBefore,
       },
     });
-    let matches = [];
-    for (let matchID of matchList) {
+    const matches = [];
+    for (const matchID of matchList) {
       const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
         metadata: true,
       });
@@ -206,7 +205,7 @@ export const createRouter = ({
    * @param {string} id - The ID of the match.
    * @return - A match object.
    */
-  router.get('/games/:name/:id', async ctx => {
+  router.get('/games/:name/:id', async (ctx) => {
     const matchID = ctx.params.id;
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
@@ -228,7 +227,7 @@ export const createRouter = ({
    * @param {object} data - The default data of the player in the match.
    * @return - Player credentials to use when interacting in the joined match.
    */
-  router.post('/games/:name/:id/join', koaBody(), async ctx => {
+  router.post('/games/:name/:id/join', koaBody(), async (ctx) => {
     const playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
     const data = ctx.request.body.data;
@@ -274,7 +273,7 @@ export const createRouter = ({
    * @param {string} credentials - The credentials of the player who leaves.
    * @return - Nothing.
    */
-  router.post('/games/:name/:id/leave', koaBody(), async ctx => {
+  router.post('/games/:name/:id/leave', koaBody(), async (ctx) => {
     const matchID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
     const credentials = ctx.request.body.credentials;
@@ -302,12 +301,10 @@ export const createRouter = ({
 
     delete metadata.players[playerID].name;
     delete metadata.players[playerID].credentials;
-    if (Object.values(metadata.players).some(player => player.name)) {
-      await db.setMetadata(matchID, metadata);
-    } else {
-      // remove room
-      await db.wipe(matchID);
-    }
+    const hasPlayers = Object.values(metadata.players).some(({ name }) => name);
+    await (hasPlayers
+      ? db.setMetadata(matchID, metadata) // Update metadata.
+      : db.wipe(matchID)); // Delete match.
     ctx.body = {};
   });
 
@@ -321,7 +318,7 @@ export const createRouter = ({
    * @param {boolean} unlisted - Whether the match should be excluded from public listing.
    * @return - The ID of the new match.
    */
-  router.post('/games/:name/:id/playAgain', koaBody(), async ctx => {
+  router.post('/games/:name/:id/playAgain', koaBody(), async (ctx) => {
     const gameName = ctx.params.name;
     const matchID = ctx.params.id;
     const playerID = ctx.request.body.playerID;
@@ -360,10 +357,10 @@ export const createRouter = ({
     const setupData = ctx.request.body.setupData || metadata.setupData;
     // The number of players for this game instance.
     const numPlayers =
-      parseInt(ctx.request.body.numPlayers) ||
+      Number.parseInt(ctx.request.body.numPlayers) ||
       Object.keys(metadata.players).length;
 
-    const game = games.find(g => g.name === gameName);
+    const game = games.find((g) => g.name === gameName);
     const nextMatchID = await CreateMatch({
       db,
       game,
@@ -433,7 +430,7 @@ export const createRouter = ({
    * @param {object} newName - The new name of the player in the match.
    * @return - Nothing.
    */
-  router.post('/games/:name/:id/rename', koaBody(), async ctx => {
+  router.post('/games/:name/:id/rename', koaBody(), async (ctx) => {
     console.warn(
       'This endpoint /rename is deprecated. Please use /update instead.'
     );

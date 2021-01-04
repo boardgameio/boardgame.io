@@ -21,7 +21,7 @@ class Board extends React.Component {
     isConnected: PropTypes.bool,
   };
 
-  onClick = id => {
+  onClick = (id) => {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
     }
@@ -36,8 +36,8 @@ class Board extends React.Component {
   render() {
     const tbody = [];
     const marker = {
-      '0': 'X',
-      '1': 'O',
+      0: 'X',
+      1: 'O',
     };
     for (let i = 0; i < 3; i++) {
       const cells = [];

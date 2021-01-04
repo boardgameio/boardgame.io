@@ -42,14 +42,16 @@ export const App = () => (
         </div>
       </aside>
       <section className="content">
-        {_.flattenDeep(routes.map(route => route.routes)).map((route, idx) => (
-          <Route
-            key={idx}
-            exact
-            path={route.path}
-            component={route.component}
-          />
-        ))}
+        {_.flattenDeep(routes.map((route) => route.routes)).map(
+          (route, idx) => (
+            <Route
+              key={idx}
+              exact
+              path={route.path}
+              component={route.component}
+            />
+          )
+        )}
       </section>
     </main>
   </Router>

@@ -1,5 +1,5 @@
 import * as StorageAPI from './base';
-import { State, Server, LogEntry } from '../../types';
+import type { State, Server, LogEntry } from '../../types';
 
 /*
  * Copyright 2017 The boardgame.io Authors
@@ -145,7 +145,7 @@ export class FlatFile extends StorageAPI.Async {
 
   async wipe(id: string) {
     const keys = await this.games.keys();
-    if (!(keys.indexOf(id) > -1)) return;
+    if (!keys.includes(id)) return;
 
     await this.removeItem(id);
     await this.removeItem(InitialStateKey(id));
@@ -164,12 +164,12 @@ export class FlatFile extends StorageAPI.Async {
     const suffix = ':metadata';
 
     const arr = await Promise.all(
-      keys.map(async k => {
+      keys.map(async (k) => {
         if (!k.endsWith(suffix)) {
           return false;
         }
 
-        const matchID = k.substring(0, k.length - suffix.length);
+        const matchID = k.slice(0, k.length - suffix.length);
 
         if (!opts) {
           return matchID;

@@ -11,7 +11,7 @@ import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import { Master, redactLog } from './master';
 import { error } from '../core/logger';
-import { Server, State, Ctx, LogEntry } from '../types';
+import type { Server, State, Ctx, LogEntry } from '../types';
 import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
@@ -40,7 +40,7 @@ class InMemoryAsync extends StorageAPI.Async {
 
   private sleep(): Promise<void> {
     const interval = Math.round(Math.random() * 50 + 50);
-    return new Promise(resolve => void setTimeout(resolve, interval));
+    return new Promise((resolve) => void setTimeout(resolve, interval));
   }
 
   async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
@@ -152,7 +152,7 @@ describe('update', () => {
   let sendAllReturn;
 
   const send = jest.fn();
-  const sendAll = jest.fn(arg => {
+  const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
   const db = new InMemory();
@@ -173,7 +173,7 @@ describe('update', () => {
     expect(sendAll).toBeCalled();
     expect(sendAllReturn).not.toBeUndefined();
 
-    let value = sendAllReturn('0');
+    const value = sendAllReturn('0');
     expect(value.type).toBe('update');
     expect(value.args[0]).toBe('matchID');
     expect(value.args[1]).toMatchObject({
@@ -490,7 +490,7 @@ describe('connectionChange', () => {
   let sendAllReturn;
 
   const send = jest.fn();
-  const sendAll = jest.fn(arg => {
+  const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
 
@@ -592,10 +592,10 @@ describe('playerView', () => {
   let sendAllReturn;
   let sendReturn;
 
-  const send = jest.fn(arg => {
+  const send = jest.fn((arg) => {
     sendReturn = arg;
   });
-  const sendAll = jest.fn(arg => {
+  const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
   const game = {
@@ -968,9 +968,9 @@ describe('redactLog', () => {
   test('make sure sync redacts the log', async () => {
     const game = {
       moves: {
-        A: G => G,
+        A: (G) => G,
         B: {
-          move: G => G,
+          move: (G) => G,
           redact: true,
         },
       },
@@ -1019,7 +1019,7 @@ describe('redactLog', () => {
 describe('chat', () => {
   let sendAllReturn;
   const send = jest.fn();
-  const sendAll = jest.fn(arg => {
+  const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
   const db = new InMemory();

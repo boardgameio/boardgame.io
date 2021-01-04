@@ -13,7 +13,7 @@ import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore } from 'redux';
 import * as logging from '../core/logger';
 import { PlayerView } from '../plugins/main';
-import {
+import type {
   SyncInfo,
   FilteredMetadata,
   Game,
@@ -26,14 +26,14 @@ import {
   ChatMessage,
 } from '../types';
 import { createMetadata } from '../server/util';
-import { Auth } from '../server/auth';
+import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 
 /**
  * Filter match data to get a player metadata object with credentials stripped.
  */
 const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
-  Object.values(matchData.players).map(player => {
+  Object.values(matchData.players).map((player) => {
     const { credentials, ...filteredData } = player;
     return filteredData;
   });
@@ -50,7 +50,7 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
     return log;
   }
 
-  return log.map(logEvent => {
+  return log.map((logEvent) => {
     // filter for all other players and spectators.
     if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
       return logEvent;
@@ -69,7 +69,6 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
       action: { ...logEvent.action, payload },
     };
 
-    /* eslint-disable-next-line no-unused-vars */
     const { redact, ...remaining } = filteredEvent;
     return remaining;
   });
@@ -79,7 +78,6 @@ export function redactLog(log: LogEntry[], playerID: PlayerID) {
  * Remove player credentials from action payload
  */
 const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
-  // eslint-disable-next-line no-unused-vars
   const { credentials, ...payload } = action.payload;
   return { ...action, payload };
 };
@@ -90,7 +88,7 @@ type CallbackFn = (arg: {
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
-type TransportData =
+export type TransportData =
   | {
       type: 'update';
       args: [string, State, LogEntry[]];
@@ -173,7 +171,7 @@ export class Master {
       }
     }
 
-    let action = stripCredentialsFromAction(credAction);
+    const action = stripCredentialsFromAction(credAction);
     const key = matchID;
 
     let state: State;
@@ -331,13 +329,10 @@ export class Master {
       log: true,
       initialState: true,
     } as const;
-    let fetchResult: StorageAPI.FetchResult<typeof fetchOpts>;
 
-    if (StorageAPI.isSynchronous(this.storageAPI)) {
-      fetchResult = this.storageAPI.fetch(key, fetchOpts);
-    } else {
-      fetchResult = await this.storageAPI.fetch(key, fetchOpts);
-    }
+    const fetchResult = StorageAPI.isSynchronous(this.storageAPI)
+      ? this.storageAPI.fetch(key, fetchOpts)
+      : await this.storageAPI.fetch(key, fetchOpts);
 
     let { state, initialState, log, metadata } = fetchResult;
 

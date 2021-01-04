@@ -26,7 +26,7 @@ Enzyme.configure({ adapter: new Adapter() });
 
 describe('lobby', () => {
   let lobby;
-  let spy = jest.fn();
+  const spy = jest.fn();
   let components: any[];
 
   beforeEach(async () => {
@@ -86,10 +86,7 @@ describe('lobby', () => {
           .onChange({ target: { value: 'Mark' } });
       });
       test('by clicking', () => {
-        lobby
-          .find('LobbyLoginForm')
-          .find('button')
-          .simulate('click');
+        lobby.find('LobbyLoginForm').find('button').simulate('click');
         expect(lobby.instance().state.playerName).toBe('Mark');
       });
       test('by pressing enter', () => {
@@ -109,16 +106,10 @@ describe('lobby', () => {
           .find('input')
           .props()
           .onChange({ target: { value: '' } });
-        lobby
-          .find('LobbyLoginForm')
-          .find('button')
-          .simulate('click');
-        expect(
-          lobby
-            .find('LobbyLoginForm')
-            .find('.error-msg')
-            .text()
-        ).not.toBe('');
+        lobby.find('LobbyLoginForm').find('button').simulate('click');
+        expect(lobby.find('LobbyLoginForm').find('.error-msg').text()).not.toBe(
+          ''
+        );
       });
       test('invalid key press', () => {
         lobby
@@ -146,10 +137,7 @@ describe('lobby', () => {
       });
       test('disconnect from server', async () => {
         lobby.instance().connection.disconnect = spy;
-        lobby
-          .find('#lobby-exit')
-          .find('button')
-          .simulate('click');
+        lobby.find('#lobby-exit').find('button').simulate('click');
         expect(spy).toHaveBeenCalledWith();
       });
     });
@@ -174,7 +162,7 @@ describe('lobby', () => {
   });
 
   describe('matches list', () => {
-    let spyClient = jest.fn();
+    const spyClient = jest.fn();
     beforeEach(async () => {
       // initial state = logged-in as 'Bob'
       Cookies.save(
@@ -213,10 +201,7 @@ describe('lobby', () => {
 
       test('match with default number of players', () => {
         lobby.instance().connection.create = spy;
-        lobby
-          .find('LobbyCreateMatchForm')
-          .find('button')
-          .simulate('click');
+        lobby.find('LobbyCreateMatchForm').find('button').simulate('click');
         expect(spy).toHaveBeenCalledWith('GameName1', 3);
       });
       test('match with 2 players', () => {
@@ -233,10 +218,7 @@ describe('lobby', () => {
           .at(1)
           .props()
           .onChange({ target: { value: '2' } });
-        lobby
-          .find('LobbyCreateMatchForm')
-          .find('button')
-          .simulate('click');
+        lobby.find('LobbyCreateMatchForm').find('button').simulate('click');
         expect(spy).toHaveBeenCalledWith('GameName2', 2);
       });
       test('when server request fails', async () => {
@@ -247,12 +229,7 @@ describe('lobby', () => {
           .find('LobbyCreateMatchForm')
           .find('button')
           .simulate('click');
-        expect(
-          lobby
-            .find('#instances')
-            .find('.error-msg')
-            .text()
-        ).not.toBe('');
+        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
       });
       test('when game has no boundaries on the number of players', async () => {
         // select 2nd game
@@ -263,20 +240,12 @@ describe('lobby', () => {
           .props()
           .onChange({ target: { value: '1' } });
         expect(
-          lobby
-            .find('LobbyCreateMatchForm')
-            .find('select')
-            .at(1)
-            .text()
+          lobby.find('LobbyCreateMatchForm').find('select').at(1).text()
         ).toBe('1234');
       });
       test('when game has boundaries on the number of players', async () => {
         expect(
-          lobby
-            .find('LobbyCreateMatchForm')
-            .find('select')
-            .at(1)
-            .text()
+          lobby.find('LobbyCreateMatchForm').find('select').at(1).text()
         ).toBe('345');
       });
     });
@@ -310,12 +279,9 @@ describe('lobby', () => {
       });
       test('when match is full', () => {
         // try 2nd match
-        expect(
-          lobby
-            .find('LobbyMatchInstance')
-            .at(1)
-            .text()
-        ).toContain('RUNNING');
+        expect(lobby.find('LobbyMatchInstance').at(1).text()).toContain(
+          'RUNNING'
+        );
       });
       test('when server request fails', async () => {
         lobby.instance().connection.join = spy.mockImplementation(() => {
@@ -327,12 +293,7 @@ describe('lobby', () => {
           .first()
           .find('button')
           .simulate('click');
-        expect(
-          lobby
-            .find('#instances')
-            .find('.error-msg')
-            .text()
-        ).not.toBe('');
+        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
       });
     });
 
@@ -350,36 +311,19 @@ describe('lobby', () => {
         ];
         lobby.instance().forceUpdate();
         lobby.update();
-        expect(
-          lobby
-            .find('LobbyMatchInstance')
-            .find('button')
-            .text()
-        ).toBe('Leave');
       });
       test('shall leave a match', () => {
         // leave match
         lobby.instance().connection.leave = spy;
-        lobby
-          .find('LobbyMatchInstance')
-          .find('button')
-          .simulate('click');
+        lobby.find('LobbyMatchInstance').find('button').simulate('click');
         expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1');
       });
       test('when server request fails', async () => {
         lobby.instance().connection.leave = spy.mockImplementation(() => {
           throw new Error('fail');
         });
-        await lobby
-          .find('LobbyMatchInstance')
-          .find('button')
-          .simulate('click');
-        expect(
-          lobby
-            .find('#instances')
-            .find('.error-msg')
-            .text()
-        ).not.toBe('');
+        await lobby.find('LobbyMatchInstance').find('button').simulate('click');
+        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
       });
     });
 
@@ -438,11 +382,7 @@ describe('lobby', () => {
       });
 
       test('if player is spectator', () => {
-        lobby
-          .find('LobbyMatchInstance')
-          .at(1)
-          .find('button')
-          .simulate('click');
+        lobby.find('LobbyMatchInstance').at(1).find('button').simulate('click');
         expect(lobby.instance().state.runningMatch).toEqual({
           app: NullComponent,
           credentials: undefined,
@@ -452,18 +392,9 @@ describe('lobby', () => {
       });
 
       test('if game is not supported', () => {
-        lobby
-          .find('LobbyMatchInstance')
-          .at(3)
-          .find('button')
-          .simulate('click');
+        lobby.find('LobbyMatchInstance').at(3).find('button').simulate('click');
         expect(spy).not.toHaveBeenCalled();
-        expect(
-          lobby
-            .find('#instances')
-            .find('.error-msg')
-            .text()
-        ).not.toBe('');
+        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
       });
 
       test('if game is monoplayer', () => {
@@ -505,10 +436,7 @@ describe('lobby', () => {
           .first()
           .simulate('click');
         // exit game
-        lobby
-          .find('#match-exit')
-          .find('button')
-          .simulate('click');
+        lobby.find('#match-exit').find('button').simulate('click');
         expect(lobby.instance().state.runningMatch).toEqual(null);
         expect(lobby.instance().state.phase).toEqual('list');
       });
@@ -528,10 +456,10 @@ describe('lobby', () => {
           { game: { name: 'GameName1' } },
           { game: { name: 'GameName2' } },
         ];
-        const CustomLobbyUI = ({ gameComponents }) => (
+        const CustomLobbyUI = ({ gameComponents }: any) => (
           <div>
             {gameComponents
-              .map(gameComponent => gameComponent.game.name)
+              .map((gameComponent) => gameComponent.game.name)
               .join(',')}
           </div>
         );
@@ -549,7 +477,7 @@ describe('lobby', () => {
       });
 
       test('should change lobby phase when click on custom enter button', () => {
-        const CustomLobbyUI = ({ onEnterLobby }) => (
+        const CustomLobbyUI = ({ onEnterLobby }: any) => (
           <button onClick={() => onEnterLobby('Alex')}>Enter</button>
         );
 

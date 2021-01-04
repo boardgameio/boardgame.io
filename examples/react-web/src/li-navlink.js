@@ -10,7 +10,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink, Route } from 'react-router-dom';
 
-const LiNavLink = props => {
+const LiNavLink = (props) => {
   const {
     to,
     exact,

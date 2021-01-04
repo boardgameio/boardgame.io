@@ -8,7 +8,7 @@
 
 import { Events } from './events';
 import { Client } from '../../client/client';
-import { Game, Ctx } from '../../types';
+import type { Game, Ctx } from '../../types';
 
 test('constructor', () => {
   const flow = {} as Game['flow'];

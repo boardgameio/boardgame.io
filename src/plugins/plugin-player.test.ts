@@ -120,7 +120,7 @@ describe('game with phases', () => {
 
   beforeAll(() => {
     const game = {
-      plugins: [PluginPlayer({ setup: id => ({ id }) })],
+      plugins: [PluginPlayer({ setup: (id) => ({ id }) })],
       phases: {
         phase: {},
       },
@@ -145,7 +145,7 @@ describe('game with phases', () => {
 
 describe('with playerView', () => {
   const plugin = PluginPlayer({
-    setup: id => ({ id }),
+    setup: (id) => ({ id }),
     playerView: (players, playerID) => ({
       [playerID]: players[playerID],
     }),

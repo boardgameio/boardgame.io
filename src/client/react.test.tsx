@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { Client, BoardProps } from './react';
+import type { BoardProps } from './react';
+import { Client } from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { Local } from './transport/local';
@@ -39,11 +40,11 @@ test('board is rendered', () => {
 });
 
 test('board props', () => {
-  let Board = Client({
+  const Board = Client({
     game: {},
     board: TestBoard,
   });
-  let board = Enzyme.mount(<Board />).find(TestBoard);
+  const board = Enzyme.mount(<Board />).find(TestBoard);
   expect(board.props().isMultiplayer).toEqual(false);
   expect(board.props().isActive).toBe(true);
 });

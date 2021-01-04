@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Plugin } from '../types';
+import type { Plugin } from '../types';
 
 interface LogData {
   metadata?: any;
@@ -28,7 +28,7 @@ const LogPlugin: Plugin<LogAPI, LogData> = {
 
   api: ({ data }) => {
     return {
-      setMetadata: metadata => {
+      setMetadata: (metadata) => {
         data.metadata = metadata;
       },
     };
