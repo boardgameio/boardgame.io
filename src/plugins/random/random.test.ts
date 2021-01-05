@@ -11,6 +11,7 @@ import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
 import { Client } from '../../client/client';
+import { PlayerView } from '../main';
 
 function Init(seed) {
   return new Random({ seed });
@@ -121,6 +122,24 @@ test('Random API is not executed optimisitically', () => {
     state = reducer(state, makeMove('rollDie'));
     expect(state.G.die).not.toBeDefined();
   }
+});
+
+test('Random API works when its state is redacted by playerView', () => {
+  const game = {
+    seed: 0,
+    moves: {
+      rollDie: (G, ctx) => ({ ...G, die: ctx.random.D6() }),
+    },
+  };
+
+  const opts = { game, isClient: true };
+  const reducer = CreateGameReducer(opts);
+  let state = InitializeGame({ game });
+  state.plugins = PlayerView(state, { ...opts, playerID: '0' });
+  expect(state.plugins.random.data).not.toBeDefined();
+  expect(state.G.die).not.toBeDefined();
+  state = reducer(state, makeMove('rollDie'));
+  expect(state.G.die).not.toBeDefined();
 });
 
 test('turn.onBegin has ctx APIs at the beginning of the game', () => {
