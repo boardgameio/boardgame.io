@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import 'svelte';
 import type { Dispatch, StoreEnhancer } from 'redux';
 import { createStore, compose, applyMiddleware } from 'redux';
@@ -345,7 +345,7 @@ export class _ClientImpl<G extends any = any> {
       this.chatMessages = [];
       this.sendChatMessage = (payload) => {
         this.transport.onChatMessage(this.matchID, {
-          id: shortid(),
+          id: nanoid(),
           sender: this.playerID,
           payload: payload,
         });

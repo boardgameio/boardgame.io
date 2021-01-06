@@ -1,4 +1,4 @@
-import { generate as uuid } from 'shortid';
+import { nanoid } from 'nanoid';
 import { LocalStorage } from './localstorage';
 import type { State, Server } from '../../types';
 
@@ -6,7 +6,7 @@ describe('LocaLStorage', () => {
   let db: LocalStorage;
 
   beforeAll(() => {
-    db = new LocalStorage(uuid());
+    db = new LocalStorage(nanoid());
     db.connect();
   });
 
@@ -55,7 +55,7 @@ describe('LocaLStorage', () => {
 
   test('must create new empty db if other localstorage key is used', () => {
     // create another localstorage with anothr key
-    const db2 = new LocalStorage(uuid());
+    const db2 = new LocalStorage(nanoid());
     const stateEntry: unknown = { a: 1 };
 
     // create game in db
