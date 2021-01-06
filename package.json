@@ -72,7 +72,7 @@
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
   "devDependencies": {
-    "@babel/cli": "^7.10.3",
+    "@babel/cli": "^7.12.10",
     "@babel/core": "^7.10.3",
     "@babel/node": "^7.10.3",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
@@ -102,7 +102,7 @@
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
     "css-loader": "^3.1.0",
-    "docsify-cli": "^4.4.0",
+    "docsify-cli": "^4.4.2",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^7.16.0",
