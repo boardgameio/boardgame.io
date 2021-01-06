@@ -345,7 +345,7 @@ export class _ClientImpl<G extends any = any> {
       this.chatMessages = [];
       this.sendChatMessage = (payload) => {
         this.transport.onChatMessage(this.matchID, {
-          id: nanoid(),
+          id: nanoid(7),
           sender: this.playerID,
           payload: payload,
         });

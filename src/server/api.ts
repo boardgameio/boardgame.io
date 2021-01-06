@@ -80,7 +80,7 @@ export const createRouter = ({
   db,
   auth,
   games,
-  uuid = nanoid,
+  uuid = () => nanoid(11),
 }: {
   auth: Auth;
   games: Game[];
