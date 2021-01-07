@@ -116,6 +116,13 @@ Simple hexagonal board game.
 [c10]: https://github.com/Korla/hexgame
 [b10]: https://img.shields.io/github/stars/Korla/hexgame?label=%E2%98%85&logo=github
 
+#### [![GitHub stars][b-lhog]][c-lhog] [Lewis' House of Games][p-lhog] \[[code][c-lhog]\]
+&nbsp;&nbsp;
+Lobby framework for boardgame.io games. Play Splendor or Powergrid clones here.
+
+[p-lhog]: https://lhog.herokuapp.com/
+[c-lhog]: https://github.com/sillle14/lhog
+[b-lhog]: https://img.shields.io/github/stars/sillle14/lhog?label=%E2%98%85&logo=github
 
 #### [![GitHub stars][b11]][c11] [Matchimals.fun][p11] \[[code][c11]\]
 &nbsp;&nbsp;
