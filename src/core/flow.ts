@@ -470,7 +470,7 @@ export function Flow({
       logEntry.automatic = true;
     }
 
-    const deltalog = [...state.deltalog, logEntry];
+    const deltalog = [...(state.deltalog || []), logEntry];
 
     return { ...state, G, ctx, deltalog };
   }
