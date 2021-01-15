@@ -1,3 +1,9 @@
+## v0.43.1
+
+#### Bugfixes
+
+* [[b14ea29](https://github.com/boardgameio/boardgame.io/commit/b14ea29)] client: Always include `chatMessages` and `sendChatMessage` on client instances
+
 ## v0.43.0
 
 #### Features
