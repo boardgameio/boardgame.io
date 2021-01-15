@@ -467,9 +467,12 @@ export class Master {
     const key = matchID;
 
     if (this.auth) {
-      const { metadata } = StorageAPI.isSynchronous(this.storageAPI)
-        ? this.storageAPI.fetch(key, { metadata: true })
-        : await this.storageAPI.fetch(key, { metadata: true });
+      const { metadata } = await (this.storageAPI as StorageAPI.Async).fetch(
+        key,
+        {
+          metadata: true,
+        }
+      );
       const isAuthentic = await this.auth.authenticateCredentials({
         playerID: chatMessage.sender,
         credentials,
