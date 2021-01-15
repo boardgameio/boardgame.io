@@ -713,6 +713,20 @@ describe('endIf', () => {
         .payload.type
     ).toBe('endPhase');
   });
+
+  test('during game initialization with phases', () => {
+    const flow = Flow({
+      phases: {
+        A: {
+          start: true,
+        },
+      },
+      endIf: () => 'gameover',
+    });
+
+    const state = flow.init({ G: {}, ctx: flow.ctx(2) } as State);
+    expect(state.ctx.gameover).toBe('gameover');
+  });
 });
 
 test('isPlayerActive', () => {
