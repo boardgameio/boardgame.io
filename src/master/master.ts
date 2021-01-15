@@ -465,14 +465,11 @@ export class Master {
     credentials: string | undefined
   ): Promise<void | { error: string }> {
     const key = matchID;
-    let metadata: Server.MatchData | undefined;
 
-    if (StorageAPI.isSynchronous(this.storageAPI)) {
-      ({ metadata } = this.storageAPI.fetch(key, { metadata: true }));
-    } else {
-      ({ metadata } = await this.storageAPI.fetch(key, { metadata: true }));
-    }
-    if (this.auth && chatMessage.sender !== undefined) {
+    if (this.auth) {
+      const { metadata } = StorageAPI.isSynchronous(this.storageAPI)
+        ? this.storageAPI.fetch(key, { metadata: true })
+        : await this.storageAPI.fetch(key, { metadata: true });
       const isAuthentic = await this.auth.authenticateCredentials({
         playerID: chatMessage.sender,
         credentials,
