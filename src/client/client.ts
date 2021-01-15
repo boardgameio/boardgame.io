@@ -18,6 +18,7 @@ import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { PlayerView } from '../plugins/main';
 import type { Transport, TransportOpts } from './transport/transport';
+import { DummyTransport } from './transport/dummy';
 import { ClientManager } from './manager';
 import type {
   ActivePlayersArg,
@@ -308,31 +309,17 @@ export class _ClientImpl<G extends any = any> {
 
     this.store = createStore(this.reducer, this.initialState, enhancer);
 
-    this.transport = ({
-      isConnected: true,
-      onAction: () => {},
-      subscribe: () => {},
-      subscribeMatchData: () => {},
-      subscribeChatMessage: () => {},
-      connect: () => {},
-      disconnect: () => {},
-      updateMatchID: () => {},
-      updatePlayerID: () => {},
-    } as unknown) as Transport;
-
-    if (multiplayer) {
-      // typeof multiplayer is 'function'
-      this.transport = multiplayer({
-        gameKey: game,
-        game: this.game,
-        store: this.store,
-        matchID,
-        playerID,
-        credentials,
-        gameName: this.game.name,
-        numPlayers,
-      });
-    }
+    if (!multiplayer) multiplayer = DummyTransport;
+    this.transport = multiplayer({
+      gameKey: game,
+      game: this.game,
+      store: this.store,
+      matchID,
+      playerID,
+      credentials,
+      gameName: this.game.name,
+      numPlayers,
+    });
 
     this.createDispatchers();
 
@@ -341,20 +328,18 @@ export class _ClientImpl<G extends any = any> {
       this.notifySubscribers();
     });
 
-    if (this.transport.onChatMessage) {
-      this.chatMessages = [];
-      this.sendChatMessage = (payload) => {
-        this.transport.onChatMessage(this.matchID, {
-          id: nanoid(7),
-          sender: this.playerID,
-          payload: payload,
-        });
-      };
-      this.transport.subscribeChatMessage((message) => {
-        this.chatMessages = [...this.chatMessages, message];
-        this.notifySubscribers();
+    this.chatMessages = [];
+    this.sendChatMessage = (payload) => {
+      this.transport.onChatMessage(this.matchID, {
+        id: nanoid(7),
+        sender: this.playerID,
+        payload: payload,
       });
-    }
+    };
+    this.transport.subscribeChatMessage((message) => {
+      this.chatMessages = [...this.chatMessages, message];
+      this.notifySubscribers();
+    });
   }
 
   private notifySubscribers() {

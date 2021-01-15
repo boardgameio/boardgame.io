@@ -279,6 +279,8 @@ describe('multiplayer', () => {
       subscribeMatchData(fn) {
         this.callback = fn;
       }
+
+      subscribeChatMessage() {}
     }
     const customTransport = () =>
       (new CustomTransport() as unknown) as Transport;

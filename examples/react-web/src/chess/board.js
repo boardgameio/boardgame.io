@@ -67,7 +67,7 @@ class Board extends React.Component {
 
         {this._getStatus()}
         {disconnected}
-        {this.props.sendChatMessage && this.props.chatMessages && (
+        {this.props.isMultiplayer && this.props.playerID !== null && (
           <Chat
             onSend={this.props.sendChatMessage}
             messages={this.props.chatMessages}

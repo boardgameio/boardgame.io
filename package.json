@@ -177,7 +177,7 @@
     },
     "coveragePathIgnorePatterns": [
       "/node_modules/",
-      "src/.*/random.alea.js",
+      "src/client/transport/dummy",
       "src/client/debug/.*",
       "src/types.ts"
     ],
