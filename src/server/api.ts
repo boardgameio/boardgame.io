@@ -9,7 +9,7 @@
 import type Koa from 'koa';
 import Router from 'koa-router';
 import koaBody from 'koa-body';
-import { generate as shortid } from 'shortid';
+import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
 
 import { InitializeGame } from '../core/initialize';
@@ -80,7 +80,7 @@ export const createRouter = ({
   db,
   auth,
   games,
-  uuid = shortid,
+  uuid = () => nanoid(11),
 }: {
   auth: Auth;
   games: Game[];

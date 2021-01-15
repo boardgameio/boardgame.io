@@ -25,7 +25,7 @@ A config object with the following options:
 3. `transport` (_object_): the transport implementation.
    If not provided, socket.io is used.
 
-4. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [shortid](https://www.npmjs.com/package/shortid).
+4. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [nanoid](https://www.npmjs.com/package/nanoid).
 
 5. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
 

@@ -60,12 +60,12 @@ export class Random {
    * constructor
    * @param {object} ctx - The ctx object to initialize from.
    */
-  constructor(state: RandomState) {
+  constructor(state?: RandomState) {
     // If we are on the client, the seed is not present.
     // Just use a temporary seed to execute the move without
     // crashing it. The move state itself is discarded,
     // so the actual value doesn't matter.
-    this.state = state;
+    this.state = state || { seed: '0' };
     this.used = false;
   }
 

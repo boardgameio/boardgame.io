@@ -1,4 +1,4 @@
-import { generate as shortid } from 'shortid';
+import { nanoid } from 'nanoid';
 import type { Server, PlayerID } from '../types';
 
 /**
@@ -50,7 +50,8 @@ export class Auth {
   /**
    * Generate credentials string from the Koa context.
    */
-  public readonly generateCredentials: Server.GenerateCredentials = shortid;
+  public readonly generateCredentials: Server.GenerateCredentials = () =>
+    nanoid();
 
   constructor(
     opts: {
