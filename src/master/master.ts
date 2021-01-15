@@ -459,7 +459,30 @@ export class Master {
     }
   }
 
-  async onChatMessage(matchID, chatMessage) {
+  async onChatMessage(
+    matchID: string,
+    chatMessage: ChatMessage,
+    credentials: string | undefined
+  ): Promise<void | { error: string }> {
+    const key = matchID;
+
+    if (this.auth) {
+      const { metadata } = await (this.storageAPI as StorageAPI.Async).fetch(
+        key,
+        {
+          metadata: true,
+        }
+      );
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID: chatMessage.sender,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
+    }
+
     this.transportAPI.sendAll(() => ({
       type: 'chat',
       args: [matchID, chatMessage],

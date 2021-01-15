@@ -14,6 +14,7 @@ import type { TransportAPI, TransportData } from '../../master/master';
 import { Transport } from './transport';
 import type { TransportOpts, ChatCallback } from './transport';
 import type {
+  ChatMessage,
   CredentialedActionShape,
   Game,
   LogEntry,
@@ -161,8 +162,18 @@ export class LocalTransport extends Transport {
     this.isConnected = true;
   }
 
-  onChatMessage(matchID, chatMessage) {
-    this.master.onChatMessage(matchID, chatMessage);
+  /**
+   * Called when any player sends a chat message and the
+   * master broadcasts the update to other clients (including
+   * this one).
+   */
+  onChatMessage(matchID: string, chatMessage: ChatMessage) {
+    const args: Parameters<Master['onChatMessage']> = [
+      matchID,
+      chatMessage,
+      this.credentials,
+    ];
+    this.master.onChatMessage(...args);
   }
 
   /**
