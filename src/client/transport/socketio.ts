@@ -96,8 +96,13 @@ export class SocketIOTransport extends Transport {
     this.socket.emit('update', ...args);
   }
 
-  onChatMessage(matchID, chatMessage) {
-    this.socket.emit('chat', matchID, chatMessage, this.credentials);
+  onChatMessage(matchID: string, chatMessage: ChatMessage) {
+    const args: Parameters<Master['onChatMessage']> = [
+      matchID,
+      chatMessage,
+      this.credentials,
+    ];
+    this.socket.emit('chat', ...args);
   }
 
   /**

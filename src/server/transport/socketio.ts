@@ -185,15 +185,19 @@ export class SocketIO {
             );
           }
         });
-        socket.on('chat', async (matchID, chatMessage, credentials) => {
-          const master = new Master(
-            game,
-            app.context.db,
-            TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
-            app.context.auth
-          );
-          master.onChatMessage(matchID, chatMessage, credentials);
-        });
+        socket.on(
+          'chat',
+          async (...args: Parameters<Master['onChatMessage']>) => {
+            const [matchID] = args;
+            const master = new Master(
+              game,
+              app.context.db,
+              TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+              app.context.auth
+            );
+            master.onChatMessage(...args);
+          }
+        );
       });
     }
   }

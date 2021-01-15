@@ -13,7 +13,7 @@ import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
 import * as Actions from '../../core/action-types';
 import type { Master } from '../../master/master';
-import type { State, Store } from '../../types';
+import type { ChatMessage, State, Store } from '../../types';
 
 type UpdateArgs = Parameters<Master['onUpdate']>;
 type SyncArgs = Parameters<Master['onSync']>;
@@ -204,13 +204,16 @@ describe('multiplayer', () => {
   });
 
   test('send chat-message', () => {
-    m.onChatMessage('matchID', { message: 'foo' });
+    const message: ChatMessage = {
+      id: '0',
+      sender: '0',
+      payload: { message: 'foo' },
+    };
+    m.onChatMessage('matchID', message);
     expect(mockSocket.emit).lastCalledWith(
       'chat',
       'matchID',
-      {
-        message: 'foo',
-      },
+      message,
       m.getCredentials()
     );
   });
