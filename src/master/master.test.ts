@@ -808,6 +808,54 @@ describe('authentication', () => {
       expect(sendAll).not.toHaveBeenCalled();
     });
   });
+
+  describe('onChatMessage', () => {
+    const chatMessage = {
+      id: 'uuid',
+      payload: { message: 'foo' },
+      sender: '0',
+    };
+
+    beforeEach(resetTestEnvironment);
+
+    test('auth failure', async () => {
+      const authenticateCredentials = () => false;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onChatMessage(matchID, chatMessage, undefined);
+      expect(ret && ret.error).toBe('unauthorized');
+      expect(sendAll).not.toHaveBeenCalled();
+    });
+
+    test('auth success', async () => {
+      const authenticateCredentials = () => true;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onChatMessage(matchID, chatMessage, undefined);
+      expect(ret).toBeUndefined();
+      expect(sendAll).toHaveBeenCalled();
+    });
+
+    test('default', async () => {
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth()
+      );
+      const ret = await master.onChatMessage(matchID, chatMessage, undefined);
+      expect(ret).toBeUndefined();
+      expect(sendAll).toHaveBeenCalled();
+    });
+  });
 });
 
 describe('redactLog', () => {
@@ -982,10 +1030,17 @@ describe('chat', () => {
   });
 
   test('Sends chat messages to all', async () => {
-    master.onChatMessage('matchID', { message: 'foo' });
+    master.onChatMessage(
+      'matchID',
+      { id: 'uuid', sender: '0', payload: { message: 'foo' } },
+      undefined
+    );
     expect(sendAllReturn('0')).toEqual({
       type: 'chat',
-      args: ['matchID', { message: 'foo' }],
+      args: [
+        'matchID',
+        { id: 'uuid', sender: '0', payload: { message: 'foo' } },
+      ],
     });
   });
 });
