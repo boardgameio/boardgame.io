@@ -1,3 +1,17 @@
+## v0.43.0
+
+#### Features
+
+* [[0ad1d6d](https://github.com/boardgameio/boardgame.io/commit/0ad1d6d)] [[c178a41](https://github.com/boardgameio/boardgame.io/commit/c178a41)] Add in-game chat support ([#871](https://github.com/boardgameio/boardgame.io/pull/871), [#879](https://github.com/boardgameio/boardgame.io/pull/879))
+* [[3918cc9](https://github.com/boardgameio/boardgame.io/commit/3918cc9)] Add plugin to allow adding custom metadata to logs ([#865](https://github.com/boardgameio/boardgame.io/pull/865))
+* [[243388d](https://github.com/boardgameio/boardgame.io/commit/243388d)] Centralise lobby API and master authentication logic ([#853](https://github.com/boardgameio/boardgame.io/pull/853))
+
+#### Bugfixes
+
+* [[e515573](https://github.com/boardgameio/boardgame.io/commit/e515573)] Handle random plugin redacted state on multiplayer clients ([#885](https://github.com/boardgameio/boardgame.io/pull/885))
+* [[3b8ac79](https://github.com/boardgameio/boardgame.io/commit/3b8ac79)] Prevent `TypeError: state.deltalog is not iterable` ([#888](https://github.com/boardgameio/boardgame.io/pull/888))
+* [[2cc6104](https://github.com/boardgameio/boardgame.io/commit/2cc6104)] Support latest Safari & Firefox when running examples
+
 ## v0.42.2
 
 #### Features
