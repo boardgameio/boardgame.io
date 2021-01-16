@@ -452,11 +452,11 @@ describe('setActivePlayers', () => {
   });
 
   test('set stages to Stage.NULL', () => {
-    const game = {
+    const game: Game = {
       moves: {
-        A: (G) => G,
-        B: (G, ctx) => {
-          ctx.events.setActivePlayers({
+        A: ({ G }) => G,
+        B: ({ G, events }) => {
+          events.setActivePlayers({
             moveLimit: 1,
             currentPlayer: 'start',
           });
@@ -473,8 +473,8 @@ describe('setActivePlayers', () => {
         stages: {
           start: {
             moves: {
-              S: (G, ctx) => {
-                ctx.events.setStage(Stage.NULL);
+              S: ({ G, events }) => {
+                events.setStage(Stage.NULL);
                 return G;
               },
             },
