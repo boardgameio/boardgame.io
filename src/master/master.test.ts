@@ -11,7 +11,7 @@ import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import { Master, redactLog } from './master';
 import { error } from '../core/logger';
-import type { Server, State, Ctx, LogEntry } from '../types';
+import type { Game, Server, State, Ctx, LogEntry } from '../types';
 import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
@@ -145,6 +145,21 @@ describe('sync', () => {
     expect(send.mock.calls[0][0].args[1].filteredMetadata).toMatchObject(
       expectedMetadata
     );
+  });
+
+  test('should not create match for games that require setupData', async () => {
+    const game: Game = {
+      validateSetupData: () => 'requires setupData',
+    };
+    const db = new InMemory();
+    const master = new Master(game, db, TransportAPI(send));
+
+    const matchID = 'matchID';
+    const res = await master.onSync(matchID, '0', undefined, 2);
+
+    expect(res).toEqual({ error: 'game requires setupData' });
+    expect(send).not.toHaveBeenCalled();
+    expect(db.fetch(matchID, { state: true })).toEqual({ state: undefined });
   });
 });
 
