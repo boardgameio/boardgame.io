@@ -33,17 +33,16 @@ const CreateMatch = async ({
 }: {
   db: StorageAPI.Sync | StorageAPI.Async;
   ctx: Koa.BaseContext;
-} & Parameters<typeof createMatch>[0]) => {
+} & Parameters<typeof createMatch>[0]): Promise<string> => {
   const match = createMatch(opts);
 
   if ('setupDataError' in match) {
     ctx.throw(400, match.setupDataError);
-    return;
+  } else {
+    const { matchID, ...data } = match;
+    await db.createMatch(matchID, data);
+    return matchID;
   }
-
-  const { matchID, ...data } = match;
-  await db.createMatch(matchID, data);
-  return matchID;
 };
 
 /**
