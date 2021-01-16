@@ -215,9 +215,12 @@ export class LocalTransport extends Transport {
           return this.chatMessageCallback(data.args[1]);
       }
     });
-    this.master.onSync(this.matchID, this.playerID, this.credentials, {
-      numPlayers: this.numPlayers,
-    });
+    this.master.onSync(
+      this.matchID,
+      this.playerID,
+      this.credentials,
+      this.numPlayers
+    );
   }
 
   /**
