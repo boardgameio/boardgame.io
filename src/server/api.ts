@@ -29,17 +29,20 @@ import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 const CreateMatch = async ({
   ctx,
   db,
+  uuid,
   ...opts
 }: {
   db: StorageAPI.Sync | StorageAPI.Async;
   ctx: Koa.BaseContext;
+  uuid: () => string;
 } & Parameters<typeof createMatch>[0]): Promise<string> => {
+  const matchID = uuid();
   const match = createMatch(opts);
 
   if ('setupDataError' in match) {
     ctx.throw(400, match.setupDataError);
   } else {
-    const { matchID, ...data } = match;
+    const { ...data } = match;
     await db.createMatch(matchID, data);
     return matchID;
   }

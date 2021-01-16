@@ -41,16 +41,14 @@ export const createMatch = ({
   game,
   numPlayers,
   setupData,
-  uuid,
   unlisted,
 }: {
   game: Game;
   numPlayers: number;
   setupData: any;
-  uuid: () => string;
   unlisted: boolean;
 }):
-  | { matchID: string; metadata: Server.MatchData; initialState: State }
+  | { metadata: Server.MatchData; initialState: State }
   | { setupDataError: string } => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
 
@@ -60,7 +58,6 @@ export const createMatch = ({
 
   const metadata = createMetadata({ game, numPlayers, setupData, unlisted });
   const initialState = InitializeGame({ game, numPlayers, setupData });
-  const matchID = uuid();
 
-  return { matchID, metadata, initialState };
+  return { metadata, initialState };
 };

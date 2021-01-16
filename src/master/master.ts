@@ -354,7 +354,6 @@ export class Master {
         unlisted: true,
         numPlayers,
         setupData: undefined,
-        uuid: () => key,
       });
 
       if ('setupDataError' in match) {
