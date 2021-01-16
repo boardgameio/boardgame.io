@@ -42,8 +42,7 @@ const CreateMatch = async ({
   if ('setupDataError' in match) {
     ctx.throw(400, match.setupDataError);
   } else {
-    const { ...data } = match;
-    await db.createMatch(matchID, data);
+    await db.createMatch(matchID, match);
     return matchID;
   }
 };
