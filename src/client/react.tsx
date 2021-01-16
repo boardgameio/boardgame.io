@@ -69,7 +69,7 @@ export function Client<
   G extends any = any,
   P extends BoardProps<G> = BoardProps<G>
 >(opts: ReactClientOpts<G, P>) {
-  let { loading, board, multiplayer, debug } = opts;
+  let { game, numPlayers, loading, board, multiplayer, enhancer, debug } = opts;
 
   // Component that is displayed before the client has synced
   // with the game master.
@@ -121,11 +121,14 @@ export function Client<
       }
 
       this.client = RawClient({
-        ...opts,
+        game,
         debug,
+        numPlayers,
+        multiplayer,
         matchID: props.matchID,
         playerID: props.playerID,
         credentials: props.credentials,
+        enhancer,
       });
     }
 

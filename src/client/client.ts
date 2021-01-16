@@ -104,15 +104,13 @@ export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 export interface ClientOpts<
   G extends any = any,
-  CtxWithPlugins extends Ctx = Ctx,
-  SetupData extends any = any
+  CtxWithPlugins extends Ctx = Ctx
 > {
-  game: Game<G, CtxWithPlugins, SetupData>;
+  game: Game<G, CtxWithPlugins>;
   debug?: DebugOpt | boolean;
   numPlayers?: number;
   multiplayer?: (opts: TransportOpts) => Transport;
   matchID?: string;
-  setupData?: SetupData;
   playerID?: PlayerID;
   credentials?: string;
   enhancer?: StoreEnhancer;
@@ -143,7 +141,6 @@ export class _ClientImpl<G extends any = any> {
   readonly store: Store;
   log: State['deltalog'];
   matchID: string;
-  setupData?: any;
   playerID: PlayerID | null;
   credentials: string;
   matchData?: FilteredMetadata;
@@ -170,7 +167,6 @@ export class _ClientImpl<G extends any = any> {
     numPlayers,
     multiplayer,
     matchID: matchID,
-    setupData,
     playerID,
     credentials,
     enhancer,
@@ -178,7 +174,6 @@ export class _ClientImpl<G extends any = any> {
     this.game = ProcessGameConfig(game);
     this.playerID = playerID;
     this.matchID = matchID;
-    this.setupData = setupData;
     this.credentials = credentials;
     this.multiplayer = multiplayer;
     this.debugOpt = debug;
@@ -194,11 +189,7 @@ export class _ClientImpl<G extends any = any> {
 
     this.initialState = null;
     if (!multiplayer) {
-      this.initialState = InitializeGame({
-        game: this.game,
-        numPlayers,
-        setupData,
-      });
+      this.initialState = InitializeGame({ game: this.game, numPlayers });
     }
 
     this.reset = () => {
@@ -496,12 +487,6 @@ export class _ClientImpl<G extends any = any> {
     this.credentials = credentials;
     this.createDispatchers();
     this.transport.updateCredentials(credentials);
-    this.notifySubscribers();
-  }
-
-  updateSetupData(setupData?: any) {
-    this.setupData = setupData;
-    this.transport.updateSetupData(setupData);
     this.notifySubscribers();
   }
 }
