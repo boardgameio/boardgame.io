@@ -360,8 +360,8 @@ export class Master {
         return { error: 'game requires setupData' };
       }
 
-      ({ initialState, metadata } = match);
-      state = initialState;
+      initialState = state = match.initialState;
+      metadata = match.metadata;
 
       this.subscribeCallback({ state, matchID });
 
