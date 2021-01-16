@@ -115,19 +115,19 @@ export interface Plugin<
 > {
   name: string;
   noClient?: (context: PluginContext<API, Data, G>) => boolean;
-  setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G, Ctx> }) => Data;
+  setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G> }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
     G: G;
     ctx: Ctx;
-    game: Game<G, Ctx>;
+    game: Game<G>;
     data: Data;
     playerID?: PlayerID;
   }) => API;
   flush?: (context: PluginContext<API, Data, G>) => Data;
   dangerouslyFlushRawState?: (flushCtx: {
     state: State<G>;
-    game: Game<G, Ctx>;
+    game: Game<G>;
     api: API;
     data: Data;
   }) => State<G>;
@@ -137,7 +137,7 @@ export interface Plugin<
   playerView?: (context: {
     G: G;
     ctx: Ctx;
-    game: Game<G, Ctx>;
+    game: Game<G>;
     data: Data;
     playerID?: PlayerID | null;
   }) => any;
@@ -145,7 +145,7 @@ export interface Plugin<
 
 export type FnContext<
   G extends any = any,
-  PluginAPIs extends {} = {}
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > = PluginAPIs &
   DefaultPluginAPIs & {
     G: G;
@@ -153,12 +153,18 @@ export type FnContext<
   };
 
 type SerializableAny = Misc.JSON.Value;
-type MoveFn<G extends any = any, PluginAPIs extends {} = {}> = (
+type MoveFn<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> = (
   context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
   ...args: SerializableAny[]
 ) => void | G | typeof INVALID_MOVE;
 
-export interface LongFormMove<G extends any = any, PluginAPIs extends {} = {}> {
+export interface LongFormMove<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   move: MoveFn<G, PluginAPIs>;
   redact?: boolean;
   noLimit?: boolean;
@@ -167,15 +173,22 @@ export interface LongFormMove<G extends any = any, PluginAPIs extends {} = {}> {
   ignoreStaleStateID?: boolean;
 }
 
-export type Move<G extends any = any, PluginAPIs extends {} = {}> =
-  | MoveFn<G, PluginAPIs>
-  | LongFormMove<G, PluginAPIs>;
+export type Move<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> = MoveFn<G, PluginAPIs> | LongFormMove<G, PluginAPIs>;
 
-export interface MoveMap<G extends any = any, PluginAPIs extends {} = {}> {
+export interface MoveMap<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   [moveName: string]: Move<G, PluginAPIs>;
 }
 
-export interface PhaseConfig<G extends any = any, PluginAPIs extends {} = {}> {
+export interface PhaseConfig<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   start?: boolean;
   next?: string;
   onBegin?: (context: FnContext<G, PluginAPIs>) => any;
@@ -192,25 +205,34 @@ export interface PhaseConfig<G extends any = any, PluginAPIs extends {} = {}> {
   };
 }
 
-export interface StageConfig<G extends any = any, PluginAPIs extends {} = {}> {
+export interface StageConfig<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   moves?: MoveMap<G, PluginAPIs>;
   next?: string;
 }
 
-export interface StageMap<G extends any = any, PluginAPIs extends {} = {}> {
+export interface StageMap<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   [stageName: string]: StageConfig<G, PluginAPIs>;
 }
 
 export interface TurnOrderConfig<
   G extends any = any,
-  PluginAPIs extends {} = {}
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > {
   first: (context: FnContext<G, PluginAPIs>) => number;
   next: (context: FnContext<G, PluginAPIs>) => number | undefined;
   playOrder?: (context: FnContext<G, PluginAPIs>) => PlayerID[];
 }
 
-export interface TurnConfig<G extends any = any, PluginAPIs extends {} = {}> {
+export interface TurnConfig<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   activePlayers?: ActivePlayersArg;
   moveLimit?: number;
   onBegin?: (context: FnContext<G, PluginAPIs>) => any;
@@ -230,13 +252,16 @@ export interface TurnConfig<G extends any = any, PluginAPIs extends {} = {}> {
   };
 }
 
-interface PhaseMap<G extends any = any, PluginAPIs extends {} = {}> {
+interface PhaseMap<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   [phaseName: string]: PhaseConfig<G, PluginAPIs>;
 }
 
 export interface Game<
   G extends any = any,
-  PluginAPIs extends {} = {},
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
   SetupData extends any = any
 > {
   name?: string;
@@ -245,7 +270,7 @@ export interface Game<
   disableUndo?: boolean;
   seed?: string | number;
   setup?: (
-    context: Omit<FnContext<any, PluginAPIs>, 'G'>,
+    context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },
     setupData?: SetupData
   ) => G;
   validateSetupData?: (

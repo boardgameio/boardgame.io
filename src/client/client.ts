@@ -101,7 +101,10 @@ export const createEventDispatchers = createDispatchers.bind(null, 'gameEvent');
 // Creates a set of dispatchers to dispatch actions to plugins.
 export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
-export interface ClientOpts<G extends any = any, PluginAPIs extends {} = {}> {
+export interface ClientOpts<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
   game: Game<G, PluginAPIs>;
   debug?: DebugOpt | boolean;
   numPlayers?: number;
