@@ -18,12 +18,12 @@ function IsVictory(cells) {
     [2, 4, 6],
   ];
 
-  const isRowComplete = row => {
-    const symbols = row.map(i => cells[i]);
-    return symbols.every(i => i !== null && i === symbols[0]);
+  const isRowComplete = (row) => {
+    const symbols = row.map((i) => cells[i]);
+    return symbols.every((i) => i !== null && i === symbols[0]);
   };
 
-  return positions.map(isRowComplete).some(i => i === true);
+  return positions.map(isRowComplete).some((i) => i === true);
 }
 
 const TicTacToe = {
@@ -52,13 +52,13 @@ const TicTacToe = {
     if (IsVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }
-    if (G.cells.filter(c => c === null).length == 0) {
+    if (G.cells.filter((c) => c === null).length == 0) {
       return { draw: true };
     }
   },
 
   ai: {
-    enumerate: G => {
+    enumerate: (G) => {
       let r = [];
       for (let i = 0; i < 9; i++) {
         if (G.cells[i] === null) {

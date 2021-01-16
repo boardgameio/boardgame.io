@@ -6,18 +6,18 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import IO from 'koa-socket-2';
-import { SocketIO, SocketOpts } from './socketio';
+import type { SocketOpts } from './socketio';
+import { SocketIO } from './socketio';
 import { Auth } from '../auth';
 import { InMemory } from '../db';
+import { Async } from '../db/base';
 import { createMetadata } from '../util';
 import { ProcessGameConfig } from '../../core/game';
 import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
-import { _ClientImpl } from '../../client/client';
-import { Master } from '../../master/master';
-import { Game, LogEntry, Server, State, StorageAPI } from '../../types';
+import type { Master } from '../../master/master';
+import type { Game, LogEntry, Server, State, StorageAPI } from '../../types';
 
 type SyncArgs = Parameters<Master['onSync']>;
 type UpdateArgs = Parameters<Master['onUpdate']>;
@@ -27,7 +27,7 @@ type SocketIOTestAdapterOpts = SocketOpts & {
   roomInfo?: Map<any, any>;
 };
 
-class InMemoryAsync extends StorageAPI.Async {
+class InMemoryAsync extends Async {
   db: InMemory;
 
   constructor() {
@@ -41,7 +41,7 @@ class InMemoryAsync extends StorageAPI.Async {
 
   private sleep(): Promise<void> {
     const interval = Math.round(Math.random() * 50 + 50);
-    return new Promise(resolve => void setTimeout(resolve, interval));
+    return new Promise((resolve) => void setTimeout(resolve, interval));
   }
 
   async createMatch(id: string, opts: StorageAPI.CreateMatchOpts) {
@@ -84,7 +84,7 @@ class SocketIOTestAdapter extends SocketIO {
     roomInfo = new Map(),
     ...args
   }: SocketIOTestAdapterOpts = {}) {
-    super(Object.keys(args).length ? args : undefined);
+    super(Object.keys(args).length > 0 ? args : undefined);
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
@@ -132,7 +132,7 @@ jest.mock('koa-socket-2', () => {
 
     constructor() {
       this.sockets = new Map(
-        ['0', '1'].map(id => [id, new MockSocket({ id })])
+        ['0', '1'].map((id) => [id, new MockSocket({ id })])
       );
     }
 
@@ -149,7 +149,7 @@ jest.mock('koa-socket-2', () => {
     }
 
     on(_event, callback) {
-      this.sockets.forEach(socket => void callback(socket));
+      this.sockets.forEach((socket) => void callback(socket));
     }
   }
 
@@ -202,7 +202,7 @@ describe('simultaneous moves on server game', () => {
   let transport: SocketIOTestAdapter;
   let clientInfo;
   let roomInfo;
-  let io: IO;
+  let io;
 
   beforeEach(async () => {
     clientInfo = new Map();
@@ -210,8 +210,8 @@ describe('simultaneous moves on server game', () => {
   });
 
   test('two clients playing using sync storage', async () => {
-    let db = new InMemory();
-    let auth = new Auth();
+    const db = new InMemory();
+    const auth = new Auth();
     app = { context: { db, auth } };
     transport = new SocketIOTestAdapter({
       clientInfo,
@@ -221,7 +221,6 @@ describe('simultaneous moves on server game', () => {
     io = app.context.io;
     const socket0 = io.sockets.get('0');
     const socket1 = io.sockets.get('1');
-    let fetchResult;
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
@@ -298,7 +297,7 @@ describe('simultaneous moves on server game', () => {
       })(),
     ]);
 
-    fetchResult = db.fetch('matchID', {
+    const fetchResult = db.fetch('matchID', {
       state: true,
       metadata: true,
       log: true,
@@ -333,9 +332,9 @@ describe('simultaneous moves on server game', () => {
   });
 
   test('two clients playing using async storage', async () => {
-    let db = new InMemoryAsync();
+    const db = new InMemoryAsync();
     await db.connect();
-    let auth = new Auth();
+    const auth = new Auth();
 
     app = { context: { db, auth } };
     transport = new SocketIOTestAdapter({
@@ -346,7 +345,6 @@ describe('simultaneous moves on server game', () => {
     io = app.context.io;
     const socket0 = io.sockets.get('0');
     const socket1 = io.sockets.get('1');
-    let fetchResult;
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
@@ -421,7 +419,7 @@ describe('simultaneous moves on server game', () => {
       })(),
     ]);
 
-    fetchResult = await db.fetch('matchID', {
+    const fetchResult = await db.fetch('matchID', {
       state: true,
       metadata: true,
       log: true,

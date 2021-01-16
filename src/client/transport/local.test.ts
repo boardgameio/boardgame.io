@@ -15,7 +15,7 @@ import { InitializeGame } from '../../core/initialize';
 import { Client } from '../client';
 import { RandomBot } from '../../ai/random-bot';
 import { Stage } from '../../core/turn-order';
-import { Game, State, Store, SyncInfo } from '../../types';
+import type { ChatMessage, Game, State, Store, SyncInfo } from '../../types';
 
 jest.useFakeTimers();
 
@@ -361,10 +361,13 @@ describe('LocalTransport', () => {
     });
 
     test('send chat-message', () => {
-      m.onChatMessage('matchID', { message: 'foo' });
-      expect(m.master.onChatMessage).lastCalledWith('matchID', {
-        message: 'foo',
-      });
+      const msg: ChatMessage = {
+        id: '0',
+        sender: '0',
+        payload: { message: 'foo' },
+      };
+      m.onChatMessage('matchID', msg);
+      expect(m.master.onChatMessage).lastCalledWith('matchID', msg, undefined);
     });
   });
 });

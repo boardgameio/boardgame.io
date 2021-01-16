@@ -20,7 +20,7 @@ const App = Client({
   debug: true,
 });
 
-const Multiplayer = playerID => () => (
+const Multiplayer = (playerID) => () => (
   <div style={{ padding: 50 }}>
     <App matchID="multi" playerID={playerID} />
     PlayerID: {playerID}

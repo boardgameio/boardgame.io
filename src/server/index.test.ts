@@ -6,9 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server, createServerRunConfig, KoaServer, getPortFromServer } from '.';
-import { SocketIO } from './transport/socketio';
-import { Game, StorageAPI } from '../types';
+import { Server, createServerRunConfig, getPortFromServer } from '.';
+import type { KoaServer } from '.';
+import type { SocketIO } from './transport/socketio';
+import type { Game, StorageAPI } from '../types';
 
 const game: Game = { seed: 0 };
 
@@ -35,7 +36,7 @@ jest.mock('koa-socket-2', () => {
     on(type, callback) {
       callback((this as any).socket);
     }
-    adapter(adapter) {
+    adapter() {
       return this;
     }
   };

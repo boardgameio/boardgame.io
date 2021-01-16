@@ -7,11 +7,12 @@
  */
 
 import IO from 'koa-socket-2';
-import IOTypes from 'socket.io';
-import { ServerOptions as HttpsOptions } from 'https';
+import type IOTypes from 'socket.io';
+import type { ServerOptions as HttpsOptions } from 'https';
 import PQueue from 'p-queue';
-import { Master, TransportAPI as MasterTransport } from '../../master/master';
-import { Game, PlayerID, Server } from '../../types';
+import { Master } from '../../master/master';
+import type { TransportAPI as MasterTransport } from '../../master/master';
+import type { Game, PlayerID, Server } from '../../types';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -46,8 +47,8 @@ export function TransportAPI(
   /**
    * Send a message to all clients.
    */
-  const sendAll: MasterTransport['sendAll'] = makePlayerData => {
-    roomInfo.get(matchID).forEach(c => {
+  const sendAll: MasterTransport['sendAll'] = (makePlayerData) => {
+    roomInfo.get(matchID).forEach((c) => {
       const playerID: PlayerID = clientInfo.get(c).playerID;
       const data = makePlayerData(playerID);
       send({ playerID, ...data });
@@ -184,15 +185,19 @@ export class SocketIO {
             );
           }
         });
-        socket.on('chat', async (matchID, chatMessage) => {
-          const master = new Master(
-            game,
-            app.context.db,
-            TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
-            app.context.auth
-          );
-          master.onChatMessage(matchID, chatMessage);
-        });
+        socket.on(
+          'chat',
+          async (...args: Parameters<Master['onChatMessage']>) => {
+            const [matchID] = args;
+            const master = new Master(
+              game,
+              app.context.db,
+              TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+              app.context.auth
+            );
+            master.onChatMessage(...args);
+          }
+        );
       });
     }
   }

@@ -14,7 +14,7 @@ import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
 import { Auth } from './auth';
 import * as StorageAPI from './db/base';
-import { Game, Server } from '../types';
+import type { Game, Server } from '../types';
 
 jest.setTimeout(2000000000);
 
@@ -1056,8 +1056,8 @@ describe('.createRouter', () => {
     describe('when given 2 games', () => {
       let response;
       beforeEach(async () => {
-        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        const app = createApiServer({ db, auth, games });
 
         response = await request(app.callback()).get('/games');
       });
@@ -1244,7 +1244,7 @@ describe('.createRouter', () => {
   describe('requesting room list', () => {
     let db: AsyncStorage;
     const auth = new Auth();
-    const dbFetch = jest.fn(async matchID => {
+    const dbFetch = jest.fn(async (matchID) => {
       return {
         metadata: {
           players: {
@@ -1262,7 +1262,7 @@ describe('.createRouter', () => {
         },
       };
     });
-    const dblistMatches = jest.fn(async opts => {
+    const dblistMatches = jest.fn(async (opts) => {
       const metadata = {
         'foo-0': { gameName: 'foo' },
         'foo-1': { gameName: 'foo' },
@@ -1272,7 +1272,7 @@ describe('.createRouter', () => {
       };
       const keys = Object.keys(metadata);
       if (opts && opts.gameName) {
-        return keys.filter(key => metadata[key].gameName === opts.gameName);
+        return keys.filter((key) => metadata[key].gameName === opts.gameName);
       }
       return [...keys];
     });
@@ -1288,8 +1288,8 @@ describe('.createRouter', () => {
       let response;
       let matches;
       beforeEach(async () => {
-        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        const app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar');
         matches = JSON.parse(response.text).matches;
       });
@@ -1445,8 +1445,8 @@ describe('.createRouter', () => {
       let response;
       let room;
       beforeEach(async () => {
-        let games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
+        const app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar/bar-0');
         room = JSON.parse(response.text);
       });
@@ -1470,8 +1470,8 @@ describe('.createRouter', () => {
         db = new AsyncStorage({
           fetch: async () => ({ metadata: null }),
         });
-        let games = [ProcessGameConfig({ name: 'foo' })];
-        let app = createApiServer({ db, auth, games });
+        const games = [ProcessGameConfig({ name: 'foo' })];
+        const app = createApiServer({ db, auth, games });
         response = await request(app.callback()).get('/games/bar/doesnotexist');
       });
 

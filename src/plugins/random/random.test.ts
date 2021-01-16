@@ -11,7 +11,8 @@ import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
 import { Client } from '../../client/client';
-import { Game } from '../../types';
+import type { Game } from '../../types';
+import { PlayerView } from '../main';
 
 function Init(seed) {
   return new Random({ seed });
@@ -28,11 +29,11 @@ test('random', () => {
 test('predefined dice values', () => {
   const r = Init(0);
 
-  const rfns = [4, 6, 8, 10, 12, 20].map(v => {
+  const rfns = [4, 6, 8, 10, 12, 20].map((v) => {
     return { fn: r.api()[`D${v}`], highest: v };
   });
 
-  rfns.forEach(pair => {
+  rfns.forEach((pair) => {
     const result = pair.fn();
     expect(result).toBeDefined();
     expect(result).toBeGreaterThanOrEqual(1);
@@ -42,7 +43,7 @@ test('predefined dice values', () => {
     const multiple = pair.fn(5);
     expect(multiple).toBeDefined();
     expect(multiple).toHaveLength(5);
-    multiple.forEach(m => {
+    multiple.forEach((m) => {
       expect(m).toBeGreaterThanOrEqual(1);
       expect(m).toBeLessThanOrEqual(pair.highest);
     });
@@ -71,7 +72,7 @@ test('Random.Die', () => {
     const multiple = api.Die(6, 3);
     expect(multiple).toBeDefined();
     expect(multiple).toHaveLength(3);
-    multiple.forEach(m => {
+    multiple.forEach((m) => {
       expect(m).toBeGreaterThanOrEqual(1);
       expect(m).toBeLessThanOrEqual(6);
     });
@@ -124,13 +125,31 @@ test('Random API is not executed optimisitically', () => {
   }
 });
 
-test('turn.onBegin has plugin APIs at the beginning of the game', () => {
+test('Random API works when its state is redacted by playerView', () => {
+  const game = {
+    seed: 0,
+    moves: {
+      rollDie: ({ G, random }) => ({ ...G, die: random.D6() }),
+    },
+  };
+
+  const opts = { game, isClient: true };
+  const reducer = CreateGameReducer(opts);
+  let state = InitializeGame({ game });
+  state.plugins = PlayerView(state, { ...opts, playerID: '0' });
+  expect(state.plugins.random.data).not.toBeDefined();
+  expect(state.G.die).not.toBeDefined();
+  state = reducer(state, makeMove('rollDie'));
+  expect(state.G.die).not.toBeDefined();
+});
+
+test('turn.onBegin has ctx APIs at the beginning of the game', () => {
   let random = null;
   let events = null;
 
   const game: Game = {
     turn: {
-      onBegin: context => {
+      onBegin: (context) => {
         random = context.random;
         events = context.events;
       },

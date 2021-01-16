@@ -6,8 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 import { CreateGameReducer } from '../core/reducer';
-import { Bot, BotAction } from './bot';
-import { Game, PlayerID, Ctx, State, Reducer } from '../types';
+import { Bot } from './bot';
+import type { BotAction } from './bot';
+import type { Game, PlayerID, Ctx, State, Reducer } from '../types';
 
 export interface Node {
   /** Game state at this node. */
@@ -126,7 +127,7 @@ export class MCTSBot extends Bot {
       actions = this.enumerate(G, ctx, playerID);
       objectives = this.objectives(G, ctx, playerID);
     } else if (ctx.activePlayers) {
-      for (let playerID in ctx.activePlayers) {
+      for (const playerID in ctx.activePlayers) {
         actions = actions.concat(this.enumerate(G, ctx, playerID));
         objectives = objectives.concat(this.objectives(G, ctx, playerID));
       }
@@ -161,7 +162,7 @@ export class MCTSBot extends Bot {
     }
 
     let selectedChild = null;
-    let best = 0.0;
+    let best = 0;
 
     for (const child of node.children) {
       const childVisits = child.visits + Number.EPSILON;
@@ -219,7 +220,7 @@ export class MCTSBot extends Bot {
           return score + objective.weight;
         }
         return score;
-      }, 0.0);
+      }, 0);
 
       // If so, stop and return the score.
       if (score > 0) {
@@ -288,7 +289,7 @@ export class MCTSBot extends Bot {
       return { action, metadata };
     };
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const iteration = () => {
         for (
           let i = 0;

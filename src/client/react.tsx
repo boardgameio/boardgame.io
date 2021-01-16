@@ -8,12 +8,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Client as RawClient,
-  ClientOpts,
-  ClientState,
-  _ClientImpl,
-} from './client';
+import { Client as RawClient } from './client';
+import type { ClientOpts, ClientState, _ClientImpl } from './client';
 
 type WrappedBoardDelegates = 'matchID' | 'playerID' | 'credentials';
 

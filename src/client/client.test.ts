@@ -11,13 +11,13 @@ import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Client, createMoveDispatchers } from './client';
 import { ProcessGameConfig } from '../core/game';
-import { Transport } from './transport/transport';
+import type { Transport } from './transport/transport';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
 import { update, sync, makeMove, gameEvent } from '../core/action-creators';
 import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
-import { Game, LogEntry, State, SyncInfo } from '../types';
+import type { Game, LogEntry, State, SyncInfo } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -26,7 +26,7 @@ jest.mock('../core/logger', () => ({
 
 describe('basic', () => {
   let client: ReturnType<typeof Client>;
-  let initial = { initial: true };
+  const initial = { initial: true };
 
   const game: Game = {
     setup: () => initial,
@@ -130,8 +130,8 @@ test('isActive', () => {
 
 describe('multiplayer', () => {
   describe('socket.io master', () => {
-    let host = 'host';
-    let port = '4321';
+    const host = 'host';
+    const port = '4321';
     let client;
 
     beforeAll(() => {
@@ -166,7 +166,6 @@ describe('multiplayer', () => {
     });
 
     test('Sends and receives chat messages', () => {
-      const fn = jest.fn();
       jest.spyOn(client.transport, 'onAction');
       client.updatePlayerID('0');
       client.updateMatchID('matchID');
@@ -280,6 +279,8 @@ describe('multiplayer', () => {
       subscribeMatchData(fn) {
         this.callback = fn;
       }
+
+      subscribeChatMessage() {}
     }
     const customTransport = () =>
       (new CustomTransport() as unknown) as Transport;
@@ -310,13 +311,13 @@ describe('strip secret only on server', () => {
   let client0;
   let client1;
   let spec: { game: Game<G>; multiplayer };
-  let initial = { secret: [1, 2, 3, 4], sum: 0 };
+  const initial = { secret: [1, 2, 3, 4], sum: 0 };
   beforeAll(() => {
     spec = {
       game: {
         setup: () => initial,
-        playerView: G => {
-          let r = { ...G };
+        playerView: (G) => {
+          const r = { ...G };
           r.sum = r.secret.reduce((prev, curr) => {
             return prev + curr;
           });
@@ -348,11 +349,11 @@ describe('strip secret only on server', () => {
 
 test('accepts enhancer for store', () => {
   let spyDispatcher;
-  const spyEnhancer = vanillaCreateStore => (...args) => {
+  const spyEnhancer = (vanillaCreateStore) => (...args) => {
     const vanillaStore = vanillaCreateStore(...args);
     return {
       ...vanillaStore,
-      dispatch: spyDispatcher = jest.fn(vanillaStore.dispatch),
+      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
     };
   };
   const client = Client({

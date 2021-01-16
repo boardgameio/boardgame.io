@@ -10,7 +10,7 @@ import { ProcessGameConfig } from './game';
 import { Client } from '../client/client';
 import { error } from '../core/logger';
 import { InitializeGame } from './initialize';
-import { Game } from '../types';
+import type { Game } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),

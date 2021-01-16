@@ -8,7 +8,7 @@
 
 import { Client } from '../client/client';
 import { Local } from '../client/transport/local';
-import { Game, Plugin } from '../types';
+import type { Game, Plugin } from '../types';
 
 describe('basic', () => {
   let client: ReturnType<typeof Client>;
@@ -27,7 +27,7 @@ describe('basic', () => {
       setup: () => init,
 
       api: ({ data }) => {
-        let state = { value: data.n };
+        const state = { value: data.n };
         const increment = () => state.value++;
         const get = () => state.value;
         return { increment, get };
@@ -35,7 +35,7 @@ describe('basic', () => {
 
       flush: ({ api }) => ({ n: api.get() }),
 
-      fnWrap: fn => context => {
+      fnWrap: (fn) => (context) => {
         const G = fn(context);
         return { ...G, wrap: true };
       },

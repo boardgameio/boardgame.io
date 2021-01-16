@@ -19,7 +19,7 @@ const App = Client({
   debug: false,
   multiplayer: Local({
     bots: {
-      '1': MCTSBot,
+      1: MCTSBot,
     },
   }),
 });

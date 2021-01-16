@@ -18,7 +18,7 @@ import {
 import { gameEvent } from './action-creators';
 import * as plugin from '../plugins/main';
 import * as logging from './logger';
-import {
+import type {
   ActionPayload,
   ActionShape,
   State,
@@ -71,11 +71,11 @@ export function Flow({
 
   phaseMap[''] = {};
 
-  let moveMap = {};
-  let moveNames = new Set();
+  const moveMap = {};
+  const moveNames = new Set();
   let startingPhase = null;
 
-  Object.keys(moves).forEach(name => moveNames.add(name));
+  Object.keys(moves).forEach((name) => moveNames.add(name));
 
   const HookWrapper = (fn: (context: FnContext) => any) => {
     const withPlugins = plugin.FnWrap(fn, plugins);
@@ -105,7 +105,7 @@ export function Flow({
     endIf: TriggerWrapper(endIf),
   };
 
-  for (let phase in phaseMap) {
+  for (const phase in phaseMap) {
     const conf = phaseMap[phase];
 
     if (conf.start === true) {
@@ -113,7 +113,7 @@ export function Flow({
     }
 
     if (conf.moves !== undefined) {
-      for (let move of Object.keys(conf.moves)) {
+      for (const move of Object.keys(conf.moves)) {
         moveMap[phase + '.' + move] = conf.moves[move];
         moveNames.add(move);
       }
@@ -153,8 +153,8 @@ export function Flow({
     for (const stage in conf.turn.stages) {
       const stageConfig = conf.turn.stages[stage];
       const moves = stageConfig.moves || {};
-      for (let move of Object.keys(moves)) {
-        let key = phase + '.' + stage + '.' + move;
+      for (const move of Object.keys(moves)) {
+        const key = phase + '.' + stage + '.' + move;
         moveMap[key] = moves[move];
         moveNames.add(move);
       }
@@ -216,7 +216,7 @@ export function Flow({
       }
 
       // Process event.
-      let next = [];
+      const next = [];
       state = fn(state, {
         ...rest,
         arg,
@@ -490,7 +490,7 @@ export function Flow({
       logEntry.automatic = true;
     }
 
-    const deltalog = [...state.deltalog, logEntry];
+    const deltalog = [...(state.deltalog || []), logEntry];
 
     return { ...state, G, ctx, deltalog };
   }
@@ -535,7 +535,7 @@ export function Flow({
     if (arg && arg.remove) {
       playerID = playerID || ctx.currentPlayer;
 
-      const playOrder = ctx.playOrder.filter(i => i != playerID);
+      const playOrder = ctx.playOrder.filter((i) => i != playerID);
 
       const playOrderPos =
         ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
@@ -593,7 +593,7 @@ export function Flow({
 
     // Remove player from activePlayers.
     activePlayers = Object.keys(activePlayers)
-      .filter(id => id !== playerID)
+      .filter((id) => id !== playerID)
       .reduce((obj, key) => {
         obj[key] = activePlayers[key];
         return obj;
@@ -602,7 +602,7 @@ export function Flow({
     if (_activePlayersMoveLimit) {
       // Remove player from _activePlayersMoveLimit.
       _activePlayersMoveLimit = Object.keys(_activePlayersMoveLimit)
-        .filter(id => id !== playerID)
+        .filter((id) => id !== playerID)
         .reduce((obj, key) => {
           obj[key] = _activePlayersMoveLimit[key];
           return obj;
@@ -780,7 +780,7 @@ export function Flow({
     setActivePlayers: SetActivePlayersEvent,
   };
 
-  let enabledEventNames = [];
+  const enabledEventNames = [];
 
   if (events.endTurn !== false) {
     enabledEventNames.push('endTurn');
@@ -809,14 +809,14 @@ export function Flow({
 
   function ProcessEvent(state: State, action: ActionShape.GameEvent) {
     const { type, playerID, args } = action.payload;
-    if (eventHandlers.hasOwnProperty(type)) {
+    if (Object.prototype.hasOwnProperty.call(eventHandlers, type)) {
       const eventArgs = [state, playerID].concat(args);
       return eventHandlers[type].apply({}, eventArgs);
     }
     return state;
   }
 
-  function IsPlayerActive(_G: object, ctx: Ctx, playerID: PlayerID): boolean {
+  function IsPlayerActive(_G: any, ctx: Ctx, playerID: PlayerID): boolean {
     if (ctx.activePlayers) {
       return playerID in ctx.activePlayers;
     }

@@ -23,6 +23,7 @@
     "parcel-plugin-svelte": "^4.0.4",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-router-dom": "^5.2.0",
     "svelte": "^3.0.0",
     "three": "^0.109.0"
   },

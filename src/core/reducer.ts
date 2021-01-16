@@ -11,7 +11,7 @@ import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
 import { error } from './logger';
 import { INVALID_MOVE } from './constants';
-import {
+import type {
   ActionShape,
   Ctx,
   Game,
@@ -230,7 +230,7 @@ export function CreateGameReducer({
         });
 
         // Process the move.
-        let G = game.processMove(state, action.payload);
+        const G = game.processMove(state, action.payload);
 
         // The game declared the move as invalid.
         if (G === INVALID_MOVE) {
@@ -331,7 +331,7 @@ export function CreateGameReducer({
           ctx: restore.ctx,
           plugins: restore.plugins,
           _stateID: state._stateID + 1,
-          _undo: _undo.slice(0, _undo.length - 1),
+          _undo: _undo.slice(0, -1),
           _redo: [last, ..._redo],
         };
       }

@@ -14,8 +14,8 @@ const RedactedMoves = {
   setup: () => ({
     other: {},
     players: {
-      '0': 'player 0 state',
-      '1': 'player 1 state',
+      0: 'player 0 state',
+      1: 'player 1 state',
     },
   }),
 

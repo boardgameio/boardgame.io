@@ -8,7 +8,7 @@
 
 import * as logging from './logger';
 import * as plugin from '../plugins/main';
-import {
+import type {
   Ctx,
   StageArg,
   ActivePlayersArg,
@@ -37,8 +37,8 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
 
   if (Array.isArray(arg)) {
     // support a simple array of player IDs as active players
-    let value = {};
-    arg.forEach(v => (value[v] = Stage.NULL));
+    const value = {};
+    arg.forEach((v) => (value[v] = Stage.NULL));
     activePlayers = value;
   } else {
     // process active players argument object
@@ -46,15 +46,13 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
       _nextActivePlayers = arg.next;
     }
 
-    if (arg.revert) {
-      _prevActivePlayers = _prevActivePlayers.concat({
-        activePlayers: ctx.activePlayers,
-        _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
-        _activePlayersNumMoves: ctx._activePlayersNumMoves,
-      });
-    } else {
-      _prevActivePlayers = [];
-    }
+    _prevActivePlayers = arg.revert
+      ? _prevActivePlayers.concat({
+          activePlayers: ctx.activePlayers,
+          _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
+          _activePlayersNumMoves: ctx._activePlayersNumMoves,
+        })
+      : [];
 
     if (arg.currentPlayer !== undefined) {
       ApplyActivePlayerArgument(
@@ -119,7 +117,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
     _activePlayersMoveLimit = null;
   }
 
-  let _activePlayersNumMoves = {};
+  const _activePlayersNumMoves = {};
   for (const id in activePlayers) {
     _activePlayersNumMoves[id] = 0;
   }
@@ -274,7 +272,7 @@ export function UpdateTurnOrderState(
       logging.error(`invalid argument to endTurn: ${endTurnArg}`);
     }
 
-    Object.keys(endTurnArg).forEach(arg => {
+    Object.keys(endTurnArg).forEach((arg) => {
       switch (arg) {
         case 'remove':
           currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);

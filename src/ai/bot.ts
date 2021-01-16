@@ -7,8 +7,9 @@
  */
 
 import { makeMove, gameEvent } from '../core/action-creators';
-import { alea, AleaState } from '../plugins/random/random.alea';
-import { ActionShape, Game, Ctx, PlayerID, State } from '../types';
+import { alea } from '../plugins/random/random.alea';
+import type { AleaState } from '../plugins/random/random.alea';
+import type { ActionShape, Game, Ctx, PlayerID, State } from '../types';
 
 export type BotAction = ActionShape.GameEvent | ActionShape.MakeMove;
 
@@ -77,7 +78,7 @@ export abstract class Bot {
 
   enumerate(G: any, ctx: Ctx, playerID: PlayerID) {
     const actions = this.enumerateFn(G, ctx, playerID);
-    return actions.map(a => {
+    return actions.map((a) => {
       if ('payload' in a) {
         return a;
       }

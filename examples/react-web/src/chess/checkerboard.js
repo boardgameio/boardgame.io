@@ -66,7 +66,7 @@ export class Checkerboard extends React.Component {
 
   render() {
     // Convert the square="" prop to x and y.
-    const tokens = React.Children.map(this.props.children, child => {
+    const tokens = React.Children.map(this.props.children, (child) => {
       const square = child.props.square;
       const { x, y } = algebraicToCartesian(square, this.props.rows);
       return React.cloneElement(child, { x, y });

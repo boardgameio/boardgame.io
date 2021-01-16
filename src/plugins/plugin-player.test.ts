@@ -6,9 +6,10 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import PluginPlayer, { PlayerAPI } from './plugin-player';
+import PluginPlayer from './plugin-player';
+import type { PlayerAPI } from './plugin-player';
 import { Client } from '../client/client';
-import { Game } from '../types';
+import type { Game } from '../types';
 
 describe('default values', () => {
   test('playerState is not passed', () => {
@@ -121,7 +122,7 @@ describe('game with phases', () => {
 
   beforeAll(() => {
     const game: Game<any, { player: PlayerAPI }> = {
-      plugins: [PluginPlayer({ setup: id => ({ id }) })],
+      plugins: [PluginPlayer({ setup: (id) => ({ id }) })],
       phases: {
         phase: {},
       },
@@ -146,7 +147,7 @@ describe('game with phases', () => {
 
 describe('with playerView', () => {
   const plugin = PluginPlayer({
-    setup: id => ({ id }),
+    setup: (id) => ({ id }),
     playerView: (players, playerID) => ({
       [playerID]: players[playerID],
     }),

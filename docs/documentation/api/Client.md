@@ -113,6 +113,23 @@ The following properties are available on a client instance:
   ```
 
 
+- `chatMessages`: An array containing chat messages this client has received.
+  Each message is an object with the following properties:
+
+    - `id`: a unique ID string
+    - `sender`: the `playerID` of the sender
+    - `payload`: the value passed to `sendChatMessage`
+
+  Example:
+
+  ```js
+  [
+    { id: 'foo', sender: '0', payload: 'Ready to play?' },
+    { id: 'bar', sender: '1', payload: 'Let’s go!' },
+  ]
+  ```
+
+
 #### Methods
 
 The following methods are available on a client instance:
@@ -173,6 +190,11 @@ The following methods are available on a client instance:
 
 
 - `redo()`: Function that redoes the previously undone move.
+
+
+- `sendChatMessage(message)`: Function that sends a chat message to other
+  players. The `message` argument can be a string or you can send objects
+  to include more metadata.
 
 
 - `updateMatchID(id)`: Function to update the client’s match ID.
@@ -303,6 +325,28 @@ following as `props`:
 
 
 - `redo`: Function that redoes the previously undone move.
+
+
+- `sendChatMessage(message)`: Function that sends a chat message to other
+  players. The `message` argument can be a string or you can send objects
+  to include more metadata.
+
+
+- `chatMessages`: An array containing chat messages this client has received.
+  Each message is an object with the following properties:
+
+    - `id`: a unique ID string
+    - `sender`: the `playerID` of the sender
+    - `payload`: the value passed to `sendChatMessage`
+
+  Example:
+
+  ```js
+  [
+    { id: 'foo', sender: '0', payload: 'Ready to play?' },
+    { id: 'bar', sender: '1', payload: 'Let’s go!' },
+  ]
+  ```
 
 
 - `log`: The game log.
