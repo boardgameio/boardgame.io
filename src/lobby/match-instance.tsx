@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { LobbyAPI } from '../types';
+import type { LobbyAPI } from '../types';
 
 export type MatchOpts = {
   numPlayers: number;
@@ -85,9 +85,9 @@ class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
 
   _createInstanceButtons = (inst: Match) => {
     const playerSeat = inst.players.find(
-      player => player.name === this.props.playerName
+      (player) => player.name === this.props.playerName
     );
-    const freeSeat = inst.players.find(player => !player.name);
+    const freeSeat = inst.players.find((player) => !player.name);
     if (playerSeat && freeSeat) {
       // already seated: waiting for match to start
       return this._createButtonLeave(inst);
@@ -114,7 +114,7 @@ class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
   render() {
     const match = this.props.match;
     let status = 'OPEN';
-    if (!match.players.find(player => !player.name)) {
+    if (!match.players.find((player) => !player.name)) {
       status = 'RUNNING';
     }
     return (

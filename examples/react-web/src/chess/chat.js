@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 const Chat = ({ onSend, messages }) => {
   const [message, setMessage] = useState('');
 
-  const onChange = event => {
+  const onChange = (event) => {
     setMessage(event.target.value);
   };
 
-  const triggerSend = () => {
+  const triggerSend = (event) => {
+    event.preventDefault();
     onSend(message);
     setMessage('');
   };
@@ -18,19 +19,21 @@ const Chat = ({ onSend, messages }) => {
         style={{
           height: 200,
           maxWidth: 400,
+          padding: '.5em',
           overflow: 'scroll',
           border: '1px solid black',
         }}
       >
-        {messages.map(message => (
-          <div key={message.id}>
-            <div>{message.sender}</div>
-            <div>{JSON.stringify(message.payload)}</div>
+        {messages.map((message) => (
+          <div key={message.id} style={{ marginBottom: '.25em' }}>
+            <strong>Player {message.sender}:</strong> {message.payload}
           </div>
         ))}
       </div>
-      <input onChange={onChange} value={message} />
-      <button onClick={triggerSend}>Send</button>
+      <form onSubmit={triggerSend}>
+        <input onChange={onChange} value={message} />
+        <button type="submit">Send</button>
+      </form>
     </div>
   );
 };

@@ -22,7 +22,7 @@ class Board extends React.Component {
     isPreview: PropTypes.bool,
   };
 
-  onClick = id => {
+  onClick = (id) => {
     if (this.isActive(id)) {
       this.props.moves.clickCell(id);
     }

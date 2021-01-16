@@ -19,6 +19,20 @@ const client = Client({
 });
 ```
 
+### Custom metadata in game logs
+
+It can sometimes be helpful to surface some metadata during a move.
+You can do this by using the log plugin. For example,
+
+```js
+const move = (G, ctx) => {
+  ctx.log.setMetadata('metadata for this move');
+};
+```
+
+This metadata is stored in the `log` client property and displayed
+in the Log section of the debug panel.
+
 ### Redux
 
 The framework uses Redux under the hood.

@@ -6,13 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Plugin } from '../types';
-import {
-  Random,
-  RandomAPI,
-  PrivateRandomAPI,
-  RandomState,
-} from './random/random';
+import type { Plugin } from '../types';
+import type { RandomAPI, PrivateRandomAPI, RandomState } from './random/random';
+import { Random } from './random/random';
 
 const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI, RandomState> = {
   name: 'random',

@@ -6,8 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { ProcessGameConfig } from '../../core/game';
-import {
+import type { ProcessGameConfig } from '../../core/game';
+import type {
   Game,
   PlayerID,
   CredentialedActionShape,

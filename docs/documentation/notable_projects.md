@@ -27,6 +27,14 @@ Unofficial Angular client for boardgame.io.
 [c2]: https://github.com/turn-based/boardgame.io-angular
 [d2]: https://turn-based-209306.firebaseapp.com/
 
+#### [![GitHub stars][b-bri]][c-bri] [Briscola][p-bri] \[[code][c-bri] | [demo][d-bri]\]
+&nbsp;&nbsp;
+Online 2-player variant of the Briscola card game.
+
+[p-bri]: https://instant-briscola.herokuapp.com/
+[c-bri]: https://github.com/aflorj/briscola
+[d-bri]: https://instant-briscola.herokuapp.com/demo
+[b-bri]: https://img.shields.io/github/stars/aflorj/briscola?label=%E2%98%85&logo=github
 
 #### [![GitHub stars][b3]][c3]  [Camelot][p3] \[[code][c3]\]
 &nbsp;&nbsp;
@@ -108,6 +116,13 @@ Simple hexagonal board game.
 [c10]: https://github.com/Korla/hexgame
 [b10]: https://img.shields.io/github/stars/Korla/hexgame?label=%E2%98%85&logo=github
 
+#### [![GitHub stars][b-lhog]][c-lhog] [Lewis' House of Games][p-lhog] \[[code][c-lhog]\]
+&nbsp;&nbsp;
+Lobby framework for boardgame.io games. Play Splendor or Powergrid clones here.
+
+[p-lhog]: https://lhog.herokuapp.com/
+[c-lhog]: https://github.com/sillle14/lhog
+[b-lhog]: https://img.shields.io/github/stars/sillle14/lhog?label=%E2%98%85&logo=github
 
 #### [![GitHub stars][b11]][c11] [Matchimals.fun][p11] \[[code][c11]\]
 &nbsp;&nbsp;

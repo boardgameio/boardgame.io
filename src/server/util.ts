@@ -1,5 +1,5 @@
 import { InitializeGame } from '../core/initialize';
-import { Server, State, Game } from '../types';
+import type { Server, State, Game } from '../types';
 
 /**
  * Creates a new match metadata object.

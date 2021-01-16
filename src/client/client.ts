@@ -6,25 +6,21 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import 'svelte';
-import {
-  Dispatch,
-  StoreEnhancer,
-  createStore,
-  compose,
-  applyMiddleware,
-} from 'redux';
+import type { Dispatch, StoreEnhancer } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { ProcessGameConfig } from '../core/game';
-import Debug from './debug/Debug.svelte';
+import type Debug from './debug/Debug.svelte';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { PlayerView } from '../plugins/main';
-import { Transport, TransportOpts } from './transport/transport';
+import type { Transport, TransportOpts } from './transport/transport';
+import { DummyTransport } from './transport/dummy';
 import { ClientManager } from './manager';
-import {
+import type {
   ActivePlayersArg,
   ActionShape,
   CredentialedActionShape,
@@ -84,7 +80,7 @@ function createDispatchers(
   multiplayer?: unknown
 ) {
   return innerActionNames.reduce((dispatchers, name) => {
-    dispatchers[name] = function(...args: any[]) {
+    dispatchers[name] = function (...args: any[]) {
       store.dispatch(
         ActionCreators[storeActionType](
           name,
@@ -267,7 +263,7 @@ export class _ClientImpl<G extends any = any> {
           // in the current log. This may occur when the
           // client adds an entry to the log followed by
           // the update from the master here.
-          deltalog = deltalog.filter(l => l._stateID > id);
+          deltalog = deltalog.filter((l) => l._stateID > id);
 
           this.log = [...this.log, ...deltalog];
           break;
@@ -311,77 +307,52 @@ export class _ClientImpl<G extends any = any> {
       return result;
     };
 
-    if (enhancer !== undefined) {
-      enhancer = compose(
-        applyMiddleware(
-          SubscriptionMiddleware,
-          TransportMiddleware,
-          LogMiddleware
-        ),
-        enhancer
-      );
-    } else {
-      enhancer = applyMiddleware(
-        SubscriptionMiddleware,
-        TransportMiddleware,
-        LogMiddleware
-      );
-    }
+    const middleware = applyMiddleware(
+      SubscriptionMiddleware,
+      TransportMiddleware,
+      LogMiddleware
+    );
+
+    enhancer =
+      enhancer !== undefined ? compose(middleware, enhancer) : middleware;
 
     this.store = createStore(this.reducer, this.initialState, enhancer);
 
-    this.transport = ({
-      isConnected: true,
-      onAction: () => {},
-      subscribe: () => {},
-      subscribeMatchData: () => {},
-      subscribeChatMessage: () => {},
-      connect: () => {},
-      disconnect: () => {},
-      updateMatchID: () => {},
-      updatePlayerID: () => {},
-    } as unknown) as Transport;
-
-    if (multiplayer) {
-      // typeof multiplayer is 'function'
-      this.transport = multiplayer({
-        gameKey: game,
-        game: this.game,
-        store: this.store,
-        matchID,
-        playerID,
-        credentials,
-        gameName: this.game.name,
-        numPlayers,
-        setupData,
-      });
-    }
+    if (!multiplayer) multiplayer = DummyTransport;
+    this.transport = multiplayer({
+      gameKey: game,
+      game: this.game,
+      store: this.store,
+      matchID,
+      playerID,
+      credentials,
+      gameName: this.game.name,
+      numPlayers,
+    });
 
     this.createDispatchers();
 
-    this.transport.subscribeMatchData(metadata => {
+    this.transport.subscribeMatchData((metadata) => {
       this.matchData = metadata;
       this.notifySubscribers();
     });
 
-    if (this.transport.onChatMessage) {
-      this.chatMessages = [];
-      this.sendChatMessage = payload => {
-        this.transport.onChatMessage(this.matchID, {
-          id: shortid(),
-          sender: this.playerID,
-          payload: payload,
-        });
-      };
-      this.transport.subscribeChatMessage(message => {
-        this.chatMessages = [...this.chatMessages, message];
-        this.notifySubscribers();
+    this.chatMessages = [];
+    this.sendChatMessage = (payload) => {
+      this.transport.onChatMessage(this.matchID, {
+        id: nanoid(7),
+        sender: this.playerID,
+        payload: payload,
       });
-    }
+    };
+    this.transport.subscribeChatMessage((message) => {
+      this.chatMessages = [...this.chatMessages, message];
+      this.notifySubscribers();
+    });
   }
 
   private notifySubscribers() {
-    Object.values(this.subscribers).forEach(fn => fn(this.getState()));
+    Object.values(this.subscribers).forEach((fn) => fn(this.getState()));
   }
 
   overrideGameState(state: any) {

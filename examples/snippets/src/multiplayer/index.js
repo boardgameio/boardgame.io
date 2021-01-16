@@ -51,7 +51,7 @@ const TicTacToe = {
     if (IsVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }
-    if (G.cells.filter(c => c === null).length == 0) {
+    if (G.cells.filter((c) => c === null).length == 0) {
       return { draw: true };
     }
   },
@@ -80,7 +80,7 @@ class TicTacToeBoard extends React.Component {
         );
     }
 
-    const cellStyle = id => ({
+    const cellStyle = (id) => ({
       cursor: 'pointer',
       border: '1px solid #555',
       width: '50px',

@@ -3,7 +3,8 @@
  */
 
 import React from 'react';
-import { Client, BoardProps } from './react';
+import type { BoardProps } from './react';
+import { Client } from './react';
 import ReactDOMServer from 'react-dom/server';
 
 class TestBoard extends React.Component<BoardProps> {
@@ -17,7 +18,7 @@ test('board is rendered - ssr', () => {
     game: {},
     board: TestBoard,
   });
-  let ssrRender = ReactDOMServer.renderToString(<Board />);
+  const ssrRender = ReactDOMServer.renderToString(<Board />);
   expect(ssrRender).toContain('bgio-client');
   expect(ssrRender).toContain('my-board');
 });

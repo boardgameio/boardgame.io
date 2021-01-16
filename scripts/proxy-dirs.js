@@ -30,7 +30,7 @@ function makeSubpackage(name, opts) {
   writeFileSync(`${dir}/package.json`, PackageJson(name, opts));
 }
 
-subpackages.forEach(name => {
+subpackages.forEach((name) => {
   makeSubpackage(name, { mainDir: 'cjs', esmDir: 'esm' });
 });
 

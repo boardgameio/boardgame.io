@@ -6,10 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Plugin } from '../types';
-import { Events, EventsAPI, PrivateEventsAPI } from './events/events';
+import type { Plugin } from '../types';
+import type { PrivateEventsAPI, EventsAPI } from './events/events';
+import { Events } from './events/events';
 
-export { EventsAPI };
+export type { EventsAPI };
 
 const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   name: 'events',

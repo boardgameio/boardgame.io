@@ -10,14 +10,14 @@ import * as ioNamespace from 'socket.io-client';
 const io = ioNamespace.default;
 
 import * as ActionCreators from '../../core/action-creators';
-import { Master } from '../../master/master';
-import {
-  Transport,
+import type { Master } from '../../master/master';
+import { Transport } from './transport';
+import type {
   TransportOpts,
   MetadataCallback,
   ChatCallback,
 } from './transport';
-import {
+import type {
   CredentialedActionShape,
   FilteredMetadata,
   LogEntry,
@@ -92,8 +92,13 @@ export class SocketIOTransport extends Transport {
     this.socket.emit('update', ...args);
   }
 
-  onChatMessage(matchID, chatMessage) {
-    this.socket.emit('chat', matchID, chatMessage);
+  onChatMessage(matchID: string, chatMessage: ChatMessage) {
+    const args: Parameters<Master['onChatMessage']> = [
+      matchID,
+      chatMessage,
+      this.credentials,
+    ];
+    this.socket.emit('chat', ...args);
   }
 
   /**
@@ -106,7 +111,7 @@ export class SocketIOTransport extends Transport {
         if (server.search(/^https?:\/\//) == -1) {
           server = 'http://' + this.server;
         }
-        if (server.substr(-1) != '/') {
+        if (server.slice(-1) != '/') {
           // add trailing slash if not already present
           server = server + '/';
         }

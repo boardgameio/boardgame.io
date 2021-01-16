@@ -45,9 +45,9 @@ function Board({ ctx, moves, events, playerID }) {
   }
 
   moves = Object.entries(moves)
-    .filter(e => !(e[0] === 'play' && stage === 'discard'))
-    .filter(e => !(e[0] === 'discard' && stage !== 'discard'))
-    .map(e => (
+    .filter((e) => !(e[0] === 'play' && stage === 'discard'))
+    .filter((e) => !(e[0] === 'discard' && stage !== 'discard'))
+    .map((e) => (
       <button key={e[0]} onClick={() => e[1]()}>
         {e[0]}
       </button>
@@ -55,10 +55,10 @@ function Board({ ctx, moves, events, playerID }) {
 
   events = Object.entries(events)
     .filter(() => current && active)
-    .filter(e => e[0] != 'setActivePlayers')
-    .filter(e => e[0] != 'setStage')
-    .filter(e => e[0] != 'endStage')
-    .map(e => (
+    .filter((e) => e[0] != 'setActivePlayers')
+    .filter((e) => e[0] != 'setStage')
+    .filter((e) => e[0] != 'endStage')
+    .map((e) => (
       <button key={e[0]} onClick={() => e[1]()}>
         {e[0]}
       </button>

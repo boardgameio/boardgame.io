@@ -6,13 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import React from 'react';
+import type { ComponentType } from 'react';
 import { LobbyClient } from './client';
-import { Game, LobbyAPI } from '../types';
+import type { Game, LobbyAPI } from '../types';
 
 export interface GameComponent {
   game: Game;
-  board: React.ComponentType<any>;
+  board: ComponentType<any>;
 }
 
 interface LobbyConnectionOpts {
@@ -57,20 +57,21 @@ class _LobbyConnectionImpl {
   }
 
   _getMatchInstance(matchID: string) {
-    for (let inst of this.matches) {
+    for (const inst of this.matches) {
       if (inst['matchID'] === matchID) return inst;
     }
   }
 
   _getGameComponents(gameName: string) {
-    for (let comp of this.gameComponents) {
+    for (const comp of this.gameComponents) {
       if (comp.game.name === gameName) return comp;
     }
   }
 
   _findPlayer(playerName: string) {
-    for (let inst of this.matches) {
-      if (inst.players.some(player => player.name === playerName)) return inst;
+    for (const inst of this.matches) {
+      if (inst.players.some((player) => player.name === playerName))
+        return inst;
     }
   }
 
@@ -97,7 +98,7 @@ class _LobbyConnectionImpl {
 
   async leave(gameName: string, matchID: string) {
     try {
-      let inst = this._getMatchInstance(matchID);
+      const inst = this._getMatchInstance(matchID);
       if (!inst) throw new Error('match instance not found');
       for (const player of inst.players) {
         if (player.name === this.playerName) {
@@ -117,7 +118,7 @@ class _LobbyConnectionImpl {
   }
 
   async disconnect() {
-    let inst = this._findPlayer(this.playerName);
+    const inst = this._findPlayer(this.playerName);
     if (inst) {
       await this.leave(inst.gameName, inst.matchID);
     }

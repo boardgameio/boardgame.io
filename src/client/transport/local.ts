@@ -9,9 +9,12 @@
 import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { LocalStorage } from '../../server/db/localstorage';
-import { Master, TransportAPI } from '../../master/master';
-import { Transport, TransportOpts, ChatCallback } from './transport';
-import {
+import { Master } from '../../master/master';
+import type { TransportAPI, TransportData } from '../../master/master';
+import { Transport } from './transport';
+import type { TransportOpts, ChatCallback } from './transport';
+import type {
+  ChatMessage,
   CredentialedActionShape,
   Game,
   LogEntry,
@@ -60,11 +63,11 @@ export class LocalMaster extends Master {
   connect: (
     matchID: string,
     playerID: PlayerID,
-    callback: (...args: any[]) => void
+    callback: (data: TransportData) => void
   ) => void;
 
   constructor({ game, bots, storageKey, persist }: LocalMasterOpts) {
-    const clientCallbacks: Record<PlayerID, (...args: any[]) => void> = {};
+    const clientCallbacks: Record<PlayerID, (data: TransportData) => void> = {};
     const initializedBots = {};
 
     if (game && game.ai && bots) {
@@ -78,16 +81,16 @@ export class LocalMaster extends Master {
       }
     }
 
-    const send: TransportAPI['send'] = ({ playerID, type, args }) => {
+    const send: TransportAPI['send'] = ({ playerID, ...data }) => {
       const callback = clientCallbacks[playerID];
       if (callback !== undefined) {
-        callback.apply(null, [type, ...args]);
+        callback(data);
       }
     };
 
     const transportAPI: TransportAPI = {
       send,
-      sendAll: makePlayerData => {
+      sendAll: (makePlayerData) => {
         for (const playerID in clientCallbacks) {
           const data = makePlayerData(playerID);
           send({ playerID, ...data });
@@ -151,8 +154,18 @@ export class LocalTransport extends Transport {
     this.isConnected = true;
   }
 
-  onChatMessage(matchID, chatMessage) {
-    this.master.onChatMessage(matchID, chatMessage);
+  /**
+   * Called when any player sends a chat message and the
+   * master broadcasts the update to other clients (including
+   * this one).
+   */
+  onChatMessage(matchID: string, chatMessage: ChatMessage) {
+    const args: Parameters<Master['onChatMessage']> = [
+      matchID,
+      chatMessage,
+      this.credentials,
+    ];
+    this.master.onChatMessage(...args);
   }
 
   /**
@@ -192,16 +205,14 @@ export class LocalTransport extends Transport {
    * Connect to the master.
    */
   connect() {
-    this.master.connect(this.matchID, this.playerID, (type, ...args) => {
-      if (type == 'sync') {
-        this.onSync.apply(this, args);
-      }
-      if (type == 'update') {
-        this.onUpdate.apply(this, args);
-      }
-      if (type == 'chat') {
-        const [matchID, message] = args;
-        this.chatMessageCallback.apply(this, [message]);
+    this.master.connect(this.matchID, this.playerID, (data) => {
+      switch (data.type) {
+        case 'sync':
+          return this.onSync(...data.args);
+        case 'update':
+          return this.onUpdate(...data.args);
+        case 'chat':
+          return this.chatMessageCallback(data.args[1]);
       }
     });
     this.master.onSync(this.matchID, this.playerID, this.credentials, {
