@@ -30,7 +30,6 @@ export interface TransportOpts {
   matchID?: string;
   credentials?: string;
   numPlayers?: number;
-  setupData?: any;
 }
 
 export abstract class Transport {
@@ -40,7 +39,6 @@ export abstract class Transport {
   protected matchID: string;
   protected credentials?: string;
   protected numPlayers: number;
-  protected setupData?: any;
   isConnected: boolean;
 
   constructor({
@@ -50,7 +48,6 @@ export abstract class Transport {
     matchID,
     credentials,
     numPlayers,
-    setupData,
   }: TransportOpts) {
     this.store = store;
     this.gameName = gameName || 'default';
@@ -58,7 +55,6 @@ export abstract class Transport {
     this.matchID = matchID || 'default';
     this.credentials = credentials;
     this.numPlayers = numPlayers || 2;
-    this.setupData = setupData;
   }
 
   abstract onAction(state: State, action: CredentialedActionShape.Any): void;
@@ -69,7 +65,6 @@ export abstract class Transport {
   abstract updateMatchID(id: string): void;
   abstract updatePlayerID(id: PlayerID): void;
   abstract updateCredentials(credentials?: string): void;
-  abstract updateSetupData(setupData?: any): void;
   abstract onChatMessage(matchID: string, chatMessage: ChatMessage): void;
   abstract subscribeChatMessage(fn: ChatCallback): void;
 }

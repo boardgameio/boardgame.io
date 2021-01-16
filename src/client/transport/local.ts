@@ -271,15 +271,6 @@ export class LocalTransport extends Transport {
     this.credentials = credentials;
     this.resetAndSync();
   }
-
-  /**
-   * Updates the game setup data associated with this client.
-   * @param setupData - The new setupData to use.
-   */
-  updateSetupData(setupData?: any) {
-    this.setupData = setupData;
-    this.resetAndSync();
-  }
 }
 
 /**
