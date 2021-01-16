@@ -353,12 +353,12 @@ export class Master {
         game: this.game,
         unlisted: true,
         numPlayers,
-        setupData,
+        setupData: undefined,
         uuid: () => key,
       });
 
       if ('setupDataError' in match) {
-        return { error: 'setupData is invalid' };
+        return { error: 'game requires setupData' };
       }
 
       ({ initialState, metadata } = match);
