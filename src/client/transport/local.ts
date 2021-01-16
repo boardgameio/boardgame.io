@@ -148,16 +148,8 @@ export class LocalTransport extends Transport {
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
    */
-  constructor({
-    master,
-    store,
-    matchID,
-    playerID,
-    credentials,
-    gameName,
-    numPlayers,
-  }: LocalTransportOpts) {
-    super({ store, gameName, playerID, matchID, credentials, numPlayers });
+  constructor({ master, ...opts }: LocalTransportOpts) {
+    super(opts);
     this.master = master;
     this.isConnected = true;
   }

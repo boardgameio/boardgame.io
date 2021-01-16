@@ -11,11 +11,9 @@ import Router from 'koa-router';
 import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
-
-import { InitializeGame } from '../core/initialize';
+import { createMatch } from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
-import { createMetadata } from './util';
 
 /**
  * Creates a new match.
@@ -28,30 +26,25 @@ import { createMetadata } from './util';
  * @param {object } lobbyConfig - Configuration options for the lobby.
  * @param {boolean} unlisted - Whether the match should be excluded from public listing.
  */
-export const CreateMatch = async ({
+const CreateMatch = async ({
+  ctx,
   db,
-  game,
-  numPlayers,
-  setupData,
   uuid,
-  unlisted,
+  ...opts
 }: {
   db: StorageAPI.Sync | StorageAPI.Async;
-  game: Game;
-  numPlayers: number;
-  setupData: any;
+  ctx: Koa.BaseContext;
   uuid: () => string;
-  unlisted: boolean;
-}) => {
-  if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
-
-  const metadata = createMetadata({ game, numPlayers, setupData, unlisted });
+} & Parameters<typeof createMatch>[0]): Promise<string> => {
   const matchID = uuid();
-  const initialState = InitializeGame({ game, numPlayers, setupData });
+  const match = createMatch(opts);
 
-  await db.createMatch(matchID, { metadata, initialState });
-
-  return matchID;
+  if ('setupDataError' in match) {
+    ctx.throw(400, match.setupDataError);
+  } else {
+    await db.createMatch(matchID, match);
+    return matchID;
+  }
 };
 
 /**
@@ -122,11 +115,8 @@ export const createRouter = ({
     const game = games.find((g) => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
-    const setupDataError =
-      game.validateSetupData && game.validateSetupData(setupData, numPlayers);
-    if (setupDataError !== undefined) ctx.throw(400, setupDataError);
-
     const matchID = await CreateMatch({
+      ctx,
       db,
       game,
       numPlayers,
@@ -362,6 +352,7 @@ export const createRouter = ({
 
     const game = games.find((g) => g.name === gameName);
     const nextMatchID = await CreateMatch({
+      ctx,
       db,
       game,
       numPlayers,
