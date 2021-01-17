@@ -191,8 +191,8 @@ export interface PhaseConfig<
 > {
   start?: boolean;
   next?: string;
-  onBegin?: (context: FnContext<G, PluginAPIs>) => any;
-  onEnd?: (context: FnContext<G, PluginAPIs>) => any;
+  onBegin?: (context: FnContext<G, PluginAPIs>) => void | G;
+  onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
   endIf?: (
     context: FnContext<G, PluginAPIs>
   ) => boolean | void | { next: string };
@@ -200,8 +200,8 @@ export interface PhaseConfig<
   turn?: TurnConfig<G, PluginAPIs>;
   wrapped?: {
     endIf?: (state: State<G>) => boolean | void | { next: string };
-    onBegin?: (state: State<G>) => any;
-    onEnd?: (state: State<G>) => any;
+    onBegin?: (state: State<G>) => void | G;
+    onEnd?: (state: State<G>) => void | G;
   };
 }
 
@@ -235,20 +235,20 @@ export interface TurnConfig<
 > {
   activePlayers?: ActivePlayersArg;
   moveLimit?: number;
-  onBegin?: (context: FnContext<G, PluginAPIs>) => any;
-  onEnd?: (context: FnContext<G, PluginAPIs>) => any;
+  onBegin?: (context: FnContext<G, PluginAPIs>) => void | G;
+  onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
   endIf?: (
     context: FnContext<G, PluginAPIs>
   ) => boolean | void | { next: PlayerID };
-  onMove?: (context: FnContext<G, PluginAPIs>) => any;
+  onMove?: (context: FnContext<G, PluginAPIs>) => void | G;
   stages?: StageMap<G, PluginAPIs>;
   moves?: MoveMap<G, PluginAPIs>;
   order?: TurnOrderConfig<G, PluginAPIs>;
   wrapped?: {
     endIf?: (state: State<G>) => boolean | void | { next: PlayerID };
-    onBegin?: (state: State<G>) => any;
-    onEnd?: (state: State<G>) => any;
-    onMove?: (state: State<G>) => any;
+    onBegin?: (state: State<G>) => void | G;
+    onEnd?: (state: State<G>) => void | G;
+    onMove?: (state: State<G>) => void | G;
   };
 }
 
@@ -291,7 +291,7 @@ export interface Game<
     setActivePlayers?: boolean;
   };
   endIf?: (context: FnContext<G, PluginAPIs>) => any;
-  onEnd?: (context: FnContext<G, PluginAPIs>) => any;
+  onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
   playerView?: (G: G, ctx: Ctx, playerID: PlayerID) => any;
   plugins?: Array<Plugin<any, any, G>>;
   ai?: {
