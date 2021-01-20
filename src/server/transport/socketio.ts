@@ -11,8 +11,11 @@ import type IOTypes from 'socket.io';
 import type { ServerOptions as HttpsOptions } from 'https';
 import PQueue from 'p-queue';
 import { Master } from '../../master/master';
-import type { TransportAPI as MasterTransport } from '../../master/master';
 import type { Game, PlayerID, Server } from '../../types';
+import type {
+  TransportAPI as MasterTransport,
+  TransportData,
+} from '../../master/master';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -28,19 +31,23 @@ export function TransportAPI(
   roomInfo: SocketIO['roomInfo']
 ): MasterTransport {
   /**
+   * Emit a socket.io event to the recipientID.
+   * If the recipient is the current socket, uses a basic emit, otherwise
+   * emits via the current socket’s `to` method.
+   */
+  const emit = (recipientID: string, { type, args }: TransportData) => {
+    const emitter = socket.id === recipientID ? socket : socket.to(recipientID);
+    emitter.emit(type, ...args);
+  };
+
+  /**
    * Send a message to a specific client.
    */
-  const send: MasterTransport['send'] = ({ type, playerID, args }) => {
+  const send: MasterTransport['send'] = ({ playerID, ...data }) => {
     const clients = roomInfo.get(matchID).values();
     for (const client of clients) {
       const info = clientInfo.get(client);
-      if (info.playerID === playerID) {
-        if (socket.id === client) {
-          socket.emit(type, ...args);
-        } else {
-          socket.to(info.socket.id).emit(type, ...args);
-        }
-      }
+      if (info.playerID === playerID) emit(client, data);
     }
   };
 
