@@ -171,7 +171,11 @@ export class SocketIO {
             TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
             app.context.auth
           );
-          await master.onSync(...args);
+          const syncResponse = await master.onSync(...args);
+          if (syncResponse && syncResponse.error === 'unauthorized') {
+            this.removeClient(socket.id);
+            return;
+          }
           await master.onConnectionChange(matchID, playerID, credentials, true);
         });
 
