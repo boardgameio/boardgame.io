@@ -29,10 +29,12 @@ type SocketIOTestAdapterOpts = SocketOpts & {
 
 class InMemoryAsync extends Async {
   db: InMemory;
+  delays: number[];
 
   constructor() {
     super();
     this.db = new InMemory();
+    this.delays = [];
   }
 
   async connect() {
@@ -40,7 +42,10 @@ class InMemoryAsync extends Async {
   }
 
   private sleep(): Promise<void> {
-    const interval = Math.round(Math.random() * 50 + 50);
+    const interval =
+      this.delays.length > 0
+        ? this.delays.shift()
+        : Math.round(Math.random() * 50 + 50);
     return new Promise((resolve) => void setTimeout(resolve, interval));
   }
 
