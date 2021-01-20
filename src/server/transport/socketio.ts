@@ -36,9 +36,9 @@ export function TransportAPI(
       const info = clientInfo.get(client);
       if (info.playerID === playerID) {
         if (socket.id === client) {
-          socket.emit.apply(socket, [type, ...args]);
+          socket.emit(type, ...args);
         } else {
-          socket.to(info.socket.id).emit.apply(socket, [type, ...args]);
+          socket.to(info.socket.id).emit(type, ...args);
         }
       }
     }
