@@ -91,6 +91,38 @@ export class SocketIO {
     this.socketOpts = socketOpts;
   }
 
+  /**
+   * Unregister client data for a socket.
+   */
+  private removeClient(socketID: string): void {
+    // Get client data for this socket ID.
+    const client = this.clientInfo.get(socketID);
+    if (!client) return;
+    // Remove client from list of connected sockets for this match.
+    const { matchID } = client;
+    const matchClients = this.roomInfo.get(matchID);
+    matchClients.delete(socketID);
+    // If the match is now empty, also delete the match’s promise queue.
+    if (matchClients.size === 0) this.deleteMatchQueue(matchID);
+    // Remove client data from the client map.
+    this.clientInfo.delete(socketID);
+  }
+
+  /**
+   * Register client data for a socket.
+   */
+  private addClient(client: Client): void {
+    // Add client to list of connected sockets for this match.
+    let matchClients = this.roomInfo.get(client.matchID);
+    if (matchClients === undefined) {
+      matchClients = new Set<string>();
+      this.roomInfo.set(client.matchID, matchClients);
+    }
+    matchClients.add(client.socket.id);
+    // Register data for this socket in the client map.
+    this.clientInfo.set(client.socket.id, client);
+  }
+
   init(app: Server.App & { _io?: IOTypes.Server }, games: Game[]) {
     const io = new IO({
       ioOptions: {
@@ -130,25 +162,8 @@ export class SocketIO {
           const [matchID, playerID, credentials] = args;
           socket.join(matchID);
 
-          // Remove client from any previous game that it was a part of.
-          if (this.clientInfo.has(socket.id)) {
-            const { matchID: oldMatchID } = this.clientInfo.get(socket.id);
-            this.roomInfo.get(oldMatchID).delete(socket.id);
-          }
-
-          let roomClients = this.roomInfo.get(matchID);
-          if (roomClients === undefined) {
-            roomClients = new Set<string>();
-            this.roomInfo.set(matchID, roomClients);
-          }
-          roomClients.add(socket.id);
-
-          this.clientInfo.set(socket.id, {
-            matchID,
-            playerID,
-            socket,
-            credentials,
-          });
+          this.removeClient(socket.id);
+          this.addClient({ socket, matchID, playerID, credentials });
 
           const master = new Master(
             game,
@@ -162,15 +177,9 @@ export class SocketIO {
 
         socket.on('disconnect', async () => {
           const client = this.clientInfo.get(socket.id);
+          this.removeClient(socket.id);
           if (client) {
             const { matchID, playerID, credentials } = client;
-            this.roomInfo.get(matchID).delete(socket.id);
-            this.clientInfo.delete(socket.id);
-
-            if (!this.roomInfo.get(matchID).size) {
-              this.deleteMatchQueue(matchID);
-            }
-
             const master = new Master(
               game,
               app.context.db,
