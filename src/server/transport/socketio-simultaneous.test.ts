@@ -156,51 +156,51 @@ jest.mock('koa-socket-2', () => {
   return MockIO;
 });
 
-const game = {
-  name: 'test',
-  setup: () => {
-    const G = {
-      players: {
-        '0': {
-          cards: ['card3'],
-        },
-        '1': {
-          cards: [],
-        },
-      },
-      cards: ['card0', 'card1', 'card2'],
-      discardedCards: [],
-    };
-    return G;
-  },
-  playerView: PlayerView.STRIP_SECRETS,
-  turn: {
-    activePlayers: { currentPlayer: { stage: 'A' } },
-    stages: {
-      A: {
-        moves: {
-          A: {
-            client: false,
-            move: (G, ctx: Ctx) => {
-              const card = G.players[ctx.playerID].cards.shift();
-              G.discardedCards.push(card);
-            },
+describe('simultaneous moves on server game', () => {
+  const game = {
+    name: 'test',
+    setup: () => {
+      const G = {
+        players: {
+          '0': {
+            cards: ['card3'],
           },
-          B: {
-            client: false,
-            ignoreStaleStateID: true,
-            move: (G, ctx: Ctx) => {
-              const card = G.cards.pop();
-              G.players[ctx.playerID].cards.push(card);
+          '1': {
+            cards: [],
+          },
+        },
+        cards: ['card0', 'card1', 'card2'],
+        discardedCards: [],
+      };
+      return G;
+    },
+    playerView: PlayerView.STRIP_SECRETS,
+    turn: {
+      activePlayers: { currentPlayer: { stage: 'A' } },
+      stages: {
+        A: {
+          moves: {
+            A: {
+              client: false,
+              move: (G, ctx: Ctx) => {
+                const card = G.players[ctx.playerID].cards.shift();
+                G.discardedCards.push(card);
+              },
+            },
+            B: {
+              client: false,
+              ignoreStaleStateID: true,
+              move: (G, ctx: Ctx) => {
+                const card = G.cards.pop();
+                G.players[ctx.playerID].cards.push(card);
+              },
             },
           },
         },
       },
     },
-  },
-};
+  };
 
-describe('simultaneous moves on server game', () => {
   let app;
   let transport: SocketIOTestAdapter;
   let clientInfo;
