@@ -44,11 +44,10 @@ export function TransportAPI(
    * Send a message to a specific client.
    */
   const send: MasterTransport['send'] = ({ playerID, ...data }) => {
-    const clients = roomInfo.get(matchID).values();
-    for (const client of clients) {
-      const info = clientInfo.get(client);
-      if (info.playerID === playerID) emit(client, data);
-    }
+    roomInfo.get(matchID).forEach((clientID) => {
+      const client = clientInfo.get(clientID);
+      if (client.playerID === playerID) emit(clientID, data);
+    });
   };
 
   /**
