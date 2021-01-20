@@ -204,6 +204,7 @@ export class SocketIO {
             );
           }
         });
+
         socket.on(
           'chat',
           async (...args: Parameters<Master['onChatMessage']>) => {
