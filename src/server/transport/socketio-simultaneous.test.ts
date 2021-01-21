@@ -29,10 +29,12 @@ type SocketIOTestAdapterOpts = SocketOpts & {
 
 class InMemoryAsync extends Async {
   db: InMemory;
+  delays: number[];
 
   constructor() {
     super();
     this.db = new InMemory();
+    this.delays = [];
   }
 
   async connect() {
@@ -40,7 +42,10 @@ class InMemoryAsync extends Async {
   }
 
   private sleep(): Promise<void> {
-    const interval = Math.round(Math.random() * 50 + 50);
+    const interval =
+      this.delays.length > 0
+        ? this.delays.shift()
+        : Math.round(Math.random() * 50 + 50);
     return new Promise((resolve) => void setTimeout(resolve, interval));
   }
 
@@ -156,51 +161,51 @@ jest.mock('koa-socket-2', () => {
   return MockIO;
 });
 
-const game = {
-  name: 'test',
-  setup: () => {
-    const G = {
-      players: {
-        '0': {
-          cards: ['card3'],
-        },
-        '1': {
-          cards: [],
-        },
-      },
-      cards: ['card0', 'card1', 'card2'],
-      discardedCards: [],
-    };
-    return G;
-  },
-  playerView: PlayerView.STRIP_SECRETS,
-  turn: {
-    activePlayers: { currentPlayer: { stage: 'A' } },
-    stages: {
-      A: {
-        moves: {
-          A: {
-            client: false,
-            move: (G, ctx: Ctx) => {
-              const card = G.players[ctx.playerID].cards.shift();
-              G.discardedCards.push(card);
-            },
+describe('simultaneous moves on server game', () => {
+  const game = {
+    name: 'test',
+    setup: () => {
+      const G = {
+        players: {
+          '0': {
+            cards: ['card3'],
           },
-          B: {
-            client: false,
-            ignoreStaleStateID: true,
-            move: (G, ctx: Ctx) => {
-              const card = G.cards.pop();
-              G.players[ctx.playerID].cards.push(card);
+          '1': {
+            cards: [],
+          },
+        },
+        cards: ['card0', 'card1', 'card2'],
+        discardedCards: [],
+      };
+      return G;
+    },
+    playerView: PlayerView.STRIP_SECRETS,
+    turn: {
+      activePlayers: { currentPlayer: { stage: 'A' } },
+      stages: {
+        A: {
+          moves: {
+            A: {
+              client: false,
+              move: (G, ctx: Ctx) => {
+                const card = G.players[ctx.playerID].cards.shift();
+                G.discardedCards.push(card);
+              },
+            },
+            B: {
+              client: false,
+              ignoreStaleStateID: true,
+              move: (G, ctx: Ctx) => {
+                const card = G.cards.pop();
+                G.players[ctx.playerID].cards.push(card);
+              },
             },
           },
         },
       },
     },
-  },
-};
+  };
 
-describe('simultaneous moves on server game', () => {
   let app;
   let transport: SocketIOTestAdapter;
   let clientInfo;
@@ -454,5 +459,148 @@ describe('simultaneous moves on server game', () => {
     expect(spyDeleteMatchQueue).toHaveBeenCalledWith('matchID');
 
     await db.wipe('matchID');
+  });
+});
+
+describe('inauthentic clients', () => {
+  const game = {
+    setup: () => ({
+      0: 'foo',
+      1: 'bar',
+    }),
+    playerView: (G, _ctx, playerID) => ({ [playerID]: G[playerID] }),
+  };
+
+  let app;
+  let db: InMemoryAsync;
+  let transport: SocketIOTestAdapter;
+  let clientInfo: Map<string, Record<string, any>>;
+  let roomInfo: Map<string, Set<string>>;
+  let io;
+  const matchID = 'matchID';
+  const cred0 = 'password-0';
+  const cred1 = 'password-1';
+
+  beforeEach(async () => {
+    clientInfo = new Map();
+    roomInfo = new Map();
+
+    db = new InMemoryAsync();
+    await db.connect();
+
+    app = { context: { db, auth: new Auth() } };
+    transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
+    transport.init(app, [ProcessGameConfig(game)]);
+    io = app.context.io;
+
+    // Create credentialed match.
+    const metadata = createMetadata({ game, unlisted: false, numPlayers: 2 });
+    metadata.players[0].credentials = cred0;
+    metadata.players[1].credentials = cred1;
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    await db.createMatch(matchID, { initialState, metadata });
+  });
+
+  afterEach(async () => {
+    await db.wipe(matchID);
+  });
+
+  test('inauthentic client is not added to clientInfo', async () => {
+    const inauthenticID = '0';
+    const socket = io.sockets.get(inauthenticID);
+
+    const args: Parameters<Master['onSync']> = ['matchID', '0', undefined];
+    const doneReceiving = socket.receive('sync', ...args);
+    // Is not added before awaiting the game master.
+    expect(clientInfo.get(inauthenticID)).toBeUndefined();
+    await doneReceiving;
+    // Is not added after awaiting the game master.
+    expect(clientInfo.get(inauthenticID)).toBeUndefined();
+  });
+
+  test('connected inauthentic client doesn’t receive authentic client’s sync', async () => {
+    const inauthenticID = '0';
+    const authenticID = '1';
+    const inauthenticSocket = io.sockets.get(inauthenticID);
+    const authenticSocket = io.sockets.get(authenticID);
+
+    // Call sync for both players
+    {
+      const args: Parameters<Master['onSync']> = ['matchID', '0', undefined];
+      await inauthenticSocket.receive('sync', ...args);
+    }
+    {
+      const args: Parameters<Master['onSync']> = ['matchID', '0', cred0];
+      await authenticSocket.receive('sync', ...args);
+    }
+
+    expect(clientInfo.get(inauthenticID)).toBeUndefined();
+
+    expect(clientInfo.get(authenticID)).toEqual({
+      matchID,
+      playerID: '0',
+      credentials: cred0,
+      socket: authenticSocket,
+    });
+
+    expect(inauthenticSocket.emit).not.toHaveBeenCalled();
+
+    expect(authenticSocket.emit).toHaveBeenCalledWith(
+      'sync',
+      matchID,
+      expect.objectContaining({
+        state: expect.objectContaining({
+          G: {
+            0: 'foo',
+          },
+        }),
+      })
+    );
+
+    const syncEmits = authenticSocket.emit.mock.calls.filter(
+      ([type]) => type === 'sync'
+    );
+    expect(syncEmits).toHaveLength(1);
+  });
+
+  test('inauthentic client doesn’t receive authentic client’s sync while still syncing', async () => {
+    const inauthenticID = '0';
+    const authenticID = '1';
+    const inauthenticSocket = io.sockets.get(inauthenticID);
+    const authenticSocket = io.sockets.get(authenticID);
+
+    // Make db#fetch in Master#onSync for first sync resolve after second sync.
+    db.delays = [200, 0];
+
+    // Call sync for both players
+    await Promise.all([
+      (async () => {
+        const args: Parameters<Master['onSync']> = ['matchID', '0', undefined];
+        await inauthenticSocket.receive('sync', ...args);
+      })(),
+      (async () => {
+        const args: Parameters<Master['onSync']> = ['matchID', '0', cred0];
+        await authenticSocket.receive('sync', ...args);
+      })(),
+    ]);
+
+    expect(clientInfo.get(inauthenticID)).toBeUndefined();
+
+    expect(authenticSocket.emit).toHaveBeenCalledWith(
+      'sync',
+      matchID,
+      expect.objectContaining({
+        state: expect.objectContaining({
+          G: {
+            0: 'foo',
+          },
+        }),
+      })
+    );
+
+    const syncEmits = authenticSocket.emit.mock.calls.filter(
+      ([type]) => type === 'sync'
+    );
+    expect(syncEmits).toHaveLength(1);
   });
 });
