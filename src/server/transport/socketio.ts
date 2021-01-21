@@ -202,7 +202,6 @@ export class SocketIO {
           );
           const syncResponse = await master.onSync(...args);
           if (syncResponse && syncResponse.error === 'unauthorized') {
-            this.removeClient(socket.id);
             return;
           }
           await master.onConnectionChange(matchID, playerID, credentials, true);
