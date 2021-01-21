@@ -187,29 +187,29 @@ export class SocketIO {
         socket.on('sync', async (...args: Parameters<Master['onSync']>) => {
           const [matchID, playerID, credentials] = args;
           socket.join(matchID);
-
           this.removeClient(socket.id);
-          const provisionalClient = { socket, matchID, playerID, credentials };
+
+          const client = { socket, matchID, playerID, credentials };
           const transport = TransportAPI(
             matchID,
             socket,
             this.clientInfo,
             this.roomInfo,
-            provisionalClient
+            client
           );
-
           const master = new Master(
             game,
             app.context.db,
             transport,
             app.context.auth
           );
+
           const syncResponse = await master.onSync(...args);
           if (syncResponse && syncResponse.error === 'unauthorized') {
             return;
           }
           await master.onConnectionChange(matchID, playerID, credentials, true);
-          this.addClient(provisionalClient);
+          this.addClient(client);
         });
 
         socket.on('disconnect', async () => {
