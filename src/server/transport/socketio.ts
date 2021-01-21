@@ -46,9 +46,9 @@ export function TransportAPI(
    * this transport’s provisionalClient if provided.
    */
   const forEachClient = (clientCallback: (client: Client) => void) => {
-    const clients = roomInfo.get(matchID);
-    if (clients) {
-      clients.forEach((clientID) => {
+    const clientIDs = roomInfo.get(matchID);
+    if (clientIDs) {
+      clientIDs.forEach((clientID) => {
         const client = clientInfo.get(clientID);
         clientCallback(client);
       });
