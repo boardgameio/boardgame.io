@@ -134,15 +134,16 @@ export class SocketIO {
    * Register client data for a socket.
    */
   private addClient(client: Client): void {
+    const { matchID, socket } = client;
     // Add client to list of connected sockets for this match.
-    let matchClients = this.roomInfo.get(client.matchID);
+    let matchClients = this.roomInfo.get(matchID);
     if (matchClients === undefined) {
       matchClients = new Set<string>();
-      this.roomInfo.set(client.matchID, matchClients);
+      this.roomInfo.set(matchID, matchClients);
     }
-    matchClients.add(client.socket.id);
+    matchClients.add(socket.id);
     // Register data for this socket in the client map.
-    this.clientInfo.set(client.socket.id, client);
+    this.clientInfo.set(socket.id, client);
   }
 
   init(app: Server.App & { _io?: IOTypes.Server }, games: Game[]) {
