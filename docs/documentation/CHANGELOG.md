@@ -1,3 +1,10 @@
+### v0.43.2
+
+#### Bugfixes
+
+* [[3d614b8](https://github.com/boardgameio/boardgame.io/commit/3d614b8)] server: Improve security of socket.io transport layer ([#894](https://github.com/boardgameio/boardgame.io/pull/894))
+* [[dc96b26](https://github.com/boardgameio/boardgame.io/commit/dc96b26)] master: Disallow `onSync` match creation if game requires `setupData` ([#890](https://github.com/boardgameio/boardgame.io/pull/890))
+
 ### v0.43.1
 
 #### Bugfixes
