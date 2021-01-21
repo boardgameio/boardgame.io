@@ -28,7 +28,8 @@ export function TransportAPI(
   matchID: string,
   socket: IOTypes.Socket,
   clientInfo: SocketIO['clientInfo'],
-  roomInfo: SocketIO['roomInfo']
+  roomInfo: SocketIO['roomInfo'],
+  provisionalClient?: Client
 ): MasterTransport {
   /**
    * Emit a socket.io event to the recipientID.
@@ -41,12 +42,28 @@ export function TransportAPI(
   };
 
   /**
+   * Run a callback for each registered client for this match, including
+   * this transport’s provisionalClient if provided.
+   */
+  const forEachClient = (clientCallback: (client: Client) => void) => {
+    const clients = roomInfo.get(matchID);
+    if (clients) {
+      clients.forEach((clientID) => {
+        const client = clientInfo.get(clientID);
+        clientCallback(client);
+      });
+    }
+    if (provisionalClient) {
+      clientCallback(provisionalClient);
+    }
+  };
+
+  /**
    * Send a message to a specific client.
    */
   const send: MasterTransport['send'] = ({ playerID, ...data }) => {
-    roomInfo.get(matchID).forEach((clientID) => {
-      const client = clientInfo.get(clientID);
-      if (client.playerID === playerID) emit(clientID, data);
+    forEachClient((client) => {
+      if (client.playerID === playerID) emit(client.socket.id, data);
     });
   };
 
@@ -54,10 +71,9 @@ export function TransportAPI(
    * Send a message to all clients.
    */
   const sendAll: MasterTransport['sendAll'] = (makePlayerData) => {
-    roomInfo.get(matchID).forEach((clientID) => {
-      const { playerID } = clientInfo.get(clientID);
-      const data = makePlayerData(playerID);
-      emit(clientID, data);
+    forEachClient((client) => {
+      const data = makePlayerData(client.playerID);
+      emit(client.socket.id, data);
     });
   };
 
