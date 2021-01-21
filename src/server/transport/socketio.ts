@@ -124,8 +124,11 @@ export class SocketIO {
     const { matchID } = client;
     const matchClients = this.roomInfo.get(matchID);
     matchClients.delete(socketID);
-    // If the match is now empty, also delete the match’s promise queue.
-    if (matchClients.size === 0) this.deleteMatchQueue(matchID);
+    // If the match is now empty, delete its promise queue & client ID list.
+    if (matchClients.size === 0) {
+      this.roomInfo.delete(matchID);
+      this.deleteMatchQueue(matchID);
+    }
     // Remove client data from the client map.
     this.clientInfo.delete(socketID);
   }
