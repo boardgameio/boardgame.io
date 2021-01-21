@@ -185,12 +185,19 @@ export class SocketIO {
           socket.join(matchID);
 
           this.removeClient(socket.id);
-          this.addClient({ socket, matchID, playerID, credentials });
+          const provisionalClient = { socket, matchID, playerID, credentials };
+          const transport = TransportAPI(
+            matchID,
+            socket,
+            this.clientInfo,
+            this.roomInfo,
+            provisionalClient
+          );
 
           const master = new Master(
             game,
             app.context.db,
-            TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+            transport,
             app.context.auth
           );
           const syncResponse = await master.onSync(...args);
@@ -199,6 +206,7 @@ export class SocketIO {
             return;
           }
           await master.onConnectionChange(matchID, playerID, credentials, true);
+          this.addClient(provisionalClient);
         });
 
         socket.on('disconnect', async () => {
