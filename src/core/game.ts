@@ -29,6 +29,7 @@ function IsProcessed(game: Game | ProcessedGame): game is ProcessedGame {
 function checkSerializable(G: unknown) {
   if (process.env.NODE_ENV !== 'test') {
     // Only check on test environment.
+    /* istanbul ignore next */
     return G;
   }
   const assert = require('assert');
