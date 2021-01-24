@@ -27,6 +27,15 @@ describe('basic', () => {
         C: {
           move: () => 'C',
         },
+        INVALID: () => {
+          class Foo {
+            a: number;
+            constructor(a: number) {
+              this.a = a;
+            }
+          }
+          return { a: new Foo(1) };
+        },
       },
 
       phases: {
@@ -40,7 +49,7 @@ describe('basic', () => {
   });
 
   test('sanity', () => {
-    expect(game.moveNames).toEqual(['A', 'B', 'C']);
+    expect(game.moveNames).toEqual(['A', 'B', 'C', 'INVALID']);
     expect(typeof game.processMove).toEqual('function');
   });
 
@@ -55,6 +64,16 @@ describe('basic', () => {
 
     state.ctx.phase = 'PA';
     expect(game.processMove(state, { type: 'A' })).toEqual('PA.A');
+  });
+
+  test('invalid non-serializable state throws', () => {
+    const G = { test: true };
+    const ctx = { phase: '' };
+    const state = { G, ctx, plugins: {} };
+
+    expect(() => {
+      game.processMove(state, { type: 'INVALID' });
+    }).toThrow();
   });
 
   test('long-form move syntax', () => {

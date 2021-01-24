@@ -26,6 +26,20 @@ function IsProcessed(game: Game | ProcessedGame): game is ProcessedGame {
   return game.processMove !== undefined;
 }
 
+function checkSerializable(G: unknown) {
+  if (process.env.NODE_ENV !== 'test') {
+    // Only check on test environment.
+    return G;
+  }
+  const assert = require('assert');
+  assert.deepStrictEqual(
+    G,
+    JSON.parse(JSON.stringify(G)),
+    'Resulting state from move is not serialiazble.'
+  );
+  return G;
+}
+
 /**
  * Helper to generate the game move reducer. The returned
  * reducer has the following signature:
@@ -95,7 +109,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
         if (action.args !== undefined) {
           args = args.concat(action.args);
         }
-        return fn(state.G, ctxWithAPI, ...args);
+        return checkSerializable(fn(state.G, ctxWithAPI, ...args));
       }
 
       logging.error(`invalid move object: ${action.type}`);
