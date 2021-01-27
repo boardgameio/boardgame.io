@@ -67,16 +67,73 @@ describe('LobbyClient', () => {
 
   describe('status errors', () => {
     beforeEach(async () => {
+      client = new LobbyClient();
+    });
+
+    test('404 throws an error', async () => {
       (global as any).fetch = jest.fn(async () => ({
         ok: false,
         status: 404,
         json: async () => {},
       }));
-      client = new LobbyClient();
+
+      await expect(client.listGames()).rejects.toThrow('HTTP status 404');
     });
 
-    test('404 throws an error', async () => {
-      await expect(client.listGames()).rejects.toThrow('HTTP status 404');
+    test('404 throws an error with json details', async () => {
+      (global as any).fetch = jest.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({ moreInformation: 'some helpful details' }),
+      }));
+
+      await expect(client.listGames()).rejects.toThrow(
+        expect.objectContaining({
+          message: 'HTTP status 404',
+          details: {
+            moreInformation: 'some helpful details',
+          },
+        })
+      );
+    });
+
+    test('404 throws an error with text details', async () => {
+      (global as any).fetch = jest.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => {
+          throw new Error('impossible to parse json');
+        },
+        text: async () =>
+          '<moreInformation>some helpful details</moreInformation>',
+      }));
+
+      await expect(client.listGames()).rejects.toThrow(
+        expect.objectContaining({
+          message: 'HTTP status 404',
+          details: '<moreInformation>some helpful details</moreInformation>',
+        })
+      );
+    });
+
+    test('404 throws an error without details', async () => {
+      (global as any).fetch = jest.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => {
+          throw new Error('impossible to parse json');
+        },
+        text: async () => {
+          throw new Error('something went wrong in the connection');
+        },
+      }));
+
+      await expect(client.listGames()).rejects.toThrow(
+        expect.objectContaining({
+          message: 'HTTP status 404',
+          details: 'something went wrong in the connection',
+        })
+      );
     });
   });
 
