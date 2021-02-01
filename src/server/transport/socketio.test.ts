@@ -228,14 +228,6 @@ describe('connect / disconnect', () => {
   let roomInfo;
   let io;
 
-  const toObj = (m) => {
-    const o = {};
-    m.forEach((value, key) => {
-      o[key] = value;
-    });
-    return o;
-  };
-
   beforeAll(() => {
     clientInfo = new Map();
     roomInfo = new Map();
@@ -252,11 +244,11 @@ describe('connect / disconnect', () => {
     const args1: SyncArgs = ['matchID', '1', undefined, 2];
     await io.socket.receive('sync', ...args1);
 
-    expect(toObj(clientInfo)['0']).toMatchObject({
+    expect(clientInfo.get('0')).toMatchObject({
       matchID: 'matchID',
       playerID: '0',
     });
-    expect(toObj(clientInfo)['1']).toMatchObject({
+    expect(clientInfo.get('1')).toMatchObject({
       matchID: 'matchID',
       playerID: '1',
     });
@@ -266,30 +258,30 @@ describe('connect / disconnect', () => {
     io.socket.id = '0';
     await io.socket.receive('disconnect');
 
-    expect(toObj(clientInfo)['0']).toBeUndefined();
-    expect(toObj(clientInfo)['1']).toMatchObject({
+    expect(clientInfo.get('0')).toBeUndefined();
+    expect(clientInfo.get('1')).toMatchObject({
       matchID: 'matchID',
       playerID: '1',
     });
-    expect(toObj(roomInfo.get('matchID'))).toEqual({ '1': '1' });
+    expect([...roomInfo.get('matchID')]).toEqual(['1']);
   });
 
   test('unknown player disconnects', async () => {
     io.socket.id = 'unknown';
     await io.socket.receive('disconnect');
 
-    expect(toObj(clientInfo)['0']).toBeUndefined();
-    expect(toObj(clientInfo)['1']).toMatchObject({
+    expect(clientInfo.get('0')).toBeUndefined();
+    expect(clientInfo.get('1')).toMatchObject({
       matchID: 'matchID',
       playerID: '1',
     });
-    expect(toObj(roomInfo.get('matchID'))).toEqual({ '1': '1' });
+    expect([...roomInfo.get('matchID')]).toEqual(['1']);
   });
 
   test('1 disconnects', async () => {
     io.socket.id = '1';
     await io.socket.receive('disconnect');
-    expect(toObj(clientInfo)).toEqual({});
-    expect(toObj(roomInfo.get('matchID'))).toEqual({});
+    expect([...clientInfo.keys()]).toHaveLength(0);
+    expect(roomInfo.get('matchID')).toBeUndefined();
   });
 });

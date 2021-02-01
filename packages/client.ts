@@ -7,6 +7,6 @@
  */
 
 import { Client } from '../src/client/client';
-import { LobbyClient } from '../src/lobby/client';
+import { LobbyClient, LobbyClientError } from '../src/lobby/client';
 
-export { Client, LobbyClient };
+export { Client, LobbyClient, LobbyClientError };

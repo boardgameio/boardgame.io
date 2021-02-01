@@ -1,4 +1,11 @@
-## v0.43.1
+### v0.43.2
+
+#### Bugfixes
+
+* [[3d614b8](https://github.com/boardgameio/boardgame.io/commit/3d614b8)] server: Improve security of socket.io transport layer ([#894](https://github.com/boardgameio/boardgame.io/pull/894))
+* [[dc96b26](https://github.com/boardgameio/boardgame.io/commit/dc96b26)] master: Disallow `onSync` match creation if game requires `setupData` ([#890](https://github.com/boardgameio/boardgame.io/pull/890))
+
+### v0.43.1
 
 #### Bugfixes
 
@@ -18,7 +25,7 @@
 * [[3b8ac79](https://github.com/boardgameio/boardgame.io/commit/3b8ac79)] Prevent `TypeError: state.deltalog is not iterable` ([#888](https://github.com/boardgameio/boardgame.io/pull/888))
 * [[2cc6104](https://github.com/boardgameio/boardgame.io/commit/2cc6104)] Support latest Safari & Firefox when running examples
 
-## v0.42.2
+### v0.42.2
 
 #### Features
 
@@ -28,7 +35,7 @@
 
 * [[c51bc09](https://github.com/boardgameio/boardgame.io/commit/c51bc09)] debug: prevent `endStage` event crashing debug log panel ([#856](https://github.com/boardgameio/boardgame.io/pull/856))
 
-## v0.42.1
+### v0.42.1
 
 #### Features
 
@@ -51,7 +58,7 @@
 * [[ace1144](https://github.com/boardgameio/boardgame.io/commit/ace1144)] local: Use shared local master with bots ([#838](https://github.com/boardgameio/boardgame.io/pull/838))
 * [[9fcbed7](https://github.com/boardgameio/boardgame.io/commit/9fcbed7)] client: Correctly type state returned by client to subscribers
 
-## v0.41.1
+### v0.41.1
 
 Push another release to fix NPM weirdness.
 
@@ -100,20 +107,20 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[f32dc76](https://github.com/boardgameio/boardgame.io/commit/f32dc76)] api: Expose gameover metadata in lobby endpoints ([#666](https://github.com/boardgameio/boardgame.io/pull/666))
 * [[fa865da](https://github.com/boardgameio/boardgame.io/commit/fa865da)] fixes build in rushjs monorepo context ([#550](https://github.com/boardgameio/boardgame.io/pull/550))
 
-## v0.39.16
+### v0.39.16
 
 #### Bugfixes
 
 * [[84e93b4](https://github.com/boardgameio/boardgame.io/commit/84e93b4)] build: Exclude svelte from Rollup’s external module list (#767)
 * [[72ed591](https://github.com/boardgameio/boardgame.io/commit/72ed591)] fix: Tidy up type provision (#764)
 
-## v0.39.15
+### v0.39.15
 
 #### Bugfixes
 
 * [[271aecd](https://github.com/boardgameio/boardgame.io/commit/271aecd)] fix: Fix client types & move BoardProps to React package (#752)
 
-## v0.39.14
+### v0.39.14
 
 #### Features
 
@@ -123,7 +130,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 * [[a6698e6](https://github.com/boardgameio/boardgame.io/commit/a6698e6)] debug: Fix save & restore in Debug panel (#746)
 
-## v0.39.13
+### v0.39.13
 
 #### Features
 
@@ -134,7 +141,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 * [[0088cb5](https://github.com/boardgameio/boardgame.io/commit/0088cb5)] fix: Re-sync client on reconnect, fixes #713 (#727)
 
-## v0.39.12
+### v0.39.12
 
 #### Features
 
@@ -149,7 +156,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[d728425](https://github.com/boardgameio/boardgame.io/commit/d728425)] core: Fix undo/redo if the move changed the stage (#701)
 * [[3a622f1](https://github.com/boardgameio/boardgame.io/commit/3a622f1)] Use Promise chaining to enforce read/write queue (#699)
 
-## v0.39.11
+### v0.39.11
 
 #### Features
 
@@ -162,7 +169,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[1483a08](https://github.com/boardgameio/boardgame.io/commit/1483a08)] fix UX issues in move debugger (#640)
 * [[814621b](https://github.com/boardgameio/boardgame.io/commit/814621b)] Make package.json scripts work on Windows (#657)
 
-## 0.39.10
+### v0.39.10
 
 #### Features
 
@@ -181,14 +188,14 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[78113aa](https://github.com/boardgameio/boardgame.io/commit/78113aa)] Add mosaic to notable_projects.md (#649)
 * [[c51b277](https://github.com/boardgameio/boardgame.io/commit/c51b277)] expose log as a prop in the React client (#641)
 
-## 0.39.9
+### v0.39.9
 
 #### Bugfixes
 
 * [[b4bd8b7](https://github.com/boardgameio/boardgame.io/commit/b4bd8b7)] package: update npm files field for new server bundle (#639)
 * [[0552efb](https://github.com/boardgameio/boardgame.io/commit/0552efb)] add src/ to NPM
 
-## v0.39.8
+### v0.39.8
 
 #### Bugfixes
 
@@ -198,13 +205,13 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[3d1c07c](https://github.com/boardgameio/boardgame.io/commit/3d1c07c)] server: Proxy server module with package.json (#622)
 * [[bd44678](https://github.com/boardgameio/boardgame.io/commit/bd44678)] Fix passing params to db adapter (#621)
 
-## v0.39.7
+### v0.39.7
 
 #### Bugfixes
 
 * [[44d0d4f](https://github.com/boardgameio/boardgame.io/commit/44d0d4f)] fix bad merge that undid https://github.com/boardgameio/boardgame.io/pull/614
 
-## v0.39.6
+### v0.39.6
 
 #### Features
 
@@ -216,7 +223,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[0688f4d](https://github.com/boardgameio/boardgame.io/commit/0688f4d)] Include credentials in undo/redo actions (#595)
 * [[f34f46b](https://github.com/boardgameio/boardgame.io/commit/f34f46b)] core: Don’t error if turn.order.next returns undefined (#614)
 
-## v0.39.5
+### v0.39.5
 
 #### Features
 
@@ -228,7 +235,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[1877268](https://github.com/boardgameio/boardgame.io/commit/1877268)] plugins: More Typescript & pass playerID to Enhance (#598)
 * [[5696dc4](https://github.com/boardgameio/boardgame.io/commit/5696dc4)] server: Correctly wait for server.listen event (#589)
 
-## v0.39.4
+### v0.39.4
 
 #### Features
 
@@ -241,13 +248,13 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 
 * [[9a21fee](https://github.com/boardgameio/boardgame.io/commit/9a21fee)] Remove namespacing in gameIDs on client side (#583)
 
-## v0.39.3
+### v0.39.3
 
 #### Features
 
 * [[c507cf0](https://github.com/boardgameio/boardgame.io/commit/c507cf0)] Typescript improvements (#578)
 
-## v0.39.1
+### v0.39.1
 
 #### Bugfixes
 
@@ -274,7 +281,7 @@ See [PR #709 on GitHub](https://github.com/boardgameio/boardgame.io/pull/709) fo
 * [[4157bc1](https://github.com/boardgameio/boardgame.io/commit/4157bc1)] remove namespacing in gameIDs
 * [[8c80785](https://github.com/boardgameio/boardgame.io/commit/8c80785)] remove namespace
 
-## v0.38.1
+### v0.38.1
 
 #### Features
 
@@ -311,7 +318,7 @@ or need help migrating.
 * [[79ebcc3](https://github.com/boardgameio/boardgame.io/commit/79ebcc3)] remove graceful-fs patch
 * [[9370366](https://github.com/boardgameio/boardgame.io/commit/9370366)] remove some unused Svelte props
 
-## v0.37.2
+### v0.37.2
 
 #### Bugfixes
 
@@ -319,7 +326,7 @@ or need help migrating.
 * [[aed5cd1](https://github.com/boardgameio/boardgame.io/commit/aed5cd1)] don't run bot once game is over
 * [[7c65046](https://github.com/boardgameio/boardgame.io/commit/7c65046)] fix redacted move example
 
-## v0.37.1
+### v0.37.1
 
 #### Bugfixes
 
@@ -362,7 +369,7 @@ const game = {
 * [[ef4f24d](https://github.com/boardgameio/boardgame.io/commit/ef4f24d)] Fix events in hooks triggered by a move (#525)
 * [[a2c64f8](https://github.com/boardgameio/boardgame.io/commit/a2c64f8)] increment turn before calling turn.onBegin
 
-## v0.35.1
+### v0.35.1
 
 #### Bugfixes
 
@@ -422,7 +429,7 @@ The other big change is that the NPM package now contains both CJS and ES builds
 - [[c77ba53](https://github.com/boardgameio/boardgame.io/commit/c77ba53)] handle multiple subscriptions correctly
 - [[b045de3](https://github.com/boardgameio/boardgame.io/commit/b045de3)] use Parcel instead of Webpack in examples
 
-## v0.33.2
+### v0.33.2
 
 #### Features
 
@@ -433,7 +440,7 @@ The other big change is that the NPM package now contains both CJS and ES builds
 
 - [[bed18ce](https://github.com/boardgameio/boardgame.io/commit/bed18ce)] reintroduce InitializeGame in boardgame.io/core
 
-## v0.33.1
+### v0.33.1
 
 #### Features
 
@@ -485,7 +492,7 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 
 - [[fd70ed5](https://github.com/boardgameio/boardgame.io/commit/fd70ed5)] No payload is not an authentic player (#430)
 
-## v0.32.1
+### v0.32.1
 
 #### Features
 
@@ -504,7 +511,7 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 - [[25c2263](https://github.com/boardgameio/boardgame.io/commit/25c2263)] Fix #345; restrict undo/redo to currentPlayer (#408)
 - [[6de7b64](https://github.com/boardgameio/boardgame.io/commit/6de7b64)] Add /rename endpoint for lobby (#414)
 
-## v0.31.7
+### v0.31.7
 
 #### Features
 
@@ -514,7 +521,7 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 
 - [[a6145a5](https://github.com/boardgameio/boardgame.io/commit/a6145a5)] upgrade koa and koa-body
 
-## v0.31.6
+### v0.31.6
 
 #### Bugfixes
 
@@ -527,7 +534,7 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 - [[eda9728](https://github.com/boardgameio/boardgame.io/commit/eda9728)] update undo to reflect current ctx (#393)
 - [[e46f195](https://github.com/boardgameio/boardgame.io/commit/e46f195)] add turn and phase to log entries
 
-## v0.31.5
+### v0.31.5
 
 #### Features
 
@@ -539,7 +546,7 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 - [[8ed812e](https://github.com/boardgameio/boardgame.io/commit/8ed812e)] handle default number of players bigger than 2 for 1st game of the list (#392)
 - [[ec7dde5](https://github.com/boardgameio/boardgame.io/commit/ec7dde5)] Don't leak undefined ctx properties from turnOrder.actionPlayers (#382)
 
-## v0.31.4
+### v0.31.4
 
 #### Features
 
@@ -551,14 +558,14 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 - [[c24e0cd](https://github.com/boardgameio/boardgame.io/commit/c24e0cd)] upgrade Expo and fix React Native example
 - [[c1ee6f3](https://github.com/boardgameio/boardgame.io/commit/c1ee6f3)] python bot: fix #379 (#380)
 
-## v0.31.3
+### v0.31.3
 
 #### Features
 
 - [[94b1d65](https://github.com/boardgameio/boardgame.io/commit/94b1d65)] Add flatfile database with node-persist (#372)
 - [[f6e70fd](https://github.com/boardgameio/boardgame.io/commit/f6e70fd)] Add custom renderer parameter to lobby + clean up code (#353)
 
-## v0.31.2
+### v0.31.2
 
 #### Features
 
@@ -571,7 +578,7 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 - [[d7d6b44](https://github.com/boardgameio/boardgame.io/commit/d7d6b44)] Fix lobby example (#351)
 - [[a285fbf](https://github.com/boardgameio/boardgame.io/commit/a285fbf)] Allow https urls to be passed to lobby (#350)
 
-## v0.31.1
+### v0.31.1
 
 #### Bugfixes
 
@@ -602,32 +609,32 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 
 - [[d20d26c](https://github.com/boardgameio/boardgame.io/commit/d20d26c)] make master write to proper namepspaced keys
 
-## v0.29.5
+### v0.29.5
 
 #### Features
 
 - [[7188222](https://github.com/boardgameio/boardgame.io/commit/7188222)] add plugin.onPhaseBegin
 
-## v0.29.4
+### v0.29.4
 
 #### Features
 
 - [[c1b4a03](https://github.com/boardgameio/boardgame.io/commit/c1b4a03)] add playerSetup option to PluginPlayer
 
-## v0.29.3
+### v0.29.3
 
 #### Features
 
 - [[da1eac6](https://github.com/boardgameio/boardgame.io/commit/da1eac6)] rename plugin api functions
 - [[659007a](https://github.com/boardgameio/boardgame.io/commit/659007a)] pass game object to plugins
 
-## v0.29.2
+### v0.29.2
 
 #### Bugfixes
 
 - [[5d74c95](https://github.com/boardgameio/boardgame.io/commit/5d74c95)] fix immer plugin order
 
-## v0.29.1
+### v0.29.1
 
 #### Features
 
@@ -642,7 +649,7 @@ Check out this [migration guide](https://nicolodavis.com/blog/boardgame.io-0.33/
 
 - [[d1bd1d1](https://github.com/boardgameio/boardgame.io/commit/d1bd1d1)] Plugin API
 
-## v0.28.1
+### v0.28.1
 
 #### Features
 
@@ -685,7 +692,7 @@ const TicTacToe = Game({
 });
 ```
 
-## v0.27.1
+### v0.27.1
 
 #### Features
 
@@ -822,7 +829,7 @@ actionPlayers: { all: true },
 }
 ```
 
-## v0.26.3
+### v0.26.3
 
 #### Features
 
@@ -833,13 +840,13 @@ actionPlayers: { all: true },
 - [[58e135b](https://github.com/boardgameio/boardgame.io/commit/58e135b)] fix bug that was causing ctx.events to be undefined
 - [[ea3754b](https://github.com/boardgameio/boardgame.io/commit/ea3754b)] player needs to be in actionPlayers in order to call events
 
-## v0.26.2
+### v0.26.2
 
 #### Features
 
 - [[a352d1e](https://github.com/boardgameio/boardgame.io/commit/a352d1e)] decouple once and allOthers
 
-## v0.26.1
+### v0.26.1
 
 #### Bugfixes
 
@@ -864,20 +871,20 @@ actionPlayers: { all: true },
 - [[b4874a6](https://github.com/boardgameio/boardgame.io/commit/b4874a6)] call the client subscribe callback after LogMiddleware has run
 - [[9b9d735](https://github.com/boardgameio/boardgame.io/commit/9b9d735)] reset deltalog properly
 
-## v0.25.5
+### v0.25.5
 
 #### Features
 
 - [[4ed6b94](https://github.com/boardgameio/boardgame.io/commit/4ed6b94)] add server startup message
 - [[1688639](https://github.com/boardgameio/boardgame.io/commit/1688639)] decouple transport layer from server logic
 
-## v0.25.4
+### v0.25.4
 
 #### Bugfixes
 
 - Fixed babelHelpers error in npm.
 
-## v0.25.3
+### v0.25.3
 
 Broken, do not use (complains about babelHelpers missing).
 
@@ -885,14 +892,14 @@ Broken, do not use (complains about babelHelpers missing).
 
 - [[ebf7e73](https://github.com/boardgameio/boardgame.io/commit/ebf7e73)] fix bug that was preventing playerID from being overriden by the debug ui
 
-## v0.25.2
+### v0.25.2
 
 #### Bugfixes
 
 - [[a42e07b](https://github.com/boardgameio/boardgame.io/commit/a42e07b)] npm audit fix --only=prod
 - [[cfe7296](https://github.com/boardgameio/boardgame.io/commit/cfe7296)] update koa and socket.io
 
-## v0.25.1
+### v0.25.1
 
 #### Bugfixes
 
@@ -941,13 +948,13 @@ Broken, do not use (complains about babelHelpers missing).
 - [[b28ee74](https://github.com/boardgameio/boardgame.io/commit/b28ee74)] ability to change playerID from Debug UI
 - [[fe1230e](https://github.com/boardgameio/boardgame.io/commit/fe1230e)] Firebase integration (#223)
 
-## v0.23.3
+### v0.23.3
 
 #### Bugfixes
 
 - [[6194986](https://github.com/boardgameio/boardgame.io/commit/6194986)] remove async/await from client code
 
-## v0.23.2
+### v0.23.2
 
 #### Bugfixes
 
@@ -958,13 +965,13 @@ Broken, do not use (complains about babelHelpers missing).
 - [[99b9844](https://github.com/boardgameio/boardgame.io/commit/99b9844)] Python Bots
 - [[a7134a5](https://github.com/boardgameio/boardgame.io/commit/a7134a5)] List available games API
 
-## v0.23.1
+### v0.23.1
 
 #### Bugfixes
 
 - [[f26328c](https://github.com/boardgameio/boardgame.io/commit/f26328c)] add ai.js to rollup config
 
-# v0.23
+## v0.23.0
 
 #### Features
 
@@ -976,7 +983,7 @@ Broken, do not use (complains about babelHelpers missing).
 - [[7a80f66](https://github.com/boardgameio/boardgame.io/commit/7a80f66)] make changeActionPlayers an opt-in event
 - [[40cd4b8](https://github.com/boardgameio/boardgame.io/commit/40cd4b8)] Add config update on phase change Fixes #211 (#212)
 
-## v0.22.1
+### v0.22.1
 
 #### Bugfixes
 
@@ -984,20 +991,20 @@ Broken, do not use (complains about babelHelpers missing).
 - [[81ed088](https://github.com/boardgameio/boardgame.io/commit/81ed088)] ensure endTurn is called only once after a move
 - [[ca9f6ca](https://github.com/boardgameio/boardgame.io/commit/ca9f6ca)] disable move if playerID is null
 
-# v0.22.0
+## v0.22.0
 
 #### Features
 
 - [[5362955](https://github.com/boardgameio/boardgame.io/commit/5362955)] React Native Client (#128)
 - [[b329df2](https://github.com/boardgameio/boardgame.io/commit/b329df2)] Pass through props (#173)
 
-## v0.21.5
+### v0.21.5
 
 #### Bugfixes
 
 - [[55715c9](https://github.com/boardgameio/boardgame.io/commit/55715c9)] Fix undefined ctx in onPhaseBegin
 
-## v0.21.4
+### v0.21.4
 
 #### Features
 
@@ -1010,7 +1017,7 @@ Broken, do not use (complains about babelHelpers missing).
 
 - [[278b369](https://github.com/boardgameio/boardgame.io/commit/278b369)] Fix bug that was ending phase incorrectly (#176)
 
-## v0.21.3
+### v0.21.3
 
 #### Features
 
@@ -1022,19 +1029,19 @@ Broken, do not use (complains about babelHelpers missing).
 
 - [[5e49448](https://github.com/boardgameio/boardgame.io/commit/5e49448)] convert multiplayer move whitelist to blacklist
 
-## v0.21.2
+### v0.21.2
 
 #### Bugfixes
 
 - [[27705d5](https://github.com/boardgameio/boardgame.io/commit/27705d5)] pass Events API correctly inside events.update
 
-## v0.21.1
+### v0.21.1
 
 #### Bugfixes
 
 - [[87e77c1](https://github.com/boardgameio/boardgame.io/commit/87e77c1)] correctly detach APIs from ctx in startTurn
 
-# v0.21
+## v0.21.0
 
 #### Features
 
@@ -1048,7 +1055,7 @@ Broken, do not use (complains about babelHelpers missing).
 - [[748f36f](https://github.com/boardgameio/boardgame.io/commit/748f36f)] UI: add mouse hover action props to grid, hex, and token (#153)
 - [[f664237](https://github.com/boardgameio/boardgame.io/commit/f664237)] Add notion of actionPlayers (#145)
 
-## v0.20.2
+### v0.20.2
 
 #### Features
 
@@ -1066,7 +1073,7 @@ Broken, do not use (complains about babelHelpers missing).
   is passed to the moves. Take a look at http://boardgame.io/#/random for
   more details.
 
-## v0.20.1
+### v0.20.1
 
 #### Bugfixes
 
@@ -1074,13 +1081,13 @@ Broken, do not use (complains about babelHelpers missing).
 - [[ed09f51](https://github.com/boardgameio/boardgame.io/commit/ed09f51)] Allow calling Random during setup
 - [[c50d5ea](https://github.com/boardgameio/boardgame.io/commit/c50d5ea)] fix log rendering of phases
 
-# v0.20
+## v0.20.0
 
 #### Features
 
 - [[eec8896](https://github.com/boardgameio/boardgame.io/commit/eec8896)] undo/redo
 
-# v0.19
+## v0.19.0
 
 #### Features
 
@@ -1107,13 +1114,13 @@ const Server = require('boardgame.io/server').Server;
 const Server = require('boardgame.io/server');
 ```
 
-## v0.18.1
+### v0.18.1
 
 #### Bugfixes
 
 [[0c894bd](https://github.com/boardgameio/boardgame.io/commit/0c894bd)] add react.js to rollup config
 
-# v0.18
+## v0.18.0
 
 #### Features
 
@@ -1148,7 +1155,7 @@ to any particular UI framework.
 
 - [[6a010c8](https://github.com/boardgameio/boardgame.io/commit/6a010c8)] Debug UI: fixes related to errors in arguments (#123)
 
-## v0.17.2
+### v0.17.2
 
 #### Features
 
@@ -1160,7 +1167,7 @@ to any particular UI framework.
 
 - [[a768f1f](https://github.com/boardgameio/boardgame.io/commit/a768f1f)] remove entries from clientInfo and roomInfo on disconnect
 
-## v0.17.1
+### v0.17.1
 
 #### Features
 
@@ -1171,7 +1178,7 @@ to any particular UI framework.
 
 - [[11e215e](https://github.com/boardgameio/boardgame.io/commit/11e215e)] fix bug that was using the wrong playerID when calculating playerView
 
-# v0.17.0
+## v0.17.0
 
 #### Features
 
@@ -1183,7 +1190,7 @@ to any particular UI framework.
 - [[f3da742](https://github.com/boardgameio/boardgame.io/commit/f3da742)] make playerID available in ctx
 - [[cb09d9a](https://github.com/boardgameio/boardgame.io/commit/cb09d9a)] make turnOrder a globally configurable option
 
-## v0.16.8
+### v0.16.8
 
 #### Features
 
@@ -1193,13 +1200,13 @@ to any particular UI framework.
 
 - [[2ab3dfc](https://github.com/boardgameio/boardgame.io/commit/2ab3dfc6928eb8f0bfdf1ce319ac53021a2f905b)] end turn automatically when game ends
 
-## v0.16.7
+### v0.16.7
 
 #### Bugfixes
 
 - [[c65580d](https://github.com/boardgameio/boardgame.io/commit/c65580d)] Fix bug introduced in af3a7b5.
 
-## v0.16.6
+### v0.16.6
 
 #### Bugfixes
 
@@ -1211,13 +1218,13 @@ Buggy fix (fixed in 0.16.7).
 
 - [[2721ad4](https://github.com/boardgameio/boardgame.io/commit/2721ad4)] Allow overriding `db` implementation in Server.
 
-## v0.16.5
+### v0.16.5
 
 #### Features
 
 - `PlayerView.STRIP_SECRETS`
 
-## v0.16.4
+### v0.16.4
 
 #### Bugfixes
 
@@ -1240,7 +1247,7 @@ this.props.events.endTurn();
 }
 ```
 
-## v0.16.3
+### v0.16.3
 
 #### Features
 
@@ -1256,7 +1263,7 @@ games: [ TicTacToe, Chess ]
 };
 ```
 
-## v0.16.2
+### v0.16.2
 
 #### Bugfixes
 
@@ -1266,7 +1273,7 @@ games: [ TicTacToe, Chess ]
 
 - [[9ce42b2](https://github.com/boardgameio/boardgame.io/commit/9ce42b297372160f3ece4203b4c92000334d85e0)]: Change color in `GameLog` based on the player that made the move.
 
-## v0.16.1
+### v0.16.1
 
 #### Bugfixes
 
@@ -1277,7 +1284,7 @@ games: [ TicTacToe, Chess ]
 - [Triggers](https://github.com/boardgameio/boardgame.io/commit/774e540b20d7402184a00abdb7c512d7c8e85995)
 - [movesPerTurn](https://github.com/boardgameio/boardgame.io/commit/73d5b73d00eaba9aaf73a3576dfcfb25fc2b311d)
 
-# v0.16.0
+## v0.16.0
 
 #### Features
 
@@ -1305,11 +1312,3 @@ import Client from 'boardgame.io/client'
   the function returns anything at all.
 - `ctx.winner` is now `ctx.gameover`, and contains the return value of `endGameIf`.
 - `props.endTurn` is now `props.game.endTurn`.
-
-```
-
-```
-
-```
-
-```

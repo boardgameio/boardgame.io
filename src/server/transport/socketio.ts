@@ -11,8 +11,11 @@ import type IOTypes from 'socket.io';
 import type { ServerOptions as HttpsOptions } from 'https';
 import PQueue from 'p-queue';
 import { Master } from '../../master/master';
-import type { TransportAPI as MasterTransport } from '../../master/master';
-import type { Game, PlayerID, Server } from '../../types';
+import type {
+  TransportAPI as MasterTransport,
+  TransportData,
+} from '../../master/master';
+import type { Game, Server } from '../../types';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -25,33 +28,52 @@ export function TransportAPI(
   matchID: string,
   socket: IOTypes.Socket,
   clientInfo: SocketIO['clientInfo'],
-  roomInfo: SocketIO['roomInfo']
+  roomInfo: SocketIO['roomInfo'],
+  provisionalClient?: Client
 ): MasterTransport {
+  /**
+   * Emit a socket.io event to the recipientID.
+   * If the recipient is the current socket, uses a basic emit, otherwise
+   * emits via the current socket’s `to` method.
+   */
+  const emit = (recipientID: string, { type, args }: TransportData) => {
+    const emitter = socket.id === recipientID ? socket : socket.to(recipientID);
+    emitter.emit(type, ...args);
+  };
+
+  /**
+   * Run a callback for each registered client for this match, including
+   * this transport’s provisionalClient if provided.
+   */
+  const forEachClient = (clientCallback: (client: Client) => void) => {
+    const clientIDs = roomInfo.get(matchID);
+    if (clientIDs) {
+      clientIDs.forEach((clientID) => {
+        const client = clientInfo.get(clientID);
+        clientCallback(client);
+      });
+    }
+    if (provisionalClient) {
+      clientCallback(provisionalClient);
+    }
+  };
+
   /**
    * Send a message to a specific client.
    */
-  const send: MasterTransport['send'] = ({ type, playerID, args }) => {
-    const clients = roomInfo.get(matchID).values();
-    for (const client of clients) {
-      const info = clientInfo.get(client);
-      if (info.playerID === playerID) {
-        if (socket.id === client) {
-          socket.emit.apply(socket, [type, ...args]);
-        } else {
-          socket.to(info.socket.id).emit.apply(socket, [type, ...args]);
-        }
-      }
-    }
+  const send: MasterTransport['send'] = ({ playerID, ...data }) => {
+    forEachClient((client) => {
+      if (client.playerID === playerID) emit(client.socket.id, data);
+    });
   };
 
   /**
    * Send a message to all clients.
    */
   const sendAll: MasterTransport['sendAll'] = (makePlayerData) => {
-    roomInfo.get(matchID).forEach((c) => {
-      const playerID: PlayerID = clientInfo.get(c).playerID;
-      const data = makePlayerData(playerID);
-      send({ playerID, ...data });
+    forEachClient((client) => {
+      const data = makePlayerData(client.playerID);
+      emit(client.socket.id, data);
     });
   };
 
@@ -89,6 +111,42 @@ export class SocketIO {
     this.https = https;
     this.socketAdapter = socketAdapter;
     this.socketOpts = socketOpts;
+  }
+
+  /**
+   * Unregister client data for a socket.
+   */
+  private removeClient(socketID: string): void {
+    // Get client data for this socket ID.
+    const client = this.clientInfo.get(socketID);
+    if (!client) return;
+    // Remove client from list of connected sockets for this match.
+    const { matchID } = client;
+    const matchClients = this.roomInfo.get(matchID);
+    matchClients.delete(socketID);
+    // If the match is now empty, delete its promise queue & client ID list.
+    if (matchClients.size === 0) {
+      this.roomInfo.delete(matchID);
+      this.deleteMatchQueue(matchID);
+    }
+    // Remove client data from the client map.
+    this.clientInfo.delete(socketID);
+  }
+
+  /**
+   * Register client data for a socket.
+   */
+  private addClient(client: Client): void {
+    const { matchID, socket } = client;
+    // Add client to list of connected sockets for this match.
+    let matchClients = this.roomInfo.get(matchID);
+    if (matchClients === undefined) {
+      matchClients = new Set<string>();
+      this.roomInfo.set(matchID, matchClients);
+    }
+    matchClients.add(socket.id);
+    // Register data for this socket in the client map.
+    this.clientInfo.set(socket.id, client);
   }
 
   init(app: Server.App & { _io?: IOTypes.Server }, games: Game[]) {
@@ -129,48 +187,36 @@ export class SocketIO {
         socket.on('sync', async (...args: Parameters<Master['onSync']>) => {
           const [matchID, playerID, credentials] = args;
           socket.join(matchID);
+          this.removeClient(socket.id);
 
-          // Remove client from any previous game that it was a part of.
-          if (this.clientInfo.has(socket.id)) {
-            const { matchID: oldMatchID } = this.clientInfo.get(socket.id);
-            this.roomInfo.get(oldMatchID).delete(socket.id);
-          }
-
-          let roomClients = this.roomInfo.get(matchID);
-          if (roomClients === undefined) {
-            roomClients = new Set<string>();
-            this.roomInfo.set(matchID, roomClients);
-          }
-          roomClients.add(socket.id);
-
-          this.clientInfo.set(socket.id, {
+          const client = { socket, matchID, playerID, credentials };
+          const transport = TransportAPI(
             matchID,
-            playerID,
             socket,
-            credentials,
-          });
-
+            this.clientInfo,
+            this.roomInfo,
+            client
+          );
           const master = new Master(
             game,
             app.context.db,
-            TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+            transport,
             app.context.auth
           );
-          await master.onSync(...args);
+
+          const syncResponse = await master.onSync(...args);
+          if (syncResponse && syncResponse.error === 'unauthorized') {
+            return;
+          }
           await master.onConnectionChange(matchID, playerID, credentials, true);
+          this.addClient(client);
         });
 
         socket.on('disconnect', async () => {
           const client = this.clientInfo.get(socket.id);
+          this.removeClient(socket.id);
           if (client) {
             const { matchID, playerID, credentials } = client;
-            this.roomInfo.get(matchID).delete(socket.id);
-            this.clientInfo.delete(socket.id);
-
-            if (!this.roomInfo.get(matchID).size) {
-              this.deleteMatchQueue(matchID);
-            }
-
             const master = new Master(
               game,
               app.context.db,
@@ -185,6 +231,7 @@ export class SocketIO {
             );
           }
         });
+
         socket.on(
           'chat',
           async (...args: Parameters<Master['onChatMessage']>) => {
