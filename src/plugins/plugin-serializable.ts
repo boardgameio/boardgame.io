@@ -1,5 +1,5 @@
 import type { Plugin, AnyFn, Ctx } from '../types';
-import isPlainObject from 'lodash/isPlainObject';
+import isPlainObject from 'lodash.isplainobject';
 
 /**
  * Check if a value can be serialized (e.g. using `JSON.stringify`).
