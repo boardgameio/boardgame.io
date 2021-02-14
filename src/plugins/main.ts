@@ -10,6 +10,7 @@ import PluginImmer from './plugin-immer';
 import PluginRandom from './plugin-random';
 import PluginEvents from './plugin-events';
 import PluginLog from './plugin-log';
+import PluginSerializable from './plugin-serializable';
 import type {
   AnyFn,
   PartialGameState,
@@ -29,7 +30,13 @@ interface PluginOpts {
 /**
  * List of plugins that are always added.
  */
-const DEFAULT_PLUGINS = [PluginImmer, PluginRandom, PluginEvents, PluginLog];
+const DEFAULT_PLUGINS = [
+  PluginImmer,
+  PluginRandom,
+  PluginEvents,
+  PluginLog,
+  PluginSerializable,
+];
 
 /**
  * Allow plugins to intercept actions and process them.

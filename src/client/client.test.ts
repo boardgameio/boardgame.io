@@ -471,6 +471,19 @@ describe('move dispatchers', () => {
     expect(store.getState().G).toMatchObject({ moved: '0' });
   });
 
+  test('with undefined playerID - multiplayer mode', () => {
+    const store = createStore(reducer, initialState);
+    const api = createMoveDispatchers(
+      game.moveNames,
+      store,
+      undefined,
+      null,
+      true
+    );
+    api.B();
+    expect(store.getState().G).toMatchObject({ moved: undefined });
+  });
+
   test('with null playerID - singleplayer mode', () => {
     const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null);

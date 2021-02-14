@@ -66,16 +66,6 @@ describe('basic', () => {
     expect(game.processMove(state, { type: 'A' })).toEqual('PA.A');
   });
 
-  test('invalid non-serializable state throws', () => {
-    const G = { test: true };
-    const ctx = { phase: '' };
-    const state = { G, ctx, plugins: {} };
-
-    expect(() => {
-      game.processMove(state, { type: 'INVALID' });
-    }).toThrow();
-  });
-
   test('long-form move syntax', () => {
     expect(
       game.processMove({ ctx: { phase: '' }, plugins: {} }, { type: 'C' })
