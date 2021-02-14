@@ -27,15 +27,6 @@ describe('basic', () => {
         C: {
           move: () => 'C',
         },
-        INVALID: () => {
-          class Foo {
-            a: number;
-            constructor(a: number) {
-              this.a = a;
-            }
-          }
-          return { a: new Foo(1) };
-        },
       },
 
       phases: {
@@ -49,7 +40,7 @@ describe('basic', () => {
   });
 
   test('sanity', () => {
-    expect(game.moveNames).toEqual(['A', 'B', 'C', 'INVALID']);
+    expect(game.moveNames).toEqual(['A', 'B', 'C']);
     expect(typeof game.processMove).toEqual('function');
   });
 
