@@ -6,11 +6,11 @@ describe('plugin-serializable', () => {
   beforeAll(() => {
     const game = {
       moves: {
-        serializable: (_, ctx) => {
+        serializable: () => {
           return { hello: 'world' };
         },
 
-        nonSerializable: (_, ctx) => {
+        nonSerializable: () => {
           class Foo {
             a: number;
             constructor(a: number) {
