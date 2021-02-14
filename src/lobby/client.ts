@@ -24,6 +24,15 @@ const validateBody = (
   }
 };
 
+export class LobbyClientError extends Error {
+  readonly details: any;
+
+  constructor(message: string, details: any) {
+    super(message);
+    this.details = details;
+  }
+}
+
 /**
  * Create a boardgame.io Lobby API client.
  * @param server The API’s base URL, e.g. `http://localhost:8000`.
@@ -38,7 +47,23 @@ export class LobbyClient {
 
   private async request(route: string, init?: RequestInit) {
     const response = await fetch(this.server + route, init);
-    if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+
+    if (!response.ok) {
+      let details: any;
+
+      try {
+        details = await response.json();
+      } catch {
+        try {
+          details = await response.text();
+        } catch (error) {
+          details = error.message;
+        }
+      }
+
+      throw new LobbyClientError(`HTTP status ${response.status}`, details);
+    }
+
     return response.json();
   }
 
