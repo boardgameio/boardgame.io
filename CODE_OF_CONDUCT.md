@@ -16,6 +16,6 @@ You may do either or both of the following:
 
 1. Politely message the perpetrator to steer them in the right direction.
 
-1. Contact a moderator privately to report bad behavior and request intervention.
+1. Contact a moderator privately (or email moderators@boardgame.io) to report bad behavior and request intervention.
 
 Moderators will encourage better behavior or issue a warning as appropriate. Further action (like banning a member) may be necessary as a last resort when other measures fail.
