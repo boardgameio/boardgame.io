@@ -1,3 +1,15 @@
+### v0.43.3
+
+#### Features
+
+* [[01c522c](https://github.com/boardgameio/boardgame.io/commit/01c522c)] Throw error in development if non-serializable state is used in a move ([#896](https://github.com/boardgameio/boardgame.io/pull/896))
+* [[ccc9ada](https://github.com/boardgameio/boardgame.io/commit/ccc9ada)] Add details to exceptions raised in LobbyClient ([#898](https://github.com/boardgameio/boardgame.io/pull/898))
+
+#### Bugfixes
+
+* [[ae790e8](https://github.com/boardgameio/boardgame.io/commit/ae790e8)] dependencies: bump immer from 7.0.8 to 8.0.1 ([#895](https://github.com/boardgameio/boardgame.io/pull/895))
+* [[6f9bc27](https://github.com/boardgameio/boardgame.io/commit/6f9bc27)] dependencies: Run `npm audit fix`
+
 ### v0.43.2
 
 #### Bugfixes
