@@ -21,6 +21,7 @@ import type {
   LongFormMove,
   Undo,
 } from '../types';
+import { applyPatch } from 'rfc6902';
 
 /**
  * Check if the payload for the passed action contains a playerID.
@@ -352,7 +353,7 @@ export function CreateGameReducer({
 
         const first = _redo[0];
 
-        // Only allow players to redo their own undos.
+        // Only allow players to redo their own undo.
         if (
           actionHasPlayerID(action) &&
           action.payload.playerID !== first.playerID
@@ -377,6 +378,15 @@ export function CreateGameReducer({
         return plugins.ProcessAction(state, action, { game });
       }
 
+      case Actions.PATCH: {
+        const newState = applyPatch(state, action.patch);
+        if (Array.isArray(newState)) {
+          error(`Patch ${JSON.stringify(action.patch)} apply failed`);
+          return state;
+        } else {
+          return newState;
+        }
+      }
       default: {
         return state;
       }

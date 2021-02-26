@@ -8,6 +8,8 @@
 
 import * as Actions from './action-types';
 import type { SyncInfo, State, LogEntry } from '../types';
+import type { Operation } from 'rfc6902';
+import { applyPatch } from 'rfc6902';
 
 /**
  * Generate a move to be dispatched to the game move reducer.
@@ -68,6 +70,28 @@ export const sync = (info: SyncInfo) => ({
   state: info.state,
   log: info.log,
   initialState: info.initialState,
+  clientOnly: true as const,
+});
+
+/**
+ * Used to update the Redux store's state with patch in response to
+ * an action coming from another player.
+ * @param prevStateID previous stateID
+ * @param stateID stateID after this patch
+ * @param {object} patch - The patch to apply.
+ * @param {Array} deltalog - A log delta.
+ */
+export const patch = (
+  prevStateID: number,
+  stateID: number,
+  patch: Operation[],
+  deltalog: LogEntry[]
+) => ({
+  type: Actions.PATCH as typeof Actions.PATCH,
+  prevStateID,
+  stateID,
+  patch,
+  deltalog,
   clientOnly: true as const,
 });
 
