@@ -7,8 +7,8 @@
  */
 
 const production = process.env.NODE_ENV === 'production';
-const logfn = production ? () => {} : console.log;
-const errorfn = console.error;
+const logfn = production ? () => {} : (...msg) => console.log(...msg);
+const errorfn = (...msg) => console.error(...msg);
 
 export function info(msg: string) {
   logfn(`INFO: ${msg}`);
