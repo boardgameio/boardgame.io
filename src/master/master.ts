@@ -260,7 +260,7 @@ export class Master {
       );
       return;
     }
-
+    const prevState = store.getState();
     // Update server's version of the store.
     store.dispatch(action);
     state = store.getState();
@@ -283,9 +283,7 @@ export class Master {
       };
 
       if (this.game.deltaState) {
-        const prevState = store.getState();
-        const prevStateID = prevState._stateID;
-        const stateID = state._stateID;
+        const newStateID = state._stateID;
         const prevFilteredState = {
           ...prevState,
           G: this.game.playerView(prevState.G, prevState.ctx, playerID),
@@ -298,7 +296,7 @@ export class Master {
 
         return {
           type: 'patch',
-          args: [matchID, prevStateID, stateID, patch, log],
+          args: [matchID, stateID, newStateID, patch, log],
         };
       } else {
         return {
