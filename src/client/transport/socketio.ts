@@ -146,6 +146,7 @@ export class SocketIOTransport extends Transport {
             deltalog
           );
           this.store.dispatch(action);
+          // emit sync if patch apply failed
           if (this.store.getState()._stateID === currentStateID) {
             this.sync();
           }
