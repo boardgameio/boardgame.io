@@ -51,6 +51,9 @@ describe('logging', () => {
       jest.resetModules();
       logging = require('./logger');
     });
+    afterAll(() => {
+      process.env.NODE_ENV = oldNodeEnv;
+    });
 
     test('info stripped', () => {
       logging.info('msg2');
@@ -60,6 +63,28 @@ describe('logging', () => {
     test('error not stripped', () => {
       logging.error('msg1');
       expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('spying after load', () => {
+    let logging;
+
+    beforeAll(() => {
+      jest.resetModules();
+      console.log = oldConsoleLog;
+      console.error = oldConsoleError;
+      logging = require('./logger');
+      console.log = jest.fn();
+      console.error = jest.fn();
+    });
+
+    test('should allow console log to be spied', () => {
+      logging.info('test');
+      expect(console.log).toHaveBeenCalledWith('INFO: test');
+    });
+    test('should allow console error to be spied', () => {
+      logging.error('test');
+      expect(console.error).toHaveBeenCalledWith('ERROR:', 'test');
     });
   });
 });
