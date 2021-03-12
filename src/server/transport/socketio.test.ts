@@ -11,6 +11,12 @@ import { TransportAPI, SocketIO } from './socketio';
 import { Auth } from '../auth';
 import { ProcessGameConfig } from '../../core/game';
 import type { Master } from '../../master/master';
+import { error } from '../../core/logger';
+
+jest.mock('../../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 type SyncArgs = Parameters<Master['onSync']>;
 
@@ -201,10 +207,12 @@ describe('sync / update', () => {
 
   test('sync', () => {
     io.socket.receive('sync', 'matchID', '0');
+    expect(error).not.toBeCalled();
   });
 
   test('update', () => {
     io.socket.receive('update');
+    expect(error).not.toBeCalled();
   });
 });
 
@@ -217,6 +225,7 @@ describe('chat', () => {
 
   test('chat message', async () => {
     await io.socket.receive('chat', 'matchID', { message: 'foo' });
+    expect(error).not.toBeCalled();
   });
 });
 

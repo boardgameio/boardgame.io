@@ -137,7 +137,6 @@ export class SocketIOTransport extends Transport {
         deltalog: LogEntry[]
       ) => {
         const currentStateID = this.store.getState()._stateID;
-
         if (matchID === this.matchID && prevStateID === currentStateID) {
           const action = ActionCreators.patch(
             prevStateID,

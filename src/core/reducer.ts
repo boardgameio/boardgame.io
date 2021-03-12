@@ -21,7 +21,7 @@ import type {
   LongFormMove,
   Undo,
 } from '../types';
-import { applyPatch, createPatch } from 'rfc6902';
+import { applyPatch } from 'rfc6902';
 
 /**
  * Check if the payload for the passed action contains a playerID.
