@@ -131,7 +131,10 @@ test('valid patch', () => {
 
 test('invalid patch', () => {
   const originalState = { _stateID: 0, G: 'patch' } as State;
-  const state = reducer(originalState, patch(0, 1, [], []));
+  const state = reducer(
+    originalState,
+    patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], [])
+  );
   expect(state).toEqual(originalState);
 });
 
