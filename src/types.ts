@@ -98,7 +98,7 @@ export interface LogEntry {
   metadata?: any;
 }
 
-interface PluginContext<
+export interface PluginContext<
   API extends any = any,
   Data extends any = any,
   G extends any = any
@@ -143,7 +143,7 @@ export interface Plugin<
   }) => any;
 }
 
-type MoveFn<G extends any = any, CtxWithPlugins extends Ctx = Ctx> = (
+export type MoveFn<G extends any = any, CtxWithPlugins extends Ctx = Ctx> = (
   G: G,
   ctx: CtxWithPlugins,
   ...args: any[]
@@ -239,7 +239,7 @@ export interface TurnConfig<
   };
 }
 
-interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
+export interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   [phaseName: string]: PhaseConfig<G, CtxWithPlugins>;
 }
 
