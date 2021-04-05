@@ -239,7 +239,10 @@ export interface TurnConfig<
   };
 }
 
-export interface PhaseMap<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
+export interface PhaseMap<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
   [phaseName: string]: PhaseConfig<G, CtxWithPlugins>;
 }
 
