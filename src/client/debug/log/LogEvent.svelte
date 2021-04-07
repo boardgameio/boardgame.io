@@ -11,7 +11,9 @@
   const dispatch = createEventDispatcher();
 
   const args = action.payload.args;
-  const renderedArgs = typeof args === 'string' ? args : (args || []).join(',');
+  const renderedArgs = Array.isArray(args)
+    ? args.map(arg => JSON.stringify(arg, null, 2)).join(',')
+    : JSON.stringify(args, null, 2) || '';
   const playerID = action.payload.playerID;
   let actionType;
   switch (action.type) {
@@ -57,6 +59,11 @@
     border-style: solid;
     background: #eee;
     opacity: 1;
+  }
+
+  .args {
+    text-align: left;
+    white-space: pre-wrap;
   }
 
   .player0 {
@@ -133,7 +140,7 @@
   on:mouseleave={() => dispatch('mouseleave')}
   on:blur={() => dispatch('mouseleave')}
 >
-  <div>{actionType}({renderedArgs})</div>
+  <div class="args">{actionType}({renderedArgs})</div>
   {#if metadataComponent}
     <svelte:component this={metadataComponent} {metadata} />
   {:else}
