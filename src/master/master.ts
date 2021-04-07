@@ -260,7 +260,9 @@ export class Master {
       );
       return;
     }
+
     const prevState = store.getState();
+
     // Update server's version of the store.
     store.dispatch(action);
     state = store.getState();
