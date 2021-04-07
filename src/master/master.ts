@@ -27,6 +27,8 @@ import type {
 import { createMatch } from '../server/util';
 import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
+import type { Operation } from 'rfc6902';
+import { createPatch } from 'rfc6902';
 
 /**
  * Filter match data to get a player metadata object with credentials stripped.
@@ -91,6 +93,10 @@ export type TransportData =
   | {
       type: 'update';
       args: [string, State, LogEntry[]];
+    }
+  | {
+      type: 'patch';
+      args: [string, number, number, Operation[], LogEntry[]];
     }
   | {
       type: 'sync';
@@ -227,7 +233,7 @@ export class Master {
       return;
     }
 
-    // Get move for further checkings
+    // Get move for further checks
     const move =
       action.type == MAKE_MOVE
         ? this.game.flow.getMove(state.ctx, action.payload.type, playerID)
@@ -255,6 +261,8 @@ export class Master {
       return;
     }
 
+    const prevState = store.getState();
+
     // Update server's version of the store.
     store.dispatch(action);
     state = store.getState();
@@ -266,6 +274,7 @@ export class Master {
     });
 
     this.transportAPI.sendAll((playerID: string) => {
+      const log = redactLog(state.deltalog, playerID);
       const filteredState = {
         ...state,
         G: this.game.playerView(state.G, state.ctx, playerID),
@@ -275,12 +284,28 @@ export class Master {
         _redo: [],
       };
 
-      const log = redactLog(state.deltalog, playerID);
+      if (this.game.deltaState) {
+        const newStateID = state._stateID;
+        const prevFilteredState = {
+          ...prevState,
+          G: this.game.playerView(prevState.G, prevState.ctx, playerID),
+          plugins: PlayerView(prevState, { playerID, game: this.game }),
+          deltalog: undefined,
+          _undo: [],
+          _redo: [],
+        };
+        const patch = createPatch(prevFilteredState, filteredState);
 
-      return {
-        type: 'update',
-        args: [matchID, filteredState, log],
-      };
+        return {
+          type: 'patch',
+          args: [matchID, stateID, newStateID, patch, log],
+        };
+      } else {
+        return {
+          type: 'update',
+          args: [matchID, filteredState, log],
+        };
+      }
     });
 
     const { deltalog, ...stateWithoutDeltalog } = state;

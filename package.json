@@ -162,6 +162,7 @@
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
     "redux": "^4.0.0",
+    "rfc6902": "^4.0.1",
     "socket.io": "^2.4.1",
     "socket.io-client": "^2.3.0",
     "svelte": "^3.24.0",

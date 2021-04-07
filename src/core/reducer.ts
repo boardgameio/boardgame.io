@@ -21,6 +21,7 @@ import type {
   LongFormMove,
   Undo,
 } from '../types';
+import { applyPatch } from 'rfc6902';
 
 /**
  * Check if the payload for the passed action contains a playerID.
@@ -377,6 +378,18 @@ export function CreateGameReducer({
         return plugins.ProcessAction(state, action, { game });
       }
 
+      case Actions.PATCH: {
+        const oldState = state;
+        const newState = JSON.parse(JSON.stringify(oldState));
+        const patchError = applyPatch(newState, action.patch);
+        const hasError = patchError.some((entry) => entry !== null);
+        if (hasError) {
+          error(`Patch ${JSON.stringify(action.patch)} apply failed`);
+          return oldState;
+        } else {
+          return newState;
+        }
+      }
       default: {
         return state;
       }
