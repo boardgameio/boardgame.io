@@ -14,6 +14,12 @@ import { InitializeGame } from '../../core/initialize';
 import * as Actions from '../../core/action-types';
 import type { Master } from '../../master/master';
 import type { ChatMessage, State, Store } from '../../types';
+import { error } from '../../core/logger';
+
+jest.mock('../../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
 
 type UpdateArgs = Parameters<Master['onUpdate']>;
 type SyncArgs = Parameters<Master['onSync']>;
@@ -27,8 +33,8 @@ class MockSocket {
     this.emit = jest.fn();
   }
 
-  receive(type: string, arg0?: any, arg1?: any) {
-    this.callbacks[type](arg0, arg1);
+  receive(type: string, ...args) {
+    this.callbacks[type](...args);
   }
 
   on(type: string, callback: (arg0?: any, arg1?: any) => void) {
@@ -215,6 +221,61 @@ describe('multiplayer', () => {
       'matchID',
       message,
       m.getCredentials()
+    );
+  });
+});
+
+describe('multiplayer delta state', () => {
+  const mockSocket = new MockSocket();
+  const m = new TransportAdapter({ socket: mockSocket });
+  m.connect();
+  const game = { deltaState: true };
+  let store = null;
+
+  beforeEach(() => {
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game });
+    store = createStore(reducer, initialState);
+    m.setStore(store);
+  });
+
+  test('returns a valid store', () => {
+    expect(store).not.toBe(undefined);
+  });
+
+  test('receive patch', () => {
+    const originalState = JSON.parse(JSON.stringify(store.getState()));
+    mockSocket.receive(
+      'patch',
+      'unknown matchID',
+      0,
+      1,
+      [{ op: 'replace', path: '/_stateID', value: 1 }],
+      []
+    );
+    expect(store.getState()).toMatchObject(originalState);
+    mockSocket.receive(
+      'patch',
+      'default',
+      0,
+      1,
+      [{ op: 'replace', path: '/_stateID', value: 1 }],
+      []
+    );
+    expect(store.getState()._stateID).toBe(1);
+    mockSocket.receive(
+      'patch',
+      'default',
+      1,
+      2,
+      [{ op: 'replace', path: '/_stateIDD', value: 3 }],
+      []
+    );
+    expect(store.getState()._stateID).toBe(1);
+    const args: SyncArgs = ['default', null, undefined, 2];
+    expect(mockSocket.emit).lastCalledWith('sync', ...args);
+    expect(error).lastCalledWith(
+      'Patch [{"op":"replace","path":"/_stateIDD","value":3}] apply failed'
     );
   });
 });

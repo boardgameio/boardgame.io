@@ -100,9 +100,9 @@ export class SocketIO {
   protected clientInfo: Map<string, Client>;
   protected roomInfo: Map<string, Set<string>>;
   protected perMatchQueue: Map<string, PQueue>;
-  private https: HttpsOptions;
-  private socketAdapter: any;
-  private socketOpts: IOTypes.ServerOptions;
+  private readonly https: HttpsOptions;
+  private readonly socketAdapter: any;
+  private readonly socketOpts: IOTypes.ServerOptions;
 
   constructor({ https, socketAdapter, socketOpts }: SocketOpts = {}) {
     this.clientInfo = new Map();

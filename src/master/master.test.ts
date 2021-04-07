@@ -501,6 +501,191 @@ describe('update', () => {
   });
 });
 
+describe('patch', () => {
+  let sendAllReturn;
+
+  const send = jest.fn();
+  const sendAll = jest.fn((arg) => {
+    sendAllReturn = arg;
+  });
+  const db = new InMemory();
+  const master = new Master(
+    {
+      seed: 0,
+      deltaState: true,
+      setup: () => {
+        return {
+          players: {
+            '0': {
+              cards: ['card3'],
+            },
+            '1': {
+              cards: [],
+            },
+          },
+          cards: ['card0', 'card1', 'card2'],
+          discardedCards: [],
+        };
+      },
+      playerView: PlayerView.STRIP_SECRETS,
+      turn: {
+        activePlayers: { currentPlayer: { stage: 'A' } },
+        stages: {
+          A: {
+            moves: {
+              A: {
+                client: false,
+                move: (G, ctx: Ctx) => {
+                  const card = G.players[ctx.playerID].cards.shift();
+                  G.discardedCards.push(card);
+                },
+              },
+              B: {
+                client: false,
+                ignoreStaleStateID: true,
+                move: (G, ctx: Ctx) => {
+                  const card = G.cards.pop();
+                  G.players[ctx.playerID].cards.push(card);
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    db,
+    TransportAPI(send, sendAll)
+  );
+  const move = ActionCreators.makeMove('A', null, '0');
+  const action = ActionCreators.gameEvent('endTurn');
+
+  beforeAll(async () => {
+    await master.onSync('matchID', '0', undefined, 2);
+  });
+
+  beforeEach(() => {
+    sendAllReturn = undefined;
+    jest.clearAllMocks();
+  });
+
+  test('basic', async () => {
+    await master.onUpdate(move, 0, 'matchID', '0');
+    expect(sendAll).toBeCalled();
+    expect(sendAllReturn).not.toBeUndefined();
+
+    const value = sendAllReturn('0');
+    expect(value.type).toBe('patch');
+    expect(value.args[0]).toBe('matchID');
+    expect(value.args[1]).toBe(0);
+    expect(value.args[2]).toBe(1);
+    expect(value.args[3]).toMatchObject([
+      { op: 'remove', path: '/G/players/0/cards/0' },
+      { op: 'add', path: '/G/discardedCards/-', value: 'card3' },
+      { op: 'replace', path: '/ctx/numMoves', value: 1 },
+      { op: 'replace', path: '/_stateID', value: 1 },
+    ]);
+
+    expect(value.args[4]).toMatchObject([
+      {
+        action: {
+          payload: {
+            args: null,
+            playerID: '0',
+            type: 'A',
+          },
+          type: 'MAKE_MOVE',
+        },
+      },
+    ]);
+  });
+
+  test('invalid matchID', async () => {
+    await master.onUpdate(action, 1, 'default:unknown', '1');
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      `game not found, matchID=[default:unknown]`
+    );
+  });
+
+  test('invalid stateID', async () => {
+    await master.onUpdate(action, 100, 'matchID', '0');
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      `invalid stateID, was=[100], expected=[1] - playerID=[0] - action[endTurn]`
+    );
+  });
+
+  test('invalid playerID', async () => {
+    await master.onUpdate(action, 1, 'matchID', '102');
+    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '102');
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      `player not active - playerID=[102] - action[move]`
+    );
+  });
+
+  test('invalid move', async () => {
+    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '0');
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      `move not processed - canPlayerMakeMove=false - playerID=[0] - action[move]`
+    );
+  });
+
+  test('valid matchID / stateID / playerID', async () => {
+    await master.onUpdate(action, 1, 'matchID', '0');
+    expect(sendAll).toHaveBeenCalled();
+  });
+
+  describe('undo / redo', () => {
+    test('player 0 can undo', async () => {
+      await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '1');
+      expect(error).not.toBeCalled();
+    });
+
+    test('player 1 can’t undo', async () => {
+      await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
+      expect(error).toHaveBeenCalledWith(
+        `playerID=[0] cannot undo / redo right now`
+      );
+    });
+
+    test('player can’t undo with multiple active players', async () => {
+      const setActivePlayers = ActionCreators.gameEvent(
+        'setActivePlayers',
+        [{ all: 'A' }],
+        '0'
+      );
+      await master.onUpdate(setActivePlayers, 2, 'matchID', '0');
+      await master.onUpdate(ActionCreators.undo('0'), 3, 'matchID', '0');
+      expect(error).toHaveBeenCalledWith(
+        `playerID=[0] cannot undo / redo right now`
+      );
+    });
+
+    test('player can undo if they are the only active player', async () => {
+      const endStage = ActionCreators.gameEvent('endStage', undefined, '1');
+      await master.onUpdate(endStage, 2, 'matchID', '1');
+      await master.onUpdate(ActionCreators.undo('0'), 3, 'matchID', '1');
+      expect(error).not.toBeCalled();
+
+      // Clean-up active players.
+      const endStage2 = ActionCreators.gameEvent('endStage', undefined, '1');
+      await master.onUpdate(endStage2, 4, 'matchID', '1');
+    });
+  });
+
+  test('game over', async () => {
+    let event = ActionCreators.gameEvent('endGame');
+    await master.onUpdate(event, 3, 'matchID', '1');
+    event = ActionCreators.gameEvent('endTurn');
+    await master.onUpdate(event, 3, 'matchID', '1');
+    expect(error).toHaveBeenCalledWith(
+      `game over - matchID=[matchID] - playerID=[1] - action[endTurn]`
+    );
+  });
+});
+
 describe('connectionChange', () => {
   let sendAllReturn;
 

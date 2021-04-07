@@ -17,6 +17,7 @@ import {
   reset,
   undo,
   redo,
+  patch,
 } from './action-creators';
 import { error } from '../core/logger';
 import type { Ctx, Game, State, SyncInfo } from '../types';
@@ -117,6 +118,24 @@ test('sync', () => {
 test('update', () => {
   const state = reducer(undefined, update({ G: 'restored' } as State, []));
   expect(state).toEqual({ G: 'restored' });
+});
+
+test('valid patch', () => {
+  const originalState = { _stateID: 0, G: 'patch' } as State;
+  const state = reducer(
+    originalState,
+    patch(0, 1, [{ op: 'replace', path: '/_stateID', value: 1 }], [])
+  );
+  expect(state).toEqual({ _stateID: 1, G: 'patch' });
+});
+
+test('invalid patch', () => {
+  const originalState = { _stateID: 0, G: 'patch' } as State;
+  const state = reducer(
+    originalState,
+    patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], [])
+  );
+  expect(state).toEqual(originalState);
 });
 
 test('reset', () => {

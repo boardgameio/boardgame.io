@@ -7,11 +7,13 @@
  */
 
 import * as ioNamespace from 'socket.io-client';
+
 const io = ioNamespace.default;
 
 import * as ActionCreators from '../../core/action-creators';
 import type { Master } from '../../master/master';
 import { Transport } from './transport';
+import type { Operation } from 'rfc6902';
 import type {
   TransportOpts,
   MetadataCallback,
@@ -51,11 +53,13 @@ export class SocketIOTransport extends Transport {
   chatMessageCallback: ChatCallback;
 
   /**
-   * Creates a new Mutiplayer instance.
+   * Creates a new Multiplayer instance.
    * @param {object} socket - Override for unit tests.
    * @param {object} socketOpts - Options to pass to socket.io.
+   * @param {object} store - Redux store
    * @param {string} matchID - The game ID to connect to.
    * @param {string} playerID - The player ID associated with this client.
+   * @param {string} credentials - Authentication credentials
    * @param {string} gameName - The game type (the `name` field in `Game`).
    * @param {string} numPlayers - The number of players.
    * @param {string} server - The game server in the form of 'hostname:port'. Defaults to the server serving the client if not provided.
@@ -119,6 +123,35 @@ export class SocketIOTransport extends Transport {
         this.socket = io('/' + this.gameName, this.socketOpts);
       }
     }
+
+    // Called when another player makes a move and the
+    // master broadcasts the update as a patch to other clients (including
+    // this one).
+    this.socket.on(
+      'patch',
+      (
+        matchID: string,
+        prevStateID: number,
+        stateID: number,
+        patch: Operation[],
+        deltalog: LogEntry[]
+      ) => {
+        const currentStateID = this.store.getState()._stateID;
+        if (matchID === this.matchID && prevStateID === currentStateID) {
+          const action = ActionCreators.patch(
+            prevStateID,
+            stateID,
+            patch,
+            deltalog
+          );
+          this.store.dispatch(action);
+          // emit sync if patch apply failed
+          if (this.store.getState()._stateID === currentStateID) {
+            this.sync();
+          }
+        }
+      }
+    );
 
     // Called when another player makes a move and the
     // master broadcasts the update to other clients (including
