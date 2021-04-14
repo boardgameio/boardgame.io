@@ -10,6 +10,7 @@
   - [Undo / Redo](undo.md)
   - [Randomness](random.md)
   - [Secret State](secret-state.md)
+  - [Chat](chat.md)
   - [Storage](storage.md)
   - [Immutability](immutability.md)
   - [Plugins](plugins.md)
