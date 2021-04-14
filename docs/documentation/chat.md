@@ -16,3 +16,5 @@ Example:
     { id: 'bar', sender: '1', payload: 'Let’s go!' },
 ]
 ```
+
+!> The client only receives messages once connected to the server. If messages are sent amongst players before another player has connected, the new player will not receive those prior messages.
