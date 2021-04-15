@@ -2,13 +2,13 @@
 
 #### Features
 
-* [[abc516b](https://github.com/boardgameio/boardgame.io/commit/abc516b)] feat: Add an option to use JSON patches for state updates ([#920](https://github.com/boardgameio/boardgame.io/pull/920))
-* [[0bab885](https://github.com/boardgameio/boardgame.io/commit/0bab885)] feat: Support spying on logs after framework is loaded ([#918](https://github.com/boardgameio/boardgame.io/pull/918))
-* [[a57fe19](https://github.com/boardgameio/boardgame.io/commit/a57fe19)] feat: Export additional game API types ([#927](https://github.com/boardgameio/boardgame.io/pull/927))
+* [[abc516b](https://github.com/boardgameio/boardgame.io/commit/abc516b)] Add an option to use JSON patches for state updates ([#920](https://github.com/boardgameio/boardgame.io/pull/920))
+* [[0bab885](https://github.com/boardgameio/boardgame.io/commit/0bab885)] Support spying on logs after framework is loaded ([#918](https://github.com/boardgameio/boardgame.io/pull/918))
+* [[a57fe19](https://github.com/boardgameio/boardgame.io/commit/a57fe19)] Export additional game API types ([#927](https://github.com/boardgameio/boardgame.io/pull/927))
 
 #### Bugfixes
 
-* [[e94d476](https://github.com/boardgameio/boardgame.io/commit/e94d476)] fix: improve typescript typings for the player plugin and react client ([#922](https://github.com/boardgameio/boardgame.io/pull/922))
+* [[e94d476](https://github.com/boardgameio/boardgame.io/commit/e94d476)] Improve TypeScript typings for the player plugin and React client ([#922](https://github.com/boardgameio/boardgame.io/pull/922))
 
 ### v0.43.3
 
