@@ -16,6 +16,7 @@
   - [Debugging](debugging.md)
   - [Testing](testing.md)
   - [Deployment](deployment.md)
+  - [Chat](chat.md)
 - **Reference**
   - [Game](api/Game.md)
   - [Client](api/Client.md)
