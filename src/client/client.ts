@@ -162,7 +162,7 @@ export class _ClientImpl<G extends any = any> {
   reset: () => void;
   undo: () => void;
   redo: () => void;
-  sendChatMessage: (message: ChatMessage) => void;
+  sendChatMessage: (message: any) => void;
   chatMessages: ChatMessage[];
 
   constructor({
