@@ -1,3 +1,10 @@
+## v0.44.1
+
+#### Bugfixes
+
+* [[1d20e7e](https://github.com/boardgameio/boardgame.io/commit/1d20e7e)] client: Correct signature type for `sendChatMessage`
+* [[a7c8776](https://github.com/boardgameio/boardgame.io/commit/a7c8776)] debug panel: Handle all possible argument types in the log pane
+
 ## v0.44.0
 
 #### Features
