@@ -30,13 +30,8 @@ interface PluginOpts {
 /**
  * List of plugins that are always added.
  */
-const DEFAULT_PLUGINS = [
-  PluginImmer,
-  PluginRandom,
-  PluginEvents,
-  PluginLog,
-  PluginSerializable,
-];
+const CORE_PLUGINS = [PluginImmer, PluginRandom, PluginLog, PluginSerializable];
+const DEFAULT_PLUGINS = [...CORE_PLUGINS, PluginEvents];
 
 /**
  * Allow plugins to intercept actions and process them.
@@ -172,9 +167,9 @@ export const Enhance = (
  * Allows plugins to update their state after a move / event.
  */
 export const Flush = (state: State, opts: PluginOpts): State => {
-  // Note that we flush plugins in reverse order, to make sure that plugins
-  // that come before in the chain are still available.
-  [...DEFAULT_PLUGINS, ...opts.game.plugins].reverse().forEach((plugin) => {
+  // We flush the events plugin first, then custom plugins and the core plugins
+  // This means custom plugins cannot use the events API but will be available in event hooks
+  [PluginEvents, ...opts.game.plugins, ...CORE_PLUGINS].forEach((plugin) => {
     const name = plugin.name;
     const pluginState = state.plugins[name] || { data: {} };
 

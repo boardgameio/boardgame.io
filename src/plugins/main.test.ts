@@ -180,14 +180,34 @@ describe('actions', () => {
 });
 
 describe('plugins are accessible in events triggered from moves', () => {
+  const plugins = [
+    {
+      name: 'test',
+
+      setup: () => ({
+        initial: true,
+      }),
+
+      flush: () => ({ initial: true }),
+
+      api: ({ data }) => {
+        return {
+          get: () => data.initial,
+        };
+      },
+    },
+  ];
+
   test('turn/onBegin', () => {
     const game = {
+      plugins,
       moves: {
         stop: (G, ctx) => ctx.events.endTurn(),
       },
       turn: {
         onBegin: (G, ctx) => {
           G.onBegin = ctx.random.Die(1);
+          G.test = ctx.test.get();
         },
       },
     };
@@ -196,17 +216,20 @@ describe('plugins are accessible in events triggered from moves', () => {
     client.moves.stop();
     expect(client.getState().G).toEqual({
       onBegin: 1,
+      test: true,
     });
   });
 
   test('turn/onEnd', () => {
     const game = {
+      plugins,
       moves: {
         stop: (G, ctx) => ctx.events.endTurn(),
       },
       turn: {
         onEnd: (G, ctx) => {
           G.onEnd = ctx.random.Die(1);
+          G.test = ctx.test.get();
         },
       },
     };
@@ -215,11 +238,13 @@ describe('plugins are accessible in events triggered from moves', () => {
     client.moves.stop();
     expect(client.getState().G).toEqual({
       onEnd: 1,
+      test: true,
     });
   });
 
   test('phase/onBegin', () => {
     const game = {
+      plugins,
       moves: {
         stop: (G, ctx) => ctx.events.setPhase('second'),
       },
@@ -229,7 +254,8 @@ describe('plugins are accessible in events triggered from moves', () => {
         },
         second: {
           onBegin: (G, ctx) => {
-            G.onEnd = ctx.random.Die(1);
+            G.onBegin = ctx.random.Die(1);
+            G.test = ctx.test.get();
           },
         },
       },
@@ -238,12 +264,14 @@ describe('plugins are accessible in events triggered from moves', () => {
     const client = Client({ game });
     client.moves.stop();
     expect(client.getState().G).toEqual({
-      onEnd: 1,
+      onBegin: 1,
+      test: true,
     });
   });
 
   test('phase/onEnd', () => {
     const game = {
+      plugins,
       moves: {
         stop: (G, ctx) => ctx.events.endPhase(),
       },
@@ -252,6 +280,7 @@ describe('plugins are accessible in events triggered from moves', () => {
           start: true,
           onEnd: (G, ctx) => {
             G.onEnd = ctx.random.Die(1);
+            G.test = ctx.test.get();
           },
         },
       },
@@ -261,6 +290,7 @@ describe('plugins are accessible in events triggered from moves', () => {
     client.moves.stop();
     expect(client.getState().G).toEqual({
       onEnd: 1,
+      test: true,
     });
   });
 });
