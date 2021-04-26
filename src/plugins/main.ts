@@ -167,47 +167,50 @@ export const Enhance = (
  * Allows plugins to update their state after a move / event.
  */
 export const Flush = (state: State, opts: PluginOpts): State => {
-  // We flush the events plugin first, then custom plugins and the core plugins
-  // This means custom plugins cannot use the events API but will be available in event hooks
-  [PluginEvents, ...opts.game.plugins, ...CORE_PLUGINS].forEach((plugin) => {
-    const name = plugin.name;
-    const pluginState = state.plugins[name] || { data: {} };
+  // We flush the events plugin first, then custom plugins and the core plugins.
+  // This means custom plugins cannot use the events API but will be available in event hooks.
+  // Note that plugins are flushed in reverse, to allow custom plugins calling each other.
+  [...CORE_PLUGINS, ...opts.game.plugins, PluginEvents]
+    .reverse()
+    .forEach((plugin) => {
+      const name = plugin.name;
+      const pluginState = state.plugins[name] || { data: {} };
 
-    if (plugin.flush) {
-      const newData = plugin.flush({
-        G: state.G,
-        ctx: state.ctx,
-        game: opts.game,
-        api: pluginState.api,
-        data: pluginState.data,
-      });
+      if (plugin.flush) {
+        const newData = plugin.flush({
+          G: state.G,
+          ctx: state.ctx,
+          game: opts.game,
+          api: pluginState.api,
+          data: pluginState.data,
+        });
 
-      state = {
-        ...state,
-        plugins: {
-          ...state.plugins,
-          [plugin.name]: { data: newData },
-        },
-      };
-    } else if (plugin.dangerouslyFlushRawState) {
-      state = plugin.dangerouslyFlushRawState({
-        state,
-        game: opts.game,
-        api: pluginState.api,
-        data: pluginState.data,
-      });
+        state = {
+          ...state,
+          plugins: {
+            ...state.plugins,
+            [plugin.name]: { data: newData },
+          },
+        };
+      } else if (plugin.dangerouslyFlushRawState) {
+        state = plugin.dangerouslyFlushRawState({
+          state,
+          game: opts.game,
+          api: pluginState.api,
+          data: pluginState.data,
+        });
 
-      // Remove everything other than data.
-      const data = state.plugins[name].data;
-      state = {
-        ...state,
-        plugins: {
-          ...state.plugins,
-          [plugin.name]: { data },
-        },
-      };
-    }
-  });
+        // Remove everything other than data.
+        const data = state.plugins[name].data;
+        state = {
+          ...state,
+          plugins: {
+            ...state.plugins,
+            [plugin.name]: { data },
+          },
+        };
+      }
+    });
 
   return state;
 };
