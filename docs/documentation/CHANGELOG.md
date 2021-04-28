@@ -1,3 +1,9 @@
+## v0.44.2
+
+#### Bugfixes
+
+* [[b832b07](https://github.com/boardgameio/boardgame.io/commit/b832b07)] Make custom plugins available in event hooks ([#932](https://github.com/boardgameio/boardgame.io/pull/932))
+
 ## v0.44.1
 
 #### Bugfixes
