@@ -1,10 +1,16 @@
-## v0.44.2
+### v0.44.3
+
+#### Bugfixes
+
+* [[f1c60ee](https://github.com/boardgameio/boardgame.io/commit/f1c60ee), [3718124](https://github.com/boardgameio/boardgame.io/commit/3718124), [2685470](https://github.com/boardgameio/boardgame.io/commit/2685470), [ac78e82](https://github.com/boardgameio/boardgame.io/commit/ac78e82), [5b0de40](https://github.com/boardgameio/boardgame.io/commit/5b0de40)] Dependency updates
+
+### v0.44.2
 
 #### Bugfixes
 
 * [[b832b07](https://github.com/boardgameio/boardgame.io/commit/b832b07)] Make custom plugins available in event hooks ([#932](https://github.com/boardgameio/boardgame.io/pull/932))
 
-## v0.44.1
+### v0.44.1
 
 #### Bugfixes
 
