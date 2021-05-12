@@ -15,14 +15,16 @@ import { InitializeGame } from '../../core/initialize';
 import { Client } from '../client';
 import { RandomBot } from '../../ai/random-bot';
 import { Stage } from '../../core/turn-order';
-import type { ChatMessage, State, Store, SyncInfo } from '../../types';
+import type { ChatMessage, Game, State, Store, SyncInfo } from '../../types';
 
-jest.useFakeTimers();
+const sleep = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('bots', () => {
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G: any) => G,
+      A: (_, ctx) => {
+        ctx.events.endTurn();
+      },
     },
     ai: {
       enumerate: () => [{ move: 'A' }],
@@ -37,14 +39,15 @@ describe('bots', () => {
     });
 
     client.start();
+    expect(client.getState().ctx.turn).toBe(1);
 
-    // Make it Player 1's turn and make the bot move.
-    // There isn't a good way to test the result of this
-    // due to the setTimeout and async calls. These are
-    // run primarily to cover the lines in the test and
-    // ensure that there are no exceptions.
+    // Make it Player 1's turn and trigger the bot move.
     client.events.endTurn();
-    jest.runAllTimers();
+    expect(client.getState().ctx.turn).toBe(2);
+
+    // Wait until the bot has hopefully completed its move.
+    await sleep();
+    expect(client.getState().ctx.turn).toBe(3);
   });
 
   test('no bot move', async () => {
@@ -56,14 +59,16 @@ describe('bots', () => {
     });
 
     client.start();
+    expect(client.getState().ctx.turn).toBe(1);
 
     // Make it Player 1's turn. No bot move.
-    // There isn't a good way to test the result of this
-    // due to the setTimeout and async calls. These are
-    // run primarily to cover the lines in the test and
-    // ensure that there are no exceptions.
     client.events.endTurn();
-    jest.runAllTimers();
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+
+    // Wait until the bot has hopefully completed its move.
+    await sleep();
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+    expect(client.getState().ctx.numMoves).toBe(0);
   });
 });
 
@@ -255,13 +260,17 @@ describe('LocalMaster', () => {
   });
 
   test('connect without callback', () => {
-    master.connect('matchID', '0', undefined);
-    master.onSync('matchID', '0');
+    expect(() => {
+      master.connect('matchID', '0', undefined);
+      master.onSync('matchID', '0');
+    }).not.toThrow();
   });
 
   test('disconnect', () => {
-    localA.disconnect();
-    localB.disconnect();
+    expect(() => {
+      localA.disconnect();
+      localB.disconnect();
+    }).not.toThrow();
   });
 });
 
