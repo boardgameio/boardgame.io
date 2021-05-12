@@ -535,17 +535,17 @@ describe('patch', () => {
             moves: {
               A: {
                 client: false,
-                move: (G, ctx: Ctx) => {
-                  const card = G.players[ctx.playerID].cards.shift();
+                move: ({ G, playerID }) => {
+                  const card = G.players[playerID].cards.shift();
                   G.discardedCards.push(card);
                 },
               },
               B: {
                 client: false,
                 ignoreStaleStateID: true,
-                move: (G, ctx: Ctx) => {
+                move: ({ G, playerID }) => {
                   const card = G.cards.pop();
-                  G.players[ctx.playerID].cards.push(card);
+                  G.players[playerID].cards.push(card);
                 },
               },
             },
@@ -581,6 +581,7 @@ describe('patch', () => {
     expect(value.args[3]).toMatchObject([
       { op: 'remove', path: '/G/players/0/cards/0' },
       { op: 'add', path: '/G/discardedCards/-', value: 'card3' },
+      { op: 'replace', path: '/ctx/_activePlayersNumMoves/0', value: 1 },
       { op: 'replace', path: '/ctx/numMoves', value: 1 },
       { op: 'replace', path: '/_stateID', value: 1 },
     ]);

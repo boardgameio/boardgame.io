@@ -266,7 +266,7 @@ describe('plugins are accessible in events triggered from moves', () => {
         },
         second: {
           onBegin: ({ G, random, test }) => {
-            G.onEnd = random.Die(1);
+            G.onBegin = random.Die(1);
             G.test = test.get();
           },
         },
