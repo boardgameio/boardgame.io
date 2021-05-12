@@ -1,3 +1,46 @@
+### v0.44.3
+
+#### Bugfixes
+
+* [[f1c60ee](https://github.com/boardgameio/boardgame.io/commit/f1c60ee), [3718124](https://github.com/boardgameio/boardgame.io/commit/3718124), [2685470](https://github.com/boardgameio/boardgame.io/commit/2685470), [ac78e82](https://github.com/boardgameio/boardgame.io/commit/ac78e82), [5b0de40](https://github.com/boardgameio/boardgame.io/commit/5b0de40)] Dependency updates
+
+### v0.44.2
+
+#### Bugfixes
+
+* [[b832b07](https://github.com/boardgameio/boardgame.io/commit/b832b07)] Make custom plugins available in event hooks ([#932](https://github.com/boardgameio/boardgame.io/pull/932))
+
+### v0.44.1
+
+#### Bugfixes
+
+* [[1d20e7e](https://github.com/boardgameio/boardgame.io/commit/1d20e7e)] client: Correct signature type for `sendChatMessage`
+* [[a7c8776](https://github.com/boardgameio/boardgame.io/commit/a7c8776)] debug panel: Handle all possible argument types in the log pane
+
+## v0.44.0
+
+#### Features
+
+* [[abc516b](https://github.com/boardgameio/boardgame.io/commit/abc516b)] Add an option to use JSON patches for state updates ([#920](https://github.com/boardgameio/boardgame.io/pull/920))
+* [[0bab885](https://github.com/boardgameio/boardgame.io/commit/0bab885)] Support spying on logs after framework is loaded ([#918](https://github.com/boardgameio/boardgame.io/pull/918))
+* [[a57fe19](https://github.com/boardgameio/boardgame.io/commit/a57fe19)] Export additional game API types ([#927](https://github.com/boardgameio/boardgame.io/pull/927))
+
+#### Bugfixes
+
+* [[e94d476](https://github.com/boardgameio/boardgame.io/commit/e94d476)] Improve TypeScript typings for the player plugin and React client ([#922](https://github.com/boardgameio/boardgame.io/pull/922))
+
+### v0.43.3
+
+#### Features
+
+* [[01c522c](https://github.com/boardgameio/boardgame.io/commit/01c522c)] Throw error in development if non-serializable state is used in a move ([#896](https://github.com/boardgameio/boardgame.io/pull/896))
+* [[ccc9ada](https://github.com/boardgameio/boardgame.io/commit/ccc9ada)] Add details to exceptions raised in LobbyClient ([#898](https://github.com/boardgameio/boardgame.io/pull/898))
+
+#### Bugfixes
+
+* [[ae790e8](https://github.com/boardgameio/boardgame.io/commit/ae790e8)] dependencies: bump immer from 7.0.8 to 8.0.1 ([#895](https://github.com/boardgameio/boardgame.io/pull/895))
+* [[6f9bc27](https://github.com/boardgameio/boardgame.io/commit/6f9bc27)] dependencies: Run `npm audit fix`
+
 ### v0.43.2
 
 #### Bugfixes

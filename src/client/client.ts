@@ -34,7 +34,11 @@ import type {
   ChatMessage,
 } from '../types';
 
-type ClientAction = ActionShape.Reset | ActionShape.Sync | ActionShape.Update;
+type ClientAction =
+  | ActionShape.Reset
+  | ActionShape.Sync
+  | ActionShape.Update
+  | ActionShape.Patch;
 type Action = CredentialedActionShape.Any | ClientAction;
 
 export interface DebugOpt {
@@ -157,7 +161,7 @@ export class _ClientImpl<G extends any = any> {
   reset: () => void;
   undo: () => void;
   redo: () => void;
-  sendChatMessage: (message: ChatMessage) => void;
+  sendChatMessage: (message: any) => void;
   chatMessages: ChatMessage[];
 
   constructor({
@@ -240,7 +244,7 @@ export class _ClientImpl<G extends any = any> {
           this.log = [];
           break;
         }
-
+        case Actions.PATCH:
         case Actions.UPDATE: {
           let id = -1;
           if (this.log.length > 0) {

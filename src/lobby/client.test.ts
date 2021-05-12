@@ -1,3 +1,11 @@
+// Tell ESLint about additional assertion methods.
+/*
+eslint jest/expect-expect: [
+  "warn",
+  { "assertFunctionNames": ["expect", "throwsWith*", "testBasicBody"] }
+]
+*/
+
 import { LobbyClient } from './client';
 
 const throwsWithoutBody = (fn: (...args: any) => Promise<any>) => async () => {

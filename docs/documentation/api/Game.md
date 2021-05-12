@@ -122,5 +122,8 @@
 
   // Disable undo feature for all the moves in the game
   disableUndo: true,
+    
+  // Transfer delta state with JSON Patch in multiplayer
+  deltaState: true,
 }
 ```

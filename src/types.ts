@@ -10,7 +10,7 @@ import type * as StorageAPI from './server/db/base';
 import type { EventsAPI } from './plugins/plugin-events';
 import type { LogAPI } from './plugins/plugin-log';
 import type { RandomAPI } from './plugins/random/random';
-
+import type { Operation } from 'rfc6902';
 export type { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
@@ -94,9 +94,10 @@ export interface LogEntry {
   redact?: boolean;
   automatic?: boolean;
   metadata?: any;
+  patch?: Operation[];
 }
 
-interface PluginContext<
+export interface PluginContext<
   API extends any = any,
   Data extends any = any,
   G extends any = any
@@ -153,7 +154,7 @@ export type FnContext<
   };
 
 type SerializableAny = Misc.JSON.Value;
-type MoveFn<
+export type MoveFn<
   G extends any = any,
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > = (
@@ -252,7 +253,7 @@ export interface TurnConfig<
   };
 }
 
-interface PhaseMap<
+export interface PhaseMap<
   G extends any = any,
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > {
@@ -267,6 +268,7 @@ export interface Game<
   name?: string;
   minPlayers?: number;
   maxPlayers?: number;
+  deltaState?: boolean;
   disableUndo?: boolean;
   seed?: string | number;
   setup?: (
@@ -413,6 +415,7 @@ export namespace ActionShape {
   export type AutomaticGameEvent = StripCredentials<CredentialedActionShape.AutomaticGameEvent>;
   export type Sync = ReturnType<typeof ActionCreators.sync>;
   export type Update = ReturnType<typeof ActionCreators.update>;
+  export type Patch = ReturnType<typeof ActionCreators.patch>;
   export type Reset = ReturnType<typeof ActionCreators.reset>;
   export type Undo = StripCredentials<CredentialedActionShape.Undo>;
   export type Redo = StripCredentials<CredentialedActionShape.Redo>;
@@ -422,6 +425,7 @@ export namespace ActionShape {
     | AutomaticGameEvent
     | Sync
     | Update
+    | Patch
     | Reset
     | Undo
     | Redo

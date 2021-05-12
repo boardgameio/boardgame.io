@@ -14,10 +14,17 @@ import { ProcessGameConfig } from '../core/game';
 import type { Transport } from './transport/transport';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
-import { update, sync, makeMove, gameEvent } from '../core/action-creators';
+import {
+  update,
+  sync,
+  makeMove,
+  gameEvent,
+  patch,
+} from '../core/action-creators';
 import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
 import type { Game, LogEntry, State, SyncInfo } from '../types';
+import type { Operation } from 'rfc6902';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -371,19 +378,20 @@ test('accepts enhancer for store', () => {
 });
 
 describe('event dispatchers', () => {
+  const clientEvents = [
+    'endTurn',
+    'pass',
+    'endPhase',
+    'setPhase',
+    'endGame',
+    'setActivePlayers',
+    'endStage',
+    'setStage',
+  ];
   test('default', () => {
     const game: Game = {};
     const client = Client({ game });
-    expect(Object.keys(client.events)).toEqual([
-      'endTurn',
-      'pass',
-      'endPhase',
-      'setPhase',
-      'endGame',
-      'setActivePlayers',
-      'endStage',
-      'setStage',
-    ]);
+    expect(Object.keys(client.events)).toEqual(clientEvents);
     expect(client.getState().ctx.turn).toBe(1);
     client.events.endTurn();
     expect(client.getState().ctx.turn).toBe(2);
@@ -397,16 +405,7 @@ describe('event dispatchers', () => {
       },
     };
     const client = Client({ game });
-    expect(Object.keys(client.events)).toEqual([
-      'endTurn',
-      'pass',
-      'endPhase',
-      'setPhase',
-      'endGame',
-      'setActivePlayers',
-      'endStage',
-      'setStage',
-    ]);
+    expect(Object.keys(client.events)).toEqual(clientEvents);
     expect(client.getState().ctx.turn).toBe(1);
     client.events.endTurn();
     expect(client.getState().ctx.turn).toBe(2);
@@ -465,7 +464,7 @@ describe('move dispatchers', () => {
     expect(store.getState().G).toMatchObject({ victory: true });
   });
 
-  test('with undefined playerID - singleplayer mode', () => {
+  test('with undefined playerID - single player mode', () => {
     const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store);
     api.B();
@@ -485,7 +484,7 @@ describe('move dispatchers', () => {
     expect(store.getState().G).toMatchObject({ moved: undefined });
   });
 
-  test('with null playerID - singleplayer mode', () => {
+  test('with null playerID - single player mode', () => {
     const store = createStore(reducer, initialState);
     const api = createMoveDispatchers(game.moveNames, store, null);
     api.B();
@@ -548,6 +547,26 @@ describe('log handling', () => {
     const action = update(state, deltalog);
 
     client.store.dispatch(action);
+    client.store.dispatch(action);
+
+    expect(client.log).toEqual(deltalog);
+  });
+
+  test('patch', () => {
+    const patches = [
+      { op: 'replace', path: '/_stateID', value: 1 },
+    ] as Operation[];
+    const deltalog = [
+      {
+        action: {},
+        _stateID: 0,
+      },
+      {
+        action: {},
+        _stateID: 1,
+      },
+    ] as LogEntry[];
+    const action = patch(0, 1, patches, deltalog);
     client.store.dispatch(action);
 
     expect(client.log).toEqual(deltalog);
@@ -757,6 +776,10 @@ describe('start / stop', () => {
     const client = Client({ game: {}, debug: { target: el } });
     client.start();
     client.stop();
+    expect(error).toHaveBeenCalledTimes(3);
+    expect(error).toHaveBeenCalledWith('disallowed move: B');
+    expect(error).toHaveBeenCalledWith('disallowed move: C');
+    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
   });
 
   test('no error when mounting on null element', () => {
@@ -770,6 +793,10 @@ describe('start / stop', () => {
     const client = Client({ game: {}, debug: { impl: Debug } });
     client.start();
     client.stop();
+    expect(error).toHaveBeenCalledTimes(3);
+    expect(error).toHaveBeenCalledWith('disallowed move: B');
+    expect(error).toHaveBeenCalledWith('disallowed move: C');
+    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
   });
 
   test('production mode', () => {
@@ -777,10 +804,18 @@ describe('start / stop', () => {
     const client = Client({ game: {} });
     client.start();
     client.stop();
+    expect(error).toHaveBeenCalledTimes(3);
+    expect(error).toHaveBeenCalledWith('disallowed move: B');
+    expect(error).toHaveBeenCalledWith('disallowed move: C');
+    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
   });
 
   test('try to stop without starting', () => {
     const client = Client({ game: {} });
     client.stop();
+    expect(error).toHaveBeenCalledTimes(3);
+    expect(error).toHaveBeenCalledWith('disallowed move: B');
+    expect(error).toHaveBeenCalledWith('disallowed move: C');
+    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
   });
 });

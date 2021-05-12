@@ -72,9 +72,11 @@ describe('lobby', () => {
     });
 
     test('changing prop debug', () => {
-      lobby.setProps({
-        debug: !lobby.props().debug,
-      });
+      expect(() => {
+        lobby.setProps({
+          debug: !lobby.props().debug,
+        });
+      }).not.toThrow();
     });
 
     describe('login succeeds', () => {
@@ -112,11 +114,10 @@ describe('lobby', () => {
         );
       });
       test('invalid key press', () => {
-        lobby
-          .find('LobbyLoginForm')
-          .find('input')
-          .props()
-          .onKeyPress({ key: 'Wololo' });
+        const input = lobby.find('LobbyLoginForm').find('input');
+        const currentValue = input.instance().value;
+        input.props().onKeyPress({ key: 'Wololo' });
+        expect(input.instance().value).toBe(currentValue);
       });
     });
 

@@ -13,4 +13,5 @@ export const RESET = 'RESET';
 export const SYNC = 'SYNC';
 export const UNDO = 'UNDO';
 export const UPDATE = 'UPDATE';
+export const PATCH = 'PATCH';
 export const PLUGIN = 'PLUGIN';

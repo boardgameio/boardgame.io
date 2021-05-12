@@ -190,14 +190,36 @@ describe('actions', () => {
 });
 
 describe('plugins are accessible in events triggered from moves', () => {
+  type TestPluginAPI = { get: () => boolean };
+  type PluginAPIs = { test: TestPluginAPI };
+  const plugins = [
+    {
+      name: 'test',
+
+      setup: () => ({
+        initial: true,
+      }),
+
+      flush: () => ({ initial: true }),
+
+      api: ({ data }): TestPluginAPI => {
+        return {
+          get: () => data.initial,
+        };
+      },
+    },
+  ];
+
   test('turn/onBegin', () => {
-    const game: Game = {
+    const game: Game<any, PluginAPIs> = {
+      plugins,
       moves: {
         stop: ({ events }) => events.endTurn(),
       },
       turn: {
-        onBegin: ({ G, random }) => {
+        onBegin: ({ G, random, test }) => {
           G.onBegin = random.Die(1);
+          G.test = test.get();
         },
       },
     };
@@ -206,17 +228,20 @@ describe('plugins are accessible in events triggered from moves', () => {
     client.moves.stop();
     expect(client.getState().G).toEqual({
       onBegin: 1,
+      test: true,
     });
   });
 
   test('turn/onEnd', () => {
-    const game: Game = {
+    const game: Game<any, PluginAPIs> = {
+      plugins,
       moves: {
         stop: ({ events }) => events.endTurn(),
       },
       turn: {
-        onEnd: ({ G, random }) => {
+        onEnd: ({ G, random, test }) => {
           G.onEnd = random.Die(1);
+          G.test = test.get();
         },
       },
     };
@@ -225,11 +250,13 @@ describe('plugins are accessible in events triggered from moves', () => {
     client.moves.stop();
     expect(client.getState().G).toEqual({
       onEnd: 1,
+      test: true,
     });
   });
 
   test('phase/onBegin', () => {
-    const game: Game = {
+    const game: Game<any, PluginAPIs> = {
+      plugins,
       moves: {
         stop: ({ events }) => events.setPhase('second'),
       },
@@ -238,8 +265,9 @@ describe('plugins are accessible in events triggered from moves', () => {
           start: true,
         },
         second: {
-          onBegin: ({ G, random }) => {
+          onBegin: ({ G, random, test }) => {
             G.onEnd = random.Die(1);
+            G.test = test.get();
           },
         },
       },
@@ -248,20 +276,23 @@ describe('plugins are accessible in events triggered from moves', () => {
     const client = Client({ game });
     client.moves.stop();
     expect(client.getState().G).toEqual({
-      onEnd: 1,
+      onBegin: 1,
+      test: true,
     });
   });
 
   test('phase/onEnd', () => {
-    const game: Game = {
+    const game: Game<any, PluginAPIs> = {
+      plugins,
       moves: {
         stop: ({ events }) => events.endPhase(),
       },
       phases: {
         first: {
           start: true,
-          onEnd: ({ G, random }) => {
+          onEnd: ({ G, random, test }) => {
             G.onEnd = random.Die(1);
+            G.test = test.get();
           },
         },
       },
@@ -271,6 +302,7 @@ describe('plugins are accessible in events triggered from moves', () => {
     client.moves.stop();
     expect(client.getState().G).toEqual({
       onEnd: 1,
+      test: true,
     });
   });
 });

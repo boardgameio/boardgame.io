@@ -179,7 +179,7 @@ describe('lobby', () => {
       });
       test('when the number of players has no boundaries', async () => {
         jsonResult.push(() => ({ matchID: 'def' }));
-        await lobby.create('game2', 1);
+        await expect(lobby.create('game2', 1)).resolves.toBeUndefined();
       });
       test('when the game is unknown', async () => {
         await expect(lobby.create('game3', 2)).rejects.toThrow();

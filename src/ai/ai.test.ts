@@ -113,7 +113,7 @@ describe('Step', () => {
       },
     });
     const bot = new RandomBot({ enumerate: client.game.ai.enumerate });
-    await Step(client, bot);
+    await expect(Step(client, bot)).resolves.toBeUndefined();
   });
 
   test('works with stages', async () => {
@@ -378,7 +378,10 @@ describe('MCTSBot', () => {
 
     test('setOpt works on invalid key', () => {
       const bot = new RandomBot({ enumerate: jest.fn() });
-      bot.setOpt('unknown', 1);
+      const setInvalidKey = () => bot.setOpt('unknown', 1);
+      const getInvalidKey = () => bot.getOpt('unknown');
+      expect(setInvalidKey).not.toThrow();
+      expect(getInvalidKey).toThrow();
     });
 
     test('functions', () => {
