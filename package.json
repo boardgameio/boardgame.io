@@ -161,7 +161,7 @@
     "redux": "^4.0.0",
     "rfc6902": "^4.0.1",
     "socket.io": "^2.4.1",
-    "socket.io-client": "^2.3.0",
+    "socket.io-client": "^2.4.0",
     "svelte": "^3.24.0",
     "svelte-json-tree-auto": "^0.1.0",
     "ts-toolbelt": "^6.3.6"
