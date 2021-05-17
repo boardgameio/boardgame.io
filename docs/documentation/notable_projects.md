@@ -208,6 +208,14 @@ Clone of Jaipur, a 2 Player Card game, with online multiplayer support.
 [c20]: https://github.com/skvrahul/UdaipurGame
 [b20]:https://img.shields.io/github/stars/skvrahul/UdaipurGame?label=%E2%98%85&logo=github
 
+#### [![GitHub stars][b23]][c23] [Unstable Unicorns][p23] \[[code][c23]\]
+&nbsp;&nbsp;
+Online game variant of the popular card game Unstable Unicorns 🦄. Playable with your friends.
+
+[p23]: https://unstable-unicorns-online.herokuapp.com/hello-world/6/0
+[c23]: https://github.com/geniegeist/unstable-unicorns
+[b23]: https://img.shields.io/github/stars/geniegeist/unstable-unicorns?label=%E2%98%85&logo=github
+
 
 #### [![GitHub stars][b22]][c22] [Yatzy][p22] \[[code][c22] | [tutorial][t22]\]
 &nbsp;&nbsp;
