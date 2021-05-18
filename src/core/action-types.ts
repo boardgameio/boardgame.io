@@ -15,3 +15,4 @@ export const UNDO = 'UNDO';
 export const UPDATE = 'UPDATE';
 export const PATCH = 'PATCH';
 export const PLUGIN = 'PLUGIN';
+export const STRIP_TRANSIENTS = 'STRIP_TRANSIENTS';

@@ -14,13 +14,16 @@ import { INVALID_MOVE } from './constants';
 import type {
   ActionShape,
   Ctx,
+  ErrorType,
   Game,
   LogEntry,
-  State,
-  Move,
   LongFormMove,
+  Move,
+  State,
+  TransientState,
   Undo,
 } from '../types';
+import { ActionErrorType, UpdateErrorType } from './errors';
 import { applyPatch } from 'rfc6902';
 
 /**
@@ -97,7 +100,7 @@ function initializeDeltalog(
   state: State,
   action: ActionShape.MakeMove | ActionShape.Undo | ActionShape.Redo,
   move?: Move
-): State {
+): TransientState {
   // Create a log entry for this action.
   const logEntry: LogEntry = {
     action,
@@ -122,6 +125,28 @@ function initializeDeltalog(
 }
 
 /**
+ * WithError
+ *
+ * Augment a State instance with transient error information.
+ */
+function WithError<PT extends any = any>(
+  state: State,
+  errorType: ErrorType,
+  payload?: PT
+): TransientState {
+  const error = {
+    type: errorType,
+    payload,
+  };
+  return {
+    ...state,
+    transients: {
+      error,
+    },
+  };
+}
+
+/**
  * CreateGameReducer
  *
  * Creates the main game state reducer.
@@ -142,8 +167,23 @@ export function CreateGameReducer({
    * @param {object} state - The state before the action.
    * @param {object} action - A Redux action.
    */
-  return (state: State | null = null, action: ActionShape.Any): State => {
+  return (
+    state: TransientState | null = null,
+    action: ActionShape.Any
+  ): TransientState => {
     switch (action.type) {
+      case Actions.STRIP_TRANSIENTS: {
+        // This action indicates that transient metadata in the state has been
+        // consumed and should now be stripped from the state..
+        const {
+          transients,
+          // Revert the game state to before the error so existing consumers do
+          // not see garbage.
+          ...strippedState
+        } = state;
+        return strippedState;
+      }
+
       case Actions.GAME_EVENT: {
         state = { ...state, deltalog: [] };
 
@@ -158,7 +198,7 @@ export function CreateGameReducer({
         // Disallow events once the game is over.
         if (state.ctx.gameover !== undefined) {
           error(`cannot call event after game end`);
-          return state;
+          return WithError(state, ActionErrorType.GameOver);
         }
 
         // Ignore the event if the player isn't active.
@@ -167,11 +207,11 @@ export function CreateGameReducer({
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed event: ${action.payload.type}`);
-          return state;
+          return WithError(state, ActionErrorType.InactivePlayer);
         }
 
         // Execute plugins.
-        state = plugins.Enhance(state, {
+        state = plugins.Enhance(state as State, {
           game,
           isClient: false,
           playerID: action.payload.playerID,
@@ -200,7 +240,7 @@ export function CreateGameReducer({
         );
         if (move === null) {
           error(`disallowed move: ${action.payload.type}`);
-          return state;
+          return WithError(state, ActionErrorType.UnavailableMove);
         }
 
         // Don't run move on client if move says so.
@@ -211,7 +251,7 @@ export function CreateGameReducer({
         // Disallow moves once the game is over.
         if (state.ctx.gameover !== undefined) {
           error(`cannot make move after game end`);
-          return state;
+          return WithError(state, ActionErrorType.GameOver);
         }
 
         // Ignore the move if the player isn't active.
@@ -220,7 +260,7 @@ export function CreateGameReducer({
           !game.flow.isPlayerActive(state.G, state.ctx, action.payload.playerID)
         ) {
           error(`disallowed move: ${action.payload.type}`);
-          return state;
+          return WithError(state, ActionErrorType.InactivePlayer);
         }
 
         // Execute plugins.
@@ -238,7 +278,8 @@ export function CreateGameReducer({
           error(
             `invalid move: ${action.payload.type} args: ${action.payload.args}`
           );
-          return state;
+          // TODO(#723): Marshal a nice error payload with the processed move.
+          return WithError(state, ActionErrorType.InvalidMove);
         }
 
         const newState = { ...state, G };
@@ -294,12 +335,15 @@ export function CreateGameReducer({
 
         if (game.disableUndo) {
           error('Undo is not enabled');
-          return state;
+          return WithError(state, ActionErrorType.ActionDisabled);
         }
 
         const { _undo, _redo } = state;
 
         if (_undo.length < 2) {
+          // TODO(#723): Add an error case here.
+          //  error(`No moves to undo`);
+          //  return WithError(state, ActionErrorType.ActionDisabled);
           return state;
         }
 
@@ -311,6 +355,9 @@ export function CreateGameReducer({
           actionHasPlayerID(action) &&
           action.payload.playerID !== last.playerID
         ) {
+          // TODO(#723): Add an error case here.
+          //  error(`Cannot undo other players' moves`);
+          //  return WithError(state, ActionErrorType.ActionDisabled);
           return state;
         }
 
@@ -321,6 +368,9 @@ export function CreateGameReducer({
           last.playerID
         );
         if (!CanUndoMove(state.G, state.ctx, lastMove)) {
+          // TODO(#723): Add an error case here.
+          //  error(`Move cannot be undone`);
+          //  return WithError(state, ActionErrorType.ActionDisabled);
           return state;
         }
 
@@ -342,12 +392,15 @@ export function CreateGameReducer({
 
         if (game.disableUndo) {
           error('Redo is not enabled');
-          return state;
+          return WithError(state, ActionErrorType.ActionDisabled);
         }
 
         const { _undo, _redo } = state;
 
         if (_redo.length == 0) {
+          // TODO(#723): Add an error case here.
+          //  error(`No moves to redo`);
+          //  return WithError(state, ActionErrorType.ActionDisabled);
           return state;
         }
 
@@ -358,6 +411,9 @@ export function CreateGameReducer({
           actionHasPlayerID(action) &&
           action.payload.playerID !== first.playerID
         ) {
+          // TODO(#723): Add an error case here.
+          //  error(`Cannot redo other players` moves`);
+          //  return WithError(state, ActionErrorType.ActionDisabled);
           return state;
         }
 
@@ -375,6 +431,10 @@ export function CreateGameReducer({
       }
 
       case Actions.PLUGIN: {
+        // TODO(#723): Expose error semantics to plugin processing.
+        // DevNote: The upcast to State is reasonable both from a typing
+        // and functionality perspective because plugin actions can only be
+        // invoked after any transient artifacts like errors have been cleaned.
         return plugins.ProcessAction(state, action, { game });
       }
 
@@ -385,7 +445,7 @@ export function CreateGameReducer({
         const hasError = patchError.some((entry) => entry !== null);
         if (hasError) {
           error(`Patch ${JSON.stringify(action.patch)} apply failed`);
-          return oldState;
+          return WithError(oldState, UpdateErrorType.PatchFailed, patchError);
         } else {
           return newState;
         }

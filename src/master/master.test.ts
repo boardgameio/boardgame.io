@@ -16,6 +16,7 @@ import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 import { PlayerView } from '../core/player-view';
+import { INVALID_MOVE } from '../core/constants';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -81,6 +82,12 @@ const game = { seed: 0 };
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
+}
+
+function validateNotTransientState(state: any) {
+  expect(state).toEqual(
+    expect.not.objectContaining({ transients: expect.anything() })
+  );
 }
 
 describe('sync', () => {
@@ -533,6 +540,9 @@ describe('patch', () => {
         stages: {
           A: {
             moves: {
+              Invalid: () => {
+                return INVALID_MOVE;
+              },
               A: {
                 client: false,
                 move: (G, ctx: Ctx) => {
@@ -560,6 +570,9 @@ describe('patch', () => {
   const action = ActionCreators.gameEvent('endTurn');
 
   beforeAll(async () => {
+    master.subscribe(({ state }) => {
+      validateNotTransientState(state);
+    });
     await master.onSync('matchID', '0', undefined, 2);
   });
 
@@ -624,12 +637,23 @@ describe('patch', () => {
     );
   });
 
-  test('invalid move', async () => {
+  test('disallowed move', async () => {
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
       `move not processed - canPlayerMakeMove=false - playerID=[0] - action[move]`
     );
+  });
+
+  test('invalid move', async () => {
+    await master.onUpdate(
+      ActionCreators.makeMove('Invalid', null, '0'),
+      1,
+      'matchID',
+      '0'
+    );
+    expect(sendAll).toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith('invalid move: Invalid args: null');
   });
 
   test('valid matchID / stateID / playerID', async () => {
@@ -720,6 +744,9 @@ describe('connectionChange', () => {
 
   beforeEach(() => {
     sendAllReturn = undefined;
+    master.subscribe(({ state }) => {
+      validateNotTransientState(state);
+    });
     jest.clearAllMocks();
   });
 

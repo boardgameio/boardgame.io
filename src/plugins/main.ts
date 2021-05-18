@@ -14,6 +14,7 @@ import PluginSerializable from './plugin-serializable';
 import type {
   AnyFn,
   PartialGameState,
+  TransientState,
   State,
   Game,
   Plugin,
@@ -40,7 +41,8 @@ export const ProcessAction = (
   state: State,
   action: ActionShape.Plugin,
   opts: PluginOpts
-): State => {
+): TransientState => {
+  // TODO(#723): Extend error handling to plugins.
   opts.game.plugins
     .filter((plugin) => plugin.action !== undefined)
     .filter((plugin) => plugin.name === action.payload.type)
@@ -137,7 +139,7 @@ export const Setup = (
 export const Enhance = (
   state: State,
   opts: PluginOpts & { playerID: PlayerID }
-): State => {
+): TransientState => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter((plugin) => plugin.api !== undefined)
     .forEach((plugin) => {
@@ -166,7 +168,7 @@ export const Enhance = (
 /**
  * Allows plugins to update their state after a move / event.
  */
-export const Flush = (state: State, opts: PluginOpts): State => {
+export const Flush = (state: State, opts: PluginOpts): TransientState => {
   // We flush the events plugin first, then custom plugins and the core plugins.
   // This means custom plugins cannot use the events API but will be available in event hooks.
   // Note that plugins are flushed in reverse, to allow custom plugins calling each other.

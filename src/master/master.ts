@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import * as ActionCreators from '../core/action-creators';
 import { CreateGameReducer } from '../core/reducer';
 import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
@@ -266,6 +267,12 @@ export class Master {
     // Update server's version of the store.
     store.dispatch(action);
     state = store.getState();
+    if ('transients' in state) {
+      // TODO(#723): Where appropriate, extract the reported error and notify
+      // the caller.
+      store.dispatch(ActionCreators.stripTransients());
+      state = store.getState();
+    }
 
     this.subscribeCallback({
       state,

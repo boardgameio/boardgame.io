@@ -131,11 +131,16 @@ test('valid patch', () => {
 
 test('invalid patch', () => {
   const originalState = { _stateID: 0, G: 'patch' } as State;
-  const state = reducer(
+  const { transients, ...state } = reducer(
     originalState,
     patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], [])
   );
   expect(state).toEqual(originalState);
+  expect(transients.error.type).toEqual('patch_failed');
+  // It's an array.
+  expect(transients.error.payload.length).toEqual(1);
+  // It looks like the standard rfc6902 error language.
+  expect(transients.error.payload[0].toString()).toContain('/_stateIDD');
 });
 
 test('reset', () => {

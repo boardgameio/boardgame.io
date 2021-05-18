@@ -2,6 +2,7 @@ import type { Object } from 'ts-toolbelt';
 import type Koa from 'koa';
 import type { Store as ReduxStore } from 'redux';
 import type * as ActionCreators from './core/action-creators';
+import type { ActionErrorType, UpdateErrorType } from './core/errors';
 import type { Flow } from './core/flow';
 import type { CreateGameReducer } from './core/reducer';
 import type { INVALID_MOVE } from './core/constants';
@@ -15,6 +16,7 @@ export type { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
 
+// "Public" state to be communicated to clients.
 export interface State<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   G: G;
   ctx: Ctx | CtxWithPlugins;
@@ -25,6 +27,27 @@ export interface State<G extends any = any, CtxWithPlugins extends Ctx = Ctx> {
   _undo: Array<Undo<G>>;
   _redo: Array<Undo<G>>;
   _stateID: number;
+}
+
+export type ErrorType = UpdateErrorType | ActionErrorType;
+
+export interface ActionError {
+  type: ErrorType;
+  // TODO(#723): Figure out if we want to strongly type payloads.
+  payload: ?any;
+}
+
+export interface TransientMetadata {
+  error?: ActionError;
+}
+
+// "Private" state that may include garbage that should be stripped before
+// being handed back to a client.
+export interface TransientState<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> extends State<G, CtxWithPlugins> {
+  transients?: TransientMetadata;
 }
 
 export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
@@ -403,6 +426,9 @@ export namespace ActionShape {
   export type Reset = ReturnType<typeof ActionCreators.reset>;
   export type Undo = StripCredentials<CredentialedActionShape.Undo>;
   export type Redo = StripCredentials<CredentialedActionShape.Redo>;
+  // Private type used only for internal error processing.
+  // Included here to preserve type-checking of reducer inputs.
+  type _StripTransients = ReturnType<typeof ActionCreators.stripTransients>;
   export type Any =
     | MakeMove
     | GameEvent
@@ -413,7 +439,8 @@ export namespace ActionShape {
     | Reset
     | Undo
     | Redo
-    | Plugin;
+    | Plugin
+    | _StripTransients;
 }
 
 export namespace ActionPayload {
