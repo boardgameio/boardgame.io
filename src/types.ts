@@ -34,12 +34,15 @@ export type ErrorType = UpdateErrorType | ActionErrorType;
 export interface ActionError {
   type: ErrorType;
   // TODO(#723): Figure out if we want to strongly type payloads.
-  payload: ?any;
+  payload?: any;
 }
 
 export interface TransientMetadata {
   error?: ActionError;
 }
+
+// TODO(#732): Actually define a schema for the action dispatch results.
+export type ActionResult = any;
 
 // "Private" state that may include garbage that should be stripped before
 // being handed back to a client.

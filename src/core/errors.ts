@@ -1,10 +1,18 @@
+/*
+ * Copyright 2017 The boardgame.io Authors
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
 export enum UpdateErrorType {
   // The action’s credentials were missing or invalid
   UnauthorizedAction = 'update/unauthorized_action',
   // The action’s matchID was not found
-  MatchNotFound = 'match_not_found',
+  MatchNotFound = 'update/match_not_found',
   // Could not apply Patch operation (rfc6902).
-  PatchFailed = 'patch_failed',
+  PatchFailed = 'update/patch_failed',
 }
 
 export enum ActionErrorType {

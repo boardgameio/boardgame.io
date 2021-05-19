@@ -11,6 +11,7 @@ import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
 import { error } from './logger';
 import { INVALID_MOVE } from './constants';
+import type { Dispatch } from 'redux';
 import type {
   ActionShape,
   Ctx,
@@ -20,9 +21,12 @@ import type {
   LongFormMove,
   Move,
   State,
+  Store,
+  TransientMetadata,
   TransientState,
   Undo,
 } from '../types';
+import { stripTransients } from './action-creators';
 import { ActionErrorType, UpdateErrorType } from './errors';
 import { applyPatch } from 'rfc6902';
 
@@ -125,6 +129,24 @@ function initializeDeltalog(
 }
 
 /**
+ * ExtractTransientsFromState
+ *
+ * Split out transients from the a TransientState
+ */
+function ExtractTransients(
+  transientState: TransientState | null
+): [State | null, TransientMetadata | null] {
+  if (!transientState) {
+    // We preserve null for the state for legacy callers, but the transient
+    // field should be undefined if not present to be consistent with the
+    // code path below.
+    return [null, undefined];
+  }
+  const { transients, ...state } = transientState;
+  return [state as State, transients as TransientMetadata];
+}
+
+/**
  * WithError
  *
  * Augment a State instance with transient error information.
@@ -145,6 +167,39 @@ function WithError<PT extends any = any>(
     },
   };
 }
+
+/**
+ * Middleware for processing TransientState associated with the reducer
+ * returned by CreateGameReducer.
+ * This should pretty much be used everywhere you want realistic state
+ * transitions and error handling.
+ */
+export const TransientHandlingMiddleware = (store: Store) => (
+  next: Dispatch<ActionShape.Any>
+) => (action: ActionShape.Any) => {
+  const result = next(action);
+  switch (action.type) {
+    case Actions.STRIP_TRANSIENTS: {
+      return result;
+    }
+    default: {
+      const [, transients] = ExtractTransients(store.getState());
+      if (typeof transients !== 'undefined') {
+        store.dispatch(stripTransients());
+        // Dev Note: If parent middleware needs to correlate the spawned
+        // StripTransients action to the triggering action, instrument here.
+        //
+        // This is a bit tricky; for more details, see:
+        //   https://github.com/boardgameio/boardgame.io/pull/940#discussion_r636200648
+        return {
+          ...result,
+          transients,
+        };
+      }
+      return result;
+    }
+  }
+};
 
 /**
  * CreateGameReducer
@@ -168,20 +223,15 @@ export function CreateGameReducer({
    * @param {object} action - A Redux action.
    */
   return (
-    state: TransientState | null = null,
+    stateWithTransients: TransientState | null = null,
     action: ActionShape.Any
   ): TransientState => {
+    let [state /*, transients */] = ExtractTransients(stateWithTransients);
     switch (action.type) {
       case Actions.STRIP_TRANSIENTS: {
         // This action indicates that transient metadata in the state has been
         // consumed and should now be stripped from the state..
-        const {
-          transients,
-          // Revert the game state to before the error so existing consumers do
-          // not see garbage.
-          ...strippedState
-        } = state;
-        return strippedState;
+        return state;
       }
 
       case Actions.GAME_EVENT: {
@@ -211,7 +261,7 @@ export function CreateGameReducer({
         }
 
         // Execute plugins.
-        state = plugins.Enhance(state as State, {
+        state = plugins.Enhance(state, {
           game,
           isClient: false,
           playerID: action.payload.playerID,
@@ -432,9 +482,6 @@ export function CreateGameReducer({
 
       case Actions.PLUGIN: {
         // TODO(#723): Expose error semantics to plugin processing.
-        // DevNote: The upcast to State is reasonable both from a typing
-        // and functionality perspective because plugin actions can only be
-        // invoked after any transient artifacts like errors have been cleaned.
         return plugins.ProcessAction(state, action, { game });
       }
 

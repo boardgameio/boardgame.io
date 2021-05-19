@@ -7,7 +7,8 @@
  */
 
 import { INVALID_MOVE } from './constants';
-import { CreateGameReducer } from './reducer';
+import { applyMiddleware, createStore } from 'redux';
+import { CreateGameReducer, TransientHandlingMiddleware } from './reducer';
 import { InitializeGame } from './initialize';
 import {
   makeMove,
@@ -32,6 +33,7 @@ const game: Game = {
     A: (G) => G,
     B: () => ({ moved: true }),
     C: () => ({ victory: true }),
+    Invalid: () => INVALID_MOVE,
   },
   endIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
 };
@@ -136,7 +138,7 @@ test('invalid patch', () => {
     patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], [])
   );
   expect(state).toEqual(originalState);
-  expect(transients.error.type).toEqual('patch_failed');
+  expect(transients.error.type).toEqual('update/patch_failed');
   // It's an array.
   expect(transients.error.payload.length).toEqual(1);
   // It looks like the standard rfc6902 error language.
@@ -752,5 +754,35 @@ describe('undo / redo with stages', () => {
       C: false,
     });
     expect(state.ctx.activePlayers['0']).toBe('B');
+  });
+});
+
+describe('TransientHandlingMiddleware', () => {
+  const middleware = applyMiddleware(TransientHandlingMiddleware);
+  let store = null;
+
+  beforeEach(() => {
+    store = createStore(reducer, initialState, middleware);
+  });
+
+  test('regular dispatch result has no transients', () => {
+    const result = store.dispatch(makeMove('A'));
+    expect(result).toEqual(
+      expect.not.objectContaining({ transients: expect.anything() })
+    );
+    expect(result).toEqual(
+      expect.not.objectContaining({ stripTransientsResult: expect.anything() })
+    );
+  });
+
+  test('failing dispatch result contains transients', () => {
+    const result = store.dispatch(makeMove('Invalid'));
+    expect(result).toMatchObject({
+      transients: {
+        error: {
+          type: 'action/invalid_move',
+        },
+      },
+    });
   });
 });

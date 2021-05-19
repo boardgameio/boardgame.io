@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import { INVALID_MOVE } from '../core/constants';
 import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
@@ -498,6 +499,45 @@ describe('move dispatchers', () => {
   });
 });
 
+describe('transient handling', () => {
+  let client = null;
+
+  beforeEach(() => {
+    client = Client({
+      game: {
+        moves: {
+          A: () => ({}),
+          Invalid: () => INVALID_MOVE,
+        },
+      },
+    });
+  });
+
+  test('regular move', () => {
+    const result = client.moves.A();
+    // TODO(#723): Check against a successful ActionResult.
+    expect(result).toBeUndefined();
+    const state = client.store.getState();
+    // Slightly paranoid check to ensure we don't erroneously add transients.
+    expect(state).toEqual(
+      expect.not.objectContaining({ transients: expect.anything() })
+    );
+  });
+
+  test('invalid move', () => {
+    const result = client.moves.Invalid();
+    // TODO(#723): Check against an errored ActionResult.
+    expect(result).toBeUndefined();
+    const state = client.store.getState();
+    // Ensure we've stripped the transients automagically.
+    // At the time this test was written, this effectively ensures that Client
+    // hooks up the TransientHandlingMiddleware correctly.
+    expect(state).toEqual(
+      expect.not.objectContaining({ transients: expect.anything() })
+    );
+  });
+});
+
 describe('log handling', () => {
   let client = null;
 
@@ -769,20 +809,30 @@ test('override game state', () => {
   expect(client.getState().G).toEqual({ moved: true });
 });
 
+// TODO(#941): These tests should validate DOM mounting/unmounting.
 describe('start / stop', () => {
+  beforeEach(() => {
+    // Don't let other calls to `error` pollute this state.
+    jest.resetAllMocks();
+  });
+
   test('mount on custom element', () => {
     const el = document.createElement('div');
     const client = Client({ game: {}, debug: { target: el } });
-    client.start();
-    client.stop();
-    expect(error).toHaveBeenCalledTimes(3);
-    expect(error).toHaveBeenCalledWith('disallowed move: B');
-    expect(error).toHaveBeenCalledWith('disallowed move: C');
-    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
+    expect(() => {
+      client.start();
+      client.stop();
+    }).not.toThrow();
+    expect(error).not.toHaveBeenCalled();
   });
 
   test('no error when mounting on null element', () => {
     const client = Client({ game: {}, debug: { target: null } }) as any;
+    expect(() => {
+      client.start();
+      client.stop();
+    }).not.toThrow();
+
     client.start();
     client.stop();
     expect(client.manager.debugPanel).toBe(null);
@@ -790,31 +840,31 @@ describe('start / stop', () => {
 
   test('override debug implementation', () => {
     const client = Client({ game: {}, debug: { impl: Debug } });
+    expect(() => {
+      client.start();
+      client.stop();
+    }).not.toThrow();
+
     client.start();
     client.stop();
-    expect(error).toHaveBeenCalledTimes(3);
-    expect(error).toHaveBeenCalledWith('disallowed move: B');
-    expect(error).toHaveBeenCalledWith('disallowed move: C');
-    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
+    expect(error).not.toHaveBeenCalled();
   });
 
   test('production mode', () => {
     process.env.NODE_ENV = 'production';
     const client = Client({ game: {} });
-    client.start();
-    client.stop();
-    expect(error).toHaveBeenCalledTimes(3);
-    expect(error).toHaveBeenCalledWith('disallowed move: B');
-    expect(error).toHaveBeenCalledWith('disallowed move: C');
-    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
+    expect(() => {
+      client.start();
+      client.stop();
+    }).not.toThrow();
+    expect(error).not.toHaveBeenCalled();
   });
 
   test('try to stop without starting', () => {
     const client = Client({ game: {} });
-    client.stop();
-    expect(error).toHaveBeenCalledTimes(3);
-    expect(error).toHaveBeenCalledWith('disallowed move: B');
-    expect(error).toHaveBeenCalledWith('disallowed move: C');
-    expect(error).toHaveBeenLastCalledWith('disallowed move: A');
+    expect(() => {
+      client.stop();
+    }).not.toThrow();
+    expect(error).not.toHaveBeenCalled();
   });
 });
