@@ -135,7 +135,7 @@ function initializeDeltalog(
  */
 function ExtractTransients(
   transientState: TransientState | null
-): [State | null, TransientMetadata | null] {
+): [State | null, TransientMetadata | undefined] {
   if (!transientState) {
     // We preserve null for the state for legacy callers, but the transient
     // field should be undefined if not present to be consistent with the
