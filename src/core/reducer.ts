@@ -314,7 +314,7 @@ export function CreateGameReducer({
           return state;
         }
 
-        // Only allow events and undoable moves to be undone.
+        // If undoing a move, check it is undoable.
         if (last.moveType) {
           const lastMove: Move = game.flow.getMove(
             restore.ctx,
@@ -327,6 +327,7 @@ export function CreateGameReducer({
         }
 
         state = initializeDeltalog(state, action);
+
         return {
           ...state,
           G: restore.G,
