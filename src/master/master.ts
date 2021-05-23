@@ -6,10 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { CreateGameReducer } from '../core/reducer';
+import {
+  CreateGameReducer,
+  TransientHandlingMiddleware,
+} from '../core/reducer';
 import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import * as logging from '../core/logger';
 import { PlayerView } from '../plugins/main';
 import type {
@@ -202,7 +205,8 @@ export class Master {
     const reducer = CreateGameReducer({
       game: this.game,
     });
-    const store = createStore(reducer, state);
+    const middleware = applyMiddleware(TransientHandlingMiddleware);
+    const store = createStore(reducer, state, middleware);
 
     // Only allow UNDO / REDO if there is exactly one player
     // that can make moves right now and the person doing the

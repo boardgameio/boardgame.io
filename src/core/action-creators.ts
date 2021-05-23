@@ -149,3 +149,11 @@ export const plugin = (
   type: Actions.PLUGIN as typeof Actions.PLUGIN,
   payload: { type, args, playerID, credentials },
 });
+
+/**
+ * Private action used to strip transient metadata (e.g. errors) from the game
+ * state.
+ */
+export const stripTransients = () => ({
+  type: Actions.STRIP_TRANSIENTS as typeof Actions.STRIP_TRANSIENTS,
+});
