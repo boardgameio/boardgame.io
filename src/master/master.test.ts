@@ -177,15 +177,19 @@ describe('update', () => {
   const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
-  const db = new InMemory();
-  const master = new Master(game, db, TransportAPI(send, sendAll));
+  const game = {
+    moves: {
+      A: (G) => G,
+    },
+  };
+  let db;
+  let master;
   const action = ActionCreators.gameEvent('endTurn');
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    db = new InMemory();
+    master = new Master(game, db, TransportAPI(send, sendAll));
     await master.onSync('matchID', '0', undefined, 2);
-  });
-
-  beforeEach(() => {
     sendAllReturn = undefined;
     jest.clearAllMocks();
   });
@@ -230,7 +234,7 @@ describe('update', () => {
   });
 
   test('invalid matchID', async () => {
-    await master.onUpdate(action, 1, 'default:unknown', '1');
+    await master.onUpdate(action, 0, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
       `game not found, matchID=[default:unknown]`
@@ -238,15 +242,15 @@ describe('update', () => {
   });
 
   test('invalid stateID', async () => {
-    await master.onUpdate(action, 100, 'matchID', '1');
+    await master.onUpdate(action, 100, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `invalid stateID, was=[100], expected=[1] - playerID=[1] - action[endTurn]`
+      `invalid stateID, was=[100], expected=[0] - playerID=[0] - action[endTurn]`
     );
   });
 
   test('invalid playerID', async () => {
-    await master.onUpdate(action, 1, 'matchID', '100');
+    await master.onUpdate(action, 0, 'matchID', '100');
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '100');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
@@ -255,15 +259,15 @@ describe('update', () => {
   });
 
   test('invalid move', async () => {
-    await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '1');
+    await master.onUpdate(ActionCreators.makeMove('move'), 0, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `move not processed - canPlayerMakeMove=false - playerID=[1] - action[move]`
+      `move not processed - canPlayerMakeMove=false - playerID=[0] - action[move]`
     );
   });
 
   test('valid matchID / stateID / playerID', async () => {
-    await master.onUpdate(action, 1, 'matchID', '1');
+    await master.onUpdate(action, 0, 'matchID', '0');
     expect(sendAll).toHaveBeenCalled();
   });
 
@@ -361,8 +365,15 @@ describe('update', () => {
 
   describe('undo / redo', () => {
     test('player 0 can undo', async () => {
+      const move = ActionCreators.makeMove('A', null, '0');
+      await master.onUpdate(move, 0, 'matchID', '0');
+      expect(error).not.toHaveBeenCalled();
+      await master.onUpdate(ActionCreators.undo(), 1, 'matchID', '0');
+      expect(error).not.toHaveBeenCalled();
+
+      // Negative case: All moves already undone.
       await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
-      expect(error).not.toBeCalled();
+      expect(error).toHaveBeenCalledWith(`No moves to undo`);
     });
 
     test('player 1 can’t undo', async () => {
@@ -378,30 +389,34 @@ describe('update', () => {
         [{ all: 'A' }],
         '0'
       );
-      await master.onUpdate(setActivePlayers, 2, 'matchID', '0');
-      await master.onUpdate(ActionCreators.undo('0'), 3, 'matchID', '0');
+      await master.onUpdate(setActivePlayers, 0, 'matchID', '0');
+      await master.onUpdate(ActionCreators.undo('0'), 1, 'matchID', '0');
       expect(error).toHaveBeenCalledWith(
         `playerID=[0] cannot undo / redo right now`
       );
     });
 
     test('player can undo if they are the only active player', async () => {
+      const move = ActionCreators.makeMove('A', null, '0');
+      await master.onUpdate(move, 0, 'matchID', '0');
+      expect(error).not.toHaveBeenCalled();
       const endStage = ActionCreators.gameEvent('endStage', undefined, '0');
-      await master.onUpdate(endStage, 3, 'matchID', '0');
-      await master.onUpdate(ActionCreators.undo('1'), 4, 'matchID', '1');
+      await master.onUpdate(endStage, 1, 'matchID', '0');
+      expect(error).not.toBeCalled();
+      await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
       expect(error).not.toBeCalled();
 
       // Clean-up active players.
       const endStage2 = ActionCreators.gameEvent('endStage', undefined, '1');
-      await master.onUpdate(endStage2, 4, 'matchID', '1');
+      await master.onUpdate(endStage2, 3, 'matchID', '1');
     });
   });
 
   test('game over', async () => {
     let event = ActionCreators.gameEvent('endGame');
-    await master.onUpdate(event, 5, 'matchID', '0');
+    await master.onUpdate(event, 0, 'matchID', '0');
     event = ActionCreators.gameEvent('endTurn');
-    await master.onUpdate(event, 6, 'matchID', '0');
+    await master.onUpdate(event, 1, 'matchID', '0');
     expect(error).toHaveBeenCalledWith(
       `game over - matchID=[matchID] - playerID=[0] - action[endTurn]`
     );
@@ -664,7 +679,8 @@ describe('patch', () => {
   describe('undo / redo', () => {
     test('player 0 can undo', async () => {
       await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '1');
-      expect(error).not.toBeCalled();
+      // The master allows this, but the reducer does not.
+      expect(error).toHaveBeenCalledWith(`No moves to undo`);
     });
 
     test('player 1 can’t undo', async () => {
@@ -691,7 +707,8 @@ describe('patch', () => {
       const endStage = ActionCreators.gameEvent('endStage', undefined, '1');
       await master.onUpdate(endStage, 2, 'matchID', '1');
       await master.onUpdate(ActionCreators.undo('0'), 3, 'matchID', '1');
-      expect(error).not.toBeCalled();
+      // The master allows this, but the reducer does not.
+      expect(error).toHaveBeenCalledWith(`Cannot undo other players' moves`);
 
       // Clean-up active players.
       const endStage2 = ActionCreators.gameEvent('endStage', undefined, '1');

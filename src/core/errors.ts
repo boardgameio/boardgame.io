@@ -28,4 +28,6 @@ export enum ActionErrorType {
   GameOver = 'action/gameover',
   // The requested action is disabled (e.g. undo/redo, events)
   ActionDisabled = 'action/action_disabled',
+  // The requested action is not currently possible
+  ActionInvalid = 'action/action_invalid',
 }

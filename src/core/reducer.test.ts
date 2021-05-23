@@ -438,7 +438,15 @@ describe('undo / redo', () => {
 
   test('redo only resets deltalog if nothing to redo', () => {
     const state = reducer(initialState, makeMove('move', 'A', '0'));
-    expect(reducer(state, redo())).toEqual({ ...state, deltalog: [] });
+    expect(reducer(state, redo())).toMatchObject({
+      ...state,
+      deltalog: [],
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
   });
 });
 
@@ -533,13 +541,29 @@ describe('undo stack', () => {
 
   test('can’t undo at the start of a turn', () => {
     const newState = reducer(state, undo());
-    expect(newState).toEqual({ ...state, deltalog: [] });
+    expect(newState).toMatchObject({
+      ...state,
+      deltalog: [],
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
   });
 
   test('can’t undo another player’s move', () => {
     state = reducer(state, makeMove('basic', null, '1'));
     const newState = reducer(state, undo('0'));
-    expect(newState).toEqual({ ...state, deltalog: [] });
+    expect(newState).toMatchObject({
+      ...state,
+      deltalog: [],
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
   });
 });
 
@@ -595,7 +619,15 @@ describe('redo stack', () => {
     expect(state._redo).toHaveLength(1);
     const newState = reducer(state, redo('0'));
     expect(state._redo).toHaveLength(1);
-    expect(newState).toEqual({ ...state, deltalog: [] });
+    expect(newState).toMatchObject({
+      ...state,
+      deltalog: [],
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
   });
 });
 

@@ -391,10 +391,8 @@ export function CreateGameReducer({
         const { _undo, _redo } = state;
 
         if (_undo.length < 2) {
-          // TODO(#723): Add an error case here.
-          //  error(`No moves to undo`);
-          //  return WithError(state, ActionErrorType.ActionDisabled);
-          return state;
+          error(`No moves to undo`);
+          return WithError(state, ActionErrorType.ActionInvalid);
         }
 
         const last = _undo[_undo.length - 1];
@@ -405,10 +403,8 @@ export function CreateGameReducer({
           actionHasPlayerID(action) &&
           action.payload.playerID !== last.playerID
         ) {
-          // TODO(#723): Add an error case here.
-          //  error(`Cannot undo other players' moves`);
-          //  return WithError(state, ActionErrorType.ActionDisabled);
-          return state;
+          error(`Cannot undo other players' moves`);
+          return WithError(state, ActionErrorType.ActionInvalid);
         }
 
         // If undoing a move, check it is undoable.
@@ -419,7 +415,8 @@ export function CreateGameReducer({
             last.playerID
           );
           if (!CanUndoMove(state.G, state.ctx, lastMove)) {
-            return state;
+            error(`Move cannot be undone`);
+            return WithError(state, ActionErrorType.ActionInvalid);
           }
         }
 
@@ -447,10 +444,8 @@ export function CreateGameReducer({
         const { _undo, _redo } = state;
 
         if (_redo.length == 0) {
-          // TODO(#723): Add an error case here.
-          //  error(`No moves to redo`);
-          //  return WithError(state, ActionErrorType.ActionDisabled);
-          return state;
+          error(`No moves to redo`);
+          return WithError(state, ActionErrorType.ActionInvalid);
         }
 
         const first = _redo[0];
@@ -460,10 +455,8 @@ export function CreateGameReducer({
           actionHasPlayerID(action) &&
           action.payload.playerID !== first.playerID
         ) {
-          // TODO(#723): Add an error case here.
-          //  error(`Cannot redo other players` moves`);
-          //  return WithError(state, ActionErrorType.ActionDisabled);
-          return state;
+          error(`Cannot redo other players' moves`);
+          return WithError(state, ActionErrorType.ActionInvalid);
         }
 
         state = initializeDeltalog(state, action);
