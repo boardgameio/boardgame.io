@@ -411,17 +411,16 @@ export function CreateGameReducer({
           return state;
         }
 
-        // Only allow undoable moves to be undone.
-        const lastMove: Move = game.flow.getMove(
-          restore.ctx,
-          last.moveType,
-          last.playerID
-        );
-        if (!CanUndoMove(state.G, state.ctx, lastMove)) {
-          // TODO(#723): Add an error case here.
-          //  error(`Move cannot be undone`);
-          //  return WithError(state, ActionErrorType.ActionDisabled);
-          return state;
+        // If undoing a move, check it is undoable.
+        if (last.moveType) {
+          const lastMove: Move = game.flow.getMove(
+            restore.ctx,
+            last.moveType,
+            last.playerID
+          );
+          if (!CanUndoMove(state.G, state.ctx, lastMove)) {
+            return state;
+          }
         }
 
         state = initializeDeltalog(state, action);
