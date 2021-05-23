@@ -327,7 +327,16 @@ describe('undo / redo', () => {
         G.roll = ctx.random.D6();
       },
     },
+    turn: {
+      stages: {
+        special: {},
+      },
+    },
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   const reducer = CreateGameReducer({ game });
 
@@ -341,11 +350,25 @@ describe('undo / redo', () => {
     expect(state._undo[1].ctx.random).toBeUndefined();
   });
 
-  test('undo restores previous state', () => {
+  test('undo restores previous state after move', () => {
     let state = reducer(initialState, makeMove('move', 'A', '0'));
     const { G, ctx, plugins } = state;
     state = reducer(state, makeMove('roll', null, '0'));
     state = reducer(state, undo());
+    expect(state.G).toEqual(G);
+    expect(state.ctx).toEqual(ctx);
+    expect(state.plugins).toEqual(plugins);
+  });
+
+  test('undo restores previous state after event', () => {
+    let state = reducer(initialState, gameEvent('setStage', 'special', '0'));
+    const { G, ctx, plugins } = state;
+    state = reducer(state, gameEvent('endStage', undefined, '0'));
+    expect(error).not.toBeCalled();
+    // Make sure we actually modified the stage.
+    expect(state.ctx.activePlayers).not.toEqual(ctx.activePlayers);
+    state = reducer(state, undo());
+    expect(error).not.toBeCalled();
     expect(state.G).toEqual(G);
     expect(state.ctx).toEqual(ctx);
     expect(state.plugins).toEqual(plugins);
