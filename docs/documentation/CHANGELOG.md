@@ -1,3 +1,14 @@
+### v0.44.4
+
+#### Features
+
+* [[2eca252](https://github.com/boardgameio/boardgame.io/commit/2eca252)] Improve error handling (work in progress) (PR [#940](https://github.com/boardgameio/boardgame.io/pull/940), Issue [#723](https://github.com/boardgameio/boardgame.io/issues/723))
+* [[cceb0f2](https://github.com/boardgameio/boardgame.io/commit/cceb0f2)] package: Add funding field
+
+#### Bugfixes
+
+* [[49c2c12](https://github.com/boardgameio/boardgame.io/commit/49c2c12)] reducer: Don’t crash when undoing stage events ([#942](https://github.com/boardgameio/boardgame.io/pull/942))
+
 ### v0.44.3
 
 #### Bugfixes
