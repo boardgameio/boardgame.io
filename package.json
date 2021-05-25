@@ -71,6 +71,13 @@
   },
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
+  "funding": [
+    "https://github.com/boardgameio/boardgame.io?sponsor=1",
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/boardgameio"
+    }
+  ],
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.10.3",
