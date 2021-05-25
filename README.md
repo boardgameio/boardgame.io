@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/boardgameio/boardgame.io/main/docs/logo-optimized.svg?sanitize=true" alt="boardgame.io" />
+  <a href="https://boardgame.io/">
+    <img src="https://raw.githubusercontent.com/boardgameio/boardgame.io/main/docs/logo-optimized.svg?sanitize=true" alt="boardgame.io" />
+  </a>
 </p>
 
 <p align="center">
@@ -10,8 +12,13 @@
 </p>
 
 <p align="center">
+<a href="#"><img src="https://img.shields.io/badge/Support_Us:-fff?style=flat-square" alt="Support us:" /></a>
+<a href="https://opencollective.com/boardgameio#support"><img src="https://img.shields.io/badge/Open_Collective-fff?logo=open-collective" alt="Open Collective" /></a>
+<a href="https://github.com/sponsors/boardgameio"><img src="https://img.shields.io/badge/GitHub_Sponsors-fff?logo=github-sponsors" alt="GitHub Sponsors" /></a>
+</p>
+
+<p align="center">
   <strong><a href="https://boardgame.io/documentation/#/">Read the Documentation</a></strong>
-  
 </p>
 
 <p align="center">
@@ -63,10 +70,42 @@ The examples can be found in the [examples](examples/) folder.
 
 See [changelog](docs/documentation/CHANGELOG.md).
 
-## Contributing
+## Get involved
 
-See the contributing [guidelines](CONTRIBUTING.md). Also take a look at the [roadmap](roadmap.md)
-to find things that you could contribute to.
+We welcome contributions of all kinds!
+Please take a moment to review our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+🐛 **Found a bug?**  
+Let us know by [creating an issue][new-issue].
+
+❓ **Have a question?**  
+Our [Gitter channel][gitter] and [GitHub Discussions][discussions]
+are good places to start.
+
+⚙️ **Interested in fixing a [bug][bugs] or adding a [feature][features]?**  
+Check out the [contributing guidelines](CONTRIBUTING.md)
+and the [project roadmap](roadmap.md).
+
+📖 **Can we improve [our documentation][docs]?**  
+Pull requests even for small changes can be helpful. Each page in the
+docs can be edited by clicking the “Edit on GitHub” link at the top right.
+
+💸 **Want to support the project financially?**  
+We accept donations via [GitHub Sponsors][sponsors] and on [Open Collective][collective].
+
+[
+![Open Collective Sponsors](https://opencollective.com/boardgameio/tiers/sponsor.svg?width=600&button=false&avatarHeight=75)
+![OpenCollective Backers](https://opencollective.com/boardgameio/tiers/backer.svg?width=600&avatarHeight=50)
+][collective]
+
+[new-issue]: https://github.com/boardgameio/boardgame.io/issues/new/choose
+[gitter]: https://gitter.im/boardgame-io/General
+[discussions]: https://github.com/boardgameio/boardgame.io/discussions
+[bugs]: https://github.com/boardgameio/boardgame.io/issues?q=is%3Aissue+is%3Aopen+label%3Abug
+[features]: https://github.com/boardgameio/boardgame.io/issues?q=is%3Aissue+is%3Aopen+label%3Afeature
+[docs]: https://boardgame.io/documentation/
+[sponsors]: https://github.com/sponsors/boardgameio
+[collective]: https://opencollective.com/boardgameio#support
 
 ## License
 
