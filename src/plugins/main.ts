@@ -41,6 +41,7 @@ export const ProcessAction = (
   action: ActionShape.Plugin,
   opts: PluginOpts
 ): State => {
+  // TODO(#723): Extend error handling to plugins.
   opts.game.plugins
     .filter((plugin) => plugin.action !== undefined)
     .filter((plugin) => plugin.name === action.payload.type)

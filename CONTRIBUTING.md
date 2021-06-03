@@ -16,7 +16,7 @@ The Issue Tracker may contain items labelled [**good first issue**][gfi] or [**h
 
 [Pull Requests](https://help.github.com/articles/about-pull-requests/) are used for contributions. Code must be well-tested and not decrease the test coverage significantly.
 
-#### Use a separate branch (not `master`)
+#### Use a separate branch (not `main`)
 
 Please commit changes to a separate branch in your fork
 so that we can work together making changes to it before it
@@ -24,7 +24,7 @@ is ready to be merged. Name your branch something like
 `<username>/feature`.
 
 Once you are ready, you can create a Pull Request for it to be
-merged into the `master` branch in this repo.
+merged into the `main` branch in this repo.
 
 #### Testing
 

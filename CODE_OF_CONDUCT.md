@@ -23,4 +23,3 @@ Moderators will encourage better behavior or issue a warning as appropriate. Fur
 ## Moderators
 
 - Chris Swithinbank
-- Nicolo Davis

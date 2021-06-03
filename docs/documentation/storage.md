@@ -62,4 +62,4 @@ a basic caching model compatible with any boardgame.io database connector.
 
 ### Writing a Custom Adapter
 
-Create a class that implements the [StorageAPI.Async](https://github.com/boardgameio/boardgame.io/blob/master/src/server/db/base.ts) interface.
+Create a class that implements the [StorageAPI.Async](https://github.com/boardgameio/boardgame.io/blob/main/src/server/db/base.ts) interface.

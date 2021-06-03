@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.44.3",
+  "version": "0.44.4",
   "description": "library for turn-based games",
   "repository": "https://github.com/boardgameio/boardgame.io",
   "scripts": {
@@ -71,6 +71,13 @@
   },
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
+  "funding": [
+    "https://github.com/boardgameio/boardgame.io?sponsor=1",
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/boardgameio"
+    }
+  ],
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.10.3",
@@ -100,7 +107,7 @@
     "bundlewatch": "^0.3.2",
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
-    "docsify-cli": "^4.4.2",
+    "docsify-cli": "^4.4.3",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^7.16.0",

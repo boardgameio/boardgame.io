@@ -14,7 +14,10 @@ import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { ProcessGameConfig } from '../core/game';
 import type Debug from './debug/Debug.svelte';
-import { CreateGameReducer } from '../core/reducer';
+import {
+  CreateGameReducer,
+  TransientHandlingMiddleware,
+} from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { PlayerView } from '../plugins/main';
 import type { Transport, TransportOpts } from './transport/transport';
@@ -302,6 +305,7 @@ export class _ClientImpl<G extends any = any> {
     };
 
     const middleware = applyMiddleware(
+      TransientHandlingMiddleware,
       SubscriptionMiddleware,
       TransportMiddleware,
       LogMiddleware

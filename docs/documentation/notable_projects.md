@@ -209,6 +209,24 @@ Clone of Jaipur, a 2 Player Card game, with online multiplayer support.
 [b20]:https://img.shields.io/github/stars/skvrahul/UdaipurGame?label=%E2%98%85&logo=github
 
 
+#### [![GitHub stars][b24]][c24] [Unmuted: 2021][p24] \[[code][c24]\]
+&nbsp;&nbsp;
+A single-player deckbuilder game.
+
+[p24]: https://shaoster.github.io/unmuted2021
+[c24]: https://github.com/shaoster/unmuted2021
+[b24]: https://img.shields.io/github/stars/shaoster/unmuted2021?label=%E2%98%85&logo=github
+
+
+#### [![GitHub stars][b23]][c23] [Unstable Unicorns][p23] \[[code][c23]\]
+&nbsp;&nbsp;
+Online game variant of the popular card game Unstable Unicorns 🦄. Playable with your friends.
+
+[p23]: https://unstable-unicorns-online.herokuapp.com/hello-world/6/0
+[c23]: https://github.com/geniegeist/unstable-unicorns
+[b23]: https://img.shields.io/github/stars/geniegeist/unstable-unicorns?label=%E2%98%85&logo=github
+
+
 #### [![GitHub stars][b22]][c22] [Yatzy][p22] \[[code][c22] | [tutorial][t22]\]
 &nbsp;&nbsp;
 A 1-4 player dice game played locally.
@@ -216,4 +234,4 @@ A 1-4 player dice game played locally.
 [p22]: https://www.lonesomecrowdedweb.com/yatzy/
 [c22]: https://github.com/pjohannessen/yatzy
 [t22]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
-[b22]:https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
+[b22]: https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
