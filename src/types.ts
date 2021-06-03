@@ -193,7 +193,7 @@ export interface LongFormMove<
   redact?: boolean;
   noLimit?: boolean;
   client?: boolean;
-  undoable?: boolean | ((G: G, ctx: Ctx) => boolean);
+  undoable?: boolean | ((context: { G: G; ctx: Ctx }) => boolean);
   ignoreStaleStateID?: boolean;
 }
 

@@ -645,7 +645,7 @@ describe('undo / redo with stages', () => {
                 events.setStage('A');
                 return { ...G, moveAisReversible, A: true };
               },
-              undoable: (G) => G.moveAisReversible > 0,
+              undoable: ({ G }) => G.moveAisReversible > 0,
             },
           },
         },

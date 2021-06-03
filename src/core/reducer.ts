@@ -60,7 +60,7 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
   }
 
   if (IsFunction(move.undoable)) {
-    return move.undoable(G, ctx);
+    return move.undoable({ G, ctx });
   }
 
   return move.undoable;

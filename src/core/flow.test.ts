@@ -867,7 +867,7 @@ test('undoable moves', () => {
     moves: {
       A: {
         move: () => ({ A: true }),
-        undoable: (_, ctx) => {
+        undoable: ({ ctx }) => {
           return ctx.phase == 'A';
         },
       },
