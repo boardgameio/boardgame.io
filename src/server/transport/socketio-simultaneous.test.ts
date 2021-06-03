@@ -465,7 +465,7 @@ describe('inauthentic clients', () => {
       0: 'foo',
       1: 'bar',
     }),
-    playerView: (G, _ctx, playerID) => ({ [playerID]: G[playerID] }),
+    playerView: ({ G, playerID }) => ({ [playerID]: G[playerID] }),
   };
 
   let app;

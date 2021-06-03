@@ -41,7 +41,7 @@
   // Everything below is OPTIONAL.
 
   // Function that allows you to tailor the game state to a specific player.
-  playerView: (G, ctx, playerID) => G,
+  playerView: ({ G, ctx, playerID }) => G,
 
   // The seed used by the pseudo-random number generator.
   seed: 'random-string',

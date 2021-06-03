@@ -844,7 +844,7 @@ describe('playerView', () => {
     sendAllReturn = arg;
   });
   const game: Game = {
-    playerView: (G, _ctx, player) => {
+    playerView: ({ G, playerID: player }) => {
       return { ...G, player };
     },
   };

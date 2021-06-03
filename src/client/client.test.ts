@@ -324,7 +324,7 @@ describe('strip secret only on server', () => {
     spec = {
       game: {
         setup: () => initial,
-        playerView: (G) => {
+        playerView: ({ G }) => {
           const r = { ...G };
           r.sum = r.secret.reduce((prev, curr) => {
             return prev + curr;

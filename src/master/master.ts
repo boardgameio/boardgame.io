@@ -281,7 +281,7 @@ export class Master {
       const log = redactLog(state.deltalog, playerID);
       const filteredState = {
         ...state,
-        G: this.game.playerView(state.G, state.ctx, playerID),
+        G: this.game.playerView({ G: state.G, ctx: state.ctx, playerID }),
         plugins: PlayerView(state, { playerID, game: this.game }),
         deltalog: undefined,
         _undo: [],
@@ -292,7 +292,11 @@ export class Master {
         const newStateID = state._stateID;
         const prevFilteredState = {
           ...prevState,
-          G: this.game.playerView(prevState.G, prevState.ctx, playerID),
+          G: this.game.playerView({
+            G: prevState.G,
+            ctx: prevState.ctx,
+            playerID,
+          }),
           plugins: PlayerView(prevState, { playerID, game: this.game }),
           deltalog: undefined,
           _undo: [],
@@ -405,7 +409,7 @@ export class Master {
 
     const filteredState = {
       ...state,
-      G: this.game.playerView(state.G, state.ctx, playerID),
+      G: this.game.playerView({ G: state.G, ctx: state.ctx, playerID }),
       plugins: PlayerView(state, { playerID, game: this.game }),
       deltalog: undefined,
       _undo: [],

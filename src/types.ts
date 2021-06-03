@@ -317,7 +317,7 @@ export interface Game<
   };
   endIf?: (context: FnContext<G, PluginAPIs>) => any;
   onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
-  playerView?: (G: G, ctx: Ctx, playerID: PlayerID) => any;
+  playerView?: (context: { G: G; ctx: Ctx; playerID: PlayerID }) => any;
   plugins?: Array<Plugin<any, any, G>>;
   ai?: {
     enumerate: (

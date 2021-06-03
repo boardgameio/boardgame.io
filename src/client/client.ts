@@ -436,7 +436,11 @@ export class _ClientImpl<G extends any = any> {
     if (!this.multiplayer) {
       state = {
         ...state,
-        G: this.game.playerView(state.G, state.ctx, this.playerID),
+        G: this.game.playerView({
+          G: state.G,
+          ctx: state.ctx,
+          playerID: this.playerID,
+        }),
         plugins: PlayerView(state, this),
       };
     }

@@ -10,15 +10,15 @@ provides support for not even sending such data to
 the client.
 
 In order to do this, use the `playerView` setting in
-the game object. It accepts a function that
-takes `G`, `ctx`, `playerID` and returns a version of `G`
+the game object. It accepts a function that receives an
+object containing `G`, `ctx`, and `playerID`, and returns a version of `G`
 that is stripped of any information that should be hidden
 from that specific player.
 
 ```js
 const game = {
   // ...
-  playerView: (G, ctx, playerID) => {
+  playerView: ({ G, ctx, playerID }) => {
     return StripSecrets(G, playerID);
   },
 };
