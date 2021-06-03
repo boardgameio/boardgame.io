@@ -177,9 +177,9 @@ describe('update', () => {
   const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G) => G,
+      A: ({ G }) => G,
     },
   };
   let db;

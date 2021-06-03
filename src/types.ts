@@ -46,10 +46,7 @@ export type ActionResult = any;
 
 // "Private" state that may include garbage that should be stripped before
 // being handed back to a client.
-export interface TransientState<
-  G extends any = any,
-  CtxWithPlugins extends Ctx = Ctx
-> extends State<G, CtxWithPlugins> {
+export interface TransientState<G extends any = any> extends State<G> {
   transients?: TransientMetadata;
 }
 
