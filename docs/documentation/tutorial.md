@@ -2,6 +2,16 @@
 
 This tutorial walks through a simple game of Tic-Tac-Toe.
 
+?> We’re going to be running commands from a terminal and using Node.js/npm.
+   If you haven’t done that before, you might want to read [an introduction to the command line][cmd]
+   and follow [the instructions on how to install Node][node]. You’ll also want
+   a text editor to write code in like [VS Code][vsc] or [Atom][atom].
+
+[node]: https://nodejs.dev/learn/how-to-install-nodejs
+[cmd]: https://tutorial.djangogirls.org/en/intro_to_command_line/
+[vsc]: https://code.visualstudio.com/
+[atom]: https://atom.io/
+
 
 
 ## Setup
@@ -25,8 +35,14 @@ Let’s create a new Node project from the command line:
 ```
 mkdir bgio-tutorial
 cd bgio-tutorial
-npm init
+npm init --yes
 ```
+
+?> These commands will make a new directory called `bgio-tutorial`,
+   change to that directory, and initialise a new Node package.
+   [Read more in the Node Package Manager docs.][pkgjson]
+
+[pkgjson]: https://docs.npmjs.com/creating-a-package-json-file#creating-a-default-packagejson-file
 
 We’re going to add boardgame.io and also Parcel to help us build our app:
 
@@ -180,13 +196,13 @@ indicate the browsers we want to support:
   "scripts": {
     "start": "parcel index.html --open"
   },
-  "browserslist": "> 0.4% and not ie 11"
+  "browserslist": "defaults and supports async-functions"
 }
 ```
-?> By dropping support for older browsers, we don’t need to worry about
-   including polyfills like `regenerator-runtime`. If you need to support IE11
-   or some of the other browsers excluded here, you can skip adding
-   `browserslist`, but may need to include some polyfills manually.
+?> By dropping support for browsers that don’t support async functions, we don’t
+   need to worry about including the `regenerator-runtime` polyfill. If you need to
+   support older browsers, you can skip adding `browserslist`, but may need to
+   include the polyfill manually.
 
 You can now serve the app from the command line by running:
 
