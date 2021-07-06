@@ -8,6 +8,7 @@
 
 import { createStore } from 'redux';
 import { SocketIOTransport } from './socketio';
+import type * as ioNamespace from 'socket.io-client';
 import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
@@ -51,7 +52,7 @@ test('defaults', () => {
 });
 
 class TransportAdapter extends SocketIOTransport {
-  socket: SocketIOClient.Socket & {
+  declare socket: ioNamespace.Socket & {
     io: { engine: any };
   };
 
@@ -297,7 +298,7 @@ describe('server option', () => {
     const server = 'http://' + hostname + ':' + port;
     const m = new SocketIOTransport({ server });
     m.connect();
-    expect(m.socket.io.uri).toEqual(server + '/default');
+    expect((m.socket.io as any).uri).toEqual(server + '/default');
   });
 
   test('https', () => {
