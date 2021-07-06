@@ -11,7 +11,8 @@ import TicTacToe from './src/tic-tac-toe/game';
 import Chess from './src/chess/game';
 
 const PORT = process.env.PORT || 8000;
-const server = Server({ games: [TicTacToe, Chess] });
+const origins = [`http://localhost:${PORT}`];
+const server = Server({ games: [TicTacToe, Chess], origins });
 server.run(PORT, () => {
-  console.log(`Serving at: http://localhost:${PORT}/`);
+  console.log(`Serving at: ${origins[0]}`);
 });

@@ -19,17 +19,20 @@ A config object with the following options:
 1. `games` (_array_): a list of game implementations
    (each should be an object conforming to the [Game API](/api/Game.md)).
 
-2. `db` (_object_): the [database connector](/storage).
+2. `origins` (_array_): a list of allowed origins for CORS.
+    For instance, this could be [`https://example.com`], or in the case of our examples, [`http://localhost:3000`]
+
+3. `db` (_object_): the [database connector](/storage).
    If not provided, an in-memory implementation is used.
 
-3. `transport` (_object_): the transport implementation.
+4. `transport` (_object_): the transport implementation.
    If not provided, socket.io is used.
 
-4. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [nanoid](https://www.npmjs.com/package/nanoid).
+5. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [nanoid](https://www.npmjs.com/package/nanoid).
 
-5. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
+6. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
 
-6. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
+7. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
 #### Returns
 

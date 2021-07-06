@@ -149,11 +149,18 @@ export class SocketIO {
     this.clientInfo.set(socket.id, client);
   }
 
-  init(app: Server.App & { _io?: IOTypes.Server }, games: Game[]) {
+  init(
+    app: Server.App & { _io?: IOTypes.Server },
+    games: Game[],
+    origins: string[] = []
+  ) {
     const io = new IO({
       ioOptions: {
         pingTimeout: PING_TIMEOUT,
         pingInterval: PING_INTERVAL,
+        cors: {
+          origins,
+        },
         ...this.socketOpts,
       },
     });

@@ -57,6 +57,7 @@ export const getPortFromServer = (
 
 interface ServerOpts {
   games: Game[];
+  origins?: string[];
   db?: StorageAPI.Async | StorageAPI.Sync;
   transport?: SocketIO;
   uuid?: () => string;
@@ -72,6 +73,7 @@ interface ServerOpts {
  * @param db - The interface with the database.
  * @param transport - The interface with the clients.
  * @param authenticateCredentials - Function to test player credentials.
+ * @param origins - Allowed origins to use this server, i.e. [http://localhost:300]
  * @param generateCredentials - Method for API to generate player credentials.
  * @param https - HTTPS configuration options passed through to the TLS module.
  * @param lobbyConfig - Configuration options for the Lobby API server.
@@ -82,6 +84,7 @@ export function Server({
   transport,
   https,
   uuid,
+  origins,
   generateCredentials = uuid,
   authenticateCredentials,
 }: ServerOpts) {
@@ -100,7 +103,7 @@ export function Server({
   if (transport === undefined) {
     transport = new SocketIO({ https });
   }
-  transport.init(app, games);
+  transport.init(app, games, origins);
 
   const router = createRouter({ db, games, uuid, auth });
 

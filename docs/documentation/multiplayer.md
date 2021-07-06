@@ -216,7 +216,7 @@ boardgame.io server module and provide it with our `TicTacToe` game object.
 const { Server } = require('boardgame.io/server');
 const { TicTacToe } = require('./Game');
 
-const server = Server({ games: [TicTacToe] });
+const server = Server({ games: [TicTacToe], origins: ['http://localhost:300'] });
 
 server.run(8000);
 ```
