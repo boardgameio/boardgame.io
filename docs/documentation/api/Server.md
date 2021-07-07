@@ -16,11 +16,19 @@ be configured to run on a separate port.
 
 A config object with the following options:
 
-1. `games` (_array_): a list of game implementations
+1. `games` (_array_) (required): a list of game implementations
    (each should be an object conforming to the [Game API](/api/Game.md)).
 
-2. `origins` (_array_): a list of allowed origins for CORS.
-    For instance, this could be [`https://example.com`], or in the case of our examples, [`http://localhost:3000`]
+2. `origins` (_array_) (required): a list of allowed origins for
+    [CORS](https://a.lu "Cross-Origin Resource Sharing").
+    
+    The list can contain strings or regular expressions, matching the origins
+    that are allowed to access the game server. For example, this could be
+    `['https://example.com']` if that’s where your game is running. While
+    developing locally you could set it to `[/localhost:\d+/]` to allow access for
+    any page running on localhost.
+
+[cors]: https://github.com/expressjs/cors#configuration-options
 
 3. `db` (_object_): the [database connector](/storage).
    If not provided, an in-memory implementation is used.
