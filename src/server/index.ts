@@ -7,6 +7,7 @@
  */
 
 import Koa from 'koa';
+import type IOTypes from 'socket.io';
 
 import { createRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
@@ -57,7 +58,7 @@ export const getPortFromServer = (
 
 interface ServerOpts {
   games: Game[];
-  origins?: string[];
+  origins?: IOTypes.ServerOptions['cors']['origin'];
   db?: StorageAPI.Async | StorageAPI.Sync;
   transport?: SocketIO;
   uuid?: () => string;

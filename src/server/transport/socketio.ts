@@ -152,7 +152,7 @@ export class SocketIO {
   init(
     app: Server.App & { _io?: IOTypes.Server },
     games: Game[],
-    origins: string[] = []
+    origins: IOTypes.ServerOptions['cors']['origin'] = []
   ) {
     const io = new IO({
       ioOptions: {
