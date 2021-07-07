@@ -104,6 +104,14 @@ export function Server({
   if (transport === undefined) {
     transport = new SocketIO({ https });
   }
+  if (origins === undefined) {
+    console.warn(
+      'Server `origins` option is not set.\n' +
+        'Since boardgame.io@0.45, CORS is not enabled by default and you must ' +
+        'explicitly set the origins that are allowed to connect to the server.\n' +
+        'See https://boardgame.io/documentation/#/api/Server'
+    );
+  }
   transport.init(app, games, origins);
 
   const router = createRouter({ db, games, uuid, auth });
