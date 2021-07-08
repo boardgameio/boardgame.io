@@ -20,7 +20,7 @@ A config object with the following options:
    (each should be an object conforming to the [Game API](/api/Game.md)).
 
 2. `origins` (_array_) (required): a list of allowed origins for
-    [CORS](https://a.lu "Cross-Origin Resource Sharing").
+    [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS "Cross-Origin Resource Sharing").
     
     The list can contain strings or regular expressions, matching the origins
     that are allowed to access the game server. For example, this could be
