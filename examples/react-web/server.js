@@ -6,12 +6,15 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server } from 'boardgame.io/server';
+import { Server, Origins } from 'boardgame.io/server';
 import TicTacToe from './src/tic-tac-toe/game';
 import Chess from './src/chess/game';
 
 const PORT = process.env.PORT || 8000;
-const server = Server({ games: [TicTacToe, Chess] });
+const server = Server({
+  games: [TicTacToe, Chess],
+  origins: [Origins.LOCALHOST],
+});
 server.run(PORT, () => {
-  console.log(`Serving at: http://localhost:${PORT}/`);
+  console.log(`Serving at: http://localhost:${PORT}`);
 });

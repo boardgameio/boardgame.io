@@ -1,3 +1,24 @@
+## v0.45.0
+
+#### Breaking Changes
+
+Previously boardgame.io servers allowed CORS requests from all origins by default. After updating socket.io in 0.45.0, an `origins` option must now be provided when creating the server to enable cross-origin requests:
+
+```js
+const { Server } = require('boardgame.io/server');
+
+Server({
+  origins: ['https://www.mygame.com'],
+  // ...
+});
+```
+
+See [the Server reference page](https://boardgame.io/documentation/#/api/Server) for more details.
+
+#### Features
+
+* [[dffcb18](https://github.com/boardgameio/boardgame.io/commit/dffcb18)] chore(deps): Upgrade socket.io packages ([#946](https://github.com/boardgameio/boardgame.io/pull/946))
+
 ### v0.44.4
 
 #### Features

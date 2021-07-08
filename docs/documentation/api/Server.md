@@ -16,20 +16,45 @@ be configured to run on a separate port.
 
 A config object with the following options:
 
-1. `games` (_array_): a list of game implementations
+1. `games` (_array_) (required): a list of game implementations
    (each should be an object conforming to the [Game API](/api/Game.md)).
 
-2. `db` (_object_): the [database connector](/storage).
+2. `origins` (_array_) (required): a list of allowed origins for
+    [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS "Cross-Origin Resource Sharing").
+    
+    The list can contain strings or regular expressions, matching the origins
+    that are allowed to access the game server. For example, this could be
+    `['https://example.com']` if that’s where your game is running. While
+    developing locally you probably want to allow any page running on localhost
+    to connect. boardgame.io provides default configurations to help with this:
+
+    ```js
+    const { Server, Origins } = require('boardgame.io/server');
+    
+    Server({
+      origins: [
+        // Allow your game site to connect.
+        'https://www.mygame.domain',
+        // Allow localhost to connect, except when NODE_ENV is 'production'.
+        Origins.LOCALHOST_IN_DEVELOPMENT
+      ],
+      // ...
+    });
+    ```
+
+[cors]: https://github.com/expressjs/cors#configuration-options
+
+3. `db` (_object_): the [database connector](/storage).
    If not provided, an in-memory implementation is used.
 
-3. `transport` (_object_): the transport implementation.
+4. `transport` (_object_): the transport implementation.
    If not provided, socket.io is used.
 
-4. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [nanoid](https://www.npmjs.com/package/nanoid).
+5. `uuid` (_function_): an optional function that returns a unique identifier, used to create new game IDs and — if `generateCredentials` is not specified — player credentials. Defaults to [nanoid](https://www.npmjs.com/package/nanoid).
 
-5. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
+6. `generateCredentials` (_function_): an optional function that returns player credentials to store in the game metadata and validate against. If not specified, the `uuid` function will be used.
 
-6. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
+7. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
 #### Returns
 

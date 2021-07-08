@@ -13,6 +13,10 @@ import type { Game, StorageAPI } from '../types';
 
 const game: Game = { seed: 0 };
 
+const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+beforeEach(warn.mockReset);
+afterAll(warn.mockRestore);
+
 jest.mock('../core/logger', () => ({
   info: () => {},
   error: () => {},
@@ -79,6 +83,18 @@ describe('new', () => {
     const authenticateCredentials = () => true;
     const server = Server({ games: [game], authenticateCredentials });
     expect(server.db).not.toBeNull();
+  });
+
+  test('logs a warning if origins not set', () => {
+    Server({ games: [{}] });
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('Server `origins` option is not set.')
+    );
+  });
+
+  test('does not log a warning if origins set', () => {
+    Server({ games: [{}], origins: [] });
+    expect(warn).not.toHaveBeenCalled();
   });
 });
 
