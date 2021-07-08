@@ -213,17 +213,17 @@ boardgame.io provides a server module that simplifies running the game
 master on a Node server. We import that module and configure it with our
 `TicTacToe` game object and a list of URL origins we want to allow to
 connect to the server. Later you would set `origins` with your game’s domain
-name, but for now we’ll use a value that allows any locally served page
-to connect.
+name, but for now we’ll import a default value that allows any locally served
+page to connect.
 
 ```js
 // src/server.js
-const { Server } = require('boardgame.io/server');
+const { Server, Origins } = require('boardgame.io/server');
 const { TicTacToe } = require('./Game');
 
 const server = Server({
   games: [TicTacToe],
-  origins: [/localhost:\d+/],
+  origins: [Origins.LOCALHOST],
 });
 
 server.run(8000);

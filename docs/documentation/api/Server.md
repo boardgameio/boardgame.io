@@ -25,8 +25,22 @@ A config object with the following options:
     The list can contain strings or regular expressions, matching the origins
     that are allowed to access the game server. For example, this could be
     `['https://example.com']` if that’s where your game is running. While
-    developing locally you could set it to `[/localhost:\d+/]` to allow access for
-    any page running on localhost.
+    developing locally you probably want to allow any page running on localhost
+    to connect. boardgame.io provides default configurations to help with this:
+
+    ```js
+    const { Server, Origins } = require('boardgame.io/server');
+    
+    Server({
+      origins: [
+        // Allow your game site to connect.
+        'https://www.mygame.domain',
+        // Allow localhost to connect, except when NODE_ENV is 'production'.
+        Origins.LOCALHOST_IN_DEVELOPMENT
+      ],
+      // ...
+    });
+    ```
 
 [cors]: https://github.com/expressjs/cors#configuration-options
 
