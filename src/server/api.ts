@@ -11,6 +11,7 @@ import Router from 'koa-router';
 import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
+import type IOTypes from 'socket.io';
 import { createMatch } from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
@@ -446,9 +447,18 @@ export const createRouter = ({
 
 export const configureApp = (
   app: Server.App,
-  router: Router<any, Server.AppCtx>
+  router: Router<any, Server.AppCtx>,
+  origins: IOTypes.ServerOptions['cors']['origin']
 ): void => {
-  app.use(cors());
+  app.use(
+    cors({
+      // Set Access-Control-Allow-Origin header for allowed origins.
+      origin: (ctx) => {
+        const origin = ctx.get('Origin');
+        return isOriginAllowed(origin, origins) ? origin : '';
+      },
+    })
+  );
 
   // If API_SECRET is set, then require that requests set an
   // api-secret header that is set to the same value.
@@ -465,3 +475,30 @@ export const configureApp = (
 
   app.use(router.routes()).use(router.allowedMethods());
 };
+
+/**
+ * Check if a request’s origin header is allowed for CORS.
+ * Adapted from `cors` package: https://github.com/expressjs/cors
+ * @param origin Request origin to test.
+ * @param allowedOrigin Origin(s) that are allowed to connect via CORS.
+ * @returns `true` if the origin matched at least one of the allowed origins.
+ */
+function isOriginAllowed(
+  origin: string,
+  allowedOrigin: IOTypes.ServerOptions['cors']['origin']
+): boolean {
+  if (Array.isArray(allowedOrigin)) {
+    for (const entry of allowedOrigin) {
+      if (isOriginAllowed(origin, entry)) {
+        return true;
+      }
+    }
+    return false;
+  } else if (typeof allowedOrigin === 'string') {
+    return origin === allowedOrigin;
+  } else if (allowedOrigin instanceof RegExp) {
+    return allowedOrigin.test(origin);
+  } else {
+    return !!allowedOrigin;
+  }
+}

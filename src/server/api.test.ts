@@ -14,6 +14,7 @@ import { createRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
 import { Auth } from './auth';
 import * as StorageAPI from './db/base';
+import { Origins } from './cors';
 import type { Game, Server } from '../types';
 
 jest.setTimeout(2000000000);
@@ -72,13 +73,19 @@ class AsyncStorage extends StorageAPI.Async {
 describe('.createRouter', () => {
   function addApiToServer({
     app,
+    origins,
     ...args
-  }: { app: Server.App } & Parameters<typeof createRouter>[0]) {
+  }: {
+    app: Server.App;
+    origins?: Parameters<typeof configureApp>[2];
+  } & Parameters<typeof createRouter>[0]) {
     const router = createRouter(args);
-    configureApp(app, router);
+    configureApp(app, router, origins);
   }
 
-  function createApiServer(args: Parameters<typeof createRouter>[0]) {
+  function createApiServer(
+    args: Omit<Parameters<typeof addApiToServer>[0], 'app'>
+  ) {
     const app: Server.App = new Koa();
     addApiToServer({ app, ...args });
     return app;
@@ -1509,6 +1516,72 @@ describe('.createRouter', () => {
       const uuid = () => 'foo';
       addApiToServer({ app: server, db, auth, games, uuid });
       expect(server.use.mock.calls.length).toBeGreaterThan(1);
+    });
+  });
+
+  describe('cors', () => {
+    const auth = new Auth();
+    const games: Game[] = [];
+    const db = new AsyncStorage();
+
+    describe('no allowed origins', () => {
+      const app = createApiServer({ auth, games, db, origins: false });
+
+      test('does not allow CORS', async () => {
+        const { res } = await request(app.callback())
+          .get('/games')
+          .set('Origin', 'https://www.example.com')
+          .expect('Vary', 'Origin');
+        expect(res.headers).not.toHaveProperty('access-control-allow-origin');
+        expect(res.headers).not.toHaveProperty('Access-Control-Allow-Origin');
+      });
+    });
+
+    describe('single allowed origin', () => {
+      const origin = 'https://www.example.com';
+      const app = createApiServer({ auth, games, db, origins: origin });
+
+      test('disallows non-matching origin', async () => {
+        const { res } = await request(app.callback())
+          .get('/games')
+          .set('Origin', 'https://www.other.com')
+          .expect('Vary', 'Origin');
+        expect(res.headers).not.toHaveProperty('access-control-allow-origin');
+        expect(res.headers).not.toHaveProperty('Access-Control-Allow-Origin');
+      });
+
+      // eslint-disable-next-line jest/expect-expect
+      test('allows matching origin', async () => {
+        await request(app.callback())
+          .get('/games')
+          .set('Origin', origin)
+          .expect('Vary', 'Origin')
+          .expect('Access-Control-Allow-Origin', origin);
+      });
+    });
+
+    describe('multiple allowed origins', () => {
+      const origins = [Origins.LOCALHOST, 'https://www.example.com'];
+      const app = createApiServer({ auth, games, db, origins });
+
+      test('disallows non-matching origin', async () => {
+        const { res } = await request(app.callback())
+          .get('/games')
+          .set('Origin', 'https://www.other.com')
+          .expect('Vary', 'Origin');
+        expect(res.headers).not.toHaveProperty('access-control-allow-origin');
+        expect(res.headers).not.toHaveProperty('Access-Control-Allow-Origin');
+      });
+
+      // eslint-disable-next-line jest/expect-expect
+      test('allows matching origin', async () => {
+        const origin = 'http://localhost:5000';
+        await request(app.callback())
+          .get('/games')
+          .set('Origin', origin)
+          .expect('Vary', 'Origin')
+          .expect('Access-Control-Allow-Origin', origin);
+      });
     });
   });
 });
