@@ -59,6 +59,7 @@ export const getPortFromServer = (
 interface ServerOpts {
   games: Game[];
   origins?: IOTypes.ServerOptions['cors']['origin'];
+  apiOrigins?: IOTypes.ServerOptions['cors']['origin'];
   db?: StorageAPI.Async | StorageAPI.Sync;
   transport?: SocketIO;
   uuid?: () => string;
@@ -74,7 +75,8 @@ interface ServerOpts {
  * @param db - The interface with the database.
  * @param transport - The interface with the clients.
  * @param authenticateCredentials - Function to test player credentials.
- * @param origins - Allowed origins to use this server, i.e. [http://localhost:300]
+ * @param origins - Allowed origins to use this server, e.g. `['http://localhost:3000']`.
+ * @param apiOrigins - Allowed origins to use the Lobby API, defaults to `origins`.
  * @param generateCredentials - Method for API to generate player credentials.
  * @param https - HTTPS configuration options passed through to the TLS module.
  * @param lobbyConfig - Configuration options for the Lobby API server.
@@ -86,6 +88,7 @@ export function Server({
   https,
   uuid,
   origins,
+  apiOrigins = origins,
   generateCredentials = uuid,
   authenticateCredentials,
 }: ServerOpts) {
@@ -133,13 +136,13 @@ export function Server({
       const lobbyConfig = serverRunConfig.lobbyConfig;
       let apiServer: KoaServer | undefined;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
-        configureApp(app, router, origins);
+        configureApp(app, router, apiOrigins);
       } else {
         // Run API in a separate Koa app.
         const api: ServerTypes.App = new Koa();
         api.context.db = db;
         api.context.auth = auth;
-        configureApp(api, router, origins);
+        configureApp(api, router, apiOrigins);
         await new Promise((resolve) => {
           apiServer = api.listen(lobbyConfig.apiPort, resolve);
         });
