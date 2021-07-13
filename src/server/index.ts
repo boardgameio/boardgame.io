@@ -133,13 +133,13 @@ export function Server({
       const lobbyConfig = serverRunConfig.lobbyConfig;
       let apiServer: KoaServer | undefined;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
-        configureApp(app, router);
+        configureApp(app, router, origins);
       } else {
         // Run API in a separate Koa app.
         const api: ServerTypes.App = new Koa();
         api.context.db = db;
         api.context.auth = auth;
-        configureApp(api, router);
+        configureApp(api, router, origins);
         await new Promise((resolve) => {
           apiServer = api.listen(lobbyConfig.apiPort, resolve);
         });

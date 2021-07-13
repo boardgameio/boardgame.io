@@ -75,7 +75,7 @@ describe('.createRouter', () => {
     ...args
   }: { app: Server.App } & Parameters<typeof createRouter>[0]) {
     const router = createRouter(args);
-    configureApp(app, router);
+    configureApp(app, router, []);
   }
 
   function createApiServer(args: Parameters<typeof createRouter>[0]) {
