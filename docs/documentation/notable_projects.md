@@ -18,6 +18,13 @@ Fool the computer, but not your friends! Adversarial "Quick, Draw".
 [b1]: https://img.shields.io/github/stars/jayelm/bad-flamingo?label=%E2%98%85&logo=github
 [c1]: https://github.com/jayelm/bad-flamingo
 
+#### [![GitHub stars][b-bl]][c-bl]  [Battle Line][p-bl] \[[code][c-bl]\]
+&nbsp;&nbsp;
+Clone of Battle Line, a 2 player card game.
+
+[b-bl]: https://img.shields.io/github/stars/rsandzimier/battleline?label=%E2%98%85&logo=github
+[c-bl]: https://github.com/rsandzimier/battleline
+[p-bl]: https://rsandzimier.github.io/battleline/
 
 #### [![GitHub stars][b2]][c2] boardgame.io-angular \[[code][c2] | [demo][d2]\]
 &nbsp;&nbsp;
