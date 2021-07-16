@@ -150,6 +150,7 @@
   "dependencies": {
     "@koa/cors": "^2.2.1",
     "@types/koa": "^2.11.3",
+    "@types/redis": "^2.8.31",
     "flatted": "^0.2.3",
     "immer": "^8.0.1",
     "koa": "^2.7.0",
@@ -161,8 +162,10 @@
     "p-queue": "^6.6.2",
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
+    "redis": "^3.1.2",
     "redux": "^4.0.0",
     "rfc6902": "^4.0.1",
+    "rxjs": "^7.2.0",
     "socket.io": "^4.1.2",
     "socket.io-client": "^4.1.2",
     "svelte": "^3.24.0",
