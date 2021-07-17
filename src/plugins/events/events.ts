@@ -23,6 +23,7 @@ export interface EventsAPI {
 export interface PrivateEventsAPI {
   _obj: {
     isUsed(): boolean;
+    storeMetadata(ctx: Ctx): void;
     update(state: State): State;
   };
 }
@@ -39,26 +40,28 @@ export class Events {
     phase: string;
     turn: number;
   }>;
+  currentPhase: string;
+  currentTurn: number;
 
-  constructor(flow: Game['flow'], playerID?: PlayerID) {
+  constructor(flow: Game['flow'], ctx: Ctx, playerID?: PlayerID) {
     this.flow = flow;
     this.playerID = playerID;
     this.dispatch = [];
+    this.storeMetadata(ctx);
   }
 
-  /**
-   * Attaches the Events API to ctx.
-   * @param {object} ctx - The ctx object to attach to.
-   */
-  api(ctx: Ctx) {
+  api() {
     const events: EventsAPI & PrivateEventsAPI = {
       _obj: this,
     };
-    const { phase, turn } = ctx;
-
     for (const key of this.flow.eventNames) {
       events[key] = (...args: any[]) => {
-        this.dispatch.push({ key, args, phase, turn });
+        this.dispatch.push({
+          key,
+          args,
+          phase: this.currentPhase,
+          turn: this.currentTurn,
+        });
       };
     }
 
@@ -69,6 +72,11 @@ export class Events {
     return this.dispatch.length > 0;
   }
 
+  storeMetadata(ctx: Ctx) {
+    this.currentPhase = ctx.phase;
+    this.currentTurn = ctx.turn;
+  }
+
   /**
    * Updates ctx with the triggered events.
    * @param {object} state - The state object { G, ctx }.
@@ -76,6 +84,17 @@ export class Events {
   update(state: State) {
     for (let i = 0; i < this.dispatch.length; i++) {
       const item = this.dispatch[i];
+
+      // If the turn already ended,
+      // don't try to process stage events.
+      if (
+        (item.key === 'endStage' ||
+          item.key === 'setStage' ||
+          item.key === 'setActivePlayers') &&
+        item.turn !== state.ctx.turn
+      ) {
+        continue;
+      }
 
       // If the turn already ended some other way,
       // don't try to end the turn again.

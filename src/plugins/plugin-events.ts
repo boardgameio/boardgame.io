@@ -19,12 +19,24 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
     return api._obj.isUsed();
   },
 
+  fnWrap: (fn) => (G, ctx, ...args) => {
+    const api = ctx.events as PrivateEventsAPI;
+
+    if (api) {
+      api._obj.storeMetadata(ctx);
+    }
+
+    G = fn(G, ctx, ...args);
+
+    return G;
+  },
+
   dangerouslyFlushRawState: ({ state, api }) => {
     return api._obj.update(state);
   },
 
-  api: ({ game, playerID, ctx }) => {
-    return new Events(game.flow, playerID).api(ctx);
+  api: ({ game, ctx, playerID }) => {
+    return new Events(game.flow, ctx, playerID).api();
   },
 };
 

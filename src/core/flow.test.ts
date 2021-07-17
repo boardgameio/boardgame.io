@@ -1084,3 +1084,56 @@ test('events in hooks triggered by moves should be processed', () => {
     '1': 'A',
   });
 });
+
+test('stage events should not be processed out of turn', () => {
+  const game = {
+    phases: {
+      A: {
+        start: true,
+        turn: {
+          activePlayers: {
+            all: 'A1',
+          },
+          stages: {
+            A1: {
+              moves: {
+                endStage: (G, ctx) => {
+                  G.endStage = true;
+                  ctx.events.endStage();
+                },
+              },
+            },
+          },
+        },
+        endIf: (G) => G.endStage,
+        next: 'B',
+      },
+      B: {
+        turn: {
+          activePlayers: {
+            all: 'B1',
+          },
+          stages: {
+            B1: {},
+          },
+        },
+      },
+    },
+  };
+
+  const client = Client({ game, numPlayers: 3 });
+
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '0': 'A1',
+    '1': 'A1',
+    '2': 'A1',
+  });
+
+  client.moves.endStage();
+
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '0': 'B1',
+    '1': 'B1',
+    '2': 'B1',
+  });
+});
