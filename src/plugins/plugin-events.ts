@@ -23,7 +23,7 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
     const api = ctx.events as PrivateEventsAPI;
 
     if (api) {
-      api._obj.storeMetadata(ctx);
+      api._obj.updateTurnContext(ctx);
     }
 
     G = fn(G, ctx, ...args);

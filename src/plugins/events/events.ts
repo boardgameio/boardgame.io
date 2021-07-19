@@ -23,7 +23,7 @@ export interface EventsAPI {
 export interface PrivateEventsAPI {
   _obj: {
     isUsed(): boolean;
-    storeMetadata(ctx: Ctx): void;
+    updateTurnContext(ctx: Ctx): void;
     update(state: State): State;
   };
 }
@@ -49,7 +49,7 @@ export class Events {
     this.playerID = playerID;
     this.dispatch = [];
     this.initialTurn = ctx.turn;
-    this.storeMetadata(ctx);
+    this.updateTurnContext(ctx);
   }
 
   api() {
@@ -74,7 +74,7 @@ export class Events {
     return this.dispatch.length > 0;
   }
 
-  storeMetadata(ctx: Ctx) {
+  updateTurnContext(ctx: Ctx) {
     this.currentPhase = ctx.phase;
     this.currentTurn = ctx.turn;
   }
