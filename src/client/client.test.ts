@@ -22,6 +22,7 @@ import {
   gameEvent,
   patch,
 } from '../core/action-creators';
+import * as Actions from '../core/action-types';
 import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
 import type { LogEntry, State, SyncInfo } from '../types';
@@ -144,7 +145,7 @@ describe('multiplayer', () => {
 
     beforeAll(() => {
       client = Client({
-        game: { moves: { A: () => {} } },
+        game: { moves: { A: () => {}, Invalid: () => INVALID_MOVE } },
         multiplayer: SocketIO({ server: host + ':' + port }),
       });
       client.start();
@@ -171,6 +172,18 @@ describe('multiplayer', () => {
       client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
+    });
+
+    test('strip transients action not sent to transport', () => {
+      jest.spyOn(client.transport, 'onAction');
+      const state = { G: {}, ctx: { phase: '' }, plugins: {} };
+      const filteredMetadata = [];
+      client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
+      client.moves.Invalid();
+      expect(client.transport.onAction).not.toHaveBeenCalledWith(
+        expect.any(Object),
+        { type: Actions.STRIP_TRANSIENTS }
+      );
     });
 
     test('Sends and receives chat messages', () => {

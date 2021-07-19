@@ -161,6 +161,10 @@ export class Master {
     matchID: string,
     playerID: string
   ): Promise<void | { error: string }> {
+    if (!credAction || !credAction.payload) {
+      return { error: 'missing action or action payload' };
+    }
+
     let metadata: Server.MatchData | undefined;
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
