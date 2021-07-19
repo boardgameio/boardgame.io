@@ -17,6 +17,7 @@ test('constructor', () => {
   expect(e.flow).toBe(flow);
   expect(e.playerID).toBe(playerID);
   expect(e.dispatch).toEqual([]);
+  expect(e.initialTurn).toEqual(0);
   expect(e.currentPhase).toEqual('');
   expect(e.currentTurn).toEqual(0);
 });
