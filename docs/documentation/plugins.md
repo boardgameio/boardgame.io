@@ -47,6 +47,12 @@ A plugin is an object that contains the following fields.
   // for the master instead.
   noClient: ({ G, ctx, game, data, api }) => boolean,
 
+  // Function that allows the plugin to indicate that the
+  // current action should be declared invalid and cancelled.
+  // If `isInvalid` returns an error message, the whole update
+  // will be abandoned and an error returned to the client.
+  isInvalid: ({ G, ctx, game, data, api }) => false | string,
+
   // Function that can filter `data` to hide secret state
   // before sending it to a specific client.
   // `playerID` could also be null or undefined for spectators.

@@ -8,6 +8,7 @@
 
 import { Client } from '../client/client';
 import { Local } from '../client/transport/local';
+import type { Ctx, Game } from '../types';
 
 describe('basic', () => {
   let client: ReturnType<typeof Client>;
@@ -131,6 +132,68 @@ describe('default values', () => {
     client.start();
     client.moves.A();
     expect(client.getState().plugins.test.data).toEqual(pluginData);
+  });
+});
+
+describe('isInvalid method', () => {
+  // Silence expected error logging and restore when finished.
+  const stderr = console.error;
+  beforeAll(() => (console.error = () => {}));
+  afterAll(() => (console.error = stderr));
+
+  test('basic plugin', () => {
+    const game: Game = {
+      plugins: [
+        {
+          name: 'test',
+          isInvalid: ({ G }) => 'bad' in G && 'not ok',
+        },
+      ],
+      moves: {
+        good: () => ({ good: 'nice' }),
+        bad: () => ({ bad: 'not ok' }),
+      },
+    };
+
+    const client = Client({ game, playerID: '0' });
+    client.start();
+    client.moves.good();
+    expect(client.getState().G).toEqual({ good: 'nice' });
+    client.moves.bad();
+    expect(client.getState().G).toEqual({ good: 'nice' });
+  });
+
+  test('plugin with API and data', () => {
+    const game: Game<any, any> = {
+      plugins: [
+        {
+          name: 'test',
+          setup: () => ({}),
+          api: ({ data }) => ({
+            set: (key, val) => {
+              data[key] = val;
+            },
+          }),
+          isInvalid: ({ data }) => 'bad' in data && 'not ok',
+        },
+      ],
+      moves: {
+        good: (_, ctx) => {
+          ctx.test.set('good', 'nice');
+        },
+        bad: (_, ctx) => {
+          ctx.test.set('bad', 'not ok');
+        },
+      },
+    };
+
+    const client = Client({ game, playerID: '0' });
+    client.start();
+    expect(client.getState().ctx.numMoves).toBe(0);
+    client.moves.good();
+    expect(client.getState().ctx.numMoves).toBe(1);
+    client.moves.bad();
+    expect(client.getState().ctx.numMoves).toBe(1);
   });
 });
 

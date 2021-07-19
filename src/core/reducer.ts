@@ -129,6 +129,32 @@ function initializeDeltalog(
 }
 
 /**
+ * Update plugin state after move/event & check if plugins consider the action to be valid.
+ * @param newState Latest version of state in the reducer.
+ * @param oldState Initial value of state when reducer started its work.
+ * @param pluginOpts Plugin configuration options.
+ * @returns Tuple of the new state updated after flushing plugins and the old
+ * state augmented with an error if a plugin declared the action invalid.
+ */
+function flushAndValidatePlugins(
+  newState: State,
+  oldState: State,
+  pluginOpts: { game: Game; isClient?: boolean }
+): [State, TransientState?] {
+  newState = plugins.Flush(newState, pluginOpts);
+  const isInvalid = plugins.IsInvalid(newState, pluginOpts);
+  if (isInvalid) {
+    const { plugin, message } = isInvalid;
+    error(`plugin declared action invalid: ${plugin} - ${message}`);
+    return [
+      newState,
+      WithError(oldState, ActionErrorType.PluginActionInvalid, isInvalid),
+    ];
+  }
+  return [newState];
+}
+
+/**
  * ExtractTransientsFromState
  *
  * Split out transients from the a TransientState
@@ -271,7 +297,12 @@ export function CreateGameReducer({
         let newState = game.flow.processEvent(state, action);
 
         // Execute plugins.
-        newState = plugins.Flush(newState, { game, isClient: false });
+        let stateWithError: TransientState | undefined;
+        [newState, stateWithError] = flushAndValidatePlugins(newState, state, {
+          game,
+          isClient: false,
+        });
+        if (stateWithError) return stateWithError;
 
         // Update undo / redo state.
         newState = updateUndoRedoState(newState, { game, action });
@@ -280,7 +311,7 @@ export function CreateGameReducer({
       }
 
       case Actions.MAKE_MOVE: {
-        state = { ...state, deltalog: [] };
+        const oldState = (state = { ...state, deltalog: [] });
 
         // Check whether the move is allowed at this time.
         const move: Move = game.flow.getMove(
@@ -348,10 +379,12 @@ export function CreateGameReducer({
         // These will be processed on the server, which
         // will send back a state update.
         if (isClient) {
-          state = plugins.Flush(state, {
+          let stateWithError: TransientState | undefined;
+          [state, stateWithError] = flushAndValidatePlugins(state, oldState, {
             game,
             isClient: true,
           });
+          if (stateWithError) return stateWithError;
           return {
             ...state,
             _stateID: state._stateID + 1,
@@ -363,7 +396,11 @@ export function CreateGameReducer({
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
-        state = plugins.Flush(state, { game });
+        let stateWithError: TransientState | undefined;
+        [state, stateWithError] = flushAndValidatePlugins(state, oldState, {
+          game,
+        });
+        if (stateWithError) return stateWithError;
 
         // Update undo / redo state.
         state = updateUndoRedoState(state, { game, action });
