@@ -1,3 +1,9 @@
+### v0.45.2
+
+#### Bugfixes
+
+* [[9753c0e](https://github.com/boardgameio/boardgame.io/commit/9753c0e)] fix: Don’t leak `STRIP_TRANSIENTS` action ([#961](https://github.com/boardgameio/boardgame.io/pull/961))
+
 ### v0.45.1
 
 #### Breaking Changes
