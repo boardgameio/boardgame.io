@@ -233,6 +233,18 @@ describe('update', () => {
     ]);
   });
 
+  test('missing action', async () => {
+    const { error } = await master.onUpdate(null, 0, 'matchID', '0');
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toBe('missing action or action payload');
+  });
+
+  test('missing action payload', async () => {
+    const { error } = await master.onUpdate({}, 0, 'matchID', '0');
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toBe('missing action or action payload');
+  });
+
   test('invalid matchID', async () => {
     await master.onUpdate(action, 0, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
