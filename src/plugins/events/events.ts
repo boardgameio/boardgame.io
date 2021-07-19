@@ -40,6 +40,7 @@ export class Events {
     phase: string;
     turn: number;
   }>;
+  initialTurn: number;
   currentPhase: string;
   currentTurn: number;
 
@@ -47,6 +48,7 @@ export class Events {
     this.flow = flow;
     this.playerID = playerID;
     this.dispatch = [];
+    this.initialTurn = ctx.turn;
     this.storeMetadata(ctx);
   }
 
@@ -83,6 +85,17 @@ export class Events {
    */
   update(state: State) {
     for (let i = 0; i < this.dispatch.length; i++) {
+      const endedTurns = this.currentTurn - this.initialTurn;
+      // This is an arbitrarily large number.
+      const threshold = state.ctx.numPlayers * 10;
+
+      // This protects against potential infinite loops if specific events are called on hooks.
+      // The moment we exceed the defined threshold, we just bail out of all phases.
+      if (endedTurns > threshold) {
+        state = { ...state, ctx: { ...state.ctx, phase: null } };
+        break;
+      }
+
       const item = this.dispatch[i];
 
       // If the turn already ended,

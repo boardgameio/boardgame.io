@@ -1022,6 +1022,21 @@ describe('infinite loops', () => {
     client.moves.endTurn();
     expect(client.getState().ctx.currentPlayer).toBe('1');
   });
+
+  test('loop 5', () => {
+    const onBegin = (G, ctx) => ctx.events.endPhase();
+    const game = {
+      phases: {
+        A: { onBegin, next: 'B', start: true },
+        B: { onBegin, next: 'C' },
+        C: { onBegin, next: 'A' },
+      },
+    };
+
+    const client = Client({ game, numPlayers: 3 });
+
+    expect(client.getState().ctx.phase).toBe(null);
+  });
 });
 
 describe('activePlayers', () => {
