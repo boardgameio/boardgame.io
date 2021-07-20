@@ -22,7 +22,7 @@ const RedactedMoves = {
   moves: {
     clickCell: {
       /* eslint-disable no-unused-vars */
-      move: (G, ctx, secretstuff) => {},
+      move: (_, secretstuff) => {},
       /* eslint-enable no-unused-vars */
       redact: true,
     },

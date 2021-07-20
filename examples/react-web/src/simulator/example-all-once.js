@@ -24,7 +24,7 @@ export default {
   description: Description,
   game: {
     moves: {
-      move: (G) => G,
+      move: ({ G }) => G,
     },
 
     turn: { activePlayers: ActivePlayers.ALL_ONCE },

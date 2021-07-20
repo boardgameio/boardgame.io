@@ -11,6 +11,7 @@ import { makeMove } from '../../core/action-creators';
 import { CreateGameReducer } from '../../core/reducer';
 import { InitializeGame } from '../../core/initialize';
 import { Client } from '../../client/client';
+import type { Game } from '../../types';
 import { PlayerView } from '../main';
 
 function Init(seed) {
@@ -100,10 +101,10 @@ test('Random.Shuffle', () => {
 });
 
 test('Random API is not executed optimisitically', () => {
-  const game = {
+  const game: Game = {
     seed: 0,
     moves: {
-      rollDie: (G, ctx) => ({ ...G, die: ctx.random.D6() }),
+      rollDie: ({ G, random }) => ({ ...G, die: random.D6() }),
     },
   };
 
@@ -128,7 +129,7 @@ test('Random API works when its state is redacted by playerView', () => {
   const game = {
     seed: 0,
     moves: {
-      rollDie: (G, ctx) => ({ ...G, die: ctx.random.D6() }),
+      rollDie: ({ G, random }) => ({ ...G, die: random.D6() }),
     },
   };
 
@@ -146,11 +147,11 @@ test('turn.onBegin has ctx APIs at the beginning of the game', () => {
   let random = null;
   let events = null;
 
-  const game = {
+  const game: Game = {
     turn: {
-      onBegin: (G, ctx) => {
-        random = ctx.random;
-        events = ctx.events;
+      onBegin: (context) => {
+        random = context.random;
+        events = context.events;
       },
     },
   };

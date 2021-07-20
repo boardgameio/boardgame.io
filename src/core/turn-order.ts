@@ -15,6 +15,7 @@ import type {
   PlayerID,
   State,
   TurnConfig,
+  FnContext,
 } from '../types';
 
 /**
@@ -222,15 +223,16 @@ function getCurrentPlayer(
  */
 export function InitTurnOrderState(state: State, turn: TurnConfig) {
   let { G, ctx } = state;
-  const ctxWithAPI = plugin.EnhanceCtx(state);
+  const pluginAPIs = plugin.GetAPIs(state);
+  const context = { ...pluginAPIs, G, ctx };
   const order = turn.order;
 
   let playOrder = [...new Array(ctx.numPlayers)].map((_, i) => i + '');
   if (order.playOrder !== undefined) {
-    playOrder = order.playOrder(G, ctxWithAPI);
+    playOrder = order.playOrder(context);
   }
 
-  const playOrderPos = order.first(G, ctxWithAPI);
+  const playOrderPos = order.first(context);
   const posType = typeof playOrderPos;
   if (posType !== 'number') {
     logging.error(
@@ -284,8 +286,9 @@ export function UpdateTurnOrderState(
       }
     });
   } else {
-    const ctxWithAPI = plugin.EnhanceCtx(state);
-    const t = order.next(G, ctxWithAPI);
+    const pluginAPIs = plugin.GetAPIs(state);
+    const context = { ...pluginAPIs, G, ctx };
+    const t = order.next(context);
     const type = typeof t;
     if (t !== undefined && type !== 'number') {
       logging.error(
@@ -328,11 +331,11 @@ export const TurnOrder = {
    * The default round-robin turn order.
    */
   DEFAULT: {
-    first: (G: any, ctx: Ctx) =>
+    first: ({ ctx }: FnContext) =>
       ctx.turn === 0
         ? ctx.playOrderPos
         : (ctx.playOrderPos + 1) % ctx.playOrder.length,
-    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: ({ ctx }: FnContext) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -342,7 +345,7 @@ export const TurnOrder = {
    */
   RESET: {
     first: () => 0,
-    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: ({ ctx }: FnContext) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -351,8 +354,8 @@ export const TurnOrder = {
    * Similar to DEFAULT, but starts with the player who ended the last phase.
    */
   CONTINUE: {
-    first: (G: any, ctx: Ctx) => ctx.playOrderPos,
-    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    first: ({ ctx }: FnContext) => ctx.playOrderPos,
+    next: ({ ctx }: FnContext) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   },
 
   /**
@@ -363,7 +366,7 @@ export const TurnOrder = {
    */
   ONCE: {
     first: () => 0,
-    next: (G: any, ctx: Ctx) => {
+    next: ({ ctx }: FnContext) => {
       if (ctx.playOrderPos < ctx.playOrder.length - 1) {
         return ctx.playOrderPos + 1;
       }
@@ -381,7 +384,7 @@ export const TurnOrder = {
   CUSTOM: (playOrder: string[]) => ({
     playOrder: () => playOrder,
     first: () => 0,
-    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: ({ ctx }: FnContext) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   }),
 
   /**
@@ -394,9 +397,9 @@ export const TurnOrder = {
    * @param {string} playOrderField - Field in G.
    */
   CUSTOM_FROM: (playOrderField: string) => ({
-    playOrder: (G: any) => G[playOrderField],
+    playOrder: ({ G }: FnContext) => G[playOrderField],
     first: () => 0,
-    next: (G: any, ctx: Ctx) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+    next: ({ ctx }: FnContext) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
   }),
 };
 

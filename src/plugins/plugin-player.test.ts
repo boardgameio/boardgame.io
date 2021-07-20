@@ -7,12 +7,14 @@
  */
 
 import PluginPlayer from './plugin-player';
+import type { PlayerAPI } from './plugin-player';
 import { Client } from '../client/client';
+import type { Game } from '../types';
 
 describe('default values', () => {
   test('playerState is not passed', () => {
     const plugin = PluginPlayer();
-    const game = {
+    const game: Game<any, { player: PlayerAPI }> = {
       plugins: [plugin],
     };
     const client = Client({ game });
@@ -23,7 +25,7 @@ describe('default values', () => {
 
   test('playerState is passed', () => {
     const plugin = PluginPlayer({ setup: () => ({ A: 1 }) });
-    const game = {
+    const game: Game<any, { player: PlayerAPI }> = {
       plugins: [plugin],
     };
     const client = Client({ game });
@@ -37,16 +39,16 @@ describe('2 player game', () => {
   let client;
 
   beforeAll(() => {
-    const game = {
+    const game: Game<any, { player: PlayerAPI }> = {
       moves: {
-        A: (_, ctx) => {
-          ctx.player.set({ field: 'A1' });
-          ctx.player.opponent.set({ field: 'A2' });
+        A: ({ player }) => {
+          player.set({ field: 'A1' });
+          player.opponent.set({ field: 'A2' });
         },
 
-        B: (G, ctx) => {
-          G.playerValue = ctx.player.get().field;
-          G.opponentValue = ctx.player.opponent.get().field;
+        B: ({ G, player }) => {
+          G.playerValue = player.get().field;
+          G.opponentValue = player.opponent.get().field;
         },
       },
 
@@ -90,10 +92,10 @@ describe('3 player game', () => {
   let client;
 
   beforeAll(() => {
-    const game = {
+    const game: Game<any, { player: PlayerAPI }> = {
       moves: {
-        A: (_, ctx) => {
-          ctx.player.set({ field: 'A' });
+        A: ({ player }) => {
+          player.set({ field: 'A' });
         },
       },
 
@@ -119,7 +121,7 @@ describe('game with phases', () => {
   let client;
 
   beforeAll(() => {
-    const game = {
+    const game: Game<any, { player: PlayerAPI }> = {
       plugins: [PluginPlayer({ setup: (id) => ({ id }) })],
       phases: {
         phase: {},

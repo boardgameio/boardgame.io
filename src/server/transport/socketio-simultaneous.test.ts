@@ -17,7 +17,7 @@ import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
 import type { Master } from '../../master/master';
-import type { Ctx, LogEntry, Server, State, StorageAPI } from '../../types';
+import type { Game, LogEntry, Server, State, StorageAPI } from '../../types';
 
 type SyncArgs = Parameters<Master['onSync']>;
 type UpdateArgs = Parameters<Master['onUpdate']>;
@@ -162,23 +162,20 @@ jest.mock('koa-socket-2', () => {
 });
 
 describe('simultaneous moves on server game', () => {
-  const game = {
+  const game: Game = {
     name: 'test',
-    setup: () => {
-      const G = {
-        players: {
-          '0': {
-            cards: ['card3'],
-          },
-          '1': {
-            cards: [],
-          },
+    setup: () => ({
+      players: {
+        '0': {
+          cards: ['card3'],
         },
-        cards: ['card0', 'card1', 'card2'],
-        discardedCards: [],
-      };
-      return G;
-    },
+        '1': {
+          cards: [],
+        },
+      },
+      cards: ['card0', 'card1', 'card2'],
+      discardedCards: [],
+    }),
     playerView: PlayerView.STRIP_SECRETS,
     turn: {
       activePlayers: { currentPlayer: { stage: 'A' } },
@@ -187,17 +184,17 @@ describe('simultaneous moves on server game', () => {
           moves: {
             A: {
               client: false,
-              move: (G, ctx: Ctx) => {
-                const card = G.players[ctx.playerID].cards.shift();
+              move: ({ G, playerID }) => {
+                const card = G.players[playerID].cards.shift();
                 G.discardedCards.push(card);
               },
             },
             B: {
               client: false,
               ignoreStaleStateID: true,
-              move: (G, ctx: Ctx) => {
+              move: ({ G, playerID }) => {
                 const card = G.cards.pop();
-                G.players[ctx.playerID].cards.push(card);
+                G.players[playerID].cards.push(card);
               },
             },
           },
@@ -463,12 +460,12 @@ describe('simultaneous moves on server game', () => {
 });
 
 describe('inauthentic clients', () => {
-  const game = {
+  const game: Game = {
     setup: () => ({
       0: 'foo',
       1: 'bar',
     }),
-    playerView: (G, _ctx, playerID) => ({ [playerID]: G[playerID] }),
+    playerView: ({ G, playerID }) => ({ [playerID]: G[playerID] }),
   };
 
   let app;

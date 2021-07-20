@@ -82,12 +82,13 @@ for more details.
 
 You can trigger events from a move or code inside
 your game logic (a phase’s `onBegin` hook, for example).
-This is done through the `ctx.events` object:
+This is done through the `events` API in the object passed
+as the first argument to moves:
 
 ```js
 moves: {
-  drawCard: (G, ctx) => {
-    ctx.events.endPhase();
+  drawCard: ({ G, ctx, events }) => {
+    events.endPhase();
   };
 }
 ```

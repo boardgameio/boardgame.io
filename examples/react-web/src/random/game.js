@@ -14,9 +14,9 @@ const RandomExample = {
   }),
 
   moves: {
-    shuffle: (G, ctx) => ({ ...G, deck: ctx.random.Shuffle(G.deck) }),
-    rollDie: (G, ctx, value) => ({ ...G, dice: ctx.random.Die(value) }),
-    rollD6: (G, ctx) => ({ ...G, dice: ctx.random.D6() }),
+    shuffle: ({ G, random }) => ({ ...G, deck: random.Shuffle(G.deck) }),
+    rollDie: ({ G, random }, value) => ({ ...G, dice: random.Die(value) }),
+    rollD6: ({ G, random }) => ({ ...G, dice: random.D6() }),
   },
 };
 

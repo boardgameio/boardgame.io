@@ -25,7 +25,7 @@ import {
 import * as Actions from '../core/action-types';
 import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
-import type { LogEntry, State, SyncInfo } from '../types';
+import type { Game, LogEntry, State, SyncInfo } from '../types';
 import type { Operation } from 'rfc6902';
 
 jest.mock('../core/logger', () => ({
@@ -34,10 +34,10 @@ jest.mock('../core/logger', () => ({
 }));
 
 describe('basic', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
   const initial = { initial: true };
 
-  const game = {
+  const game: Game = {
     setup: () => initial,
   };
 
@@ -58,7 +58,7 @@ test('move api', () => {
   const client = Client({
     game: {
       moves: {
-        A: (G, ctx, arg) => ({ arg }),
+        A: (_, arg) => ({ arg }),
       },
     },
   });
@@ -69,7 +69,7 @@ test('move api', () => {
 });
 
 describe('namespaced moves', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
   beforeAll(() => {
     client = Client({
       game: {
@@ -123,10 +123,10 @@ test('isActive', () => {
   const client = Client({
     game: {
       moves: {
-        A: (G, ctx, arg) => ({ arg }),
+        A: (_, arg) => ({ arg }),
       },
 
-      endIf: (G) => G.arg == 42,
+      endIf: ({ G }) => G.arg == 42,
     },
   });
 
@@ -228,7 +228,7 @@ describe('multiplayer', () => {
 
     beforeAll(() => {
       spec = {
-        game: { moves: { A: (G, ctx) => ({ A: ctx.playerID }) } },
+        game: { moves: { A: ({ playerID }) => ({ A: playerID }) } },
         multiplayer: Local(),
       };
 
@@ -328,15 +328,16 @@ describe('multiplayer', () => {
 });
 
 describe('strip secret only on server', () => {
+  type G = { secret?: number[]; sum?: number; A?: string };
   let client0;
   let client1;
-  let spec;
+  let spec: { game: Game<G>; multiplayer };
   const initial = { secret: [1, 2, 3, 4], sum: 0 };
   beforeAll(() => {
     spec = {
       game: {
         setup: () => initial,
-        playerView: (G) => {
+        playerView: ({ G }) => {
           const r = { ...G };
           r.sum = r.secret.reduce((prev, curr) => {
             return prev + curr;
@@ -344,7 +345,7 @@ describe('strip secret only on server', () => {
           delete r.secret;
           return r;
         },
-        moves: { A: (G, ctx) => ({ A: ctx.playerID }) },
+        moves: { A: ({ playerID }) => ({ A: playerID }) },
       },
       multiplayer: Local(),
     };
@@ -379,7 +380,7 @@ test('accepts enhancer for store', () => {
   const client = Client({
     game: {
       moves: {
-        A: (G, ctx, arg) => ({ arg }),
+        A: (_, arg) => ({ arg }),
       },
     },
     enhancer: spyEnhancer,
@@ -402,7 +403,7 @@ describe('event dispatchers', () => {
     'setStage',
   ];
   test('default', () => {
-    const game = {};
+    const game: Game = {};
     const client = Client({ game });
     expect(Object.keys(client.events)).toEqual(clientEvents);
     expect(client.getState().ctx.turn).toBe(1);
@@ -411,7 +412,7 @@ describe('event dispatchers', () => {
   });
 
   test('all events', () => {
-    const game = {
+    const game: Game = {
       events: {
         endPhase: true,
         endGame: true,
@@ -425,7 +426,7 @@ describe('event dispatchers', () => {
   });
 
   test('no events', () => {
-    const game = {
+    const game: Game = {
       events: {
         endGame: false,
         endPhase: false,
@@ -445,11 +446,11 @@ describe('event dispatchers', () => {
 describe('move dispatchers', () => {
   const game = ProcessGameConfig({
     moves: {
-      A: (G) => G,
-      B: (G, ctx) => ({ moved: ctx.playerID }),
+      A: ({ G }) => G,
+      B: ({ playerID }) => ({ moved: playerID }),
       C: () => ({ victory: true }),
     },
-    endIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
+    endIf: ({ G, ctx }) => (G.victory ? ctx.currentPlayer : undefined),
   });
   const reducer = CreateGameReducer({ game });
   const initialState = InitializeGame({ game });
@@ -649,9 +650,9 @@ describe('log handling', () => {
 });
 
 describe('undo / redo', () => {
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G, ctx, arg) => ({ arg }),
+      A: (_, arg) => ({ arg }),
     },
   };
 
@@ -674,9 +675,9 @@ describe('subscribe', () => {
   let client;
   let fn;
   beforeAll(() => {
-    const game = {
+    const game: Game = {
       moves: {
-        A: (G) => {
+        A: ({ G }) => {
           G.moved = true;
         },
       },
@@ -806,9 +807,9 @@ describe('subscribe', () => {
 });
 
 test('override game state', () => {
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G) => {
+      A: ({ G }) => {
         G.moved = true;
       },
     },

@@ -14,7 +14,7 @@ import { makeMove, gameEvent } from '../src/core/action-creators';
 
 const game = {
   moves: {
-    A: (G) => G,
+    A: ({ G }) => G,
   },
   endIf: () => false,
 };

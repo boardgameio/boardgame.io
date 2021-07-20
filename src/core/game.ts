@@ -52,7 +52,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
   if (game.disableUndo === undefined) game.disableUndo = false;
   if (game.setup === undefined) game.setup = () => ({});
   if (game.moves === undefined) game.moves = {};
-  if (game.playerView === undefined) game.playerView = (G) => G;
+  if (game.playerView === undefined) game.playerView = ({ G }) => G;
   if (game.plugins === undefined) game.plugins = [];
 
   game.plugins.forEach((plugin) => {
@@ -88,15 +88,17 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
 
       if (moveFn instanceof Function) {
         const fn = plugins.FnWrap(moveFn, game.plugins);
-        const ctxWithAPI = {
-          ...plugins.EnhanceCtx(state),
-          playerID: action.playerID,
-        };
         let args = [];
         if (action.args !== undefined) {
           args = args.concat(action.args);
         }
-        return fn(state.G, ctxWithAPI, ...args);
+        const context = {
+          ...plugins.GetAPIs(state),
+          G: state.G,
+          ctx: state.ctx,
+          playerID: action.playerID,
+        };
+        return fn(context, ...args);
       }
 
       logging.error(`invalid move object: ${action.type}`);

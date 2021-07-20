@@ -11,7 +11,7 @@ import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import { Master, redactLog } from './master';
 import { error } from '../core/logger';
-import type { Game, Server, State, Ctx, LogEntry } from '../types';
+import type { Game, Server, State, LogEntry } from '../types';
 import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
@@ -78,7 +78,7 @@ class InMemoryAsync extends StorageAPI.Async {
   }
 }
 
-const game = { seed: 0 };
+const game: Game = { seed: 0 };
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
@@ -177,9 +177,9 @@ describe('update', () => {
   const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G) => G,
+      A: ({ G }) => G,
     },
   };
   let db;
@@ -284,7 +284,7 @@ describe('update', () => {
   });
 
   test('allow execution of moves with ignoreStaleStateID truthy', async () => {
-    const game = {
+    const game: Game = {
       setup: () => {
         const G = {
           players: {
@@ -306,14 +306,14 @@ describe('update', () => {
         stages: {
           A: {
             moves: {
-              A: (G, ctx: Ctx) => {
-                const card = G.players[ctx.playerID].cards.shift();
+              A: ({ G, playerID }) => {
+                const card = G.players[playerID].cards.shift();
                 G.discardedCards.push(card);
               },
               B: {
-                move: (G, ctx: Ctx) => {
+                move: ({ G, playerID }) => {
                   const card = G.cards.pop();
-                  G.players[ctx.playerID].cards.push(card);
+                  G.players[playerID].cards.push(card);
                 },
                 ignoreStaleStateID: true,
               },
@@ -572,17 +572,17 @@ describe('patch', () => {
               },
               A: {
                 client: false,
-                move: (G, ctx: Ctx) => {
-                  const card = G.players[ctx.playerID].cards.shift();
+                move: ({ G, playerID }) => {
+                  const card = G.players[playerID].cards.shift();
                   G.discardedCards.push(card);
                 },
               },
               B: {
                 client: false,
                 ignoreStaleStateID: true,
-                move: (G, ctx: Ctx) => {
+                move: ({ G, playerID }) => {
                   const card = G.cards.pop();
-                  G.players[ctx.playerID].cards.push(card);
+                  G.players[playerID].cards.push(card);
                 },
               },
             },
@@ -621,6 +621,7 @@ describe('patch', () => {
     expect(value.args[3]).toMatchObject([
       { op: 'remove', path: '/G/players/0/cards/0' },
       { op: 'add', path: '/G/discardedCards/-', value: 'card3' },
+      { op: 'replace', path: '/ctx/_activePlayersNumMoves/0', value: 1 },
       { op: 'replace', path: '/ctx/numMoves', value: 1 },
       { op: 'replace', path: '/_stateID', value: 1 },
     ]);
@@ -854,8 +855,8 @@ describe('playerView', () => {
   const sendAll = jest.fn((arg) => {
     sendAllReturn = arg;
   });
-  const game = {
-    playerView: (G, ctx, player) => {
+  const game: Game = {
+    playerView: ({ G, playerID: player }) => {
       return { ...G, player };
     },
   };
@@ -1222,11 +1223,11 @@ describe('redactLog', () => {
   });
 
   test('make sure sync redacts the log', async () => {
-    const game = {
+    const game: Game = {
       moves: {
-        A: (G) => G,
+        A: ({ G }) => G,
         B: {
-          move: (G) => G,
+          move: ({ G }) => G,
           redact: true,
         },
       },

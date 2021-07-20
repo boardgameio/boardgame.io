@@ -22,7 +22,7 @@ describe('basic', () => {
   beforeAll(() => {
     game = ProcessGameConfig({
       moves: {
-        A: (G) => G,
+        A: ({ G }) => G,
         B: () => null,
         C: {
           move: () => 'C',
@@ -66,11 +66,11 @@ describe('basic', () => {
 
 // Following turn order is often used in worker placement games like Agricola and Viticulture.
 test('rounds with starting player token', () => {
-  const game = {
+  const game: Game = {
     setup: () => ({ startingPlayerToken: 0 }),
 
     moves: {
-      takeStartingPlayerToken: (G, ctx) => {
+      takeStartingPlayerToken: ({ G, ctx }) => {
         G.startingPlayerToken = ctx.currentPlayer;
       },
     },
@@ -80,8 +80,8 @@ test('rounds with starting player token', () => {
         start: true,
         turn: {
           order: {
-            first: (G) => G.startingPlayerToken,
-            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+            first: ({ G }) => G.startingPlayerToken,
+            next: ({ ctx }) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
       },
@@ -115,14 +115,14 @@ test('rounds with starting player token', () => {
 
 // The following pattern is used in Catan, Twilight Imperium, and (sort of) Powergrid.
 test('serpentine setup phases', () => {
-  const game = {
+  const game: Game = {
     phases: {
       'first setup round': {
         start: true,
         turn: {
           order: {
             first: () => 0,
-            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+            next: ({ ctx }) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
         next: 'second setup round',
@@ -130,8 +130,8 @@ test('serpentine setup phases', () => {
       'second setup round': {
         turn: {
           order: {
-            first: (G, ctx) => ctx.playOrder.length - 1,
-            next: (G, ctx) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
+            first: ({ ctx }) => ctx.playOrder.length - 1,
+            next: ({ ctx }) => (+ctx.playOrderPos - 1) % ctx.playOrder.length,
           },
         },
         next: 'main phase',
@@ -140,7 +140,7 @@ test('serpentine setup phases', () => {
         turn: {
           order: {
             first: () => 0,
-            next: (G, ctx) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
+            next: ({ ctx }) => (+ctx.playOrderPos + 1) % ctx.playOrder.length,
           },
         },
       },

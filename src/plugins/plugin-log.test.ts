@@ -7,17 +7,18 @@
  */
 
 import { Client } from '../client/client';
+import type { Game } from '../types';
 
 describe('log-metadata', () => {
   test('It sets metadata in a move and then clears the metadata', () => {
-    const game = {
+    const game: Game = {
       moves: {
-        setMetadataMove: (G, ctx) => {
-          ctx.log.setMetadata({
+        setMetadataMove: ({ log }) => {
+          log.setMetadata({
             message: 'test',
           });
         },
-        doNothing: (G) => G,
+        doNothing: ({ G }) => G,
       },
     };
     const client = Client({ game });

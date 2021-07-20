@@ -22,8 +22,8 @@ const sleep = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('bots', () => {
   const game: Game = {
     moves: {
-      A: (_, ctx) => {
-        ctx.events.endTurn();
+      A: ({ events }) => {
+        events.endTurn();
       },
     },
     ai: {
@@ -155,10 +155,10 @@ describe('Local', () => {
   });
 
   describe('with localStorage persistence', () => {
-    const game = {
+    const game: Game = {
       setup: () => ({ count: 0 }),
       moves: {
-        A: (G: any) => {
+        A: ({ G }) => {
           G.count++;
         },
       },
@@ -204,7 +204,7 @@ describe('Local', () => {
 });
 
 describe('LocalMaster', () => {
-  const game = {};
+  const game: Game = {};
   const master = new LocalMaster({ game });
 
   const storeA = ({
@@ -320,7 +320,7 @@ describe('LocalTransport', () => {
       }
     }
     const m = new WrappedLocalTransport({ master });
-    const game = {};
+    const game: Game = {};
     let store: Store | null = null;
 
     beforeEach(() => {
