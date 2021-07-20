@@ -23,6 +23,7 @@ export interface EventsAPI {
 export interface PrivateEventsAPI {
   _obj: {
     isUsed(): boolean;
+    updateTurnContext(ctx: Ctx): void;
     update(state: State): State;
   };
 }
@@ -39,26 +40,30 @@ export class Events {
     phase: string;
     turn: number;
   }>;
+  initialTurn: number;
+  currentPhase: string;
+  currentTurn: number;
 
-  constructor(flow: Game['flow'], playerID?: PlayerID) {
+  constructor(flow: Game['flow'], ctx: Ctx, playerID?: PlayerID) {
     this.flow = flow;
     this.playerID = playerID;
     this.dispatch = [];
+    this.initialTurn = ctx.turn;
+    this.updateTurnContext(ctx);
   }
 
-  /**
-   * Attaches the Events API to ctx.
-   * @param {object} ctx - The ctx object to attach to.
-   */
-  api(ctx: Ctx) {
+  api() {
     const events: EventsAPI & PrivateEventsAPI = {
       _obj: this,
     };
-    const { phase, turn } = ctx;
-
     for (const key of this.flow.eventNames) {
       events[key] = (...args: any[]) => {
-        this.dispatch.push({ key, args, phase, turn });
+        this.dispatch.push({
+          key,
+          args,
+          phase: this.currentPhase,
+          turn: this.currentTurn,
+        });
       };
     }
 
@@ -69,13 +74,40 @@ export class Events {
     return this.dispatch.length > 0;
   }
 
+  updateTurnContext(ctx: Ctx) {
+    this.currentPhase = ctx.phase;
+    this.currentTurn = ctx.turn;
+  }
+
   /**
    * Updates ctx with the triggered events.
    * @param {object} state - The state object { G, ctx }.
    */
   update(state: State) {
     for (let i = 0; i < this.dispatch.length; i++) {
+      const endedTurns = this.currentTurn - this.initialTurn;
+      // This is an arbitrarily large number.
+      const threshold = state.ctx.numPlayers * 10;
+
+      // This protects against potential infinite loops if specific events are called on hooks.
+      // The moment we exceed the defined threshold, we just bail out of all phases.
+      if (endedTurns > threshold) {
+        state = { ...state, ctx: { ...state.ctx, phase: null } };
+        break;
+      }
+
       const item = this.dispatch[i];
+
+      // If the turn already ended,
+      // don't try to process stage events.
+      if (
+        (item.key === 'endStage' ||
+          item.key === 'setStage' ||
+          item.key === 'setActivePlayers') &&
+        item.turn !== state.ctx.turn
+      ) {
+        continue;
+      }
 
       // If the turn already ended some other way,
       // don't try to end the turn again.

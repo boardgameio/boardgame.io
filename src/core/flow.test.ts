@@ -1022,6 +1022,21 @@ describe('infinite loops', () => {
     client.moves.endTurn();
     expect(client.getState().ctx.currentPlayer).toBe('1');
   });
+
+  test('loop 5', () => {
+    const onBegin = (G, ctx) => ctx.events.endPhase();
+    const game = {
+      phases: {
+        A: { onBegin, next: 'B', start: true },
+        B: { onBegin, next: 'C' },
+        C: { onBegin, next: 'A' },
+      },
+    };
+
+    const client = Client({ game, numPlayers: 3 });
+
+    expect(client.getState().ctx.phase).toBe(null);
+  });
 });
 
 describe('activePlayers', () => {
@@ -1082,5 +1097,58 @@ test('events in hooks triggered by moves should be processed', () => {
   expect(client.getState().ctx.currentPlayer).toBe('1');
   expect(client.getState().ctx.activePlayers).toEqual({
     '1': 'A',
+  });
+});
+
+test('stage events should not be processed out of turn', () => {
+  const game = {
+    phases: {
+      A: {
+        start: true,
+        turn: {
+          activePlayers: {
+            all: 'A1',
+          },
+          stages: {
+            A1: {
+              moves: {
+                endStage: (G, ctx) => {
+                  G.endStage = true;
+                  ctx.events.endStage();
+                },
+              },
+            },
+          },
+        },
+        endIf: (G) => G.endStage,
+        next: 'B',
+      },
+      B: {
+        turn: {
+          activePlayers: {
+            all: 'B1',
+          },
+          stages: {
+            B1: {},
+          },
+        },
+      },
+    },
+  };
+
+  const client = Client({ game, numPlayers: 3 });
+
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '0': 'A1',
+    '1': 'A1',
+    '2': 'A1',
+  });
+
+  client.moves.endStage();
+
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '0': 'B1',
+    '1': 'B1',
+    '2': 'B1',
   });
 });
