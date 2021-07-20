@@ -244,6 +244,34 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
 };
 
 /**
+ * Allows plugins to indicate if the entire action should be thrown out
+ * as invalid. This will cancel the entire state update.
+ */
+export const IsInvalid = (
+  state: State,
+  opts: PluginOpts
+): false | { plugin: string; message: string } => {
+  const firstInvalidReturn = [...DEFAULT_PLUGINS, ...opts.game.plugins]
+    .filter((plugin) => plugin.isInvalid !== undefined)
+    .map((plugin) => {
+      const { name } = plugin;
+      const pluginState = state.plugins[name];
+
+      const message = plugin.isInvalid({
+        G: state.G,
+        ctx: state.ctx,
+        game: opts.game,
+        api: pluginState && pluginState.api,
+        data: pluginState && pluginState.data,
+      });
+
+      return message ? { plugin: name, message } : false;
+    })
+    .find((value) => value);
+  return firstInvalidReturn || false;
+};
+
+/**
  * Allows plugins to customize their data for specific players.
  * For example, a plugin may want to share no data with the client, or
  * want to keep some player data secret from opponents.

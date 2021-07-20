@@ -30,4 +30,6 @@ export enum ActionErrorType {
   ActionDisabled = 'action/action_disabled',
   // The requested action is not currently possible
   ActionInvalid = 'action/action_invalid',
+  // The requested action was declared invalid by a plugin
+  PluginActionInvalid = 'action/plugin_invalid',
 }
