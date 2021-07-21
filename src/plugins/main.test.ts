@@ -8,7 +8,7 @@
 
 import { Client } from '../client/client';
 import { Local } from '../client/transport/local';
-import type { Ctx, Game } from '../types';
+import type { Game } from '../types';
 
 describe('basic', () => {
   let client: ReturnType<typeof Client>;
@@ -142,6 +142,7 @@ describe('isInvalid method', () => {
   afterAll(() => (console.error = stderr));
 
   test('basic plugin', () => {
+    const goodG = { good: 'nice' };
     const game: Game = {
       plugins: [
         {
@@ -150,7 +151,7 @@ describe('isInvalid method', () => {
         },
       ],
       moves: {
-        good: () => ({ good: 'nice' }),
+        good: () => goodG,
         bad: () => ({ bad: 'not ok' }),
       },
     };
@@ -158,9 +159,9 @@ describe('isInvalid method', () => {
     const client = Client({ game, playerID: '0' });
     client.start();
     client.moves.good();
-    expect(client.getState().G).toEqual({ good: 'nice' });
+    expect(client.getState().G).toEqual(goodG);
     client.moves.bad();
-    expect(client.getState().G).toEqual({ good: 'nice' });
+    expect(client.getState().G).toEqual(goodG);
   });
 
   test('plugin with API and data', () => {

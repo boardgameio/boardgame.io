@@ -143,15 +143,13 @@ function flushAndValidatePlugins(
 ): [State, TransientState?] {
   newState = plugins.Flush(newState, pluginOpts);
   const isInvalid = plugins.IsInvalid(newState, pluginOpts);
-  if (isInvalid) {
-    const { plugin, message } = isInvalid;
-    error(`plugin declared action invalid: ${plugin} - ${message}`);
-    return [
-      newState,
-      WithError(oldState, ActionErrorType.PluginActionInvalid, isInvalid),
-    ];
-  }
-  return [newState];
+  if (!isInvalid) return [newState];
+  const { plugin, message } = isInvalid;
+  error(`plugin declared action invalid: ${plugin} - ${message}`);
+  return [
+    newState,
+    WithError(oldState, ActionErrorType.PluginActionInvalid, isInvalid),
+  ];
 }
 
 /**
