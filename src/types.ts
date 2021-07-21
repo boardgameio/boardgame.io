@@ -144,6 +144,7 @@ export interface Plugin<
 > {
   name: string;
   noClient?: (context: PluginContext<API, Data, G>) => boolean;
+  isInvalid?: (context: PluginContext<API, Data, G>) => false | string;
   setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G, Ctx> }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
