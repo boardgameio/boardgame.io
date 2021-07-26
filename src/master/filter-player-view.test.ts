@@ -2,12 +2,21 @@ import { getFilterPlayerView, redactLog } from './filter-player-view';
 import * as ActionCreators from '../core/action-creators';
 import { Master } from './master';
 import { InMemory } from '../server/db/inmemory';
+import { PlayerView } from '../core/player-view';
+import { INVALID_MOVE } from '../core/constants';
+import type { Ctx } from '../types';
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
 }
 
-describe('playerView', () => {
+function validateNotTransientState(state: any) {
+  expect(state).toEqual(
+    expect.not.objectContaining({ transients: expect.anything() })
+  );
+}
+
+describe('playerView - update', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
   const game = {
@@ -46,6 +55,92 @@ describe('playerView', () => {
 
     expect(G_player0.player).toBe('0');
     expect(G_player1.player).toBe('1');
+  });
+});
+
+describe('playerView - patch', () => {
+  const send = jest.fn();
+  const sendAll = jest.fn();
+  const db = new InMemory();
+  const game = {
+    seed: 0,
+    deltaState: true,
+    setup: () => {
+      return {
+        players: {
+          '0': {
+            cards: ['card3'],
+          },
+          '1': {
+            cards: [],
+          },
+        },
+        cards: ['card0', 'card1', 'card2'],
+        discardedCards: [],
+      };
+    },
+    playerView: PlayerView.STRIP_SECRETS,
+    turn: {
+      activePlayers: { currentPlayer: { stage: 'A' } },
+      stages: {
+        A: {
+          moves: {
+            Invalid: () => {
+              return INVALID_MOVE;
+            },
+            A: {
+              client: false,
+              move: (G, ctx: Ctx) => {
+                const card = G.players[ctx.playerID].cards.shift();
+                G.discardedCards.push(card);
+              },
+            },
+            B: {
+              client: false,
+              ignoreStaleStateID: true,
+              move: (G, ctx: Ctx) => {
+                const card = G.cards.pop();
+                G.players[ctx.playerID].cards.push(card);
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  const master = new Master(game, db, TransportAPI(send, sendAll));
+  const move = ActionCreators.makeMove('A', null, '0');
+
+  beforeAll(async () => {
+    master.subscribe(({ state }) => {
+      validateNotTransientState(state);
+    });
+    await master.onSync('matchID', '0', undefined, 2);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('patch', async () => {
+    await master.onUpdate(move, 0, 'matchID', '0');
+    expect(sendAll).toBeCalled();
+
+    const payload = sendAll.mock.calls[sendAll.mock.calls.length - 1][0];
+    expect(payload.type).toBe('patch');
+
+    const filterPlayerView = getFilterPlayerView(game);
+    const value = filterPlayerView('0', payload);
+    expect(value.type).toBe('patch');
+    expect(value.args[0]).toBe('matchID');
+    expect(value.args[1]).toBe(0);
+    expect(value.args[2]).toBe(1);
+    expect(value.args[3]).toMatchObject([
+      { op: 'remove', path: '/G/players/0/cards/0' },
+      { op: 'add', path: '/G/discardedCards/-', value: 'card3' },
+      { op: 'replace', path: '/ctx/numMoves', value: 1 },
+      { op: 'replace', path: '/_stateID', value: 1 },
+    ]);
   });
 });
 
