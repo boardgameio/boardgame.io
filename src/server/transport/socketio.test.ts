@@ -12,6 +12,7 @@ import { Auth } from '../auth';
 import { ProcessGameConfig } from '../../core/game';
 import type { Master } from '../../master/master';
 import { error } from '../../core/logger';
+import { getFilterPlayerView } from '../../master/filter-player-view';
 
 jest.mock('../../core/logger', () => ({
   info: jest.fn(),
@@ -165,7 +166,14 @@ describe('TransportAPI', () => {
     const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
-    api = TransportAPI('matchID', io.socket, clientInfo, roomInfo);
+    const filterPlayerView = getFilterPlayerView(games[0]);
+    api = TransportAPI(
+      'matchID',
+      io.socket,
+      clientInfo,
+      roomInfo,
+      filterPlayerView
+    );
   });
 
   beforeEach(async () => {
@@ -191,9 +199,9 @@ describe('TransportAPI', () => {
   });
 
   test('sendAll - function', () => {
-    api.sendAll((playerID) => ({ type: 'A', args: [playerID] }));
-    expect(io.socket.emit).toHaveBeenCalledWith('A', '0');
-    expect(io.socket.emit).toHaveBeenCalledWith('A', '1');
+    api.sendAll({ type: 'A', args: [] });
+    expect(io.socket.emit).toHaveBeenCalledTimes(2);
+    expect(io.socket.emit).toHaveBeenCalledWith('A');
   });
 });
 

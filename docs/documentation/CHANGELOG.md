@@ -1,3 +1,23 @@
+### v0.45.2
+
+#### Bugfixes
+
+* [[9753c0e](https://github.com/boardgameio/boardgame.io/commit/9753c0e)] fix: Don’t leak `STRIP_TRANSIENTS` action ([#961](https://github.com/boardgameio/boardgame.io/pull/961))
+
+### v0.45.1
+
+#### Breaking Changes
+
+Please see notes for v0.45.0. This release extends CORS security restrictions to the Lobby API (0.45.0 only applied the `origins` config to the socket.io server).
+
+#### Features
+
+* [[8b950a0](https://github.com/boardgameio/boardgame.io/commit/8b950a0)] server: Use `origins` option to configure Lobby API CORS ([#955](https://github.com/boardgameio/boardgame.io/pull/955))
+
+#### Bugfixes
+
+* [[2b1d013](https://github.com/boardgameio/boardgame.io/commit/2b1d013)] server: Update to latest `@types/cors` to provide better origins configuration defaults
+
 ## v0.45.0
 
 #### Breaking Changes

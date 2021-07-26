@@ -144,6 +144,7 @@ export interface Plugin<
 > {
   name: string;
   noClient?: (context: PluginContext<API, Data, G>) => boolean;
+  isInvalid?: (context: PluginContext<API, Data, G>) => false | string;
   setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G, Ctx> }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
@@ -431,7 +432,9 @@ export namespace ActionShape {
   export type Redo = StripCredentials<CredentialedActionShape.Redo>;
   // Private type used only for internal error processing.
   // Included here to preserve type-checking of reducer inputs.
-  type _StripTransients = ReturnType<typeof ActionCreators.stripTransients>;
+  export type StripTransients = ReturnType<
+    typeof ActionCreators.stripTransients
+  >;
   export type Any =
     | MakeMove
     | GameEvent
@@ -443,7 +446,7 @@ export namespace ActionShape {
     | Undo
     | Redo
     | Plugin
-    | _StripTransients;
+    | StripTransients;
 }
 
 export namespace ActionPayload {

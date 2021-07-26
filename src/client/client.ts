@@ -43,7 +43,10 @@ type ClientAction =
   | ActionShape.Sync
   | ActionShape.Update
   | ActionShape.Patch;
-type Action = CredentialedActionShape.Any | ClientAction;
+type Action =
+  | CredentialedActionShape.Any
+  | ActionShape.StripTransients
+  | ClientAction;
 
 export interface DebugOpt {
   target?: HTMLElement;
@@ -287,7 +290,10 @@ export class _ClientImpl<G extends any = any> {
       const baseState = store.getState();
       const result = next(action);
 
-      if (!('clientOnly' in action)) {
+      if (
+        !('clientOnly' in action) &&
+        action.type !== Actions.STRIP_TRANSIENTS
+      ) {
         this.transport.onAction(baseState, action);
       }
 

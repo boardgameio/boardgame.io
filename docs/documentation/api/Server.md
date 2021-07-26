@@ -56,6 +56,9 @@ A config object with the following options:
 
 7. `authenticateCredentials` (_function_): an optional function that tests if a player’s move is made with the correct credentials when using the default socket.io transport implementation.
 
+8. `apiOrigins` (_array_): a list of allowed origins for requests to the Lobby API. Defaults
+   to the value provided as the `origins` option (which also applies to the socket transport).
+
 #### Returns
 
 An object that contains:

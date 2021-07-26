@@ -22,6 +22,7 @@ import type {
   State,
   SyncInfo,
 } from '../../types';
+import { getFilterPlayerView } from '../../master/filter-player-view';
 
 /**
  * Returns null if it is not a bot's turn.
@@ -88,11 +89,12 @@ export class LocalMaster extends Master {
       }
     };
 
+    const filterPlayerView = getFilterPlayerView(game);
     const transportAPI: TransportAPI = {
       send,
-      sendAll: (makePlayerData) => {
+      sendAll: (payload) => {
         for (const playerID in clientCallbacks) {
-          const data = makePlayerData(playerID);
+          const data = filterPlayerView(playerID, payload);
           send({ playerID, ...data });
         }
       },

@@ -1,6 +1,6 @@
 {
   "name": "boardgame.io",
-  "version": "0.45.0",
+  "version": "0.45.2",
   "description": "library for turn-based games",
   "repository": "https://github.com/boardgameio/boardgame.io",
   "scripts": {
@@ -93,7 +93,7 @@
     "@types/enzyme": "^3.10.5",
     "@types/jest": "^24.0.0",
     "@types/koa-router": "^7.4.0",
-    "@types/koa__cors": "^3.0.1",
+    "@types/koa__cors": "^3.0.3",
     "@types/node": "^14.0.24",
     "@types/react": "^16.9.36",
     "@types/react-dom": "^16.9.8",
@@ -148,7 +148,7 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
-    "@koa/cors": "^2.2.1",
+    "@koa/cors": "^3.1.0",
     "@types/koa": "^2.11.3",
     "@types/redis": "^2.8.31",
     "flatted": "^0.2.3",
