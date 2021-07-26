@@ -299,6 +299,96 @@ describe('Events API', () => {
   });
 });
 
+describe('Plugin Invalid Action API', () => {
+  const pluginName = 'validator';
+  const message = 'G.value must divide by 5';
+  const game: Game<{ value: number }> = {
+    setup: () => ({ value: 5 }),
+    plugins: [
+      {
+        name: pluginName,
+        isInvalid: ({ G }) => {
+          if (G.value % 5 !== 0) return message;
+          return false;
+        },
+      },
+    ],
+    moves: {
+      setValue: (G, _ctx, arg) => {
+        G.value = arg;
+      },
+    },
+    phases: {
+      unenterable: {
+        onBegin: () => ({ value: 13 }),
+      },
+      enterable: {
+        onBegin: () => ({ value: 25 }),
+      },
+    },
+  };
+
+  let state: State;
+  beforeEach(() => {
+    state = InitializeGame({ game });
+  });
+
+  describe('multiplayer client', () => {
+    const reducer = CreateGameReducer({ game });
+
+    test('move is cancelled if plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [6], '0'));
+      expect(state.G).toMatchObject({ value: 5 });
+      expect(state['transients'].error).toEqual({
+        type: 'action/plugin_invalid',
+        payload: { plugin: pluginName, message },
+      });
+    });
+
+    test('move is processed if no plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [15], '0'));
+      expect(state.G).toMatchObject({ value: 15 });
+      expect(state['transients']).toBeUndefined();
+    });
+
+    test('event is cancelled if plugin declares it invalid', () => {
+      state = reducer(state, gameEvent('setPhase', 'unenterable', '0'));
+      expect(state.G).toMatchObject({ value: 5 });
+      expect(state.ctx.phase).toBe(null);
+      expect(state['transients'].error).toEqual({
+        type: 'action/plugin_invalid',
+        payload: { plugin: pluginName, message },
+      });
+    });
+
+    test('event is processed if no plugin declares it invalid', () => {
+      state = reducer(state, gameEvent('setPhase', 'enterable', '0'));
+      expect(state.G).toMatchObject({ value: 25 });
+      expect(state.ctx.phase).toBe('enterable');
+      expect(state['transients']).toBeUndefined();
+    });
+  });
+
+  describe('local client', () => {
+    const reducer = CreateGameReducer({ game, isClient: true });
+
+    test('move is cancelled if plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [6], '0'));
+      expect(state.G).toMatchObject({ value: 5 });
+      expect(state['transients'].error).toEqual({
+        type: 'action/plugin_invalid',
+        payload: { plugin: pluginName, message },
+      });
+    });
+
+    test('move is processed if no plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [15], '0'));
+      expect(state.G).toMatchObject({ value: 15 });
+      expect(state['transients']).toBeUndefined();
+    });
+  });
+});
+
 describe('Random inside setup()', () => {
   const game1: Game = {
     seed: 'seed1',
