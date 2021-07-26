@@ -7,6 +7,9 @@ export interface GenericPubSub<T> {
 
   // Subscribes to events related to a single match.
   subscribe(channelId: PubSubChannelId): Observable<T>;
+
+  // Cleans up subscription for a given channel.
+  unsubscribe(channelId: PubSubChannelId);
 }
 
 /** All possible namespaces for IDs that pubsubs might be used.  */

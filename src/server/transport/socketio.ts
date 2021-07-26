@@ -17,9 +17,27 @@ import type {
 } from '../../master/master';
 import { getFilterPlayerView } from '../../master/filter-player-view';
 import type { Game, Server } from '../../types';
+import { GenericPubSub, PubSubChannelIdNamespace } from './pubsub/generic-pub-sub';
+import { IntermediateTransportData } from '../../master/master';
+import { InMemoryPubSub } from './pubsub/in-memory-pub-sub';
+import { PubSubChannelId } from './pubsub/generic-pub-sub';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
+
+/**
+ * Emit a socket.io event to the recipientID.
+ * If the recipient is the current socket, uses a basic emit, otherwise
+ * emits via the current socket’s `to` method.
+ */
+const emit = (socket: IOTypes.Socket, recipientID: string, { type, args }: TransportData) => {
+  const emitter = socket.id === recipientID ? socket : socket.to(recipientID);
+  emitter.emit(type, ...args);
+};
+
+function getPubSubChannelId(matchID: string): PubSubChannelId {
+  return { namespace: PubSubChannelIdNamespace.MATCH, value: matchID };
+}
 
 /**
  * API that's exposed by SocketIO for the Master to send
@@ -28,55 +46,21 @@ const PING_INTERVAL = 10 * 1e3;
 export function TransportAPI(
   matchID: string,
   socket: IOTypes.Socket,
-  clientInfo: SocketIO['clientInfo'],
-  roomInfo: SocketIO['roomInfo'],
-  filterPlayerView: (string, IntermediateTransportData) => TransportData,
-  provisionalClient?: Client
-): MasterTransport {
+  requestingClient: Client,
+  pubSub: GenericPubSub<IntermediateTransportData>,
+): MasterTransport { 
   /**
-   * Emit a socket.io event to the recipientID.
-   * If the recipient is the current socket, uses a basic emit, otherwise
-   * emits via the current socket’s `to` method.
+   * Send a message to requesting client.
    */
-  const emit = (recipientID: string, { type, args }: TransportData) => {
-    const emitter = socket.id === recipientID ? socket : socket.to(recipientID);
-    emitter.emit(type, ...args);
-  };
-
-  /**
-   * Run a callback for each registered client for this match, including
-   * this transport’s provisionalClient if provided.
-   */
-  const forEachClient = (clientCallback: (client: Client) => void) => {
-    const clientIDs = roomInfo.get(matchID);
-    if (clientIDs) {
-      clientIDs.forEach((clientID) => {
-        const client = clientInfo.get(clientID);
-        clientCallback(client);
-      });
-    }
-    if (provisionalClient) {
-      clientCallback(provisionalClient);
-    }
-  };
-
-  /**
-   * Send a message to a specific client.
-   */
-  const send: MasterTransport['send'] = ({ playerID, ...data }) => {
-    forEachClient((client) => {
-      if (client.playerID === playerID) emit(client.socket.id, data);
-    });
+  const send: MasterTransport['send'] = ({ ...data }) => {
+    emit(socket, requestingClient.socket.id, data); 
   };
 
   /**
    * Send a message to all clients.
    */
   const sendAll: MasterTransport['sendAll'] = (payload) => {
-    forEachClient((client) => {
-      const data = filterPlayerView(client.playerID, payload);
-      emit(client.socket.id, data);
-    });
+    pubSub.publish(getPubSubChannelId(matchID), payload); 
   };
 
   return { send, sendAll };
@@ -86,6 +70,7 @@ export interface SocketOpts {
   https?: HttpsOptions;
   socketOpts?: IOTypes.ServerOptions;
   socketAdapter?: any;
+  pubSub?: GenericPubSub<IntermediateTransportData>;
 }
 
 interface Client {
@@ -105,14 +90,16 @@ export class SocketIO {
   private readonly https: HttpsOptions;
   private readonly socketAdapter: any;
   private readonly socketOpts: IOTypes.ServerOptions;
+  private readonly pubSub: GenericPubSub<IntermediateTransportData>;
 
-  constructor({ https, socketAdapter, socketOpts }: SocketOpts = {}) {
+  constructor({ https, socketAdapter, socketOpts, pubSub }: SocketOpts = {}) {
     this.clientInfo = new Map();
     this.roomInfo = new Map();
     this.perMatchQueue = new Map();
     this.https = https;
     this.socketAdapter = socketAdapter;
     this.socketOpts = socketOpts;
+    this.pubSub = pubSub ?? new InMemoryPubSub();
   }
 
   /**
@@ -128,6 +115,7 @@ export class SocketIO {
     matchClients.delete(socketID);
     // If the match is now empty, delete its promise queue & client ID list.
     if (matchClients.size === 0) {
+      this.unsubscribePubSubChannel(matchID);
       this.roomInfo.delete(matchID);
       this.deleteMatchQueue(matchID);
     }
@@ -138,17 +126,35 @@ export class SocketIO {
   /**
    * Register client data for a socket.
    */
-  private addClient(client: Client): void {
+  private addClient(client: Client, game: Game): void {
     const { matchID, socket } = client;
     // Add client to list of connected sockets for this match.
     let matchClients = this.roomInfo.get(matchID);
     if (matchClients === undefined) {
+      this.subscribePubSubChannel(matchID, game);
       matchClients = new Set<string>();
       this.roomInfo.set(matchID, matchClients);
     }
     matchClients.add(socket.id);
     // Register data for this socket in the client map.
     this.clientInfo.set(socket.id, client);
+  } 
+
+  private subscribePubSubChannel(matchID: string, game: Game) {
+    this.pubSub.subscribe(getPubSubChannelId(matchID)).subscribe((payload: IntermediateTransportData) => {
+      const clientIDs = this.roomInfo.get(matchID);
+      if (clientIDs) {
+        clientIDs.forEach((clientID) => {
+          const client = this.clientInfo.get(clientID);
+          const data = getFilterPlayerView(game)(client.playerID, payload);
+          emit(client.socket, client.socket.id, data); 
+        });
+      } 
+    }); 
+  }
+
+  private unsubscribePubSubChannel(matchID: string) {
+    this.pubSub.unsubscribe(getPubSubChannelId(matchID));
   }
 
   init(
@@ -176,20 +182,20 @@ export class SocketIO {
 
     for (const game of games) {
       const nsp = app._io.of(game.name);
-      const filterPlayerView = getFilterPlayerView(game);
 
       nsp.on('connection', (socket: IOTypes.Socket) => {
         socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
           const [action, stateID, matchID, playerID] = args;
+          const credentials = action?.payload?.credentials;
+          const requestingClient = { socket, matchID, playerID, credentials };
           const master = new Master(
             game,
             app.context.db,
             TransportAPI(
               matchID,
               socket,
-              this.clientInfo,
-              this.roomInfo,
-              filterPlayerView
+              requestingClient,
+              this.pubSub,
             ),
             app.context.auth
           );
@@ -204,15 +210,12 @@ export class SocketIO {
           const [matchID, playerID, credentials] = args;
           socket.join(matchID);
           this.removeClient(socket.id);
-
-          const client = { socket, matchID, playerID, credentials };
+          const requestingClient = { socket, matchID, playerID, credentials };
           const transport = TransportAPI(
             matchID,
             socket,
-            this.clientInfo,
-            this.roomInfo,
-            filterPlayerView,
-            client
+            requestingClient,
+            this.pubSub,
           );
           const master = new Master(
             game,
@@ -226,7 +229,7 @@ export class SocketIO {
             return;
           }
           await master.onConnectionChange(matchID, playerID, credentials, true);
-          this.addClient(client);
+          this.addClient(requestingClient, game);
         });
 
         socket.on('disconnect', async () => {
@@ -234,15 +237,15 @@ export class SocketIO {
           this.removeClient(socket.id);
           if (client) {
             const { matchID, playerID, credentials } = client;
+            const requestingClient = { socket, matchID, playerID, credentials };
             const master = new Master(
               game,
               app.context.db,
               TransportAPI(
                 matchID,
                 socket,
-                this.clientInfo,
-                this.roomInfo,
-                filterPlayerView
+                requestingClient,
+                this.pubSub,
               ),
               app.context.auth
             );
@@ -258,16 +261,17 @@ export class SocketIO {
         socket.on(
           'chat',
           async (...args: Parameters<Master['onChatMessage']>) => {
-            const [matchID] = args;
+            const [matchID, chatMessage, credentials] = args;
+            const playerID = chatMessage.sender;
+            const requestingClient = { socket, matchID, playerID, credentials }; 
             const master = new Master(
               game,
               app.context.db,
               TransportAPI(
                 matchID,
                 socket,
-                this.clientInfo,
-                this.roomInfo,
-                filterPlayerView
+                requestingClient,
+                this.pubSub,
               ),
               app.context.auth
             );
