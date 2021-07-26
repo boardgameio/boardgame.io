@@ -31,7 +31,7 @@ import { createMatch } from '../server/util';
 import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import type { Operation } from 'rfc6902';
-import { createPatch } from 'rfc6902';
+import { redactLog } from './filter-player-view';
 
 /**
  * Filter match data to get a player metadata object with credentials stripped.
@@ -41,42 +41,6 @@ const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
     const { credentials, ...filteredData } = player;
     return filteredData;
   });
-
-/**
- * Redact the log.
- *
- * @param {Array} log - The game log (or deltalog).
- * @param {String} playerID - The playerID that this log is
- *                            to be sent to.
- */
-export function redactLog(log: LogEntry[], playerID: PlayerID) {
-  if (log === undefined) {
-    return log;
-  }
-
-  return log.map((logEvent) => {
-    // filter for all other players and spectators.
-    if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
-      return logEvent;
-    }
-
-    if (logEvent.redact !== true) {
-      return logEvent;
-    }
-
-    const payload = {
-      ...logEvent.action.payload,
-      args: null,
-    };
-    const filteredEvent = {
-      ...logEvent,
-      action: { ...logEvent.action, payload },
-    };
-
-    const { redact, ...remaining } = filteredEvent;
-    return remaining;
-  });
-}
 
 /**
  * Remove player credentials from action payload
@@ -114,9 +78,31 @@ export type TransportData =
       args: [string, ChatMessage];
     };
 
+export type IntermediateTransportData =
+  | {
+      type: 'update';
+      args: [string, State];
+    }
+  | {
+      type: 'patch';
+      args: [string, number, State, State];
+    }
+  | {
+      type: 'sync';
+      args: [string, SyncInfo];
+    }
+  | {
+      type: 'matchData';
+      args: [string, FilteredMetadata];
+    }
+  | {
+      type: 'chat';
+      args: [string, ChatMessage];
+    };
+
 export interface TransportAPI {
   send: (playerData: { playerID: PlayerID } & TransportData) => void;
-  sendAll: (makePlayerData: (playerID: PlayerID) => TransportData) => void;
+  sendAll: (payload: IntermediateTransportData) => void;
 }
 
 /**
@@ -277,40 +263,17 @@ export class Master {
       matchID,
     });
 
-    this.transportAPI.sendAll((playerID: string) => {
-      const log = redactLog(state.deltalog, playerID);
-      const filteredState = {
-        ...state,
-        G: this.game.playerView(state.G, state.ctx, playerID),
-        plugins: PlayerView(state, { playerID, game: this.game }),
-        deltalog: undefined,
-        _undo: [],
-        _redo: [],
-      };
-
-      if (this.game.deltaState) {
-        const newStateID = state._stateID;
-        const prevFilteredState = {
-          ...prevState,
-          G: this.game.playerView(prevState.G, prevState.ctx, playerID),
-          plugins: PlayerView(prevState, { playerID, game: this.game }),
-          deltalog: undefined,
-          _undo: [],
-          _redo: [],
-        };
-        const patch = createPatch(prevFilteredState, filteredState);
-
-        return {
-          type: 'patch',
-          args: [matchID, stateID, newStateID, patch, log],
-        };
-      } else {
-        return {
-          type: 'update',
-          args: [matchID, filteredState, log],
-        };
-      }
-    });
+    if (this.game.deltaState) {
+      this.transportAPI.sendAll({
+        type: 'patch',
+        args: [matchID, stateID, prevState, state],
+      });
+    } else {
+      this.transportAPI.sendAll({
+        type: 'update',
+        args: [matchID, state],
+      });
+    }
 
     const { deltalog, ...stateWithoutDeltalog } = state;
 
@@ -482,10 +445,10 @@ export class Master {
 
     const filteredMetadata = filterMatchData(metadata);
 
-    this.transportAPI.sendAll(() => ({
+    this.transportAPI.sendAll({
       type: 'matchData',
       args: [matchID, filteredMetadata],
-    }));
+    });
 
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       this.storageAPI.setMetadata(key, metadata);
@@ -518,9 +481,9 @@ export class Master {
       }
     }
 
-    this.transportAPI.sendAll(() => ({
+    this.transportAPI.sendAll({
       type: 'chat',
       args: [matchID, chatMessage],
-    }));
+    });
   }
 }
