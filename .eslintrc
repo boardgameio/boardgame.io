@@ -29,6 +29,7 @@ rules:
   # plugin:unicorn
   unicorn/consistent-function-scoping: off
   unicorn/no-array-for-each: off
+  unicorn/no-array-reduce: off
   unicorn/no-fn-reference-in-iterator: off
   unicorn/no-null: off
   unicorn/no-reduce: off

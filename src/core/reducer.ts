@@ -423,7 +423,7 @@ export function CreateGameReducer({
           return WithError(state, ActionErrorType.ActionDisabled);
         }
 
-        const { _undo, _redo } = state;
+        const { G, ctx, _undo, _redo, _stateID } = state;
 
         if (_undo.length < 2) {
           error(`No moves to undo`);
@@ -449,7 +449,7 @@ export function CreateGameReducer({
             last.moveType,
             last.playerID
           );
-          if (!CanUndoMove(state.G, state.ctx, lastMove)) {
+          if (!CanUndoMove(G, ctx, lastMove)) {
             error(`Move cannot be undone`);
             return WithError(state, ActionErrorType.ActionInvalid);
           }
@@ -462,7 +462,7 @@ export function CreateGameReducer({
           G: restore.G,
           ctx: restore.ctx,
           plugins: restore.plugins,
-          _stateID: state._stateID + 1,
+          _stateID: _stateID + 1,
           _undo: _undo.slice(0, -1),
           _redo: [last, ..._redo],
         };
@@ -476,7 +476,7 @@ export function CreateGameReducer({
           return WithError(state, ActionErrorType.ActionDisabled);
         }
 
-        const { _undo, _redo } = state;
+        const { _undo, _redo, _stateID } = state;
 
         if (_redo.length === 0) {
           error(`No moves to redo`);
@@ -501,7 +501,7 @@ export function CreateGameReducer({
           G: first.G,
           ctx: first.ctx,
           plugins: first.plugins,
-          _stateID: state._stateID + 1,
+          _stateID: _stateID + 1,
           _undo: [..._undo, first],
           _redo: _redo.slice(1),
         };

@@ -114,7 +114,7 @@ class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
   render() {
     const match = this.props.match;
     let status = 'OPEN';
-    if (!match.players.find((player) => !player.name)) {
+    if (!match.players.some((player) => !player.name)) {
       status = 'RUNNING';
     }
     return (
@@ -122,7 +122,7 @@ class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
         <td key={'cell-name-' + match.matchID}>{match.gameName}</td>
         <td key={'cell-status-' + match.matchID}>{status}</td>
         <td key={'cell-seats-' + match.matchID}>
-          {match.players.map(this._createSeat).join(', ')}
+          {match.players.map((player) => this._createSeat(player)).join(', ')}
         </td>
         <td key={'cell-buttons-' + match.matchID}>
           {this._createInstanceButtons(match)}

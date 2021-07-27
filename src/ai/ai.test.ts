@@ -35,7 +35,7 @@ function IsVictory(cells) {
     return symbols.every((i) => i !== null && i === symbols[0]);
   };
 
-  return positions.map(isRowComplete).includes(true);
+  return positions.map((row) => isRowComplete(row)).includes(true);
 }
 
 const TicTacToe = ProcessGameConfig({

@@ -89,20 +89,19 @@ function createDispatchers(
   credentials: string,
   multiplayer?: unknown
 ) {
-  return innerActionNames.reduce((dispatchers, name) => {
-    dispatchers[name] = function (...args: any[]) {
-      store.dispatch(
-        ActionCreators[storeActionType](
-          name,
-          args,
-          assumedPlayerID(playerID, store, multiplayer),
-          credentials
-        )
+  const dispatchers: Record<string, (...args: any[]) => void> = {};
+  for (const name of innerActionNames) {
+    dispatchers[name] = (...args) => {
+      const action = ActionCreators[storeActionType](
+        name,
+        args,
+        assumedPlayerID(playerID, store, multiplayer),
+        credentials
       );
+      store.dispatch(action);
     };
-
-    return dispatchers;
-  }, {} as Record<string, (...args: any[]) => void>);
+  }
+  return dispatchers;
 }
 
 // Creates a set of dispatchers to make moves.

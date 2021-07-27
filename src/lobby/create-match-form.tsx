@@ -65,7 +65,9 @@ class LobbyCreateMatchForm extends React.Component<
   };
 
   _createNumPlayersRange = (game: Game) => {
-    return [...new Array(game.maxPlayers + 1).keys()].slice(game.minPlayers);
+    return Array.from({ length: game.maxPlayers + 1 })
+      .map((_, i) => i)
+      .slice(game.minPlayers);
   };
 
   render() {
@@ -75,7 +77,9 @@ class LobbyCreateMatchForm extends React.Component<
           value={this.state.selectedGame}
           onChange={(evt) => this.onChangeSelectedGame(evt)}
         >
-          {this.props.games.map(this._createGameNameOption)}
+          {this.props.games.map((game, index) =>
+            this._createGameNameOption(game, index)
+          )}
         </select>
         <span>Players:</span>
         <select
@@ -84,7 +88,7 @@ class LobbyCreateMatchForm extends React.Component<
         >
           {this._createNumPlayersRange(
             this.props.games[this.state.selectedGame].game
-          ).map(this._createNumPlayersOption)}
+          ).map((number) => this._createNumPlayersOption(number))}
         </select>
         <span className="buttons">
           <button onClick={this.onClickCreate}>Create</button>
