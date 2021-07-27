@@ -252,13 +252,13 @@ describe('config errors', () => {
       },
     ];
     const game = () => {
-      ProcessGameConfig(({ plugins } as unknown) as Game);
+      ProcessGameConfig({ plugins } as unknown as Game);
     };
     expect(game).toThrow();
   });
 
   test('invalid move object', () => {
-    const game = ProcessGameConfig(({ moves: { A: 1 } } as unknown) as Game);
+    const game = ProcessGameConfig({ moves: { A: 1 } } as unknown as Game);
     const state = InitializeGame({ game });
     game.processMove(state, { type: 'A', args: null, playerID: '0' });
     expect(error).toBeCalledWith(

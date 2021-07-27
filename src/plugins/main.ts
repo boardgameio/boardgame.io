@@ -88,14 +88,13 @@ export const GetAPIs = ({ plugins }: PartialGameState) =>
 /**
  * Applies the provided plugins to the given move / flow function.
  *
- * @param {function} fn - The move function or trigger to apply the plugins to.
+ * @param {function} functionToWrap - The move function or trigger to apply the plugins to.
  * @param {object} plugins - The list of plugins.
  */
-export const FnWrap = (fn: AnyFn, plugins: Plugin[]) => {
-  const reducer = (acc: AnyFn, { fnWrap }: Plugin) => fnWrap(acc);
+export const FnWrap = (functionToWrap: AnyFn, plugins: Plugin[]) => {
   return [...DEFAULT_PLUGINS, ...plugins]
     .filter((plugin) => plugin.fnWrap !== undefined)
-    .reduce(reducer, fn);
+    .reduce((fn: AnyFn, { fnWrap }: Plugin) => fnWrap(fn), functionToWrap);
 };
 
 /**
@@ -237,7 +236,35 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
 
       return false;
     })
-    .some((value) => value === true);
+    .includes(true);
+};
+
+/**
+ * Allows plugins to indicate if the entire action should be thrown out
+ * as invalid. This will cancel the entire state update.
+ */
+export const IsInvalid = (
+  state: State,
+  opts: PluginOpts
+): false | { plugin: string; message: string } => {
+  const firstInvalidReturn = [...DEFAULT_PLUGINS, ...opts.game.plugins]
+    .filter((plugin) => plugin.isInvalid !== undefined)
+    .map((plugin) => {
+      const { name } = plugin;
+      const pluginState = state.plugins[name];
+
+      const message = plugin.isInvalid({
+        G: state.G,
+        ctx: state.ctx,
+        game: opts.game,
+        api: pluginState && pluginState.api,
+        data: pluginState && pluginState.data,
+      });
+
+      return message ? { plugin: name, message } : false;
+    })
+    .find((value) => value);
+  return firstInvalidReturn || false;
 };
 
 /**

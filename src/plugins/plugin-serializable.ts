@@ -37,17 +37,19 @@ function isSerializable(value: any) {
 const SerializablePlugin: Plugin = {
   name: 'plugin-serializable',
 
-  fnWrap: (move) => (context, ...args) => {
-    const result = move(context, ...args);
-    // Check state in non-production environments.
-    if (process.env.NODE_ENV !== 'production' && !isSerializable(result)) {
-      throw new Error(
-        'Move state is not JSON-serialiazable.\n' +
-          'See https://boardgame.io/documentation/#/?id=state for more information.'
-      );
-    }
-    return result;
-  },
+  fnWrap:
+    (move) =>
+    (context, ...args) => {
+      const result = move(context, ...args);
+      // Check state in non-production environments.
+      if (process.env.NODE_ENV !== 'production' && !isSerializable(result)) {
+        throw new Error(
+          'Move state is not JSON-serialiazable.\n' +
+            'See https://boardgame.io/documentation/#/?id=state for more information.'
+        );
+      }
+      return result;
+    },
 };
 
 export default SerializablePlugin;

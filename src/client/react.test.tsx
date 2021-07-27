@@ -5,6 +5,7 @@
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT.
  */
+/* eslint-disable unicorn/no-array-callback-reference */
 
 import React from 'react';
 import type { BoardProps } from './react';

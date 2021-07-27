@@ -73,7 +73,7 @@ describe('new', () => {
 
   test('custom transport implementation', () => {
     const game: Game = {};
-    const transport = ({ init: jest.fn() } as unknown) as SocketIO;
+    const transport = { init: jest.fn() } as unknown as SocketIO;
     Server({ games: [game], transport });
     expect(transport.init).toBeCalled();
   });
@@ -154,12 +154,12 @@ describe('run', () => {
 
 describe('kill', () => {
   test('call close on both servers', async () => {
-    const apiServer = ({
+    const apiServer = {
       close: jest.fn(),
-    } as unknown) as KoaServer;
-    const appServer = ({
+    } as unknown as KoaServer;
+    const appServer = {
       close: jest.fn(),
-    } as unknown) as KoaServer;
+    } as unknown as KoaServer;
     const server = Server({ games: [game] });
 
     server.kill({ appServer, apiServer });
@@ -169,9 +169,9 @@ describe('kill', () => {
   });
 
   test('do not fail if api server is not defined', async () => {
-    const appServer = ({
+    const appServer = {
       close: jest.fn(),
-    } as unknown) as KoaServer;
+    } as unknown as KoaServer;
     const server = Server({ games: [game] });
 
     expect(() => server.kill({ appServer })).not.toThrowError();
@@ -255,9 +255,9 @@ describe('getPortFromServer', () => {
 
   test('returns port from address object', () => {
     expect(
-      getPortFromServer(({
+      getPortFromServer({
         address: () => ({ port: '8000' }),
-      } as unknown) as KoaServer)
+      } as unknown as KoaServer)
     ).toBe('8000');
   });
 });

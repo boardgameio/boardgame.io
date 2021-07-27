@@ -22,6 +22,7 @@ import {
   gameEvent,
   patch,
 } from '../core/action-creators';
+import * as Actions from '../core/action-types';
 import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
 import type { Game, LogEntry, State, SyncInfo } from '../types';
@@ -144,7 +145,7 @@ describe('multiplayer', () => {
 
     beforeAll(() => {
       client = Client({
-        game: { moves: { A: () => {} } },
+        game: { moves: { A: () => {}, Invalid: () => INVALID_MOVE } },
         multiplayer: SocketIO({ server: host + ':' + port }),
       });
       client.start();
@@ -171,6 +172,18 @@ describe('multiplayer', () => {
       client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
       client.moves.A();
       expect(client.transport.onAction).toHaveBeenCalled();
+    });
+
+    test('strip transients action not sent to transport', () => {
+      jest.spyOn(client.transport, 'onAction');
+      const state = { G: {}, ctx: { phase: '' }, plugins: {} };
+      const filteredMetadata = [];
+      client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
+      client.moves.Invalid();
+      expect(client.transport.onAction).not.toHaveBeenCalledWith(
+        expect.any(Object),
+        { type: Actions.STRIP_TRANSIENTS }
+      );
     });
 
     test('Sends and receives chat messages', () => {
@@ -290,8 +303,7 @@ describe('multiplayer', () => {
 
       subscribeChatMessage() {}
     }
-    const customTransport = () =>
-      (new CustomTransport() as unknown) as Transport;
+    const customTransport = () => new CustomTransport() as unknown as Transport;
 
     let client;
 
@@ -326,9 +338,7 @@ describe('strip secret only on server', () => {
         setup: () => initial,
         playerView: ({ G }) => {
           const r = { ...G };
-          r.sum = r.secret.reduce((prev, curr) => {
-            return prev + curr;
-          });
+          r.sum = r.secret.reduce((prev, curr) => prev + curr);
           delete r.secret;
           return r;
         },
@@ -357,13 +367,15 @@ describe('strip secret only on server', () => {
 
 test('accepts enhancer for store', () => {
   let spyDispatcher;
-  const spyEnhancer = (vanillaCreateStore) => (...args) => {
-    const vanillaStore = vanillaCreateStore(...args);
-    return {
-      ...vanillaStore,
-      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+  const spyEnhancer =
+    (vanillaCreateStore) =>
+    (...args) => {
+      const vanillaStore = vanillaCreateStore(...args);
+      return {
+        ...vanillaStore,
+        dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+      };
     };
-  };
   const client = Client({
     game: {
       moves: {
@@ -573,7 +585,7 @@ describe('log handling', () => {
   });
 
   test('update', () => {
-    const state = ({ restore: true, _stateID: 0 } as unknown) as State;
+    const state = { restore: true, _stateID: 0 } as unknown as State;
     const deltalog = [
       {
         action: {},
@@ -615,7 +627,7 @@ describe('log handling', () => {
   test('sync', () => {
     const state = { restore: true };
     const log = ['0', '1'];
-    const action = sync(({ state, log } as unknown) as SyncInfo);
+    const action = sync({ state, log } as unknown as SyncInfo);
 
     client.store.dispatch(action);
     client.store.dispatch(action);

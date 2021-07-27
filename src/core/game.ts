@@ -90,7 +90,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
         const fn = plugins.FnWrap(moveFn, game.plugins);
         let args = [];
         if (action.args !== undefined) {
-          args = args.concat(action.args);
+          args = Array.isArray(action.args) ? action.args : [action.args];
         }
         const context = {
           ...plugins.GetAPIs(state),

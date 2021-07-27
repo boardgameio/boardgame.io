@@ -122,7 +122,7 @@ export class Random {
       predefined[key] = (diceCount?: number) => {
         return diceCount === undefined
           ? Math.floor(random() * spotvalue) + 1
-          : [...new Array(diceCount).keys()].map(
+          : Array.from({ length: diceCount }).map(
               () => Math.floor(random() * spotvalue) + 1
             );
       };
@@ -133,7 +133,7 @@ export class Random {
     function Die(spotvalue = 6, diceCount?: number) {
       return diceCount === undefined
         ? Math.floor(random() * spotvalue) + 1
-        : [...new Array(diceCount).keys()].map(
+        : Array.from({ length: diceCount }).map(
             () => Math.floor(random() * spotvalue) + 1
           );
     }
@@ -178,15 +178,15 @@ export class Random {
        *                       the input, but returns the shuffled array.
        */
       Shuffle: <T extends any>(deck: T[]) => {
-        const clone = deck.slice(0);
-        let srcIndex = deck.length;
-        let dstIndex = 0;
-        const shuffled = new Array<T>(srcIndex);
+        const clone = [...deck];
+        let sourceIndex = deck.length;
+        let destinationIndex = 0;
+        const shuffled = Array.from<T>({ length: sourceIndex });
 
-        while (srcIndex) {
-          const randIndex = Math.trunc(srcIndex * random());
-          shuffled[dstIndex++] = clone[randIndex];
-          clone[randIndex] = clone[--srcIndex];
+        while (sourceIndex) {
+          const randomIndex = Math.trunc(sourceIndex * random());
+          shuffled[destinationIndex++] = clone[randomIndex];
+          clone[randomIndex] = clone[--sourceIndex];
         }
 
         return shuffled;

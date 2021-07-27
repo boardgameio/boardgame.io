@@ -30,8 +30,8 @@ export function SetActivePlayersEvent(
 }
 
 export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
-  let { _prevActivePlayers } = ctx;
-  let activePlayers = {};
+  let activePlayers: typeof ctx.activePlayers = {};
+  let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
   let _activePlayersMoveLimit = {};
 
@@ -46,13 +46,16 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
       _nextActivePlayers = arg.next;
     }
 
-    _prevActivePlayers = arg.revert
-      ? _prevActivePlayers.concat({
+    if (arg.revert) {
+      _prevActivePlayers = [
+        ...ctx._prevActivePlayers,
+        {
           activePlayers: ctx.activePlayers,
           _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
           _activePlayersNumMoves: ctx._activePlayersNumMoves,
-        })
-      : [];
+        },
+      ];
+    }
 
     if (arg.currentPlayer !== undefined) {
       ApplyActivePlayerArgument(
@@ -109,11 +112,11 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
     }
   }
 
-  if (Object.keys(activePlayers).length == 0) {
+  if (Object.keys(activePlayers).length === 0) {
     activePlayers = null;
   }
 
-  if (Object.keys(_activePlayersMoveLimit).length == 0) {
+  if (Object.keys(_activePlayersMoveLimit).length === 0) {
     _activePlayersMoveLimit = null;
   }
 
@@ -143,11 +146,12 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
     _activePlayersMoveLimit,
     _activePlayersNumMoves,
     _prevActivePlayers,
+    _nextActivePlayers,
   } = ctx;
 
-  if (activePlayers && Object.keys(activePlayers).length == 0) {
-    if (ctx._nextActivePlayers) {
-      ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
+  if (activePlayers && Object.keys(activePlayers).length === 0) {
+    if (_nextActivePlayers) {
+      ctx = SetActivePlayers(ctx, _nextActivePlayers);
       ({
         activePlayers,
         _activePlayersMoveLimit,
@@ -156,11 +160,8 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
       } = ctx);
     } else if (_prevActivePlayers.length > 0) {
       const lastIndex = _prevActivePlayers.length - 1;
-      ({
-        activePlayers,
-        _activePlayersMoveLimit,
-        _activePlayersNumMoves,
-      } = _prevActivePlayers[lastIndex]);
+      ({ activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
+        _prevActivePlayers[lastIndex]);
       _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
     } else {
       activePlayers = null;
@@ -223,11 +224,12 @@ function getCurrentPlayer(
  */
 export function InitTurnOrderState(state: State, turn: TurnConfig) {
   let { G, ctx } = state;
+  const { numPlayers } = ctx;
   const pluginAPIs = plugin.GetAPIs(state);
   const context = { ...pluginAPIs, G, ctx };
   const order = turn.order;
 
-  let playOrder = [...new Array(ctx.numPlayers)].map((_, i) => i + '');
+  let playOrder = [...Array.from({ length: numPlayers })].map((_, i) => i + '');
   if (order.playOrder !== undefined) {
     playOrder = order.playOrder(context);
   }

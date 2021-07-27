@@ -144,6 +144,69 @@ describe('default values', () => {
   });
 });
 
+describe('isInvalid method', () => {
+  // Silence expected error logging and restore when finished.
+  const stderr = console.error;
+  beforeAll(() => (console.error = () => {}));
+  afterAll(() => (console.error = stderr));
+
+  test('basic plugin', () => {
+    const goodG = { good: 'nice' };
+    const game: Game = {
+      plugins: [
+        {
+          name: 'test',
+          isInvalid: ({ G }) => 'bad' in G && 'not ok',
+        },
+      ],
+      moves: {
+        good: () => goodG,
+        bad: () => ({ bad: 'not ok' }),
+      },
+    };
+
+    const client = Client({ game, playerID: '0' });
+    client.start();
+    client.moves.good();
+    expect(client.getState().G).toEqual(goodG);
+    client.moves.bad();
+    expect(client.getState().G).toEqual(goodG);
+  });
+
+  test('plugin with API and data', () => {
+    const game: Game<any, any> = {
+      plugins: [
+        {
+          name: 'test',
+          setup: () => ({}),
+          api: ({ data }) => ({
+            set: (key, val) => {
+              data[key] = val;
+            },
+          }),
+          isInvalid: ({ data }) => 'bad' in data && 'not ok',
+        },
+      ],
+      moves: {
+        good: (_, ctx) => {
+          ctx.test.set('good', 'nice');
+        },
+        bad: (_, ctx) => {
+          ctx.test.set('bad', 'not ok');
+        },
+      },
+    };
+
+    const client = Client({ game, playerID: '0' });
+    client.start();
+    expect(client.getState().ctx.numMoves).toBe(0);
+    client.moves.good();
+    expect(client.getState().ctx.numMoves).toBe(1);
+    client.moves.bad();
+    expect(client.getState().ctx.numMoves).toBe(1);
+  });
+});
+
 describe('actions', () => {
   let client: ReturnType<typeof Client>;
 

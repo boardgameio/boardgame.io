@@ -737,7 +737,7 @@ test('isPlayerActive', () => {
   expect(
     flow.isPlayerActive(
       {},
-      ({ currentPlayer: '0', activePlayers: { '1': '' } } as unknown) as Ctx,
+      { currentPlayer: '0', activePlayers: { '1': '' } } as unknown as Ctx,
       playerID
     )
   ).toBe(false);

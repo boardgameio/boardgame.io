@@ -35,12 +35,12 @@ function IsVictory(cells) {
     return symbols.every((i) => i !== null && i === symbols[0]);
   };
 
-  return positions.map(isRowComplete).some((i) => i === true);
+  return positions.map((row) => isRowComplete(row)).includes(true);
 }
 
 const TicTacToe = ProcessGameConfig({
   setup: () => ({
-    cells: new Array(9).fill(null),
+    cells: Array.from({ length: 9 }).fill(null),
   }),
 
   moves: {
@@ -60,7 +60,7 @@ const TicTacToe = ProcessGameConfig({
       return { winner: ctx.currentPlayer };
     }
 
-    if (G.cells.filter((t) => t == null).length == 0) {
+    if (G.cells.filter((t) => t == null).length === 0) {
       return { draw: true };
     }
   },
