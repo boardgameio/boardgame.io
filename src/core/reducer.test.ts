@@ -314,7 +314,7 @@ describe('Plugin Invalid Action API', () => {
       },
     ],
     moves: {
-      setValue: (G, _ctx, arg) => {
+      setValue: ({ G }, arg: number) => {
         G.value = arg;
       },
     },

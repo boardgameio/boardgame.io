@@ -188,11 +188,11 @@ describe('isInvalid method', () => {
         },
       ],
       moves: {
-        good: (_, ctx) => {
-          ctx.test.set('good', 'nice');
+        good: ({ test }) => {
+          test.set('good', 'nice');
         },
-        bad: (_, ctx) => {
-          ctx.test.set('bad', 'not ok');
+        bad: ({ test }) => {
+          test.set('bad', 'not ok');
         },
       },
     };
