@@ -108,11 +108,11 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
     }
   }
 
-  if (Object.keys(activePlayers).length == 0) {
+  if (Object.keys(activePlayers).length === 0) {
     activePlayers = null;
   }
 
-  if (Object.keys(_activePlayersMoveLimit).length == 0) {
+  if (Object.keys(_activePlayersMoveLimit).length === 0) {
     _activePlayersMoveLimit = null;
   }
 
@@ -144,7 +144,7 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
     _prevActivePlayers,
   } = ctx;
 
-  if (activePlayers && Object.keys(activePlayers).length == 0) {
+  if (activePlayers && Object.keys(activePlayers).length === 0) {
     if (ctx._nextActivePlayers) {
       ctx = SetActivePlayers(ctx, ctx._nextActivePlayers);
       ({

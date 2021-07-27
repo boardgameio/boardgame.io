@@ -478,7 +478,7 @@ export function CreateGameReducer({
 
         const { _undo, _redo } = state;
 
-        if (_redo.length == 0) {
+        if (_redo.length === 0) {
           error(`No moves to redo`);
           return WithError(state, ActionErrorType.ActionInvalid);
         }

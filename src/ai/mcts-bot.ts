@@ -157,7 +157,7 @@ export class MCTSBot extends Bot {
     }
 
     // This is a terminal node.
-    if (node.children.length == 0) {
+    if (node.children.length === 0) {
       return node;
     }
 
@@ -181,7 +181,7 @@ export class MCTSBot extends Bot {
   private expand(node: Node) {
     const actions = node.actions;
 
-    if (actions.length == 0 || node.state.ctx.gameover !== undefined) {
+    if (actions.length === 0 || node.state.ctx.gameover !== undefined) {
       return node;
     }
 
@@ -227,7 +227,7 @@ export class MCTSBot extends Bot {
         return { score };
       }
 
-      if (!moves || moves.length == 0) {
+      if (!moves || moves.length === 0) {
         return undefined;
       }
 

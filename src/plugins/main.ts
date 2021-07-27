@@ -240,7 +240,7 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
 
       return false;
     })
-    .some((value) => value === true);
+    .includes(true);
 };
 
 /**

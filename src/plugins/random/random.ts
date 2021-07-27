@@ -178,7 +178,7 @@ export class Random {
        *                       the input, but returns the shuffled array.
        */
       Shuffle: <T extends any>(deck: T[]) => {
-        const clone = deck.slice(0);
+        const clone = [...deck];
         let srcIndex = deck.length;
         let dstIndex = 0;
         const shuffled = new Array<T>(srcIndex);
