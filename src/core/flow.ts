@@ -358,11 +358,8 @@ export function Flow({
     }
 
     let { ctx } = state;
-    let {
-      activePlayers,
-      _activePlayersMoveLimit,
-      _activePlayersNumMoves,
-    } = ctx;
+    let { activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
+      ctx;
 
     // Checking if stage is valid, even Stage.NULL
     if (arg.stage !== undefined) {

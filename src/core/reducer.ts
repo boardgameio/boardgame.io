@@ -198,32 +198,33 @@ function WithError<PT extends any = any>(
  * This should pretty much be used everywhere you want realistic state
  * transitions and error handling.
  */
-export const TransientHandlingMiddleware = (store: Store) => (
-  next: Dispatch<ActionShape.Any>
-) => (action: ActionShape.Any) => {
-  const result = next(action);
-  switch (action.type) {
-    case Actions.STRIP_TRANSIENTS: {
-      return result;
-    }
-    default: {
-      const [, transients] = ExtractTransients(store.getState());
-      if (typeof transients !== 'undefined') {
-        store.dispatch(stripTransients());
-        // Dev Note: If parent middleware needs to correlate the spawned
-        // StripTransients action to the triggering action, instrument here.
-        //
-        // This is a bit tricky; for more details, see:
-        //   https://github.com/boardgameio/boardgame.io/pull/940#discussion_r636200648
-        return {
-          ...result,
-          transients,
-        };
+export const TransientHandlingMiddleware =
+  (store: Store) =>
+  (next: Dispatch<ActionShape.Any>) =>
+  (action: ActionShape.Any) => {
+    const result = next(action);
+    switch (action.type) {
+      case Actions.STRIP_TRANSIENTS: {
+        return result;
       }
-      return result;
+      default: {
+        const [, transients] = ExtractTransients(store.getState());
+        if (typeof transients !== 'undefined') {
+          store.dispatch(stripTransients());
+          // Dev Note: If parent middleware needs to correlate the spawned
+          // StripTransients action to the triggering action, instrument here.
+          //
+          // This is a bit tricky; for more details, see:
+          //   https://github.com/boardgameio/boardgame.io/pull/940#discussion_r636200648
+          return {
+            ...result,
+            transients,
+          };
+        }
+        return result;
+      }
     }
-  }
-};
+  };
 
 /**
  * CreateGameReducer

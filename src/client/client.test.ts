@@ -303,8 +303,7 @@ describe('multiplayer', () => {
 
       subscribeChatMessage() {}
     }
-    const customTransport = () =>
-      (new CustomTransport() as unknown) as Transport;
+    const customTransport = () => new CustomTransport() as unknown as Transport;
 
     let client;
 
@@ -367,13 +366,15 @@ describe('strip secret only on server', () => {
 
 test('accepts enhancer for store', () => {
   let spyDispatcher;
-  const spyEnhancer = (vanillaCreateStore) => (...args) => {
-    const vanillaStore = vanillaCreateStore(...args);
-    return {
-      ...vanillaStore,
-      dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+  const spyEnhancer =
+    (vanillaCreateStore) =>
+    (...args) => {
+      const vanillaStore = vanillaCreateStore(...args);
+      return {
+        ...vanillaStore,
+        dispatch: (spyDispatcher = jest.fn(vanillaStore.dispatch)),
+      };
     };
-  };
   const client = Client({
     game: {
       moves: {
@@ -583,7 +584,7 @@ describe('log handling', () => {
   });
 
   test('update', () => {
-    const state = ({ restore: true, _stateID: 0 } as unknown) as State;
+    const state = { restore: true, _stateID: 0 } as unknown as State;
     const deltalog = [
       {
         action: {},
@@ -625,7 +626,7 @@ describe('log handling', () => {
   test('sync', () => {
     const state = { restore: true };
     const log = ['0', '1'];
-    const action = sync(({ state, log } as unknown) as SyncInfo);
+    const action = sync({ state, log } as unknown as SyncInfo);
 
     client.store.dispatch(action);
     client.store.dispatch(action);
