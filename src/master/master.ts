@@ -54,15 +54,7 @@ type CallbackFn = (arg: {
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
-export type TransportData =
-  | {
-      type: 'update';
-      args: [string, State, LogEntry[]];
-    }
-  | {
-      type: 'patch';
-      args: [string, number, number, Operation[], LogEntry[]];
-    }
+type CommonTransportData =
   | {
       type: 'sync';
       args: [string, SyncInfo];
@@ -76,6 +68,17 @@ export type TransportData =
       args: [string, ChatMessage];
     };
 
+export type TransportData =
+  | {
+      type: 'update';
+      args: [string, State, LogEntry[]];
+    }
+  | {
+      type: 'patch';
+      args: [string, number, number, Operation[], LogEntry[]];
+    }
+  | CommonTransportData;
+
 export type IntermediateTransportData =
   | {
       type: 'update';
@@ -85,18 +88,7 @@ export type IntermediateTransportData =
       type: 'patch';
       args: [string, number, State, State];
     }
-  | {
-      type: 'sync';
-      args: [string, SyncInfo];
-    }
-  | {
-      type: 'matchData';
-      args: [string, FilteredMetadata];
-    }
-  | {
-      type: 'chat';
-      args: [string, ChatMessage];
-    };
+  | CommonTransportData;
 
 export interface TransportAPI {
   send: (
