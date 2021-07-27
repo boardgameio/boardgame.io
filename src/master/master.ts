@@ -14,7 +14,6 @@ import { ProcessGameConfig, IsLongFormMove } from '../core/game';
 import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
 import { createStore, applyMiddleware } from 'redux';
 import * as logging from '../core/logger';
-import { PlayerView } from '../plugins/main';
 import type {
   SyncInfo,
   FilteredMetadata,
@@ -31,7 +30,6 @@ import { createMatch } from '../server/util';
 import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import type { Operation } from 'rfc6902';
-import { redactLog } from './filter-player-view';
 
 /**
  * Filter match data to get a player metadata object with credentials stripped.
@@ -101,7 +99,9 @@ export type IntermediateTransportData =
     };
 
 export interface TransportAPI {
-  send: (playerData: { playerID: PlayerID } & TransportData) => void;
+  send: (
+    playerData: { playerID: PlayerID } & IntermediateTransportData
+  ) => void;
   sendAll: (payload: IntermediateTransportData) => void;
 }
 
@@ -370,19 +370,8 @@ export class Master {
 
     const filteredMetadata = metadata ? filterMatchData(metadata) : undefined;
 
-    const filteredState = {
-      ...state,
-      G: this.game.playerView(state.G, state.ctx, playerID),
-      plugins: PlayerView(state, { playerID, game: this.game }),
-      deltalog: undefined,
-      _undo: [],
-      _redo: [],
-    };
-
-    log = redactLog(log, playerID);
-
     const syncInfo: SyncInfo = {
-      state: filteredState,
+      state,
       log,
       filteredMetadata,
       initialState,

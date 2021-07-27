@@ -40,6 +40,19 @@ export const getFilterPlayerView = (game: Game) => (
       type: 'update',
       args: [matchID, filteredState, log],
     };
+  } else if (payload.type === 'sync') {
+    const [matchID, syncInfo] = payload.args;
+    const filteredState = applyPlayerView(game, playerID, syncInfo.state);
+    const log = redactLog(syncInfo.log, playerID);
+    const newSyncInfo = {
+      ...syncInfo,
+      state: filteredState,
+      log,
+    };
+    return {
+      type: 'sync',
+      args: [matchID, newSyncInfo],
+    };
   } else {
     return payload;
   }

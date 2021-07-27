@@ -4,7 +4,7 @@ import { Master } from './master';
 import { InMemory } from '../server/db/inmemory';
 import { PlayerView } from '../core/player-view';
 import { INVALID_MOVE } from '../core/constants';
-import type { Ctx } from '../types';
+import type { Ctx, SyncInfo } from '../types';
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
@@ -36,7 +36,11 @@ describe('playerView - update', () => {
 
   test('sync', async () => {
     await master.onSync('matchID', '0', undefined, 2);
-    expect(send.mock.calls[0][0].args[1].state).toMatchObject({
+    const payload = send.mock.calls[0][0];
+    const filterPlayerView = getFilterPlayerView(game);
+    expect(
+      (filterPlayerView('0', payload).args[1] as SyncInfo).state
+    ).toMatchObject({
       G: { player: '0' },
     });
   });
@@ -251,7 +255,7 @@ describe('redactLog', () => {
     expect(result).toMatchObject(logEvents);
   });
 
-  test('make sure sync redacts the log', async () => {
+  test('make sure filter player view redacts the log', async () => {
     const game = {
       moves: {
         A: (G) => G,
@@ -264,6 +268,7 @@ describe('redactLog', () => {
 
     const send = jest.fn();
     const master = new Master(game, new InMemory(), TransportAPI(send));
+    const filterPlayerView = getFilterPlayerView(game);
 
     const actionA = ActionCreators.makeMove('A', ['not redacted'], '0');
     const actionB = ActionCreators.makeMove('B', ['redacted'], '0');
@@ -274,8 +279,10 @@ describe('redactLog', () => {
     await master.onUpdate(actionB, 1, 'matchID', '0');
     await master.onSync('matchID', '1', undefined, 2);
 
-    const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
-    expect(log).toMatchObject([
+    const payload = send.mock.calls[send.mock.calls.length - 1][0];
+    expect(
+      (filterPlayerView('1', payload).args[1] as SyncInfo).log
+    ).toMatchObject([
       {
         action: {
           type: 'MAKE_MOVE',

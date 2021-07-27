@@ -65,7 +65,8 @@ export function TransportAPI(
    */
   const send: MasterTransport['send'] = ({ playerID, ...data }) => {
     forEachClient((client) => {
-      if (client.playerID === playerID) emit(client.socket.id, data);
+      if (client.playerID === playerID)
+        emit(client.socket.id, filterPlayerView(playerID, data));
     });
   };
 

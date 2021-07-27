@@ -85,7 +85,7 @@ export class LocalMaster extends Master {
     const send: TransportAPI['send'] = ({ playerID, ...data }) => {
       const callback = clientCallbacks[playerID];
       if (callback !== undefined) {
-        callback(data);
+        callback(filterPlayerView(playerID, data));
       }
     };
 
@@ -94,8 +94,7 @@ export class LocalMaster extends Master {
       send,
       sendAll: (payload) => {
         for (const playerID in clientCallbacks) {
-          const data = filterPlayerView(playerID, payload);
-          send({ playerID, ...data });
+          send({ playerID, ...payload });
         }
       },
     };
