@@ -91,14 +91,13 @@ export const EnhanceCtx = (state: PartialGameState): Ctx => {
 /**
  * Applies the provided plugins to the given move / flow function.
  *
- * @param {function} fn - The move function or trigger to apply the plugins to.
+ * @param {function} functionToWrap - The move function or trigger to apply the plugins to.
  * @param {object} plugins - The list of plugins.
  */
-export const FnWrap = (fn: AnyFn, plugins: Plugin[]) => {
-  const reducer = (acc: AnyFn, { fnWrap }: Plugin) => fnWrap(acc);
+export const FnWrap = (functionToWrap: AnyFn, plugins: Plugin[]) => {
   return [...DEFAULT_PLUGINS, ...plugins]
     .filter((plugin) => plugin.fnWrap !== undefined)
-    .reduce(reducer, fn);
+    .reduce((fn: AnyFn, { fnWrap }: Plugin) => fnWrap(fn), functionToWrap);
 };
 
 /**
@@ -240,7 +239,7 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
 
       return false;
     })
-    .some((value) => value === true);
+    .includes(true);
 };
 
 /**

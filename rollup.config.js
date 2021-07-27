@@ -15,6 +15,7 @@ import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 import typescript from 'rollup-plugin-typescript2';
+import ts from 'typescript';
 const subpackages = require('./subpackages');
 
 const internalDeps = new Set(['svelte']);
@@ -28,7 +29,7 @@ const plugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true, only: [/svelte/] }),
   typescript({
-    typescript: require('typescript'),
+    typescript: ts,
     tsconfigOverride: {
       compilerOptions: {
         declaration: true,
@@ -42,7 +43,7 @@ const plugins = [
 
 const serverPlugins = [
   resolve(),
-  typescript({ typescript: require('typescript') }),
+  typescript({ typescript: ts }),
   babel({ exclude: ['**/node_modules/**'] }),
   commonjs({ include: 'node_modules/**' }),
 ];
@@ -50,7 +51,7 @@ const serverPlugins = [
 const minifiedPlugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true }),
-  typescript({ typescript: require('typescript') }),
+  typescript({ typescript: ts }),
   svelte({ extensions: ['.svelte'] }),
   commonjs(),
   replace({

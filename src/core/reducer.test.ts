@@ -448,27 +448,28 @@ describe('undo / redo', () => {
   });
 
   test('undo restores previous state after move', () => {
-    let state = reducer(initialState, makeMove('move', 'A', '0'));
-    const { G, ctx, plugins } = state;
-    state = reducer(state, makeMove('roll', null, '0'));
-    state = reducer(state, undo());
-    expect(state.G).toEqual(G);
-    expect(state.ctx).toEqual(ctx);
-    expect(state.plugins).toEqual(plugins);
+    const initial = reducer(initialState, makeMove('move', 'A', '0'));
+    let newState = reducer(initial, makeMove('roll', null, '0'));
+    newState = reducer(newState, undo());
+    expect(newState.G).toEqual(initial.G);
+    expect(newState.ctx).toEqual(initial.ctx);
+    expect(newState.plugins).toEqual(initial.plugins);
   });
 
   test('undo restores previous state after event', () => {
-    let state = reducer(initialState, gameEvent('setStage', 'special', '0'));
-    const { G, ctx, plugins } = state;
-    state = reducer(state, gameEvent('endStage', undefined, '0'));
+    const initial = reducer(
+      initialState,
+      gameEvent('setStage', 'special', '0')
+    );
+    let newState = reducer(initial, gameEvent('endStage', undefined, '0'));
     expect(error).not.toBeCalled();
     // Make sure we actually modified the stage.
-    expect(state.ctx.activePlayers).not.toEqual(ctx.activePlayers);
-    state = reducer(state, undo());
+    expect(newState.ctx.activePlayers).not.toEqual(initial.ctx.activePlayers);
+    newState = reducer(newState, undo());
     expect(error).not.toBeCalled();
-    expect(state.G).toEqual(G);
-    expect(state.ctx).toEqual(ctx);
-    expect(state.plugins).toEqual(plugins);
+    expect(newState.G).toEqual(initial.G);
+    expect(newState.ctx).toEqual(initial.ctx);
+    expect(newState.plugins).toEqual(initial.plugins);
   });
 
   test('redo restores undone state', () => {

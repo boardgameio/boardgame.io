@@ -89,20 +89,19 @@ function createDispatchers(
   credentials: string,
   multiplayer?: unknown
 ) {
-  return innerActionNames.reduce((dispatchers, name) => {
-    dispatchers[name] = function (...args: any[]) {
-      store.dispatch(
-        ActionCreators[storeActionType](
-          name,
-          args,
-          assumedPlayerID(playerID, store, multiplayer),
-          credentials
-        )
+  const dispatchers: Record<string, (...args: any[]) => void> = {};
+  for (const name of innerActionNames) {
+    dispatchers[name] = (...args) => {
+      const action = ActionCreators[storeActionType](
+        name,
+        args,
+        assumedPlayerID(playerID, store, multiplayer),
+        credentials
       );
+      store.dispatch(action);
     };
-
-    return dispatchers;
-  }, {} as Record<string, (...args: any[]) => void>);
+  }
+  return dispatchers;
 }
 
 // Creates a set of dispatchers to make moves.
@@ -231,85 +230,82 @@ export class _ClientImpl<G extends any = any> {
      * The middleware below takes care of all these cases while
      * managing the log object.
      */
-    const LogMiddleware = (store: Store) => (next: Dispatch<Action>) => (
-      action: Action
-    ) => {
-      const result = next(action);
-      const state = store.getState();
+    const LogMiddleware =
+      (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
+        const result = next(action);
+        const state = store.getState();
 
-      switch (action.type) {
-        case Actions.MAKE_MOVE:
-        case Actions.GAME_EVENT:
-        case Actions.UNDO:
-        case Actions.REDO: {
-          const deltalog = state.deltalog;
-          this.log = [...this.log, ...deltalog];
-          break;
-        }
-
-        case Actions.RESET: {
-          this.log = [];
-          break;
-        }
-        case Actions.PATCH:
-        case Actions.UPDATE: {
-          let id = -1;
-          if (this.log.length > 0) {
-            id = this.log[this.log.length - 1]._stateID;
+        switch (action.type) {
+          case Actions.MAKE_MOVE:
+          case Actions.GAME_EVENT:
+          case Actions.UNDO:
+          case Actions.REDO: {
+            const deltalog = state.deltalog;
+            this.log = [...this.log, ...deltalog];
+            break;
           }
 
-          let deltalog = action.deltalog || [];
+          case Actions.RESET: {
+            this.log = [];
+            break;
+          }
+          case Actions.PATCH:
+          case Actions.UPDATE: {
+            let id = -1;
+            if (this.log.length > 0) {
+              id = this.log[this.log.length - 1]._stateID;
+            }
 
-          // Filter out actions that are already present
-          // in the current log. This may occur when the
-          // client adds an entry to the log followed by
-          // the update from the master here.
-          deltalog = deltalog.filter((l) => l._stateID > id);
+            let deltalog = action.deltalog || [];
 
-          this.log = [...this.log, ...deltalog];
-          break;
+            // Filter out actions that are already present
+            // in the current log. This may occur when the
+            // client adds an entry to the log followed by
+            // the update from the master here.
+            deltalog = deltalog.filter((l) => l._stateID > id);
+
+            this.log = [...this.log, ...deltalog];
+            break;
+          }
+
+          case Actions.SYNC: {
+            this.initialState = action.initialState;
+            this.log = action.log || [];
+            break;
+          }
         }
 
-        case Actions.SYNC: {
-          this.initialState = action.initialState;
-          this.log = action.log || [];
-          break;
-        }
-      }
-
-      return result;
-    };
+        return result;
+      };
 
     /**
      * Middleware that intercepts actions and sends them to the master,
      * which keeps the authoritative version of the state.
      */
-    const TransportMiddleware = (store: Store) => (next: Dispatch<Action>) => (
-      action: Action
-    ) => {
-      const baseState = store.getState();
-      const result = next(action);
+    const TransportMiddleware =
+      (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
+        const baseState = store.getState();
+        const result = next(action);
 
-      if (
-        !('clientOnly' in action) &&
-        action.type !== Actions.STRIP_TRANSIENTS
-      ) {
-        this.transport.onAction(baseState, action);
-      }
+        if (
+          !('clientOnly' in action) &&
+          action.type !== Actions.STRIP_TRANSIENTS
+        ) {
+          this.transport.onAction(baseState, action);
+        }
 
-      return result;
-    };
+        return result;
+      };
 
     /**
      * Middleware that intercepts actions and invokes the subscription callback.
      */
-    const SubscriptionMiddleware = () => (next: Dispatch<Action>) => (
-      action: Action
-    ) => {
-      const result = next(action);
-      this.notifySubscribers();
-      return result;
-    };
+    const SubscriptionMiddleware =
+      () => (next: Dispatch<Action>) => (action: Action) => {
+        const result = next(action);
+        this.notifySubscribers();
+        return result;
+      };
 
     const middleware = applyMiddleware(
       TransientHandlingMiddleware,

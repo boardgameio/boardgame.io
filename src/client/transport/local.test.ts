@@ -75,13 +75,13 @@ describe('bots', () => {
 describe('GetBotPlayer', () => {
   test('stages', () => {
     const result = GetBotPlayer(
-      ({
+      {
         ctx: {
           activePlayers: {
             '1': Stage.NULL,
           },
         },
-      } as unknown) as State,
+      } as unknown as State,
       {
         '0': {},
         '1': {},
@@ -92,11 +92,11 @@ describe('GetBotPlayer', () => {
 
   test('no stages', () => {
     const result = GetBotPlayer(
-      ({
+      {
         ctx: {
           currentPlayer: '0',
         },
-      } as unknown) as State,
+      } as unknown as State,
       { '0': {} }
     );
     expect(result).toEqual('0');
@@ -104,11 +104,11 @@ describe('GetBotPlayer', () => {
 
   test('null', () => {
     const result = GetBotPlayer(
-      ({
+      {
         ctx: {
           currentPlayer: '1',
         },
-      } as unknown) as State,
+      } as unknown as State,
       { '0': {} }
     );
     expect(result).toEqual(null);
@@ -116,12 +116,12 @@ describe('GetBotPlayer', () => {
 
   test('gameover', () => {
     const result = GetBotPlayer(
-      ({
+      {
         ctx: {
           currentPlayer: '0',
           gameover: true,
         },
-      } as unknown) as State,
+      } as unknown as State,
       { '0': {} }
     );
     expect(result).toEqual(null);
@@ -207,14 +207,14 @@ describe('LocalMaster', () => {
   const game = {};
   const master = new LocalMaster({ game });
 
-  const storeA = ({
+  const storeA = {
     dispatch: jest.fn(),
     getState: () => ({ _stateID: 0 }),
-  } as unknown) as Store;
-  const storeB = ({
+  } as unknown as Store;
+  const storeB = {
     dispatch: jest.fn(),
     getState: () => ({ _stateID: 0 }),
-  } as unknown) as Store;
+  } as unknown as Store;
 
   const localA = new LocalTransport({ master, store: storeA, playerID: '0' });
   const localB = new LocalTransport({ master, store: storeB, playerID: '1' });
@@ -242,10 +242,7 @@ describe('LocalMaster', () => {
   });
 
   test('update', () => {
-    localA.onAction(
-      ({ _stateID: 0 } as unknown) as State,
-      gameEvent('endTurn')
-    );
+    localA.onAction({ _stateID: 0 } as unknown as State, gameEvent('endTurn'));
 
     expect(storeA.dispatch).toBeCalledWith(
       expect.objectContaining({
@@ -276,11 +273,11 @@ describe('LocalMaster', () => {
 
 describe('LocalTransport', () => {
   describe('update matchID / playerID', () => {
-    const master = ({
+    const master = {
       connect: jest.fn(),
       onSync: jest.fn(),
-    } as unknown) as LocalMaster;
-    const store = ({ dispatch: () => {} } as unknown) as Store;
+    } as unknown as LocalMaster;
+    const store = { dispatch: () => {} } as unknown as Store;
     class WrappedLocalTransport extends LocalTransport {
       getMatchID() {
         return this.matchID;
@@ -309,11 +306,11 @@ describe('LocalTransport', () => {
   });
 
   describe('multiplayer', () => {
-    const master = ({
+    const master = {
       onSync: jest.fn(),
       onUpdate: jest.fn(),
       onChatMessage: jest.fn(),
-    } as unknown) as LocalMaster;
+    } as unknown as LocalMaster;
     class WrappedLocalTransport extends LocalTransport {
       setStore(store: Store) {
         this.store = store;
@@ -335,7 +332,7 @@ describe('LocalTransport', () => {
     });
 
     test('receive update', () => {
-      const restored = ({ restore: true } as unknown) as State;
+      const restored = { restore: true } as unknown as State;
       expect(store.getState()).not.toMatchObject(restored);
       m.onUpdate('unknown matchID', restored, []);
       expect(store.getState()).not.toMatchObject(restored);
@@ -349,7 +346,7 @@ describe('LocalTransport', () => {
     });
 
     test('receive sync', () => {
-      const restored = ({ restore: true } as unknown) as State;
+      const restored = { restore: true } as unknown as State;
       expect(store.getState()).not.toMatchObject(restored);
       m.onSync('unknown matchID', { state: restored } as SyncInfo);
       expect(store.getState()).not.toMatchObject(restored);
@@ -359,7 +356,7 @@ describe('LocalTransport', () => {
 
     test('send update', () => {
       const action = makeMove('move');
-      const state = ({ _stateID: 0 } as unknown) as State;
+      const state = { _stateID: 0 } as unknown as State;
       m.onAction(state, action);
       expect(m.master.onUpdate).lastCalledWith(
         action,

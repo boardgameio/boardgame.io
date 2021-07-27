@@ -1018,7 +1018,7 @@ describe('UpdateTurnOrderState', () => {
     UpdateTurnOrderState({ G, ctx } as State, ctx.currentPlayer, {
       order: {
         first: () => 0,
-        next: () => ('2' as unknown) as number,
+        next: () => '2' as unknown as number,
       },
     });
     expect(error).toHaveBeenCalledWith(

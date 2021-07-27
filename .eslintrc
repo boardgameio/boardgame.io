@@ -3,11 +3,8 @@ extends:
 - plugin:jest/recommended
 - plugin:unicorn/recommended
 - plugin:react/recommended
-- plugin:prettier/recommended
 - plugin:@typescript-eslint/recommended
-- prettier/react
-- prettier/unicorn
-- prettier/@typescript-eslint
+- plugin:prettier/recommended
 
 plugins:
 - "@typescript-eslint"
@@ -28,6 +25,8 @@ rules:
 
   # plugin:unicorn
   unicorn/consistent-function-scoping: off
+  unicorn/no-array-for-each: off
+  unicorn/no-array-reduce: off
   unicorn/no-fn-reference-in-iterator: off
   unicorn/no-null: off
   unicorn/no-reduce: off

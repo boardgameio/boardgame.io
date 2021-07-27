@@ -17,46 +17,50 @@ const applyPlayerView = (
 });
 
 /** Gets a function that filters the TransportData for a given player and game. */
-export const getFilterPlayerView = (game: Game) => (
-  playerID: string,
-  payload: IntermediateTransportData
-): TransportData => {
-  if (payload.type === 'patch') {
-    const [matchID, stateID, prevState, state] = payload.args;
-    const log = redactLog(state.deltalog, playerID);
-    const filteredState = applyPlayerView(game, playerID, state);
-    const newStateID = state._stateID;
-    const prevFilteredState = applyPlayerView(game, playerID, prevState);
-    const patch = createPatch(prevFilteredState, filteredState);
-    return {
-      type: 'patch',
-      args: [matchID, stateID, newStateID, patch, log],
-    };
-  } else if (payload.type === 'update') {
-    const [matchID, state] = payload.args;
-    const log = redactLog(state.deltalog, playerID);
-    const filteredState = applyPlayerView(game, playerID, state);
-    return {
-      type: 'update',
-      args: [matchID, filteredState, log],
-    };
-  } else if (payload.type === 'sync') {
-    const [matchID, syncInfo] = payload.args;
-    const filteredState = applyPlayerView(game, playerID, syncInfo.state);
-    const log = redactLog(syncInfo.log, playerID);
-    const newSyncInfo = {
-      ...syncInfo,
-      state: filteredState,
-      log,
-    };
-    return {
-      type: 'sync',
-      args: [matchID, newSyncInfo],
-    };
-  } else {
-    return payload;
-  }
-};
+export const getFilterPlayerView =
+  (game: Game) =>
+  (playerID: string, payload: IntermediateTransportData): TransportData => {
+    switch (payload.type) {
+      case 'patch': {
+        const [matchID, stateID, prevState, state] = payload.args;
+        const log = redactLog(state.deltalog, playerID);
+        const filteredState = applyPlayerView(game, playerID, state);
+        const newStateID = state._stateID;
+        const prevFilteredState = applyPlayerView(game, playerID, prevState);
+        const patch = createPatch(prevFilteredState, filteredState);
+        return {
+          type: 'patch',
+          args: [matchID, stateID, newStateID, patch, log],
+        };
+      }
+      case 'update': {
+        const [matchID, state] = payload.args;
+        const log = redactLog(state.deltalog, playerID);
+        const filteredState = applyPlayerView(game, playerID, state);
+        return {
+          type: 'update',
+          args: [matchID, filteredState, log],
+        };
+      }
+      case 'sync': {
+        const [matchID, syncInfo] = payload.args;
+        const filteredState = applyPlayerView(game, playerID, syncInfo.state);
+        const log = redactLog(syncInfo.log, playerID);
+        const newSyncInfo = {
+          ...syncInfo,
+          state: filteredState,
+          log,
+        };
+        return {
+          type: 'sync',
+          args: [matchID, newSyncInfo],
+        };
+      }
+      default: {
+        return payload;
+      }
+    }
+  };
 
 /**
  * Redact the log.

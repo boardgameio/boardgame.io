@@ -49,7 +49,7 @@ class _LobbyConnectionImpl {
       for (const game of games) {
         if (!this._getGameComponents(game)) continue;
         const { matches } = await this.client.listMatches(game);
-        this.matches = this.matches.concat(matches);
+        this.matches.push(...matches);
       }
     } catch (error) {
       throw new Error('failed to retrieve list of matches (' + error + ')');
