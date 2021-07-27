@@ -15,6 +15,7 @@ import type {
   TransportAPI as MasterTransport,
   TransportData,
 } from '../../master/master';
+import { getFilterPlayerView } from '../../master/filter-player-view';
 import type { Game, Server } from '../../types';
 
 const PING_TIMEOUT = 20 * 1e3;
@@ -29,6 +30,7 @@ export function TransportAPI(
   socket: IOTypes.Socket,
   clientInfo: SocketIO['clientInfo'],
   roomInfo: SocketIO['roomInfo'],
+  filterPlayerView: (string, IntermediateTransportData) => TransportData,
   provisionalClient?: Client
 ): MasterTransport {
   /**
@@ -63,16 +65,17 @@ export function TransportAPI(
    */
   const send: MasterTransport['send'] = ({ playerID, ...data }) => {
     forEachClient((client) => {
-      if (client.playerID === playerID) emit(client.socket.id, data);
+      if (client.playerID === playerID)
+        emit(client.socket.id, filterPlayerView(playerID, data));
     });
   };
 
   /**
    * Send a message to all clients.
    */
-  const sendAll: MasterTransport['sendAll'] = (makePlayerData) => {
+  const sendAll: MasterTransport['sendAll'] = (payload) => {
     forEachClient((client) => {
-      const data = makePlayerData(client.playerID);
+      const data = filterPlayerView(client.playerID, payload);
       emit(client.socket.id, data);
     });
   };
@@ -174,6 +177,7 @@ export class SocketIO {
 
     for (const game of games) {
       const nsp = app._io.of(game.name);
+      const filterPlayerView = getFilterPlayerView(game);
 
       nsp.on('connection', (socket: IOTypes.Socket) => {
         socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
@@ -181,7 +185,13 @@ export class SocketIO {
           const master = new Master(
             game,
             app.context.db,
-            TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+            TransportAPI(
+              matchID,
+              socket,
+              this.clientInfo,
+              this.roomInfo,
+              filterPlayerView
+            ),
             app.context.auth
           );
 
@@ -202,6 +212,7 @@ export class SocketIO {
             socket,
             this.clientInfo,
             this.roomInfo,
+            filterPlayerView,
             client
           );
           const master = new Master(
@@ -227,7 +238,13 @@ export class SocketIO {
             const master = new Master(
               game,
               app.context.db,
-              TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+              TransportAPI(
+                matchID,
+                socket,
+                this.clientInfo,
+                this.roomInfo,
+                filterPlayerView
+              ),
               app.context.auth
             );
             await master.onConnectionChange(
@@ -246,7 +263,13 @@ export class SocketIO {
             const master = new Master(
               game,
               app.context.db,
-              TransportAPI(matchID, socket, this.clientInfo, this.roomInfo),
+              TransportAPI(
+                matchID,
+                socket,
+                this.clientInfo,
+                this.roomInfo,
+                filterPlayerView
+              ),
               app.context.auth
             );
             master.onChatMessage(...args);

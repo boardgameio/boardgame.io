@@ -9,7 +9,7 @@
 import * as ActionCreators from '../core/action-creators';
 import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
-import { Master, redactLog } from './master';
+import { Master } from './master';
 import { error } from '../core/logger';
 import type { Game, Server, State, Ctx, LogEntry } from '../types';
 import { Auth } from '../server/auth';
@@ -171,12 +171,8 @@ describe('sync', () => {
 });
 
 describe('update', () => {
-  let sendAllReturn;
-
   const send = jest.fn();
-  const sendAll = jest.fn((arg) => {
-    sendAllReturn = arg;
-  });
+  const sendAll = jest.fn();
   const game = {
     moves: {
       A: (G) => G,
@@ -190,24 +186,18 @@ describe('update', () => {
     db = new InMemory();
     master = new Master(game, db, TransportAPI(send, sendAll));
     await master.onSync('matchID', '0', undefined, 2);
-    sendAllReturn = undefined;
     jest.clearAllMocks();
   });
 
   test('basic', async () => {
     await master.onUpdate(action, 0, 'matchID', '0');
     expect(sendAll).toBeCalled();
-    expect(sendAllReturn).not.toBeUndefined();
-
-    const value = sendAllReturn('0');
+    const value = sendAll.mock.calls[0][0];
     expect(value.type).toBe('update');
     expect(value.args[0]).toBe('matchID');
     expect(value.args[1]).toMatchObject({
       G: {},
-      deltalog: undefined,
-      _redo: [],
       _stateID: 1,
-      _undo: [],
       ctx: {
         currentPlayer: '1',
         numPlayers: 2,
@@ -217,20 +207,6 @@ describe('update', () => {
         turn: 2,
       },
     });
-
-    expect(value.args[2]).toMatchObject([
-      {
-        action: {
-          payload: {
-            args: undefined,
-            credentials: undefined,
-            playerID: undefined,
-            type: 'endTurn',
-          },
-          type: 'GAME_EVENT',
-        },
-      },
-    ]);
   });
 
   test('missing action', async () => {
@@ -352,22 +328,12 @@ describe('update', () => {
       master.onSync('matchID', '1', undefined, 2),
     ]);
 
-    const G_player0 = sendAllReturn('0').args[1].G;
-    const G_player1 = sendAllReturn('1').args[1].G;
+    const G = sendAll.mock.calls[sendAll.mock.calls.length - 1][0].args[1].G;
 
-    expect(G_player0).toMatchObject({
+    expect(G).toMatchObject({
       players: {
         '0': {
           cards: ['card1'],
-        },
-      },
-      cards: ['card0'],
-      discardedCards: ['card3'],
-    });
-    expect(G_player1).toMatchObject({
-      players: {
-        '1': {
-          cards: ['card2'],
         },
       },
       cards: ['card0'],
@@ -536,12 +502,8 @@ describe('update', () => {
 });
 
 describe('patch', () => {
-  let sendAllReturn;
-
   const send = jest.fn();
-  const sendAll = jest.fn((arg) => {
-    sendAllReturn = arg;
-  });
+  const sendAll = jest.fn();
   const db = new InMemory();
   const master = new Master(
     {
@@ -604,39 +566,21 @@ describe('patch', () => {
   });
 
   beforeEach(() => {
-    sendAllReturn = undefined;
     jest.clearAllMocks();
   });
 
   test('basic', async () => {
     await master.onUpdate(move, 0, 'matchID', '0');
     expect(sendAll).toBeCalled();
-    expect(sendAllReturn).not.toBeUndefined();
 
-    const value = sendAllReturn('0');
+    const value = sendAll.mock.calls[0][0];
     expect(value.type).toBe('patch');
     expect(value.args[0]).toBe('matchID');
     expect(value.args[1]).toBe(0);
-    expect(value.args[2]).toBe(1);
-    expect(value.args[3]).toMatchObject([
-      { op: 'remove', path: '/G/players/0/cards/0' },
-      { op: 'add', path: '/G/discardedCards/-', value: 'card3' },
-      { op: 'replace', path: '/ctx/numMoves', value: 1 },
-      { op: 'replace', path: '/_stateID', value: 1 },
-    ]);
-
-    expect(value.args[4]).toMatchObject([
-      {
-        action: {
-          payload: {
-            args: null,
-            playerID: '0',
-            type: 'A',
-          },
-          type: 'MAKE_MOVE',
-        },
-      },
-    ]);
+    // prevState -- had a card
+    expect(value.args[2].G.players[0].cards).toEqual(['card3']);
+    // state -- doesnt have a card anymore
+    expect(value.args[3].G.players[0].cards).toEqual([]);
   });
 
   test('invalid matchID', async () => {
@@ -740,12 +684,8 @@ describe('patch', () => {
 });
 
 describe('connectionChange', () => {
-  let sendAllReturn;
-
   const send = jest.fn();
-  const sendAll = jest.fn((arg) => {
-    sendAllReturn = arg;
-  });
+  const sendAll = jest.fn();
 
   const db = new InMemory();
   const master = new Master(game, db, TransportAPI(send, sendAll));
@@ -772,7 +712,6 @@ describe('connectionChange', () => {
   db.createMatch('matchID', { metadata, initialState: {} as State });
 
   beforeEach(() => {
-    sendAllReturn = undefined;
     master.subscribe(({ state }) => {
       validateNotTransientState(state);
     });
@@ -795,7 +734,7 @@ describe('connectionChange', () => {
       { id: 0, name: 'Alice', isConnected: true },
       { id: 1, name: 'Bob', isConnected: false },
     ];
-    const sentMessage = sendAllReturn('0');
+    const sentMessage = sendAll.mock.calls[0][0];
     expect(sentMessage.type).toEqual('matchData');
     expect(sentMessage.args[1]).toMatchObject(expectedMetadata);
   });
@@ -841,53 +780,6 @@ describe('connectionChange', () => {
     await masterWithAsyncDb.onConnectionChange('matchID', '0', undefined, true);
 
     expect(sendAll).toHaveBeenCalled();
-  });
-});
-
-describe('playerView', () => {
-  let sendAllReturn;
-  let sendReturn;
-
-  const send = jest.fn((arg) => {
-    sendReturn = arg;
-  });
-  const sendAll = jest.fn((arg) => {
-    sendAllReturn = arg;
-  });
-  const game = {
-    playerView: (G, ctx, player) => {
-      return { ...G, player };
-    },
-  };
-  const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
-
-  beforeAll(async () => {
-    await master.onSync('matchID', '0', undefined, 2);
-  });
-
-  beforeEach(() => {
-    sendReturn = undefined;
-    sendAllReturn = undefined;
-    jest.clearAllMocks();
-  });
-
-  test('sync', async () => {
-    await master.onSync('matchID', '0', undefined, 2);
-    expect(sendReturn.args[1].state).toMatchObject({
-      G: { player: '0' },
-    });
-  });
-
-  test('update', async () => {
-    const action = ActionCreators.gameEvent('endTurn');
-    await master.onSync('matchID', '0', undefined, 2);
-    await master.onUpdate(action, 0, 'matchID', '0');
-
-    const G_player0 = sendAllReturn('0').args[1].G;
-    const G_player1 = sendAllReturn('1').args[1].G;
-
-    expect(G_player0.player).toBe('0');
-    expect(G_player1.player).toBe('1');
   });
 });
 
@@ -1114,170 +1006,9 @@ describe('authentication', () => {
   });
 });
 
-describe('redactLog', () => {
-  test('no-op with undefined log', () => {
-    const result = redactLog(undefined, '0');
-    expect(result).toBeUndefined();
-  });
-
-  test('no redactedMoves', () => {
-    const logEvents = [
-      {
-        _stateID: 0,
-        turn: 0,
-        phase: '',
-        action: ActionCreators.gameEvent('endTurn'),
-      },
-    ];
-    const result = redactLog(logEvents, '0');
-    expect(result).toMatchObject(logEvents);
-  });
-
-  test('redacted move is only shown with args to the player that made the move', () => {
-    const logEvents = [
-      {
-        _stateID: 0,
-        turn: 0,
-        phase: '',
-        action: ActionCreators.makeMove('clickCell', [1, 2, 3], '0'),
-        redact: true,
-      },
-    ];
-
-    // player that made the move
-    let result = redactLog(logEvents, '0');
-    expect(result).toMatchObject(logEvents);
-
-    // other player
-    result = redactLog(logEvents, '1');
-    expect(result).toMatchObject([
-      {
-        _stateID: 0,
-        turn: 0,
-        phase: '',
-        action: {
-          type: 'MAKE_MOVE',
-          payload: {
-            credentials: undefined,
-            playerID: '0',
-            type: 'clickCell',
-          },
-        },
-      },
-    ]);
-  });
-
-  test('not redacted move is shown to all', () => {
-    const logEvents = [
-      {
-        _stateID: 0,
-        turn: 0,
-        phase: '',
-        action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0'),
-      },
-    ];
-
-    // player that made the move
-    let result = redactLog(logEvents, '0');
-    expect(result).toMatchObject(logEvents);
-    // other player
-    result = redactLog(logEvents, '1');
-    expect(result).toMatchObject(logEvents);
-  });
-
-  test('can explicitly set showing args to true', () => {
-    const logEvents = [
-      {
-        _stateID: 0,
-        turn: 0,
-        phase: '',
-        action: ActionCreators.makeMove('unclickCell', [1, 2, 3], '0'),
-      },
-    ];
-
-    // player that made the move
-    let result = redactLog(logEvents, '0');
-    expect(result).toMatchObject(logEvents);
-    // other player
-    result = redactLog(logEvents, '1');
-    expect(result).toMatchObject(logEvents);
-  });
-
-  test('events are not redacted', () => {
-    const logEvents = [
-      {
-        _stateID: 0,
-        turn: 0,
-        phase: '',
-        action: ActionCreators.gameEvent('endTurn'),
-      },
-    ];
-
-    // player that made the move
-    let result = redactLog(logEvents, '0');
-    expect(result).toMatchObject(logEvents);
-    // other player
-    result = redactLog(logEvents, '1');
-    expect(result).toMatchObject(logEvents);
-  });
-
-  test('make sure sync redacts the log', async () => {
-    const game = {
-      moves: {
-        A: (G) => G,
-        B: {
-          move: (G) => G,
-          redact: true,
-        },
-      },
-    };
-
-    const send = jest.fn();
-    const master = new Master(game, new InMemory(), TransportAPI(send));
-
-    const actionA = ActionCreators.makeMove('A', ['not redacted'], '0');
-    const actionB = ActionCreators.makeMove('B', ['redacted'], '0');
-
-    // test: ping-pong two moves, then sync and check the log
-    await master.onSync('matchID', '0', undefined, 2);
-    await master.onUpdate(actionA, 0, 'matchID', '0');
-    await master.onUpdate(actionB, 1, 'matchID', '0');
-    await master.onSync('matchID', '1', undefined, 2);
-
-    const { log } = send.mock.calls[send.mock.calls.length - 1][0].args[1];
-    expect(log).toMatchObject([
-      {
-        action: {
-          type: 'MAKE_MOVE',
-          payload: {
-            type: 'A',
-            args: ['not redacted'],
-            playerID: '0',
-          },
-        },
-        _stateID: 0,
-      },
-      {
-        action: {
-          type: 'MAKE_MOVE',
-          payload: {
-            type: 'B',
-            args: null,
-            playerID: '0',
-          },
-        },
-        _stateID: 1,
-      },
-    ]);
-  });
-});
-
 describe('chat', () => {
-  let sendAllReturn;
   const send = jest.fn();
-  const sendAll = jest.fn((arg) => {
-    sendAllReturn = arg;
-  });
+  const sendAll = jest.fn();
   const db = new InMemory();
   const master = new Master(game, db, TransportAPI(send, sendAll));
 
@@ -1291,7 +1022,7 @@ describe('chat', () => {
       { id: 'uuid', sender: '0', payload: { message: 'foo' } },
       undefined
     );
-    expect(sendAllReturn('0')).toEqual({
+    expect(sendAll.mock.calls[0][0]).toEqual({
       type: 'chat',
       args: [
         'matchID',
