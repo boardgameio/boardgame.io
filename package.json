@@ -161,7 +161,7 @@
     "p-queue": "^6.6.2",
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
-    "redux": "^4.0.0",
+    "redux": "^4.1.0",
     "rfc6902": "^4.0.1",
     "socket.io": "^4.1.2",
     "socket.io-client": "^4.1.2",
