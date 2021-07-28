@@ -102,7 +102,7 @@
     "babel-plugin-module-resolver": "^4.1.0",
     "benchmark": "^2.1.4",
     "bundlewatch": "^0.3.2",
-    "cross-env": "^5.1.1",
+    "cross-env": "^7.0.3",
     "docsify-cli": "^4.4.3",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
