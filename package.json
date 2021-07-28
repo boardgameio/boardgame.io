@@ -138,7 +138,7 @@
     "rollup-plugin-typescript2": "^0.22.0",
     "shelljs": "^0.8.4",
     "supertest": "^3.1.0",
-    "svelte-icons": "^1.1.0",
+    "svelte-icons": "^2.1.0",
     "tempy": "^1.0.1",
     "ts-jest": "^24.3.0",
     "ts-transformer-imports": "^0.4.3",
