@@ -150,7 +150,7 @@
   "dependencies": {
     "@koa/cors": "^3.1.0",
     "@types/koa": "^2.11.3",
-    "flatted": "^0.2.3",
+    "flatted": "^3.2.1",
     "immer": "^8.0.1",
     "koa": "^2.7.0",
     "koa-body": "^4.1.0",
