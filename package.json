@@ -120,7 +120,7 @@
     "jest-transform-svelte": "^2.1.1",
     "lint-staged": "^10.5.4",
     "node-persist": "^3.1.0",
-    "nodemon": "^1.18.9",
+    "nodemon": "^2.0.12",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.3.2",
     "raf": "^3.4.1",
