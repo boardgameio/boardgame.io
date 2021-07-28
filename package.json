@@ -136,7 +136,7 @@
     "rollup-plugin-svelte": "^6.1.1",
     "rollup-plugin-terser": "^5.3.0",
     "rollup-plugin-typescript2": "^0.22.0",
-    "shelljs": "^0.7.8",
+    "shelljs": "^0.8.4",
     "supertest": "^3.1.0",
     "svelte-icons": "^1.1.0",
     "tempy": "^1.0.1",
