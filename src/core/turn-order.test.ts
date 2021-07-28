@@ -25,6 +25,15 @@ jest.mock('../core/logger', () => ({
   error: jest.fn(),
 }));
 
+// Let the Typescript compiler know about our custom matcher.
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toHaveUndefinedProperties(): R;
+    }
+  }
+}
+
 describe('turn orders', () => {
   // Defines a matcher for testing that ctx has no undefined properties.
   // Identifies which property is undefined.
