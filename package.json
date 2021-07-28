@@ -99,7 +99,7 @@
     "@types/react-dom": "^16.9.8",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
-    "babel-plugin-module-resolver": "^3.0.0",
+    "babel-plugin-module-resolver": "^4.1.0",
     "benchmark": "^2.1.4",
     "bundlewatch": "^0.3.2",
     "coveralls": "^3.0.0",
