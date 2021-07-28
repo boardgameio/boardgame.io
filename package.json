@@ -142,7 +142,7 @@
     "tempy": "^1.0.1",
     "ts-jest": "^24.3.0",
     "ts-transformer-imports": "^0.4.3",
-    "ttypescript": "^1.5.7",
+    "ttypescript": "^1.5.12",
     "typescript": "^3.8.2"
   },
   "dependencies": {
