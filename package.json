@@ -118,7 +118,7 @@
     "jest-date-mock": "^1.0.8",
     "jest-environment-jsdom-fifteen": "^1.0.2",
     "jest-transform-svelte": "^2.1.1",
-    "lint-staged": "^8.1.0",
+    "lint-staged": "^10.5.4",
     "node-persist": "^3.0.4",
     "nodemon": "^1.18.9",
     "npm-run-all": "^4.1.5",
