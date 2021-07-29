@@ -255,7 +255,6 @@ export interface TurnConfig<
   endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void | { next: PlayerID };
   onMove?: (G: G, ctx: CtxWithPlugins) => any;
   stages?: StageMap<G, CtxWithPlugins>;
-  moves?: MoveMap<G, CtxWithPlugins>;
   order?: TurnOrderConfig<G, CtxWithPlugins>;
   wrapped?: {
     endIf?: (
