@@ -255,7 +255,6 @@ export interface TurnConfig<
   endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void | { next: PlayerID };
   onMove?: (G: G, ctx: CtxWithPlugins) => any;
   stages?: StageMap<G, CtxWithPlugins>;
-  moves?: MoveMap<G, CtxWithPlugins>;
   order?: TurnOrderConfig<G, CtxWithPlugins>;
   wrapped?: {
     endIf?: (
@@ -423,7 +422,8 @@ export namespace ActionShape {
   export type MakeMove = StripCredentials<CredentialedActionShape.MakeMove>;
   export type GameEvent = StripCredentials<CredentialedActionShape.GameEvent>;
   export type Plugin = StripCredentials<CredentialedActionShape.Plugin>;
-  export type AutomaticGameEvent = StripCredentials<CredentialedActionShape.AutomaticGameEvent>;
+  export type AutomaticGameEvent =
+    StripCredentials<CredentialedActionShape.AutomaticGameEvent>;
   export type Sync = ReturnType<typeof ActionCreators.sync>;
   export type Update = ReturnType<typeof ActionCreators.update>;
   export type Patch = ReturnType<typeof ActionCreators.patch>;

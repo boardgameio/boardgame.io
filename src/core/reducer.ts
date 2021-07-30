@@ -198,32 +198,33 @@ function WithError<PT extends any = any>(
  * This should pretty much be used everywhere you want realistic state
  * transitions and error handling.
  */
-export const TransientHandlingMiddleware = (store: Store) => (
-  next: Dispatch<ActionShape.Any>
-) => (action: ActionShape.Any) => {
-  const result = next(action);
-  switch (action.type) {
-    case Actions.STRIP_TRANSIENTS: {
-      return result;
-    }
-    default: {
-      const [, transients] = ExtractTransients(store.getState());
-      if (typeof transients !== 'undefined') {
-        store.dispatch(stripTransients());
-        // Dev Note: If parent middleware needs to correlate the spawned
-        // StripTransients action to the triggering action, instrument here.
-        //
-        // This is a bit tricky; for more details, see:
-        //   https://github.com/boardgameio/boardgame.io/pull/940#discussion_r636200648
-        return {
-          ...result,
-          transients,
-        };
+export const TransientHandlingMiddleware =
+  (store: Store) =>
+  (next: Dispatch<ActionShape.Any>) =>
+  (action: ActionShape.Any) => {
+    const result = next(action);
+    switch (action.type) {
+      case Actions.STRIP_TRANSIENTS: {
+        return result;
       }
-      return result;
+      default: {
+        const [, transients] = ExtractTransients(store.getState());
+        if (typeof transients !== 'undefined') {
+          store.dispatch(stripTransients());
+          // Dev Note: If parent middleware needs to correlate the spawned
+          // StripTransients action to the triggering action, instrument here.
+          //
+          // This is a bit tricky; for more details, see:
+          //   https://github.com/boardgameio/boardgame.io/pull/940#discussion_r636200648
+          return {
+            ...result,
+            transients,
+          };
+        }
+        return result;
+      }
     }
-  }
-};
+  };
 
 /**
  * CreateGameReducer
@@ -423,7 +424,7 @@ export function CreateGameReducer({
           return WithError(state, ActionErrorType.ActionDisabled);
         }
 
-        const { _undo, _redo } = state;
+        const { G, ctx, _undo, _redo, _stateID } = state;
 
         if (_undo.length < 2) {
           error(`No moves to undo`);
@@ -449,7 +450,7 @@ export function CreateGameReducer({
             last.moveType,
             last.playerID
           );
-          if (!CanUndoMove(state.G, state.ctx, lastMove)) {
+          if (!CanUndoMove(G, ctx, lastMove)) {
             error(`Move cannot be undone`);
             return WithError(state, ActionErrorType.ActionInvalid);
           }
@@ -462,7 +463,7 @@ export function CreateGameReducer({
           G: restore.G,
           ctx: restore.ctx,
           plugins: restore.plugins,
-          _stateID: state._stateID + 1,
+          _stateID: _stateID + 1,
           _undo: _undo.slice(0, -1),
           _redo: [last, ..._redo],
         };
@@ -476,9 +477,9 @@ export function CreateGameReducer({
           return WithError(state, ActionErrorType.ActionDisabled);
         }
 
-        const { _undo, _redo } = state;
+        const { _undo, _redo, _stateID } = state;
 
-        if (_redo.length == 0) {
+        if (_redo.length === 0) {
           error(`No moves to redo`);
           return WithError(state, ActionErrorType.ActionInvalid);
         }
@@ -501,7 +502,7 @@ export function CreateGameReducer({
           G: first.G,
           ctx: first.ctx,
           plugins: first.plugins,
-          _stateID: state._stateID + 1,
+          _stateID: _stateID + 1,
           _undo: [..._undo, first],
           _redo: _redo.slice(1),
         };

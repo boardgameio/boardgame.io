@@ -99,6 +99,12 @@
 
       // Overrides `turn` for the duration of this phase.
       turn: { ... },
+
+      // Make this phase the first phase of the game.
+      start: true,
+
+      // Set the phase to enter when this phase ends.
+      next: 'nextPhaseName',
     },
 
     ...

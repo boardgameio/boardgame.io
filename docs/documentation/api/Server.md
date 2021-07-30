@@ -26,21 +26,7 @@ A config object with the following options:
     that are allowed to access the game server. For example, this could be
     `['https://example.com']` if that’s where your game is running. While
     developing locally you probably want to allow any page running on localhost
-    to connect. boardgame.io provides default configurations to help with this:
-
-    ```js
-    const { Server, Origins } = require('boardgame.io/server');
-    
-    Server({
-      origins: [
-        // Allow your game site to connect.
-        'https://www.mygame.domain',
-        // Allow localhost to connect, except when NODE_ENV is 'production'.
-        Origins.LOCALHOST_IN_DEVELOPMENT
-      ],
-      // ...
-    });
-    ```
+    to connect. See [Usage](#usage) below for an example.
 
 [cors]: https://github.com/expressjs/cors#configuration-options
 
@@ -80,12 +66,21 @@ An object that contains:
 #### Basic
 
 ```js
-const Server = require('boardgame.io/server').Server;
+const { Server, Origins } = require('boardgame.io/server');
 
 const server = Server({
+  // Provide the definitions for your game(s).
   games: [game1, game2, ...],
 
+  // Provide the database storage class to use.
   db: new DbConnector(),
+
+  origins: [
+    // Allow your game site to connect.
+    'https://www.mygame.domain',
+    // Allow localhost to connect, except when NODE_ENV is 'production'.
+    Origins.LOCALHOST_IN_DEVELOPMENT
+  ],
 });
 
 server.run(8000);
@@ -181,3 +176,41 @@ server.run(8000);
 ```
 
 !> N.B. This approach is not currently compatible with how the React `<Lobby>` provides credentials.
+
+### Extending the server
+
+The boardgame.io server uses [Koa](koajs.com/) and
+[`@koa/router`](https://github.com/koajs/router). You can customise the
+Lobby API by accessing the router instance, for example to add routes or
+to add custom middleware for existing routes. See an example of customising
+the entire Koa app [in the Heroku deployment guide](/deployment.md#frontend-and-backend).
+
+#### Add a custom route
+
+```js
+const server = Server({ /* options */ });
+
+server.router.get('/custom-endpoint', (ctx, next) => {
+  ctx.body = 'Hello World!';
+});
+
+server.run(8000);
+```
+
+#### Add middleware
+
+```js
+const server = Server({ /* options */ });
+
+// Add middleware to the create game route.
+server.router.use('/games/:name/create', async (ctx, next) => {
+  // Decide number of players etc. based on some other API.
+  const { numPlayers, setupData } = await fetchDataFromSomeCustomAPI();
+  // Set request body to be used by the create game route.
+  ctx.request.body.numPlayers = numPlayers;
+  ctx.request.body.setupData = setupData;
+  next();
+});
+
+server.run(8000);
+```

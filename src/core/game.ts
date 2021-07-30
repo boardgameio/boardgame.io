@@ -94,7 +94,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
         };
         let args = [];
         if (action.args !== undefined) {
-          args = args.concat(action.args);
+          args = Array.isArray(action.args) ? action.args : [action.args];
         }
         return fn(state.G, ctxWithAPI, ...args);
       }

@@ -14,16 +14,14 @@ const throwsWithoutBody = (fn: (...args: any) => Promise<any>) => async () => {
   );
 };
 
-const testStringValidation = (
-  fn: (arg: any) => Promise<any>,
-  label: string
-) => async () => {
-  await expect(fn(undefined)).rejects.toThrow(
-    `Expected ${label} string, got "undefined".`
-  );
-  await expect(fn(2)).rejects.toThrow(`Expected ${label} string, got "2".`);
-  await expect(fn('')).rejects.toThrow(`Expected ${label} string, got "".`);
-};
+const testStringValidation =
+  (fn: (arg: any) => Promise<any>, label: string) => async () => {
+    await expect(fn(undefined)).rejects.toThrow(
+      `Expected ${label} string, got "undefined".`
+    );
+    await expect(fn(2)).rejects.toThrow(`Expected ${label} string, got "2".`);
+    await expect(fn('')).rejects.toThrow(`Expected ${label} string, got "".`);
+  };
 
 const throwsWithInvalidGameName = (fn: (...args: any) => Promise<any>) =>
   testStringValidation(fn, 'game name');
@@ -39,7 +37,7 @@ const testBasicBody = (fn: (...args: any) => Promise<any>) => async () => {
   );
 
   await expect(
-    fn('chess', '2', { playerID: '0', credentials: (0 as unknown) as string })
+    fn('chess', '2', { playerID: '0', credentials: 0 as unknown as string })
   ).rejects.toThrow('Expected body.credentials to be of type string, got “0”.');
 };
 
@@ -239,7 +237,7 @@ describe('LobbyClient', () => {
     test('validates body', async () => {
       await expect(
         client.createMatch('tic-tac-toe', {
-          numPlayers: ('12' as unknown) as number,
+          numPlayers: '12' as unknown as number,
         })
       ).rejects.toThrow(
         'Expected body.numPlayers to be of type number, got “12”.'
@@ -287,7 +285,7 @@ describe('LobbyClient', () => {
     test('validates body', async () => {
       await expect(
         client.joinMatch('tic-tac-toe', 'xyz', {
-          playerID: (0 as unknown) as string,
+          playerID: 0 as unknown as string,
           playerName: 'Bob',
         })
       ).rejects.toThrow(

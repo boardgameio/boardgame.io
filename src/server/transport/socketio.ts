@@ -182,6 +182,7 @@ export class SocketIO {
 
     for (const game of games) {
       const nsp = app._io.of(game.name);
+      const filterPlayerView = getFilterPlayerView(game);
 
       nsp.on('connection', (socket: IOTypes.Socket) => {
         socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
