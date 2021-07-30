@@ -102,7 +102,7 @@ export class SocketIO {
     this.https = https;
     this.socketAdapter = socketAdapter;
     this.socketOpts = socketOpts;
-    this.pubSub = pubSub ?? new InMemoryPubSub();
+    this.pubSub = pubSub ? pubSub : new InMemoryPubSub();
   }
 
   /**
