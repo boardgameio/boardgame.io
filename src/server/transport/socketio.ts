@@ -192,7 +192,7 @@ export class SocketIO {
       nsp.on('connection', (socket: IOTypes.Socket) => {
         socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
           const [action, stateID, matchID, playerID] = args;
-          const credentials = action?.payload?.credentials;
+          const credentials = action.payload.credentials;
           const requestingClient = { socket, matchID, playerID, credentials };
           const master = new Master(
             game,
