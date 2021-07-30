@@ -32,7 +32,7 @@ export class RedisPubSub<T> implements GenericPubSub<T> {
     return observable;
   }
 
-  unsubscribe(channelId: PubSubChannelId) { 
+  unsubscribe(channelId: PubSubChannelId) {
     this.subscriptions.delete(channelId);
     this.client.unsubscribe(globalChannelId(channelId));
   }

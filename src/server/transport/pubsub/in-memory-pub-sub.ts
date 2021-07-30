@@ -18,7 +18,7 @@ export class InMemoryPubSub<T> implements GenericPubSub<T> {
   }
 
   unsubscribe(channelId: PubSubChannelId) {
-    if(this.subjects.has(channelId)) {
+    if (this.subjects.has(channelId)) {
       this.subjects.get(channelId).unsubscribe();
     }
     this.subjects.delete(channelId);
