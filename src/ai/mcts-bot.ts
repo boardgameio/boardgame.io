@@ -128,14 +128,12 @@ export class MCTSBot extends Bot {
       objectives = this.objectives(G, ctx, playerID);
     } else if (ctx.activePlayers) {
       for (const playerID in ctx.activePlayers) {
-        actions = actions.concat(this.enumerate(G, ctx, playerID));
-        objectives = objectives.concat(this.objectives(G, ctx, playerID));
+        actions.push(...this.enumerate(G, ctx, playerID));
+        objectives.push(this.objectives(G, ctx, playerID));
       }
     } else {
-      actions = actions.concat(this.enumerate(G, ctx, ctx.currentPlayer));
-      objectives = objectives.concat(
-        this.objectives(G, ctx, ctx.currentPlayer)
-      );
+      actions = this.enumerate(G, ctx, ctx.currentPlayer);
+      objectives = this.objectives(G, ctx, ctx.currentPlayer);
     }
 
     return {
@@ -157,7 +155,7 @@ export class MCTSBot extends Bot {
     }
 
     // This is a terminal node.
-    if (node.children.length == 0) {
+    if (node.children.length === 0) {
       return node;
     }
 
@@ -181,7 +179,7 @@ export class MCTSBot extends Bot {
   private expand(node: Node) {
     const actions = node.actions;
 
-    if (actions.length == 0 || node.state.ctx.gameover !== undefined) {
+    if (actions.length === 0 || node.state.ctx.gameover !== undefined) {
       return node;
     }
 
@@ -227,7 +225,7 @@ export class MCTSBot extends Bot {
         return { score };
       }
 
-      if (!moves || moves.length == 0) {
+      if (!moves || moves.length === 0) {
         return undefined;
       }
 

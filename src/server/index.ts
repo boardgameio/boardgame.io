@@ -94,7 +94,7 @@ export function Server({
 }: ServerOpts) {
   const app: ServerTypes.App = new Koa();
 
-  games = games.map(ProcessGameConfig);
+  games = games.map((game) => ProcessGameConfig(game));
 
   if (db === undefined) {
     db = DBFromEnv();

@@ -17,19 +17,21 @@ import { INVALID_MOVE } from '../core/constants';
 const ImmerPlugin: Plugin = {
   name: 'plugin-immer',
 
-  fnWrap: (move: AnyFn) => (G: any, ctx: Ctx, ...args: any[]) => {
-    let isInvalid = false;
-    const newG = produce(G, (G) => {
-      const result = move(G, ctx, ...args);
-      if (result === INVALID_MOVE) {
-        isInvalid = true;
-        return;
-      }
-      return result;
-    });
-    if (isInvalid) return INVALID_MOVE;
-    return newG;
-  },
+  fnWrap:
+    (move: AnyFn) =>
+    (G: any, ctx: Ctx, ...args: any[]) => {
+      let isInvalid = false;
+      const newG = produce(G, (G) => {
+        const result = move(G, ctx, ...args);
+        if (result === INVALID_MOVE) {
+          isInvalid = true;
+          return;
+        }
+        return result;
+      });
+      if (isInvalid) return INVALID_MOVE;
+      return newG;
+    },
 };
 
 export default ImmerPlugin;

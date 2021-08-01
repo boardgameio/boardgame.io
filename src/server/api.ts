@@ -349,6 +349,7 @@ export const createRouter = ({
     // The number of players for this game instance.
     const numPlayers =
       Number.parseInt(ctx.request.body.numPlayers) ||
+      // eslint-disable-next-line unicorn/explicit-length-check
       Object.keys(metadata.players).length;
 
     const game = games.find((g) => g.name === gameName);

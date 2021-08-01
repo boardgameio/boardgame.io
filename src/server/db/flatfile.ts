@@ -131,7 +131,7 @@ export class FlatFile extends StorageAPI.Async {
       const key = LogKey(id);
       const log: LogEntry[] = ((await this.getItem(key)) as LogEntry[]) || [];
 
-      await this.setItem(key, log.concat(deltalog));
+      await this.setItem(key, [...log, ...deltalog]);
     }
 
     return await this.setItem(id, state);

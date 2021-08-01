@@ -53,7 +53,7 @@ export class InMemory extends StorageAPI.Sync {
   setState(matchID: string, state: State, deltalog?: LogEntry[]): void {
     if (deltalog && deltalog.length > 0) {
       const log = this.log.get(matchID) || [];
-      this.log.set(matchID, log.concat(deltalog));
+      this.log.set(matchID, [...log, ...deltalog]);
     }
     this.state.set(matchID, state);
   }

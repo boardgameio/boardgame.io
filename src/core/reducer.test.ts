@@ -299,6 +299,96 @@ describe('Events API', () => {
   });
 });
 
+describe('Plugin Invalid Action API', () => {
+  const pluginName = 'validator';
+  const message = 'G.value must divide by 5';
+  const game: Game<{ value: number }> = {
+    setup: () => ({ value: 5 }),
+    plugins: [
+      {
+        name: pluginName,
+        isInvalid: ({ G }) => {
+          if (G.value % 5 !== 0) return message;
+          return false;
+        },
+      },
+    ],
+    moves: {
+      setValue: (G, _ctx, arg) => {
+        G.value = arg;
+      },
+    },
+    phases: {
+      unenterable: {
+        onBegin: () => ({ value: 13 }),
+      },
+      enterable: {
+        onBegin: () => ({ value: 25 }),
+      },
+    },
+  };
+
+  let state: State;
+  beforeEach(() => {
+    state = InitializeGame({ game });
+  });
+
+  describe('multiplayer client', () => {
+    const reducer = CreateGameReducer({ game });
+
+    test('move is cancelled if plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [6], '0'));
+      expect(state.G).toMatchObject({ value: 5 });
+      expect(state['transients'].error).toEqual({
+        type: 'action/plugin_invalid',
+        payload: { plugin: pluginName, message },
+      });
+    });
+
+    test('move is processed if no plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [15], '0'));
+      expect(state.G).toMatchObject({ value: 15 });
+      expect(state['transients']).toBeUndefined();
+    });
+
+    test('event is cancelled if plugin declares it invalid', () => {
+      state = reducer(state, gameEvent('setPhase', 'unenterable', '0'));
+      expect(state.G).toMatchObject({ value: 5 });
+      expect(state.ctx.phase).toBe(null);
+      expect(state['transients'].error).toEqual({
+        type: 'action/plugin_invalid',
+        payload: { plugin: pluginName, message },
+      });
+    });
+
+    test('event is processed if no plugin declares it invalid', () => {
+      state = reducer(state, gameEvent('setPhase', 'enterable', '0'));
+      expect(state.G).toMatchObject({ value: 25 });
+      expect(state.ctx.phase).toBe('enterable');
+      expect(state['transients']).toBeUndefined();
+    });
+  });
+
+  describe('local client', () => {
+    const reducer = CreateGameReducer({ game, isClient: true });
+
+    test('move is cancelled if plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [6], '0'));
+      expect(state.G).toMatchObject({ value: 5 });
+      expect(state['transients'].error).toEqual({
+        type: 'action/plugin_invalid',
+        payload: { plugin: pluginName, message },
+      });
+    });
+
+    test('move is processed if no plugin declares it invalid', () => {
+      state = reducer(state, makeMove('setValue', [15], '0'));
+      expect(state.G).toMatchObject({ value: 15 });
+      expect(state['transients']).toBeUndefined();
+    });
+  });
+});
+
 describe('Random inside setup()', () => {
   const game1: Game = {
     seed: 'seed1',
@@ -358,27 +448,28 @@ describe('undo / redo', () => {
   });
 
   test('undo restores previous state after move', () => {
-    let state = reducer(initialState, makeMove('move', 'A', '0'));
-    const { G, ctx, plugins } = state;
-    state = reducer(state, makeMove('roll', null, '0'));
-    state = reducer(state, undo());
-    expect(state.G).toEqual(G);
-    expect(state.ctx).toEqual(ctx);
-    expect(state.plugins).toEqual(plugins);
+    const initial = reducer(initialState, makeMove('move', 'A', '0'));
+    let newState = reducer(initial, makeMove('roll', null, '0'));
+    newState = reducer(newState, undo());
+    expect(newState.G).toEqual(initial.G);
+    expect(newState.ctx).toEqual(initial.ctx);
+    expect(newState.plugins).toEqual(initial.plugins);
   });
 
   test('undo restores previous state after event', () => {
-    let state = reducer(initialState, gameEvent('setStage', 'special', '0'));
-    const { G, ctx, plugins } = state;
-    state = reducer(state, gameEvent('endStage', undefined, '0'));
+    const initial = reducer(
+      initialState,
+      gameEvent('setStage', 'special', '0')
+    );
+    let newState = reducer(initial, gameEvent('endStage', undefined, '0'));
     expect(error).not.toBeCalled();
     // Make sure we actually modified the stage.
-    expect(state.ctx.activePlayers).not.toEqual(ctx.activePlayers);
-    state = reducer(state, undo());
+    expect(newState.ctx.activePlayers).not.toEqual(initial.ctx.activePlayers);
+    newState = reducer(newState, undo());
     expect(error).not.toBeCalled();
-    expect(state.G).toEqual(G);
-    expect(state.ctx).toEqual(ctx);
-    expect(state.plugins).toEqual(plugins);
+    expect(newState.G).toEqual(initial.G);
+    expect(newState.ctx).toEqual(initial.ctx);
+    expect(newState.plugins).toEqual(initial.plugins);
   });
 
   test('redo restores undone state', () => {

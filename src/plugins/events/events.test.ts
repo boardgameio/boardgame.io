@@ -28,8 +28,8 @@ test('dispatch', () => {
   const events = e.api();
 
   expect(e.dispatch).toEqual([]);
-  ((events as unknown) as { A(): void }).A();
-  ((events as unknown) as { B(): void }).B();
+  (events as unknown as { A(): void }).A();
+  (events as unknown as { B(): void }).B();
   expect(e.dispatch).toEqual([
     { key: 'A', args: [], phase: '', turn: 0 },
     { key: 'B', args: [], phase: '', turn: 0 },
