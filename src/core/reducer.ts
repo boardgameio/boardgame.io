@@ -141,7 +141,7 @@ function flushAndValidatePlugins(
   oldState: State,
   pluginOpts: { game: Game; isClient?: boolean }
 ): [State, TransientState?] {
-  const [newState, isInvalid] = plugins.flushAndValidate(state, pluginOpts);
+  const [newState, isInvalid] = plugins.FlushAndValidate(state, pluginOpts);
   if (!isInvalid) return [newState];
   return [
     newState,

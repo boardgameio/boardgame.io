@@ -275,7 +275,7 @@ const IsInvalid = (
  * Update plugin state after move/event & check if plugins consider the update to be valid.
  * @returns Tuple of `[updatedState]` or `[originalState, invalidError]`.
  */
-export const flushAndValidate = (state: State, opts: PluginOpts) => {
+export const FlushAndValidate = (state: State, opts: PluginOpts) => {
   const updatedState = Flush(state, opts);
   const isInvalid = IsInvalid(updatedState, opts);
   if (!isInvalid) return [updatedState] as const;

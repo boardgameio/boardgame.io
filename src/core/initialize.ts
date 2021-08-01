@@ -60,7 +60,7 @@ export function InitializeGame({
   };
 
   initial = game.flow.init(initial);
-  [initial] = plugins.flushAndValidate(initial, { game });
+  [initial] = plugins.FlushAndValidate(initial, { game });
 
   // Initialize undo stack.
   if (!game.disableUndo) {
