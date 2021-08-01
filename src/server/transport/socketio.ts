@@ -236,8 +236,8 @@ export class SocketIO {
           if (syncResponse && syncResponse.error === 'unauthorized') {
             return;
           }
-          await master.onConnectionChange(matchID, playerID, credentials, true);
           this.addClient(requestingClient, game);
+          await master.onConnectionChange(matchID, playerID, credentials, true);
         });
 
         socket.on('disconnect', async () => {

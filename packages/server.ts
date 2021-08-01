@@ -10,5 +10,7 @@ import { Server } from '../src/server';
 import { Origins } from '../src/server/cors';
 import { FlatFile } from '../src/server/db';
 import { SocketIO } from '../src/server/transport/socketio';
+import { RedisPubSub } from '../src/server/transport/pubsub/redis-pub-sub';
+import { InMemoryPubSub } from '../src/server/transport/pubsub/in-memory-pub-sub';
 
-export { Server, Origins, FlatFile, SocketIO };
+export { Server, Origins, FlatFile, SocketIO, RedisPubSub, InMemoryPubSub };
