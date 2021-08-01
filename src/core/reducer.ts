@@ -131,7 +131,7 @@ function initializeDeltalog(
 /**
  * Update plugin state after move/event & check if plugins consider the action to be valid.
  * @param newState Latest version of state in the reducer.
- * @param oldState Initial value of state when reducer started its work.
+ * @param oldState State to revert to in case of error.
  * @param pluginOpts Plugin configuration options.
  * @returns Tuple of the new state updated after flushing plugins and the old
  * state augmented with an error if a plugin declared the action invalid.
@@ -141,13 +141,10 @@ function flushAndValidatePlugins(
   oldState: State,
   pluginOpts: { game: Game; isClient?: boolean }
 ): [State, TransientState?] {
-  newState = plugins.Flush(newState, pluginOpts);
-  const isInvalid = plugins.IsInvalid(newState, pluginOpts);
-  if (!isInvalid) return [newState];
-  const { plugin, message } = isInvalid;
-  error(`plugin declared action invalid: ${plugin} - ${message}`);
+  const [state, isInvalid] = plugins.flushAndValidate(newState, pluginOpts);
+  if (!isInvalid) return [state];
   return [
-    newState,
+    state,
     WithError(oldState, ActionErrorType.PluginActionInvalid, isInvalid),
   ];
 }
