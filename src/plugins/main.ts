@@ -261,7 +261,6 @@ const IsInvalid = (
         G: state.G,
         ctx: state.ctx,
         game: opts.game,
-        api: pluginState && pluginState.api,
         data: pluginState && pluginState.data,
       });
 
