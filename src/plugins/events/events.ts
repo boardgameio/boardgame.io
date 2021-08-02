@@ -83,18 +83,35 @@ export class Events {
     this.currentTurn = ctx.turn;
   }
 
+  stateWithError(state: State): State {
+    return {
+      ...state,
+      plugins: {
+        ...state.plugins,
+        events: {
+          ...state.plugins.events,
+          data: {
+            error:
+              'Maximum number of turn endings exceeded for this update.\n' +
+              'This likely means game code is triggering an infinite loop.',
+          },
+        },
+      },
+    };
+  }
+
   /**
    * Updates ctx with the triggered events.
    * @param {object} state - The state object { G, ctx }.
    */
   update(state: State) {
+    const initialState = state;
     for (let i = 0; i < this.dispatch.length; i++) {
       const endedTurns = this.currentTurn - this.initialTurn;
       // This protects against potential infinite loops if specific events are called on hooks.
       // The moment we exceed the defined threshold, we just bail out of all phases.
       if (endedTurns >= this.maxEndedTurnsPerAction) {
-        state = { ...state, ctx: { ...state.ctx, phase: null } };
-        break;
+        return this.stateWithError(initialState);
       }
 
       const item = this.dispatch[i];

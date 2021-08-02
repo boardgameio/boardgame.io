@@ -19,6 +19,8 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
     return api._obj.isUsed();
   },
 
+  isInvalid: ({ data }) => data.error || false,
+
   fnWrap:
     (fn) =>
     (G, ctx, ...args) => {
