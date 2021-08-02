@@ -83,12 +83,12 @@ class TicTacToeBoard extends React.Component {
     const cellStyle = (id) => ({
       cursor: 'pointer',
       border: '1px solid #555',
-      width: '50px',
-      height: '50px',
-      lineHeight: '50px',
+      width: '3.125rem',
+      height: '3.125rem',
+      lineHeight: '3.125rem',
       textAlign: 'center',
       fontFamily: 'monospace',
-      fontSize: '20px',
+      fontSize: '1.25rem',
       fontWeight: 'bold',
       background: this.isActive(id) ? '#eeffe9' : 'transparent',
     });
@@ -109,14 +109,20 @@ class TicTacToeBoard extends React.Component {
 
     return (
       <div>
-        Player {this.props.playerID}
-        {this.props.isActive && (
-          <span style={{ float: 'right' }}>Your turn!</span>
-        )}
+        <p
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span>Player {this.props.playerID}</span>
+          {this.props.isActive && <span>Your turn!</span>}
+        </p>
         <table id="board">
           <tbody>{tbody}</tbody>
         </table>
-        {winner}
+        <p>{winner}</p>
       </div>
     );
   }
@@ -130,14 +136,11 @@ var TicTacToeClient = Client({
 });
 
 const App = () => (
-  <div>
-    <div style={{ float: 'left' }}>
-      <TicTacToeClient playerID="0" />
-    </div>
-
-    <div style={{ float: 'right' }}>
-      <TicTacToeClient playerID="1" />
-    </div>
+  <div
+    style={{ display: 'flex', justifyContent: 'space-around', gap: '1.25rem' }}
+  >
+    <TicTacToeClient playerID="0" />
+    <TicTacToeClient playerID="1" />
   </div>
 );
 
