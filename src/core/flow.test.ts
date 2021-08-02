@@ -16,6 +16,7 @@ jest.mock('../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
+afterEach(jest.clearAllMocks);
 
 describe('phases', () => {
   test('invalid phase name', () => {
@@ -957,7 +958,7 @@ describe('moveMap', () => {
 });
 
 describe('infinite loops', () => {
-  test('loop 1', () => {
+  test('infinite loop of self-ending phases via endIf', () => {
     const endIf = () => true;
     const game = {
       phases: {
@@ -969,12 +970,49 @@ describe('infinite loops', () => {
     expect(client.getState().ctx.phase).toBe(null);
   });
 
-  test('loop 2', () => {
+  test('infinite endPhase loop from phase.onBegin', () => {
+    const onBegin = (G, ctx) => ctx.events.endPhase();
+    const game = {
+      phases: {
+        A: {
+          onBegin,
+          next: 'B',
+          start: true,
+          moves: {
+            a: (G, ctx) => void ctx.events.endPhase(),
+          },
+        },
+        B: { onBegin, next: 'C' },
+        C: { onBegin, next: 'A' },
+      },
+    };
+
+    // The onBegin fails to end the phase during initialisation.
+    const client = Client({ game, numPlayers: 3 });
+    let state = client.getState();
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.turn).toBe(1);
+    expect(error).toHaveBeenCalled();
+    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
+      /events plugin declared action invalid/
+    );
+    jest.clearAllMocks();
+
+    // Moves also fail because of the infinite loop (the game is stuck).
+    client.moves.a();
+    state = client.getState();
+    expect(error).toHaveBeenCalled();
+    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
+      /events plugin declared action invalid/
+    );
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.turn).toBe(1);
+  });
+
+  test('double phase ending from client event and turn.onEnd', () => {
     const game = {
       turn: {
-        onEnd: (G, ctx) => {
-          ctx.events.endPhase();
-        },
+        onEnd: (G, ctx) => void ctx.events.endPhase(),
       },
       phases: {
         A: { next: 'B', start: true },
@@ -984,12 +1022,17 @@ describe('infinite loops', () => {
     };
     const client = Client({ game });
 
-    expect(client.getState().ctx.phase).toBe('A');
+    let state = client.getState();
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.turn).toBe(1);
     client.events.endPhase();
-    expect(client.getState().ctx.phase).toBe('B');
+
+    state = client.getState();
+    expect(state.ctx.phase).toBe('B');
+    expect(state.ctx.turn).toBe(2);
   });
 
-  test('loop 3', () => {
+  test('infinite turn endings from turn.onBegin', () => {
     const game = {
       moves: {
         endTurn: (G, ctx) => {
@@ -997,16 +1040,26 @@ describe('infinite loops', () => {
         },
       },
       turn: {
-        onBegin: (G, ctx) => ctx.events.endTurn(),
+        onBegin: (G, ctx) => void ctx.events.endTurn(),
       },
     };
     const client = Client({ game });
+    const initialState = client.getState();
     expect(client.getState().ctx.currentPlayer).toBe('0');
+
+    // Trigger infinite loop
     client.moves.endTurn();
-    expect(client.getState().ctx.currentPlayer).toBe('1');
+
+    // Expect state to be unchanged and error to be logged.
+    expect(error).toHaveBeenCalled();
+    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
+      /events plugin declared action invalid/
+    );
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState()).toEqual({ ...initialState, deltalog: [] });
   });
 
-  test('loop 4', () => {
+  test('double turn ending from event and endIf', () => {
     const game = {
       moves: {
         endTurn: (G, ctx) => {
@@ -1018,9 +1071,257 @@ describe('infinite loops', () => {
       },
     };
     const client = Client({ game });
-    expect(client.getState().ctx.currentPlayer).toBe('0');
+
+    // turn.endIf is ignored during game setup.
+    let state = client.getState();
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.turn).toBe(1);
+
+    // turn.endIf is ignored when the turn was just ended.
     client.moves.endTurn();
-    expect(client.getState().ctx.currentPlayer).toBe('1');
+    state = client.getState();
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.turn).toBe(2);
+  });
+});
+
+describe('events in hooks', () => {
+  const moves = {
+    setAutoEnd: () => ({ shouldEnd: true }),
+  };
+
+  describe('endTurn', () => {
+    const conditionalEndTurn = (G, ctx) => {
+      if (!G.shouldEnd) return;
+      G.shouldEnd = false;
+      ctx.events.endTurn();
+    };
+
+    test('can end turn from turn.onBegin', () => {
+      const client = Client({
+        game: { moves, turn: { onBegin: conditionalEndTurn } },
+      });
+
+      client.moves.setAutoEnd();
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      client.events.endTurn();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+    });
+
+    test('cannot end turn from phase.onBegin', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: { onBegin: conditionalEndTurn },
+          },
+        },
+      });
+
+      client.moves.setAutoEnd();
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBeNull();
+
+      client.events.setPhase('A');
+      state = client.getState();
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.phase).toBe('A');
+    });
+
+    test('can end turn from turn.onBegin at start of phase', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: {
+              turn: { onBegin: conditionalEndTurn },
+            },
+          },
+        },
+      });
+
+      client.moves.setAutoEnd();
+
+      let state = client.getState();
+      expect(state.ctx.phase).toBeNull();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      client.events.setPhase('A');
+      state = client.getState();
+      expect(state.ctx.phase).toBe('A');
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+    });
+
+    test('cannot end turn from turn.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          turn: { onEnd: conditionalEndTurn },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      client.moves.setAutoEnd();
+      client.events.endTurn();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+    });
+
+    test('cannot end turn from phase.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: {
+              start: true,
+              onEnd: conditionalEndTurn,
+            },
+          },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+
+      client.moves.setAutoEnd();
+      client.events.endPhase();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.phase).toBeNull();
+    });
+  });
+
+  describe('endPhase', () => {
+    const conditionalEndPhase = (G, ctx) => {
+      if (!G.shouldEnd) return;
+      G.shouldEnd = false;
+      ctx.events.endPhase();
+    };
+
+    test('can end phase from turn.onBegin', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: {
+              start: true,
+              turn: { onBegin: conditionalEndPhase },
+            },
+          },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+
+      client.moves.setAutoEnd();
+      client.events.endTurn();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBeNull();
+    });
+
+    test('can end phase from phase.onBegin', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: { onBegin: conditionalEndPhase },
+          },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBeNull();
+
+      client.moves.setAutoEnd();
+      client.events.setPhase('A');
+      state = client.getState();
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBeNull();
+    });
+
+    test('can end phase from turn.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: {
+              start: true,
+              turn: { onEnd: conditionalEndPhase },
+            },
+          },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+
+      client.moves.setAutoEnd();
+      client.events.endTurn();
+      state = client.getState();
+      // TODO: This is likely not the desired behaviour. Turn 1 is ended,
+      // then the phase is ended, automatically ending turn 2, ending up in turn 3.
+      // Turn 2 is effectively skipped. Works better with TurnOrder.CONTINUE.
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBeNull();
+    });
+
+    test('cannot end phase from phase.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: {
+              start: true,
+              next: 'B',
+              onEnd: conditionalEndPhase,
+            },
+            B: {},
+          },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+
+      client.moves.setAutoEnd();
+      client.events.endPhase();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.phase).toBe('B');
+    });
   });
 });
 
@@ -1082,5 +1383,58 @@ test('events in hooks triggered by moves should be processed', () => {
   expect(client.getState().ctx.currentPlayer).toBe('1');
   expect(client.getState().ctx.activePlayers).toEqual({
     '1': 'A',
+  });
+});
+
+test('stage events should not be processed out of turn', () => {
+  const game = {
+    phases: {
+      A: {
+        start: true,
+        turn: {
+          activePlayers: {
+            all: 'A1',
+          },
+          stages: {
+            A1: {
+              moves: {
+                endStage: (G, ctx) => {
+                  G.endStage = true;
+                  ctx.events.endStage();
+                },
+              },
+            },
+          },
+        },
+        endIf: (G) => G.endStage,
+        next: 'B',
+      },
+      B: {
+        turn: {
+          activePlayers: {
+            all: 'B1',
+          },
+          stages: {
+            B1: {},
+          },
+        },
+      },
+    },
+  };
+
+  const client = Client({ game, numPlayers: 3 });
+
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '0': 'A1',
+    '1': 'A1',
+    '2': 'A1',
+  });
+
+  client.moves.endStage();
+
+  expect(client.getState().ctx.activePlayers).toEqual({
+    '0': 'B1',
+    '1': 'B1',
+    '2': 'B1',
   });
 });
