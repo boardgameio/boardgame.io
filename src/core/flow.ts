@@ -234,7 +234,7 @@ export function Flow({
       }
 
       // Check if we should end the turn.
-      if (fn === OnMove) {
+      if (fn === OnMove || fn === UpdateStage) {
         const shouldEndTurn = ShouldEndTurn(state);
         if (shouldEndTurn) {
           events.push({
@@ -356,6 +356,7 @@ export function Flow({
     if (typeof arg === 'string' || arg === Stage.NULL) {
       arg = { stage: arg };
     }
+    if (typeof arg !== 'object') return state;
 
     let { ctx } = state;
     let { activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
@@ -552,7 +553,7 @@ export function Flow({
     }
 
     // Checking if arg is a valid stage, even Stage.NULL
-    if (next && arg !== undefined) {
+    if (next) {
       next.push({ fn: UpdateStage, arg, playerID });
     }
 

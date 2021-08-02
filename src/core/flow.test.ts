@@ -478,6 +478,70 @@ describe('stages', () => {
       expect(error).toBeCalledWith('disallowed move: B');
     });
   });
+
+  test('stage updates can be reacted to in turn.endIf', () => {
+    const client = Client({
+      game: {
+        turn: {
+          activePlayers: {
+            all: 'A',
+          },
+          stages: {
+            A: {
+              moves: {
+                leaveStage: (G, ctx) => void ctx.events.endStage(),
+              },
+            },
+          },
+          endIf: (G, ctx) => ctx.activePlayers === null,
+        },
+      },
+    });
+
+    let state = client.getState();
+    expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A' });
+
+    client.updatePlayerID('0');
+
+    client.moves.leaveStage();
+    state = client.getState();
+    expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.activePlayers).toEqual({ '1': 'A' });
+
+    client.updatePlayerID('1');
+    client.moves.leaveStage();
+    state = client.getState();
+    expect(state.ctx.turn).toBe(2);
+    expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A' });
+  });
+
+  test('stage changes due to move limits are seen by turn.endIf', () => {
+    const client = Client({
+      game: {
+        turn: {
+          activePlayers: {
+            currentPlayer: 'A',
+            moveLimit: 1,
+          },
+          endIf: (G, ctx) => ctx.activePlayers === null,
+          stages: {
+            A: {
+              moves: {
+                A: () => ({ moved: true }),
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let state = client.getState();
+    expect(state.ctx.activePlayers).toEqual({ '0': 'A' });
+    client.moves.A();
+    state = client.getState();
+    expect(state.ctx.activePlayers).toEqual({ '1': 'A' });
+  });
 });
 
 describe('stage events', () => {
