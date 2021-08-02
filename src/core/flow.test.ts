@@ -16,6 +16,7 @@ jest.mock('../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
+afterEach(jest.clearAllMocks);
 
 describe('phases', () => {
   test('invalid phase name', () => {
@@ -957,7 +958,7 @@ describe('moveMap', () => {
 });
 
 describe('infinite loops', () => {
-  test('loop 1', () => {
+  test('infinite loop of self-ending phases via endIf', () => {
     const endIf = () => true;
     const game = {
       phases: {
@@ -969,12 +970,49 @@ describe('infinite loops', () => {
     expect(client.getState().ctx.phase).toBe(null);
   });
 
-  test('loop 2', () => {
+  test('infinite endPhase loop from phase.onBegin', () => {
+    const onBegin = (G, ctx) => ctx.events.endPhase();
+    const game = {
+      phases: {
+        A: {
+          onBegin,
+          next: 'B',
+          start: true,
+          moves: {
+            a: (G, ctx) => void ctx.events.endPhase(),
+          },
+        },
+        B: { onBegin, next: 'C' },
+        C: { onBegin, next: 'A' },
+      },
+    };
+
+    // The onBegin fails to end the phase during initialisation.
+    const client = Client({ game, numPlayers: 3 });
+    let state = client.getState();
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.turn).toBe(1);
+    expect(error).toHaveBeenCalled();
+    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
+      /events plugin declared action invalid/
+    );
+    jest.clearAllMocks();
+
+    // Moves also fail because of the infinite loop (the game is stuck).
+    client.moves.a();
+    state = client.getState();
+    expect(error).toHaveBeenCalled();
+    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
+      /events plugin declared action invalid/
+    );
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.turn).toBe(1);
+  });
+
+  test('double phase ending from client event and turn.onEnd', () => {
     const game = {
       turn: {
-        onEnd: (G, ctx) => {
-          ctx.events.endPhase();
-        },
+        onEnd: (G, ctx) => void ctx.events.endPhase(),
       },
       phases: {
         A: { next: 'B', start: true },
@@ -984,12 +1022,17 @@ describe('infinite loops', () => {
     };
     const client = Client({ game });
 
-    expect(client.getState().ctx.phase).toBe('A');
+    let state = client.getState();
+    expect(state.ctx.phase).toBe('A');
+    expect(state.ctx.turn).toBe(1);
     client.events.endPhase();
-    expect(client.getState().ctx.phase).toBe('B');
+
+    state = client.getState();
+    expect(state.ctx.phase).toBe('B');
+    expect(state.ctx.turn).toBe(2);
   });
 
-  test('loop 3', () => {
+  test('infinite turn endings from turn.onBegin', () => {
     const game = {
       moves: {
         endTurn: (G, ctx) => {
@@ -997,16 +1040,26 @@ describe('infinite loops', () => {
         },
       },
       turn: {
-        onBegin: (G, ctx) => ctx.events.endTurn(),
+        onBegin: (G, ctx) => void ctx.events.endTurn(),
       },
     };
     const client = Client({ game });
+    const initialState = client.getState();
     expect(client.getState().ctx.currentPlayer).toBe('0');
+
+    // Trigger infinite loop
     client.moves.endTurn();
-    expect(client.getState().ctx.currentPlayer).toBe('1');
+
+    // Expect state to be unchanged and error to be logged.
+    expect(error).toHaveBeenCalled();
+    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
+      /events plugin declared action invalid/
+    );
+    expect(client.getState().ctx.currentPlayer).toBe('0');
+    expect(client.getState()).toEqual({ ...initialState, deltalog: [] });
   });
 
-  test('loop 4', () => {
+  test('double turn ending from event and endIf', () => {
     const game = {
       moves: {
         endTurn: (G, ctx) => {
@@ -1018,24 +1071,17 @@ describe('infinite loops', () => {
       },
     };
     const client = Client({ game });
-    expect(client.getState().ctx.currentPlayer).toBe('0');
+
+    // turn.endIf is ignored during game setup.
+    let state = client.getState();
+    expect(state.ctx.currentPlayer).toBe('0');
+    expect(state.ctx.turn).toBe(1);
+
+    // turn.endIf is ignored when the turn was just ended.
     client.moves.endTurn();
-    expect(client.getState().ctx.currentPlayer).toBe('1');
-  });
-
-  test('loop 5', () => {
-    const onBegin = (G, ctx) => ctx.events.endPhase();
-    const game = {
-      phases: {
-        A: { onBegin, next: 'B', start: true },
-        B: { onBegin, next: 'C' },
-        C: { onBegin, next: 'A' },
-      },
-    };
-
-    const client = Client({ game, numPlayers: 3 });
-
-    expect(client.getState().ctx.phase).toBe(null);
+    state = client.getState();
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.turn).toBe(2);
   });
 });
 
