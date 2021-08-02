@@ -104,7 +104,7 @@ export class Events {
    * Updates ctx with the triggered events.
    * @param {object} state - The state object { G, ctx }.
    */
-  update(state: State) {
+  update(state: State): State {
     const initialState = state;
     for (let i = 0; i < this.dispatch.length; i++) {
       const endedTurns = this.currentTurn - this.initialTurn;
@@ -116,8 +116,7 @@ export class Events {
 
       const item = this.dispatch[i];
 
-      // If the turn already ended,
-      // don't try to process stage events.
+      // If the turn already ended, don't try to process stage events.
       if (
         (item.key === 'endStage' ||
           item.key === 'setStage' ||
