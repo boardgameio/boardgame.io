@@ -40,6 +40,7 @@ export class Events {
     phase: string;
     turn: number;
   }>;
+  maxEndedTurnsPerAction: number;
   initialTurn: number;
   currentPhase: string;
   currentTurn: number;
@@ -50,6 +51,9 @@ export class Events {
     this.dispatch = [];
     this.initialTurn = ctx.turn;
     this.updateTurnContext(ctx);
+    // This is an arbitrarily large upper threshold, which could be made
+    // configurable via a game option if the need arises.
+    this.maxEndedTurnsPerAction = ctx.numPlayers * 10;
   }
 
   api() {
@@ -86,12 +90,9 @@ export class Events {
   update(state: State) {
     for (let i = 0; i < this.dispatch.length; i++) {
       const endedTurns = this.currentTurn - this.initialTurn;
-      // This is an arbitrarily large number.
-      const threshold = state.ctx.numPlayers * 10;
-
       // This protects against potential infinite loops if specific events are called on hooks.
       // The moment we exceed the defined threshold, we just bail out of all phases.
-      if (endedTurns > threshold) {
+      if (endedTurns >= this.maxEndedTurnsPerAction) {
         state = { ...state, ctx: { ...state.ctx, phase: null } };
         break;
       }
