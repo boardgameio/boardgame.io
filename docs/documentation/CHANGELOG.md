@@ -1,3 +1,9 @@
+### v0.46.1
+
+#### Bugfixes
+
+* [[f0bc8b9](https://github.com/boardgameio/boardgame.io/commit/f0bc8b9)] flow: Run `turn.endIf` hook after updating stages
+
 ## v0.46.0
 
 #### Features
