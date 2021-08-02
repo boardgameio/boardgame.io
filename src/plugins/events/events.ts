@@ -35,7 +35,7 @@ export class Events {
   flow: Game['flow'];
   playerID: PlayerID | undefined;
   dispatch: Array<{
-    key: string;
+    type: string;
     args: any[];
     phase: string;
     turn: number;
@@ -60,10 +60,10 @@ export class Events {
     const events: EventsAPI & PrivateEventsAPI = {
       _obj: this,
     };
-    for (const key of this.flow.eventNames) {
-      events[key] = (...args: any[]) => {
+    for (const type of this.flow.eventNames) {
+      events[type] = (...args: any[]) => {
         this.dispatch.push({
-          key,
+          type,
           args,
           phase: this.currentPhase,
           turn: this.currentTurn,
@@ -114,34 +114,34 @@ export class Events {
         return this.stateWithError(initialState);
       }
 
-      const item = this.dispatch[i];
+      const event = this.dispatch[i];
 
       // If the turn already ended, don't try to process stage events.
       if (
-        (item.key === 'endStage' ||
-          item.key === 'setStage' ||
-          item.key === 'setActivePlayers') &&
-        item.turn !== state.ctx.turn
+        (event.type === 'endStage' ||
+          event.type === 'setStage' ||
+          event.type === 'setActivePlayers') &&
+        event.turn !== state.ctx.turn
       ) {
         continue;
       }
 
       // If the turn already ended some other way,
       // don't try to end the turn again.
-      if (item.key === 'endTurn' && item.turn !== state.ctx.turn) {
+      if (event.type === 'endTurn' && event.turn !== state.ctx.turn) {
         continue;
       }
 
       // If the phase already ended some other way,
       // don't try to end the phase again.
       if (
-        (item.key === 'endPhase' || item.key === 'setPhase') &&
-        item.phase !== state.ctx.phase
+        (event.type === 'endPhase' || event.type === 'setPhase') &&
+        event.phase !== state.ctx.phase
       ) {
         continue;
       }
 
-      const action = automaticGameEvent(item.key, item.args, this.playerID);
+      const action = automaticGameEvent(event.type, event.args, this.playerID);
 
       state = {
         ...state,
