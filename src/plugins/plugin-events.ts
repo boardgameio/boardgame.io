@@ -21,6 +21,9 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
 
   isInvalid: ({ data }) => data.error || false,
 
+  // Update the events plugin’s internal turn context each time a move
+  // or hook is called. This allows events called after turn or phase
+  // endings to dispatch the current turn and phase correctly.
   fnWrap:
     (fn) =>
     (G, ctx, ...args) => {
