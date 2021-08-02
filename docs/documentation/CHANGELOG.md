@@ -1,3 +1,21 @@
+## v0.46.0
+
+#### Features
+
+* [[91cf25e](https://github.com/boardgameio/boardgame.io/commit/91cf25e)] Events Plugin: Don’t leak stage events across turns & allow self-ending turns/phases ([#957](https://github.com/boardgameio/boardgame.io/pull/957))
+* [[afee0b7](https://github.com/boardgameio/boardgame.io/commit/afee0b7), [1e435c2](https://github.com/boardgameio/boardgame.io/commit/1e435c2), [1078b13](https://github.com/boardgameio/boardgame.io/commit/1078b13)] Allow plugins to declare an action invalid ([#963](https://github.com/boardgameio/boardgame.io/pull/963), [#970](https://github.com/boardgameio/boardgame.io/pull/970))
+* [[262d867](https://github.com/boardgameio/boardgame.io/commit/262d867)] Server: Decouple player view calculation from Master ([#966](https://github.com/boardgameio/boardgame.io/pull/966))
+
+#### Bugfixes
+
+* [[dcaca7f](https://github.com/boardgameio/boardgame.io/commit/dcaca7f)] types: Remove `turn.moves` from `Game` type
+* [[b753094](https://github.com/boardgameio/boardgame.io/commit/b753094), [2aa9db5](https://github.com/boardgameio/boardgame.io/commit/2aa9db5)] Update dependencies ([#965](https://github.com/boardgameio/boardgame.io/pull/965), [#968](https://github.com/boardgameio/boardgame.io/pull/968))
+
+#### Other
+
+* [[be63602](https://github.com/boardgameio/boardgame.io/commit/be63602)] Update development dependencies ([#969](https://github.com/boardgameio/boardgame.io/pull/969))
+* [[4efec1a](https://github.com/boardgameio/boardgame.io/commit/4efec1a)] Update linter tooling & refactor errors ([#967](https://github.com/boardgameio/boardgame.io/pull/967))
+
 ### v0.45.2
 
 #### Bugfixes
