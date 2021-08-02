@@ -53,7 +53,7 @@ export class Events {
     this.updateTurnContext(ctx);
     // This is an arbitrarily large upper threshold, which could be made
     // configurable via a game option if the need arises.
-    this.maxEndedTurnsPerAction = ctx.numPlayers * 10;
+    this.maxEndedTurnsPerAction = ctx.numPlayers * 100;
   }
 
   api() {
