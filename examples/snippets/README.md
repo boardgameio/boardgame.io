@@ -21,7 +21,7 @@ page.
 Each snippet will be available at
 `https://localhost:1234/<snippet-name>/index.html`.
 
-### `npm build`
+### `npm run update-docs`
 
 Builds the snippets and installs them at the appropriate places
 in the docs. Be careful not to let Prettier "un-minify" the
