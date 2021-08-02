@@ -19,17 +19,14 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
     return api._obj.isUsed();
   },
 
-  fnWrap: (fn) => (G, ctx, ...args) => {
-    const api = ctx.events as PrivateEventsAPI;
-
-    if (api) {
-      api._obj.updateTurnContext(ctx);
-    }
-
-    G = fn(G, ctx, ...args);
-
-    return G;
-  },
+  fnWrap:
+    (fn) =>
+    (G, ctx, ...args) => {
+      const api = ctx.events as PrivateEventsAPI;
+      if (api) api._obj.updateTurnContext(ctx);
+      G = fn(G, ctx, ...args);
+      return G;
+    },
 
   dangerouslyFlushRawState: ({ state, api }) => {
     return api._obj.update(state);
