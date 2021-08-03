@@ -320,10 +320,8 @@ export function Flow({
         logging.error('invalid phase: ' + arg.next);
         return state;
       }
-    } else if (phaseConfig.next !== undefined) {
-      ctx = { ...ctx, phase: phaseConfig.wrapped.next(state) || null };
     } else {
-      ctx = { ...ctx, phase: null };
+      ctx = { ...ctx, phase: phaseConfig.wrapped.next(state) || null };
     }
 
     state = { ...state, ctx };
