@@ -163,6 +163,10 @@ export function Flow({
       onEnd: HookWrapper(phaseConfig.turn.onEnd),
       endIf: TriggerWrapper(phaseConfig.turn.endIf),
     };
+
+    if (typeof phaseConfig.next === 'function') {
+      phaseConfig.wrapped.next = HookWrapper(phaseConfig.next);
+    }
   }
 
   function GetPhase(ctx: { phase: string }): PhaseConfig {
@@ -315,7 +319,10 @@ export function Flow({
         return state;
       }
     } else if (phaseConfig.next !== undefined) {
-      ctx = { ...ctx, phase: phaseConfig.next };
+      ctx =
+        typeof phaseConfig.next === 'function'
+          ? { ...ctx, phase: phaseConfig.wrapped.next(state) }
+          : { ...ctx, phase: phaseConfig.next };
     } else {
       ctx = { ...ctx, phase: null };
     }
