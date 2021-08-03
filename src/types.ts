@@ -207,7 +207,7 @@ export interface PhaseConfig<
   CtxWithPlugins extends Ctx = Ctx
 > {
   start?: boolean;
-  next?: string;
+  next?: ((G: G, ctx: CtxWithPlugins) => string | void) | string;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
   endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void | { next: string };
@@ -219,6 +219,7 @@ export interface PhaseConfig<
     ) => boolean | void | { next: string };
     onBegin?: (state: State<G, CtxWithPlugins>) => any;
     onEnd?: (state: State<G, CtxWithPlugins>) => any;
+    next?: (state: State<G, CtxWithPlugins>) => string | void;
   };
 }
 

@@ -163,6 +163,12 @@ export function Flow({
       onEnd: HookWrapper(phaseConfig.turn.onEnd),
       endIf: TriggerWrapper(phaseConfig.turn.endIf),
     };
+
+    if (typeof phaseConfig.next !== 'function') {
+      const { next } = phaseConfig;
+      phaseConfig.next = () => next || null;
+    }
+    phaseConfig.wrapped.next = HookWrapper(phaseConfig.next);
   }
 
   function GetPhase(ctx: { phase: string }): PhaseConfig {
@@ -314,10 +320,8 @@ export function Flow({
         logging.error('invalid phase: ' + arg.next);
         return state;
       }
-    } else if (phaseConfig.next !== undefined) {
-      ctx = { ...ctx, phase: phaseConfig.next };
     } else {
-      ctx = { ...ctx, phase: null };
+      ctx = { ...ctx, phase: phaseConfig.wrapped.next(state) || null };
     }
 
     state = { ...state, ctx };

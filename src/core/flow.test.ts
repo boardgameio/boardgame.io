@@ -730,6 +730,21 @@ test('init', () => {
   expect(state.G).toMatchObject({ done: true });
 });
 
+test('next', () => {
+  const flow = Flow({
+    phases: {
+      A: { start: true, next: () => 'C' },
+      B: {},
+      C: {},
+    },
+  });
+
+  let state = { ctx: flow.ctx(3) } as State;
+  state = flow.processEvent(state, gameEvent('endPhase'));
+
+  expect(state.ctx.phase).toEqual('C');
+});
+
 describe('endIf', () => {
   test('basic', () => {
     const flow = Flow({ endIf: (G) => G.win });
