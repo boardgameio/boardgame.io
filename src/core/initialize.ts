@@ -7,9 +7,8 @@
  */
 
 import { ProcessGameConfig } from './game';
-import type { Game } from '../types';
 import * as plugins from '../plugins/main';
-import type { PartialGameState, State, Ctx } from '../types';
+import type { Ctx, Game, PartialGameState, State } from '../types';
 
 /**
  * Creates the initial game state.
@@ -61,7 +60,7 @@ export function InitializeGame({
   };
 
   initial = game.flow.init(initial);
-  initial = plugins.Flush(initial, { game });
+  [initial] = plugins.FlushAndValidate(initial, { game });
 
   // Initialize undo stack.
   if (!game.disableUndo) {
