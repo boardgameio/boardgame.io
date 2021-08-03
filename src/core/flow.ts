@@ -7,7 +7,6 @@
  */
 
 import {
-  SetActivePlayersEvent,
   SetActivePlayers,
   UpdateActivePlayersOnceEmpty,
   InitTurnOrderState,
@@ -21,6 +20,7 @@ import * as logging from './logger';
 import type {
   ActionPayload,
   ActionShape,
+  ActivePlayersArg,
   State,
   Ctx,
   LogEntry,
@@ -240,7 +240,7 @@ export function Flow({
       }
 
       // Check if we should end the turn.
-      if (fn === OnMove || fn === UpdateStage) {
+      if ([OnMove, UpdateStage, UpdateActivePlayers].includes(fn)) {
         const shouldEndTurn = ShouldEndTurn(state);
         if (shouldEndTurn) {
           events.push({
@@ -390,6 +390,10 @@ export function Flow({
     };
 
     return { ...state, ctx };
+  }
+
+  function UpdateActivePlayers(state: State, { arg }): State {
+    return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
   }
 
   ///////////////
@@ -683,6 +687,14 @@ export function Flow({
 
   function EndStageEvent(state: State, playerID: PlayerID): State {
     return Process(state, [{ fn: EndStage, playerID }]);
+  }
+
+  function SetActivePlayersEvent(
+    state: State,
+    _playerID: PlayerID,
+    arg: ActivePlayersArg | PlayerID[]
+  ): State {
+    return Process(state, [{ fn: UpdateActivePlayers, arg }]);
   }
 
   function SetPhaseEvent(
