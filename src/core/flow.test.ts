@@ -489,11 +489,11 @@ describe('stages', () => {
           stages: {
             A: {
               moves: {
-                leaveStage: (G, ctx) => void ctx.events.endStage(),
+                leaveStage: ({ events }) => void events.endStage(),
               },
             },
           },
-          endIf: (G, ctx) => ctx.activePlayers === null,
+          endIf: ({ ctx }) => ctx.activePlayers === null,
         },
       },
     });
@@ -524,7 +524,7 @@ describe('stages', () => {
             currentPlayer: 'A',
             moveLimit: 1,
           },
-          endIf: (G, ctx) => ctx.activePlayers === null,
+          endIf: ({ ctx }) => ctx.activePlayers === null,
           stages: {
             A: {
               moves: {
@@ -1170,10 +1170,10 @@ describe('events in hooks', () => {
   };
 
   describe('endTurn', () => {
-    const conditionalEndTurn = (G, ctx) => {
+    const conditionalEndTurn = ({ G, events }) => {
       if (!G.shouldEnd) return;
       G.shouldEnd = false;
-      ctx.events.endTurn();
+      events.endTurn();
     };
 
     test('can end turn from turn.onBegin', () => {
@@ -1290,10 +1290,10 @@ describe('events in hooks', () => {
   });
 
   describe('endPhase', () => {
-    const conditionalEndPhase = (G, ctx) => {
+    const conditionalEndPhase = ({ G, events }) => {
       if (!G.shouldEnd) return;
       G.shouldEnd = false;
-      ctx.events.endPhase();
+      events.endPhase();
     };
 
     test('can end phase from turn.onBegin', () => {
@@ -1466,7 +1466,7 @@ test('events in hooks triggered by moves should be processed', () => {
 });
 
 test('stage events should not be processed out of turn', () => {
-  const game = {
+  const game: Game = {
     phases: {
       A: {
         start: true,
@@ -1477,15 +1477,15 @@ test('stage events should not be processed out of turn', () => {
           stages: {
             A1: {
               moves: {
-                endStage: (G, ctx) => {
+                endStage: ({ G, events }) => {
                   G.endStage = true;
-                  ctx.events.endStage();
+                  events.endStage();
                 },
               },
             },
           },
         },
-        endIf: (G) => G.endStage,
+        endIf: ({ G }) => G.endStage,
         next: 'B',
       },
       B: {
@@ -1531,16 +1531,16 @@ describe('hook execution order', () => {
     game: {
       moves: {
         move: () => void calls.push('move'),
-        setStage: (G, ctx) => {
-          ctx.events.setStage('A');
+        setStage: ({ events }) => {
+          events.setStage('A');
           calls.push('moves.setStage');
         },
-        endStage: (G, ctx) => {
-          ctx.events.endStage();
+        endStage: ({ events }) => {
+          events.endStage();
           calls.push('moves.endStage');
         },
-        setActivePlayers: (G, ctx) => {
-          ctx.events.setActivePlayers({ all: 'A', moveLimit: 1 });
+        setActivePlayers: ({ events }) => {
+          events.setActivePlayers({ all: 'A', moveLimit: 1 });
           calls.push('moves.setActivePlayers');
         },
       },

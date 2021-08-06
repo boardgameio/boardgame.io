@@ -24,11 +24,10 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   // endings to dispatch the current turn and phase correctly.
   fnWrap:
     (fn) =>
-    (G, ctx, ...args) => {
-      const api = ctx.events as PrivateEventsAPI;
-      if (api) api._obj.updateTurnContext(ctx);
-      G = fn(G, ctx, ...args);
-      return G;
+    (context, ...args) => {
+      const api = context.events as PrivateEventsAPI;
+      if (api) api._obj.updateTurnContext(context.ctx);
+      return fn(context, ...args);
     },
 
   dangerouslyFlushRawState: ({ state, api }) => api._obj.update(state),
