@@ -1517,3 +1517,215 @@ test('stage events should not be processed out of turn', () => {
     '2': 'B1',
   });
 });
+
+// These tests serve to document the order in which the various game hooks
+// are executed and also to catch any potential breaking changes.
+describe('hook execution order', () => {
+  const calls: string[] = [];
+  afterEach(() => {
+    calls.length = 0;
+  });
+
+  const client = Client({
+    playerID: '0',
+    game: {
+      moves: {
+        move: () => void calls.push('move'),
+        setStage: (G, ctx) => {
+          ctx.events.setStage('A');
+          calls.push('moves.setStage');
+        },
+        endStage: (G, ctx) => {
+          ctx.events.endStage();
+          calls.push('moves.endStage');
+        },
+        setActivePlayers: (G, ctx) => {
+          ctx.events.setActivePlayers({ all: 'A', moveLimit: 1 });
+          calls.push('moves.setActivePlayers');
+        },
+      },
+      endIf: () => void calls.push('game.endIf'),
+      onEnd: () => void calls.push('game.onEnd'),
+      turn: {
+        activePlayers: { all: 'A' },
+        endIf: () => void calls.push('turn.endIf'),
+        onBegin: () => void calls.push('turn.onBegin'),
+        onMove: () => void calls.push('turn.onMove'),
+        onEnd: () => void calls.push('turn.onEnd'),
+        order: {
+          first: () => calls.push('turn.order.first') && 0,
+          next: () => calls.push('turn.order.next') && 0,
+          playOrder: () => calls.push('turn.order.playOrder') && ['0', '1'],
+        },
+      },
+      phases: {
+        A: {
+          start: true,
+          next: 'B',
+          endIf: () => void calls.push('phaseA.endIf'),
+          onBegin: () => void calls.push('phaseA.onBegin'),
+          onEnd: () => void calls.push('phaseA.onEnd'),
+        },
+        B: {
+          next: 'A',
+          endIf: () => void calls.push('phaseB.endIf'),
+          onBegin: () => void calls.push('phaseB.onBegin'),
+          onEnd: () => void calls.push('phaseB.onEnd'),
+        },
+      },
+    },
+  });
+
+  test('hooks called during setup', () => {
+    expect(calls).toEqual([
+      'game.endIf',
+      'phaseA.endIf',
+      'phaseA.onBegin',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.order.playOrder',
+      'turn.order.first',
+      'turn.onBegin',
+      'game.endIf',
+      'phaseA.endIf',
+    ]);
+  });
+
+  test('hooks called on move', () => {
+    client.moves.move();
+    expect(calls).toEqual([
+      'move',
+      'turn.onMove',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+    ]);
+  });
+
+  test('hooks called on setStage', () => {
+    client.events.setStage('B');
+    expect(calls).toEqual([
+      'game.endIf',
+      'phaseA.endIf',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+    ]);
+  });
+
+  test('hooks called on endStage', () => {
+    client.updatePlayerID('1');
+    client.events.endStage();
+    client.updatePlayerID('0');
+    expect(calls).toEqual([
+      'game.endIf',
+      'phaseA.endIf',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+    ]);
+  });
+
+  test('hooks called on setActivePlayers', () => {
+    client.events.setActivePlayers({});
+    expect(calls).toEqual(['game.endIf', 'phaseA.endIf', 'turn.endIf']);
+  });
+
+  test('hooks called on setStage triggered by move', () => {
+    client.moves.setStage();
+    expect(calls).toEqual([
+      'moves.setStage',
+      'turn.onMove',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+      'game.endIf',
+      'phaseA.endIf',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+    ]);
+  });
+
+  test('hooks called on endStage triggered by move', () => {
+    client.moves.endStage();
+    expect(calls).toEqual([
+      'moves.endStage',
+      'turn.onMove',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+      'game.endIf',
+      'phaseA.endIf',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+    ]);
+  });
+
+  test('hooks called on setActivePlayers triggered by move', () => {
+    client.moves.setActivePlayers();
+    expect(calls).toEqual([
+      'moves.setActivePlayers',
+      'turn.onMove',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+    ]);
+  });
+
+  test('hooks called on stage end triggered by moveLimit', () => {
+    client.updatePlayerID('1');
+    client.moves.move();
+    client.updatePlayerID('0');
+    expect(calls).toEqual([
+      'move',
+      'turn.onMove',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.endIf',
+    ]);
+  });
+
+  test('hooks called on endTurn', () => {
+    client.events.endTurn();
+    expect(calls).toEqual([
+      'turn.onEnd',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.order.next',
+      'game.endIf',
+      'phaseA.endIf',
+      'turn.onBegin',
+      'game.endIf',
+      'phaseA.endIf',
+    ]);
+  });
+
+  test('hooks called on endPhase', () => {
+    client.events.endPhase();
+    expect(calls).toEqual([
+      'turn.onEnd',
+      'phaseA.onEnd',
+      'game.endIf',
+      'game.endIf',
+      'phaseB.endIf',
+      'phaseB.onBegin',
+      'game.endIf',
+      'phaseB.endIf',
+      'turn.order.playOrder',
+      'turn.order.first',
+      'turn.onBegin',
+      'game.endIf',
+      'phaseB.endIf',
+    ]);
+  });
+
+  test('hooks called on endGame', () => {
+    client.events.endGame(5);
+    expect(calls).toEqual(['phaseB.onEnd', 'game.onEnd']);
+  });
+});
