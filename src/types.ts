@@ -140,7 +140,9 @@ export interface Plugin<
   name: string;
   noClient?: (context: PluginContext<API, Data, G>) => boolean;
   setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G> }) => Data;
-  isInvalid?: (context: PluginContext<API, Data, G>) => false | string;
+  isInvalid?: (
+    context: Omit<PluginContext<API, Data, G>, 'api'>
+  ) => false | string;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
     G: G;
@@ -215,7 +217,7 @@ export interface PhaseConfig<
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > {
   start?: boolean;
-  next?: string;
+  next?: ((context: FnContext<G, PluginAPIs>) => string | void) | string;
   onBegin?: (context: FnContext<G, PluginAPIs>) => void | G;
   onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
   endIf?: (
@@ -227,6 +229,7 @@ export interface PhaseConfig<
     endIf?: (state: State<G>) => boolean | void | { next: string };
     onBegin?: (state: State<G>) => void | G;
     onEnd?: (state: State<G>) => void | G;
+    next?: (state: State<G>) => string | void;
   };
 }
 
@@ -267,7 +270,6 @@ export interface TurnConfig<
   ) => boolean | void | { next: PlayerID };
   onMove?: (context: FnContext<G, PluginAPIs>) => void | G;
   stages?: StageMap<G, PluginAPIs>;
-  moves?: MoveMap<G, PluginAPIs>;
   order?: TurnOrderConfig<G, PluginAPIs>;
   wrapped?: {
     endIf?: (state: State<G>) => boolean | void | { next: PlayerID };

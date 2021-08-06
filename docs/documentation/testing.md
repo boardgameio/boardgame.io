@@ -113,29 +113,31 @@ it('multiplayer test', () => {
 ### Integration Tests
 
 Test the application end-to-end from the UI layer's point of view.
-In this case we mount our React component and look for the TicTacToe board inside of it.
-We then check the board's props and invoke callbacks in order to see that the props changed accordingly.
+
+In this case we use [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+to mount our React component and look for the TicTacToe board inside of it.
+We then check the board is rendered and responds to user interaction as expected.
 
 ```js
 import React from 'react';
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 import App from './app';
 
-Enzyme.configure({ adapter: new Adapter() });
-
-test('should place marker', () => {
-  const game = Enzyme.mount(<App />);
-  const board = game.find('TicTacToeBoard').instance();
-  const cells = Array(9).fill(null);
-
-  expect(board.props.G).toEqual({ cells });
-  expect(board.props.ctx.gameover).toEqual(undefined);
-
-  board.props.moves.clickCell(5);
-
-  expect(board.props.G).toEqual({
-    cells: [null, null, null, null, null, '0', null, null, null],
+describe('Tic-Tac-Toe', () => {
+  const { container } = render(<App />);
+  const cells = container.querySelectorAll('td');
+  
+  test('board is empty initially', () => {
+    expect(cells).toHaveLength(9);
+    for (const cell of cells) {
+      expect(cell).toBeEmptyDOMElement();
+    }
+  });
+  
+  test('clicking a cell places player 0’s marker', () => {
+    fireEvent.click(cells[5]);
+    expect(cells[5]).toHaveTextContent('0');
   });
 });
 ```

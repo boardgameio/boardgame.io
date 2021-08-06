@@ -4,15 +4,21 @@
 <head>
 <style>
 body {
-  padding: 20px;
+  padding: 1.25rem;
 }
 .msg {
   position: absolute;
   bottom: 0;
-  left: 20px;
+  left: 1.25rem;
   color: #aaa;
-  font-size: 12px;
-  margin-bottom: 20px;
+  font-size: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media screen and (max-width: 420px) {
+  :root {
+    font-size: 75%;
+  }
 }
 </style>
 </head>

@@ -2,6 +2,7 @@
   "name": "snippets",
   "scripts": {
     "start": "parcel src/*/index.html",
+    "update-docs": "./install.sh",
     "build": "parcel build --no-source-maps --public-url /documentation/snippets src/*/index.html",
     "build:opt": "parcel build --experimental-scope-hoisting --no-source-maps --public-url /documentation/snippets src/*/index.html"
   },

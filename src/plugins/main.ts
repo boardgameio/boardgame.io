@@ -21,6 +21,7 @@ import type {
   ActionShape,
   PlayerID,
 } from '../types';
+import { error } from '../core/logger';
 
 interface PluginOpts {
   game: Game;
@@ -163,7 +164,7 @@ export const Enhance = <S extends State | PartialGameState>(
 /**
  * Allows plugins to update their state after a move / event.
  */
-export const Flush = (state: State, opts: PluginOpts): State => {
+const Flush = (state: State, opts: PluginOpts): State => {
   // We flush the events plugin first, then custom plugins and the core plugins.
   // This means custom plugins cannot use the events API but will be available in event hooks.
   // Note that plugins are flushed in reverse, to allow custom plugins calling each other.
@@ -243,7 +244,7 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
  * Allows plugins to indicate if the entire action should be thrown out
  * as invalid. This will cancel the entire state update.
  */
-export const IsInvalid = (
+const IsInvalid = (
   state: State,
   opts: PluginOpts
 ): false | { plugin: string; message: string } => {
@@ -257,7 +258,6 @@ export const IsInvalid = (
         G: state.G,
         ctx: state.ctx,
         game: opts.game,
-        api: pluginState && pluginState.api,
         data: pluginState && pluginState.data,
       });
 
@@ -265,6 +265,19 @@ export const IsInvalid = (
     })
     .find((value) => value);
   return firstInvalidReturn || false;
+};
+
+/**
+ * Update plugin state after move/event & check if plugins consider the update to be valid.
+ * @returns Tuple of `[updatedState]` or `[originalState, invalidError]`.
+ */
+export const FlushAndValidate = (state: State, opts: PluginOpts) => {
+  const updatedState = Flush(state, opts);
+  const isInvalid = IsInvalid(updatedState, opts);
+  if (!isInvalid) return [updatedState] as const;
+  const { plugin, message } = isInvalid;
+  error(`${plugin} plugin declared action invalid:\n${message}`);
+  return [state, isInvalid] as const;
 };
 
 /**
