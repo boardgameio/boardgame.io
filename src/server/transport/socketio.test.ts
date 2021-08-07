@@ -36,6 +36,10 @@ class SocketIOTestAdapter extends SocketIO {
     this.clientInfo = clientInfo;
     this.roomInfo = roomInfo;
   }
+
+  public getPubSub() {
+    return this.pubSub;
+  }
 }
 
 jest.mock('../../master/master', () => {
@@ -156,6 +160,7 @@ describe('socketAdapter', () => {
 describe('TransportAPI', () => {
   let io;
   let api;
+  const matchID = 'matchID';
 
   beforeAll(() => {
     const auth = new Auth({ authenticateCredentials: () => true });
@@ -166,35 +171,36 @@ describe('TransportAPI', () => {
     const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
     io = app.context.io;
+    const socket = io.socket;
+    const requestingClient = {
+      socket,
+      matchID,
+      playerID: '0',
+      credentials: 'none',
+    };
     const filterPlayerView = getFilterPlayerView(games[0]);
     api = TransportAPI(
-      'matchID',
-      io.socket,
-      clientInfo,
-      roomInfo,
-      filterPlayerView
+      matchID,
+      socket,
+      requestingClient,
+      filterPlayerView,
+      transport.getPubSub()
     );
   });
 
   beforeEach(async () => {
     io.socket.emit = jest.fn();
     io.socket.id = '0';
-    const args0: SyncArgs = ['matchID', '0', undefined, 2];
+    const args0: SyncArgs = [matchID, '0', undefined];
     await io.socket.receive('sync', ...args0);
     io.socket.id = '1';
-    const args1: SyncArgs = ['matchID', '1', undefined, 2];
+    const args1: SyncArgs = [matchID, '1', undefined];
     await io.socket.receive('sync', ...args1);
   });
 
   test('send', () => {
     io.socket.id = '0';
     api.send({ type: 'A', playerID: '0', args: [] });
-    expect(io.socket.emit).toHaveBeenCalledWith('A');
-  });
-
-  test('send to another player', () => {
-    io.socket.id = '0';
-    api.send({ type: 'A', playerID: '1', args: [] });
     expect(io.socket.emit).toHaveBeenCalledWith('A');
   });
 

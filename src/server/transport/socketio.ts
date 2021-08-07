@@ -93,7 +93,7 @@ export class SocketIO {
   private readonly https: HttpsOptions;
   private readonly socketAdapter: any;
   private readonly socketOpts: IOTypes.ServerOptions;
-  private readonly pubSub: GenericPubSub<IntermediateTransportData>;
+  protected pubSub: GenericPubSub<IntermediateTransportData>;
 
   constructor({ https, socketAdapter, socketOpts, pubSub }: SocketOpts = {}) {
     this.clientInfo = new Map();
