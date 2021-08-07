@@ -144,7 +144,9 @@ export interface Plugin<
 > {
   name: string;
   noClient?: (context: PluginContext<API, Data, G>) => boolean;
-  isInvalid?: (context: PluginContext<API, Data, G>) => false | string;
+  isInvalid?: (
+    context: Omit<PluginContext<API, Data, G>, 'api'>
+  ) => false | string;
   setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G, Ctx> }) => Data;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
@@ -205,7 +207,7 @@ export interface PhaseConfig<
   CtxWithPlugins extends Ctx = Ctx
 > {
   start?: boolean;
-  next?: string;
+  next?: ((G: G, ctx: CtxWithPlugins) => string | void) | string;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
   endIf?: (G: G, ctx: CtxWithPlugins) => boolean | void | { next: string };
@@ -217,6 +219,7 @@ export interface PhaseConfig<
     ) => boolean | void | { next: string };
     onBegin?: (state: State<G, CtxWithPlugins>) => any;
     onEnd?: (state: State<G, CtxWithPlugins>) => any;
+    next?: (state: State<G, CtxWithPlugins>) => string | void;
   };
 }
 

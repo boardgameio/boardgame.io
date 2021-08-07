@@ -13,23 +13,26 @@ import type { Game, Ctx } from '../../types';
 test('constructor', () => {
   const flow = {} as Game['flow'];
   const playerID = '0';
-  const e = new Events(flow, playerID);
+  const e = new Events(flow, { phase: '', turn: 0 } as Ctx, playerID);
   expect(e.flow).toBe(flow);
   expect(e.playerID).toBe(playerID);
   expect(e.dispatch).toEqual([]);
+  expect(e.initialTurn).toEqual(0);
+  expect(e.currentPhase).toEqual('');
+  expect(e.currentTurn).toEqual(0);
 });
 
 test('dispatch', () => {
   const flow = { eventNames: ['A', 'B'] } as Game['flow'];
-  const e = new Events(flow);
-  const events = e.api({ phase: '', turn: 0 } as Ctx);
+  const e = new Events(flow, { phase: '', turn: 0 } as Ctx);
+  const events = e.api();
 
   expect(e.dispatch).toEqual([]);
   (events as unknown as { A(): void }).A();
   (events as unknown as { B(): void }).B();
   expect(e.dispatch).toEqual([
-    { key: 'A', args: [], phase: '', turn: 0 },
-    { key: 'B', args: [], phase: '', turn: 0 },
+    { type: 'A', args: [], phase: '', turn: 0 },
+    { type: 'B', args: [], phase: '', turn: 0 },
   ]);
 });
 

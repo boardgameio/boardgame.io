@@ -17,18 +17,10 @@ import type {
   TurnConfig,
 } from '../types';
 
-/**
- * Event to change the active players (and their stages) in the current turn.
- */
-export function SetActivePlayersEvent(
-  state: State,
-  _playerID: PlayerID,
+export function SetActivePlayers(
+  ctx: Ctx,
   arg: ActivePlayersArg | PlayerID[]
-) {
-  return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
-}
-
-export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg | PlayerID[]) {
+): Ctx {
   let activePlayers: typeof ctx.activePlayers = {};
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;

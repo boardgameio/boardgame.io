@@ -7,7 +7,6 @@
  */
 
 import {
-  SetActivePlayersEvent,
   SetActivePlayers,
   UpdateActivePlayersOnceEmpty,
   InitTurnOrderState,
@@ -21,6 +20,7 @@ import * as logging from './logger';
 import type {
   ActionPayload,
   ActionShape,
+  ActivePlayersArg,
   State,
   Ctx,
   LogEntry,
@@ -163,6 +163,12 @@ export function Flow({
       onEnd: HookWrapper(phaseConfig.turn.onEnd),
       endIf: TriggerWrapper(phaseConfig.turn.endIf),
     };
+
+    if (typeof phaseConfig.next !== 'function') {
+      const { next } = phaseConfig;
+      phaseConfig.next = () => next || null;
+    }
+    phaseConfig.wrapped.next = HookWrapper(phaseConfig.next);
   }
 
   function GetPhase(ctx: { phase: string }): PhaseConfig {
@@ -234,7 +240,7 @@ export function Flow({
       }
 
       // Check if we should end the turn.
-      if (fn === OnMove) {
+      if ([OnMove, UpdateStage, UpdateActivePlayers].includes(fn)) {
         const shouldEndTurn = ShouldEndTurn(state);
         if (shouldEndTurn) {
           events.push({
@@ -314,10 +320,8 @@ export function Flow({
         logging.error('invalid phase: ' + arg.next);
         return state;
       }
-    } else if (phaseConfig.next !== undefined) {
-      ctx = { ...ctx, phase: phaseConfig.next };
     } else {
-      ctx = { ...ctx, phase: null };
+      ctx = { ...ctx, phase: phaseConfig.wrapped.next(state) || null };
     }
 
     state = { ...state, ctx };
@@ -356,6 +360,7 @@ export function Flow({
     if (typeof arg === 'string' || arg === Stage.NULL) {
       arg = { stage: arg };
     }
+    if (typeof arg !== 'object') return state;
 
     let { ctx } = state;
     let { activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
@@ -385,6 +390,10 @@ export function Flow({
     };
 
     return { ...state, ctx };
+  }
+
+  function UpdateActivePlayers(state: State, { arg }): State {
+    return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
   }
 
   ///////////////
@@ -552,7 +561,7 @@ export function Flow({
     }
 
     // Checking if arg is a valid stage, even Stage.NULL
-    if (next && arg !== undefined) {
+    if (next) {
       next.push({ fn: UpdateStage, arg, playerID });
     }
 
@@ -678,6 +687,14 @@ export function Flow({
 
   function EndStageEvent(state: State, playerID: PlayerID): State {
     return Process(state, [{ fn: EndStage, playerID }]);
+  }
+
+  function SetActivePlayersEvent(
+    state: State,
+    _playerID: PlayerID,
+    arg: ActivePlayersArg | PlayerID[]
+  ): State {
+    return Process(state, [{ fn: UpdateActivePlayers, arg }]);
   }
 
   function SetPhaseEvent(

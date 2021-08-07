@@ -93,11 +93,6 @@ docs can be edited by clicking the “Edit on GitHub” link at the top right.
 💸 **Want to support the project financially?**  
 We accept donations via [GitHub Sponsors][sponsors] and on [Open Collective][collective].
 
-[
-![Open Collective Sponsors](https://opencollective.com/boardgameio/tiers/sponsor.svg?width=600&button=false&avatarHeight=75)
-![OpenCollective Backers](https://opencollective.com/boardgameio/tiers/backer.svg?width=600&avatarHeight=50)
-][collective]
-
 [new-issue]: https://github.com/boardgameio/boardgame.io/issues/new/choose
 [gitter]: https://gitter.im/boardgame-io/General
 [discussions]: https://github.com/boardgameio/boardgame.io/discussions

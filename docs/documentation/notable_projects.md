@@ -97,6 +97,15 @@ Open source simulator of Fields of Arle.
 [c7]: https://github.com/philihp/fields-of-arle
 
 
+#### [![GitHub stars][b-fd]][c-fd] [Forbidden Desert][p-fd] \[[code][c-fd]\]
+&nbsp;&nbsp;
+Clone of Forbidden Desert, a 2-5 player cooperative board game played locally.
+
+[b-fd]: https://img.shields.io/github/stars/hwabis/forbidden-desert?label=%E2%98%85&logo=github
+[p-fd]: https://hwabis.github.io/forbidden-desert/
+[c-fd]: https://github.com/hwabis/forbidden-desert
+
+
 #### [![GitHub stars][b8]][c8] Four in a row \[[code][c8] | [tutorial][t8]\]
 &nbsp;&nbsp;
 Four in a Row using boardgame.io.
