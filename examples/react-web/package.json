@@ -19,7 +19,6 @@
     "@babel/core": "^7.13.14",
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-react": "^7.13.13",
-    "bgio-postgres": "^1.0.13",
     "chess.js": "^0.11.0",
     "parcel-plugin-svelte": "^4.0.6",
     "react": "^17.0.2",

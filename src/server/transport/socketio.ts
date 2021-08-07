@@ -26,11 +26,6 @@ import type { PubSubChannelId } from './pubsub/generic-pub-sub';
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
 
-/**
- * Emit a socket.io event to the recipientID.
- * If the recipient is the current socket, uses a basic emit, otherwise
- * emits via the current socket’s `to` method.
- */
 const emit = (socket: IOTypes.Socket, { type, args }: TransportData) => {
   socket.emit(type, ...args);
 };
