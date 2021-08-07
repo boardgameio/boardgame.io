@@ -1,3 +1,13 @@
+### v0.46.2
+
+#### Features
+
+* [[064b7507](https://github.com/boardgameio/boardgame.io/commit/064b7507)] Support setting next phase with a function ([#972](https://github.com/boardgameio/boardgame.io/pull/972))
+
+#### Bugfixes
+
+* [[bff1d294](https://github.com/boardgameio/boardgame.io/commit/bff1d294)] flow: Run `turn.endIf` after `setActivePlayers` event
+
 ### v0.46.1
 
 #### Bugfixes
