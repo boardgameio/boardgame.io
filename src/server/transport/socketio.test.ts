@@ -172,17 +172,10 @@ describe('TransportAPI', () => {
     transport.init(app, games);
     io = app.context.io;
     const socket = io.socket;
-    const requestingClient = {
-      socket,
-      matchID,
-      playerID: '0',
-      credentials: 'none',
-    };
     const filterPlayerView = getFilterPlayerView(games[0]);
     api = TransportAPI(
       matchID,
       socket,
-      requestingClient,
       filterPlayerView,
       transport.getPubSub()
     );

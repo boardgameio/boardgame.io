@@ -31,13 +31,8 @@ const PING_INTERVAL = 10 * 1e3;
  * If the recipient is the current socket, uses a basic emit, otherwise
  * emits via the current socket’s `to` method.
  */
-const emit = (
-  socket: IOTypes.Socket,
-  recipientID: string,
-  { type, args }: TransportData
-) => {
-  const emitter = socket.id === recipientID ? socket : socket.to(recipientID);
-  emitter.emit(type, ...args);
+const emit = (socket: IOTypes.Socket, { type, args }: TransportData) => {
+  socket.emit(type, ...args);
 };
 
 function getPubSubChannelId(matchID: string): PubSubChannelId {
@@ -51,12 +46,11 @@ function getPubSubChannelId(matchID: string): PubSubChannelId {
 export const TransportAPI = (
   matchID: string,
   socket: IOTypes.Socket,
-  requestingClient: Client,
   filterPlayerView: any,
   pubSub: GenericPubSub<IntermediateTransportData>
 ): MasterTransport => {
   const send: MasterTransport['send'] = ({ playerID, ...data }) => {
-    emit(socket, requestingClient.socket.id, filterPlayerView(playerID, data));
+    emit(socket, filterPlayerView(playerID, data));
   };
 
   /**
@@ -147,14 +141,11 @@ export class SocketIO {
     this.pubSub
       .subscribe(getPubSubChannelId(matchID))
       .subscribe((payload: IntermediateTransportData) => {
-        const clientIDs = this.roomInfo.get(matchID);
-        if (clientIDs) {
-          clientIDs.forEach((clientID) => {
-            const client = this.clientInfo.get(clientID);
-            const data = getFilterPlayerView(game)(client.playerID, payload);
-            emit(client.socket, client.socket.id, data);
-          });
-        }
+        this.roomInfo.get(matchID).forEach((clientID) => {
+          const client = this.clientInfo.get(clientID);
+          const data = getFilterPlayerView(game)(client.playerID, payload);
+          emit(client.socket, data);
+        });
       });
   }
 
@@ -192,18 +183,10 @@ export class SocketIO {
       nsp.on('connection', (socket: IOTypes.Socket) => {
         socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
           const [action, stateID, matchID, playerID] = args;
-          const credentials = action.payload.credentials;
-          const requestingClient = { socket, matchID, playerID, credentials };
           const master = new Master(
             game,
             app.context.db,
-            TransportAPI(
-              matchID,
-              socket,
-              requestingClient,
-              filterPlayerView,
-              this.pubSub
-            ),
+            TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
             app.context.auth
           );
 
@@ -221,7 +204,6 @@ export class SocketIO {
           const transport = TransportAPI(
             matchID,
             socket,
-            requestingClient,
             filterPlayerView,
             this.pubSub
           );
@@ -245,17 +227,10 @@ export class SocketIO {
           this.removeClient(socket.id);
           if (client) {
             const { matchID, playerID, credentials } = client;
-            const requestingClient = { socket, matchID, playerID, credentials };
             const master = new Master(
               game,
               app.context.db,
-              TransportAPI(
-                matchID,
-                socket,
-                requestingClient,
-                filterPlayerView,
-                this.pubSub
-              ),
+              TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
               app.context.auth
             );
             await master.onConnectionChange(
@@ -270,19 +245,11 @@ export class SocketIO {
         socket.on(
           'chat',
           async (...args: Parameters<Master['onChatMessage']>) => {
-            const [matchID, chatMessage, credentials] = args;
-            const playerID = chatMessage.sender;
-            const requestingClient = { socket, matchID, playerID, credentials };
+            const [matchID] = args;
             const master = new Master(
               game,
               app.context.db,
-              TransportAPI(
-                matchID,
-                socket,
-                requestingClient,
-                filterPlayerView,
-                this.pubSub
-              ),
+              TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
               app.context.auth
             );
             master.onChatMessage(...args);
