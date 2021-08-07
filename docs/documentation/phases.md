@@ -176,14 +176,20 @@ phases: {
 },
 ```
 
-If you need to specify the next phase dynamically, you can return
-an object containing a `next` field from your `endIf`:
+!> Whenever a phase ends, the current player's turn is first ended automatically.
+
+
+### Setting the next phase dynamically
+
+Instead of setting a phase’s `next` option with a string, you can
+provide a function that will return the next phase based on game
+state at the end of the phase:
 
 ```js
 phases: {
   phaseA: {
-    endIf: (G, ctx) => {
-      return { next: G.condition ? 'phaseB' : 'phaseC' }
+    next: (G, ctx) => {
+      return G.condition ? 'phaseC' : 'phaseB';
     },
   },
   phaseB: { ... },
@@ -191,7 +197,6 @@ phases: {
 },
 ```
 
-!> Whenever a phase ends, the current player's turn is first ended automatically.
 
 ### Override Behavior
 

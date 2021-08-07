@@ -104,6 +104,7 @@
       start: true,
 
       // Set the phase to enter when this phase ends.
+      // Can also be a function: (G, ctx) => 'nextPhaseName'
       next: 'nextPhaseName',
     },
 
