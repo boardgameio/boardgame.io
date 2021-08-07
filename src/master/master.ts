@@ -456,7 +456,7 @@ export class Master {
           metadata: true,
         }
       );
-      const isAuthentic = await this.auth.authenticateCredentials({
+      const isAuthentic = !!(chatMessage?.sender) && await this.auth.authenticateCredentials({
         playerID: chatMessage.sender,
         credentials,
         metadata,
