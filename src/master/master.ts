@@ -456,11 +456,13 @@ export class Master {
           metadata: true,
         }
       );
-      const isAuthentic = !!(chatMessage?.sender) && await this.auth.authenticateCredentials({
-        playerID: chatMessage.sender,
-        credentials,
-        metadata,
-      });
+      const isAuthentic =
+        !!chatMessage?.sender &&
+        (await this.auth.authenticateCredentials({
+          playerID: chatMessage.sender,
+          credentials,
+          metadata,
+        }));
       if (!isAuthentic) {
         return { error: 'unauthorized' };
       }
