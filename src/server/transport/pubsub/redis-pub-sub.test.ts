@@ -35,12 +35,15 @@ describe('redis pub-sub', () => {
   });
 
   it('should receive a message after subscription', () => {
-    const callback = jest.fn();
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
     const payload = 'hello world';
-    pubSub.subscribe(CHANNEL_FOO, callback);
+    pubSub.subscribe(CHANNEL_FOO, callback1);
+    pubSub.subscribe(CHANNEL_FOO, callback2);
     const redisCallback = subClient.on.mock.calls[0][1];
     redisCallback(CHANNEL_FOO, JSON.stringify(payload));
-    expect(callback).toHaveBeenCalledWith(payload);
+    expect(callback1).toHaveBeenCalledWith(payload);
+    expect(callback2).toHaveBeenCalledWith(payload);
   });
 
   it('should ignore message from unrelated channel', () => {
