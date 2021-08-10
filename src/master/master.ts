@@ -456,6 +456,9 @@ export class Master {
           metadata: true,
         }
       );
+      if (!(chatMessage && typeof chatMessage.sender === 'string')) {
+        return { error: 'unauthorized' };
+      }
       const isAuthentic = await this.auth.authenticateCredentials({
         playerID: chatMessage.sender,
         credentials,
