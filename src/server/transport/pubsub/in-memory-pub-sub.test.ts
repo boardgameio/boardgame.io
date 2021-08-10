@@ -12,6 +12,18 @@ describe('in-memory pubsub', () => {
     expect(callback).toHaveBeenCalledWith(payload);
   });
 
+  it('should receive message from two subscriptions', () => {
+    const pubSub = new InMemoryPubSub<string>();
+    const callback1 = jest.fn();
+    const callback2 = jest.fn();
+    pubSub.subscribe(CHANNEL_FOO, callback1);
+    pubSub.subscribe(CHANNEL_FOO, callback2);
+    const payload = 'hello world';
+    pubSub.publish(CHANNEL_FOO, payload);
+    expect(callback1).toHaveBeenCalledWith(payload);
+    expect(callback2).toHaveBeenCalledWith(payload);
+  });
+
   it('should unsubscribe', () => {
     const pubSub = new InMemoryPubSub<string>();
     const callback = jest.fn();

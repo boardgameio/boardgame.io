@@ -51,4 +51,14 @@ describe('redis pub-sub', () => {
     redisCallback('notTheRightId', JSON.stringify(payload));
     expect(callback).not.toHaveBeenCalled();
   });
+
+  it('should ignore message after unsubscription', () => {
+    const callback = jest.fn();
+    const payload = 'hello world';
+    pubSub.subscribe(CHANNEL_FOO, callback);
+    pubSub.unsubscribeAll(CHANNEL_FOO);
+    const redisCallback = subClient.on.mock.calls[0][1];
+    redisCallback(CHANNEL_FOO, JSON.stringify(payload));
+    expect(callback).not.toHaveBeenCalled();
+  });
 });
