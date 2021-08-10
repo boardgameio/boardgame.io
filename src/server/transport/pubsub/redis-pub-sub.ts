@@ -1,41 +1,42 @@
 import type redis from 'redis';
-import { Observable } from 'rxjs';
-import type { GenericPubSub, PubSubChannelId } from './generic-pub-sub';
-import { globalChannelId } from './util';
+import type { GenericPubSub } from './generic-pub-sub';
 
 export class RedisPubSub<T> implements GenericPubSub<T> {
   private pubClient: redis.RedisClient;
   private subClient: redis.RedisClient;
-  private subscriptions: Map<string, Observable<T>> = new Map();
+  callbacks: Map<string, ((payload: T) => void)[]> = new Map();
 
   constructor(pubClient: redis.redisclient, subClient: redis.redisclient) {
     this.pubClient = pubClient;
     this.subClient = subClient;
-  }
-
-  publish(channelId: PubSubChannelId, payload: T) {
-    this.pubClient.publish(globalChannelId(channelId), JSON.stringify(payload));
-  }
-
-  subscribe(channelId: PubSubChannelId): Observable<T> {
-    if (this.subscriptions.has(globalChannelId(channelId))) {
-      return this.subscriptions.get(globalChannelId(channelId));
-    }
-    const observable = new Observable<T>((subscribe) => {
-      this.subClient.on('message', (redisChannelId, message) => {
-        if (redisChannelId !== globalChannelId(channelId)) {
-          return;
-        }
-        subscribe.next(JSON.parse(message) as T);
-      });
+    this.subClient.on('message', (redisChannelId, message) => {
+      if (!this.callbacks.has(redisChannelId)) {
+        return;
+      }
+      const allCallbacks = this.callbacks.get(redisChannelId);
+      const parsedPayload = JSON.parse(message) as T;
+      for (const callback of allCallbacks) {
+        callback(parsedPayload);
+      }
     });
-    this.subClient.subscribe(globalChannelId(channelId));
-    this.subscriptions.set(globalChannelId(channelId), observable);
-    return observable;
   }
 
-  unsubscribe(channelId: PubSubChannelId) {
-    this.subscriptions.delete(globalChannelId(channelId));
-    this.subClient.unsubscribe(globalChannelId(channelId));
+  publish(channelId: string, payload: T) {
+    this.pubClient.publish(channelId, JSON.stringify(payload));
+  }
+
+  subscribe(channelId: string, callback: (payload: T) => void) {
+    if (!this.callbacks.has(channelId)) {
+      this.callbacks.set(channelId, []);
+    }
+    this.callbacks.get(channelId).push(callback);
+    this.subClient.subscribe(channelId);
+  }
+
+  unsubscribeAll(channelId: string) {
+    this.subClient.unsubscribe(channelId);
+    if (this.callbacks.has(channelId)) {
+      this.callbacks.delete(channelId);
+    }
   }
 }

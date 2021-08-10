@@ -18,10 +18,8 @@ import type {
 import { getFilterPlayerView } from '../../master/filter-player-view';
 import type { Game, Server } from '../../types';
 import type { GenericPubSub } from './pubsub/generic-pub-sub';
-import { PubSubChannelIdNamespace } from './pubsub/generic-pub-sub';
 import type { IntermediateTransportData } from '../../master/master';
 import { InMemoryPubSub } from './pubsub/in-memory-pub-sub';
-import type { PubSubChannelId } from './pubsub/generic-pub-sub';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
@@ -30,8 +28,8 @@ const emit = (socket: IOTypes.Socket, { type, args }: TransportData) => {
   socket.emit(type, ...args);
 };
 
-function getPubSubChannelId(matchID: string): PubSubChannelId {
-  return { namespace: PubSubChannelIdNamespace.MATCH, value: matchID };
+function getPubSubChannelId(matchID: string): string {
+  return `MATCH-${matchID}`;
 }
 
 /**
@@ -133,19 +131,20 @@ export class SocketIO {
   }
 
   private subscribePubSubChannel(matchID: string, game: Game) {
-    this.pubSub
-      .subscribe(getPubSubChannelId(matchID))
-      .subscribe((payload: IntermediateTransportData) => {
+    this.pubSub.subscribe(
+      getPubSubChannelId(matchID),
+      (payload: IntermediateTransportData) => {
         this.roomInfo.get(matchID).forEach((clientID) => {
           const client = this.clientInfo.get(clientID);
           const data = getFilterPlayerView(game)(client.playerID, payload);
           emit(client.socket, data);
         });
-      });
+      }
+    );
   }
 
   private unsubscribePubSubChannel(matchID: string) {
-    this.pubSub.unsubscribe(getPubSubChannelId(matchID));
+    this.pubSub.unsubscribeAll(getPubSubChannelId(matchID));
   }
 
   init(
