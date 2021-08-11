@@ -131,16 +131,16 @@ export class SocketIO {
   }
 
   private subscribePubSubChannel(matchID: string, game: Game) {
-    this.pubSub.subscribe(
-      getPubSubChannelId(matchID),
-      (payload: IntermediateTransportData) => {
-        this.roomInfo.get(matchID).forEach((clientID) => {
-          const client = this.clientInfo.get(clientID);
-          const data = getFilterPlayerView(game)(client.playerID, payload);
-          emit(client.socket, data);
-        });
-      }
-    );
+    const filterPlayerView = getFilterPlayerView(game);
+    const broadcast = (payload: IntermediateTransportData) => {
+      this.roomInfo.get(matchID).forEach((clientID) => {
+        const client = this.clientInfo.get(clientID);
+        const data = filterPlayerView(client.playerID, payload);
+        emit(client.socket, data);
+      });
+    };
+
+    this.pubSub.subscribe(getPubSubChannelId(matchID), broadcast);
   }
 
   private unsubscribePubSubChannel(matchID: string) {
