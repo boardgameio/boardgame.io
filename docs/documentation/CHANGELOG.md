@@ -1,3 +1,13 @@
+## v0.47.0
+
+#### Features
+
+* [[b6a4fed](https://github.com/boardgameio/boardgame.io/commit/b6a4fed)] Adds pub-sub support for horizontally scaling bgio server (#978)
+
+#### Bugfixes
+
+* [[241701f](https://github.com/boardgameio/boardgame.io/commit/241701f)] fix(master): Don’t crash on missing chatMessage (#977)
+
 ### v0.46.2
 
 #### Features
