@@ -17,76 +17,50 @@ import type {
 } from '../../master/master';
 import { getFilterPlayerView } from '../../master/filter-player-view';
 import type { Game, Server } from '../../types';
+import type { GenericPubSub } from './pubsub/generic-pub-sub';
+import type { IntermediateTransportData } from '../../master/master';
+import { InMemoryPubSub } from './pubsub/in-memory-pub-sub';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
+
+const emit = (socket: IOTypes.Socket, { type, args }: TransportData) => {
+  socket.emit(type, ...args);
+};
+
+function getPubSubChannelId(matchID: string): string {
+  return `MATCH-${matchID}`;
+}
 
 /**
  * API that's exposed by SocketIO for the Master to send
  * information to the clients.
  */
-export function TransportAPI(
+export const TransportAPI = (
   matchID: string,
   socket: IOTypes.Socket,
-  clientInfo: SocketIO['clientInfo'],
-  roomInfo: SocketIO['roomInfo'],
-  filterPlayerView: (string, IntermediateTransportData) => TransportData,
-  provisionalClient?: Client
-): MasterTransport {
-  /**
-   * Emit a socket.io event to the recipientID.
-   * If the recipient is the current socket, uses a basic emit, otherwise
-   * emits via the current socket’s `to` method.
-   */
-  const emit = (recipientID: string, { type, args }: TransportData) => {
-    const emitter = socket.id === recipientID ? socket : socket.to(recipientID);
-    emitter.emit(type, ...args);
-  };
-
-  /**
-   * Run a callback for each registered client for this match, including
-   * this transport’s provisionalClient if provided.
-   */
-  const forEachClient = (clientCallback: (client: Client) => void) => {
-    const clientIDs = roomInfo.get(matchID);
-    if (clientIDs) {
-      clientIDs.forEach((clientID) => {
-        const client = clientInfo.get(clientID);
-        clientCallback(client);
-      });
-    }
-    if (provisionalClient) {
-      clientCallback(provisionalClient);
-    }
-  };
-
-  /**
-   * Send a message to a specific client.
-   */
+  filterPlayerView: any,
+  pubSub: GenericPubSub<IntermediateTransportData>
+): MasterTransport => {
   const send: MasterTransport['send'] = ({ playerID, ...data }) => {
-    forEachClient((client) => {
-      if (client.playerID === playerID)
-        emit(client.socket.id, filterPlayerView(playerID, data));
-    });
+    emit(socket, filterPlayerView(playerID, data));
   };
 
   /**
    * Send a message to all clients.
    */
   const sendAll: MasterTransport['sendAll'] = (payload) => {
-    forEachClient((client) => {
-      const data = filterPlayerView(client.playerID, payload);
-      emit(client.socket.id, data);
-    });
+    pubSub.publish(getPubSubChannelId(matchID), payload);
   };
 
   return { send, sendAll };
-}
+};
 
 export interface SocketOpts {
   https?: HttpsOptions;
   socketOpts?: IOTypes.ServerOptions;
   socketAdapter?: any;
+  pubSub?: GenericPubSub<IntermediateTransportData>;
 }
 
 interface Client {
@@ -106,14 +80,16 @@ export class SocketIO {
   private readonly https: HttpsOptions;
   private readonly socketAdapter: any;
   private readonly socketOpts: IOTypes.ServerOptions;
+  protected pubSub: GenericPubSub<IntermediateTransportData>;
 
-  constructor({ https, socketAdapter, socketOpts }: SocketOpts = {}) {
+  constructor({ https, socketAdapter, socketOpts, pubSub }: SocketOpts = {}) {
     this.clientInfo = new Map();
     this.roomInfo = new Map();
     this.perMatchQueue = new Map();
     this.https = https;
     this.socketAdapter = socketAdapter;
     this.socketOpts = socketOpts;
+    this.pubSub = pubSub || new InMemoryPubSub();
   }
 
   /**
@@ -129,6 +105,7 @@ export class SocketIO {
     matchClients.delete(socketID);
     // If the match is now empty, delete its promise queue & client ID list.
     if (matchClients.size === 0) {
+      this.unsubscribePubSubChannel(matchID);
       this.roomInfo.delete(matchID);
       this.deleteMatchQueue(matchID);
     }
@@ -139,17 +116,35 @@ export class SocketIO {
   /**
    * Register client data for a socket.
    */
-  private addClient(client: Client): void {
+  private addClient(client: Client, game: Game): void {
     const { matchID, socket } = client;
     // Add client to list of connected sockets for this match.
     let matchClients = this.roomInfo.get(matchID);
     if (matchClients === undefined) {
+      this.subscribePubSubChannel(matchID, game);
       matchClients = new Set<string>();
       this.roomInfo.set(matchID, matchClients);
     }
     matchClients.add(socket.id);
     // Register data for this socket in the client map.
     this.clientInfo.set(socket.id, client);
+  }
+
+  private subscribePubSubChannel(matchID: string, game: Game) {
+    const filterPlayerView = getFilterPlayerView(game);
+    const broadcast = (payload: IntermediateTransportData) => {
+      this.roomInfo.get(matchID).forEach((clientID) => {
+        const client = this.clientInfo.get(clientID);
+        const data = filterPlayerView(client.playerID, payload);
+        emit(client.socket, data);
+      });
+    };
+
+    this.pubSub.subscribe(getPubSubChannelId(matchID), broadcast);
+  }
+
+  private unsubscribePubSubChannel(matchID: string) {
+    this.pubSub.unsubscribeAll(getPubSubChannelId(matchID));
   }
 
   init(
@@ -185,13 +180,7 @@ export class SocketIO {
           const master = new Master(
             game,
             app.context.db,
-            TransportAPI(
-              matchID,
-              socket,
-              this.clientInfo,
-              this.roomInfo,
-              filterPlayerView
-            ),
+            TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
             app.context.auth
           );
 
@@ -205,15 +194,12 @@ export class SocketIO {
           const [matchID, playerID, credentials] = args;
           socket.join(matchID);
           this.removeClient(socket.id);
-
-          const client = { socket, matchID, playerID, credentials };
+          const requestingClient = { socket, matchID, playerID, credentials };
           const transport = TransportAPI(
             matchID,
             socket,
-            this.clientInfo,
-            this.roomInfo,
             filterPlayerView,
-            client
+            this.pubSub
           );
           const master = new Master(
             game,
@@ -226,8 +212,8 @@ export class SocketIO {
           if (syncResponse && syncResponse.error === 'unauthorized') {
             return;
           }
+          this.addClient(requestingClient, game);
           await master.onConnectionChange(matchID, playerID, credentials, true);
-          this.addClient(client);
         });
 
         socket.on('disconnect', async () => {
@@ -238,13 +224,7 @@ export class SocketIO {
             const master = new Master(
               game,
               app.context.db,
-              TransportAPI(
-                matchID,
-                socket,
-                this.clientInfo,
-                this.roomInfo,
-                filterPlayerView
-              ),
+              TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
               app.context.auth
             );
             await master.onConnectionChange(
@@ -263,13 +243,7 @@ export class SocketIO {
             const master = new Master(
               game,
               app.context.db,
-              TransportAPI(
-                matchID,
-                socket,
-                this.clientInfo,
-                this.roomInfo,
-                filterPlayerView
-              ),
+              TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
               app.context.auth
             );
             master.onChatMessage(...args);
