@@ -29,6 +29,8 @@ import type {
   PlayerID,
   Move,
 } from '../types';
+import { GameMethod } from './game-methods';
+import type { GameMethodNames } from './game-methods';
 
 /**
  * Flow
@@ -76,23 +78,26 @@ export function Flow({
 
   Object.keys(moves).forEach((name) => moveNames.add(name));
 
-  const HookWrapper = (fn: (G: any, ctx: Ctx) => any) => {
-    const withPlugins = plugin.FnWrap(fn, plugins);
+  const HookWrapper = (
+    hook: (G: any, ctx: Ctx) => any,
+    hookType: GameMethodNames
+  ) => {
+    const withPlugins = plugin.FnWrap(hook, hookType, plugins);
     return (state: State) => {
       const ctxWithAPI = plugin.EnhanceCtx(state);
       return withPlugins(state.G, ctxWithAPI);
     };
   };
 
-  const TriggerWrapper = (endIf: (G: any, ctx: Ctx) => any) => {
+  const TriggerWrapper = (trigger: (G: any, ctx: Ctx) => any) => {
     return (state: State) => {
       const ctxWithAPI = plugin.EnhanceCtx(state);
-      return endIf(state.G, ctxWithAPI);
+      return trigger(state.G, ctxWithAPI);
     };
   };
 
   const wrapped = {
-    onEnd: HookWrapper(onEnd),
+    onEnd: HookWrapper(onEnd, GameMethod.Game.ON_END),
     endIf: TriggerWrapper(endIf),
   };
 
@@ -152,15 +157,15 @@ export function Flow({
     }
 
     phaseConfig.wrapped = {
-      onBegin: HookWrapper(phaseConfig.onBegin),
-      onEnd: HookWrapper(phaseConfig.onEnd),
+      onBegin: HookWrapper(phaseConfig.onBegin, GameMethod.Phase.ON_BEGIN),
+      onEnd: HookWrapper(phaseConfig.onEnd, GameMethod.Phase.ON_END),
       endIf: TriggerWrapper(phaseConfig.endIf),
     };
 
     phaseConfig.turn.wrapped = {
-      onMove: HookWrapper(phaseConfig.turn.onMove),
-      onBegin: HookWrapper(phaseConfig.turn.onBegin),
-      onEnd: HookWrapper(phaseConfig.turn.onEnd),
+      onMove: HookWrapper(phaseConfig.turn.onMove, GameMethod.Turn.ON_MOVE),
+      onBegin: HookWrapper(phaseConfig.turn.onBegin, GameMethod.Turn.ON_BEGIN),
+      onEnd: HookWrapper(phaseConfig.turn.onEnd, GameMethod.Turn.ON_END),
       endIf: TriggerWrapper(phaseConfig.turn.endIf),
     };
 
@@ -168,7 +173,7 @@ export function Flow({
       const { next } = phaseConfig;
       phaseConfig.next = () => next || null;
     }
-    phaseConfig.wrapped.next = HookWrapper(phaseConfig.next);
+    phaseConfig.wrapped.next = TriggerWrapper(phaseConfig.next);
   }
 
   function GetPhase(ctx: { phase: string }): PhaseConfig {
