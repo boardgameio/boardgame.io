@@ -10,7 +10,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { Flow } from './flow';
 import { error } from '../core/logger';
-import type { Ctx, State } from '../types';
+import type { Ctx, State, Game } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -628,6 +628,24 @@ describe('stage events', () => {
       state = flow.processEvent(state, gameEvent('setStage', {}));
       expect(state.ctx.activePlayers).toBeNull();
     });
+
+    test('disallowed in phase.onBegin', () => {
+      const game: Game = {
+        phases: {
+          A: {
+            start: true,
+            onBegin: (G, ctx) => {
+              ctx.events.setStage('A');
+            },
+          },
+        },
+      };
+      Client({ game });
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(/disallowed in a phase’s `onBegin` hook/);
+    });
   });
 
   describe('endStage', () => {
@@ -1161,6 +1179,26 @@ describe('infinite loops', () => {
     state = client.getState();
     expect(state.ctx.currentPlayer).toBe('1');
     expect(state.ctx.turn).toBe(2);
+  });
+
+  test('endIf that triggers endIf', () => {
+    const game: Game = {
+      phases: {
+        A: {
+          endIf: (G, ctx) => {
+            ctx.events.setActivePlayers({ currentPlayer: 'A' });
+          },
+        },
+      },
+    };
+    const client = Client({ game });
+    client.events.setPhase('A');
+    expect(error).toHaveBeenCalled();
+    const errorMessage = (error as jest.Mock).mock.calls[0][0];
+    expect(errorMessage).toMatch(/events plugin declared action invalid/);
+    expect(errorMessage).toMatch(
+      /Events must be called from moves or the `.+` hooks./
+    );
   });
 });
 
