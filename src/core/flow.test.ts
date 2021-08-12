@@ -1090,18 +1090,22 @@ describe('infinite loops', () => {
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.turn).toBe(1);
     expect(error).toHaveBeenCalled();
-    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
-      /events plugin declared action invalid/
-    );
+    {
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(/Maximum number of turn endings exceeded/);
+    }
     jest.clearAllMocks();
 
     // Moves also fail because of the infinite loop (the game is stuck).
     client.moves.a();
     state = client.getState();
     expect(error).toHaveBeenCalled();
-    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
-      /events plugin declared action invalid/
-    );
+    {
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(/Maximum number of turn endings exceeded/);
+    }
     expect(state.ctx.phase).toBe('A');
     expect(state.ctx.turn).toBe(1);
   });
@@ -1149,9 +1153,9 @@ describe('infinite loops', () => {
 
     // Expect state to be unchanged and error to be logged.
     expect(error).toHaveBeenCalled();
-    expect((error as jest.Mock).mock.calls[0][0]).toMatch(
-      /events plugin declared action invalid/
-    );
+    const errorMessage = (error as jest.Mock).mock.calls[0][0];
+    expect(errorMessage).toMatch(/events plugin declared action invalid/);
+    expect(errorMessage).toMatch(/Maximum number of turn endings exceeded/);
     expect(client.getState().ctx.currentPlayer).toBe('0');
     expect(client.getState()).toEqual({ ...initialState, deltalog: [] });
   });
