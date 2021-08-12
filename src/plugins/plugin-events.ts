@@ -23,11 +23,12 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   // or hook is called. This allows events called after turn or phase
   // endings to dispatch the current turn and phase correctly.
   fnWrap:
-    (fn) =>
+    (method, methodType) =>
     (G, ctx, ...args) => {
       const api = ctx.events as PrivateEventsAPI;
-      if (api) api._obj.updateTurnContext(ctx);
-      G = fn(G, ctx, ...args);
+      if (api) api._obj.updateTurnContext(ctx, methodType);
+      G = method(G, ctx, ...args);
+      if (api) api._obj.unsetCurrentMethod();
       return G;
     },
 
