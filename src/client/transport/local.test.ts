@@ -19,28 +19,6 @@ import type { ChatMessage, Game, State, Store, SyncInfo } from '../../types';
 
 const sleep = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/**
- * Run a callback on an interval and resolve when it returns `true`.
- * @param condition Callback that should eventually return `true`.
- * @param interval Interval on which to test the condition callback (in ms).
- * @param timeout How long to wait for the condition to be `true` before rejecting (in ms).
- */
-const waitFor = (condition: () => boolean, interval = 50, timeout = 1000) =>
-  new Promise<void>((resolve, reject) => {
-    const startTime = Date.now();
-    const intervalID = setInterval(checkCondition, interval);
-    checkCondition();
-    function checkCondition() {
-      if (condition()) {
-        clearInterval(intervalID);
-        resolve();
-      } else if (Date.now() > startTime + timeout) {
-        clearInterval(intervalID);
-        reject();
-      }
-    }
-  });
-
 describe('bots', () => {
   const game: Game = {
     moves: {
@@ -67,8 +45,8 @@ describe('bots', () => {
     client.events.endTurn();
     expect(client.getState().ctx.turn).toBe(2);
 
-    // Wait until the bot has completed its move.
-    await waitFor(() => client.getState().ctx.turn === 3);
+    // Wait until the bot has hopefully completed its move.
+    await sleep();
     expect(client.getState().ctx.turn).toBe(3);
   });
 
