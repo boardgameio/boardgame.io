@@ -9,7 +9,6 @@
 import type { State, Ctx, PlayerID, Game } from '../../types';
 import { automaticGameEvent } from '../../core/action-creators';
 import { GameMethod } from '../../core/game-methods';
-import type { GameMethodNames } from '../../core/game-methods';
 
 const enum Errors {
   CalledOutsideHook = 'Events must be called from moves or the `onBegin`, `onEnd`, and `onMove` hooks.\n' +
@@ -34,7 +33,7 @@ export interface EventsAPI {
 export interface PrivateEventsAPI {
   _obj: {
     isUsed(): boolean;
-    updateTurnContext(ctx: Ctx, methodType: GameMethodNames | undefined): void;
+    updateTurnContext(ctx: Ctx, methodType: GameMethod | undefined): void;
     unsetCurrentMethod(): void;
     update(state: State): State;
   };
@@ -51,13 +50,13 @@ export class Events {
     args: any[];
     phase: string;
     turn: number;
-    calledFrom: GameMethodNames | undefined;
+    calledFrom: GameMethod | undefined;
   }>;
   maxEndedTurnsPerAction: number;
   initialTurn: number;
   currentPhase: string;
   currentTurn: number;
-  currentMethod?: GameMethodNames;
+  currentMethod?: GameMethod;
 
   constructor(flow: Game['flow'], ctx: Ctx, playerID?: PlayerID) {
     this.flow = flow;
@@ -93,7 +92,7 @@ export class Events {
     return this.dispatch.length > 0;
   }
 
-  updateTurnContext(ctx: Ctx, methodType: GameMethodNames | undefined) {
+  updateTurnContext(ctx: Ctx, methodType: GameMethod | undefined) {
     this.currentPhase = ctx.phase;
     this.currentTurn = ctx.turn;
     this.currentMethod = methodType;
@@ -138,7 +137,7 @@ export class Events {
 
       if (['endStage', 'setStage', 'setActivePlayers'].includes(event.type)) {
         // Disallow stage events in phase.onBegin hooks.
-        if (event.calledFrom === GameMethod.Phase.ON_BEGIN) {
+        if (event.calledFrom === GameMethod.PHASE_ON_BEGIN) {
           return this.stateWithError(
             initialState,
             Errors.StageEventInPhaseBegin

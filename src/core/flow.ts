@@ -30,7 +30,6 @@ import type {
   Move,
 } from '../types';
 import { GameMethod } from './game-methods';
-import type { GameMethodNames } from './game-methods';
 
 /**
  * Flow
@@ -80,7 +79,7 @@ export function Flow({
 
   const HookWrapper = (
     hook: (G: any, ctx: Ctx) => any,
-    hookType: GameMethodNames
+    hookType: GameMethod
   ) => {
     const withPlugins = plugin.FnWrap(hook, hookType, plugins);
     return (state: State) => {
@@ -97,7 +96,7 @@ export function Flow({
   };
 
   const wrapped = {
-    onEnd: HookWrapper(onEnd, GameMethod.Game.ON_END),
+    onEnd: HookWrapper(onEnd, GameMethod.GAME_ON_END),
     endIf: TriggerWrapper(endIf),
   };
 
@@ -157,15 +156,15 @@ export function Flow({
     }
 
     phaseConfig.wrapped = {
-      onBegin: HookWrapper(phaseConfig.onBegin, GameMethod.Phase.ON_BEGIN),
-      onEnd: HookWrapper(phaseConfig.onEnd, GameMethod.Phase.ON_END),
+      onBegin: HookWrapper(phaseConfig.onBegin, GameMethod.PHASE_ON_BEGIN),
+      onEnd: HookWrapper(phaseConfig.onEnd, GameMethod.PHASE_ON_END),
       endIf: TriggerWrapper(phaseConfig.endIf),
     };
 
     phaseConfig.turn.wrapped = {
-      onMove: HookWrapper(phaseConfig.turn.onMove, GameMethod.Turn.ON_MOVE),
-      onBegin: HookWrapper(phaseConfig.turn.onBegin, GameMethod.Turn.ON_BEGIN),
-      onEnd: HookWrapper(phaseConfig.turn.onEnd, GameMethod.Turn.ON_END),
+      onMove: HookWrapper(phaseConfig.turn.onMove, GameMethod.TURN_ON_MOVE),
+      onBegin: HookWrapper(phaseConfig.turn.onBegin, GameMethod.TURN_ON_BEGIN),
+      onEnd: HookWrapper(phaseConfig.turn.onEnd, GameMethod.TURN_ON_END),
       endIf: TriggerWrapper(phaseConfig.turn.endIf),
     };
 

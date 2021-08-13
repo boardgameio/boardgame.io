@@ -6,7 +6,7 @@ import type { ActionErrorType, UpdateErrorType } from './core/errors';
 import type { Flow } from './core/flow';
 import type { CreateGameReducer } from './core/reducer';
 import type { INVALID_MOVE } from './core/constants';
-import type { GameMethodNames } from './core/game-methods';
+import type { GameMethod } from './core/game-methods';
 import type { Auth } from './server/auth';
 import type * as StorageAPI from './server/db/base';
 import type { EventsAPI } from './plugins/plugin-events';
@@ -166,7 +166,7 @@ export interface Plugin<
   }) => State<G, Ctx>;
   fnWrap?: (
     moveOrHook: (G: G, ctx: Ctx, ...args: any[]) => any,
-    methodType: GameMethodNames
+    methodType: GameMethod
   ) => (G: G, ctx: Ctx, ...args: any[]) => any;
   playerView?: (context: {
     G: G;

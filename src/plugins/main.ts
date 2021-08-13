@@ -22,7 +22,7 @@ import type {
   PlayerID,
 } from '../types';
 import { error } from '../core/logger';
-import type { GameMethodNames } from '../core/game-methods';
+import type { GameMethod } from '../core/game-methods';
 
 interface PluginOpts {
   game: Game;
@@ -99,7 +99,7 @@ export const EnhanceCtx = (state: PartialGameState): Ctx => {
  */
 export const FnWrap = (
   methodToWrap: AnyFn,
-  methodType: GameMethodNames,
+  methodType: GameMethod,
   plugins: Plugin[]
 ) => {
   return [...DEFAULT_PLUGINS, ...plugins]
