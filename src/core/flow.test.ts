@@ -10,7 +10,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { Flow } from './flow';
 import { error } from '../core/logger';
-import type { Ctx, State, Game } from '../types';
+import type { Ctx, State, Game, MoveFn } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -629,22 +629,72 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toBeNull();
     });
 
-    test('disallowed in phase.onBegin', () => {
-      const game: Game = {
-        phases: {
-          A: {
-            start: true,
-            onBegin: (G, ctx) => {
-              ctx.events.setStage('A');
+    describe('disallowed in hooks', () => {
+      const setStage: MoveFn = (G, ctx) => {
+        ctx.events.setStage('A');
+      };
+
+      test('phase.onBegin', () => {
+        const game: Game = {
+          phases: {
+            A: {
+              start: true,
+              onBegin: setStage,
             },
           },
-        },
-      };
-      Client({ game });
-      expect(error).toHaveBeenCalled();
-      const errorMessage = (error as jest.Mock).mock.calls[0][0];
-      expect(errorMessage).toMatch(/events plugin declared action invalid/);
-      expect(errorMessage).toMatch(/disallowed in a phase’s `onBegin` hook/);
+        };
+        Client({ game });
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in a phase’s `onBegin` hook/);
+      });
+
+      test('phase.onEnd', () => {
+        const game: Game = {
+          phases: {
+            A: {
+              start: true,
+              onEnd: setStage,
+            },
+          },
+        };
+        const client = Client({ game });
+        expect(error).not.toHaveBeenCalled();
+        client.events.endPhase();
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `onEnd` hooks/);
+      });
+
+      test('turn.onBegin', () => {
+        const game: Game = {
+          turn: {
+            onBegin: setStage,
+          },
+        };
+        Client({ game });
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `turn.onBegin`/);
+      });
+
+      test('turn.onEnd', () => {
+        const game: Game = {
+          turn: {
+            onEnd: setStage,
+          },
+        };
+        const client = Client({ game });
+        expect(error).not.toHaveBeenCalled();
+        client.events.endTurn();
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `onEnd` hooks/);
+      });
     });
   });
 
@@ -724,6 +774,165 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toMatchObject({
         '0': 'A2',
         '1': 'B2',
+      });
+    });
+
+    describe('disallowed in hooks', () => {
+      const endStage: MoveFn = (G, ctx) => {
+        ctx.events.endStage();
+      };
+
+      test('phase.onBegin', () => {
+        const game: Game = {
+          phases: {
+            A: {
+              start: true,
+              onBegin: endStage,
+            },
+          },
+        };
+        Client({ game });
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in a phase’s `onBegin` hook/);
+      });
+
+      test('phase.onEnd', () => {
+        const game: Game = {
+          phases: {
+            A: {
+              start: true,
+              onEnd: endStage,
+            },
+          },
+        };
+        const client = Client({ game });
+        expect(error).not.toHaveBeenCalled();
+        client.events.endPhase();
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `onEnd` hooks/);
+      });
+
+      test('turn.onBegin', () => {
+        const game: Game = {
+          turn: {
+            onBegin: endStage,
+          },
+        };
+        Client({ game });
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `turn.onBegin`/);
+      });
+
+      test('turn.onEnd', () => {
+        const game: Game = {
+          turn: {
+            onEnd: endStage,
+          },
+        };
+        const client = Client({ game });
+        expect(error).not.toHaveBeenCalled();
+        client.events.endTurn();
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `onEnd` hooks/);
+      });
+    });
+  });
+
+  describe('setActivePlayers', () => {
+    test('basic', () => {
+      const client = Client({
+        numPlayers: 3,
+        game: {
+          turn: {
+            onBegin: (G, ctx) => {
+              ctx.events.setActivePlayers({ currentPlayer: 'A' });
+            },
+          },
+          moves: {
+            updateActivePlayers: (G, ctx) => {
+              ctx.events.setActivePlayers({ others: 'B' });
+            },
+          },
+        },
+      });
+      expect(client.getState().ctx.activePlayers).toEqual({ '0': 'A' });
+      client.moves.updateActivePlayers();
+      expect(client.getState().ctx.activePlayers).toEqual({
+        '1': 'B',
+        '2': 'B',
+      });
+    });
+
+    describe('in hooks', () => {
+      const setActivePlayers: MoveFn = (G, ctx) => {
+        ctx.events.setActivePlayers({ currentPlayer: 'A' });
+      };
+
+      test('disallowed in phase.onBegin', () => {
+        const game: Game = {
+          phases: {
+            A: {
+              start: true,
+              onBegin: setActivePlayers,
+            },
+          },
+        };
+        Client({ game });
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in a phase’s `onBegin` hook/);
+      });
+
+      test('disallowed in phase.onEnd', () => {
+        const game: Game = {
+          phases: {
+            A: {
+              start: true,
+              onEnd: setActivePlayers,
+            },
+          },
+        };
+        const client = Client({ game });
+        expect(error).not.toHaveBeenCalled();
+        client.events.endPhase();
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `onEnd` hooks/);
+      });
+
+      test('allowed in turn.onBegin', () => {
+        const client = Client({
+          game: {
+            turn: { onBegin: setActivePlayers },
+          },
+        });
+        expect(client.getState().ctx.activePlayers).toEqual({ '0': 'A' });
+        expect(error).not.toHaveBeenCalled();
+      });
+
+      test('disallowed in turn.onEnd', () => {
+        const game: Game = {
+          turn: {
+            onEnd: setActivePlayers,
+          },
+        };
+        const client = Client({ game });
+        expect(error).not.toHaveBeenCalled();
+        client.events.endTurn();
+        expect(error).toHaveBeenCalled();
+        const errorMessage = (error as jest.Mock).mock.calls[0][0];
+        expect(errorMessage).toMatch(/events plugin declared action invalid/);
+        expect(errorMessage).toMatch(/disallowed in `onEnd` hooks/);
       });
     });
   });
@@ -1300,8 +1509,12 @@ describe('events in hooks', () => {
       client.moves.setAutoEnd();
       client.events.endTurn();
       state = client.getState();
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(/`endTurn` is disallowed in `onEnd` hooks/);
     });
 
     test('cannot end turn from phase.onEnd', () => {
@@ -1325,9 +1538,13 @@ describe('events in hooks', () => {
       client.moves.setAutoEnd();
       client.events.endPhase();
       state = client.getState();
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
-      expect(state.ctx.phase).toBeNull();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(/`endTurn` is disallowed in `onEnd` hooks/);
     });
   });
 
@@ -1439,9 +1656,15 @@ describe('events in hooks', () => {
       client.moves.setAutoEnd();
       client.events.endPhase();
       state = client.getState();
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
-      expect(state.ctx.phase).toBe('B');
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`setPhase` & `endPhase` are disallowed in a phase’s `onEnd` hook/
+      );
     });
   });
 });
