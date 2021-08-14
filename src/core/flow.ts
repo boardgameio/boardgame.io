@@ -784,7 +784,7 @@ export function Flow({
     enabledEventNames.push('setStage');
   }
 
-  function ProcessEvent(state: State, action: ActionShape.GameEvent) {
+  function ProcessEvent(state: State, action: ActionShape.GameEvent): State {
     const { type, playerID, args } = action.payload;
     if (typeof eventHandlers[type] !== 'function') return state;
     return eventHandlers[type](

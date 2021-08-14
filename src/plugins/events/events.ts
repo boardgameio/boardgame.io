@@ -133,6 +133,7 @@ export class Events {
 
     EventQueue: for (let i = 0; i < this.dispatch.length; i++) {
       const event = this.dispatch[i];
+      const turnHasEnded = event.turn !== state.ctx.turn;
 
       // This protects against potential infinite loops if specific events are called on hooks.
       // The moment we exceed the defined threshold, we just bail out of all phases.
@@ -144,9 +145,6 @@ export class Events {
       if (event.calledFrom === undefined) {
         return stateWithError(Errors.CalledOutsideHook);
       }
-
-      const isSetActivePlayers = 'setActivePlayers' === event.type;
-      const turnHasEnded = event.turn !== state.ctx.turn;
 
       switch (event.type) {
         case 'endStage':
@@ -161,7 +159,7 @@ export class Events {
               return stateWithError(Errors.StageEventInPhaseBegin);
             // Disallow setStage & endStage in turn.onBegin hooks.
             case GameMethod.TURN_ON_BEGIN:
-              if (isSetActivePlayers) break;
+              if (event.type === 'setActivePlayers') break;
               return stateWithError(Errors.StageEventInTurnBegin);
           }
 
@@ -198,11 +196,7 @@ export class Events {
       }
 
       const action = automaticGameEvent(event.type, event.args, this.playerID);
-
-      state = {
-        ...state,
-        ...this.flow.processEvent(state, action),
-      };
+      state = this.flow.processEvent(state, action);
     }
     return state;
   }
