@@ -158,3 +158,21 @@ const game = {
 
 !> This doesn't apply to events in moves or hooks, but just the
 ability to call an event directly from a client.
+
+### Calling events from hooks
+
+The events API is available in game hooks like it is inside moves. However,
+because of how hooks and events interact, certain events cannot be called from
+certain hooks. The following table shows which hooks support which events.
+
+|                    | turn<br>`onMove` | turn<br>`onBegin` | turn<br>`onEnd` | phase<br>`onBegin` | phase<br>`onEnd` | game<br>`onEnd` |
+|-------------------:|:----------------:|:-----------------:|:---------------:|:------------------:|:----------------:|:---------------:|
+|         `setStage` |         ✅        |         ❌         |        ❌        |          ❌         |         ❌        |        ❌        |
+|         `endStage` |         ✅        |         ❌         |        ❌        |          ❌         |         ❌        |        ❌        |
+| `setActivePlayers` |         ✅        |         ✅         |        ❌        |          ❌         |         ❌        |        ❌        |
+|          `endTurn` |         ✅        |         ✅         |        ❌        |          ✅         |         ❌        |        ❌        |
+|         `setPhase` |         ✅        |         ✅         |        ✅        |          ✅         |         ❌        |        ❌        |
+|         `endPhase` |         ✅        |         ✅         |        ✅        |          ✅         |         ❌        |        ❌        |
+|          `endGame` |         ✅        |         ✅         |        ✅        |          ✅         |         ✅        |        ❌        |
+
+✅ = supported &nbsp;&nbsp;&nbsp; ❌ = not supported
