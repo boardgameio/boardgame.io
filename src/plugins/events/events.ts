@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import type { State, Ctx, PlayerID, Game } from '../../types';
+import type { State, Ctx, PlayerID, Game, ActivePlayersArg } from '../../types';
 import { automaticGameEvent } from '../../core/action-creators';
 import { GameMethod } from '../../core/game-methods';
 
@@ -32,14 +32,14 @@ const enum Errors {
 }
 
 export interface EventsAPI {
-  endGame?(...args: any[]): void;
-  endPhase?(...args: any[]): void;
-  endStage?(...args: any[]): void;
-  endTurn?(...args: any[]): void;
-  pass?(...args: any[]): void;
-  setActivePlayers?(...args: any[]): void;
-  setPhase?(...args: any[]): void;
-  setStage?(...args: any[]): void;
+  endGame(gameover?: any): void;
+  endPhase(): void;
+  endStage(): void;
+  endTurn(arg?: { next: PlayerID }): void;
+  pass(arg?: { remove: true }): void;
+  setActivePlayers(arg: ActivePlayersArg): void;
+  setPhase(newPhase: string): void;
+  setStage(newStage: string): void;
 }
 
 export interface PrivateEventsAPI {
@@ -82,9 +82,9 @@ export class Events {
   }
 
   api() {
-    const events: EventsAPI & PrivateEventsAPI = {
+    const events = {
       _obj: this,
-    };
+    } as unknown as EventsAPI & PrivateEventsAPI;
     for (const type of this.flow.eventNames) {
       events[type] = (...args: any[]) => {
         this.dispatch.push({

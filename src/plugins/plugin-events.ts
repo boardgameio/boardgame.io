@@ -25,7 +25,7 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   fnWrap:
     (method, methodType) =>
     (G, ctx, ...args) => {
-      const api = ctx.events as PrivateEventsAPI;
+      const api = ctx.events as EventsAPI & PrivateEventsAPI;
       if (api) api._obj.updateTurnContext(ctx, methodType);
       G = method(G, ctx, ...args);
       if (api) api._obj.unsetCurrentMethod();
