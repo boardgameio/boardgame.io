@@ -43,7 +43,7 @@ export interface EventsAPI {
 }
 
 export interface PrivateEventsAPI {
-  _obj: {
+  _private: {
     isUsed(): boolean;
     updateTurnContext(ctx: Ctx, methodType: GameMethod | undefined): void;
     unsetCurrentMethod(): void;
@@ -83,7 +83,7 @@ export class Events {
 
   api() {
     const events = {
-      _obj: this,
+      _private: this,
     } as unknown as EventsAPI & PrivateEventsAPI;
     for (const type of this.flow.eventNames) {
       events[type] = (...args: any[]) => {

@@ -15,7 +15,7 @@ export type { EventsAPI };
 const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   name: 'events',
 
-  noClient: ({ api }) => api._obj.isUsed(),
+  noClient: ({ api }) => api._private.isUsed(),
 
   isInvalid: ({ data }) => data.error || false,
 
@@ -26,13 +26,13 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
     (method, methodType) =>
     (G, ctx, ...args) => {
       const api = ctx.events as EventsAPI & PrivateEventsAPI;
-      if (api) api._obj.updateTurnContext(ctx, methodType);
+      if (api) api._private.updateTurnContext(ctx, methodType);
       G = method(G, ctx, ...args);
-      if (api) api._obj.unsetCurrentMethod();
+      if (api) api._private.unsetCurrentMethod();
       return G;
     },
 
-  dangerouslyFlushRawState: ({ state, api }) => api._obj.update(state),
+  dangerouslyFlushRawState: ({ state, api }) => api._private.update(state),
 
   api: ({ game, ctx, playerID }) => new Events(game.flow, ctx, playerID).api(),
 };

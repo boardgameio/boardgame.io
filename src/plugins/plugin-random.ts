@@ -14,11 +14,11 @@ const RandomPlugin: Plugin<RandomAPI & PrivateRandomAPI, RandomState> = {
   name: 'random',
 
   noClient: ({ api }) => {
-    return api._obj.isUsed();
+    return api._private.isUsed();
   },
 
   flush: ({ api }) => {
-    return api._obj.getState();
+    return api._private.getState();
   },
 
   api: ({ data }) => {
