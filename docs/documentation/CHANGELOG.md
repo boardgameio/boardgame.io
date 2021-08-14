@@ -1,12 +1,20 @@
+### v0.47.1
+
+#### Features
+
+* [[f97a08d8](https://github.com/boardgameio/boardgame.io/commit/f97a08d8)] Improve events errors & expose method types to plugin `fnWrap` ([#980](https://github.com/boardgameio/boardgame.io/pull/980))  
+  - See [the Events guide](events#calling-events-from-hooks) for details of event support in game hooks
+* [[95be8b90](https://github.com/boardgameio/boardgame.io/commit/95be8b90)] events: Accurately type events API arguments
+
 ## v0.47.0
 
 #### Features
 
-* [[b6a4fed](https://github.com/boardgameio/boardgame.io/commit/b6a4fed)] Adds pub-sub support for horizontally scaling bgio server (#978)
+* [[b6a4fed](https://github.com/boardgameio/boardgame.io/commit/b6a4fed)] Adds pub-sub support for horizontally scaling bgio server ([#978](https://github.com/boardgameio/boardgame.io/pull/978))
 
 #### Bugfixes
 
-* [[241701f](https://github.com/boardgameio/boardgame.io/commit/241701f)] fix(master): Don’t crash on missing chatMessage (#977)
+* [[241701f](https://github.com/boardgameio/boardgame.io/commit/241701f)] master: Don’t crash on missing `chatMessage` ([#977](https://github.com/boardgameio/boardgame.io/pull/977))
 
 ### v0.46.2
 
