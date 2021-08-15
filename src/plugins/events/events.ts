@@ -63,6 +63,7 @@ export class Events {
     phase: string;
     turn: number;
     calledFrom: GameMethod | undefined;
+    error: Error;
   }>;
   maxEndedTurnsPerAction: number;
   initialTurn: number;
@@ -93,6 +94,8 @@ export class Events {
           phase: this.currentPhase,
           turn: this.currentTurn,
           calledFrom: this.currentMethod,
+          // Used to capture a stack trace in case it is needed later.
+          error: new Error('Events Plugin Error'),
         });
       };
     }
@@ -120,13 +123,13 @@ export class Events {
    */
   update(state: State): State {
     const initialState = state;
-    const stateWithError = (error: Errors) => ({
+    const stateWithError = ({ stack }: Error, message: Errors) => ({
       ...initialState,
       plugins: {
         ...initialState.plugins,
         events: {
           ...initialState.plugins.events,
-          data: { error },
+          data: { error: message + '\n' + stack },
         },
       },
     });
@@ -139,11 +142,11 @@ export class Events {
       // The moment we exceed the defined threshold, we just bail out of all phases.
       const endedTurns = this.currentTurn - this.initialTurn;
       if (endedTurns >= this.maxEndedTurnsPerAction) {
-        return stateWithError(Errors.MaxTurnEndings);
+        return stateWithError(event.error, Errors.MaxTurnEndings);
       }
 
       if (event.calledFrom === undefined) {
-        return stateWithError(Errors.CalledOutsideHook);
+        return stateWithError(event.error, Errors.CalledOutsideHook);
       }
 
       switch (event.type) {
@@ -154,13 +157,13 @@ export class Events {
             // Disallow all stage events in onEnd and phase.onBegin hooks.
             case GameMethod.TURN_ON_END:
             case GameMethod.PHASE_ON_END:
-              return stateWithError(Errors.StageEventInOnEnd);
+              return stateWithError(event.error, Errors.StageEventInOnEnd);
             case GameMethod.PHASE_ON_BEGIN:
-              return stateWithError(Errors.StageEventInPhaseBegin);
+              return stateWithError(event.error, Errors.StageEventInPhaseBegin);
             // Disallow setStage & endStage in turn.onBegin hooks.
             case GameMethod.TURN_ON_BEGIN:
               if (event.type === 'setActivePlayers') break;
-              return stateWithError(Errors.StageEventInTurnBegin);
+              return stateWithError(event.error, Errors.StageEventInTurnBegin);
           }
 
           // If the turn already ended, don't try to process stage events.
@@ -173,7 +176,7 @@ export class Events {
             event.calledFrom === GameMethod.TURN_ON_END ||
             event.calledFrom === GameMethod.PHASE_ON_END
           ) {
-            return stateWithError(Errors.EndTurnInOnEnd);
+            return stateWithError(event.error, Errors.EndTurnInOnEnd);
           }
 
           // If the turn already ended some other way,
@@ -185,7 +188,7 @@ export class Events {
         case 'endPhase':
         case 'setPhase': {
           if (event.calledFrom === GameMethod.PHASE_ON_END) {
-            return stateWithError(Errors.PhaseEventInOnEnd);
+            return stateWithError(event.error, Errors.PhaseEventInOnEnd);
           }
 
           // If the phase already ended some other way,

@@ -38,8 +38,22 @@ test('dispatch', () => {
   (events as unknown as { A(): void }).A();
   (events as unknown as { B(): void }).B();
   expect(e.dispatch).toEqual([
-    { type: 'A', args: [], phase: '', turn: 0 },
-    { type: 'B', args: [], phase: '', turn: 0 },
+    {
+      type: 'A',
+      args: [],
+      phase: '',
+      turn: 0,
+      calledFrom: undefined,
+      error: expect.any(Error),
+    },
+    {
+      type: 'B',
+      args: [],
+      phase: '',
+      turn: 0,
+      calledFrom: undefined,
+      error: expect.any(Error),
+    },
   ]);
 });
 
