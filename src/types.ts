@@ -6,6 +6,7 @@ import type { ActionErrorType, UpdateErrorType } from './core/errors';
 import type { Flow } from './core/flow';
 import type { CreateGameReducer } from './core/reducer';
 import type { INVALID_MOVE } from './core/constants';
+import type { GameMethod } from './core/game-methods';
 import type { Auth } from './server/auth';
 import type * as StorageAPI from './server/db/base';
 import type { EventsAPI } from './plugins/plugin-events';
@@ -159,7 +160,8 @@ export interface Plugin<
     data: Data;
   }) => State<G>;
   fnWrap?: (
-    fn: (context: FnContext<G>, ...args: SerializableAny[]) => any
+    moveOrHook: (context: FnContext<G>, ...args: SerializableAny[]) => any,
+    methodType: GameMethod
   ) => (context: FnContext<G>, ...args: SerializableAny[]) => any;
   playerView?: (context: {
     G: G;

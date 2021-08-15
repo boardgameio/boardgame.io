@@ -22,6 +22,7 @@ import type {
   PlayerID,
 } from '../types';
 import { error } from '../core/logger';
+import type { GameMethod } from '../core/game-methods';
 
 interface PluginOpts {
   game: Game;
@@ -89,13 +90,21 @@ export const GetAPIs = ({ plugins }: PartialGameState) =>
 /**
  * Applies the provided plugins to the given move / flow function.
  *
- * @param {function} functionToWrap - The move function or trigger to apply the plugins to.
- * @param {object} plugins - The list of plugins.
+ * @param methodToWrap - The move function or hook to apply the plugins to.
+ * @param methodType - The type of the move or hook being wrapped.
+ * @param plugins - The list of plugins.
  */
-export const FnWrap = (functionToWrap: AnyFn, plugins: Plugin[]) => {
+export const FnWrap = (
+  methodToWrap: AnyFn,
+  methodType: GameMethod,
+  plugins: Plugin[]
+) => {
   return [...DEFAULT_PLUGINS, ...plugins]
     .filter((plugin) => plugin.fnWrap !== undefined)
-    .reduce((fn: AnyFn, { fnWrap }: Plugin) => fnWrap(fn), functionToWrap);
+    .reduce(
+      (method: AnyFn, { fnWrap }: Plugin) => fnWrap(method, methodType),
+      methodToWrap
+    );
 };
 
 /**

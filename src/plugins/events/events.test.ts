@@ -8,7 +8,14 @@
 
 import { Events } from './events';
 import { Client } from '../../client/client';
+import { error } from '../../core/logger';
 import type { Game, Ctx } from '../../types';
+
+jest.mock('../../core/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}));
+afterEach(jest.clearAllMocks);
 
 test('constructor', () => {
   const flow = {} as Game['flow'];
@@ -31,8 +38,22 @@ test('dispatch', () => {
   (events as unknown as { A(): void }).A();
   (events as unknown as { B(): void }).B();
   expect(e.dispatch).toEqual([
-    { type: 'A', args: [], phase: '', turn: 0 },
-    { type: 'B', args: [], phase: '', turn: 0 },
+    {
+      type: 'A',
+      args: [],
+      phase: '',
+      turn: 0,
+      calledFrom: undefined,
+      error: expect.any(Error),
+    },
+    {
+      type: 'B',
+      args: [],
+      phase: '',
+      turn: 0,
+      calledFrom: undefined,
+      error: expect.any(Error),
+    },
   ]);
 });
 
@@ -62,7 +83,8 @@ test('no duplicate endTurn', () => {
   const client = Client({ game });
   expect(client.getState().ctx.turn).toBe(1);
   client.events.endTurn();
-  expect(client.getState().ctx.turn).toBe(2);
+  expect(client.getState().ctx.turn).toBe(1);
+  expect(error).toHaveBeenCalled();
 });
 
 test('no duplicate endPhase', () => {
@@ -81,5 +103,6 @@ test('no duplicate endPhase', () => {
   const client = Client({ game });
   expect(client.getState().ctx.phase).toBe('A');
   client.events.setPhase('B');
-  expect(client.getState().ctx.phase).toBe('B');
+  expect(client.getState().ctx.phase).toBe('A');
+  expect(error).toHaveBeenCalled();
 });

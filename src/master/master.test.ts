@@ -966,6 +966,19 @@ describe('authentication', () => {
 
     beforeEach(resetTestEnvironment);
 
+    test('auth success', async () => {
+      const authenticateCredentials = () => true;
+      const master = new Master(
+        game,
+        storage,
+        TransportAPI(send, sendAll),
+        new Auth({ authenticateCredentials })
+      );
+      const ret = await master.onChatMessage(matchID, chatMessage, undefined);
+      expect(ret).toBeUndefined();
+      expect(sendAll).toHaveBeenCalled();
+    });
+
     test('auth failure', async () => {
       const authenticateCredentials = () => false;
       const master = new Master(
@@ -979,7 +992,7 @@ describe('authentication', () => {
       expect(sendAll).not.toHaveBeenCalled();
     });
 
-    test('auth success', async () => {
+    test('invalid packet', async () => {
       const authenticateCredentials = () => true;
       const master = new Master(
         game,
@@ -987,9 +1000,9 @@ describe('authentication', () => {
         TransportAPI(send, sendAll),
         new Auth({ authenticateCredentials })
       );
-      const ret = await master.onChatMessage(matchID, chatMessage, undefined);
-      expect(ret).toBeUndefined();
-      expect(sendAll).toHaveBeenCalled();
+      const ret = await master.onChatMessage(matchID, undefined, undefined);
+      expect(ret && ret.error).toBe('unauthorized');
+      expect(sendAll).not.toHaveBeenCalled();
     });
 
     test('default', async () => {

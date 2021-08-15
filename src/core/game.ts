@@ -11,6 +11,7 @@ import { Flow } from './flow';
 import type { INVALID_MOVE } from './constants';
 import type { ActionPayload, Game, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
+import { GameMethod } from './game-methods';
 
 type ProcessedGame = Game & {
   flow: ReturnType<typeof Flow>;
@@ -87,7 +88,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
       }
 
       if (moveFn instanceof Function) {
-        const fn = plugins.FnWrap(moveFn, game.plugins);
+        const fn = plugins.FnWrap(moveFn, GameMethod.MOVE, game.plugins);
         let args = [];
         if (action.args !== undefined) {
           args = Array.isArray(action.args) ? action.args : [action.args];

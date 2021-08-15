@@ -32,7 +32,7 @@ export interface RandomAPI {
 }
 
 export interface PrivateRandomAPI {
-  _obj: {
+  _private: {
     isUsed(): boolean;
     getState(): RandomState;
   };
@@ -192,7 +192,7 @@ export class Random {
         return shuffled;
       },
 
-      _obj: this,
+      _private: this,
     };
   }
 }
