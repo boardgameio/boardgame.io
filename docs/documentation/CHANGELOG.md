@@ -1,3 +1,7 @@
+### v0.47.3
+
+* Dependency changes only
+
 ### v0.47.2
 
 #### Features
