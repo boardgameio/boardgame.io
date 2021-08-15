@@ -64,12 +64,11 @@ const formatChanges = (changes) =>
 const features = formatChanges(changes.filter((line) => isFeature(line)));
 const others = formatChanges(changes.filter((line) => !isFeature(line)));
 
-const heading = (IS_MAJOR ? '## ' : '### ') + CURRENT_TAG + EOL;
-const sections = [heading];
-if (features.length > 0) sections.push('#### Features' + P + features + EOL);
-if (others.length > 0) sections.push('#### Bugfixes' + P + others + EOL);
-shell.ShellString(sections.join(EOL)).toEnd(FILE);
-shell.echo(shell.cat(FILE));
+let NOTES = (IS_MAJOR ? '## ' : '### ') + CURRENT_TAG + P;
+if (features.length > 0) NOTES += '#### Features' + P + features + P;
+if (others.length > 0) NOTES += '#### Bugfixes' + P + others + P;
+shell.ShellString(NOTES).toEnd(FILE);
+shell.echo(NOTES);
 
 shell.cat('docs/documentation/CHANGELOG.md').toEnd(FILE);
 shell.cp(FILE, 'docs/documentation/CHANGELOG.md');
