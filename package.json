@@ -92,7 +92,6 @@
     "@testing-library/svelte": "^3.0.3",
     "@types/enzyme": "^3.10.9",
     "@types/jest": "^24.9.1",
-    "@types/koa-router": "^7.4.0",
     "@types/koa__cors": "^3.0.3",
     "@types/node": "^14.0.24",
     "@types/react": "^16.14.11",
@@ -148,6 +147,7 @@
   "dependencies": {
     "@koa/cors": "^3.1.0",
     "@types/koa": "^2.11.3",
+    "@types/koa-router": "^7.4.0",
     "flatted": "^3.2.1",
     "immer": "^9.0.5",
     "koa": "^2.7.0",
