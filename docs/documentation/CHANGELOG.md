@@ -1,3 +1,9 @@
+### v0.47.2
+
+#### Features
+
+* [[8267e36c](https://github.com/boardgameio/boardgame.io/commit/8267e36c)] events: Add stack traces to events plugin errors
+
 ### v0.47.1
 
 #### Features
