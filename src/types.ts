@@ -59,13 +59,16 @@ export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 export type StageName = string;
 export type PlayerID = string;
 
-export type StageArg = StageName | { stage?: StageName; moveLimit?: number };
+export type StageArg =
+  | StageName
+  | { stage?: StageName; minMoves?: number; moveLimit?: number };
 
 export interface ActivePlayersArg {
   currentPlayer?: StageArg;
   others?: StageArg;
   all?: StageArg;
   value?: Record<PlayerID, StageArg>;
+  minMoves?: number;
   moveLimit?: number;
   revert?: boolean;
   next?: ActivePlayersArg;
@@ -86,10 +89,12 @@ export interface Ctx {
   gameover?: any;
   turn: number;
   phase: string;
+  _activePlayersMinMoves?: Record<PlayerID, number>;
   _activePlayersMoveLimit?: Record<PlayerID, number>;
   _activePlayersNumMoves?: Record<PlayerID, number>;
   _prevActivePlayers?: Array<{
     activePlayers: null | ActivePlayers;
+    _activePlayersMinMoves?: Record<PlayerID, number>;
     _activePlayersMoveLimit?: Record<PlayerID, number>;
     _activePlayersNumMoves?: Record<PlayerID, number>;
   }>;
@@ -256,6 +261,7 @@ export interface TurnConfig<
   CtxWithPlugins extends Ctx = Ctx
 > {
   activePlayers?: ActivePlayersArg;
+  minMoves?: number;
   moveLimit?: number;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;

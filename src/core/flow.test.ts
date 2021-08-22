@@ -241,6 +241,105 @@ describe('turn', () => {
     }
   });
 
+  describe('minMoves', () => {
+    test('without phases', () => {
+      const flow = Flow({
+        turn: {
+          minMoves: 2,
+        },
+      });
+
+      let state = flow.init({ ctx: flow.ctx(2) } as State);
+
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      // player 0 could not end their turn because minMoves have not been made yet
+
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      // player 0 can now end their turn, having made another move to reach minMoves total
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+    });
+
+    test('with phases', () => {
+      const flow = Flow({
+        turn: { minMoves: 2 },
+        phases: {
+          B: {
+            turn: {
+              minMoves: 1,
+            },
+          },
+        },
+      });
+      let state = flow.init({ ctx: flow.ctx(2) } as State);
+
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      // player 0 could not end their turn because minMoves have not been made yet
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+
+      state = flow.processEvent(state, gameEvent('setPhase', 'B'));
+
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      // player 0 could not end their turn because minMoves have not been made yet
+
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      // player 0 could end their turn after only one move because minMoves in phase B is only 1
+
+      expect(state.ctx.turn).toBe(4);
+      expect(state.ctx.currentPlayer).toBe('1');
+    });
+  });
+
   describe('moveLimit', () => {
     test('without phases', () => {
       const flow = Flow({
@@ -249,13 +348,33 @@ describe('turn', () => {
         },
       });
       let state = flow.init({ ctx: flow.ctx(2) } as State);
+
       expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
       state = flow.processMove(state, makeMove('move', null, '0').payload);
+
       expect(state.ctx.turn).toBe(1);
-      state = flow.processEvent(state, gameEvent('endTurn'));
-      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
       state = flow.processMove(state, makeMove('move', null, '0').payload);
+
+      // player 0 reached moveLimit, turn ended automatically
+
       expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      // player 1 ended their turn manually, having made less moves than the moveLimit would allow
+
+      expect(state.ctx.turn).toBe(3);
+      expect(state.ctx.currentPlayer).toBe('0');
     });
 
     test('with phases', () => {
@@ -281,8 +400,10 @@ describe('turn', () => {
 
       state = flow.processEvent(state, gameEvent('endTurn'));
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+      // player 0 ended their turn manually, having made less moves than the moveLimit would allow
+
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
 
       state = flow.processMove(state, makeMove('move', null, '0').payload);
 
@@ -291,13 +412,23 @@ describe('turn', () => {
 
       state = flow.processEvent(state, gameEvent('setPhase', 'B'));
 
+      // player 1 still had moves left, but the phase change automatically ended their turn
+
       expect(state.ctx.phase).toBe('B');
       expect(state.ctx.turn).toBe(3);
       expect(state.ctx.currentPlayer).toBe('0');
 
       state = flow.processMove(state, makeMove('move', null, '0').payload);
+
       expect(state.ctx.turn).toBe(4);
       expect(state.ctx.currentPlayer).toBe('1');
+
+      state = flow.processEvent(state, gameEvent('endTurn'));
+
+      // player 1 ended their turn without using any move
+
+      expect(state.ctx.turn).toBe(5);
+      expect(state.ctx.currentPlayer).toBe('0');
     });
 
     test('with noLimit moves', () => {

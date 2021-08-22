@@ -367,8 +367,12 @@ export function Flow({
     if (typeof arg !== 'object') return state;
 
     let { ctx } = state;
-    let { activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
-      ctx;
+    let {
+      activePlayers,
+      _activePlayersMinMoves,
+      _activePlayersMoveLimit,
+      _activePlayersNumMoves,
+    } = ctx;
 
     // Checking if stage is valid, even Stage.NULL
     if (arg.stage !== undefined) {
@@ -377,6 +381,13 @@ export function Flow({
       }
       activePlayers[playerID] = arg.stage;
       _activePlayersNumMoves[playerID] = 0;
+
+      if (arg.minMoves) {
+        if (_activePlayersMinMoves === null) {
+          _activePlayersMinMoves = {};
+        }
+        _activePlayersMinMoves[playerID] = arg.minMoves;
+      }
 
       if (arg.moveLimit) {
         if (_activePlayersMoveLimit === null) {
@@ -389,6 +400,7 @@ export function Flow({
     ctx = {
       ...ctx,
       activePlayers,
+      _activePlayersMinMoves,
       _activePlayersMoveLimit,
       _activePlayersNumMoves,
     };
@@ -496,15 +508,15 @@ export function Flow({
     const { currentPlayer, numMoves, phase, turn } = state.ctx;
     const phaseConfig = GetPhase(state.ctx);
 
-    // Prevent ending the turn if moveLimit hasn't been reached.
+    // Prevent ending the turn if minMoves haven't been reached.
     const currentPlayerMoves = numMoves || 0;
     if (
       !force &&
-      phaseConfig.turn.moveLimit &&
-      currentPlayerMoves < phaseConfig.turn.moveLimit
+      phaseConfig.turn.minMoves &&
+      currentPlayerMoves < phaseConfig.turn.minMoves
     ) {
       logging.info(
-        `cannot end turn before making ${phaseConfig.turn.moveLimit} moves`
+        `cannot end turn before making ${phaseConfig.turn.minMoves} moves`
       );
       return state;
     }
@@ -554,7 +566,13 @@ export function Flow({
     playerID = playerID || state.ctx.currentPlayer;
 
     let { ctx, _stateID } = state;
-    let { activePlayers, _activePlayersMoveLimit, phase, turn } = ctx;
+    let {
+      activePlayers,
+      _activePlayersMinMoves,
+      _activePlayersMoveLimit,
+      phase,
+      turn,
+    } = ctx;
 
     const playerInStage = activePlayers !== null && playerID in activePlayers;
 
@@ -576,6 +594,12 @@ export function Flow({
     activePlayers = { ...activePlayers };
     delete activePlayers[playerID];
 
+    if (_activePlayersMinMoves) {
+      // Remove player from _activePlayersMinMoves.
+      _activePlayersMinMoves = { ..._activePlayersMinMoves };
+      delete _activePlayersMinMoves[playerID];
+    }
+
     if (_activePlayersMoveLimit) {
       // Remove player from _activePlayersMoveLimit.
       _activePlayersMoveLimit = { ..._activePlayersMoveLimit };
@@ -585,6 +609,7 @@ export function Flow({
     ctx = UpdateActivePlayersOnceEmpty({
       ...ctx,
       activePlayers,
+      _activePlayersMinMoves,
       _activePlayersMoveLimit,
     });
 

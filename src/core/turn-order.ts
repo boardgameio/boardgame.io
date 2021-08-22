@@ -24,6 +24,7 @@ export function SetActivePlayers(
   let activePlayers: typeof ctx.activePlayers = {};
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
+  let _activePlayersMinMoves = {};
   let _activePlayersMoveLimit = {};
 
   if (Array.isArray(arg)) {
@@ -42,6 +43,7 @@ export function SetActivePlayers(
         ...ctx._prevActivePlayers,
         {
           activePlayers: ctx.activePlayers,
+          _activePlayersMinMoves: ctx._activePlayersMinMoves,
           _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
           _activePlayersNumMoves: ctx._activePlayersNumMoves,
         },
@@ -51,6 +53,7 @@ export function SetActivePlayers(
     if (arg.currentPlayer !== undefined) {
       ApplyActivePlayerArgument(
         activePlayers,
+        _activePlayersMinMoves,
         _activePlayersMoveLimit,
         ctx.currentPlayer,
         arg.currentPlayer
@@ -63,6 +66,7 @@ export function SetActivePlayers(
         if (id !== ctx.currentPlayer) {
           ApplyActivePlayerArgument(
             activePlayers,
+            _activePlayersMinMoves,
             _activePlayersMoveLimit,
             id,
             arg.others
@@ -76,6 +80,7 @@ export function SetActivePlayers(
         const id = ctx.playOrder[i];
         ApplyActivePlayerArgument(
           activePlayers,
+          _activePlayersMinMoves,
           _activePlayersMoveLimit,
           id,
           arg.all
@@ -87,10 +92,19 @@ export function SetActivePlayers(
       for (const id in arg.value) {
         ApplyActivePlayerArgument(
           activePlayers,
+          _activePlayersMinMoves,
           _activePlayersMoveLimit,
           id,
           arg.value[id]
         );
+      }
+    }
+
+    if (arg.minMoves) {
+      for (const id in activePlayers) {
+        if (_activePlayersMinMoves[id] === undefined) {
+          _activePlayersMinMoves[id] = arg.minMoves;
+        }
       }
     }
 
@@ -107,6 +121,10 @@ export function SetActivePlayers(
     activePlayers = null;
   }
 
+  if (Object.keys(_activePlayersMinMoves).length === 0) {
+    _activePlayersMinMoves = null;
+  }
+
   if (Object.keys(_activePlayersMoveLimit).length === 0) {
     _activePlayersMoveLimit = null;
   }
@@ -119,6 +137,7 @@ export function SetActivePlayers(
   return {
     ...ctx,
     activePlayers,
+    _activePlayersMinMoves,
     _activePlayersMoveLimit,
     _activePlayersNumMoves,
     _prevActivePlayers,
@@ -134,6 +153,7 @@ export function SetActivePlayers(
 export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
   let {
     activePlayers,
+    _activePlayersMinMoves,
     _activePlayersMoveLimit,
     _activePlayersNumMoves,
     _prevActivePlayers,
@@ -145,17 +165,23 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
       ctx = SetActivePlayers(ctx, _nextActivePlayers);
       ({
         activePlayers,
+        _activePlayersMinMoves,
         _activePlayersMoveLimit,
         _activePlayersNumMoves,
         _prevActivePlayers,
       } = ctx);
     } else if (_prevActivePlayers.length > 0) {
       const lastIndex = _prevActivePlayers.length - 1;
-      ({ activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
-        _prevActivePlayers[lastIndex]);
+      ({
+        activePlayers,
+        _activePlayersMinMoves,
+        _activePlayersMoveLimit,
+        _activePlayersNumMoves,
+      } = _prevActivePlayers[lastIndex]);
       _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
     } else {
       activePlayers = null;
+      _activePlayersMinMoves = null;
       _activePlayersMoveLimit = null;
     }
   }
@@ -163,6 +189,7 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
   return {
     ...ctx,
     activePlayers,
+    _activePlayersMinMoves,
     _activePlayersMoveLimit,
     _activePlayersNumMoves,
     _prevActivePlayers,
@@ -172,12 +199,14 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
 /**
  * Apply an active player argument to the given player ID
  * @param {Object} activePlayers
+ * @param {Object} _activePlayersMinMoves
  * @param {Object} _activePlayersMoveLimit
  * @param {String} playerID The player to apply the parameter to
  * @param {(String|Object)} arg An active player argument
  */
 function ApplyActivePlayerArgument(
   activePlayers: Ctx['activePlayers'],
+  _activePlayersMinMoves: Ctx['_activePlayersMinMoves'],
   _activePlayersMoveLimit: Ctx['_activePlayersMoveLimit'],
   playerID: PlayerID,
   arg: StageArg
@@ -188,6 +217,7 @@ function ApplyActivePlayerArgument(
 
   if (arg.stage !== undefined) {
     activePlayers[playerID] = arg.stage;
+    if (arg.minMoves) _activePlayersMinMoves[playerID] = arg.minMoves;
     if (arg.moveLimit) _activePlayersMoveLimit[playerID] = arg.moveLimit;
   }
 }
