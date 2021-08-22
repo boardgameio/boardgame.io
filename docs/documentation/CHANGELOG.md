@@ -1,3 +1,10 @@
+### v0.47.4
+
+#### Bugfixes
+
+* [[d54af1f4](https://github.com/boardgameio/boardgame.io/commit/d54af1f4)] events: Don’t use const enum for better backwards compatibility
+
+
 ### v0.47.3
 
 * Dependency changes only
