@@ -700,7 +700,7 @@ describe('stage events', () => {
     test('with multiple active players', () => {
       const flow = Flow({
         turn: {
-          activePlayers: { all: 'A', moveLimit: 5 },
+          activePlayers: { all: 'A', minMoves: 2, moveLimit: 5 },
         },
       });
       let state = { G: {}, ctx: flow.ctx(3) } as State;
@@ -709,7 +709,7 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'B', moveLimit: 1 })
+        gameEvent('setStage', { stage: 'B', minMoves: 1 })
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'A', '2': 'A' });
 
@@ -735,6 +735,19 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 1 });
       state = flow.processEvent(state, gameEvent('setStage', 'B'));
       expect(state.ctx._activePlayersNumMoves).toMatchObject({ '0': 0 });
+    });
+
+    test('with min moves', () => {
+      const flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.init(state);
+
+      expect(state.ctx._activePlayersMinMoves).toBeNull();
+      state = flow.processEvent(
+        state,
+        gameEvent('setStage', { stage: 'A', minMoves: 1 })
+      );
+      expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 1 });
     });
 
     test('with move limit', () => {
@@ -856,6 +869,35 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
       state = flow.processEvent(state, gameEvent('endStage'));
       expect(state.ctx.activePlayers).toEqual({ '1': 'A', '2': 'A' });
+    });
+
+    test('with min moves', () => {
+      const flow = Flow({
+        turn: {
+          activePlayers: { all: 'A', minMoves: 2 },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.init(state);
+
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A' });
+
+      state = flow.processEvent(state, gameEvent('endStage'));
+
+      // player 0 is not allowed to end the stage, they haven't made any move yet
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A' });
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+      state = flow.processEvent(state, gameEvent('endStage'));
+
+      // player 0 is still not allowed to end the stage, they haven't made the minimum number of moves
+      expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A' });
+
+      state = flow.processMove(state, makeMove('move', null, '0').payload);
+      state = flow.processEvent(state, gameEvent('endStage'));
+
+      // having made 2 moves, player 0 was allowed to end the stage
+      expect(state.ctx.activePlayers).toEqual({ '1': 'A' });
     });
 
     test('maintains move count', () => {
@@ -1936,7 +1978,7 @@ describe('hook execution order', () => {
           calls.push('moves.endStage');
         },
         setActivePlayers: (G, ctx) => {
-          ctx.events.setActivePlayers({ all: 'A', moveLimit: 1 });
+          ctx.events.setActivePlayers({ all: 'A', minMoves: 1, moveLimit: 1 });
           calls.push('moves.setActivePlayers');
         },
       },

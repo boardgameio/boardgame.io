@@ -568,6 +568,7 @@ export function Flow({
     let { ctx, _stateID } = state;
     let {
       activePlayers,
+      _activePlayersNumMoves,
       _activePlayersMinMoves,
       _activePlayersMoveLimit,
       phase,
@@ -576,8 +577,9 @@ export function Flow({
 
     const playerInStage = activePlayers !== null && playerID in activePlayers;
 
+    const phaseConfig = GetPhase(ctx);
+
     if (!arg && playerInStage) {
-      const phaseConfig = GetPhase(ctx);
       const stage = phaseConfig.turn.stages[activePlayers[playerID]];
       if (stage && stage.next) arg = stage.next;
     }
@@ -589,6 +591,19 @@ export function Flow({
 
     // If player isn’t in a stage, there is nothing else to do.
     if (!playerInStage) return state;
+
+    // Prevent ending the stage if minMoves haven't been reached.
+    const currentPlayerMoves = _activePlayersNumMoves[playerID] || 0;
+    if (
+      _activePlayersMinMoves &&
+      _activePlayersMinMoves[playerID] &&
+      currentPlayerMoves < _activePlayersMinMoves[playerID]
+    ) {
+      logging.info(
+        `cannot end stage before making ${_activePlayersMinMoves[playerID]} moves`
+      );
+      return state;
+    }
 
     // Remove player from activePlayers.
     activePlayers = { ...activePlayers };
