@@ -66,6 +66,27 @@ npm start
 
 The examples can be found in the [examples](examples/) folder.
 
+#### Running inside a dev container using VS Code
+
+It is also possible to run the examples or contribute to the repository using a preconfigured dev container. This removes the need to install dependencies like Node.js on your local machine, and provides a consistent development environment no matter what OS you are on.
+
+Prerequisites on the local machine:
+
+- [VS Code](https://code.visualstudio.com/) + [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) extension
+- [git](https://git-scm.com/)
+- [Docker](https://www.docker.com/)
+
+To run the examples or start developing:
+
+- Open VS Code
+- Click the Remote Development icon in the bottom left corner of the UI -> "Clone repository in Container Volume..."
+- Paste `https://github.com/boardgameio/boardgame.io` or use your own fork (or any branch or pull request)
+- The container will start up and install all required dependencies automatically
+- Wait for terminal output to finish
+- Open NPM Scripts panel in the sidebar and run `package.json > start`
+
+If your VS Code Explorer sidebar has no NPM scripts panel right-click the Explorer header and check "NPM Scripts", or just run `npm run start` yourself from a terminal.
+
 ## Changelog
 
 See [changelog](docs/documentation/CHANGELOG.md).
