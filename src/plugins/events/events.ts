@@ -10,7 +10,7 @@ import type { State, Ctx, PlayerID, Game, ActivePlayersArg } from '../../types';
 import { automaticGameEvent } from '../../core/action-creators';
 import { GameMethod } from '../../core/game-methods';
 
-const enum Errors {
+enum Errors {
   CalledOutsideHook = 'Events must be called from moves or the `onBegin`, `onEnd`, and `onMove` hooks.\n' +
     'This error probably means you called an event from other game code, like an `endIf` trigger or one of the `turn.order` methods.',
 
