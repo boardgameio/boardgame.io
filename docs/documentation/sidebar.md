@@ -17,6 +17,7 @@
   - [Testing](testing.md)
   - [Deployment](deployment.md)
   - [Chat](chat.md)
+  - [TypeScript](typescript.md)
 - **Reference**
   - [Game](api/Game.md)
   - [Client](api/Client.md)

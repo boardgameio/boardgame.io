@@ -248,6 +248,8 @@ const App = Client({
 
   // Your React component representing the game board.
   // The props that this component receives are listed below.
+  // When using TypeScript, type the component's properties as
+  // extending BoardProps.
   board: Board,
 
   // Optional: React component to display while the client

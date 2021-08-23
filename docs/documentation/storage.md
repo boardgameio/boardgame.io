@@ -57,7 +57,7 @@ latest release).
 
 Depending on your set-up, you may want the server to cache some of the data,
 reducing the load on your database and speeding up server responses.
-[bgio-storage-cache](https://github.com/delucis/bgio-storage-cache) offers
+[@boardgame.io/storage-cache](https://github.com/boardgameio/storage-cache) offers
 a basic caching model compatible with any boardgame.io database connector.
 
 ### Writing a Custom Adapter
