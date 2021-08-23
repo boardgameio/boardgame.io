@@ -48,3 +48,33 @@ Use the following command to preview them:
 ```
 $ npm run docs
 ```
+
+## VS Code remote dev container support
+
+For minimal effort, the repository is configured to run in a remote dev container from VS Code.
+
+- No need to install Node.js or any other project-specific tooling and dependencies
+- No risk of your local machine environment getting in the way
+- Consistent development environment no matter what OS is used
+- Useful extensions preinstalled in the container, independent of your local VS Code settings
+
+### Prerequisites
+
+- [VS Code](https://code.visualstudio.com/) + [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) extension
+- [git](https://git-scm.com/)
+- [Docker](https://www.docker.com/)
+
+### Getting started
+
+- Launch VS Code
+- Click the Remote Development icon in the bottom left corner of the UI, then "Clone repository in Container Volume..."
+- Paste `https://github.com/boardgameio/boardgame.io` or use your own fork, any branch, or a pull request
+- The container will start up and install all required dependencies automatically
+- Terminal output will cease when everything is set up and ready to go
+
+### Running the examples from the VS Code Explorer
+
+- Open "NPM Scripts" panel in the sidebar
+- Click on `package.json > start`
+
+If the NPM scripts panel is not visible in the Explorer sidebar, open the Explorer settings (3 dots) and check "NPM Scripts".
