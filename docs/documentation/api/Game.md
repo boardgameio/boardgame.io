@@ -1,6 +1,6 @@
 # Game
 
-When using Typescript, type your Game as `Game<MyGameState>`.
+?> Using TypeScript? Check out [the TypeScript docs](typescript.md) on how to type your game object.
 
 ```js
 {

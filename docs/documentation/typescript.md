@@ -1,29 +1,33 @@
-# Typescript
+# TypeScript
 
-boardgame.io includes type definitions for Typescript.
+boardgame.io includes type definitions for TypeScript.
 
-Basic boardgame.io game:
+### Basic usage
 
 ```typescript
-// Game.tsx
-import { Game } from 'boardgame.io';
+// Game.ts
+import type { Game, Move } from "boardgame.io";
 
 export interface MyGameState {
   // aka 'G', your game's state
 }
 
+const move: Move<MyGameState> = (G, ctx) => {};
+
 export const MyGame: Game<MyGameState> = {
   // ...
-}
+};
 ```
 
-## React
+[Open this snippet in the TypeScript Playground ↗︎](https://www.typescriptlang.org/play?#code/PTAEHEEMFsFMDoAuBnAUAS2gBwPYCdFREBPLWUAbwhlgBpQBZHAN3IF9QAzPHaUAcgBGOSHgAmAcxrx0OfgG5UqWAA9cBUOgB2iWHk6QAxuQbEocAMqJIuyqlCgQoSAGtIA8P3rEcAVzygUnD8yKDI1rqobEqGOFrhoNAssABcjMkAPKbmsFY2sAB8oAC8oAAU4PSGiCoAlCVFFGyKymr4hLHxhNk0aTlZZjR5ukWlFPaOYPDTUUA)
+
+### React
 
 React components must include boardgame.io-specific properties, so extend your props from `BoardProps`:
 
 ```typescript
 // Board.tsx
-import { BoardProps } from 'boardgame.io/react';
+import type { BoardProps } from 'boardgame.io/react';
 
 interface MyGameProps extends BoardProps {
   // Custom properties for your component
@@ -49,3 +53,7 @@ const App = Client({
 });
 export default App;
 ```
+
+?> Want to see a more complete example? Check out a TypeScript–React implementation of the Tic-Tac-Toe tutorial on CodeSandbox:
+<br/><br/>
+[![Edit boardgame.io React-TypeScript demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgame-io-react-typescript-demo-u5uvm?fontsize=14&hidenavigation=1&theme=dark)
