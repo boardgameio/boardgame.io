@@ -291,7 +291,7 @@ export interface Game<
   deltaState?: boolean;
   disableUndo?: boolean;
   seed?: string | number;
-  setup?: (ctx: CtxWithPlugins, setupData?: SetupData) => any;
+  setup?: (ctx: CtxWithPlugins, setupData?: SetupData) => G;
   validateSetupData?: (
     setupData: SetupData | undefined,
     numPlayers: number
