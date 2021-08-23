@@ -66,6 +66,10 @@ npm start
 
 The examples can be found in the [examples](examples/) folder.
 
+#### Using VS Code?
+
+This repository is ready to run in a dev container in VS Code. See [the contributing guidelines for details](CONTRIBUTING.md).
+
 ## Changelog
 
 See [changelog](docs/documentation/CHANGELOG.md).
