@@ -1,5 +1,7 @@
 # Game
 
+When using Typescript, type your Game as `Game<MyGameState>`.
+
 ```js
 {
   // The name of the game.
@@ -126,7 +128,7 @@
 
   // Disable undo feature for all the moves in the game
   disableUndo: true,
-    
+
   // Transfer delta state with JSON Patch in multiplayer
   deltaState: true,
 }
