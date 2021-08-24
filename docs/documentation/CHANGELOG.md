@@ -1,3 +1,10 @@
+### v0.47.6
+
+#### Bugfixes
+
+* [[62f97e54](https://github.com/boardgameio/boardgame.io/commit/62f97e54)] Allow plugins to use events in `fnWrap`
+
+
 ### v0.47.5
 
 #### Bugfixes
