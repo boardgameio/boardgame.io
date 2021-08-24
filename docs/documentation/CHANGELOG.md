@@ -1,3 +1,10 @@
+### v0.47.5
+
+#### Bugfixes
+
+* [[fa30fcca](https://github.com/boardgameio/boardgame.io/commit/fa30fcca)] types: Expect `Game.setup` method to return `G` ([#987](https://github.com/boardgameio/boardgame.io/pull/987))
+
+
 ### v0.47.4
 
 #### Bugfixes
