@@ -8,9 +8,10 @@
 
 import request from 'supertest';
 import Koa from 'koa';
+import Router from 'koa-router';
 import * as dateMock from 'jest-date-mock';
 
-import { createRouter, configureApp } from './api';
+import { configureRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
 import { Auth } from './auth';
 import * as StorageAPI from './db/base';
@@ -70,7 +71,7 @@ class AsyncStorage extends StorageAPI.Async {
   }
 }
 
-describe('.createRouter', () => {
+describe('.configureRouter', () => {
   function addApiToServer({
     app,
     origins,
@@ -78,8 +79,9 @@ describe('.createRouter', () => {
   }: {
     app: Server.App;
     origins?: Parameters<typeof configureApp>[2];
-  } & Parameters<typeof createRouter>[0]) {
-    const router = createRouter(args);
+  } & Omit<Parameters<typeof configureRouter>[0], 'router'>) {
+    const router = new Router<any, Server.AppCtx>();
+    configureRouter({ router, ...args });
     configureApp(app, router, origins);
   }
 
