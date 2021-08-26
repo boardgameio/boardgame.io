@@ -19,7 +19,7 @@ export const PlayerView = {
    * removes all the keys in `players`, except for the one
    * corresponding to the current playerID.
    */
-  STRIP_SECRETS: (G: any, ctx: Ctx, playerID: PlayerID) => {
+  STRIP_SECRETS: (G: any, ctx: Ctx, playerID: PlayerID | null) => {
     const r = { ...G };
 
     if (r.secret !== undefined) {
@@ -27,9 +27,11 @@ export const PlayerView = {
     }
 
     if (r.players) {
-      r.players = {
-        [playerID]: r.players[playerID],
-      };
+      r.players = playerID
+        ? {
+            [playerID]: r.players[playerID],
+          }
+        : {};
     }
 
     return r;
