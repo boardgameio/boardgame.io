@@ -105,7 +105,7 @@
   }
 
   .closer {
-    left: 175px;
+    left: -326px;
   }
 
   /* Rotate chevron icon on toggle. */

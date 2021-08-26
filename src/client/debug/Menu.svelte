@@ -8,20 +8,16 @@
 
 <style>
   .menu {
-    /**
-     * 1. Rotate menu 90 degrees, so it runs vertically.
-     * 2. Move menu up by height + border.
-     *    Because of the rotation, this is equivalent to moving left.
-     * 3. Move menu left (equivalent to down), to leave space above it for show/hide toggle.
-     */
     display: flex;
+    margin-top: 43px;
     flex-direction: row-reverse;
     border: 1px solid #ccc;
     border-radius: 5px 5px 0 0;
     height: 25px;
     line-height: 25px;
-    transform-origin: top right;
-    transform: /* 1 */ rotate(-90deg) /* 2 */ translateY(-27px) /* 3 */ translateX(-70px);
+    margin-right: -500px;
+    transform-origin: bottom right;
+    transform: rotate(-90deg) translate(0, -500px);
   }
 
   .menu-item {
