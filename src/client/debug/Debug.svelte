@@ -118,12 +118,14 @@
     }
   }
 
-  .visibility-toggle > :global(*) {
+  .icon {
+    display: flex;
+    height: 100%;
     animation: rotateFromZero 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) 0s 1
       normal forwards;
   }
 
-  .closer > :global(*) {
+  .closer .icon {
     animation-direction: reverse;
   }
 
@@ -185,7 +187,9 @@
       in:receive={{ key: 'toggle' }}
       out:send={{ key: 'toggle' }}
     >
-      <Chevron />
+      <span class="icon" aria-hidden="true">
+        <Chevron />
+      </span>
     </button>
   {:else}
     <div transition:fly={{ x: 400, ...transitionOpts }} class="panel">
@@ -196,7 +200,9 @@
         in:receive={{ key: 'toggle' }}
         out:send={{ key: 'toggle' }}
       >
-        <Chevron />
+        <span class="icon" aria-hidden="true">
+          <Chevron />
+        </span>
       </button>
       <Menu on:change={MenuChange} {panes} {pane} />
       <div
