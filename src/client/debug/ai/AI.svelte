@@ -174,8 +174,8 @@
     {#if Object.keys(bot.opts()).length}
       <section>
         <h3>Options</h3>
-        <label>debug</label>
-        <input type=checkbox bind:checked={debug} on:change={OnDebug}>
+        <label for="ai-option-debug">debug</label>
+        <input id="ai-option-debug" type=checkbox bind:checked={debug} on:change={OnDebug}>
         <Options bot={bot}/>
       </section>
     {/if}

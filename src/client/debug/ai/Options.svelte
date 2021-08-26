@@ -11,6 +11,8 @@
       bot.setOpt(key, value);
     }
   }
+
+  const makeID = (key) => 'ai-option-' + key;
 </script>
 
 <style>
@@ -34,15 +36,13 @@
 
 {#each Object.entries(bot.opts()) as [key, value]}
   <div class="option">
-    <label>{key}</label>
+    <label for={makeID(key)}>{key}</label>
 
     {#if value.range}
       <span class="value">{values[key]}</span>
-      <input type=range bind:value={values[key]} min={value.range.min} max={value.range.max} on:change={OnChange}>
-    {/if}
-
-    {#if typeof value.value === 'boolean'}
-      <input type=checkbox bind:checked={values[key]} on:change={OnChange}>
+      <input id={makeID(key)} type=range bind:value={values[key]} min={value.range.min} max={value.range.max} on:change={OnChange}>
+    {:else if typeof value.value === 'boolean'}
+      <input id={makeID(key)} type=checkbox bind:checked={values[key]} on:change={OnChange}>
     {/if}
   </div>
 {/each}
