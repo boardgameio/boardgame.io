@@ -1,3 +1,14 @@
+### v0.47.7
+
+#### Features
+
+* [[98c860ec](https://github.com/boardgameio/boardgame.io/commit/98c860ec)] debug: Support toggling debug panel visibility without a keyboard ([#991](https://github.com/boardgameio/boardgame.io/pull/991))
+
+#### Bugfixes
+
+* [[f18c63a1](https://github.com/boardgameio/boardgame.io/commit/f18c63a1)] types: playerID in `playerView` can be string or null ([#990](https://github.com/boardgameio/boardgame.io/pull/990))
+
+
 ### v0.47.6
 
 #### Bugfixes
