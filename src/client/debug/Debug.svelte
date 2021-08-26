@@ -216,6 +216,7 @@
           this={panes[pane].component}
           {client}
           {clientManager}
+          {ToggleVisibility}
         />
       </div>
       {#if $secondaryPane}
