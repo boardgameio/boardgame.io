@@ -39,6 +39,37 @@ test('switching panels', async () => {
   client.stop();
 });
 
+test('visibility toggle', async () => {
+  const client = Client({ game: {} });
+  client.start();
+
+  // Visibility toggle button & debug panel are rendered
+  const hideButton = screen.getByTitle('Hide Debug Panel');
+  expect(hideButton).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Controls' })).toBeInTheDocument();
+
+  // Hide debug panel
+  await fireEvent.click(hideButton);
+  await waitFor(() => expect(hideButton).not.toBeInTheDocument());
+
+  // Show button is rendered & debug panel is not.
+  const showButton = screen.getByTitle('Show Debug Panel');
+  expect(showButton).toBeInTheDocument();
+  expect(
+    screen.queryByRole('heading', { name: 'Controls' })
+  ).not.toBeInTheDocument();
+
+  // Show debug panel
+  await fireEvent.click(showButton);
+  await waitFor(() => expect(showButton).not.toBeInTheDocument());
+
+  // Hide button & debug panel are rendered.
+  expect(screen.getByTitle('Hide Debug Panel')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Controls' })).toBeInTheDocument();
+
+  client.stop();
+});
+
 describe('multiple clients', () => {
   const client0 = Client({
     game: { name: 'game1' },

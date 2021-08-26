@@ -1,3 +1,22 @@
+### v0.47.8
+
+#### Bugfixes
+
+* [[06bc7479](https://github.com/boardgameio/boardgame.io/commit/06bc7479)] debug: Improve AI panel accessibility
+* [[d2b611d7](https://github.com/boardgameio/boardgame.io/commit/d2b611d7)] debug: Stop panel intercepting clicks in transparent parts
+
+
+### v0.47.7
+
+#### Features
+
+* [[98c860ec](https://github.com/boardgameio/boardgame.io/commit/98c860ec)] debug: Support toggling debug panel visibility without a keyboard ([#991](https://github.com/boardgameio/boardgame.io/pull/991))
+
+#### Bugfixes
+
+* [[f18c63a1](https://github.com/boardgameio/boardgame.io/commit/f18c63a1)] types: playerID in `playerView` can be string or null ([#990](https://github.com/boardgameio/boardgame.io/pull/990))
+
+
 ### v0.47.6
 
 #### Bugfixes

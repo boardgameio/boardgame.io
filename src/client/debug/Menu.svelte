@@ -9,7 +9,7 @@
 <style>
   .menu {
     display: flex;
-    margin-top: -10px;
+    margin-top: 43px;
     flex-direction: row-reverse;
     border: 1px solid #ccc;
     border-radius: 5px 5px 0 0;
