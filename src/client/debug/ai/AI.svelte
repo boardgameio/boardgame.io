@@ -1,6 +1,7 @@
 <script>
   export let client;
   export let clientManager;
+  export let ToggleVisibility;
 
   import { MAKE_MOVE } from '../../../core/action-types';
   import Hotkey from '../main/Hotkey.svelte';
