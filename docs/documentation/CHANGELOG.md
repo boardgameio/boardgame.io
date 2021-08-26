@@ -1,3 +1,11 @@
+### v0.47.8
+
+#### Bugfixes
+
+* [[06bc7479](https://github.com/boardgameio/boardgame.io/commit/06bc7479)] debug: Improve AI panel accessibility
+* [[d2b611d7](https://github.com/boardgameio/boardgame.io/commit/d2b611d7)] debug: Stop panel intercepting clicks in transparent parts
+
+
 ### v0.47.7
 
 #### Features
