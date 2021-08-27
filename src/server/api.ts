@@ -7,7 +7,7 @@
  */
 
 import type Koa from 'koa';
-import Router from 'koa-router';
+import type Router from 'koa-router';
 import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
@@ -70,19 +70,19 @@ const createClientMatchData = (
   };
 };
 
-export const createRouter = ({
+export const configureRouter = ({
+  router,
   db,
   auth,
   games,
   uuid = () => nanoid(11),
 }: {
+  router: Router<any, Server.AppCtx>;
   auth: Auth;
   games: Game[];
   uuid?: () => string;
   db: StorageAPI.Sync | StorageAPI.Async;
-}): Router<any, Server.AppCtx> => {
-  const router = new Router<any, Server.AppCtx>();
-
+}) => {
   /**
    * List available games.
    *
