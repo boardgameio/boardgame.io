@@ -176,6 +176,15 @@ A project for building board games with React and boardgame.io.
 [b14]: https://img.shields.io/github/stars/Pong420/Boardgame?label=%E2%98%85&logo=github
 
 
+#### [![GitHub stars][bsixpieces]][csixpieces] [SixPieces][psixpieces] \[[code][csixpieces]\]
+&nbsp;&nbsp;
+A 3-D online version of the tile-based boardgame "Qwirkle" for two to four players.
+
+[psixpieces]: https://zwo.uber.space/SixPieces/
+[csixpieces]: https://github.com/fuenfundachtzig/SixPieces
+[bsixpieces]: https://img.shields.io/github/stars/fuenfundachtzig/SixPieces?label=%E2%98%85&logo=github
+
+
 #### [Splendor][p15]
 &nbsp;&nbsp;
 A minimal splendor game you can play with up to 4 players.
