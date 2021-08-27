@@ -1530,7 +1530,7 @@ describe('.configureRouter', () => {
       const app = createApiServer({ auth, games, db, origins: false });
 
       test('does not allow CORS', async () => {
-        const { res } = await request(app.callback())
+        const res = await request(app.callback())
           .get('/games')
           .set('Origin', 'https://www.example.com')
           .expect('Vary', 'Origin');
@@ -1544,7 +1544,7 @@ describe('.configureRouter', () => {
       const app = createApiServer({ auth, games, db, origins: origin });
 
       test('disallows non-matching origin', async () => {
-        const { res } = await request(app.callback())
+        const res = await request(app.callback())
           .get('/games')
           .set('Origin', 'https://www.other.com')
           .expect('Vary', 'Origin');
@@ -1567,7 +1567,7 @@ describe('.configureRouter', () => {
       const app = createApiServer({ auth, games, db, origins });
 
       test('disallows non-matching origin', async () => {
-        const { res } = await request(app.callback())
+        const res = await request(app.callback())
           .get('/games')
           .set('Origin', 'https://www.other.com')
           .expect('Vary', 'Origin');
