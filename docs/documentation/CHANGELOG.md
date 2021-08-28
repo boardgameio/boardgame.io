@@ -1,3 +1,11 @@
+### v0.47.9
+
+#### Bugfixes
+
+* [[a240bbee](https://github.com/boardgameio/boardgame.io/commit/a240bbee)] client: Fix React Native support
+* [[8b871ab5](https://github.com/boardgameio/boardgame.io/commit/8b871ab5)] server: Support custom Lobby API middleware ([#992](https://github.com/boardgameio/boardgame.io/pull/992))
+
+
 ### v0.47.8
 
 #### Bugfixes
