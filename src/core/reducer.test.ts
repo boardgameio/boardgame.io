@@ -444,8 +444,8 @@ describe('undo / redo', () => {
     let state = reducer(initialState, makeMove('move', 'A', '0'));
     state = reducer(state, makeMove('move', 'B', '0'));
     expect(state.G).toMatchObject({ A: true, B: true });
-    expect((state._undo[1].ctx as any).events).toBeUndefined();
-    expect((state._undo[1].ctx as any).random).toBeUndefined();
+    expect(state._undo[1].ctx).not.toHaveProperty('events');
+    expect(state._undo[1].ctx).not.toHaveProperty('random');
   });
 
   test('undo restores previous state after move', () => {
