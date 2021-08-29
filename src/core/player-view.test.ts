@@ -40,7 +40,11 @@ describe('players', () => {
   });
 
   test('playerID: null', () => {
-    const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, null);
+    const newG = PlayerView.STRIP_SECRETS({
+      G,
+      ctx: {} as Ctx,
+      playerID: null,
+    });
     expect(newG.players).toEqual({});
   });
 });

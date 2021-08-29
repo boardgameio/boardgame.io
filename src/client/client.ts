@@ -520,6 +520,9 @@ export class _ClientImpl<G extends any = any> {
  *   A JS object that provides an API to interact with the
  *   game by dispatching moves and events.
  */
-export function Client<G extends any = any>(opts: ClientOpts<G>) {
+export function Client<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+>(opts: ClientOpts<G, PluginAPIs>) {
   return new _ClientImpl<G>(opts);
 }

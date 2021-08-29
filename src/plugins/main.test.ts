@@ -378,13 +378,13 @@ describe('plugins can use events in fnWrap', () => {
         name: 'test',
         fnWrap:
           (fn, type) =>
-          (G, ctx, ...args) => {
-            G = fn(G, ctx, ...args);
+          (context, ...args) => {
+            const G = fn(context, ...args);
             if (G.endTurn && type === GameMethod.MOVE) {
-              ctx.events.endTurn();
+              context.events.endTurn();
             }
             if (G.endGame) {
-              ctx.events.endGame(G.endGame);
+              context.events.endGame(G.endGame);
             }
             return G;
           },
