@@ -21,7 +21,7 @@ test('secret', () => {
   expect(newG).toEqual({});
 });
 
-test('players', () => {
+describe('players', () => {
   const G = {
     players: {
       '0': {},
@@ -29,13 +29,18 @@ test('players', () => {
     },
   };
 
-  {
+  test('playerID: "0"', () => {
     const newG = PlayerView.STRIP_SECRETS({ G, ctx: {} as Ctx, playerID: '0' });
     expect(newG.players).toEqual({ '0': {} });
-  }
+  });
 
-  {
+  test('playerID: "1"', () => {
     const newG = PlayerView.STRIP_SECRETS({ G, ctx: {} as Ctx, playerID: '1' });
     expect(newG.players).toEqual({ '1': {} });
-  }
+  });
+
+  test('playerID: null', () => {
+    const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, null);
+    expect(newG.players).toEqual({});
+  });
 });

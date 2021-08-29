@@ -7,9 +7,10 @@
  */
 
 import Koa from 'koa';
+import Router from 'koa-router';
 import type IOTypes from 'socket.io';
 
-import { createRouter, configureApp } from './api';
+import { configureRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
 import { ProcessGameConfig } from '../core/game';
 import * as logger from '../core/logger';
@@ -117,7 +118,7 @@ export function Server({
   }
   transport.init(app, games, origins);
 
-  const router = createRouter({ db, games, uuid, auth });
+  const router = new Router<any, ServerTypes.AppCtx>();
 
   return {
     app,
@@ -128,6 +129,7 @@ export function Server({
 
     run: async (portOrConfig: number | ServerConfig, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
+      configureRouter({ router, db, games, uuid, auth });
 
       // DB
       await db.connect();

@@ -4,7 +4,9 @@
 
   import { writable } from 'svelte/store';
   import { setContext } from 'svelte';
-  import { fly } from 'svelte/transition';
+  import { crossfade, fly } from 'svelte/transition';
+  import { cubicOut } from 'svelte/easing';
+  import Chevron from 'svelte-icons/fa/FaChevronRight.svelte';
   import Menu from './Menu.svelte';
   import Main from './main/Main.svelte';
   import Info from './info/Info.svelte';
@@ -31,11 +33,15 @@
     paneDiv.focus();
   }
 
+  // Toggle debugger visibilty
+  function ToggleVisibility() {
+    visible = !visible;
+  }
+
   let visible = true;
   function Keypress(e) {
-    // Toggle debugger visibilty
     if (e.key == '.') {
-      visible = !visible;
+      ToggleVisibility();
       return;
     }
     // Set displayed pane
@@ -46,6 +52,12 @@
       }
     });
   }
+
+  const transitionOpts = {
+    duration: 150,
+    easing: cubicOut,
+  };
+  const [send, receive] = crossfade(transitionOpts);
 </script>
 
 <style>
@@ -53,17 +65,68 @@
     position: fixed;
     color: #555;
     font-family: monospace;
-    display: flex;
-    flex-direction: row;
-    text-align: left;
     right: 0;
     top: 0;
     height: 100%;
     font-size: 14px;
-    box-sizing: border-box;
     opacity: 0.9;
     /* we want the debug panel to be above any other elements */
     z-index: 99999;
+  }
+
+  .panel {
+    display: flex;
+    position: relative;
+    flex-direction: row;
+    height: 100%;
+  }
+
+  .visibility-toggle {
+    position: absolute;
+    box-sizing: border-box;
+    top: 7px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 48px;
+    height: 48px;
+    padding: 8px;
+    background: white;
+    color: #555;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .visibility-toggle:hover,
+  .visibility-toggle:focus {
+    background: #eee;
+  }
+
+  .opener {
+    right: 10px;
+  }
+
+  .closer {
+    left: -326px;
+  }
+
+  /* Rotate chevron icon on toggle. */
+  @keyframes rotateFromZero {
+    from {
+      transform: rotateZ(0deg);
+    }
+    to {
+      transform: rotateZ(180deg);
+    }
+  }
+
+  .icon {
+    display: flex;
+    height: 100%;
+    animation: rotateFromZero 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) 0s 1
+      normal forwards;
+  }
+
+  .closer .icon {
+    animation-direction: reverse;
   }
 
   .pane {
@@ -103,36 +166,67 @@
   }
 
   .debug-panel :global(.screen-reader-only) {
-    clip: rect(0 0 0 0); 
+    clip: rect(0 0 0 0);
     clip-path: inset(50%);
     height: 1px;
     overflow: hidden;
     position: absolute;
-    white-space: nowrap; 
+    white-space: nowrap;
     width: 1px;
   }
 </style>
 
 <svelte:window on:keypress={Keypress} />
 
-{#if visible}
-  <section aria-label="boardgame.io Debug Panel" class="debug-panel" transition:fly={{ x: 400 }}>
-    <Menu on:change={MenuChange} {panes} {pane} />
-    <div
-      bind:this={paneDiv}
-      class="pane"
-      role="region"
-      aria-label={pane}
-      tabindex="-1"
+<section aria-label="boardgame.io Debug Panel" class="debug-panel">
+  {#if !visible}
+    <button
+      on:click={ToggleVisibility}
+      class="visibility-toggle opener"
+      title="Show Debug Panel"
+      in:receive={{ key: 'toggle' }}
+      out:send={{ key: 'toggle' }}
     >
-      <svelte:component this={panes[pane].component} {client} {clientManager} />
-    </div>
-    {#if $secondaryPane}
-      <div class="secondary-pane">
+      <span class="icon" aria-hidden="true">
+        <Chevron />
+      </span>
+    </button>
+  {:else}
+    <div transition:fly={{ x: 400, ...transitionOpts }} class="panel">
+      <button
+        on:click={ToggleVisibility}
+        class="visibility-toggle closer"
+        title="Hide Debug Panel"
+        in:receive={{ key: 'toggle' }}
+        out:send={{ key: 'toggle' }}
+      >
+        <span class="icon" aria-hidden="true">
+          <Chevron />
+        </span>
+      </button>
+      <Menu on:change={MenuChange} {panes} {pane} />
+      <div
+        bind:this={paneDiv}
+        class="pane"
+        role="region"
+        aria-label={pane}
+        tabindex="-1"
+      >
         <svelte:component
-          this={$secondaryPane.component}
-          metadata={$secondaryPane.metadata} />
+          this={panes[pane].component}
+          {client}
+          {clientManager}
+          {ToggleVisibility}
+        />
       </div>
-    {/if}
-  </section>
-{/if}
+      {#if $secondaryPane}
+        <div class="secondary-pane">
+          <svelte:component
+            this={$secondaryPane.component}
+            metadata={$secondaryPane.metadata}
+          />
+        </div>
+      {/if}
+    </div>
+  {/if}
+</section>

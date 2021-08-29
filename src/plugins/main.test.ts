@@ -9,6 +9,7 @@
 import { Client } from '../client/client';
 import { Local } from '../client/transport/local';
 import type { Game, Plugin } from '../types';
+import { GameMethod } from '../../packages/core';
 
 describe('basic', () => {
   let client: ReturnType<typeof Client>;
@@ -367,5 +368,44 @@ describe('plugins are accessible in events triggered from moves', () => {
       onEnd: 1,
       test: true,
     });
+  });
+});
+
+describe('plugins can use events in fnWrap', () => {
+  const game: Game = {
+    plugins: [
+      {
+        name: 'test',
+        fnWrap:
+          (fn, type) =>
+          (G, ctx, ...args) => {
+            G = fn(G, ctx, ...args);
+            if (G.endTurn && type === GameMethod.MOVE) {
+              ctx.events.endTurn();
+            }
+            if (G.endGame) {
+              ctx.events.endGame(G.endGame);
+            }
+            return G;
+          },
+      },
+    ],
+    moves: {
+      endGame: () => ({ endGame: true }),
+      endTurn: () => ({ endTurn: true }),
+    },
+  };
+
+  test('plugin can end turn', () => {
+    const client = Client({ game });
+    client.moves.endTurn();
+    expect(client.getState().ctx.turn).toBe(2);
+    expect(client.getState().ctx.currentPlayer).toBe('1');
+  });
+
+  test('plugin can end game', () => {
+    const client = Client({ game });
+    client.moves.endGame();
+    expect(client.getState().ctx.gameover).toBe(true);
   });
 });

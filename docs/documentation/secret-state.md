@@ -1,7 +1,7 @@
 # Secret State
 
 In some games you might need to hide information from
-players. For example, you might not want to reveal the
+players or spectators. For example, you might not want to reveal the
 hands of opponents in card games.
 
 This is easily accomplished at the UI layer (by not
@@ -17,10 +17,11 @@ from that specific player.
 
 ```js
 const game = {
-  // ...
+  // `playerID` could also be null or undefined for spectators.
   playerView: ({ G, ctx, playerID }) => {
     return StripSecrets(G, playerID);
   },
+  // ...
 };
 ```
 

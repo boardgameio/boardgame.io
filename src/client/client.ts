@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { nanoid } from 'nanoid';
+import { nanoid } from 'nanoid/non-secure';
 import 'svelte';
 import type { Dispatch, StoreEnhancer } from 'redux';
 import { createStore, compose, applyMiddleware } from 'redux';

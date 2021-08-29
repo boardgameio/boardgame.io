@@ -1,5 +1,6 @@
 <script>
   export let client;
+  export let ToggleVisibility;
 
   import Hotkey from './Hotkey.svelte';
   import { sync } from '../../../core/action-creators';
@@ -52,6 +53,6 @@
     <Hotkey value="3" onPress={Restore} label="restore" />
   </li>
   <li>
-    <Hotkey value="." disable={true} label="hide" />
+    <Hotkey value="." onPress={ToggleVisibility} label="hide" />
   </li>
 </ul>

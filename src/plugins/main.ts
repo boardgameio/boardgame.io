@@ -99,7 +99,7 @@ export const FnWrap = (
   methodType: GameMethod,
   plugins: Plugin[]
 ) => {
-  return [...DEFAULT_PLUGINS, ...plugins]
+  return [...CORE_PLUGINS, ...plugins, PluginEvents]
     .filter((plugin) => plugin.fnWrap !== undefined)
     .reduce(
       (method: AnyFn, { fnWrap }: Plugin) => fnWrap(method, methodType),

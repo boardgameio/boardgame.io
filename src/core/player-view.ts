@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import type { Game } from '../types';
+import type { Game, PlayerID } from '../types';
 
 /**
  * PlayerView reducers.
@@ -19,7 +19,7 @@ export const PlayerView: { STRIP_SECRETS: Game['playerView'] } = {
    * removes all the keys in `players`, except for the one
    * corresponding to the current playerID.
    */
-  STRIP_SECRETS: ({ G, playerID }) => {
+  STRIP_SECRETS: ({ G, playerID }: { G: any; playerID: PlayerID | null }) => {
     const r = { ...G };
 
     if (r.secret !== undefined) {
@@ -27,9 +27,11 @@ export const PlayerView: { STRIP_SECRETS: Game['playerView'] } = {
     }
 
     if (r.players) {
-      r.players = {
-        [playerID]: r.players[playerID],
-      };
+      r.players = playerID
+        ? {
+            [playerID]: r.players[playerID],
+          }
+        : {};
     }
 
     return r;
