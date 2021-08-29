@@ -60,11 +60,11 @@
 
     // Ends the turn if this returns true.
     // Returning { next }, sets next playerID.
-    endIf: ({ G, ctx, events, random, ...plugins }) => (
+    endIf: ({ G, ctx, random, ...plugins }) => (
       true | { next: '0' }
     ),
 
-    // Called at the end of each move.
+    // Called after each move.
     onMove: ({ G, ctx, events, random, ...plugins }) => G,
 
     // Ends the turn automatically after a number of moves.
@@ -97,7 +97,7 @@
       onEnd: ({ G, ctx, events, random, ...plugins }) => G,
 
       // Ends the phase if this returns true.
-      endIf: ({ G, ctx, events, random, ...plugins }) => true,
+      endIf: ({ G, ctx, random, ...plugins }) => true,
 
       // Overrides `moves` for the duration of this phase.
       moves: { ... },
@@ -123,7 +123,7 @@
 
   // Ends the game if this returns anything.
   // The return value is available in `ctx.gameover`.
-  endIf: ({ G, ctx, events, random, ...plugins }) => obj,
+  endIf: ({ G, ctx, random, ...plugins }) => obj,
 
   // Called at the end of the game.
   // `ctx.gameover` is available at this point.
