@@ -39,10 +39,12 @@ export type BoardProps<G extends any = any> = ClientState<G> &
     isMultiplayer: boolean;
   };
 
+export type CtxClient = Omit<Ctx, 'random' | '_random'>
+
 type ReactClientOpts<
   G extends any = any,
   P extends BoardProps<G> = BoardProps<G>,
-  CtxWithPlugins extends Ctx = Ctx
+  CtxWithPlugins extends CtxClient = CtxClient
 > = Omit<ClientOpts<G, CtxWithPlugins>, WrappedBoardDelegates> & {
   board?: React.ComponentType<P>;
   loading?: React.ComponentType;
@@ -70,7 +72,7 @@ type ReactClientOpts<
 export function Client<
   G extends any = any,
   P extends BoardProps<G> = BoardProps<G>,
-  ContextWithPlugins extends Ctx = Ctx
+  ContextWithPlugins extends CtxClient = CtxClient
 >(opts: ReactClientOpts<G, P, ContextWithPlugins>) {
   let { game, numPlayers, loading, board, multiplayer, enhancer, debug } = opts;
 

@@ -97,13 +97,13 @@ export interface Ctx {
   _random?: {
     seed: string | number;
   };
+  random: RandomAPI;
 
   // TODO public api should have these as non-optional
   // internally there are two contexts, one is a serialized POJO and another
   // "enhanced" context that has plugin api methods attached
   events?: EventsAPI;
   log?: LogAPI;
-  random?: RandomAPI;
 }
 
 export interface PluginState {
