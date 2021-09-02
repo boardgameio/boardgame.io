@@ -8,5 +8,6 @@
 
 import { Local } from '../src/client/transport/local';
 import { SocketIO } from '../src/client/transport/socketio';
+import { P2P } from '../src/client/transport/p2p';
 
-export { Local, SocketIO };
+export { Local, SocketIO, P2P };
