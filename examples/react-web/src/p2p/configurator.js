@@ -57,7 +57,7 @@ export const Configurator = ({
 
 function Instructions() {
   return (
-    <small>
+    <small style={{ display: 'block', marginTop: '4rem' }}>
       <h2>Instructions</h2>
       <h3>Window/Computer 1</h3>
       <ol>

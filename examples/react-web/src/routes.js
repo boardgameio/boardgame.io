@@ -27,7 +27,7 @@ const routes = [
     routes: chess.routes,
   },
   {
-    name: 'Peer-to-peer',
+    name: 'Peer-to-Peer Multiplayer',
     routes: p2p.routes,
   },
   {
