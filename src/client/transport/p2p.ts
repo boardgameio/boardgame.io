@@ -1,4 +1,5 @@
 import Peer from 'peerjs';
+import type { PeerJSOption } from 'peerjs';
 
 import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
@@ -19,6 +20,7 @@ import type { TransportOpts } from './transport';
 
 interface P2POpts {
   isHost?: boolean;
+  peerJSOptions?: PeerJSOption;
 }
 
 interface Client {
@@ -120,13 +122,19 @@ class P2PHost {
 
 class P2PTransport extends Transport {
   private peer: Peer;
+  private peerJSOptions: PeerJSOption;
   private isHost: boolean;
   private game: Game;
   private emit: (data: ClientAction) => void;
 
-  constructor({ isHost, ...opts }: TransportOpts & P2POpts) {
+  constructor({
+    isHost,
+    peerJSOptions = {},
+    ...opts
+  }: TransportOpts & P2POpts) {
     super(opts);
     this.isHost = Boolean(isHost);
+    this.peerJSOptions = peerJSOptions;
     this.game = opts.game;
   }
 
@@ -194,7 +202,7 @@ class P2PTransport extends Transport {
     const metadata = { playerID: this.playerID };
 
     this.isConnected = true;
-    this.peer = new Peer(this.isHost ? hostID : undefined, { debug: 3 });
+    this.peer = new Peer(this.isHost ? hostID : undefined, this.peerJSOptions);
 
     if (this.isHost) {
       const host = new P2PHost({
