@@ -12,7 +12,7 @@ import { LocalStorage } from '../../server/db/localstorage';
 import { Master } from '../../master/master';
 import type { TransportAPI, TransportData } from '../../master/master';
 import { Transport } from './transport';
-import type { TransportOpts, ChatCallback } from './transport';
+import type { TransportOpts } from './transport';
 import type {
   ChatMessage,
   CredentialedActionShape,
@@ -140,7 +140,6 @@ type LocalTransportOpts = TransportOpts & {
  */
 export class LocalTransport extends Transport {
   master: LocalMaster;
-  chatMessageCallback: ChatCallback;
 
   /**
    * Creates a new Mutiplayer instance.
@@ -228,17 +227,6 @@ export class LocalTransport extends Transport {
    * Disconnect from the master.
    */
   disconnect() {}
-
-  /**
-   * Subscribe to connection state changes.
-   */
-  subscribe() {}
-
-  subscribeMatchData() {}
-
-  subscribeChatMessage(fn: ChatCallback) {
-    this.chatMessageCallback = fn;
-  }
 
   /**
    * Dispatches a reset action, then requests a fresh sync from the master.

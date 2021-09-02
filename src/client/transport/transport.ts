@@ -39,6 +39,9 @@ export abstract class Transport {
   protected matchID: string;
   protected credentials?: string;
   protected numPlayers: number;
+  protected callback: () => void = () => {};
+  protected chatMessageCallback: ChatCallback = () => {};
+  protected matchDataCallback: MetadataCallback = () => {};
   isConnected: boolean;
 
   constructor({
@@ -57,14 +60,26 @@ export abstract class Transport {
     this.numPlayers = numPlayers || 2;
   }
 
+  /** Subscribe to connection state changes. */
+  subscribe(fn: () => void): void {
+    this.callback = fn;
+  }
+
+  /** Subscribe to match metadata changes. */
+  subscribeMatchData(fn: MetadataCallback): void {
+    this.matchDataCallback = fn;
+  }
+
+  /** Subscribe to incoming chat messages. */
+  subscribeChatMessage(fn: ChatCallback): void {
+    this.chatMessageCallback = fn;
+  }
+
   abstract onAction(state: State, action: CredentialedActionShape.Any): void;
   abstract connect(): void;
   abstract disconnect(): void;
-  abstract subscribe(fn: () => void): void;
-  abstract subscribeMatchData(fn: MetadataCallback): void;
   abstract updateMatchID(id: string): void;
   abstract updatePlayerID(id: PlayerID): void;
   abstract updateCredentials(credentials?: string): void;
   abstract onChatMessage(matchID: string, chatMessage: ChatMessage): void;
-  abstract subscribeChatMessage(fn: ChatCallback): void;
 }

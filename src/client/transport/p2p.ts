@@ -15,11 +15,7 @@ import type {
   State,
 } from '../../types';
 import { Transport } from './transport';
-import type {
-  ChatCallback,
-  MetadataCallback,
-  TransportOpts,
-} from './transport';
+import type { TransportOpts } from './transport';
 
 interface P2POpts {
   isHost?: boolean;
@@ -123,10 +119,6 @@ class P2PHost {
 }
 
 class P2PTransport extends Transport {
-  callback: () => void;
-  matchDataCallback: MetadataCallback;
-  chatMessageCallback: ChatCallback;
-
   private peer: Peer;
   private isHost: boolean;
   private game: Game;
@@ -270,18 +262,6 @@ class P2PTransport extends Transport {
   onChatMessage(matchID: string, chatMessage: ChatMessage): void {
     if (!this.isConnected) return;
     this.emit({ type: 'chat', args: [matchID, chatMessage, this.credentials] });
-  }
-
-  subscribe(fn: () => void): void {
-    this.callback = fn;
-  }
-
-  subscribeChatMessage(fn: ChatCallback): void {
-    this.chatMessageCallback = fn;
-  }
-
-  subscribeMatchData(fn: MetadataCallback): void {
-    this.matchDataCallback = fn;
   }
 
   private resetAndReconnect() {

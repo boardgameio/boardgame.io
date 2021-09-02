@@ -47,8 +47,8 @@ class MockSocket {
 
 test('defaults', () => {
   const m = new SocketIOTransport();
-  expect(typeof m.callback).toBe('function');
-  m.callback();
+  expect(typeof (m as any).callback).toBe('function');
+  (m as any).callback();
 });
 
 class TransportAdapter extends SocketIOTransport {

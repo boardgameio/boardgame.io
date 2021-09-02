@@ -771,7 +771,7 @@ describe('subscribe', () => {
     client.subscribe(fn);
     client.start();
     fn.mockClear();
-    transport.callback();
+    (transport as any).callback();
     expect(fn).toHaveBeenCalled();
     client.stop();
   });

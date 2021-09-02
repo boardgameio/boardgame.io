@@ -14,11 +14,7 @@ import * as ActionCreators from '../../core/action-creators';
 import type { Master } from '../../master/master';
 import { Transport } from './transport';
 import type { Operation } from 'rfc6902';
-import type {
-  TransportOpts,
-  MetadataCallback,
-  ChatCallback,
-} from './transport';
+import type { TransportOpts } from './transport';
 import type {
   CredentialedActionShape,
   FilteredMetadata,
@@ -48,9 +44,6 @@ export class SocketIOTransport extends Transport {
   server: string;
   socket: ioNamespace.Socket;
   socketOpts: ioNamespace.SocketOptions;
-  callback: () => void;
-  matchDataCallback: MetadataCallback;
-  chatMessageCallback: ChatCallback;
 
   /**
    * Creates a new Multiplayer instance.
@@ -76,9 +69,6 @@ export class SocketIOTransport extends Transport {
     this.socket = socket;
     this.socketOpts = socketOpts;
     this.isConnected = false;
-    this.callback = () => {};
-    this.matchDataCallback = () => {};
-    this.chatMessageCallback = () => {};
   }
 
   /**
@@ -219,21 +209,6 @@ export class SocketIOTransport extends Transport {
     this.socket = null;
     this.isConnected = false;
     this.callback();
-  }
-
-  /**
-   * Subscribe to connection state changes.
-   */
-  subscribe(fn: () => void) {
-    this.callback = fn;
-  }
-
-  subscribeMatchData(fn: MetadataCallback) {
-    this.matchDataCallback = fn;
-  }
-
-  subscribeChatMessage(fn: ChatCallback) {
-    this.chatMessageCallback = fn;
   }
 
   /**

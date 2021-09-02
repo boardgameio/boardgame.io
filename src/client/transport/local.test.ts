@@ -227,7 +227,7 @@ describe('LocalMaster', () => {
   test('connect', () => {
     localA.connect();
     localB.connect();
-    localA.subscribe();
+    localA.subscribe(jest.fn());
 
     expect(storeA.dispatch).toBeCalledWith(
       expect.objectContaining({
