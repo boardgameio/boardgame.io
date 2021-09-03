@@ -64,8 +64,11 @@
     // Called at the end of each move.
     onMove: (G, ctx) => G,
 
+    // Prevents ending the turn before a minimum number of moves.
+    minMoves: 1,
+
     // Ends the turn automatically after a number of moves.
-    moveLimit: 1,
+    maxMoves: 1,
 
     // Calls setActivePlayers with this as argument at the
     // beginning of the turn.

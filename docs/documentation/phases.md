@@ -33,7 +33,7 @@ function PlayCard(G, ctx) {
 const game = {
   setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   moves: { DrawCard, PlayCard },
-  turn: { moveLimit: 1 },
+  turn: { minMoves: 1, maxMoves: 1 },
 };
 ```
 
@@ -59,7 +59,7 @@ list of moves, which come into effect during that phase:
 ```js
 const game = {
   setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
-  turn: { moveLimit: 1 },
+  turn: { minMoves: 1, maxMoves: 1 },
 
   phases: {
     draw: {
