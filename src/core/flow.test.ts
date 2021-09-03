@@ -766,21 +766,6 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 1 });
     });
 
-    test('with deprecated move limit', () => {
-      const flow = Flow({});
-      let state = { G: {}, ctx: flow.ctx(2) } as State;
-      state = flow.init(state);
-
-      expect(state.ctx._activePlayersMinMoves).toBeNull();
-      expect(state.ctx._activePlayersMaxMoves).toBeNull();
-      state = flow.processEvent(
-        state,
-        gameEvent('setStage', { stage: 'A', moveLimit: 2 })
-      );
-      expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 2 });
-      expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
-    });
-
     test('empty argument ends stage', () => {
       const flow = Flow({ turn: { activePlayers: { currentPlayer: 'A' } } });
       let state = { G: {}, ctx: flow.ctx(2) } as State;
@@ -1971,6 +1956,74 @@ test('stage events should not be processed out of turn', () => {
     '0': 'B1',
     '1': 'B1',
     '2': 'B1',
+  });
+});
+
+describe('backwards compatibility for moveLimit', () => {
+  test('turn config maps moveLimit to minMoves/maxMoves', () => {
+    const flow = Flow({
+      moves: {
+        noop: () => {},
+      },
+      turn: {
+        moveLimit: 2,
+      },
+    });
+    let state = flow.init({ ctx: flow.ctx(2) } as State);
+
+    expect(state.ctx.turn).toBe(1);
+    expect(state.ctx.currentPlayer).toBe('0');
+
+    state = flow.processMove(state, makeMove('noop', null, '0').payload);
+    state = flow.processMove(state, makeMove('noop', null, '0').payload);
+
+    expect(state.ctx.turn).toBe(2);
+    expect(state.ctx.currentPlayer).toBe('1');
+
+    state = flow.processMove(state, makeMove('noop', null, '1').payload);
+
+    state = flow.processEvent(state, gameEvent('endTurn', null, '1'));
+
+    // player should not be able to endTurn because they haven't made minMoves yet
+
+    expect(state.ctx.turn).toBe(2);
+    expect(state.ctx.currentPlayer).toBe('1');
+  });
+
+  // test('setActivePlayers maps moveLimit to minMoves/maxMoves', () => {
+  //   const flow = Flow({
+  //     moves: {
+  //       setActivePlayers: (G, ctx) => {
+  //         ctx.events.setActivePlayers({ all: 'A', moveLimit: 1 });
+  //       },
+  //     },
+  //   });
+  //   let state = flow.init({ ctx: flow.ctx(2) } as State);
+
+  //   expect(state.ctx.turn).toBe(1);
+  //   expect(state.ctx.currentPlayer).toBe('0');
+
+  //   state = flow.processMove(
+  //     state,
+  //     makeMove('setActivePlayers', null, '0').payload
+  //   );
+
+  //   expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 1, '1': 1 });
+  //   expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 1, '1': 1 });
+  // });
+
+  test('setStage maps moveLimit to minMoves/maxMoves', () => {
+    const flow = Flow({});
+    let state = flow.init({ ctx: flow.ctx(2) } as State);
+
+    expect(state.ctx._activePlayersMinMoves).toBeNull();
+    expect(state.ctx._activePlayersMaxMoves).toBeNull();
+    state = flow.processEvent(
+      state,
+      gameEvent('setStage', { stage: 'A', moveLimit: 2 })
+    );
+    expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 2 });
+    expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
   });
 });
 
