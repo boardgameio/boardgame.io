@@ -1,6 +1,7 @@
 <script>
   export let client;
   export let clientManager;
+  export let ToggleVisibility;
 
   import Item from './Item.svelte';
 </script>

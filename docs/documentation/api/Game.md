@@ -1,5 +1,7 @@
 # Game
 
+?> Using TypeScript? Check out [the TypeScript docs](typescript.md) on how to type your game object.
+
 ```js
 {
   // The name of the game.
@@ -126,7 +128,7 @@
 
   // Disable undo feature for all the moves in the game
   disableUndo: true,
-    
+
   // Transfer delta state with JSON Patch in multiplayer
   deltaState: true,
 }

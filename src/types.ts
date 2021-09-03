@@ -297,7 +297,7 @@ export interface Game<
   deltaState?: boolean;
   disableUndo?: boolean;
   seed?: string | number;
-  setup?: (ctx: CtxWithPlugins, setupData?: SetupData) => any;
+  setup?: (ctx: CtxWithPlugins, setupData?: SetupData) => G;
   validateSetupData?: (
     setupData: SetupData | undefined,
     numPlayers: number
@@ -317,7 +317,7 @@ export interface Game<
   };
   endIf?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
-  playerView?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID) => any;
+  playerView?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID | null) => any;
   plugins?: Array<Plugin<any, any, G>>;
   ai?: {
     enumerate: (

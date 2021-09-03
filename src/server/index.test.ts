@@ -6,6 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import request from 'supertest';
+
 import { Server, createServerRunConfig, getPortFromServer } from '.';
 import type { KoaServer } from '.';
 import type { SocketIO } from './transport/socketio';
@@ -42,23 +44,6 @@ jest.mock('koa-socket-2', () => {
     }
     adapter() {
       return this;
-    }
-  };
-});
-
-jest.mock('koa', () => {
-  return class {
-    constructor() {
-      (this as any).context = {};
-      (this as any).use = () => this;
-      (this as any).callback = () => {};
-      (this as any).listen = (port, listeningCallback?: () => void) => {
-        if (listeningCallback) listeningCallback();
-        return {
-          address: () => ({ port: 'mock-api-port' }),
-          close: () => {},
-        };
-      };
     }
   };
 });
@@ -149,6 +134,23 @@ describe('run', () => {
       lobbyConfig: { apiPort: 9999, apiCallback },
     });
     expect(apiCallback).toHaveBeenCalled();
+  });
+
+  test('runs route middleware', async () => {
+    const usedMiddleware = jest.fn(async (_ctx, next) => {
+      await next;
+    });
+    const unusedMiddleware = jest.fn(async (_ctx, next) => {
+      await next;
+    });
+    server = Server({ games: [game] });
+    server.router.use('/games', usedMiddleware);
+    server.router.use('/games/unused', unusedMiddleware);
+    runningServer = await server.run(8888);
+
+    await request(runningServer.appServer).get('/games');
+    expect(usedMiddleware).toHaveBeenCalled();
+    expect(unusedMiddleware).not.toHaveBeenCalled();
   });
 });
 

@@ -5,7 +5,7 @@ import type { TransportData, IntermediateTransportData } from './master';
 
 const applyPlayerView = (
   game: Game,
-  playerID: string,
+  playerID: string | null,
   state: State
 ): State => ({
   ...state,
@@ -19,7 +19,10 @@ const applyPlayerView = (
 /** Gets a function that filters the TransportData for a given player and game. */
 export const getFilterPlayerView =
   (game: Game) =>
-  (playerID: string, payload: IntermediateTransportData): TransportData => {
+  (
+    playerID: string | null,
+    payload: IntermediateTransportData
+  ): TransportData => {
     switch (payload.type) {
       case 'patch': {
         const [matchID, stateID, prevState, state] = payload.args;
@@ -69,7 +72,7 @@ export const getFilterPlayerView =
  * @param {String} playerID - The playerID that this log is
  *                            to be sent to.
  */
-export function redactLog(log: LogEntry[], playerID: PlayerID) {
+export function redactLog(log: LogEntry[], playerID: PlayerID | null) {
   if (log === undefined) {
     return log;
   }

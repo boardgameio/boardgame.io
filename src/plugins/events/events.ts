@@ -149,6 +149,9 @@ export class Events {
         return stateWithError(event.error, Errors.CalledOutsideHook);
       }
 
+      // Stop processing events once the game has finished.
+      if (state.ctx.gameover) break EventQueue;
+
       switch (event.type) {
         case 'endStage':
         case 'setStage':

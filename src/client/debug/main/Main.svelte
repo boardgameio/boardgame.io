@@ -1,6 +1,7 @@
 <script>
   export let client;
   export let clientManager;
+  export let ToggleVisibility;
 
   import JSONTree from 'svelte-json-tree-auto/src/Root.svelte';
   import ClientSwitcher from './ClientSwitcher.svelte';
@@ -59,7 +60,7 @@
 
 <section>
   <h3>Controls</h3>
-  <Controls {client} />
+  <Controls {client} {ToggleVisibility} />
 </section>
 
 <section>
