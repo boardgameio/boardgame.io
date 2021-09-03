@@ -16,6 +16,7 @@ import type {
   State,
   TurnConfig,
 } from '../types';
+import { supportDeprecatedMoveLimit } from './backwards-compatibility';
 
 export function SetActivePlayers(
   ctx: Ctx,
@@ -25,7 +26,7 @@ export function SetActivePlayers(
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
   let _activePlayersMinMoves = {};
-  let _activePlayersMoveLimit = {};
+  let _activePlayersMaxMoves = {};
 
   if (Array.isArray(arg)) {
     // support a simple array of player IDs as active players
@@ -34,6 +35,8 @@ export function SetActivePlayers(
     activePlayers = value;
   } else {
     // process active players argument object
+    supportDeprecatedMoveLimit(arg);
+
     if (arg.next) {
       _nextActivePlayers = arg.next;
     }
@@ -44,7 +47,7 @@ export function SetActivePlayers(
         {
           activePlayers: ctx.activePlayers,
           _activePlayersMinMoves: ctx._activePlayersMinMoves,
-          _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
+          _activePlayersMaxMoves: ctx._activePlayersMaxMoves,
           _activePlayersNumMoves: ctx._activePlayersNumMoves,
         },
       ];
@@ -54,7 +57,7 @@ export function SetActivePlayers(
       ApplyActivePlayerArgument(
         activePlayers,
         _activePlayersMinMoves,
-        _activePlayersMoveLimit,
+        _activePlayersMaxMoves,
         ctx.currentPlayer,
         arg.currentPlayer
       );
@@ -67,7 +70,7 @@ export function SetActivePlayers(
           ApplyActivePlayerArgument(
             activePlayers,
             _activePlayersMinMoves,
-            _activePlayersMoveLimit,
+            _activePlayersMaxMoves,
             id,
             arg.others
           );
@@ -81,7 +84,7 @@ export function SetActivePlayers(
         ApplyActivePlayerArgument(
           activePlayers,
           _activePlayersMinMoves,
-          _activePlayersMoveLimit,
+          _activePlayersMaxMoves,
           id,
           arg.all
         );
@@ -93,7 +96,7 @@ export function SetActivePlayers(
         ApplyActivePlayerArgument(
           activePlayers,
           _activePlayersMinMoves,
-          _activePlayersMoveLimit,
+          _activePlayersMaxMoves,
           id,
           arg.value[id]
         );
@@ -108,10 +111,10 @@ export function SetActivePlayers(
       }
     }
 
-    if (arg.moveLimit) {
+    if (arg.maxMoves) {
       for (const id in activePlayers) {
-        if (_activePlayersMoveLimit[id] === undefined) {
-          _activePlayersMoveLimit[id] = arg.moveLimit;
+        if (_activePlayersMaxMoves[id] === undefined) {
+          _activePlayersMaxMoves[id] = arg.maxMoves;
         }
       }
     }
@@ -125,8 +128,8 @@ export function SetActivePlayers(
     _activePlayersMinMoves = null;
   }
 
-  if (Object.keys(_activePlayersMoveLimit).length === 0) {
-    _activePlayersMoveLimit = null;
+  if (Object.keys(_activePlayersMaxMoves).length === 0) {
+    _activePlayersMaxMoves = null;
   }
 
   const _activePlayersNumMoves = {};
@@ -138,7 +141,7 @@ export function SetActivePlayers(
     ...ctx,
     activePlayers,
     _activePlayersMinMoves,
-    _activePlayersMoveLimit,
+    _activePlayersMaxMoves,
     _activePlayersNumMoves,
     _prevActivePlayers,
     _nextActivePlayers,
@@ -154,7 +157,7 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
   let {
     activePlayers,
     _activePlayersMinMoves,
-    _activePlayersMoveLimit,
+    _activePlayersMaxMoves,
     _activePlayersNumMoves,
     _prevActivePlayers,
     _nextActivePlayers,
@@ -166,7 +169,7 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
       ({
         activePlayers,
         _activePlayersMinMoves,
-        _activePlayersMoveLimit,
+        _activePlayersMaxMoves,
         _activePlayersNumMoves,
         _prevActivePlayers,
       } = ctx);
@@ -175,14 +178,14 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
       ({
         activePlayers,
         _activePlayersMinMoves,
-        _activePlayersMoveLimit,
+        _activePlayersMaxMoves,
         _activePlayersNumMoves,
       } = _prevActivePlayers[lastIndex]);
       _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
     } else {
       activePlayers = null;
       _activePlayersMinMoves = null;
-      _activePlayersMoveLimit = null;
+      _activePlayersMaxMoves = null;
     }
   }
 
@@ -190,7 +193,7 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
     ...ctx,
     activePlayers,
     _activePlayersMinMoves,
-    _activePlayersMoveLimit,
+    _activePlayersMaxMoves,
     _activePlayersNumMoves,
     _prevActivePlayers,
   };
@@ -200,14 +203,14 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
  * Apply an active player argument to the given player ID
  * @param {Object} activePlayers
  * @param {Object} _activePlayersMinMoves
- * @param {Object} _activePlayersMoveLimit
+ * @param {Object} _activePlayersMaxMoves
  * @param {String} playerID The player to apply the parameter to
  * @param {(String|Object)} arg An active player argument
  */
 function ApplyActivePlayerArgument(
   activePlayers: Ctx['activePlayers'],
   _activePlayersMinMoves: Ctx['_activePlayersMinMoves'],
-  _activePlayersMoveLimit: Ctx['_activePlayersMoveLimit'],
+  _activePlayersMaxMoves: Ctx['_activePlayersMaxMoves'],
   playerID: PlayerID,
   arg: StageArg
 ) {
@@ -218,7 +221,7 @@ function ApplyActivePlayerArgument(
   if (arg.stage !== undefined) {
     activePlayers[playerID] = arg.stage;
     if (arg.minMoves) _activePlayersMinMoves[playerID] = arg.minMoves;
-    if (arg.moveLimit) _activePlayersMoveLimit[playerID] = arg.moveLimit;
+    if (arg.maxMoves) _activePlayersMaxMoves[playerID] = arg.maxMoves;
   }
 }
 
@@ -444,7 +447,7 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every player in the game.
    */
-  ALL_ONCE: { all: Stage.NULL, moveLimit: 1 },
+  ALL_ONCE: { all: Stage.NULL, minMoves: 1, maxMoves: 1 },
 
   /**
    * OTHERS
@@ -461,5 +464,5 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every *other* player in the game.
    */
-  OTHERS_ONCE: { others: Stage.NULL, moveLimit: 1 },
+  OTHERS_ONCE: { others: Stage.NULL, minMoves: 1, maxMoves: 1 },
 };

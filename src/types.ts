@@ -61,7 +61,7 @@ export type PlayerID = string;
 
 export type StageArg =
   | StageName
-  | { stage?: StageName; minMoves?: number; moveLimit?: number };
+  | { stage?: StageName; minMoves?: number; maxMoves?: number };
 
 export interface ActivePlayersArg {
   currentPlayer?: StageArg;
@@ -69,6 +69,8 @@ export interface ActivePlayersArg {
   all?: StageArg;
   value?: Record<PlayerID, StageArg>;
   minMoves?: number;
+  maxMoves?: number;
+  /** @deprecated Use `minMoves` and `maxMoves` instead. */
   moveLimit?: number;
   revert?: boolean;
   next?: ActivePlayersArg;
@@ -90,12 +92,12 @@ export interface Ctx {
   turn: number;
   phase: string;
   _activePlayersMinMoves?: Record<PlayerID, number>;
-  _activePlayersMoveLimit?: Record<PlayerID, number>;
+  _activePlayersMaxMoves?: Record<PlayerID, number>;
   _activePlayersNumMoves?: Record<PlayerID, number>;
   _prevActivePlayers?: Array<{
     activePlayers: null | ActivePlayers;
     _activePlayersMinMoves?: Record<PlayerID, number>;
-    _activePlayersMoveLimit?: Record<PlayerID, number>;
+    _activePlayersMaxMoves?: Record<PlayerID, number>;
     _activePlayersNumMoves?: Record<PlayerID, number>;
   }>;
   _nextActivePlayers?: ActivePlayersArg;
@@ -262,6 +264,8 @@ export interface TurnConfig<
 > {
   activePlayers?: ActivePlayersArg;
   minMoves?: number;
+  maxMoves?: number;
+  /** @deprecated Use `minMoves` and `maxMoves` instead. */
   moveLimit?: number;
   onBegin?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;

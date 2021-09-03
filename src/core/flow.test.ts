@@ -340,11 +340,12 @@ describe('turn', () => {
     });
   });
 
-  describe('moveLimit', () => {
+  describe('minMoves/maxMoves', () => {
     test('without phases', () => {
       const flow = Flow({
         turn: {
-          moveLimit: 2,
+          minMoves: 2,
+          maxMoves: 2,
         },
       });
       let state = flow.init({ ctx: flow.ctx(2) } as State);
@@ -359,32 +360,30 @@ describe('turn', () => {
 
       state = flow.processMove(state, makeMove('move', null, '0').payload);
 
-      // player 0 reached moveLimit, turn ended automatically
+      // player 0 reached maxMoves, turn ended automatically
 
       expect(state.ctx.turn).toBe(2);
       expect(state.ctx.currentPlayer).toBe('1');
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+      state = flow.processMove(state, makeMove('move', null, '1').payload);
 
       expect(state.ctx.turn).toBe(2);
       expect(state.ctx.currentPlayer).toBe('1');
 
       state = flow.processEvent(state, gameEvent('endTurn'));
 
-      // player 1 ended their turn manually, having made less moves than the moveLimit would allow
+      // player 1 could not end turn manually, they have not yet made [minMoves] moves
 
-      expect(state.ctx.turn).toBe(3);
-      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.turn).toBe(2);
+      expect(state.ctx.currentPlayer).toBe('1');
     });
 
     test('with phases', () => {
       const flow = Flow({
-        turn: { moveLimit: 2 },
+        turn: { minMoves: 2, maxMoves: 2 },
         phases: {
           B: {
-            turn: {
-              moveLimit: 1,
-            },
+            turn: { minMoves: 1, maxMoves: 1 },
           },
         },
       });
@@ -400,10 +399,10 @@ describe('turn', () => {
 
       state = flow.processEvent(state, gameEvent('endTurn'));
 
-      // player 0 ended their turn manually, having made less moves than the moveLimit would allow
+      // player 0 could not end turn manually, they have not yet made [minMoves] moves
 
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
 
       state = flow.processMove(state, makeMove('move', null, '0').payload);
 
@@ -425,16 +424,16 @@ describe('turn', () => {
 
       state = flow.processEvent(state, gameEvent('endTurn'));
 
-      // player 1 ended their turn without using any move
+      // player 1 could not end turn manually, they have not yet made [minMoves] moves
 
-      expect(state.ctx.turn).toBe(5);
-      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.turn).toBe(4);
+      expect(state.ctx.currentPlayer).toBe('1');
     });
 
     test('with noLimit moves', () => {
       const flow = Flow({
         turn: {
-          moveLimit: 2,
+          maxMoves: 2,
         },
         moves: {
           A: () => {},
@@ -653,7 +652,7 @@ describe('stages', () => {
         turn: {
           activePlayers: {
             currentPlayer: 'A',
-            moveLimit: 1,
+            maxMoves: 1,
           },
           endIf: (G, ctx) => ctx.activePlayers === null,
           stages: {
@@ -700,7 +699,7 @@ describe('stage events', () => {
     test('with multiple active players', () => {
       const flow = Flow({
         turn: {
-          activePlayers: { all: 'A', minMoves: 2, moveLimit: 5 },
+          activePlayers: { all: 'A', minMoves: 2, maxMoves: 5 },
         },
       });
       let state = { G: {}, ctx: flow.ctx(3) } as State;
@@ -715,7 +714,7 @@ describe('stage events', () => {
 
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'B', moveLimit: 1 }, '1')
+        gameEvent('setStage', { stage: 'B', maxMoves: 1 }, '1')
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'B', '2': 'A' });
     });
@@ -743,24 +742,43 @@ describe('stage events', () => {
       state = flow.init(state);
 
       expect(state.ctx._activePlayersMinMoves).toBeNull();
+      expect(state.ctx._activePlayersMaxMoves).toBeNull();
       state = flow.processEvent(
         state,
         gameEvent('setStage', { stage: 'A', minMoves: 1 })
       );
       expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 1 });
+      expect(state.ctx._activePlayersMaxMoves).toBeNull();
     });
 
-    test('with move limit', () => {
+    test('with max moves', () => {
       const flow = Flow({});
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
-      expect(state.ctx._activePlayersMoveLimit).toBeNull();
+      expect(state.ctx._activePlayersMinMoves).toBeNull();
+      expect(state.ctx._activePlayersMaxMoves).toBeNull();
+      state = flow.processEvent(
+        state,
+        gameEvent('setStage', { stage: 'A', maxMoves: 1 })
+      );
+      expect(state.ctx._activePlayersMinMoves).toBeNull();
+      expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 1 });
+    });
+
+    test('with deprecated move limit', () => {
+      const flow = Flow({});
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.init(state);
+
+      expect(state.ctx._activePlayersMinMoves).toBeNull();
+      expect(state.ctx._activePlayersMaxMoves).toBeNull();
       state = flow.processEvent(
         state,
         gameEvent('setStage', { stage: 'A', moveLimit: 2 })
       );
-      expect(state.ctx._activePlayersMoveLimit).toEqual({ '0': 2 });
+      expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 2 });
+      expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
     });
 
     test('empty argument ends stage', () => {
@@ -860,7 +878,7 @@ describe('stage events', () => {
     test('with multiple active players', () => {
       const flow = Flow({
         turn: {
-          activePlayers: { all: 'A', moveLimit: 5 },
+          activePlayers: { all: 'A', maxMoves: 5 },
         },
       });
       let state = { G: {}, ctx: flow.ctx(3) } as State;
@@ -1978,7 +1996,7 @@ describe('hook execution order', () => {
           calls.push('moves.endStage');
         },
         setActivePlayers: (G, ctx) => {
-          ctx.events.setActivePlayers({ all: 'A', minMoves: 1, moveLimit: 1 });
+          ctx.events.setActivePlayers({ all: 'A', minMoves: 1, maxMoves: 1 });
           calls.push('moves.setActivePlayers');
         },
       },
@@ -2115,7 +2133,7 @@ describe('hook execution order', () => {
     ]);
   });
 
-  test('hooks called on stage end triggered by moveLimit', () => {
+  test('hooks called on stage end triggered by maxMoves', () => {
     client.updatePlayerID('1');
     client.moves.move();
     client.updatePlayerID('0');
