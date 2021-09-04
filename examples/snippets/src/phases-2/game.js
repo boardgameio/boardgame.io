@@ -23,7 +23,7 @@ const game = {
       endIf: (G) => G.deck >= 6,
     },
   },
-  turn: { moveLimit: 1 },
+  turn: { minMoves: 1, maxMoves: 1 },
 };
 
 export default game;

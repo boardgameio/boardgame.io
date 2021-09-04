@@ -11,7 +11,7 @@ function PlayCard(G, ctx) {
 const game = {
   setup: (ctx) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   moves: { DrawCard, PlayCard },
-  turn: { moveLimit: 1 },
+  turn: { minMoves: 1, maxMoves: 1 },
 };
 
 export default game;
