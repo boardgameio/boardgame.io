@@ -45,7 +45,8 @@ const TicTacToe = {
   },
 
   turn: {
-    moveLimit: 1,
+    minMoves: 1,
+    maxMoves: 1,
   },
 
   endIf: ({ G, ctx }) => {

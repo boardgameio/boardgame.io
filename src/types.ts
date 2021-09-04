@@ -56,13 +56,24 @@ export type PartialGameState = Pick<State, 'G' | 'ctx' | 'plugins'>;
 export type StageName = string;
 export type PlayerID = string;
 
-export type StageArg = StageName | { stage?: StageName; moveLimit?: number };
+export type StageArg =
+  | StageName
+  | {
+      stage?: StageName;
+      /** @deprecated Use `minMoves` and `maxMoves` instead. */
+      moveLimit?: number;
+      minMoves?: number;
+      maxMoves?: number;
+    };
 
 export interface ActivePlayersArg {
   currentPlayer?: StageArg;
   others?: StageArg;
   all?: StageArg;
   value?: Record<PlayerID, StageArg>;
+  minMoves?: number;
+  maxMoves?: number;
+  /** @deprecated Use `minMoves` and `maxMoves` instead. */
   moveLimit?: number;
   revert?: boolean;
   next?: ActivePlayersArg;
@@ -82,11 +93,13 @@ export interface Ctx {
   gameover?: any;
   turn: number;
   phase: string;
-  _activePlayersMoveLimit?: Record<PlayerID, number>;
+  _activePlayersMinMoves?: Record<PlayerID, number>;
+  _activePlayersMaxMoves?: Record<PlayerID, number>;
   _activePlayersNumMoves?: Record<PlayerID, number>;
   _prevActivePlayers?: Array<{
     activePlayers: null | ActivePlayers;
-    _activePlayersMoveLimit?: Record<PlayerID, number>;
+    _activePlayersMinMoves?: Record<PlayerID, number>;
+    _activePlayersMaxMoves?: Record<PlayerID, number>;
     _activePlayersNumMoves?: Record<PlayerID, number>;
   }>;
   _nextActivePlayers?: ActivePlayersArg;
@@ -264,6 +277,9 @@ export interface TurnConfig<
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > {
   activePlayers?: ActivePlayersArg;
+  minMoves?: number;
+  maxMoves?: number;
+  /** @deprecated Use `minMoves` and `maxMoves` instead. */
   moveLimit?: number;
   onBegin?: (context: FnContext<G, PluginAPIs>) => void | G;
   onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;

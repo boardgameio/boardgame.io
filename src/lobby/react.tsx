@@ -115,11 +115,11 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   };
 
   private connection?: ReturnType<typeof LobbyConnection>;
+  private _currentInterval?: NodeJS.Timeout;
 
   constructor(props: LobbyProps) {
     super(props);
     this._createConnection(this.props);
-    setInterval(this._updateConnection, this.props.refreshInterval);
   }
 
   componentDidMount() {
@@ -132,6 +132,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       playerName: cookie.playerName || 'Visitor',
       credentialStore: cookie.credentialStore || {},
     });
+    this._startRefreshInterval();
   }
 
   componentDidUpdate(prevProps: LobbyProps, prevState: LobbyState) {
@@ -151,6 +152,25 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       };
       Cookies.save('lobbyState', cookie, { path: '/' });
     }
+    if (prevProps.refreshInterval !== this.props.refreshInterval) {
+      this._startRefreshInterval();
+    }
+  }
+
+  componentWillUnmount() {
+    this._clearRefreshInterval();
+  }
+
+  _startRefreshInterval() {
+    this._clearRefreshInterval();
+    this._currentInterval = setInterval(
+      this._updateConnection,
+      this.props.refreshInterval
+    );
+  }
+
+  _clearRefreshInterval() {
+    clearInterval(this._currentInterval);
   }
 
   _createConnection = (props: LobbyProps) => {

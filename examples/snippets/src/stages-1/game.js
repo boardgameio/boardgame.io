@@ -1,5 +1,5 @@
 function militia({ G, events }) {
-  events.setActivePlayers({ others: 'discard', moveLimit: 1 });
+  events.setActivePlayers({ others: 'discard', minMoves: 1, maxMoves: 1 });
 }
 
 function discard({ G, ctx }) {}

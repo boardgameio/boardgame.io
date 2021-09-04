@@ -13,7 +13,8 @@ const code = `{
     play: ({ G, events }) => {
       events.setActivePlayers({
         others: 'discard',
-        moveLimit: 1
+        minMoves: 1, 
+        maxMoves: 1,
       });
       return G;
     },
@@ -47,7 +48,11 @@ export default {
 
     moves: {
       play: ({ G, events }) => {
-        events.setActivePlayers({ others: 'discard', moveLimit: 1 });
+        events.setActivePlayers({
+          others: 'discard',
+          minMoves: 1,
+          maxMoves: 1,
+        });
         return G;
       },
     },

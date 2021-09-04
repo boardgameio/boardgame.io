@@ -162,6 +162,30 @@ describe('lobby', () => {
     });
   });
 
+  describe('refresh interval', () => {
+    beforeEach(() => {
+      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+    });
+    afterEach(() => lobby.unmount());
+
+    test('lobby stores an interval ID', () => {
+      const { _currentInterval } = lobby.instance();
+      expect(_currentInterval).toEqual(expect.any(Number));
+    });
+
+    test('updating interval prop, updates internal interval ID', () => {
+      const { _currentInterval } = lobby.instance();
+      lobby.setProps({ refreshInterval: 10000 });
+      expect(lobby.instance()._currentInterval).not.toEqual(_currentInterval);
+    });
+
+    test('updating other props does not update interval ID', () => {
+      const { _currentInterval } = lobby.instance();
+      lobby.setProps({ debug: true });
+      expect(lobby.instance()._currentInterval).toEqual(_currentInterval);
+    });
+  });
+
   describe('matches list', () => {
     const spyClient = jest.fn();
     beforeEach(async () => {

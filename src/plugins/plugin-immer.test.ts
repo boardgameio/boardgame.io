@@ -7,13 +7,14 @@
  */
 
 import { Client } from '../client/client';
+import type { _ClientImpl } from '../client/client';
 import { INVALID_MOVE } from '../core/constants';
 
 // Surpress invalid move error logging
 jest.mock('../core/logger');
 
 describe('immer', () => {
-  let client: ReturnType<typeof Client>;
+  let client: _ClientImpl;
 
   beforeAll(() => {
     client = Client({

@@ -1,6 +1,5 @@
 import { InMemory } from './inmemory';
 import { FlatFile } from './flatfile';
-import { LocalStorage } from './localstorage';
 
 const DBFromEnv = () => {
   return process.env.FLATFILE_DIR
@@ -10,4 +9,4 @@ const DBFromEnv = () => {
     : new InMemory();
 };
 
-export { InMemory, FlatFile, LocalStorage, DBFromEnv };
+export { InMemory, FlatFile, DBFromEnv };

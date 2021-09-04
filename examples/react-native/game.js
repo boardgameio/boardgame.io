@@ -52,7 +52,7 @@ const TicTacToe = {
     },
   },
 
-  turn: { moveLimit: 1 },
+  turn: { minMoves: 1, maxMoves: 1 },
 
   endIf: ({ G, ctx }) => {
     if (IsVictory(G.cells)) {

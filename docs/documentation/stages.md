@@ -116,19 +116,23 @@ setActivePlayers({
     ...
   },
 
+  // Prevents manual endStage before the player
+  // has made the specified number of moves.
+  minMoves: 1,
+
   // Calls endStage automatically after the player
   // has made the specified number of moves.
-  moveLimit: 5,
+  maxMoves: 5,
 
   // This takes the stage configuration to the
   // value prior to this setActivePlayers call
   // once the set of active players becomes empty
   // (due to players either calling endStage or
-  // a moveLimit ending the stage for them).
+  // maxMoves ending the stage for them).
   revert: true,
 
   // A next option will be used once the set of active players
-  // becomes empty (either by using moveLimit or manually removing
+  // becomes empty (either by using maxMoves or manually removing
   // players).
   // All options available inside setActivePlayers are available
   // inside next.
@@ -141,7 +145,7 @@ require every other player to discard a card when we play one:
 
 ```js
 function PlayCard({ events }) {
-  events.setActivePlayers({ others: 'discard', moveLimit: 1 });
+  events.setActivePlayers({ others: 'discard', minMoves: 1, maxMoves: 1 });
 }
 
 const game = {
@@ -162,21 +166,41 @@ const game = {
 
 #### Advanced Move Limits
 
-Passing a `moveLimit` argument to `setActivePlayers` limits all the
+Passing a `minMoves` argument to `setActivePlayers` forces all the
+active players to make at least that number of moves before being able to
+end the stage, but sometimes you might want to set different move limits 
+for different players. For cases like this, `setStage` and `setActivePlayers` 
+support long-form arguments:
+
+```js
+setStage({ stage: 'stage-name', minMoves: 3 });
+```
+
+```js
+setActivePlayers({
+  currentPlayer: { stage: 'stage-name', minMoves: 2 },
+  others: { stage: 'stage-name', minMoves: 1 },
+  value: {
+    '0': { stage: 'stage-name', minMoves: 4 },
+  },
+});
+```
+
+Passing a `maxMoves` argument to `setActivePlayers` limits all the
 active players to making that number of moves, but sometimes you might want
 to set different move limits for different players. For cases like this,
 `setStage` and `setActivePlayers` support long-form arguments:
 
 ```js
-setStage({ stage: 'stage-name', moveLimit: 3 });
+setStage({ stage: 'stage-name', maxMoves: 3 });
 ```
 
 ```js
 setActivePlayers({
-  currentPlayer: { stage: 'stage-name', moveLimit: 2 },
-  others: { stage: 'stage-name', moveLimit: 1 },
+  currentPlayer: { stage: 'stage-name', maxMoves: 2 },
+  others: { stage: 'stage-name', maxMoves: 1 },
   value: {
-    '0': { stage: 'stage-name', moveLimit: 4 },
+    '0': { stage: 'stage-name', maxMoves: 4 },
   },
 });
 ```
@@ -236,7 +260,7 @@ aren't restricted to any particular stage.
 
 #### ALL_ONCE
 
-Equivalent to `{ all: Stage.NULL, moveLimit: 1 }`. Any player can make
+Equivalent to `{ all: Stage.NULL, minMoves: 1, maxMoves: 1 }`. Any player can make
 exactly one move before they are removed from the set of active players.
 
 #### OTHERS
