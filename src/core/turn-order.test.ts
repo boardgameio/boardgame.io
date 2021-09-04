@@ -810,11 +810,7 @@ describe('setActivePlayers', () => {
       const reducer = CreateGameReducer({ game });
       let state = InitializeGame({ game, numPlayers: 3 });
 
-      expect(state.ctx._activePlayersMinMoves).toEqual({
-        '0': 1,
-        '1': undefined,
-        '2': undefined,
-      });
+      expect(state.ctx._activePlayersMinMoves).toStrictEqual({ '0': 1 });
 
       expect(state.ctx._activePlayersMaxMoves).toEqual({
         '0': 2,
@@ -888,8 +884,7 @@ describe('setActivePlayers', () => {
       const reducer = CreateGameReducer({ game });
       let state = InitializeGame({ game, numPlayers: 3 });
 
-      expect(state.ctx._activePlayersMinMoves).toEqual({
-        '0': undefined,
+      expect(state.ctx._activePlayersMinMoves).toStrictEqual({
         '1': 1,
         '2': 2,
       });
