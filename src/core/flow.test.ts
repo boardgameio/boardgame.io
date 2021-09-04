@@ -242,44 +242,42 @@ describe('turn', () => {
   });
 
   describe('minMoves', () => {
-    test('without phases', () => {
+    describe('without phases', () => {
       const flow = Flow({
         turn: {
           minMoves: 2,
         },
       });
 
-      let state = flow.init({ ctx: flow.ctx(2) } as State);
+      test('player cannot endTurn if not enough moves were made', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
+      });
 
-      state = flow.processEvent(state, gameEvent('endTurn'));
+      test('player can endTurn after enough moves were made', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      // player 0 could not end their turn because minMoves have not been made yet
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
-
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
-
-      // player 0 can now end their turn, having made another move to reach minMoves total
-
-      state = flow.processEvent(state, gameEvent('endTurn'));
-
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
+      });
     });
 
-    test('with phases', () => {
+    describe('with phases', () => {
       const flow = Flow({
         turn: { minMoves: 2 },
         phases: {
@@ -290,144 +288,169 @@ describe('turn', () => {
           },
         },
       });
-      let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+      test('player cannot endTurn if not enough moves were made in default phase', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      state = flow.processEvent(state, gameEvent('endTurn'));
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
+      });
 
-      // player 0 could not end their turn because minMoves have not been made yet
+      test('player can endTurn after enough moves were made in default phase', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      state = flow.processEvent(state, gameEvent('endTurn'));
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
+      });
 
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+      test('player cannot endTurn if no move was made in explicit phase', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      state = flow.processEvent(state, gameEvent('setPhase', 'B'));
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      expect(state.ctx.turn).toBe(3);
-      expect(state.ctx.currentPlayer).toBe('0');
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
+        state = flow.processMove(state, makeMove('move', null, '1').payload);
 
-      state = flow.processEvent(state, gameEvent('endTurn'));
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
 
-      // player 0 could not end their turn because minMoves have not been made yet
+        state = flow.processEvent(state, gameEvent('setPhase', 'B'));
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      expect(state.ctx.turn).toBe(3);
-      expect(state.ctx.currentPlayer).toBe('0');
+        expect(state.ctx.turn).toBe(3);
+        expect(state.ctx.currentPlayer).toBe('0');
+      });
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+      test('player can endTurn after having made a move, fewer moves needed in explicit phase', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      expect(state.ctx.turn).toBe(3);
-      expect(state.ctx.currentPlayer).toBe('0');
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      state = flow.processEvent(state, gameEvent('endTurn'));
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
+        state = flow.processMove(state, makeMove('move', null, '1').payload);
 
-      // player 0 could end their turn after only one move because minMoves in phase B is only 1
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
 
-      expect(state.ctx.turn).toBe(4);
-      expect(state.ctx.currentPlayer).toBe('1');
+        state = flow.processEvent(state, gameEvent('setPhase', 'B'));
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
+
+        expect(state.ctx.turn).toBe(4);
+        expect(state.ctx.currentPlayer).toBe('1');
+      });
     });
   });
 
-  describe('minMoves/maxMoves', () => {
-    test('without phases', () => {
+  describe('maxMoves', () => {
+    describe('without phases', () => {
       const flow = Flow({
         turn: {
-          minMoves: 2,
           maxMoves: 2,
         },
       });
-      let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+      test('manual endTurn works, even if not enough moves were made', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
+      });
 
-      // player 0 reached maxMoves, turn ended automatically
+      test('turn automatically ends after making enough moves', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      state = flow.processMove(state, makeMove('move', null, '1').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
 
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
-
-      state = flow.processEvent(state, gameEvent('endTurn'));
-
-      // player 1 could not end turn manually, they have not yet made [minMoves] moves
-
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
+      });
     });
 
-    test('with phases', () => {
+    describe('with phases', () => {
       const flow = Flow({
-        turn: { minMoves: 2, maxMoves: 2 },
+        turn: { maxMoves: 2 },
         phases: {
           B: {
-            turn: { minMoves: 1, maxMoves: 1 },
+            turn: { maxMoves: 1 },
           },
         },
       });
-      let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+      test('manual endTurn works in all phases, even if fewer than maxMoves have been made', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      state = flow.processEvent(state, gameEvent('endTurn'));
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
 
-      // player 0 could not end turn manually, they have not yet made [minMoves] moves
+        state = flow.processEvent(state, gameEvent('setPhase', 'B'));
 
-      expect(state.ctx.turn).toBe(1);
-      expect(state.ctx.currentPlayer).toBe('0');
+        expect(state.ctx.turn).toBe(3);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processEvent(state, gameEvent('endTurn'));
 
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+        expect(state.ctx.turn).toBe(4);
+        expect(state.ctx.currentPlayer).toBe('1');
+      });
 
-      state = flow.processEvent(state, gameEvent('setPhase', 'B'));
+      test('automatic endTurn triggers after fewer moves in different phase', () => {
+        let state = flow.init({ ctx: flow.ctx(2) } as State);
 
-      // player 1 still had moves left, but the phase change automatically ended their turn
+        expect(state.ctx.turn).toBe(1);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      expect(state.ctx.phase).toBe('B');
-      expect(state.ctx.turn).toBe(3);
-      expect(state.ctx.currentPlayer).toBe('0');
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
 
-      state = flow.processMove(state, makeMove('move', null, '0').payload);
+        expect(state.ctx.turn).toBe(2);
+        expect(state.ctx.currentPlayer).toBe('1');
 
-      expect(state.ctx.turn).toBe(4);
-      expect(state.ctx.currentPlayer).toBe('1');
+        state = flow.processEvent(state, gameEvent('setPhase', 'B'));
 
-      state = flow.processEvent(state, gameEvent('endTurn'));
+        expect(state.ctx.turn).toBe(3);
+        expect(state.ctx.currentPlayer).toBe('0');
 
-      // player 1 could not end turn manually, they have not yet made [minMoves] moves
+        state = flow.processMove(state, makeMove('move', null, '0').payload);
 
-      expect(state.ctx.turn).toBe(4);
-      expect(state.ctx.currentPlayer).toBe('1');
+        expect(state.ctx.turn).toBe(4);
+        expect(state.ctx.currentPlayer).toBe('1');
+      });
     });
 
     test('with noLimit moves', () => {
