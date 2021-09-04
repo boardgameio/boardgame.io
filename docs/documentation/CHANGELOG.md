@@ -1,3 +1,11 @@
+### v0.47.10
+
+#### Bugfixes
+
+* [[ad78eded](https://github.com/boardgameio/boardgame.io/commit/ad78eded)] ai: Run AI iterations using `setImmediate` for improved performance ([#999](https://github.com/boardgameio/boardgame.io/pull/999))
+* [[feb08a12](https://github.com/boardgameio/boardgame.io/commit/feb08a12)] lobby: Clean up & update refresh polling interval properly ([#996](https://github.com/boardgameio/boardgame.io/pull/996))
+
+
 ### v0.47.9
 
 #### Bugfixes

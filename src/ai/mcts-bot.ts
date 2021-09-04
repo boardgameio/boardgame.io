@@ -5,6 +5,7 @@
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT.
  */
+import 'setimmediate';
 import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
 import type { BotAction } from './bot';
@@ -313,7 +314,7 @@ export class MCTSBot extends Bot {
         const asyncIteration = () => {
           if (this.iterationCounter < numIterations) {
             iteration();
-            setTimeout(asyncIteration, 0);
+            setImmediate(asyncIteration);
           } else {
             resolve(getResult());
           }
