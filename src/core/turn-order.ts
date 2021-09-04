@@ -16,6 +16,7 @@ import type {
   State,
   TurnConfig,
 } from '../types';
+import { supportDeprecatedMoveLimit } from './backwards-compatibility';
 
 export function SetActivePlayers(
   ctx: Ctx,
@@ -24,7 +25,8 @@ export function SetActivePlayers(
   let activePlayers: typeof ctx.activePlayers = {};
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
-  let _activePlayersMoveLimit = {};
+  let _activePlayersMinMoves = {};
+  let _activePlayersMaxMoves = {};
 
   if (Array.isArray(arg)) {
     // support a simple array of player IDs as active players
@@ -33,6 +35,10 @@ export function SetActivePlayers(
     activePlayers = value;
   } else {
     // process active players argument object
+
+    // stages previously did not enforce minMoves, this behaviour is kept intentionally
+    supportDeprecatedMoveLimit(arg);
+
     if (arg.next) {
       _nextActivePlayers = arg.next;
     }
@@ -42,7 +48,8 @@ export function SetActivePlayers(
         ...ctx._prevActivePlayers,
         {
           activePlayers: ctx.activePlayers,
-          _activePlayersMoveLimit: ctx._activePlayersMoveLimit,
+          _activePlayersMinMoves: ctx._activePlayersMinMoves,
+          _activePlayersMaxMoves: ctx._activePlayersMaxMoves,
           _activePlayersNumMoves: ctx._activePlayersNumMoves,
         },
       ];
@@ -51,7 +58,8 @@ export function SetActivePlayers(
     if (arg.currentPlayer !== undefined) {
       ApplyActivePlayerArgument(
         activePlayers,
-        _activePlayersMoveLimit,
+        _activePlayersMinMoves,
+        _activePlayersMaxMoves,
         ctx.currentPlayer,
         arg.currentPlayer
       );
@@ -63,7 +71,8 @@ export function SetActivePlayers(
         if (id !== ctx.currentPlayer) {
           ApplyActivePlayerArgument(
             activePlayers,
-            _activePlayersMoveLimit,
+            _activePlayersMinMoves,
+            _activePlayersMaxMoves,
             id,
             arg.others
           );
@@ -76,7 +85,8 @@ export function SetActivePlayers(
         const id = ctx.playOrder[i];
         ApplyActivePlayerArgument(
           activePlayers,
-          _activePlayersMoveLimit,
+          _activePlayersMinMoves,
+          _activePlayersMaxMoves,
           id,
           arg.all
         );
@@ -87,17 +97,26 @@ export function SetActivePlayers(
       for (const id in arg.value) {
         ApplyActivePlayerArgument(
           activePlayers,
-          _activePlayersMoveLimit,
+          _activePlayersMinMoves,
+          _activePlayersMaxMoves,
           id,
           arg.value[id]
         );
       }
     }
 
-    if (arg.moveLimit) {
+    if (arg.minMoves) {
       for (const id in activePlayers) {
-        if (_activePlayersMoveLimit[id] === undefined) {
-          _activePlayersMoveLimit[id] = arg.moveLimit;
+        if (_activePlayersMinMoves[id] === undefined) {
+          _activePlayersMinMoves[id] = arg.minMoves;
+        }
+      }
+    }
+
+    if (arg.maxMoves) {
+      for (const id in activePlayers) {
+        if (_activePlayersMaxMoves[id] === undefined) {
+          _activePlayersMaxMoves[id] = arg.maxMoves;
         }
       }
     }
@@ -107,8 +126,12 @@ export function SetActivePlayers(
     activePlayers = null;
   }
 
-  if (Object.keys(_activePlayersMoveLimit).length === 0) {
-    _activePlayersMoveLimit = null;
+  if (Object.keys(_activePlayersMinMoves).length === 0) {
+    _activePlayersMinMoves = null;
+  }
+
+  if (Object.keys(_activePlayersMaxMoves).length === 0) {
+    _activePlayersMaxMoves = null;
   }
 
   const _activePlayersNumMoves = {};
@@ -119,7 +142,8 @@ export function SetActivePlayers(
   return {
     ...ctx,
     activePlayers,
-    _activePlayersMoveLimit,
+    _activePlayersMinMoves,
+    _activePlayersMaxMoves,
     _activePlayersNumMoves,
     _prevActivePlayers,
     _nextActivePlayers,
@@ -134,7 +158,8 @@ export function SetActivePlayers(
 export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
   let {
     activePlayers,
-    _activePlayersMoveLimit,
+    _activePlayersMinMoves,
+    _activePlayersMaxMoves,
     _activePlayersNumMoves,
     _prevActivePlayers,
     _nextActivePlayers,
@@ -145,25 +170,32 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
       ctx = SetActivePlayers(ctx, _nextActivePlayers);
       ({
         activePlayers,
-        _activePlayersMoveLimit,
+        _activePlayersMinMoves,
+        _activePlayersMaxMoves,
         _activePlayersNumMoves,
         _prevActivePlayers,
       } = ctx);
     } else if (_prevActivePlayers.length > 0) {
       const lastIndex = _prevActivePlayers.length - 1;
-      ({ activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
-        _prevActivePlayers[lastIndex]);
+      ({
+        activePlayers,
+        _activePlayersMinMoves,
+        _activePlayersMaxMoves,
+        _activePlayersNumMoves,
+      } = _prevActivePlayers[lastIndex]);
       _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
     } else {
       activePlayers = null;
-      _activePlayersMoveLimit = null;
+      _activePlayersMinMoves = null;
+      _activePlayersMaxMoves = null;
     }
   }
 
   return {
     ...ctx,
     activePlayers,
-    _activePlayersMoveLimit,
+    _activePlayersMinMoves,
+    _activePlayersMaxMoves,
     _activePlayersNumMoves,
     _prevActivePlayers,
   };
@@ -172,13 +204,15 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
 /**
  * Apply an active player argument to the given player ID
  * @param {Object} activePlayers
- * @param {Object} _activePlayersMoveLimit
+ * @param {Object} _activePlayersMinMoves
+ * @param {Object} _activePlayersMaxMoves
  * @param {String} playerID The player to apply the parameter to
  * @param {(String|Object)} arg An active player argument
  */
 function ApplyActivePlayerArgument(
   activePlayers: Ctx['activePlayers'],
-  _activePlayersMoveLimit: Ctx['_activePlayersMoveLimit'],
+  _activePlayersMinMoves: Ctx['_activePlayersMinMoves'],
+  _activePlayersMaxMoves: Ctx['_activePlayersMaxMoves'],
   playerID: PlayerID,
   arg: StageArg
 ) {
@@ -187,8 +221,12 @@ function ApplyActivePlayerArgument(
   }
 
   if (arg.stage !== undefined) {
+    // stages previously did not enforce minMoves, this behaviour is kept intentionally
+    supportDeprecatedMoveLimit(arg);
+
     activePlayers[playerID] = arg.stage;
-    if (arg.moveLimit) _activePlayersMoveLimit[playerID] = arg.moveLimit;
+    if (arg.minMoves) _activePlayersMinMoves[playerID] = arg.minMoves;
+    if (arg.maxMoves) _activePlayersMaxMoves[playerID] = arg.maxMoves;
   }
 }
 
@@ -414,7 +452,7 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every player in the game.
    */
-  ALL_ONCE: { all: Stage.NULL, moveLimit: 1 },
+  ALL_ONCE: { all: Stage.NULL, minMoves: 1, maxMoves: 1 },
 
   /**
    * OTHERS
@@ -431,5 +469,5 @@ export const ActivePlayers = {
    * This is typically used in a phase where you want to elicit a response
    * from every *other* player in the game.
    */
-  OTHERS_ONCE: { others: Stage.NULL, moveLimit: 1 },
+  OTHERS_ONCE: { others: Stage.NULL, minMoves: 1, maxMoves: 1 },
 };

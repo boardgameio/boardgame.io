@@ -1,3 +1,22 @@
+## v0.48.0
+
+#### Features
+
+* [[4165d45d](https://github.com/boardgameio/boardgame.io/commit/4165d45d)] Deprecate `moveLimit` in favour of `minMoves`/`maxMoves` ([#985](https://github.com/boardgameio/boardgame.io/pull/985))
+
+    Migration:
+    
+    - Replace `turn.moveLimit` with both `turn.minMoves` and `turn.maxMoves`.
+    - Replace `moveLimit` in `setStage` and `setActivePlayers` with `maxMoves`.
+
+### v0.47.10
+
+#### Bugfixes
+
+* [[ad78eded](https://github.com/boardgameio/boardgame.io/commit/ad78eded)] ai: Run AI iterations using `setImmediate` for improved performance ([#999](https://github.com/boardgameio/boardgame.io/pull/999))
+* [[feb08a12](https://github.com/boardgameio/boardgame.io/commit/feb08a12)] lobby: Clean up & update refresh polling interval properly ([#996](https://github.com/boardgameio/boardgame.io/pull/996))
+
+
 ### v0.47.9
 
 #### Bugfixes

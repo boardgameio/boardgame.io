@@ -287,16 +287,18 @@ because a player could choose when to end their turn, but in
 Tic-Tac-Toe we know that the turn should always end when a move is made.
 
 There are several different ways to manage turns in boardgame.io.
-We’ll use the `moveLimit` option in our game definition to tell
+We’ll use the `maxMoves` option in our game definition to tell
 the framework to automatically end a player’s turn after a single
-move has been made.
+move has been made, as well as the `minMoves` option, so players
+*have* to make a move and can't just `endTurn`.
 
 ```js
 export const TicTacToe = {
   setup: () => { /* ... */ },
 
   turn: {
-    moveLimit: 1,
+    minMoves: 1,
+    maxMoves: 1,
   },
 
   moves: { /* ... */ },

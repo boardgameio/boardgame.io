@@ -52,14 +52,15 @@ const TicTacToe = {
   },
 
   turn: {
-    moveLimit: 1,
+    minMoves: 1,
+    maxMoves: 1,
   },
 
   endIf: (G, ctx) => {
     if (IsVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }
-    if (G.cells.filter(c => c === null).length === 0) {
+    if (G.cells.filter((c) => c === null).length === 0) {
       return { draw: true };
     }
   },

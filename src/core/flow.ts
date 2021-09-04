@@ -30,6 +30,7 @@ import type {
   Move,
 } from '../types';
 import { GameMethod } from './game-methods';
+import { supportDeprecatedMoveLimit } from './backwards-compatibility';
 
 /**
  * Flow
@@ -144,6 +145,9 @@ export function Flow({
     if (phaseConfig.turn.stages === undefined) {
       phaseConfig.turn.stages = {};
     }
+
+    // turns previously treated moveLimit as both minMoves and maxMoves, this behaviour is kept intentionally
+    supportDeprecatedMoveLimit(phaseConfig.turn, true);
 
     for (const stage in phaseConfig.turn.stages) {
       const stageConfig = phaseConfig.turn.stages[stage];
@@ -366,9 +370,17 @@ export function Flow({
     }
     if (typeof arg !== 'object') return state;
 
+    // `arg` should be of type `StageArg`, loose typing as `any` here for historic reasons
+    // stages previously did not enforce minMoves, this behaviour is kept intentionally
+    supportDeprecatedMoveLimit(arg);
+
     let { ctx } = state;
-    let { activePlayers, _activePlayersMoveLimit, _activePlayersNumMoves } =
-      ctx;
+    let {
+      activePlayers,
+      _activePlayersMinMoves,
+      _activePlayersMaxMoves,
+      _activePlayersNumMoves,
+    } = ctx;
 
     // Checking if stage is valid, even Stage.NULL
     if (arg.stage !== undefined) {
@@ -378,18 +390,26 @@ export function Flow({
       activePlayers[playerID] = arg.stage;
       _activePlayersNumMoves[playerID] = 0;
 
-      if (arg.moveLimit) {
-        if (_activePlayersMoveLimit === null) {
-          _activePlayersMoveLimit = {};
+      if (arg.minMoves) {
+        if (_activePlayersMinMoves === null) {
+          _activePlayersMinMoves = {};
         }
-        _activePlayersMoveLimit[playerID] = arg.moveLimit;
+        _activePlayersMinMoves[playerID] = arg.minMoves;
+      }
+
+      if (arg.maxMoves) {
+        if (_activePlayersMaxMoves === null) {
+          _activePlayersMaxMoves = {};
+        }
+        _activePlayersMaxMoves[playerID] = arg.maxMoves;
       }
     }
 
     ctx = {
       ...ctx,
       activePlayers,
-      _activePlayersMoveLimit,
+      _activePlayersMinMoves,
+      _activePlayersMaxMoves,
       _activePlayersNumMoves,
     };
 
@@ -419,8 +439,8 @@ export function Flow({
     // End the turn if the required number of moves has been made.
     const currentPlayerMoves = state.ctx.numMoves || 0;
     if (
-      phaseConfig.turn.moveLimit &&
-      currentPlayerMoves >= phaseConfig.turn.moveLimit
+      phaseConfig.turn.maxMoves &&
+      currentPlayerMoves >= phaseConfig.turn.maxMoves
     ) {
       return true;
     }
@@ -496,15 +516,15 @@ export function Flow({
     const { currentPlayer, numMoves, phase, turn } = state.ctx;
     const phaseConfig = GetPhase(state.ctx);
 
-    // Prevent ending the turn if moveLimit hasn't been reached.
+    // Prevent ending the turn if minMoves haven't been reached.
     const currentPlayerMoves = numMoves || 0;
     if (
       !force &&
-      phaseConfig.turn.moveLimit &&
-      currentPlayerMoves < phaseConfig.turn.moveLimit
+      phaseConfig.turn.minMoves &&
+      currentPlayerMoves < phaseConfig.turn.minMoves
     ) {
       logging.info(
-        `cannot end turn before making ${phaseConfig.turn.moveLimit} moves`
+        `cannot end turn before making ${phaseConfig.turn.minMoves} moves`
       );
       return state;
     }
@@ -554,14 +574,24 @@ export function Flow({
     playerID = playerID || state.ctx.currentPlayer;
 
     let { ctx, _stateID } = state;
-    let { activePlayers, _activePlayersMoveLimit, phase, turn } = ctx;
+    let {
+      activePlayers,
+      _activePlayersNumMoves,
+      _activePlayersMinMoves,
+      _activePlayersMaxMoves,
+      phase,
+      turn,
+    } = ctx;
 
     const playerInStage = activePlayers !== null && playerID in activePlayers;
 
+    const phaseConfig = GetPhase(ctx);
+
     if (!arg && playerInStage) {
-      const phaseConfig = GetPhase(ctx);
       const stage = phaseConfig.turn.stages[activePlayers[playerID]];
-      if (stage && stage.next) arg = stage.next;
+      if (stage && stage.next) {
+        arg = stage.next;
+      }
     }
 
     // Checking if arg is a valid stage, even Stage.NULL
@@ -572,20 +602,40 @@ export function Flow({
     // If player isn’t in a stage, there is nothing else to do.
     if (!playerInStage) return state;
 
+    // Prevent ending the stage if minMoves haven't been reached.
+    const currentPlayerMoves = _activePlayersNumMoves[playerID] || 0;
+    if (
+      _activePlayersMinMoves &&
+      _activePlayersMinMoves[playerID] &&
+      currentPlayerMoves < _activePlayersMinMoves[playerID]
+    ) {
+      logging.info(
+        `cannot end stage before making ${_activePlayersMinMoves[playerID]} moves`
+      );
+      return state;
+    }
+
     // Remove player from activePlayers.
     activePlayers = { ...activePlayers };
     delete activePlayers[playerID];
 
-    if (_activePlayersMoveLimit) {
-      // Remove player from _activePlayersMoveLimit.
-      _activePlayersMoveLimit = { ..._activePlayersMoveLimit };
-      delete _activePlayersMoveLimit[playerID];
+    if (_activePlayersMinMoves) {
+      // Remove player from _activePlayersMinMoves.
+      _activePlayersMinMoves = { ..._activePlayersMinMoves };
+      delete _activePlayersMinMoves[playerID];
+    }
+
+    if (_activePlayersMaxMoves) {
+      // Remove player from _activePlayersMaxMoves.
+      _activePlayersMaxMoves = { ..._activePlayersMaxMoves };
+      delete _activePlayersMaxMoves[playerID];
     }
 
     ctx = UpdateActivePlayersOnceEmpty({
       ...ctx,
       activePlayers,
-      _activePlayersMoveLimit,
+      _activePlayersMinMoves,
+      _activePlayersMaxMoves,
     });
 
     // Create log entry.
@@ -649,7 +699,7 @@ export function Flow({
   function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
     const { playerID, type } = action;
     const { ctx } = state;
-    const { currentPlayer, activePlayers, _activePlayersMoveLimit } = ctx;
+    const { currentPlayer, activePlayers, _activePlayersMaxMoves } = ctx;
     const move = GetMove(ctx, type, playerID);
     const shouldCount =
       !move || typeof move === 'function' || move.noLimit !== true;
@@ -670,8 +720,8 @@ export function Flow({
     };
 
     if (
-      _activePlayersMoveLimit &&
-      _activePlayersNumMoves[playerID] >= _activePlayersMoveLimit[playerID]
+      _activePlayersMaxMoves &&
+      _activePlayersNumMoves[playerID] >= _activePlayersMaxMoves[playerID]
     ) {
       state = EndStage(state, { playerID, automatic: true });
     }
