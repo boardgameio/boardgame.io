@@ -4,10 +4,20 @@ type MoveLimitOptions = {
   moveLimit?: number;
 };
 
-export function supportDeprecatedMoveLimit(options: MoveLimitOptions) {
+/**
+ * Adjust the given options to use the new minMoves/maxMoves if a legacy moveLimit was given
+ * @param options The options object to apply backwards compatibility to
+ * @param enforceMinMoves Use moveLimit to set both minMoves and maxMoves
+ */
+export function supportDeprecatedMoveLimit(
+  options: MoveLimitOptions,
+  enforceMinMoves = false
+) {
   if (options.moveLimit) {
-    options.minMoves = options.moveLimit;
+    if (enforceMinMoves) {
+      options.minMoves = options.moveLimit;
+    }
     options.maxMoves = options.moveLimit;
-    options.moveLimit = null;
+    delete options.moveLimit;
   }
 }

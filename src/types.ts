@@ -61,7 +61,13 @@ export type PlayerID = string;
 
 export type StageArg =
   | StageName
-  | { stage?: StageName; minMoves?: number; maxMoves?: number };
+  | {
+      stage?: StageName;
+      /** @deprecated Use `minMoves` and `maxMoves` instead. */
+      moveLimit?: number;
+      minMoves?: number;
+      maxMoves?: number;
+    };
 
 export interface ActivePlayersArg {
   currentPlayer?: StageArg;

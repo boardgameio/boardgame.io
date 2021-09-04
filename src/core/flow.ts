@@ -146,7 +146,8 @@ export function Flow({
       phaseConfig.turn.stages = {};
     }
 
-    supportDeprecatedMoveLimit(phaseConfig.turn);
+    // turns previously treated moveLimit as both minMoves and maxMoves, this behaviour is kept intentionally
+    supportDeprecatedMoveLimit(phaseConfig.turn, true);
 
     for (const stage in phaseConfig.turn.stages) {
       const stageConfig = phaseConfig.turn.stages[stage];
@@ -369,7 +370,8 @@ export function Flow({
     }
     if (typeof arg !== 'object') return state;
 
-    // This does seem kind of weird, the arg being `any` and all, but otherwise tests fail
+    // `arg` should be of type `StageArg`, loose typing as `any` here for historic reasons
+    // stages previously did not enforce minMoves, this behaviour is kept intentionally
     supportDeprecatedMoveLimit(arg);
 
     let { ctx } = state;

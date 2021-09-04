@@ -35,6 +35,8 @@ export function SetActivePlayers(
     activePlayers = value;
   } else {
     // process active players argument object
+
+    // stages previously did not enforce minMoves, this behaviour is kept intentionally
     supportDeprecatedMoveLimit(arg);
 
     if (arg.next) {
@@ -219,6 +221,9 @@ function ApplyActivePlayerArgument(
   }
 
   if (arg.stage !== undefined) {
+    // stages previously did not enforce minMoves, this behaviour is kept intentionally
+    supportDeprecatedMoveLimit(arg);
+
     activePlayers[playerID] = arg.stage;
     if (arg.minMoves) _activePlayersMinMoves[playerID] = arg.minMoves;
     if (arg.maxMoves) _activePlayersMaxMoves[playerID] = arg.maxMoves;
