@@ -1,3 +1,14 @@
+## v0.48.0
+
+#### Features
+
+* [[4165d45d](https://github.com/boardgameio/boardgame.io/commit/4165d45d)] Deprecate `moveLimit` in favour of `minMoves`/`maxMoves` ([#985](https://github.com/boardgameio/boardgame.io/pull/985))
+
+    Migration:
+    
+    - Replace `turn.moveLimit` with both `turn.minMoves` and `turn.maxMoves`.
+    - Replace `moveLimit` in `setStage` and `setActivePlayers` with `maxMoves`.
+
 ### v0.47.10
 
 #### Bugfixes
