@@ -27,7 +27,8 @@ const FILE = tempy.file();
 /** Tests for a `feat` commit type. */
 const isFeature = (s) => /feat(\(\w+\))?:/.test(s);
 /** Tests for commit types that don’t need adding to the CHANGELOG (like `docs` or `chore`). */
-const isUninformative = (s) => /(test|style|chore|docs|ci)(\(\w+\))?:/.test(s);
+const isUninformative = (s) =>
+  /(test|style|chore|docs|ci)(\([\w-]+\))?:/.test(s);
 /** Tests if this commit just bumped the version (via `npm version`). */
 const isVersionBump = (s) => /^\w{8} \d+\.\d+\.\d+$/.test(s);
 
