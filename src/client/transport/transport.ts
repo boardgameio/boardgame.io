@@ -38,8 +38,9 @@ export abstract class Transport {
   protected matchID: string;
   protected credentials?: string;
   protected numPlayers: number;
-  private callback: () => void = () => {};
   protected clientCallback: (data: TransportData) => void;
+  /** Callback to let the client know when the connection status has changed. */
+  private connectionStatusCallback: () => void = () => {};
   isConnected = false;
 
   constructor({
@@ -60,12 +61,12 @@ export abstract class Transport {
 
   /** Subscribe to connection state changes. */
   subscribe(fn: () => void): void {
-    this.callback = fn;
+    this.connectionStatusCallback = fn;
   }
 
   protected setConnectionStatus(isConnected: boolean) {
     this.isConnected = isConnected;
-    this.callback();
+    this.connectionStatusCallback();
   }
 
   /** Called by the client to connect the transport. */

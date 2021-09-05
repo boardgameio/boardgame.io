@@ -881,7 +881,7 @@ describe('subscribe', () => {
     client.subscribe(fn);
     client.start();
     fn.mockClear();
-    (transport as any).callback();
+    (transport as any).connectionStatusCallback();
     expect(fn).toHaveBeenCalled();
     client.stop();
   });

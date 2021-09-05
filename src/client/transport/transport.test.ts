@@ -10,13 +10,13 @@ describe('Transport', () => {
     updateMatchID() {}
     updatePlayerID() {}
     updateCredentials() {}
-    get(key: 'callback') {
+    get(key: 'connectionStatusCallback') {
       return this[key].bind(this);
     }
   }
 
   test('base class sets up callbacks', () => {
     const transport = new SimpleTransport({ clientCallback: () => {} });
-    expect(transport.get('callback')()).toBeUndefined();
+    expect(transport.get('connectionStatusCallback')()).toBeUndefined();
   });
 });
