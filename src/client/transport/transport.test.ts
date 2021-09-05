@@ -2,22 +2,21 @@ import { Transport } from './transport';
 
 describe('Transport', () => {
   class SimpleTransport extends Transport {
-    onAction(): void {}
-    connect(): void {}
-    disconnect(): void {}
-    updateMatchID(): void {}
-    updatePlayerID(): void {}
-    updateCredentials(): void {}
-    onChatMessage(): void {}
-    get(key: 'callback' | 'chatMessageCallback' | 'matchDataCallback') {
+    connect() {}
+    disconnect() {}
+    onAction() {}
+    onChatMessage() {}
+    requestSync() {}
+    updateMatchID() {}
+    updatePlayerID() {}
+    updateCredentials() {}
+    get(key: 'callback') {
       return this[key].bind(this);
     }
   }
 
   test('base class sets up callbacks', () => {
-    const transport = new SimpleTransport({});
+    const transport = new SimpleTransport({ clientCallback: () => {} });
     expect(transport.get('callback')()).toBeUndefined();
-    expect(transport.get('chatMessageCallback')()).toBeUndefined();
-    expect(transport.get('matchDataCallback')()).toBeUndefined();
   });
 });
