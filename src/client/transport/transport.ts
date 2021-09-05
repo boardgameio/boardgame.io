@@ -68,9 +68,9 @@ export abstract class Transport {
   /** Called by the client to disconnect the transport. */
   abstract disconnect(): void;
   /** Called by the client to dispatch an action via the transport. */
-  abstract onAction(state: State, action: CredentialedActionShape.Any): void;
+  abstract sendAction(state: State, action: CredentialedActionShape.Any): void;
   /** Called by the client to dispatch a chat message via the transport. */
-  abstract onChatMessage(matchID: string, chatMessage: ChatMessage): void;
+  abstract sendChatMessage(matchID: string, chatMessage: ChatMessage): void;
   /** Called by the client to request a sync action from the transport. */
   abstract requestSync(): void;
   abstract updateMatchID(id: string): void;

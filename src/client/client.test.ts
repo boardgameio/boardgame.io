@@ -167,35 +167,35 @@ describe('multiplayer', () => {
     });
 
     test('onAction called', () => {
-      jest.spyOn(client.transport, 'onAction');
+      jest.spyOn(client.transport, 'sendAction');
       const state = { G: {}, ctx: { phase: '' }, plugins: {} };
       const filteredMetadata = [];
       client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
       client.moves.A();
-      expect(client.transport.onAction).toHaveBeenCalled();
+      expect(client.transport.sendAction).toHaveBeenCalled();
     });
 
     test('strip transients action not sent to transport', () => {
-      jest.spyOn(client.transport, 'onAction');
+      jest.spyOn(client.transport, 'sendAction');
       const state = { G: {}, ctx: { phase: '' }, plugins: {} };
       const filteredMetadata = [];
       client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
       client.moves.Invalid();
-      expect(client.transport.onAction).not.toHaveBeenCalledWith(
+      expect(client.transport.sendAction).not.toHaveBeenCalledWith(
         expect.any(Object),
         { type: Actions.STRIP_TRANSIENTS }
       );
     });
 
     test('Sends and receives chat messages', () => {
-      jest.spyOn(client.transport, 'onAction');
+      jest.spyOn(client.transport, 'sendAction');
       client.updatePlayerID('0');
       client.updateMatchID('matchID');
-      jest.spyOn(client.transport, 'onChatMessage');
+      jest.spyOn(client.transport, 'sendChatMessage');
 
       client.sendChatMessage({ message: 'foo' });
 
-      expect(client.transport.onChatMessage).toHaveBeenCalledWith(
+      expect(client.transport.sendChatMessage).toHaveBeenCalledWith(
         'matchID',
         expect.objectContaining({ payload: { message: 'foo' }, sender: '0' })
       );
@@ -294,8 +294,8 @@ describe('multiplayer', () => {
     class CustomTransport extends Transport {
       connect() {}
       disconnect() {}
-      onAction() {}
-      onChatMessage() {}
+      sendAction() {}
+      sendChatMessage() {}
       requestSync() {}
       updateMatchID() {}
       updatePlayerID() {}

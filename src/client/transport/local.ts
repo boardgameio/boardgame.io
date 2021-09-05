@@ -149,12 +149,7 @@ export class LocalTransport extends Transport {
     this.master = master;
   }
 
-  /**
-   * Called when any player sends a chat message and the
-   * master broadcasts the update to other clients (including
-   * this one).
-   */
-  onChatMessage(matchID: string, chatMessage: ChatMessage) {
+  sendChatMessage(matchID: string, chatMessage: ChatMessage) {
     const args: Parameters<Master['onChatMessage']> = [
       matchID,
       chatMessage,
@@ -163,11 +158,7 @@ export class LocalTransport extends Transport {
     this.master.onChatMessage(...args);
   }
 
-  /**
-   * Called when an action that has to be relayed to the
-   * game master is made.
-   */
-  onAction(state: State, action: CredentialedActionShape.Any) {
+  sendAction(state: State, action: CredentialedActionShape.Any) {
     this.master.onUpdate(action, state._stateID, this.matchID, this.playerID);
   }
 

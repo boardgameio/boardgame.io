@@ -8,8 +8,8 @@ import type { TransportOpts } from './transport';
 class DummyImpl extends Transport {
   connect() {}
   disconnect() {}
-  onAction() {}
-  onChatMessage() {}
+  sendAction() {}
+  sendChatMessage() {}
   requestSync() {}
   updateCredentials() {}
   updateMatchID() {}

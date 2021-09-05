@@ -180,7 +180,7 @@ describe('multiplayer', () => {
   test('send update', () => {
     const action = makeMove(undefined, undefined, undefined);
     const state = { _stateID: 0 } as State;
-    transport.onAction(state, action);
+    transport.sendAction(state, action);
     const args: UpdateArgs = [action, state._stateID, 'default', null];
     expect(mockSocket.emit).lastCalledWith('update', ...args);
   });
@@ -200,7 +200,7 @@ describe('multiplayer', () => {
       sender: '0',
       payload: { message: 'foo' },
     };
-    transport.onChatMessage('matchID', message);
+    transport.sendChatMessage('matchID', message);
     expect(mockSocket.emit).lastCalledWith(
       'chat',
       'matchID',

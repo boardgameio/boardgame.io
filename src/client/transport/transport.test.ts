@@ -4,8 +4,8 @@ describe('Transport', () => {
   class SimpleTransport extends Transport {
     connect() {}
     disconnect() {}
-    onAction() {}
-    onChatMessage() {}
+    sendAction() {}
+    sendChatMessage() {}
     requestSync() {}
     updateMatchID() {}
     updatePlayerID() {}

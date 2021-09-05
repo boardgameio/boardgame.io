@@ -65,11 +65,7 @@ export class SocketIOTransport extends Transport {
     this.isConnected = false;
   }
 
-  /**
-   * Called when an action that has to be relayed to the
-   * game master is made.
-   */
-  onAction(state: State, action: CredentialedActionShape.Any) {
+  sendAction(state: State, action: CredentialedActionShape.Any) {
     const args: Parameters<Master['onUpdate']> = [
       action,
       state._stateID,
@@ -79,7 +75,7 @@ export class SocketIOTransport extends Transport {
     this.socket.emit('update', ...args);
   }
 
-  onChatMessage(matchID: string, chatMessage: ChatMessage) {
+  sendChatMessage(matchID: string, chatMessage: ChatMessage) {
     const args: Parameters<Master['onChatMessage']> = [
       matchID,
       chatMessage,

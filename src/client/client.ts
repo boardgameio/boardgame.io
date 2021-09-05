@@ -292,7 +292,7 @@ export class _ClientImpl<G extends any = any> {
           !('clientOnly' in action) &&
           action.type !== Actions.STRIP_TRANSIENTS
         ) {
-          this.transport.onAction(baseState, action);
+          this.transport.sendAction(baseState, action);
         }
 
         return result;
@@ -336,7 +336,7 @@ export class _ClientImpl<G extends any = any> {
 
     this.chatMessages = [];
     this.sendChatMessage = (payload) => {
-      this.transport.onChatMessage(this.matchID, {
+      this.transport.sendChatMessage(this.matchID, {
         id: nanoid(7),
         sender: this.playerID,
         payload: payload,

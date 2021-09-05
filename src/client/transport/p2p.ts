@@ -204,7 +204,10 @@ class P2PTransport extends Transport {
     });
   }
 
-  onAction(state: State<any, Ctx>, action: CredentialedActionShape.Any): void {
+  sendAction(
+    state: State<any, Ctx>,
+    action: CredentialedActionShape.Any
+  ): void {
     if (!this.isConnected) return;
     this.emit({
       type: 'update',
@@ -212,7 +215,7 @@ class P2PTransport extends Transport {
     });
   }
 
-  onChatMessage(matchID: string, chatMessage: ChatMessage): void {
+  sendChatMessage(matchID: string, chatMessage: ChatMessage): void {
     if (!this.isConnected) return;
     this.emit({ type: 'chat', args: [matchID, chatMessage, this.credentials] });
   }
