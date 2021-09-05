@@ -8,7 +8,6 @@
 
 import tic_tac_toe from './tic-tac-toe';
 import chess from './chess';
-import p2p from './p2p';
 import secret_state from './secret-state';
 import random from './random';
 import threejs from './threejs';
@@ -25,10 +24,6 @@ const routes = [
   {
     name: 'Chess',
     routes: chess.routes,
-  },
-  {
-    name: 'Peer-to-Peer Multiplayer',
-    routes: p2p.routes,
   },
   {
     name: 'Turn Orders',
