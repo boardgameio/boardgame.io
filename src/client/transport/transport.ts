@@ -40,7 +40,7 @@ export abstract class Transport {
   protected numPlayers: number;
   protected callback: () => void = () => {};
   protected clientCallback: (data: TransportData) => void;
-  isConnected: boolean;
+  isConnected = false;
 
   constructor({
     clientCallback,

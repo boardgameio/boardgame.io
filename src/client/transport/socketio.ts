@@ -62,7 +62,6 @@ export class SocketIOTransport extends Transport {
     this.server = server;
     this.socket = socket;
     this.socketOpts = socketOpts;
-    this.isConnected = false;
   }
 
   sendAction(state: State, action: CredentialedActionShape.Any) {
