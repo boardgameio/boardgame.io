@@ -146,7 +146,6 @@ class P2PTransport extends Transport {
     const hostID = this.namespacedPeerID();
     const metadata = { playerID: this.playerID };
 
-    this.isConnected = true;
     this.peer = new Peer(this.isHost ? hostID : undefined, this.peerJSOptions);
 
     if (this.isHost) {
@@ -186,18 +185,17 @@ class P2PTransport extends Transport {
       });
     }
 
-    this.callback();
+    this.setConnectionStatus(true);
   }
 
   disconnect(): void {
-    if (!this.isConnected) return;
-    this.isConnected = false;
-    this.peer.destroy();
-    this.callback();
+    if (this.peer) this.peer.destroy();
+    this.peer = null;
+    this.setConnectionStatus(false);
   }
 
   requestSync(): void {
-    if (!this.isConnected) return;
+    if (!this.emit) return;
     this.emit({
       type: 'sync',
       args: [this.matchID, this.playerID, this.credentials, this.numPlayers],
@@ -208,7 +206,7 @@ class P2PTransport extends Transport {
     state: State<any, Ctx>,
     action: CredentialedActionShape.Any
   ): void {
-    if (!this.isConnected) return;
+    if (!this.emit) return;
     this.emit({
       type: 'update',
       args: [action, state._stateID, this.matchID, this.playerID],
@@ -216,12 +214,11 @@ class P2PTransport extends Transport {
   }
 
   sendChatMessage(matchID: string, chatMessage: ChatMessage): void {
-    if (!this.isConnected) return;
+    if (!this.emit) return;
     this.emit({ type: 'chat', args: [matchID, chatMessage, this.credentials] });
   }
 
   private resetAndReconnect(): void {
-    if (!this.isConnected) return;
     this.disconnect();
     this.connect();
   }

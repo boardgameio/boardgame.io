@@ -158,12 +158,10 @@ export class SocketIOTransport extends Transport {
     this.socket.on('connect', () => {
       // Initial sync to get game state.
       this.requestSync();
-      this.isConnected = true;
-      this.callback();
+      this.setConnectionStatus(true);
     });
     this.socket.on('disconnect', () => {
-      this.isConnected = false;
-      this.callback();
+      this.setConnectionStatus(false);
     });
   }
 
@@ -173,8 +171,7 @@ export class SocketIOTransport extends Transport {
   disconnect() {
     this.socket.close();
     this.socket = null;
-    this.isConnected = false;
-    this.callback();
+    this.setConnectionStatus(false);
   }
 
   /**

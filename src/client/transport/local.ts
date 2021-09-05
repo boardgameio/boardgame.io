@@ -175,8 +175,7 @@ export class LocalTransport extends Transport {
    * Connect to the master.
    */
   connect() {
-    this.isConnected = true;
-    this.callback();
+    this.setConnectionStatus(true);
     this.master.connect(this.playerID, (data) => this.clientCallback(data));
     this.requestSync();
   }
@@ -185,8 +184,7 @@ export class LocalTransport extends Transport {
    * Disconnect from the master.
    */
   disconnect() {
-    this.isConnected = false;
-    this.callback();
+    this.setConnectionStatus(false);
   }
 
   /**

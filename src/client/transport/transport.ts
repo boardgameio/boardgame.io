@@ -38,7 +38,7 @@ export abstract class Transport {
   protected matchID: string;
   protected credentials?: string;
   protected numPlayers: number;
-  protected callback: () => void = () => {};
+  private callback: () => void = () => {};
   protected clientCallback: (data: TransportData) => void;
   isConnected = false;
 
@@ -61,6 +61,11 @@ export abstract class Transport {
   /** Subscribe to connection state changes. */
   subscribe(fn: () => void): void {
     this.callback = fn;
+  }
+
+  protected setConnectionStatus(isConnected: boolean) {
+    this.isConnected = isConnected;
+    this.callback();
   }
 
   /** Called by the client to connect the transport. */
