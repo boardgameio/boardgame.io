@@ -64,6 +64,7 @@ export abstract class Transport {
     this.connectionStatusCallback = fn;
   }
 
+  /** Transport implementations should call this when they connect/disconnect. */
   protected setConnectionStatus(isConnected: boolean) {
     this.isConnected = isConnected;
     this.connectionStatusCallback();
@@ -79,7 +80,10 @@ export abstract class Transport {
   abstract sendChatMessage(matchID: string, chatMessage: ChatMessage): void;
   /** Called by the client to request a sync action from the transport. */
   abstract requestSync(): void;
+  /** Called by the client to update the matchID it wants to connect to. */
   abstract updateMatchID(id: string): void;
+  /** Called by the client to update the playerID it is playing as. */
   abstract updatePlayerID(id: PlayerID): void;
+  /** Called by the client to update the credentials it is using. */
   abstract updateCredentials(credentials?: string): void;
 }

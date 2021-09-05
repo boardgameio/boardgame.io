@@ -171,44 +171,26 @@ export class LocalTransport extends Transport {
     );
   }
 
-  /**
-   * Connect to the master.
-   */
   connect() {
     this.setConnectionStatus(true);
     this.master.connect(this.playerID, (data) => this.clientCallback(data));
     this.requestSync();
   }
 
-  /**
-   * Disconnect from the master.
-   */
   disconnect() {
     this.setConnectionStatus(false);
   }
 
-  /**
-   * Updates the game id.
-   * @param {string} id - The new game id.
-   */
   updateMatchID(id: string) {
     this.matchID = id;
     this.connect();
   }
 
-  /**
-   * Updates the player associated with this client.
-   * @param {string} id - The new player id.
-   */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
     this.connect();
   }
 
-  /**
-   * Updates the credentials associated with this client.
-   * @param {string|undefined} credentials - The new credentials to use.
-   */
   updateCredentials(credentials?: string) {
     this.credentials = credentials;
     this.connect();

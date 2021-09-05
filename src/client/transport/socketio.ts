@@ -83,9 +83,6 @@ export class SocketIOTransport extends Transport {
     this.socket.emit('chat', ...args);
   }
 
-  /**
-   * Connect to the server.
-   */
   connect() {
     if (!this.socket) {
       if (this.server) {
@@ -165,18 +162,12 @@ export class SocketIOTransport extends Transport {
     });
   }
 
-  /**
-   * Disconnect from the server.
-   */
   disconnect() {
     this.socket.close();
     this.socket = null;
     this.setConnectionStatus(false);
   }
 
-  /**
-   * Send a “sync” event to the server.
-   */
   requestSync() {
     if (this.socket) {
       const args: Parameters<Master['onSync']> = [
@@ -189,28 +180,16 @@ export class SocketIOTransport extends Transport {
     }
   }
 
-  /**
-   * Updates the game id.
-   * @param {string} id - The new game id.
-   */
   updateMatchID(id: string) {
     this.matchID = id;
     this.requestSync();
   }
 
-  /**
-   * Updates the player associated with this client.
-   * @param {string} id - The new player id.
-   */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
     this.requestSync();
   }
 
-  /**
-   * Updates the credentials associated with this client.
-   * @param {string|undefined} credentials - The new credentials to use.
-   */
   updateCredentials(credentials?: string) {
     this.credentials = credentials;
     this.requestSync();
