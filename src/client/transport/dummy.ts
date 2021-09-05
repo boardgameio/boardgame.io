@@ -10,9 +10,7 @@ class DummyImpl extends Transport {
   disconnect() {}
   onAction() {}
   onChatMessage() {}
-  subscribe() {}
-  subscribeChatMessage() {}
-  subscribeMatchData() {}
+  requestSync() {}
   updateCredentials() {}
   updateMatchID() {}
   updatePlayerID() {}

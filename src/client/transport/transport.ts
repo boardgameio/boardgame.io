@@ -7,12 +7,12 @@
  */
 
 import type { ProcessGameConfig } from '../../core/game';
+import type { TransportData } from '../../master/master';
 import type {
   Game,
   PlayerID,
   CredentialedActionShape,
   State,
-  Store,
   SyncInfo,
   ChatMessage,
 } from '../../types';
@@ -22,7 +22,7 @@ export type MetadataCallback = (metadata: SyncInfo['filteredMetadata']) => void;
 export type ChatCallback = (message: ChatMessage) => void;
 
 export interface TransportOpts {
-  store?: Store;
+  clientCallback: (data: TransportData) => void;
   gameName?: string;
   gameKey?: Game;
   game?: ReturnType<typeof ProcessGameConfig>;
@@ -33,26 +33,24 @@ export interface TransportOpts {
 }
 
 export abstract class Transport {
-  protected store: Store;
   protected gameName: string;
   protected playerID: PlayerID | null;
   protected matchID: string;
   protected credentials?: string;
   protected numPlayers: number;
   protected callback: () => void = () => {};
-  protected chatMessageCallback: ChatCallback = () => {};
-  protected matchDataCallback: MetadataCallback = () => {};
+  protected clientCallback: (data: TransportData) => void;
   isConnected: boolean;
 
   constructor({
-    store,
+    clientCallback,
     gameName,
     playerID,
     matchID,
     credentials,
     numPlayers,
   }: TransportOpts) {
-    this.store = store;
+    this.clientCallback = clientCallback;
     this.gameName = gameName || 'default';
     this.playerID = playerID || null;
     this.matchID = matchID || 'default';
@@ -65,21 +63,17 @@ export abstract class Transport {
     this.callback = fn;
   }
 
-  /** Subscribe to match metadata changes. */
-  subscribeMatchData(fn: MetadataCallback): void {
-    this.matchDataCallback = fn;
-  }
-
-  /** Subscribe to incoming chat messages. */
-  subscribeChatMessage(fn: ChatCallback): void {
-    this.chatMessageCallback = fn;
-  }
-
-  abstract onAction(state: State, action: CredentialedActionShape.Any): void;
+  /** Called by the client to connect the transport. */
   abstract connect(): void;
+  /** Called by the client to disconnect the transport. */
   abstract disconnect(): void;
+  /** Called by the client to dispatch an action via the transport. */
+  abstract onAction(state: State, action: CredentialedActionShape.Any): void;
+  /** Called by the client to dispatch a chat message via the transport. */
+  abstract onChatMessage(matchID: string, chatMessage: ChatMessage): void;
+  /** Called by the client to request a sync action from the transport. */
+  abstract requestSync(): void;
   abstract updateMatchID(id: string): void;
   abstract updatePlayerID(id: PlayerID): void;
   abstract updateCredentials(credentials?: string): void;
-  abstract onChatMessage(matchID: string, chatMessage: ChatMessage): void;
 }

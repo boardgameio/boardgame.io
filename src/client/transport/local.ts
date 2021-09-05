@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { LocalStorage } from '../../server/db/localstorage';
 import { Master } from '../../master/master';
@@ -17,10 +16,8 @@ import type {
   ChatMessage,
   CredentialedActionShape,
   Game,
-  LogEntry,
   PlayerID,
   State,
-  SyncInfo,
 } from '../../types';
 import { getFilterPlayerView } from '../../master/filter-player-view';
 
@@ -62,7 +59,6 @@ type LocalMasterOpts = LocalOpts & {
  */
 export class LocalMaster extends Master {
   connect: (
-    matchID: string,
     playerID: PlayerID,
     callback: (data: TransportData) => void
   ) => void;
@@ -101,7 +97,7 @@ export class LocalMaster extends Master {
     const storage = persist ? new LocalStorage(storageKey) : new InMemory();
     super(game, storage, transportAPI);
 
-    this.connect = (matchID, playerID, callback) => {
+    this.connect = (playerID, callback) => {
       clientCallbacks[playerID] = callback;
     };
 
@@ -151,7 +147,6 @@ export class LocalTransport extends Transport {
   constructor({ master, ...opts }: LocalTransportOpts) {
     super(opts);
     this.master = master;
-    this.isConnected = true;
   }
 
   /**
@@ -169,31 +164,6 @@ export class LocalTransport extends Transport {
   }
 
   /**
-   * Called when another player makes a move and the
-   * master broadcasts the update to other clients (including
-   * this one).
-   */
-  async onUpdate(matchID: string, state: State, deltalog: LogEntry[]) {
-    const currentState = this.store.getState();
-
-    if (matchID == this.matchID && state._stateID >= currentState._stateID) {
-      const action = ActionCreators.update(state, deltalog);
-      this.store.dispatch(action);
-    }
-  }
-
-  /**
-   * Called when the client first connects to the master
-   * and requests the current game state.
-   */
-  onSync(matchID: string, syncInfo: SyncInfo) {
-    if (matchID == this.matchID) {
-      const action = ActionCreators.sync(syncInfo);
-      this.store.dispatch(action);
-    }
-  }
-
-  /**
    * Called when an action that has to be relayed to the
    * game master is made.
    */
@@ -201,20 +171,7 @@ export class LocalTransport extends Transport {
     this.master.onUpdate(action, state._stateID, this.matchID, this.playerID);
   }
 
-  /**
-   * Connect to the master.
-   */
-  connect() {
-    this.master.connect(this.matchID, this.playerID, (data) => {
-      switch (data.type) {
-        case 'sync':
-          return this.onSync(...data.args);
-        case 'update':
-          return this.onUpdate(...data.args);
-        case 'chat':
-          return this.chatMessageCallback(data.args[1]);
-      }
-    });
+  requestSync(): void {
     this.master.onSync(
       this.matchID,
       this.playerID,
@@ -224,17 +181,21 @@ export class LocalTransport extends Transport {
   }
 
   /**
-   * Disconnect from the master.
+   * Connect to the master.
    */
-  disconnect() {}
+  connect() {
+    this.isConnected = true;
+    this.callback();
+    this.master.connect(this.playerID, (data) => this.clientCallback(data));
+    this.requestSync();
+  }
 
   /**
-   * Dispatches a reset action, then requests a fresh sync from the master.
+   * Disconnect from the master.
    */
-  private resetAndSync() {
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
-    this.connect();
+  disconnect() {
+    this.isConnected = false;
+    this.callback();
   }
 
   /**
@@ -243,7 +204,7 @@ export class LocalTransport extends Transport {
    */
   updateMatchID(id: string) {
     this.matchID = id;
-    this.resetAndSync();
+    this.connect();
   }
 
   /**
@@ -252,7 +213,7 @@ export class LocalTransport extends Transport {
    */
   updatePlayerID(id: PlayerID) {
     this.playerID = id;
-    this.resetAndSync();
+    this.connect();
   }
 
   /**
@@ -261,7 +222,7 @@ export class LocalTransport extends Transport {
    */
   updateCredentials(credentials?: string) {
     this.credentials = credentials;
-    this.resetAndSync();
+    this.connect();
   }
 }
 

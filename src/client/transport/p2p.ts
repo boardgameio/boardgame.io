@@ -1,10 +1,8 @@
 import Peer from 'peerjs';
 import type { PeerJSOption } from 'peerjs';
 
-import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { Master } from '../../master/master';
-import type { TransportData } from '../../master/master';
 import { InMemory } from '../../server/db';
 import { createMetadata } from '../../server/util';
 import type {
@@ -85,7 +83,7 @@ class P2PHost {
     });
   }
 
-  registerClient(client: Client) {
+  registerClient(client: Client): void {
     this.clients.set(client, client);
     this.master.onConnectionChange(
       this.matchID,
@@ -95,7 +93,7 @@ class P2PHost {
     );
   }
 
-  unregisterClient(client: Client) {
+  unregisterClient(client: Client): void {
     this.clients.delete(client);
     this.master.onConnectionChange(
       this.matchID,
@@ -105,7 +103,7 @@ class P2PHost {
     );
   }
 
-  processAction(data: ClientAction) {
+  processAction(data: ClientAction): void {
     switch (data.type) {
       case 'update':
         this.master.onUpdate(...data.args);
@@ -144,59 +142,6 @@ class P2PTransport extends Transport {
       : undefined;
   }
 
-  private handleUpdate(data: TransportData) {
-    switch (data.type) {
-      case 'sync': {
-        const [matchID, syncInfo] = data.args;
-        if (matchID == this.matchID) {
-          const action = ActionCreators.sync(syncInfo);
-          this.matchDataCallback(syncInfo.filteredMetadata);
-          this.store.dispatch(action);
-        }
-        break;
-      }
-      case 'update': {
-        const [matchID, state, deltalog] = data.args;
-        const currentState = this.store.getState();
-        if (
-          matchID == this.matchID &&
-          state._stateID >= currentState._stateID
-        ) {
-          const action = ActionCreators.update(state, deltalog);
-          this.store.dispatch(action);
-        }
-        break;
-      }
-      case 'patch': {
-        const [matchID, prevStateID, stateID, patch, deltalog] = data.args;
-        const currentStateID = this.store.getState()._stateID;
-        if (matchID !== this.matchID || prevStateID !== currentStateID) break;
-        const action = ActionCreators.patch(
-          prevStateID,
-          stateID,
-          patch,
-          deltalog
-        );
-        this.store.dispatch(action);
-        // Emit sync if patch apply failed.
-        if (this.store.getState()._stateID === currentStateID) {
-          this.sync();
-        }
-        break;
-      }
-      case 'matchData': {
-        const [matchID, matchData] = data.args;
-        if (matchID === this.matchID) this.matchDataCallback(matchData);
-        break;
-      }
-      case 'chat': {
-        const [matchID, chatMessage] = data.args;
-        if (matchID === this.matchID) this.chatMessageCallback(chatMessage);
-        break;
-      }
-    }
-  }
-
   connect(): void {
     const hostID = this.namespacedPeerID();
     const metadata = { playerID: this.playerID };
@@ -216,7 +161,7 @@ class P2PTransport extends Transport {
 
       // Register a local client for the host that applies updates directly to itself.
       host.registerClient({
-        send: (data) => void this.handleUpdate(data),
+        send: (data) => void this.clientCallback(data),
         metadata,
       });
 
@@ -226,17 +171,17 @@ class P2PTransport extends Transport {
         client.on('close', () => void host.unregisterClient(client));
       });
 
-      this.sync();
+      this.requestSync();
     } else {
       this.peer.on('open', () => {
         const host = this.peer.connect(hostID, { metadata });
         // Forward actions to the host.
         this.emit = (action) => void host.send(action);
         // Emit sync action when a connection to the host is established.
-        host.on('open', () => void this.sync());
+        host.on('open', () => void this.requestSync());
         // Apply updates received from the host.
         host.on('data', (data) => {
-          this.handleUpdate(data);
+          this.clientCallback(data);
         });
       });
     }
@@ -251,7 +196,7 @@ class P2PTransport extends Transport {
     this.callback();
   }
 
-  private sync() {
+  requestSync(): void {
     if (!this.isConnected) return;
     this.emit({
       type: 'sync',
@@ -272,7 +217,7 @@ class P2PTransport extends Transport {
     this.emit({ type: 'chat', args: [matchID, chatMessage, this.credentials] });
   }
 
-  private resetAndReconnect() {
+  private resetAndReconnect(): void {
     if (!this.isConnected) return;
     this.disconnect();
     this.connect();
