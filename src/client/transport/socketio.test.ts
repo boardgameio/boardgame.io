@@ -108,7 +108,7 @@ describe('connection status', () => {
       numPlayers: 2,
       clientCallback: () => {},
     });
-    m.subscribe(onChangeMock);
+    m.subscribeToConnectionStatus(onChangeMock);
     m.connect();
   });
 

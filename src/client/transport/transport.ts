@@ -60,7 +60,7 @@ export abstract class Transport {
   }
 
   /** Subscribe to connection state changes. */
-  subscribe(fn: () => void): void {
+  subscribeToConnectionStatus(fn: () => void): void {
     this.connectionStatusCallback = fn;
   }
 

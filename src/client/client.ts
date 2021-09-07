@@ -431,7 +431,7 @@ export class _ClientImpl<G extends any = any> {
   subscribe(fn: (state: ClientState<G>) => void) {
     const id = Object.keys(this.subscribers).length;
     this.subscribers[id] = fn;
-    this.transport.subscribe(() => this.notifySubscribers());
+    this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
     if (this._running || !this.multiplayer) {
       fn(this.getState());
