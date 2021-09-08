@@ -90,7 +90,9 @@ describe('LobbyClient', () => {
       (global as any).fetch = jest.fn(async () => ({
         ok: false,
         status: 404,
-        json: async () => ({ moreInformation: 'some helpful details' }),
+        clone: () => ({
+          json: async () => ({ moreInformation: 'some helpful details' }),
+        }),
       }));
 
       await expect(client.listGames()).rejects.toThrow(
