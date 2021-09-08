@@ -52,7 +52,7 @@ export class LobbyClient {
       let details: any;
 
       try {
-        details = await response.json();
+        details = await response.clone().json();
       } catch {
         try {
           details = await response.text();
