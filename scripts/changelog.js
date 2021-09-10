@@ -30,7 +30,7 @@ const isFeature = (s) => /feat(\(\w+\))?:/.test(s);
 const isUninformative = (s) =>
   /(test|style|chore|docs|ci)(\([\w-]+\))?:/.test(s);
 /** Tests if this commit just bumped the version (via `npm version`). */
-const isVersionBump = (s) => /^\w{8} \d+\.\d+\.\d+$/.test(s);
+const isVersionBump = (s) => /^\w+\s\d+\.\d+\.\d+$/.test(s);
 
 const changes = shell
   .exec(`git log --oneline "${PREVIOUS_TAG}"..`)
@@ -51,7 +51,7 @@ const formatChanges = (changes) =>
         .replace(/[a-z]+\((\w+)\)/, '$1')
         // Linkify commit refs.
         .replace(
-          /^(\w{8})/,
+          /^(\w+)\s/,
           '* [[$1](https://github.com/boardgameio/boardgame.io/commit/$1)]'
         )
         // Linkify PR references.
@@ -59,6 +59,7 @@ const formatChanges = (changes) =>
           /\(#(\d{3,})\)/,
           '([#$1](https://github.com/boardgameio/boardgame.io/pull/$1))'
         )
+        .replace(/\)](\w*)/, ')] $1')
     )
     .join(EOL);
 
