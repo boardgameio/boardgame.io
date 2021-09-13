@@ -322,7 +322,7 @@ export class _ClientImpl<G extends any = any> {
 
     if (!multiplayer) multiplayer = DummyTransport;
     this.transport = multiplayer({
-      clientCallback: (data) => this.receiveUpdate(data),
+      clientCallback: (data) => this.receiveTransportData(data),
       gameKey: game,
       game: this.game,
       matchID,
@@ -357,7 +357,7 @@ export class _ClientImpl<G extends any = any> {
   }
 
   /** Handle all incoming updates from a multiplayer transport. */
-  private receiveUpdate(data: TransportData): void {
+  private receiveTransportData(data: TransportData): void {
     const [matchID] = data.args;
     if (matchID !== this.matchID) return;
     switch (data.type) {

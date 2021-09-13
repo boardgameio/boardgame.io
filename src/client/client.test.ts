@@ -327,7 +327,7 @@ describe('multiplayer', () => {
   });
 });
 
-describe('receiveUpdate', () => {
+describe('receiveTransportData', () => {
   let sendToClient: (data: TransportData) => void;
   let client: ReturnType<typeof Client>;
   let requestSync: jest.Mock;
