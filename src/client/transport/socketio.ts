@@ -64,7 +64,7 @@ export class SocketIOTransport extends Transport {
     this.socketOpts = socketOpts;
   }
 
-  sendAction(state: State, action: CredentialedActionShape.Any) {
+  sendAction(state: State, action: CredentialedActionShape.Any): void {
     const args: Parameters<Master['onUpdate']> = [
       action,
       state._stateID,
@@ -74,7 +74,7 @@ export class SocketIOTransport extends Transport {
     this.socket.emit('update', ...args);
   }
 
-  sendChatMessage(matchID: string, chatMessage: ChatMessage) {
+  sendChatMessage(matchID: string, chatMessage: ChatMessage): void {
     const args: Parameters<Master['onChatMessage']> = [
       matchID,
       chatMessage,
@@ -83,7 +83,7 @@ export class SocketIOTransport extends Transport {
     this.socket.emit('chat', ...args);
   }
 
-  connect() {
+  connect(): void {
     if (!this.socket) {
       if (this.server) {
         let server = this.server;
@@ -162,13 +162,13 @@ export class SocketIOTransport extends Transport {
     });
   }
 
-  disconnect() {
+  disconnect(): void {
     this.socket.close();
     this.socket = null;
     this.setConnectionStatus(false);
   }
 
-  requestSync() {
+  requestSync(): void {
     if (this.socket) {
       const args: Parameters<Master['onSync']> = [
         this.matchID,
@@ -180,17 +180,17 @@ export class SocketIOTransport extends Transport {
     }
   }
 
-  updateMatchID(id: string) {
+  updateMatchID(id: string): void {
     this.matchID = id;
     this.requestSync();
   }
 
-  updatePlayerID(id: PlayerID) {
+  updatePlayerID(id: PlayerID): void {
     this.playerID = id;
     this.requestSync();
   }
 
-  updateCredentials(credentials?: string) {
+  updateCredentials(credentials?: string): void {
     this.credentials = credentials;
     this.requestSync();
   }

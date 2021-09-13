@@ -149,7 +149,7 @@ export class LocalTransport extends Transport {
     this.master = master;
   }
 
-  sendChatMessage(matchID: string, chatMessage: ChatMessage) {
+  sendChatMessage(matchID: string, chatMessage: ChatMessage): void {
     const args: Parameters<Master['onChatMessage']> = [
       matchID,
       chatMessage,
@@ -158,7 +158,7 @@ export class LocalTransport extends Transport {
     this.master.onChatMessage(...args);
   }
 
-  sendAction(state: State, action: CredentialedActionShape.Any) {
+  sendAction(state: State, action: CredentialedActionShape.Any): void {
     this.master.onUpdate(action, state._stateID, this.matchID, this.playerID);
   }
 
@@ -171,27 +171,27 @@ export class LocalTransport extends Transport {
     );
   }
 
-  connect() {
+  connect(): void {
     this.setConnectionStatus(true);
     this.master.connect(this.playerID, (data) => this.notifyClient(data));
     this.requestSync();
   }
 
-  disconnect() {
+  disconnect(): void {
     this.setConnectionStatus(false);
   }
 
-  updateMatchID(id: string) {
+  updateMatchID(id: string): void {
     this.matchID = id;
     this.connect();
   }
 
-  updatePlayerID(id: PlayerID) {
+  updatePlayerID(id: PlayerID): void {
     this.playerID = id;
     this.connect();
   }
 
-  updateCredentials(credentials?: string) {
+  updateCredentials(credentials?: string): void {
     this.credentials = credentials;
     this.connect();
   }

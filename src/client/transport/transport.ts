@@ -66,7 +66,7 @@ export abstract class Transport {
   }
 
   /** Transport implementations should call this when they connect/disconnect. */
-  protected setConnectionStatus(isConnected: boolean) {
+  protected setConnectionStatus(isConnected: boolean): void {
     this.isConnected = isConnected;
     this.connectionStatusCallback();
   }
