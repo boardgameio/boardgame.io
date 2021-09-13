@@ -6,21 +6,18 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import * as ActionCreators from '../../core/action-creators';
 import { InMemory } from '../../server/db/inmemory';
 import { LocalStorage } from '../../server/db/localstorage';
 import { Master } from '../../master/master';
 import type { TransportAPI, TransportData } from '../../master/master';
 import { Transport } from './transport';
-import type { TransportOpts, ChatCallback } from './transport';
+import type { TransportOpts } from './transport';
 import type {
   ChatMessage,
   CredentialedActionShape,
   Game,
-  LogEntry,
   PlayerID,
   State,
-  SyncInfo,
 } from '../../types';
 import { getFilterPlayerView } from '../../master/filter-player-view';
 
@@ -62,7 +59,6 @@ type LocalMasterOpts = LocalOpts & {
  */
 export class LocalMaster extends Master {
   connect: (
-    matchID: string,
     playerID: PlayerID,
     callback: (data: TransportData) => void
   ) => void;
@@ -101,7 +97,7 @@ export class LocalMaster extends Master {
     const storage = persist ? new LocalStorage(storageKey) : new InMemory();
     super(game, storage, transportAPI);
 
-    this.connect = (matchID, playerID, callback) => {
+    this.connect = (playerID, callback) => {
       clientCallbacks[playerID] = callback;
     };
 
@@ -140,7 +136,6 @@ type LocalTransportOpts = TransportOpts & {
  */
 export class LocalTransport extends Transport {
   master: LocalMaster;
-  chatMessageCallback: ChatCallback;
 
   /**
    * Creates a new Mutiplayer instance.
@@ -152,15 +147,9 @@ export class LocalTransport extends Transport {
   constructor({ master, ...opts }: LocalTransportOpts) {
     super(opts);
     this.master = master;
-    this.isConnected = true;
   }
 
-  /**
-   * Called when any player sends a chat message and the
-   * master broadcasts the update to other clients (including
-   * this one).
-   */
-  onChatMessage(matchID: string, chatMessage: ChatMessage) {
+  sendChatMessage(matchID: string, chatMessage: ChatMessage): void {
     const args: Parameters<Master['onChatMessage']> = [
       matchID,
       chatMessage,
@@ -169,53 +158,11 @@ export class LocalTransport extends Transport {
     this.master.onChatMessage(...args);
   }
 
-  /**
-   * Called when another player makes a move and the
-   * master broadcasts the update to other clients (including
-   * this one).
-   */
-  async onUpdate(matchID: string, state: State, deltalog: LogEntry[]) {
-    const currentState = this.store.getState();
-
-    if (matchID == this.matchID && state._stateID >= currentState._stateID) {
-      const action = ActionCreators.update(state, deltalog);
-      this.store.dispatch(action);
-    }
-  }
-
-  /**
-   * Called when the client first connects to the master
-   * and requests the current game state.
-   */
-  onSync(matchID: string, syncInfo: SyncInfo) {
-    if (matchID == this.matchID) {
-      const action = ActionCreators.sync(syncInfo);
-      this.store.dispatch(action);
-    }
-  }
-
-  /**
-   * Called when an action that has to be relayed to the
-   * game master is made.
-   */
-  onAction(state: State, action: CredentialedActionShape.Any) {
+  sendAction(state: State, action: CredentialedActionShape.Any): void {
     this.master.onUpdate(action, state._stateID, this.matchID, this.playerID);
   }
 
-  /**
-   * Connect to the master.
-   */
-  connect() {
-    this.master.connect(this.matchID, this.playerID, (data) => {
-      switch (data.type) {
-        case 'sync':
-          return this.onSync(...data.args);
-        case 'update':
-          return this.onUpdate(...data.args);
-        case 'chat':
-          return this.chatMessageCallback(data.args[1]);
-      }
-    });
+  requestSync(): void {
     this.master.onSync(
       this.matchID,
       this.playerID,
@@ -224,56 +171,29 @@ export class LocalTransport extends Transport {
     );
   }
 
-  /**
-   * Disconnect from the master.
-   */
-  disconnect() {}
-
-  /**
-   * Subscribe to connection state changes.
-   */
-  subscribe() {}
-
-  subscribeMatchData() {}
-
-  subscribeChatMessage(fn: ChatCallback) {
-    this.chatMessageCallback = fn;
+  connect(): void {
+    this.setConnectionStatus(true);
+    this.master.connect(this.playerID, (data) => this.notifyClient(data));
+    this.requestSync();
   }
 
-  /**
-   * Dispatches a reset action, then requests a fresh sync from the master.
-   */
-  private resetAndSync() {
-    const action = ActionCreators.reset(null);
-    this.store.dispatch(action);
+  disconnect(): void {
+    this.setConnectionStatus(false);
+  }
+
+  updateMatchID(id: string): void {
+    this.matchID = id;
     this.connect();
   }
 
-  /**
-   * Updates the game id.
-   * @param {string} id - The new game id.
-   */
-  updateMatchID(id: string) {
-    this.matchID = id;
-    this.resetAndSync();
-  }
-
-  /**
-   * Updates the player associated with this client.
-   * @param {string} id - The new player id.
-   */
-  updatePlayerID(id: PlayerID) {
+  updatePlayerID(id: PlayerID): void {
     this.playerID = id;
-    this.resetAndSync();
+    this.connect();
   }
 
-  /**
-   * Updates the credentials associated with this client.
-   * @param {string|undefined} credentials - The new credentials to use.
-   */
-  updateCredentials(credentials?: string) {
+  updateCredentials(credentials?: string): void {
     this.credentials = credentials;
-    this.resetAndSync();
+    this.connect();
   }
 }
 

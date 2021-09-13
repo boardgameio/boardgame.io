@@ -12,7 +12,7 @@ import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
 import { Client, createMoveDispatchers } from './client';
 import { ProcessGameConfig } from '../core/game';
-import type { Transport } from './transport/transport';
+import { Transport } from './transport/transport';
 import { LocalTransport, Local } from './transport/local';
 import { SocketIOTransport, SocketIO } from './transport/socketio';
 import {
@@ -27,6 +27,7 @@ import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
 import type { LogEntry, State, SyncInfo } from '../types';
 import type { Operation } from 'rfc6902';
+import type { TransportData } from '../master/master';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -166,35 +167,35 @@ describe('multiplayer', () => {
     });
 
     test('onAction called', () => {
-      jest.spyOn(client.transport, 'onAction');
+      jest.spyOn(client.transport, 'sendAction');
       const state = { G: {}, ctx: { phase: '' }, plugins: {} };
       const filteredMetadata = [];
       client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
       client.moves.A();
-      expect(client.transport.onAction).toHaveBeenCalled();
+      expect(client.transport.sendAction).toHaveBeenCalled();
     });
 
     test('strip transients action not sent to transport', () => {
-      jest.spyOn(client.transport, 'onAction');
+      jest.spyOn(client.transport, 'sendAction');
       const state = { G: {}, ctx: { phase: '' }, plugins: {} };
       const filteredMetadata = [];
       client.store.dispatch(sync({ state, filteredMetadata } as SyncInfo));
       client.moves.Invalid();
-      expect(client.transport.onAction).not.toHaveBeenCalledWith(
+      expect(client.transport.sendAction).not.toHaveBeenCalledWith(
         expect.any(Object),
         { type: Actions.STRIP_TRANSIENTS }
       );
     });
 
     test('Sends and receives chat messages', () => {
-      jest.spyOn(client.transport, 'onAction');
+      jest.spyOn(client.transport, 'sendAction');
       client.updatePlayerID('0');
       client.updateMatchID('matchID');
-      jest.spyOn(client.transport, 'onChatMessage');
+      jest.spyOn(client.transport, 'sendChatMessage');
 
       client.sendChatMessage({ message: 'foo' });
 
-      expect(client.transport.onChatMessage).toHaveBeenCalledWith(
+      expect(client.transport.sendChatMessage).toHaveBeenCalledWith(
         'matchID',
         expect.objectContaining({ payload: { message: 'foo' }, sender: '0' })
       );
@@ -290,20 +291,20 @@ describe('multiplayer', () => {
   });
 
   describe('custom transport', () => {
-    class CustomTransport {
-      callback;
-
-      constructor() {
-        this.callback = null;
+    class CustomTransport extends Transport {
+      connect() {}
+      disconnect() {}
+      sendAction() {}
+      sendChatMessage() {}
+      requestSync() {}
+      updateMatchID() {}
+      updatePlayerID() {}
+      updateCredentials() {}
+      setMetadata(metadata) {
+        this.notifyClient({ type: 'matchData', args: ['default', metadata] });
       }
-
-      subscribeMatchData(fn) {
-        this.callback = fn;
-      }
-
-      subscribeChatMessage() {}
     }
-    const customTransport = () => new CustomTransport() as unknown as Transport;
+    const customTransport = (opts) => new CustomTransport(opts);
 
     let client;
 
@@ -320,9 +321,118 @@ describe('multiplayer', () => {
 
     test('metadata callback', () => {
       const metadata = { m: true };
-      client.transport.callback(metadata);
+      client.transport.setMetadata(metadata);
       expect(client.matchData).toEqual(metadata);
     });
+  });
+});
+
+describe('receiveTransportData', () => {
+  let sendToClient: (data: TransportData) => void;
+  let client: ReturnType<typeof Client>;
+  let requestSync: jest.Mock;
+
+  beforeEach(() => {
+    requestSync = jest.fn();
+    client = Client({
+      game: {},
+      matchID: 'A',
+      debug: false,
+      // Use the multiplayer interface to extract the client callback
+      // and use it to send updates to the client directly.
+      multiplayer: ({ transportDataCallback }) => {
+        sendToClient = transportDataCallback;
+        return {
+          connect() {},
+          disconnect() {},
+          subscribe() {},
+          requestSync,
+        } as unknown as Transport;
+      },
+    });
+    client.start();
+  });
+
+  afterEach(() => {
+    client.stop();
+  });
+
+  test('discards update with wrong matchID', () => {
+    sendToClient({
+      type: 'sync',
+      args: ['wrongID', { state: { G: 'G', ctx: {} } } as SyncInfo],
+    });
+    expect(client.getState()).toBeNull();
+  });
+
+  test('applies sync', () => {
+    const state = { G: 'G', ctx: {} };
+    sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    expect(client.getState().G).toEqual(state.G);
+  });
+
+  test('applies update', () => {
+    const state1 = { G: 'G1', _stateID: 1, ctx: {} } as State;
+    const state2 = { G: 'G2', _stateID: 2, ctx: {} } as State;
+    sendToClient({ type: 'sync', args: ['A', { state: state1 } as SyncInfo] });
+    sendToClient({ type: 'update', args: ['A', state2, []] });
+    expect(client.getState().G).toEqual(state2.G);
+  });
+
+  test('ignores stale update', () => {
+    const state1 = { G: 'G1', _stateID: 1, ctx: {} } as State;
+    const state2 = { G: 'G2', _stateID: 0, ctx: {} } as State;
+    sendToClient({ type: 'sync', args: ['A', { state: state1 } as SyncInfo] });
+    sendToClient({ type: 'update', args: ['A', state2, []] });
+    expect(client.getState().G).toEqual(state1.G);
+  });
+
+  test('applies a patch', () => {
+    const state = { G: 'G1', _stateID: 1, ctx: {} } as State;
+    sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    sendToClient({
+      type: 'patch',
+      args: ['A', 1, 2, [{ op: 'replace', path: '/_stateID', value: 2 }], []],
+    });
+    expect(client.getState()._stateID).toBe(2);
+  });
+
+  test('ignores patch for different state ID', () => {
+    const state = { G: 'G1', _stateID: 1, ctx: {} } as State;
+    sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    sendToClient({
+      type: 'patch',
+      args: ['A', 2, 3, [{ op: 'replace', path: '/_stateID', value: 3 }], []],
+    });
+    expect(client.getState()._stateID).toBe(1);
+  });
+
+  test('resyncs after failed patch', () => {
+    const state = { G: 'G1', _stateID: 1, ctx: {} } as State;
+    sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    expect(requestSync).not.toHaveBeenCalled();
+    // Send bad patch.
+    sendToClient({
+      type: 'patch',
+      args: ['A', 1, 2, [{ op: 'replace', path: '/_stateIDD', value: 2 }], []],
+    });
+    // State is unchanged and the client requested to resync.
+    expect(client.getState()._stateID).toBe(1);
+    expect(requestSync).toHaveBeenCalled();
+  });
+
+  test('updates match metadata', () => {
+    expect(client.matchData).toBeUndefined();
+    const matchData = [{ id: 0 }];
+    sendToClient({ type: 'matchData', args: ['A', matchData] });
+    expect(client.matchData).toEqual(matchData);
+  });
+
+  test('appends a chat message', () => {
+    expect(client.chatMessages).toEqual([]);
+    const message = { id: 'x', sender: '0', payload: 'hi' };
+    sendToClient({ type: 'chat', args: ['A', message] });
+    expect(client.chatMessages).toEqual([message]);
   });
 });
 
@@ -771,7 +881,7 @@ describe('subscribe', () => {
     client.subscribe(fn);
     client.start();
     fn.mockClear();
-    transport.callback();
+    (transport as any).connectionStatusCallback();
     expect(fn).toHaveBeenCalled();
     client.stop();
   });
