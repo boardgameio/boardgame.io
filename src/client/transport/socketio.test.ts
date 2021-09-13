@@ -41,7 +41,7 @@ class MockSocket {
 }
 
 test('defaults', () => {
-  const m = new SocketIOTransport({ clientCallback: () => {} });
+  const m = new SocketIOTransport({ transportDataCallback: () => {} });
   expect(typeof (m as any).connectionStatusCallback).toBe('function');
   (m as any).connectionStatusCallback();
 });
@@ -66,7 +66,7 @@ class TransportAdapter extends SocketIOTransport {
 
 describe('update matchID / playerID / credentials', () => {
   const socket = new MockSocket();
-  const m = new TransportAdapter({ socket, clientCallback: () => {} });
+  const m = new TransportAdapter({ socket, transportDataCallback: () => {} });
 
   beforeEach(() => (socket.emit = jest.fn()));
 
@@ -106,7 +106,7 @@ describe('connection status', () => {
       playerID: '0',
       gameName: 'foo',
       numPlayers: 2,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     m.subscribeToConnectionStatus(onChangeMock);
     m.connect();
@@ -132,19 +132,19 @@ describe('connection status', () => {
   });
 
   test('doesn’t crash if syncing before connecting', () => {
-    const clientCallback = jest.fn();
-    const transport = new SocketIOTransport({ clientCallback });
+    const transportDataCallback = jest.fn();
+    const transport = new SocketIOTransport({ transportDataCallback });
     transport.requestSync();
-    expect(clientCallback).not.toHaveBeenCalled();
+    expect(transportDataCallback).not.toHaveBeenCalled();
   });
 });
 
 describe('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const clientCallback = jest.fn();
+  const transportDataCallback = jest.fn();
   const transport = new TransportAdapter({
     socket: mockSocket,
-    clientCallback,
+    transportDataCallback,
   });
   transport.connect();
 
@@ -153,7 +153,7 @@ describe('multiplayer', () => {
   test('receive update', () => {
     const restored: { restore: boolean; _stateID?: number } = { restore: true };
     mockSocket.receive('update', 'default', restored);
-    expect(clientCallback).toHaveBeenCalledWith({
+    expect(transportDataCallback).toHaveBeenCalledWith({
       type: 'update',
       args: ['default', restored, undefined],
     });
@@ -162,7 +162,7 @@ describe('multiplayer', () => {
   test('receive sync', () => {
     const restored = { restore: true };
     mockSocket.receive('sync', 'default', { state: restored });
-    expect(clientCallback).toHaveBeenCalledWith({
+    expect(transportDataCallback).toHaveBeenCalledWith({
       type: 'sync',
       args: ['default', { state: restored }],
     });
@@ -171,7 +171,7 @@ describe('multiplayer', () => {
   test('receive matchData', () => {
     const matchData = [{ id: '0', name: 'Alice' }];
     mockSocket.receive('matchData', 'default', matchData);
-    expect(clientCallback).toHaveBeenCalledWith({
+    expect(transportDataCallback).toHaveBeenCalledWith({
       type: 'matchData',
       args: ['default', matchData],
     });
@@ -188,7 +188,7 @@ describe('multiplayer', () => {
   test('receive chat-message', () => {
     const chatData = { message: 'foo' };
     mockSocket.receive('chat', 'default', chatData);
-    expect(clientCallback).toHaveBeenCalledWith({
+    expect(transportDataCallback).toHaveBeenCalledWith({
       type: 'chat',
       args: ['default', chatData],
     });
@@ -212,10 +212,10 @@ describe('multiplayer', () => {
 
 describe('multiplayer delta state', () => {
   const mockSocket = new MockSocket();
-  const clientCallback = jest.fn();
+  const transportDataCallback = jest.fn();
   const transport = new TransportAdapter({
     socket: mockSocket,
-    clientCallback,
+    transportDataCallback,
   });
   transport.connect();
 
@@ -230,7 +230,7 @@ describe('multiplayer delta state', () => {
       [],
     ];
     mockSocket.receive('patch', ...patch1);
-    expect(clientCallback).toHaveBeenCalledWith({
+    expect(transportDataCallback).toHaveBeenCalledWith({
       type: 'patch',
       args: patch1,
     });
@@ -243,7 +243,7 @@ describe('server option', () => {
 
   test('without protocol', () => {
     const server = hostname + ':' + port;
-    const m = new TransportAdapter({ server, clientCallback: () => {} });
+    const m = new TransportAdapter({ server, transportDataCallback: () => {} });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -252,7 +252,10 @@ describe('server option', () => {
 
   test('without trailing slash', () => {
     const server = 'http://' + hostname + ':' + port;
-    const m = new SocketIOTransport({ server, clientCallback: () => {} });
+    const m = new SocketIOTransport({
+      server,
+      transportDataCallback: () => {},
+    });
     m.connect();
     expect((m.socket.io as any).uri).toEqual(server + '/default');
   });
@@ -261,7 +264,7 @@ describe('server option', () => {
     const serverWithProtocol = 'https://' + hostname + ':' + port + '/';
     const m = new TransportAdapter({
       server: serverWithProtocol,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
@@ -273,7 +276,7 @@ describe('server option', () => {
     const serverWithProtocol = 'http://' + hostname + ':' + port + '/';
     const m = new TransportAdapter({
       server: serverWithProtocol,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
@@ -282,7 +285,7 @@ describe('server option', () => {
   });
 
   test('no server set', () => {
-    const m = new TransportAdapter({ clientCallback: () => {} });
+    const m = new TransportAdapter({ transportDataCallback: () => {} });
     m.connect();
     expect(m.socket.io.engine.hostname).not.toEqual(hostname);
     expect(m.socket.io.engine.port).not.toEqual(port);

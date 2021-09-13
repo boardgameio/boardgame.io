@@ -112,7 +112,7 @@ export class SocketIOTransport extends Transport {
         patch: Operation[],
         deltalog: LogEntry[]
       ) => {
-        this.clientCallback({
+        this.notifyClient({
           type: 'patch',
           args: [matchID, prevStateID, stateID, patch, deltalog],
         });
@@ -125,7 +125,7 @@ export class SocketIOTransport extends Transport {
     this.socket.on(
       'update',
       (matchID: string, state: State, deltalog: LogEntry[]) => {
-        this.clientCallback({
+        this.notifyClient({
           type: 'update',
           args: [matchID, state, deltalog],
         });
@@ -135,7 +135,7 @@ export class SocketIOTransport extends Transport {
     // Called when the client first connects to the master
     // and requests the current game state.
     this.socket.on('sync', (matchID: string, syncInfo: SyncInfo) => {
-      this.clientCallback({ type: 'sync', args: [matchID, syncInfo] });
+      this.notifyClient({ type: 'sync', args: [matchID, syncInfo] });
     });
 
     // Called when new player joins the match or changes
@@ -143,12 +143,12 @@ export class SocketIOTransport extends Transport {
     this.socket.on(
       'matchData',
       (matchID: string, matchData: FilteredMetadata) => {
-        this.clientCallback({ type: 'matchData', args: [matchID, matchData] });
+        this.notifyClient({ type: 'matchData', args: [matchID, matchData] });
       }
     );
 
     this.socket.on('chat', (matchID: string, chatMessage: ChatMessage) => {
-      this.clientCallback({ type: 'chat', args: [matchID, chatMessage] });
+      this.notifyClient({ type: 'chat', args: [matchID, chatMessage] });
     });
 
     // Keep track of connection status.

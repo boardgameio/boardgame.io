@@ -173,7 +173,7 @@ export class LocalTransport extends Transport {
 
   connect() {
     this.setConnectionStatus(true);
-    this.master.connect(this.playerID, (data) => this.clientCallback(data));
+    this.master.connect(this.playerID, (data) => this.notifyClient(data));
     this.requestSync();
   }
 

@@ -16,7 +16,7 @@ describe('Transport', () => {
   }
 
   test('base class sets up callbacks', () => {
-    const transport = new SimpleTransport({ clientCallback: () => {} });
+    const transport = new SimpleTransport({ transportDataCallback: () => {} });
     expect(transport.get('connectionStatusCallback')()).toBeUndefined();
   });
 });

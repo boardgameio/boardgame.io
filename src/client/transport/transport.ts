@@ -22,7 +22,7 @@ export type MetadataCallback = (metadata: SyncInfo['filteredMetadata']) => void;
 export type ChatCallback = (message: ChatMessage) => void;
 
 export interface TransportOpts {
-  clientCallback: (data: TransportData) => void;
+  transportDataCallback: (data: TransportData) => void;
   gameName?: string;
   gameKey?: Game;
   game?: ReturnType<typeof ProcessGameConfig>;
@@ -38,20 +38,21 @@ export abstract class Transport {
   protected matchID: string;
   protected credentials?: string;
   protected numPlayers: number;
-  protected clientCallback: (data: TransportData) => void;
+  /** Callback to pass transport data back to the client. */
+  private transportDataCallback: (data: TransportData) => void;
   /** Callback to let the client know when the connection status has changed. */
   private connectionStatusCallback: () => void = () => {};
   isConnected = false;
 
   constructor({
-    clientCallback,
+    transportDataCallback,
     gameName,
     playerID,
     matchID,
     credentials,
     numPlayers,
   }: TransportOpts) {
-    this.clientCallback = clientCallback;
+    this.transportDataCallback = transportDataCallback;
     this.gameName = gameName || 'default';
     this.playerID = playerID || null;
     this.matchID = matchID || 'default';
@@ -68,6 +69,11 @@ export abstract class Transport {
   protected setConnectionStatus(isConnected: boolean) {
     this.isConnected = isConnected;
     this.connectionStatusCallback();
+  }
+
+  /** Transport implementations should call this when they receive data from a master. */
+  protected notifyClient(data: TransportData): void {
+    this.transportDataCallback(data);
   }
 
   /** Called by the client to connect the transport. */

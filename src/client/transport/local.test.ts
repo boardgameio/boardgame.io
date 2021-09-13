@@ -129,8 +129,16 @@ describe('Local', () => {
   test('transports for same game use shared master', () => {
     const gameKey = {};
     const game = ProcessGameConfig(gameKey);
-    const transport1 = Local()({ game, gameKey, clientCallback: () => {} });
-    const transport2 = Local()({ game, gameKey, clientCallback: () => {} });
+    const transport1 = Local()({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
+    const transport2 = Local()({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
     expect(transport1.master).toBe(transport2.master);
   });
 
@@ -141,12 +149,12 @@ describe('Local', () => {
     const transport1 = Local({ bots })({
       game,
       gameKey,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     const transport2 = Local({ bots })({
       game,
       gameKey,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     expect(transport1.master).toBe(transport2.master);
   });
@@ -157,12 +165,12 @@ describe('Local', () => {
     const transport1 = Local({ bots: {} })({
       game,
       gameKey,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     const transport2 = Local({ bots: {} })({
       game,
       gameKey,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     expect(transport1.master).not.toBe(transport2.master);
   });
@@ -274,7 +282,7 @@ describe('LocalTransport', () => {
     }
     const transport = new WrappedLocalTransport({
       master,
-      clientCallback: () => {},
+      transportDataCallback: () => {},
     });
     jest.spyOn(transport, 'requestSync');
 

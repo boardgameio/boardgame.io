@@ -301,7 +301,7 @@ describe('multiplayer', () => {
       updatePlayerID() {}
       updateCredentials() {}
       setMetadata(metadata) {
-        this.clientCallback({ type: 'matchData', args: ['default', metadata] });
+        this.notifyClient({ type: 'matchData', args: ['default', metadata] });
       }
     }
     const customTransport = (opts) => new CustomTransport(opts);
@@ -340,8 +340,8 @@ describe('receiveTransportData', () => {
       debug: false,
       // Use the multiplayer interface to extract the client callback
       // and use it to send updates to the client directly.
-      multiplayer: ({ clientCallback }) => {
-        sendToClient = clientCallback;
+      multiplayer: ({ transportDataCallback }) => {
+        sendToClient = transportDataCallback;
         return {
           connect() {},
           disconnect() {},
