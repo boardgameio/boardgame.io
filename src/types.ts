@@ -481,6 +481,7 @@ export namespace ActionPayload {
 export type FilteredMetadata = {
   id: number;
   name?: string;
+  isConnected?: boolean;
 }[];
 
 export interface SyncInfo {
