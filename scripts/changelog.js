@@ -51,7 +51,7 @@ const formatChanges = (changes) =>
         .replace(/[a-z]+\((\w+)\)/, '$1')
         // Linkify commit refs.
         .replace(
-          /^(\w+)\s/,
+          /^(\w+)/,
           '* [[$1](https://github.com/boardgameio/boardgame.io/commit/$1)]'
         )
         // Linkify PR references.
@@ -59,7 +59,6 @@ const formatChanges = (changes) =>
           /\(#(\d{3,})\)/,
           '([#$1](https://github.com/boardgameio/boardgame.io/pull/$1))'
         )
-        .replace(/\)](\w*)/, ')] $1')
     )
     .join(EOL);
 
