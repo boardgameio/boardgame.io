@@ -385,6 +385,7 @@ export namespace Server {
     unlisted?: boolean;
     createdAt: number;
     updatedAt: number;
+    numPlayers: number;
   }
 
   export type AppCtx = Koa.DefaultContext & {
