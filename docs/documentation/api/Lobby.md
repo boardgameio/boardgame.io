@@ -147,7 +147,8 @@ Allows a player to join a particular match instance `id` of a game named `name`.
 
 Accepts three JSON body parameters:
 
-- `playerID` (required): the ordinal player in the match that is being joined (`'0'`, `'1'`...).
+- `playerID` (optional): the ordinal player in the match that is being joined (`'0'`, `'1'`...).  
+If not sent, will be automatically assigned to the first available ordinal.
 
 - `playerName` (required): the display name of the player joining the match.
 
