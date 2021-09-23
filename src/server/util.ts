@@ -21,7 +21,6 @@ export const createMetadata = ({
     players: {},
     createdAt: Date.now(),
     updatedAt: Date.now(),
-    numPlayers: numPlayers
   };
 
   if (setupData !== undefined) metadata.setupData = setupData;
@@ -64,16 +63,27 @@ export const createMatch = ({
 };
 
 /**
- * Given a match, tries to find the first index of player that can be joined
+ * Given players, returns the count of players.
  */
-export const getFirstAvailablePlayerIndex = (match: Server.MatchData): number => {
+export const getNumPlayers = (players: {
+  [id: number]: Server.PlayerMetadata;
+}): number =>
+  Math.max(...Object.keys(players).map((k) => Number.parseInt(k))) + 1;
+
+/**
+ * Given players, tries to find the first index of player that can be joined. Returns -1 if there's no available index.
+ */
+export const getFirstAvailablePlayerIndex = (players: {
+  [id: number]: Server.PlayerMetadata;
+}): number => {
+  const numPlayers = getNumPlayers(players);
   let playerID = -1;
   // Try to get the first index available
-  for (const i of Array(match.numPlayers)) {
-    if (typeof match.players[i].name === 'undefined' || match.players[i].name === null) {
+  for (let i = 0; i < numPlayers; i++) {
+    if (typeof players[i].name === 'undefined' || players[i].name === null) {
       playerID = i;
       break;
     }
   }
   return playerID;
-}
+};

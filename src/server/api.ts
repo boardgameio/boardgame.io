@@ -12,7 +12,11 @@ import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
 import type IOTypes from 'socket.io';
-import { createMatch, getFirstAvailablePlayerIndex } from './util';
+import {
+  createMatch,
+  getFirstAvailablePlayerIndex,
+  getNumPlayers,
+} from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 
@@ -223,13 +227,14 @@ export const configureRouter = ({
     const playerName = ctx.request.body.playerName;
     const data = ctx.request.body.data;
     const matchID = ctx.params.id;
-    
     if (!playerName) {
       ctx.throw(403, 'playerName is required');
     }
 
     // Fetch matchdata early for determining playerID
-    const { metadata } : { metadata: Server.MatchData } = await (db as StorageAPI.Async).fetch(matchID, {
+    const { metadata }: { metadata: Server.MatchData } = await (
+      db as StorageAPI.Async
+    ).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
@@ -237,13 +242,19 @@ export const configureRouter = ({
     }
 
     if (typeof playerID === 'undefined' || playerID === null) {
-      playerID = getFirstAvailablePlayerIndex(metadata);
+      playerID = getFirstAvailablePlayerIndex(metadata.players);
       if (playerID === -1) {
-        ctx.throw(409, 'Match ' + matchID + ' reached maximum number of players (' + metadata.numPlayers + ')');
+        ctx.throw(
+          409,
+          'Match ' +
+            matchID +
+            ' reached maximum number of players (' +
+            getNumPlayers(metadata.players) +
+            ')'
+        );
       }
     }
 
-    
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
