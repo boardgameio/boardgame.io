@@ -12,11 +12,7 @@ import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
 import type IOTypes from 'socket.io';
-import {
-  createMatch,
-  getFirstAvailablePlayerIndex,
-  getNumPlayers,
-} from './util';
+import { createMatch, getFirstAvailablePlayerID, getNumPlayers } from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 
@@ -239,7 +235,7 @@ export const configureRouter = ({
     }
 
     if (typeof playerID === 'undefined' || playerID === null) {
-      playerID = getFirstAvailablePlayerIndex(metadata.players);
+      playerID = getFirstAvailablePlayerID(metadata.players);
       if (playerID === undefined) {
         const numPlayers = getNumPlayers(metadata.players);
         ctx.throw(

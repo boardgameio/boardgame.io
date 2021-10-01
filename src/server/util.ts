@@ -69,9 +69,10 @@ export const getNumPlayers = (players: Server.MatchData['players']): number =>
   Object.keys(players).length;
 
 /**
- * Given players, tries to find the first index of player that can be joined. Returns -1 if there's no available index.
+ * Given players, tries to find the ID of the first player that can be joined.
+ * Returns `undefined` if there’s no available ID.
  */
-export const getFirstAvailablePlayerIndex = (
+export const getFirstAvailablePlayerID = (
   players: Server.MatchData['players']
 ): string | undefined => {
   const numPlayers = getNumPlayers(players);
