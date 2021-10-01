@@ -231,10 +231,7 @@ export const configureRouter = ({
       ctx.throw(403, 'playerName is required');
     }
 
-    // Fetch matchdata early for determining playerID
-    const { metadata }: { metadata: Server.MatchData } = await (
-      db as StorageAPI.Async
-    ).fetch(matchID, {
+    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
@@ -243,7 +240,7 @@ export const configureRouter = ({
 
     if (typeof playerID === 'undefined' || playerID === null) {
       playerID = getFirstAvailablePlayerIndex(metadata.players);
-      if (playerID === -1) {
+      if (playerID === undefined) {
         ctx.throw(
           409,
           'Match ' +

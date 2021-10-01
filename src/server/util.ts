@@ -65,9 +65,9 @@ export const createMatch = ({
 /**
  * Given players, returns the count of players.
  */
-export const getNumPlayers = (players: {
-  [id: number]: Server.PlayerMetadata;
-}): number =>
+export const getNumPlayers = (
+  players: Server.MatchData['players']
+): number =>
   Math.max(...Object.keys(players).map((k) => Number.parseInt(k))) + 1;
 
 /**
@@ -81,9 +81,7 @@ export const getFirstAvailablePlayerIndex = (players: {
   // Try to get the first index available
   for (let i = 0; i < numPlayers; i++) {
     if (typeof players[i].name === 'undefined' || players[i].name === null) {
-      playerID = i;
-      break;
+      return String(i);
     }
   }
-  return playerID;
 };
