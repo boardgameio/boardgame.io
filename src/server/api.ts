@@ -241,13 +241,10 @@ export const configureRouter = ({
     if (typeof playerID === 'undefined' || playerID === null) {
       playerID = getFirstAvailablePlayerIndex(metadata.players);
       if (playerID === undefined) {
+        const numPlayers = getNumPlayers(metadata.players);
         ctx.throw(
           409,
-          'Match ' +
-            matchID +
-            ' reached maximum number of players (' +
-            getNumPlayers(metadata.players) +
-            ')'
+          `Match ${matchID} reached maximum number of players (${numPlayers})`
         );
       }
     }
