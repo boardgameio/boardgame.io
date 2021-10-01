@@ -65,10 +65,9 @@ export const createMatch = ({
 /**
  * Given players, returns the count of players.
  */
-export const getNumPlayers = (
-  players: Server.MatchData['players']
-): number =>
-  Math.max(...Object.keys(players).map((k) => Number.parseInt(k))) + 1;
+export const getNumPlayers = (players: {
+  players: Server.MatchData['players'];
+}): number => Object.keys(players).length;
 
 /**
  * Given players, tries to find the first index of player that can be joined. Returns -1 if there's no available index.
