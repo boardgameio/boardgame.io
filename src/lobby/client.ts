@@ -232,7 +232,7 @@ export class LobbyClient {
     gameName: string,
     matchID: string,
     body: {
-      playerID: string;
+      playerID?: string;
       playerName: string;
       data?: any;
       [key: string]: any;
@@ -241,7 +241,10 @@ export class LobbyClient {
   ): Promise<LobbyAPI.JoinedMatch> {
     assertGameName(gameName);
     assertMatchID(matchID);
-    validateBody(body, { playerID: 'string', playerName: 'string' });
+    validateBody(body, {
+      playerID: ['string', 'undefined'],
+      playerName: 'string',
+    });
     return this.post(`/games/${gameName}/${matchID}/join`, { body, init });
   }
 

@@ -291,7 +291,7 @@ describe('LobbyClient', () => {
           playerName: 'Bob',
         })
       ).rejects.toThrow(
-        'Expected body.playerID to be of type string, got “0”.'
+        'Expected body.playerID to be of type string|undefined, got “0”.'
       );
 
       await expect(
