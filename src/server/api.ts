@@ -216,7 +216,7 @@ export const configureRouter = ({
    * @param {string} playerID - The ID of the player who joins. If not sent, will be assigned to the first index available.
    * @param {string} playerName - The name of the player who joins.
    * @param {object} data - The default data of the player in the match.
-   * @return - Player credentials to use when interacting in the joined match.
+   * @return - Player ID and credentials to use when interacting in the joined match.
    */
   router.post('/games/:name/:id/join', koaBody(), async (ctx) => {
     let playerID = ctx.request.body.playerID;
@@ -261,7 +261,7 @@ export const configureRouter = ({
 
     await db.setMetadata(matchID, metadata);
 
-    const body: LobbyAPI.JoinedMatch = { playerCredentials };
+    const body: LobbyAPI.JoinedMatch = { playerID, playerCredentials };
     ctx.body = body;
   });
 

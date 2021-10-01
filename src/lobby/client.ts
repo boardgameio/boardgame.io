@@ -226,7 +226,7 @@ export class LobbyClient {
    *   playerID: '1',
    *   playerName: 'Bob',
    * }).then(console.log);
-   * // => { playerCredentials: 'random-string' }
+   * // => { playerID: '1', playerCredentials: 'random-string' }
    */
   async joinMatch(
     gameName: string,

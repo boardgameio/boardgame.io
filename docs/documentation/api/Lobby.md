@@ -147,14 +147,14 @@ Allows a player to join a particular match instance `id` of a game named `name`.
 
 Accepts three JSON body parameters:
 
+- `playerName` (required): the display name of the player joining the match.
+
 - `playerID` (optional): the ordinal player in the match that is being joined (`'0'`, `'1'`...).  
 If not sent, will be automatically assigned to the first available ordinal.
 
-- `playerName` (required): the display name of the player joining the match.
-
 - `data` (optional): additional metadata to associate with the player.
 
-Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future.
+Returns `playerCredentials` which is the token this player will require to authenticate their actions in the future and `playerID`, which can be useful if you didn’t specify a `playerID` when making the request.
 
 #### Using a LobbyClient instance
 
