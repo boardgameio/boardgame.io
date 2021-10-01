@@ -65,16 +65,15 @@ export const createMatch = ({
 /**
  * Given players, returns the count of players.
  */
-export const getNumPlayers = (players: {
-  players: Server.MatchData['players'];
-}): number => Object.keys(players).length;
+export const getNumPlayers = (players: Server.MatchData['players']): number =>
+  Object.keys(players).length;
 
 /**
  * Given players, tries to find the first index of player that can be joined. Returns -1 if there's no available index.
  */
-export const getFirstAvailablePlayerIndex = (players: {
-  players: Server.MatchData['players'];
-}): string => {
+export const getFirstAvailablePlayerIndex = (
+  players: Server.MatchData['players']
+): string => {
   const numPlayers = getNumPlayers(players);
   // Try to get the first index available
   for (let i = 0; i < numPlayers; i++) {
