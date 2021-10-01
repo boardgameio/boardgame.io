@@ -73,7 +73,7 @@ export const getNumPlayers = (players: Server.MatchData['players']): number =>
  */
 export const getFirstAvailablePlayerIndex = (
   players: Server.MatchData['players']
-): string => {
+): string | undefined => {
   const numPlayers = getNumPlayers(players);
   // Try to get the first index available
   for (let i = 0; i < numPlayers; i++) {
