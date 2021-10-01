@@ -73,10 +73,9 @@ export const getNumPlayers = (players: {
  * Given players, tries to find the first index of player that can be joined. Returns -1 if there's no available index.
  */
 export const getFirstAvailablePlayerIndex = (players: {
-  [id: number]: Server.PlayerMetadata;
-}): number => {
+  players: Server.MatchData['players'];
+}): string => {
   const numPlayers = getNumPlayers(players);
-  let playerID = -1;
   // Try to get the first index available
   for (let i = 0; i < numPlayers; i++) {
     if (typeof players[i].name === 'undefined' || players[i].name === null) {
