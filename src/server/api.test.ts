@@ -492,6 +492,10 @@ describe('.configureRouter', () => {
             expect(response.body.playerCredentials).toEqual(credentials);
           });
 
+          test('returns the playerID', async () => {
+            expect(response.body.playerID).toEqual('0');
+          });
+
           test('updates the player name', async () => {
             expect(db.mocks.setMetadata).toHaveBeenCalledWith(
               '1',
