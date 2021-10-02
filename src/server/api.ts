@@ -12,7 +12,7 @@ import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
 import type IOTypes from 'socket.io';
-import { createMatch } from './util';
+import { createMatch, getFirstAvailablePlayerID, getNumPlayers } from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 
@@ -213,28 +213,38 @@ export const configureRouter = ({
    *
    * @param {string} name - The name of the game.
    * @param {string} id - The ID of the match.
-   * @param {string} playerID - The ID of the player who joins.
+   * @param {string} playerID - The ID of the player who joins. If not sent, will be assigned to the first index available.
    * @param {string} playerName - The name of the player who joins.
    * @param {object} data - The default data of the player in the match.
-   * @return - Player credentials to use when interacting in the joined match.
+   * @return - Player ID and credentials to use when interacting in the joined match.
    */
   router.post('/games/:name/:id/join', koaBody(), async (ctx) => {
-    const playerID = ctx.request.body.playerID;
+    let playerID = ctx.request.body.playerID;
     const playerName = ctx.request.body.playerName;
     const data = ctx.request.body.data;
-    if (typeof playerID === 'undefined' || playerID === null) {
-      ctx.throw(403, 'playerID is required');
-    }
+    const matchID = ctx.params.id;
     if (!playerName) {
       ctx.throw(403, 'playerName is required');
     }
-    const matchID = ctx.params.id;
+
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
+
+    if (typeof playerID === 'undefined' || playerID === null) {
+      playerID = getFirstAvailablePlayerID(metadata.players);
+      if (playerID === undefined) {
+        const numPlayers = getNumPlayers(metadata.players);
+        ctx.throw(
+          409,
+          `Match ${matchID} reached maximum number of players (${numPlayers})`
+        );
+      }
+    }
+
     if (!metadata.players[playerID]) {
       ctx.throw(404, 'Player ' + playerID + ' not found');
     }
@@ -251,7 +261,7 @@ export const configureRouter = ({
 
     await db.setMetadata(matchID, metadata);
 
-    const body: LobbyAPI.JoinedMatch = { playerCredentials };
+    const body: LobbyAPI.JoinedMatch = { playerID, playerCredentials };
     ctx.body = body;
   });
 

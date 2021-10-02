@@ -449,14 +449,64 @@ describe('.configureRouter', () => {
 
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, auth, games });
+            const app = createApiServer({
+              db,
+              auth: new Auth({ generateCredentials: () => credentials }),
+              games,
+              uuid: () => 'matchID',
+            });
             response = await request(app.callback())
               .post('/games/foo/1/join')
-              .send('playerName=1');
+              .send('playerName=alice');
           });
 
-          test('throws error 403', async () => {
-            expect(response.status).toEqual(403);
+          describe('numPlayers is reached in match', () => {
+            beforeEach(async () => {
+              db = new AsyncStorage({
+                fetch: async () => {
+                  return {
+                    metadata: {
+                      players: {
+                        '0': { name: 'alice' },
+                      },
+                    },
+                  };
+                },
+              });
+              const app = createApiServer({ db, auth, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/join')
+                .send('playerName=bob');
+            });
+
+            test('throws error 409', async () => {
+              expect(response.status).toEqual(409);
+            });
+          });
+
+          test('is successful', async () => {
+            expect(response.status).toEqual(200);
+          });
+
+          test('returns the player credentials', async () => {
+            expect(response.body.playerCredentials).toEqual(credentials);
+          });
+
+          test('returns the playerID', async () => {
+            expect(response.body.playerID).toEqual('0');
+          });
+
+          test('updates the player name', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({
+                players: expect.objectContaining({
+                  '0': expect.objectContaining({
+                    name: 'alice',
+                  }),
+                }),
+              })
+            );
           });
         });
 

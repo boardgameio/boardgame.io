@@ -409,6 +409,7 @@ export namespace LobbyAPI {
     matchID: string;
   }
   export interface JoinedMatch {
+    playerID: string;
     playerCredentials: string;
   }
   export interface NextMatch {

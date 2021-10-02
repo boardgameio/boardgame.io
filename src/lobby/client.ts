@@ -8,17 +8,29 @@ const assertString = (str: unknown, label: string) => {
 const assertGameName = (name?: string) => assertString(name, 'game name');
 const assertMatchID = (id?: string) => assertString(id, 'match ID');
 
+type JSType =
+  | 'string'
+  | 'number'
+  | 'bigint'
+  | 'object'
+  | 'boolean'
+  | 'symbol'
+  | 'function'
+  | 'undefined';
+
 const validateBody = (
   body: { [key: string]: any } | undefined,
-  schema: { [key: string]: 'string' | 'number' | 'object' | 'boolean' }
+  schema: { [key: string]: JSType | JSType[] }
 ) => {
   if (!body) throw new Error(`Expected body, got “${body}”.`);
   for (const key in schema) {
-    const type = schema[key];
+    const propSchema = schema[key];
+    const types = Array.isArray(propSchema) ? propSchema : [propSchema];
     const received = body[key];
-    if (typeof received !== type) {
+    if (!types.includes(typeof received)) {
+      const union = types.join('|');
       throw new TypeError(
-        `Expected body.${key} to be of type ${type}, got “${received}”.`
+        `Expected body.${key} to be of type ${union}, got “${received}”.`
       );
     }
   }
@@ -214,13 +226,13 @@ export class LobbyClient {
    *   playerID: '1',
    *   playerName: 'Bob',
    * }).then(console.log);
-   * // => { playerCredentials: 'random-string' }
+   * // => { playerID: '1', playerCredentials: 'random-string' }
    */
   async joinMatch(
     gameName: string,
     matchID: string,
     body: {
-      playerID: string;
+      playerID?: string;
       playerName: string;
       data?: any;
       [key: string]: any;
@@ -229,7 +241,10 @@ export class LobbyClient {
   ): Promise<LobbyAPI.JoinedMatch> {
     assertGameName(gameName);
     assertMatchID(matchID);
-    validateBody(body, { playerID: 'string', playerName: 'string' });
+    validateBody(body, {
+      playerID: ['string', 'undefined'],
+      playerName: 'string',
+    });
     return this.post(`/games/${gameName}/${matchID}/join`, { body, init });
   }
 
