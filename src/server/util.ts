@@ -33,7 +33,7 @@ export const createMetadata = ({
 };
 
 /**
- * Creates matchID, initial state and metadata for a new match.
+ * Creates initial state and metadata for a new match.
  * If the provided `setupData` doesn’t pass the game’s validation,
  * an error object is returned instead.
  */
