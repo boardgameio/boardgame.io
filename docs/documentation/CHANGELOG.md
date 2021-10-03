@@ -1,3 +1,16 @@
+## v0.49.0
+
+#### Features
+
+* [[604d12e6](https://github.com/boardgameio/boardgame.io/commit/604d12e6)] lobby: use first available `playerID` when joining a match ([#1013](https://github.com/boardgameio/boardgame.io/pull/1013))
+* [[510a082a](https://github.com/boardgameio/boardgame.io/commit/510a082a)] transport: Consolidate transport interface ([#1002](https://github.com/boardgameio/boardgame.io/pull/1002))
+* [[d30d5776](https://github.com/boardgameio/boardgame.io/commit/d30d5776)] Expose `createMatch` utility
+
+#### Bugfixes
+
+* [[ca94f3a5](https://github.com/boardgameio/boardgame.io/commit/ca94f3a5)] lobby: Prevent error accessing fetch response twice ([#1005](https://github.com/boardgameio/boardgame.io/pull/1005))
+
+
 ## v0.48.0
 
 #### Features
