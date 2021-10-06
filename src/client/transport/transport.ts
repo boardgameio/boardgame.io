@@ -24,8 +24,8 @@ export type ChatCallback = (message: ChatMessage) => void;
 export interface TransportOpts {
   transportDataCallback: (data: TransportData) => void;
   gameName?: string;
-  gameKey?: Game;
-  game?: ReturnType<typeof ProcessGameConfig>;
+  gameKey: Game;
+  game: ReturnType<typeof ProcessGameConfig>;
   playerID?: PlayerID;
   matchID?: string;
   credentials?: string;

@@ -1,4 +1,5 @@
 import { Transport } from './transport';
+import { ProcessGameConfig } from '../../core/game';
 
 describe('Transport', () => {
   class SimpleTransport extends Transport {
@@ -16,7 +17,11 @@ describe('Transport', () => {
   }
 
   test('base class sets up callbacks', () => {
-    const transport = new SimpleTransport({ transportDataCallback: () => {} });
+    const transport = new SimpleTransport({
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     expect(transport.get('connectionStatusCallback')()).toBeUndefined();
   });
 });

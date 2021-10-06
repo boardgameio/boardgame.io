@@ -11,6 +11,7 @@ import type * as ioNamespace from 'socket.io-client';
 import { makeMove } from '../../core/action-creators';
 import type { Master } from '../../master/master';
 import type { ChatMessage, State } from '../../types';
+import { ProcessGameConfig } from '../../core/game';
 
 jest.mock('../../core/logger', () => ({
   info: jest.fn(),
@@ -41,7 +42,11 @@ class MockSocket {
 }
 
 test('defaults', () => {
-  const m = new SocketIOTransport({ transportDataCallback: () => {} });
+  const m = new SocketIOTransport({
+    transportDataCallback: () => {},
+    game: ProcessGameConfig({}),
+    gameKey: {},
+  });
   expect(typeof (m as any).connectionStatusCallback).toBe('function');
   (m as any).connectionStatusCallback();
 });
@@ -66,7 +71,12 @@ class TransportAdapter extends SocketIOTransport {
 
 describe('update matchID / playerID / credentials', () => {
   const socket = new MockSocket();
-  const m = new TransportAdapter({ socket, transportDataCallback: () => {} });
+  const m = new TransportAdapter({
+    socket,
+    transportDataCallback: () => {},
+    game: ProcessGameConfig({}),
+    gameKey: {},
+  });
 
   beforeEach(() => (socket.emit = jest.fn()));
 
@@ -105,6 +115,8 @@ describe('connection status', () => {
       matchID: '0',
       playerID: '0',
       gameName: 'foo',
+      game: ProcessGameConfig({}),
+      gameKey: {},
       numPlayers: 2,
       transportDataCallback: () => {},
     });
@@ -133,7 +145,11 @@ describe('connection status', () => {
 
   test('doesn’t crash if syncing before connecting', () => {
     const transportDataCallback = jest.fn();
-    const transport = new SocketIOTransport({ transportDataCallback });
+    const transport = new SocketIOTransport({
+      transportDataCallback,
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     transport.requestSync();
     expect(transportDataCallback).not.toHaveBeenCalled();
   });
@@ -145,6 +161,8 @@ describe('multiplayer', () => {
   const transport = new TransportAdapter({
     socket: mockSocket,
     transportDataCallback,
+    game: ProcessGameConfig({}),
+    gameKey: {},
   });
   transport.connect();
 
@@ -216,6 +234,8 @@ describe('multiplayer delta state', () => {
   const transport = new TransportAdapter({
     socket: mockSocket,
     transportDataCallback,
+    game: ProcessGameConfig({}),
+    gameKey: {},
   });
   transport.connect();
 
@@ -243,7 +263,12 @@ describe('server option', () => {
 
   test('without protocol', () => {
     const server = hostname + ':' + port;
-    const m = new TransportAdapter({ server, transportDataCallback: () => {} });
+    const m = new TransportAdapter({
+      server,
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -255,6 +280,8 @@ describe('server option', () => {
     const m = new SocketIOTransport({
       server,
       transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
     });
     m.connect();
     expect((m.socket.io as any).uri).toEqual(server + '/default');
@@ -265,6 +292,8 @@ describe('server option', () => {
     const m = new TransportAdapter({
       server: serverWithProtocol,
       transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
     });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
@@ -277,6 +306,8 @@ describe('server option', () => {
     const m = new TransportAdapter({
       server: serverWithProtocol,
       transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
     });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
@@ -285,7 +316,11 @@ describe('server option', () => {
   });
 
   test('no server set', () => {
-    const m = new TransportAdapter({ transportDataCallback: () => {} });
+    const m = new TransportAdapter({
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     m.connect();
     expect(m.socket.io.engine.hostname).not.toEqual(hostname);
     expect(m.socket.io.engine.port).not.toEqual(port);

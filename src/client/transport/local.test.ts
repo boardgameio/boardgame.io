@@ -283,6 +283,8 @@ describe('LocalTransport', () => {
     const transport = new WrappedLocalTransport({
       master,
       transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
     });
     jest.spyOn(transport, 'requestSync');
 
