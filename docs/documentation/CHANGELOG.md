@@ -1,3 +1,14 @@
+### v0.49.1
+
+#### Features
+
+* [[7b151798](https://github.com/boardgameio/boardgame.io/commit/7b151798)] Expose `getFilterPlayerView` from `internal` package
+
+#### Bugfixes
+
+* [[20817aa3](https://github.com/boardgameio/boardgame.io/commit/20817aa3)] transport: More accurately type `TransportOpts`
+
+
 ## v0.49.0
 
 #### Features
