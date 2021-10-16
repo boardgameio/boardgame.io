@@ -217,17 +217,17 @@ describe('turn', () => {
     expect(onEnd).toHaveBeenCalled();
   });
 
-  test('onMove', () => {
+  describe('onMove', () => {
     const onMove = () => ({ A: true });
 
-    {
+    test('top level callback', () => {
       const flow = Flow({ turn: { onMove } });
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.processMove(state, makeMove('').payload);
       expect(state.G).toEqual({ A: true });
-    }
+    });
 
-    {
+    test('phase specific callback', () => {
       const flow = Flow({
         turn: { onMove },
         phases: { B: { turn: { onMove: () => ({ B: true }) } } },
@@ -238,7 +238,20 @@ describe('turn', () => {
       state = flow.processEvent(state, gameEvent('setPhase', 'B'));
       state = flow.processMove(state, makeMove('').payload);
       expect(state.G).toEqual({ B: true });
-    }
+    });
+
+    test('ctx with playerID', () => {
+      const playerID = 'playerID';
+      const flow = Flow({
+        turn: { onMove: (G, ctx) => ({ playerID: ctx.playerID }) },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.processMove(
+        state,
+        makeMove('', undefined, 'playerID').payload
+      );
+      expect(state.G.playerID).toEqual(playerID);
+    });
   });
 
   describe('minMoves', () => {
