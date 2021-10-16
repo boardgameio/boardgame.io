@@ -70,6 +70,11 @@ const createClientMatchData = (
   };
 };
 
+/** Utility extracting `string` from a query if it is `string[]`. */
+const unwrapQuery = (
+  query: undefined | string | string[]
+): string | undefined => (Array.isArray(query) ? query[0] : query);
+
 export const configureRouter = ({
   router,
   db,
@@ -140,11 +145,9 @@ export const configureRouter = ({
    */
   router.get('/games/:name', async (ctx) => {
     const gameName = ctx.params.name;
-    const {
-      isGameover: isGameoverString,
-      updatedBefore: updatedBeforeString,
-      updatedAfter: updatedAfterString,
-    } = ctx.query;
+    const isGameoverString = unwrapQuery(ctx.query.isGameover);
+    const updatedBeforeString = unwrapQuery(ctx.query.updatedBefore);
+    const updatedAfterString = unwrapQuery(ctx.query.updatedAfter);
 
     let isGameover: boolean | undefined;
     if (isGameoverString) {
