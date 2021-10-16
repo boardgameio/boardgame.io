@@ -1,3 +1,14 @@
+### v0.49.2
+
+#### Features
+
+* [[ff4c7564](https://github.com/boardgameio/boardgame.io/commit/ff4c7564)] core: Expose `ctx.playerID` in `onMove` hook ([#1019](https://github.com/boardgameio/boardgame.io/pull/1019))
+
+#### Bugfixes
+
+* [[fa7544f5](https://github.com/boardgameio/boardgame.io/commit/fa7544f5)] api: Update query string types and handle array queries
+* [[4813fa15](https://github.com/boardgameio/boardgame.io/commit/4813fa15), [0f6076b5](https://github.com/boardgameio/boardgame.io/commit/0f6076b5), [06b4172d](https://github.com/boardgameio/boardgame.io/commit/06b4172d), [54c0b4c0](https://github.com/boardgameio/boardgame.io/commit/54c0b4c0)] Update dependencies
+
 ### v0.49.1
 
 #### Features
