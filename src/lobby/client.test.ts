@@ -90,7 +90,9 @@ describe('LobbyClient', () => {
       (global as any).fetch = jest.fn(async () => ({
         ok: false,
         status: 404,
-        json: async () => ({ moreInformation: 'some helpful details' }),
+        clone: () => ({
+          json: async () => ({ moreInformation: 'some helpful details' }),
+        }),
       }));
 
       await expect(client.listGames()).rejects.toThrow(
@@ -289,7 +291,7 @@ describe('LobbyClient', () => {
           playerName: 'Bob',
         })
       ).rejects.toThrow(
-        'Expected body.playerID to be of type string, got “0”.'
+        'Expected body.playerID to be of type string|undefined, got “0”.'
       );
 
       await expect(
@@ -300,6 +302,11 @@ describe('LobbyClient', () => {
       ).rejects.toThrow(
         'Expected body.playerName to be of type string, got “undefined”.'
       );
+
+      // Allows requests that don’t specify `playerID`.
+      await expect(
+        client.joinMatch('tic-tac-toe', 'xyz', { playerName: 'Bob' })
+      ).resolves.not.toThrow();
     });
   });
 

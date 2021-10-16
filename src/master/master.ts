@@ -54,6 +54,9 @@ type CallbackFn = (arg: {
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
+/**
+ * Data types that are shared across `TransportData` and `IntermediateTransportData`.
+ */
 type CommonTransportData =
   | {
       type: 'sync';
@@ -68,6 +71,10 @@ type CommonTransportData =
       args: [string, ChatMessage];
     };
 
+/**
+ * Final shape of data sent by the transport API
+ * to be received by clients/client transports.
+ */
 export type TransportData =
   | {
       type: 'update';
@@ -79,6 +86,10 @@ export type TransportData =
     }
   | CommonTransportData;
 
+/**
+ * Data type sent by a master to its transport API. The transport then transforms
+ * this into `TransportData` for each individual player it forwards it to.
+ */
 export type IntermediateTransportData =
   | {
       type: 'update';
@@ -90,6 +101,7 @@ export type IntermediateTransportData =
     }
   | CommonTransportData;
 
+/** API used by a master to emit data to any connected clients/client transports. */
 export interface TransportAPI {
   send: (
     playerData: { playerID: PlayerID } & IntermediateTransportData

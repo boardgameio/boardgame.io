@@ -743,7 +743,10 @@ export function Flow({
     }
 
     const phaseConfig = GetPhase(ctx);
-    const G = phaseConfig.turn.wrapped.onMove(state);
+    const G = phaseConfig.turn.wrapped.onMove({
+      ...state,
+      ctx: { ...ctx, playerID },
+    });
     state = { ...state, G };
 
     const events = [{ fn: OnMove }];

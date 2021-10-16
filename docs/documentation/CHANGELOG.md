@@ -1,3 +1,49 @@
+### v0.49.2
+
+#### Features
+
+* [[ff4c7564](https://github.com/boardgameio/boardgame.io/commit/ff4c7564)] core: Expose `ctx.playerID` in `onMove` hook ([#1019](https://github.com/boardgameio/boardgame.io/pull/1019))
+
+#### Bugfixes
+
+* [[fa7544f5](https://github.com/boardgameio/boardgame.io/commit/fa7544f5)] api: Update query string types and handle array queries
+* [[4813fa15](https://github.com/boardgameio/boardgame.io/commit/4813fa15), [0f6076b5](https://github.com/boardgameio/boardgame.io/commit/0f6076b5), [06b4172d](https://github.com/boardgameio/boardgame.io/commit/06b4172d), [54c0b4c0](https://github.com/boardgameio/boardgame.io/commit/54c0b4c0)] Update dependencies
+
+### v0.49.1
+
+#### Features
+
+* [[7b151798](https://github.com/boardgameio/boardgame.io/commit/7b151798)] Expose `getFilterPlayerView` from `internal` package
+
+#### Bugfixes
+
+* [[20817aa3](https://github.com/boardgameio/boardgame.io/commit/20817aa3)] transport: More accurately type `TransportOpts`
+
+
+## v0.49.0
+
+#### Features
+
+* [[604d12e6](https://github.com/boardgameio/boardgame.io/commit/604d12e6)] lobby: use first available `playerID` when joining a match ([#1013](https://github.com/boardgameio/boardgame.io/pull/1013))
+* [[510a082a](https://github.com/boardgameio/boardgame.io/commit/510a082a)] transport: Consolidate transport interface ([#1002](https://github.com/boardgameio/boardgame.io/pull/1002))
+* [[d30d5776](https://github.com/boardgameio/boardgame.io/commit/d30d5776)] Expose `createMatch` utility
+
+#### Bugfixes
+
+* [[ca94f3a5](https://github.com/boardgameio/boardgame.io/commit/ca94f3a5)] lobby: Prevent error accessing fetch response twice ([#1005](https://github.com/boardgameio/boardgame.io/pull/1005))
+
+
+## v0.48.0
+
+#### Features
+
+* [[4165d45d](https://github.com/boardgameio/boardgame.io/commit/4165d45d)] Deprecate `moveLimit` in favour of `minMoves`/`maxMoves` ([#985](https://github.com/boardgameio/boardgame.io/pull/985))
+
+    Migration:
+    
+    - Replace `turn.moveLimit` with both `turn.minMoves` and `turn.maxMoves`.
+    - Replace `moveLimit` in `setStage` and `setActivePlayers` with `maxMoves`.
+
 ### v0.47.10
 
 #### Bugfixes

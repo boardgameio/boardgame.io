@@ -6,16 +6,13 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { createStore } from 'redux';
 import { LocalTransport, LocalMaster, Local, GetBotPlayer } from './local';
-import { makeMove, gameEvent } from '../../core/action-creators';
-import { CreateGameReducer } from '../../core/reducer';
+import { gameEvent } from '../../core/action-creators';
 import { ProcessGameConfig } from '../../core/game';
-import { InitializeGame } from '../../core/initialize';
 import { Client } from '../client';
 import { RandomBot } from '../../ai/random-bot';
 import { Stage } from '../../core/turn-order';
-import type { ChatMessage, Game, State, Store, SyncInfo } from '../../types';
+import type { Game, State } from '../../types';
 
 const sleep = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -132,8 +129,16 @@ describe('Local', () => {
   test('transports for same game use shared master', () => {
     const gameKey = {};
     const game = ProcessGameConfig(gameKey);
-    const transport1 = Local()({ game, gameKey });
-    const transport2 = Local()({ game, gameKey });
+    const transport1 = Local()({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
+    const transport2 = Local()({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
     expect(transport1.master).toBe(transport2.master);
   });
 
@@ -141,16 +146,32 @@ describe('Local', () => {
     const gameKey = {};
     const game = ProcessGameConfig(gameKey);
     const bots = {};
-    const transport1 = Local({ bots })({ game, gameKey });
-    const transport2 = Local({ bots })({ game, gameKey });
+    const transport1 = Local({ bots })({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
+    const transport2 = Local({ bots })({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
     expect(transport1.master).toBe(transport2.master);
   });
 
   test('transports use different master for different bots', () => {
     const gameKey = {};
     const game = ProcessGameConfig(gameKey);
-    const transport1 = Local({ bots: {} })({ game, gameKey });
-    const transport2 = Local({ bots: {} })({ game, gameKey });
+    const transport1 = Local({ bots: {} })({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
+    const transport2 = Local({ bots: {} })({
+      game,
+      gameKey,
+      transportDataCallback: () => {},
+    });
     expect(transport1.master).not.toBe(transport2.master);
   });
 
@@ -204,69 +225,43 @@ describe('Local', () => {
 });
 
 describe('LocalMaster', () => {
-  const game: Game = {};
-  const master = new LocalMaster({ game });
-
-  const storeA = {
-    dispatch: jest.fn(),
-    getState: () => ({ _stateID: 0 }),
-  } as unknown as Store;
-  const storeB = {
-    dispatch: jest.fn(),
-    getState: () => ({ _stateID: 0 }),
-  } as unknown as Store;
-
-  const localA = new LocalTransport({ master, store: storeA, playerID: '0' });
-  const localB = new LocalTransport({ master, store: storeB, playerID: '1' });
+  let master: LocalMaster;
+  let player0Callback: jest.Mock;
+  let player1Callback: jest.Mock;
 
   beforeEach(() => {
-    storeA.dispatch = jest.fn();
-    storeB.dispatch = jest.fn();
+    master = new LocalMaster({ game: {} });
+    player0Callback = jest.fn();
+    player1Callback = jest.fn();
+    master.connect('0', player0Callback);
+    master.connect('1', player1Callback);
+    master.onSync('matchID', '0');
+    master.onSync('matchID', '1');
   });
 
-  test('connect', () => {
-    localA.connect();
-    localB.connect();
-    localA.subscribe();
-
-    expect(storeA.dispatch).toBeCalledWith(
-      expect.objectContaining({
-        type: 'SYNC',
-      })
+  test('sync', () => {
+    expect(player0Callback).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'sync' })
     );
-    expect(storeB.dispatch).toBeCalledWith(
-      expect.objectContaining({
-        type: 'SYNC',
-      })
+    expect(player1Callback).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'sync' })
     );
   });
 
   test('update', () => {
-    localA.onAction({ _stateID: 0 } as unknown as State, gameEvent('endTurn'));
-
-    expect(storeA.dispatch).toBeCalledWith(
-      expect.objectContaining({
-        type: 'UPDATE',
-      })
+    master.onUpdate(gameEvent('endTurn'), 0, 'matchID', '0');
+    expect(player0Callback).toBeCalledWith(
+      expect.objectContaining({ type: 'update' })
     );
-    expect(storeB.dispatch).toBeCalledWith(
-      expect.objectContaining({
-        type: 'UPDATE',
-      })
+    expect(player1Callback).toBeCalledWith(
+      expect.objectContaining({ type: 'update' })
     );
   });
 
   test('connect without callback', () => {
     expect(() => {
-      master.connect('matchID', '0', undefined);
+      master.connect('0', undefined);
       master.onSync('matchID', '0');
-    }).not.toThrow();
-  });
-
-  test('disconnect', () => {
-    expect(() => {
-      localA.disconnect();
-      localB.disconnect();
     }).not.toThrow();
   });
 });
@@ -277,7 +272,6 @@ describe('LocalTransport', () => {
       connect: jest.fn(),
       onSync: jest.fn(),
     } as unknown as LocalMaster;
-    const store = { dispatch: () => {} } as unknown as Store;
     class WrappedLocalTransport extends LocalTransport {
       getMatchID() {
         return this.matchID;
@@ -286,94 +280,74 @@ describe('LocalTransport', () => {
         return this.playerID;
       }
     }
-    const m = new WrappedLocalTransport({ master, store });
+    const transport = new WrappedLocalTransport({
+      master,
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
+    jest.spyOn(transport, 'requestSync');
 
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
     test('matchID', () => {
-      m.updateMatchID('test');
-      expect(m.getMatchID()).toBe('test');
-      expect(master.connect).toBeCalled();
+      transport.updateMatchID('test');
+      expect(transport.getMatchID()).toBe('test');
+      expect(transport.requestSync).toBeCalled();
     });
 
     test('playerID', () => {
-      m.updatePlayerID('player');
-      expect(m.getPlayerID()).toBe('player');
+      transport.updatePlayerID('player');
+      expect(transport.getPlayerID()).toBe('player');
       expect(master.connect).toBeCalled();
     });
   });
 
   describe('multiplayer', () => {
-    const master = {
-      onSync: jest.fn(),
-      onUpdate: jest.fn(),
-      onChatMessage: jest.fn(),
-    } as unknown as LocalMaster;
-    class WrappedLocalTransport extends LocalTransport {
-      setStore(store: Store) {
-        this.store = store;
-      }
-    }
-    const m = new WrappedLocalTransport({ master });
-    const game: Game = {};
-    let store: Store | null = null;
+    const game: Game = {
+      setup: () => ({ initial: true }),
+      moves: {
+        A: () => ({ A: true }),
+      },
+    };
+    const multiplayer = Local();
+    const matchID = 'local-multiplayer';
+    const client1 = Client({ game, multiplayer, matchID, playerID: '0' });
+    const client2 = Client({ game, multiplayer, matchID, playerID: '1' });
 
-    beforeEach(() => {
-      const reducer = CreateGameReducer({ game });
-      const initialState = InitializeGame({ game });
-      store = createStore(reducer, initialState);
-      m.setStore(store);
+    beforeAll(() => {
+      client1.start();
+      client2.start();
     });
 
-    test('returns a valid store', () => {
-      expect(store).not.toBe(undefined);
+    afterAll(() => {
+      client1.stop();
+      client2.stop();
     });
 
-    test('receive update', () => {
-      const restored = { restore: true } as unknown as State;
-      expect(store.getState()).not.toMatchObject(restored);
-      m.onUpdate('unknown matchID', restored, []);
-      expect(store.getState()).not.toMatchObject(restored);
-      m.onUpdate('default', restored, []);
-      expect(store.getState()).not.toMatchObject(restored);
-
-      // Only if the stateID is not stale.
-      restored._stateID = 1;
-      m.onUpdate('default', restored, []);
-      expect(store.getState()).toMatchObject(restored);
+    test('send/receive update', () => {
+      expect(client1.getState().G).toStrictEqual({ initial: true });
+      expect(client2.getState().G).toStrictEqual({ initial: true });
+      client1.moves.A();
+      expect(client1.getState().G).toStrictEqual({ A: true });
+      expect(client2.getState().G).toStrictEqual({ A: true });
     });
 
     test('receive sync', () => {
-      const restored = { restore: true } as unknown as State;
-      expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('unknown matchID', { state: restored } as SyncInfo);
-      expect(store.getState()).not.toMatchObject(restored);
-      m.onSync('default', { state: restored } as SyncInfo);
-      expect(store.getState()).toMatchObject(restored);
-    });
-
-    test('send update', () => {
-      const action = makeMove('move');
-      const state = { _stateID: 0 } as unknown as State;
-      m.onAction(state, action);
-      expect(m.master.onUpdate).lastCalledWith(
-        action,
-        state._stateID,
-        'default',
-        null
-      );
+      const newClient = Client({ game, multiplayer, matchID });
+      newClient.start();
+      expect(newClient.getState().G).toStrictEqual({ A: true });
+      newClient.stop();
     });
 
     test('send chat-message', () => {
-      const msg: ChatMessage = {
-        id: '0',
-        sender: '0',
-        payload: { message: 'foo' },
-      };
-      m.onChatMessage('matchID', msg);
-      expect(m.master.onChatMessage).lastCalledWith('matchID', msg, undefined);
+      const payload = { message: 'foo' };
+      client1.sendChatMessage(payload);
+      expect(client2.chatMessages).toStrictEqual([
+        { id: expect.any(String), sender: '0', payload },
+      ]);
     });
   });
 });

@@ -8,7 +8,7 @@
 
 import request from 'supertest';
 import Koa from 'koa';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import * as dateMock from 'jest-date-mock';
 
 import { configureRouter, configureApp } from './api';
@@ -449,14 +449,64 @@ describe('.configureRouter', () => {
 
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
-            const app = createApiServer({ db, auth, games });
+            const app = createApiServer({
+              db,
+              auth: new Auth({ generateCredentials: () => credentials }),
+              games,
+              uuid: () => 'matchID',
+            });
             response = await request(app.callback())
               .post('/games/foo/1/join')
-              .send('playerName=1');
+              .send('playerName=alice');
           });
 
-          test('throws error 403', async () => {
-            expect(response.status).toEqual(403);
+          describe('numPlayers is reached in match', () => {
+            beforeEach(async () => {
+              db = new AsyncStorage({
+                fetch: async () => {
+                  return {
+                    metadata: {
+                      players: {
+                        '0': { name: 'alice' },
+                      },
+                    },
+                  };
+                },
+              });
+              const app = createApiServer({ db, auth, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/join')
+                .send('playerName=bob');
+            });
+
+            test('throws error 409', async () => {
+              expect(response.status).toEqual(409);
+            });
+          });
+
+          test('is successful', async () => {
+            expect(response.status).toEqual(200);
+          });
+
+          test('returns the player credentials', async () => {
+            expect(response.body.playerCredentials).toEqual(credentials);
+          });
+
+          test('returns the playerID', async () => {
+            expect(response.body.playerID).toEqual('0');
+          });
+
+          test('updates the player name', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({
+                players: expect.objectContaining({
+                  '0': expect.objectContaining({
+                    name: 'alice',
+                  }),
+                }),
+              })
+            );
           });
         });
 
@@ -1357,6 +1407,14 @@ describe('.configureRouter', () => {
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
+        test('uses first array value', async () => {
+          await request(app.callback()).get(
+            '/games/bar?isGameover=true&isGameover=false'
+          );
+          expect(dblistMatches).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: true } })
+          );
+        });
       });
 
       describe('updatedBefore query param', () => {
@@ -1387,6 +1445,18 @@ describe('.configureRouter', () => {
             expect.objectContaining({ where: { updatedBefore: undefined } })
           );
         });
+        test('uses first array value', async () => {
+          const t1 = new Date(2020, 3, 4, 5, 6, 7).getTime();
+          const t2 = new Date(2021, 3, 4, 5, 6, 7).getTime();
+          await request(app.callback()).get(
+            `/games/bar?updatedBefore=${t1}&updatedBefore=${t2}`
+          );
+          expect(dblistMatches).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedBefore: t1 }),
+            })
+          );
+        });
       });
 
       describe('updatedAfter query param', () => {
@@ -1415,6 +1485,18 @@ describe('.configureRouter', () => {
           await request(app.callback()).get('/games/bar?updatedAfter=-5');
           expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { updatedAfter: undefined } })
+          );
+        });
+        test('uses first array value', async () => {
+          const t1 = new Date(2020, 3, 4, 5, 6, 7).getTime();
+          const t2 = new Date(2021, 3, 4, 5, 6, 7).getTime();
+          await request(app.callback()).get(
+            `/games/bar?updatedAfter=${t1}&updatedAfter=${t2}`
+          );
+          expect(dblistMatches).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedAfter: t1 }),
+            })
           );
         });
       });

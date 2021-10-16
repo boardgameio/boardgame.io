@@ -420,6 +420,7 @@ export namespace LobbyAPI {
     matchID: string;
   }
   export interface JoinedMatch {
+    playerID: string;
     playerCredentials: string;
   }
   export interface NextMatch {
@@ -492,6 +493,7 @@ export namespace ActionPayload {
 export type FilteredMetadata = {
   id: number;
   name?: string;
+  isConnected?: boolean;
 }[];
 
 export interface SyncInfo {

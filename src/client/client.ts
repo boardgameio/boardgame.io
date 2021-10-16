@@ -23,6 +23,7 @@ import { PlayerView } from '../plugins/main';
 import type { Transport, TransportOpts } from './transport/transport';
 import { DummyTransport } from './transport/dummy';
 import { ClientManager } from './manager';
+import type { TransportData } from '../master/master';
 import type {
   ActivePlayersArg,
   ActionShape,
@@ -181,7 +182,7 @@ export class _ClientImpl<G extends any = any> {
   }: ClientOpts) {
     this.game = ProcessGameConfig(game);
     this.playerID = playerID;
-    this.matchID = matchID;
+    this.matchID = matchID || 'default';
     this.credentials = credentials;
     this.multiplayer = multiplayer;
     this.debugOpt = debug;
@@ -290,7 +291,7 @@ export class _ClientImpl<G extends any = any> {
           !('clientOnly' in action) &&
           action.type !== Actions.STRIP_TRANSIENTS
         ) {
-          this.transport.onAction(baseState, action);
+          this.transport.sendAction(baseState, action);
         }
 
         return result;
@@ -320,9 +321,9 @@ export class _ClientImpl<G extends any = any> {
 
     if (!multiplayer) multiplayer = DummyTransport;
     this.transport = multiplayer({
+      transportDataCallback: (data) => this.receiveTransportData(data),
       gameKey: game,
       game: this.game,
-      store: this.store,
       matchID,
       playerID,
       credentials,
@@ -332,23 +333,77 @@ export class _ClientImpl<G extends any = any> {
 
     this.createDispatchers();
 
-    this.transport.subscribeMatchData((metadata) => {
-      this.matchData = metadata;
-      this.notifySubscribers();
-    });
-
     this.chatMessages = [];
     this.sendChatMessage = (payload) => {
-      this.transport.onChatMessage(this.matchID, {
+      this.transport.sendChatMessage(this.matchID, {
         id: nanoid(7),
         sender: this.playerID,
         payload: payload,
       });
     };
-    this.transport.subscribeChatMessage((message) => {
-      this.chatMessages = [...this.chatMessages, message];
-      this.notifySubscribers();
-    });
+  }
+
+  /** Handle incoming match data from a multiplayer transport. */
+  private receiveMatchData(matchData: FilteredMetadata): void {
+    this.matchData = matchData;
+    this.notifySubscribers();
+  }
+
+  /** Handle an incoming chat message from a multiplayer transport. */
+  private receiveChatMessage(message: ChatMessage): void {
+    this.chatMessages = [...this.chatMessages, message];
+    this.notifySubscribers();
+  }
+
+  /** Handle all incoming updates from a multiplayer transport. */
+  private receiveTransportData(data: TransportData): void {
+    const [matchID] = data.args;
+    if (matchID !== this.matchID) return;
+    switch (data.type) {
+      case 'sync': {
+        const [, syncInfo] = data.args;
+        const action = ActionCreators.sync(syncInfo);
+        this.receiveMatchData(syncInfo.filteredMetadata);
+        this.store.dispatch(action);
+        break;
+      }
+      case 'update': {
+        const [, state, deltalog] = data.args;
+        const currentState = this.store.getState();
+        if (state._stateID >= currentState._stateID) {
+          const action = ActionCreators.update(state, deltalog);
+          this.store.dispatch(action);
+        }
+        break;
+      }
+      case 'patch': {
+        const [, prevStateID, stateID, patch, deltalog] = data.args;
+        const currentStateID = this.store.getState()._stateID;
+        if (prevStateID !== currentStateID) break;
+        const action = ActionCreators.patch(
+          prevStateID,
+          stateID,
+          patch,
+          deltalog
+        );
+        this.store.dispatch(action);
+        // Emit sync if patch apply failed.
+        if (this.store.getState()._stateID === currentStateID) {
+          this.transport.requestSync();
+        }
+        break;
+      }
+      case 'matchData': {
+        const [, matchData] = data.args;
+        this.receiveMatchData(matchData);
+        break;
+      }
+      case 'chat': {
+        const [, chatMessage] = data.args;
+        this.receiveChatMessage(chatMessage);
+        break;
+      }
+    }
   }
 
   private notifySubscribers() {
@@ -375,7 +430,7 @@ export class _ClientImpl<G extends any = any> {
   subscribe(fn: (state: ClientState<G>) => void) {
     const id = Object.keys(this.subscribers).length;
     this.subscribers[id] = fn;
-    this.transport.subscribe(() => this.notifySubscribers());
+    this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
     if (this._running || !this.multiplayer) {
       fn(this.getState());

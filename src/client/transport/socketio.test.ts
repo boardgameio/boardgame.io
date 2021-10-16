@@ -6,16 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { createStore } from 'redux';
 import { SocketIOTransport } from './socketio';
 import type * as ioNamespace from 'socket.io-client';
 import { makeMove } from '../../core/action-creators';
-import { CreateGameReducer } from '../../core/reducer';
-import { InitializeGame } from '../../core/initialize';
-import * as Actions from '../../core/action-types';
 import type { Master } from '../../master/master';
-import type { ChatMessage, State, Store } from '../../types';
-import { error } from '../../core/logger';
+import type { ChatMessage, State } from '../../types';
+import { ProcessGameConfig } from '../../core/game';
 
 jest.mock('../../core/logger', () => ({
   info: jest.fn(),
@@ -46,9 +42,13 @@ class MockSocket {
 }
 
 test('defaults', () => {
-  const m = new SocketIOTransport();
-  expect(typeof m.callback).toBe('function');
-  m.callback();
+  const m = new SocketIOTransport({
+    transportDataCallback: () => {},
+    game: ProcessGameConfig({}),
+    gameKey: {},
+  });
+  expect(typeof (m as any).connectionStatusCallback).toBe('function');
+  (m as any).connectionStatusCallback();
 });
 
 class TransportAdapter extends SocketIOTransport {
@@ -67,16 +67,16 @@ class TransportAdapter extends SocketIOTransport {
   getCredentials() {
     return this.credentials;
   }
-
-  setStore(store: Store | { dispatch: () => void }) {
-    this.store = store as Store;
-  }
 }
 
 describe('update matchID / playerID / credentials', () => {
   const socket = new MockSocket();
-  const m = new TransportAdapter({ socket });
-  m.setStore({ dispatch: () => {} });
+  const m = new TransportAdapter({
+    socket,
+    transportDataCallback: () => {},
+    game: ProcessGameConfig({}),
+    gameKey: {},
+  });
 
   beforeEach(() => (socket.emit = jest.fn()));
 
@@ -115,9 +115,12 @@ describe('connection status', () => {
       matchID: '0',
       playerID: '0',
       gameName: 'foo',
+      game: ProcessGameConfig({}),
+      gameKey: {},
       numPlayers: 2,
+      transportDataCallback: () => {},
     });
-    m.subscribe(onChangeMock);
+    m.subscribeToConnectionStatus(onChangeMock);
     m.connect();
   });
 
@@ -139,75 +142,74 @@ describe('connection status', () => {
     m.disconnect();
     expect(m.isConnected).toBe(false);
   });
+
+  test('doesn’t crash if syncing before connecting', () => {
+    const transportDataCallback = jest.fn();
+    const transport = new SocketIOTransport({
+      transportDataCallback,
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
+    transport.requestSync();
+    expect(transportDataCallback).not.toHaveBeenCalled();
+  });
 });
 
 describe('multiplayer', () => {
   const mockSocket = new MockSocket();
-  const m = new TransportAdapter({ socket: mockSocket });
-  m.connect();
-  const game = {};
-  let store = null;
-
-  beforeEach(() => {
-    const reducer = CreateGameReducer({ game });
-    const initialState = InitializeGame({ game });
-    store = createStore(reducer, initialState);
-    m.setStore(store);
+  const transportDataCallback = jest.fn();
+  const transport = new TransportAdapter({
+    socket: mockSocket,
+    transportDataCallback,
+    game: ProcessGameConfig({}),
+    gameKey: {},
   });
+  transport.connect();
 
-  test('returns a valid store', () => {
-    expect(store).not.toBe(undefined);
-  });
+  beforeEach(jest.clearAllMocks);
 
   test('receive update', () => {
     const restored: { restore: boolean; _stateID?: number } = { restore: true };
-    expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('update', 'unknown matchID', restored);
-    expect(store.getState()).not.toMatchObject(restored);
     mockSocket.receive('update', 'default', restored);
-    expect(store.getState()).not.toMatchObject(restored);
-
-    // Only if the stateID is not stale.
-    restored._stateID = 1;
-    mockSocket.receive('update', 'default', restored);
-    expect(store.getState()).toMatchObject(restored);
+    expect(transportDataCallback).toHaveBeenCalledWith({
+      type: 'update',
+      args: ['default', restored, undefined],
+    });
   });
 
   test('receive sync', () => {
     const restored = { restore: true };
-    expect(store.getState()).not.toMatchObject(restored);
-    mockSocket.receive('sync', 'unknown matchID', { state: restored });
-    expect(store.getState()).not.toMatchObject(restored);
     mockSocket.receive('sync', 'default', { state: restored });
-    expect(store.getState()).toMatchObject(restored);
+    expect(transportDataCallback).toHaveBeenCalledWith({
+      type: 'sync',
+      args: ['default', { state: restored }],
+    });
   });
 
   test('receive matchData', () => {
-    let receivedMatchData: any;
-    m.subscribeMatchData((data) => (receivedMatchData = data));
     const matchData = [{ id: '0', name: 'Alice' }];
-    mockSocket.receive('matchData', 'unknown matchID', matchData);
-    expect(receivedMatchData).toBe(undefined);
     mockSocket.receive('matchData', 'default', matchData);
-    expect(receivedMatchData).toMatchObject(matchData);
+    expect(transportDataCallback).toHaveBeenCalledWith({
+      type: 'matchData',
+      args: ['default', matchData],
+    });
   });
 
   test('send update', () => {
     const action = makeMove(undefined, undefined, undefined);
     const state = { _stateID: 0 } as State;
-    m.onAction(state, action);
+    transport.sendAction(state, action);
     const args: UpdateArgs = [action, state._stateID, 'default', null];
     expect(mockSocket.emit).lastCalledWith('update', ...args);
   });
 
   test('receive chat-message', () => {
-    let receivedChatData;
-    m.subscribeChatMessage((data) => (receivedChatData = data));
     const chatData = { message: 'foo' };
-    mockSocket.receive('chat', 'unknown matchID', chatData);
-    expect(receivedChatData).toBe(undefined);
     mockSocket.receive('chat', 'default', chatData);
-    expect(receivedChatData).toMatchObject(receivedChatData);
+    expect(transportDataCallback).toHaveBeenCalledWith({
+      type: 'chat',
+      args: ['default', chatData],
+    });
   });
 
   test('send chat-message', () => {
@@ -216,68 +218,42 @@ describe('multiplayer', () => {
       sender: '0',
       payload: { message: 'foo' },
     };
-    m.onChatMessage('matchID', message);
+    transport.sendChatMessage('matchID', message);
     expect(mockSocket.emit).lastCalledWith(
       'chat',
       'matchID',
       message,
-      m.getCredentials()
+      transport.getCredentials()
     );
   });
 });
 
 describe('multiplayer delta state', () => {
   const mockSocket = new MockSocket();
-  const m = new TransportAdapter({ socket: mockSocket });
-  m.connect();
-  const game = { deltaState: true };
-  let store = null;
-
-  beforeEach(() => {
-    const reducer = CreateGameReducer({ game });
-    const initialState = InitializeGame({ game });
-    store = createStore(reducer, initialState);
-    m.setStore(store);
+  const transportDataCallback = jest.fn();
+  const transport = new TransportAdapter({
+    socket: mockSocket,
+    transportDataCallback,
+    game: ProcessGameConfig({}),
+    gameKey: {},
   });
+  transport.connect();
 
-  test('returns a valid store', () => {
-    expect(store).not.toBe(undefined);
-  });
+  beforeEach(jest.clearAllMocks);
 
   test('receive patch', () => {
-    const originalState = JSON.parse(JSON.stringify(store.getState()));
-    mockSocket.receive(
-      'patch',
-      'unknown matchID',
-      0,
-      1,
-      [{ op: 'replace', path: '/_stateID', value: 1 }],
-      []
-    );
-    expect(store.getState()).toMatchObject(originalState);
-    mockSocket.receive(
-      'patch',
+    const patch1 = [
       'default',
       0,
       1,
       [{ op: 'replace', path: '/_stateID', value: 1 }],
-      []
-    );
-    expect(store.getState()._stateID).toBe(1);
-    mockSocket.receive(
-      'patch',
-      'default',
-      1,
-      2,
-      [{ op: 'replace', path: '/_stateIDD', value: 3 }],
-      []
-    );
-    expect(store.getState()._stateID).toBe(1);
-    const args: SyncArgs = ['default', null, undefined, 2];
-    expect(mockSocket.emit).lastCalledWith('sync', ...args);
-    expect(error).lastCalledWith(
-      'Patch [{"op":"replace","path":"/_stateIDD","value":3}] apply failed'
-    );
+      [],
+    ];
+    mockSocket.receive('patch', ...patch1);
+    expect(transportDataCallback).toHaveBeenCalledWith({
+      type: 'patch',
+      args: patch1,
+    });
   });
 });
 
@@ -287,7 +263,12 @@ describe('server option', () => {
 
   test('without protocol', () => {
     const server = hostname + ':' + port;
-    const m = new TransportAdapter({ server });
+    const m = new TransportAdapter({
+      server,
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -296,14 +277,24 @@ describe('server option', () => {
 
   test('without trailing slash', () => {
     const server = 'http://' + hostname + ':' + port;
-    const m = new SocketIOTransport({ server });
+    const m = new SocketIOTransport({
+      server,
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     m.connect();
     expect((m.socket.io as any).uri).toEqual(server + '/default');
   });
 
   test('https', () => {
     const serverWithProtocol = 'https://' + hostname + ':' + port + '/';
-    const m = new TransportAdapter({ server: serverWithProtocol });
+    const m = new TransportAdapter({
+      server: serverWithProtocol,
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -312,7 +303,12 @@ describe('server option', () => {
 
   test('http', () => {
     const serverWithProtocol = 'http://' + hostname + ':' + port + '/';
-    const m = new TransportAdapter({ server: serverWithProtocol });
+    const m = new TransportAdapter({
+      server: serverWithProtocol,
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     m.connect();
     expect(m.socket.io.engine.hostname).toEqual(hostname);
     expect(m.socket.io.engine.port).toEqual(port);
@@ -320,60 +316,13 @@ describe('server option', () => {
   });
 
   test('no server set', () => {
-    const m = new TransportAdapter();
+    const m = new TransportAdapter({
+      transportDataCallback: () => {},
+      game: ProcessGameConfig({}),
+      gameKey: {},
+    });
     m.connect();
     expect(m.socket.io.engine.hostname).not.toEqual(hostname);
     expect(m.socket.io.engine.port).not.toEqual(port);
   });
-});
-
-test('changing a matchID resets the state before resync', () => {
-  const m = new TransportAdapter();
-  const game = {};
-  const store = createStore(CreateGameReducer({ game }));
-  m.setStore(store);
-  const dispatchSpy = jest.spyOn(store, 'dispatch');
-
-  m.updateMatchID('foo');
-
-  expect(dispatchSpy).toHaveBeenCalledWith(
-    expect.objectContaining({
-      type: Actions.RESET,
-      clientOnly: true,
-    })
-  );
-});
-
-test('changing a playerID resets the state before resync', () => {
-  const m = new TransportAdapter();
-  const game = {};
-  const store = createStore(CreateGameReducer({ game }));
-  m.setStore(store);
-  const dispatchSpy = jest.spyOn(store, 'dispatch');
-
-  m.updatePlayerID('foo');
-
-  expect(dispatchSpy).toHaveBeenCalledWith(
-    expect.objectContaining({
-      type: Actions.RESET,
-      clientOnly: true,
-    })
-  );
-});
-
-test('changing credentials resets the state before resync', () => {
-  const m = new TransportAdapter();
-  const game = {};
-  const store = createStore(CreateGameReducer({ game }));
-  m.setStore(store);
-  const dispatchSpy = jest.spyOn(store, 'dispatch');
-
-  m.updateCredentials('foo');
-
-  expect(dispatchSpy).toHaveBeenCalledWith(
-    expect.objectContaining({
-      type: Actions.RESET,
-      clientOnly: true,
-    })
-  );
 });
