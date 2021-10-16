@@ -1407,6 +1407,14 @@ describe('.configureRouter', () => {
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
+        test('uses first array value', async () => {
+          await request(app.callback()).get(
+            '/games/bar?isGameover=true&isGameover=false'
+          );
+          expect(dblistMatches).toBeCalledWith(
+            expect.objectContaining({ where: { isGameover: true } })
+          );
+        });
       });
 
       describe('updatedBefore query param', () => {
@@ -1437,6 +1445,18 @@ describe('.configureRouter', () => {
             expect.objectContaining({ where: { updatedBefore: undefined } })
           );
         });
+        test('uses first array value', async () => {
+          const t1 = new Date(2020, 3, 4, 5, 6, 7).getTime();
+          const t2 = new Date(2021, 3, 4, 5, 6, 7).getTime();
+          await request(app.callback()).get(
+            `/games/bar?updatedBefore=${t1}&updatedBefore=${t2}`
+          );
+          expect(dblistMatches).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedBefore: t1 }),
+            })
+          );
+        });
       });
 
       describe('updatedAfter query param', () => {
@@ -1465,6 +1485,18 @@ describe('.configureRouter', () => {
           await request(app.callback()).get('/games/bar?updatedAfter=-5');
           expect(dblistMatches).toBeCalledWith(
             expect.objectContaining({ where: { updatedAfter: undefined } })
+          );
+        });
+        test('uses first array value', async () => {
+          const t1 = new Date(2020, 3, 4, 5, 6, 7).getTime();
+          const t2 = new Date(2021, 3, 4, 5, 6, 7).getTime();
+          await request(app.callback()).get(
+            `/games/bar?updatedAfter=${t1}&updatedAfter=${t2}`
+          );
+          expect(dblistMatches).toBeCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({ updatedAfter: t1 }),
+            })
           );
         });
       });
