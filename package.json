@@ -150,7 +150,7 @@
     "@types/koa-router": "^7.4.0",
     "flatted": "^3.2.1",
     "immer": "^9.0.5",
-    "koa": "^2.7.0",
+    "koa": "^2.13.3",
     "koa-body": "^4.1.0",
     "koa-router": "^7.2.1",
     "koa-socket-2": "^2.0.0",
