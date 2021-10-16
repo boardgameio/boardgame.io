@@ -239,6 +239,19 @@ describe('turn', () => {
       state = flow.processMove(state, makeMove('').payload);
       expect(state.G).toEqual({ B: true });
     });
+
+    test('ctx with playerID', () => {
+      const playerID = 'playerID';
+      const flow = Flow({
+        turn: { onMove: (G, ctx) => ({ playerID: ctx.playerID }) },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.processMove(
+        state,
+        makeMove('', undefined, 'playerID').payload
+      );
+      expect(state.G.playerID).toEqual(playerID);
+    });
   });
 
   describe('minMoves', () => {
