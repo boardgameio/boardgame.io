@@ -7,7 +7,7 @@
  */
 
 import type Koa from 'koa';
-import type Router from 'koa-router';
+import type Router from '@koa/router';
 import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';

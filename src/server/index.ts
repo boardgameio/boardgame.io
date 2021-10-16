@@ -7,7 +7,7 @@
  */
 
 import Koa from 'koa';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import type IOTypes from 'socket.io';
 
 import { configureRouter, configureApp } from './api';

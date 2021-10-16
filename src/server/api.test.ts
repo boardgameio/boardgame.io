@@ -8,7 +8,7 @@
 
 import request from 'supertest';
 import Koa from 'koa';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import * as dateMock from 'jest-date-mock';
 
 import { configureRouter, configureApp } from './api';
