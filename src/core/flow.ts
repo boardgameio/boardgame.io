@@ -84,12 +84,13 @@ export function Flow({
     hookType: GameMethod
   ) => {
     const withPlugins = plugin.FnWrap(hook, hookType, plugins);
-    return (state: State) => {
+    return (state: State & { playerID?: PlayerID }) => {
       const pluginAPIs = plugin.GetAPIs(state);
       return withPlugins({
         ...pluginAPIs,
         G: state.G,
         ctx: state.ctx,
+        playerID: state.playerID,
       });
     };
   };
@@ -743,10 +744,7 @@ export function Flow({
     }
 
     const phaseConfig = GetPhase(ctx);
-    const G = phaseConfig.turn.wrapped.onMove({
-      ...state,
-      ctx: { ...ctx, playerID },
-    });
+    const G = phaseConfig.turn.wrapped.onMove({ ...state, playerID });
     state = { ...state, G };
 
     const events = [{ fn: OnMove }];

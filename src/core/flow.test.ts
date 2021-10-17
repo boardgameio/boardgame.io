@@ -243,7 +243,7 @@ describe('turn', () => {
     test('ctx with playerID', () => {
       const playerID = 'playerID';
       const flow = Flow({
-        turn: { onMove: (G, ctx) => ({ playerID: ctx.playerID }) },
+        turn: { onMove: ({ playerID }) => ({ playerID }) },
       });
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.processMove(

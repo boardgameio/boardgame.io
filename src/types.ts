@@ -286,14 +286,16 @@ export interface TurnConfig<
   endIf?: (
     context: FnContext<G, PluginAPIs>
   ) => boolean | void | { next: PlayerID };
-  onMove?: (context: FnContext<G, PluginAPIs>) => void | G;
+  onMove?: (
+    context: FnContext<G, PluginAPIs> & { playerID: PlayerID }
+  ) => void | G;
   stages?: StageMap<G, PluginAPIs>;
   order?: TurnOrderConfig<G, PluginAPIs>;
   wrapped?: {
     endIf?: (state: State<G>) => boolean | void | { next: PlayerID };
     onBegin?: (state: State<G>) => void | G;
     onEnd?: (state: State<G>) => void | G;
-    onMove?: (state: State<G>) => void | G;
+    onMove?: (state: State<G> & { playerID: PlayerID }) => void | G;
   };
 }
 
