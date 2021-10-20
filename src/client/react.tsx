@@ -31,6 +31,7 @@ type ExposedClientProps<G extends any = any> = Pick<
   | 'matchID'
   | 'matchData'
   | 'sendChatMessage'
+  | 'chatMessages'
 >;
 
 export type BoardProps<G extends any = any> = ClientState<G> &
