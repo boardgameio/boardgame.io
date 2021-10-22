@@ -286,7 +286,7 @@ export class Master {
     const { deltalog, ...stateWithoutDeltalog } = state;
 
     let newMetadata: Server.MatchData | undefined;
-    if (metadata && !('gameover' in metadata)) {
+    if (metadata && metadata.gameover === undefined) {
       newMetadata = {
         ...metadata,
         updatedAt: Date.now(),
