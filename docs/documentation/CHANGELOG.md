@@ -1,3 +1,11 @@
+### v0.49.3
+
+#### Bugfixes
+
+* [[220823bb](https://github.com/boardgameio/boardgame.io/commit/220823bb)] Update gameover metadata when `undefined` ([#1023](https://github.com/boardgameio/boardgame.io/pull/1023))
+* [[df6b7c40](https://github.com/boardgameio/boardgame.io/commit/df6b7c40)] include `chatMessages` property in React client types ([#1022](https://github.com/boardgameio/boardgame.io/pull/1022))
+
+
 ### v0.49.2
 
 #### Features
