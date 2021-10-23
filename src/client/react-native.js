@@ -29,6 +29,14 @@ import { Client as RawClient } from './client';
  */
 export function Client(opts) {
   const { game, numPlayers, board, multiplayer, enhancer } = opts;
+  let { loading } = opts;
+
+  // Component that is displayed before the client has synced
+  // with the game master.
+  if (loading === undefined) {
+    const Loading = () => <></>;
+    loading = Loading;
+  }
 
   /*
    * WrappedBoard
@@ -96,6 +104,11 @@ export function Client(opts) {
       let _board = null;
 
       const state = this.client.getState();
+
+      if (state === null) {
+        return React.createElement(loading);
+      }
+
       const { matchID, playerID, ...rest } = this.props;
 
       if (board) {

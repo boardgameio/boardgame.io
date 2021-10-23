@@ -73,7 +73,8 @@ export function Client<
   P extends BoardProps<G> = BoardProps<G>,
   ContextWithPlugins extends Ctx = Ctx
 >(opts: ReactClientOpts<G, P, ContextWithPlugins>) {
-  let { game, numPlayers, loading, board, multiplayer, enhancer, debug } = opts;
+  const { game, numPlayers, board, multiplayer, enhancer } = opts;
+  let { loading, debug } = opts;
 
   // Component that is displayed before the client has synced
   // with the game master.
