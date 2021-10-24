@@ -72,7 +72,8 @@ export function Client<
   P extends BoardProps<G> = BoardProps<G>,
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 >(opts: ReactClientOpts<G, P, PluginAPIs>) {
-  let { game, numPlayers, loading, board, multiplayer, enhancer, debug } = opts;
+  const { game, numPlayers, board, multiplayer, enhancer } = opts;
+  let { loading, debug } = opts;
 
   // Component that is displayed before the client has synced
   // with the game master.
