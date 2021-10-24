@@ -36,6 +36,24 @@ test('board is rendered', () => {
   game.unmount();
 });
 
+test('board is rendered with custom loading', () => {
+  const Loading = () => <></>;
+
+  const Board = Client({
+    game: {},
+    board: TestBoard,
+    loading: Loading,
+  });
+
+  const game = Enzyme.mount(<Board />);
+  const board = game.find(TestBoard);
+
+  expect(board.props().isActive).toBe(true);
+  expect(board.text()).toBe('Board');
+
+  game.unmount();
+});
+
 test('board props', () => {
   const Board = Client({
     game: {},
