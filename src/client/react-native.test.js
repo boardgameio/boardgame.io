@@ -12,6 +12,18 @@ import { Client } from './react-native';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { Local } from './transport/local';
+import { Transport } from './transport/transport';
+
+class NoConnectionTransport extends Transport {
+  connect() {}
+  disconnect() {}
+  sendAction() {}
+  sendChatMessage() {}
+  requestSync() {}
+  updateMatchID() {}
+  updatePlayerID() {}
+  updateCredentials() {}
+}
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -32,6 +44,25 @@ test('board is rendered', () => {
 
   expect(board.props().isActive).toBe(true);
   expect(board.text()).toBe('Board');
+
+  game.unmount();
+});
+
+test('board is rendered with custom loading', () => {
+  const Loading = () => <>connecting...</>;
+
+  const Board = Client({
+    game: {},
+    board: TestBoard,
+    loading: Loading,
+    multiplayer: (opts) => new NoConnectionTransport(opts),
+  });
+
+  const game = Enzyme.mount(<Board />);
+  const loadingComponent = game.find(Loading);
+
+  expect(loadingComponent.props()).toEqual({});
+  expect(loadingComponent.text()).toBe('connecting...');
 
   game.unmount();
 });
