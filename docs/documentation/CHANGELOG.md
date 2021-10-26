@@ -1,3 +1,14 @@
+### v0.49.4
+
+#### Features
+
+* [[94472c0a](https://github.com/boardgameio/boardgame.io/commit/94472c0a)] react-native: handle multiplayer loading state in client ([#1026](https://github.com/boardgameio/boardgame.io/pull/1026))
+
+#### Bugfixes
+
+* [[43019562](https://github.com/boardgameio/boardgame.io/commit/43019562)] Update gameover metadata when `null` ([#1025](https://github.com/boardgameio/boardgame.io/pull/1025))
+
+
 ### v0.49.3
 
 #### Bugfixes
