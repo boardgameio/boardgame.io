@@ -421,6 +421,28 @@ describe('update', () => {
     expect(metadata.gameover).toEqual(gameOverArg);
   });
 
+  test('writes gameover to metadata with null gameover', async () => {
+    const id = 'gameWithMetadataNullGameover';
+    const db = new InMemory();
+    const dbMetadata = {
+      gameName: 'tic-tac-toe',
+      gameover: null,
+      setupData: {},
+      players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    const masterWithMetadata = new Master(game, db, TransportAPI(send));
+    await masterWithMetadata.onSync(id, '0', undefined, 2);
+    db.setMetadata(id, dbMetadata);
+
+    const gameOverArg = 'gameOverArg';
+    const event = ActionCreators.gameEvent('endGame', gameOverArg);
+    await masterWithMetadata.onUpdate(event, 0, id, '0');
+    const { metadata } = db.fetch(id, { metadata: true });
+    expect(metadata.gameover).toEqual(gameOverArg);
+  });
+
   test('writes gameover to metadata with async storage API', async () => {
     const id = 'gameWithMetadata';
     const db = new InMemoryAsync();
