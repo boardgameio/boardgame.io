@@ -260,3 +260,12 @@ A 1-4 player dice game played locally.
 [c22]: https://github.com/pjohannessen/yatzy
 [t22]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
 [b22]: https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
+
+
+#### [![GitHub stars][b25]][c25] [Santorini][p25] \[[code][c25]\]
+&nbsp;&nbsp;
+Multiplayer online boardgame with 3D board using Babylon.js.
+
+[p25]: https://santorini.herokuapp.com/
+[c25]: https://github.com/mbrinkl/santorini
+[b25]: https://img.shields.io/github/stars/mbrinkl/santorini?label=%E2%98%85&logo=github
