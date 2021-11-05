@@ -1,3 +1,10 @@
+### v0.49.5
+
+#### Bugfixes
+
+* [[279a822f](https://github.com/boardgameio/boardgame.io/commit/279a822f)] flow: Pass correct `ctx` to `onMove` hooks
+
+
 ### v0.49.4
 
 #### Features
