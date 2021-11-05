@@ -101,7 +101,6 @@
     "@typescript-eslint/parser": "^4.29.3",
     "babel-plugin-module-resolver": "^4.1.0",
     "benchmark": "^2.1.4",
-    "bundlewatch": "^0.3.2",
     "cross-env": "^7.0.3",
     "docsify-cli": "^4.4.3",
     "enzyme": "^3.11.0",
@@ -200,19 +199,6 @@
       "integration/",
       "node_modules/",
       ".npm/"
-    ]
-  },
-  "bundlewatch": {
-    "files": [
-      {
-        "path": "dist/*.js",
-        "maxSize": "100kB"
-      },
-      {
-        "path": "dist/esm/*.js",
-        "maxSize": "200kB",
-        "compression": "none"
-      }
     ]
   },
   "husky": {
