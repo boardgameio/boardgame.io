@@ -25,7 +25,7 @@ const IS_MAJOR = /^v?(0\.\d+\.0|\d+.0.0)$/.test(CURRENT_TAG);
 const FILE = tempy.file();
 
 /** Tests for a `feat` commit type. */
-const isFeature = (s) => /feat(\(\w+\))?:/.test(s);
+const isFeature = (s) => /feat(\([^)]+\))?:/.test(s);
 /** Tests for commit types that don’t need adding to the CHANGELOG (like `docs` or `chore`). */
 const isUninformative = (s) =>
   /(test|style|chore|docs|ci)(\([\w-]+\))?:/.test(s);
@@ -48,7 +48,7 @@ const formatChanges = (changes) =>
         // Strip standalone commit types ('feat:', 'fix:', etc.)
         .replace(/[a-z]+: /, '')
         // Format scoped commit types ('feat(foo):' => 'foo:', etc.)
-        .replace(/[a-z]+\((\w+)\)/, '$1')
+        .replace(/[a-z]+\(([^)]+)\)/, '$1')
         // Linkify commit refs.
         .replace(
           /^(\w+)/,

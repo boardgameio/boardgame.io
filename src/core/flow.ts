@@ -719,13 +719,12 @@ export function Flow({
 
   function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
     const { playerID, type } = action;
-    const { ctx } = state;
-    const { currentPlayer, activePlayers, _activePlayersMaxMoves } = ctx;
-    const move = GetMove(ctx, type, playerID);
+    const { currentPlayer, activePlayers, _activePlayersMaxMoves } = state.ctx;
+    const move = GetMove(state.ctx, type, playerID);
     const shouldCount =
       !move || typeof move === 'function' || move.noLimit !== true;
 
-    let { numMoves, _activePlayersNumMoves } = ctx;
+    let { numMoves, _activePlayersNumMoves } = state.ctx;
     if (shouldCount) {
       if (playerID === currentPlayer) numMoves++;
       if (activePlayers) _activePlayersNumMoves[playerID]++;
@@ -733,7 +732,11 @@ export function Flow({
 
     state = {
       ...state,
-      ctx: { ...ctx, numMoves, _activePlayersNumMoves },
+      ctx: {
+        ...state.ctx,
+        numMoves,
+        _activePlayersNumMoves,
+      },
     };
 
     if (
@@ -743,7 +746,7 @@ export function Flow({
       state = EndStage(state, { playerID, automatic: true });
     }
 
-    const phaseConfig = GetPhase(ctx);
+    const phaseConfig = GetPhase(state.ctx);
     const G = phaseConfig.turn.wrapped.onMove({ ...state, playerID });
     state = { ...state, G };
 
