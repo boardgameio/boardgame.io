@@ -1,3 +1,10 @@
+### v0.49.6
+
+#### Bugfixes
+
+* [[cf6ade54](https://github.com/boardgameio/boardgame.io/commit/cf6ade54)] Add `ctx` type parameter to client ([#1035](https://github.com/boardgameio/boardgame.io/pull/1035))
+
+
 ### v0.49.5
 
 #### Bugfixes
