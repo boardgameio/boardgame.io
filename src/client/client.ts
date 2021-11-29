@@ -137,7 +137,10 @@ export type ClientState<G extends any = any> =
 /**
  * Implementation of Client (see below).
  */
-export class _ClientImpl<G extends any = any> {
+export class _ClientImpl<
+  G extends any = any,
+  CtxWithPlugins extends Ctx = Ctx
+> {
   private gameStateOverride?: any;
   private initialState: State<G>;
   readonly multiplayer: (opts: TransportOpts) => Transport;
@@ -180,7 +183,7 @@ export class _ClientImpl<G extends any = any> {
     playerID,
     credentials,
     enhancer,
-  }: ClientOpts) {
+  }: ClientOpts<G, CtxWithPlugins>) {
     this.game = ProcessGameConfig(game);
     this.playerID = playerID;
     this.matchID = matchID || 'default';
@@ -572,6 +575,8 @@ export class _ClientImpl<G extends any = any> {
  *   A JS object that provides an API to interact with the
  *   game by dispatching moves and events.
  */
-export function Client<G extends any = any>(opts: ClientOpts<G>) {
-  return new _ClientImpl<G>(opts);
+export function Client<G extends any = any, CtxWithPlugins extends Ctx = Ctx>(
+  opts: ClientOpts<G, CtxWithPlugins>
+) {
+  return new _ClientImpl<G, CtxWithPlugins>(opts);
 }
