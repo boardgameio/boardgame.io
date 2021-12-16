@@ -159,7 +159,7 @@
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
     "redux": "^4.1.0",
-    "rfc6902": "^4.0.2",
+    "rfc6902": "^5.0.0",
     "setimmediate": "^1.0.5",
     "socket.io": "^4.1.3",
     "socket.io-client": "^4.1.3",
