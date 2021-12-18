@@ -1,3 +1,10 @@
+### v0.49.7
+
+#### Bugfixes
+
+* [[39e1f187](https://github.com/boardgameio/boardgame.io/commit/39e1f187)] Bump `rfc6902` dependency to address prototype pollution vulnerability
+
+
 ### v0.49.6
 
 #### Bugfixes
