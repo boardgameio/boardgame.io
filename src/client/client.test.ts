@@ -938,6 +938,24 @@ describe('start / stop', () => {
     jest.resetAllMocks();
   });
 
+  test('hide panel by default', () => {
+    const client = Client({ game: {}, debug: { hidePanel: true } });
+    expect(() => {
+      client.start();
+      client.stop();
+    }).not.toThrow();
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  test('remove debug panel button', () => {
+    const client = Client({ game: {}, debug: { hideButton: true } });
+    expect(() => {
+      client.start();
+      client.stop();
+    }).not.toThrow();
+    expect(error).not.toHaveBeenCalled();
+  });
+
   test('mount on custom element', () => {
     const el = document.createElement('div');
     const client = Client({ game: {}, debug: { target: el } });

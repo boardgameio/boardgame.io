@@ -38,7 +38,10 @@
     visible = !visible;
   }
 
-  let visible = true;
+  const debugOpt = $clientManager.client.debugOpt
+  let visible = !debugOpt || !debugOpt.hidePanel;
+  const showToggleButton = !debugOpt || !debugOpt.hideButton
+
   function Keypress(e) {
     if (e.key == '.') {
       ToggleVisibility();
@@ -180,6 +183,7 @@
 
 <section aria-label="boardgame.io Debug Panel" class="debug-panel">
   {#if !visible}
+    {#if showToggleButton}
     <button
       on:click={ToggleVisibility}
       class="visibility-toggle opener"
@@ -191,8 +195,10 @@
         <Chevron />
       </span>
     </button>
+    {/if}
   {:else}
     <div transition:fly={{ x: 400, ...transitionOpts }} class="panel">
+      {#if showToggleButton}
       <button
         on:click={ToggleVisibility}
         class="visibility-toggle closer"
@@ -204,6 +210,7 @@
           <Chevron />
         </span>
       </button>
+      {/if}
       <Menu on:change={MenuChange} {panes} {pane} />
       <div
         bind:this={paneDiv}
