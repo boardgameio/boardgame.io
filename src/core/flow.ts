@@ -766,7 +766,7 @@ export function Flow({
   function SetActivePlayersEvent(
     state: State,
     _playerID: PlayerID,
-    arg: ActivePlayersArg | PlayerID[]
+    arg: ActivePlayersArg
   ): State {
     return Process(state, [{ fn: UpdateActivePlayers, arg }]);
   }

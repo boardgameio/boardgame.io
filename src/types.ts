@@ -66,18 +66,20 @@ export type StageArg =
       maxMoves?: number;
     };
 
-export interface ActivePlayersArg {
-  currentPlayer?: StageArg;
-  others?: StageArg;
-  all?: StageArg;
-  value?: Record<PlayerID, StageArg>;
-  minMoves?: number;
-  maxMoves?: number;
-  /** @deprecated Use `minMoves` and `maxMoves` instead. */
-  moveLimit?: number;
-  revert?: boolean;
-  next?: ActivePlayersArg;
-}
+export type ActivePlayersArg =
+  | PlayerID[]
+  | {
+      currentPlayer?: StageArg;
+      others?: StageArg;
+      all?: StageArg;
+      value?: Record<PlayerID, StageArg>;
+      minMoves?: number;
+      maxMoves?: number;
+      /** @deprecated Use `minMoves` and `maxMoves` instead. */
+      moveLimit?: number;
+      revert?: boolean;
+      next?: ActivePlayersArg;
+    };
 
 export interface ActivePlayers {
   [playerID: string]: StageName;
