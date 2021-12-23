@@ -18,10 +18,7 @@ import type {
 } from '../types';
 import { supportDeprecatedMoveLimit } from './backwards-compatibility';
 
-export function SetActivePlayers(
-  ctx: Ctx,
-  arg: ActivePlayersArg | PlayerID[]
-): Ctx {
+export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
   let activePlayers: typeof ctx.activePlayers = {};
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
