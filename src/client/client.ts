@@ -52,6 +52,8 @@ type Action =
 export interface DebugOpt {
   target?: HTMLElement;
   impl?: typeof Debug;
+  collapseOnLoad?: boolean;
+  hideToggleButton?: boolean;
 }
 
 /**
