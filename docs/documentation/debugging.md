@@ -21,15 +21,15 @@ const client = Client({
 
 ### Debug Panel options
 
-You can use the `hidePanel` option to hide the panel by default when the client loads. The `hideButton` option removes the toggle button on the side of the panel which means you can only use the keyboard shortcut to toggle its visibility.
+You can use the `collapseOnLoad` option to hide the panel by default when the client loads. The `hideToggleButton` option removes the toggle button on the side of the panel which means you can only use the keyboard shortcut to toggle its visibility.
 
 ```js
 const client = Client({
   // ...
   debug: {
     // ...
-    hidePanel: true/false,
-    hideButton: true/false
+    collapseOnLoad: true/false,
+    hideToggleButton: true/false
   },
 });
 ```

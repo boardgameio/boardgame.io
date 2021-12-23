@@ -70,6 +70,23 @@ test('visibility toggle', async () => {
   client.stop();
 });
 
+test('panel options', async () => {
+  const client = Client({
+    game: {},
+    debug: { hideToggleButton: true, collapseOnLoad: true },
+  });
+  client.start();
+
+  const hideButton = screen.queryByTitle('Hide Debug Panel');
+  expect(hideButton).not.toBeInTheDocument();
+
+  expect(
+    screen.queryByRole('heading', { name: 'Controls' })
+  ).not.toBeInTheDocument();
+
+  client.stop();
+});
+
 describe('multiple clients', () => {
   const client0 = Client({
     game: { name: 'game1' },

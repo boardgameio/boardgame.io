@@ -39,8 +39,8 @@
   }
 
   const debugOpt = $clientManager.client.debugOpt
-  let visible = !debugOpt || !debugOpt.hidePanel;
-  const showToggleButton = !debugOpt || !debugOpt.hideButton
+  let visible = !debugOpt || !debugOpt.collapseOnLoad;
+  const showToggleButton = !debugOpt || !debugOpt.hideToggleButton
 
   function Keypress(e) {
     if (e.key == '.') {
