@@ -1,3 +1,14 @@
+### v0.49.8
+
+#### Features
+
+* [[bd34bc39](https://github.com/boardgameio/boardgame.io/commit/bd34bc39)] debug: Add collapse on load & hide toggle button options (PR [#1040](https://github.com/boardgameio/boardgame.io/pull/1040), Issue [#1039](https://github.com/boardgameio/boardgame.io/issues/1039))
+
+#### Bugfixes
+
+* [[ee230c14](https://github.com/boardgameio/boardgame.io/commit/ee230c14)] types: Always allow player ID array as active players argument (Issue [#1041](https://github.com/boardgameio/boardgame.io/issues/1041))
+
+
 ### v0.49.7
 
 #### Bugfixes
