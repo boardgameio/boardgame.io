@@ -127,12 +127,14 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     if (cookie.phase && cookie.phase === LobbyPhases.PLAY) {
       cookie.phase = LobbyPhases.LIST;
     }
+    if (cookie.phase && cookie.phase !== LobbyPhases.ENTER) {
+      this._startRefreshInterval();
+    }
     this.setState({
       phase: cookie.phase || LobbyPhases.ENTER,
       playerName: cookie.playerName || 'Visitor',
       credentialStore: cookie.credentialStore || {},
     });
-    this._startRefreshInterval();
   }
 
   componentDidUpdate(prevProps: LobbyProps, prevState: LobbyState) {
@@ -198,10 +200,12 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   };
 
   _enterLobby = (playerName: string) => {
+    this._startRefreshInterval();
     this.setState({ playerName, phase: LobbyPhases.LIST });
   };
 
   _exitLobby = async () => {
+    this._clearRefreshInterval();
     await this.connection.disconnect();
     this.setState({ phase: LobbyPhases.ENTER, errorMsg: '' });
   };
@@ -282,10 +286,12 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       credentials: this.connection.playerCredentials,
     };
 
+    this._clearRefreshInterval();
     this.setState({ phase: LobbyPhases.PLAY, runningMatch: match });
   };
 
   _exitMatch = () => {
+    this._startRefreshInterval();
     this.setState({ phase: LobbyPhases.LIST, runningMatch: null });
   };
 

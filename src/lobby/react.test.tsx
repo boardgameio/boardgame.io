@@ -27,9 +27,13 @@ Enzyme.configure({ adapter: new Adapter() });
 describe('lobby', () => {
   let lobby;
   const spy = jest.fn();
+  let setIntervalSpy;
+  let clearIntervalSpy;
   let components: any[];
 
   beforeEach(async () => {
+    setIntervalSpy = jest.spyOn(global, 'setInterval');
+    clearIntervalSpy = jest.spyOn(global, 'clearInterval');
     components = [
       {
         board: 'Board1',
@@ -45,6 +49,8 @@ describe('lobby', () => {
 
   afterEach(() => {
     spy.mockReset();
+    setIntervalSpy.mockRestore();
+    clearIntervalSpy.mockRestore();
   });
 
   describe('specify servers', () => {
@@ -157,15 +163,78 @@ describe('lobby', () => {
       );
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
     });
+    afterEach(() => {
+      Cookies.remove('lobbyState', { path: '/' });
+    });
     test('reset phase to list', async () => {
       expect(lobby.instance().state.phase).toBe('list');
     });
   });
 
-  describe('refresh interval', () => {
+  describe('refresh interval triggering', () => {
+    test('refresh does not start on initial component mount', () => {
+      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+
+      expect(setIntervalSpy).not.toHaveBeenCalled();
+    });
+
+    test('refresh starts when transitioning from ENTER lobby to LIST lobby', () => {
+      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+
+      lobby
+        .find('LobbyLoginForm')
+        .find('input')
+        .props()
+        .onKeyPress({ key: 'Enter' });
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
+    });
+
+    test('refresh starts when component mounts and cookie state sends us to LIST', () => {
+      Cookies.save(
+        'lobbyState',
+        {
+          phase: 'list',
+          playerName: 'Bob',
+        },
+        { path: '/' }
+      );
+      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
+    });
+
+    test('refresh stops when transitioning from LIST to PLAY', () => {
+      Cookies.save(
+        'lobbyState',
+        {
+          phase: 'list',
+          playerName: 'Bob',
+        },
+        { path: '/' }
+      );
+      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+
+      lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
+
+      expect(clearIntervalSpy).toHaveBeenCalledWith(
+        lobby.instance()._currentInterval
+      );
+    });
+  });
+
+  describe('refresh interval tracking', () => {
     beforeEach(() => {
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+      lobby
+        .find('LobbyLoginForm')
+        .find('input')
+        .props()
+        .onKeyPress({ key: 'Enter' });
     });
+
     afterEach(() => lobby.unmount());
 
     test('lobby stores an interval ID', () => {
@@ -209,6 +278,7 @@ describe('lobby', () => {
 
     afterEach(() => {
       spyClient.mockReset();
+      Cookies.remove('lobbyState', { path: '/' });
     });
 
     describe('creating a match', () => {
