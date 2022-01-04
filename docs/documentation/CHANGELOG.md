@@ -1,3 +1,14 @@
+### v0.49.9
+
+#### Features
+
+* [[636ce8f6](https://github.com/boardgameio/boardgame.io/commit/636ce8f6)] Add testing utility for mocking the randomness API
+
+#### Bugfixes
+
+* [[99639c41](https://github.com/boardgameio/boardgame.io/commit/99639c41)] lobby: only poll matches when match list is displayed ([#1044](https://github.com/boardgameio/boardgame.io/pull/1044))
+
+
 ### v0.49.8
 
 #### Features
