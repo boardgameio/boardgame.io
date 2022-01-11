@@ -1,3 +1,10 @@
+### v0.49.10
+
+#### Bugfixes
+
+* [[6756419a](https://github.com/boardgameio/boardgame.io/commit/6756419a)] Include `testing/package.json` in npm files
+
+
 ### v0.49.9
 
 #### Features

@@ -113,7 +113,7 @@ it('updates G.roll with a random number', () => {
 });
 ```
 
-#### Override Random API <small>`since v0.49.9`</small>
+#### Override Random API <small>`since v0.49.10`</small>
 
 If you need to test specific random outcomes, you can override the Random
 API entirely to allow complete control of the results of API methods.
