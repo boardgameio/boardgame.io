@@ -57,7 +57,8 @@
     "plugins",
     "master",
     "multiplayer",
-    "internal"
+    "internal",
+    "testing"
   ],
   "keywords": [
     "board games",
