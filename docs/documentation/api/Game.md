@@ -27,6 +27,7 @@
       // The move function.
       move: (G, ctx, ...args) => {},
       // Prevents undoing the move.
+      // Can also be a function: (G, ctx) => true/false
       undoable: false,
       // Prevents the move arguments from showing up in the log.
       redact: true,
