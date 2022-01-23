@@ -9,8 +9,9 @@
 import { makeMove, gameEvent } from './action-creators';
 import { Client } from '../client/client';
 import { Flow } from './flow';
+import { TurnOrder } from './turn-order';
 import { error } from '../core/logger';
-import type { Ctx, State, Game, MoveFn } from '../types';
+import type { Ctx, State, Game, PlayerID, MoveFn } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -2266,5 +2267,167 @@ describe('hook execution order', () => {
   test('hooks called on endGame', () => {
     client.events.endGame(5);
     expect(calls).toEqual(['phaseB.onEnd', 'game.onEnd']);
+  });
+});
+
+describe('game function signatures', () => {
+  const moveA = jest.fn();
+  let game: Game;
+
+  let client: ReturnType<typeof Client>;
+
+  // Helpers to check the objects game functions are called with.
+  const expectCtx = expect.objectContaining({ numPlayers: 2 });
+  const expectEvents = expect.objectContaining({
+    endTurn: expect.any(Function),
+  });
+  const expectRandom = expect.objectContaining({
+    D6: expect.any(Function),
+  });
+  const FnContext = ({
+    playerID,
+    G = 'G',
+  }: { playerID?: PlayerID; G?: any } = {}) => {
+    const context: any = {
+      G,
+      ctx: expectCtx,
+      events: expectEvents,
+      random: expectRandom,
+      testPluginAPI: { foo: 'bar' },
+    };
+    if (playerID !== undefined) context.playerID = playerID;
+    return expect.objectContaining(context);
+  };
+
+  beforeEach(() => {
+    game = {
+      setup: jest.fn(() => 'G'),
+
+      plugins: [
+        {
+          name: 'testPluginAPI',
+          api: () => ({ foo: 'bar' }),
+        },
+      ],
+
+      onEnd: jest.fn(),
+      endIf: jest.fn(({ G }) => G == 'gameover'),
+
+      moves: {
+        A: (...args) => moveA(...args),
+        endGame: () => 'gameover',
+      },
+
+      turn: {
+        order: {
+          playOrder: jest.fn(({ ctx }) =>
+            [...Array.from({ length: ctx.numPlayers })].map((_, i) => i + '')
+          ),
+          first: jest.fn(TurnOrder.DEFAULT.first),
+          next: jest.fn(TurnOrder.DEFAULT.next),
+        },
+        onBegin: jest.fn(),
+        onMove: jest.fn(),
+        onEnd: jest.fn(),
+        endIf: jest.fn(),
+      },
+
+      phases: {
+        A: {
+          onBegin: jest.fn(),
+          onEnd: jest.fn(),
+          endIf: jest.fn(),
+        },
+      },
+
+      events: {
+        endPhase: true,
+      },
+    };
+
+    client = Client({ game, playerID: '0' });
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('game.setup', () => {
+    expect(game.setup).lastCalledWith(
+      // setup context object
+      expect.objectContaining({
+        ctx: expectCtx,
+        events: expectEvents,
+        random: expectRandom,
+      }),
+      // setupData
+      undefined
+    );
+  });
+
+  test('game.onEnd', () => {
+    client.events.endGame();
+    expect(game.onEnd).lastCalledWith(FnContext());
+  });
+
+  test('game.endIf', () => {
+    client.moves.endGame();
+    expect(game.endIf).lastCalledWith(FnContext({ G: 'gameover' }));
+  });
+
+  test('game.turn.order.playOrder', () => {
+    expect(game.turn.order.playOrder).lastCalledWith(FnContext());
+  });
+
+  test('game.turn.order.first', () => {
+    expect(game.turn.order.first).lastCalledWith(FnContext());
+  });
+
+  test('game.turn.order.next', () => {
+    client.events.endTurn();
+    expect(game.turn.order.next).lastCalledWith(FnContext());
+  });
+
+  test('game.turn.onBegin', () => {
+    expect(game.turn.onBegin).lastCalledWith(FnContext());
+  });
+
+  test('game.turn.onMove', () => {
+    client.moves.A();
+    expect(game.turn.onMove).lastCalledWith(FnContext());
+  });
+
+  test('game.turn.onEnd', () => {
+    client.events.endTurn();
+    expect(game.turn.onEnd).lastCalledWith(FnContext());
+  });
+
+  test('game.turn.endIf', () => {
+    client.moves.A();
+    expect(game.turn.endIf).lastCalledWith(FnContext());
+  });
+
+  test('move', () => {
+    client.moves.A('arg');
+    expect(moveA).lastCalledWith(FnContext({ playerID: '0' }), 'arg');
+    client.moves.A(2, 'args');
+    expect(moveA).lastCalledWith(FnContext({ playerID: '0' }), 2, 'args');
+  });
+
+  test('game.phases.phase.onBegin', () => {
+    client.events.setPhase('A');
+    expect(game.phases.A.onBegin).lastCalledWith(FnContext());
+  });
+
+  test('game.phases.phase.onEnd', () => {
+    client.events.setPhase('A');
+    client.updatePlayerID('1');
+    client.events.endPhase();
+    expect(game.phases.A.onEnd).lastCalledWith(FnContext());
+  });
+
+  test('game.phases.phase.endIf', () => {
+    client.events.setPhase('A');
+    expect(game.phases.A.endIf).lastCalledWith(FnContext());
   });
 });
