@@ -57,75 +57,75 @@ const TicTacToe = {
   },
 };
 
-class TicTacToeBoard extends React.Component {
-  onClick(id) {
-    if (this.isActive(id)) {
-      this.props.moves.clickCell(id);
-      this.props.events.endTurn();
+function TicTacToeBoard({ G, ctx, moves, isActive, playerID }) {
+  const canClickCell = (id) => isActive && G.cells[id] == null;
+
+  const onClick = (id) => {
+    if (canClickCell(id)) {
+      moves.clickCell(id);
     }
+  };
+
+  let winner = '';
+  if (ctx.gameover) {
+    winner =
+      ctx.gameover.winner !== undefined ? (
+        <div id="winner">Winner: {ctx.gameover.winner}</div>
+      ) : (
+        <div id="winner">Draw!</div>
+      );
   }
 
-  isActive(id) {
-    return this.props.isActive && this.props.G.cells[id] == null;
+  const cellStyle = (active) => ({
+    border: '1px solid #555',
+    width: '3.125rem',
+    height: '3.125rem',
+    lineHeight: '3.125rem',
+    textAlign: 'center',
+    fontFamily: 'monospace',
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+    background: active ? '#eeffe9' : 'transparent',
+    padding: '0',
+    boxSizing: 'border-box',
+  });
+
+  let tbody = [];
+  for (let i = 0; i < 3; i++) {
+    let cells = [];
+    for (let j = 0; j < 3; j++) {
+      const id = 3 * i + j;
+      cells.push(
+        <td key={id}>
+          {canClickCell(id) ? (
+            <button style={cellStyle(true)} onClick={() => onClick(id)} />
+          ) : (
+            <div style={cellStyle(false)}>{G.cells[id]}</div>
+          )}
+        </td>
+      );
+    }
+    tbody.push(<tr key={i}>{cells}</tr>);
   }
 
-  render() {
-    let winner = '';
-    if (this.props.ctx.gameover) {
-      winner =
-        this.props.ctx.gameover.winner !== undefined ? (
-          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
-        ) : (
-          <div id="winner">Draw!</div>
-        );
-    }
-
-    const cellStyle = (id) => ({
-      cursor: 'pointer',
-      border: '1px solid #555',
-      width: '3.125rem',
-      height: '3.125rem',
-      lineHeight: '3.125rem',
-      textAlign: 'center',
-      fontFamily: 'monospace',
-      fontSize: '1.25rem',
-      fontWeight: 'bold',
-      background: this.isActive(id) ? '#eeffe9' : 'transparent',
-    });
-
-    let tbody = [];
-    for (let i = 0; i < 3; i++) {
-      let cells = [];
-      for (let j = 0; j < 3; j++) {
-        const id = 3 * i + j;
-        cells.push(
-          <td style={cellStyle(id)} key={id} onClick={() => this.onClick(id)}>
-            {this.props.G.cells[id]}
-          </td>
-        );
-      }
-      tbody.push(<tr key={i}>{cells}</tr>);
-    }
-
-    return (
-      <div>
-        <p
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-          }}
-        >
-          <span>Player {this.props.playerID}</span>
-          {this.props.isActive && <span>Your turn!</span>}
-        </p>
-        <table id="board">
-          <tbody>{tbody}</tbody>
-        </table>
-        <p>{winner}</p>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <p
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+        }}
+      >
+        <span>Player {playerID}</span>
+        {isActive && <span>Your turn!</span>}
+      </p>
+      <table id="board">
+        <tbody>{tbody}</tbody>
+      </table>
+      <p>{winner}</p>
+    </div>
+  );
 }
 
 var TicTacToeClient = Client({
