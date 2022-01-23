@@ -23,17 +23,20 @@ export const MyGame: Game<MyGameState> = {
 
 ### React
 
-React components must include boardgame.io-specific properties, so extend your props from `BoardProps`:
+React components must include boardgame.io-specific properties, so extend your
+props from `BoardProps`. By passing your game state type to `BoardProps`,
+you’ll get the correct typing for `G` in your board component.
 
 ```typescript
 // Board.tsx
 import type { BoardProps } from 'boardgame.io/react';
+import type { MyGameState } from './Game.ts'
 
-interface MyGameProps extends BoardProps {
-  // Custom properties for your component
+interface MyGameProps extends BoardProps<MyGameState> {
+  // Additional custom properties for your component
 }
 
-export class MyGameBoard extends React.Component<MyGameProps> {
+export function MyGameBoard(props: MyGameProps) {
   // Your game board
 }
 ```

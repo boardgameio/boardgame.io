@@ -59,9 +59,7 @@ move functions.
 You can access `moves` from an instance of the plain JavaScript client:
 
 ```js
-function onClick() {
-  client.moves.drawCard();
-}
+client.moves.drawCard();
 ```
 
 #### **React**
@@ -69,9 +67,7 @@ function onClick() {
 Using React, `moves` is provided through your component’s `props`:
 
 ```js
-onClick() {
-  this.props.moves.drawCard();
-}
+props.moves.drawCard();
 ```
 
 <!-- tabs:end -->
@@ -85,16 +81,12 @@ Events are dispatched from the client in a similar way to moves.
 <!-- tabs:start -->
 #### **Plain JS**
 ```js
-function onClick() {
-  client.events.endTurn();
-}
+client.events.endTurn();
 ```
 
 #### **React**
 ```js
-onClick() {
-  this.props.events.endTurn();
-}
+props.events.endTurn();
 ```
 <!-- tabs:end -->
 

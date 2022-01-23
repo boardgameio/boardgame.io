@@ -502,66 +502,63 @@ Here are the key things to remember:
 
 ### **React**
 
-React is a great fit for board games because
+React can be a good fit for board games because
 it provides a declarative API to translate objects
-to UI elements.
-
-Creating a board is a fairly mechanical process of
-translating the game state `G` into actual cells that
-are clickable.
+to UI elements. To create a board we need to translate
+the game state `G` into actual cells that are clickable.
 
 Let’s create a new file at `src/Board.js`:
 
 ```js
 import React from 'react';
 
-export class TicTacToeBoard extends React.Component {
-  onClick(id) {
-    this.props.moves.clickCell(id);
+function TicTacToeBoard({ ctx, G, moves }) {
+  const onClick = (id) => moves.clickCell(id);
+
+  let winner = '';
+  if (ctx.gameover) {
+    winner =
+      ctx.gameover.winner !== undefined ? (
+        <div id="winner">Winner: {ctx.gameover.winner}</div>
+      ) : (
+        <div id="winner">Draw!</div>
+      );
   }
 
-  render() {
-    let winner = '';
-    if (this.props.ctx.gameover) {
-      winner =
-        this.props.ctx.gameover.winner !== undefined ? (
-          <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
-        ) : (
-          <div id="winner">Draw!</div>
-        );
+  const cellStyle = {
+    border: '1px solid #555',
+    width: '50px',
+    height: '50px',
+    lineHeight: '50px',
+    textAlign: 'center',
+  };
+
+  let tbody = [];
+  for (let i = 0; i < 3; i++) {
+    let cells = [];
+    for (let j = 0; j < 3; j++) {
+      const id = 3 * i + j;
+      cells.push(
+        <td key={id}>
+          {G.cells[id] ? (
+            <div style={cellStyle}>{G.cells[id]}</div>
+          ) : (
+            <button style={cellStyle} onClick={() => onClick(id)} />
+          )}
+        </td>
+      );
     }
-
-    const cellStyle = {
-      border: '1px solid #555',
-      width: '50px',
-      height: '50px',
-      lineHeight: '50px',
-      textAlign: 'center',
-    };
-
-    let tbody = [];
-    for (let i = 0; i < 3; i++) {
-      let cells = [];
-      for (let j = 0; j < 3; j++) {
-        const id = 3 * i + j;
-        cells.push(
-          <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
-            {this.props.G.cells[id]}
-          </td>
-        );
-      }
-      tbody.push(<tr key={i}>{cells}</tr>);
-    }
-
-    return (
-      <div>
-        <table id="board">
-          <tbody>{tbody}</tbody>
-        </table>
-        {winner}
-      </div>
-    );
+    tbody.push(<tr key={i}>{cells}</tr>);
   }
+
+  return (
+    <div>
+      <table id="board">
+        <tbody>{tbody}</tbody>
+      </table>
+      {winner}
+    </div>
+  );
 }
 ```
 
@@ -570,11 +567,11 @@ dispatch moves. We have the following code in our click
 handler:
 
 ```js
-this.props.moves.clickCell(id);
+moves.clickCell(id);
 ```
 
-- `props.moves` is an object passed in by the framework that
-  contains functions to dispatch moves. `props.moves.clickCell`
+- `moves` is passed in your component’s props by the framework and
+  contains functions to dispatch your game’s moves. `props.moves.clickCell`
   dispatches the `clickCell` move, and any data passed in is made
   available in the move handler.
 
