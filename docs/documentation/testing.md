@@ -67,7 +67,7 @@ it('should declare player 1 as the winner', () => {
   client.moves.clickCell(5);
 
   // get the latest game state
-  const { G, ctx } = client.store.getState();
+  const { G, ctx } = client.getState();
 
   // the board should look like this now
   expect(G.cells).toEqual(['0', '0', null, '1', '1', '1', null, null, '0']);
@@ -76,8 +76,71 @@ it('should declare player 1 as the winner', () => {
 });
 ```
 
-!> Note that we imported the vanilla JavaScript client, not the
+?> Note that we imported the vanilla JavaScript client, not the
 one from `boardgame.io/react`.
+
+### Testing Randomness
+
+If you are testing a move that uses the [Random API](/random), by definition
+you can’t always expect the same result, making it harder to test. In this
+case, you can use one of the following strategies.
+
+#### Fixed PRNG seed
+
+You can set `seed` in your game object. This will be used to initialise the
+Random API’s internal state and you’ll see a predictable sequence of results
+from calls to random API methods:
+
+```js
+import { Client } from 'boardgame.io/client';
+
+const Game = {
+  moves: {
+    rollDice: (G, ctx) => {
+      G.roll = ctx.random.D6();
+    },
+  },
+};
+
+it('updates G.roll with a random number', () => {
+  const client = Client({
+      // Set seed so PRNG always starts in same state
+    game: { ...Game, seed: 'fixed-seed' },
+  });
+  client.moves.rollDice();
+  const { G } = client.getState();
+  expect(G.roll).toMatchInlineSnapshot(`4`);
+});
+```
+
+#### Override Random API <small>`since v0.49.10`</small>
+
+If you need to test specific random outcomes, you can override the Random
+API entirely to allow complete control of the results of API methods.
+
+```js
+import { Client } from 'boardgame.io/client';
+import { MockRandom } from 'boardgame.io/testing';
+
+// Create a mock of the random plugin, where the D6 method always returns 6.
+// Any methods you don’t provide an implementation for will behave as usual.
+const randomPlugin = MockRandom({
+  D6: () => 6,
+});
+
+it ('rolls a six', () => {
+  const client = Client({
+    game: {
+      ...Game,
+      // Add the random plugin mock to the game’s plugins.
+      plugins: [...(Game.plugins || []), randomPlugin]
+    },
+  });
+  client.moves.rollDice();
+  const { G } = client.getState();
+  expect(G.roll).toMatchInlineSnapshot(`6`);
+});
+```
 
 ### Multiplayer Tests
 

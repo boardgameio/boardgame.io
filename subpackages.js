@@ -17,4 +17,5 @@ module.exports = [
   'master',
   'multiplayer',
   'internal',
+  'testing',
 ];
