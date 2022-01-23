@@ -10,12 +10,12 @@
   - [Undo / Redo](undo.md)
   - [Randomness](random.md)
   - [Secret State](secret-state.md)
-  - [Storage](storage.md)
   - [Immutability](immutability.md)
   - [Plugins](plugins.md)
   - [Debugging](debugging.md)
   - [Testing](testing.md)
   - [Deployment](deployment.md)
+  - [Storage](storage.md)
   - [Chat](chat.md)
   - [TypeScript](typescript.md)
 - **Reference**
