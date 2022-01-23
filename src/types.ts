@@ -1,4 +1,4 @@
-import type { Object, Misc } from 'ts-toolbelt';
+import type { Object } from 'ts-toolbelt';
 import type Koa from 'koa';
 import type { Store as ReduxStore } from 'redux';
 import type * as ActionCreators from './core/action-creators';
@@ -175,9 +175,9 @@ export interface Plugin<
     data: Data;
   }) => State<G>;
   fnWrap?: (
-    moveOrHook: (context: FnContext<G>, ...args: SerializableAny[]) => any,
+    moveOrHook: (context: FnContext<G>, ...args: any[]) => any,
     methodType: GameMethod
-  ) => (context: FnContext<G>, ...args: SerializableAny[]) => any;
+  ) => (context: FnContext<G>, ...args: any[]) => any;
   playerView?: (context: {
     G: G;
     ctx: Ctx;
@@ -196,13 +196,12 @@ export type FnContext<
     ctx: Ctx;
   };
 
-type SerializableAny = Misc.JSON.Value;
 export type MoveFn<
   G extends any = any,
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > = (
   context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
-  ...args: SerializableAny[]
+  ...args: any[]
 ) => void | G | typeof INVALID_MOVE;
 
 export interface LongFormMove<
