@@ -96,8 +96,8 @@ import { Client } from 'boardgame.io/client';
 
 const Game = {
   moves: {
-    rollDice: (G, ctx) => {
-      G.roll = ctx.random.D6();
+    rollDice: ({ G, random }) => {
+      G.roll = random.D6();
     },
   },
 };

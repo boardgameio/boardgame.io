@@ -16,8 +16,8 @@ test('it creates a plugin object', () => {
 test('it can override random API methods', () => {
   const game: Game<{ roll: number }> = {
     moves: {
-      roll: (G, ctx) => {
-        G.roll = ctx.random.D6();
+      roll: ({ G, random }) => {
+        G.roll = random.D6();
       },
     },
     plugins: [MockRandom({ D6: () => 1 })],
@@ -31,8 +31,8 @@ test('it can override random API methods', () => {
 test('it can use non-overridden API methods', () => {
   const game: Game<{ roll: number }> = {
     moves: {
-      roll: (G, ctx) => {
-        G.roll = ctx.random.D6();
+      roll: ({ G, random }) => {
+        G.roll = random.D6();
       },
     },
     plugins: [MockRandom({ D10: () => 1 })],
