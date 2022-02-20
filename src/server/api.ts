@@ -121,6 +121,14 @@ export const configureRouter = ({
     const game = games.find((g) => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
+    if (
+      numPlayers != null &&
+      ((game.minPlayers != null && numPlayers < game.minPlayers) ||
+        (game.maxPlayers != null && numPlayers > game.maxPlayers))
+    ) {
+      ctx.throw(400, 'Invalid numPlayers');
+    }
+
     const matchID = await CreateMatch({
       ctx,
       db,
