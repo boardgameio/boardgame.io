@@ -24,9 +24,13 @@ import type {
   ChatMessage,
 } from '../../types';
 
+type SocketOpts = Partial<
+  ioNamespace.SocketOptions & ioNamespace.ManagerOptions
+>;
+
 interface SocketIOOpts {
   server?: string;
-  socketOpts?: ioNamespace.SocketOptions;
+  socketOpts?: SocketOpts;
 }
 
 type SocketIOTransportOpts = TransportOpts &
@@ -42,7 +46,7 @@ type SocketIOTransportOpts = TransportOpts &
 export class SocketIOTransport extends Transport {
   server: string;
   socket: ioNamespace.Socket;
-  socketOpts: ioNamespace.SocketOptions;
+  socketOpts: SocketOpts;
 
   /**
    * Creates a new Multiplayer instance.
