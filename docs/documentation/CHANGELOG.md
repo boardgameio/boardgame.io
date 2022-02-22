@@ -1,3 +1,11 @@
+### v0.49.11
+
+#### Bugfixes
+
+* [[453f530c](https://github.com/boardgameio/boardgame.io/commit/453f530c)] types: Use correct socket.io options typing
+* [[7e55d118](https://github.com/boardgameio/boardgame.io/commit/7e55d118), [75428111](https://github.com/boardgameio/boardgame.io/commit/75428111), [4fa2c4f1](https://github.com/boardgameio/boardgame.io/commit/4fa2c4f1), [52450607](https://github.com/boardgameio/boardgame.io/commit/52450607)] Update dependencies: engine.io, nanoid, ajv, and node-fetch
+
+
 ### v0.49.10
 
 #### Bugfixes
