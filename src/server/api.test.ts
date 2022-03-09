@@ -196,13 +196,27 @@ describe('.configureRouter', () => {
       });
 
       describe('with invalid numPlayers', () => {
-        beforeEach(async () => {
+        test('not enough players fails', async () => {
+          response = await request(app.callback())
+            .post('/games/validate/create')
+            .send({ numPlayers: 1 });
+
+          expect(response.status).toEqual(400);
+        });
+
+        test('too many players fails', async () => {
           response = await request(app.callback())
             .post('/games/validate/create')
             .send({ numPlayers: 3 });
+
+          expect(response.status).toEqual(400);
         });
 
-        test('fails', () => {
+        test('invalid type fails', async () => {
+          response = await request(app.callback())
+            .post('/games/validate/create')
+            .send({ numPlayers: 'hello' });
+
           expect(response.status).toEqual(400);
         });
       });

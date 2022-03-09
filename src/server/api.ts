@@ -122,9 +122,10 @@ export const configureRouter = ({
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
     if (
-      numPlayers != null &&
-      ((game.minPlayers != null && numPlayers < game.minPlayers) ||
-        (game.maxPlayers != null && numPlayers > game.maxPlayers))
+      ctx.request.body.numPlayers !== undefined &&
+      (Number.isNaN(numPlayers) ||
+        (game.minPlayers && numPlayers < game.minPlayers) ||
+        (game.maxPlayers && numPlayers > game.maxPlayers))
     ) {
       ctx.throw(400, 'Invalid numPlayers');
     }
