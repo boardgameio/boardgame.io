@@ -125,6 +125,8 @@ describe('.configureRouter', () => {
             numPlayers == 2 && setupData.tokens !== 2
               ? 'Two player games must use two tokens'
               : undefined,
+          minPlayers: 2,
+          maxPlayers: 2,
         },
       ];
     });
@@ -190,6 +192,32 @@ describe('.configureRouter', () => {
               }),
             })
           );
+        });
+      });
+
+      describe('with invalid numPlayers', () => {
+        test('not enough players fails', async () => {
+          response = await request(app.callback())
+            .post('/games/validate/create')
+            .send({ numPlayers: 1 });
+
+          expect(response.status).toEqual(400);
+        });
+
+        test('too many players fails', async () => {
+          response = await request(app.callback())
+            .post('/games/validate/create')
+            .send({ numPlayers: 3 });
+
+          expect(response.status).toEqual(400);
+        });
+
+        test('invalid type fails', async () => {
+          response = await request(app.callback())
+            .post('/games/validate/create')
+            .send({ numPlayers: 'hello' });
+
+          expect(response.status).toEqual(400);
         });
       });
 
