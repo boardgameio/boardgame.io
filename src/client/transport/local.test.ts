@@ -79,10 +79,7 @@ describe('GetBotPlayer', () => {
           },
         },
       } as unknown as State,
-      {
-        '0': {},
-        '1': {},
-      }
+      ['0', '1']
     );
     expect(result).toEqual('1');
   });
@@ -94,7 +91,7 @@ describe('GetBotPlayer', () => {
           currentPlayer: '0',
         },
       } as unknown as State,
-      { '0': {} }
+      ['0']
     );
     expect(result).toEqual('0');
   });
@@ -106,7 +103,7 @@ describe('GetBotPlayer', () => {
           currentPlayer: '1',
         },
       } as unknown as State,
-      { '0': {} }
+      ['0']
     );
     expect(result).toEqual(null);
   });
@@ -119,7 +116,7 @@ describe('GetBotPlayer', () => {
           gameover: true,
         },
       } as unknown as State,
-      { '0': {} }
+      ['0']
     );
     expect(result).toEqual(null);
   });
