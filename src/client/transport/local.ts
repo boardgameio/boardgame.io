@@ -25,18 +25,18 @@ import { getFilterPlayerView } from '../../master/filter-player-view';
  * Returns null if it is not a bot's turn.
  * Otherwise, returns a playerID of a bot that may play now.
  */
-export function GetBotPlayer(state: State, bots: Record<PlayerID, any>) {
+export function GetBotPlayer(state: State, botIDs: PlayerID[]) {
   if (state.ctx.gameover !== undefined) {
     return null;
   }
 
   if (state.ctx.activePlayers) {
-    for (const key of Object.keys(bots)) {
-      if (key in state.ctx.activePlayers) {
-        return key;
+    for (const botID of botIDs) {
+      if (botID in state.ctx.activePlayers) {
+        return botID;
       }
     }
-  } else if (state.ctx.currentPlayer in bots) {
+  } else if (botIDs.includes(state.ctx.currentPlayer)) {
     return state.ctx.currentPlayer;
   }
 
@@ -105,7 +105,7 @@ export class LocalMaster extends Master {
       if (!bots) {
         return;
       }
-      const botPlayer = GetBotPlayer(state, initializedBots);
+      const botPlayer = GetBotPlayer(state, Object.keys(initializedBots));
       if (botPlayer !== null) {
         setTimeout(async () => {
           const botAction = await initializedBots[botPlayer].play(
