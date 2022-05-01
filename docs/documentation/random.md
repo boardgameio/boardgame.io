@@ -39,7 +39,7 @@ package automatically.
 The library uses a `seed` in `ctx._random` that is stripped before it
 is sent to the client. All the code that needs randomness uses this
 `seed` to generate random numbers.
-The inital match-seed will be randomly set by boargame.io.
+The inital match-seed will be randomly set by boardgame.io.
 
 You can override the initial `seed` like this:
 
