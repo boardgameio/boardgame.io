@@ -1,3 +1,12 @@
+### v0.49.12
+
+#### Bugfixes
+
+* [[96b26bb9](https://github.com/boardgameio/boardgame.io/commit/96b26bb9)] lobby: block creation of matches with invalid player counts ([#1060](https://github.com/boardgameio/boardgame.io/pull/1060))
+* [[453f530c](https://github.com/boardgameio/boardgame.io/commit/453f530c)] types: Use correct socket.io options typing
+* [[3692199](https://github.com/boardgameio/boardgame.io/commit/3692199), [1e57a9c](https://github.com/boardgameio/boardgame.io/commit/1e57a9c)] Update dependencies: socket.io and koa-body
+
+
 ### v0.49.11
 
 #### Bugfixes
