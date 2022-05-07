@@ -6,6 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import type { CorsOptions } from 'cors';
 import IO from 'koa-socket-2';
 import type IOTypes from 'socket.io';
 import type { ServerOptions as HttpsOptions } from 'https';
@@ -150,7 +151,7 @@ export class SocketIO {
   init(
     app: Server.App & { _io?: IOTypes.Server },
     games: Game[],
-    origins: IOTypes.ServerOptions['cors']['origin'] = []
+    origins: CorsOptions['origin'] = []
   ) {
     const io = new IO({
       ioOptions: {
