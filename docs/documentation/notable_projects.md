@@ -69,6 +69,13 @@ A cross between Hangman and a card game.
 [c5]: https://github.com/VengelStudio/cardman-multiplayer
 [b5]: https://img.shields.io/github/stars/VengelStudio/cardman-multiplayer?label=%E2%98%85&logo=github
 
+#### [![GitHub stars][b26]][c26] [Chinchon][p26] \[[code][c26]\]
+&nbsp;&nbsp;
+Multiplayer online card game similar to gin rummy. 
+
+[p26]: https://chinchon-game.herokuapp.com/
+[c26]: https://github.com/maxpaulus43/chinchon
+[b26]: https://img.shields.io/github/stars/maxpaulus43/chinchon?label=%E2%98%85&logo=github
 
 #### [![GitHub stars][b21]][c21] [Coup][p21] \[[code][c21]\]
 &nbsp;&nbsp;
@@ -269,11 +276,3 @@ Multiplayer online boardgame with 3D board using Babylon.js.
 [p25]: https://santorini.herokuapp.com/
 [c25]: https://github.com/mbrinkl/santorini
 [b25]: https://img.shields.io/github/stars/mbrinkl/santorini?label=%E2%98%85&logo=github
-
-#### [![GitHub stars][b26]][c26] [Chinchon][p26] \[[code][c26]\]
-&nbsp;&nbsp;
-Multiplayer online card game similar to gin rummy. 
-
-[p26]: https://chinchon-game.herokuapp.com/
-[c26]: https://github.com/maxpaulus43/chinchon
-[b26]: https://img.shields.io/github/stars/maxpaulus43/chinchon?label=%E2%98%85&logo=github
