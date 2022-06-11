@@ -512,7 +512,7 @@ Let’s create a new file at `src/Board.js`:
 ```js
 import React from 'react';
 
-function TicTacToeBoard({ ctx, G, moves }) {
+export function TicTacToeBoard({ ctx, G, moves }) {
   const onClick = (id) => moves.clickCell(id);
 
   let winner = '';
