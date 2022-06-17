@@ -4,6 +4,7 @@ import { GetBotPlayer } from '../client/transport/local';
 import { SocketIO } from '../client/transport/socketio';
 import type { Game } from '../types';
 import type { State } from '../types';
+import { BotCreationRequest } from './botserver';
 
 export interface BotExecutionResult {
   moveName: string;
@@ -15,7 +16,11 @@ export type GameMonitorCallback = (state: State) => Promise<void>;
 
 export class BotManager {
   private clients: Map<string, Map<string, _ClientImpl>>;
-  constructor(private games: Game[], private runBot: BotCallback) {
+  constructor(
+    private games: Game[],
+    private runBot: BotCallback,
+    private masterServerHost: string
+  ) {
     this.clients = new Map();
   }
 
@@ -37,11 +42,8 @@ export class BotManager {
     }
   }
 
-  addBotToGame(
-    gameName: string,
-    matchID: string,
-    botOptsList: { playerID: string; playerCredentials: string }[]
-  ): void {
+  addBotsToGame(params: BotCreationRequest): void {
+    const { gameName, matchID, botOptsList } = params;
     const game = this.games.find((game) => game.name === gameName);
     for (const botOpts of botOptsList) {
       const { playerID, playerCredentials } = botOpts;
@@ -49,7 +51,7 @@ export class BotManager {
       const client = Client({
         game,
         multiplayer: SocketIO({
-          server: process.env.NUXT_ENV_SERVER_HOST || 'localhost:8000',
+          server: this.masterServerHost,
         }),
         playerID,
         matchID,

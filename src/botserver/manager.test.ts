@@ -18,6 +18,7 @@ jest.mock('../client/transport/local', () => ({
 
 const mockClient = <jest.Mock<any, any>>Client;
 const mockGetBotPlayer = <jest.Mock<any, any>>GetBotPlayer;
+const masterServerHost = 'localhost:3000';
 describe('Bot manager', () => {
   const gameName = 'testGame';
   const game = {
@@ -34,33 +35,39 @@ describe('Bot manager', () => {
     jest.clearAllMocks();
   });
   it('creates new BotManager instance', () => {
-    const botManager = new BotManager([game], runBot);
+    const botManager = new BotManager([game], runBot, masterServerHost);
     expect(botManager).toBeDefined();
   });
   it('adds single bot to game', () => {
-    const botManager = new BotManager([game], runBot);
+    const botManager = new BotManager([game], runBot, masterServerHost);
     mockClient.mockReturnValue(mockClientImpl);
     expect(mockClient).not.toBeCalled();
     expect(mockClientImpl.start).not.toBeCalled();
     expect(mockClientImpl.subscribe).not.toBeCalled();
-    botManager.addBotToGame(gameName, 'testMatchId', [
-      { playerID: 'p1', playerCredentials: 'pc1' },
-    ]);
+    botManager.addBotsToGame({
+      gameName,
+      matchID: 'testMatchId',
+      botOptsList: [{ playerID: 'p1', playerCredentials: 'pc1' }],
+    });
     expect(mockClient).toBeCalled();
     expect(mockClientImpl.start).toBeCalled();
     expect(mockClientImpl.subscribe).toBeCalled();
   });
   it('adds multiple bots to game', () => {
-    const botManager = new BotManager([game], runBot);
+    const botManager = new BotManager([game], runBot, masterServerHost);
     mockClient.mockReturnValue(mockClientImpl);
     expect(mockClient).not.toBeCalled();
     expect(mockClientImpl.start).not.toBeCalled();
     expect(mockClientImpl.subscribe).not.toBeCalled();
-    botManager.addBotToGame(gameName, 'testMatchId', [
-      { playerID: 'p1', playerCredentials: 'pc1' },
-      { playerID: 'p2', playerCredentials: 'pc2' },
-      { playerID: 'p3', playerCredentials: 'pc3' },
-    ]);
+    botManager.addBotsToGame({
+      gameName,
+      matchID: 'testMatchId',
+      botOptsList: [
+        { playerID: 'p1', playerCredentials: 'pc1' },
+        { playerID: 'p2', playerCredentials: 'pc2' },
+        { playerID: 'p3', playerCredentials: 'pc3' },
+      ],
+    });
     expect(mockClient).toBeCalled();
     expect(mockClientImpl.start).toBeCalledTimes(3);
     expect(mockClientImpl.subscribe).toBeCalledTimes(3);
@@ -70,7 +77,7 @@ describe('Bot manager', () => {
     const moveArgs = { arg1: 1 };
     const executionResult: BotExecutionResult = { moveName, moveArgs };
     runBot.mockResolvedValueOnce(executionResult);
-    const botManager = new BotManager([game], runBot);
+    const botManager = new BotManager([game], runBot, masterServerHost);
     const clientP1 = {
       start: jest.fn(),
       subscribe: jest.fn(),
@@ -92,11 +99,15 @@ describe('Bot manager', () => {
       .mockReturnValueOnce(clientP2)
       .mockReturnValueOnce(clientP3);
 
-    botManager.addBotToGame(gameName, 'testMatchId', [
-      { playerID: 'p1', playerCredentials: 'pc1' },
-      { playerID: 'p2', playerCredentials: 'pc2' },
-      { playerID: 'p3', playerCredentials: 'pc3' },
-    ]);
+    botManager.addBotsToGame({
+      gameName,
+      matchID: 'testMatchId',
+      botOptsList: [
+        { playerID: 'p1', playerCredentials: 'pc1' },
+        { playerID: 'p2', playerCredentials: 'pc2' },
+        { playerID: 'p3', playerCredentials: 'pc3' },
+      ],
+    });
     const gameMonitor: GameMonitorCallback =
       clientP2.subscribe.mock.calls[0][0];
 
