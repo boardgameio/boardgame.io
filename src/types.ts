@@ -298,6 +298,13 @@ export interface PhaseMap<
   [phaseName: string]: PhaseConfig<G, CtxWithPlugins>;
 }
 
+export type AiEnumerate = Array<
+  | { event: string; args?: any[] }
+  | { move: string; args?: any[] }
+  | ActionShape.MakeMove
+  | ActionShape.GameEvent
+>
+
 export interface Game<
   G extends any = any,
   CtxWithPlugins extends Ctx = Ctx,
@@ -336,12 +343,7 @@ export interface Game<
       G: G,
       ctx: Ctx,
       playerID: PlayerID
-    ) => Array<
-      | { event: string; args?: any[] }
-      | { move: string; args?: any[] }
-      | ActionShape.MakeMove
-      | ActionShape.GameEvent
-    >;
+    ) => AiEnumerate;
   };
   processMove?: (
     state: State<G, Ctx | CtxWithPlugins>,
