@@ -1,5 +1,6 @@
 import { InitializeGame } from '../core/initialize';
 import type { Server, State, Game } from '../types';
+import type { Auth } from './auth';
 
 /**
  * Creates a new match metadata object.
@@ -82,4 +83,53 @@ export const getFirstAvailablePlayerID = (
       return String(i);
     }
   }
+};
+
+/**
+ * Add player to a game
+ *
+ */
+export const addPlayerToGame = async (
+  ctx,
+  playerID: string,
+  metadata: Server.MatchData,
+  matchID: string,
+  data: any,
+  auth: Auth,
+  playerName?: string
+): Promise<{
+  metadata: Server.MatchData;
+  playerCredentials: string;
+  playerID: string;
+}> => {
+  if (typeof playerID === 'undefined' || playerID === null) {
+    playerID = getFirstAvailablePlayerID(metadata.players);
+    if (playerID === undefined) {
+      const numPlayers = getNumPlayers(metadata.players);
+      ctx.throw(
+        409,
+        `Match ${matchID} reached maximum number of players (${numPlayers})`
+      );
+    }
+  }
+
+  if (!metadata.players[playerID]) {
+    ctx.throw(404, 'Player ' + playerID + ' not found');
+  }
+  if (metadata.players[playerID].name) {
+    ctx.throw(409, 'Player ' + playerID + ' not available');
+  }
+
+  if (data) {
+    metadata.players[playerID].data = data;
+  }
+
+  if (playerName) {
+    metadata.players[playerID].name = playerName;
+  }
+
+  const playerCredentials = await auth.generateCredentials(ctx);
+  metadata.players[playerID].credentials = playerCredentials;
+
+  return { metadata, playerCredentials, playerID };
 };

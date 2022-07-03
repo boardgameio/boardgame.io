@@ -12,7 +12,7 @@ import type Router from '@koa/router';
 import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
-import { createMatch, getFirstAvailablePlayerID, getNumPlayers } from './util';
+import { addPlayerToGame, createMatch } from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 
@@ -239,37 +239,23 @@ export const configureRouter = ({
       ctx.throw(403, 'playerName is required');
     }
 
-    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
+    let { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
 
-    if (typeof playerID === 'undefined' || playerID === null) {
-      playerID = getFirstAvailablePlayerID(metadata.players);
-      if (playerID === undefined) {
-        const numPlayers = getNumPlayers(metadata.players);
-        ctx.throw(
-          409,
-          `Match ${matchID} reached maximum number of players (${numPlayers})`
-        );
-      }
-    }
-
-    if (!metadata.players[playerID]) {
-      ctx.throw(404, 'Player ' + playerID + ' not found');
-    }
-    if (metadata.players[playerID].name) {
-      ctx.throw(409, 'Player ' + playerID + ' not available');
-    }
-
-    if (data) {
-      metadata.players[playerID].data = data;
-    }
-    metadata.players[playerID].name = playerName;
-    const playerCredentials = await auth.generateCredentials(ctx);
-    metadata.players[playerID].credentials = playerCredentials;
+    let playerCredentials;
+    ({ metadata, playerCredentials, playerID } = await addPlayerToGame(
+      ctx,
+      playerID,
+      metadata,
+      matchID,
+      data,
+      auth,
+      playerName
+    ));
 
     await db.setMetadata(matchID, metadata);
 
