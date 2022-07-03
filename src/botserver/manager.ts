@@ -4,7 +4,7 @@ import { GetBotPlayer } from '../client/transport/local';
 import { SocketIO } from '../client/transport/socketio';
 import type { Game } from '../types';
 import type { State } from '../types';
-import { BotCreationRequest } from './botserver';
+import type { BotCreationRequest } from './botserver';
 
 export interface BotExecutionResult {
   moveName: string;
@@ -75,7 +75,6 @@ export class BotManager {
         const client = this.getClient(matchID, playerID);
         client.moves[moveName](moveArgs);
       }
-      return Promise.resolve(null);
     };
   }
 }
