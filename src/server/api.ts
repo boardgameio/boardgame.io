@@ -17,6 +17,9 @@ import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 import { Master } from '../master/master';
 import type { TransportAPI as MasterTransport } from '../master/master';
+import type { GenericPubSub } from './transport/pubsub/generic-pub-sub';
+import type { BotCreationRequest } from '../botserver/botserver';
+import { BOT_SERVER_CHANNEL } from '../botserver/botserver';
 
 interface MatchQueue {
   add<T>(task: () => PromiseLike<T>): Promise<T>;
@@ -94,6 +97,7 @@ export const configureRouter = ({
   uuid = () => nanoid(11),
   apiBodyLimit = '5mb',
   transport,
+  botServerPubSub,
 }: {
   router: Router<any, Server.AppCtx>;
   auth: Auth;
@@ -102,6 +106,7 @@ export const configureRouter = ({
   db: StorageAPI.Sync | StorageAPI.Async;
   apiBodyLimit?: string | number;
   transport?: MatchTransport;
+  botServerPubSub?: GenericPubSub<BotCreationRequest>;
 }) => {
   const bodyParser = koaBodyParser({
     jsonLimit: apiBodyLimit,
@@ -332,6 +337,68 @@ export const configureRouter = ({
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
     const body: LobbyAPI.Match = createClientMatchData(matchID, metadata);
+    ctx.body = body;
+  });
+
+  /**
+   * Request that bots join a match
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {number} numBots - amount of bots to add
+   *
+   */
+  router.post('/games/:name/:id/add-bots', bodyParser, async (ctx) => {
+    if (!botServerPubSub) {
+      ctx.throw(409, 'BotServer config not provided at server start up');
+    }
+
+    const data = (ctx.request.body as any)?.data;
+    const matchID = ctx.params.id;
+    const gameName = ctx.params.name;
+    let numBots = (ctx.request.body as any)?.numBots;
+    if (!numBots) {
+      numBots = 1;
+    }
+
+    let { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
+      metadata: true,
+    });
+    if (!metadata) {
+      ctx.throw(404, 'Match ' + matchID + ' not found');
+    }
+
+    const botNameList = [];
+    const botOptsList: { playerID: string; playerCredentials: string }[] = [];
+    for (let i = 0; i < numBots; i++) {
+      const playerData = await addPlayerToGame(
+        ctx,
+        null,
+        metadata,
+        matchID,
+        data,
+        auth,
+      );
+      const { playerCredentials, playerID } = playerData;
+      metadata = playerData.metadata;
+
+      const botName = `bot${playerID}`;
+      metadata.players[playerID].name = botName;
+      await db.setMetadata(matchID, metadata);
+      botNameList.push(botName);
+
+      botOptsList.push({
+        playerID,
+        playerCredentials,
+      });
+    }
+
+    botServerPubSub.publish(BOT_SERVER_CHANNEL, {
+      gameName,
+      matchID,
+      botOptsList,
+    });
+    const body: LobbyAPI.BotsJoinedMatch = { botNameList };
     ctx.body = body;
   });
 

@@ -17,6 +17,11 @@ import * as logger from '../core/logger';
 import { Auth } from './auth';
 import { SocketIO } from './transport/socketio';
 import type { Server as ServerTypes, Game, StorageAPI } from '../types';
+import type { BotCallback } from '../botserver/manager';
+import type { GenericPubSub } from './transport/pubsub/generic-pub-sub';
+import type { BotCreationRequest } from '../botserver/botserver';
+import { runBotServer } from '../botserver/botserver';
+import { InMemoryPubSub } from './transport/pubsub/in-memory-pub-sub';
 
 export type KoaServer = ReturnType<Koa['listen']>;
 
@@ -79,6 +84,10 @@ interface ServerOpts {
    * inside your game's setup() function rather than passing it via setupData.
    */
   apiBodyLimit?: string | number;
+  botServerConfig?: {
+    runBot?: BotCallback;
+    pubSub?: GenericPubSub<BotCreationRequest>;
+  };
 }
 
 /**
@@ -105,6 +114,7 @@ export function Server({
   generateCredentials = uuid,
   authenticateCredentials,
   apiBodyLimit = '5mb',
+  botServerConfig,
 }: ServerOpts) {
   const app: ServerTypes.App = new Koa();
 
@@ -131,6 +141,10 @@ export function Server({
   }
   transport.init(app, games, origins);
 
+  if (botServerConfig?.runBot && !botServerConfig.pubSub) {
+    botServerConfig.pubSub = new InMemoryPubSub<BotCreationRequest>();
+  }
+
   const router = new Router<any, ServerTypes.AppCtx>();
 
   return {
@@ -150,7 +164,19 @@ export function Server({
         auth,
         apiBodyLimit,
         transport,
+        botServerPubSub: botServerConfig?.pubSub,
       });
+
+      //BotServer
+      if (botServerConfig?.runBot) {
+        const { runBot, pubSub } = botServerConfig;
+        runBotServer({
+          games,
+          runBot,
+          masterServerHost: `localhost:${serverRunConfig.port}`,
+          pubSub,
+        });
+      }
 
       // DB
       await db.connect();

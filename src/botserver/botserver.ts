@@ -1,6 +1,7 @@
-import { GenericPubSub } from '../server/transport/pubsub/generic-pub-sub';
-import { Game } from '../types';
-import { BotCallback, BotManager } from './manager';
+import type { GenericPubSub } from '../server/transport/pubsub/generic-pub-sub';
+import type { Game } from '../types';
+import type { BotCallback } from './manager';
+import { BotManager } from './manager';
 export interface BotCreationRequest {
   gameName: string;
   matchID: string;
