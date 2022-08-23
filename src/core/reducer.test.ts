@@ -415,6 +415,62 @@ describe('Random inside setup()', () => {
   });
 });
 
+describe('redact', () => {
+  const game: Game = {
+    setup: () => ({
+      isASecret: false,
+    }),
+    moves: {
+      A: {
+        move: (G) => G,
+        redact: (G) => G.isASecret,
+      },
+      B: (G) => {
+        return { ...G, isASecret: true };
+      },
+    },
+  };
+
+  const reducer = CreateGameReducer({ game });
+
+  let state = InitializeGame({ game });
+
+  test('move A is not secret and is not redact', () => {
+    state = reducer(state, makeMove('A', ['not redact'], '0'));
+    expect(state.G).toMatchObject({
+      isASecret: false,
+    });
+    const [lastLogEntry] = state.deltalog.slice(-1);
+    expect(lastLogEntry).toMatchObject({
+      action: {
+        payload: {
+          type: 'A',
+          args: ['not redact'],
+        },
+      },
+      redact: false,
+    });
+  });
+
+  test('move A is secret and is redact', () => {
+    state = reducer(state, makeMove('B', ['not redact'], '0'));
+    state = reducer(state, makeMove('A', ['redact'], '0'));
+    expect(state.G).toMatchObject({
+      isASecret: true,
+    });
+    const [lastLogEntry] = state.deltalog.slice(-1);
+    expect(lastLogEntry).toMatchObject({
+      action: {
+        payload: {
+          type: 'A',
+          args: ['redact'],
+        },
+      },
+      redact: true,
+    });
+  });
+});
+
 describe('undo / redo', () => {
   const game: Game = {
     seed: 0,
