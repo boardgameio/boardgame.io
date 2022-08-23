@@ -118,8 +118,18 @@ function initializeDeltalog(
     logEntry.metadata = pluginLogMetadata;
   }
 
-  if (typeof move === 'object' && move.redact === true) {
-    logEntry.redact = true;
+  function IsRedactFunction(
+    redact: boolean | ((...args: any[]) => any)
+  ): redact is (...args: any[]) => any {
+    return redact instanceof Function;
+  }
+
+  if (typeof move === 'object') {
+    if (IsRedactFunction(move.redact)) {
+      logEntry.redact = move.redact(state.G, state.ctx);
+    } else if (move.redact === true) {
+      logEntry.redact = true;
+    }
   }
 
   return {
