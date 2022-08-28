@@ -143,7 +143,7 @@ Simple hexagonal board game.
 &nbsp;&nbsp;
 Lobby framework for boardgame.io games. Play Splendor or Powergrid clones here.
 
-[p-lhog]: https://lhog.herokuapp.com/
+[p-lhog]: https://lhog.lewissilletto.com/
 [c-lhog]: https://github.com/sillle14/lhog
 [b-lhog]: https://img.shields.io/github/stars/sillle14/lhog?label=%E2%98%85&logo=github
 
