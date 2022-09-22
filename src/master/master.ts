@@ -176,12 +176,7 @@ export class Master {
     const action = stripCredentialsFromAction(credAction);
     const key = matchID;
 
-    let state: State;
-    if (StorageAPI.isSynchronous(this.storageAPI)) {
-      ({ state } = this.storageAPI.fetch(key, { state: true }));
-    } else {
-      ({ state } = await this.storageAPI.fetch(key, { state: true }));
-    }
+    let state = await this.getStateFromStorageAPI(key);
 
     if (state === undefined) {
       logging.error(`game not found, matchID=[${key}]`);
@@ -430,6 +425,12 @@ export class Master {
       return { error: 'player not in the match' };
     }
 
+    const state = await this.getStateFromStorageAPI(key);
+
+    if (state === undefined) {
+      logging.error(`game not found, matchID=[${key}]`);
+    }
+
     if (this.auth) {
       const isAuthentic = await this.auth.authenticateCredentials({
         playerID,
@@ -440,6 +441,8 @@ export class Master {
         return { error: 'unauthorized' };
       }
     }
+
+    this.game.flow.playerDisconnectCallback(state.G, state.ctx, playerID);
 
     metadata.players[playerID].isConnected = connected;
 
@@ -488,5 +491,19 @@ export class Master {
       type: 'chat',
       args: [matchID, chatMessage],
     });
+  }
+
+  private async getStateFromStorageAPI(
+    key: string
+  ): Promise<State | undefined> {
+    let state: State;
+
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      ({ state } = this.storageAPI.fetch(key, { state: true }));
+    } else {
+      ({ state } = await this.storageAPI.fetch(key, { state: true }));
+    }
+
+    return state;
   }
 }

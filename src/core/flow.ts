@@ -45,6 +45,7 @@ export function Flow({
   turn,
   events,
   plugins,
+  onPlayerDisconnect,
 }: Game) {
   // Attach defaults.
   if (moves === undefined) {
@@ -60,6 +61,9 @@ export function Flow({
     phases = {};
   }
 
+  if (!onPlayerDisconnect) {
+    onPlayerDisconnect = (_G: any, ctx: Ctx, playerID: PlayerID) => {};
+  }
   if (!endIf) endIf = () => undefined;
   if (!onEnd) onEnd = (G) => G;
   if (!turn) turn = {};
@@ -853,6 +857,10 @@ export function Flow({
     return ctx.currentPlayer === playerID;
   }
 
+  function OnPlayerDisconnect(_G: any, ctx: Ctx, playerID: PlayerID) {
+    onPlayerDisconnect(_G, ctx, playerID);
+  }
+
   return {
     ctx: (numPlayers: number): Ctx => ({
       numPlayers,
@@ -875,5 +883,6 @@ export function Flow({
     processMove: ProcessMove,
     processEvent: ProcessEvent,
     getMove: GetMove,
+    playerDisconnectCallback: OnPlayerDisconnect,
   };
 }

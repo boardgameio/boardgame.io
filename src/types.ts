@@ -329,6 +329,7 @@ export interface Game<
   };
   endIf?: (G: G, ctx: CtxWithPlugins) => any;
   onEnd?: (G: G, ctx: CtxWithPlugins) => any;
+  onPlayerDisconnect?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID) => any;
   playerView?: (G: G, ctx: CtxWithPlugins, playerID: PlayerID | null) => any;
   plugins?: Array<Plugin<any, any, G>>;
   ai?: {
