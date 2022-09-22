@@ -201,11 +201,5 @@
       "node_modules/",
       ".npm/"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run test:coverage"
-    }
   }
 }
