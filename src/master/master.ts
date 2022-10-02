@@ -26,7 +26,6 @@ import type {
   PlayerID,
   ChatMessage,
 } from '../types';
-import { createMatch } from '../server/util';
 import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import type { Operation } from 'rfc6902';
@@ -336,7 +335,7 @@ export class Master {
       ? this.storageAPI.fetch(key, fetchOpts)
       : await this.storageAPI.fetch(key, fetchOpts);
 
-    let { state, initialState, log, metadata } = fetchResult;
+    const { state, initialState, log, metadata } = fetchResult;
 
     if (this.auth && playerID !== undefined && playerID !== null) {
       const isAuthentic = await this.auth.authenticateCredentials({
@@ -346,32 +345,6 @@ export class Master {
       });
       if (!isAuthentic) {
         return { error: 'unauthorized' };
-      }
-    }
-
-    // If the game doesn't exist, then create one on demand.
-    // TODO: Move this out of the sync call.
-    if (state === undefined) {
-      const match = createMatch({
-        game: this.game,
-        unlisted: true,
-        numPlayers,
-        setupData: undefined,
-      });
-
-      if ('setupDataError' in match) {
-        return { error: 'game requires setupData' };
-      }
-
-      initialState = state = match.initialState;
-      metadata = match.metadata;
-
-      this.subscribeCallback({ state, matchID });
-
-      if (StorageAPI.isSynchronous(this.storageAPI)) {
-        this.storageAPI.createMatch(key, { initialState, metadata });
-      } else {
-        await this.storageAPI.createMatch(key, { initialState, metadata });
       }
     }
 
