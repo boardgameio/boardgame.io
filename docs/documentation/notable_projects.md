@@ -143,7 +143,7 @@ Simple hexagonal board game.
 &nbsp;&nbsp;
 Lobby framework for boardgame.io games. Play Splendor or Powergrid clones here.
 
-[p-lhog]: https://lhog.herokuapp.com/
+[p-lhog]: https://lhog.lewissilletto.com/
 [c-lhog]: https://github.com/sillle14/lhog
 [b-lhog]: https://img.shields.io/github/stars/sillle14/lhog?label=%E2%98%85&logo=github
 
@@ -181,6 +181,15 @@ A project for building board games with React and boardgame.io.
 [p14]: http://play-boardgame.herokuapp.com
 [c14]: https://github.com/Pong420/Boardgame
 [b14]: https://img.shields.io/github/stars/Pong420/Boardgame?label=%E2%98%85&logo=github
+
+
+#### [![GitHub stars][b25]][c25] [Santorini][p25] \[[code][c25]\]
+&nbsp;&nbsp;
+Multiplayer online boardgame with 3D board using three.js.
+
+[p25]: https://santorini.onrender.com
+[c25]: https://github.com/mbrinkl/santorini
+[b25]: https://img.shields.io/github/stars/mbrinkl/santorini?label=%E2%98%85&logo=github
 
 
 #### [![GitHub stars][bsixpieces]][csixpieces] [SixPieces][psixpieces] \[[code][csixpieces]\]
@@ -267,12 +276,3 @@ A 1-4 player dice game played locally.
 [c22]: https://github.com/pjohannessen/yatzy
 [t22]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
 [b22]: https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
-
-
-#### [![GitHub stars][b25]][c25] [Santorini][p25] \[[code][c25]\]
-&nbsp;&nbsp;
-Multiplayer online boardgame with 3D board using Babylon.js.
-
-[p25]: https://santorini.herokuapp.com/
-[c25]: https://github.com/mbrinkl/santorini
-[b25]: https://img.shields.io/github/stars/mbrinkl/santorini?label=%E2%98%85&logo=github
