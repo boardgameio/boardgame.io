@@ -6,12 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import type { CorsOptions } from 'cors';
 import type Koa from 'koa';
 import type Router from '@koa/router';
 import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
-import type IOTypes from 'socket.io';
 import { createMatch, getFirstAvailablePlayerID, getNumPlayers } from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
@@ -120,6 +120,15 @@ export const configureRouter = ({
 
     const game = games.find((g) => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
+
+    if (
+      ctx.request.body.numPlayers !== undefined &&
+      (Number.isNaN(numPlayers) ||
+        (game.minPlayers && numPlayers < game.minPlayers) ||
+        (game.maxPlayers && numPlayers > game.maxPlayers))
+    ) {
+      ctx.throw(400, 'Invalid numPlayers');
+    }
 
     const matchID = await CreateMatch({
       ctx,
@@ -462,7 +471,7 @@ export const configureRouter = ({
 export const configureApp = (
   app: Server.App,
   router: Router<any, Server.AppCtx>,
-  origins: IOTypes.ServerOptions['cors']['origin']
+  origins: CorsOptions['origin']
 ): void => {
   app.use(
     cors({
@@ -499,7 +508,7 @@ export const configureApp = (
  */
 function isOriginAllowed(
   origin: string,
-  allowedOrigin: IOTypes.ServerOptions['cors']['origin']
+  allowedOrigin: CorsOptions['origin']
 ): boolean {
   if (Array.isArray(allowedOrigin)) {
     for (const entry of allowedOrigin) {

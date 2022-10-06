@@ -91,3 +91,15 @@ Client({
   ),
 })
 ```
+
+### Server + Sockets
+
+The Koa-server can be debugged by setting the `DEBUG` environment variable before starting it.
+This will give you access to logs of incoming requests as well as the socket.io logs.
+To set the environment variable prepend your npm script to run the server like so:
+
+```
+DEBUG=* node server.js
+```
+
+> NOTE: For various debugging scopes have a look at the [socket.io-docs](https://socket.io/docs/v4/logging-and-debugging/#available-debugging-scopes)
