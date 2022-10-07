@@ -120,6 +120,8 @@ function initializeDeltalog(
 
   if (typeof move === 'object' && move.redact === true) {
     logEntry.redact = true;
+  } else if (typeof move === 'object' && move.redact instanceof Function) {
+    logEntry.redact = move.redact(state.G, state.ctx);
   }
 
   return {

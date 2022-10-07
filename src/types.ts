@@ -203,7 +203,7 @@ export interface LongFormMove<
   CtxWithPlugins extends Ctx = Ctx
 > {
   move: MoveFn<G, CtxWithPlugins>;
-  redact?: boolean;
+  redact?: boolean | ((G: G, ctx: CtxWithPlugins) => boolean);
   noLimit?: boolean;
   client?: boolean;
   undoable?: boolean | ((G: G, ctx: CtxWithPlugins) => boolean);

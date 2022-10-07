@@ -308,3 +308,74 @@ describe('redactLog', () => {
     ]);
   });
 });
+
+test('make move args to be secret depends on G via conditional redact', async () => {
+  const game = {
+    setup: () => ({
+      isASecret: false,
+    }),
+    moves: {
+      A: {
+        move: (G) => G,
+        redact: (G) => G.isASecret,
+      },
+      B: (G) => {
+        return { ...G, isASecret: true };
+      },
+    },
+  };
+
+  const send = jest.fn();
+  const master = new Master(game, new InMemory(), TransportAPI(send));
+  const filterPlayerView = getFilterPlayerView(game);
+
+  const actionA0 = ActionCreators.makeMove('A', ['not redacted'], '0');
+  const actionB = ActionCreators.makeMove('B', ['not redacted'], '0');
+  const actionA1 = ActionCreators.makeMove('A', ['redacted'], '0');
+
+  // test: ping-pong two moves, then sync and check the log
+  await master.onSync('matchID', '0', undefined, 2);
+  await master.onUpdate(actionA0, 0, 'matchID', '0');
+  await master.onUpdate(actionB, 1, 'matchID', '0');
+  await master.onUpdate(actionA1, 2, 'matchID', '0');
+  await master.onSync('matchID', '1', undefined, 2);
+
+  const payload = send.mock.calls[send.mock.calls.length - 1][0];
+  expect(
+    (filterPlayerView('1', payload).args[1] as SyncInfo).log
+  ).toMatchObject([
+    {
+      action: {
+        type: 'MAKE_MOVE',
+        payload: {
+          type: 'A',
+          args: ['not redacted'],
+          playerID: '0',
+        },
+      },
+      _stateID: 0,
+    },
+    {
+      action: {
+        type: 'MAKE_MOVE',
+        payload: {
+          type: 'B',
+          args: ['not redacted'],
+          playerID: '0',
+        },
+      },
+      _stateID: 1,
+    },
+    {
+      action: {
+        type: 'MAKE_MOVE',
+        payload: {
+          type: 'A',
+          args: null,
+          playerID: '0',
+        },
+      },
+      _stateID: 2,
+    },
+  ]);
+});
