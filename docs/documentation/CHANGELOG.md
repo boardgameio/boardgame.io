@@ -1,4 +1,4 @@
-### 0.50.00
+## v0.50.0
 
 This release includes a large refactor in boardgame.io API. Callbacks that used to be `(G, ctx) => {}` now becomes `({ G, ctx }) => {}` ... Thanks [@delucis](https://github.com/delucis) for the great contribution!
 
@@ -6,7 +6,7 @@ This release includes a large refactor in boardgame.io API. Callbacks that used 
 
 * [[da1ccb1](https://github.com/boardgameio/boardgame.io/commit/da1ccb18819fa265144da075a445e003d8a2fcc8)] feat: Change move and hook signature ([#891](https://github.com/boardgameio/boardgame.io/pull/891))
 
-### 0.49.13
+### v0.49.13
 
 ### Features
 
