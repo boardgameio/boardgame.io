@@ -209,7 +209,7 @@ export interface LongFormMove<
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > {
   move: MoveFn<G, PluginAPIs>;
-  redact?: boolean;
+  redact?: boolean | ((context: { G: G; ctx: Ctx }) => boolean);
   noLimit?: boolean;
   client?: boolean;
   undoable?: boolean | ((context: { G: G; ctx: Ctx }) => boolean);
