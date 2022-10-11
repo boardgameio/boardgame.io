@@ -7,7 +7,7 @@
  */
 
 import produce from 'immer';
-import type { AnyFn, Ctx, Plugin } from '../types';
+import type { Plugin } from '../types';
 import { INVALID_MOVE } from '../core/constants';
 
 /**
@@ -18,11 +18,11 @@ const ImmerPlugin: Plugin = {
   name: 'plugin-immer',
 
   fnWrap:
-    (move: AnyFn) =>
-    (G: any, ctx: Ctx, ...args: any[]) => {
+    (move) =>
+    (context, ...args) => {
       let isInvalid = false;
-      const newG = produce(G, (G) => {
-        const result = move(G, ctx, ...args);
+      const newG = produce(context.G, (G) => {
+        const result = move({ ...context, G }, ...args);
         if (result === INVALID_MOVE) {
           isInvalid = true;
           return;

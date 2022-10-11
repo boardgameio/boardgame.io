@@ -11,13 +11,13 @@ import type { Ctx } from '../types';
 
 test('no change', () => {
   const G = { test: true };
-  const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '0');
+  const newG = PlayerView.STRIP_SECRETS({ G, ctx: {} as Ctx, playerID: '0' });
   expect(newG).toEqual(G);
 });
 
 test('secret', () => {
   const G = { secret: true };
-  const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '0');
+  const newG = PlayerView.STRIP_SECRETS({ G, ctx: {} as Ctx, playerID: '0' });
   expect(newG).toEqual({});
 });
 
@@ -30,17 +30,21 @@ describe('players', () => {
   };
 
   test('playerID: "0"', () => {
-    const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '0');
+    const newG = PlayerView.STRIP_SECRETS({ G, ctx: {} as Ctx, playerID: '0' });
     expect(newG.players).toEqual({ '0': {} });
   });
 
   test('playerID: "1"', () => {
-    const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, '1');
+    const newG = PlayerView.STRIP_SECRETS({ G, ctx: {} as Ctx, playerID: '1' });
     expect(newG.players).toEqual({ '1': {} });
   });
 
   test('playerID: null', () => {
-    const newG = PlayerView.STRIP_SECRETS(G, {} as Ctx, null);
+    const newG = PlayerView.STRIP_SECRETS({
+      G,
+      ctx: {} as Ctx,
+      playerID: null,
+    });
     expect(newG.players).toEqual({});
   });
 });

@@ -18,7 +18,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
 import { error } from '../core/logger';
-import type { State } from '../types';
+import type { Game, State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -311,12 +311,12 @@ describe('turn orders', () => {
 test('override', () => {
   const even = {
     first: () => 0,
-    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
+    next: ({ ctx }) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
   };
 
   const odd = {
     first: () => 1,
-    next: (G, ctx) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
+    next: ({ ctx }) => (+ctx.currentPlayer + 2) % ctx.numPlayers,
   };
 
   const flow = Flow({
@@ -343,7 +343,7 @@ test('override', () => {
 });
 
 test('playOrder', () => {
-  const game = {};
+  const game: Game = {};
   const reducer = CreateGameReducer({ game });
 
   let state = InitializeGame({ game, numPlayers: 3 });
@@ -414,17 +414,17 @@ describe('setActivePlayers', () => {
   });
 
   test('once', () => {
-    const game = {
+    const game: Game = {
       moves: {
-        B: (G, ctx) => {
-          ctx.events.setActivePlayers({
+        B: ({ G, events }) => {
+          events.setActivePlayers({
             value: { '0': Stage.NULL, '1': Stage.NULL },
             minMoves: 1,
             maxMoves: 1,
           });
           return G;
         },
-        A: (G) => G,
+        A: ({ G }) => G,
       },
     };
 
@@ -440,17 +440,17 @@ describe('setActivePlayers', () => {
   });
 
   test('others', () => {
-    const game = {
+    const game: Game = {
       moves: {
-        B: (G, ctx) => {
-          ctx.events.setActivePlayers({
+        B: ({ G, events }) => {
+          events.setActivePlayers({
             minMoves: 1,
             maxMoves: 1,
             others: Stage.NULL,
           });
           return G;
         },
-        A: (G) => G,
+        A: ({ G }) => G,
       },
     };
 
@@ -472,11 +472,11 @@ describe('setActivePlayers', () => {
   });
 
   test('set stages to Stage.NULL', () => {
-    const game = {
+    const game: Game = {
       moves: {
-        A: (G) => G,
-        B: (G, ctx) => {
-          ctx.events.setActivePlayers({
+        A: ({ G }) => G,
+        B: ({ G, events }) => {
+          events.setActivePlayers({
             minMoves: 1,
             maxMoves: 1,
             currentPlayer: 'start',
@@ -494,8 +494,8 @@ describe('setActivePlayers', () => {
         stages: {
           start: {
             moves: {
-              S: (G, ctx) => {
-                ctx.events.setStage(Stage.NULL);
+              S: ({ G, events }) => {
+                events.setStage(Stage.NULL);
                 return G;
               },
             },
@@ -523,7 +523,7 @@ describe('setActivePlayers', () => {
 
   describe('reset behavior', () => {
     test('start of turn', () => {
-      const game = {
+      const game: Game = {
         moves: {
           A: () => {},
         },
@@ -551,10 +551,10 @@ describe('setActivePlayers', () => {
 
     describe('revert', () => {
       test('resets to previous', () => {
-        const game = {
+        const game: Game = {
           moves: {
-            A: (G, ctx) => {
-              ctx.events.setActivePlayers({
+            A: ({ events }) => {
+              events.setActivePlayers({
                 currentPlayer: 'stage2',
                 minMoves: 1,
                 maxMoves: 1,
@@ -600,10 +600,10 @@ describe('setActivePlayers', () => {
       });
 
       test('restores move limits and counts', () => {
-        const game = {
+        const game: Game = {
           moves: {
-            A: (G, ctx) => {
-              ctx.events.setActivePlayers({
+            A: ({ events }) => {
+              events.setActivePlayers({
                 currentPlayer: 'stage2',
                 minMoves: 1,
                 maxMoves: 1,
@@ -681,7 +681,7 @@ describe('setActivePlayers', () => {
     });
 
     test('set to next', () => {
-      const game = {
+      const game: Game = {
         moves: {
           A: () => {},
         },
@@ -741,7 +741,7 @@ describe('setActivePlayers', () => {
 
   describe('move limits', () => {
     test('shorthand syntax', () => {
-      const game = {
+      const game: Game = {
         turn: {
           activePlayers: {
             all: 'play',
@@ -795,7 +795,7 @@ describe('setActivePlayers', () => {
     });
 
     test('long-form syntax', () => {
-      const game = {
+      const game: Game = {
         turn: {
           activePlayers: {
             currentPlayer: { stage: 'play', minMoves: 1, maxMoves: 2 },
@@ -842,7 +842,7 @@ describe('setActivePlayers', () => {
     });
 
     test('player-specific limit overrides move limit args', () => {
-      const game = {
+      const game: Game = {
         turn: {
           activePlayers: {
             all: { stage: 'play', minMoves: 2, maxMoves: 2 },
@@ -866,7 +866,7 @@ describe('setActivePlayers', () => {
     });
 
     test('value syntax', () => {
-      const game = {
+      const game: Game = {
         turn: {
           activePlayers: {
             value: {
@@ -911,7 +911,7 @@ describe('setActivePlayers', () => {
     });
 
     test('move counts reset on turn end', () => {
-      const game = {
+      const game: Game = {
         turn: {
           activePlayers: {
             all: 'play',
@@ -948,10 +948,10 @@ describe('setActivePlayers', () => {
     let state;
     let reducer;
     beforeAll(() => {
-      const game = {
+      const game: Game = {
         moves: {
-          militia: (G, ctx) => {
-            ctx.events.setActivePlayers({
+          militia: ({ events }) => {
+            events.setActivePlayers({
               others: 'discard',
               minMoves: 1,
               maxMoves: 1,
@@ -964,7 +964,7 @@ describe('setActivePlayers', () => {
           stages: {
             discard: {
               moves: {
-                discard: (G) => G,
+                discard: ({ G }) => G,
               },
             },
           },
@@ -1087,15 +1087,15 @@ describe('Random API is available', () => {
 
   const turn = {
     order: {
-      first: (_, ctx) => {
-        if (ctx.random !== undefined) {
+      first: ({ random }) => {
+        if (random !== undefined) {
           first = true;
         }
         return 0;
       },
 
-      next: (_, ctx) => {
-        if (ctx.random !== undefined) {
+      next: ({ random }) => {
+        if (random !== undefined) {
           next = true;
         }
         return 0;
@@ -1103,7 +1103,7 @@ describe('Random API is available', () => {
     },
   };
 
-  const game = { turn };
+  const game: Game = { turn };
 
   beforeEach(() => {
     first = next = false;

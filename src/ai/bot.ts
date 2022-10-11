@@ -8,6 +8,7 @@
 
 import { makeMove, gameEvent } from '../core/action-creators';
 import { alea } from '../plugins/random/random.alea';
+import type { AleaState } from '../plugins/random/random.alea';
 import type { ActionShape, Game, Ctx, PlayerID, State } from '../types';
 
 export type BotAction = ActionShape.GameEvent | ActionShape.MakeMove;
@@ -26,7 +27,7 @@ export abstract class Bot {
       value: any;
     }
   >;
-  private prngstate;
+  private prngstate?: AleaState;
 
   constructor({
     enumerate,

@@ -12,7 +12,7 @@ export interface MyGameState {
   // aka 'G', your game's state
 }
 
-const move: Move<MyGameState> = (G, ctx) => {};
+const move: Move<MyGameState> = ({ G, ctx }) => {};
 
 export const MyGame: Game<MyGameState> = {
   // ...

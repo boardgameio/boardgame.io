@@ -1,26 +1,26 @@
-function DrawCard(G, ctx) {
+function DrawCard({ G, playerID }) {
   G.deck--;
-  G.hand[ctx.currentPlayer]++;
+  G.hand[playerID]++;
 }
 
-function PlayCard(G, ctx) {
+function PlayCard({ G, playerID }) {
   G.deck++;
-  G.hand[ctx.currentPlayer]--;
+  G.hand[playerID]--;
 }
 
 const game = {
-  setup: (ctx) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
+  setup: ({ ctx }) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   phases: {
     draw: {
       moves: { DrawCard },
-      endIf: (G) => G.deck <= 0,
+      endIf: ({ G }) => G.deck <= 0,
       next: 'play',
       start: true,
     },
 
     play: {
       moves: { PlayCard },
-      endIf: (G) => G.deck >= 6,
+      endIf: ({ G }) => G.deck >= 6,
     },
   },
   turn: { minMoves: 1, maxMoves: 1 },

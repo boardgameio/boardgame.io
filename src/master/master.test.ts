@@ -11,7 +11,7 @@ import { InitializeGame } from '../core/initialize';
 import { InMemory } from '../server/db/inmemory';
 import { Master } from './master';
 import { error } from '../core/logger';
-import type { Game, Server, State, Ctx, LogEntry } from '../types';
+import type { Game, Server, State, LogEntry } from '../types';
 import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
@@ -78,7 +78,7 @@ class InMemoryAsync extends StorageAPI.Async {
   }
 }
 
-const game = { seed: 0 };
+const game: Game = { seed: 0 };
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
@@ -173,9 +173,9 @@ describe('sync', () => {
 describe('update', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G) => G,
+      A: ({ G }) => G,
     },
   };
   let db;
@@ -260,7 +260,7 @@ describe('update', () => {
   });
 
   test('allow execution of moves with ignoreStaleStateID truthy', async () => {
-    const game = {
+    const game: Game = {
       setup: () => {
         const G = {
           players: {
@@ -282,14 +282,14 @@ describe('update', () => {
         stages: {
           A: {
             moves: {
-              A: (G, ctx: Ctx) => {
-                const card = G.players[ctx.playerID].cards.shift();
+              A: ({ G, playerID }) => {
+                const card = G.players[playerID].cards.shift();
                 G.discardedCards.push(card);
               },
               B: {
-                move: (G, ctx: Ctx) => {
+                move: ({ G, playerID }) => {
                   const card = G.cards.pop();
-                  G.players[ctx.playerID].cards.push(card);
+                  G.players[playerID].cards.push(card);
                 },
                 ignoreStaleStateID: true,
               },
@@ -556,17 +556,17 @@ describe('patch', () => {
               },
               A: {
                 client: false,
-                move: (G, ctx: Ctx) => {
-                  const card = G.players[ctx.playerID].cards.shift();
+                move: ({ G, playerID }) => {
+                  const card = G.players[playerID].cards.shift();
                   G.discardedCards.push(card);
                 },
               },
               B: {
                 client: false,
                 ignoreStaleStateID: true,
-                move: (G, ctx: Ctx) => {
+                move: ({ G, playerID }) => {
                   const card = G.cards.pop();
-                  G.players[ctx.playerID].cards.push(card);
+                  G.players[playerID].cards.push(card);
                 },
               },
             },

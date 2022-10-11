@@ -1,8 +1,8 @@
-function militia(G, ctx) {
-  ctx.events.setActivePlayers({ others: 'discard', minMoves: 1, maxMoves: 1 });
+function militia({ G, events }) {
+  events.setActivePlayers({ others: 'discard', minMoves: 1, maxMoves: 1 });
 }
 
-function discard(G, ctx) {}
+function discard({ G, ctx }) {}
 
 const game = {
   moves: { militia },

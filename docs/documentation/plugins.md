@@ -34,9 +34,9 @@ A plugin is an object that contains the following fields.
   // wrapper can modify G before passing it down to
   // the wrapped function. It is a good practice to
   // undo the change at the end of the call.
-  fnWrap: (fn) => (G, ctx, ...args) => {
+  fnWrap: (fn) => ({ G, ...rest }, ...args) => {
     G = preprocess(G);
-    G = fn(G, ctx, ...args);
+    G = fn({ G, ...rest }, ...args);
     G = postprocess(G);
     return G;
   },
@@ -70,11 +70,9 @@ import { PluginA, PluginB } from 'boardgame.io/plugins';
 const game = {
   name: 'my-game',
 
-  moves: {
-    ...
-  },
-
   plugins: [PluginA, PluginB],
+
+  // ...
 };
 ```
 

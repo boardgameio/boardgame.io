@@ -27,7 +27,7 @@ const ChessGame = {
   setup: () => ({ pgn: '' }),
 
   moves: {
-    move(G, ctx, san) {
+    move({ G, ctx }, san) {
       const chess = Load(G.pgn);
       if (
         (chess.turn() == 'w' && ctx.currentPlayer == '1') ||
@@ -42,7 +42,7 @@ const ChessGame = {
 
   turn: { minMoves: 1, maxMoves: 1 },
 
-  endIf: (G) => {
+  endIf: ({ G }) => {
     const chess = Load(G.pgn);
     if (chess.game_over()) {
       if (

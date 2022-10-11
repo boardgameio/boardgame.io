@@ -41,10 +41,10 @@ export function InitializeGame({
 
   // Run plugins over initial state.
   state = plugins.Setup(state, { game });
-  state = plugins.Enhance(state as State, { game, playerID: undefined });
+  state = plugins.Enhance(state, { game, playerID: undefined });
 
-  const enhancedCtx = plugins.EnhanceCtx(state);
-  state.G = game.setup(enhancedCtx, setupData);
+  const pluginAPIs = plugins.GetAPIs(state);
+  state.G = game.setup({ ...pluginAPIs, ctx: state.ctx }, setupData);
 
   let initial: State = {
     ...state,

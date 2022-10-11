@@ -9,8 +9,8 @@ before passing them to the game object:
 `Game.js`
 
 ```js
-export function clickCell(G, ctx, id) {
-  G.cells[id] = ctx.currentPlayer;
+export function clickCell({ G, playerID }, id) {
+  G.cells[id] = playerID;
 }
 
 export const TicTacToe = {
@@ -31,7 +31,7 @@ it('should place the correct value in the cell', () => {
   };
 
   // make move.
-  clickCell(G, { currentPlayer: '1' }, 3);
+  clickCell({ G, playerID: '1' }, 3);
 
   // verify new state.
   expect(G).toEqual({
@@ -96,8 +96,8 @@ import { Client } from 'boardgame.io/client';
 
 const Game = {
   moves: {
-    rollDice: (G, ctx) => {
-      G.roll = ctx.random.D6();
+    rollDice: ({ G, random }) => {
+      G.roll = random.D6();
     },
   },
 };

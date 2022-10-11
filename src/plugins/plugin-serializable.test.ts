@@ -1,10 +1,11 @@
 import { Client } from '../client/client';
+import type { Game } from '../types';
 
 describe('plugin-serializable', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
 
   beforeAll(() => {
-    const game = {
+    const game: Game = {
       moves: {
         serializable: () => {
           return { hello: 'world' };

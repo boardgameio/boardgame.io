@@ -114,15 +114,15 @@ works the same way.
 Player `3` is made the new player in both examples below:
 
 ```js
-function Move(G, ctx) {
-  ctx.events.endTurn({ next: '3' });
+function Move({ events }) {
+  events.endTurn({ next: '3' });
 }
 ```
 
 ```js
 const game = {
   turn: {
-    endIf: (G, ctx) => ({ next: '3' }),
+    endIf: () => ({ next: '3' }),
   },
 };
 ```
@@ -137,17 +137,17 @@ turn: {
   order: {
     // Get the initial value of playOrderPos.
     // This is called at the beginning of the phase.
-    first: (G, ctx) => 0,
+    first: ({ G, ctx }) => 0,
 
     // Get the next value of playOrderPos.
     // This is called at the end of each turn.
     // The phase ends if this returns undefined.
-    next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+    next: ({ G, ctx }) => (ctx.playOrderPos + 1) % ctx.numPlayers,
 
     // OPTIONAL:
     // Override the initial value of playOrder.
     // This is called at the beginning of the game / phase.
-    playOrder: (G, ctx) => [...],
+    playOrder: ({ G, ctx }) => [...],
   }
 }
 ```

@@ -58,10 +58,10 @@ test('dispatch', () => {
 });
 
 test('update ctx', () => {
-  const game = {
+  const game: Game = {
     moves: {
-      A: (G, ctx) => {
-        ctx.events.endTurn();
+      A: ({ G, events }) => {
+        events.endTurn();
         return G;
       },
     },
@@ -73,10 +73,10 @@ test('update ctx', () => {
 });
 
 test('no duplicate endTurn', () => {
-  const game = {
+  const game: Game = {
     turn: {
-      onEnd: (G, ctx) => {
-        ctx.events.endTurn();
+      onEnd: ({ events }) => {
+        events.endTurn();
       },
     },
   };
@@ -88,12 +88,12 @@ test('no duplicate endTurn', () => {
 });
 
 test('no duplicate endPhase', () => {
-  const game = {
+  const game: Game = {
     phases: {
       A: {
         start: true,
-        onEnd: (G, ctx) => {
-          ctx.events.setPhase('C');
+        onEnd: ({ events }) => {
+          events.setPhase('C');
         },
       },
       B: {},

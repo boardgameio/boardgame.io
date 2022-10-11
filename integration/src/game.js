@@ -41,7 +41,7 @@ const TicTacToe = {
   }),
 
   moves: {
-    clickCell(G, ctx, id) {
+    clickCell({ G, ctx }, id) {
       const cells = [...G.cells];
 
       if (cells[id] === null) {
@@ -56,7 +56,7 @@ const TicTacToe = {
     maxMoves: 1,
   },
 
-  endIf: (G, ctx) => {
+  endIf: ({ G, ctx }) => {
     if (IsVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }

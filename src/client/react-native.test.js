@@ -102,7 +102,7 @@ test('move api', () => {
   const Board = Client({
     game: {
       moves: {
-        A: (G, ctx, arg) => ({ arg }),
+        A: (_, arg) => ({ arg }),
       },
     },
     board: TestBoard,
@@ -125,7 +125,7 @@ test('update matchID / playerID', () => {
   Board = Client({
     game: {
       moves: {
-        A: (G, ctx, arg) => ({ arg }),
+        A: (_, arg) => ({ arg }),
       },
     },
     board: TestBoard,
@@ -140,7 +140,7 @@ test('update matchID / playerID', () => {
   Board = Client({
     game: {
       moves: {
-        A: (G, ctx, arg) => ({ arg }),
+        A: (_, arg) => ({ arg }),
       },
     },
     board: TestBoard,
@@ -182,7 +182,7 @@ test('local playerView', () => {
   const Board = Client({
     game: {
       setup: () => ({ secret: true }),
-      playerView: (G, ctx, playerID) => ({ stripped: playerID }),
+      playerView: ({ playerID }) => ({ stripped: playerID }),
     },
     board: TestBoard,
     numPlayers: 2,
@@ -197,7 +197,7 @@ test('reset Game', () => {
   const Board = Client({
     game: {
       moves: {
-        A: (G, ctx, arg) => ({ arg }),
+        A: (_, arg) => ({ arg }),
       },
     },
     board: TestBoard,

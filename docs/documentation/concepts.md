@@ -41,7 +41,7 @@ immutability is handled by the framework.
 
 ```js
 moves: {
-  drawCard: (G, ctx) => {
+  drawCard: ({ G, ctx }) => {
     const card = G.deck.pop();
     G.hand.push(card);
   },
@@ -74,7 +74,7 @@ props.moves.drawCard();
 
 ### Events
 
-These are framework-provided functions that are analagous to moves, except that they work on `ctx`. These typically advance the game state by doing things like
+These are framework-provided functions that are analogous to moves, except that they work on `ctx`. These typically advance the game state by doing things like
 ending the turn, changing the game phase etc.
 Events are dispatched from the client in a similar way to moves.
 

@@ -11,9 +11,9 @@ import request from 'supertest';
 import { Server, createServerRunConfig, getPortFromServer } from '.';
 import type { KoaServer } from '.';
 import type { SocketIO } from './transport/socketio';
-import type { StorageAPI } from '../types';
+import type { Game, StorageAPI } from '../types';
 
-const game = { seed: 0 };
+const game: Game = { seed: 0 };
 
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 beforeEach(warn.mockReset);
@@ -50,21 +50,21 @@ jest.mock('koa-socket-2', () => {
 
 describe('new', () => {
   test('custom db implementation', () => {
-    const game = {};
+    const game: Game = {};
     const db = {} as StorageAPI.Sync;
     const server = Server({ games: [game], db });
     expect(server.db).toBe(db);
   });
 
   test('custom transport implementation', () => {
-    const game = {};
+    const game: Game = {};
     const transport = { init: jest.fn() } as unknown as SocketIO;
     Server({ games: [game], transport });
     expect(transport.init).toBeCalled();
   });
 
   test('custom auth implementation', () => {
-    const game = {};
+    const game: Game = {};
     const authenticateCredentials = () => true;
     const server = Server({ games: [game], authenticateCredentials });
     expect(server.db).not.toBeNull();

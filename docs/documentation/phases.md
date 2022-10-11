@@ -20,18 +20,18 @@ two moves:
 - play a card from your hand onto the deck.
 
 ```js
-function DrawCard(G, ctx) {
+function DrawCard({ G, playerID }) {
   G.deck--;
-  G.hand[ctx.currentPlayer]++;
+  G.hand[playerID]++;
 }
 
-function PlayCard(G, ctx) {
+function PlayCard({ G, playerID }) {
   G.deck++;
-  G.hand[ctx.currentPlayer]--;
+  G.hand[playerID]--;
 }
 
 const game = {
-  setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
+  setup: ({ ctx }) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   moves: { DrawCard, PlayCard },
   turn: { minMoves: 1, maxMoves: 1 },
 };
@@ -58,7 +58,7 @@ list of moves, which come into effect during that phase:
 
 ```js
 const game = {
-  setup: ctx => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
+  setup: ({ ctx }) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   turn: { minMoves: 1, maxMoves: 1 },
 
   phases: {
@@ -102,7 +102,7 @@ empty.
 phases: {
   draw: {
     moves: { DrawCard },
-+   endIf: G => (G.deck <= 0),
++   endIf: ({ G }) => (G.deck <= 0),
 +   next: 'play',
     start: true,
   },
@@ -134,8 +134,8 @@ You can also run code automatically at the beginning or end of a phase. These ar
 ```js
 phases: {
   phaseA: {
-    onBegin: (G, ctx) => { ... },
-    onEnd: (G, ctx) => { ... },
+    onBegin: ({ G, ctx }) => { ... },
+    onEnd: ({ G, ctx }) => { ... },
   },
 };
 ```
@@ -170,7 +170,7 @@ You can also end a phase by returning a truthy value from its
 phases: {
   phaseA: {
     next: 'phaseB',
-    endIf: (G, ctx) => true,
+    endIf: ({ G, ctx }) => true,
   },
   phaseB: { ... },
 },
@@ -188,7 +188,7 @@ state at the end of the phase:
 ```js
 phases: {
   phaseA: {
-    next: (G, ctx) => {
+    next: ({ G }) => {
       return G.condition ? 'phaseC' : 'phaseB';
     },
   },

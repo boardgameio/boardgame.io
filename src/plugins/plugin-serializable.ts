@@ -1,4 +1,4 @@
-import type { Plugin, AnyFn, Ctx } from '../types';
+import type { Plugin } from '../types';
 import isPlainObject from 'lodash.isplainobject';
 
 /**
@@ -38,9 +38,9 @@ const SerializablePlugin: Plugin = {
   name: 'plugin-serializable',
 
   fnWrap:
-    (move: AnyFn) =>
-    (G: unknown, ctx: Ctx, ...args: any[]) => {
-      const result = move(G, ctx, ...args);
+    (move) =>
+    (context, ...args) => {
+      const result = move(context, ...args);
       // Check state in non-production environments.
       if (process.env.NODE_ENV !== 'production' && !isSerializable(result)) {
         throw new Error(

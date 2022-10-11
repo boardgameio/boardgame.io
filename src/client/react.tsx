@@ -10,7 +10,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Client as RawClient } from './client';
 import type { ClientOpts, ClientState, _ClientImpl } from './client';
-import type { Ctx } from '../types';
 
 type WrappedBoardDelegates = 'matchID' | 'playerID' | 'credentials';
 
@@ -43,8 +42,8 @@ export type BoardProps<G extends any = any> = ClientState<G> &
 type ReactClientOpts<
   G extends any = any,
   P extends BoardProps<G> = BoardProps<G>,
-  CtxWithPlugins extends Ctx = Ctx
-> = Omit<ClientOpts<G, CtxWithPlugins>, WrappedBoardDelegates> & {
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> = Omit<ClientOpts<G, PluginAPIs>, WrappedBoardDelegates> & {
   board?: React.ComponentType<P>;
   loading?: React.ComponentType;
 };
@@ -71,8 +70,8 @@ type ReactClientOpts<
 export function Client<
   G extends any = any,
   P extends BoardProps<G> = BoardProps<G>,
-  ContextWithPlugins extends Ctx = Ctx
->(opts: ReactClientOpts<G, P, ContextWithPlugins>) {
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+>(opts: ReactClientOpts<G, P, PluginAPIs>) {
   const { game, numPlayers, board, multiplayer, enhancer } = opts;
   let { loading, debug } = opts;
 

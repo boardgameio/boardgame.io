@@ -60,7 +60,7 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
   }
 
   if (IsFunction(move.undoable)) {
-    return move.undoable(G, ctx);
+    return move.undoable({ G, ctx });
   }
 
   return move.undoable;
@@ -121,7 +121,7 @@ function initializeDeltalog(
   if (typeof move === 'object' && move.redact === true) {
     logEntry.redact = true;
   } else if (typeof move === 'object' && move.redact instanceof Function) {
-    logEntry.redact = move.redact(state.G, state.ctx);
+    logEntry.redact = move.redact({ G: state.G, ctx: state.ctx });
   }
 
   return {

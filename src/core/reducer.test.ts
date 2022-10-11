@@ -21,7 +21,7 @@ import {
   patch,
 } from './action-creators';
 import { error } from '../core/logger';
-import type { Ctx, Game, State, SyncInfo } from '../types';
+import type { Game, State, SyncInfo } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -30,12 +30,12 @@ jest.mock('../core/logger', () => ({
 
 const game: Game = {
   moves: {
-    A: (G) => G,
+    A: ({ G }) => G,
     B: () => ({ moved: true }),
     C: () => ({ victory: true }),
     Invalid: () => INVALID_MOVE,
   },
-  endIf: (G, ctx) => (G.victory ? ctx.currentPlayer : undefined),
+  endIf: ({ G, ctx }) => (G.victory ? ctx.currentPlayer : undefined),
 };
 const reducer = CreateGameReducer({ game });
 const initialState = InitializeGame({ game });
@@ -49,7 +49,7 @@ test('_stateID is incremented', () => {
 });
 
 test('move returns INVALID_MOVE', () => {
-  const game = {
+  const game: Game = {
     moves: {
       A: () => INVALID_MOVE,
     },
@@ -179,7 +179,7 @@ test('endTurn', () => {
 test('light client when multiplayer=true', () => {
   const game: Game = {
     moves: { A: () => ({ win: true }) },
-    endIf: (G) => G.win,
+    endIf: ({ G }) => G.win,
   };
 
   {
@@ -200,7 +200,7 @@ test('light client when multiplayer=true', () => {
 });
 
 test('disable optimistic updates', () => {
-  const game = {
+  const game: Game = {
     moves: {
       A: {
         move: () => ({ A: true }),
@@ -269,7 +269,7 @@ test('deltalog', () => {
 });
 
 describe('Events API', () => {
-  const fn = (G: any, ctx: Ctx) => (ctx.events ? {} : { error: true });
+  const fn = ({ events }) => (events ? {} : { error: true });
 
   const game: Game = {
     setup: () => ({}),
@@ -314,7 +314,7 @@ describe('Plugin Invalid Action API', () => {
       },
     ],
     moves: {
-      setValue: (G, _ctx, arg) => {
+      setValue: ({ G }, arg: number) => {
         G.value = arg;
       },
     },
@@ -422,10 +422,10 @@ describe('redact', () => {
     }),
     moves: {
       A: {
-        move: (G) => G,
-        redact: (G) => G.isASecret,
+        move: ({ G }) => G,
+        redact: ({ G }) => G.isASecret,
       },
-      B: (G) => {
+      B: ({ G }) => {
         return { ...G, isASecret: true };
       },
     },
@@ -475,9 +475,9 @@ describe('undo / redo', () => {
   const game: Game = {
     seed: 0,
     moves: {
-      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
-      roll: (G, ctx) => {
-        G.roll = ctx.random.D6();
+      move: ({ G }, arg: string) => ({ ...G, [arg]: true }),
+      roll: ({ G, random }) => {
+        G.roll = random.D6();
       },
     },
     turn: {
@@ -495,12 +495,13 @@ describe('undo / redo', () => {
 
   const initialState = InitializeGame({ game });
 
+  // TODO: Check if this test is still actually required after removal of APIs from ctx
   test('plugin APIs are not included in undo state', () => {
     let state = reducer(initialState, makeMove('move', 'A', '0'));
     state = reducer(state, makeMove('move', 'B', '0'));
     expect(state.G).toMatchObject({ A: true, B: true });
-    expect(state._undo[1].ctx.events).toBeUndefined();
-    expect(state._undo[1].ctx.random).toBeUndefined();
+    expect(state._undo[1].ctx).not.toHaveProperty('events');
+    expect(state._undo[1].ctx).not.toHaveProperty('random');
   });
 
   test('undo restores previous state after move', () => {
@@ -602,7 +603,7 @@ test('disable undo / redo', () => {
     seed: 0,
     disableUndo: true,
     moves: {
-      move: (G, ctx, arg) => ({ ...G, [arg]: true }),
+      move: ({ G }, arg: string) => ({ ...G, [arg]: true }),
     },
   };
 
@@ -640,8 +641,8 @@ describe('undo stack', () => {
   const game: Game = {
     moves: {
       basic: () => {},
-      endTurn: (_, ctx) => {
-        ctx.events.endTurn();
+      endTurn: ({ events }) => {
+        events.endTurn();
       },
     },
   };
@@ -718,8 +719,8 @@ describe('redo stack', () => {
   const game: Game = {
     moves: {
       basic: () => {},
-      endTurn: (_, ctx) => {
-        ctx.events.endTurn();
+      endTurn: ({ events }) => {
+        events.endTurn();
       },
     },
   };
@@ -787,19 +788,19 @@ describe('undo / redo with stages', () => {
         start: {
           moves: {
             moveA: {
-              move: (G, ctx, moveAisReversible) => {
-                ctx.events.setStage('A');
+              move: ({ G, events }, moveAisReversible) => {
+                events.setStage('A');
                 return { ...G, moveAisReversible, A: true };
               },
-              undoable: (G) => G.moveAisReversible > 0,
+              undoable: ({ G }) => G.moveAisReversible > 0,
             },
           },
         },
         A: {
           moves: {
             moveB: {
-              move: (G, ctx) => {
-                ctx.events.setStage('B');
+              move: ({ G, events }) => {
+                events.setStage('B');
                 return { ...G, B: true };
               },
               undoable: false,
@@ -809,8 +810,8 @@ describe('undo / redo with stages', () => {
         B: {
           moves: {
             moveC: {
-              move: (G, ctx) => {
-                ctx.events.setStage('C');
+              move: ({ G, events }) => {
+                events.setStage('C');
                 return { ...G, C: true };
               },
               undoable: true,

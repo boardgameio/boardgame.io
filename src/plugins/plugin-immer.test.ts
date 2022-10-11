@@ -20,10 +20,10 @@ describe('immer', () => {
     client = Client({
       game: {
         moves: {
-          A: (G) => {
+          A: ({ G }) => {
             G.moveBody = true;
           },
-          invalid: (G) => {
+          invalid: ({ G }) => {
             G.madeInvalidMove = true;
             return INVALID_MOVE;
           },
@@ -32,23 +32,23 @@ describe('immer', () => {
         phases: {
           A: {
             start: true,
-            onBegin: (G) => {
+            onBegin: ({ G }) => {
               G.onPhaseBegin = true;
             },
-            onEnd: (G) => {
+            onEnd: ({ G }) => {
               G.onPhaseEnd = true;
             },
           },
         },
 
         turn: {
-          onBegin: (G) => {
+          onBegin: ({ G }) => {
             G.onTurnBegin = true;
           },
-          onEnd: (G) => {
+          onEnd: ({ G }) => {
             G.onTurnEnd = true;
           },
-          onMove: (G) => {
+          onMove: ({ G }) => {
             G.onMove = true;
           },
         },

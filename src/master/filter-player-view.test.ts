@@ -4,7 +4,7 @@ import { Master } from './master';
 import { InMemory } from '../server/db/inmemory';
 import { PlayerView } from '../core/player-view';
 import { INVALID_MOVE } from '../core/constants';
-import type { Ctx, SyncInfo } from '../types';
+import type { Game, SyncInfo } from '../types';
 
 function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
   return { send, sendAll };
@@ -19,9 +19,9 @@ function validateNotTransientState(state: any) {
 describe('playerView - update', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
-  const game = {
-    playerView: (G, ctx, player) => {
-      return { ...G, player };
+  const game: Game = {
+    playerView: ({ G, playerID }) => {
+      return { ...G, player: playerID };
     },
   };
   const master = new Master(game, new InMemory(), TransportAPI(send, sendAll));
@@ -66,7 +66,7 @@ describe('playerView - patch', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
   const db = new InMemory();
-  const game = {
+  const game: Game = {
     seed: 0,
     deltaState: true,
     setup: () => {
@@ -94,17 +94,17 @@ describe('playerView - patch', () => {
             },
             A: {
               client: false,
-              move: (G, ctx: Ctx) => {
-                const card = G.players[ctx.playerID].cards.shift();
+              move: ({ G, playerID }) => {
+                const card = G.players[playerID].cards.shift();
                 G.discardedCards.push(card);
               },
             },
             B: {
               client: false,
               ignoreStaleStateID: true,
-              move: (G, ctx: Ctx) => {
+              move: ({ G, playerID }) => {
                 const card = G.cards.pop();
-                G.players[ctx.playerID].cards.push(card);
+                G.players[playerID].cards.push(card);
               },
             },
           },
@@ -256,11 +256,11 @@ describe('redactLog', () => {
   });
 
   test('make sure filter player view redacts the log', async () => {
-    const game = {
+    const game: Game = {
       moves: {
-        A: (G) => G,
+        A: ({ G }) => G,
         B: {
-          move: (G) => G,
+          move: ({ G }) => G,
           redact: true,
         },
       },
@@ -310,16 +310,16 @@ describe('redactLog', () => {
 });
 
 test('make move args to be secret depends on G via conditional redact', async () => {
-  const game = {
+  const game: Game = {
     setup: () => ({
       isASecret: false,
     }),
     moves: {
       A: {
-        move: (G) => G,
-        redact: (G) => G.isASecret,
+        move: ({ G }) => G,
+        redact: ({ G }) => G.isASecret,
       },
-      B: (G) => {
+      B: ({ G }) => {
         return { ...G, isASecret: true };
       },
     },

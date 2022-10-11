@@ -35,7 +35,6 @@ import type {
   Reducer,
   State,
   Store,
-  Ctx,
   ChatMessage,
 } from '../types';
 
@@ -116,9 +115,9 @@ export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 export interface ClientOpts<
   G extends any = any,
-  CtxWithPlugins extends Ctx = Ctx
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > {
-  game: Game<G, CtxWithPlugins>;
+  game: Game<G, PluginAPIs>;
   debug?: DebugOpt | boolean;
   numPlayers?: number;
   multiplayer?: (opts: TransportOpts) => Transport;
@@ -141,7 +140,7 @@ export type ClientState<G extends any = any> =
  */
 export class _ClientImpl<
   G extends any = any,
-  CtxWithPlugins extends Ctx = Ctx
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
 > {
   private gameStateOverride?: any;
   private initialState: State<G>;
@@ -185,7 +184,7 @@ export class _ClientImpl<
     playerID,
     credentials,
     enhancer,
-  }: ClientOpts<G, CtxWithPlugins>) {
+  }: ClientOpts<G, PluginAPIs>) {
     this.game = ProcessGameConfig(game);
     this.playerID = playerID;
     this.matchID = matchID || 'default';
@@ -499,7 +498,11 @@ export class _ClientImpl<
     if (!this.multiplayer) {
       state = {
         ...state,
-        G: this.game.playerView(state.G, state.ctx, this.playerID),
+        G: this.game.playerView({
+          G: state.G,
+          ctx: state.ctx,
+          playerID: this.playerID,
+        }),
         plugins: PlayerView(state, this),
       };
     }
@@ -577,8 +580,9 @@ export class _ClientImpl<
  *   A JS object that provides an API to interact with the
  *   game by dispatching moves and events.
  */
-export function Client<G extends any = any, CtxWithPlugins extends Ctx = Ctx>(
-  opts: ClientOpts<G, CtxWithPlugins>
-) {
-  return new _ClientImpl<G, CtxWithPlugins>(opts);
+export function Client<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+>(opts: ClientOpts<G, PluginAPIs>) {
+  return new _ClientImpl<G, PluginAPIs>(opts);
 }

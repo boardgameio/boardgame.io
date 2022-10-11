@@ -16,7 +16,7 @@ A traditional pure function just accepts arguments and then
 returns the new state. Something like this:
 
 ```js
-function move(G, ctx) {
+function move({ G }) {
   // Return new value of G without modifying the arguments.
   return { ...G, hand: G.hand + 1 };
 }
@@ -33,7 +33,7 @@ immutability principle. Both styles are supported interchangeably,
 so use the one that you prefer.
 
 ```js
-function move(G, ctx) {
+function move({ G }) {
   G.hand++;
 }
 ```
@@ -42,7 +42,9 @@ function move(G, ctx) {
 In fact, returning something while also mutating `G` is
 considered an error.
 
-!> `ctx` is a read-only object and is never modified in either style.
+!> You can only modify `G`. Other values passed to your moves
+   are read-only and should never be modified in either style.
+   Changes to `ctx` can be made using [events](events.md).
 
 ### Invalid moves
 
@@ -57,7 +59,7 @@ Tic-Tac-Toe.
 import { INVALID_MOVE } from 'boardgame.io/core';
 
 moves: {
-  clickCell: function(G, ctx, id) {
+  clickCell: function({ G, ctx }, id) {
     // Illegal move: Cell is filled.
     if (G.cells[id] !== null) {
       return INVALID_MOVE;

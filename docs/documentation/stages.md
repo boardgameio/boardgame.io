@@ -19,6 +19,16 @@ players don't have to all be in the same stage either (each player can be
 in their own stage). Each player that is in a stage is now considered an
 "active" player that can make moves as allowed by the stage that they are in.
 
+You can check `playerID` inside a move to figure out
+which player made it. This may be necessary in situations
+where multiple players are active (and could simultaneously make a move).
+
+```js
+const move = ({ G, ctx, playerID }) => {
+  console.log(`move made by player ${playerID}`);
+};
+```
+
 ### Defining Stages
 
 Stages are defined inside a `turn` section:
@@ -134,8 +144,8 @@ Let's go back to the example we discussed earlier where we
 require every other player to discard a card when we play one:
 
 ```js
-function PlayCard(G, ctx) {
-  ctx.events.setActivePlayers({ others: 'discard', minMoves: 1, maxMoves: 1 });
+function PlayCard({ events }) {
+  events.setActivePlayers({ others: 'discard', minMoves: 1, maxMoves: 1 });
 }
 
 const game = {
@@ -217,10 +227,6 @@ that you want in the set of active players:
 // and neither is placed in a stage.
 setActivePlayers(['0', '3']);
 ```
-
-?> You can check `ctx.playerID` inside a move to figure out
-which player made it. This may be necessary in situations
-where multiple players are active (and could simultaneously move).
 
 ### Configuring active players at the beginning of a turn.
 

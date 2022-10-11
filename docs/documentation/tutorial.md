@@ -128,11 +128,12 @@ To start, we’ll add a `setup` function, which will set the
 initial value of the game state `G`, and a `moves` object
 containing the moves that make up the game.
 
-A move function receives
-the game state `G` and updates it to the desired new state.
-It also receives `ctx`, an object managed by boardgame.io
-that contains metadata like `turn` and `currentPlayer`.
-After `G` and `ctx`, moves can receive arbitrary arguments
+A move is a function that updates `G` to the desired new state.
+It receives an object containing various fields
+as its first argument. This object includes the game state `G` and
+`ctx` — an object managed by boardgame.io that contains game metadata.
+It also includes `playerID`, which identifies the player making the move.
+After the object containing `G` and `ctx`, moves can receive arbitrary arguments
 that you pass in when making the move.
 
 In Tic-Tac-Toe, we only have one type of move and we will
@@ -147,15 +148,15 @@ export const TicTacToe = {
   setup: () => ({ cells: Array(9).fill(null) }),
 
   moves: {
-    clickCell: (G, ctx, id) => {
-      G.cells[id] = ctx.currentPlayer;
+    clickCell: ({ G, playerID }, id) => {
+      G.cells[id] = playerID;
     },
   },
 };
 ```
 
-?> The `setup` function will receive `ctx` as its first argument.
-This is useful if you need to customize the initial
+?> The `setup` function also receives an object as its first argument
+like moves. This is useful if you need to customize the initial
 state based on some field in `ctx` — the number of players, for example —
 but we don't need that for Tic-Tac-Toe.
 
@@ -270,11 +271,11 @@ import { INVALID_MOVE } from 'boardgame.io/core';
 Now we can return `INVALID_MOVE` from `clickCell`:
 
 ```js
-clickCell: (G, ctx, id) => {
+clickCell: ({ G, playerID }, id) => {
   if (G.cells[id] !== null) {
     return INVALID_MOVE;
   }
-  G.cells[id] = ctx.currentPlayer;
+  G.cells[id] = playerID;
 }
 ```
 
@@ -346,7 +347,7 @@ check if the game is over.
 export const TicTacToe = {
   // setup, moves, etc.
 
-  endIf: (G, ctx) => {
+  endIf: ({ G, ctx }) => {
     if (IsVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }

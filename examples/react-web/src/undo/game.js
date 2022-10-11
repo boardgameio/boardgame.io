@@ -12,10 +12,10 @@ const UndoExample = {
   setup: () => ({ moves: [] }),
 
   moves: {
-    A: (G) => {
+    A: ({ G }) => {
       G.moves.push('A');
     },
-    B: (G) => {
+    B: ({ G }) => {
       G.moves.push('B');
     },
   },

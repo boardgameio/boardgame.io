@@ -40,8 +40,8 @@ It can sometimes be helpful to surface some metadata during a move.
 You can do this by using the log plugin. For example,
 
 ```js
-const move = (G, ctx) => {
-  ctx.log.setMetadata('metadata for this move');
+const move = ({ log }) => {
+  log.setMetadata('metadata for this move');
 };
 ```
 

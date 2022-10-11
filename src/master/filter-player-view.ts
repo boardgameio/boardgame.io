@@ -9,7 +9,7 @@ const applyPlayerView = (
   state: State
 ): State => ({
   ...state,
-  G: game.playerView(state.G, state.ctx, playerID),
+  G: game.playerView({ G: state.G, ctx: state.ctx, playerID }),
   plugins: PlayerView(state, { playerID, game }),
   deltalog: undefined,
   _undo: [],

@@ -1,15 +1,15 @@
-function DrawCard(G, ctx) {
+function DrawCard({ G, playerID }) {
   G.deck--;
-  G.hand[ctx.currentPlayer]++;
+  G.hand[playerID]++;
 }
 
-function PlayCard(G, ctx) {
+function PlayCard({ G, playerID }) {
   G.deck++;
-  G.hand[ctx.currentPlayer]--;
+  G.hand[playerID]--;
 }
 
 const game = {
-  setup: (ctx) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
+  setup: ({ ctx }) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
   moves: { DrawCard, PlayCard },
   turn: { minMoves: 1, maxMoves: 1 },
 };

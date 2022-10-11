@@ -8,65 +8,71 @@
 
 import { Client } from '../client/client';
 import { Local } from '../client/transport/local';
-import type { Game } from '../types';
+import type { Game, Plugin } from '../types';
 import { GameMethod } from '../../packages/core';
 
 describe('basic', () => {
   let client: ReturnType<typeof Client>;
 
   beforeAll(() => {
-    const game = {
+    interface TestPluginAPI {
+      get(): number;
+      increment(): number;
+    }
+
+    const TestPlugin = (init: {
+      n: number;
+    }): Plugin<TestPluginAPI, { n: number }> => ({
+      name: 'test',
+
+      setup: () => init,
+
+      api: ({ data }) => {
+        const state = { value: data.n };
+        const increment = () => state.value++;
+        const get = () => state.value;
+        return { increment, get };
+      },
+
+      flush: ({ api }) => ({ n: api.get() }),
+
+      fnWrap: (fn) => (context) => {
+        const G = fn(context);
+        return { ...G, wrap: true };
+      },
+    });
+
+    const game: Game<
+      { beginA: number; endA: number; onMove: number; onTurnEnd: number },
+      { test: TestPluginAPI }
+    > = {
       moves: {
-        A: (G, ctx) => {
-          G.beginA = ctx.test.get();
-          ctx.test.increment();
-          G.endA = ctx.test.get();
+        A: ({ G, test }) => {
+          G.beginA = test.get();
+          test.increment();
+          G.endA = test.get();
         },
       },
 
-      endIf: (_, ctx) => {
-        if (ctx.test === undefined) {
+      endIf: ({ test }) => {
+        if (test === undefined) {
           throw new Error('API is not defined');
         }
       },
 
       turn: {
-        onMove: (G, ctx) => {
-          G.onMove = ctx.test.get();
-          ctx.test.increment();
+        onMove: ({ G, test }) => {
+          G.onMove = test.get();
+          test.increment();
         },
 
-        onEnd: (G, ctx) => {
-          G.onTurnEnd = ctx.test.get();
-          ctx.test.increment();
+        onEnd: ({ G, test }) => {
+          G.onTurnEnd = test.get();
+          test.increment();
         },
       },
 
-      pluginRelated: 10,
-
-      plugins: [
-        {
-          name: 'test',
-
-          setup: ({ game }) => ({
-            n: game.pluginRelated,
-          }),
-
-          api: ({ data }) => {
-            const state = { value: data.n };
-            const increment = () => state.value++;
-            const get = () => state.value;
-            return { increment, get };
-          },
-
-          flush: ({ api }) => ({ n: api.get() }),
-
-          fnWrap: (fn) => (G, ctx) => {
-            G = fn(G, ctx);
-            return { ...G, wrap: true };
-          },
-        },
-      ],
+      plugins: [TestPlugin({ n: 10 })],
     };
 
     client = Client({ game });
@@ -126,7 +132,10 @@ describe('default values', () => {
     noClient: () => false,
   };
 
-  const game = { moves: { A: () => {} }, plugins: [plugin, anotherPlugin] };
+  const game: Game = {
+    moves: { A: () => {} },
+    plugins: [plugin, anotherPlugin],
+  };
 
   test('are used if no setup is present', () => {
     const client = Client({ game, playerID: '0', multiplayer: Local() });
@@ -180,11 +189,11 @@ describe('isInvalid method', () => {
         },
       ],
       moves: {
-        good: (_, ctx) => {
-          ctx.test.set('good', 'nice');
+        good: ({ test }) => {
+          test.set('good', 'nice');
         },
-        bad: (_, ctx) => {
-          ctx.test.set('bad', 'not ok');
+        bad: ({ test }) => {
+          test.set('bad', 'not ok');
         },
       },
     };
@@ -200,10 +209,10 @@ describe('isInvalid method', () => {
 });
 
 describe('actions', () => {
-  let client;
+  let client: ReturnType<typeof Client>;
 
   beforeAll(() => {
-    const game = {
+    const game: Game = {
       plugins: [
         {
           name: 'test',
@@ -245,6 +254,8 @@ describe('actions', () => {
 });
 
 describe('plugins are accessible in events triggered from moves', () => {
+  type TestPluginAPI = { get: () => boolean };
+  type PluginAPIs = { test: TestPluginAPI };
   const plugins = [
     {
       name: 'test',
@@ -255,7 +266,7 @@ describe('plugins are accessible in events triggered from moves', () => {
 
       flush: () => ({ initial: true }),
 
-      api: ({ data }) => {
+      api: ({ data }): TestPluginAPI => {
         return {
           get: () => data.initial,
         };
@@ -264,15 +275,15 @@ describe('plugins are accessible in events triggered from moves', () => {
   ];
 
   test('turn/onBegin', () => {
-    const game = {
+    const game: Game<any, PluginAPIs> = {
       plugins,
       moves: {
-        stop: (G, ctx) => ctx.events.endTurn(),
+        stop: ({ events }) => events.endTurn(),
       },
       turn: {
-        onBegin: (G, ctx) => {
-          G.onBegin = ctx.random.Die(1);
-          G.test = ctx.test.get();
+        onBegin: ({ G, random, test }) => {
+          G.onBegin = random.Die(1);
+          G.test = test.get();
         },
       },
     };
@@ -286,15 +297,15 @@ describe('plugins are accessible in events triggered from moves', () => {
   });
 
   test('turn/onEnd', () => {
-    const game = {
+    const game: Game<any, PluginAPIs> = {
       plugins,
       moves: {
-        stop: (G, ctx) => ctx.events.endTurn(),
+        stop: ({ events }) => events.endTurn(),
       },
       turn: {
-        onEnd: (G, ctx) => {
-          G.onEnd = ctx.random.Die(1);
-          G.test = ctx.test.get();
+        onEnd: ({ G, random, test }) => {
+          G.onEnd = random.Die(1);
+          G.test = test.get();
         },
       },
     };
@@ -308,19 +319,19 @@ describe('plugins are accessible in events triggered from moves', () => {
   });
 
   test('phase/onBegin', () => {
-    const game = {
+    const game: Game<any, PluginAPIs> = {
       plugins,
       moves: {
-        stop: (G, ctx) => ctx.events.setPhase('second'),
+        stop: ({ events }) => events.setPhase('second'),
       },
       phases: {
         first: {
           start: true,
         },
         second: {
-          onBegin: (G, ctx) => {
-            G.onBegin = ctx.random.Die(1);
-            G.test = ctx.test.get();
+          onBegin: ({ G, random, test }) => {
+            G.onBegin = random.Die(1);
+            G.test = test.get();
           },
         },
       },
@@ -335,17 +346,17 @@ describe('plugins are accessible in events triggered from moves', () => {
   });
 
   test('phase/onEnd', () => {
-    const game = {
+    const game: Game<any, PluginAPIs> = {
       plugins,
       moves: {
-        stop: (G, ctx) => ctx.events.endPhase(),
+        stop: ({ events }) => events.endPhase(),
       },
       phases: {
         first: {
           start: true,
-          onEnd: (G, ctx) => {
-            G.onEnd = ctx.random.Die(1);
-            G.test = ctx.test.get();
+          onEnd: ({ G, random, test }) => {
+            G.onEnd = random.Die(1);
+            G.test = test.get();
           },
         },
       },
@@ -367,13 +378,13 @@ describe('plugins can use events in fnWrap', () => {
         name: 'test',
         fnWrap:
           (fn, type) =>
-          (G, ctx, ...args) => {
-            G = fn(G, ctx, ...args);
+          (context, ...args) => {
+            const G = fn(context, ...args);
             if (G.endTurn && type === GameMethod.MOVE) {
-              ctx.events.endTurn();
+              context.events.endTurn();
             }
             if (G.endGame) {
-              ctx.events.endGame(G.endGame);
+              context.events.endGame(G.endGame);
             }
             return G;
           },

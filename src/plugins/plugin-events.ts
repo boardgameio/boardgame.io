@@ -24,10 +24,10 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   // endings to dispatch the current turn and phase correctly.
   fnWrap:
     (method, methodType) =>
-    (G, ctx, ...args) => {
-      const api = ctx.events as EventsAPI & PrivateEventsAPI;
-      if (api) api._private.updateTurnContext(ctx, methodType);
-      G = method(G, ctx, ...args);
+    (context, ...args) => {
+      const api = context.events as EventsAPI & PrivateEventsAPI;
+      if (api) api._private.updateTurnContext(context.ctx, methodType);
+      const G = method(context, ...args);
       if (api) api._private.unsetCurrentMethod();
       return G;
     },
