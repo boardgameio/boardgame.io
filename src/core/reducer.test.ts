@@ -422,10 +422,10 @@ describe('redact', () => {
     }),
     moves: {
       A: {
-        move: (G) => G,
-        redact: (G) => G.isASecret,
+        move: ({ G }) => G,
+        redact: ({ G }) => G.isASecret,
       },
-      B: (G) => {
+      B: ({ G }) => {
         return { ...G, isASecret: true };
       },
     },
