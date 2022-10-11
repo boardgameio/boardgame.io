@@ -1,17 +1,17 @@
 ### 0.50.00
 
-This release includes a large refactor in boardgame.io API. Callbacks that used to be (G, ctx) => {} now becomes ({ G, ctx }) => {} ... Thanks @delucis for the great contribution!
+This release includes a large refactor in boardgame.io API. Callbacks that used to be `(G, ctx) => {}` now becomes `({ G, ctx }) => {}` ... Thanks [@delucis](https://github.com/delucis) for the great contribution!
 
 ### Features
 
-* [[da1ccb1](https://github.com/boardgameio/boardgame.io/commit/da1ccb18819fa265144da075a445e003d8a2fcc8) feat: Change move and hook signature ([#891](https://github.com/boardgameio/boardgame.io/pull/891))
+* [[da1ccb1](https://github.com/boardgameio/boardgame.io/commit/da1ccb18819fa265144da075a445e003d8a2fcc8)] feat: Change move and hook signature ([#891](https://github.com/boardgameio/boardgame.io/pull/891))
 
 ### 0.49.13
 
 ### Features
 
-* [[aa99a9c](https://github.com/boardgameio/boardgame.io/commit/aa99a9cce28012cb747fa6db8b3f8ad73c28be0a) feat: Conditional log redacting in long form move ([#1089](https://github.com/boardgameio/boardgame.io/pull/1089))
-* [[4bf203c](https://github.com/boardgameio/boardgame.io/commit/4bf203c1c1ec42e3193935a39e4cfb54a5658627) TypeScript: AiEnumerate return type ([#1080](https://github.com/boardgameio/boardgame.io/pull/1080))
+* [[aa99a9c](https://github.com/boardgameio/boardgame.io/commit/aa99a9cce28012cb747fa6db8b3f8ad73c28be0a)] feat: Conditional log redacting in long form move ([#1089](https://github.com/boardgameio/boardgame.io/pull/1089))
+* [[4bf203c](https://github.com/boardgameio/boardgame.io/commit/4bf203c1c1ec42e3193935a39e4cfb54a5658627)] TypeScript: AiEnumerate return type ([#1080](https://github.com/boardgameio/boardgame.io/pull/1080))
 
 ### v0.49.12
 
