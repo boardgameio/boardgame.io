@@ -310,16 +310,16 @@ describe('redactLog', () => {
 });
 
 test('make move args to be secret depends on G via conditional redact', async () => {
-  const game = {
+  const game: Game = {
     setup: () => ({
       isASecret: false,
     }),
     moves: {
       A: {
-        move: (G) => G,
-        redact: (G) => G.isASecret,
+        move: ({ G }) => G,
+        redact: ({ G }) => G.isASecret,
       },
-      B: (G) => {
+      B: ({ G }) => {
         return { ...G, isASecret: true };
       },
     },
