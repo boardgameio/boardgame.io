@@ -3,6 +3,7 @@
   export let clientManager;
   export let ToggleVisibility;
 
+  import { onDestroy } from 'svelte';
   import JSONTree from 'svelte-json-tree-auto/src/Root.svelte';
   import ClientSwitcher from './ClientSwitcher.svelte';
   import Move from './Move.svelte';
@@ -25,10 +26,12 @@
   let { playerID, moves, events } = client;
   let ctx = {};
   let G = {};
-  client.subscribe((state) => {
+  const unsubscribe = client.subscribe((state) => {
     if (state) ({ G, ctx } = state);
     ({ playerID, moves, events } = client);
   });
+
+  onDestroy(unsubscribe);
 </script>
 
 <style>
