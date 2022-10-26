@@ -1,3 +1,13 @@
+### v0.50.1
+
+This release fixes compatibility with React v18. Thanks [@mbrinkl](https://github.com/mbrinkl)!
+
+#### Bugfixes
+
+* [[2afffb13](https://github.com/boardgameio/boardgame.io/commit/2afffb13)] Fix React 18 compatibility ([#1104](https://github.com/boardgameio/boardgame.io/pull/1104))
+* [[74722165](https://github.com/boardgameio/boardgame.io/commit/74722165)] Use correct CSS margin syntax in debug panel
+
+
 ## v0.50.0
 
 This release includes a large refactor in boardgame.io API. Callbacks that used to be `(G, ctx) => {}` now becomes `({ G, ctx }) => {}` ... Thanks [@delucis](https://github.com/delucis) for the great contribution!
