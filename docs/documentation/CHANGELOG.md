@@ -1,3 +1,7 @@
+### v0.50.2
+
+This release includes dependency upgrades only.
+
 ### v0.50.1
 
 This release fixes compatibility with React v18. Thanks [@mbrinkl](https://github.com/mbrinkl)!
