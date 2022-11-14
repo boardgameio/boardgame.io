@@ -69,6 +69,15 @@ A cross between Hangman and a card game.
 [c5]: https://github.com/VengelStudio/cardman-multiplayer
 [b5]: https://img.shields.io/github/stars/VengelStudio/cardman-multiplayer?label=%E2%98%85&logo=github
 
+
+#### [![GitHub stars][b-chessweeper]][c-chessweeper] [Chessweeper][p-chessweeper] \[[code][c-chessweeper]\]
+&nbsp;&nbsp;
+A mix between Chess and Minesweeper 
+
+[p-chessweeper]: https://chessweeper.zirk.eu
+[c-chessweeper]: https://github.com/Xwilarg/Chessweeper
+[b-chessweeper]: https://img.shields.io/github/stars/xwilarg/chessweeper?label=%E2%98%85&logo=github
+
 #### [![GitHub stars][b26]][c26] [Chinchon][p26] \[[code][c26]\]
 &nbsp;&nbsp;
 Multiplayer online card game similar to gin rummy. 
