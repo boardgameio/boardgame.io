@@ -140,6 +140,13 @@ PWA framework for publishing board games.
 [b9]: https://img.shields.io/github/stars/freeboardgames/FreeBoardGames.org?label=%E2%98%85&logo=github
 
 
+#### [2048 Game][c27]
+&nbsp;&nbsp;
+The classic 2048 puzzle game. Implemented using React and Greensock.
+
+[c27]: https://2048-online.io/
+
+
 #### [![GitHub stars][b10]][c10] [Hex game][p10] \[[code][c10]\]
 &nbsp;&nbsp;
 Simple hexagonal board game.
