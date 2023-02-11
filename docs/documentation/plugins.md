@@ -33,8 +33,9 @@ A plugin is an object that contains the following fields.
   // and returns another function that wraps it. This
   // wrapper can modify G before passing it down to
   // the wrapped function. It is a good practice to
-  // undo the change at the end of the call.
-  fnWrap: (fn) => ({ G, ...rest }, ...args) => {
+  // undo the change at the end of the call. 
+  // `fnType` gives the type of hook being wrapped.
+  fnWrap: (fn, fnType) => ({ G, ...rest }, ...args) => {
     G = preprocess(G);
     G = fn({ G, ...rest }, ...args);
     G = postprocess(G);
