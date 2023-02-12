@@ -40,6 +40,9 @@ A plugin is an object that contains the following fields.
   fnWrap: (fn, fnType) => ({ G, ...rest }, ...args) => {
     G = preprocess(G);
     G = fn({ G, ...rest }, ...args);
+    if (fnType === GameMethod.TURN_ON_END) {
+      // only run when wrapping a turn’s onEnd function
+    }
     G = postprocess(G);
     return G;
   },
