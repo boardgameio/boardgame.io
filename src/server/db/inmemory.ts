@@ -92,6 +92,8 @@ export class InMemory extends StorageAPI.Sync {
   wipe(matchID: string) {
     this.state.delete(matchID);
     this.metadata.delete(matchID);
+    this.log.delete(matchID);
+    this.initial.delete(matchID);
   }
 
   /**
