@@ -7,7 +7,7 @@
  */
 
 import { InMemory } from './inmemory';
-import type { State, Server } from '../../types';
+import type { State, Server, LogEntry } from '../../types';
 
 describe('InMemory', () => {
   let db: InMemory;
@@ -139,5 +139,21 @@ describe('InMemory', () => {
     expect(db.fetch('matchID', { state: true })).toEqual({});
     // Shall not return error
     db.wipe('matchID');
+  });
+
+  test('create remove', () => {
+    // ensure we have all game attributes stored
+    db.createMatch('remove', {
+      metadata: {} as Server.MatchData,
+      initialState: {} as State,
+    });
+    db.setState('remove', {} as State, [{} as LogEntry]);
+
+    db.wipe('remove');
+
+    expect(db.fetch('remove', { state: true })).toEqual({});
+    expect(db.fetch('remove', { initialState: true })).toEqual({});
+    expect(db.fetch('remove', { log: true })).toEqual({ log: [] });
+    expect(db.fetch('remove', { metadata: true })).toEqual({});
   });
 });
