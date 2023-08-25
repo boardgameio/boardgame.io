@@ -14,12 +14,6 @@
 </p>
 
 <p align="center">
-<a href="#readme"><img src="https://img.shields.io/badge/Support_Us:-fff?style=flat-square" alt="Support us:" /></a>
-<a href="https://opencollective.com/boardgameio#support"><img src="https://img.shields.io/badge/Open_Collective-fff?logo=open-collective" alt="Open Collective" /></a>
-<a href="https://github.com/sponsors/boardgameio"><img src="https://img.shields.io/badge/GitHub_Sponsors-fff?logo=github-sponsors" alt="GitHub Sponsors" /></a>
-</p>
-
-<p align="center">
   <strong><a href="https://boardgame.io/documentation/#/">Read the Documentation</a></strong>
 </p>
 
