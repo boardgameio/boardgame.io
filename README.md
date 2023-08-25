@@ -1,4 +1,4 @@
-[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/Donate.md)
+<p align="center"><strong>The project is in maintenance mode and not being actively developed. If you'd like to become a maintainer and take over development, please file an issue and discuss your plans. Your time and contributions are most welcome.</strong></p>
 
 <p align="center">
   <a href="https://boardgame.io/">
