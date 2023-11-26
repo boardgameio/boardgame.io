@@ -1,4 +1,4 @@
-[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/Donate.md)
+<p align="center"><strong>The project is in maintenance mode and not being actively developed. If you'd like to become a maintainer and take over development, please file an issue and discuss your plans. Your time and contributions are most welcome.</strong></p>
 
 <p align="center">
   <a href="https://boardgame.io/">
@@ -11,12 +11,6 @@
 <a href="https://github.com/boardgameio/boardgame.io/actions?query=workflow%3ATests"> <img src="https://github.com/boardgameio/boardgame.io/workflows/Tests/badge.svg" alt='Build Status'></a>
 <a href='https://coveralls.io/github/boardgameio/boardgame.io?branch=main'><img src='https://coveralls.io/repos/github/boardgameio/boardgame.io/badge.svg?branch=main' alt='Coverage Status' /></a>
 <a href="https://gitter.im/boardgame-io"><img src="https://badges.gitter.im/boardgame-io.svg" alt="Gitter" /></a>
-</p>
-
-<p align="center">
-<a href="#readme"><img src="https://img.shields.io/badge/Support_Us:-fff?style=flat-square" alt="Support us:" /></a>
-<a href="https://opencollective.com/boardgameio#support"><img src="https://img.shields.io/badge/Open_Collective-fff?logo=open-collective" alt="Open Collective" /></a>
-<a href="https://github.com/sponsors/boardgameio"><img src="https://img.shields.io/badge/GitHub_Sponsors-fff?logo=github-sponsors" alt="GitHub Sponsors" /></a>
 </p>
 
 <p align="center">
