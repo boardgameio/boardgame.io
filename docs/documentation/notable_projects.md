@@ -140,6 +140,15 @@ PWA framework for publishing board games.
 [b9]: https://img.shields.io/github/stars/freeboardgames/FreeBoardGames.org?label=%E2%98%85&logo=github
 
 
+#### [![GitHub stars][b28]][c28] [Garden][p28] \[[code][c28]\]
+&nbsp;&nbsp;
+A single-player puzzle game.
+
+[p28]: https://0x682.itch.io/garden
+[c28]: https://github.com/steambap/garden
+[b28]: https://img.shields.io/github/stars/steambap/garden?label=%E2%98%85&logo=github
+
+
 #### [2048 Game][c27]
 &nbsp;&nbsp;
 The classic 2048 puzzle game. Implemented using React and Greensock.
