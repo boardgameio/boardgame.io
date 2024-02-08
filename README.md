@@ -1,4 +1,4 @@
-<p align="center"><strong>The project is in maintenance mode and not being actively developed. If you'd like to become a maintainer and take over development, please file an issue and discuss your plans. Your time and contributions are most welcome.</strong></p>
+<p align="center"><strong>The project is not being actively developed, but is pretty stable and used in several games. If you would like to become a maintainer, please file an issue to discuss.</strong></p>
 
 <p align="center">
   <a href="https://boardgame.io/">
