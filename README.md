@@ -1,4 +1,4 @@
-<p align="center"><strong>The project is not being actively developed, but is pretty stable and used in several games. If you would like to become a maintainer, please file an issue to discuss.</strong></p>
+<p align="center"><strong>The project is not being actively developed, but is pretty stable and used in several games. If you would like to become a maintainer, please open an issue to discuss.</strong></p>
 
 <p align="center">
   <a href="https://boardgame.io/">
