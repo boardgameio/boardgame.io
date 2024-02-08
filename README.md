@@ -90,9 +90,6 @@ and the [project roadmap](roadmap.md).
 Pull requests even for small changes can be helpful. Each page in the
 docs can be edited by clicking the “Edit on GitHub” link at the top right.
 
-💸 **Want to support the project financially?**  
-We accept donations via [GitHub Sponsors][sponsors] and on [Open Collective][collective].
-
 [new-issue]: https://github.com/boardgameio/boardgame.io/issues/new/choose
 [gitter]: https://gitter.im/boardgame-io/General
 [discussions]: https://github.com/boardgameio/boardgame.io/discussions
