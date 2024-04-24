@@ -51,9 +51,10 @@ This event ends the game. If you pass an argument to it,
 then that argument is made available in `ctx.gameover`.
 After the game is over, further state changes to the game
 (via a move or event) are not possible.
+In order to enable the included Bot/AI logic, you must specify the winner in the `endGame` event.
 
 ```js
-endGame();
+endGame({ winner: '2' });
 ```
 
 #### setStage
