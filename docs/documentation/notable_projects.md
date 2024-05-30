@@ -26,6 +26,14 @@ Clone of Battle Line, a 2 player card game.
 [c-bl]: https://github.com/rsandzimier/battleline
 [p-bl]: https://rsandzimier.github.io/battleline/
 
+#### [![GitHub stars][jwbj-3]][jwbj-2]  [Black Jack (John Wick theme)][jwbj-1] \[[code][jwbj-2]\]
+&nbsp;&nbsp;
+A John Wick-themed Black Jack card game with custom graphics and sound.
+
+[jwbj-3]: https://img.shields.io/github/stars/ipkevin/Blackjack-Builder?label=%E2%98%85&logo=github
+[jwbj-2]: https://github.com/ipkevin/Blackjack-Builder
+[jwbj-1]: https://johnwickblackjack.netlify.app/
+
 #### [![GitHub stars][b2]][c2] boardgame.io-angular \[[code][c2] | [demo][d2]\]
 &nbsp;&nbsp;
 Unofficial Angular client for boardgame.io.
