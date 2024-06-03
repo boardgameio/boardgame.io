@@ -16,74 +16,10 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
 
 ## Setup
 
-We’re going to use ES2015 features like module [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import)
-and the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator)
-syntax, so we’ll need to use some kind of build system to compile
-our code for the browser.
+Clone the boardgame.io template repository from https://github.com/info-hsaka/boardgame-template .
+Run `npm i` in that folder.
 
-This tutorial shows how to set up a project using plain JavaScript and Canvas rendering.
-// TODO template stuff
-
-
-### **Plain JS**
-
-Let’s create a new Node project from the command line:
-
-// TODO how to clone with git
-```
-git clone //TODO template url
-cd bgio-tutorial
-npm i
-```
-
-?> These commands will make a new directory called `bgio-tutorial`,
-   change to that directory, and initialise a new Node package.
-   [Read more in the Node Package Manager docs.][pkgjson]
-
-[pkgjson]: https://docs.npmjs.com/creating-a-package-json-file#creating-a-default-packagejson-file
-
-Now, let’s create the basic structure our project needs:
-
-
-1. A JavaScript file for our web app at `src/App.js`.
-
-
-2. A JavaScript file for our game definition at `src/Game.js`.
-
-
-3. A basic HTML page that will load our app at `index.html`:
-
-    ```html
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>boardgame.io Tutorial</title>
-      <meta charset="utf-8" />
-    </head>
-    <body>
-      <div id="app"></div>
-      <script src="./src/App.js"></script>
-    </body>
-    </html>
-    ```
-
-Your project directory should now look like this:
-
-    bgio-tutorial/
-    ├── index.html
-    ├── node_modules/
-    ├── package-lock.json
-    ├── package.json
-    └── src/
-        ├── App.js
-        └── Game.js
-
-Looking good? OK, let’s get started! 🚀
-
-?> You can check out the complete code for this tutorial
-and play around with it on CodeSandbox:<br/><br/>
-[![Edit bgio-plain-js-tutorial](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/bgio-plain-js-tutorial-ewyyt?fontsize=14&hidenavigation=1&module=%2Fsrc%2FApp.js&theme=dark)
-
+Now when running `npm run start`, you should be able to see a website on http://localhost:3000.
 
 ## Defining a Game
 
@@ -91,7 +27,7 @@ We define a game by creating an object whose contents
 tell boardgame.io how your game works. More or less everything
 is optional, so we can start simple and gradually add complexity.
 In the Template most functions are already defined but not filed out. So you can fill in the relevant parts.
-To start, we’ll add a `setup` function, which will set the
+To start, we’ll fill the `setup` function in the file `src/Game.js`, which will set the
 initial value of the game state `G`. And an `moves` object
 containing the moves that make up the game.
 
@@ -101,7 +37,7 @@ as its first argument. This object includes the game state `G` and
 `ctx` — an object managed by boardgame.io that contains game metadata.
 It also includes `playerID`, which identifies the player making the move.
 After the object containing `G` and `ctx`, moves can receive arbitrary arguments
-that you pass in when making the move.
+that you pass in when making the move. (see the example functions included in the file)
 
 In Tic-Tac-Toe, we only have one type of move and we will
 name it `clickCell`. It will take the ID of the cell that was clicked
@@ -128,49 +64,6 @@ state based on some field in `ctx` — the number of players, for example —
 but we don't need that for Tic-Tac-Toe.
 
 
-
-## Creating a Client
-
-
-### **Plain JS**
-
-We’ll start by creating a class to manage our web app’s logic in `src/App.js`.
-
-In the class’s constructor we’ll create a boardgame.io client
-and call its `start` method to run it.
-
-```js
-import { Client } from 'boardgame.io/client';
-import { TicTacToe } from './Game';
-
-class TicTacToeClient {
-  constructor() {
-    this.client = Client({ game: TicTacToe });
-    this.client.start();
-  }
-}
-
-const app = new TicTacToeClient();
-```
-
-Let’s also add a script to `package.json` to make serving the web app simpler
-and a [browserslist string](https://github.com/browserslist/browserslist) to
-indicate the browsers we want to support:
-
-```json
-{
-  "scripts": {
-    "start": "parcel index.html --open"
-  },
-  "browserslist": "defaults and supports async-functions"
-}
-```
-?> By dropping support for browsers that don’t support async functions, we don’t
-   need to worry about including the `regenerator-runtime` polyfill. If you need to
-   support older browsers, you can skip adding `browserslist`, but may need to
-   include the polyfill manually.
-
-You can now serve the app from the command line by running:
 
 ```
 npm start
@@ -309,8 +202,6 @@ the return value is available at `ctx.gameover`. In order for bots (see below) t
 
 
 ## Building a Board
-
-### **Plain JS**
 
 You can build your game board with your preferred UI tools.
 This example will use basic JavaScript, but you should be able
