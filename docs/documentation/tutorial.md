@@ -203,30 +203,13 @@ the return value is available at `ctx.gameover`. In order for bots (see below) t
 
 ## Building a Board
 
-You can build your game board with your preferred UI tools.
-This example will use basic JavaScript, but you should be able
-to adapt this approach to many other frameworks.
+We now only need to draw out board to play the game.
+We will cover how to draw this yourself in a later tutorial, for now we will use the code below in the `src/App.js` file.
 
-To start with, let’s add a `createBoard` method to our
-`TicTacToeClient` and call it in the constructor. This will inject
-the required DOM structure for our board into the web page.
-To know where to insert our board UI, we’ll pass in an
-element when instantiating the class.
 
-We’ll also add an `attachListeners` method. This will
-set up our board cells so that they trigger the `clickCell`
-move when they are clicked.
 
 ```js
-class TicTacToeClient {
-  constructor(rootElement) {
-    this.client = Client({ game: TicTacToe });
-    this.client.start();
-    this.rootElement = rootElement;
-    this.createBoard();
-    this.attachListeners();
-  }
-
+class GameClient {
   createBoard() {
     // Create cells in rows for the Tic-Tac-Toe board.
     const rows = [];
@@ -267,7 +250,7 @@ const app = new TicTacToeClient(appElement);
 ```
 
 You probably won’t see anything just yet, because all the cells are empty.
-Let’s fix that by adding a style for the cells to `index.html`:
+Let’s fix that by adding a style for the cells to `index.html` (below the `<meta />`: 
 
 ```html
 <style>
@@ -288,11 +271,11 @@ in the Debug Panel, but the board itself doesn’t change.
 We need to add a way to refresh the board every time
 boardgame.io’s state changes.
 
-Let’s do that by writing an `update` method for our `TicTacToeClient`
+Let’s do that by writing an `update` method for our `GameClient`
 class and subscribing to the boardgame.io state:
 
 ```js
-class TicTacToeClient {
+class GameClient {
   constructor() {
     // As before, but we also subscribe to the client:
     this.client.subscribe(state => this.update(state));
