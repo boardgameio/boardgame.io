@@ -197,7 +197,7 @@ export const TicTacToe = {
 
 ?> `endIf` takes a function that determines if
 the game is over. If it returns anything at all, the game ends and
-the return value is available at `ctx.gameover`. In order for bots (see below) to qwork properly, the return value should be an object with a `winner` key if there is a winner. See the example above.
+the return value is available at `ctx.gameover`. In order for bots (see below) to work properly, the return value should be an object with a `winner` key if there is a winner. See the example above.
 
 
 
