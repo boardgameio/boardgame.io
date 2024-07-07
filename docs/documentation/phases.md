@@ -8,8 +8,8 @@ entering a playing phase, for example.
 Each phase in [boardgame.io](https://boardgame.io/) defines a set
 of game configuration options that are applied for the duration
 of that phase. This includes the ability to define a different
-set of moves, use a different turn order etc. Turns happen
-inside phases.
+set of moves, use a different turn order etc. **Turns happen
+inside phases**.
 
 ### Card Game
 
@@ -20,19 +20,19 @@ two moves:
 - play a card from your hand onto the deck.
 
 ```js
-function DrawCard({ G, playerID }) {
+function drawCard({ G, playerID }) {
   G.deck--;
   G.hand[playerID]++;
 }
 
-function PlayCard({ G, playerID }) {
+function playCard({ G, playerID }) {
   G.deck++;
   G.hand[playerID]--;
 }
 
 const game = {
   setup: ({ ctx }) => ({ deck: 6, hand: Array(ctx.numPlayers).fill(0) }),
-  moves: { DrawCard, PlayCard },
+  moves: { drawCard, playCard },
   turn: { minMoves: 1, maxMoves: 1 },
 };
 ```
@@ -74,9 +74,7 @@ const game = {
 ```
 
 !> A phase that doesn't specify any moves just uses moves from
-the main `moves` section in the game. However, if it does,
-then the `moves` section in the phase overrides the global
-one.
+the main `moves` section in the game. 
 
 The game doesn't begin in any of these phases. In order to begin
 in the "draw" phase, we add a `start: true` to its config. Only
@@ -86,7 +84,7 @@ one phase can have `start: true`.
 phases: {
   draw: {
     moves: { DrawCard },
-+   start: true,
+    start: true,
   },
 
   play: {
@@ -102,8 +100,8 @@ empty.
 phases: {
   draw: {
     moves: { DrawCard },
-+   endIf: ({ G }) => (G.deck <= 0),
-+   next: 'play',
+    endIf: ({ G }) => (G.deck <= 0),
+    next: 'play',
     start: true,
   },
 

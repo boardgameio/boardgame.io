@@ -16,116 +16,19 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
 
 ## Setup
 
-We’re going to use ES2015 features like module [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import)
-and the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator)
-syntax, so we’ll need to use some kind of build system to compile
-our code for the browser.
+Clone the boardgame.io template repository from https://github.com/info-hsaka/boardgame-template .
+Run `npm i` in that folder.
 
-This tutorial shows two different approaches: one using [React](https://reactjs.org/),
-the other using basic browser APIs and compiling our app with
-[Parcel](https://parceljs.org/).
-You can follow whichever you feel most comfortable with.
-
-<!-- tabs:start -->
-
-### **Plain JS**
-
-Let’s create a new Node project from the command line:
-
-```
-mkdir bgio-tutorial
-cd bgio-tutorial
-npm init --yes
-```
-
-?> These commands will make a new directory called `bgio-tutorial`,
-   change to that directory, and initialise a new Node package.
-   [Read more in the Node Package Manager docs.][pkgjson]
-
-[pkgjson]: https://docs.npmjs.com/creating-a-package-json-file#creating-a-default-packagejson-file
-
-We’re going to add boardgame.io and also Parcel to help us build our app:
-
-```
-npm install boardgame.io
-npm install --save-dev parcel-bundler
-```
-
-
-Now, let’s create the basic structure our project needs:
-
-
-1. A JavaScript file for our web app at `src/App.js`.
-
-
-2. A JavaScript file for our game definition at `src/Game.js`.
-
-
-3. A basic HTML page that will load our app at `index.html`:
-
-    ```html
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>boardgame.io Tutorial</title>
-      <meta charset="utf-8" />
-    </head>
-    <body>
-      <div id="app"></div>
-      <script src="./src/App.js"></script>
-    </body>
-    </html>
-    ```
-
-Your project directory should now look like this:
-
-    bgio-tutorial/
-    ├── index.html
-    ├── node_modules/
-    ├── package-lock.json
-    ├── package.json
-    └── src/
-        ├── App.js
-        └── Game.js
-
-Looking good? OK, let’s get started! 🚀
-
-?> You can check out the complete code for this tutorial
-and play around with it on CodeSandbox:<br/><br/>
-[![Edit bgio-plain-js-tutorial](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/bgio-plain-js-tutorial-ewyyt?fontsize=14&hidenavigation=1&module=%2Fsrc%2FApp.js&theme=dark)
-
-### **React**
-
-We’ll use the [create-react-app](https://create-react-app.dev/)
-command line tool to initialize our React app and then add boardgame.io to it.
-
-```
-npx create-react-app bgio-tutorial
-cd bgio-tutorial
-npm install boardgame.io
-```
-
-While we’re here, let’s also create an empty JavaScript file for our game code:
-
-```
-touch src/Game.js
-```
-
-?> You can check out the complete code for this tutorial
-and play around with it on CodeSandbox:<br/><br/>
-[![Edit boardgame.io](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/boardgameio-wlvi2)
-
-<!-- tabs:end -->
-
-
+Now when running `npm run start`, you should be able to see a website on http://localhost:3000.
 
 ## Defining a Game
 
 We define a game by creating an object whose contents
 tell boardgame.io how your game works. More or less everything
 is optional, so we can start simple and gradually add complexity.
-To start, we’ll add a `setup` function, which will set the
-initial value of the game state `G`, and a `moves` object
+In the Template most functions are already defined but not filed out. So you can fill in the relevant parts.
+To start, we’ll fill the `setup` function in the file `src/Game.js`, which will set the
+initial value of the game state `G`. And an `moves` object
 containing the moves that make up the game.
 
 A move is a function that updates `G` to the desired new state.
@@ -134,7 +37,7 @@ as its first argument. This object includes the game state `G` and
 `ctx` — an object managed by boardgame.io that contains game metadata.
 It also includes `playerID`, which identifies the player making the move.
 After the object containing `G` and `ctx`, moves can receive arbitrary arguments
-that you pass in when making the move.
+that you pass in when making the move. (see the example functions included in the file)
 
 In Tic-Tac-Toe, we only have one type of move and we will
 name it `clickCell`. It will take the ID of the cell that was clicked
@@ -162,74 +65,9 @@ but we don't need that for Tic-Tac-Toe.
 
 
 
-## Creating a Client
-
-<!-- tabs:start -->
-
-### **Plain JS**
-
-We’ll start by creating a class to manage our web app’s logic in `src/App.js`.
-
-In the class’s constructor we’ll create a boardgame.io client
-and call its `start` method to run it.
-
-```js
-import { Client } from 'boardgame.io/client';
-import { TicTacToe } from './Game';
-
-class TicTacToeClient {
-  constructor() {
-    this.client = Client({ game: TicTacToe });
-    this.client.start();
-  }
-}
-
-const app = new TicTacToeClient();
-```
-
-Let’s also add a script to `package.json` to make serving the web app simpler
-and a [browserslist string](https://github.com/browserslist/browserslist) to
-indicate the browsers we want to support:
-
-```json
-{
-  "scripts": {
-    "start": "parcel index.html --open"
-  },
-  "browserslist": "defaults and supports async-functions"
-}
-```
-?> By dropping support for browsers that don’t support async functions, we don’t
-   need to worry about including the `regenerator-runtime` polyfill. If you need to
-   support older browsers, you can skip adding `browserslist`, but may need to
-   include the polyfill manually.
-
-You can now serve the app from the command line by running:
-
 ```
 npm start
 ```
-
-### **React**
-
-Replace the contents of `src/App.js` with
-
-```js
-import { Client } from 'boardgame.io/react';
-import { TicTacToe } from './Game';
-
-const App = Client({ game: TicTacToe });
-
-export default App;
-```
-
-You can now serve the app from the command line by running:
-
-```
-npm start
-```
-
-<!-- tabs:end -->
 
 Although we haven’t built any UI yet, boardgame.io renders a Debug Panel.
 This panel means we can already play our Tic-Tac-Toe game!
@@ -250,7 +88,6 @@ can end the turn by clicking `endTurn` and pressing **Enter**. The next call to
 
 ?> You can turn off the Debug Panel by passing `debug: false`
 in the `Client` config.
-
 
 
 ## Game Improvements
@@ -319,7 +156,7 @@ to test the `cells` array with:
 
 ```js
 // Return true if `cells` is in a winning configuration.
-function IsVictory(cells) {
+function isVictory(cells) {
   const positions = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
     [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
@@ -334,7 +171,7 @@ function IsVictory(cells) {
 }
 
 // Return true if all `cells` are occupied.
-function IsDraw(cells) {
+function isDraw(cells) {
   return cells.filter(c => c === null).length === 0;
 }
 ```
@@ -348,10 +185,10 @@ export const TicTacToe = {
   // setup, moves, etc.
 
   endIf: ({ G, ctx }) => {
-    if (IsVictory(G.cells)) {
+    if (isVictory(G.cells)) {
       return { winner: ctx.currentPlayer };
     }
-    if (IsDraw(G.cells)) {
+    if (isDraw(G.cells)) {
       return { draw: true };
     }
   },
@@ -360,40 +197,19 @@ export const TicTacToe = {
 
 ?> `endIf` takes a function that determines if
 the game is over. If it returns anything at all, the game ends and
-the return value is available at `ctx.gameover`.
+the return value is available at `ctx.gameover`. In order for bots (see below) to work properly, the return value should be an object with a `winner` key if there is a winner. See the example above.
 
 
 
 ## Building a Board
 
-<!-- tabs:start -->
+We now only need to draw out board to play the game.
+We will cover how to draw this yourself in a later tutorial, for now we will use the code below in the `src/App.js` file.
 
-### **Plain JS**
 
-You can build your game board with your preferred UI tools.
-This example will use basic JavaScript, but you should be able
-to adapt this approach to many other frameworks.
-
-To start with, let’s add a `createBoard` method to our
-`TicTacToeClient` and call it in the constructor. This will inject
-the required DOM structure for our board into the web page.
-To know where to insert our board UI, we’ll pass in an
-element when instantiating the class.
-
-We’ll also add an `attachListeners` method. This will
-set up our board cells so that they trigger the `clickCell`
-move when they are clicked.
 
 ```js
-class TicTacToeClient {
-  constructor(rootElement) {
-    this.client = Client({ game: TicTacToe });
-    this.client.start();
-    this.rootElement = rootElement;
-    this.createBoard();
-    this.attachListeners();
-  }
-
+class GameClient {
   createBoard() {
     // Create cells in rows for the Tic-Tac-Toe board.
     const rows = [];
@@ -434,7 +250,7 @@ const app = new TicTacToeClient(appElement);
 ```
 
 You probably won’t see anything just yet, because all the cells are empty.
-Let’s fix that by adding a style for the cells to `index.html`:
+Let’s fix that by adding a style for the cells to `index.html` (below the `<meta />`: 
 
 ```html
 <style>
@@ -455,11 +271,11 @@ in the Debug Panel, but the board itself doesn’t change.
 We need to add a way to refresh the board every time
 boardgame.io’s state changes.
 
-Let’s do that by writing an `update` method for our `TicTacToeClient`
+Let’s do that by writing an `update` method for our `GameClient`
 class and subscribing to the boardgame.io state:
 
 ```js
-class TicTacToeClient {
+class GameClient {
   constructor() {
     // As before, but we also subscribe to the client:
     this.client.subscribe(state => this.update(state));
@@ -500,97 +316,6 @@ Here are the key things to remember:
 
 
 - You can register callbacks for every state change using `client.subscribe`.
-
-### **React**
-
-React can be a good fit for board games because
-it provides a declarative API to translate objects
-to UI elements. To create a board we need to translate
-the game state `G` into actual cells that are clickable.
-
-Let’s create a new file at `src/Board.js`:
-
-```js
-import React from 'react';
-
-export function TicTacToeBoard({ ctx, G, moves }) {
-  const onClick = (id) => moves.clickCell(id);
-
-  let winner = '';
-  if (ctx.gameover) {
-    winner =
-      ctx.gameover.winner !== undefined ? (
-        <div id="winner">Winner: {ctx.gameover.winner}</div>
-      ) : (
-        <div id="winner">Draw!</div>
-      );
-  }
-
-  const cellStyle = {
-    border: '1px solid #555',
-    width: '50px',
-    height: '50px',
-    lineHeight: '50px',
-    textAlign: 'center',
-  };
-
-  let tbody = [];
-  for (let i = 0; i < 3; i++) {
-    let cells = [];
-    for (let j = 0; j < 3; j++) {
-      const id = 3 * i + j;
-      cells.push(
-        <td key={id}>
-          {G.cells[id] ? (
-            <div style={cellStyle}>{G.cells[id]}</div>
-          ) : (
-            <button style={cellStyle} onClick={() => onClick(id)} />
-          )}
-        </td>
-      );
-    }
-    tbody.push(<tr key={i}>{cells}</tr>);
-  }
-
-  return (
-    <div>
-      <table id="board">
-        <tbody>{tbody}</tbody>
-      </table>
-      {winner}
-    </div>
-  );
-}
-```
-
-The important bit to pay attention to is about how to
-dispatch moves. We have the following code in our click
-handler:
-
-```js
-moves.clickCell(id);
-```
-
-- `moves` is passed in your component’s props by the framework and
-  contains functions to dispatch your game’s moves. `props.moves.clickCell`
-  dispatches the `clickCell` move, and any data passed in is made
-  available in the move handler.
-
-
-Now, we pass the board component to our `Client` in `src/App.js`:
-
-```js
-import { TicTacToeBoard } from './Board';
-
-const App = Client({
-  game: TicTacToe,
-  board: TicTacToeBoard,
-});
-
-export default App;
-```
-
-<!-- tabs:end -->
 
 And there you have it. A basic tic-tac-toe game!
 

@@ -1,6 +1,7 @@
 # Stages
 
-A stage is similar to a phase, except that it happens within a turn.
+Stages are a way to break a turn into smaller parts. They are useful
+when you want to restrict the set of moves that a player can make.
 A turn can be subdivided into many stages, each allowing a different
 set of moves during that stage.
 
@@ -40,7 +41,7 @@ const game = {
   turn: {
     stages: {
       discard: {
-        moves: { DiscardCard },
+        moves: { discardCard },
       },
     },
   },
@@ -144,16 +145,16 @@ Let's go back to the example we discussed earlier where we
 require every other player to discard a card when we play one:
 
 ```js
-function PlayCard({ events }) {
+function playCard({ events }) {
   events.setActivePlayers({ others: 'discard', minMoves: 1, maxMoves: 1 });
 }
 
 const game = {
-  moves: { PlayCard },
+  moves: { playCard },
   turn: {
     stages: {
       discard: {
-        moves: { Discard },
+        moves: { discard },
       },
     },
   },

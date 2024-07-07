@@ -144,6 +144,8 @@ Local({
 
 ## Remote Master
 
+// TODO icorporate our server setup
+
 You can also run the game master on a separate server. Any boardgame.io
 client can connect to this master (whether it is a browser, an Android
 app etc.) and it will be kept in sync with other clients in realtime.
