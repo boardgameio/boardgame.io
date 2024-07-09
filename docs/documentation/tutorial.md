@@ -304,10 +304,6 @@ and bot moves. For example, you can make
 some manual moves to get two in a row and then verify that
 the bot makes a block.
 
-```react
-<iframe class='react' src='snippets/example-3' height='760' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
-```
-
 ?> The bot uses [MCTS](https://nicolodavis.com/blog/tic-tac-toe/) under the
 hood to explore the game tree and find good moves. The default uses
 1000 iterations per move.  This can be configured to adjust the
