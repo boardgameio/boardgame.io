@@ -66,7 +66,7 @@ export const TicTacToe = {
 }
 ```
 
-Move functions take an argument that contains a few fields, most importantly `G` and `playerID`. `G` is the game state object that we set up with the `setup` function and `playerID` is the ID of the player who made the move. The second argument can be anything else we need to pass to make a valid move. We will see later how to use that. In this case, we need to know in which cell the player would like to place their X/O, so we add a second argument `cellIndex` to the `clickCell` function.
+Move functions take an argument that contains a few fields, most importantly `G` and `playerID`. `G` is the game state object that we set up with the `setup` function and `playerID` is the ID (short for identifier, in our case 0 or 1) of the player who made the move. The second argument can be anything else we need to pass to make a valid move. We will see later how to use that. In this case, we need to know in which cell the player would like to place their X/O, so we add a second argument `cellIndex` to the `clickCell` function.
 
 ```js
 export const TicTacToe = {
