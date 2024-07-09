@@ -2,11 +2,6 @@
 
 This tutorial walks through a simple game of Tic-Tac-Toe.
 
-?> We’re going to be running commands from a terminal and using Node.js/npm.
-   If you haven’t done that before, you might want to read [an introduction to the command line][cmd]
-   and follow [the instructions on how to install Node][node]. You’ll also want
-   a text editor to write code in like [VS Code][vsc] or [Atom][atom].
-
 [node]: https://nodejs.dev/learn/how-to-install-nodejs
 [cmd]: https://tutorial.djangogirls.org/en/intro_to_command_line/
 [vsc]: https://code.visualstudio.com/
@@ -17,9 +12,11 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
 ## Setup
 
 Clone the boardgame.io template repository from https://github.com/info-hsaka/boardgame-template .
-Run `npm i` in that folder.
+(See here for an instruction on how to do that: https://js.oc.is/docs/intro/setup/#34-clone-git-repository)
+Run `npm i` in that folder. (For detailed instructions see here: https://js.oc.is/docs/intro/setup/#35-weitere-programme-installieren)
 
-Now when running `npm run start`, you should be able to see a website on http://localhost:3000.
+As with the JS tutorial, you should be able to click on the "Run" button to start the game. (See https://js.oc.is/docs/intro/howto/ for a refresher on that)
+You should be able to see a website on http://localhost:3000.
 
 ## Defining a Game
 
@@ -27,9 +24,10 @@ We define a game by creating an object whose contents
 tell boardgame.io how your game works. More or less everything
 is optional, so we can start simple and gradually add complexity.
 In the Template most functions are already defined but not filed out. So you can fill in the relevant parts.
+
 To start, we’ll fill the `setup` function in the file `src/Game.js`, which will set the
-initial value of the game state `G`. And an `moves` object
-containing the moves that make up the game.
+initial value of the game state `G`. 
+And an `moves` object containing the moves that make up the game.
 
 A move is a function that updates `G` to the desired new state.
 It receives an object containing various fields
@@ -379,12 +377,3 @@ the bot makes a block.
 hood to explore the game tree and find good moves. The default uses
 1000 iterations per move.  This can be configured to adjust the
 bot's playing strength.
-
-The framework will come bundled with a few different bot algorithms, and an advanced
-version of MCTS that will allow you to specify a set of objectives to optimize for.
-For example, at any given point in the game you can tell the bot to gather resources
-in the short term and wage wars in the late stages. You just tell the bot what to do
-and it will figure out the right combination of moves to make it happen!
-
-Detailed documentation about all this is coming soon. Adding bots to games for actual
-networked play (as opposed to merely simulating moves) is also in the works.
