@@ -1,6 +1,7 @@
 # Tutorial
 
-This tutorial walks through a simple game of Tic-Tac-Toe.
+The goal of this tutorial is to make a simple TicTacToe game using boardgame.io. 
+You'll learn the basic concepts of boardgame.io and how to use them and in the end you'll have a working game.
 
 [node]: https://nodejs.dev/learn/how-to-install-nodejs
 [cmd]: https://tutorial.djangogirls.org/en/intro_to_command_line/
@@ -12,48 +13,87 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
 ## Setup
 
 Clone the boardgame.io template repository from https://github.com/info-hsaka/boardgame-template .
-(See here for an instruction on how to do that: https://js.oc.is/docs/intro/setup/#34-clone-git-repository)
-Run `npm i` in that folder. (For detailed instructions see here: https://js.oc.is/docs/intro/setup/#35-weitere-programme-installieren)
+(See here for instructions on how to do that: https://js.oc.is/docs/intro/setup/#34-clone-git-repository)
+Like before we need to install some additional programs by running `npm i` in the folder. Take a look here for more detailed (and Windows!) instructions:  https://js.oc.is/docs/intro/setup/#35-weitere-programme-installieren
 
 As with the JS tutorial, you should be able to click on the "Run" button to start the game. (See https://js.oc.is/docs/intro/howto/ for a refresher on that)
-You should be able to see a website on http://localhost:3000.
+You should be able to see a website by navigating your browser to http://localhost:3000/
+
+Once you have cloned the template repository, this tutorial will work in the src/TicTacToe.js file. You can look at the other files in the src folder, but you don't need to change them for this tutorial. The src/Game.js file includes a game object with a few more functions added to it, so you  can get a sense for what will be possible later on. For now we will focus on the TicTacToe object in the TicTacToe.js file.
 
 ## Defining a Game
 
-We define a game by creating an object whose contents
-tell boardgame.io how your game works. More or less everything
-is optional, so we can start simple and gradually add complexity.
-In the Template most functions are already defined but not filed out. So you can fill in the relevant parts.
+We define a game by creating an object which contains information about your game to
+tell boardgame.io how it works. More or less everything
+is optional, so we can start simple and gradually add more complexity.
+In the template most functions are already defined but not filled out, which means you'll have to fill in the relevant parts.
 
 To start, we’ll fill the `setup` function in the file `src/Game.js`, which will set the
 initial value of the game state `G`. 
-And an `moves` object containing the moves that make up the game.
 
-A move is a function that updates `G` to the desired new state.
-It receives an object containing various fields
-as its first argument. This object includes the game state `G` and
-`ctx` — an object managed by boardgame.io that contains game metadata.
-It also includes `playerID`, which identifies the player making the move.
-After the object containing `G` and `ctx`, moves can receive arbitrary arguments
-that you pass in when making the move. (see the example functions included in the file)
-
-In Tic-Tac-Toe, we only have one type of move and we will
-name it `clickCell`. It will take the ID of the cell that was clicked
-and update that cell with the ID of the player who clicked it.
-
-Let’s put this together in our `src/Game.js` file to start
-defining our game:
+?> The game state `G` is a plain JavaScript object that represents the state of the game as we talked about during the in-person session. If, at any point, you have questions about parts of boardgame.io or other concepts that we use here, feel free to ask and also look around at the rest of the documentation here.
 
 ```js
 export const TicTacToe = {
-  setup: () => ({ cells: Array(9).fill(null) }),
+  // Fill the cells of the TicTacToe board with `null` to indicate that they are empty.
+  // This is the initial state of the game.
+  // This syntax might be new, but we're just defining a function in a JavaScript object.
+  // The function will be available in the `setup` field of the `TicTacToe` object and would
+  // be called like this: `TicTacToe.setup()`. However we don't need to call it ourselves, boardgame.io will do that for us.
+  setup: function setup() {
+    return { cells: [null, null, null, null, null, null, null, null, null] }
+  }
+};
+```
+
+Next up is the `moves` object.
+
+A move is a function that takes some input (like the cell a player clicked on) and updates `G` to the desired new state.
+"Moves" represent things a player can do in the game. In TicTacToe it's pretty simple: a player can click on a cell to place their mark there.
+
+The `moves` object is a collection of all possible moves with their names as a normal JavaScript object:
+
+```js
+export const TicTacToe = {
+  // I won't repeat everything in the object, just new parts that were added
+  // ...
 
   moves: {
-    clickCell: ({ G, playerID }, id) => {
-      G.cells[id] = playerID;
+    clickCell: () => {
+      console.log("A clickCell move was made!")
     },
   },
-};
+}
+```
+
+Move functions take an argument that contains a few fields, most importantly `G` and `playerID`. `G` is the game state object that we set up with the `setup` function and `playerID` is the ID of the player who made the move. The second argument can be anything else we need to pass to make a valid move. We will see later how to use that. In this case, we need to know in which cell the player would like to place their X/O, so we add a second argument `cellIndex` to the `clickCell` function.
+
+```js
+export const TicTacToe = {
+  // ...
+
+  moves: {
+    clickCell: function clickCell(move, cellIndex) {
+      console.log("Player number " + move.playerID + " wants to place their mark in cell " + cellIndex)
+    },
+  },
+}
+```
+
+Now to update the game state, we simply update G in our move function:
+
+```js
+export const TicTacToe = {
+  // ...
+
+  moves: {
+    clickCell: function clickCell(move, cellIndex) {
+      // cells is the array we setup in the setup function and we simply assign the playerID to the cellIndex
+      // to indicate which player has placed their mark there.
+      move.G.cells[cellIndex] = move.playerID;
+    },
+  },
+}
 ```
 
 ?> The `setup` function also receives an object as its first argument
@@ -61,32 +101,40 @@ like moves. This is useful if you need to customize the initial
 state based on some field in `ctx` — the number of players, for example —
 but we don't need that for Tic-Tac-Toe.
 
+At this point your TicTacToe.js file should look like this:
 
+```js
+export const TicTacToe = {
+  setup: function setup() {
+    return { cells: [null, null, null, null, null, null, null, null, null] }
+  },
 
+  moves: {
+    clickCell: function clickCell(move, cellIndex) {
+      // cells is the array we setup in the setup function and we simply assign the playerID to the cellIndex
+      // to indicate which player has placed their mark there.
+      move.G.cells[cellIndex] = move.playerID;
+    },
+  },
+}
 ```
-npm start
-```
 
-Although we haven’t built any UI yet, boardgame.io renders a Debug Panel.
+You can now click the "Run" button to see the game in action. Go to http://localhost:3000/ to see the game.
+
+At this point you should see an empty TicTacToe board and the boardgame.io Debug Panel.
 This panel means we can already play our Tic-Tac-Toe game!
 
 You can make a move by clicking on `clickCell` on the
-Debug Panel, entering a number between `0` and `8`, and pressing
+Debug Panel, entering a number between `0` and `8` in the (), and pressing
 **Enter**. The current player will make a move on the chosen
 cell. The number you enter is the `id` passed to the `clickCell` function as
-the first argument after `G` and `ctx`. Notice how the
+the first argument after `move`. Notice how the
 `cells` array on the Debug Panel updates as you make moves. You
 can end the turn by clicking `endTurn` and pressing **Enter**. The next call to
 `clickCell` will result in a “1” in the chosen cell instead of a “0”.
 
-```react
-<iframe class='react' src='snippets/example-1' height='760' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
-```
-
-
 ?> You can turn off the Debug Panel by passing `debug: false`
 in the `Client` config.
-
 
 ## Game Improvements
 
@@ -106,11 +154,19 @@ import { INVALID_MOVE } from 'boardgame.io/core';
 Now we can return `INVALID_MOVE` from `clickCell`:
 
 ```js
-clickCell: ({ G, playerID }, id) => {
-  if (G.cells[id] !== null) {
-    return INVALID_MOVE;
-  }
-  G.cells[id] = playerID;
+import { INVALID_MOVE } from 'boardgame.io/core';
+
+export const TicTacToe = {
+  // ...
+
+  moves: {
+    clickCell: function clickCell(move, cellIndex) {
+      if (move.G.cells[cellIndex] !== null) {
+        return INVALID_MOVE;
+      }
+      move.G.cells[cellIndex] = move.playerID;
+    },
+  },
 }
 ```
 
@@ -130,16 +186,17 @@ move has been made, as well as the `minMoves` option, so players
 
 ```js
 export const TicTacToe = {
-  setup: () => { /* ... */ },
+  setup: // ...
+  moves: { /* ... */ },
 
   turn: {
     minMoves: 1,
     maxMoves: 1,
   },
-
-  moves: { /* ... */ },
 }
 ```
+
+Try playing around with the game in the debug panel again. You should see that you can't make a move in a cell that is already filled and that the turn automatically ends after a move is made.
 
 ?> You can learn more in the [Turn Order](turn-order.md)
     and [Events](events.md) guides.
@@ -149,32 +206,37 @@ export const TicTacToe = {
 The Tic-Tac-Toe game we have so far doesn't really ever end.
 Let's keep track of a winner in case one player wins the game.
 
-First, let’s declare two helper functions in `src/Game.js`
-to test the `cells` array with:
+In order to do that, first we need to know if a player won and if so, which one.
+
+TicTacToe will often end in a draw, so we need to handle that as well. We can add a helper function to check if the game is over, i.e. all cells are filled.
 
 ```js
-// Return true if `cells` is in a winning configuration.
-function isVictory(cells) {
-  const positions = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
-    [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
-  ];
-
-  const isRowComplete = row => {
-    const symbols = row.map(i => cells[i]);
-    return symbols.every(i => i !== null && i === symbols[0]);
-  };
-
-  return positions.map(isRowComplete).some(i => i === true);
-}
-
-// Return true if all `cells` are occupied.
 function isDraw(cells) {
-  return cells.filter(c => c === null).length === 0;
+  // Return `true` if all cells are filled and `false` otherwise
 }
 ```
 
-Now, we add an `endIf` method to our game.
+Write the code for this function as described and we will see later how to use it.
+
+The other problem we have is finding out if someone has won the game. In Tic-Tac-Toe, a player wins if they have three of their marks in a row, either horizontally, vertically, or diagonally. We should write a helper function to check if a player has won:
+
+```js
+function isVictory(cells) {
+  // Return the playerID of the winner if there is one, otherwise `null`
+}
+```
+
+Hints: cells is an array with exactly 9 elements and each element is either `null`, `0`, or `1`. Imagine the elements of the arary being laid out like this:
+
+```
+0 | 1 | 2
+3 | 4 | 5
+6 | 7 | 8
+```
+
+And then write a function that checks for a win in each row, column, and diagonal.
+
+Now that we have these functions, we add an `endIf` method to our game.
 This method will be called each time our state updates to
 check if the game is over.
 
@@ -182,11 +244,15 @@ check if the game is over.
 export const TicTacToe = {
   // setup, moves, etc.
 
-  endIf: ({ G, ctx }) => {
-    if (isVictory(G.cells)) {
-      return { winner: ctx.currentPlayer };
+  endIf: function endIf(endIf) {
+    const winner = isVictory(endIf.G.cells);
+    if (winner != null) {
+      // our isVictory function returned a playerID so the game is over and we have a winner
+      return { winner: winner };
     }
-    if (isDraw(G.cells)) {
+    // if there is no winner, check if the game is a draw
+    if (isDraw(endIf.G.cells)) {
+      // the game is a draw, so we tell boardgame.io that result
       return { draw: true };
     }
   },
@@ -196,135 +262,6 @@ export const TicTacToe = {
 ?> `endIf` takes a function that determines if
 the game is over. If it returns anything at all, the game ends and
 the return value is available at `ctx.gameover`. In order for bots (see below) to work properly, the return value should be an object with a `winner` key if there is a winner. See the example above.
-
-
-
-## Building a Board
-
-We now only need to draw out board to play the game.
-We will cover how to draw this yourself in a later tutorial, for now we will use the code below in the `src/App.js` file.
-
-
-
-```js
-class GameClient {
-  createBoard() {
-    // Create cells in rows for the Tic-Tac-Toe board.
-    const rows = [];
-    for (let i = 0; i < 3; i++) {
-      const cells = [];
-      for (let j = 0; j < 3; j++) {
-        const id = 3 * i + j;
-        cells.push(`<td class="cell" data-id="${id}"></td>`);
-      }
-      rows.push(`<tr>${cells.join('')}</tr>`);
-    }
-
-    // Add the HTML to our app <div>.
-    // We’ll use the empty <p> to display the game winner later.
-    this.rootElement.innerHTML = `
-      <table>${rows.join('')}</table>
-      <p class="winner"></p>
-    `;
-  }
-
-  attachListeners() {
-    // This event handler will read the cell id from a cell’s
-    // `data-id` attribute and make the `clickCell` move.
-    const handleCellClick = event => {
-      const id = parseInt(event.target.dataset.id);
-      this.client.moves.clickCell(id);
-    };
-    // Attach the event listener to each of the board cells.
-    const cells = this.rootElement.querySelectorAll('.cell');
-    cells.forEach(cell => {
-      cell.onclick = handleCellClick;
-    });
-  }
-}
-
-const appElement = document.getElementById('app');
-const app = new TicTacToeClient(appElement);
-```
-
-You probably won’t see anything just yet, because all the cells are empty.
-Let’s fix that by adding a style for the cells to `index.html` (below the `<meta />`: 
-
-```html
-<style>
-  .cell {
-    border: 1px solid #555;
-    width: 50px;
-    height: 50px;
-    line-height: 50px;
-    text-align: center;
-  }
-</style>
-```
-
-Now you should see an empty Tic-Tac-Toe board!
-But there’s still one thing missing. If you click
-on the board cells, you should see `G.cells` update
-in the Debug Panel, but the board itself doesn’t change.
-We need to add a way to refresh the board every time
-boardgame.io’s state changes.
-
-Let’s do that by writing an `update` method for our `GameClient`
-class and subscribing to the boardgame.io state:
-
-```js
-class GameClient {
-  constructor() {
-    // As before, but we also subscribe to the client:
-    this.client.subscribe(state => this.update(state));
-  }
-
-  createBoard() { /* ... */ }
-
-  attachListeners() { /* ... */ }
-
-  update(state) {
-    // Get all the board cells.
-    const cells = this.rootElement.querySelectorAll('.cell');
-    // Update cells to display the values in game state.
-    cells.forEach(cell => {
-      const cellId = parseInt(cell.dataset.id);
-      const cellValue = state.G.cells[cellId];
-      cell.textContent = cellValue !== null ? cellValue : '';
-    });
-    // Get the gameover message element.
-    const messageEl = this.rootElement.querySelector('.winner');
-    // Update the element to show a winner if any.
-    if (state.ctx.gameover) {
-      messageEl.textContent =
-        state.ctx.gameover.winner !== undefined
-          ? 'Winner: ' + state.ctx.gameover.winner
-          : 'Draw!';
-    } else {
-      messageEl.textContent = '';
-    }
-  }
-}
-```
-
-Here are the key things to remember:
-
-- You can trigger the moves defined in your game definition
-  by calling `client.moves['moveName']`.
-
-
-- You can register callbacks for every state change using `client.subscribe`.
-
-And there you have it. A basic tic-tac-toe game!
-
-```react
-<iframe class='react' src='snippets/example-2' height='760' scrolling='no' title='example' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'></iframe>
-```
-
-?> You can press <kbd>1</kbd> (or click on the button next to “reset”)
-   to reset the state of the game and start over.
-
-
 
 ## Bots
 
@@ -343,14 +280,12 @@ export const TicTacToe = {
   // setup, turn, moves, endIf ...
 
   ai: {
-    enumerate: (G, ctx) => {
-      let moves = [];
-      for (let i = 0; i < 9; i++) {
-        if (G.cells[i] === null) {
-          moves.push({ move: 'clickCell', args: [i] });
-        }
-      }
-      return moves;
+    enumerate: function enumerate(enumerate) => {
+      // this function returns the top left cell as the only possible move every time
+      // Modify this function so that it will return all possible TicTacToe moves to make the
+      // bot actually play the game based on `enumerate.G.cells`.
+      // Think about what moves are possible in TicTacToe and how you can find them in our cells array.
+      return { move: 'clickCell', args: [0] };
     },
   },
 };
@@ -377,3 +312,14 @@ the bot makes a block.
 hood to explore the game tree and find good moves. The default uses
 1000 iterations per move.  This can be configured to adjust the
 bot's playing strength.
+
+## Further Reading and what's next
+
+Feel free to play around more with TicTacToe and try to think about other games and how they would map to the concepts you learned.
+
+In a future tutorial you will also learn how to actually draw the UI yourself, how to make it look nice and how to respond to user input.
+
+Feel free to look around in the other files in the template, but don't worry if you don't understand everything yet. The tutorial template uses concepts that we won't even need during the HSAKA (such as HTML and CSS), because we will be using a different technology to draw the UI.
+
+If you feel like you understand everything that's going on in the TicTacToe file, that's more than enough.
+
