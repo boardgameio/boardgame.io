@@ -280,10 +280,10 @@ export const TicTacToe = {
   // setup, turn, moves, endIf ...
 
   ai: {
-    enumerate: function enumerate(enumerate)  {
+    enumerate: function enumerate(G)  {
       // this function returns the top left cell as the only possible move every time
       // Modify this function so that it will return all possible TicTacToe moves to make the
-      // bot actually play the game based on `enumerate.G.cells`.
+      // bot actually play the game based on `G.cells`.
       // Think about what moves are possible in TicTacToe and how you can find them in our cells array.
       return [{ move: 'clickCell', args: [0] }];
     },
