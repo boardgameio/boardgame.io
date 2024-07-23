@@ -300,3 +300,11 @@ A 1-4 player dice game played locally.
 [c22]: https://github.com/pjohannessen/yatzy
 [t22]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
 [b22]: https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
+
+#### [![GitHub stars][b-wd]][c-wd] [Wizard Duel][p-wd] \[[code][c-wd]\]
+&nbsp;&nbsp;
+A single-player battle card game featuring epic fantasy card art and sound effects.
+
+[b-wd]: https://img.shields.io/github/stars/ruichen199801/wizard-duel?label=%E2%98%85&logo=github
+[p-wd]: https://wizard-duel-ten.vercel.app/
+[c-wd]: https://github.com/ruichen199801/wizard-duel
