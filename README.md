@@ -1,4 +1,4 @@
-<p align="center"><strong>The project is in maintenance mode and not being actively developed. If you'd like to become a maintainer and take over development, please file an issue and discuss your plans. Your time and contributions are most welcome.</strong></p>
+<p align="center"><strong>The project is not being actively developed at the moment, but is pretty stable and used in several games. If you would like to become a maintainer, please open an issue to discuss.</strong></p>
 
 <p align="center">
   <a href="https://boardgame.io/">
@@ -89,9 +89,6 @@ and the [project roadmap](roadmap.md).
 📖 **Can we improve [our documentation][docs]?**  
 Pull requests even for small changes can be helpful. Each page in the
 docs can be edited by clicking the “Edit on GitHub” link at the top right.
-
-💸 **Want to support the project financially?**  
-We accept donations via [GitHub Sponsors][sponsors] and on [Open Collective][collective].
 
 [new-issue]: https://github.com/boardgameio/boardgame.io/issues/new/choose
 [gitter]: https://gitter.im/boardgame-io/General

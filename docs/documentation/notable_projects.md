@@ -26,6 +26,14 @@ Clone of Battle Line, a 2 player card game.
 [c-bl]: https://github.com/rsandzimier/battleline
 [p-bl]: https://rsandzimier.github.io/battleline/
 
+#### [![GitHub stars][jwbj-3]][jwbj-2]  [Black Jack (John Wick theme)][jwbj-1] \[[code][jwbj-2]\]
+&nbsp;&nbsp;
+A John Wick-themed Black Jack card game with custom graphics and sound.
+
+[jwbj-3]: https://img.shields.io/github/stars/ipkevin/Blackjack-Builder?label=%E2%98%85&logo=github
+[jwbj-2]: https://github.com/ipkevin/Blackjack-Builder
+[jwbj-1]: https://johnwickblackjack.netlify.app/
+
 #### [![GitHub stars][b2]][c2] boardgame.io-angular \[[code][c2] | [demo][d2]\]
 &nbsp;&nbsp;
 Unofficial Angular client for boardgame.io.
@@ -301,3 +309,11 @@ A 1-4 player dice game played locally.
 [c22]: https://github.com/pjohannessen/yatzy
 [t22]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
 [b22]: https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
+
+#### [![GitHub stars][b-wd]][c-wd] [Wizard Duel][p-wd] \[[code][c-wd]\]
+&nbsp;&nbsp;
+A single-player battle card game featuring epic fantasy card art and sound effects.
+
+[b-wd]: https://img.shields.io/github/stars/ruichen199801/wizard-duel?label=%E2%98%85&logo=github
+[p-wd]: https://wizard-duel-ten.vercel.app/
+[c-wd]: https://github.com/ruichen199801/wizard-duel
