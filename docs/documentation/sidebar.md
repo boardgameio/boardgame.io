@@ -20,6 +20,7 @@
   - [TypeScript](typescript.md)
 - **Reference**
   - [Game](api/Game.md)
+  - [Context](api/Context.md)
   - [Client](api/Client.md)
   - [Server](api/Server.md)
   - [Lobby](api/Lobby.md)

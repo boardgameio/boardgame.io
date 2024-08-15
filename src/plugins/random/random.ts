@@ -15,19 +15,33 @@ export interface RandomState {
 }
 
 export interface RandomAPI {
+  /** Roll a random number on a four-sided die */
   D4(): number;
+  /** Roll multiple random numbers on a four-sided die */
   D4(diceCount: number): number[];
+  /** Roll a random number on a six-sided die */
   D6(): number;
+  /** Roll multiple random numbers on a six-sided die */
   D6(diceCount: number): number[];
+  /** Roll a random number on a ten-sided die */
   D10(): number;
+  /** Roll multiple random numbers on a ten-sided die */
   D10(diceCount: number): number[];
+  /** Roll a random number on a twelve-sided die */
   D12(): number;
+  /** Roll multiple random numbers on a twelve-sided die */
   D12(diceCount: number): number[];
+  /** Roll a random number on a twenty-sided die */
   D20(): number;
+  /** Roll multiple random numbers on a twenty-sided die */
   D20(diceCount: number): number[];
+  /** Roll a random number on a die with a given number of sides. Defaults to six sides. */
   Die(spotvalue?: number): number;
+  /** Roll multiple random numbers on a die with a given number of sides. */
   Die(spotvalue: number, diceCount: number): number[];
+  /** Generate a random floating point number between 0 and 1 */
   Number(): number;
+  /** Shuffle a given array, returning a shuffled version */
   Shuffle<T>(deck: T[]): T[];
 }
 
