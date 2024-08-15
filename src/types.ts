@@ -86,14 +86,31 @@ export interface ActivePlayers {
 }
 
 export interface Ctx {
+  /** Number of players in the game */
   numPlayers: number;
+  /** List of player IDs in play order */
   playOrder: Array<PlayerID>;
+  /** Current position in the play order */
   playOrderPos: number;
+  /**
+   * If there are stages, this is an Object containing all currently active players with their playerIds as fields and the stage they are in as content.
+   *
+   * Will be `null` if there are no stages.
+   * */
   activePlayers: null | ActivePlayers;
+  /** playerID of the player that is acting right now */
   currentPlayer: PlayerID;
+  /** Number of moves that have been taken in the game already */
   numMoves?: number;
+  /**
+   * Contains the return value of the `endIf` function in the `Game` object if the game is over.
+   *
+   * Is empty if the game is not over.
+   */
   gameover?: any;
+  /** Turn number of the current turn */
   turn: number;
+  /** Active phase of the game or `null` if there are no phases */
   phase: string;
   _activePlayersMinMoves?: Record<PlayerID, number>;
   _activePlayersMaxMoves?: Record<PlayerID, number>;
