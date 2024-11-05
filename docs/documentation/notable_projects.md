@@ -148,6 +148,15 @@ PWA framework for publishing board games.
 [b9]: https://img.shields.io/github/stars/freeboardgames/FreeBoardGames.org?label=%E2%98%85&logo=github
 
 
+#### [![GitHub stars][b28]][c28] [Garden][p28] \[[code][c28]\]
+&nbsp;&nbsp;
+A single-player puzzle game.
+
+[p28]: https://0x682.itch.io/garden
+[c28]: https://github.com/steambap/garden
+[b28]: https://img.shields.io/github/stars/steambap/garden?label=%E2%98%85&logo=github
+
+
 #### [2048 Game][c27]
 &nbsp;&nbsp;
 The classic 2048 puzzle game. Implemented using React and Greensock.
@@ -300,3 +309,11 @@ A 1-4 player dice game played locally.
 [c22]: https://github.com/pjohannessen/yatzy
 [t22]: https://www.lonesomecrowdedweb.com/blog/yatzy-boardgameio/
 [b22]: https://img.shields.io/github/stars/pjohannessen/yatzy?label=%E2%98%85&logo=github
+
+#### [![GitHub stars][b-wd]][c-wd] [Wizard Duel][p-wd] \[[code][c-wd]\]
+&nbsp;&nbsp;
+A single-player battle card game featuring epic fantasy card art and sound effects.
+
+[b-wd]: https://img.shields.io/github/stars/ruichen199801/wizard-duel?label=%E2%98%85&logo=github
+[p-wd]: https://wizard-duel-ten.vercel.app/
+[c-wd]: https://github.com/ruichen199801/wizard-duel
