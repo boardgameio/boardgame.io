@@ -125,7 +125,7 @@
     "raf": "^3.4.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "rollup": "^1.0.2",
+    "rollup": "^2.79.2",
     "rollup-plugin-babel": "^4.2.0",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-filesize": "^6.0.0",
