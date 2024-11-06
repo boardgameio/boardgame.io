@@ -197,6 +197,14 @@ Azul board game clone you can play online with friends.
 [c12]: https://github.com/maciejmatu/mosaic
 [b12]: https://img.shields.io/github/stars/maciejmatu/mosaic?label=%E2%98%85&logo=github
 
+#### [![GitHub stars][bmtghorde]][cmtghorde] [MTG Horde][pmtghorde] \[[code][cmtghorde]\]
+&nbsp;&nbsp;
+Magic The Gathering Horde format: play against a zombie horde
+
+[pmtghorde]: https://mtg-horde.netlify.app/
+[cmtghorde]: https://github.com/qdelcourte/mtg-horde
+[bmtghorde]: https://img.shields.io/github/stars/qdelcourte/mtg-horde?label=%E2%98%85&logo=github
+
 
 #### [![GitHub stars][b13]][c13] [Multibuzzer][p13] \[[code][c13]\]
 &nbsp;&nbsp;
