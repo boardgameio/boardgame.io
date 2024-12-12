@@ -20,6 +20,8 @@ import type {
   State,
 } from '../../types';
 import { getFilterPlayerView } from '../../master/filter-player-view';
+import { createMatch } from '../../server/util';
+import * as StorageAPI from '../../server/db/base';
 
 /**
  * Returns null if it is not a bot's turn.
@@ -62,6 +64,40 @@ export class LocalMaster extends Master {
     playerID: PlayerID,
     callback: (data: TransportData) => void
   ) => void;
+
+  async onSync(
+    matchID: string,
+    playerID: string | null | undefined,
+    credentials?: string,
+    numPlayers = 2
+  ): Promise<void | { error: string }> {
+    // If the game doesn't exist, then create one on demand.
+    // TODO: Move this out of the sync call.
+    const match = createMatch({
+      game: this.game,
+      unlisted: true,
+      numPlayers: numPlayers,
+      setupData: undefined,
+    });
+
+    if ('setupDataError' in match) {
+      return { error: 'game requires setupData' };
+    }
+
+    const state = match.initialState;
+    const initialState = state;
+    const metadata = match.metadata;
+
+    this.subscribeCallback({ state, matchID });
+
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      this.storageAPI.createMatch(matchID, { initialState, metadata });
+    } else {
+      await this.storageAPI.createMatch(matchID, { initialState, metadata });
+    }
+
+    super.onSync(matchID, playerID, credentials, numPlayers);
+  }
 
   constructor({ game, bots, storageKey, persist }: LocalMasterOpts) {
     const clientCallbacks: Record<PlayerID, (data: TransportData) => void> = {};
