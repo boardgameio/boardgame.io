@@ -17,6 +17,9 @@ import { Auth } from './auth';
 import * as StorageAPI from './db/base';
 import { Origins } from './cors';
 import type { Game, Server } from '../types';
+import type { GenericPubSub } from '../../packages/server';
+import type { BotCreationRequest } from '../botserver/botserver';
+import { BOT_SERVER_CHANNEL } from '../botserver/botserver';
 
 jest.setTimeout(2000000000);
 
@@ -29,6 +32,7 @@ type StorageMocks = Record<
   jest.Mock | ((...args: any[]) => any)
 >;
 
+type PubSubMocks = Record<'publish' | 'subscribe' | 'unsuscribeAll', jest.Mock>;
 class AsyncStorage extends StorageAPI.Async {
   public mocks: StorageMocks;
 
@@ -68,6 +72,29 @@ class AsyncStorage extends StorageAPI.Async {
 
   async listMatches(...args) {
     return this.mocks.listMatches(...args);
+  }
+}
+class MockBotServerPubSub implements GenericPubSub<BotCreationRequest> {
+  public mocks: PubSubMocks;
+
+  constructor(args: Partial<PubSubMocks> = {}) {
+    this.mocks = {
+      publish: args.publish || jest.fn(),
+      subscribe: args.subscribe || jest.fn(),
+      unsuscribeAll: args.unsuscribeAll || jest.fn(() => ({})),
+    };
+  }
+
+  async publish(...args) {
+    this.mocks.publish(...args);
+  }
+
+  async subscribe(...args) {
+    return this.mocks.subscribe(...args);
+  }
+
+  async unsubscribeAll(...args) {
+    this.mocks.unsuscribeAll(...args);
   }
 }
 
@@ -576,6 +603,102 @@ describe('.configureRouter', () => {
           });
           test('throws error 409', async () => {
             expect(response.status).toEqual(409);
+          });
+        });
+      });
+    });
+  });
+  describe('requesting bots to join a room', () => {
+    let response;
+    let db: AsyncStorage;
+    let botServerPubSub: MockBotServerPubSub;
+    const auth = new Auth();
+    let games: Game[];
+    let credentials: string;
+
+    beforeEach(() => {
+      credentials = 'SECRET';
+      games = [ProcessGameConfig({ name: 'foo' })];
+    });
+    describe('for an unprotected lobby', () => {
+      beforeEach(() => {
+        delete process.env.API_SECRET;
+      });
+      describe('when the game does exist', () => {
+        beforeEach(async () => {
+          db = new AsyncStorage({
+            fetch: async () => {
+              return {
+                metadata: {
+                  players: {
+                    '0': {},
+                    '1': {},
+                    '2': {},
+                  },
+                },
+              };
+            },
+          });
+          botServerPubSub = new MockBotServerPubSub();
+        });
+
+        describe('when the playerIDs are available', () => {
+          beforeEach(async () => {
+            const app = createApiServer({
+              db,
+              auth: new Auth({ generateCredentials: () => credentials }),
+              games,
+              uuid: () => 'matchID',
+              botServerPubSub,
+            });
+            response = await request(app.callback())
+              .post('/games/foo/1/add-bots')
+              .send({ numBots: 3 });
+          });
+
+          test('is successful', async () => {
+            expect(response.status).toEqual(200);
+          });
+
+          test('returns botNameList', async () => {
+            expect(response.body.botNameList).toHaveLength(3);
+          });
+
+          test('publishes to BOT_SERVER_CHANNEL', async () => {
+            expect(botServerPubSub.mocks.publish).toHaveBeenCalledWith(
+              BOT_SERVER_CHANNEL,
+              {
+                gameName: 'foo',
+                matchID: '1',
+                botOptsList: [
+                  {
+                    playerID: '0',
+                    playerCredentials: credentials,
+                  },
+                  {
+                    playerID: '1',
+                    playerCredentials: credentials,
+                  },
+                  {
+                    playerID: '2',
+                    playerCredentials: credentials,
+                  },
+                ],
+              }
+            );
+          });
+
+          describe('when no botServerPubSub was provided in server config', () => {
+            beforeEach(async () => {
+              const app = createApiServer({ db, auth, games });
+              response = await request(app.callback())
+                .post('/games/foo/1/add-bots')
+                .send({ numBots: 3 });
+            });
+
+            test('it fails', async () => {
+              expect(response.status).toEqual(409);
+            });
           });
         });
       });

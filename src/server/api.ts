@@ -12,9 +12,12 @@ import type Router from '@koa/router';
 import koaBody from 'koa-body';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
-import { createMatch, getFirstAvailablePlayerID, getNumPlayers } from './util';
+import { addPlayerToGame, createMatch } from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
+import type { GenericPubSub } from './transport/pubsub/generic-pub-sub';
+import type { BotCreationRequest } from '../botserver/botserver';
+import { BOT_SERVER_CHANNEL } from '../botserver/botserver';
 
 /**
  * Creates a new match.
@@ -81,12 +84,14 @@ export const configureRouter = ({
   auth,
   games,
   uuid = () => nanoid(11),
+  botServerPubSub,
 }: {
   router: Router<any, Server.AppCtx>;
   auth: Auth;
   games: Game[];
   uuid?: () => string;
   db: StorageAPI.Sync | StorageAPI.Async;
+  botServerPubSub?: GenericPubSub<BotCreationRequest>;
 }) => {
   /**
    * List available games.
@@ -221,6 +226,68 @@ export const configureRouter = ({
   });
 
   /**
+   * Request that bots join a match
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {number} numBots - amount of bots to add
+   *
+   */
+  router.post('/games/:name/:id/add-bots', koaBody(), async (ctx) => {
+    if (!botServerPubSub) {
+      ctx.throw(409, 'BotServer config not provided at server start up');
+    }
+
+    const data = ctx.request.body.data;
+    const matchID = ctx.params.id;
+    const gameName = ctx.params.name;
+    let numBots = ctx.request.body.numBots;
+    if (!numBots) {
+      numBots = 1;
+    }
+
+    let { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
+      metadata: true,
+    });
+    if (!metadata) {
+      ctx.throw(404, 'Match ' + matchID + ' not found');
+    }
+
+    const botNameList = [];
+    const botOptsList: { playerID: string; playerCredentials: string }[] = [];
+    for (let i = 0; i < numBots; i++) {
+      const playerData = await addPlayerToGame(
+        ctx,
+        null,
+        metadata,
+        matchID,
+        data,
+        auth
+      );
+      const { playerCredentials, playerID } = playerData;
+      metadata = playerData.metadata;
+
+      const botName = `bot${playerID}`;
+      metadata.players[playerID].name = botName;
+      await db.setMetadata(matchID, metadata);
+      botNameList.push(botName);
+
+      botOptsList.push({
+        playerID,
+        playerCredentials,
+      });
+    }
+
+    botServerPubSub.publish(BOT_SERVER_CHANNEL, {
+      gameName,
+      matchID,
+      botOptsList,
+    });
+    const body: LobbyAPI.BotsJoinedMatch = { botNameList };
+    ctx.body = body;
+  });
+
+  /**
    * Join a given match.
    *
    * @param {string} name - The name of the game.
@@ -239,37 +306,23 @@ export const configureRouter = ({
       ctx.throw(403, 'playerName is required');
     }
 
-    const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
+    let { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
     if (!metadata) {
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
 
-    if (typeof playerID === 'undefined' || playerID === null) {
-      playerID = getFirstAvailablePlayerID(metadata.players);
-      if (playerID === undefined) {
-        const numPlayers = getNumPlayers(metadata.players);
-        ctx.throw(
-          409,
-          `Match ${matchID} reached maximum number of players (${numPlayers})`
-        );
-      }
-    }
-
-    if (!metadata.players[playerID]) {
-      ctx.throw(404, 'Player ' + playerID + ' not found');
-    }
-    if (metadata.players[playerID].name) {
-      ctx.throw(409, 'Player ' + playerID + ' not available');
-    }
-
-    if (data) {
-      metadata.players[playerID].data = data;
-    }
-    metadata.players[playerID].name = playerName;
-    const playerCredentials = await auth.generateCredentials(ctx);
-    metadata.players[playerID].credentials = playerCredentials;
+    let playerCredentials;
+    ({ metadata, playerCredentials, playerID } = await addPlayerToGame(
+      ctx,
+      playerID,
+      metadata,
+      matchID,
+      data,
+      auth,
+      playerName
+    ));
 
     await db.setMetadata(matchID, metadata);
 

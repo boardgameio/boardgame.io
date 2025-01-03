@@ -424,6 +424,9 @@ export namespace LobbyAPI {
     playerID: string;
     playerCredentials: string;
   }
+  export interface BotsJoinedMatch {
+    botNameList: string[];
+  }
   export interface NextMatch {
     nextMatchID: string;
   }
