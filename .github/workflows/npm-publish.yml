@@ -10,18 +10,25 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Use Node v12
-        uses: actions/setup-node@v1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: 12
+          version: 9
+          run_install: false
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Run Tests
         run: |
-          npm run lint
-          npm run test
+          pnpm run lint
+          pnpm run test
 
       - name: Publish to NPM
         id: publish

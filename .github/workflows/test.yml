@@ -12,23 +12,30 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 16.x]
+        node-version: [22, 23]
 
     steps:
     - uses: actions/checkout@v2
-      
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+        run_install: false
+
     - name: Use Node v${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
 
-    - name: Install Dependencies
-      run: npm install
+    - name: Install dependencies
+      run: pnpm install
 
     - name: Run Tests
       run: |
-        npm run lint
-        npm run test:coverage
+        pnpm run lint
+        pnpm run test:coverage
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
@@ -40,18 +47,25 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 16.x]
+        node-version: [22, 23]
 
     steps:
     - uses: actions/checkout@v2
-      
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+        run_install: false
+
     - name: Use Node v${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
 
-    - name: Install Dependencies
-      run: npm install
+    - name: Install dependencies
+      run: pnpm install
 
     - name: Run Integration Test
-      run: npm run test:integration
+      run: pnpm run test:integration

@@ -29,6 +29,7 @@
     "prepublishOnly": "npm run clean",
     "proxydirs": "node scripts/proxy-dirs.js",
     "prepack": "run-s build proxydirs",
+    "prepare": "husky",
     "postpack": "npm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,tsx,js,jsx,css,md}\"",
     "changelog": "node ./scripts/changelog.js",
@@ -67,8 +68,8 @@
     "game engine"
   ],
   "engines": {
-    "node": ">=10.0",
-    "npm": ">=6.0"
+    "node": ">=22.13.0",
+    "npm": ">=10.9.0"
   },
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
@@ -112,7 +113,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-unicorn": "^30.0.0",
-    "husky": "^4.3.8",
+    "husky": "9.1.6",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.1.0",
     "jest-date-mock": "^1.0.8",
@@ -201,11 +202,5 @@
       "node_modules/",
       ".npm/"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run test:coverage"
-    }
   }
 }
