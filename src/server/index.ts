@@ -57,8 +57,11 @@ export const getPortFromServer = (
   return address.port;
 };
 
-interface ServerOpts {
-  games: Game[];
+interface ServerOpts<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+> {
+  games: Game<G, PluginAPIs>[];
   origins?: CorsOptions['origin'];
   apiOrigins?: CorsOptions['origin'];
   db?: StorageAPI.Async | StorageAPI.Sync;
@@ -82,7 +85,10 @@ interface ServerOpts {
  * @param https - HTTPS configuration options passed through to the TLS module.
  * @param lobbyConfig - Configuration options for the Lobby API server.
  */
-export function Server({
+export function Server<
+  G extends any = any,
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+>({
   games,
   db,
   transport,
@@ -92,7 +98,7 @@ export function Server({
   apiOrigins = origins,
   generateCredentials = uuid,
   authenticateCredentials,
-}: ServerOpts) {
+}: ServerOpts<G, PluginAPIs>) {
   const app: ServerTypes.App = new Koa();
 
   games = games.map((game) => ProcessGameConfig(game));
