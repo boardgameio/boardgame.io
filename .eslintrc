@@ -2,7 +2,6 @@ extends:
 - eslint:recommended
 - plugin:jest/recommended
 - plugin:unicorn/recommended
-- plugin:react/recommended
 - plugin:@typescript-eslint/recommended
 - plugin:prettier/recommended
 
@@ -44,7 +43,3 @@ rules:
     - args: after-used
       ignoreRestSiblings: true
   "@typescript-eslint/no-var-requires": off
-
-settings:
-  react:
-    version: detect

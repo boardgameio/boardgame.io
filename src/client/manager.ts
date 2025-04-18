@@ -1,5 +1,5 @@
-import Debug from './debug/Debug.svelte';
 import type { _ClientImpl } from './client';
+import type { Debug } from './debug-panel';
 
 type SubscriptionState = {
   client: _ClientImpl;
@@ -145,11 +145,11 @@ export class ClientManager {
       return;
     }
 
-    let DebugImpl: typeof Debug | undefined;
+    let DebugImpl: Debug | undefined;
     let target = document.body;
 
     if (process.env.NODE_ENV !== 'production') {
-      DebugImpl = Debug;
+      DebugImpl = null; // TODO(benbot) Handle debug panels correctly again
     }
 
     if (client.debugOpt && client.debugOpt !== true) {

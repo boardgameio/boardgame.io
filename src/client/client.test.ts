@@ -23,7 +23,6 @@ import {
   patch,
 } from '../core/action-creators';
 import * as Actions from '../core/action-types';
-import Debug from './debug/Debug.svelte';
 import { error } from '../core/logger';
 import type { Game, LogEntry, State, SyncInfo } from '../types';
 import type { Operation } from 'rfc6902';
@@ -959,18 +958,6 @@ describe('start / stop', () => {
     client.start();
     client.stop();
     expect(client.manager.debugPanel).toBe(null);
-  });
-
-  test('override debug implementation', () => {
-    const client = Client({ game: {}, debug: { impl: Debug } });
-    expect(() => {
-      client.start();
-      client.stop();
-    }).not.toThrow();
-
-    client.start();
-    client.stop();
-    expect(error).not.toHaveBeenCalled();
   });
 
   test('production mode', () => {

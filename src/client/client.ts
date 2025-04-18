@@ -7,13 +7,11 @@
  */
 
 import { nanoid } from 'nanoid/non-secure';
-import 'svelte';
 import type { Dispatch, StoreEnhancer } from 'redux';
 import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { ProcessGameConfig } from '../core/game';
-import type Debug from './debug/Debug.svelte';
 import {
   CreateGameReducer,
   TransientHandlingMiddleware,
@@ -50,7 +48,7 @@ type Action =
 
 export interface DebugOpt {
   target?: HTMLElement;
-  impl?: typeof Debug;
+  impl?: any; // TODO(benbot) Type this better
   collapseOnLoad?: boolean;
   hideToggleButton?: boolean;
 }

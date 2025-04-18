@@ -6,13 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import type { ComponentType } from 'react';
 import { LobbyClient } from './client';
 import type { Game, LobbyAPI } from '../types';
 
 export interface GameComponent {
   game: Game;
-  board: ComponentType<any>;
+  board: any; // TODO(benbot) add proper board component typing
 }
 
 interface LobbyConnectionOpts {
