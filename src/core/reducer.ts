@@ -11,7 +11,7 @@ import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
 import { error } from './logger';
 import { INVALID_MOVE } from './constants';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from '../../internal/redux/redux';
 import type {
   ActionShape,
   Ctx,
