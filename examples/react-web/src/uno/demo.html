@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO游戏演示 - 现代化中文界面</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .game-board {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 30px;
+        }
+
+        .players-area {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .player {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 200px;
+            text-align: center;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player.current {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .player.current::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+        }
+
+        .player-avatar {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .player-cards {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .game-center {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 40px;
+            align-items: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .deck-area, .discard-area {
+            text-align: center;
+        }
+
+        .card {
+            width: 80px;
+            height: 120px;
+            border-radius: 12px;
+            border: 3px solid rgba(255,255,255,0.8);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.4em;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(255,255,255,0.2), transparent);
+            border-radius: 9px;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .card-red {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .card-blue {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .card-green {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .card-yellow {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: #2c3e50;
+        }
+
+        .card-wild {
+            background: linear-gradient(135deg, #e74c3c 0%, #3498db 25%, #2ecc71 50%, #f1c40f 75%, #e74c3c 100%);
+            background-size: 400% 400%;
+            animation: rainbow 3s ease infinite;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .deck-info, .discard-info {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .turn-info {
+            text-align: center;
+            color: white;
+        }
+
+        .turn-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .direction-indicator {
+            font-size: 1.1em;
+            opacity: 0.9;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .hand-area {
+            margin-top: 30px;
+        }
+
+        .hand-title {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #495057;
+        }
+
+        .hand-cards {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 25px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hand-cards::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: gradient-flow 3s ease infinite;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hand-card {
+            width: 60px;
+            height: 90px;
+            font-size: 1.1em;
+        }
+
+        .hand-card.playable {
+            transform: translateY(-8px);
+            border-color: #4CAF50;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.uno {
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .status-bar {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .current-color {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin: 0 10px;
+            vertical-align: middle;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .game-center {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .players-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .card {
+                width: 60px;
+                height: 90px;
+                font-size: 1.1em;
+            }
+            
+            .hand-card {
+                width: 50px;
+                height: 75px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">🎮 UNO游戏</h1>
+            <p class="subtitle">现代化中文界面演示版本</p>
+        </div>
+
+        <div class="status-bar">
+            <span>🎯 当前回合: 玩家1</span>
+            <span>当前颜色: <span class="current-color" style="background-color: #e74c3c;"></span>红色</span>
+            <span>🔄 顺时针</span>
+        </div>
+
+        <div class="game-board">
+            <!-- 其他玩家区域 -->
+            <div class="players-area">
+                <div class="player">
+                    <div class="player-avatar">🧑</div>
+                    <div class="player-name">玩家2</div>
+                    <div class="player-cards">5 张牌</div>
+                </div>
+                <div class="player current">
+                    <div class="player-avatar">👩</div>
+                    <div class="player-name">玩家1 ⭐</div>
+                    <div class="player-cards">3 张牌</div>
+                </div>
+                <div class="player">
+                    <div class="player-avatar">👨</div>
+                    <div class="player-name">玩家3</div>
+                    <div class="player-cards">7 张牌</div>
+                </div>
+            </div>
+
+            <!-- 游戏中心区域 -->
+            <div class="game-center">
+                <div class="deck-area">
+                    <div class="card card-back">UNO</div>
+                    <div class="deck-info">
+                        <div>🎴 抽牌堆</div>
+                        <div>剩余 45 张</div>
+                    </div>
+                </div>
+
+                <div class="turn-info">
+                    <div class="turn-text">🎯 轮到你了！</div>
+                    <div class="direction-indicator">🔄 顺时针</div>
+                </div>
+
+                <div class="discard-area">
+                    <div class="card card-red">7</div>
+                    <div class="discard-info">
+                        <div>🗂️ 弃牌堆</div>
+                        <div>当前颜色: 红色</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 玩家手牌区域 -->
+            <div class="hand-area">
+                <h3 class="hand-title">🎴 你的手牌</h3>
+                <div class="hand-cards">
+                    <div class="hand-card card card-red playable">3</div>
+                    <div class="hand-card card card-blue">5</div>
+                    <div class="hand-card card card-green">⇄</div>
+                    <div class="hand-card card card-yellow playable">7</div>
+                    <div class="hand-card card card-wild playable">W</div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn">🎴 抽牌</button>
+                    <button class="btn uno">🎯 喊UNO!</button>
+                    <button class="btn">📢 指出UNO</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: rgba(255,255,255,0.8); margin-top: 20px;">
+            <p>✨ 这是UNO游戏的现代化中文界面演示</p>
+            <p>🎮 完整版本包含完整的游戏逻辑和多人游戏支持</p>
+        </div>
+    </div>
+</body>
+</html>

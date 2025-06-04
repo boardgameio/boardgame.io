@@ -15,8 +15,13 @@ import lobby from './lobby';
 import simulator from './simulator';
 import redacted_move from './redacted-move';
 import undo from './undo';
+import uno from './uno';
 
 const routes = [
+  {
+    name: 'UNO',
+    routes: uno.routes,
+  },
   {
     name: 'Tic-Tac-Toe',
     routes: tic_tac_toe.routes,

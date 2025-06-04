@@ -1,0 +1,535 @@
+/*
+ * UNO游戏移动端样式
+ * 
+ * 专为移动设备优化的界面样式
+ */
+
+/* 移动端基础样式 */
+@media (max-width: 768px) {
+  .uno-board {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .game-area {
+    padding: 0;
+  }
+
+  .game-center {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+}
+
+/* 移动端卡牌样式 */
+.mobile-card-container {
+  position: relative;
+  display: inline-block;
+}
+
+.mobile-card {
+  width: 50px;
+  height: 75px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1em;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-card-small {
+  width: 40px;
+  height: 60px;
+  font-size: 0.8em;
+}
+
+.mobile-card-large {
+  width: 70px;
+  height: 105px;
+  font-size: 1.2em;
+}
+
+.mobile-card-content {
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 移动端卡牌颜色 */
+.mobile-card-red {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+}
+
+.mobile-card-blue {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.mobile-card-green {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+}
+
+.mobile-card-yellow {
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  color: #2c3e50;
+}
+
+.mobile-card-wild {
+  background: linear-gradient(135deg, #e74c3c 0%, #3498db 25%, #2ecc71 50%, #f1c40f 75%, #e74c3c 100%);
+  background-size: 400% 400%;
+  animation: rainbow 3s ease infinite;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.mobile-card-back {
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: white;
+}
+
+/* 移动端卡牌状态 */
+.mobile-card-playable {
+  transform: scale(1.1);
+  border-color: #4CAF50;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.mobile-card-selected {
+  transform: scale(1.15);
+  border-color: #ff4444;
+  box-shadow: 0 8px 25px rgba(255, 68, 68, 0.5);
+  z-index: 10;
+}
+
+.mobile-card-indicator {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background: #4CAF50;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.7em;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+}
+
+/* 移动端卡牌提示框 */
+.mobile-card-tooltip {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 0.8em;
+  white-space: nowrap;
+  z-index: 1000;
+  animation: fadeInUp 0.3s ease;
+}
+
+.mobile-card-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tooltip-title {
+  font-weight: 600;
+}
+
+.tooltip-action {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.tooltip-close {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background: #ff4444;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 0.7em;
+  cursor: pointer;
+}
+
+/* 移动端手牌区域 */
+.mobile-hand {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px 15px 0 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.mobile-hand-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.hand-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hand-count {
+  font-weight: 600;
+  color: #495057;
+}
+
+.uno-warning {
+  background: #ff4444;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  animation: pulse 1s infinite;
+}
+
+.hand-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-select {
+  padding: 6px 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.expand-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.expand-btn:active {
+  transform: scale(0.95);
+}
+
+.mobile-hand-cards {
+  padding: 15px 20px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  max-height: 100px;
+  transition: max-height 0.3s ease;
+}
+
+.mobile-hand-cards.expanded {
+  max-height: 200px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mobile-hand-cards::-webkit-scrollbar {
+  height: 4px;
+}
+
+.mobile-hand-cards::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.mobile-hand-cards::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 2px;
+}
+
+/* 移动端状态栏 */
+.mobile-status-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 10px;
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 60px;
+}
+
+.status-icon {
+  font-size: 1.2em;
+}
+
+.status-text {
+  font-size: 0.8em;
+  font-weight: 500;
+  color: #495057;
+}
+
+.color-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 移动端操作面板 */
+.mobile-action-panel {
+  position: fixed;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  z-index: 200;
+}
+
+.action-toggle {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.action-toggle:active {
+  transform: translateY(-50%) scale(0.9);
+}
+
+.action-buttons {
+  position: absolute;
+  bottom: 60px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: slideUp 0.3s ease;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
+  border-radius: 25px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  color: #495057;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.draw-btn {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+}
+
+.uno-btn {
+  background: linear-gradient(135deg, #ff4444, #cc3333);
+  color: white;
+  animation: pulse 1s infinite;
+}
+
+.call-btn {
+  background: linear-gradient(135deg, #ffc107, #fd7e14);
+  color: #2c3e50;
+}
+
+.settings-btn {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: white;
+}
+
+/* 移动端动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* 移动端横屏适配 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-hand {
+    position: relative;
+    border-radius: 15px;
+    margin: 10px;
+  }
+
+  .mobile-hand-cards {
+    max-height: 80px;
+  }
+
+  .mobile-hand-cards.expanded {
+    max-height: 120px;
+  }
+
+  .mobile-action-panel {
+    top: 20px;
+    transform: none;
+  }
+
+  .action-buttons {
+    bottom: auto;
+    top: 60px;
+  }
+}
+
+/* 移动端触摸优化 */
+@media (pointer: coarse) {
+  .mobile-card {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .action-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .expand-btn {
+    min-height: 44px;
+    min-width: 60px;
+  }
+}
+
+/* 移动端性能优化 */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-card,
+  .action-btn,
+  .expand-btn {
+    transition: none;
+  }
+
+  .mobile-card-wild {
+    animation: none;
+    background: linear-gradient(135deg, #e74c3c, #3498db);
+  }
+
+  .uno-warning,
+  .uno-btn {
+    animation: none;
+  }
+}
+
+/* 移动端暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .mobile-hand {
+    background: rgba(44, 62, 80, 0.95);
+    color: #ecf0f1;
+  }
+
+  .mobile-status-bar {
+    background: rgba(44, 62, 80, 0.95);
+    color: #ecf0f1;
+  }
+
+  .hand-count,
+  .status-text {
+    color: #bdc3c7;
+  }
+
+  .sort-select {
+    background: #34495e;
+    color: #ecf0f1;
+    border-color: #5a6c7d;
+  }
+
+  .action-btn {
+    background: rgba(44, 62, 80, 0.95);
+    color: #ecf0f1;
+    border-color: #5a6c7d;
+  }
+}

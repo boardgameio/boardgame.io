@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO游戏 - 完整功能演示</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 3.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.3em;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 5px 0;
+            color: #555;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .demo-title {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            background: rgba(248,249,250,0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .control-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn.warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .status-panel {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .status-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .log-panel {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .log-timestamp {
+            color: #95a5a6;
+            margin-right: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .footer h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5em;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
+        .feature-card:nth-child(5) { animation-delay: 0.5s; }
+        .feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* 音效可视化 */
+        .sound-visualizer {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin: 10px 0;
+        }
+
+        .sound-bar {
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 2px;
+            animation: soundWave 1s ease-in-out infinite;
+        }
+
+        .sound-bar:nth-child(2) { animation-delay: 0.1s; }
+        .sound-bar:nth-child(3) { animation-delay: 0.2s; }
+        .sound-bar:nth-child(4) { animation-delay: 0.3s; }
+        .sound-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes soundWave {
+            0%, 100% { height: 20px; }
+            50% { height: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🎮 UNO游戏</h1>
+            <p class="subtitle">完整功能演示 - 现代化中文界面 + AI + 音效 + 计分系统</p>
+        </div>
+
+        <!-- 功能特性展示 -->
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🎵</span>
+                <h3 class="feature-title">音效系统</h3>
+                <p class="feature-description">Web Audio API实现的动态音效系统</p>
+                <ul class="feature-list">
+                    <li>出牌音效</li>
+                    <li>抽牌音效</li>
+                    <li>UNO提示音</li>
+                    <li>获胜音乐</li>
+                    <li>特殊牌音效</li>
+                    <li>音量控制</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🤖</span>
+                <h3 class="feature-title">AI玩家</h3>
+                <p class="feature-description">多难度智能AI对手系统</p>
+                <ul class="feature-list">
+                    <li>4个难度等级</li>
+                    <li>个性化AI</li>
+                    <li>策略分析</li>
+                    <li>动态决策</li>
+                    <li>学习能力</li>
+                    <li>思考时间模拟</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🏆</span>
+                <h3 class="feature-title">计分系统</h3>
+                <p class="feature-description">完整的游戏统计和排名系统</p>
+                <ul class="feature-list">
+                    <li>回合计分</li>
+                    <li>玩家排名</li>
+                    <li>游戏历史</li>
+                    <li>统计分析</li>
+                    <li>成就系统</li>
+                    <li>数据导出</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">⚙️</span>
+                <h3 class="feature-title">游戏设置</h3>
+                <p class="feature-description">丰富的自定义选项和规则设置</p>
+                <ul class="feature-list">
+                    <li>音效控制</li>
+                    <li>规则自定义</li>
+                    <li>AI难度调节</li>
+                    <li>界面主题</li>
+                    <li>动画设置</li>
+                    <li>调试模式</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🎨</span>
+                <h3 class="feature-title">现代界面</h3>
+                <p class="feature-description">美观的现代化用户界面设计</p>
+                <ul class="feature-list">
+                    <li>毛玻璃效果</li>
+                    <li>渐变背景</li>
+                    <li>3D卡牌设计</li>
+                    <li>流畅动画</li>
+                    <li>响应式布局</li>
+                    <li>中文本土化</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">📱</span>
+                <h3 class="feature-title">多平台支持</h3>
+                <p class="feature-description">跨平台兼容和多人游戏支持</p>
+                <ul class="feature-list">
+                    <li>桌面端优化</li>
+                    <li>移动端适配</li>
+                    <li>本地多人</li>
+                    <li>在线对战</li>
+                    <li>实时同步</li>
+                    <li>离线模式</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 功能演示区域 -->
+        <div class="demo-section">
+            <h2 class="demo-title">🎮 功能演示控制台</h2>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <div class="control-title">🎵 音效测试</div>
+                    <button class="btn" onclick="testSound('playCard')">🃏 出牌音效</button>
+                    <button class="btn" onclick="testSound('drawCard')">🎴 抽牌音效</button>
+                    <button class="btn" onclick="testSound('uno')">🎯 UNO音效</button>
+                    <button class="btn" onclick="testSound('win')">🏆 获胜音乐</button>
+                    <div class="sound-visualizer" id="soundViz" style="display: none;">
+                        <div class="sound-bar"></div>
+                        <div class="sound-bar"></div>
+                        <div class="sound-bar"></div>
+                        <div class="sound-bar"></div>
+                        <div class="sound-bar"></div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-title">🤖 AI演示</div>
+                    <button class="btn secondary" onclick="simulateAI('easy')">🟢 简单AI</button>
+                    <button class="btn secondary" onclick="simulateAI('medium')">🟡 中等AI</button>
+                    <button class="btn secondary" onclick="simulateAI('hard')">🟠 困难AI</button>
+                    <button class="btn secondary" onclick="simulateAI('expert')">🔴 专家AI</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-title">🏆 计分演示</div>
+                    <button class="btn success" onclick="simulateRound()">🎲 模拟回合</button>
+                    <button class="btn success" onclick="showRankings()">📊 显示排名</button>
+                    <button class="btn warning" onclick="resetStats()">🔄 重置统计</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-title">⚙️ 设置演示</div>
+                    <button class="btn" onclick="toggleSettings()">🛠️ 打开设置</button>
+                    <button class="btn" onclick="changeTheme()">🎨 切换主题</button>
+                    <button class="btn danger" onclick="toggleDebug()">🐛 调试模式</button>
+                </div>
+            </div>
+
+            <!-- 状态面板 -->
+            <div class="status-panel">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-value" id="roundCount">0</div>
+                        <div class="status-label">游戏回合</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="playerCount">4</div>
+                        <div class="status-label">玩家数量</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="aiLevel">中等</div>
+                        <div class="status-label">AI难度</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="soundStatus">开启</div>
+                        <div class="status-label">音效状态</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日志面板 -->
+            <div class="log-panel" id="logPanel">
+                <div class="log-entry">
+                    <span class="log-timestamp">[00:00:00]</span>
+                    <span>🎮 UNO游戏系统初始化完成</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">[00:00:01]</span>
+                    <span>🔊 音效系统已加载</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">[00:00:02]</span>
+                    <span>🤖 AI系统已就绪</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">[00:00:03]</span>
+                    <span>📊 计分系统已启动</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚信息 -->
+        <div class="footer">
+            <h3>🚀 UNO游戏 - 完整功能版本</h3>
+            <p>这是一个功能完整的UNO卡牌游戏实现，包含现代化界面、AI玩家、音效系统、计分统计等高级功能。</p>
+            <p>基于boardgame.io框架开发，支持多人在线游戏和本地游戏模式。</p>
+            <p>✨ 现代化设计 | 🤖 智能AI | 🎵 动态音效 | 🏆 完整计分 | 📱 跨平台支持</p>
+        </div>
+    </div>
+
+    <script>
+        // 模拟音效系统
+        let soundEnabled = true;
+        let currentRound = 0;
+        let debugMode = false;
+
+        function addLog(message) {
+            const logPanel = document.getElementById('logPanel');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span><span>${message}</span>`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        function testSound(soundType) {
+            if (!soundEnabled) {
+                addLog('❌ 音效已禁用');
+                return;
+            }
+
+            const soundNames = {
+                playCard: '🃏 出牌音效',
+                drawCard: '🎴 抽牌音效',
+                uno: '🎯 UNO音效',
+                win: '🏆 获胜音乐'
+            };
+
+            addLog(`🔊 播放${soundNames[soundType]}`);
+            
+            // 显示音效可视化
+            const viz = document.getElementById('soundViz');
+            viz.style.display = 'flex';
+            setTimeout(() => {
+                viz.style.display = 'none';
+            }, 1000);
+
+            // 模拟音效播放
+            console.log(`Playing sound: ${soundType}`);
+        }
+
+        function simulateAI(difficulty) {
+            const difficultyNames = {
+                easy: '简单',
+                medium: '中等', 
+                hard: '困难',
+                expert: '专家'
+            };
+
+            document.getElementById('aiLevel').textContent = difficultyNames[difficulty];
+            addLog(`🤖 AI难度设置为: ${difficultyNames[difficulty]}`);
+            
+            // 模拟AI思考过程
+            setTimeout(() => {
+                addLog(`🧠 ${difficultyNames[difficulty]}AI正在分析游戏状态...`);
+            }, 500);
+            
+            setTimeout(() => {
+                addLog(`🎯 ${difficultyNames[difficulty]}AI做出决策: 出红色7`);
+            }, 1500);
+        }
+
+        function simulateRound() {
+            currentRound++;
+            document.getElementById('roundCount').textContent = currentRound;
+            
+            const players = ['玩家1', '玩家2', 'AI-小智', 'AI-小红'];
+            const winner = players[Math.floor(Math.random() * players.length)];
+            const score = Math.floor(Math.random() * 100) + 50;
+            
+            addLog(`🎲 第${currentRound}回合开始`);
+            setTimeout(() => {
+                addLog(`🏆 ${winner} 获胜! 得分: ${score}`);
+                if (soundEnabled) {
+                    testSound('win');
+                }
+            }, 2000);
+        }
+
+        function showRankings() {
+            addLog('📊 显示玩家排名:');
+            setTimeout(() => {
+                addLog('🥇 1. 玩家1 - 总分: 450');
+                addLog('🥈 2. AI-小智 - 总分: 380');
+                addLog('🥉 3. 玩家2 - 总分: 320');
+                addLog('4. AI-小红 - 总分: 280');
+            }, 500);
+        }
+
+        function resetStats() {
+            currentRound = 0;
+            document.getElementById('roundCount').textContent = '0';
+            addLog('🔄 游戏统计已重置');
+        }
+
+        function toggleSettings() {
+            addLog('🛠️ 打开游戏设置面板');
+            // 这里可以实际打开设置界面
+        }
+
+        function changeTheme() {
+            const themes = ['默认', '深色', '浅色', '彩色'];
+            const currentTheme = themes[Math.floor(Math.random() * themes.length)];
+            addLog(`🎨 主题已切换为: ${currentTheme}`);
+        }
+
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const status = debugMode ? '开启' : '关闭';
+            addLog(`🐛 调试模式已${status}`);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('🎮 演示系统加载完成');
+            addLog('👆 点击上方按钮体验各种功能');
+        });
+    </script>
+</body>
+</html>

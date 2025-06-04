@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO游戏测试 - 中文界面</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .test-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .card {
+            display: inline-block;
+            width: 50px;
+            height: 75px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            margin: 2px;
+            text-align: center;
+            line-height: 75px;
+            font-weight: bold;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .card-red { background-color: #ff4444; }
+        .card-blue { background-color: #4444ff; }
+        .card-green { background-color: #44ff44; color: black; }
+        .card-yellow { background-color: #ffff44; color: black; }
+        .card-wild { background: linear-gradient(45deg, #ff4444, #4444ff, #44ff44, #ffff44); }
+        
+        .player-hand {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        
+        .game-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+        ">🎮 UNO游戏逻辑测试</h1>
+        <p style="text-align: center; font-size: 1.1em; color: #666; margin-bottom: 30px;">
+            这是一个独立的UNO游戏逻辑测试，无需完整的boardgame.io环境即可运行。
+        </p>
+
+        <div class="game-info">
+            <h3>🎯 游戏状态</h3>
+            <div id="gameStatus">点击"开始新游戏"来开始测试</div>
+        </div>
+
+        <div style="text-align: center; margin: 25px 0;">
+            <button onclick="startGame()" style="margin: 5px 10px;">🚀 开始新游戏</button>
+            <button onclick="testCardCreation()" style="margin: 5px 10px;">🃏 测试卡牌创建</button>
+            <button onclick="testGameLogic()" style="margin: 5px 10px;">🧠 测试游戏逻辑</button>
+            <button onclick="clearLog()" style="margin: 5px 10px;">🗑️ 清空日志</button>
+        </div>
+        
+        <div class="player-hand">
+            <h4>🎴 玩家0的手牌:</h4>
+            <div id="playerHand"></div>
+        </div>
+
+        <div class="player-hand">
+            <h4>🗂️ 弃牌堆 (顶牌):</h4>
+            <div id="discardPile"></div>
+        </div>
+        
+        <div class="log" id="testLog"></div>
+    </div>
+
+    <script>
+        // Simplified UNO game logic for testing
+        const COLORS = ['red', 'blue', 'green', 'yellow'];
+        const ACTION_CARDS = ['skip', 'reverse', 'draw2'];
+        
+        let gameState = null;
+        
+        function log(message) {
+            const logElement = document.getElementById('testLog');
+            logElement.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+        
+        function createDeck() {
+            const deck = [];
+            
+            // Number cards (76 cards)
+            COLORS.forEach(color => {
+                // One 0 card per color
+                deck.push({ color, type: 'number', value: 0 });
+                
+                // Two of each number 1-9 per color
+                for (let i = 1; i <= 9; i++) {
+                    deck.push({ color, type: 'number', value: i });
+                    deck.push({ color, type: 'number', value: i });
+                }
+            });
+            
+            // Action cards (24 cards)
+            COLORS.forEach(color => {
+                ACTION_CARDS.forEach(action => {
+                    deck.push({ color, type: 'action', value: action });
+                    deck.push({ color, type: 'action', value: action });
+                });
+            });
+            
+            // Wild cards (8 cards)
+            for (let i = 0; i < 4; i++) {
+                deck.push({ color: null, type: 'wild', value: 'wild' });
+                deck.push({ color: null, type: 'wild', value: 'wild_draw4' });
+            }
+            
+            return deck;
+        }
+        
+        function shuffleDeck(deck) {
+            const shuffled = [...deck];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        function renderCard(card) {
+            if (!card) return '';
+            
+            const cardElement = document.createElement('div');
+            cardElement.className = `card card-${card.color || 'wild'}`;
+            
+            let content = '';
+            if (card.type === 'number') {
+                content = card.value;
+            } else if (card.type === 'action') {
+                switch (card.value) {
+                    case 'skip': content = '⊘'; break;
+                    case 'reverse': content = '⇄'; break;
+                    case 'draw2': content = '+2'; break;
+                    default: content = card.value;
+                }
+            } else if (card.type === 'wild') {
+                content = card.value === 'wild_draw4' ? '+4' : 'W';
+            }
+            
+            cardElement.textContent = content;
+            return cardElement;
+        }
+        
+        function updateDisplay() {
+            if (!gameState) return;
+            
+            // Update game status
+            const statusElement = document.getElementById('gameStatus');
+            statusElement.innerHTML = `
+                <strong>Players:</strong> ${Object.keys(gameState.players).length}<br>
+                <strong>Deck Size:</strong> ${gameState.deck.length}<br>
+                <strong>Current Color:</strong> <span style="color: ${gameState.currentColor}">${gameState.currentColor}</span><br>
+                <strong>Direction:</strong> ${gameState.direction === 1 ? 'Clockwise' : 'Counter-clockwise'}
+            `;
+            
+            // Update player hand
+            const handElement = document.getElementById('playerHand');
+            handElement.innerHTML = '';
+            gameState.players['0'].hand.forEach(card => {
+                handElement.appendChild(renderCard(card));
+            });
+            
+            // Update discard pile
+            const discardElement = document.getElementById('discardPile');
+            discardElement.innerHTML = '';
+            const topCard = gameState.discardPile[gameState.discardPile.length - 1];
+            if (topCard) {
+                discardElement.appendChild(renderCard(topCard));
+            }
+        }
+        
+        function startGame() {
+            log('Starting new UNO game...');
+            
+            const deck = shuffleDeck(createDeck());
+            const numPlayers = 4;
+            const players = {};
+            
+            // Deal 7 cards to each player
+            let deckIndex = 0;
+            for (let i = 0; i < numPlayers; i++) {
+                players[i] = {
+                    hand: deck.slice(deckIndex, deckIndex + 7),
+                    saidUno: false,
+                    canCallUno: false
+                };
+                deckIndex += 7;
+            }
+            
+            // Set up discard pile with first non-special card
+            let discardCard;
+            do {
+                discardCard = deck[deckIndex];
+                deckIndex++;
+            } while (discardCard.type === 'wild' || discardCard.type === 'action');
+            
+            gameState = {
+                players,
+                deck: deck.slice(deckIndex),
+                discardPile: [discardCard],
+                currentColor: discardCard.color,
+                direction: 1,
+                drawCount: 0,
+                mustChooseColor: false,
+                lastPlayedCard: null
+            };
+            
+            log(`Game started with ${numPlayers} players`);
+            log(`Each player has 7 cards`);
+            log(`Deck has ${gameState.deck.length} remaining cards`);
+            log(`Starting card: ${discardCard.color} ${discardCard.value}`);
+            
+            updateDisplay();
+        }
+        
+        function testCardCreation() {
+            log('Testing card deck creation...');
+            
+            const deck = createDeck();
+            const cardCounts = {
+                number: 0,
+                action: 0,
+                wild: 0
+            };
+            
+            deck.forEach(card => {
+                cardCounts[card.type]++;
+            });
+            
+            log(`Total cards created: ${deck.length}`);
+            log(`Number cards: ${cardCounts.number} (expected: 76)`);
+            log(`Action cards: ${cardCounts.action} (expected: 24)`);
+            log(`Wild cards: ${cardCounts.wild} (expected: 8)`);
+            
+            if (deck.length === 108 && 
+                cardCounts.number === 76 && 
+                cardCounts.action === 24 && 
+                cardCounts.wild === 8) {
+                log('✅ Card creation test PASSED');
+            } else {
+                log('❌ Card creation test FAILED');
+            }
+        }
+        
+        function testGameLogic() {
+            if (!gameState) {
+                log('Please start a game first');
+                return;
+            }
+            
+            log('Testing game logic...');
+            
+            const player0 = gameState.players['0'];
+            const topCard = gameState.discardPile[gameState.discardPile.length - 1];
+            
+            log(`Top card: ${topCard.color} ${topCard.value}`);
+            log(`Current color: ${gameState.currentColor}`);
+            log(`Player 0 has ${player0.hand.length} cards`);
+            
+            // Test card matching logic
+            let playableCards = 0;
+            player0.hand.forEach((card, index) => {
+                const canPlay = card.type === 'wild' || 
+                               card.color === gameState.currentColor || 
+                               card.value === topCard.value ||
+                               (card.type === topCard.type && card.type === 'action');
+                
+                if (canPlay) {
+                    playableCards++;
+                    log(`Card ${index}: ${card.color || 'wild'} ${card.value} - PLAYABLE`);
+                }
+            });
+            
+            log(`Found ${playableCards} playable cards`);
+            
+            if (playableCards > 0) {
+                log('✅ Game logic test PASSED - Player has playable cards');
+            } else {
+                log('⚠️ Game logic test - Player has no playable cards (would need to draw)');
+            }
+        }
+        
+        // Initialize
+        log('UNO Game Test initialized');
+        log('Click "Start Game" to begin testing');
+    </script>
+</body>
+</html>
