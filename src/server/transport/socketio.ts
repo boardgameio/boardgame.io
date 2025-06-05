@@ -164,7 +164,6 @@ export class SocketIO {
       },
     });
 
-    app.context.io = io;
     io.attach(app, !!this.https, this.https);
 
     if (this.socketAdapter) {
