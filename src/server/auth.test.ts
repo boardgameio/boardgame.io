@@ -4,7 +4,7 @@ import {
   areCredentialsAuthentic,
   Auth,
 } from './auth';
-
+import type { Request, Response } from 'express';
 import type { Server } from '../types';
 
 describe('extractPlayerMetadata', () => {
@@ -195,7 +195,9 @@ describe('Auth', () => {
     const auth = new Auth();
 
     test('generateCredentials', () => {
-      expect(typeof auth.generateCredentials({})).toBe('string');
+      expect(
+        typeof auth.generateCredentials({} as Request, {} as Response)
+      ).toBe('string');
     });
 
     test('authenticateCredentials', () => {
@@ -212,7 +214,9 @@ describe('Auth', () => {
     } as any);
 
     test('generateCredentials', () => {
-      expect(typeof auth.generateCredentials({})).toBe('string');
+      expect(
+        typeof auth.generateCredentials({} as Request, {} as Response)
+      ).toBe('string');
     });
 
     test('authenticateCredentials', () => {
@@ -228,9 +232,10 @@ describe('Auth', () => {
     const auth = new Auth({ generateCredentials, authenticateCredentials });
 
     test('generateCredentials', () => {
-      const ctx = {};
-      expect(auth.generateCredentials(ctx)).toBe(credentials);
-      expect(generateCredentials).toHaveBeenCalledWith(ctx);
+      const req = {} as Request;
+      const res = {} as Response;
+      expect(auth.generateCredentials(req, res)).toBe(credentials);
+      expect(generateCredentials).toHaveBeenCalledWith(req, res);
     });
 
     test('authenticateCredentials', () => {
@@ -250,10 +255,11 @@ describe('Auth', () => {
     const auth = new Auth({ generateCredentials, authenticateCredentials });
 
     test('generateCredentials', async () => {
-      const ctx = {};
-      const promise = auth.generateCredentials(ctx);
+      const req = {} as Request;
+      const res = {} as Response;
+      const promise = auth.generateCredentials(req, res);
       expect(promise).toBeInstanceOf(Promise);
-      expect(generateCredentials).toHaveBeenCalledWith(ctx);
+      expect(generateCredentials).toHaveBeenCalledWith(req, res);
       expect(await promise).toBe(credentials);
     });
 

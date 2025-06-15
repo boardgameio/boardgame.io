@@ -7,7 +7,7 @@
  */
 
 import type { CorsOptions } from 'cors';
-import IO from 'koa-socket-2';
+import { Server as IOServer } from 'socket.io';
 import type IOTypes from 'socket.io';
 import type { ServerOptions as HttpsOptions } from 'https';
 import PQueue from 'p-queue';
@@ -72,7 +72,7 @@ interface Client {
 }
 
 /**
- * Transport interface that uses socket.io
+ * Transport interface that uses socket.io (Express version)
  */
 export class SocketIO {
   protected clientInfo: Map<string, Client>;
@@ -82,6 +82,7 @@ export class SocketIO {
   private readonly socketAdapter: any;
   private readonly socketOpts: IOTypes.ServerOptions;
   protected pubSub: GenericPubSub<IntermediateTransportData>;
+  private io: IOTypes.Server;
 
   constructor({ https, socketAdapter, socketOpts, pubSub }: SocketOpts = {}) {
     this.clientInfo = new Map();
@@ -91,6 +92,7 @@ export class SocketIO {
     this.socketAdapter = socketAdapter;
     this.socketOpts = socketOpts;
     this.pubSub = pubSub || new InMemoryPubSub();
+    this.io = null;
   }
 
   /**
@@ -103,9 +105,9 @@ export class SocketIO {
     // Remove client from list of connected sockets for this match.
     const { matchID } = client;
     const matchClients = this.roomInfo.get(matchID);
-    matchClients.delete(socketID);
+    matchClients?.delete(socketID);
     // If the match is now empty, delete its promise queue & client ID list.
-    if (matchClients.size === 0) {
+    if (matchClients && matchClients.size === 0) {
       this.unsubscribePubSubChannel(matchID);
       this.roomInfo.delete(matchID);
       this.deleteMatchQueue(matchID);
@@ -134,10 +136,12 @@ export class SocketIO {
   private subscribePubSubChannel(matchID: string, game: Game) {
     const filterPlayerView = getFilterPlayerView(game);
     const broadcast = (payload: IntermediateTransportData) => {
-      this.roomInfo.get(matchID).forEach((clientID) => {
+      this.roomInfo.get(matchID)?.forEach((clientID) => {
         const client = this.clientInfo.get(clientID);
-        const data = filterPlayerView(client.playerID, payload);
-        emit(client.socket, data);
+        if (client) {
+          const data = filterPlayerView(client.playerID, payload);
+          emit(client.socket, data);
+        }
       });
     };
 
@@ -148,31 +152,51 @@ export class SocketIO {
     this.pubSub.unsubscribeAll(getPubSubChannelId(matchID));
   }
 
-  init(
-    app: Server.App & { _io?: IOTypes.Server },
-    games: Game[],
-    origins: CorsOptions['origin'] = []
-  ) {
-    const io = new IO({
-      ioOptions: {
-        pingTimeout: PING_TIMEOUT,
-        pingInterval: PING_INTERVAL,
-        cors: {
-          origins,
-        },
-        ...this.socketOpts,
-      },
-    });
+  /**
+   * Initialize socket.io on an Express app.
+   * @param app Express app instance
+   * @param games List of games
+   * @param origins Allowed CORS origins
+   */
+  init(app: Server.App, games: Game[], origins: CorsOptions['origin'] = []) {
+    // Create socket.io server and attach to the HTTP server
+    // The Express app must be started with http(s).createServer(app)
+    // and the resulting server passed to io.attach(server)
+    // Here, we assume the user will call io.attach(server) after app.listen
+    // For backwards compatibility, we also support attaching to app.server if present
 
-    app.context.io = io;
-    io.attach(app, !!this.https, this.https);
+    // If app.server exists (e.g. from http.createServer), use it; otherwise, warn
+    // const server = app.Server;
+    // if (!server) {
+    // If not available, warn user to call io.attach(server) after app.listen
+    // We'll create the io instance, but user must attach it manually
+    this.io = new IOServer(app.server, {
+      pingTimeout: PING_TIMEOUT,
+      pingInterval: PING_INTERVAL,
+      cors: {
+        origin: origins,
+      },
+      ...this.socketOpts,
+    });
+    app.io = this.io;
+    // } else {
+    //   this.io = new IOServer(server, {
+    //     pingTimeout: PING_TIMEOUT,
+    //     pingInterval: PING_INTERVAL,
+    //     cors: {
+    //       origin: origins,
+    //     },
+    //     ...this.socketOpts,
+    //   });
+    //   app.io = this.io;
+    // }
 
     if (this.socketAdapter) {
-      io.adapter(this.socketAdapter);
+      this.io.adapter(this.socketAdapter);
     }
 
     for (const game of games) {
-      const nsp = app._io.of(game.name);
+      const nsp = this.io.of(`/${game.name}`);
       const filterPlayerView = getFilterPlayerView(game);
 
       nsp.on('connection', (socket: IOTypes.Socket) => {
@@ -180,9 +204,9 @@ export class SocketIO {
           const [action, stateID, matchID, playerID] = args;
           const master = new Master(
             game,
-            app.context.db,
+            app.db,
             TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
-            app.context.auth
+            app.auth
           );
 
           const matchQueue = this.getMatchQueue(matchID);
@@ -202,12 +226,7 @@ export class SocketIO {
             filterPlayerView,
             this.pubSub
           );
-          const master = new Master(
-            game,
-            app.context.db,
-            transport,
-            app.context.auth
-          );
+          const master = new Master(game, app.db, transport, app.auth);
 
           const syncResponse = await master.onSync(...args);
           if (syncResponse && syncResponse.error === 'unauthorized') {
@@ -224,9 +243,9 @@ export class SocketIO {
             const { matchID, playerID, credentials } = client;
             const master = new Master(
               game,
-              app.context.db,
+              app.db,
               TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
-              app.context.auth
+              app.auth
             );
             await master.onConnectionChange(
               matchID,
@@ -243,9 +262,9 @@ export class SocketIO {
             const [matchID] = args;
             const master = new Master(
               game,
-              app.context.db,
+              app.db,
               TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
-              app.context.auth
+              app.auth
             );
             master.onChatMessage(...args);
           }

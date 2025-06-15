@@ -145,15 +145,10 @@
     "typescript": "^3.8.2"
   },
   "dependencies": {
-    "@koa/cors": "^3.1.0",
-    "@koa/router": "^10.1.1",
-    "@types/koa": "^2.13.4",
     "@types/koa__router": "^8.0.8",
+    "express": "^5.1.0",
     "flatted": "^3.2.1",
     "immer": "^9.0.5",
-    "koa": "^2.13.3",
-    "koa-body": "^5.0.0",
-    "koa-socket-2": "^2.0.0",
     "lodash.isplainobject": "^4.0.6",
     "nanoid": "^3.1.30",
     "p-queue": "^6.6.2",
@@ -184,7 +179,8 @@
     ],
     "setupFiles": [
       "raf/polyfill",
-      "jest-date-mock"
+      "jest-date-mock",
+      "./setup.jest.ts"
     ],
     "setupFilesAfterEnv": [
       "@testing-library/jest-dom/extend-expect"

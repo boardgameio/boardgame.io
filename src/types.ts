@@ -1,5 +1,5 @@
 import type { Object } from 'ts-toolbelt';
-import type Koa from 'koa';
+import type { Request, Response, Express } from 'express';
 import type { Store as ReduxStore } from 'redux';
 import type * as ActionCreators from './core/action-creators';
 import type { ActionErrorType, UpdateErrorType } from './core/errors';
@@ -13,6 +13,8 @@ import type { EventsAPI } from './plugins/plugin-events';
 import type { LogAPI } from './plugins/plugin-log';
 import type { RandomAPI } from './plugins/random/random';
 import type { Operation } from 'rfc6902';
+import type { Server as IOServer } from 'socket.io';
+import type { createServer } from 'http';
 export type { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
@@ -372,7 +374,8 @@ export type Undo<G extends any = any> = {
 
 export namespace Server {
   export type GenerateCredentials = (
-    ctx: Koa.DefaultContext
+    req: Request,
+    res: Response
   ) => Promise<string> | string;
 
   export type AuthenticateCredentials = (
@@ -399,12 +402,21 @@ export namespace Server {
     updatedAt: number;
   }
 
-  export type AppCtx = Koa.DefaultContext & {
-    db: StorageAPI.Async | StorageAPI.Sync;
-    auth: Auth;
-  };
+  // Koa-specific AppCtx and App types removed for Express migration.
+  // export type AppCtx = Koa.DefaultContext & {
+  //   db: StorageAPI.Async | StorageAPI.Sync;
+  //   auth: Auth;
+  // };
 
-  export type App = Koa<Koa.DefaultState, AppCtx>;
+  // export type App = Koa<Koa.DefaultState, AppCtx>;
+
+  export type AppExtras = {
+    db?: StorageAPI.Async | StorageAPI.Sync;
+    auth?: Auth;
+    io?: IOServer;
+    server?: ReturnType<typeof createServer>;
+  };
+  export type App = Express & AppExtras;
 }
 
 export namespace LobbyAPI {

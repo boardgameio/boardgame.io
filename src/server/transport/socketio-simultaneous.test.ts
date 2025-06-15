@@ -99,67 +99,67 @@ class SocketIOTestAdapter extends SocketIO {
   }
 }
 
-jest.mock('koa-socket-2', () => {
-  class MockSocket {
-    id: string;
-    callbacks: Record<string, (...args: any[]) => Promise<void>>;
-    emit: jest.Mock<any, any>;
-    broadcast: { emit: jest.Mock<any, any> };
+class MockSocket {
+  id: string;
+  callbacks: Record<string, (...args: any[]) => Promise<void>>;
+  emit: jest.Mock<any, any>;
+  broadcast: { emit: jest.Mock<any, any> };
 
-    constructor({ id }: { id: string }) {
-      this.id = id;
-      this.callbacks = {};
-      this.emit = jest.fn();
-      this.broadcast = { emit: jest.fn() };
-    }
-
-    async receive(type, ...args) {
-      await this.callbacks[type](...args);
-    }
-
-    on(type, callback) {
-      this.callbacks[type] = callback;
-    }
-
-    to() {
-      return {
-        broadcast: this.broadcast,
-        emit: this.emit,
-      };
-    }
-
-    join() {}
+  constructor({ id }: { id: string }) {
+    this.id = id;
+    this.callbacks = {};
+    this.emit = jest.fn();
+    this.broadcast = { emit: jest.fn() };
   }
 
-  class MockIO {
-    sockets: Map<string, MockSocket>;
-    socketAdapter: any;
-
-    constructor() {
-      this.sockets = new Map(
-        ['0', '1'].map((id) => [id, new MockSocket({ id })])
-      );
-    }
-
-    adapter(socketAdapter) {
-      this.socketAdapter = socketAdapter;
-    }
-
-    attach(app) {
-      app.io = app._io = this;
-    }
-
-    of() {
-      return this;
-    }
-
-    on(_event, callback) {
-      this.sockets.forEach((socket) => void callback(socket));
-    }
+  async receive(type, ...args) {
+    await this.callbacks[type](...args);
   }
 
-  return MockIO;
-});
+  on(type, callback) {
+    this.callbacks[type] = callback;
+  }
+
+  to() {
+    return {
+      broadcast: this.broadcast,
+      emit: this.emit,
+    };
+  }
+
+  join() {}
+}
+
+class MockIO {
+  sockets: Map<string, MockSocket>;
+  socketAdapter: any;
+
+  constructor() {
+    this.sockets = new Map(
+      ['0', '1'].map((id) => [id, new MockSocket({ id })])
+    );
+  }
+
+  adapter(socketAdapter) {
+    this.socketAdapter = socketAdapter;
+  }
+
+  attach(app) {
+    app.io = this;
+  }
+
+  of() {
+    return this;
+  }
+
+  on(_event, callback) {
+    this.sockets.forEach((socket) => void callback(socket));
+  }
+}
+
+jest.mock('socket.io', () => ({
+  Server: jest.fn().mockImplementation(() => new MockIO()),
+}));
 
 describe('simultaneous moves on server game', () => {
   const game: Game = {
@@ -217,13 +217,13 @@ describe('simultaneous moves on server game', () => {
   test('two clients playing using sync storage', async () => {
     const db = new InMemory();
     const auth = new Auth();
-    app = { context: { db, auth } };
+    app = { db, auth };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
     });
     transport.init(app, [ProcessGameConfig(game)]);
-    io = app.context.io;
+    io = app.io;
     const socket0 = io.sockets.get('0');
     const socket1 = io.sockets.get('1');
 
@@ -280,7 +280,7 @@ describe('simultaneous moves on server game', () => {
     // Set all players active
     await socket0.receive('update', ...activePlayersArgs);
 
-    // Call actions simultaeously
+    // Call actions simultaneously
     await Promise.all([
       (async () => {
         const moveBArgs: UpdateArgs = [
@@ -341,13 +341,13 @@ describe('simultaneous moves on server game', () => {
     await db.connect();
     const auth = new Auth();
 
-    app = { context: { db, auth } };
+    app = { db, auth };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
     });
     transport.init(app, [ProcessGameConfig(game)]);
-    io = app.context.io;
+    io = app.io;
     const socket0 = io.sockets.get('0');
     const socket1 = io.sockets.get('1');
 
@@ -402,7 +402,7 @@ describe('simultaneous moves on server game', () => {
     // Set all players active
     await socket0.receive('update', ...activePlayersArgs);
 
-    // Call actions simultaeously
+    // Call actions simultaneously
     await Promise.all([
       (async () => {
         const moveBArgs: UpdateArgs = [
@@ -485,10 +485,10 @@ describe('inauthentic clients', () => {
     db = new InMemoryAsync();
     await db.connect();
 
-    app = { context: { db, auth: new Auth() } };
+    app = { db, auth: new Auth() };
     transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, [ProcessGameConfig(game)]);
-    io = app.context.io;
+    io = app.io;
 
     // Create credentialed match.
     const metadata = createMetadata({ game, unlisted: false, numPlayers: 2 });

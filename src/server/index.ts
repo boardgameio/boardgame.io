@@ -6,9 +6,18 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Koa from 'koa';
-import Router from '@koa/router';
+import type { Express } from 'express';
+import express, { Router as ExpressRouter } from 'express';
 import type { CorsOptions } from 'cors';
+import { createServer } from 'http';
+
+// Extend Express type to include custom properties
+// declare module 'express-serve-static-core' {
+//   interface Application {
+//     db?: StorageAPI.Async | StorageAPI.Sync;
+//     auth?: Auth;
+//   }
+// }
 
 import { configureRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
@@ -18,7 +27,7 @@ import { Auth } from './auth';
 import { SocketIO } from './transport/socketio';
 import type { Server as ServerTypes, Game, StorageAPI } from '../types';
 
-export type KoaServer = ReturnType<Koa['listen']>;
+export type ExpressServer = ReturnType<Express['listen']>;
 
 interface ServerConfig {
   port?: number;
@@ -49,7 +58,7 @@ export const createServerRunConfig = (
     : { port: portOrConfig as number, callback };
 
 export const getPortFromServer = (
-  server: KoaServer
+  server: ExpressServer
 ): string | number | null => {
   const address = server.address();
   if (typeof address === 'string') return address;
@@ -93,17 +102,18 @@ export function Server({
   generateCredentials = uuid,
   authenticateCredentials,
 }: ServerOpts) {
-  const app: ServerTypes.App = new Koa();
+  const app: ServerTypes.App = express();
+  app.server = createServer(app);
 
   games = games.map((game) => ProcessGameConfig(game));
 
   if (db === undefined) {
     db = DBFromEnv();
   }
-  app.context.db = db;
+  app.db = db;
 
   const auth = new Auth({ authenticateCredentials, generateCredentials });
-  app.context.auth = auth;
+  app.auth = auth;
 
   if (transport === undefined) {
     transport = new SocketIO({ https });
@@ -118,7 +128,7 @@ export function Server({
   }
   transport.init(app, games, origins);
 
-  const router = new Router<any, ServerTypes.AppCtx>();
+  const router = ExpressRouter();
 
   return {
     app,
@@ -136,34 +146,34 @@ export function Server({
 
       // Lobby API
       const lobbyConfig = serverRunConfig.lobbyConfig;
-      let apiServer: KoaServer | undefined;
+      let apiServer: ExpressServer | undefined;
       if (!lobbyConfig || !lobbyConfig.apiPort) {
         configureApp(app, router, apiOrigins);
       } else {
-        // Run API in a separate Koa app.
-        const api: ServerTypes.App = new Koa();
-        api.context.db = db;
-        api.context.auth = auth;
+        // Run API in a separate Express app.
+        const api: Express = express();
         configureApp(api, router, apiOrigins);
-        await new Promise((resolve) => {
-          apiServer = api.listen(lobbyConfig.apiPort, resolve);
+        await new Promise<void>((resolve) => {
+          apiServer = api.listen(lobbyConfig.apiPort, () => resolve());
         });
         if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
         logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
       }
 
       // Run Game Server (+ API, if necessary).
-      let appServer: KoaServer;
-      await new Promise((resolve) => {
-        appServer = app.listen(serverRunConfig.port, resolve);
+      await new Promise<void>((resolve) => {
+        app.server.listen(serverRunConfig.port, () => resolve());
       });
       if (serverRunConfig.callback) serverRunConfig.callback();
-      logger.info(`App serving on ${getPortFromServer(appServer)}...`);
+      logger.info(`App serving on ${getPortFromServer(app.server)}...`);
 
-      return { apiServer, appServer };
+      return { apiServer, appServer: app.server };
     },
 
-    kill: (servers: { apiServer?: KoaServer; appServer: KoaServer }) => {
+    kill: (servers: {
+      apiServer?: ExpressServer;
+      appServer: ExpressServer;
+    }) => {
       if (servers.apiServer) {
         servers.apiServer.close();
       }

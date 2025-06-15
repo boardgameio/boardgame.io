@@ -42,6 +42,64 @@ class SocketIOTestAdapter extends SocketIO {
   }
 }
 
+// Mock socket.io for Express
+class MockSocket {
+  id: string;
+  callbacks: Record<string, (...args: any[]) => any>;
+  emit: jest.Mock<any, any>;
+  broadcast: { emit: jest.Mock<any, any> };
+
+  constructor() {
+    this.id = 'id';
+    this.callbacks = {};
+    this.emit = jest.fn();
+    this.broadcast = { emit: jest.fn() };
+  }
+
+  async receive(type, ...args) {
+    await this.callbacks[type](...args);
+    return;
+  }
+
+  on(type, callback) {
+    this.callbacks[type] = callback;
+  }
+
+  to() {
+    return {
+      broadcast: this.broadcast,
+      emit: this.emit,
+    };
+  }
+
+  join() {}
+}
+
+class MockIO {
+  socket: MockSocket;
+  socketAdapter: any;
+
+  constructor() {
+    this.socket = new MockSocket();
+  }
+
+  adapter(socketAdapter) {
+    this.socketAdapter = socketAdapter;
+  }
+
+  of() {
+    return this;
+  }
+
+  on(type, callback) {
+    callback(this.socket);
+  }
+}
+
+jest.mock('socket.io', () => ({
+  Server: jest.fn().mockImplementation(() => new MockIO()),
+}));
+
 jest.mock('../../master/master', () => {
   class Master {
     onUpdate: jest.Mock<any, any>;
@@ -60,70 +118,9 @@ jest.mock('../../master/master', () => {
   return { Master };
 });
 
-jest.mock('koa-socket-2', () => {
-  class MockSocket {
-    id: string;
-    callbacks: Record<string, (...args: any[]) => any>;
-    emit: jest.Mock<any, any>;
-    broadcast: { emit: jest.Mock<any, any> };
-
-    constructor() {
-      this.id = 'id';
-      this.callbacks = {};
-      this.emit = jest.fn();
-      this.broadcast = { emit: jest.fn() };
-    }
-
-    async receive(type, ...args) {
-      await this.callbacks[type](args[0], args[1], args[2], args[3], args[4]);
-      return;
-    }
-
-    on(type, callback) {
-      this.callbacks[type] = callback;
-    }
-
-    to() {
-      return {
-        broadcast: this.broadcast,
-        emit: this.emit,
-      };
-    }
-
-    join() {}
-  }
-
-  class MockIO {
-    socket: MockSocket;
-    socketAdapter: any;
-
-    constructor() {
-      this.socket = new MockSocket();
-    }
-
-    adapter(socketAdapter) {
-      this.socketAdapter = socketAdapter;
-    }
-
-    attach(app) {
-      app.io = app._io = this;
-    }
-
-    of() {
-      return this;
-    }
-
-    on(type, callback) {
-      callback(this.socket);
-    }
-  }
-
-  return MockIO;
-});
-
 describe('basic', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { auth };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
@@ -136,13 +133,13 @@ describe('basic', () => {
   });
 
   test('is attached to app', () => {
-    expect(app.context.io).toBeDefined();
+    expect(app.io).toBeDefined();
   });
 });
 
 describe('socketAdapter', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { auth };
   const games = [ProcessGameConfig({ seed: 0 })];
 
   const socketAdapter = jest.fn();
@@ -164,13 +161,13 @@ describe('TransportAPI', () => {
 
   beforeAll(() => {
     const auth = new Auth({ authenticateCredentials: () => true });
-    const app: any = { context: { auth } };
+    const app: any = { auth };
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
     const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
-    io = app.context.io;
+    io = app.io;
     const socket = io.socket;
     const filterPlayerView = getFilterPlayerView(games[0]);
     api = TransportAPI(
@@ -206,11 +203,11 @@ describe('TransportAPI', () => {
 
 describe('sync / update', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { auth };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
-  const io = app.context.io;
+  const io = app.io;
 
   test('sync', () => {
     io.socket.receive('sync', 'matchID', '0');
@@ -224,11 +221,11 @@ describe('sync / update', () => {
 });
 
 describe('chat', () => {
-  const app: any = { context: {} };
+  const app: any = {};
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
-  const io = app.context.io;
+  const io = app.io;
 
   test('chat message', async () => {
     await io.socket.receive('chat', 'matchID', { message: 'foo' });
@@ -238,7 +235,7 @@ describe('chat', () => {
 
 describe('connect / disconnect', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { auth };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
@@ -249,7 +246,7 @@ describe('connect / disconnect', () => {
     roomInfo = new Map();
     const transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, games);
-    io = app.context.io;
+    io = app.io;
   });
 
   test('0 and 1 connect', async () => {

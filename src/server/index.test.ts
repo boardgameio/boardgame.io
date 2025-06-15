@@ -9,7 +9,7 @@
 import request from 'supertest';
 
 import { Server, createServerRunConfig, getPortFromServer } from '.';
-import type { KoaServer } from '.';
+import type { ExpressServer } from '.';
 import type { SocketIO } from './transport/socketio';
 import type { Game, StorageAPI } from '../types';
 
@@ -24,6 +24,7 @@ jest.mock('../core/logger', () => ({
   error: () => {},
 }));
 
+/*
 jest.mock('koa-socket-2', () => {
   class MockSocket {
     on() {}
@@ -47,6 +48,7 @@ jest.mock('koa-socket-2', () => {
     }
   };
 });
+*/
 
 describe('new', () => {
   test('custom db implementation', () => {
@@ -85,7 +87,10 @@ describe('new', () => {
 
 describe('run', () => {
   let server: ReturnType<typeof Server> | null;
-  let runningServer: { appServer: KoaServer; apiServer?: KoaServer } | null;
+  let runningServer: {
+    appServer: ExpressServer;
+    apiServer?: ExpressServer;
+  } | null;
 
   beforeEach(() => {
     server = null;
@@ -137,11 +142,11 @@ describe('run', () => {
   });
 
   test('runs route middleware', async () => {
-    const usedMiddleware = jest.fn(async (_ctx, next) => {
-      await next;
+    const usedMiddleware = jest.fn((req, res, next) => {
+      next();
     });
-    const unusedMiddleware = jest.fn(async (_ctx, next) => {
-      await next;
+    const unusedMiddleware = jest.fn((req, res, next) => {
+      next();
     });
     server = Server({ games: [game] });
     server.router.use('/games', usedMiddleware);
@@ -158,10 +163,10 @@ describe('kill', () => {
   test('call close on both servers', async () => {
     const apiServer = {
       close: jest.fn(),
-    } as unknown as KoaServer;
+    } as unknown as ExpressServer;
     const appServer = {
       close: jest.fn(),
-    } as unknown as KoaServer;
+    } as unknown as ExpressServer;
     const server = Server({ games: [game] });
 
     server.kill({ appServer, apiServer });
@@ -173,7 +178,7 @@ describe('kill', () => {
   test('do not fail if api server is not defined', async () => {
     const appServer = {
       close: jest.fn(),
-    } as unknown as KoaServer;
+    } as unknown as ExpressServer;
     const server = Server({ games: [game] });
 
     expect(() => server.kill({ appServer })).not.toThrowError();
@@ -243,7 +248,7 @@ describe('getPortFromServer', () => {
     expect(
       getPortFromServer({
         address: () => null,
-      } as KoaServer)
+      } as ExpressServer)
     ).toBeNull();
   });
 
@@ -251,7 +256,7 @@ describe('getPortFromServer', () => {
     expect(
       getPortFromServer({
         address: () => '8000',
-      } as KoaServer)
+      } as ExpressServer)
     ).toBe('8000');
   });
 
@@ -259,7 +264,7 @@ describe('getPortFromServer', () => {
     expect(
       getPortFromServer({
         address: () => ({ port: '8000' }),
-      } as unknown as KoaServer)
+      } as unknown as ExpressServer)
     ).toBe('8000');
   });
 });
