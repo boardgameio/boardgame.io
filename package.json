@@ -136,6 +136,7 @@
     "rollup-plugin-terser": "^5.3.0",
     "rollup-plugin-typescript2": "^0.22.0",
     "shelljs": "^0.8.4",
+    "source-map": "^0.7.4",
     "supertest": "^3.1.0",
     "svelte-icons": "^2.1.0",
     "tempy": "^1.0.1",
@@ -165,6 +166,7 @@
     "ts-toolbelt": "^6.3.6"
   },
   "jest": {
+    "coverageProvider": "v8",
     "preset": "ts-jest/presets/js-with-babel",
     "testEnvironment": "jsdom",
     "moduleNameMapper": {
