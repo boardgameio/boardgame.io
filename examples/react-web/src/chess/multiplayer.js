@@ -20,11 +20,12 @@ const App = Client({
   debug: true,
 });
 
-const Multiplayer = (playerID) => () => (
-  <div style={{ padding: 50 }}>
-    <App matchID="multi" playerID={playerID} />
-    PlayerID: {playerID}
-  </div>
-);
+const Multiplayer = (playerID) => () =>
+  (
+    <div style={{ padding: 50 }}>
+      <App matchID="multi" playerID={playerID} />
+      PlayerID: {playerID}
+    </div>
+  );
 
 export default Multiplayer;

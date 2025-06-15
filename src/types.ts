@@ -402,14 +402,6 @@ export namespace Server {
     updatedAt: number;
   }
 
-  // Koa-specific AppCtx and App types removed for Express migration.
-  // export type AppCtx = Koa.DefaultContext & {
-  //   db: StorageAPI.Async | StorageAPI.Sync;
-  //   auth: Auth;
-  // };
-
-  // export type App = Koa<Koa.DefaultState, AppCtx>;
-
   export type AppExtras = {
     db?: StorageAPI.Async | StorageAPI.Sync;
     auth?: Auth;

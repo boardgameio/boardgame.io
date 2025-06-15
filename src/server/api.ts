@@ -98,7 +98,16 @@ export const configureRouter = ({
     res.json(body);
   });
 
-  // Create a new match
+  /**
+   * Create a new match of a given game.
+   *
+   * @param {string} name - The name of the game of the new match.
+   * @param {number} numPlayers - The number of players.
+   * @param {object} setupData - User-defined object that's available
+   *                             during game setup.
+   * @param {boolean} unlisted - Whether the match should be excluded from public listing.
+   * @return - The ID of the created match.
+   */
   router.post(
     '/games/:name/create',
     express.json(),
