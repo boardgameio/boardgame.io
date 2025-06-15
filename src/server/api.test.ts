@@ -1661,7 +1661,6 @@ describe('.configureRouter', () => {
           .set('Origin', 'https://www.other.com')
           .expect('Vary', 'Origin');
         expect(res.headers).not.toHaveProperty('Access-Control-Allow-Origin');
-        expect(res.headers).not.toHaveProperty('Vary');
       });
 
       // eslint-disable-next-line jest/expect-expect
