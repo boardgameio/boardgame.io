@@ -11,14 +11,6 @@ import express, { Router as ExpressRouter } from 'express';
 import type { CorsOptions } from 'cors';
 import { createServer } from 'http';
 
-// Extend Express type to include custom properties
-// declare module 'express-serve-static-core' {
-//   interface Application {
-//     db?: StorageAPI.Async | StorageAPI.Sync;
-//     auth?: Auth;
-//   }
-// }
-
 import { configureRouter, configureApp } from './api';
 import { DBFromEnv } from './db';
 import { ProcessGameConfig } from '../core/game';

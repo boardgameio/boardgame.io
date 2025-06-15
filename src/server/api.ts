@@ -94,10 +94,8 @@ export const configureRouter = ({
    * @return - Array of game names as string.
    */
   router.get('/games', async (req: Request, res: Response) => {
-    // console.log('GET /games', req.headers);
     const body: LobbyAPI.GameList = games.map((game) => game.name);
     res.json(body);
-    // console.log('Res', res.getHeaders());
   });
 
   // Create a new match
@@ -378,8 +376,7 @@ export const configureRouter = ({
 
       // Check if nextMatch is already set, if so, return that id.
       if (metadata.nextMatchID) {
-        res.json({ nextMatchID: metadata.nextMatchID });
-        return;
+        return res.json({ nextMatchID: metadata.nextMatchID });
       }
 
       const setupData = req.body.setupData || metadata.setupData;
@@ -499,7 +496,6 @@ export const configureApp = (
   router: Router,
   origins: CorsOptions['origin']
 ): void => {
-  // console.log('CORS allowed origins:', origins);
   app.use(
     // cors({
     //   origin: (origin, callback) => {

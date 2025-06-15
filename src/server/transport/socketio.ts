@@ -159,17 +159,7 @@ export class SocketIO {
    * @param origins Allowed CORS origins
    */
   init(app: Server.App, games: Game[], origins: CorsOptions['origin'] = []) {
-    // Create socket.io server and attach to the HTTP server
-    // The Express app must be started with http(s).createServer(app)
-    // and the resulting server passed to io.attach(server)
-    // Here, we assume the user will call io.attach(server) after app.listen
-    // For backwards compatibility, we also support attaching to app.server if present
-
-    // If app.server exists (e.g. from http.createServer), use it; otherwise, warn
-    // const server = app.Server;
-    // if (!server) {
-    // If not available, warn user to call io.attach(server) after app.listen
-    // We'll create the io instance, but user must attach it manually
+    // Initialize socket.io
     this.io = new IOServer(app.server, {
       pingTimeout: PING_TIMEOUT,
       pingInterval: PING_INTERVAL,
@@ -178,18 +168,8 @@ export class SocketIO {
       },
       ...this.socketOpts,
     });
+
     app.io = this.io;
-    // } else {
-    //   this.io = new IOServer(server, {
-    //     pingTimeout: PING_TIMEOUT,
-    //     pingInterval: PING_INTERVAL,
-    //     cors: {
-    //       origin: origins,
-    //     },
-    //     ...this.socketOpts,
-    //   });
-    //   app.io = this.io;
-    // }
 
     if (this.socketAdapter) {
       this.io.adapter(this.socketAdapter);

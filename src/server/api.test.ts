@@ -72,7 +72,6 @@ class AsyncStorage extends StorageAPI.Async {
   }
 }
 
-// Express helpers to replace Koa
 function addApiToServer({
   app,
   origins,
@@ -1640,21 +1639,13 @@ describe('.configureRouter', () => {
     const db = new AsyncStorage();
 
     describe('no allowed origins', () => {
-      // console.log('no allowed origins');
       const app = createApiServer({ auth, games, db, origins: false });
 
       test('does not allow CORS', async () => {
-        // console.log('does not allow CORS');
         const res = await request(app)
           .get('/games')
           .set('Origin', 'https://www.example.com');
         // .expect('Vary', 'Origin');
-        // console.log(
-        //   'does not allow CORS headers',
-        //   res.headers,
-        //   res.statusCode,
-        //   res.text
-        // );
         expect(res.headers).not.toHaveProperty('access-control-allow-origin');
         expect(res.headers).not.toHaveProperty('Access-Control-Allow-Origin');
         expect(res.headers).not.toHaveProperty('vary');
@@ -1663,21 +1654,14 @@ describe('.configureRouter', () => {
     });
 
     describe('single allowed origin', () => {
-      // console.log('single allowed origin');
       const origin = 'https://www.example.com';
       const app = createApiServer({ auth, games, db, origins: origin });
 
       test('disallows non-matching origin', async () => {
-        // console.log('disallows non-matching origin');
         const res = await request(app)
           .get('/games')
           .set('Origin', 'https://www.other.com');
         // .expect('Vary', 'Origin');
-        // console.log(
-        //   'disallows non-matching origin headers',
-        //   res.headers,
-        //   res.statusCode
-        // );
         expect(res.headers)./*not.*/ toHaveProperty(
           'access-control-allow-origin'
         );

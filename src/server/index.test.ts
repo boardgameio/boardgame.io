@@ -24,32 +24,6 @@ jest.mock('../core/logger', () => ({
   error: () => {},
 }));
 
-/*
-jest.mock('koa-socket-2', () => {
-  class MockSocket {
-    on() {}
-  }
-
-  return class {
-    constructor() {
-      (this as any).socket = new MockSocket();
-    }
-    attach(app) {
-      app.io = app._io = this;
-    }
-    of() {
-      return this;
-    }
-    on(type, callback) {
-      callback((this as any).socket);
-    }
-    adapter() {
-      return this;
-    }
-  };
-});
-*/
-
 describe('new', () => {
   test('custom db implementation', () => {
     const game: Game = {};

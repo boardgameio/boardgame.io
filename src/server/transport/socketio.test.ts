@@ -42,7 +42,6 @@ class SocketIOTestAdapter extends SocketIO {
   }
 }
 
-// Mock socket.io for Express
 class MockSocket {
   id: string;
   callbacks: Record<string, (...args: any[]) => any>;
