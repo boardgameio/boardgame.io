@@ -1648,8 +1648,6 @@ describe('.configureRouter', () => {
         // .expect('Vary', 'Origin');
         expect(res.headers).not.toHaveProperty('access-control-allow-origin');
         expect(res.headers).not.toHaveProperty('Access-Control-Allow-Origin');
-        expect(res.headers).not.toHaveProperty('vary');
-        expect(res.headers).not.toHaveProperty('Vary');
       });
     });
 
@@ -1660,14 +1658,10 @@ describe('.configureRouter', () => {
       test('disallows non-matching origin', async () => {
         const res = await request(app)
           .get('/games')
-          .set('Origin', 'https://www.other.com');
-        // .expect('Vary', 'Origin');
-        expect(res.headers)./*not.*/ toHaveProperty(
-          'access-control-allow-origin'
-        );
+          .set('Origin', 'https://www.other.com')
+          .expect('Vary', 'Origin');
         expect(res.headers).not.toHaveProperty('Access-Control-Allow-Origin');
         expect(res.headers).not.toHaveProperty('Vary');
-        expect(res.headers).toHaveProperty('vary');
       });
 
       // eslint-disable-next-line jest/expect-expect
