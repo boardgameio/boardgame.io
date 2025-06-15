@@ -146,6 +146,7 @@
   },
   "dependencies": {
     "@types/koa__router": "^8.0.8",
+    "cors": "^2.8.5",
     "express": "^5.1.0",
     "flatted": "^3.2.1",
     "immer": "^9.0.5",
