@@ -7,7 +7,7 @@
  */
 
 import request from 'supertest';
-import type { Express } from 'express';
+import type { Express, NextFunction, Response, Request } from 'express';
 import express from 'express';
 import bodyParser from 'body-parser';
 import * as dateMock from 'jest-date-mock';
@@ -1698,6 +1698,40 @@ describe('.configureRouter', () => {
           .expect('Vary', 'Origin')
           .expect('Access-Control-Allow-Origin', origin);
       });
+    });
+  });
+
+  describe('Error handling', () => {
+    const auth = new Auth();
+    const games: Game[] = [];
+    const db = new AsyncStorage();
+    const app = createApiServer({ auth, games, db });
+
+    global.console = {
+      ...console,
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+    };
+
+    test('returns 404 for games wrong route', async () => {
+      const response = await request(app).get('/games/wrong/route');
+      expect(response.status).toBe(404);
+    });
+
+    test('returns 404 for wrong route', async () => {
+      const response = await request(app).get('/wrong/route');
+      expect(response.status).toBe(404);
+    });
+
+    test('returns 500 when a handler fails', async () => {
+      // force failure by passing an invalid Game[].
+      const app = createApiServer({ auth, games: null, db });
+      const response = await request(app).get('/games');
+      expect(response.status).toBe(500);
     });
   });
 });

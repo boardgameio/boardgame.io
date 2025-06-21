@@ -395,25 +395,21 @@ export const configureRouter = ({
         Object.keys(metadata.players).length;
 
       const game = games.find((g) => g.name === gameName);
-      try {
-        const nextMatchID = await CreateMatch({
-          res,
-          db,
-          game,
-          numPlayers,
-          setupData,
-          uuid,
-          unlisted,
-        });
-        metadata.nextMatchID = nextMatchID;
+      const nextMatchID = await CreateMatch({
+        res,
+        db,
+        game,
+        numPlayers,
+        setupData,
+        uuid,
+        unlisted,
+      });
+      metadata.nextMatchID = nextMatchID;
 
-        await db.setMetadata(matchID, metadata);
+      await db.setMetadata(matchID, metadata);
 
-        const body: LobbyAPI.NextMatch = { nextMatchID };
-        res.json(body);
-      } catch {
-        // Error already handled in CreateMatch
-      }
+      const body: LobbyAPI.NextMatch = { nextMatchID };
+      res.json(body);
     }
   );
 
@@ -534,6 +530,13 @@ export const configureApp = (
   });
 
   app.use(router);
+
+  // If the request is not handled by the router, throw error.
+  app.use((req: Request, res: Response) => {
+    const error = new Error(`Not Found: ${req.method} ${req.originalUrl}`);
+    (error as any).status = 404;
+    throw error;
+  });
 
   // Error handler
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
