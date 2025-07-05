@@ -38,6 +38,19 @@
   "main": "dist/boardgameio.js",
   "unpkg": "dist/boardgameio.min.js",
   "module": "dist/boardgameio.es.js",
+  "exports": {
+    ".": {
+      "require": "./dist/boardgameio.js",
+      "import": "./dist/boardgameio.es.js"
+    },
+    "./server": {
+      "import": "./dist/cjs/server.js"
+    },
+    "./*": {
+      "require": "./dist/cjs/*.js",
+      "import": "./dist/esm/*.js"
+    }
+  },
   "types": "dist/types/src/types.d.ts",
   "files": [
     "src",
