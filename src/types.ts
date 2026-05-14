@@ -138,7 +138,7 @@ export interface LogEntry {
 export interface PluginContext<
   API extends any = any,
   Data extends any = any,
-  G extends any = any
+  G extends any = any,
 > {
   G: G;
   ctx: Ctx;
@@ -150,13 +150,13 @@ export interface PluginContext<
 export interface Plugin<
   API extends any = any,
   Data extends any = any,
-  G extends any = any
+  G extends any = any,
 > {
   name: string;
   noClient?: (context: PluginContext<API, Data, G>) => boolean;
   setup?: (setupCtx: { G: G; ctx: Ctx; game: Game<G> }) => Data;
   isInvalid?: (
-    context: Omit<PluginContext<API, Data, G>, 'api'>
+    context: Omit<PluginContext<API, Data, G>, 'api'>,
   ) => false | string;
   action?: (data: Data, payload: ActionShape.Plugin['payload']) => Data;
   api?: (context: {
@@ -175,7 +175,7 @@ export interface Plugin<
   }) => State<G>;
   fnWrap?: (
     moveOrHook: (context: FnContext<G>, ...args: any[]) => any,
-    methodType: GameMethod
+    methodType: GameMethod,
   ) => (context: FnContext<G>, ...args: any[]) => any;
   playerView?: (context: {
     G: G;
@@ -188,7 +188,7 @@ export interface Plugin<
 
 export type FnContext<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > = PluginAPIs &
   DefaultPluginAPIs & {
     G: G;
@@ -197,7 +197,7 @@ export type FnContext<
 
 export type MoveFn<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > = (
   context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
   ...args: any[]
@@ -205,7 +205,7 @@ export type MoveFn<
 
 export interface LongFormMove<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   move: MoveFn<G, PluginAPIs>;
   redact?: boolean | ((context: { G: G; ctx: Ctx }) => boolean);
@@ -217,26 +217,26 @@ export interface LongFormMove<
 
 export type Move<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > = MoveFn<G, PluginAPIs> | LongFormMove<G, PluginAPIs>;
 
 export interface MoveMap<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   [moveName: string]: Move<G, PluginAPIs>;
 }
 
 export interface PhaseConfig<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   start?: boolean;
   next?: ((context: FnContext<G, PluginAPIs>) => string | void) | string;
   onBegin?: (context: FnContext<G, PluginAPIs>) => void | G;
   onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
   endIf?: (
-    context: FnContext<G, PluginAPIs>
+    context: FnContext<G, PluginAPIs>,
   ) => boolean | void | { next: string };
   moves?: MoveMap<G, PluginAPIs>;
   turn?: TurnConfig<G, PluginAPIs>;
@@ -250,7 +250,7 @@ export interface PhaseConfig<
 
 export interface StageConfig<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   moves?: MoveMap<G, PluginAPIs>;
   next?: string;
@@ -258,14 +258,14 @@ export interface StageConfig<
 
 export interface StageMap<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   [stageName: string]: StageConfig<G, PluginAPIs>;
 }
 
 export interface TurnOrderConfig<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   first: (context: FnContext<G, PluginAPIs>) => number;
   next: (context: FnContext<G, PluginAPIs>) => number | undefined;
@@ -274,7 +274,7 @@ export interface TurnOrderConfig<
 
 export interface TurnConfig<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   activePlayers?: ActivePlayersArg;
   minMoves?: number;
@@ -284,10 +284,10 @@ export interface TurnConfig<
   onBegin?: (context: FnContext<G, PluginAPIs>) => void | G;
   onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
   endIf?: (
-    context: FnContext<G, PluginAPIs>
+    context: FnContext<G, PluginAPIs>,
   ) => boolean | void | { next: PlayerID };
   onMove?: (
-    context: FnContext<G, PluginAPIs> & { playerID: PlayerID }
+    context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
   ) => void | G;
   stages?: StageMap<G, PluginAPIs>;
   order?: TurnOrderConfig<G, PluginAPIs>;
@@ -301,7 +301,7 @@ export interface TurnConfig<
 
 export interface PhaseMap<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   [phaseName: string]: PhaseConfig<G, PluginAPIs>;
 }
@@ -316,7 +316,7 @@ export type AiEnumerate = Array<
 export interface Game<
   G extends any = any,
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
-  SetupData extends any = any
+  SetupData extends any = any,
 > {
   name?: string;
   minPlayers?: number;
@@ -326,11 +326,11 @@ export interface Game<
   seed?: string | number;
   setup?: (
     context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },
-    setupData?: SetupData
+    setupData?: SetupData,
   ) => G;
   validateSetupData?: (
     setupData: SetupData | undefined,
-    numPlayers: number
+    numPlayers: number,
   ) => string | undefined;
   moves?: MoveMap<G, PluginAPIs>;
   phases?: PhaseMap<G, PluginAPIs>;
@@ -354,7 +354,7 @@ export interface Game<
   };
   processMove?: (
     state: State<G>,
-    action: ActionPayload.MakeMove
+    action: ActionPayload.MakeMove,
   ) => State<G> | typeof INVALID_MOVE;
   flow?: ReturnType<typeof Flow>;
 }
@@ -371,12 +371,12 @@ export type Undo<G extends any = any> = {
 
 export namespace Server {
   export type GenerateCredentials = (
-    ctx: Koa.DefaultContext
+    ctx: Koa.DefaultContext,
   ) => Promise<string> | string;
 
   export type AuthenticateCredentials = (
     credentials: string,
-    playerMetadata: PlayerMetadata
+    playerMetadata: PlayerMetadata,
   ) => Promise<boolean> | boolean;
 
   export type PlayerMetadata = {

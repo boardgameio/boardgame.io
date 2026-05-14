@@ -66,7 +66,7 @@ const GlobalClientManager = new ClientManager();
 function assumedPlayerID(
   playerID: PlayerID | null | undefined,
   store: Store,
-  multiplayer?: unknown
+  multiplayer?: unknown,
 ): PlayerID {
   // In singleplayer mode, if the client does not have a playerID
   // associated with it, we attach the currentPlayer as playerID.
@@ -89,7 +89,7 @@ function createDispatchers(
   store: Store,
   playerID: PlayerID,
   credentials: string,
-  multiplayer?: unknown
+  multiplayer?: unknown,
 ) {
   const dispatchers: Record<string, (...args: any[]) => void> = {};
   for (const name of innerActionNames) {
@@ -98,7 +98,7 @@ function createDispatchers(
         name,
         args,
         assumedPlayerID(playerID, store, multiplayer),
-        credentials
+        credentials,
       );
       store.dispatch(action);
     };
@@ -115,7 +115,7 @@ export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 export interface ClientOpts<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   game: Game<G, PluginAPIs>;
   debug?: DebugOpt | boolean;
@@ -140,7 +140,7 @@ export type ClientState<G extends any = any> =
  */
 export class _ClientImpl<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   private gameStateOverride?: any;
   private initialState: State<G>;
@@ -212,14 +212,14 @@ export class _ClientImpl<
     this.undo = () => {
       const undo = ActionCreators.undo(
         assumedPlayerID(this.playerID, this.store, this.multiplayer),
-        this.credentials
+        this.credentials,
       );
       this.store.dispatch(undo);
     };
     this.redo = () => {
       const redo = ActionCreators.redo(
         assumedPlayerID(this.playerID, this.store, this.multiplayer),
-        this.credentials
+        this.credentials,
       );
       this.store.dispatch(redo);
     };
@@ -258,7 +258,7 @@ export class _ClientImpl<
           case Actions.UPDATE: {
             let id = -1;
             if (this.log.length > 0) {
-              id = this.log[this.log.length - 1]._stateID;
+              id = this.log.at(-1)._stateID;
             }
 
             let deltalog = action.deltalog || [];
@@ -316,7 +316,7 @@ export class _ClientImpl<
       TransientHandlingMiddleware,
       SubscriptionMiddleware,
       TransportMiddleware,
-      LogMiddleware
+      LogMiddleware,
     );
 
     enhancer = (
@@ -390,7 +390,7 @@ export class _ClientImpl<
           prevStateID,
           stateID,
           patch,
-          deltalog
+          deltalog,
         );
         this.store.dispatch(action);
         // Emit sync if patch apply failed.
@@ -471,7 +471,7 @@ export class _ClientImpl<
     const isPlayerActive = this.game.flow.isPlayerActive(
       state.G,
       state.ctx,
-      this.playerID
+      this.playerID,
     );
 
     if (this.multiplayer && !isPlayerActive) {
@@ -523,7 +523,7 @@ export class _ClientImpl<
       this.store,
       this.playerID,
       this.credentials,
-      this.multiplayer
+      this.multiplayer,
     );
 
     this.events = createEventDispatchers(
@@ -531,7 +531,7 @@ export class _ClientImpl<
       this.store,
       this.playerID,
       this.credentials,
-      this.multiplayer
+      this.multiplayer,
     );
 
     this.plugins = createPluginDispatchers(
@@ -539,7 +539,7 @@ export class _ClientImpl<
       this.store,
       this.playerID,
       this.credentials,
-      this.multiplayer
+      this.multiplayer,
     );
   }
 
@@ -583,7 +583,7 @@ export class _ClientImpl<
  */
 export function Client<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 >(opts: ClientOpts<G, PluginAPIs>) {
   return new _ClientImpl<G, PluginAPIs>(opts);
 }
