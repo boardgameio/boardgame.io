@@ -32,7 +32,8 @@
     "postpack": "npm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,tsx,js,jsx,css,md}\"",
     "changelog": "node ./scripts/changelog.js",
-    "clean": "node ./scripts/clean.js"
+    "clean": "node ./scripts/clean.js",
+    "prepare": "husky"
   },
   "sideEffects": false,
   "main": "dist/boardgameio.js",
@@ -112,7 +113,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-unicorn": "^30.0.0",
-    "husky": "^4.3.8",
+    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.1.0",
     "jest-date-mock": "^1.0.8",
@@ -201,11 +202,5 @@
       "node_modules/",
       ".npm/"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run test:coverage"
-    }
   }
 }
