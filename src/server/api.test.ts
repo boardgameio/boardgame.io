@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2018 The boardgame.io Authors
  *

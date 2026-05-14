@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { screen, fireEvent, waitFor } from '@testing-library/svelte';
 import { Client } from '../../client';
 import { Local } from '../../transport/local';
