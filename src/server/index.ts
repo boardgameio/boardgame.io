@@ -145,8 +145,8 @@ export function Server({
         api.context.db = db;
         api.context.auth = auth;
         configureApp(api, router, apiOrigins);
-        await new Promise((resolve) => {
-          apiServer = api.listen(lobbyConfig.apiPort, resolve);
+        await new Promise<void>((resolve) => {
+          apiServer = api.listen(lobbyConfig.apiPort, () => resolve());
         });
         if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
         logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
@@ -154,8 +154,8 @@ export function Server({
 
       // Run Game Server (+ API, if necessary).
       let appServer: KoaServer;
-      await new Promise((resolve) => {
-        appServer = app.listen(serverRunConfig.port, resolve);
+      await new Promise<void>((resolve) => {
+        appServer = app.listen(serverRunConfig.port, () => resolve());
       });
       if (serverRunConfig.callback) serverRunConfig.callback();
       logger.info(`App serving on ${getPortFromServer(appServer)}...`);
