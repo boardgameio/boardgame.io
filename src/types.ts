@@ -13,7 +13,6 @@ import type { EventsAPI } from './plugins/plugin-events';
 import type { LogAPI } from './plugins/plugin-log';
 import type { RandomAPI } from './plugins/random/random';
 import type { Operation } from 'rfc6902';
-export type { StorageAPI };
 
 export type AnyFn = (...args: any[]) => any;
 
@@ -486,7 +485,9 @@ export namespace ActionShape {
 }
 
 export namespace ActionPayload {
-  type GetPayload<T extends ActionShape.Any> = Object.At<T, 'payload'>;
+  type GetPayload<T extends ActionShape.Any> = T extends { payload: infer P }
+    ? P
+    : never;
   export type MakeMove = GetPayload<ActionShape.MakeMove>;
   export type GameEvent = GetPayload<ActionShape.GameEvent>;
 }
@@ -509,3 +510,5 @@ export interface ChatMessage {
   sender: PlayerID;
   payload: any;
 }
+
+export * as StorageAPI from './server/db/base';
