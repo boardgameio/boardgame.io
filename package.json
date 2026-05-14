@@ -141,8 +141,6 @@
     "svelte-icons": "^2.1.0",
     "tempy": "^1.0.1",
     "ts-jest": "^27.0.5",
-    "ts-transformer-imports": "^0.4.3",
-    "ttypescript": "^1.5.12",
     "typescript": "^3.8.2"
   },
   "dependencies": {
