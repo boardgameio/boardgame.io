@@ -55,7 +55,7 @@ type LobbyProps = {
     handleJoinMatch: (
       gameName: string,
       matchID: string,
-      playerID: string
+      playerID: string,
     ) => Promise<void>;
     handleLeaveMatch: (gameName: string, matchID: string) => Promise<void>;
     handleExitMatch: () => void;
@@ -167,7 +167,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     this._clearRefreshInterval();
     this._currentInterval = setInterval(
       this._updateConnection,
-      this.props.refreshInterval
+      this.props.refreshInterval,
     );
   }
 
@@ -227,7 +227,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
-        this.connection.playerCredentials
+        this.connection.playerCredentials,
       );
     } catch (error) {
       this.setState({ errorMsg: error.message });
@@ -240,7 +240,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
-        this.connection.playerCredentials
+        this.connection.playerCredentials,
       );
     } catch (error) {
       this.setState({ errorMsg: error.message });
@@ -296,12 +296,12 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   };
 
   _getPhaseVisibility = (phase: LobbyPhases) => {
-    return this.state.phase !== phase ? 'hidden' : 'phase';
+    return this.state.phase === phase ? 'phase' : 'hidden';
   };
 
   renderMatches = (
     matches: LobbyAPI.MatchList['matches'],
-    playerName: string
+    playerName: string,
   ) => {
     return matches.map((match) => {
       const { matchID, gameName, players } = match;

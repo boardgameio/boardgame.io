@@ -159,14 +159,17 @@ export class Events {
           switch (event.calledFrom) {
             // Disallow all stage events in onEnd and phase.onBegin hooks.
             case GameMethod.TURN_ON_END:
-            case GameMethod.PHASE_ON_END:
+            case GameMethod.PHASE_ON_END: {
               return stateWithError(event.error, Errors.StageEventInOnEnd);
-            case GameMethod.PHASE_ON_BEGIN:
+            }
+            case GameMethod.PHASE_ON_BEGIN: {
               return stateWithError(event.error, Errors.StageEventInPhaseBegin);
+            }
             // Disallow setStage & endStage in turn.onBegin hooks.
-            case GameMethod.TURN_ON_BEGIN:
+            case GameMethod.TURN_ON_BEGIN: {
               if (event.type === 'setActivePlayers') break;
               return stateWithError(event.error, Errors.StageEventInTurnBegin);
+            }
           }
 
           // If the turn already ended, don't try to process stage events.

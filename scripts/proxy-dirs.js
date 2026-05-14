@@ -7,8 +7,8 @@
  */
 
 const subpackages = require('../subpackages');
-const path = require('path');
-const { mkdirSync, writeFileSync } = require('fs');
+const path = require('node:path');
+const { mkdirSync, writeFileSync } = require('node:fs');
 
 function PackageJson(name, { mainDir, esmDir } = {}) {
   const root = '../dist';

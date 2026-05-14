@@ -19,7 +19,7 @@ type ProcessedGame = Game & {
   pluginNames: string[];
   processMove: (
     state: State,
-    action: ActionPayload.MakeMove
+    action: ActionPayload.MakeMove,
   ) => State | typeof INVALID_MOVE;
 };
 

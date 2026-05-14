@@ -56,7 +56,7 @@ test('visibility toggle', async () => {
   const showButton = screen.getByTitle('Show Debug Panel');
   expect(showButton).toBeInTheDocument();
   expect(
-    screen.queryByRole('heading', { name: 'Controls' })
+    screen.queryByRole('heading', { name: 'Controls' }),
   ).not.toBeInTheDocument();
 
   // Show debug panel
@@ -81,7 +81,7 @@ test('panel options', async () => {
   expect(hideButton).not.toBeInTheDocument();
 
   expect(
-    screen.queryByRole('heading', { name: 'Controls' })
+    screen.queryByRole('heading', { name: 'Controls' }),
   ).not.toBeInTheDocument();
 
   client.stop();
@@ -126,13 +126,13 @@ describe('multiple clients', () => {
     const select = screen.getByLabelText('Client');
     // Check it is displaying details for the client that rendered first.
     expect(
-      screen.getByDisplayValue('0 — playerID: "0", matchID: "A" (game1)')
+      screen.getByDisplayValue('0 — playerID: "0", matchID: "A" (game1)'),
     ).toBeInTheDocument();
     // Switch to client1.
     await fireEvent.change(select, { target: { value: 1 } });
     // Check the client switcher now shows details for client1.
     expect(
-      screen.getByDisplayValue('1 — playerID: "0", matchID: "B" (game2)')
+      screen.getByDisplayValue('1 — playerID: "0", matchID: "B" (game2)'),
     ).toBeInTheDocument();
 
     // Switch to the info tab and check if the matchID for client1 is displayed.
@@ -147,7 +147,7 @@ describe('multiple clients', () => {
     await fireEvent.click(screen.getByRole('button', { name: 'Player 1' }));
     // Check client0’s playerID was updated.
     expect(
-      screen.getByDisplayValue('0 — playerID: "1", matchID: "A" (game1)')
+      screen.getByDisplayValue('0 — playerID: "1", matchID: "A" (game1)'),
     ).toBeInTheDocument();
     expect(client0.playerID).toBe('1');
   });
@@ -160,13 +160,13 @@ describe('multiple clients', () => {
     await fireEvent.change(select, { target: { value: 1 } });
     // Check the client switcher now shows details for client1.
     expect(
-      screen.getByDisplayValue('1 — playerID: "0", matchID: "B" (game2)')
+      screen.getByDisplayValue('1 — playerID: "0", matchID: "B" (game2)'),
     ).toBeInTheDocument();
     // Toggle to playerID 1 by clicking on the “1” button.
     await fireEvent.click(screen.getByRole('button', { name: 'Player 1' }));
     // Check the client switcher now shows details for client2.
     expect(
-      screen.getByDisplayValue('2 — playerID: "1", matchID: "B" (game2)')
+      screen.getByDisplayValue('2 — playerID: "1", matchID: "B" (game2)'),
     ).toBeInTheDocument();
     // Client playerIDs have not changed.
     expect(client1.playerID).toBe('0');
@@ -177,7 +177,7 @@ describe('multiple clients', () => {
     const select = screen.getByLabelText('Client');
     await fireEvent.change(select, { target: { value: 0 } });
     expect(
-      screen.getByDisplayValue('0 — playerID: "1", matchID: "A" (game1)')
+      screen.getByDisplayValue('0 — playerID: "1", matchID: "A" (game1)'),
     ).toBeInTheDocument();
   });
 });

@@ -13,7 +13,7 @@ import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 /* mock server requests */
-global.fetch = jest
+globalThis.fetch = jest
   .fn()
   .mockReturnValue({ ok: true, status: 200, json: () => [] });
 
@@ -32,8 +32,8 @@ describe('lobby', () => {
   let components: any[];
 
   beforeEach(async () => {
-    setIntervalSpy = jest.spyOn(global, 'setInterval');
-    clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+    setIntervalSpy = jest.spyOn(globalThis, 'setInterval');
+    clearIntervalSpy = jest.spyOn(globalThis, 'clearInterval');
     components = [
       {
         board: 'Board1',
@@ -61,13 +61,13 @@ describe('lobby', () => {
           gameComponents={components}
           clientFactory={spy.mockReturnValue(NullComponent)}
           gameServer="localhost:9000"
-        />
+        />,
       );
       lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
-      expect(spy).toBeCalledWith(
+      expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({
           multiplayer: expect.anything(),
-        })
+        }),
       );
     });
   });
@@ -116,7 +116,7 @@ describe('lobby', () => {
           .onChange({ target: { value: '' } });
         lobby.find('LobbyLoginForm').find('button').simulate('click');
         expect(lobby.find('LobbyLoginForm').find('.error-msg').text()).not.toBe(
-          ''
+          '',
         );
       });
       test('invalid key press', () => {
@@ -159,7 +159,7 @@ describe('lobby', () => {
           phase: 'play',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
     });
@@ -198,7 +198,7 @@ describe('lobby', () => {
           phase: 'list',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
 
@@ -213,14 +213,14 @@ describe('lobby', () => {
           phase: 'list',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
 
       lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
 
       expect(clearIntervalSpy).toHaveBeenCalledWith(
-        lobby.instance()._currentInterval
+        lobby.instance()._currentInterval,
       );
     });
   });
@@ -244,7 +244,7 @@ describe('lobby', () => {
 
     test('updating interval prop, updates internal interval ID', () => {
       const { _currentInterval } = lobby.instance();
-      lobby.setProps({ refreshInterval: 10000 });
+      lobby.setProps({ refreshInterval: 10_000 });
       expect(lobby.instance()._currentInterval).not.toEqual(_currentInterval);
     });
 
@@ -265,14 +265,14 @@ describe('lobby', () => {
           phase: 'list',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
       lobby = Enzyme.mount(
         <Lobby
           gameComponents={components}
           // stub for Client factory
           clientFactory={spyClient.mockReturnValue(NullComponent)}
-        />
+        />,
       );
     });
 
@@ -335,12 +335,12 @@ describe('lobby', () => {
           .props()
           .onChange({ target: { value: '1' } });
         expect(
-          lobby.find('LobbyCreateMatchForm').find('select').at(1).text()
+          lobby.find('LobbyCreateMatchForm').find('select').at(1).text(),
         ).toBe('1234');
       });
       test('when game has boundaries on the number of players', async () => {
         expect(
-          lobby.find('LobbyCreateMatchForm').find('select').at(1).text()
+          lobby.find('LobbyCreateMatchForm').find('select').at(1).text(),
         ).toBe('345');
       });
     });
@@ -375,7 +375,7 @@ describe('lobby', () => {
       test('when match is full', () => {
         // try 2nd match
         expect(lobby.find('LobbyMatchInstance').at(1).text()).toContain(
-          'RUNNING'
+          'RUNNING',
         );
       });
       test('when server request fails', async () => {
@@ -540,7 +540,7 @@ describe('lobby', () => {
     describe('custom renderer', () => {
       test('should render custom lobby ui', () => {
         const lobby = Enzyme.mount(
-          <Lobby gameComponents={[]} renderer={() => <div>Foo</div>} />
+          <Lobby gameComponents={[]} renderer={() => <div>Foo</div>} />,
         );
 
         expect(lobby.html()).toEqual('<div>Foo</div>');
@@ -565,7 +565,7 @@ describe('lobby', () => {
             renderer={({ gameComponents }) => (
               <CustomLobbyUI gameComponents={gameComponents} />
             )}
-          />
+          />,
         );
 
         expect(lobby.html()).toEqual('<div>GameName1,GameName2</div>');
@@ -582,7 +582,7 @@ describe('lobby', () => {
             renderer={({ handleEnterLobby }) => (
               <CustomLobbyUI onEnterLobby={handleEnterLobby} />
             )}
-          />
+          />,
         );
         lobby.find('button').simulate('click');
 

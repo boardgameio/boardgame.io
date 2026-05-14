@@ -83,7 +83,7 @@ test('can pass extra props to Client', () => {
     board: TestBoard,
   });
   const board = Enzyme.mount(
-    <Board doStuff={() => true} extraValue={55} />
+    <Board doStuff={() => true} extraValue={55} />,
   ).find(TestBoard);
   expect(board.props().doStuff()).toBe(true);
   expect(board.props().extraValue).toBe(55);
@@ -225,5 +225,5 @@ test('can receive enhancer', () => {
   });
 
   Enzyme.mount(<Board />);
-  expect(enhancer).toBeCalled();
+  expect(enhancer).toHaveBeenCalled();
 });

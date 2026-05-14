@@ -54,7 +54,7 @@ describe('FlatFile', () => {
     // Must remove match from DB
     await db.wipe('matchID');
     expect(
-      await db.fetch('matchID', { metadata: true, state: true, log: true })
+      await db.fetch('matchID', { metadata: true, state: true, log: true }),
     ).toEqual({});
 
     // Shall not return error
@@ -128,7 +128,7 @@ describe('FlatFile', () => {
     test('filter by gameName', async () => {
       let keys = await db.listMatches();
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3']),
       );
 
       keys = await db.listMatches({ gameName: 'game1' });
@@ -142,7 +142,7 @@ describe('FlatFile', () => {
       let keys = await db.listMatches({});
 
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3']),
       );
 
       keys = await db.listMatches({ where: { isGameover: true } });
@@ -157,7 +157,7 @@ describe('FlatFile', () => {
 
       let keys = await db.listMatches({});
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3']),
       );
 
       keys = await db.listMatches({
@@ -171,7 +171,7 @@ describe('FlatFile', () => {
 
       let keys = await db.listMatches({});
       expect(keys).toEqual(
-        expect.arrayContaining(['matchID', 'matchID2', 'matchID3'])
+        expect.arrayContaining(['matchID', 'matchID2', 'matchID3']),
       );
 
       keys = await db.listMatches({

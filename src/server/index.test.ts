@@ -64,7 +64,7 @@ describe('new', () => {
     const game: Game = {};
     const transport = { init: jest.fn() } as unknown as SocketIO;
     Server({ games: [game], transport });
-    expect(transport.init).toBeCalled();
+    expect(transport.init).toHaveBeenCalled();
   });
 
   test('custom auth implementation', () => {
@@ -77,7 +77,7 @@ describe('new', () => {
   test('logs a warning if origins not set', () => {
     Server({ games: [{}] });
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('Server `origins` option is not set.')
+      expect.stringContaining('Server `origins` option is not set.'),
     );
   });
 
@@ -115,8 +115,8 @@ describe('run', () => {
   test('multiple servers running', async () => {
     server = Server({ games: [game] });
     runningServer = await server.run({
-      port: 57890,
-      lobbyConfig: { apiPort: 57891 },
+      port: 57_890,
+      lobbyConfig: { apiPort: 57_891 },
     });
 
     expect(server).not.toBeUndefined();
@@ -170,8 +170,8 @@ describe('kill', () => {
 
     server.kill({ appServer, apiServer });
 
-    expect(apiServer.close).toBeCalled();
-    expect(appServer.close).toBeCalled();
+    expect(apiServer.close).toHaveBeenCalled();
+    expect(appServer.close).toHaveBeenCalled();
   });
 
   test('do not fail if api server is not defined', async () => {
@@ -180,8 +180,8 @@ describe('kill', () => {
     } as unknown as KoaServer;
     const server = Server({ games: [game] });
 
-    expect(() => server.kill({ appServer })).not.toThrowError();
-    expect(appServer.close).toBeCalled();
+    expect(() => server.kill({ appServer })).not.toThrow();
+    expect(appServer.close).toHaveBeenCalled();
   });
 });
 
@@ -209,14 +209,14 @@ describe('createServerRunConfig', () => {
       callback: undefined,
     });
     expect(
-      createServerRunConfig({ port: 1234, callback: mockCallback })
+      createServerRunConfig({ port: 1234, callback: mockCallback }),
     ).toEqual({
       port: 1234,
       callback: mockCallback,
     });
 
     expect(
-      createServerRunConfig({ port: 1234, lobbyConfig: { apiPort: 5467 } })
+      createServerRunConfig({ port: 1234, lobbyConfig: { apiPort: 5467 } }),
     ).toEqual({
       port: 1234,
       callback: undefined,
@@ -230,7 +230,7 @@ describe('createServerRunConfig', () => {
           apiPort: 5467,
           apiCallback: mockApiCallback,
         },
-      })
+      }),
     ).toEqual({
       port: 1234,
       callback: mockCallback,
@@ -247,7 +247,7 @@ describe('getPortFromServer', () => {
     expect(
       getPortFromServer({
         address: () => null,
-      } as KoaServer)
+      } as KoaServer),
     ).toBeNull();
   });
 
@@ -255,7 +255,7 @@ describe('getPortFromServer', () => {
     expect(
       getPortFromServer({
         address: () => '8000',
-      } as KoaServer)
+      } as KoaServer),
     ).toBe('8000');
   });
 
@@ -263,7 +263,7 @@ describe('getPortFromServer', () => {
     expect(
       getPortFromServer({
         address: () => ({ port: '8000' }),
-      } as unknown as KoaServer)
+      } as unknown as KoaServer),
     ).toBe('8000');
   });
 });

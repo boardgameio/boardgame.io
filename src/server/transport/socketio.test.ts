@@ -181,7 +181,7 @@ describe('TransportAPI', () => {
       matchID,
       socket,
       filterPlayerView,
-      transport.getPubSub()
+      transport.getPubSub(),
     );
   });
 
@@ -218,12 +218,12 @@ describe('sync / update', () => {
 
   test('sync', () => {
     io.socket.receive('sync', 'matchID', '0');
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 
   test('update', () => {
     io.socket.receive('update');
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 });
 
@@ -236,7 +236,7 @@ describe('chat', () => {
 
   test('chat message', async () => {
     await io.socket.receive('chat', 'matchID', { message: 'foo' });
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 });
 

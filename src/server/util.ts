@@ -73,12 +73,12 @@ export const getNumPlayers = (players: Server.MatchData['players']): number =>
  * Returns `undefined` if there’s no available ID.
  */
 export const getFirstAvailablePlayerID = (
-  players: Server.MatchData['players']
+  players: Server.MatchData['players'],
 ): string | undefined => {
   const numPlayers = getNumPlayers(players);
   // Try to get the first index available
   for (let i = 0; i < numPlayers; i++) {
-    if (typeof players[i].name === 'undefined' || players[i].name === null) {
+    if (players[i].name === undefined || players[i].name === null) {
       return String(i);
     }
   }

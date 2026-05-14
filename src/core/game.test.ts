@@ -59,7 +59,7 @@ describe('basic', () => {
 
   test('long-form move syntax', () => {
     expect(
-      game.processMove({ ctx: { phase: '' }, plugins: {} }, { type: 'C' })
+      game.processMove({ ctx: { phase: '' }, plugins: {} }, { type: 'C' }),
     ).toEqual('C');
   });
 });
@@ -261,8 +261,8 @@ describe('config errors', () => {
     const game = ProcessGameConfig({ moves: { A: 1 } } as unknown as Game);
     const state = InitializeGame({ game });
     game.processMove(state, { type: 'A', args: null, playerID: '0' });
-    expect(error).toBeCalledWith(
-      expect.stringContaining('invalid move object')
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('invalid move object'),
     );
   });
 });

@@ -84,21 +84,21 @@ describe('update matchID / playerID / credentials', () => {
     m.updateMatchID('test');
     expect(m.getMatchID()).toBe('test');
     const args: SyncArgs = ['test', null, undefined, 2];
-    expect(socket.emit).lastCalledWith('sync', ...args);
+    expect(socket.emit).toHaveBeenLastCalledWith('sync', ...args);
   });
 
   test('playerID', () => {
     m.updatePlayerID('player');
     expect(m.getPlayerID()).toBe('player');
     const args: SyncArgs = ['test', 'player', undefined, 2];
-    expect(socket.emit).lastCalledWith('sync', ...args);
+    expect(socket.emit).toHaveBeenLastCalledWith('sync', ...args);
   });
 
   test('credentials', () => {
     m.updateCredentials('1234');
     expect(m.getCredentials()).toBe('1234');
     const args: SyncArgs = ['test', 'player', '1234', 2];
-    expect(socket.emit).lastCalledWith('sync', ...args);
+    expect(socket.emit).toHaveBeenLastCalledWith('sync', ...args);
   });
 });
 
@@ -200,7 +200,7 @@ describe('multiplayer', () => {
     const state = { _stateID: 0 } as State;
     transport.sendAction(state, action);
     const args: UpdateArgs = [action, state._stateID, 'default', null];
-    expect(mockSocket.emit).lastCalledWith('update', ...args);
+    expect(mockSocket.emit).toHaveBeenLastCalledWith('update', ...args);
   });
 
   test('receive chat-message', () => {
@@ -219,11 +219,11 @@ describe('multiplayer', () => {
       payload: { message: 'foo' },
     };
     transport.sendChatMessage('matchID', message);
-    expect(mockSocket.emit).lastCalledWith(
+    expect(mockSocket.emit).toHaveBeenLastCalledWith(
       'chat',
       'matchID',
       message,
-      transport.getCredentials()
+      transport.getCredentials(),
     );
   });
 });

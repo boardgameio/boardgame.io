@@ -60,7 +60,7 @@ type LocalMasterOpts = LocalOpts & {
 export class LocalMaster extends Master {
   connect: (
     playerID: PlayerID,
-    callback: (data: TransportData) => void
+    callback: (data: TransportData) => void,
   ) => void;
 
   constructor({ game, bots, storageKey, persist }: LocalMasterOpts) {
@@ -110,13 +110,13 @@ export class LocalMaster extends Master {
         setTimeout(async () => {
           const botAction = await initializedBots[botPlayer].play(
             state,
-            botPlayer
+            botPlayer,
           );
           await this.onUpdate(
             botAction.action,
             state._stateID,
             matchID,
-            botAction.action.payload.playerID
+            botAction.action.payload.playerID,
           );
         }, 100);
       }
@@ -167,7 +167,7 @@ export class LocalTransport extends Transport {
       this.matchID,
       this.playerID,
       this.credentials,
-      this.numPlayers
+      this.numPlayers,
     );
   }
 

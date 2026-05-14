@@ -62,7 +62,7 @@ class Alea {
   }
 
   next() {
-    const t = 2091639 * this.s0 + this.c * 2.3283064365386963e-10; // 2^-32
+    const t = 2_091_639 * this.s0 + this.c * 2.328_306_436_538_696_3e-10; // 2^-32
     this.s0 = this.s1;
     this.s1 = this.s2;
     return (this.s2 = t - (this.c = Math.trunc(t)));
@@ -70,21 +70,21 @@ class Alea {
 }
 
 function Mash() {
-  let n = 0xefc8249d;
+  let n = 0xef_c8_24_9d;
 
   const mash = function (data: string | number) {
     const str = data.toString();
     for (let i = 0; i < str.length; i++) {
       n += str.charCodeAt(i);
-      let h = 0.02519603282416938 * n;
+      let h = 0.025_196_032_824_169_38 * n;
       n = h >>> 0;
       h -= n;
       h *= n;
       n = h >>> 0;
       h -= n;
-      n += h * 0x100000000; // 2^32
+      n += h * 0x1_00_00_00_00; // 2^32
     }
-    return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+    return (n >>> 0) * 2.328_306_436_538_696_3e-10; // 2^-32
   };
 
   return mash;

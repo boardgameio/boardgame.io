@@ -32,6 +32,12 @@ rules:
   unicorn/no-reduce: off
   unicorn/no-useless-undefined: off
   unicorn/prevent-abbreviations: off
+  unicorn/prefer-module: off
+  unicorn/prefer-code-point: off
+  unicorn/prefer-top-level-await: off
+  unicorn/prefer-structured-clone: off
+  unicorn/prefer-event-target: off
+  unicorn/throw-new-error: off
 
   # plugin:@typescript-eslint
   "@typescript-eslint/consistent-type-imports": error
@@ -44,6 +50,8 @@ rules:
     - args: after-used
       ignoreRestSiblings: true
   "@typescript-eslint/no-var-requires": off
+  "@typescript-eslint/no-require-imports": off
+  "@typescript-eslint/no-unnecessary-type-constraint": off
 
 settings:
   react:

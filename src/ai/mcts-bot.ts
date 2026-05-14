@@ -240,7 +240,7 @@ export class MCTSBot extends Bot {
 
   private backpropagate(
     node: Node,
-    result: { score?: number; draw?: boolean; winner?: PlayerID } = {}
+    result: { score?: number; draw?: boolean; winner?: PlayerID } = {},
   ) {
     node.visits++;
 
@@ -266,7 +266,7 @@ export class MCTSBot extends Bot {
 
   play(
     state: State,
-    playerID: PlayerID
+    playerID: PlayerID,
   ): Promise<{ action: BotAction; metadata: Node }> {
     const root = this.createNode({ state, playerID });
 

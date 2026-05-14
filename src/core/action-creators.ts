@@ -22,7 +22,7 @@ export const makeMove = (
   type: string,
   args?: any,
   playerID?: string | null,
-  credentials?: string
+  credentials?: string,
 ) => ({
   type: Actions.MAKE_MOVE as typeof Actions.MAKE_MOVE,
   payload: { type, args, playerID, credentials },
@@ -40,7 +40,7 @@ export const gameEvent = (
   type: string,
   args?: any,
   playerID?: string | null,
-  credentials?: string
+  credentials?: string,
 ) => ({
   type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
@@ -57,7 +57,7 @@ export const automaticGameEvent = (
   type: string,
   args: any,
   playerID?: string | null,
-  credentials?: string
+  credentials?: string,
 ) => ({
   type: Actions.GAME_EVENT as typeof Actions.GAME_EVENT,
   payload: { type, args, playerID, credentials },
@@ -84,7 +84,7 @@ export const patch = (
   prevStateID: number,
   stateID: number,
   patch: Operation[],
-  deltalog: LogEntry[]
+  deltalog: LogEntry[],
 ) => ({
   type: Actions.PATCH as typeof Actions.PATCH,
   prevStateID,
@@ -144,7 +144,7 @@ export const plugin = (
   type: string,
   args?: any,
   playerID?: string | null,
-  credentials?: string
+  credentials?: string,
 ) => ({
   type: Actions.PLUGIN as typeof Actions.PLUGIN,
   payload: { type, args, playerID, credentials },
