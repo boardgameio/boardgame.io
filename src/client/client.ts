@@ -319,8 +319,9 @@ export class _ClientImpl<
       LogMiddleware
     );
 
-    enhancer =
-      enhancer !== undefined ? compose(middleware, enhancer) : middleware;
+    enhancer = (
+      enhancer === undefined ? middleware : compose(middleware, enhancer)
+    ) as StoreEnhancer;
 
     this.store = createStore(this.reducer, this.initialState, enhancer);
 
