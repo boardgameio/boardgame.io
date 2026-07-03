@@ -177,7 +177,7 @@ describe('TransportAPI', () => {
       matchID,
       socket,
       filterPlayerView,
-      transport.getPubSub()
+      transport.getPubSub(),
     );
   });
 

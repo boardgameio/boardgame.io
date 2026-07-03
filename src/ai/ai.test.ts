@@ -210,7 +210,7 @@ describe('Bot', () => {
     const enumerate = () => [makeMove('move')];
     const b = new RandomBot({ enumerate });
     expect(b.enumerate(undefined, undefined, undefined)[0].type).toBe(
-      MAKE_MOVE
+      MAKE_MOVE,
     );
   });
 
@@ -218,7 +218,7 @@ describe('Bot', () => {
     const enumerate = () => [{ move: 'move' }];
     const b = new RandomBot({ enumerate });
     expect(b.enumerate(undefined, undefined, undefined)[0].type).toBe(
-      MAKE_MOVE
+      MAKE_MOVE,
     );
   });
 
@@ -226,7 +226,7 @@ describe('Bot', () => {
     const enumerate = () => [{ event: 'endTurn' }];
     const b = new RandomBot({ enumerate });
     expect(b.enumerate(undefined, undefined, undefined)[0].type).toBe(
-      GAME_EVENT
+      GAME_EVENT,
     );
   });
 
@@ -403,10 +403,10 @@ describe('MCTSBot', () => {
       });
 
       expect(
-        (bot.iterations as AnyFn)(null, { turn } as Ctx, currentPlayer)
+        (bot.iterations as AnyFn)(null, { turn } as Ctx, currentPlayer),
       ).toBe(turn * 100);
       expect(
-        (bot.playoutDepth as AnyFn)(null, { turn } as Ctx, currentPlayer)
+        (bot.playoutDepth as AnyFn)(null, { turn } as Ctx, currentPlayer),
       ).toBe(turn * 10);
 
       // try the playout() function which requests the playoutDepth value
@@ -415,7 +415,7 @@ describe('MCTSBot', () => {
       expect(enumerateSpy).toHaveBeenCalledWith(
         state.G,
         state.ctx,
-        currentPlayer
+        currentPlayer,
       );
 
       // then try the play() function which requests the iterations value
@@ -426,7 +426,7 @@ describe('MCTSBot', () => {
       expect(enumerateSpy).toHaveBeenCalledWith(
         state.G,
         state.ctx,
-        currentPlayer
+        currentPlayer,
       );
     });
   });

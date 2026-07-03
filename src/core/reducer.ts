@@ -38,7 +38,7 @@ const actionHasPlayerID = (
     | ActionShape.MakeMove
     | ActionShape.GameEvent
     | ActionShape.Undo
-    | ActionShape.Redo
+    | ActionShape.Redo,
 ) => action.payload.playerID !== null && action.payload.playerID !== undefined;
 
 /**
@@ -50,7 +50,7 @@ const CanUndoMove = (G: any, ctx: Ctx, move: Move): boolean => {
   }
 
   function IsFunction(
-    undoable: boolean | ((...args: any[]) => any)
+    undoable: boolean | ((...args: any[]) => any),
   ): undoable is (...args: any[]) => any {
     return undoable instanceof Function;
   }
@@ -74,7 +74,7 @@ function updateUndoRedoState(
   opts: {
     game: Game;
     action: ActionShape.GameEvent | ActionShape.MakeMove;
-  }
+  },
 ): State {
   if (opts.game.disableUndo) return state;
 
@@ -103,7 +103,7 @@ function updateUndoRedoState(
 function initializeDeltalog(
   state: State,
   action: ActionShape.MakeMove | ActionShape.Undo | ActionShape.Redo,
-  move?: Move
+  move?: Move,
 ): TransientState {
   // Create a log entry for this action.
   const logEntry: LogEntry = {
@@ -141,7 +141,7 @@ function initializeDeltalog(
 function flushAndValidatePlugins(
   state: State,
   oldState: State,
-  pluginOpts: { game: Game; isClient?: boolean }
+  pluginOpts: { game: Game; isClient?: boolean },
 ): [State, TransientState?] {
   const [newState, isInvalid] = plugins.FlushAndValidate(state, pluginOpts);
   if (!isInvalid) return [newState];
@@ -157,7 +157,7 @@ function flushAndValidatePlugins(
  * Split out transients from the a TransientState
  */
 function ExtractTransients(
-  transientState: TransientState | null
+  transientState: TransientState | null,
 ): [State | null, TransientMetadata | undefined] {
   if (!transientState) {
     // We preserve null for the state for legacy callers, but the transient
@@ -177,7 +177,7 @@ function ExtractTransients(
 function WithError<PT extends any = any>(
   state: State,
   errorType: ErrorType,
-  payload?: PT
+  payload?: PT,
 ): TransientState {
   const error = {
     type: errorType,
@@ -208,7 +208,7 @@ export const TransientHandlingMiddleware =
       }
       default: {
         const [, transients] = ExtractTransients(store.getState());
-        if (typeof transients !== 'undefined') {
+        if (transients !== undefined) {
           store.dispatch(stripTransients());
           // Dev Note: If parent middleware needs to correlate the spawned
           // StripTransients action to the triggering action, instrument here.
@@ -248,7 +248,7 @@ export function CreateGameReducer({
    */
   return (
     stateWithTransients: TransientState | null = null,
-    action: ActionShape.Any
+    action: ActionShape.Any,
   ): TransientState => {
     let [state /*, transients */] = ExtractTransients(stateWithTransients);
     switch (action.type) {
@@ -315,7 +315,7 @@ export function CreateGameReducer({
         const move: Move = game.flow.getMove(
           state.ctx,
           action.payload.type,
-          action.payload.playerID || state.ctx.currentPlayer
+          action.payload.playerID || state.ctx.currentPlayer,
         );
         if (move === null) {
           error(`disallowed move: ${action.payload.type}`);
@@ -355,7 +355,7 @@ export function CreateGameReducer({
         // The game declared the move as invalid.
         if (G === INVALID_MOVE) {
           error(
-            `invalid move: ${action.payload.type} args: ${action.payload.args}`
+            `invalid move: ${action.payload.type} args: ${action.payload.args}`,
           );
           // TODO(#723): Marshal a nice error payload with the processed move.
           return WithError(state, ActionErrorType.InvalidMove);
@@ -430,8 +430,8 @@ export function CreateGameReducer({
           return WithError(state, ActionErrorType.ActionInvalid);
         }
 
-        const last = _undo[_undo.length - 1];
-        const restore = _undo[_undo.length - 2];
+        const last = _undo.at(-1);
+        const restore = _undo.at(-2);
 
         // Only allow players to undo their own moves.
         if (
@@ -447,7 +447,7 @@ export function CreateGameReducer({
           const lastMove: Move = game.flow.getMove(
             restore.ctx,
             last.moveType,
-            last.playerID
+            last.playerID,
           );
           if (!CanUndoMove(G, ctx, lastMove)) {
             error(`Move cannot be undone`);

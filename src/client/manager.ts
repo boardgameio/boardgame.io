@@ -129,7 +129,7 @@ export class ClientManager {
    */
   private getDebuggableClients(): _ClientImpl[] {
     return [...this.clients.values()].filter(
-      (client) => client.debugOpt !== false
+      (client) => client.debugOpt !== false,
     );
   }
 

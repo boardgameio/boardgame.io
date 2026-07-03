@@ -6,7 +6,7 @@ import type { TransportData, IntermediateTransportData } from './master';
 const applyPlayerView = (
   game: Game,
   playerID: string | null,
-  state: State
+  state: State,
 ): State => ({
   ...state,
   G: game.playerView({ G: state.G, ctx: state.ctx, playerID }),
@@ -21,7 +21,7 @@ export const getFilterPlayerView =
   (game: Game) =>
   (
     playerID: string | null,
-    payload: IntermediateTransportData
+    payload: IntermediateTransportData,
   ): TransportData => {
     switch (payload.type) {
       case 'patch': {

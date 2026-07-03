@@ -20,7 +20,7 @@ type JSType =
 
 const validateBody = (
   body: { [key: string]: any } | undefined,
-  schema: { [key: string]: JSType | JSType[] }
+  schema: { [key: string]: JSType | JSType[] },
 ) => {
   if (!body) throw new Error(`Expected body, got “${body}”.`);
   for (const key in schema) {
@@ -30,7 +30,7 @@ const validateBody = (
     if (!types.includes(typeof received)) {
       const union = types.join('|');
       throw new TypeError(
-        `Expected body.${key} to be of type ${union}, got “${received}”.`
+        `Expected body.${key} to be of type ${union}, got “${received}”.`,
       );
     }
   }
@@ -146,7 +146,7 @@ export class LobbyClient {
        */
       updatedAfter?: number;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.MatchList> {
     assertGameName(gameName);
     let query = '';
@@ -179,7 +179,7 @@ export class LobbyClient {
   async getMatch(
     gameName: string,
     matchID: string,
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.Match> {
     assertGameName(gameName);
     assertMatchID(matchID);
@@ -206,7 +206,7 @@ export class LobbyClient {
       unlisted?: boolean;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.CreatedMatch> {
     assertGameName(gameName);
     validateBody(body, { numPlayers: 'number' });
@@ -237,7 +237,7 @@ export class LobbyClient {
       data?: any;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.JoinedMatch> {
     assertGameName(gameName);
     assertMatchID(matchID);
@@ -272,7 +272,7 @@ export class LobbyClient {
       credentials: string;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<void> {
     assertGameName(gameName);
     assertMatchID(matchID);
@@ -307,7 +307,7 @@ export class LobbyClient {
       data?: any;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<void> {
     assertGameName(gameName);
     assertMatchID(matchID);
@@ -348,7 +348,7 @@ export class LobbyClient {
       unlisted?: boolean;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.NextMatch> {
     assertGameName(gameName);
     assertMatchID(matchID);

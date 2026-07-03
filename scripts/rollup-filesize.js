@@ -25,7 +25,7 @@ export default function filesize() {
 
     generateBundle(options, bundle) {
       const entries = Object.entries(bundle).filter(
-        ([, item]) => item.type === 'chunk'
+        ([, item]) => item.type === 'chunk',
       );
 
       entries.forEach(([fileName, item], index) => {

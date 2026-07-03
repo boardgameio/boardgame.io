@@ -112,7 +112,7 @@ test('disable move by invalid playerIDs', () => {
 test('sync', () => {
   const state = reducer(
     undefined,
-    sync({ state: { G: 'restored' } } as SyncInfo)
+    sync({ state: { G: 'restored' } } as SyncInfo),
   );
   expect(state).toEqual({ G: 'restored' });
 });
@@ -126,7 +126,7 @@ test('valid patch', () => {
   const originalState = { _stateID: 0, G: 'patch' } as State;
   const state = reducer(
     originalState,
-    patch(0, 1, [{ op: 'replace', path: '/_stateID', value: 1 }], [])
+    patch(0, 1, [{ op: 'replace', path: '/_stateID', value: 1 }], []),
   );
   expect(state).toEqual({ _stateID: 1, G: 'patch' });
 });
@@ -135,7 +135,7 @@ test('invalid patch', () => {
   const originalState = { _stateID: 0, G: 'patch' } as State;
   const { transients, ...state } = reducer(
     originalState,
-    patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], [])
+    patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], []),
   );
   expect(state).toEqual(originalState);
   expect(transients.error.type).toEqual('update/patch_failed');
@@ -516,7 +516,7 @@ describe('undo / redo', () => {
   test('undo restores previous state after event', () => {
     const initial = reducer(
       initialState,
-      gameEvent('setStage', 'special', '0')
+      gameEvent('setStage', 'special', '0'),
     );
     let newState = reducer(initial, gameEvent('endStage', undefined, '0'));
     expect(error).not.toHaveBeenCalled();
@@ -971,10 +971,10 @@ describe('TransientHandlingMiddleware', () => {
   test('regular dispatch result has no transients', () => {
     const result = store.dispatch(makeMove('A'));
     expect(result).toEqual(
-      expect.not.objectContaining({ transients: expect.anything() })
+      expect.not.objectContaining({ transients: expect.anything() }),
     );
     expect(result).toEqual(
-      expect.not.objectContaining({ stripTransientsResult: expect.anything() })
+      expect.not.objectContaining({ stripTransientsResult: expect.anything() }),
     );
   });
 

@@ -183,7 +183,7 @@ describe('multiplayer', () => {
       client.moves.Invalid();
       expect(client.transport.sendAction).not.toHaveBeenCalledWith(
         expect.any(Object),
-        { type: Actions.STRIP_TRANSIENTS }
+        { type: Actions.STRIP_TRANSIENTS },
       );
     });
 
@@ -197,7 +197,7 @@ describe('multiplayer', () => {
 
       expect(client.transport.sendChatMessage).toHaveBeenCalledWith(
         'matchID',
-        expect.objectContaining({ payload: { message: 'foo' }, sender: '0' })
+        expect.objectContaining({ payload: { message: 'foo' }, sender: '0' }),
       );
     });
   });
@@ -601,7 +601,7 @@ describe('move dispatchers', () => {
       store,
       undefined,
       null,
-      true
+      true,
     );
     api.B();
     expect(store.getState().G).toMatchObject({ moved: undefined });
@@ -643,7 +643,7 @@ describe('transient handling', () => {
     const state = client.store.getState();
     // Slightly paranoid check to ensure we don't erroneously add transients.
     expect(state).toEqual(
-      expect.not.objectContaining({ transients: expect.anything() })
+      expect.not.objectContaining({ transients: expect.anything() }),
     );
   });
 
@@ -656,7 +656,7 @@ describe('transient handling', () => {
     // At the time this test was written, this effectively ensures that Client
     // hooks up the TransientHandlingMiddleware correctly.
     expect(state).toEqual(
-      expect.not.objectContaining({ transients: expect.anything() })
+      expect.not.objectContaining({ transients: expect.anything() }),
     );
   });
 });
@@ -801,7 +801,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: {},
         ctx: expect.objectContaining({ turn: 1 }),
-      })
+      }),
     );
   });
 
@@ -811,7 +811,7 @@ describe('subscribe', () => {
     expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
   });
 
@@ -821,7 +821,7 @@ describe('subscribe', () => {
     expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         ctx: expect.objectContaining({ turn: 2 }),
-      })
+      }),
     );
   });
 
@@ -836,7 +836,7 @@ describe('subscribe', () => {
     expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
 
     fn.mockClear();
@@ -848,12 +848,12 @@ describe('subscribe', () => {
     expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
     expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
 
     unsubscribe();
@@ -866,7 +866,7 @@ describe('subscribe', () => {
     expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
     expect(fn2).not.toHaveBeenCalled();
   });

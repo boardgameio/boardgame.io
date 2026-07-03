@@ -249,7 +249,7 @@ describe('turn', () => {
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.processMove(
         state,
-        makeMove('', undefined, 'playerID').payload
+        makeMove('', undefined, 'playerID').payload,
       );
       expect(state.G.playerID).toEqual(playerID);
     });
@@ -745,13 +745,13 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'B', minMoves: 1 })
+        gameEvent('setStage', { stage: 'B', minMoves: 1 }),
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'A', '2': 'A' });
 
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'B', maxMoves: 1 }, '1')
+        gameEvent('setStage', { stage: 'B', maxMoves: 1 }, '1'),
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'B', '2': 'A' });
     });
@@ -782,7 +782,7 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersMaxMoves).toBeNull();
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'A', minMoves: 1 })
+        gameEvent('setStage', { stage: 'A', minMoves: 1 }),
       );
       expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 1 });
       expect(state.ctx._activePlayersMaxMoves).toBeNull();
@@ -797,7 +797,7 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersMaxMoves).toBeNull();
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'A', maxMoves: 1 })
+        gameEvent('setStage', { stage: 'A', maxMoves: 1 }),
       );
       expect(state.ctx._activePlayersMinMoves).toBeNull();
       expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 1 });
@@ -1230,7 +1230,7 @@ describe('endIf', () => {
     expect(client.getState().ctx.gameover).toBe('A');
     expect(
       client.getState().deltalog[client.getState().deltalog.length - 1].action
-        .payload.type
+        .payload.type,
     ).toBe('endPhase');
   });
 
@@ -1258,11 +1258,11 @@ test('isPlayerActive', () => {
     flow.isPlayerActive(
       {},
       { currentPlayer: '0', activePlayers: { '1': '' } } as unknown as Ctx,
-      playerID
-    )
+      playerID,
+    ),
   ).toBe(false);
   expect(flow.isPlayerActive({}, { currentPlayer: '0' } as Ctx, playerID)).toBe(
-    true
+    true,
   );
 });
 
@@ -1623,7 +1623,7 @@ describe('infinite loops', () => {
     const errorMessage = (error as jest.Mock).mock.calls[0][0];
     expect(errorMessage).toMatch(/events plugin declared action invalid/);
     expect(errorMessage).toMatch(
-      /Events must be called from moves or the `.+` hooks./
+      /Events must be called from moves or the `.+` hooks./,
     );
   });
 });
@@ -1876,7 +1876,7 @@ describe('events in hooks', () => {
       const errorMessage = (error as jest.Mock).mock.calls[0][0];
       expect(errorMessage).toMatch(/events plugin declared action invalid/);
       expect(errorMessage).toMatch(
-        /`setPhase` & `endPhase` are disallowed in a phase’s `onEnd` hook/
+        /`setPhase` & `endPhase` are disallowed in a phase’s `onEnd` hook/,
       );
     });
   });
@@ -2036,7 +2036,7 @@ describe('backwards compatibility for moveLimit', () => {
 
     state = flow.processEvent(
       state,
-      gameEvent('setActivePlayers', { all: 'A', moveLimit: 1 })
+      gameEvent('setActivePlayers', { all: 'A', moveLimit: 1 }),
     );
 
     expect(state.ctx._activePlayersMinMoves).toBeNull();
@@ -2051,7 +2051,7 @@ describe('backwards compatibility for moveLimit', () => {
     expect(state.ctx._activePlayersMaxMoves).toBeNull();
     state = flow.processEvent(
       state,
-      gameEvent('setStage', { stage: 'A', moveLimit: 2 })
+      gameEvent('setStage', { stage: 'A', moveLimit: 2 }),
     );
     expect(state.ctx._activePlayersMinMoves).toBeNull();
     expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
@@ -2321,7 +2321,7 @@ describe('game function signatures', () => {
       turn: {
         order: {
           playOrder: jest.fn(({ ctx }) =>
-            [...Array.from({ length: ctx.numPlayers })].map((_, i) => i + '')
+            Array.from({ length: ctx.numPlayers }).map((_, i) => i + ''),
           ),
           first: jest.fn(TurnOrder.DEFAULT.first),
           next: jest.fn(TurnOrder.DEFAULT.next),
@@ -2361,7 +2361,7 @@ describe('game function signatures', () => {
         random: expectRandom,
       }),
       // setupData
-      undefined
+      undefined,
     );
   });
 
@@ -2414,7 +2414,7 @@ describe('game function signatures', () => {
     expect(moveA).toHaveBeenLastCalledWith(
       FnContext({ playerID: '0' }),
       2,
-      'args'
+      'args',
     );
   });
 

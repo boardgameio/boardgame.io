@@ -14,7 +14,7 @@ import RandomPlugin from '../plugins/plugin-random';
  * };
  */
 export const MockRandom = (
-  overrides: Partial<Record<keyof RandomAPI, (...args: any[]) => any>> = {}
+  overrides: Partial<Record<keyof RandomAPI, (...args: any[]) => any>> = {},
 ): Omit<typeof RandomPlugin, 'flush'> => {
   // Don’t include the original flush method, otherwise when the
   // built-in random plugin flushes, it won’t have access to the

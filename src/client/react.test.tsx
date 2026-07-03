@@ -144,7 +144,7 @@ test('update matchID / playerID', () => {
 
   ref = React.createRef<InstanceType<typeof Board>>();
   ({ rerender } = render(
-    <Board ref={ref} matchID="a" playerID="1" credentials="foo" />
+    <Board ref={ref} matchID="a" playerID="1" credentials="foo" />,
   ));
 
   const m = (ref.current as any).client.transport;
@@ -169,10 +169,10 @@ test('update matchID / playerID', () => {
 
   rerender(<Board ref={ref} matchID="next" playerID="1" credentials="foo" />);
   rerender(
-    <Board ref={ref} matchID="next" playerID="next" credentials="foo" />
+    <Board ref={ref} matchID="next" playerID="next" credentials="foo" />,
   );
   rerender(
-    <Board ref={ref} matchID="next" playerID="next" credentials="bar" />
+    <Board ref={ref} matchID="next" playerID="next" credentials="bar" />,
   );
 
   expect(m.matchID).toBe('next');

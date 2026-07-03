@@ -57,7 +57,7 @@ const CreateMatch = async ({
  */
 const createClientMatchData = (
   matchID: string,
-  metadata: Server.MatchData
+  metadata: Server.MatchData,
 ): LobbyAPI.Match => {
   return {
     ...metadata,
@@ -72,7 +72,7 @@ const createClientMatchData = (
 
 /** Utility extracting `string` from a query if it is `string[]`. */
 const unwrapQuery = (
-  query: undefined | string | string[]
+  query: undefined | string | string[],
 ): string | undefined => (Array.isArray(query) ? query[0] : query);
 
 export const configureRouter = ({
@@ -246,13 +246,13 @@ export const configureRouter = ({
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
 
-    if (typeof playerID === 'undefined' || playerID === null) {
+    if (playerID === undefined || playerID === null) {
       playerID = getFirstAvailablePlayerID(metadata.players);
       if (playerID === undefined) {
         const numPlayers = getNumPlayers(metadata.players);
         ctx.throw(
           409,
-          `Match ${matchID} reached maximum number of players (${numPlayers})`
+          `Match ${matchID} reached maximum number of players (${numPlayers})`,
         );
       }
     }
@@ -293,7 +293,7 @@ export const configureRouter = ({
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
-    if (typeof playerID === 'undefined' || playerID === null) {
+    if (playerID === undefined || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
 
@@ -341,7 +341,7 @@ export const configureRouter = ({
       metadata: true,
     });
 
-    if (typeof playerID === 'undefined' || playerID === null) {
+    if (playerID === undefined || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
 
@@ -402,7 +402,7 @@ export const configureRouter = ({
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
-    if (typeof playerID === 'undefined') {
+    if (playerID === undefined) {
       ctx.throw(403, 'playerID is required');
     }
     if (data === undefined && !newName) {
@@ -448,7 +448,7 @@ export const configureRouter = ({
    */
   router.post('/games/:name/:id/rename', koaBody(), async (ctx) => {
     console.warn(
-      'This endpoint /rename is deprecated. Please use /update instead.'
+      'This endpoint /rename is deprecated. Please use /update instead.',
     );
     await updatePlayerMetadata(ctx);
   });
@@ -472,7 +472,7 @@ export const configureRouter = ({
 export const configureApp = (
   app: Server.App,
   router: Router<any, Server.AppCtx>,
-  origins: CorsOptions['origin']
+  origins: CorsOptions['origin'],
 ): void => {
   app.use(
     cors({
@@ -481,7 +481,7 @@ export const configureApp = (
         const origin = ctx.get('Origin');
         return isOriginAllowed(origin, origins) ? origin : '';
       },
-    })
+    }),
   );
 
   // If API_SECRET is set, then require that requests set an
@@ -509,7 +509,7 @@ export const configureApp = (
  */
 function isOriginAllowed(
   origin: string,
-  allowedOrigin: CorsOptions['origin']
+  allowedOrigin: CorsOptions['origin'],
 ): boolean {
   if (Array.isArray(allowedOrigin)) {
     for (const entry of allowedOrigin) {

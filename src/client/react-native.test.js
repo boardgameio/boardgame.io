@@ -149,7 +149,7 @@ test('update matchID / playerID', () => {
   });
   const ref2 = React.createRef();
   const { rerender: rerender2 } = render(
-    <Board ref={ref2} matchID="a" playerID="1" credentials="foo" />
+    <Board ref={ref2} matchID="a" playerID="1" credentials="foo" />,
   );
   const m = ref2.current.client.transport;
   const g = ref2.current.client;
@@ -170,7 +170,7 @@ test('update matchID / playerID', () => {
   expect(spy3).not.toHaveBeenCalled();
 
   rerender2(
-    <Board ref={ref2} matchID="next" playerID="next" credentials="bar" />
+    <Board ref={ref2} matchID="next" playerID="next" credentials="bar" />,
   );
 
   expect(m.matchID).toBe('next');

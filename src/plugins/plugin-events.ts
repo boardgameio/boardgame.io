@@ -10,8 +10,6 @@ import type { Plugin } from '../types';
 import type { PrivateEventsAPI, EventsAPI } from './events/events';
 import { Events } from './events/events';
 
-export type { EventsAPI };
-
 const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
   name: 'events',
 
@@ -38,3 +36,5 @@ const EventsPlugin: Plugin<EventsAPI & PrivateEventsAPI> = {
 };
 
 export default EventsPlugin;
+
+export { type EventsAPI } from './events/events';

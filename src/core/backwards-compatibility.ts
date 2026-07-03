@@ -11,7 +11,7 @@ type MoveLimitOptions = {
  */
 export function supportDeprecatedMoveLimit(
   options: MoveLimitOptions,
-  enforceMinMoves = false
+  enforceMinMoves = false,
 ) {
   if (options.moveLimit) {
     if (enforceMinMoves) {

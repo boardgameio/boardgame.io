@@ -70,7 +70,7 @@ class InMemoryAsync extends Async {
 
   async fetch<O extends StorageAPI.FetchOpts>(
     matchID: string,
-    opts: O
+    opts: O,
   ): Promise<StorageAPI.FetchResult<O>> {
     await this.sleep();
     return this.db.fetch(matchID, opts);
@@ -141,7 +141,7 @@ jest.mock('socket.io', () => {
 
     constructor() {
       this.sockets = new Map(
-        ['0', '1'].map((id) => [id, new MockSocket({ id })])
+        ['0', '1'].map((id) => [id, new MockSocket({ id })]),
       );
     }
 
@@ -229,11 +229,11 @@ describe('simultaneous moves on server game', () => {
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'getMatchQueue'
+      'getMatchQueue',
     );
     const spyDeleteMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'deleteMatchQueue'
+      'deleteMatchQueue',
     );
 
     db.createMatch('matchID', {
@@ -353,11 +353,11 @@ describe('simultaneous moves on server game', () => {
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'getMatchQueue'
+      'getMatchQueue',
     );
     const spyDeleteMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'deleteMatchQueue'
+      'deleteMatchQueue',
     );
 
     await db.createMatch('matchID', {
@@ -551,11 +551,11 @@ describe('inauthentic clients', () => {
             0: 'foo',
           },
         }),
-      })
+      }),
     );
 
     const syncEmits = authenticSocket.emit.mock.calls.filter(
-      ([type]) => type === 'sync'
+      ([type]) => type === 'sync',
     );
     expect(syncEmits).toHaveLength(1);
   });
@@ -592,11 +592,11 @@ describe('inauthentic clients', () => {
             0: 'foo',
           },
         }),
-      })
+      }),
     );
 
     const syncEmits = authenticSocket.emit.mock.calls.filter(
-      ([type]) => type === 'sync'
+      ([type]) => type === 'sync',
     );
     expect(syncEmits).toHaveLength(1);
   });

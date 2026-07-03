@@ -72,7 +72,7 @@ describe('socket.io v4 transport (no mocks)', () => {
       { type: 'MAKE_MOVE', payload: { type: 'bump', args: [], playerID: '0' } },
       0,
       'match-1',
-      '0'
+      '0',
     );
     await new Promise((r) => setTimeout(r, 300));
 

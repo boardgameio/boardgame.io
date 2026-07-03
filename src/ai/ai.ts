@@ -57,7 +57,7 @@ export async function Simulate({
   state: State;
   depth?: number;
 }) {
-  if (depth === undefined) depth = 10000;
+  if (depth === undefined) depth = 10_000;
   const reducer = CreateGameReducer({ game });
 
   let metadata = null;

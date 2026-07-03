@@ -78,7 +78,7 @@ class LobbyCreateMatchForm extends React.Component<
           onChange={(evt) => this.onChangeSelectedGame(evt)}
         >
           {this.props.games.map((game, index) =>
-            this._createGameNameOption(game, index)
+            this._createGameNameOption(game, index),
           )}
         </select>
         <span>Players:</span>
@@ -87,7 +87,7 @@ class LobbyCreateMatchForm extends React.Component<
           onChange={this.onChangeNumPlayers}
         >
           {this._createNumPlayersRange(
-            this.props.games[this.state.selectedGame].game
+            this.props.games[this.state.selectedGame].game,
           ).map((number) => this._createNumPlayersOption(number))}
         </select>
         <span className="buttons">
@@ -114,7 +114,7 @@ class LobbyCreateMatchForm extends React.Component<
   onClickCreate = () => {
     this.props.createMatch(
       this.props.games[this.state.selectedGame].game.name,
-      this.state.numPlayers
+      this.state.numPlayers,
     );
   };
 }

@@ -223,7 +223,7 @@ describe('multiplayer', () => {
       'chat',
       'matchID',
       message,
-      transport.getCredentials()
+      transport.getCredentials(),
     );
   });
 });
@@ -286,7 +286,7 @@ describe('server option', () => {
     });
     m.connect();
     expect((m.socket.io as any).uri).toEqual(
-      'http://' + hostname + ':' + port + '/default'
+      'http://' + hostname + ':' + port + '/default',
     );
   });
 
@@ -314,7 +314,7 @@ describe('server option', () => {
     });
     m.connect();
     expect((m.socket.io as any).uri).toEqual(
-      'https://' + hostname + ':' + port + '/default'
+      'https://' + hostname + ':' + port + '/default',
     );
   });
 
@@ -329,7 +329,7 @@ describe('server option', () => {
     });
     m.connect();
     expect((m.socket.io as any).uri).toEqual(
-      'http://' + hostname + ':' + port + '/default'
+      'http://' + hostname + ':' + port + '/default',
     );
   });
 

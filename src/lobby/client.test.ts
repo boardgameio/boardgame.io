@@ -10,14 +10,14 @@ import { LobbyClient } from './client';
 
 const throwsWithoutBody = (fn: (...args: any) => Promise<any>) => async () => {
   await expect(fn('tic-tac-toe')).rejects.toThrow(
-    `Expected body, got “undefined”.`
+    `Expected body, got “undefined”.`,
   );
 };
 
 const testStringValidation =
   (fn: (arg: any) => Promise<any>, label: string) => async () => {
     await expect(fn(undefined)).rejects.toThrow(
-      `Expected ${label} string, got "undefined".`
+      `Expected ${label} string, got "undefined".`,
     );
     await expect(fn(2)).rejects.toThrow(`Expected ${label} string, got "2".`);
     await expect(fn('')).rejects.toThrow(`Expected ${label} string, got "".`);
@@ -31,13 +31,13 @@ const throwsWithInvalidMatchID = (fn: (...args: any) => Promise<any>) =>
 
 const testBasicBody = (fn: (...args: any) => Promise<any>) => async () => {
   await expect(
-    fn('chess', '1', { playerID: undefined, credentials: 'pwd' })
+    fn('chess', '1', { playerID: undefined, credentials: 'pwd' }),
   ).rejects.toThrow(
-    'Expected body.playerID to be of type string, got “undefined”.'
+    'Expected body.playerID to be of type string, got “undefined”.',
   );
 
   await expect(
-    fn('chess', '2', { playerID: '0', credentials: 0 as unknown as string })
+    fn('chess', '2', { playerID: '0', credentials: 0 as unknown as string }),
   ).rejects.toThrow('Expected body.credentials to be of type string, got “0”.');
 };
 
@@ -45,7 +45,7 @@ describe('LobbyClient', () => {
   let client = new LobbyClient();
 
   beforeEach(async () => {
-    (global as any).fetch = jest.fn(async () => ({
+    (globalThis as any).fetch = jest.fn(async () => ({
       ok: true,
       status: 200,
       json: async () => {},
@@ -77,7 +77,7 @@ describe('LobbyClient', () => {
     });
 
     test('404 throws an error', async () => {
-      (global as any).fetch = jest.fn(async () => ({
+      (globalThis as any).fetch = jest.fn(async () => ({
         ok: false,
         status: 404,
         json: async () => {},
@@ -87,7 +87,7 @@ describe('LobbyClient', () => {
     });
 
     test('404 throws an error with json details', async () => {
-      (global as any).fetch = jest.fn(async () => ({
+      (globalThis as any).fetch = jest.fn(async () => ({
         ok: false,
         status: 404,
         clone: () => ({
@@ -101,12 +101,12 @@ describe('LobbyClient', () => {
           details: {
             moreInformation: 'some helpful details',
           },
-        })
+        }),
       );
     });
 
     test('404 throws an error with text details', async () => {
-      (global as any).fetch = jest.fn(async () => ({
+      (globalThis as any).fetch = jest.fn(async () => ({
         ok: false,
         status: 404,
         json: async () => {
@@ -120,12 +120,12 @@ describe('LobbyClient', () => {
         expect.objectContaining({
           message: 'HTTP status 404',
           details: '<moreInformation>some helpful details</moreInformation>',
-        })
+        }),
       );
     });
 
     test('404 throws an error without details', async () => {
-      (global as any).fetch = jest.fn(async () => ({
+      (globalThis as any).fetch = jest.fn(async () => ({
         ok: false,
         status: 404,
         json: async () => {
@@ -140,7 +140,7 @@ describe('LobbyClient', () => {
         expect.objectContaining({
           message: 'HTTP status 404',
           details: 'something went wrong in the connection',
-        })
+        }),
       );
     });
   });
@@ -176,7 +176,7 @@ describe('LobbyClient', () => {
         });
         expect(fetch).toHaveBeenCalledWith(
           '/games/chess?isGameover=false&updatedBefore=3000&updatedAfter=1000',
-          undefined
+          undefined,
         );
       });
 
@@ -186,12 +186,12 @@ describe('LobbyClient', () => {
         await client.listMatches('chess', { isGameover: false });
         expect(fetch).toHaveBeenCalledWith(
           '/games/chess?isGameover=false',
-          undefined
+          undefined,
         );
         await client.listMatches('chess', { isGameover: true });
         expect(fetch).toHaveBeenCalledWith(
           '/games/chess?isGameover=true',
-          undefined
+          undefined,
         );
       });
 
@@ -200,7 +200,7 @@ describe('LobbyClient', () => {
         await client.listMatches('chess', { updatedBefore });
         expect(fetch).toHaveBeenCalledWith(
           '/games/chess?updatedBefore=1989',
-          undefined
+          undefined,
         );
       });
 
@@ -209,7 +209,7 @@ describe('LobbyClient', () => {
         await client.listMatches('chess', { updatedAfter });
         expect(fetch).toHaveBeenCalledWith(
           '/games/chess?updatedAfter=1970',
-          undefined
+          undefined,
         );
       });
     });
@@ -243,9 +243,9 @@ describe('LobbyClient', () => {
       await expect(
         client.createMatch('tic-tac-toe', {
           numPlayers: '12' as unknown as number,
-        })
+        }),
       ).rejects.toThrow(
-        'Expected body.numPlayers to be of type number, got “12”.'
+        'Expected body.numPlayers to be of type number, got “12”.',
       );
     });
 
@@ -253,7 +253,7 @@ describe('LobbyClient', () => {
       await client.createMatch(
         'chess',
         { numPlayers: 2 },
-        { headers: { Authorization: 'pwd' } }
+        { headers: { Authorization: 'pwd' } },
       );
       expect(fetch).toHaveBeenCalledWith(`/games/chess/create`, {
         method: 'post',
@@ -284,7 +284,7 @@ describe('LobbyClient', () => {
 
     test(
       'throws without body',
-      throwsWithoutBody(() => client.joinMatch('chess', 'id', undefined))
+      throwsWithoutBody(() => client.joinMatch('chess', 'id', undefined)),
     );
 
     test('validates body', async () => {
@@ -292,23 +292,23 @@ describe('LobbyClient', () => {
         client.joinMatch('tic-tac-toe', 'xyz', {
           playerID: 0 as unknown as string,
           playerName: 'Bob',
-        })
+        }),
       ).rejects.toThrow(
-        'Expected body.playerID to be of type string|undefined, got “0”.'
+        'Expected body.playerID to be of type string|undefined, got “0”.',
       );
 
       await expect(
         client.joinMatch('tic-tac-toe', 'xyz', {
           playerID: '0',
           playerName: undefined,
-        })
+        }),
       ).rejects.toThrow(
-        'Expected body.playerName to be of type string, got “undefined”.'
+        'Expected body.playerName to be of type string, got “undefined”.',
       );
 
       // Allows requests that don’t specify `playerID`.
       await expect(
-        client.joinMatch('tic-tac-toe', 'xyz', { playerName: 'Bob' })
+        client.joinMatch('tic-tac-toe', 'xyz', { playerName: 'Bob' }),
       ).resolves.not.toThrow();
     });
   });
@@ -331,7 +331,7 @@ describe('LobbyClient', () => {
 
     test(
       'throws without body',
-      throwsWithoutBody(() => client.leaveMatch('chess', 'id', undefined))
+      throwsWithoutBody(() => client.leaveMatch('chess', 'id', undefined)),
     );
 
     test('validates body', testBasicBody(client.leaveMatch));
@@ -356,7 +356,7 @@ describe('LobbyClient', () => {
 
     test(
       'throws without body',
-      throwsWithoutBody(() => client.updatePlayer('chess', 'id', undefined))
+      throwsWithoutBody(() => client.updatePlayer('chess', 'id', undefined)),
     );
 
     test('validates body', testBasicBody(client.updatePlayer));
@@ -380,7 +380,7 @@ describe('LobbyClient', () => {
 
     test(
       'throws without body',
-      throwsWithoutBody(() => client.playAgain('chess', 'id', undefined))
+      throwsWithoutBody(() => client.playAgain('chess', 'id', undefined)),
     );
 
     test('validates body', testBasicBody(client.playAgain));

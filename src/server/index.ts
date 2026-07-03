@@ -39,7 +39,7 @@ interface HttpsOptions {
  */
 export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
-  callback?: () => void
+  callback?: () => void,
 ): ServerConfig =>
   portOrConfig && typeof portOrConfig === 'object'
     ? {
@@ -49,7 +49,7 @@ export const createServerRunConfig = (
     : { port: portOrConfig as number, callback };
 
 export const getPortFromServer = (
-  server: KoaServer
+  server: KoaServer,
 ): string | number | null => {
   const address = server.address();
   if (typeof address === 'string') return address;
@@ -113,7 +113,7 @@ export function Server({
       'Server `origins` option is not set.\n' +
         'Since boardgame.io@0.45, CORS is not enabled by default and you must ' +
         'explicitly set the origins that are allowed to connect to the server.\n' +
-        'See https://boardgame.io/documentation/#/api/Server'
+        'See https://boardgame.io/documentation/#/api/Server',
     );
   }
   transport.init(app, games, origins);

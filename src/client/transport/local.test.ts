@@ -82,7 +82,7 @@ describe('GetBotPlayer', () => {
       {
         '0': {},
         '1': {},
-      }
+      },
     );
     expect(result).toEqual('1');
   });
@@ -94,7 +94,7 @@ describe('GetBotPlayer', () => {
           currentPlayer: '0',
         },
       } as unknown as State,
-      { '0': {} }
+      { '0': {} },
     );
     expect(result).toEqual('0');
   });
@@ -106,7 +106,7 @@ describe('GetBotPlayer', () => {
           currentPlayer: '1',
         },
       } as unknown as State,
-      { '0': {} }
+      { '0': {} },
     );
     expect(result).toEqual(null);
   });
@@ -119,7 +119,7 @@ describe('GetBotPlayer', () => {
           gameover: true,
         },
       } as unknown as State,
-      { '0': {} }
+      { '0': {} },
     );
     expect(result).toEqual(null);
   });
@@ -241,20 +241,20 @@ describe('LocalMaster', () => {
 
   test('sync', () => {
     expect(player0Callback).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'sync' })
+      expect.objectContaining({ type: 'sync' }),
     );
     expect(player1Callback).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'sync' })
+      expect.objectContaining({ type: 'sync' }),
     );
   });
 
   test('update', () => {
     master.onUpdate(gameEvent('endTurn'), 0, 'matchID', '0');
     expect(player0Callback).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'update' })
+      expect.objectContaining({ type: 'update' }),
     );
     expect(player1Callback).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'update' })
+      expect.objectContaining({ type: 'update' }),
     );
   });
 

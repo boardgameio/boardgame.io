@@ -15,7 +15,7 @@ import { LobbyConnection } from './connection';
 jest.mock('./connection');
 
 /* mock server requests */
-global.fetch = jest
+globalThis.fetch = jest
   .fn()
   .mockReturnValue({ ok: true, status: 200, json: () => [] }) as any;
 
@@ -51,7 +51,7 @@ function makeMockConnection(components: any[]): MockConnection {
     leave: jest.fn().mockResolvedValue(undefined),
     disconnect: jest.fn().mockResolvedValue(undefined),
     _getGameComponents: jest.fn((gameName: string) =>
-      components.find((c) => c.game.name === gameName)
+      components.find((c) => c.game.name === gameName),
     ),
   };
 }
@@ -96,7 +96,7 @@ describe('lobby', () => {
           gameComponents={components}
           clientFactory={clientSpy.mockReturnValue(NullComponent) as any}
           gameServer="localhost:9000"
-        />
+        />,
       );
       act(() => {
         (ref.current as any)._startMatch('GameName1', { numPlayers: 2 });
@@ -104,7 +104,7 @@ describe('lobby', () => {
       expect(clientSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           multiplayer: expect.anything(),
-        })
+        }),
       );
     });
   });
@@ -135,13 +135,13 @@ describe('lobby', () => {
       let input: HTMLInputElement;
       beforeEach(() => {
         input = container.querySelector(
-          '.phase input[type="text"]'
+          '.phase input[type="text"]',
         ) as HTMLInputElement;
         fireEvent.change(input, { target: { value: 'Mark' } });
       });
       test('by clicking', () => {
         const button = container.querySelector(
-          '.phase button'
+          '.phase button',
         ) as HTMLButtonElement;
         fireEvent.click(button);
         expect((ref.current as any).state.playerName).toBe('Mark');
@@ -155,21 +155,21 @@ describe('lobby', () => {
     describe('login fails', () => {
       test('if no name entered', () => {
         const input = container.querySelector(
-          '.phase input[type="text"]'
+          '.phase input[type="text"]',
         ) as HTMLInputElement;
         fireEvent.change(input, { target: { value: '' } });
         const button = container.querySelector(
-          '.phase button'
+          '.phase button',
         ) as HTMLButtonElement;
         fireEvent.click(button);
         const errorMsg = container.querySelector(
-          '.phase .error-msg'
+          '.phase .error-msg',
         ) as HTMLElement;
         expect(errorMsg.textContent).not.toBe('');
       });
       test('invalid key press', () => {
         const input = container.querySelector(
-          '.phase input[type="text"]'
+          '.phase input[type="text"]',
         ) as HTMLInputElement;
         const currentValue = input.value;
         fireEvent.keyDown(input, { key: 'Wololo' });
@@ -196,7 +196,7 @@ describe('lobby', () => {
       test('disconnect from server', () => {
         mockConnection.disconnect = spy.mockResolvedValue(undefined);
         const exitButton = container.querySelector(
-          '#lobby-exit button'
+          '#lobby-exit button',
         ) as HTMLButtonElement;
         fireEvent.click(exitButton);
         expect(spy).toHaveBeenCalledWith();
@@ -214,7 +214,7 @@ describe('lobby', () => {
           phase: 'play',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
       ref = React.createRef<Lobby>();
       render(<Lobby ref={ref} gameComponents={components} />);
@@ -242,11 +242,11 @@ describe('lobby', () => {
     test('refresh starts when transitioning from ENTER lobby to LIST lobby', () => {
       const ref = React.createRef<Lobby>();
       const { container } = render(
-        <Lobby ref={ref} gameComponents={components} />
+        <Lobby ref={ref} gameComponents={components} />,
       );
 
       const input = container.querySelector(
-        '.phase input[type="text"]'
+        '.phase input[type="text"]',
       ) as HTMLInputElement;
       fireEvent.change(input, { target: { value: 'Mark' } });
       fireEvent.keyDown(input, { key: 'Enter' });
@@ -262,7 +262,7 @@ describe('lobby', () => {
           phase: 'list',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
       const ref = React.createRef<Lobby>();
       render(<Lobby ref={ref} gameComponents={components} />);
@@ -278,7 +278,7 @@ describe('lobby', () => {
           phase: 'list',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
       const ref = React.createRef<Lobby>();
       render(<Lobby ref={ref} gameComponents={components} />);
@@ -288,7 +288,7 @@ describe('lobby', () => {
       });
 
       expect(clearIntervalSpy).toHaveBeenCalledWith(
-        (ref.current as any)._currentInterval
+        (ref.current as any)._currentInterval,
       );
     });
   });
@@ -304,7 +304,7 @@ describe('lobby', () => {
       rerender = result.rerender;
       unmount = result.unmount;
       const input = result.container.querySelector(
-        '.phase input[type="text"]'
+        '.phase input[type="text"]',
       ) as HTMLInputElement;
       fireEvent.change(input, { target: { value: 'Mark' } });
       fireEvent.keyDown(input, { key: 'Enter' });
@@ -323,10 +323,14 @@ describe('lobby', () => {
     test('updating interval prop, updates internal interval ID', () => {
       const { _currentInterval } = ref.current as any;
       rerender(
-        <Lobby ref={ref} gameComponents={components} refreshInterval={10_000} />
+        <Lobby
+          ref={ref}
+          gameComponents={components}
+          refreshInterval={10_000}
+        />,
       );
       expect((ref.current as any)._currentInterval).not.toEqual(
-        _currentInterval
+        _currentInterval,
       );
     });
 
@@ -349,7 +353,7 @@ describe('lobby', () => {
           ref={ref}
           gameComponents={components}
           clientFactory={spyClient.mockReturnValue(NullComponent) as any}
-        />
+        />,
       );
       container = result.container;
     }
@@ -374,7 +378,7 @@ describe('lobby', () => {
           phase: 'list',
           playerName: 'Bob',
         },
-        { path: '/' }
+        { path: '/' },
       );
     });
 
@@ -399,7 +403,7 @@ describe('lobby', () => {
       test('match with default number of players', () => {
         mockConnection.create = spy;
         const createButton = container.querySelector(
-          '#match-creation button'
+          '#match-creation button',
         ) as HTMLButtonElement;
         fireEvent.click(createButton);
         expect(spy).toHaveBeenCalledWith('GameName1', 3);
@@ -410,7 +414,7 @@ describe('lobby', () => {
         fireEvent.change(selects[0], { target: { value: '1' } });
         fireEvent.change(selects[1], { target: { value: '2' } });
         const createButton = container.querySelector(
-          '#match-creation button'
+          '#match-creation button',
         ) as HTMLButtonElement;
         fireEvent.click(createButton);
         expect(spy).toHaveBeenCalledWith('GameName2', 2);
@@ -420,13 +424,13 @@ describe('lobby', () => {
           throw new Error('fail');
         });
         const createButton = container.querySelector(
-          '#match-creation button'
+          '#match-creation button',
         ) as HTMLButtonElement;
         await act(async () => {
           fireEvent.click(createButton);
         });
         const errorMsg = container.querySelector(
-          '#instances .error-msg'
+          '#instances .error-msg',
         ) as HTMLElement;
         expect(errorMsg.textContent).not.toBe('');
       });
@@ -435,13 +439,13 @@ describe('lobby', () => {
         const selects = container.querySelectorAll('#match-creation select');
         fireEvent.change(selects[0], { target: { value: '1' } });
         const numSelect = container.querySelectorAll(
-          '#match-creation select'
+          '#match-creation select',
         )[1] as HTMLSelectElement;
         expect(numSelect.textContent).toBe('1234');
       });
       test('when game has boundaries on the number of players', () => {
         const numSelect = container.querySelectorAll(
-          '#match-creation select'
+          '#match-creation select',
         )[1] as HTMLSelectElement;
         expect(numSelect.textContent).toBe('345');
       });
@@ -488,7 +492,7 @@ describe('lobby', () => {
           fireEvent.click(button);
         });
         const errorMsg = container.querySelector(
-          '#instances .error-msg'
+          '#instances .error-msg',
         ) as HTMLElement;
         expect(errorMsg.textContent).not.toBe('');
       });
@@ -527,7 +531,7 @@ describe('lobby', () => {
           fireEvent.click(button);
         });
         const errorMsg = container.querySelector(
-          '#instances .error-msg'
+          '#instances .error-msg',
         ) as HTMLElement;
         expect(errorMsg.textContent).not.toBe('');
       });
@@ -601,7 +605,7 @@ describe('lobby', () => {
         fireEvent.click(button);
         expect(spy).not.toHaveBeenCalled();
         const errorMsg = container.querySelector(
-          '#instances .error-msg'
+          '#instances .error-msg',
         ) as HTMLElement;
         expect(errorMsg.textContent).not.toBe('');
       });
@@ -639,7 +643,7 @@ describe('lobby', () => {
         fireEvent.click(buttons[0]);
         // exit game
         const exitButton = container.querySelector(
-          '#match-exit button'
+          '#match-exit button',
         ) as HTMLButtonElement;
         fireEvent.click(exitButton);
         expect((ref.current as any).state.runningMatch).toEqual(null);
@@ -650,7 +654,7 @@ describe('lobby', () => {
     describe('custom renderer', () => {
       test('should render custom lobby ui', () => {
         const { container } = render(
-          <Lobby gameComponents={[]} renderer={() => <div>Foo</div>} />
+          <Lobby gameComponents={[]} renderer={() => <div>Foo</div>} />,
         );
 
         expect(container.innerHTML).toEqual('<div>Foo</div>');
@@ -675,7 +679,7 @@ describe('lobby', () => {
             renderer={({ gameComponents }) => (
               <CustomLobbyUI gameComponents={gameComponents} />
             )}
-          />
+          />,
         );
 
         expect(container.innerHTML).toEqual('<div>GameName1,GameName2</div>');
@@ -694,7 +698,7 @@ describe('lobby', () => {
             renderer={({ handleEnterLobby }) => (
               <CustomLobbyUI onEnterLobby={handleEnterLobby} />
             )}
-          />
+          />,
         );
         const button = container.querySelector('button') as HTMLButtonElement;
         fireEvent.click(button);
