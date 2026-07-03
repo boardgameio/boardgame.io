@@ -6,7 +6,7 @@
   import { setContext } from 'svelte';
   import { crossfade, fly } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
-  import Chevron from 'svelte-icons/fa/FaChevronRight.svelte';
+  import Chevron from './icons/Chevron.svelte';
   import Menu from './Menu.svelte';
   import Main from './main/Main.svelte';
   import Info from './info/Info.svelte';

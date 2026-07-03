@@ -1,7 +1,7 @@
 <script>
   export let metadata;
 
-  import Arrow from 'svelte-icons/fa/FaArrowAltCircleDown.svelte'
+  import Arrow from '../icons/ArrowDown.svelte'
 
   let nodes = [];
   let prevNodes = [];

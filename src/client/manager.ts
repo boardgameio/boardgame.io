@@ -1,3 +1,4 @@
+import { mount, unmount, type Component } from 'svelte';
 import Debug from './debug/Debug.svelte';
 import type { _ClientImpl } from './client';
 
@@ -12,7 +13,7 @@ type UnsubscribeCallback = () => void;
  * Class to manage boardgame.io clients and limit debug panel rendering.
  */
 export class ClientManager {
-  private debugPanel: Debug | null;
+  private debugPanel: Record<string, any> | null;
   private currentClient: _ClientImpl | null;
   private clients: Map<_ClientImpl, _ClientImpl>;
   private subscribers: Map<symbol, SubscribeCallback>;
@@ -145,11 +146,11 @@ export class ClientManager {
       return;
     }
 
-    let DebugImpl: typeof Debug | undefined;
+    let DebugImpl: Component | undefined;
     let target = document.body;
 
     if (process.env.NODE_ENV !== 'production') {
-      DebugImpl = Debug;
+      DebugImpl = Debug as unknown as Component;
     }
 
     if (client.debugOpt && client.debugOpt !== true) {
@@ -159,7 +160,7 @@ export class ClientManager {
 
     if (DebugImpl) {
       this.currentClient = client;
-      this.debugPanel = new DebugImpl({
+      this.debugPanel = mount(DebugImpl, {
         target,
         props: { clientManager: this },
       });
@@ -170,7 +171,7 @@ export class ClientManager {
    * Unmount the debug panel.
    */
   private unmountDebug(): void {
-    this.debugPanel.$destroy();
+    if (this.debugPanel) unmount(this.debugPanel);
     this.debugPanel = null;
     this.currentClient = null;
   }

@@ -77,9 +77,11 @@
 
 <table>
   <thead>
-    <th>Value</th>
-    <th>Visits</th>
-    <th>Action</th>
+    <tr>
+      <th>Value</th>
+      <th>Visits</th>
+      <th>Action</th>
+    </tr>
   </thead>
 
   <tbody>
