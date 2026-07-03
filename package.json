@@ -96,7 +96,7 @@
     "@rollup/plugin-terser": "^1.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@testing-library/svelte": "^3.0.3",
+    "@testing-library/svelte": "5.3.1",
     "@types/jest": "^30.0.0",
     "@types/koa__cors": "^5.0.1",
     "@types/node": "^14.0.24",
@@ -120,7 +120,6 @@
     "jest": "^30.3.0",
     "jest-date-mock": "^1.0.10",
     "jest-environment-jsdom": "^30.2.0",
-    "jest-transform-svelte": "^2.1.1",
     "lint-staged": "^10.5.4",
     "node-persist": "^3.1.0",
     "nodemon": "^2.0.12",
@@ -135,7 +134,7 @@
     "rollup-plugin-typescript2": "^0.37.0",
     "shelljs": "^0.8.4",
     "supertest": "^3.1.0",
-    "svelte-icons": "^2.1.0",
+    "svelte": "^5.0.0",
     "tempy": "^1.0.1",
     "ts-jest": "^29.4.9",
     "typescript": "^5.9.3"
@@ -159,7 +158,6 @@
     "setimmediate": "^1.0.5",
     "socket.io": "^4.5.0",
     "socket.io-client": "^4.1.3",
-    "svelte": "^3.41.0",
     "svelte-json-tree-auto": "^0.1.0",
     "ts-toolbelt": "^9.6.0"
   },
@@ -175,7 +173,11 @@
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
       "\\.(svg)$": "<rootDir>/.empty_module.js",
-      "svelte-json-tree-auto": "<rootDir>/src/client/debug/tests/JSONTree.mock.svelte"
+      "svelte-json-tree-auto": "<rootDir>/src/client/debug/tests/JSONTree.mock.svelte",
+      "^svelte$": "<rootDir>/node_modules/svelte/src/index-client.js",
+      "^svelte/legacy$": "<rootDir>/node_modules/svelte/src/legacy/legacy-client.js",
+      "^svelte/reactivity$": "<rootDir>/node_modules/svelte/src/reactivity/index-client.js",
+      "^svelte/store$": "<rootDir>/node_modules/svelte/src/store/index-client.js"
     },
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -192,10 +194,10 @@
       "@testing-library/jest-dom"
     ],
     "transform": {
-      "^.+\\.svelte$": "jest-transform-svelte"
+      "^.+\\.svelte$": "<rootDir>/jest-svelte-transformer.cjs"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io|flatted|svelte-icons)/)"
+      "node_modules/(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
