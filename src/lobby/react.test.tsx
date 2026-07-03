@@ -64,7 +64,7 @@ describe('lobby', () => {
         />
       );
       lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
-      expect(spy).toBeCalledWith(
+      expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({
           multiplayer: expect.anything(),
         })

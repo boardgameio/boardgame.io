@@ -225,5 +225,5 @@ test('can receive enhancer', () => {
   });
 
   Enzyme.mount(<Board />);
-  expect(enhancer).toBeCalled();
+  expect(enhancer).toHaveBeenCalled();
 });

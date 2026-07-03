@@ -250,10 +250,10 @@ describe('LocalMaster', () => {
 
   test('update', () => {
     master.onUpdate(gameEvent('endTurn'), 0, 'matchID', '0');
-    expect(player0Callback).toBeCalledWith(
+    expect(player0Callback).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'update' })
     );
-    expect(player1Callback).toBeCalledWith(
+    expect(player1Callback).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'update' })
     );
   });
@@ -295,13 +295,13 @@ describe('LocalTransport', () => {
     test('matchID', () => {
       transport.updateMatchID('test');
       expect(transport.getMatchID()).toBe('test');
-      expect(transport.requestSync).toBeCalled();
+      expect(transport.requestSync).toHaveBeenCalled();
     });
 
     test('playerID', () => {
       transport.updatePlayerID('player');
       expect(transport.getPlayerID()).toBe('player');
-      expect(master.connect).toBeCalled();
+      expect(master.connect).toHaveBeenCalled();
     });
   });
 

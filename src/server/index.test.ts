@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2017 The boardgame.io Authors
  *
@@ -60,7 +64,7 @@ describe('new', () => {
     const game: Game = {};
     const transport = { init: jest.fn() } as unknown as SocketIO;
     Server({ games: [game], transport });
-    expect(transport.init).toBeCalled();
+    expect(transport.init).toHaveBeenCalled();
   });
 
   test('custom auth implementation', () => {
@@ -166,8 +170,8 @@ describe('kill', () => {
 
     server.kill({ appServer, apiServer });
 
-    expect(apiServer.close).toBeCalled();
-    expect(appServer.close).toBeCalled();
+    expect(apiServer.close).toHaveBeenCalled();
+    expect(appServer.close).toHaveBeenCalled();
   });
 
   test('do not fail if api server is not defined', async () => {
@@ -176,8 +180,8 @@ describe('kill', () => {
     } as unknown as KoaServer;
     const server = Server({ games: [game] });
 
-    expect(() => server.kill({ appServer })).not.toThrowError();
-    expect(appServer.close).toBeCalled();
+    expect(() => server.kill({ appServer })).not.toThrow();
+    expect(appServer.close).toHaveBeenCalled();
   });
 });
 

@@ -55,19 +55,19 @@ describe('LobbyClient', () => {
   describe('construction', () => {
     test('basic', async () => {
       await client.listGames();
-      expect(fetch).toBeCalledWith(`/games`, undefined);
+      expect(fetch).toHaveBeenCalledWith(`/games`, undefined);
     });
 
     test('with server address', async () => {
       const client = new LobbyClient({ server: 'http://api.io' });
       await client.listGames();
-      expect(fetch).toBeCalledWith(`http://api.io/games`, undefined);
+      expect(fetch).toHaveBeenCalledWith(`http://api.io/games`, undefined);
     });
 
     test('with server address with trailing slash', async () => {
       const client = new LobbyClient({ server: 'http://api.io/' });
       await client.listGames();
-      expect(fetch).toBeCalledWith(`http://api.io/games`, undefined);
+      expect(fetch).toHaveBeenCalledWith(`http://api.io/games`, undefined);
     });
   });
 
@@ -148,12 +148,12 @@ describe('LobbyClient', () => {
   describe('listGames', () => {
     test('calls `/games`', async () => {
       await client.listGames();
-      expect(fetch).toBeCalledWith('/games', undefined);
+      expect(fetch).toHaveBeenCalledWith('/games', undefined);
     });
 
     test('init can be customized', async () => {
       await client.listGames({ headers: { Authorization: 'pwd' } });
-      expect(fetch).toBeCalledWith('/games', {
+      expect(fetch).toHaveBeenCalledWith('/games', {
         headers: { Authorization: 'pwd' },
       });
     });
@@ -162,7 +162,7 @@ describe('LobbyClient', () => {
   describe('listMatches', () => {
     test('calls `/games/:name`', async () => {
       await client.listMatches('tic-tac-toe');
-      expect(fetch).toBeCalledWith(`/games/tic-tac-toe`, undefined);
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe`, undefined);
     });
 
     test('validates gameName', throwsWithInvalidGameName(client.listMatches));
@@ -174,7 +174,7 @@ describe('LobbyClient', () => {
           updatedBefore: 3000,
           updatedAfter: 1000,
         });
-        expect(fetch).toBeCalledWith(
+        expect(fetch).toHaveBeenCalledWith(
           '/games/chess?isGameover=false&updatedBefore=3000&updatedAfter=1000',
           undefined
         );
@@ -182,20 +182,23 @@ describe('LobbyClient', () => {
 
       test('isGameover', async () => {
         await client.listMatches('chess', { isGameover: undefined });
-        expect(fetch).toBeCalledWith('/games/chess', undefined);
+        expect(fetch).toHaveBeenCalledWith('/games/chess', undefined);
         await client.listMatches('chess', { isGameover: false });
-        expect(fetch).toBeCalledWith(
+        expect(fetch).toHaveBeenCalledWith(
           '/games/chess?isGameover=false',
           undefined
         );
         await client.listMatches('chess', { isGameover: true });
-        expect(fetch).toBeCalledWith('/games/chess?isGameover=true', undefined);
+        expect(fetch).toHaveBeenCalledWith(
+          '/games/chess?isGameover=true',
+          undefined
+        );
       });
 
       test('updatedBefore', async () => {
         const updatedBefore = 1989;
         await client.listMatches('chess', { updatedBefore });
-        expect(fetch).toBeCalledWith(
+        expect(fetch).toHaveBeenCalledWith(
           '/games/chess?updatedBefore=1989',
           undefined
         );
@@ -204,7 +207,7 @@ describe('LobbyClient', () => {
       test('updatedAfter', async () => {
         const updatedAfter = 1970;
         await client.listMatches('chess', { updatedAfter });
-        expect(fetch).toBeCalledWith(
+        expect(fetch).toHaveBeenCalledWith(
           '/games/chess?updatedAfter=1970',
           undefined
         );
@@ -215,7 +218,7 @@ describe('LobbyClient', () => {
   describe('getMatch', () => {
     test('calls `/games/:name/:id`', async () => {
       await client.getMatch('tic-tac-toe', 'xyz');
-      expect(fetch).toBeCalledWith(`/games/tic-tac-toe/xyz`, undefined);
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz`, undefined);
     });
 
     test('validates gameName', throwsWithInvalidGameName(client.getMatch));
@@ -225,7 +228,7 @@ describe('LobbyClient', () => {
   describe('createMatch', () => {
     test('calls `/games/:name/create`', async () => {
       await client.createMatch('tic-tac-toe', { numPlayers: 2 });
-      expect(fetch).toBeCalledWith(`/games/tic-tac-toe/create`, {
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/create`, {
         method: 'post',
         body: '{"numPlayers":2}',
         headers: { 'Content-Type': 'application/json' },
@@ -252,7 +255,7 @@ describe('LobbyClient', () => {
         { numPlayers: 2 },
         { headers: { Authorization: 'pwd' } }
       );
-      expect(fetch).toBeCalledWith(`/games/chess/create`, {
+      expect(fetch).toHaveBeenCalledWith(`/games/chess/create`, {
         method: 'post',
         body: '{"numPlayers":2}',
         headers: {
@@ -269,7 +272,7 @@ describe('LobbyClient', () => {
         playerID: '0',
         playerName: 'Alice',
       });
-      expect(fetch).toBeCalledWith(`/games/tic-tac-toe/xyz/join`, {
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz/join`, {
         method: 'post',
         body: '{"playerID":"0","playerName":"Alice"}',
         headers: { 'Content-Type': 'application/json' },
@@ -316,7 +319,7 @@ describe('LobbyClient', () => {
         playerID: '0',
         credentials: 'pwd',
       });
-      expect(fetch).toBeCalledWith(`/games/tic-tac-toe/xyz/leave`, {
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz/leave`, {
         method: 'post',
         body: '{"playerID":"0","credentials":"pwd"}',
         headers: { 'Content-Type': 'application/json' },
@@ -341,7 +344,7 @@ describe('LobbyClient', () => {
         credentials: 'pwd',
         newName: 'Al',
       });
-      expect(fetch).toBeCalledWith(`/games/tic-tac-toe/xyz/update`, {
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz/update`, {
         method: 'post',
         body: '{"playerID":"0","credentials":"pwd","newName":"Al"}',
         headers: { 'Content-Type': 'application/json' },
@@ -365,7 +368,7 @@ describe('LobbyClient', () => {
         playerID: '0',
         credentials: 'pwd',
       });
-      expect(fetch).toBeCalledWith(`/games/tic-tac-toe/xyz/playAgain`, {
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz/playAgain`, {
         method: 'post',
         body: '{"playerID":"0","credentials":"pwd"}',
         headers: { 'Content-Type': 'application/json' },

@@ -198,7 +198,7 @@ describe('phases', () => {
 
       expect(state.ctx.phase).toBe('A');
       state = flow.processEvent(state, gameEvent('setPhase', 'C'));
-      expect(error).toBeCalledWith('invalid phase: C');
+      expect(error).toHaveBeenCalledWith('invalid phase: C');
       expect(state.ctx.phase).toBe(null);
     });
   });
@@ -605,12 +605,12 @@ describe('stages', () => {
   describe('no stage', () => {
     test('A is allowed', () => {
       client.moves.A();
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
     });
 
     test('B is not allowed', () => {
       client.moves.B();
-      expect(error).toBeCalledWith('disallowed move: B');
+      expect(error).toHaveBeenCalledWith('disallowed move: B');
     });
   });
 
@@ -621,12 +621,12 @@ describe('stages', () => {
 
     test('A is not allowed', () => {
       client.moves.A();
-      expect(error).toBeCalledWith('disallowed move: A');
+      expect(error).toHaveBeenCalledWith('disallowed move: A');
     });
 
     test('B is allowed', () => {
       client.moves.B();
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
     });
   });
 
@@ -637,12 +637,12 @@ describe('stages', () => {
 
     test('A is allowed', () => {
       client.moves.A();
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
     });
 
     test('B is not allowed', () => {
       client.moves.B();
-      expect(error).toBeCalledWith('disallowed move: B');
+      expect(error).toHaveBeenCalledWith('disallowed move: B');
     });
   });
 
@@ -1309,7 +1309,7 @@ describe('endTurn args', () => {
   test('invalid arg to endTurn', () => {
     let t = state;
     t = flow.processEvent(t, gameEvent('endTurn', '2'));
-    expect(error).toBeCalledWith(`invalid argument to endTurn: 2`);
+    expect(error).toHaveBeenCalledWith(`invalid argument to endTurn: 2`);
     expect(t.ctx.currentPlayer).toBe('0');
   });
 
@@ -1343,7 +1343,7 @@ describe('pass args', () => {
   test('invalid arg to pass', () => {
     let t = state;
     t = flow.processEvent(t, gameEvent('pass', '2'));
-    expect(error).toBeCalledWith(`invalid argument to endTurn: 2`);
+    expect(error).toHaveBeenCalledWith(`invalid argument to endTurn: 2`);
     expect(t.ctx.currentPlayer).toBe('0');
   });
 
@@ -2353,7 +2353,7 @@ describe('game function signatures', () => {
   });
 
   test('game.setup', () => {
-    expect(game.setup).lastCalledWith(
+    expect(game.setup).toHaveBeenLastCalledWith(
       // setup context object
       expect.objectContaining({
         ctx: expectCtx,
@@ -2367,67 +2367,71 @@ describe('game function signatures', () => {
 
   test('game.onEnd', () => {
     client.events.endGame();
-    expect(game.onEnd).lastCalledWith(FnContext());
+    expect(game.onEnd).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.endIf', () => {
     client.moves.endGame();
-    expect(game.endIf).lastCalledWith(FnContext({ G: 'gameover' }));
+    expect(game.endIf).toHaveBeenLastCalledWith(FnContext({ G: 'gameover' }));
   });
 
   test('game.turn.order.playOrder', () => {
-    expect(game.turn.order.playOrder).lastCalledWith(FnContext());
+    expect(game.turn.order.playOrder).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.order.first', () => {
-    expect(game.turn.order.first).lastCalledWith(FnContext());
+    expect(game.turn.order.first).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.order.next', () => {
     client.events.endTurn();
-    expect(game.turn.order.next).lastCalledWith(FnContext());
+    expect(game.turn.order.next).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.onBegin', () => {
-    expect(game.turn.onBegin).lastCalledWith(FnContext());
+    expect(game.turn.onBegin).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.onMove', () => {
     client.moves.A();
-    expect(game.turn.onMove).lastCalledWith(FnContext());
+    expect(game.turn.onMove).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.onEnd', () => {
     client.events.endTurn();
-    expect(game.turn.onEnd).lastCalledWith(FnContext());
+    expect(game.turn.onEnd).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.endIf', () => {
     client.moves.A();
-    expect(game.turn.endIf).lastCalledWith(FnContext());
+    expect(game.turn.endIf).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('move', () => {
     client.moves.A('arg');
-    expect(moveA).lastCalledWith(FnContext({ playerID: '0' }), 'arg');
+    expect(moveA).toHaveBeenLastCalledWith(FnContext({ playerID: '0' }), 'arg');
     client.moves.A(2, 'args');
-    expect(moveA).lastCalledWith(FnContext({ playerID: '0' }), 2, 'args');
+    expect(moveA).toHaveBeenLastCalledWith(
+      FnContext({ playerID: '0' }),
+      2,
+      'args'
+    );
   });
 
   test('game.phases.phase.onBegin', () => {
     client.events.setPhase('A');
-    expect(game.phases.A.onBegin).lastCalledWith(FnContext());
+    expect(game.phases.A.onBegin).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.phases.phase.onEnd', () => {
     client.events.setPhase('A');
     client.updatePlayerID('1');
     client.events.endPhase();
-    expect(game.phases.A.onEnd).lastCalledWith(FnContext());
+    expect(game.phases.A.onEnd).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.phases.phase.endIf', () => {
     client.events.setPhase('A');
-    expect(game.phases.A.endIf).lastCalledWith(FnContext());
+    expect(game.phases.A.endIf).toHaveBeenLastCalledWith(FnContext());
   });
 });

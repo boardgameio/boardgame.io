@@ -261,7 +261,7 @@ describe('config errors', () => {
     const game = ProcessGameConfig({ moves: { A: 1 } } as unknown as Game);
     const state = InitializeGame({ game });
     game.processMove(state, { type: 'A', args: null, playerID: '0' });
-    expect(error).toBeCalledWith(
+    expect(error).toHaveBeenCalledWith(
       expect.stringContaining('invalid move object')
     );
   });

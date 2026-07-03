@@ -797,7 +797,7 @@ describe('subscribe', () => {
   });
 
   test('called at the beginning', () => {
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: {},
         ctx: expect.objectContaining({ turn: 1 }),
@@ -808,7 +808,7 @@ describe('subscribe', () => {
   test('called after a move', () => {
     fn.mockClear();
     client.moves.A();
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
       })
@@ -818,7 +818,7 @@ describe('subscribe', () => {
   test('called after an event', () => {
     fn.mockClear();
     client.events.endTurn();
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         ctx: expect.objectContaining({ turn: 2 }),
       })
@@ -832,8 +832,8 @@ describe('subscribe', () => {
     const unsubscribe = client.subscribe(fn2);
 
     // The subscriber that just subscribed is notified.
-    expect(fn).not.toBeCalled();
-    expect(fn2).toBeCalledWith(
+    expect(fn).not.toHaveBeenCalled();
+    expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
       })
@@ -845,12 +845,12 @@ describe('subscribe', () => {
     client.moves.A();
 
     // Both subscribers are notified.
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
       })
     );
-    expect(fn2).toBeCalledWith(
+    expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
       })
@@ -863,12 +863,12 @@ describe('subscribe', () => {
 
     // The subscriber the unsubscribed is not notified.
     client.moves.A();
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
       })
     );
-    expect(fn2).not.toBeCalled();
+    expect(fn2).not.toHaveBeenCalled();
   });
 
   test('transport notifies subscribers', () => {
@@ -895,9 +895,9 @@ describe('subscribe', () => {
         multiplayer: Local(),
       });
       client.subscribe(fn);
-      expect(fn).not.toBeCalled();
+      expect(fn).not.toHaveBeenCalled();
       client.start();
-      expect(fn).toBeCalled();
+      expect(fn).toHaveBeenCalled();
       client.stop();
     });
 
@@ -909,7 +909,7 @@ describe('subscribe', () => {
       });
       client.start();
       client.subscribe(fn);
-      expect(fn).toBeCalled();
+      expect(fn).toHaveBeenCalled();
       client.stop();
     });
   });

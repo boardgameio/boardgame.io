@@ -128,7 +128,7 @@ describe('playerView - patch', () => {
 
   test('patch', async () => {
     await master.onUpdate(move, 0, 'matchID', '0');
-    expect(sendAll).toBeCalled();
+    expect(sendAll).toHaveBeenCalled();
 
     const payload = sendAll.mock.calls[sendAll.mock.calls.length - 1][0];
     expect(payload.type).toBe('patch');

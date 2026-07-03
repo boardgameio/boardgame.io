@@ -56,7 +56,7 @@ test('move returns INVALID_MOVE', () => {
   };
   const reducer = CreateGameReducer({ game });
   const state = reducer(initialState, makeMove('A'));
-  expect(error).toBeCalledWith('invalid move: A args: undefined');
+  expect(error).toHaveBeenCalledWith('invalid move: A args: undefined');
   expect(state._stateID).toBe(0);
 });
 
@@ -67,7 +67,7 @@ test('makeMove', () => {
   state = reducer(state, makeMove('unknown'));
   expect(state._stateID).toBe(0);
   expect(state.G).not.toMatchObject({ moved: true });
-  expect(error).toBeCalledWith('disallowed move: unknown');
+  expect(error).toHaveBeenCalledWith('disallowed move: unknown');
 
   state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(1);
@@ -81,11 +81,11 @@ test('makeMove', () => {
 
   state = reducer(state, makeMove('B'));
   expect(state._stateID).toBe(2);
-  expect(error).toBeCalledWith('cannot make move after game end');
+  expect(error).toHaveBeenCalledWith('cannot make move after game end');
 
   state = reducer(state, gameEvent('endTurn'));
   expect(state._stateID).toBe(2);
-  expect(error).toBeCalledWith('cannot call event after game end');
+  expect(error).toHaveBeenCalledWith('cannot call event after game end');
 });
 
 test('disable move by invalid playerIDs', () => {
@@ -519,11 +519,11 @@ describe('undo / redo', () => {
       gameEvent('setStage', 'special', '0')
     );
     let newState = reducer(initial, gameEvent('endStage', undefined, '0'));
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
     // Make sure we actually modified the stage.
     expect(newState.ctx.activePlayers).not.toEqual(initial.ctx.activePlayers);
     newState = reducer(newState, undo());
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
     expect(newState.G).toEqual(initial.G);
     expect(newState.ctx).toEqual(initial.ctx);
     expect(newState.plugins).toEqual(initial.plugins);

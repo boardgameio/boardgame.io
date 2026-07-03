@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2018 The boardgame.io Authors
  *
@@ -191,7 +195,7 @@ describe('update', () => {
 
   test('basic', async () => {
     await master.onUpdate(action, 0, 'matchID', '0');
-    expect(sendAll).toBeCalled();
+    expect(sendAll).toHaveBeenCalled();
     const value = sendAll.mock.calls[0][0];
     expect(value.type).toBe('update');
     expect(value.args[0]).toBe('matchID');
@@ -380,9 +384,9 @@ describe('update', () => {
       expect(error).not.toHaveBeenCalled();
       const endStage = ActionCreators.gameEvent('endStage', undefined, '0');
       await master.onUpdate(endStage, 1, 'matchID', '0');
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
       await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
 
       // Clean-up active players.
       const endStage2 = ActionCreators.gameEvent('endStage', undefined, '1');
@@ -593,7 +597,7 @@ describe('patch', () => {
 
   test('basic', async () => {
     await master.onUpdate(move, 0, 'matchID', '0');
-    expect(sendAll).toBeCalled();
+    expect(sendAll).toHaveBeenCalled();
 
     const value = sendAll.mock.calls[0][0];
     expect(value.type).toBe('patch');
@@ -816,7 +820,7 @@ describe('subscribe', () => {
 
   test('sync', async () => {
     master.onSync('matchID', '0');
-    expect(callback).toBeCalledWith({
+    expect(callback).toHaveBeenCalledWith({
       matchID: 'matchID',
       state: expect.objectContaining({ _stateID: 0 }),
     });
@@ -825,7 +829,7 @@ describe('subscribe', () => {
   test('update', async () => {
     const action = ActionCreators.gameEvent('endTurn');
     master.onUpdate(action, 0, 'matchID', '0');
-    expect(callback).toBeCalledWith({
+    expect(callback).toHaveBeenCalledWith({
       matchID: 'matchID',
       action,
       state: expect.objectContaining({ _stateID: 1 }),
