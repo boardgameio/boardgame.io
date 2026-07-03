@@ -1,12 +1,26 @@
 {
   "name": "boardgame.io",
   "version": "0.50.2",
+  "packageManager": "pnpm@10.16.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [],
+    "overrides": {
+      "jest": "30.4.1",
+      "@jest/core": "30.4.1",
+      "jest-cli": "30.4.1",
+      "jest-circus": "30.4.1",
+      "jest-config": "30.4.1",
+      "jest-runner": "30.4.1",
+      "jest-runtime": "30.4.1",
+      "jest-resolve-dependencies": "30.4.1"
+    }
+  },
   "description": "library for turn-based games",
   "repository": "https://github.com/boardgameio/boardgame.io",
   "scripts": {
     "prestart": "run-p examples:install build",
     "start": "run-p dev:server dev:client",
-    "predev": "npm run examples:install",
+    "predev": "pnpm run examples:install",
     "dev": "run-p build:watch dev:server dev:client",
     "dev:client": "node scripts/dev-client.js",
     "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions \".ts,.js\" --ignore \"src/**/*.test.ts\" --presets @babel/preset-env examples/react-web/server.js",
@@ -14,22 +28,22 @@
     "build:watch": "cross-env BABEL_ENV=rollup rollup -w --config rollup.config.js",
     "benchmark": "babel-node --extensions .ts,.js --presets @babel/preset-env,@babel/preset-typescript benchmark/index.js",
     "docs": "docsify serve docs",
-    "examples": "npm run start",
+    "examples": "pnpm run start",
     "examples:install": "node scripts/install-examples.js",
-    "pretest": "npm run lint",
+    "pretest": "pnpm run lint",
     "test": "cross-env NODE_ENV=test jest",
-    "test:watch": "npm test -- --watch",
-    "test:coverage": "npm test -- --coverage --collectCoverageFrom=\"src/**\"",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
+    "test:coverage": "pnpm run lint && cross-env NODE_ENV=test jest --coverage --collectCoverageFrom=\"src/**\"",
     "test:coveralls": "coveralls < coverage/lcov.info",
     "test:integration": "node ./scripts/integration.js",
     "ts": "tsc --noEmit",
     "ts:watch": "tsc --noEmit --watch",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "prepublishOnly": "npm run clean",
+    "prepublishOnly": "pnpm run clean",
     "proxydirs": "node scripts/proxy-dirs.js",
     "prepack": "run-s build proxydirs",
-    "postpack": "npm run clean",
+    "postpack": "pnpm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,tsx,js,jsx,css,md}\"",
     "changelog": "node ./scripts/changelog.js",
     "clean": "node ./scripts/clean.js",
@@ -42,6 +56,11 @@
   "types": "dist/types/src/types.d.ts",
   "files": [
     "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!src/**/*.test.js",
+    "!src/**/*.test.jsx",
+    "!src/client/debug/tests",
     "dist/boardgameio.js",
     "dist/boardgameio.min.js",
     "dist/boardgameio.es.js",
@@ -68,7 +87,8 @@
     "game engine"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "pnpm": ">=10.16"
   },
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
@@ -97,6 +117,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/svelte": "5.3.1",
+    "@types/cors": "^2.8.19",
     "@types/jest": "^30.0.0",
     "@types/js-cookie": "^3.0.6",
     "@types/koa__cors": "^5.0.1",
@@ -144,6 +165,7 @@
     "@koa/router": "^15.5.0",
     "@types/koa": "^3.0.2",
     "@types/koa__router": "^12.0.5",
+    "cors": "^2.8.6",
     "flatted": "^3.4.2",
     "immer": "^11.1.7",
     "js-cookie": "^3.0.5",
@@ -205,13 +227,15 @@
       "^.+\\.svelte$": "<rootDir>/jest-svelte-transformer.cjs"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
+      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
+      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
       "integration/",
       "node_modules/",
-      ".npm/"
+      ".npm/",
+      ".claude/"
     ]
   }
 }

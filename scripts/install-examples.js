@@ -24,7 +24,7 @@ console.log('Starting the application...');
 
 function installDependencies() {
   const isWindowsOs = process.platform === 'win32';
-  const npmCommand = isWindowsOs ? 'npm.cmd' : 'npm';
+  const npmCommand = isWindowsOs ? 'pnpm.cmd' : 'pnpm';
 
   console.log('Installing web dependencies...');
 
