@@ -154,8 +154,11 @@ export function Server({
 
       // Run Game Server (+ API, if necessary).
       let appServer: KoaServer;
+      const httpServer = transport.server;
       await new Promise<void>((resolve) => {
-        appServer = app.listen(serverRunConfig.port, () => resolve());
+        appServer = httpServer
+          ? httpServer.listen(serverRunConfig.port, () => resolve())
+          : app.listen(serverRunConfig.port, () => resolve());
       });
       if (serverRunConfig.callback) serverRunConfig.callback();
       logger.info(`App serving on ${getPortFromServer(appServer)}...`);

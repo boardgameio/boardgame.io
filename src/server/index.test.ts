@@ -28,27 +28,26 @@ jest.mock('../core/logger', () => ({
   error: () => {},
 }));
 
-jest.mock('koa-socket-2', () => {
+jest.mock('socket.io', () => {
   class MockSocket {
     on() {}
   }
 
-  return class {
-    constructor() {
-      (this as any).socket = new MockSocket();
-    }
-    attach(app) {
-      app.io = app._io = this;
-    }
-    of() {
-      return this;
-    }
-    on(type, callback) {
-      callback((this as any).socket);
-    }
-    adapter() {
-      return this;
-    }
+  return {
+    Server: class {
+      constructor() {
+        (this as any).socket = new MockSocket();
+      }
+      of() {
+        return this;
+      }
+      on(type, callback) {
+        callback((this as any).socket);
+      }
+      adapter() {
+        return this;
+      }
+    },
   };
 });
 

@@ -64,7 +64,7 @@ jest.mock('../../master/master', () => {
   return { Master };
 });
 
-jest.mock('koa-socket-2', () => {
+jest.mock('socket.io', () => {
   class MockSocket {
     id: string;
     callbacks: Record<string, (...args: any[]) => any>;
@@ -109,10 +109,6 @@ jest.mock('koa-socket-2', () => {
       this.socketAdapter = socketAdapter;
     }
 
-    attach(app) {
-      app.io = app._io = this;
-    }
-
     of() {
       return this;
     }
@@ -122,12 +118,12 @@ jest.mock('koa-socket-2', () => {
     }
   }
 
-  return MockIO;
+  return { Server: MockIO };
 });
 
 describe('basic', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
@@ -146,7 +142,7 @@ describe('basic', () => {
 
 describe('socketAdapter', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
 
   const socketAdapter = jest.fn();
@@ -157,7 +153,7 @@ describe('socketAdapter', () => {
   });
 
   test('socketAdapter is passed', () => {
-    expect(app.io.socketAdapter).toBe(socketAdapter);
+    expect(app.context.io.socketAdapter).toBe(socketAdapter);
   });
 });
 
@@ -168,7 +164,7 @@ describe('TransportAPI', () => {
 
   beforeAll(() => {
     const auth = new Auth({ authenticateCredentials: () => true });
-    const app: any = { context: { auth } };
+    const app: any = { context: { auth }, callback: () => () => {} };
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
@@ -210,7 +206,7 @@ describe('TransportAPI', () => {
 
 describe('sync / update', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
@@ -228,7 +224,7 @@ describe('sync / update', () => {
 });
 
 describe('chat', () => {
-  const app: any = { context: {} };
+  const app: any = { context: {}, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
@@ -242,7 +238,7 @@ describe('chat', () => {
 
 describe('connect / disconnect', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
