@@ -97,6 +97,14 @@ describe('.configureRouter', () => {
     return app;
   }
 
+  function apiCall(app: Koa) {
+    const agent = request(app.callback());
+    return {
+      get: (path: string) => agent.get(path).set('Connection', 'close'),
+      post: (path: string) => agent.post(path).set('Connection', 'close'),
+    };
+  }
+
   describe('creating a game', () => {
     let response;
     let app: Koa;
@@ -144,7 +152,7 @@ describe('.configureRouter', () => {
         const uuid = () => 'matchID';
         app = createApiServer({ db, auth, games, uuid });
 
-        response = await request(app.callback())
+        response = await apiCall(app)
           .post('/games/foo/create')
           .send({ numPlayers: 3 });
       });
@@ -182,7 +190,7 @@ describe('.configureRouter', () => {
 
       describe('without numPlayers', () => {
         beforeEach(async () => {
-          response = await request(app.callback()).post('/games/foo/create');
+          response = await apiCall(app).post('/games/foo/create');
         });
 
         test('uses default numPlayers', () => {
@@ -201,7 +209,7 @@ describe('.configureRouter', () => {
 
       describe('with invalid numPlayers', () => {
         test('not enough players fails', async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/validate/create')
             .send({ numPlayers: 1 });
 
@@ -209,7 +217,7 @@ describe('.configureRouter', () => {
         });
 
         test('too many players fails', async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/validate/create')
             .send({ numPlayers: 3 });
 
@@ -217,7 +225,7 @@ describe('.configureRouter', () => {
         });
 
         test('invalid type fails', async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/validate/create')
             .send({ numPlayers: 'hello' });
 
@@ -227,7 +235,7 @@ describe('.configureRouter', () => {
 
       describe('for an unknown game name', () => {
         beforeEach(async () => {
-          response = await request(app.callback()).post('/games/bar/create');
+          response = await apiCall(app).post('/games/bar/create');
         });
 
         test('returns 404 error', () => {
@@ -237,7 +245,7 @@ describe('.configureRouter', () => {
 
       describe('with setupData', () => {
         beforeEach(async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/create')
             .send({
               setupData: {
@@ -284,7 +292,7 @@ describe('.configureRouter', () => {
 
       describe('with setupData validation', () => {
         test('creates game if validation passes', async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/validate/create')
             .send({
               numPlayers: 2,
@@ -297,7 +305,7 @@ describe('.configureRouter', () => {
         });
 
         test('returns error if validation fails', async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/validate/create')
             .send({
               numPlayers: 2,
@@ -312,7 +320,7 @@ describe('.configureRouter', () => {
 
       describe('with unlisted option', () => {
         beforeEach(async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/create')
             .send({ unlisted: true });
         });
@@ -338,7 +346,7 @@ describe('.configureRouter', () => {
 
       describe('without the lobby token', () => {
         beforeEach(async () => {
-          response = await request(app.callback()).post('/games/foo/create');
+          response = await apiCall(app).post('/games/foo/create');
         });
 
         test('fails', () => {
@@ -348,7 +356,7 @@ describe('.configureRouter', () => {
 
       describe('with the lobby token', () => {
         beforeEach(async () => {
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/create')
             .set('API-Secret', 'protected');
         });
@@ -384,7 +392,7 @@ describe('.configureRouter', () => {
           });
           const app = createApiServer({ db, auth, games });
 
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/1/join')
             .send('playerID=0&playerName=alice');
         });
@@ -417,7 +425,7 @@ describe('.configureRouter', () => {
               games,
               uuid: () => 'matchID',
             });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/join')
               .send({ playerID: 0, playerName: 'alice' });
           });
@@ -446,7 +454,7 @@ describe('.configureRouter', () => {
           describe('when custom data is provided', () => {
             beforeEach(async () => {
               const app = createApiServer({ db, auth, games });
-              response = await request(app.callback())
+              response = await apiCall(app)
                 .post('/games/foo/1/join')
                 .send({ playerID: 0, playerName: 'alice', data: 99 });
             });
@@ -469,7 +477,7 @@ describe('.configureRouter', () => {
         describe('when the playerID does not exist', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/join')
               .send('playerID=1&playerName=alice');
           });
@@ -487,7 +495,7 @@ describe('.configureRouter', () => {
               games,
               uuid: () => 'matchID',
             });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/join')
               .send('playerName=alice');
           });
@@ -506,7 +514,7 @@ describe('.configureRouter', () => {
                 },
               });
               const app = createApiServer({ db, auth, games });
-              response = await request(app.callback())
+              response = await apiCall(app)
                 .post('/games/foo/1/join')
                 .send('playerName=bob');
             });
@@ -545,7 +553,7 @@ describe('.configureRouter', () => {
         describe('when playerName is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/join')
               .send('playerID=1');
           });
@@ -574,7 +582,7 @@ describe('.configureRouter', () => {
 
             const app = createApiServer({ db, auth, games });
 
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/join')
               .send('playerID=0&playerName=alice');
           });
@@ -610,7 +618,7 @@ describe('.configureRouter', () => {
             fetch: async () => ({ metadata: null }),
           });
           const app = createApiServer({ db, auth, games });
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/1/rename')
             .send('playerID=0&playerName=alice&newName=ali');
           expect(response.status).toEqual(404);
@@ -640,7 +648,7 @@ describe('.configureRouter', () => {
               },
             });
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/rename')
               .send('playerID=0&credentials=SECRET1&newName=ali');
           });
@@ -648,7 +656,7 @@ describe('.configureRouter', () => {
           describe('when the playerName is not a string', () => {
             test('throws newName must be a string', async () => {
               const app = createApiServer({ db, auth, games });
-              response = await request(app.callback())
+              response = await apiCall(app)
                 .post('/games/foo/1/rename')
                 .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
               expect(response.text).toEqual(
@@ -681,7 +689,7 @@ describe('.configureRouter', () => {
         describe('when the playerID does not exist', () => {
           test('throws error 404', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/rename')
               .send('playerID=2&credentials=SECRET1&newName=joe');
             expect(response.status).toEqual(404);
@@ -692,7 +700,7 @@ describe('.configureRouter', () => {
         describe('when the credentials are invalid', () => {
           test('throws error 404', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/rename')
               .send('playerID=0&credentials=SECRET2&newName=mike');
             expect(response.status).toEqual(403);
@@ -703,7 +711,7 @@ describe('.configureRouter', () => {
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/rename')
               .send('credentials=foo&newName=bill');
           });
@@ -717,7 +725,7 @@ describe('.configureRouter', () => {
         describe('when newName is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/rename')
               .send('credentials=foo&playerID=0');
           });
@@ -752,7 +760,7 @@ describe('.configureRouter', () => {
             fetch: async () => ({ metadata: null }),
           });
           const app = createApiServer({ db, auth, games });
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/1/update')
             .send('playerID=0&playerName=alice&newName=ali');
           expect(response.text).toEqual('Match 1 not found');
@@ -781,7 +789,7 @@ describe('.configureRouter', () => {
               },
             });
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET1&newName=ali');
           });
@@ -789,7 +797,7 @@ describe('.configureRouter', () => {
           describe('when the playerName is not a string', () => {
             test('throws newName must be a string', async () => {
               const app = createApiServer({ db, auth, games });
-              response = await request(app.callback())
+              response = await apiCall(app)
                 .post('/games/foo/1/update')
                 .send({ playerID: 0, credentials: 'SECRET1', newName: 2 });
               expect(response.text).toEqual(
@@ -819,7 +827,7 @@ describe('.configureRouter', () => {
         describe('when the playerID does not exist', () => {
           test('throws player not found', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send('playerID=2&credentials=SECRET1&newName=joe');
             expect(response.text).toEqual('Player 2 not found');
@@ -829,7 +837,7 @@ describe('.configureRouter', () => {
         describe('when the credentials are invalid', () => {
           test('throws invalid credentials', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET2&newName=mike');
             expect(response.text).toEqual('Invalid credentials SECRET2');
@@ -839,7 +847,7 @@ describe('.configureRouter', () => {
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send('credentials=foo&newName=bill');
           });
@@ -851,7 +859,7 @@ describe('.configureRouter', () => {
         describe('when newName is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send('credentials=foo&playerID=0');
           });
@@ -884,7 +892,7 @@ describe('.configureRouter', () => {
             fetch: async () => ({ metadata: null }),
           });
           const app = createApiServer({ db, auth, games });
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/1/update')
             .send({ playerID: 0, data: { subdata: 'text' } });
           expect(response.text).toEqual('Match 1 not found');
@@ -913,7 +921,7 @@ describe('.configureRouter', () => {
               },
             });
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send({
                 playerID: 0,
@@ -945,7 +953,7 @@ describe('.configureRouter', () => {
         describe('when the playerID does not exist', () => {
           test('throws playerID not found', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send({
                 playerID: 2,
@@ -959,7 +967,7 @@ describe('.configureRouter', () => {
         describe('when the credentials are invalid', () => {
           test('invalid credentials', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send({
                 playerID: 0,
@@ -973,7 +981,7 @@ describe('.configureRouter', () => {
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send({ credentials: 'foo', data: { subdata: 'text' } });
           });
@@ -986,7 +994,7 @@ describe('.configureRouter', () => {
         describe('when data is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/update')
               .send({ playerID: 0, credentials: 'foo' });
           });
@@ -1020,7 +1028,7 @@ describe('.configureRouter', () => {
             fetch: async () => ({ metadata: null }),
           });
           const app = createApiServer({ db, auth, games });
-          response = await request(app.callback())
+          response = await apiCall(app)
             .post('/games/foo/1/leave')
             .send('playerID=0&playerName=alice');
           expect(response.status).toEqual(404);
@@ -1049,7 +1057,7 @@ describe('.configureRouter', () => {
               },
             });
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/leave')
               .send('playerID=0&credentials=SECRET1');
           });
@@ -1093,7 +1101,7 @@ describe('.configureRouter', () => {
                 },
               });
               const app = createApiServer({ db, auth, games });
-              response = await request(app.callback())
+              response = await apiCall(app)
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
               expect(db.mocks.wipe).toHaveBeenCalledWith('1');
@@ -1104,7 +1112,7 @@ describe('.configureRouter', () => {
         describe('when the playerID does not exist', () => {
           test('throws error 404', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/leave')
               .send('playerID=2&credentials=SECRET1');
             expect(response.status).toEqual(404);
@@ -1114,7 +1122,7 @@ describe('.configureRouter', () => {
         describe('when the credentials are invalid', () => {
           test('throws error 404', async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/leave')
               .send('playerID=0&credentials=SECRET2');
             expect(response.status).toEqual(403);
@@ -1123,7 +1131,7 @@ describe('.configureRouter', () => {
         describe('when playerID is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
-            response = await request(app.callback())
+            response = await apiCall(app)
               .post('/games/foo/1/leave')
               .send('credentials=foo');
           });
@@ -1150,7 +1158,7 @@ describe('.configureRouter', () => {
         const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         const app = createApiServer({ db, auth, games });
 
-        response = await request(app.callback()).get('/games');
+        response = await apiCall(app).get('/games');
       });
 
       test('should get 2 games', async () => {
@@ -1202,7 +1210,7 @@ describe('.configureRouter', () => {
       const uuid = () => 'newGameID';
       const app = createApiServer({ db, auth, games, uuid });
 
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/playAgain')
         .send({
           playerID: 0,
@@ -1237,7 +1245,7 @@ describe('.configureRouter', () => {
     test('when game configuration not supplied, uses previous game config', async () => {
       const uuid = () => 'newGameID';
       const app = createApiServer({ db, auth, games, uuid });
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
       expect(db.mocks.createMatch).toHaveBeenCalledWith(
@@ -1282,7 +1290,7 @@ describe('.configureRouter', () => {
         },
       });
       const app = createApiServer({ db, auth, games });
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET1');
       expect(response.body.nextMatchID).toBe('12345');
@@ -1293,7 +1301,7 @@ describe('.configureRouter', () => {
         fetch: async () => ({ metadata: null }),
       });
       const app = createApiServer({ db, auth, games });
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/playAgain')
         .send('playerID=0&playerName=alice');
       expect(response.status).toEqual(404);
@@ -1301,7 +1309,7 @@ describe('.configureRouter', () => {
 
     test('when the playerID is undefined throws error 403', async () => {
       const app = createApiServer({ db, auth, games });
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/playAgain')
         .send('credentials=SECRET1');
       expect(response.status).toEqual(403);
@@ -1309,7 +1317,7 @@ describe('.configureRouter', () => {
 
     test('when the playerID does not exist throws error 404', async () => {
       const app = createApiServer({ db, auth, games });
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/playAgain')
         .send('playerID=3&credentials=SECRET1');
       expect(response.status).toEqual(404);
@@ -1317,7 +1325,7 @@ describe('.configureRouter', () => {
 
     test('when the credentials are invalid throws error 404', async () => {
       const app = createApiServer({ db, auth, games });
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/playAgain')
         .send('playerID=0&credentials=SECRET2');
       expect(response.status).toEqual(403);
@@ -1325,7 +1333,7 @@ describe('.configureRouter', () => {
 
     test('when playerID is omitted throws error 403', async () => {
       const app = createApiServer({ db, auth, games });
-      response = await request(app.callback())
+      response = await apiCall(app)
         .post('/games/foo/1/leave')
         .send('credentials=foo');
       expect(response.status).toEqual(403);
@@ -1381,7 +1389,7 @@ describe('.configureRouter', () => {
       beforeEach(async () => {
         const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         const app = createApiServer({ db, auth, games });
-        response = await request(app.callback()).get('/games/bar');
+        response = await apiCall(app).get('/games/bar');
         matches = JSON.parse(response.text).matches;
       });
 
@@ -1416,33 +1424,31 @@ describe('.configureRouter', () => {
 
       describe('isGameover query param', () => {
         test('is undefined if not specified in request', async () => {
-          await request(app.callback()).get('/games/bar');
+          await apiCall(app).get('/games/bar');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
         test('is true', async () => {
-          await request(app.callback()).get('/games/bar?isGameover=true');
+          await apiCall(app).get('/games/bar?isGameover=true');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({ where: { isGameover: true } })
           );
         });
         test('is false', async () => {
-          await request(app.callback()).get('/games/bar?isGameover=false');
+          await apiCall(app).get('/games/bar?isGameover=false');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({ where: { isGameover: false } })
           );
         });
         test('invalid value is ignored', async () => {
-          await request(app.callback()).get('/games/bar?isGameover=5');
+          await apiCall(app).get('/games/bar?isGameover=5');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({ where: { isGameover: undefined } })
           );
         });
         test('uses first array value', async () => {
-          await request(app.callback()).get(
-            '/games/bar?isGameover=true&isGameover=false'
-          );
+          await apiCall(app).get('/games/bar?isGameover=true&isGameover=false');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({ where: { isGameover: true } })
           );
@@ -1451,7 +1457,7 @@ describe('.configureRouter', () => {
 
       describe('updatedBefore query param', () => {
         test('is undefined if not specified in request', async () => {
-          await request(app.callback()).get('/games/bar');
+          await apiCall(app).get('/games/bar');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({ updatedBefore: undefined }),
@@ -1460,7 +1466,7 @@ describe('.configureRouter', () => {
         });
         test('is specified', async () => {
           const timestamp = new Date(2020, 3, 4, 5, 6, 7);
-          await request(app.callback()).get(
+          await apiCall(app).get(
             `/games/bar?updatedBefore=${timestamp.getTime()}`
           );
           expect(dblistMatches).toHaveBeenCalledWith(
@@ -1472,7 +1478,7 @@ describe('.configureRouter', () => {
           );
         });
         test('invalid value is ignored', async () => {
-          await request(app.callback()).get('/games/bar?updatedBefore=-5');
+          await apiCall(app).get('/games/bar?updatedBefore=-5');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({ where: { updatedBefore: undefined } })
           );
@@ -1480,7 +1486,7 @@ describe('.configureRouter', () => {
         test('uses first array value', async () => {
           const t1 = new Date(2020, 3, 4, 5, 6, 7).getTime();
           const t2 = new Date(2021, 3, 4, 5, 6, 7).getTime();
-          await request(app.callback()).get(
+          await apiCall(app).get(
             `/games/bar?updatedBefore=${t1}&updatedBefore=${t2}`
           );
           expect(dblistMatches).toHaveBeenCalledWith(
@@ -1493,7 +1499,7 @@ describe('.configureRouter', () => {
 
       describe('updatedAfter query param', () => {
         test('is undefined if not specified in request', async () => {
-          await request(app.callback()).get('/games/bar');
+          await apiCall(app).get('/games/bar');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({ updatedAfter: undefined }),
@@ -1502,7 +1508,7 @@ describe('.configureRouter', () => {
         });
         test('is specified', async () => {
           const timestamp = new Date(2020, 3, 4, 5, 6, 7);
-          await request(app.callback()).get(
+          await apiCall(app).get(
             `/games/bar?updatedAfter=${timestamp.getTime()}`
           );
           expect(dblistMatches).toHaveBeenCalledWith(
@@ -1514,7 +1520,7 @@ describe('.configureRouter', () => {
           );
         });
         test('invalid value is ignored', async () => {
-          await request(app.callback()).get('/games/bar?updatedAfter=-5');
+          await apiCall(app).get('/games/bar?updatedAfter=-5');
           expect(dblistMatches).toHaveBeenCalledWith(
             expect.objectContaining({ where: { updatedAfter: undefined } })
           );
@@ -1522,7 +1528,7 @@ describe('.configureRouter', () => {
         test('uses first array value', async () => {
           const t1 = new Date(2020, 3, 4, 5, 6, 7).getTime();
           const t2 = new Date(2021, 3, 4, 5, 6, 7).getTime();
-          await request(app.callback()).get(
+          await apiCall(app).get(
             `/games/bar?updatedAfter=${t1}&updatedAfter=${t2}`
           );
           expect(dblistMatches).toHaveBeenCalledWith(
@@ -1570,7 +1576,7 @@ describe('.configureRouter', () => {
       beforeEach(async () => {
         const games = [ProcessGameConfig({ name: 'foo' }), { name: 'bar' }];
         const app = createApiServer({ db, auth, games });
-        response = await request(app.callback()).get('/games/bar/bar-0');
+        response = await apiCall(app).get('/games/bar/bar-0');
         room = JSON.parse(response.text);
       });
 
@@ -1595,7 +1601,7 @@ describe('.configureRouter', () => {
         });
         const games = [ProcessGameConfig({ name: 'foo' })];
         const app = createApiServer({ db, auth, games });
-        response = await request(app.callback()).get('/games/bar/doesnotexist');
+        response = await apiCall(app).get('/games/bar/doesnotexist');
       });
 
       test('throws error 404', async () => {
@@ -1644,7 +1650,7 @@ describe('.configureRouter', () => {
       const app = createApiServer({ auth, games, db, origins: false });
 
       test('does not allow CORS', async () => {
-        const res = await request(app.callback())
+        const res = await apiCall(app)
           .get('/games')
           .set('Origin', 'https://www.example.com')
           .expect('Vary', 'Origin');
@@ -1658,7 +1664,7 @@ describe('.configureRouter', () => {
       const app = createApiServer({ auth, games, db, origins: origin });
 
       test('disallows non-matching origin', async () => {
-        const res = await request(app.callback())
+        const res = await apiCall(app)
           .get('/games')
           .set('Origin', 'https://www.other.com')
           .expect('Vary', 'Origin');
@@ -1668,7 +1674,7 @@ describe('.configureRouter', () => {
 
       // eslint-disable-next-line jest/expect-expect
       test('allows matching origin', async () => {
-        await request(app.callback())
+        await apiCall(app)
           .get('/games')
           .set('Origin', origin)
           .expect('Vary', 'Origin')
@@ -1681,7 +1687,7 @@ describe('.configureRouter', () => {
       const app = createApiServer({ auth, games, db, origins });
 
       test('disallows non-matching origin', async () => {
-        const res = await request(app.callback())
+        const res = await apiCall(app)
           .get('/games')
           .set('Origin', 'https://www.other.com')
           .expect('Vary', 'Origin');
@@ -1692,7 +1698,7 @@ describe('.configureRouter', () => {
       // eslint-disable-next-line jest/expect-expect
       test('allows matching origin', async () => {
         const origin = 'http://localhost:5000';
-        await request(app.callback())
+        await apiCall(app)
           .get('/games')
           .set('Origin', origin)
           .expect('Vary', 'Origin')
