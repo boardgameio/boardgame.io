@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import Cookies from 'react-cookies';
+import Cookies from 'js-cookie';
 import PropTypes from 'prop-types';
 import type { DebugOpt } from '../client/client';
 import { Client } from '../client/react';
@@ -123,7 +123,8 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   componentDidMount() {
-    const cookie = Cookies.load('lobbyState') || {};
+    const raw = Cookies.get('lobbyState');
+    const cookie = raw ? JSON.parse(raw) : {};
     if (cookie.phase && cookie.phase === LobbyPhases.PLAY) {
       cookie.phase = LobbyPhases.LIST;
     }
@@ -152,7 +153,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
         playerName: name,
         credentialStore: this.state.credentialStore,
       };
-      Cookies.save('lobbyState', cookie, { path: '/' });
+      Cookies.set('lobbyState', JSON.stringify(cookie), { path: '/' });
     }
     if (prevProps.refreshInterval !== this.props.refreshInterval) {
       this._startRefreshInterval();

@@ -7,10 +7,14 @@
  */
 
 import React from 'react';
-import Cookies from 'react-cookies';
+import Cookies from 'js-cookie';
 import Lobby from './react';
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+
+const seedLobbyState = (state: Record<string, unknown>) =>
+  Cookies.set('lobbyState', JSON.stringify(state), { path: '/' });
+const clearLobbyState = () => Cookies.remove('lobbyState', { path: '/' });
 
 /* mock server requests */
 global.fetch = jest
@@ -153,18 +157,14 @@ describe('lobby', () => {
   describe('refresh during game', () => {
     beforeEach(async () => {
       // initial state = phase 'play'
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'play',
-          playerName: 'Bob',
-        },
-        { path: '/' }
-      );
+      seedLobbyState({
+        phase: 'play',
+        playerName: 'Bob',
+      });
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
     });
     afterEach(() => {
-      Cookies.remove('lobbyState', { path: '/' });
+      clearLobbyState();
     });
     test('reset phase to list', async () => {
       expect(lobby.instance().state.phase).toBe('list');
@@ -192,14 +192,10 @@ describe('lobby', () => {
     });
 
     test('refresh starts when component mounts and cookie state sends us to LIST', () => {
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'list',
-          playerName: 'Bob',
-        },
-        { path: '/' }
-      );
+      seedLobbyState({
+        phase: 'list',
+        playerName: 'Bob',
+      });
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
 
       expect(setIntervalSpy).toHaveBeenCalledTimes(1);
@@ -207,14 +203,10 @@ describe('lobby', () => {
     });
 
     test('refresh stops when transitioning from LIST to PLAY', () => {
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'list',
-          playerName: 'Bob',
-        },
-        { path: '/' }
-      );
+      seedLobbyState({
+        phase: 'list',
+        playerName: 'Bob',
+      });
       lobby = Enzyme.mount(<Lobby gameComponents={components} />);
 
       lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
@@ -259,14 +251,10 @@ describe('lobby', () => {
     const spyClient = jest.fn();
     beforeEach(async () => {
       // initial state = logged-in as 'Bob'
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'list',
-          playerName: 'Bob',
-        },
-        { path: '/' }
-      );
+      seedLobbyState({
+        phase: 'list',
+        playerName: 'Bob',
+      });
       lobby = Enzyme.mount(
         <Lobby
           gameComponents={components}
@@ -278,7 +266,7 @@ describe('lobby', () => {
 
     afterEach(() => {
       spyClient.mockReset();
-      Cookies.remove('lobbyState', { path: '/' });
+      clearLobbyState();
     });
 
     describe('creating a match', () => {
