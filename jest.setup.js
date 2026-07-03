@@ -31,3 +31,37 @@ if (globalThis.MessagePort === undefined) {
   globalThis.MessagePort = MessagePort;
   globalThis.MessageChannel = MessageChannel;
 }
+// jsdom does not implement Web Animations. Svelte 5 transitions invoke
+// element.animate(); stub it so tests that exercise toggle UI don't crash.
+// Stub fires onfinish synchronously so transitions complete and Svelte
+// proceeds with DOM removal in the same tick.
+if (
+  typeof Element !== 'undefined' &&
+  typeof Element.prototype.animate !== 'function'
+) {
+  Element.prototype.animate = function () {
+    let onfinish = null;
+    const animation = {
+      cancel() {},
+      finish() {
+        if (onfinish) onfinish();
+      },
+      pause() {},
+      play() {},
+      reverse() {},
+      addEventListener(type, cb) {
+        if (type === 'finish') onfinish = cb;
+      },
+      removeEventListener() {},
+      set onfinish(cb) {
+        onfinish = cb;
+        if (cb) cb();
+      },
+      get onfinish() {
+        return onfinish;
+      },
+      finished: Promise.resolve(),
+    };
+    return animation;
+  };
+}
