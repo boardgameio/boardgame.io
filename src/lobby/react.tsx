@@ -61,7 +61,7 @@ type LobbyProps = {
     handleExitMatch: () => void;
     handleRefreshMatches: () => Promise<void>;
     handleStartMatch: (gameName: string, matchOpts: MatchOpts) => void;
-  }) => JSX.Element;
+  }) => React.JSX.Element;
 };
 
 type LobbyState = {

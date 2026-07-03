@@ -7,33 +7,64 @@
  */
 
 import React from 'react';
+import { act, fireEvent, render } from '@testing-library/react';
 import Cookies from 'react-cookies';
 import Lobby from './react';
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { LobbyConnection } from './connection';
+
+jest.mock('./connection');
 
 /* mock server requests */
 global.fetch = jest
   .fn()
-  .mockReturnValue({ ok: true, status: 200, json: () => [] });
+  .mockReturnValue({ ok: true, status: 200, json: () => [] }) as any;
 
 /* mock 'Client' component */
 function NullComponent() {
   return '<noscript />';
 }
 
-Enzyme.configure({ adapter: new Adapter() });
+type MockConnection = {
+  matches: any[];
+  playerName: string;
+  playerCredentials?: string;
+  gameComponents: any[];
+  refresh: jest.Mock;
+  create: jest.Mock;
+  join: jest.Mock;
+  leave: jest.Mock;
+  disconnect: jest.Mock;
+  _getGameComponents: jest.Mock;
+};
+
+let mockConnection: MockConnection;
+
+function makeMockConnection(components: any[]): MockConnection {
+  return {
+    matches: [],
+    playerName: 'Visitor',
+    playerCredentials: undefined,
+    gameComponents: components,
+    refresh: jest.fn().mockResolvedValue(undefined),
+    create: jest.fn().mockResolvedValue(undefined),
+    join: jest.fn().mockResolvedValue(undefined),
+    leave: jest.fn().mockResolvedValue(undefined),
+    disconnect: jest.fn().mockResolvedValue(undefined),
+    _getGameComponents: jest.fn((gameName: string) =>
+      components.find((c) => c.game.name === gameName)
+    ),
+  };
+}
 
 describe('lobby', () => {
-  let lobby;
   const spy = jest.fn();
-  let setIntervalSpy;
-  let clearIntervalSpy;
+  let setIntervalSpy: jest.SpyInstance;
+  let clearIntervalSpy: jest.SpyInstance;
   let components: any[];
 
-  beforeEach(async () => {
-    setIntervalSpy = jest.spyOn(global, 'setInterval');
-    clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+  beforeEach(() => {
+    setIntervalSpy = jest.spyOn(globalThis, 'setInterval');
+    clearIntervalSpy = jest.spyOn(globalThis, 'clearInterval');
     components = [
       {
         board: 'Board1',
@@ -45,6 +76,8 @@ describe('lobby', () => {
         game: { name: 'GameName3', maxPlayers: 1 },
       },
     ];
+    mockConnection = makeMockConnection(components);
+    (LobbyConnection as jest.Mock).mockImplementation(() => mockConnection);
   });
 
   afterEach(() => {
@@ -55,16 +88,20 @@ describe('lobby', () => {
 
   describe('specify servers', () => {
     test('gameServer', () => {
-      const spy = jest.fn();
-      const lobby: any = Enzyme.mount(
+      const clientSpy = jest.fn();
+      const ref = React.createRef<Lobby>();
+      render(
         <Lobby
+          ref={ref}
           gameComponents={components}
-          clientFactory={spy.mockReturnValue(NullComponent)}
+          clientFactory={clientSpy.mockReturnValue(NullComponent) as any}
           gameServer="localhost:9000"
         />
       );
-      lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
-      expect(spy).toHaveBeenCalledWith(
+      act(() => {
+        (ref.current as any)._startMatch('GameName1', { numPlayers: 2 });
+      });
+      expect(clientSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           multiplayer: expect.anything(),
         })
@@ -73,63 +110,76 @@ describe('lobby', () => {
   });
 
   describe('login/logout', () => {
-    beforeEach(async () => {
-      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+    let ref: React.RefObject<Lobby>;
+    let container: HTMLElement;
+    let rerender: (ui: React.ReactElement) => void;
+
+    beforeEach(() => {
+      ref = React.createRef<Lobby>();
+      const result = render(<Lobby ref={ref} gameComponents={components} />);
+      container = result.container;
+      rerender = result.rerender;
+    });
+
+    afterEach(() => {
+      Cookies.remove('lobbyState', { path: '/' });
     });
 
     test('changing prop debug', () => {
       expect(() => {
-        lobby.setProps({
-          debug: !lobby.props().debug,
-        });
+        rerender(<Lobby ref={ref} gameComponents={components} debug={true} />);
       }).not.toThrow();
     });
 
     describe('login succeeds', () => {
-      beforeEach(async () => {
-        lobby
-          .find('LobbyLoginForm')
-          .find('input')
-          .props()
-          .onChange({ target: { value: 'Mark' } });
+      let input: HTMLInputElement;
+      beforeEach(() => {
+        input = container.querySelector(
+          '.phase input[type="text"]'
+        ) as HTMLInputElement;
+        fireEvent.change(input, { target: { value: 'Mark' } });
       });
       test('by clicking', () => {
-        lobby.find('LobbyLoginForm').find('button').simulate('click');
-        expect(lobby.instance().state.playerName).toBe('Mark');
+        const button = container.querySelector(
+          '.phase button'
+        ) as HTMLButtonElement;
+        fireEvent.click(button);
+        expect((ref.current as any).state.playerName).toBe('Mark');
       });
       test('by pressing enter', () => {
-        lobby
-          .find('LobbyLoginForm')
-          .find('input')
-          .props()
-          .onKeyPress({ key: 'Enter' });
-        expect(lobby.instance().state.playerName).toBe('Mark');
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect((ref.current as any).state.playerName).toBe('Mark');
       });
     });
 
     describe('login fails', () => {
       test('if no name entered', () => {
-        lobby
-          .find('LobbyLoginForm')
-          .find('input')
-          .props()
-          .onChange({ target: { value: '' } });
-        lobby.find('LobbyLoginForm').find('button').simulate('click');
-        expect(lobby.find('LobbyLoginForm').find('.error-msg').text()).not.toBe(
-          ''
-        );
+        const input = container.querySelector(
+          '.phase input[type="text"]'
+        ) as HTMLInputElement;
+        fireEvent.change(input, { target: { value: '' } });
+        const button = container.querySelector(
+          '.phase button'
+        ) as HTMLButtonElement;
+        fireEvent.click(button);
+        const errorMsg = container.querySelector(
+          '.phase .error-msg'
+        ) as HTMLElement;
+        expect(errorMsg.textContent).not.toBe('');
       });
       test('invalid key press', () => {
-        const input = lobby.find('LobbyLoginForm').find('input');
-        const currentValue = input.instance().value;
-        input.props().onKeyPress({ key: 'Wololo' });
-        expect(input.instance().value).toBe(currentValue);
+        const input = container.querySelector(
+          '.phase input[type="text"]'
+        ) as HTMLInputElement;
+        const currentValue = input.value;
+        fireEvent.keyDown(input, { key: 'Wololo' });
+        expect(input.value).toBe(currentValue);
       });
     });
 
     describe('exiting lobby', () => {
-      beforeEach(async () => {
-        lobby.instance().connection.matches = [
+      beforeEach(() => {
+        mockConnection.matches = [
           {
             matchID: 'matchID1',
             players: {
@@ -139,19 +189,24 @@ describe('lobby', () => {
             gameName: 'GameName1',
           },
         ];
-        lobby.instance().forceUpdate();
-        lobby.update();
+        act(() => {
+          (ref.current as any).forceUpdate();
+        });
       });
-      test('disconnect from server', async () => {
-        lobby.instance().connection.disconnect = spy;
-        lobby.find('#lobby-exit').find('button').simulate('click');
+      test('disconnect from server', () => {
+        mockConnection.disconnect = spy.mockResolvedValue(undefined);
+        const exitButton = container.querySelector(
+          '#lobby-exit button'
+        ) as HTMLButtonElement;
+        fireEvent.click(exitButton);
         expect(spy).toHaveBeenCalledWith();
       });
     });
   });
 
   describe('refresh during game', () => {
-    beforeEach(async () => {
+    let ref: React.RefObject<Lobby>;
+    beforeEach(() => {
       // initial state = phase 'play'
       Cookies.save(
         'lobbyState',
@@ -161,31 +216,40 @@ describe('lobby', () => {
         },
         { path: '/' }
       );
-      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+      ref = React.createRef<Lobby>();
+      render(<Lobby ref={ref} gameComponents={components} />);
     });
     afterEach(() => {
       Cookies.remove('lobbyState', { path: '/' });
     });
-    test('reset phase to list', async () => {
-      expect(lobby.instance().state.phase).toBe('list');
+    test('reset phase to list', () => {
+      expect((ref.current as any).state.phase).toBe('list');
     });
   });
 
   describe('refresh interval triggering', () => {
+    afterEach(() => {
+      Cookies.remove('lobbyState', { path: '/' });
+    });
+
     test('refresh does not start on initial component mount', () => {
-      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+      const ref = React.createRef<Lobby>();
+      render(<Lobby ref={ref} gameComponents={components} />);
 
       expect(setIntervalSpy).not.toHaveBeenCalled();
     });
 
     test('refresh starts when transitioning from ENTER lobby to LIST lobby', () => {
-      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+      const ref = React.createRef<Lobby>();
+      const { container } = render(
+        <Lobby ref={ref} gameComponents={components} />
+      );
 
-      lobby
-        .find('LobbyLoginForm')
-        .find('input')
-        .props()
-        .onKeyPress({ key: 'Enter' });
+      const input = container.querySelector(
+        '.phase input[type="text"]'
+      ) as HTMLInputElement;
+      fireEvent.change(input, { target: { value: 'Mark' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
 
       expect(setIntervalSpy).toHaveBeenCalledTimes(1);
       expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
@@ -200,7 +264,8 @@ describe('lobby', () => {
         },
         { path: '/' }
       );
-      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+      const ref = React.createRef<Lobby>();
+      render(<Lobby ref={ref} gameComponents={components} />);
 
       expect(setIntervalSpy).toHaveBeenCalledTimes(1);
       expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
@@ -215,49 +280,93 @@ describe('lobby', () => {
         },
         { path: '/' }
       );
-      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
+      const ref = React.createRef<Lobby>();
+      render(<Lobby ref={ref} gameComponents={components} />);
 
-      lobby.instance()._startMatch('GameName1', { numPlayers: 2 });
+      act(() => {
+        (ref.current as any)._startMatch('GameName1', { numPlayers: 2 });
+      });
 
       expect(clearIntervalSpy).toHaveBeenCalledWith(
-        lobby.instance()._currentInterval
+        (ref.current as any)._currentInterval
       );
     });
   });
 
   describe('refresh interval tracking', () => {
+    let ref: React.RefObject<Lobby>;
+    let rerender: (ui: React.ReactElement) => void;
+    let unmount: () => void;
+
     beforeEach(() => {
-      lobby = Enzyme.mount(<Lobby gameComponents={components} />);
-      lobby
-        .find('LobbyLoginForm')
-        .find('input')
-        .props()
-        .onKeyPress({ key: 'Enter' });
+      ref = React.createRef<Lobby>();
+      const result = render(<Lobby ref={ref} gameComponents={components} />);
+      rerender = result.rerender;
+      unmount = result.unmount;
+      const input = result.container.querySelector(
+        '.phase input[type="text"]'
+      ) as HTMLInputElement;
+      fireEvent.change(input, { target: { value: 'Mark' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
     });
 
-    afterEach(() => lobby.unmount());
+    afterEach(() => {
+      unmount();
+      Cookies.remove('lobbyState', { path: '/' });
+    });
 
     test('lobby stores an interval ID', () => {
-      const { _currentInterval } = lobby.instance();
+      const { _currentInterval } = ref.current as any;
       expect(_currentInterval).toEqual(expect.any(Number));
     });
 
     test('updating interval prop, updates internal interval ID', () => {
-      const { _currentInterval } = lobby.instance();
-      lobby.setProps({ refreshInterval: 10000 });
-      expect(lobby.instance()._currentInterval).not.toEqual(_currentInterval);
+      const { _currentInterval } = ref.current as any;
+      rerender(
+        <Lobby ref={ref} gameComponents={components} refreshInterval={10_000} />
+      );
+      expect((ref.current as any)._currentInterval).not.toEqual(
+        _currentInterval
+      );
     });
 
     test('updating other props does not update interval ID', () => {
-      const { _currentInterval } = lobby.instance();
-      lobby.setProps({ debug: true });
-      expect(lobby.instance()._currentInterval).toEqual(_currentInterval);
+      const { _currentInterval } = ref.current as any;
+      rerender(<Lobby ref={ref} gameComponents={components} debug={true} />);
+      expect((ref.current as any)._currentInterval).toEqual(_currentInterval);
     });
   });
 
   describe('matches list', () => {
     const spyClient = jest.fn();
-    beforeEach(async () => {
+    let ref: React.RefObject<Lobby>;
+    let container: HTMLElement;
+
+    function renderLobbyAlreadyLoggedIn() {
+      ref = React.createRef<Lobby>();
+      const result = render(
+        <Lobby
+          ref={ref}
+          gameComponents={components}
+          clientFactory={spyClient.mockReturnValue(NullComponent) as any}
+        />
+      );
+      container = result.container;
+    }
+
+    function forceLobbyUpdate() {
+      act(() => {
+        (ref.current as any).forceUpdate();
+      });
+    }
+
+    function matchRows(): HTMLTableRowElement[] {
+      return [
+        ...container.querySelectorAll('#instances tbody tr'),
+      ] as HTMLTableRowElement[];
+    }
+
+    beforeEach(() => {
       // initial state = logged-in as 'Bob'
       Cookies.save(
         'lobbyState',
@@ -267,13 +376,6 @@ describe('lobby', () => {
         },
         { path: '/' }
       );
-      lobby = Enzyme.mount(
-        <Lobby
-          gameComponents={components}
-          // stub for Client factory
-          clientFactory={spyClient.mockReturnValue(NullComponent)}
-        />
-      );
     });
 
     afterEach(() => {
@@ -282,72 +384,73 @@ describe('lobby', () => {
     });
 
     describe('creating a match', () => {
-      beforeEach(async () => {
-        lobby.instance().connection.matches = [
+      beforeEach(() => {
+        renderLobbyAlreadyLoggedIn();
+        mockConnection.matches = [
           {
             matchID: 'matchID1',
             players: { '0': { id: 0 } },
             gameName: 'GameName1',
           },
         ];
-        lobby.instance().forceUpdate();
-        lobby.update();
+        forceLobbyUpdate();
       });
 
       test('match with default number of players', () => {
-        lobby.instance().connection.create = spy;
-        lobby.find('LobbyCreateMatchForm').find('button').simulate('click');
+        mockConnection.create = spy;
+        const createButton = container.querySelector(
+          '#match-creation button'
+        ) as HTMLButtonElement;
+        fireEvent.click(createButton);
         expect(spy).toHaveBeenCalledWith('GameName1', 3);
       });
       test('match with 2 players', () => {
-        lobby.instance().connection.create = spy;
-        lobby
-          .find('LobbyCreateMatchForm')
-          .find('select')
-          .first()
-          .props()
-          .onChange({ target: { value: '1' } });
-        lobby
-          .find('LobbyCreateMatchForm')
-          .find('select')
-          .at(1)
-          .props()
-          .onChange({ target: { value: '2' } });
-        lobby.find('LobbyCreateMatchForm').find('button').simulate('click');
+        mockConnection.create = spy;
+        const selects = container.querySelectorAll('#match-creation select');
+        fireEvent.change(selects[0], { target: { value: '1' } });
+        fireEvent.change(selects[1], { target: { value: '2' } });
+        const createButton = container.querySelector(
+          '#match-creation button'
+        ) as HTMLButtonElement;
+        fireEvent.click(createButton);
         expect(spy).toHaveBeenCalledWith('GameName2', 2);
       });
       test('when server request fails', async () => {
-        lobby.instance().connection.create = spy.mockImplementation(() => {
+        mockConnection.create = spy.mockImplementation(() => {
           throw new Error('fail');
         });
-        await lobby
-          .find('LobbyCreateMatchForm')
-          .find('button')
-          .simulate('click');
-        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
+        const createButton = container.querySelector(
+          '#match-creation button'
+        ) as HTMLButtonElement;
+        await act(async () => {
+          fireEvent.click(createButton);
+        });
+        const errorMsg = container.querySelector(
+          '#instances .error-msg'
+        ) as HTMLElement;
+        expect(errorMsg.textContent).not.toBe('');
       });
-      test('when game has no boundaries on the number of players', async () => {
+      test('when game has no boundaries on the number of players', () => {
         // select 2nd game
-        lobby
-          .find('LobbyCreateMatchForm')
-          .find('select')
-          .first()
-          .props()
-          .onChange({ target: { value: '1' } });
-        expect(
-          lobby.find('LobbyCreateMatchForm').find('select').at(1).text()
-        ).toBe('1234');
+        const selects = container.querySelectorAll('#match-creation select');
+        fireEvent.change(selects[0], { target: { value: '1' } });
+        const numSelect = container.querySelectorAll(
+          '#match-creation select'
+        )[1] as HTMLSelectElement;
+        expect(numSelect.textContent).toBe('1234');
       });
-      test('when game has boundaries on the number of players', async () => {
-        expect(
-          lobby.find('LobbyCreateMatchForm').find('select').at(1).text()
-        ).toBe('345');
+      test('when game has boundaries on the number of players', () => {
+        const numSelect = container.querySelectorAll(
+          '#match-creation select'
+        )[1] as HTMLSelectElement;
+        expect(numSelect.textContent).toBe('345');
       });
     });
 
     describe('joining a match', () => {
-      beforeEach(async () => {
-        lobby.instance().connection.matches = [
+      beforeEach(() => {
+        renderLobbyAlreadyLoggedIn();
+        mockConnection.matches = [
           {
             matchID: 'matchID1',
             players: { '0': { id: 0 } },
@@ -359,42 +462,42 @@ describe('lobby', () => {
             gameName: 'GameName1',
           },
         ];
-        lobby.instance().forceUpdate();
-        lobby.update();
+        forceLobbyUpdate();
       });
       test('when match is empty', () => {
         // join 1st match
-        lobby.instance().connection.join = spy;
-        lobby
-          .find('LobbyMatchInstance')
-          .first()
-          .find('button')
-          .simulate('click');
+        mockConnection.join = spy;
+        const firstRow = matchRows()[0];
+        const button = firstRow.querySelector('button') as HTMLButtonElement;
+        fireEvent.click(button);
         expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1', '0');
       });
       test('when match is full', () => {
         // try 2nd match
-        expect(lobby.find('LobbyMatchInstance').at(1).text()).toContain(
-          'RUNNING'
-        );
+        const rows = matchRows();
+        expect(rows[1].textContent).toContain('RUNNING');
       });
       test('when server request fails', async () => {
-        lobby.instance().connection.join = spy.mockImplementation(() => {
+        mockConnection.join = spy.mockImplementation(() => {
           throw new Error('fail');
         });
         // join 1st match
-        await lobby
-          .find('LobbyMatchInstance')
-          .first()
-          .find('button')
-          .simulate('click');
-        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
+        const firstRow = matchRows()[0];
+        const button = firstRow.querySelector('button') as HTMLButtonElement;
+        await act(async () => {
+          fireEvent.click(button);
+        });
+        const errorMsg = container.querySelector(
+          '#instances .error-msg'
+        ) as HTMLElement;
+        expect(errorMsg.textContent).not.toBe('');
       });
     });
 
     describe('leaving a match', () => {
-      beforeEach(async () => {
-        lobby.instance().connection.matches = [
+      beforeEach(() => {
+        renderLobbyAlreadyLoggedIn();
+        mockConnection.matches = [
           {
             matchID: 'matchID1',
             players: {
@@ -404,27 +507,36 @@ describe('lobby', () => {
             gameName: 'GameName1',
           },
         ];
-        lobby.instance().forceUpdate();
-        lobby.update();
+        forceLobbyUpdate();
       });
       test('shall leave a match', () => {
         // leave match
-        lobby.instance().connection.leave = spy;
-        lobby.find('LobbyMatchInstance').find('button').simulate('click');
+        mockConnection.leave = spy;
+        const row = matchRows()[0];
+        const button = row.querySelector('button') as HTMLButtonElement;
+        fireEvent.click(button);
         expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1');
       });
       test('when server request fails', async () => {
-        lobby.instance().connection.leave = spy.mockImplementation(() => {
+        mockConnection.leave = spy.mockImplementation(() => {
           throw new Error('fail');
         });
-        await lobby.find('LobbyMatchInstance').find('button').simulate('click');
-        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
+        const row = matchRows()[0];
+        const button = row.querySelector('button') as HTMLButtonElement;
+        await act(async () => {
+          fireEvent.click(button);
+        });
+        const errorMsg = container.querySelector(
+          '#instances .error-msg'
+        ) as HTMLElement;
+        expect(errorMsg.textContent).not.toBe('');
       });
     });
 
     describe('starting a game', () => {
-      beforeEach(async () => {
-        lobby.instance().connection.matches = [
+      beforeEach(() => {
+        renderLobbyAlreadyLoggedIn();
+        mockConnection.matches = [
           {
             matchID: 'matchID1',
             players: {
@@ -449,20 +561,15 @@ describe('lobby', () => {
             gameName: 'GameNameUnknown',
           },
         ];
-        lobby.instance().forceUpdate();
-        lobby.update();
+        forceLobbyUpdate();
       });
 
       test('if player has joined the game', () => {
-        lobby.instance().connection.playerCredentials = 'SECRET1';
-        lobby
-          .find('LobbyMatchInstance')
-          .first()
-          .find('button')
-
-          .first()
-          .simulate('click');
-        expect(lobby.instance().state.runningMatch).toEqual({
+        mockConnection.playerCredentials = 'SECRET1';
+        const firstRow = matchRows()[0];
+        const buttons = firstRow.querySelectorAll('button');
+        fireEvent.click(buttons[0]);
+        expect((ref.current as any).state.runningMatch).toEqual({
           app: NullComponent,
           matchID: 'matchID1',
           playerID: '0',
@@ -477,8 +584,10 @@ describe('lobby', () => {
       });
 
       test('if player is spectator', () => {
-        lobby.find('LobbyMatchInstance').at(1).find('button').simulate('click');
-        expect(lobby.instance().state.runningMatch).toEqual({
+        const rows = matchRows();
+        const button = rows[1].querySelector('button') as HTMLButtonElement;
+        fireEvent.click(button);
+        expect((ref.current as any).state.runningMatch).toEqual({
           app: NullComponent,
           credentials: undefined,
           matchID: 'matchID2',
@@ -487,19 +596,20 @@ describe('lobby', () => {
       });
 
       test('if game is not supported', () => {
-        lobby.find('LobbyMatchInstance').at(3).find('button').simulate('click');
+        const rows = matchRows();
+        const button = rows[3].querySelector('button') as HTMLButtonElement;
+        fireEvent.click(button);
         expect(spy).not.toHaveBeenCalled();
-        expect(lobby.find('#instances').find('.error-msg').text()).not.toBe('');
+        const errorMsg = container.querySelector(
+          '#instances .error-msg'
+        ) as HTMLElement;
+        expect(errorMsg.textContent).not.toBe('');
       });
 
       test('if game is monoplayer', () => {
-        lobby
-          .find('LobbyMatchInstance')
-          .at(2)
-          .find('button')
-
-          .first()
-          .simulate('click');
+        const rows = matchRows();
+        const buttons = rows[2].querySelectorAll('button');
+        fireEvent.click(buttons[0]);
         expect(spy).not.toHaveBeenCalledWith(expect.anything(), {
           matchID: 'matchID3',
         });
@@ -507,8 +617,9 @@ describe('lobby', () => {
     });
 
     describe('exiting during game', () => {
-      beforeEach(async () => {
-        lobby.instance().connection.matches = [
+      beforeEach(() => {
+        renderLobbyAlreadyLoggedIn();
+        mockConnection.matches = [
           {
             matchID: 'matchID1',
             players: {
@@ -518,57 +629,56 @@ describe('lobby', () => {
             gameName: 'GameName1',
           },
         ];
-        lobby.instance().forceUpdate();
-        lobby.update();
+        forceLobbyUpdate();
       });
       test('reset game', () => {
-        lobby.instance().connection.playerCredentials = 'SECRET1';
+        mockConnection.playerCredentials = 'SECRET1';
         // start game
-        lobby
-          .find('LobbyMatchInstance')
-          .first()
-          .find('button')
-          .first()
-          .simulate('click');
+        const firstRow = matchRows()[0];
+        const buttons = firstRow.querySelectorAll('button');
+        fireEvent.click(buttons[0]);
         // exit game
-        lobby.find('#match-exit').find('button').simulate('click');
-        expect(lobby.instance().state.runningMatch).toEqual(null);
-        expect(lobby.instance().state.phase).toEqual('list');
+        const exitButton = container.querySelector(
+          '#match-exit button'
+        ) as HTMLButtonElement;
+        fireEvent.click(exitButton);
+        expect((ref.current as any).state.runningMatch).toEqual(null);
+        expect((ref.current as any).state.phase).toEqual('list');
       });
     });
 
     describe('custom renderer', () => {
       test('should render custom lobby ui', () => {
-        const lobby = Enzyme.mount(
+        const { container } = render(
           <Lobby gameComponents={[]} renderer={() => <div>Foo</div>} />
         );
 
-        expect(lobby.html()).toEqual('<div>Foo</div>');
+        expect(container.innerHTML).toEqual('<div>Foo</div>');
       });
 
       test('should render custom lobby with games list', () => {
-        const components: any[] = [
+        const customComponents: any[] = [
           { game: { name: 'GameName1' } },
           { game: { name: 'GameName2' } },
         ];
         const CustomLobbyUI = ({ gameComponents }: any) => (
           <div>
             {gameComponents
-              .map((gameComponent) => gameComponent.game.name)
+              .map((gameComponent: any) => gameComponent.game.name)
               .join(',')}
           </div>
         );
 
-        const lobby = Enzyme.mount(
+        const { container } = render(
           <Lobby
-            gameComponents={components}
+            gameComponents={customComponents}
             renderer={({ gameComponents }) => (
               <CustomLobbyUI gameComponents={gameComponents} />
             )}
           />
         );
 
-        expect(lobby.html()).toEqual('<div>GameName1,GameName2</div>');
+        expect(container.innerHTML).toEqual('<div>GameName1,GameName2</div>');
       });
 
       test('should change lobby phase when click on custom enter button', () => {
@@ -576,18 +686,21 @@ describe('lobby', () => {
           <button onClick={() => onEnterLobby('Alex')}>Enter</button>
         );
 
-        const lobby: any = Enzyme.mount(
+        const customRef = React.createRef<Lobby>();
+        const { container } = render(
           <Lobby
+            ref={customRef}
             gameComponents={[]}
             renderer={({ handleEnterLobby }) => (
               <CustomLobbyUI onEnterLobby={handleEnterLobby} />
             )}
           />
         );
-        lobby.find('button').simulate('click');
+        const button = container.querySelector('button') as HTMLButtonElement;
+        fireEvent.click(button);
 
-        expect(lobby.instance().state.phase).toEqual('list');
-        expect(lobby.instance().state.playerName).toEqual('Alex');
+        expect((customRef.current as any).state.phase).toEqual('list');
+        expect((customRef.current as any).state.playerName).toEqual('Alex');
       });
     });
   });
