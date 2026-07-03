@@ -155,7 +155,7 @@
     "p-queue": "^6.6.2",
     "prop-types": "^15.5.10",
     "react-cookies": "^0.1.0",
-    "redux": "^4.1.0",
+    "redux": "^5.0.1",
     "rfc6902": "^5.0.0",
     "setimmediate": "^1.0.5",
     "socket.io": "^4.5.0",
