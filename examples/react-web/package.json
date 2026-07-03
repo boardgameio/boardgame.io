@@ -5,10 +5,13 @@
     "build": "parcel build src/index.html"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.11.0"
+    "parcel": "^2.16.4",
+    "process": "^0.11.10"
   },
   "alias": {
-    "boardgame.io": "../../dist/esm"
+    "boardgame.io": "../../dist/esm",
+    "react": "./node_modules/react",
+    "react-dom": "./node_modules/react-dom"
   },
   "browserslist": [
     "last 1 Chrome versions",
@@ -20,12 +23,10 @@
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-react": "^7.13.13",
     "chess.js": "^0.11.0",
-    "parcel-plugin-svelte": "^4.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^5.2.0",
     "superagent": "^6.1.0",
-    "svelte": "^3.37.0",
     "three": "^0.127.0"
   },
   "babel": {
