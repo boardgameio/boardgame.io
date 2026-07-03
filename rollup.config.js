@@ -6,16 +6,18 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import resolve from 'rollup-plugin-node-resolve';
-import replace from 'rollup-plugin-replace';
-import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
-import filesize from 'rollup-plugin-filesize';
+import resolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
+import { babel } from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
+import filesize from './scripts/rollup-filesize.js';
 import svelte from 'rollup-plugin-svelte';
-import { terser } from 'rollup-plugin-terser';
-import pkg from './package.json';
+import terser from '@rollup/plugin-terser';
+import { createRequire } from 'node:module';
 import typescript from 'rollup-plugin-typescript2';
 import ts from 'typescript';
+const require = createRequire(import.meta.url);
+const pkg = require('./package.json');
 const subpackages = require('./subpackages');
 
 const internalDeps = new Set(['svelte']);
@@ -38,7 +40,7 @@ const plugins = [
     },
     useTsconfigDeclarationDir: true,
   }),
-  svelte({ extensions: ['.svelte'] }),
+  svelte({ extensions: ['.svelte'], emitCss: false }),
 ];
 
 const serverPlugins = [
@@ -52,7 +54,7 @@ const minifiedPlugins = [
   babel({ exclude: '**/node_modules/**' }),
   resolve({ browser: true }),
   typescript({ typescript: ts }),
-  svelte({ extensions: ['.svelte'] }),
+  svelte({ extensions: ['.svelte'], emitCss: false }),
   commonjs(),
   replace({
     include: 'src/**',
@@ -90,7 +92,7 @@ export default [
   // Server.
   {
     input: 'packages/server.ts',
-    output: { dir: 'dist/cjs', format: 'cjs' },
+    output: { dir: 'dist/cjs', format: 'cjs', interop: 'auto' },
     external,
     plugins: serverPlugins,
   },

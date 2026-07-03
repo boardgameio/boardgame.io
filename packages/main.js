@@ -6,25 +6,14 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Client } from '../src/client/client';
-import { Client as ReactClient } from '../src/client/react';
-import { Client as ReactNativeClient } from '../src/client/react-native';
-import { TurnOrder } from '../src/core/turn-order';
-import { Step, Simulate } from '../src/ai/ai';
-import { RandomBot } from '../src/ai/random-bot';
-import { MCTSBot } from '../src/ai/mcts-bot';
-import { Local } from '../src/client/transport/local';
-import { SocketIO } from '../src/client/transport/socketio';
+export { Client } from '../src/client/client';
+export { Client as ReactNativeClient } from '../src/client/react-native';
+export { Client as ReactClient } from '../src/client/react';
+export { Step, Simulate } from '../src/ai/ai';
+export { TurnOrder } from '../src/core/turn-order';
+export { RandomBot } from '../src/ai/random-bot';
 
-export {
-  Client,
-  Local,
-  MCTSBot,
-  RandomBot,
-  ReactClient,
-  ReactNativeClient,
-  Simulate,
-  SocketIO,
-  Step,
-  TurnOrder,
-};
+export { Local } from '../src/client/transport/local';
+export { MCTSBot } from '../src/ai/mcts-bot';
+
+export { SocketIO } from '../src/client/transport/socketio';

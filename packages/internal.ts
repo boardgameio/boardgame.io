@@ -6,21 +6,11 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { InitializeGame } from '../src/core/initialize';
-import { ProcessGameConfig } from '../src/core/game';
-import { CreateGameReducer } from '../src/core/reducer';
-import { getFilterPlayerView } from '../src/master/filter-player-view';
-import { Async, Sync } from '../src/server/db/base';
-import { Transport } from '../src/client/transport/transport';
-import { createMatch } from '../src/server/util';
+export { InitializeGame } from '../src/core/initialize';
+export { CreateGameReducer } from '../src/core/reducer';
+export { ProcessGameConfig } from '../src/core/game';
+export { Async, Sync } from '../src/server/db/base';
+export { getFilterPlayerView } from '../src/master/filter-player-view';
+export { Transport } from '../src/client/transport/transport';
 
-export {
-  Async,
-  Sync,
-  Transport,
-  ProcessGameConfig,
-  InitializeGame,
-  CreateGameReducer,
-  createMatch,
-  getFilterPlayerView,
-};
+export { createMatch } from '../src/server/util';
