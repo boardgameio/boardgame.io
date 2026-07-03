@@ -464,6 +464,18 @@ describe('lobby', () => {
         fireEvent.click(button);
         expect(spy).toHaveBeenCalledWith('GameName1', 'matchID1', '0');
       });
+      test('stores credentials returned by the join', async () => {
+        mockConnection.playerName = 'Bob';
+        mockConnection.playerCredentials = 'SECRET1';
+        const firstRow = matchRows()[0];
+        const button = firstRow.querySelector('button') as HTMLButtonElement;
+        await act(async () => {
+          fireEvent.click(button);
+        });
+        expect((ref.current as any).state.credentialStore).toEqual({
+          Bob: 'SECRET1',
+        });
+      });
       test('when match is full', () => {
         // try 2nd match
         const rows = matchRows();

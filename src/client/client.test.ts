@@ -990,4 +990,25 @@ describe('start / stop', () => {
     }).not.toThrow();
     expect(error).not.toHaveBeenCalled();
   });
+
+  test('unmount debug when no panel is mounted', () => {
+    // A client with the debug panel disabled never mounts a panel, so the
+    // manager's currentClient/debugPanel stay null.
+    const withoutDebug = Client({ game: {}, debug: false }) as any;
+    const withDebug = Client({ game: {}, debug: { impl: Debug } }) as any;
+    const manager = withoutDebug.manager;
+
+    withoutDebug.start();
+    expect(manager.debugPanel).toBe(null);
+
+    // Switching clients unmounts the (non-existent) panel before mounting the
+    // new one, exercising the branch where debugPanel is already null.
+    expect(() => {
+      manager.switchToClient(withDebug);
+    }).not.toThrow();
+
+    withoutDebug.stop();
+    withDebug.stop();
+    expect(error).not.toHaveBeenCalled();
+  });
 });

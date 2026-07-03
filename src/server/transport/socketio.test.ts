@@ -23,6 +23,12 @@ jest.mock('../../core/logger', () => ({
   error: jest.fn(),
 }));
 
+jest.mock('node:https', () => ({
+  createServer: jest.fn(() => ({ https: true })),
+}));
+
+import https from 'node:https';
+
 type SyncArgs = Parameters<Master['onSync']>;
 
 type SocketIOTestAdapterOpts = SocketOpts & {
@@ -154,6 +160,24 @@ describe('socketAdapter', () => {
 
   test('socketAdapter is passed', () => {
     expect(app.context.io.socketAdapter).toBe(socketAdapter);
+  });
+});
+
+describe('https', () => {
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth }, callback: () => () => {} };
+  const games = [ProcessGameConfig({ seed: 0 })];
+
+  test('creates an HTTPS server when the https option is set', () => {
+    const httpsOptions = { key: 'KEY', cert: 'CERT' };
+    const transport = new SocketIOTestAdapter({ https: httpsOptions });
+    transport.init(app, games);
+
+    expect(https.createServer).toHaveBeenCalledWith(
+      httpsOptions,
+      expect.any(Function),
+    );
+    expect(transport.server).toEqual({ https: true });
   });
 });
 

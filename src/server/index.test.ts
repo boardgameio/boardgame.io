@@ -111,6 +111,20 @@ describe('run', () => {
     expect(runningServer.apiServer).toBeUndefined();
   });
 
+  test('listens on the app when the transport has no server', async () => {
+    // A transport that does not expose its own HTTP server falls back to
+    // `app.listen`.
+    const transport = {
+      init: jest.fn(),
+      server: undefined,
+    } as unknown as SocketIO;
+    server = Server({ games: [game], transport });
+    runningServer = await server.run(undefined);
+
+    expect(runningServer.appServer).not.toBeUndefined();
+    expect(runningServer.apiServer).toBeUndefined();
+  });
+
   test('multiple servers running', async () => {
     server = Server({ games: [game] });
     runningServer = await server.run({
