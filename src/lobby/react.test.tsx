@@ -8,11 +8,15 @@
 
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
-import Cookies from 'react-cookies';
+import Cookies from 'js-cookie';
 import Lobby from './react';
 import { LobbyConnection } from './connection';
 
 jest.mock('./connection');
+
+const seedLobbyState = (state: object) =>
+  Cookies.set('lobbyState', JSON.stringify(state), { path: '/' });
+const clearLobbyState = () => Cookies.remove('lobbyState', { path: '/' });
 
 /* mock server requests */
 globalThis.fetch = jest
@@ -122,7 +126,7 @@ describe('lobby', () => {
     });
 
     afterEach(() => {
-      Cookies.remove('lobbyState', { path: '/' });
+      clearLobbyState();
     });
 
     test('changing prop debug', () => {
@@ -208,19 +212,15 @@ describe('lobby', () => {
     let ref: React.RefObject<Lobby>;
     beforeEach(() => {
       // initial state = phase 'play'
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'play',
-          playerName: 'Bob',
-        },
-        { path: '/' },
-      );
+      seedLobbyState({
+        phase: 'play',
+        playerName: 'Bob',
+      });
       ref = React.createRef<Lobby>();
       render(<Lobby ref={ref} gameComponents={components} />);
     });
     afterEach(() => {
-      Cookies.remove('lobbyState', { path: '/' });
+      clearLobbyState();
     });
     test('reset phase to list', () => {
       expect((ref.current as any).state.phase).toBe('list');
@@ -229,7 +229,7 @@ describe('lobby', () => {
 
   describe('refresh interval triggering', () => {
     afterEach(() => {
-      Cookies.remove('lobbyState', { path: '/' });
+      clearLobbyState();
     });
 
     test('refresh does not start on initial component mount', () => {
@@ -256,14 +256,10 @@ describe('lobby', () => {
     });
 
     test('refresh starts when component mounts and cookie state sends us to LIST', () => {
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'list',
-          playerName: 'Bob',
-        },
-        { path: '/' },
-      );
+      seedLobbyState({
+        phase: 'list',
+        playerName: 'Bob',
+      });
       const ref = React.createRef<Lobby>();
       render(<Lobby ref={ref} gameComponents={components} />);
 
@@ -272,14 +268,10 @@ describe('lobby', () => {
     });
 
     test('refresh stops when transitioning from LIST to PLAY', () => {
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'list',
-          playerName: 'Bob',
-        },
-        { path: '/' },
-      );
+      seedLobbyState({
+        phase: 'list',
+        playerName: 'Bob',
+      });
       const ref = React.createRef<Lobby>();
       render(<Lobby ref={ref} gameComponents={components} />);
 
@@ -312,7 +304,7 @@ describe('lobby', () => {
 
     afterEach(() => {
       unmount();
-      Cookies.remove('lobbyState', { path: '/' });
+      clearLobbyState();
     });
 
     test('lobby stores an interval ID', () => {
@@ -372,19 +364,15 @@ describe('lobby', () => {
 
     beforeEach(() => {
       // initial state = logged-in as 'Bob'
-      Cookies.save(
-        'lobbyState',
-        {
-          phase: 'list',
-          playerName: 'Bob',
-        },
-        { path: '/' },
-      );
+      seedLobbyState({
+        phase: 'list',
+        playerName: 'Bob',
+      });
     });
 
     afterEach(() => {
       spyClient.mockReset();
-      Cookies.remove('lobbyState', { path: '/' });
+      clearLobbyState();
     });
 
     describe('creating a match', () => {
