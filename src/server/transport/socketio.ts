@@ -7,9 +7,11 @@
  */
 
 import type { CorsOptions } from 'cors';
-import IO from 'koa-socket-2';
+import http from 'node:http';
+import https from 'node:https';
+import { Server as IOServer } from 'socket.io';
 import type IOTypes from 'socket.io';
-import type { ServerOptions as HttpsOptions } from 'https';
+import type { ServerOptions as HttpsOptions } from 'node:https';
 import PQueue from 'p-queue';
 import { Master } from '../../master/master';
 import type {
@@ -41,7 +43,7 @@ export const TransportAPI = (
   matchID: string,
   socket: IOTypes.Socket,
   filterPlayerView: any,
-  pubSub: GenericPubSub<IntermediateTransportData>
+  pubSub: GenericPubSub<IntermediateTransportData>,
 ): MasterTransport => {
   const send: MasterTransport['send'] = ({ playerID, ...data }) => {
     emit(socket, filterPlayerView(playerID, data));
@@ -82,6 +84,8 @@ export class SocketIO {
   private readonly socketAdapter: any;
   private readonly socketOpts: IOTypes.ServerOptions;
   protected pubSub: GenericPubSub<IntermediateTransportData>;
+  public server: http.Server | https.Server;
+  public io: IOServer;
 
   constructor({ https, socketAdapter, socketOpts, pubSub }: SocketOpts = {}) {
     this.clientInfo = new Map();
@@ -148,31 +152,26 @@ export class SocketIO {
     this.pubSub.unsubscribeAll(getPubSubChannelId(matchID));
   }
 
-  init(
-    app: Server.App & { _io?: IOTypes.Server },
-    games: Game[],
-    origins: CorsOptions['origin'] = []
-  ) {
-    const io = new IO({
-      ioOptions: {
-        pingTimeout: PING_TIMEOUT,
-        pingInterval: PING_INTERVAL,
-        cors: {
-          origins,
-        },
-        ...this.socketOpts,
-      },
-    });
+  init(app: Server.App, games: Game[], origins: CorsOptions['origin'] = []) {
+    this.server = this.https
+      ? https.createServer(this.https, app.callback())
+      : http.createServer(app.callback());
 
+    const io = new IOServer(this.server, {
+      pingTimeout: PING_TIMEOUT,
+      pingInterval: PING_INTERVAL,
+      cors: { origin: origins },
+      ...this.socketOpts,
+    });
+    this.io = io;
     app.context.io = io;
-    io.attach(app, !!this.https, this.https);
 
     if (this.socketAdapter) {
       io.adapter(this.socketAdapter);
     }
 
     for (const game of games) {
-      const nsp = app._io.of(game.name);
+      const nsp = io.of(game.name);
       const filterPlayerView = getFilterPlayerView(game);
 
       nsp.on('connection', (socket: IOTypes.Socket) => {
@@ -182,12 +181,12 @@ export class SocketIO {
             game,
             app.context.db,
             TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
-            app.context.auth
+            app.context.auth,
           );
 
           const matchQueue = this.getMatchQueue(matchID);
           await matchQueue.add(() =>
-            master.onUpdate(action, stateID, matchID, playerID)
+            master.onUpdate(action, stateID, matchID, playerID),
           );
         });
 
@@ -200,13 +199,13 @@ export class SocketIO {
             matchID,
             socket,
             filterPlayerView,
-            this.pubSub
+            this.pubSub,
           );
           const master = new Master(
             game,
             app.context.db,
             transport,
-            app.context.auth
+            app.context.auth,
           );
 
           const syncResponse = await master.onSync(...args);
@@ -226,13 +225,13 @@ export class SocketIO {
               game,
               app.context.db,
               TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
-              app.context.auth
+              app.context.auth,
             );
             await master.onConnectionChange(
               matchID,
               playerID,
               credentials,
-              false
+              false,
             );
           }
         });
@@ -245,10 +244,10 @@ export class SocketIO {
               game,
               app.context.db,
               TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
-              app.context.auth
+              app.context.auth,
             );
             master.onChatMessage(...args);
-          }
+          },
         );
       });
     }

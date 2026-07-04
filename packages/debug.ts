@@ -6,6 +6,4 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import Debug from '../src/client/debug/Debug.svelte';
-
-export { Debug };
+export { default as Debug } from '../src/client/debug/Debug.svelte';

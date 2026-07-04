@@ -104,7 +104,7 @@ export type IntermediateTransportData =
 /** API used by a master to emit data to any connected clients/client transports. */
 export interface TransportAPI {
   send: (
-    playerData: { playerID: PlayerID } & IntermediateTransportData
+    playerData: { playerID: PlayerID } & IntermediateTransportData,
   ) => void;
   sendAll: (payload: IntermediateTransportData) => void;
 }
@@ -127,7 +127,7 @@ export class Master {
     game: Game,
     storageAPI: StorageAPI.Sync | StorageAPI.Async,
     transportAPI: TransportAPI,
-    auth?: Auth
+    auth?: Auth,
   ) {
     this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
@@ -149,7 +149,7 @@ export class Master {
     credAction: CredentialedActionShape.Any,
     stateID: number,
     matchID: string,
-    playerID: string
+    playerID: string,
   ): Promise<void | { error: string }> {
     if (!credAction || !credAction.payload) {
       return { error: 'missing action or action payload' };
@@ -191,7 +191,7 @@ export class Master {
     if (state.ctx.gameover !== undefined) {
       logging.error(
         `game over - matchID=[${key}] - playerID=[${playerID}]` +
-          ` - action[${action.payload.type}]`
+          ` - action[${action.payload.type}]`,
       );
       return;
     }
@@ -226,7 +226,7 @@ export class Master {
     if (!this.game.flow.isPlayerActive(state.G, state.ctx, playerID)) {
       logging.error(
         `player not active - playerID=[${playerID}]` +
-          ` - action[${action.payload.type}]`
+          ` - action[${action.payload.type}]`,
       );
       return;
     }
@@ -241,7 +241,7 @@ export class Master {
     if (action.type == MAKE_MOVE && !move) {
       logging.error(
         `move not processed - canPlayerMakeMove=false - playerID=[${playerID}]` +
-          ` - action[${action.payload.type}]`
+          ` - action[${action.payload.type}]`,
       );
       return;
     }
@@ -254,7 +254,7 @@ export class Master {
     ) {
       logging.error(
         `invalid stateID, was=[${stateID}], expected=[${state._stateID}]` +
-          ` - playerID=[${playerID}] - action[${action.payload.type}]`
+          ` - playerID=[${playerID}] - action[${action.payload.type}]`,
       );
       return;
     }
@@ -321,7 +321,7 @@ export class Master {
     matchID: string,
     playerID: string | null | undefined,
     credentials?: string,
-    numPlayers = 2
+    numPlayers = 2,
   ): Promise<void | { error: string }> {
     const key = matchID;
 
@@ -401,7 +401,7 @@ export class Master {
     matchID: string,
     playerID: string | null | undefined,
     credentials: string | undefined,
-    connected: boolean
+    connected: boolean,
   ): Promise<void | { error: string }> {
     const key = matchID;
 
@@ -425,7 +425,7 @@ export class Master {
 
     if (metadata.players[playerID] === undefined) {
       logging.error(
-        `Player not in the match, matchID=[${key}] playerID=[${playerID}]`
+        `Player not in the match, matchID=[${key}] playerID=[${playerID}]`,
       );
       return { error: 'player not in the match' };
     }
@@ -460,7 +460,7 @@ export class Master {
   async onChatMessage(
     matchID: string,
     chatMessage: ChatMessage,
-    credentials: string | undefined
+    credentials: string | undefined,
   ): Promise<void | { error: string }> {
     const key = matchID;
 
@@ -469,7 +469,7 @@ export class Master {
         key,
         {
           metadata: true,
-        }
+        },
       );
       if (!(chatMessage && typeof chatMessage.sender === 'string')) {
         return { error: 'unauthorized' };

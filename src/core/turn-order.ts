@@ -59,7 +59,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
         _activePlayersMinMoves,
         _activePlayersMaxMoves,
         ctx.currentPlayer,
-        arg.currentPlayer
+        arg.currentPlayer,
       );
     }
 
@@ -72,7 +72,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
             _activePlayersMinMoves,
             _activePlayersMaxMoves,
             id,
-            arg.others
+            arg.others,
           );
         }
       }
@@ -86,7 +86,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
           _activePlayersMinMoves,
           _activePlayersMaxMoves,
           id,
-          arg.all
+          arg.all,
         );
       }
     }
@@ -98,7 +98,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
           _activePlayersMinMoves,
           _activePlayersMaxMoves,
           id,
-          arg.value[id]
+          arg.value[id],
         );
       }
     }
@@ -212,7 +212,7 @@ function ApplyActivePlayerArgument(
   _activePlayersMinMoves: Ctx['_activePlayersMinMoves'],
   _activePlayersMaxMoves: Ctx['_activePlayersMaxMoves'],
   playerID: PlayerID,
-  arg: StageArg
+  arg: StageArg,
 ) {
   if (typeof arg !== 'object' || arg === Stage.NULL) {
     arg = { stage: arg as string | null };
@@ -235,7 +235,7 @@ function ApplyActivePlayerArgument(
  */
 function getCurrentPlayer(
   playOrder: Ctx['playOrder'],
-  playOrderPos: Ctx['playOrderPos']
+  playOrderPos: Ctx['playOrderPos'],
 ) {
   // convert to string in case playOrder is set to number[]
   return playOrder[playOrderPos] + '';
@@ -256,7 +256,7 @@ export function InitTurnOrderState(state: State, turn: TurnConfig) {
   const context = { ...pluginAPIs, G, ctx };
   const order = turn.order;
 
-  let playOrder = [...Array.from({ length: numPlayers })].map((_, i) => i + '');
+  let playOrder = Array.from({ length: numPlayers }).map((_, i) => i + '');
   if (order.playOrder !== undefined) {
     playOrder = order.playOrder(context);
   }
@@ -265,7 +265,7 @@ export function InitTurnOrderState(state: State, turn: TurnConfig) {
   const posType = typeof playOrderPos;
   if (posType !== 'number') {
     logging.error(
-      `invalid value returned by turn.order.first — expected number got ${posType} “${playOrderPos}”.`
+      `invalid value returned by turn.order.first — expected number got ${posType} “${playOrderPos}”.`,
     );
   }
   const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
@@ -288,7 +288,7 @@ export function UpdateTurnOrderState(
   state: State,
   currentPlayer: PlayerID,
   turn: TurnConfig,
-  endTurnArg?: true | { remove?: any; next?: string }
+  endTurnArg?: true | { remove?: any; next?: string },
 ) {
   const order = turn.order;
 
@@ -303,15 +303,18 @@ export function UpdateTurnOrderState(
 
     Object.keys(endTurnArg).forEach((arg) => {
       switch (arg) {
-        case 'remove':
+        case 'remove': {
           currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
           break;
-        case 'next':
+        }
+        case 'next': {
           playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
           currentPlayer = endTurnArg.next;
           break;
-        default:
+        }
+        default: {
           logging.error(`invalid argument to endTurn: ${arg}`);
+        }
       }
     });
   } else {
@@ -321,7 +324,7 @@ export function UpdateTurnOrderState(
     const type = typeof t;
     if (t !== undefined && type !== 'number') {
       logging.error(
-        `invalid value returned by turn.order.next — expected number or undefined got ${type} “${t}”.`
+        `invalid value returned by turn.order.next — expected number or undefined got ${type} “${t}”.`,
       );
     }
 

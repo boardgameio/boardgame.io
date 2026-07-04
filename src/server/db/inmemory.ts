@@ -63,7 +63,7 @@ export class InMemory extends StorageAPI.Sync {
    */
   fetch<O extends StorageAPI.FetchOpts>(
     matchID: string,
-    opts: O
+    opts: O,
   ): StorageAPI.FetchResult<O> {
     const result = {} as StorageAPI.FetchFields;
 

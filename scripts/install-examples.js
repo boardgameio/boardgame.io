@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-const path = require('path');
-const { spawnSync } = require('child_process');
-const { existsSync } = require('fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const { existsSync } = require('node:fs');
 
 const projectRoot = path.resolve(__dirname, '../');
 const webExamplePath = path.resolve(projectRoot, './examples/react-web');

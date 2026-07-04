@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import cors from 'cors';
 import type { Origins as OriginsTS } from './cors';
 let { Origins } = require('./cors') as { Origins: typeof OriginsTS };
@@ -107,7 +107,7 @@ class MockResponse extends EventEmitter {
     process.nextTick(
       function () {
         this.emit('finish');
-      }.bind(this)
+      }.bind(this),
     );
   }
 

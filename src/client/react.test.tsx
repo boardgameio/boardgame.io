@@ -5,25 +5,29 @@
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT.
  */
-/* eslint-disable unicorn/no-array-callback-reference */
 
 import React from 'react';
+import '@testing-library/jest-dom';
+import { act, render, screen } from '@testing-library/react';
 import type { BoardProps } from './react';
 import { Client } from './react';
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
 
-Enzyme.configure({ adapter: new Adapter() });
+let lastBoardProps: (BoardProps & { doStuff?; extraValue? }) | null = null;
 
 class TestBoard extends React.Component<
   BoardProps & { doStuff?; extraValue? }
 > {
   render() {
+    lastBoardProps = this.props;
     return <div id="board">Board</div>;
   }
 }
+
+beforeEach(() => {
+  lastBoardProps = null;
+});
 
 test('board is rendered', () => {
   const Board = Client({
@@ -31,13 +35,12 @@ test('board is rendered', () => {
     board: TestBoard,
   });
 
-  const game = Enzyme.mount(<Board />);
-  const board = game.find(TestBoard);
+  const { container, unmount } = render(<Board />);
 
-  expect(board.props().isActive).toBe(true);
-  expect(board.text()).toBe('Board');
+  expect(lastBoardProps.isActive).toBe(true);
+  expect(container.textContent).toBe('Board');
 
-  game.unmount();
+  unmount();
 });
 
 test('board props', () => {
@@ -45,9 +48,9 @@ test('board props', () => {
     game: {},
     board: TestBoard,
   });
-  const board = Enzyme.mount(<Board />).find(TestBoard);
-  expect(board.props().isMultiplayer).toEqual(false);
-  expect(board.props().isActive).toBe(true);
+  render(<Board />);
+  expect(lastBoardProps.isMultiplayer).toEqual(false);
+  expect(lastBoardProps.isActive).toBe(true);
 });
 
 test('can pass extra props to Client', () => {
@@ -55,11 +58,9 @@ test('can pass extra props to Client', () => {
     game: {},
     board: TestBoard,
   });
-  const board = Enzyme.mount(
-    <Board doStuff={() => true} extraValue={55} />
-  ).find(TestBoard);
-  expect(board.props().doStuff()).toBe(true);
-  expect(board.props().extraValue).toBe(55);
+  render(<Board doStuff={() => true} extraValue={55} />);
+  expect(lastBoardProps.doStuff()).toBe(true);
+  expect(lastBoardProps.extraValue).toBe(55);
 });
 
 test('debug ui can be turned off', () => {
@@ -69,8 +70,8 @@ test('debug ui can be turned off', () => {
     debug: false,
   });
 
-  const game = Enzyme.mount(<Board />);
-  expect(game.find('.debug-ui')).toHaveLength(0);
+  const { container } = render(<Board />);
+  expect(container.querySelector('.debug-ui')).toBeNull();
 });
 
 test('custom loading component', () => {
@@ -81,8 +82,8 @@ test('custom loading component', () => {
     board: TestBoard,
     multiplayer: SocketIO(),
   });
-  const board = Enzyme.mount(<Board />);
-  expect(board.html()).toContain('custom');
+  render(<Board />);
+  expect(screen.getByText('custom')).toBeInTheDocument();
 });
 
 test('can pass empty board', () => {
@@ -90,8 +91,8 @@ test('can pass empty board', () => {
     game: {},
   });
 
-  const game = Enzyme.mount(<Board />);
-  expect(game).not.toBe(undefined);
+  const result = render(<Board />);
+  expect(result).not.toBe(undefined);
 });
 
 test('move api', () => {
@@ -104,21 +105,17 @@ test('move api', () => {
     board: TestBoard,
   });
 
-  const game = Enzyme.mount(<Board />);
-  const board = game.find('TestBoard').instance() as TestBoard;
+  render(<Board />);
 
-  expect(board.props.G).toEqual({});
-  board.props.moves.A(42);
-  expect(board.props.G).toEqual({ arg: 42 });
+  expect(lastBoardProps.G).toEqual({});
+  act(() => lastBoardProps.moves.A(42));
+  expect(lastBoardProps.G).toEqual({ arg: 42 });
 });
 
 test('update matchID / playerID', () => {
-  let Board = null;
-  let game = null;
-
   // No multiplayer.
 
-  Board = Client({
+  let Board = Client({
     game: {
       moves: {
         A: (_, arg) => ({ arg }),
@@ -126,10 +123,12 @@ test('update matchID / playerID', () => {
     },
     board: TestBoard,
   });
-  game = Enzyme.mount(<Board />);
-  game.setProps({ matchID: 'a' });
-  game.setProps({ playerID: '3' });
-  expect(game.instance().transport).toBe(undefined);
+
+  let ref = React.createRef<InstanceType<typeof Board>>();
+  let { rerender } = render(<Board ref={ref} />);
+  rerender(<Board ref={ref} matchID="a" />);
+  rerender(<Board ref={ref} matchID="a" playerID="3" />);
+  expect((ref.current as any).transport).toBe(undefined);
 
   // Multiplayer.
 
@@ -142,9 +141,14 @@ test('update matchID / playerID', () => {
     board: TestBoard,
     multiplayer: Local(),
   });
-  game = Enzyme.mount(<Board matchID="a" playerID="1" credentials="foo" />);
-  const m = game.instance().client.transport;
-  const g = game.instance().client;
+
+  ref = React.createRef<InstanceType<typeof Board>>();
+  ({ rerender } = render(
+    <Board ref={ref} matchID="a" playerID="1" credentials="foo" />,
+  ));
+
+  const m = (ref.current as any).client.transport;
+  const g = (ref.current as any).client;
 
   const spy1 = jest.spyOn(m, 'updateMatchID');
   const spy2 = jest.spyOn(m, 'updatePlayerID');
@@ -153,9 +157,9 @@ test('update matchID / playerID', () => {
   expect(m.matchID).toBe('a');
   expect(m.playerID).toBe('1');
 
-  game.setProps({ matchID: 'a' });
-  game.setProps({ playerID: '1' });
-  game.setProps({ credentials: 'foo' });
+  rerender(<Board ref={ref} matchID="a" playerID="1" credentials="foo" />);
+  rerender(<Board ref={ref} matchID="a" playerID="1" credentials="foo" />);
+  rerender(<Board ref={ref} matchID="a" playerID="1" credentials="foo" />);
 
   expect(m.matchID).toBe('a');
   expect(m.playerID).toBe('1');
@@ -163,9 +167,13 @@ test('update matchID / playerID', () => {
   expect(spy2).not.toHaveBeenCalled();
   expect(spy3).not.toHaveBeenCalled();
 
-  game.setProps({ matchID: 'next' });
-  game.setProps({ playerID: 'next' });
-  game.setProps({ credentials: 'bar' });
+  rerender(<Board ref={ref} matchID="next" playerID="1" credentials="foo" />);
+  rerender(
+    <Board ref={ref} matchID="next" playerID="next" credentials="foo" />,
+  );
+  rerender(
+    <Board ref={ref} matchID="next" playerID="next" credentials="bar" />,
+  );
 
   expect(m.matchID).toBe('next');
   expect(m.playerID).toBe('next');
@@ -184,9 +192,8 @@ test('local playerView', () => {
     numPlayers: 2,
   });
 
-  const game = Enzyme.mount(<Board playerID="1" />);
-  const board = game.find('TestBoard').instance() as TestBoard;
-  expect(board.props.G).toEqual({ stripped: '1' });
+  render(<Board playerID="1" />);
+  expect(lastBoardProps.G).toEqual({ stripped: '1' });
 });
 
 test('reset Game', () => {
@@ -199,15 +206,17 @@ test('reset Game', () => {
     board: TestBoard,
   });
 
-  const game = Enzyme.mount(<Board />);
-  const board = game.find('TestBoard').instance() as TestBoard;
+  render(<Board />);
 
-  const initial = { G: { ...board.props.G }, ctx: { ...board.props.ctx } };
+  const initial = {
+    G: { ...lastBoardProps.G },
+    ctx: { ...lastBoardProps.ctx },
+  };
 
-  expect(board.props.G).toEqual({});
-  board.props.moves.A(42);
-  expect(board.props.G).toEqual({ arg: 42 });
-  board.props.reset();
-  expect(board.props.G).toEqual(initial.G);
-  expect(board.props.ctx).toEqual(initial.ctx);
+  expect(lastBoardProps.G).toEqual({});
+  act(() => lastBoardProps.moves.A(42));
+  expect(lastBoardProps.G).toEqual({ arg: 42 });
+  act(() => lastBoardProps.reset());
+  expect(lastBoardProps.G).toEqual(initial.G);
+  expect(lastBoardProps.ctx).toEqual(initial.ctx);
 });

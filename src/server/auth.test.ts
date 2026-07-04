@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import {
   extractPlayerMetadata,
   doesMatchRequireAuthentication,
@@ -17,7 +21,7 @@ describe('extractPlayerMetadata', () => {
   describe('when metadata does not contain players field', () => {
     test('then playerMetadata is undefined', () => {
       expect(
-        extractPlayerMetadata({} as Server.MatchData, '0')
+        extractPlayerMetadata({} as Server.MatchData, '0'),
       ).toBeUndefined();
     });
   });
@@ -33,8 +37,8 @@ describe('extractPlayerMetadata', () => {
             createdAt: 0,
             updatedAt: 0,
           },
-          '0'
-        )
+          '0',
+        ),
       ).toBeUndefined();
     });
   });
@@ -50,7 +54,7 @@ describe('extractPlayerMetadata', () => {
           createdAt: 0,
           updatedAt: 0,
         },
-        '0'
+        '0',
       );
       expect(result).toBe(playerMetadata);
     });
@@ -200,7 +204,7 @@ describe('Auth', () => {
 
     test('authenticateCredentials', () => {
       expect(
-        auth.authenticateCredentials({ playerID: '0', metadata, credentials })
+        auth.authenticateCredentials({ playerID: '0', metadata, credentials }),
       ).toBe(true);
     });
   });
@@ -217,7 +221,7 @@ describe('Auth', () => {
 
     test('authenticateCredentials', () => {
       expect(
-        auth.authenticateCredentials({ playerID: '0', metadata, credentials })
+        auth.authenticateCredentials({ playerID: '0', metadata, credentials }),
       ).toBe(true);
     });
   });
@@ -235,11 +239,11 @@ describe('Auth', () => {
 
     test('authenticateCredentials', () => {
       expect(
-        auth.authenticateCredentials({ playerID: '0', metadata, credentials })
+        auth.authenticateCredentials({ playerID: '0', metadata, credentials }),
       ).toBe(true);
       expect(authenticateCredentials).toHaveBeenCalledWith(
         credentials,
-        playerData
+        playerData,
       );
     });
   });
@@ -267,7 +271,7 @@ describe('Auth', () => {
       expect(promise).toBeInstanceOf(Promise);
       expect(authenticateCredentials).toHaveBeenCalledWith(
         credentials,
-        playerData
+        playerData,
       );
       expect(await promise).toBe(true);
     });

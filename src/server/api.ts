@@ -57,7 +57,7 @@ const CreateMatch = async ({
  */
 const createClientMatchData = (
   matchID: string,
-  metadata: Server.MatchData
+  metadata: Server.MatchData,
 ): LobbyAPI.Match => {
   return {
     ...metadata,
@@ -72,7 +72,7 @@ const createClientMatchData = (
 
 /** Utility extracting `string` from a query if it is `string[]`. */
 const unwrapQuery = (
-  query: undefined | string | string[]
+  query: undefined | string | string[],
 ): string | undefined => (Array.isArray(query) ? query[0] : query);
 
 export const configureRouter = ({
@@ -112,17 +112,17 @@ export const configureRouter = ({
     // The name of the game (for example: tic-tac-toe).
     const gameName = ctx.params.name;
     // User-data to pass to the game setup function.
-    const setupData = ctx.request.body.setupData;
+    const setupData = (ctx.request.body as any)?.setupData;
     // Whether the game should be excluded from public listing.
-    const unlisted = ctx.request.body.unlisted;
+    const unlisted = (ctx.request.body as any)?.unlisted;
     // The number of players for this game instance.
-    const numPlayers = Number.parseInt(ctx.request.body.numPlayers);
+    const numPlayers = Number.parseInt((ctx.request.body as any)?.numPlayers);
 
     const game = games.find((g) => g.name === gameName);
     if (!game) ctx.throw(404, 'Game ' + gameName + ' not found');
 
     if (
-      ctx.request.body.numPlayers !== undefined &&
+      (ctx.request.body as any)?.numPlayers !== undefined &&
       (Number.isNaN(numPlayers) ||
         (game.minPlayers && numPlayers < game.minPlayers) ||
         (game.maxPlayers && numPlayers > game.maxPlayers))
@@ -231,9 +231,9 @@ export const configureRouter = ({
    * @return - Player ID and credentials to use when interacting in the joined match.
    */
   router.post('/games/:name/:id/join', koaBody(), async (ctx) => {
-    let playerID = ctx.request.body.playerID;
-    const playerName = ctx.request.body.playerName;
-    const data = ctx.request.body.data;
+    let playerID = (ctx.request.body as any)?.playerID;
+    const playerName = (ctx.request.body as any)?.playerName;
+    const data = (ctx.request.body as any)?.data;
     const matchID = ctx.params.id;
     if (!playerName) {
       ctx.throw(403, 'playerName is required');
@@ -246,13 +246,13 @@ export const configureRouter = ({
       ctx.throw(404, 'Match ' + matchID + ' not found');
     }
 
-    if (typeof playerID === 'undefined' || playerID === null) {
+    if (playerID === undefined || playerID === null) {
       playerID = getFirstAvailablePlayerID(metadata.players);
       if (playerID === undefined) {
         const numPlayers = getNumPlayers(metadata.players);
         ctx.throw(
           409,
-          `Match ${matchID} reached maximum number of players (${numPlayers})`
+          `Match ${matchID} reached maximum number of players (${numPlayers})`,
         );
       }
     }
@@ -288,12 +288,12 @@ export const configureRouter = ({
    */
   router.post('/games/:name/:id/leave', koaBody(), async (ctx) => {
     const matchID = ctx.params.id;
-    const playerID = ctx.request.body.playerID;
-    const credentials = ctx.request.body.credentials;
+    const playerID = (ctx.request.body as any)?.playerID;
+    const credentials = (ctx.request.body as any)?.credentials;
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
-    if (typeof playerID === 'undefined' || playerID === null) {
+    if (playerID === undefined || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
 
@@ -334,14 +334,14 @@ export const configureRouter = ({
   router.post('/games/:name/:id/playAgain', koaBody(), async (ctx) => {
     const gameName = ctx.params.name;
     const matchID = ctx.params.id;
-    const playerID = ctx.request.body.playerID;
-    const credentials = ctx.request.body.credentials;
-    const unlisted = ctx.request.body.unlisted;
+    const playerID = (ctx.request.body as any)?.playerID;
+    const credentials = (ctx.request.body as any)?.credentials;
+    const unlisted = (ctx.request.body as any)?.unlisted;
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
 
-    if (typeof playerID === 'undefined' || playerID === null) {
+    if (playerID === undefined || playerID === null) {
       ctx.throw(403, 'playerID is required');
     }
 
@@ -367,10 +367,11 @@ export const configureRouter = ({
     }
 
     // User-data to pass to the game setup function.
-    const setupData = ctx.request.body.setupData || metadata.setupData;
+    const setupData =
+      (ctx.request.body as any)?.setupData || metadata.setupData;
     // The number of players for this game instance.
     const numPlayers =
-      Number.parseInt(ctx.request.body.numPlayers) ||
+      Number.parseInt((ctx.request.body as any)?.numPlayers) ||
       // eslint-disable-next-line unicorn/explicit-length-check
       Object.keys(metadata.players).length;
 
@@ -394,14 +395,14 @@ export const configureRouter = ({
 
   const updatePlayerMetadata = async (ctx: Koa.Context) => {
     const matchID = ctx.params.id;
-    const playerID = ctx.request.body.playerID;
-    const credentials = ctx.request.body.credentials;
-    const newName = ctx.request.body.newName;
-    const data = ctx.request.body.data;
+    const playerID = (ctx.request.body as any)?.playerID;
+    const credentials = (ctx.request.body as any)?.credentials;
+    const newName = (ctx.request.body as any)?.newName;
+    const data = (ctx.request.body as any)?.data;
     const { metadata } = await (db as StorageAPI.Async).fetch(matchID, {
       metadata: true,
     });
-    if (typeof playerID === 'undefined') {
+    if (playerID === undefined) {
       ctx.throw(403, 'playerID is required');
     }
     if (data === undefined && !newName) {
@@ -447,7 +448,7 @@ export const configureRouter = ({
    */
   router.post('/games/:name/:id/rename', koaBody(), async (ctx) => {
     console.warn(
-      'This endpoint /rename is deprecated. Please use /update instead.'
+      'This endpoint /rename is deprecated. Please use /update instead.',
     );
     await updatePlayerMetadata(ctx);
   });
@@ -471,7 +472,7 @@ export const configureRouter = ({
 export const configureApp = (
   app: Server.App,
   router: Router<any, Server.AppCtx>,
-  origins: CorsOptions['origin']
+  origins: CorsOptions['origin'],
 ): void => {
   app.use(
     cors({
@@ -480,7 +481,7 @@ export const configureApp = (
         const origin = ctx.get('Origin');
         return isOriginAllowed(origin, origins) ? origin : '';
       },
-    })
+    }),
   );
 
   // If API_SECRET is set, then require that requests set an
@@ -508,7 +509,7 @@ export const configureApp = (
  */
 function isOriginAllowed(
   origin: string,
-  allowedOrigin: CorsOptions['origin']
+  allowedOrigin: CorsOptions['origin'],
 ): boolean {
   if (Array.isArray(allowedOrigin)) {
     for (const entry of allowedOrigin) {

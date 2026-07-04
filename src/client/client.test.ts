@@ -183,7 +183,7 @@ describe('multiplayer', () => {
       client.moves.Invalid();
       expect(client.transport.sendAction).not.toHaveBeenCalledWith(
         expect.any(Object),
-        { type: Actions.STRIP_TRANSIENTS }
+        { type: Actions.STRIP_TRANSIENTS },
       );
     });
 
@@ -197,7 +197,7 @@ describe('multiplayer', () => {
 
       expect(client.transport.sendChatMessage).toHaveBeenCalledWith(
         'matchID',
-        expect.objectContaining({ payload: { message: 'foo' }, sender: '0' })
+        expect.objectContaining({ payload: { message: 'foo' }, sender: '0' }),
       );
     });
   });
@@ -601,7 +601,7 @@ describe('move dispatchers', () => {
       store,
       undefined,
       null,
-      true
+      true,
     );
     api.B();
     expect(store.getState().G).toMatchObject({ moved: undefined });
@@ -643,7 +643,7 @@ describe('transient handling', () => {
     const state = client.store.getState();
     // Slightly paranoid check to ensure we don't erroneously add transients.
     expect(state).toEqual(
-      expect.not.objectContaining({ transients: expect.anything() })
+      expect.not.objectContaining({ transients: expect.anything() }),
     );
   });
 
@@ -656,7 +656,7 @@ describe('transient handling', () => {
     // At the time this test was written, this effectively ensures that Client
     // hooks up the TransientHandlingMiddleware correctly.
     expect(state).toEqual(
-      expect.not.objectContaining({ transients: expect.anything() })
+      expect.not.objectContaining({ transients: expect.anything() }),
     );
   });
 });
@@ -797,31 +797,31 @@ describe('subscribe', () => {
   });
 
   test('called at the beginning', () => {
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: {},
         ctx: expect.objectContaining({ turn: 1 }),
-      })
+      }),
     );
   });
 
   test('called after a move', () => {
     fn.mockClear();
     client.moves.A();
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
   });
 
   test('called after an event', () => {
     fn.mockClear();
     client.events.endTurn();
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         ctx: expect.objectContaining({ turn: 2 }),
-      })
+      }),
     );
   });
 
@@ -832,11 +832,11 @@ describe('subscribe', () => {
     const unsubscribe = client.subscribe(fn2);
 
     // The subscriber that just subscribed is notified.
-    expect(fn).not.toBeCalled();
-    expect(fn2).toBeCalledWith(
+    expect(fn).not.toHaveBeenCalled();
+    expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
 
     fn.mockClear();
@@ -845,15 +845,15 @@ describe('subscribe', () => {
     client.moves.A();
 
     // Both subscribers are notified.
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
-    expect(fn2).toBeCalledWith(
+    expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
 
     unsubscribe();
@@ -863,12 +863,12 @@ describe('subscribe', () => {
 
     // The subscriber the unsubscribed is not notified.
     client.moves.A();
-    expect(fn).toBeCalledWith(
+    expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
-      })
+      }),
     );
-    expect(fn2).not.toBeCalled();
+    expect(fn2).not.toHaveBeenCalled();
   });
 
   test('transport notifies subscribers', () => {
@@ -895,9 +895,9 @@ describe('subscribe', () => {
         multiplayer: Local(),
       });
       client.subscribe(fn);
-      expect(fn).not.toBeCalled();
+      expect(fn).not.toHaveBeenCalled();
       client.start();
-      expect(fn).toBeCalled();
+      expect(fn).toHaveBeenCalled();
       client.stop();
     });
 
@@ -909,7 +909,7 @@ describe('subscribe', () => {
       });
       client.start();
       client.subscribe(fn);
-      expect(fn).toBeCalled();
+      expect(fn).toHaveBeenCalled();
       client.stop();
     });
   });
@@ -988,6 +988,27 @@ describe('start / stop', () => {
     expect(() => {
       client.stop();
     }).not.toThrow();
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  test('unmount debug when no panel is mounted', () => {
+    // A client with the debug panel disabled never mounts a panel, so the
+    // manager's currentClient/debugPanel stay null.
+    const withoutDebug = Client({ game: {}, debug: false }) as any;
+    const withDebug = Client({ game: {}, debug: { impl: Debug } }) as any;
+    const manager = withoutDebug.manager;
+
+    withoutDebug.start();
+    expect(manager.debugPanel).toBe(null);
+
+    // Switching clients unmounts the (non-existent) panel before mounting the
+    // new one, exercising the branch where debugPanel is already null.
+    expect(() => {
+      manager.switchToClient(withDebug);
+    }).not.toThrow();
+
+    withoutDebug.stop();
+    withDebug.stop();
     expect(error).not.toHaveBeenCalled();
   });
 });

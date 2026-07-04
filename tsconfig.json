@@ -8,7 +8,6 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "react",
-    "skipLibCheck": true,
-    "plugins": [{ "transform": "ts-transformer-imports" }]
+    "skipLibCheck": true
   }
 }

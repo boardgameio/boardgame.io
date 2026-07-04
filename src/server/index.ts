@@ -39,7 +39,7 @@ interface HttpsOptions {
  */
 export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
-  callback?: () => void
+  callback?: () => void,
 ): ServerConfig =>
   portOrConfig && typeof portOrConfig === 'object'
     ? {
@@ -49,7 +49,7 @@ export const createServerRunConfig = (
     : { port: portOrConfig as number, callback };
 
 export const getPortFromServer = (
-  server: KoaServer
+  server: KoaServer,
 ): string | number | null => {
   const address = server.address();
   if (typeof address === 'string') return address;
@@ -113,7 +113,7 @@ export function Server({
       'Server `origins` option is not set.\n' +
         'Since boardgame.io@0.45, CORS is not enabled by default and you must ' +
         'explicitly set the origins that are allowed to connect to the server.\n' +
-        'See https://boardgame.io/documentation/#/api/Server'
+        'See https://boardgame.io/documentation/#/api/Server',
     );
   }
   transport.init(app, games, origins);
@@ -145,8 +145,8 @@ export function Server({
         api.context.db = db;
         api.context.auth = auth;
         configureApp(api, router, apiOrigins);
-        await new Promise((resolve) => {
-          apiServer = api.listen(lobbyConfig.apiPort, resolve);
+        await new Promise<void>((resolve) => {
+          apiServer = api.listen(lobbyConfig.apiPort, () => resolve());
         });
         if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
         logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
@@ -154,8 +154,11 @@ export function Server({
 
       // Run Game Server (+ API, if necessary).
       let appServer: KoaServer;
-      await new Promise((resolve) => {
-        appServer = app.listen(serverRunConfig.port, resolve);
+      const httpServer = transport.server;
+      await new Promise<void>((resolve) => {
+        appServer = httpServer
+          ? httpServer.listen(serverRunConfig.port, () => resolve())
+          : app.listen(serverRunConfig.port, () => resolve());
       });
       if (serverRunConfig.callback) serverRunConfig.callback();
       logger.info(`App serving on ${getPortFromServer(appServer)}...`);

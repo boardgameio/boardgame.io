@@ -36,7 +36,7 @@ class LobbyLoginForm extends React.Component<LoginFormProps, LoginFormState> {
           type="text"
           value={this.state.playerName}
           onChange={this.onChangePlayerName}
-          onKeyPress={this.onKeyPress}
+          onKeyDown={this.onKeyDown}
         />
         <span className="buttons">
           <button className="buttons" onClick={this.onClickEnter}>
@@ -57,7 +57,7 @@ class LobbyLoginForm extends React.Component<LoginFormProps, LoginFormState> {
     this.props.onEnter(this.state.playerName);
   };
 
-  onKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       this.onClickEnter();
     }

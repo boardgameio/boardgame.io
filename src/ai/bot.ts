@@ -44,7 +44,7 @@ export abstract class Bot {
 
   abstract play(
     state: State,
-    playerID: PlayerID
+    playerID: PlayerID,
   ): Promise<{ action: BotAction; metadata?: any }>;
 
   addOpt({
@@ -98,14 +98,14 @@ export abstract class Bot {
   random<T extends any = any>(arg?: number | T[]) {
     let number: number;
 
-    if (this.seed !== undefined) {
+    if (this.seed === undefined) {
+      number = Math.random();
+    } else {
       const seed = this.prngstate ? '' : this.seed;
       const rand = alea(seed, this.prngstate);
 
       number = rand();
       this.prngstate = rand.state();
-    } else {
-      number = Math.random();
     }
 
     if (arg) {

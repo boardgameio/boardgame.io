@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import produce from 'immer';
+import { produce } from 'immer';
 import type { Plugin } from '../types';
 import { INVALID_MOVE } from '../core/constants';
 

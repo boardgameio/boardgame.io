@@ -41,7 +41,7 @@ const DEFAULT_PLUGINS = [...CORE_PLUGINS, PluginEvents];
 export const ProcessAction = (
   state: State,
   action: ActionShape.Plugin,
-  opts: PluginOpts
+  opts: PluginOpts,
 ): State => {
   // TODO(#723): Extend error handling to plugins.
   opts.game.plugins
@@ -97,13 +97,13 @@ export const GetAPIs = ({ plugins }: PartialGameState) =>
 export const FnWrap = (
   methodToWrap: AnyFn,
   methodType: GameMethod,
-  plugins: Plugin[]
+  plugins: Plugin[],
 ) => {
   return [...CORE_PLUGINS, ...plugins, PluginEvents]
     .filter((plugin) => plugin.fnWrap !== undefined)
     .reduce(
       (method: AnyFn, { fnWrap }: Plugin) => fnWrap(method, methodType),
-      methodToWrap
+      methodToWrap,
     );
 };
 
@@ -112,7 +112,7 @@ export const FnWrap = (
  */
 export const Setup = (
   state: PartialGameState,
-  opts: PluginOpts
+  opts: PluginOpts,
 ): PartialGameState => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter((plugin) => plugin.setup !== undefined)
@@ -143,7 +143,7 @@ export const Setup = (
  */
 export const Enhance = <S extends State | PartialGameState>(
   state: S,
-  opts: PluginOpts & { playerID: PlayerID }
+  opts: PluginOpts & { playerID: PlayerID },
 ): S => {
   [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter((plugin) => plugin.api !== undefined)
@@ -255,7 +255,7 @@ export const NoClient = (state: State, opts: PluginOpts): boolean => {
  */
 const IsInvalid = (
   state: State,
-  opts: PluginOpts
+  opts: PluginOpts,
 ): false | { plugin: string; message: string } => {
   const firstInvalidReturn = [...DEFAULT_PLUGINS, ...opts.game.plugins]
     .filter((plugin) => plugin.isInvalid !== undefined)
@@ -272,7 +272,7 @@ const IsInvalid = (
 
       return message ? { plugin: name, message } : false;
     })
-    .find((value) => value);
+    .find(Boolean);
   return firstInvalidReturn || false;
 };
 
@@ -296,7 +296,7 @@ export const FlushAndValidate = (state: State, opts: PluginOpts) => {
  */
 export const PlayerView = (
   { G, ctx, plugins = {} }: State,
-  { game, playerID }: PluginOpts & { playerID: PlayerID }
+  { game, playerID }: PluginOpts & { playerID: PlayerID },
 ) => {
   [...DEFAULT_PLUGINS, ...game.plugins].forEach(({ name, playerView }) => {
     if (!playerView) return;

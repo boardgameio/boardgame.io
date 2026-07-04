@@ -138,7 +138,7 @@ class _LobbyConnectionImpl {
       await this.client.createMatch(gameName, { numPlayers });
     } catch (error) {
       throw new Error(
-        'failed to create match for ' + gameName + ' (' + error + ')'
+        'failed to create match for ' + gameName + ' (' + error + ')',
       );
     }
   }

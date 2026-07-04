@@ -42,7 +42,7 @@ describe('lobby', () => {
     ];
     const nextResult = jsonResult.shift.bind(jsonResult);
     nextStatus = 200;
-    (global as any).fetch = jest.fn(async () => ({
+    (globalThis as any).fetch = jest.fn(async () => ({
       ok: nextStatus === 200,
       status: nextStatus,
       json: nextResult(),

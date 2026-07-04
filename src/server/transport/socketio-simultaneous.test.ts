@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2018 The boardgame.io Authors
  *
@@ -66,7 +70,7 @@ class InMemoryAsync extends Async {
 
   async fetch<O extends StorageAPI.FetchOpts>(
     matchID: string,
-    opts: O
+    opts: O,
   ): Promise<StorageAPI.FetchResult<O>> {
     await this.sleep();
     return this.db.fetch(matchID, opts);
@@ -99,7 +103,7 @@ class SocketIOTestAdapter extends SocketIO {
   }
 }
 
-jest.mock('koa-socket-2', () => {
+jest.mock('socket.io', () => {
   class MockSocket {
     id: string;
     callbacks: Record<string, (...args: any[]) => Promise<void>>;
@@ -137,16 +141,12 @@ jest.mock('koa-socket-2', () => {
 
     constructor() {
       this.sockets = new Map(
-        ['0', '1'].map((id) => [id, new MockSocket({ id })])
+        ['0', '1'].map((id) => [id, new MockSocket({ id })]),
       );
     }
 
     adapter(socketAdapter) {
       this.socketAdapter = socketAdapter;
-    }
-
-    attach(app) {
-      app.io = app._io = this;
     }
 
     of() {
@@ -158,7 +158,7 @@ jest.mock('koa-socket-2', () => {
     }
   }
 
-  return MockIO;
+  return { Server: MockIO };
 });
 
 describe('simultaneous moves on server game', () => {
@@ -217,7 +217,7 @@ describe('simultaneous moves on server game', () => {
   test('two clients playing using sync storage', async () => {
     const db = new InMemory();
     const auth = new Auth();
-    app = { context: { db, auth } };
+    app = { context: { db, auth }, callback: () => () => {} };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
@@ -229,11 +229,11 @@ describe('simultaneous moves on server game', () => {
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'getMatchQueue'
+      'getMatchQueue',
     );
     const spyDeleteMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'deleteMatchQueue'
+      'deleteMatchQueue',
     );
 
     db.createMatch('matchID', {
@@ -341,7 +341,7 @@ describe('simultaneous moves on server game', () => {
     await db.connect();
     const auth = new Auth();
 
-    app = { context: { db, auth } };
+    app = { context: { db, auth }, callback: () => () => {} };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
@@ -353,11 +353,11 @@ describe('simultaneous moves on server game', () => {
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'getMatchQueue'
+      'getMatchQueue',
     );
     const spyDeleteMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'deleteMatchQueue'
+      'deleteMatchQueue',
     );
 
     await db.createMatch('matchID', {
@@ -485,7 +485,7 @@ describe('inauthentic clients', () => {
     db = new InMemoryAsync();
     await db.connect();
 
-    app = { context: { db, auth: new Auth() } };
+    app = { context: { db, auth: new Auth() }, callback: () => () => {} };
     transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, [ProcessGameConfig(game)]);
     io = app.context.io;
@@ -551,11 +551,11 @@ describe('inauthentic clients', () => {
             0: 'foo',
           },
         }),
-      })
+      }),
     );
 
     const syncEmits = authenticSocket.emit.mock.calls.filter(
-      ([type]) => type === 'sync'
+      ([type]) => type === 'sync',
     );
     expect(syncEmits).toHaveLength(1);
   });
@@ -592,11 +592,11 @@ describe('inauthentic clients', () => {
             0: 'foo',
           },
         }),
-      })
+      }),
     );
 
     const syncEmits = authenticSocket.emit.mock.calls.filter(
-      ([type]) => type === 'sync'
+      ([type]) => type === 'sync',
     );
     expect(syncEmits).toHaveLength(1);
   });

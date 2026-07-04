@@ -45,7 +45,7 @@ const SerializablePlugin: Plugin = {
       if (process.env.NODE_ENV !== 'production' && !isSerializable(result)) {
         throw new Error(
           'Move state is not JSON-serialiazable.\n' +
-            'See https://boardgame.io/documentation/#/?id=state for more information.'
+            'See https://boardgame.io/documentation/#/?id=state for more information.',
         );
       }
       return result;
