@@ -29,6 +29,22 @@ const move = ({ G, ctx, playerID }) => {
 };
 ```
 
+### Inspecting active players
+
+When no stage mechanism is active, `ctx.activePlayers` is `null` and only
+`currentPlayer` may make moves. When one or more players are in a stage,
+`ctx.activePlayers` is an object mapping player IDs to stage names.
+
+Because it can be `null`, always guard property access:
+
+```js
+// Safe
+if (playerId in (ctx.activePlayers || {})) { ... }
+
+// Unsafe — throws when activePlayers is null
+if (playerId in ctx.activePlayers) { ... }
+```
+
 ### Defining Stages
 
 Stages are defined inside a `turn` section:

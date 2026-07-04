@@ -290,6 +290,33 @@ describe('.configureRouter', () => {
         });
       });
 
+      describe('with large setupData (>1MB, <5MB)', () => {
+        beforeEach(async () => {
+          // Create a ~1.5MB string to exceed the default 1MB jsonLimit
+          const largeData = 'x'.repeat(1.5 * 1024 * 1024);
+          response = await apiCall(app)
+            .post('/games/foo/create')
+            .send({ setupData: { payload: largeData } });
+        });
+
+        test('is successful', () => {
+          expect(response.status).toEqual(200);
+        });
+
+        test('preserves large setupData in metadata', () => {
+          expect(db.mocks.createMatch).toHaveBeenCalledWith(
+            'matchID',
+            expect.objectContaining({
+              metadata: expect.objectContaining({
+                setupData: expect.objectContaining({
+                  payload: expect.stringMatching(/^x+$/),
+                }),
+              }),
+            }),
+          );
+        });
+      });
+
       describe('with setupData validation', () => {
         test('creates game if validation passes', async () => {
           response = await apiCall(app)

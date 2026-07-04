@@ -27,6 +27,8 @@ interface ServerConfig {
     apiPort: number;
     apiCallback?: () => void;
   };
+  // Future: apiBodyLimit could be added here to allow runtime overrides.
+  // Currently, it is set once at the factory level in ServerOpts.
 }
 
 interface HttpsOptions {
@@ -67,6 +69,14 @@ interface ServerOpts {
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
   https?: HttpsOptions;
+  /**
+   * Maximum size for request bodies parsed by the lobby API.
+   * Defaults to '5mb'. Increase only if you genuinely need large setupData.
+   *
+   * NOTE: Large setupData is an anti-pattern; prefer generating heavy data
+   * inside your game's setup() function rather than passing it via setupData.
+   */
+  apiBodyLimit?: string | number;
 }
 
 /**
@@ -92,6 +102,7 @@ export function Server({
   apiOrigins = origins,
   generateCredentials = uuid,
   authenticateCredentials,
+  apiBodyLimit = '5mb',
 }: ServerOpts) {
   const app: ServerTypes.App = new Koa();
 
@@ -129,7 +140,7 @@ export function Server({
 
     run: async (portOrConfig: number | ServerConfig, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
-      configureRouter({ router, db, games, uuid, auth });
+      configureRouter({ router, db, games, uuid, auth, apiBodyLimit });
 
       // DB
       await db.connect();
