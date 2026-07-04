@@ -130,7 +130,6 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "rollup": "^4.60.3",
-    "rollup-plugin-polyfill-node": "^0.13.0",
     "rollup-plugin-svelte": "^7.2.3",
     "rollup-plugin-typescript2": "^0.37.0",
     "shelljs": "^0.10.0",
