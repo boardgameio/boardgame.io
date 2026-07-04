@@ -38,7 +38,7 @@
     const { logIndex } = e.detail;
     const state = rewind(logIndex);
     const renderedLogEntries = log.filter(e => !e.automatic);
-    client.overrideGameState(state);
+    client.previewState(state);
 
     if (pinned == logIndex) {
       pinned = null;
@@ -56,19 +56,19 @@
     const { logIndex } = e.detail;
     if (pinned === null) {
       const state = rewind(logIndex);
-      client.overrideGameState(state);
+      client.previewState(state);
     }
   }
 
   function OnMouseLeave() {
     if (pinned === null) {
-      client.overrideGameState(null);
+      client.previewState(null);
     }
   }
 
   function Reset() {
     pinned = null;
-    client.overrideGameState(null);
+    client.previewState(null);
     secondaryPane.set(null);
   }
 

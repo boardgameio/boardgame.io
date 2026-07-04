@@ -915,7 +915,7 @@ describe('subscribe', () => {
   });
 });
 
-test('override game state', () => {
+test('preview state', () => {
   const game: Game = {
     moves: {
       A: ({ G }) => {
@@ -926,10 +926,57 @@ test('override game state', () => {
   const client = Client({ game });
   client.moves.A();
   expect(client.getState().G).toEqual({ moved: true });
-  client.overrideGameState({ G: { override: true }, ctx: {} });
+  client.previewState({ G: { override: true }, ctx: {} });
   expect(client.getState().G).toEqual({ override: true });
-  client.overrideGameState(null);
+  client.previewState(null);
   expect(client.getState().G).toEqual({ moved: true });
+});
+
+test('loadState allows moves from the loaded phase', () => {
+  const game: Game = {
+    phases: {
+      start: {
+        start: true,
+        moves: {
+          startMove: ({ G }) => {
+            G.started = true;
+          },
+        },
+        next: 'play',
+      },
+      play: {
+        moves: {
+          playMove: ({ G }) => {
+            G.played = true;
+          },
+        },
+      },
+    },
+  };
+  const client = Client({ game });
+
+  // Advance to 'play' phase
+  client.moves.startMove();
+  client.events.endPhase();
+  expect(client.getState().ctx.phase).toBe('play');
+
+  // Capture state
+  const savedState = client.getState();
+
+  // Fresh client (starts in 'start' phase)
+  const freshClient = Client({ game });
+  expect(freshClient.getState().ctx.phase).toBe('start');
+
+  // Move should fail in 'start' phase
+  freshClient.moves.playMove();
+  expect(freshClient.getState().G.played).toBeUndefined();
+
+  // Load saved state
+  freshClient.loadState(savedState);
+
+  // Move should now work
+  freshClient.moves.playMove();
+  expect(freshClient.getState().G.played).toBe(true);
 });
 
 // TODO(#941): These tests should validate DOM mounting/unmounting.

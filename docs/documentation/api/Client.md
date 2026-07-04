@@ -192,6 +192,18 @@ The following methods are available on a client instance:
 - `redo()`: Function that redoes the previously undone move.
 
 
+- `previewState(state)`: Visual override. Replaces the state returned by
+  `getState()` (and passed to subscribers) without changing the internal
+  store. Useful for time-travel debugging or AI preview. Call with no
+  arguments (or `null`) to clear the override.
+
+
+- `loadState(state)`: Replaces the entire internal game state with a saved
+  state object, allowing play to continue from that point. Use this to
+  implement save / load or to reconstruct a game from an external source.
+  The state must contain `G`, `ctx` and `_stateID` keys.
+
+
 - `sendChatMessage(message)`: Function that sends a chat message to other
   players. The `message` argument can be a string or you can send objects
   to include more metadata.
@@ -327,6 +339,18 @@ following as `props`:
 
 
 - `redo`: Function that redoes the previously undone move.
+
+
+- `previewState(state)`: Visual override. Replaces the state returned by
+  `getState()` (and passed to subscribers) without changing the internal
+  store. Useful for time-travel debugging or AI preview. Call with no
+  arguments (or `null`) to clear the override.
+
+
+- `loadState(state)`: Replaces the entire internal game state with a saved
+  state object, allowing play to continue from that point. Use this to
+  implement save / load or to reconstruct a game from an external source.
+  The state must contain `G`, `ctx` and `_stateID` keys.
 
 
 - `sendChatMessage(message)`: Function that sends a chat message to other
