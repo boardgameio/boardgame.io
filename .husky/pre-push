@@ -1,1 +1,1 @@
-npm run test:coverage
+pnpm run test:coverage
