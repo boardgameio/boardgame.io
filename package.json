@@ -68,8 +68,7 @@
     "game engine"
   ],
   "engines": {
-    "node": ">=10.0",
-    "npm": ">=6.0"
+    "node": ">=22"
   },
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
