@@ -161,6 +161,14 @@
     "svelte-json-tree-auto": "^0.1.0",
     "ts-toolbelt": "^9.6.0"
   },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "svelte": {
+      "optional": true
+    }
+  },
   "jest": {
     "preset": "ts-jest/presets/js-with-babel",
     "testEnvironment": "jsdom",
