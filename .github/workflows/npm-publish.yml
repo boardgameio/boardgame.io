@@ -2,39 +2,45 @@ name: Publish
 
 on:
   push:
-    tags: [ 'v0.[0-9]+.[0-9]+' ]
+    tags: ['v0.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Use Node v12
-        uses: actions/setup-node@v1
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320  # v4.4.0
         with:
-          node-version: 12
+          version: 10.16.0
 
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Tests
-        run: |
-          npm run lint
-          npm run test
-
-      - name: Publish to NPM
-        id: publish
-        uses: JS-DevTools/npm-publish@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
         with:
-          token: ${{ secrets.NPM_TOKEN }}
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
 
-      - name: Version already published
-        if: steps.publish.outputs.type == 'none'
-        run: |
-          echo "Version ${{ steps.publish.outputs.old-version }} already exists."
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: New version published
-        if: steps.publish.outputs.type != 'none'
-        run: |
-          echo "New ${{ steps.publish.outputs.type }} version ${{ steps.publish.outputs.version }} published. Was ${{ steps.publish.outputs.old-version }}."
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run ts
+
+      - name: Test
+        run: pnpm test
+
+      - name: Integration test
+        run: pnpm run test:integration
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
