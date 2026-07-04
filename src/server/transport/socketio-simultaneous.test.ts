@@ -87,6 +87,35 @@ class InMemoryAsync extends Async {
   }
 }
 
+/**
+ * Variant of InMemoryAsync that returns deep copies on fetch.
+ * This makes read-modify-write races reproducible in tests.
+ */
+class CopyingInMemoryAsync extends InMemoryAsync {
+  async fetch<O extends StorageAPI.FetchOpts>(
+    matchID: string,
+    opts: O,
+  ): Promise<StorageAPI.FetchResult<O>> {
+    const result = (await super.fetch(matchID, opts)) as StorageAPI.FetchFields;
+    const copy = {} as StorageAPI.FetchFields;
+
+    if (opts.state && result.state !== undefined) {
+      copy.state = JSON.parse(JSON.stringify(result.state));
+    }
+    if (opts.metadata && result.metadata !== undefined) {
+      copy.metadata = JSON.parse(JSON.stringify(result.metadata));
+    }
+    if (opts.log && result.log !== undefined) {
+      copy.log = JSON.parse(JSON.stringify(result.log));
+    }
+    if (opts.initialState && result.initialState !== undefined) {
+      copy.initialState = JSON.parse(JSON.stringify(result.initialState));
+    }
+
+    return copy as StorageAPI.FetchResult<O>;
+  }
+}
+
 class SocketIOTestAdapter extends SocketIO {
   constructor({
     clientInfo = new Map(),
@@ -599,5 +628,95 @@ describe('inauthentic clients', () => {
       ([type]) => type === 'sync',
     );
     expect(syncEmits).toHaveLength(1);
+  });
+});
+
+describe('simultaneous sync race condition', () => {
+  const game: Game = {
+    name: 'test',
+    setup: () => ({
+      0: 'foo',
+      1: 'bar',
+    }),
+    playerView: ({ G, playerID }) => ({ [playerID]: G[playerID] }),
+  };
+
+  let app;
+  let db: CopyingInMemoryAsync;
+  let transport: SocketIOTestAdapter;
+  let clientInfo: Map<string, Record<string, any>>;
+  let roomInfo: Map<string, Set<string>>;
+  let io;
+  const matchID = 'matchID';
+
+  beforeEach(async () => {
+    clientInfo = new Map();
+    roomInfo = new Map();
+
+    db = new CopyingInMemoryAsync();
+    await db.connect();
+
+    app = { context: { db, auth: new Auth() }, callback: () => () => {} };
+    transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
+    transport.init(app, [ProcessGameConfig(game)]);
+    io = app.context.io;
+
+    const metadata = createMetadata({ game, unlisted: false, numPlayers: 2 });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    await db.createMatch(matchID, { initialState, metadata });
+  });
+
+  afterEach(async () => {
+    await db.wipe(matchID);
+  });
+
+  test('concurrent syncs preserve both players isConnected status', async () => {
+    const socket0 = io.sockets.get('0');
+    const socket1 = io.sockets.get('1');
+
+    // Force a deterministic race by using zero delays for onSync fetches
+    // and a long delay for the first onConnectionChange setMetadata.
+    // Without queue protection, the second sync's onConnectionChange
+    // fetch will resolve before the first sync's setMetadata completes,
+    // causing the second player to overwrite the first player's isConnected.
+    db.delays = [0, 0, 0, 0, 50, 0, 50, 0];
+
+    await Promise.all([
+      (async () => {
+        const args: Parameters<Master['onSync']> = [matchID, '0', undefined];
+        await socket0.receive('sync', ...args);
+      })(),
+      (async () => {
+        const args: Parameters<Master['onSync']> = [matchID, '1', undefined];
+        await socket1.receive('sync', ...args);
+      })(),
+    ]);
+
+    const { metadata } = await db.fetch(matchID, { metadata: true });
+    expect(metadata.players['0'].isConnected).toBe(true);
+    expect(metadata.players['1'].isConnected).toBe(true);
+  });
+
+  test('concurrent sync and disconnect preserve connection status', async () => {
+    const socket0 = io.sockets.get('0');
+    const socket1 = io.sockets.get('1');
+
+    // Player 0 syncs, then immediately disconnects while player 1 syncs.
+    db.delays = [0, 0, 0, 0, 50, 0, 50, 0, 50, 0];
+
+    await socket0.receive('sync', matchID, '0', undefined);
+
+    await Promise.all([
+      (async () => {
+        await socket0.receive('disconnect');
+      })(),
+      (async () => {
+        await socket1.receive('sync', matchID, '1', undefined);
+      })(),
+    ]);
+
+    const { metadata } = await db.fetch(matchID, { metadata: true });
+    expect(metadata.players['0'].isConnected).toBe(false);
+    expect(metadata.players['1'].isConnected).toBe(true);
   });
 });

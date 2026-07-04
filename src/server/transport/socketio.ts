@@ -208,12 +208,20 @@ export class SocketIO {
             app.context.auth,
           );
 
-          const syncResponse = await master.onSync(...args);
-          if (syncResponse && syncResponse.error === 'unauthorized') {
-            return;
-          }
-          this.addClient(requestingClient, game);
-          await master.onConnectionChange(matchID, playerID, credentials, true);
+          const matchQueue = this.getMatchQueue(matchID);
+          await matchQueue.add(async () => {
+            const syncResponse = await master.onSync(...args);
+            if (syncResponse && syncResponse.error === 'unauthorized') {
+              return;
+            }
+            this.addClient(requestingClient, game);
+            await master.onConnectionChange(
+              matchID,
+              playerID,
+              credentials,
+              true,
+            );
+          });
         });
 
         socket.on('disconnect', async () => {
@@ -227,11 +235,9 @@ export class SocketIO {
               TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
               app.context.auth,
             );
-            await master.onConnectionChange(
-              matchID,
-              playerID,
-              credentials,
-              false,
+            const matchQueue = this.getMatchQueue(matchID);
+            await matchQueue.add(() =>
+              master.onConnectionChange(matchID, playerID, credentials, false),
             );
           }
         });

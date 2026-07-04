@@ -81,13 +81,19 @@ export const configureRouter = ({
   auth,
   games,
   uuid = () => nanoid(11),
+  apiBodyLimit = '5mb',
 }: {
   router: Router<any, Server.AppCtx>;
   auth: Auth;
   games: Game[];
   uuid?: () => string;
   db: StorageAPI.Sync | StorageAPI.Async;
+  apiBodyLimit?: string | number;
 }) => {
+  const bodyParser = koaBody({
+    jsonLimit: apiBodyLimit,
+    formLimit: apiBodyLimit,
+  });
   /**
    * List available games.
    *
@@ -108,7 +114,7 @@ export const configureRouter = ({
    * @param {boolean} unlisted - Whether the match should be excluded from public listing.
    * @return - The ID of the created match.
    */
-  router.post('/games/:name/create', koaBody(), async (ctx) => {
+  router.post('/games/:name/create', bodyParser, async (ctx) => {
     // The name of the game (for example: tic-tac-toe).
     const gameName = ctx.params.name;
     // User-data to pass to the game setup function.
@@ -230,7 +236,7 @@ export const configureRouter = ({
    * @param {object} data - The default data of the player in the match.
    * @return - Player ID and credentials to use when interacting in the joined match.
    */
-  router.post('/games/:name/:id/join', koaBody(), async (ctx) => {
+  router.post('/games/:name/:id/join', bodyParser, async (ctx) => {
     let playerID = (ctx.request.body as any)?.playerID;
     const playerName = (ctx.request.body as any)?.playerName;
     const data = (ctx.request.body as any)?.data;
@@ -286,7 +292,7 @@ export const configureRouter = ({
    * @param {string} credentials - The credentials of the player who leaves.
    * @return - Nothing.
    */
-  router.post('/games/:name/:id/leave', koaBody(), async (ctx) => {
+  router.post('/games/:name/:id/leave', bodyParser, async (ctx) => {
     const matchID = ctx.params.id;
     const playerID = (ctx.request.body as any)?.playerID;
     const credentials = (ctx.request.body as any)?.credentials;
@@ -331,7 +337,7 @@ export const configureRouter = ({
    * @param {boolean} unlisted - Whether the match should be excluded from public listing.
    * @return - The ID of the new match.
    */
-  router.post('/games/:name/:id/playAgain', koaBody(), async (ctx) => {
+  router.post('/games/:name/:id/playAgain', bodyParser, async (ctx) => {
     const gameName = ctx.params.name;
     const matchID = ctx.params.id;
     const playerID = (ctx.request.body as any)?.playerID;
@@ -446,7 +452,7 @@ export const configureRouter = ({
    * @param {object} newName - The new name of the player in the match.
    * @return - Nothing.
    */
-  router.post('/games/:name/:id/rename', koaBody(), async (ctx) => {
+  router.post('/games/:name/:id/rename', bodyParser, async (ctx) => {
     console.warn(
       'This endpoint /rename is deprecated. Please use /update instead.',
     );
@@ -464,7 +470,7 @@ export const configureRouter = ({
    * @param {object} data - The new data of the player in the match.
    * @return - Nothing.
    */
-  router.post('/games/:name/:id/update', koaBody(), updatePlayerMetadata);
+  router.post('/games/:name/:id/update', bodyParser, updatePlayerMetadata);
 
   return router;
 };
