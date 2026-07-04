@@ -124,7 +124,14 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
 
   componentDidMount() {
     const raw = Cookies.get('lobbyState');
-    const cookie = raw ? JSON.parse(raw) : {};
+    let cookie: Partial<LobbyState> = {};
+    if (raw) {
+      try {
+        cookie = JSON.parse(raw);
+      } catch {
+        cookie = {};
+      }
+    }
     if (cookie.phase && cookie.phase === LobbyPhases.PLAY) {
       cookie.phase = LobbyPhases.LIST;
     }

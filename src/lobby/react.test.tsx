@@ -239,6 +239,18 @@ describe('lobby', () => {
       expect(setIntervalSpy).not.toHaveBeenCalled();
     });
 
+    test('falls back to ENTER phase when the lobbyState cookie is corrupt', () => {
+      Cookies.set('lobbyState', 'not-valid-json{', { path: '/' });
+      const ref = React.createRef<Lobby>();
+
+      expect(() =>
+        render(<Lobby ref={ref} gameComponents={components} />),
+      ).not.toThrow();
+
+      expect((ref.current as any).state.phase).toBe('enter');
+      expect(setIntervalSpy).not.toHaveBeenCalled();
+    });
+
     test('refresh starts when transitioning from ENTER lobby to LIST lobby', () => {
       const ref = React.createRef<Lobby>();
       const { container } = render(
