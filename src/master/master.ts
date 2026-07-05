@@ -11,7 +11,13 @@ import {
   TransientHandlingMiddleware,
 } from '../core/reducer';
 import { ProcessGameConfig, IsLongFormMove } from '../core/game';
-import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
+import {
+  GAME_EVENT,
+  MAKE_MOVE,
+  PLUGIN,
+  REDO,
+  UNDO,
+} from '../core/action-types';
 import { createStore, applyMiddleware } from 'redux';
 import * as logging from '../core/logger';
 import type {
@@ -46,6 +52,10 @@ const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
 const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
   const { credentials, ...payload } = action.payload;
   return { ...action, payload };
+};
+
+const isPublicClientAction = (action: CredentialedActionShape.Any) => {
+  return [MAKE_MOVE, GAME_EVENT, UNDO, REDO, PLUGIN].includes(action.type);
 };
 
 type CallbackFn = (arg: {
@@ -151,8 +161,22 @@ export class Master {
     matchID: string,
     playerID: string,
   ): Promise<void | { error: string }> {
-    if (!credAction || !credAction.payload) {
+    if (!credAction || !credAction.type) {
       return { error: 'missing action or action payload' };
+    }
+
+    if (!isPublicClientAction(credAction)) {
+      logging.error(`unauthorized action type: ${credAction.type}`);
+      return { error: 'unauthorized action' };
+    }
+
+    if (!credAction.payload) {
+      return { error: 'missing action or action payload' };
+    }
+
+    if ('automatic' in credAction && credAction.automatic === true) {
+      logging.error(`unauthorized automatic action: ${credAction.type}`);
+      return { error: 'unauthorized action' };
     }
 
     let metadata: Server.MatchData | undefined;
@@ -175,6 +199,14 @@ export class Master {
 
     const action = stripCredentialsFromAction(credAction);
     const key = matchID;
+
+    if (
+      action.type === GAME_EVENT &&
+      !this.game.flow.enabledEventNames.includes(action.payload.type)
+    ) {
+      logging.error(`unauthorized game event: ${action.payload.type}`);
+      return { error: 'unauthorized action' };
+    }
 
     let state: State;
     if (StorageAPI.isSynchronous(this.storageAPI)) {

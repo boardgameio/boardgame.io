@@ -225,6 +225,53 @@ describe('update', () => {
     expect(error).toBe('missing action or action payload');
   });
 
+  test('rejects private action types', async () => {
+    const { error: updateError } = await master.onUpdate(
+      ActionCreators.update({} as State, []) as any,
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(updateError).toBe('unauthorized action');
+  });
+
+  test('rejects automatic client actions', async () => {
+    const { error: updateError } = await master.onUpdate(
+      ActionCreators.automaticGameEvent('endTurn', undefined, '0') as any,
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(updateError).toBe('unauthorized action');
+  });
+
+  test('rejects disabled game events', async () => {
+    const gameWithDisabledEvent: Game = {
+      events: {
+        setActivePlayers: false,
+      },
+      moves: game.moves,
+    };
+    const masterWithDisabledEvent = new Master(
+      gameWithDisabledEvent,
+      db,
+      TransportAPI(send, sendAll),
+    );
+    const disabledResult = await masterWithDisabledEvent.onUpdate(
+      ActionCreators.gameEvent('setActivePlayers', [{ all: 'A' }], '0'),
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(disabledResult).toEqual({ error: 'unauthorized action' });
+  });
+
   test('invalid matchID', async () => {
     await master.onUpdate(action, 0, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
