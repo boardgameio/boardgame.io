@@ -104,6 +104,7 @@ export interface Ctx {
     _activePlayersNumMoves?: Record<PlayerID, number>;
   }>;
   _nextActivePlayers?: ActivePlayersArg;
+  _removedPlayers?: PlayerID[];
   _random?: {
     seed: string | number;
   };
@@ -125,7 +126,8 @@ export interface LogEntry {
     | ActionShape.MakeMove
     | ActionShape.GameEvent
     | ActionShape.Undo
-    | ActionShape.Redo;
+    | ActionShape.Redo
+    | ActionShape.PlayerLeave;
   _stateID: number;
   turn: number;
   phase: string;
@@ -347,6 +349,9 @@ export interface Game<
   };
   endIf?: (context: FnContext<G, PluginAPIs>) => any;
   onEnd?: (context: FnContext<G, PluginAPIs>) => void | G;
+  onPlayerLeave?: (
+    context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
+  ) => void | G;
   playerView?: (context: { G: G; ctx: Ctx; playerID: PlayerID | null }) => any;
   plugins?: Array<Plugin<any, any, G>>;
   ai?: {
@@ -356,6 +361,7 @@ export interface Game<
     state: State<G>,
     action: ActionPayload.MakeMove,
   ) => State<G> | typeof INVALID_MOVE;
+  processPlayerLeave?: (state: State<G>, playerID: PlayerID) => State<G>['G'];
   flow?: ReturnType<typeof Flow>;
 }
 
@@ -460,6 +466,7 @@ export namespace ActionShape {
   export type Reset = ReturnType<typeof ActionCreators.reset>;
   export type Undo = StripCredentials<CredentialedActionShape.Undo>;
   export type Redo = StripCredentials<CredentialedActionShape.Redo>;
+  export type PlayerLeave = ReturnType<typeof ActionCreators.playerLeave>;
   // Private type used only for internal error processing.
   // Included here to preserve type-checking of reducer inputs.
   export type StripTransients = ReturnType<
@@ -475,6 +482,7 @@ export namespace ActionShape {
     | Reset
     | Undo
     | Redo
+    | PlayerLeave
     | Plugin
     | StripTransients;
 }

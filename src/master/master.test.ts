@@ -232,9 +232,16 @@ describe('update', () => {
       'matchID',
       '0',
     );
+    const { error: leaveError } = await master.onUpdate(
+      ActionCreators.playerLeave('0') as any,
+      0,
+      'matchID',
+      '0',
+    );
 
     expect(sendAll).not.toHaveBeenCalled();
     expect(updateError).toBe('unauthorized action');
+    expect(leaveError).toBe('unauthorized action');
   });
 
   test('rejects automatic client actions', async () => {
@@ -249,7 +256,7 @@ describe('update', () => {
     expect(updateError).toBe('unauthorized action');
   });
 
-  test('rejects disabled game events', async () => {
+  test('rejects disabled and private game events', async () => {
     const gameWithDisabledEvent: Game = {
       events: {
         setActivePlayers: false,
@@ -267,9 +274,16 @@ describe('update', () => {
       'matchID',
       '0',
     );
+    const { error: privateError } = await master.onUpdate(
+      ActionCreators.gameEvent('removePlayer', '1', '0'),
+      0,
+      'matchID',
+      '0',
+    );
 
     expect(sendAll).not.toHaveBeenCalled();
     expect(disabledResult).toEqual({ error: 'unauthorized action' });
+    expect(privateError).toBe('unauthorized action');
   });
 
   test('invalid matchID', async () => {
