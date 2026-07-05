@@ -133,6 +133,10 @@
   // `ctx.gameover` is available at this point.
   onEnd: ({ G, ctx, events, random, ...plugins }) => G,
 
+  // Called when a player permanently leaves via the Lobby API.
+  // The player is removed from turn order and active-player state after this.
+  onPlayerLeave: ({ G, ctx, playerID, events, random, ...plugins }) => G,
+
   // Disable undo feature for all the moves in the game
   disableUndo: true,
 

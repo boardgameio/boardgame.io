@@ -78,6 +78,12 @@ Allows adding additional players to the set of "active players", and
 also any stages that you want to put them in. See the guide on [Stages](stages.md)
 for more details.
 
+#### removePlayer
+
+Permanently removes a player from turn order and active-player state.
+This is available to game logic through `events.removePlayer(playerID)`.
+It is not directly callable by clients.
+
 ### Triggering an event from game logic.
 
 You can trigger events from a move or code inside
@@ -154,6 +160,9 @@ const game = {
 
 !> This doesn't apply to events in moves or hooks, but just the
 ability to call an event directly from a client.
+
+!> `removePlayer` is always server-side game logic only. It is not exposed
+on client `events`, even though it is available inside moves and hooks.
 
 ### Calling events from hooks
 
