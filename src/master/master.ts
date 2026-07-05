@@ -18,6 +18,7 @@ import {
   REDO,
   UNDO,
 } from '../core/action-types';
+import { playerLeave } from '../core/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import * as logging from '../core/logger';
 import type {
@@ -36,6 +37,14 @@ import { createMatch } from '../server/util';
 import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import type { Operation } from 'rfc6902';
+
+type DispatchResultWithTransients = {
+  transients?: {
+    error?: {
+      type: string;
+    };
+  };
+};
 
 /**
  * Filter match data to get a player metadata object with credentials stripped.
@@ -342,6 +351,123 @@ export class Master {
         writes.push(this.storageAPI.setMetadata(key, newMetadata));
       }
       await Promise.all(writes);
+    }
+  }
+
+  /**
+   * Called by the lobby API when a player permanently leaves a match.
+   * This runs the game lifecycle via a private action and broadcasts the
+   * resulting state like a normal update.
+   */
+  async onPlayerLeave(
+    matchID: string,
+    playerID: string,
+    credentials?: string,
+  ): Promise<void | { error: string }> {
+    const key = matchID;
+
+    let metadata: Server.MatchData | undefined;
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
+    } else {
+      ({ metadata } = await this.storageAPI.fetch(matchID, { metadata: true }));
+    }
+
+    if (metadata === undefined) {
+      logging.error(`metadata not found for matchID=[${key}]`);
+      return { error: 'metadata not found' };
+    }
+
+    if (
+      metadata.gameName !== undefined &&
+      metadata.gameName !== this.game.name
+    ) {
+      logging.error(
+        `metadata game mismatch - matchID=[${key}]` +
+          ` - expected=[${this.game.name}] actual=[${metadata.gameName}]`,
+      );
+      return { error: 'game not found' };
+    }
+
+    if (this.auth) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
+    }
+
+    let state: State;
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      ({ state } = this.storageAPI.fetch(key, { state: true }));
+    } else {
+      ({ state } = await this.storageAPI.fetch(key, { state: true }));
+    }
+
+    if (state === undefined) {
+      logging.error(`game not found, matchID=[${key}]`);
+      return { error: 'game not found' };
+    }
+
+    if (state.ctx.gameover !== undefined) {
+      return;
+    }
+
+    const reducer = CreateGameReducer({
+      game: this.game,
+    });
+    const middleware = applyMiddleware(TransientHandlingMiddleware);
+    const store = createStore(reducer, state, middleware);
+    const prevState = store.getState();
+    const stateID = prevState._stateID;
+    const action = playerLeave(playerID);
+
+    const result = store.dispatch(action) as DispatchResultWithTransients;
+    if (result && result.transients && result.transients.error) {
+      return { error: result.transients.error.type };
+    }
+
+    state = store.getState();
+
+    this.subscribeCallback({
+      state,
+      action,
+      matchID,
+    });
+
+    if (this.game.deltaState) {
+      this.transportAPI.sendAll({
+        type: 'patch',
+        args: [matchID, stateID, prevState, state],
+      });
+    } else {
+      this.transportAPI.sendAll({
+        type: 'update',
+        args: [matchID, state],
+      });
+    }
+
+    const { deltalog, ...stateWithoutDeltalog } = state;
+
+    const newMetadata = {
+      ...metadata,
+      updatedAt: Date.now(),
+    };
+    if (state.ctx.gameover !== undefined) {
+      newMetadata.gameover = state.ctx.gameover;
+    }
+
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
+      this.storageAPI.setMetadata(key, newMetadata);
+    } else {
+      await Promise.all([
+        this.storageAPI.setState(key, stateWithoutDeltalog, deltalog),
+        this.storageAPI.setMetadata(key, newMetadata),
+      ]);
     }
   }
 

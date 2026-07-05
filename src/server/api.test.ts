@@ -17,8 +17,10 @@ import * as dateMock from 'jest-date-mock';
 
 import { configureRouter, configureApp } from './api';
 import { ProcessGameConfig } from '../core/game';
+import { InitializeGame } from '../core/initialize';
 import { Auth } from './auth';
 import * as StorageAPI from './db/base';
+import { InMemory } from './db/inmemory';
 import { Origins } from './cors';
 import type { Game, Server } from '../types';
 
@@ -1039,9 +1041,28 @@ describe('.configureRouter', () => {
     let db: AsyncStorage;
     const auth = new Auth();
     let games: Game[];
+    const warnMsg =
+      'This endpoint /leave is deprecated. Please use /leaveSlot instead.';
+    const createLeaveMetadata = (
+      gameName = 'foo',
+      players?: Server.MatchData['players'],
+    ): Server.MatchData => {
+      players = players || {
+        '0': { id: 0, name: 'alice', credentials: 'SECRET1' },
+        '1': { id: 1, name: 'bob', credentials: 'SECRET2' },
+      };
+
+      return {
+        gameName,
+        players,
+        createdAt: 0,
+        updatedAt: 0,
+      };
+    };
 
     beforeEach(() => {
       games = [ProcessGameConfig({ name: 'foo' })];
+      console.warn = jest.fn();
     });
 
     describe('for an unprotected lobby', () => {
@@ -1069,6 +1090,7 @@ describe('.configureRouter', () => {
               fetch: async () => {
                 return {
                   metadata: {
+                    gameName: 'foo',
                     players: {
                       '0': {
                         name: 'alice',
@@ -1093,6 +1115,10 @@ describe('.configureRouter', () => {
             expect(response.status).toEqual(200);
           });
 
+          test('warns that /leave is deprecated', async () => {
+            expect(console.warn).toHaveBeenCalledWith(warnMsg);
+          });
+
           test('updates the players', async () => {
             expect(db.mocks.setMetadata).toHaveBeenCalledWith(
               '1',
@@ -1114,6 +1140,7 @@ describe('.configureRouter', () => {
                 fetch: async () => {
                   return {
                     metadata: {
+                      gameName: 'foo',
                       players: {
                         '0': {
                           name: 'alice',
@@ -1167,6 +1194,236 @@ describe('.configureRouter', () => {
             expect(response.status).toEqual(403);
           });
         });
+
+        test.each(['/leave', '/leaveSlot', '/leaveGame'])(
+          'rejects non-string playerID for %s',
+          async (endpoint) => {
+            const app = createApiServer({
+              db: new AsyncStorage(),
+              auth,
+              games,
+            });
+            response = await apiCall(app)
+              .post(`/games/foo/1${endpoint}`)
+              .send({ playerID: 0, credentials: 'SECRET1' });
+
+            expect(response.status).toEqual(403);
+            expect(response.text).toEqual(
+              'playerID must be a string, got number',
+            );
+          },
+        );
+
+        test.each(['/leave', '/leaveSlot', '/leaveGame'])(
+          'checks game name before player lookup for %s',
+          async (endpoint) => {
+            db = new AsyncStorage({
+              fetch: async () => ({ metadata: createLeaveMetadata('bar') }),
+            });
+            const app = createApiServer({ db, auth, games });
+
+            response = await apiCall(app)
+              .post(`/games/foo/1${endpoint}`)
+              .send('playerID=9&credentials=SECRET1');
+
+            expect(response.status).toEqual(404);
+            expect(response.text).toEqual('Match 1 not found');
+            expect(db.mocks.setMetadata).not.toHaveBeenCalled();
+            expect(db.mocks.wipe).not.toHaveBeenCalled();
+          },
+        );
+
+        test('leaveSlot clears the lobby slot', async () => {
+          db = new AsyncStorage({
+            fetch: async () => ({ metadata: createLeaveMetadata() }),
+          });
+          const app = createApiServer({ db, auth, games });
+
+          response = await apiCall(app)
+            .post('/games/foo/1/leaveSlot')
+            .send('playerID=0&credentials=SECRET1');
+
+          expect(response.status).toEqual(200);
+          expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({
+              players: expect.objectContaining({
+                '0': { id: 0 },
+                '1': expect.objectContaining({
+                  name: 'bob',
+                  credentials: 'SECRET2',
+                }),
+              }),
+            }),
+          );
+        });
+      });
+    });
+
+    describe('/leaveGame', () => {
+      const createMemoryMatch = (
+        game: Game,
+        {
+          numPlayers = 2,
+          initialState = InitializeGame({ game, numPlayers }),
+          metadata = createLeaveMetadata(),
+        }: {
+          numPlayers?: number;
+          initialState?: ReturnType<typeof InitializeGame>;
+          metadata?: Server.MatchData;
+        } = {},
+      ) => {
+        const memory = new InMemory();
+        memory.createMatch('1', { initialState, metadata });
+        return memory;
+      };
+
+      beforeEach(() => {
+        delete process.env.API_SECRET;
+      });
+
+      test('runs the leave lifecycle before clearing the lobby slot', async () => {
+        const game = ProcessGameConfig({
+          name: 'foo',
+          setup: () => ({ left: null }),
+          onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+        });
+        const memory = createMemoryMatch(game);
+        const app = createApiServer({ db: memory, auth, games: [game] });
+
+        response = await apiCall(app)
+          .post('/games/foo/1/leaveGame')
+          .send('playerID=0&credentials=SECRET1');
+
+        const { state, metadata, log } = memory.fetch('1', {
+          state: true,
+          metadata: true,
+          log: true,
+        });
+        expect(response.status).toEqual(200);
+        expect(state.G).toEqual({ left: '0' });
+        expect(state.ctx.playOrder).toEqual(['1']);
+        expect(state.ctx._removedPlayers).toEqual(['0']);
+        expect(metadata.players['0']).toEqual({ id: 0 });
+        expect(metadata.players['1']).toEqual({
+          id: 1,
+          name: 'bob',
+          credentials: 'SECRET2',
+        });
+        expect(log.at(-1).action.type).toEqual('PLAYER_LEAVE');
+      });
+
+      test('clears the lobby slot without changing game state after gameover', async () => {
+        const game = ProcessGameConfig({
+          name: 'foo',
+          setup: () => ({ left: null }),
+          onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+        });
+        const initialState = InitializeGame({ game, numPlayers: 2 });
+        const memory = createMemoryMatch(game, {
+          initialState: {
+            ...initialState,
+            ctx: { ...initialState.ctx, gameover: { winner: '1' } },
+          },
+        });
+        const app = createApiServer({ db: memory, auth, games: [game] });
+
+        response = await apiCall(app)
+          .post('/games/foo/1/leaveGame')
+          .send('playerID=0&credentials=SECRET1');
+
+        const { state, metadata, log } = memory.fetch('1', {
+          state: true,
+          metadata: true,
+          log: true,
+        });
+        expect(response.status).toEqual(200);
+        expect(state.G).toEqual({ left: null });
+        expect(state.ctx.gameover).toEqual({ winner: '1' });
+        expect(metadata.players['0']).toEqual({ id: 0 });
+        expect(log).toEqual([]);
+      });
+
+      test('does not clear the lobby slot when game leave is rejected', async () => {
+        const game = ProcessGameConfig({ name: 'foo' });
+        const memory = createMemoryMatch(game, {
+          numPlayers: 1,
+          metadata: createLeaveMetadata('foo', {
+            '0': { id: 0, name: 'alice', credentials: 'SECRET1' },
+          }),
+        });
+        const app = createApiServer({ db: memory, auth, games: [game] });
+
+        response = await apiCall(app)
+          .post('/games/foo/1/leaveGame')
+          .send('playerID=0&credentials=SECRET1');
+
+        const { state, metadata, log } = memory.fetch('1', {
+          state: true,
+          metadata: true,
+          log: true,
+        });
+        expect(response.status).toEqual(400);
+        expect(response.text).toEqual('action/action_invalid');
+        expect(state.ctx.playOrder).toEqual(['0']);
+        expect(metadata.players['0']).toEqual({
+          id: 0,
+          name: 'alice',
+          credentials: 'SECRET1',
+        });
+        expect(log).toEqual([]);
+      });
+
+      test('re-authenticates before clearing the lobby slot', async () => {
+        const game = ProcessGameConfig({
+          name: 'foo',
+          setup: () => ({ left: null }),
+          onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+        });
+        const initialState = InitializeGame({ game, numPlayers: 2 });
+        const originalMetadata = createLeaveMetadata();
+        const rejoinedMetadata = createLeaveMetadata('foo', {
+          '0': { id: 0, name: 'carol', credentials: 'SECRET3' },
+          '1': { id: 1, name: 'bob', credentials: 'SECRET2' },
+        });
+        let metadataFetches = 0;
+        db = new AsyncStorage({
+          fetch: async (_matchID, opts) => {
+            if (opts.metadata) {
+              metadataFetches++;
+              return {
+                metadata:
+                  metadataFetches < 3 ? originalMetadata : rejoinedMetadata,
+              };
+            }
+            if (opts.state) {
+              return { state: initialState };
+            }
+            return {};
+          },
+        });
+        const app = createApiServer({ db, auth, games: [game] });
+
+        response = await apiCall(app)
+          .post('/games/foo/1/leaveGame')
+          .send('playerID=0&credentials=SECRET1');
+
+        expect(response.status).toEqual(403);
+        expect(response.text).toEqual('Invalid credentials SECRET1');
+        expect(db.mocks.setState).toHaveBeenCalledTimes(1);
+        expect(db.mocks.setMetadata).toHaveBeenCalledTimes(1);
+        expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+          '1',
+          expect.objectContaining({
+            players: expect.objectContaining({
+              '0': expect.objectContaining({
+                name: 'alice',
+                credentials: 'SECRET1',
+              }),
+            }),
+          }),
+        );
+        expect(db.mocks.wipe).not.toHaveBeenCalled();
       });
     });
   });

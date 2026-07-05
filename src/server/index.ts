@@ -140,7 +140,15 @@ export function Server({
 
     run: async (portOrConfig: number | ServerConfig, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
-      configureRouter({ router, db, games, uuid, auth, apiBodyLimit });
+      configureRouter({
+        router,
+        db,
+        games,
+        uuid,
+        auth,
+        apiBodyLimit,
+        transport,
+      });
 
       // DB
       await db.connect();
