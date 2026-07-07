@@ -163,7 +163,7 @@ export const configureRouter = ({
       metadata,
     });
     if (!isAuthorized) {
-      ctx.throw(403, 'Invalid credentials ' + credentials);
+      ctx.throw(403, 'Invalid credentials');
     }
   };
 
@@ -496,7 +496,7 @@ export const configureRouter = ({
       metadata,
     });
     if (!isAuthorized) {
-      ctx.throw(403, 'Invalid credentials ' + credentials);
+      ctx.throw(403, 'Invalid credentials');
     }
 
     // Check if nextMatch is already set, if so, return that id.
@@ -562,7 +562,7 @@ export const configureRouter = ({
       metadata,
     });
     if (!isAuthorized) {
-      ctx.throw(403, 'Invalid credentials ' + credentials);
+      ctx.throw(403, 'Invalid credentials');
     }
 
     if (newName) {

@@ -869,7 +869,7 @@ describe('.configureRouter', () => {
             response = await apiCall(app)
               .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET2&newName=mike');
-            expect(response.text).toEqual('Invalid credentials SECRET2');
+            expect(response.text).toEqual('Invalid credentials');
           });
         });
 
@@ -1003,7 +1003,7 @@ describe('.configureRouter', () => {
                 credentials: 'SECRET2',
                 data: { subdata: 'text' },
               });
-            expect(response.text).toEqual('Invalid credentials SECRET2');
+            expect(response.text).toEqual('Invalid credentials');
           });
         });
 
@@ -1428,7 +1428,7 @@ describe('.configureRouter', () => {
           .send('playerID=0&credentials=SECRET1');
 
         expect(response.status).toEqual(403);
-        expect(response.text).toEqual('Invalid credentials SECRET1');
+        expect(response.text).toEqual('Invalid credentials');
         expect(db.mocks.setState).toHaveBeenCalledTimes(1);
         expect(db.mocks.setMetadata).toHaveBeenCalledTimes(1);
         expect(db.mocks.setMetadata).toHaveBeenCalledWith(
