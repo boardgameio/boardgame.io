@@ -25,6 +25,7 @@
       break;
     case 'REDO':
       actionType = 'redo';
+      break;
     case 'GAME_EVENT':
     case 'MAKE_MOVE':
     default:

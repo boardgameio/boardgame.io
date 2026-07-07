@@ -19,7 +19,7 @@ import { Master } from '../master/master';
 import type { TransportAPI as MasterTransport } from '../master/master';
 
 interface MatchQueue {
-  add<T>(task: () => T | Promise<T>): Promise<T | Promise<T>>;
+  add<T>(task: () => PromiseLike<T>): Promise<T>;
 }
 
 interface MatchTransport {
