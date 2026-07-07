@@ -914,6 +914,83 @@ describe('playerLeave', () => {
     expect(state.ctx.playOrder).toEqual([]);
     expect(state.ctx._removedPlayers).toEqual(['0']);
   });
+
+  test('rejects non-string playerID', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+
+    const state = reducer(initialState, playerLeave(1 as any));
+
+    expect(state).toMatchObject({
+      ...initialState,
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
+  });
+
+  test('rejects leave after gameover', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    const stateWithGameover = {
+      ...initialState,
+      ctx: { ...initialState.ctx, gameover: true },
+    };
+
+    const state = reducer(stateWithGameover, playerLeave('0'));
+
+    expect(state).toMatchObject({
+      ...stateWithGameover,
+      transients: {
+        error: {
+          type: 'action/gameover',
+        },
+      },
+    });
+  });
+
+  test('leave is cancelled if plugin declares it invalid', () => {
+    const game: Game<{ value: number }> = {
+      setup: () => ({ value: 5 }),
+      plugins: [
+        {
+          name: 'validator',
+          isInvalid: ({ G }) => {
+            if (G.value % 5 !== 0) return 'G.value must divide by 5';
+            return false;
+          },
+        },
+      ],
+      onPlayerLeave: ({ G }) => ({ ...G, value: 6 }),
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.G).toEqual({ value: 5 });
+    expect(state.ctx.playOrder).toEqual(['0', '1']);
+    expect(state['transients'].error).toEqual({
+      type: 'action/plugin_invalid',
+      payload: { plugin: 'validator', message: 'G.value must divide by 5' },
+    });
+  });
+
+  test('clears undo history when undo is disabled', () => {
+    const game: Game = { disableUndo: true };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state._undo).toEqual([]);
+    expect(state._redo).toEqual([]);
+  });
 });
 
 describe('undo / redo with stages', () => {

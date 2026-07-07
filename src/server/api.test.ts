@@ -1215,6 +1215,25 @@ describe('.configureRouter', () => {
         );
 
         test.each(['/leave', '/leaveSlot', '/leaveGame'])(
+          'rejects non-string credentials for %s',
+          async (endpoint) => {
+            const app = createApiServer({
+              db: new AsyncStorage(),
+              auth,
+              games,
+            });
+            response = await apiCall(app)
+              .post(`/games/foo/1${endpoint}`)
+              .send({ playerID: '0', credentials: 1 });
+
+            expect(response.status).toEqual(403);
+            expect(response.text).toEqual(
+              'credentials must be a string, got number',
+            );
+          },
+        );
+
+        test.each(['/leave', '/leaveSlot', '/leaveGame'])(
           'checks game name before player lookup for %s',
           async (endpoint) => {
             db = new AsyncStorage({
@@ -1424,6 +1443,88 @@ describe('.configureRouter', () => {
           }),
         );
         expect(db.mocks.wipe).not.toHaveBeenCalled();
+      });
+
+      test('throws when the game is not found', async () => {
+        const game = ProcessGameConfig({ name: 'foo' });
+        const memory = createMemoryMatch(game);
+        const app = createApiServer({ db: memory, auth, games: [game] });
+
+        response = await apiCall(app)
+          .post('/games/bar/1/leaveGame')
+          .send('playerID=0&credentials=SECRET1');
+
+        expect(response.status).toEqual(404);
+        expect(response.text).toEqual('Game bar not found');
+      });
+
+      test('runs the leave through the transport match queue when available', async () => {
+        const game = ProcessGameConfig({
+          name: 'foo',
+          setup: () => ({ left: null }),
+          onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+        });
+        const memory = createMemoryMatch(game);
+        const transportAPI = { send: jest.fn(), sendAll: jest.fn() };
+        const transport = {
+          createTransportAPI: jest.fn(() => transportAPI),
+          getMatchQueue: jest.fn(() => ({
+            add: <T>(task: () => PromiseLike<T>) => Promise.resolve(task()),
+          })),
+        };
+        const app = createApiServer({
+          db: memory,
+          auth,
+          games: [game],
+          transport,
+        });
+
+        response = await apiCall(app)
+          .post('/games/foo/1/leaveGame')
+          .send('playerID=0&credentials=SECRET1');
+
+        const { state } = memory.fetch('1', { state: true });
+        expect(response.status).toEqual(200);
+        expect(state.G).toEqual({ left: '0' });
+        expect(transport.createTransportAPI).toHaveBeenCalledWith('1');
+        expect(transport.getMatchQueue).toHaveBeenCalledWith('1');
+        expect(transportAPI.sendAll).toHaveBeenCalled();
+      });
+
+      test('responds 403 when the game master rejects the credentials', async () => {
+        const game = ProcessGameConfig({ name: 'foo' });
+        const initialState = InitializeGame({ game, numPlayers: 2 });
+        let metadataFetches = 0;
+        db = new AsyncStorage({
+          fetch: async (_matchID, opts) => {
+            if (opts.metadata) {
+              metadataFetches++;
+              return {
+                metadata:
+                  metadataFetches < 2
+                    ? createLeaveMetadata()
+                    : createLeaveMetadata('foo', {
+                        '0': { id: 0, name: 'carol', credentials: 'SECRET3' },
+                        '1': { id: 1, name: 'bob', credentials: 'SECRET2' },
+                      }),
+              };
+            }
+            if (opts.state) {
+              return { state: initialState };
+            }
+            return {};
+          },
+        });
+        const app = createApiServer({ db, auth, games: [game] });
+
+        response = await apiCall(app)
+          .post('/games/foo/1/leaveGame')
+          .send('playerID=0&credentials=SECRET1');
+
+        expect(response.status).toEqual(403);
+        expect(response.text).toEqual('unauthorized');
+        expect(db.mocks.setState).not.toHaveBeenCalled();
+        expect(db.mocks.setMetadata).not.toHaveBeenCalled();
       });
     });
   });

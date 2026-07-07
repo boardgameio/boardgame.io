@@ -237,6 +237,21 @@ describe('redactLog', () => {
     expect(result).toMatchObject(logEvents);
   });
 
+  test('actions without args are not redacted', () => {
+    const logEvents = [
+      {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
+        action: ActionCreators.playerLeave('0'),
+        redact: true,
+      },
+    ];
+
+    const result = redactLog(logEvents, '1');
+    expect(result).toMatchObject(logEvents);
+  });
+
   test('events are not redacted', () => {
     const logEvents = [
       {
