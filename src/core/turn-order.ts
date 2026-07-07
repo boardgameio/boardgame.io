@@ -68,20 +68,20 @@ export function RemovePlayer(ctx: Ctx, playerID: PlayerID): Ctx {
   let playOrderPos = 0;
   let currentPlayer = ctx.currentPlayer;
 
-  if (playOrder.length > 0) {
-    if (ctx.currentPlayer === playerID) {
+  if (playOrder.length === 0) {
+    currentPlayer = '';
+  } else if (ctx.currentPlayer === playerID) {
+    playOrderPos =
+      ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
+    currentPlayer = playOrder[playOrderPos];
+  } else {
+    const currentPlayerPos = playOrder.indexOf(ctx.currentPlayer);
+    if (currentPlayerPos === -1) {
       playOrderPos =
         ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
       currentPlayer = playOrder[playOrderPos];
     } else {
-      const currentPlayerPos = playOrder.indexOf(ctx.currentPlayer);
-      if (currentPlayerPos === -1) {
-        playOrderPos =
-          ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
-        currentPlayer = playOrder[playOrderPos];
-      } else {
-        playOrderPos = currentPlayerPos;
-      }
+      playOrderPos = currentPlayerPos;
     }
   }
 

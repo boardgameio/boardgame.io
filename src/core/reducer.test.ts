@@ -912,6 +912,7 @@ describe('playerLeave', () => {
 
     expect(state.ctx.gameover).toBe('left');
     expect(state.ctx.playOrder).toEqual([]);
+    expect(state.ctx.currentPlayer).toBe('');
     expect(state.ctx._removedPlayers).toEqual(['0']);
   });
 

@@ -1208,6 +1208,21 @@ describe('RemovePlayer', () => {
     expect(next.currentPlayer).toBe('0');
   });
 
+  test('clears current player when the last player is removed', () => {
+    const ctx = {
+      ...baseCtx(),
+      numPlayers: 1,
+      playOrder: ['0'],
+      currentPlayer: '0',
+    };
+
+    const next = RemovePlayer(ctx, '0');
+
+    expect(next.playOrder).toEqual([]);
+    expect(next.currentPlayer).toBe('');
+    expect(next.playOrderPos).toBe(0);
+  });
+
   test('is idempotent for an already removed player', () => {
     const ctx = {
       ...baseCtx(),
