@@ -225,6 +225,78 @@ describe('update', () => {
     expect(error).toBe('missing action or action payload');
   });
 
+  test('public action type with missing payload', async () => {
+    const { error } = await master.onUpdate(
+      { type: 'MAKE_MOVE' } as any,
+      0,
+      'matchID',
+      '0',
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toBe('missing action or action payload');
+  });
+
+  test('rejects private action types', async () => {
+    const { error: updateError } = await master.onUpdate(
+      ActionCreators.update({} as State, []) as any,
+      0,
+      'matchID',
+      '0',
+    );
+    const { error: leaveError } = await master.onUpdate(
+      ActionCreators.playerLeave('0') as any,
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(updateError).toBe('unauthorized action');
+    expect(leaveError).toBe('unauthorized action');
+  });
+
+  test('rejects automatic client actions', async () => {
+    const { error: updateError } = await master.onUpdate(
+      ActionCreators.automaticGameEvent('endTurn', undefined, '0') as any,
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(updateError).toBe('unauthorized action');
+  });
+
+  test('rejects disabled and private game events', async () => {
+    const gameWithDisabledEvent: Game = {
+      events: {
+        setActivePlayers: false,
+      },
+      moves: game.moves,
+    };
+    const masterWithDisabledEvent = new Master(
+      gameWithDisabledEvent,
+      db,
+      TransportAPI(send, sendAll),
+    );
+    const disabledResult = await masterWithDisabledEvent.onUpdate(
+      ActionCreators.gameEvent('setActivePlayers', [{ all: 'A' }], '0'),
+      0,
+      'matchID',
+      '0',
+    );
+    const { error: privateError } = await master.onUpdate(
+      ActionCreators.gameEvent('removePlayer', '1', '0'),
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(disabledResult).toEqual({ error: 'unauthorized action' });
+    expect(privateError).toBe('unauthorized action');
+  });
+
   test('invalid matchID', async () => {
     await master.onUpdate(action, 0, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
@@ -524,6 +596,243 @@ describe('update', () => {
     ({ state, metadata } = await db.fetch(id, { state: true, metadata: true }));
     expect(state.ctx.turn).toBe(2);
     expect(metadata).toBeUndefined();
+  });
+});
+
+describe('player leave', () => {
+  const send = jest.fn();
+  const sendAll = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('runs leave lifecycle, persists state, and broadcasts', async () => {
+    const game: Game = {
+      name: 'leave',
+      onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+    };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 }, '2': { id: 2 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+    const { state, log } = db.fetch('matchID', { state: true, log: true });
+
+    expect(result).toBeUndefined();
+    expect(state.G).toEqual({ left: '1' });
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state.ctx._removedPlayers).toEqual(['1']);
+    expect(log.at(-1).action).toEqual(ActionCreators.playerLeave('1'));
+    expect(sendAll).toHaveBeenCalledWith({
+      type: 'update',
+      args: ['matchID', expect.objectContaining({ G: { left: '1' } })],
+    });
+  });
+
+  test('skips lifecycle after gameover', async () => {
+    const game: Game = {
+      name: 'leave',
+      onPlayerLeave: () => ({ changed: true }),
+    };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState: {
+        ...initialState,
+        ctx: { ...initialState.ctx, gameover: true },
+      },
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+    const { state } = db.fetch('matchID', { state: true });
+
+    expect(result).toBeUndefined();
+    expect(state.G).toEqual({});
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects metadata game mismatch', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'other',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+
+    expect(result).toEqual({ error: 'game not found' });
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('does not persist or broadcast when reducer rejects leave', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '0');
+    const { state, log } = db.fetch('matchID', { state: true, log: true });
+
+    expect(result).toEqual({ error: 'action/action_invalid' });
+    expect(state.ctx.playOrder).toEqual(['0']);
+    expect(log).toEqual([]);
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects unknown matchID', async () => {
+    const game: Game = { name: 'leave' };
+    const master = new Master(
+      game,
+      new InMemory(),
+      TransportAPI(send, sendAll),
+    );
+
+    const result = await master.onPlayerLeave('unknownMatchID', '0');
+
+    expect(result).toEqual({ error: 'metadata not found' });
+    expect(error).toHaveBeenCalledWith(
+      'metadata not found for matchID=[unknownMatchID]',
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects match with missing game state', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    db.setMetadata('matchID', {
+      gameName: 'leave',
+      players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '0');
+
+    expect(result).toEqual({ error: 'game not found' });
+    expect(error).toHaveBeenCalledWith('game not found, matchID=[matchID]');
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects invalid credentials', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(
+      game,
+      db,
+      TransportAPI(send, sendAll),
+      new Auth({ authenticateCredentials: () => false }),
+    );
+
+    const result = await master.onPlayerLeave('matchID', '0', 'invalid');
+
+    expect(result).toEqual({ error: 'unauthorized' });
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('broadcasts a patch when deltaState is enabled', async () => {
+    const game: Game = { name: 'leave', deltaState: true };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 }, '2': { id: 2 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+
+    expect(result).toBeUndefined();
+    expect(sendAll).toHaveBeenCalledWith({
+      type: 'patch',
+      args: [
+        'matchID',
+        0,
+        expect.objectContaining({ _stateID: 0 }),
+        expect.objectContaining({ _stateID: 1 }),
+      ],
+    });
+  });
+
+  test('stores gameover in metadata when the leave ends the game', async () => {
+    const game: Game = {
+      name: 'leave',
+      onPlayerLeave: ({ G, events }) => {
+        events.endGame('done');
+        return G;
+      },
+    };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+    const { state, metadata } = db.fetch('matchID', {
+      state: true,
+      metadata: true,
+    });
+
+    expect(result).toBeUndefined();
+    expect(state.ctx.gameover).toBe('done');
+    expect(metadata.gameover).toBe('done');
   });
 });
 

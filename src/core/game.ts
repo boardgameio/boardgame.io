@@ -21,6 +21,7 @@ type ProcessedGame = Game & {
     state: State,
     action: ActionPayload.MakeMove,
   ) => State | typeof INVALID_MOVE;
+  processPlayerLeave: (state: State, playerID: string) => State['G'];
 };
 
 function IsProcessed(game: Game | ProcessedGame): game is ProcessedGame {
@@ -53,6 +54,7 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
   if (game.disableUndo === undefined) game.disableUndo = false;
   if (game.setup === undefined) game.setup = () => ({});
   if (game.moves === undefined) game.moves = {};
+  if (game.onPlayerLeave === undefined) game.onPlayerLeave = ({ G }) => G;
   if (game.playerView === undefined) game.playerView = ({ G }) => G;
   if (game.plugins === undefined) game.plugins = [];
 
@@ -105,6 +107,21 @@ export function ProcessGameConfig(game: Game | ProcessedGame): ProcessedGame {
       logging.error(`invalid move object: ${action.type}`);
 
       return state.G;
+    },
+
+    processPlayerLeave: (state: State, playerID: string) => {
+      const fn = plugins.FnWrap(
+        game.onPlayerLeave,
+        GameMethod.GAME_ON_PLAYER_LEAVE,
+        game.plugins,
+      );
+      const context = {
+        ...plugins.GetAPIs(state),
+        G: state.G,
+        ctx: state.ctx,
+        playerID,
+      };
+      return fn(context);
     },
   };
 }

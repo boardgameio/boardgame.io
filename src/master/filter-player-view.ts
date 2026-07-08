@@ -1,7 +1,18 @@
 import { PlayerView } from '../plugins/main';
 import { createPatch } from 'rfc6902';
-import type { Game, State, LogEntry, PlayerID } from '../types';
+import type { Game, State, LogEntry, PlayerID, ActionShape } from '../types';
 import type { TransportData, IntermediateTransportData } from './master';
+
+type RedactableLogAction = Extract<
+  LogEntry['action'],
+  ActionShape.MakeMove | ActionShape.GameEvent
+>;
+
+function isRedactableLogAction(
+  action: LogEntry['action'],
+): action is RedactableLogAction {
+  return 'args' in action.payload;
+}
 
 const applyPlayerView = (
   game: Game,
@@ -79,7 +90,11 @@ export function redactLog(log: LogEntry[], playerID: PlayerID | null) {
 
   return log.map((logEvent) => {
     // filter for all other players and spectators.
-    if (playerID !== null && +playerID === +logEvent.action.payload.playerID) {
+    if (
+      playerID !== null &&
+      'playerID' in logEvent.action.payload &&
+      +playerID === +logEvent.action.payload.playerID
+    ) {
       return logEvent;
     }
 
@@ -87,13 +102,17 @@ export function redactLog(log: LogEntry[], playerID: PlayerID | null) {
       return logEvent;
     }
 
-    const payload = {
+    if (!isRedactableLogAction(logEvent.action)) {
+      return logEvent;
+    }
+
+    const redactedPayload = {
       ...logEvent.action.payload,
       args: null,
     };
     const filteredEvent = {
       ...logEvent,
-      action: { ...logEvent.action, payload },
+      action: { ...logEvent.action, payload: redactedPayload },
     };
 
     const { redact, ...remaining } = filteredEvent;

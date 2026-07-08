@@ -337,6 +337,54 @@ describe('LobbyClient', () => {
     test('validates body', testBasicBody(client.leaveMatch));
   });
 
+  describe('leaveSlot', () => {
+    test('calls `/games/:name/:id/leaveSlot`', async () => {
+      await client.leaveSlot('tic-tac-toe', 'xyz', {
+        playerID: '0',
+        credentials: 'pwd',
+      });
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz/leaveSlot`, {
+        method: 'post',
+        body: '{"playerID":"0","credentials":"pwd"}',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    test('validates gameName', throwsWithInvalidGameName(client.leaveSlot));
+    test('validates matchID', throwsWithInvalidMatchID(client.leaveSlot));
+
+    test(
+      'throws without body',
+      throwsWithoutBody(() => client.leaveSlot('chess', 'id', undefined)),
+    );
+
+    test('validates body', testBasicBody(client.leaveSlot));
+  });
+
+  describe('leaveGame', () => {
+    test('calls `/games/:name/:id/leaveGame`', async () => {
+      await client.leaveGame('tic-tac-toe', 'xyz', {
+        playerID: '0',
+        credentials: 'pwd',
+      });
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz/leaveGame`, {
+        method: 'post',
+        body: '{"playerID":"0","credentials":"pwd"}',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    test('validates gameName', throwsWithInvalidGameName(client.leaveGame));
+    test('validates matchID', throwsWithInvalidMatchID(client.leaveGame));
+
+    test(
+      'throws without body',
+      throwsWithoutBody(() => client.leaveGame('chess', 'id', undefined)),
+    );
+
+    test('validates body', testBasicBody(client.leaveGame));
+  });
+
   describe('updatePlayer', () => {
     test('calls `/games/:name/:id/update`', async () => {
       await client.updatePlayer('tic-tac-toe', 'xyz', {

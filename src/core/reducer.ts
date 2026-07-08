@@ -29,6 +29,7 @@ import type {
 import { stripTransients } from './action-creators';
 import { ActionErrorType, UpdateErrorType } from './errors';
 import { applyPatch } from 'rfc6902';
+import { RemovePlayer } from './turn-order';
 
 /**
  * Check if the payload for the passed action contains a playerID.
@@ -98,11 +99,47 @@ function updateUndoRedoState(
 }
 
 /**
+ * Replace undo / redo history with the current state as the new baseline.
+ */
+function rebaseUndoRedoState(
+  state: State,
+  opts: {
+    game: Game;
+    playerID: string;
+  },
+): State {
+  if (opts.game.disableUndo) {
+    return {
+      ...state,
+      _undo: [],
+      _redo: [],
+    };
+  }
+
+  return {
+    ...state,
+    _undo: [
+      {
+        G: state.G,
+        ctx: state.ctx,
+        plugins: state.plugins,
+        playerID: opts.playerID,
+      },
+    ],
+    _redo: [],
+  };
+}
+
+/**
  * Process state, adding the initial deltalog for this action.
  */
 function initializeDeltalog(
   state: State,
-  action: ActionShape.MakeMove | ActionShape.Undo | ActionShape.Redo,
+  action:
+    | ActionShape.MakeMove
+    | ActionShape.Undo
+    | ActionShape.Redo
+    | ActionShape.PlayerLeave,
   move?: Move,
 ): TransientState {
   // Create a log entry for this action.
@@ -402,6 +439,57 @@ export function CreateGameReducer({
 
         // Update undo / redo state.
         state = updateUndoRedoState(state, { game, action });
+
+        return {
+          ...state,
+          _stateID: state._stateID + 1,
+        };
+      }
+
+      case Actions.PLAYER_LEAVE: {
+        const oldState = (state = { ...state, deltalog: [] });
+        const { playerID } = action.payload;
+
+        if (typeof playerID !== 'string') {
+          error(`invalid playerID: ${playerID}`);
+          return WithError(state, ActionErrorType.ActionInvalid);
+        }
+
+        if (state.ctx.gameover !== undefined) {
+          error(`cannot leave after game end`);
+          return WithError(state, ActionErrorType.GameOver);
+        }
+
+        state = plugins.Enhance(state, {
+          game,
+          isClient: false,
+          playerID,
+        });
+
+        const G = game.processPlayerLeave(state, playerID);
+        state = initializeDeltalog({ ...state, G }, action);
+
+        let stateWithError: TransientState | undefined;
+        [state, stateWithError] = flushAndValidatePlugins(state, oldState, {
+          game,
+          isClient: false,
+        });
+        if (stateWithError) return stateWithError;
+
+        state = {
+          ...state,
+          ctx: RemovePlayer(state.ctx, playerID),
+        };
+
+        if (
+          state.ctx.gameover === undefined &&
+          state.ctx.playOrder.length === 0
+        ) {
+          error(`cannot remove final player before game end`);
+          return WithError(oldState, ActionErrorType.ActionInvalid);
+        }
+
+        state = rebaseUndoRedoState(state, { game, playerID });
 
         return {
           ...state,

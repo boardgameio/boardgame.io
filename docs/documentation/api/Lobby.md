@@ -195,11 +195,20 @@ await lobbyClient.updatePlayer('tic-tac-toe', 'matchID', {
 });
 ```
 
-### Leaving a match
+### Leaving a lobby slot
 
 #### POST `/games/{name}/{id}/leave`
 
-Leave the match instance `id` of a game named `name` previously joined by the player.
+?> Deprecated. Use `/leaveSlot` for lobby-slot-only leave, or `/leaveGame`
+for permanent game leave.
+
+Clear the player’s lobby slot in match instance `id` of a game named `name`.
+This does not run game logic or remove the player from the game state.
+
+#### POST `/games/{name}/{id}/leaveSlot`
+
+Clear the player’s lobby slot in match instance `id` of a game named `name`.
+This is the explicit replacement for `/leave`.
 
 Accepts two JSON body parameters, all required:
 
@@ -210,7 +219,31 @@ Accepts two JSON body parameters, all required:
 #### Using a LobbyClient instance
 
 ```js
-await lobbyClient.leaveMatch('tic-tac-toe', 'matchID', {
+await lobbyClient.leaveSlot('tic-tac-toe', 'matchID', {
+  playerID: '0',
+  credentials: 'playerCredentials',
+});
+```
+
+### Leaving a game
+
+#### POST `/games/{name}/{id}/leaveGame`
+
+Permanently remove the player from the game through the normal game-state
+lifecycle, then clear their lobby slot. This runs the game’s
+`onPlayerLeave` hook and removes the player from turn order and active-player
+state. If the match is already over, this only clears the lobby slot.
+
+Accepts two JSON body parameters, all required:
+
+- `playerID`: the ID used by the player in the match (0, 1...).
+
+- `credentials`: the authentication token of the player.
+
+#### Using a LobbyClient instance
+
+```js
+await lobbyClient.leaveGame('tic-tac-toe', 'matchID', {
   playerID: '0',
   credentials: 'playerCredentials',
 });

@@ -152,6 +152,15 @@ export class SocketIO {
     this.pubSub.unsubscribeAll(getPubSubChannelId(matchID));
   }
 
+  createTransportAPI(matchID: string): MasterTransport {
+    return {
+      send: () => {},
+      sendAll: (payload) => {
+        this.pubSub.publish(getPubSubChannelId(matchID), payload);
+      },
+    };
+  }
+
   init(app: Server.App, games: Game[], origins: CorsOptions['origin'] = []) {
     this.server = this.https
       ? https.createServer(this.https, app.callback())

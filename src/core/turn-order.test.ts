@@ -10,6 +10,9 @@ import { Flow } from './flow';
 import { Client } from '../client/client';
 import {
   UpdateTurnOrderState,
+  InitTurnOrderState,
+  RemovePlayer,
+  SetActivePlayers,
   Stage,
   TurnOrder,
   ActivePlayers,
@@ -18,7 +21,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
 import { error } from '../core/logger';
-import type { Game, State } from '../types';
+import type { Ctx, Game, State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -1120,4 +1123,191 @@ describe('Random API is available', () => {
     client.events.endTurn();
     expect(next).toBe(true);
   });
+});
+
+describe('RemovePlayer', () => {
+  const baseCtx = () =>
+    ({
+      numPlayers: 3,
+      turn: 1,
+      currentPlayer: '0',
+      playOrder: ['0', '1', '2'],
+      playOrderPos: 0,
+      phase: null,
+      activePlayers: null,
+    }) as unknown as Ctx;
+
+  test('filters array-form queued active players', () => {
+    const ctx = {
+      ...baseCtx(),
+      _nextActivePlayers: ['1', '2'] as any,
+    };
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next._nextActivePlayers).toEqual(['2']);
+  });
+
+  test('drops emptied value from queued active players recursively', () => {
+    const ctx = {
+      ...baseCtx(),
+      _nextActivePlayers: {
+        value: { '1': 'A' },
+        next: { value: { '1': 'B' }, currentPlayer: 'C' },
+      } as any,
+    };
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next._nextActivePlayers).toEqual({
+      next: { currentPlayer: 'C' },
+    });
+  });
+
+  test('resets position when current player is missing from play order', () => {
+    const ctx = {
+      ...baseCtx(),
+      currentPlayer: '3',
+      playOrderPos: 2,
+    };
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next.playOrder).toEqual(['0', '2']);
+    expect(next.playOrderPos).toBe(0);
+    expect(next.currentPlayer).toBe('0');
+  });
+
+  test('keeps position when a stale current player leaves room in the order', () => {
+    const ctx = {
+      ...baseCtx(),
+      currentPlayer: '9',
+      playOrderPos: 1,
+    };
+
+    const next = RemovePlayer(ctx, '2');
+
+    expect(next.playOrder).toEqual(['0', '1']);
+    expect(next.playOrderPos).toBe(1);
+    expect(next.currentPlayer).toBe('1');
+  });
+
+  test('wraps position when the current player leaves from the end of the order', () => {
+    const ctx = {
+      ...baseCtx(),
+      numPlayers: 2,
+      playOrder: ['0', '1'],
+      playOrderPos: 1,
+      currentPlayer: '1',
+    };
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next.playOrder).toEqual(['0']);
+    expect(next.playOrderPos).toBe(0);
+    expect(next.currentPlayer).toBe('0');
+  });
+
+  test('clears current player when the last player is removed', () => {
+    const ctx = {
+      ...baseCtx(),
+      numPlayers: 1,
+      playOrder: ['0'],
+      currentPlayer: '0',
+    };
+
+    const next = RemovePlayer(ctx, '0');
+
+    expect(next.playOrder).toEqual([]);
+    expect(next.currentPlayer).toBe('');
+    expect(next.playOrderPos).toBe(0);
+  });
+
+  test('is idempotent for an already removed player', () => {
+    const ctx = {
+      ...baseCtx(),
+      playOrder: ['0', '2'],
+      _removedPlayers: ['1'],
+    };
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next._removedPlayers).toEqual(['1']);
+    expect(next.playOrder).toEqual(['0', '2']);
+  });
+
+  test('keeps queued active players without a value untouched', () => {
+    const ctx = {
+      ...baseCtx(),
+      _nextActivePlayers: { all: 'A' } as any,
+    };
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next._nextActivePlayers).toEqual({ all: 'A' });
+  });
+});
+
+describe('SetActivePlayers with removed players', () => {
+  const ctx = {
+    numPlayers: 3,
+    turn: 1,
+    currentPlayer: '0',
+    playOrder: ['0', '1', '2'],
+    playOrderPos: 0,
+    phase: null,
+    activePlayers: null,
+    _removedPlayers: ['1'],
+  } as unknown as Ctx;
+
+  test('skips removed players in all', () => {
+    const next = SetActivePlayers(ctx, { all: 'A' });
+    expect(next.activePlayers).toEqual({ '0': 'A', '2': 'A' });
+  });
+
+  test('skips removed players in value', () => {
+    const next = SetActivePlayers(ctx, { value: { '0': 'B', '1': 'B' } });
+    expect(next.activePlayers).toEqual({ '0': 'B' });
+  });
+});
+
+test('current player is empty when every player has been removed', () => {
+  const state = {
+    G: {},
+    plugins: {},
+    ctx: {
+      numPlayers: 1,
+      turn: 1,
+      currentPlayer: '0',
+      playOrder: ['0'],
+      playOrderPos: 0,
+      phase: null,
+      activePlayers: null,
+      _removedPlayers: ['0'],
+    },
+  } as unknown as State;
+
+  const ctx = InitTurnOrderState(state, {
+    order: { first: () => 0, next: () => 0 },
+  });
+
+  expect(ctx.playOrder).toEqual([]);
+  expect(ctx.currentPlayer).toBe('');
+});
+
+test('out-of-range first player position falls back to start of play order', () => {
+  const flow = Flow({
+    turn: {
+      order: {
+        first: () => 5,
+        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+      },
+    },
+  });
+
+  let state = { ctx: flow.ctx(2) } as State;
+  state = flow.init(state);
+
+  expect(state.ctx.playOrderPos).toBe(0);
+  expect(state.ctx.currentPlayer).toBe('0');
 });

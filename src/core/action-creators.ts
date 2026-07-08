@@ -150,6 +150,11 @@ export const plugin = (
   payload: { type, args, playerID, credentials },
 });
 
+export const playerLeave = (playerID: string) => ({
+  type: Actions.PLAYER_LEAVE as typeof Actions.PLAYER_LEAVE,
+  payload: { playerID },
+});
+
 /**
  * Private action used to strip transient metadata (e.g. errors) from the game
  * state.
