@@ -871,6 +871,40 @@ describe('subscribe', () => {
     expect(fn2).not.toHaveBeenCalled();
   });
 
+  // https://github.com/boardgameio/boardgame.io/issues/1137
+  test('subscribers keep receiving updates after an earlier subscriber unsubscribes', () => {
+    const game: Game = {
+      moves: {
+        A: ({ G }) => {
+          G.moved = true;
+        },
+      },
+    };
+    const freshClient = Client({ game });
+
+    const subA = jest.fn();
+    const subB = jest.fn();
+    const subC = jest.fn();
+
+    const unsubscribeA = freshClient.subscribe(subA);
+    freshClient.subscribe(subB);
+
+    // The oldest subscriber leaves while a newer one remains.
+    unsubscribeA();
+
+    // A new subscriber arrives after the non-LIFO unsubscribe.
+    freshClient.subscribe(subC);
+
+    subA.mockClear();
+    subB.mockClear();
+    subC.mockClear();
+
+    freshClient.moves.A();
+    expect(subC).toHaveBeenCalled();
+    expect(subA).not.toHaveBeenCalled();
+    expect(subB).toHaveBeenCalled();
+  });
+
   test('transport notifies subscribers', () => {
     let transport: ReturnType<ReturnType<typeof SocketIO>>;
     const multiplayer = (opts: any) => {

@@ -142,6 +142,7 @@ export class _ClientImpl<
   private reducer: Reducer;
   private _running: boolean;
   private subscribers: Record<string, (state: State<G> | null) => void>;
+  private nextSubscriberID: number;
   private transport: Transport;
   private manager: ClientManager;
   readonly debugOpt?: DebugOpt | boolean;
@@ -188,6 +189,7 @@ export class _ClientImpl<
     this.manager = GlobalClientManager;
     this.previewStateData = null;
     this.subscribers = {};
+    this.nextSubscriberID = 0;
     this._running = false;
 
     this.reducer = CreateGameReducer({
@@ -445,7 +447,9 @@ export class _ClientImpl<
   }
 
   subscribe(fn: (state: ClientState<G>) => void) {
-    const id = Object.keys(this.subscribers).length;
+    // IDs must never be reused, so derive them from a monotonic counter
+    // rather than the current subscriber count (issue #1137).
+    const id = this.nextSubscriberID++;
     this.subscribers[id] = fn;
     this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
