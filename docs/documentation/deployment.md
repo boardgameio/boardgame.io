@@ -83,10 +83,10 @@ production build in `/build`, which you can host just about anywhere.
 [Heroku](https://heroku.com) uses 2 different ways to determine the run command of a node application. It is possible to either:
 
 - Add a Procfile to the project root directory with the following line  
-  `web: node -r esm server.js`
+  `web: node server.js`
 
 - Update the start script in the package.json to  
-  `"start": "node -r esm server.js"`
+  `"start": "node server.js"`
 
 On Heroku, a regular heroku/nodejs buildpack is necessary to build your app which is usually selected by default for node applications.  
 
