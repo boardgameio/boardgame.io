@@ -9,7 +9,7 @@
 import type { CorsOptions } from 'cors';
 import type Koa from 'koa';
 import type Router from '@koa/router';
-import koaBody from 'koa-body';
+import { bodyParser as koaBodyParser } from '@koa/bodyparser';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
 import { createMatch, getFirstAvailablePlayerID, getNumPlayers } from './util';
@@ -103,7 +103,7 @@ export const configureRouter = ({
   apiBodyLimit?: string | number;
   transport?: MatchTransport;
 }) => {
-  const bodyParser = koaBody({
+  const bodyParser = koaBodyParser({
     jsonLimit: apiBodyLimit,
     formLimit: apiBodyLimit,
   });
