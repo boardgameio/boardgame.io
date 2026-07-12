@@ -1,8 +1,12 @@
 const shell = require('shelljs');
+const pkg = require('../package.json');
 
 shell.rm('-rf', 'dist');
 const packResult = shell.exec('npm pack --silent', { silent: true });
-const packed = packResult.stdout.trim().split('\n').pop();
+if (packResult.code !== 0) shell.exit(packResult.code);
+const packed =
+  packResult.stdout.trim().split('\n').pop() ||
+  `${pkg.name}-${pkg.version}.tgz`;
 
 shell.mv(packed, 'integration');
 shell.cd('integration');
@@ -18,10 +22,18 @@ shell.exec('pnpm install --config.minimum-release-age=0');
 // rather than a registry package name (npm install <name>.tgz is forgiving;
 // pnpm add is not).
 shell.exec(`pnpm add --config.minimum-release-age=0 ./${packed}`);
-shell.rm(packed);
 
 shell.set('-e');
 
 // Test
 shell.exec('pnpm test');
 shell.exec('pnpm run build');
+shell.exec('node node-smoke/esm-test.mjs');
+shell.exec('node node-smoke/cjs-test.cjs');
+shell.exec('pnpm dlx publint@latest', { cwd: 'node_modules/boardgame.io' });
+
+shell.set('+e');
+shell.exec(`pnpm dlx @arethetypeswrong/cli@0.18.2 ./${packed} --format table`);
+shell.set('-e');
+
+shell.rm(packed);

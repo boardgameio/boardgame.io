@@ -71,10 +71,13 @@ const minifiedPlugins = [
 export default [
   // Subpackages.
   {
-    input: subpackages.reduce((obj, name) => {
-      obj[name] = `packages/${name}.ts`;
-      return obj;
-    }, {}),
+    input: subpackages.reduce(
+      (obj, name) => {
+        obj[name] = `packages/${name}.ts`;
+        return obj;
+      },
+      { main: 'packages/main.js' },
+    ),
     external,
     plugins,
     output: [
@@ -92,7 +95,10 @@ export default [
   // Server.
   {
     input: 'packages/server.ts',
-    output: { dir: 'dist/cjs', format: 'cjs', interop: 'auto' },
+    output: [
+      { dir: 'dist/cjs', format: 'cjs', interop: 'auto' },
+      { dir: 'dist/esm', format: 'esm' },
+    ],
     external,
     plugins: serverPlugins,
   },
