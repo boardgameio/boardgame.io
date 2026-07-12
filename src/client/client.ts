@@ -141,7 +141,7 @@ export class _ClientImpl<
   readonly multiplayer: (opts: TransportOpts) => Transport;
   private reducer: Reducer;
   private _running: boolean;
-  private subscribers: Record<string, (state: State<G> | null) => void>;
+  private subscribers: Map<symbol, (state: State<G> | null) => void>;
   private transport: Transport;
   private manager: ClientManager;
   readonly debugOpt?: DebugOpt | boolean;
@@ -187,7 +187,7 @@ export class _ClientImpl<
     this.debugOpt = debug;
     this.manager = GlobalClientManager;
     this.previewStateData = null;
-    this.subscribers = {};
+    this.subscribers = new Map();
     this._running = false;
 
     this.reducer = CreateGameReducer({
@@ -407,7 +407,7 @@ export class _ClientImpl<
   }
 
   private notifySubscribers() {
-    Object.values(this.subscribers).forEach((fn) => fn(this.getState()));
+    this.subscribers.forEach((fn) => fn(this.getState()));
   }
 
   previewState(state: any) {
@@ -445,8 +445,8 @@ export class _ClientImpl<
   }
 
   subscribe(fn: (state: ClientState<G>) => void) {
-    const id = Object.keys(this.subscribers).length;
-    this.subscribers[id] = fn;
+    const id = Symbol();
+    this.subscribers.set(id, fn);
     this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
     if (this._running || !this.multiplayer) {
@@ -455,7 +455,7 @@ export class _ClientImpl<
 
     // Return a handle that allows the caller to unsubscribe.
     return () => {
-      delete this.subscribers[id];
+      this.subscribers.delete(id);
     };
   }
 
