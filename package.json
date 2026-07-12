@@ -161,6 +161,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@koa/bodyparser": "^6.1.0",
     "@koa/cors": "^5.0.0",
     "@koa/router": "^15.5.0",
     "@types/koa": "^3.0.2",
@@ -170,7 +171,6 @@
     "immer": "^11.1.7",
     "js-cookie": "^3.0.5",
     "koa": "^3.2.0",
-    "koa-body": "^7.0.1",
     "lodash.isplainobject": "^4.0.6",
     "nanoid": "^3.3.11",
     "p-queue": "^6.6.2",
