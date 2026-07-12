@@ -18,6 +18,9 @@ importers:
 
   .:
     dependencies:
+      '@koa/bodyparser':
+        specifier: ^6.1.0
+        version: 6.1.0(koa@3.2.1)
       '@koa/cors':
         specifier: ^5.0.0
         version: 5.0.0
@@ -45,9 +48,6 @@ importers:
       koa:
         specifier: ^3.2.0
         version: 3.2.1
-      koa-body:
-        specifier: ^7.0.1
-        version: 7.0.1
       lodash.isplainobject:
         specifier: ^4.0.6
         version: 4.0.6
@@ -1130,6 +1130,12 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
+  '@koa/bodyparser@6.1.0':
+    resolution: {integrity: sha512-thVG/Utbz9+dB4Nl8EBJKoaOI1DzO74dJqeDFILbAVhUq6C+4rmmrKFwxiDE63ScywOs0CHypx1IUrSRMueFTw==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      koa: '>=2'
+
   '@koa/cors@5.0.0':
     resolution: {integrity: sha512-x/iUDjcS90W69PryLDIMgFyV21YLTnG9zOpPXS7Bkt2b8AsY3zZsIpOLBkYr9fBcF3HbkKaER5hOBZLfpLgYNw==}
     engines: {node: '>= 14.0.0'}
@@ -1493,9 +1499,6 @@ packages:
 
   '@types/express@5.0.6':
     resolution: {integrity: sha512-sKYVuV7Sv9fbPIt/442koC7+IIwK5olP1KWeD88e/idgoJqDm3JV/YUiPwkoKK92ylff2MGxSz1CSjsXelx0YA==}
-
-  '@types/formidable@3.5.1':
-    resolution: {integrity: sha512-aFQijSGbD8JCeEST2LEbwR7faHynbt43lojLIcTM/QhB2U06h41ZVRFVEql+Z1xdL+aKGIzm69V/P/uSW9N6XA==}
 
   '@types/http-assert@1.5.6':
     resolution: {integrity: sha512-TTEwmtjgVbYAzZYWyeHPrrtWnfVkm8tQkP8P21uQifPgMRgjrow3XDEYqucuC8SKZJT7pUnhU/JymvjggxO9vw==}
@@ -3503,9 +3506,6 @@ packages:
     resolution: {integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==}
     engines: {node: '>=0.10.0'}
 
-  koa-body@7.0.1:
-    resolution: {integrity: sha512-fSCZyN7Mhf/gijDeoOr20H4+g29znYhqoNuCX5X1kPQkUiRYIG/lku0CaCx0BBuoZ4pDAjsbJJfiECtJspKP/Q==}
-
   koa-compose@4.1.0:
     resolution: {integrity: sha512-8ODW8TrDuMYvXRwra/Kh7/rJo9BtOfPc6qO8eAfC80CnCvSjSl0bkRM24X6/XBBEyj0v1nRUQ1LyOy3dbqOWXw==}
 
@@ -4637,10 +4637,6 @@ packages:
     resolution: {integrity: sha512-eNRKgb3z66Yp3D2CixVujOUvXLFUTij/zVnV8KRyvFdQwpz7I5DS8UfRkTeLzb64u+dkzDSdelE24izu+zSSUg==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  tagged-tag@1.0.0:
-    resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
-    engines: {node: '>=20'}
-
   temp-dir@2.0.0:
     resolution: {integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==}
     engines: {node: '>=8'}
@@ -4791,10 +4787,6 @@ packages:
   type-fest@4.41.0:
     resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
     engines: {node: '>=16'}
-
-  type-fest@5.7.0:
-    resolution: {integrity: sha512-1URUxUqfHFM1c+zfSPsa3gnkO7Aq21qyH75SIduNYz4SzY964rn1X2vCMQaHSHhktiw+0kPa2iyb6PUpXqB6Vg==}
-    engines: {node: '>=20'}
 
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
@@ -5092,9 +5084,6 @@ packages:
 
   zimmerframe@1.1.4:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
-
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
@@ -6273,6 +6262,14 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@koa/bodyparser@6.1.0(koa@3.2.1)':
+    dependencies:
+      '@types/co-body': 6.1.3
+      co-body: 6.2.0
+      koa: 3.2.1
+      lodash.merge: 4.6.2
+      type-is: 2.1.0
+
   '@koa/cors@5.0.0':
     dependencies:
       vary: 1.1.2
@@ -6593,10 +6590,6 @@ snapshots:
       '@types/body-parser': 1.19.6
       '@types/express-serve-static-core': 5.1.1
       '@types/serve-static': 2.2.0
-
-  '@types/formidable@3.5.1':
-    dependencies:
-      '@types/node': 25.9.4
 
   '@types/http-assert@1.5.6': {}
 
@@ -9037,16 +9030,6 @@ snapshots:
 
   kind-of@6.0.3: {}
 
-  koa-body@7.0.1:
-    dependencies:
-      '@types/co-body': 6.1.3
-      '@types/formidable': 3.5.1
-      '@types/koa': 3.0.3
-      co-body: 6.2.0
-      formidable: 3.5.4
-      type-fest: 5.7.0
-      zod: 4.4.3
-
   koa-compose@4.1.0: {}
 
   koa@3.2.1:
@@ -10278,8 +10261,6 @@ snapshots:
     dependencies:
       '@pkgr/core': 0.3.6
 
-  tagged-tag@1.0.0: {}
-
   temp-dir@2.0.0: {}
 
   tempy@1.0.1:
@@ -10393,10 +10374,6 @@ snapshots:
   type-fest@0.8.1: {}
 
   type-fest@4.41.0: {}
-
-  type-fest@5.7.0:
-    dependencies:
-      tagged-tag: 1.0.0
 
   type-is@1.6.18:
     dependencies:
@@ -10751,5 +10728,3 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   zimmerframe@1.1.4: {}
-
-  zod@4.4.3: {}
