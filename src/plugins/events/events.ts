@@ -14,9 +14,9 @@ enum Errors {
   CalledOutsideHook = 'Events must be called from moves or the `onBegin`, `onEnd`, and `onMove` hooks.\n' +
     'This error probably means you called an event from other game code, like an `endIf` trigger or one of the `turn.order` methods.',
 
-  EndTurnInOnEnd = '`endTurn` is disallowed in `onEnd` hooks — the turn is already ending.',
+  EndTurnInOnEnd = '`endTurn` & `pass` are disallowed in `onEnd` hooks — the turn is already ending.',
 
-  TurnEventInPhaseBegin = '`endTurn` is disallowed in a phase’s `onBegin` hook — no turn has started yet.\n' +
+  TurnEventInPhaseBegin = '`endTurn` & `pass` are disallowed in a phase’s `onBegin` hook — no turn has started yet.\n' +
     'Use `turn.order.first` to choose the starting player.',
 
   MaxTurnEndings = 'Maximum number of turn endings exceeded for this update.\n' +
