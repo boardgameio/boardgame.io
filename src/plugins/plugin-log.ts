@@ -18,8 +18,8 @@ export interface LogAPI {
 
 /**
  * Plugin that makes it possible to add metadata to log entries.
- * During a move, you can set metadata using ctx.log.setMetadata and it will be
- * available on the log entry for that move.
+ * During a move or game event, you can set metadata using ctx.log.setMetadata
+ * and it will be available on that action's log entry.
  */
 const LogPlugin: Plugin<LogAPI, LogData> = {
   name: 'log',

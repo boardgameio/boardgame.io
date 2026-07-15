@@ -168,6 +168,27 @@ function initializeDeltalog(
 }
 
 /**
+ * Add metadata set by the log plugin to the final log entry for an event.
+ */
+function addLogMetadata(state: State): State {
+  const metadata = state.plugins.log?.data.metadata;
+  const { deltalog } = state;
+
+  if (metadata === undefined || !deltalog?.length) {
+    return state;
+  }
+
+  const lastEntry = deltalog.length - 1;
+  const updatedDeltalog = [...deltalog];
+  updatedDeltalog[lastEntry] = {
+    ...updatedDeltalog[lastEntry],
+    metadata,
+  };
+
+  return { ...state, deltalog: updatedDeltalog };
+}
+
+/**
  * Update plugin state after move/event & check if plugins consider the action to be valid.
  * @param state Current version of state in the reducer.
  * @param oldState State to revert to in case of error.
@@ -330,6 +351,7 @@ export function CreateGameReducer({
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
+        newState = addLogMetadata(newState);
 
         // Execute plugins.
         let stateWithError: TransientState | undefined;
