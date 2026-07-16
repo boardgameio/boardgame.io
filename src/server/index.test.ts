@@ -15,7 +15,7 @@ import request from 'supertest';
 import { Server, createServerRunConfig, getPortFromServer } from '.';
 import type { KoaServer } from '.';
 import type { SocketIO } from './transport/socketio';
-import type { Game, StorageAPI } from '../types';
+import type { Game, Plugin, StorageAPI } from '../types';
 
 const game: Game = { seed: 0 };
 
@@ -52,6 +52,42 @@ jest.mock('socket.io', () => {
 });
 
 describe('new', () => {
+  test('accepts games with custom plugin APIs', () => {
+    interface CustomPluginAPIs extends Record<string, unknown> {
+      custom: { enabled: boolean };
+    }
+
+    const customPlugin: Plugin<CustomPluginAPIs['custom']> = {
+      name: 'custom',
+      api: () => ({ enabled: true }),
+    };
+    const customGame: Game<{ enabled: boolean }, CustomPluginAPIs> = {
+      name: 'custom-plugin-game',
+      plugins: [customPlugin],
+      setup: ({ custom }) => ({ enabled: custom.enabled }),
+    };
+    const init = jest.fn();
+    const transport = { init } as unknown as SocketIO;
+
+    Server({
+      games: [customGame, { name: 'standard-game' }],
+      transport,
+    });
+
+    expect(init).toHaveBeenCalledTimes(1);
+    expect(init.mock.calls[0][1]).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'custom-plugin-game',
+          processMove: expect.any(Function),
+        }),
+        expect.objectContaining({
+          name: 'standard-game',
+          processMove: expect.any(Function),
+        }),
+      ]),
+    );
+  });
   test('custom db implementation', () => {
     const game: Game = {};
     const db = {} as StorageAPI.Sync;
