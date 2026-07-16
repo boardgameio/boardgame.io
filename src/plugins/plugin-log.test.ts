@@ -10,6 +10,8 @@ import { Client } from '../client/client';
 import type { Game } from '../types';
 
 describe('log-metadata', () => {
+  test.todo('preserves metadata from hooks triggered by moves');
+
   test('It sets metadata in a move and then clears the metadata', () => {
     const game: Game = {
       moves: {
