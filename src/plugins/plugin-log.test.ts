@@ -7,6 +7,7 @@
  */
 
 import { Client } from '../client/client';
+import { TurnOrder } from '../core/turn-order';
 import type { Game } from '../types';
 
 describe('log-metadata', () => {
@@ -88,5 +89,73 @@ describe('log-metadata', () => {
     expect(log.at(-1).metadata).toEqual({
       message: 'phase B began',
     });
+  });
+
+  test('It attaches turn metadata before an automatically ended phase', () => {
+    const game: Game = {
+      phases: {
+        A: {
+          start: true,
+          turn: {
+            order: TurnOrder.ONCE,
+            onEnd: ({ log }) => {
+              log.setMetadata({ message: 'turn ended' });
+            },
+          },
+        },
+      },
+    };
+    const client = Client({ game, numPlayers: 1 });
+
+    client.events.endTurn();
+
+    const log = client.getState().log;
+    const endTurn = log.find(
+      (entry) =>
+        entry.action.type === 'GAME_EVENT' &&
+        entry.action.payload.type === 'endTurn' &&
+        !entry.automatic,
+    );
+    const endPhase = log.find(
+      (entry) =>
+        entry.action.type === 'GAME_EVENT' &&
+        entry.action.payload.type === 'endPhase',
+    );
+
+    expect(endTurn.metadata).toEqual({ message: 'turn ended' });
+    expect(endPhase.metadata).toBeUndefined();
+  });
+
+  test('It clears metadata set during a plugin-rejected event', () => {
+    const game: Game<{ invalid: boolean }> = {
+      setup: () => ({ invalid: false }),
+      plugins: [
+        {
+          name: 'validator',
+          isInvalid: ({ G }) => G.invalid && 'invalid',
+        },
+      ],
+      phases: {
+        A: { start: true },
+        B: {
+          onBegin: ({ G, log }) => {
+            log.setMetadata({ message: 'rejected' });
+            G.invalid = true;
+          },
+        },
+      },
+    };
+    const client = Client({ game });
+    const consoleError = jest.spyOn(console, 'error').mockImplementation();
+
+    client.events.setPhase('B');
+    consoleError.mockRestore();
+
+    expect(client.getState().ctx.phase).toBe('A');
+    expect(client.getState().plugins.log.data).toEqual({});
+
+    client.events.endTurn();
+
+    expect(client.getState().log.at(-1).metadata).toBeUndefined();
   });
 });

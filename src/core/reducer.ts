@@ -168,24 +168,73 @@ function initializeDeltalog(
 }
 
 /**
- * Add metadata set by the log plugin to the final log entry for an event.
+ * Get the event type used in the log for a directly dispatched game event.
  */
-function addLogMetadata(state: State): State {
+function getLogEventType(eventType: string): string | undefined {
+  switch (eventType) {
+    case 'endTurn':
+    case 'pass': {
+      return 'endTurn';
+    }
+    case 'endPhase':
+    case 'setPhase': {
+      return 'endPhase';
+    }
+    case 'endStage':
+    case 'setStage': {
+      return 'endStage';
+    }
+    case 'endGame': {
+      return 'endGame';
+    }
+  }
+}
+
+/**
+ * Add metadata set by the log plugin to the log entry for an event.
+ */
+function addLogMetadata(state: State, action: ActionShape.GameEvent): State {
   const metadata = state.plugins.log?.data.metadata;
   const { deltalog } = state;
+  const eventType = getLogEventType(action.payload.type);
 
-  if (metadata === undefined || !deltalog?.length) {
+  if (metadata === undefined || !deltalog?.length || eventType === undefined) {
     return state;
   }
 
-  const lastEntry = deltalog.length - 1;
+  const eventEntry = deltalog.findIndex(
+    (entry) =>
+      entry.action.type === Actions.GAME_EVENT &&
+      entry.action.payload.type === eventType,
+  );
+  if (eventEntry === -1) return state;
+
   const updatedDeltalog = [...deltalog];
-  updatedDeltalog[lastEntry] = {
-    ...updatedDeltalog[lastEntry],
+  updatedDeltalog[eventEntry] = {
+    ...updatedDeltalog[eventEntry],
     metadata,
   };
 
   return { ...state, deltalog: updatedDeltalog };
+}
+
+/**
+ * Remove metadata set during an action that was rejected.
+ */
+function clearLogMetadata(state: State): State {
+  const logPlugin = state.plugins.log;
+  if (logPlugin?.data.metadata === undefined) return state;
+
+  const data = { ...logPlugin.data };
+  delete data.metadata;
+
+  return {
+    ...state,
+    plugins: {
+      ...state.plugins,
+      log: { ...logPlugin, data },
+    },
+  };
 }
 
 /**
@@ -205,7 +254,11 @@ function flushAndValidatePlugins(
   if (!isInvalid) return [newState];
   return [
     newState,
-    WithError(oldState, ActionErrorType.PluginActionInvalid, isInvalid),
+    WithError(
+      clearLogMetadata(oldState),
+      ActionErrorType.PluginActionInvalid,
+      isInvalid,
+    ),
   ];
 }
 
@@ -317,7 +370,7 @@ export function CreateGameReducer({
       }
 
       case Actions.GAME_EVENT: {
-        state = { ...state, deltalog: [] };
+        const oldState = (state = { ...state, deltalog: [] });
 
         // Process game events only on the server.
         // These events like `endTurn` typically
@@ -351,14 +404,18 @@ export function CreateGameReducer({
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
-        newState = addLogMetadata(newState);
+        newState = addLogMetadata(newState, action);
 
         // Execute plugins.
         let stateWithError: TransientState | undefined;
-        [newState, stateWithError] = flushAndValidatePlugins(newState, state, {
-          game,
-          isClient: false,
-        });
+        [newState, stateWithError] = flushAndValidatePlugins(
+          newState,
+          oldState,
+          {
+            game,
+            isClient: false,
+          },
+        );
         if (stateWithError) return stateWithError;
 
         // Update undo / redo state.
