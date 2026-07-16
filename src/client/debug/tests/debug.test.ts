@@ -173,6 +173,19 @@ describe('multiple clients', () => {
     expect(client2.playerID).toBe('1');
   });
 
+  test('hides state controls for multiplayer clients', async () => {
+    const select = screen.getByLabelText('Client');
+    await fireEvent.change(select, { target: { value: 1 } });
+
+    expect(
+      screen.getByText('State controls are unavailable in multiplayer games.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('reset')).not.toBeInTheDocument();
+    expect(screen.queryByText('save')).not.toBeInTheDocument();
+    expect(screen.queryByText('restore')).not.toBeInTheDocument();
+    expect(screen.getByText('hide')).toBeInTheDocument();
+  });
+
   test('switching to current client', async () => {
     const select = screen.getByLabelText('Client');
     await fireEvent.change(select, { target: { value: 0 } });
