@@ -14,7 +14,7 @@ const InvalidMoveTag = Symbol.for('boardgame.io/INVALID_MOVE');
 declare const InvalidMoveBrand: unique symbol;
 
 export interface InvalidMoveResult<Payload = any> {
-  [InvalidMoveBrand]?: never;
+  readonly [InvalidMoveBrand]: true;
   payload: Payload;
 }
 
@@ -27,7 +27,10 @@ export interface InvalidMoveResult<Payload = any> {
 export const Invalid = <Payload>(
   payload?: Payload,
 ): InvalidMoveResult<Payload> =>
-  ({ [InvalidMoveTag]: true, payload }) as InvalidMoveResult<Payload>;
+  ({
+    [InvalidMoveTag]: true,
+    payload,
+  }) as unknown as InvalidMoveResult<Payload>;
 
 const hasInvalidMoveTag = (result: unknown): boolean =>
   typeof result === 'object' &&

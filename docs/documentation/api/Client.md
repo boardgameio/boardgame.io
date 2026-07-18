@@ -132,8 +132,9 @@ The following properties are available on a client instance:
 
 - `lastActionError`: The reason this client’s most recent action was
   rejected, or `undefined` if it wasn’t. Cleared when a subsequent
-  action succeeds. In multiplayer, rejections are delivered only to
-  the client that made the move. An error object has:
+  action succeeds. In multiplayer, this reflects the authoritative
+  result from the master, and rejections are delivered only to the
+  client that made the move. An error object has:
 
     - `type`: an error code string, e.g. `'action/invalid_move'`
     - `payload`: the value the move returned via
@@ -191,15 +192,17 @@ The following methods are available on a client instance:
 
 - `subscribe(callback)`: Add a callback for every state change.
   The passed function will be called with the same value as returned by
-  `getState`, and — if the client’s most recent action was rejected —
-  an error object as its second argument (see `lastActionError` below).
-  `subscribe` returns an unsubscribe function.
+  `getState`. When a newly processed action is rejected, that notification
+  includes the error object as its second argument. Other notifications pass
+  `undefined`, so an error can be handled as a one-time event. Use
+  `lastActionError` when you need to inspect the current error between
+  notifications. `subscribe` returns an unsubscribe function.
 
   ```js
   const unsubscribe = client.subscribe((state, error) => {
     // use updated state
     if (error) {
-      // the last action was rejected, e.g. show error.payload.message
+      // a new action rejection arrived, e.g. show error.payload.message
     }
   });
 

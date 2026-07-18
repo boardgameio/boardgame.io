@@ -12,6 +12,7 @@ import { makeMove } from '../../core/action-creators';
 import type { Master } from '../../master/master';
 import type { ChatMessage, State } from '../../types';
 import { ProcessGameConfig } from '../../core/game';
+import { ActionErrorType } from '../../core/errors';
 
 jest.mock('../../core/logger', () => ({
   info: jest.fn(),
@@ -22,7 +23,7 @@ type UpdateArgs = Parameters<Master['onUpdate']>;
 type SyncArgs = Parameters<Master['onSync']>;
 
 class MockSocket {
-  callbacks: Record<string, (arg0?: any, arg1?: any) => void>;
+  callbacks: Record<string, (...args: any[]) => void>;
   emit: jest.Mock;
 
   constructor() {
@@ -34,7 +35,7 @@ class MockSocket {
     this.callbacks[type](...args);
   }
 
-  on(type: string, callback: (arg0?: any, arg1?: any) => void) {
+  on(type: string, callback: (...args: any[]) => void) {
     this.callbacks[type] = callback;
   }
 
@@ -198,8 +199,8 @@ describe('multiplayer', () => {
   test('send update', () => {
     const action = makeMove(undefined, undefined, undefined);
     const state = { _stateID: 0 } as State;
-    transport.sendAction(state, action);
-    const args: UpdateArgs = [action, state._stateID, 'default', null];
+    transport.sendAction(state, action, 7);
+    const args: UpdateArgs = [action, state._stateID, 'default', null, 7];
     expect(mockSocket.emit).toHaveBeenLastCalledWith('update', ...args);
   });
 
@@ -209,6 +210,20 @@ describe('multiplayer', () => {
     expect(transportDataCallback).toHaveBeenCalledWith({
       type: 'chat',
       args: ['default', chatData],
+    });
+  });
+
+  test('receive action result', () => {
+    const result = {
+      error: {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'not allowed' },
+      },
+    };
+    mockSocket.receive('actionResult', 'default', 7, result);
+    expect(transportDataCallback).toHaveBeenCalledWith({
+      type: 'actionResult',
+      args: ['default', 7, result],
     });
   });
 

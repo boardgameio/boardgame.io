@@ -21,6 +21,7 @@ import {
 import { playerLeave } from '../core/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import * as logging from '../core/logger';
+import { ActionErrorType, UpdateErrorType } from '../core/errors';
 import type {
   SyncInfo,
   FilteredMetadata,
@@ -71,6 +72,10 @@ type CallbackFn = (arg: {
   action?: ActionShape.Any | CredentialedActionShape.Any;
 }) => void;
 
+export interface TransportActionResult {
+  error?: ActionError;
+}
+
 /**
  * Data types that are shared across `TransportData` and `IntermediateTransportData`.
  */
@@ -88,8 +93,8 @@ type CommonTransportData =
       args: [string, ChatMessage];
     }
   | {
-      type: 'actionError';
-      args: [string, ActionError];
+      type: 'actionResult';
+      args: [string, number, TransportActionResult];
     };
 
 /**
@@ -171,22 +176,36 @@ export class Master {
     stateID: number,
     matchID: string,
     playerID: string,
+    actionID?: number,
   ): Promise<void | { error: string }> {
+    const sendActionResult = (error?: ActionError) => {
+      if (actionID === undefined) return;
+      this.transportAPI.send({
+        playerID,
+        type: 'actionResult',
+        args: [matchID, actionID, error === undefined ? {} : { error }],
+      });
+    };
+
     if (!credAction || !credAction.type) {
+      sendActionResult({ type: ActionErrorType.ActionInvalid });
       return { error: 'missing action or action payload' };
     }
 
     if (!isPublicClientAction(credAction)) {
       logging.error(`unauthorized action type: ${credAction.type}`);
+      sendActionResult({ type: UpdateErrorType.UnauthorizedAction });
       return { error: 'unauthorized action' };
     }
 
     if (!credAction.payload) {
+      sendActionResult({ type: ActionErrorType.ActionInvalid });
       return { error: 'missing action or action payload' };
     }
 
     if ('automatic' in credAction && credAction.automatic === true) {
       logging.error(`unauthorized automatic action: ${credAction.type}`);
+      sendActionResult({ type: UpdateErrorType.UnauthorizedAction });
       return { error: 'unauthorized action' };
     }
 
@@ -204,6 +223,7 @@ export class Master {
         metadata,
       });
       if (!isAuthentic) {
+        sendActionResult({ type: UpdateErrorType.UnauthorizedAction });
         return { error: 'unauthorized action' };
       }
     }
@@ -216,6 +236,7 @@ export class Master {
       !this.game.flow.enabledEventNames.includes(action.payload.type)
     ) {
       logging.error(`unauthorized game event: ${action.payload.type}`);
+      sendActionResult({ type: UpdateErrorType.UnauthorizedAction });
       return { error: 'unauthorized action' };
     }
 
@@ -228,6 +249,7 @@ export class Master {
 
     if (state === undefined) {
       logging.error(`game not found, matchID=[${key}]`);
+      sendActionResult({ type: UpdateErrorType.MatchNotFound });
       return { error: 'game not found' };
     }
 
@@ -236,6 +258,7 @@ export class Master {
         `game over - matchID=[${key}] - playerID=[${playerID}]` +
           ` - action[${action.payload.type}]`,
       );
+      sendActionResult({ type: ActionErrorType.GameOver });
       return;
     }
 
@@ -261,6 +284,7 @@ export class Master {
             Object.keys(state.ctx.activePlayers).length > 1))
       ) {
         logging.error(`playerID=[${playerID}] cannot undo / redo right now`);
+        sendActionResult({ type: ActionErrorType.ActionInvalid });
         return;
       }
     }
@@ -271,6 +295,7 @@ export class Master {
         `player not active - playerID=[${playerID}]` +
           ` - action[${action.payload.type}]`,
       );
+      sendActionResult({ type: ActionErrorType.InactivePlayer });
       return;
     }
 
@@ -286,6 +311,7 @@ export class Master {
         `move not processed - canPlayerMakeMove=false - playerID=[${playerID}]` +
           ` - action[${action.payload.type}]`,
       );
+      sendActionResult({ type: ActionErrorType.UnavailableMove });
       return;
     }
 
@@ -299,6 +325,7 @@ export class Master {
         `invalid stateID, was=[${stateID}], expected=[${state._stateID}]` +
           ` - playerID=[${playerID}] - action[${action.payload.type}]`,
       );
+      sendActionResult({ type: ActionErrorType.StaleStateId });
       return;
     }
 
@@ -328,14 +355,9 @@ export class Master {
       });
     }
 
-    // The sendAll above rolls everyone back; only the actor learns why.
-    if (dispatchResult?.transients?.error) {
-      this.transportAPI.send({
-        playerID,
-        type: 'actionError',
-        args: [matchID, dispatchResult.transients.error],
-      });
-    }
+    // The broadcast above updates everyone; only the actor receives the
+    // correlated outcome of this action.
+    sendActionResult(dispatchResult?.transients?.error);
 
     const { deltalog, ...stateWithoutDeltalog } = state;
 

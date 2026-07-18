@@ -178,12 +178,8 @@ export class _ClientImpl<
    * Cleared when a subsequent action succeeds.
    */
   lastActionError?: ActionError;
-  /**
-   * Count of action errors delivered via receiveActionError. Lets
-   * SubscriptionMiddleware detect a rejection that a synchronous transport
-   * delivered during `next(action)` and avoid clearing it on the same pass.
-   */
-  private actionErrorDeliveries = 0;
+  private nextActionID = 0;
+  private latestActionID?: number;
 
   constructor({
     game,
@@ -300,13 +296,16 @@ export class _ClientImpl<
     const TransportMiddleware =
       (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
         const baseState = store.getState();
+        const shouldSend =
+          !('clientOnly' in action) && action.type !== Actions.STRIP_TRANSIENTS;
+        const actionID =
+          shouldSend && this.multiplayer
+            ? (this.latestActionID = ++this.nextActionID)
+            : undefined;
         const result = next(action);
 
-        if (
-          !('clientOnly' in action) &&
-          action.type !== Actions.STRIP_TRANSIENTS
-        ) {
-          this.transport.sendAction(baseState, action);
+        if (shouldSend) {
+          this.transport.sendAction(baseState, action, actionID);
         }
 
         return result;
@@ -314,31 +313,29 @@ export class _ClientImpl<
 
     /**
      * Middleware that intercepts actions and invokes the subscription callback.
-     * Also tracks action errors: the store still holds this action's transients
-     * here (TransientHandlingMiddleware strips them after we run), and the
-     * deliveries counter keeps the clear-on-success branch from wiping an
-     * error that a synchronous transport delivered during `next(action)`.
+     * Single-player clients read action errors directly from reducer
+     * transients. Multiplayer clients wait for the master's correlated result.
      */
     const SubscriptionMiddleware =
       (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
-        const deliveriesBefore = this.actionErrorDeliveries;
         const result = next(action);
-        if (action.type !== Actions.STRIP_TRANSIENTS) {
+        let actionError: ActionError | undefined;
+        if (!this.multiplayer && action.type !== Actions.STRIP_TRANSIENTS) {
           const transientError = (store.getState() as TransientState<G> | null)
             ?.transients?.error;
           if (transientError) {
             this.lastActionError = transientError;
+            actionError = transientError;
           } else if (
-            (action.type === Actions.MAKE_MOVE ||
-              action.type === Actions.GAME_EVENT ||
-              action.type === Actions.UNDO ||
-              action.type === Actions.REDO) &&
-            this.actionErrorDeliveries === deliveriesBefore
+            action.type === Actions.MAKE_MOVE ||
+            action.type === Actions.GAME_EVENT ||
+            action.type === Actions.UNDO ||
+            action.type === Actions.REDO
           ) {
             this.lastActionError = undefined;
           }
         }
-        this.notifySubscribers();
+        this.notifySubscribers(actionError);
         return result;
       };
 
@@ -391,11 +388,11 @@ export class _ClientImpl<
     this.notifySubscribers();
   }
 
-  /** Handle an action error sent to this client by a multiplayer master. */
-  private receiveActionError(error: ActionError): void {
-    this.actionErrorDeliveries++;
+  /** Handle the authoritative result of an action sent to the master. */
+  private receiveActionResult(actionID: number, error?: ActionError): void {
+    if (actionID !== this.latestActionID) return;
     this.lastActionError = error;
-    this.notifySubscribers();
+    this.notifySubscribers(error);
   }
 
   /** Handle all incoming updates from a multiplayer transport. */
@@ -446,16 +443,16 @@ export class _ClientImpl<
         this.receiveChatMessage(chatMessage);
         break;
       }
-      case 'actionError': {
-        const [, error] = data.args;
-        this.receiveActionError(error);
+      case 'actionResult': {
+        const [, actionID, result] = data.args;
+        this.receiveActionResult(actionID, result.error);
         break;
       }
     }
   }
 
-  private notifySubscribers() {
-    this.subscribers.forEach((fn) => fn(this.getState(), this.lastActionError));
+  private notifySubscribers(actionError?: ActionError) {
+    this.subscribers.forEach((fn) => fn(this.getState(), actionError));
   }
 
   previewState(state: any) {
@@ -498,7 +495,7 @@ export class _ClientImpl<
     this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
     if (this._running || !this.multiplayer) {
-      fn(this.getState(), this.lastActionError);
+      fn(this.getState(), undefined);
     }
 
     // Return a handle that allows the caller to unsubscribe.

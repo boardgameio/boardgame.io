@@ -599,7 +599,7 @@ describe('update', () => {
   });
 });
 
-describe('action errors', () => {
+describe('action results', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
   const game: Game = {
@@ -619,46 +619,83 @@ describe('action errors', () => {
     jest.clearAllMocks();
   });
 
-  test('invalid move sends actionError to the acting client only', async () => {
+  test('invalid move sends its result to the acting client only', async () => {
     await master.onUpdate(
       ActionCreators.makeMove('rejected'),
       0,
       'matchID',
       '0',
+      1,
     );
     // The rollback broadcast still goes out to everyone.
     expect(sendAll).toHaveBeenCalled();
     expect(send).toHaveBeenCalledWith({
       playerID: '0',
-      type: 'actionError',
+      type: 'actionResult',
       args: [
         'matchID',
-        { type: 'action/invalid_move', payload: { reason: 'not allowed' } },
+        1,
+        {
+          error: {
+            type: 'action/invalid_move',
+            payload: { reason: 'not allowed' },
+          },
+        },
       ],
     });
   });
 
-  test('bare INVALID_MOVE sends actionError without payload', async () => {
+  test('bare INVALID_MOVE sends a result without a payload', async () => {
     await master.onUpdate(
       ActionCreators.makeMove('rejectedBare'),
       0,
       'matchID',
       '0',
+      2,
     );
     expect(send).toHaveBeenCalledWith({
       playerID: '0',
-      type: 'actionError',
-      args: ['matchID', { type: 'action/invalid_move', payload: undefined }],
+      type: 'actionResult',
+      args: [
+        'matchID',
+        2,
+        {
+          error: { type: 'action/invalid_move', payload: undefined },
+        },
+      ],
     });
   });
 
-  test('valid move sends no actionError', async () => {
-    await master.onUpdate(ActionCreators.makeMove('valid'), 0, 'matchID', '0');
-    expect(sendAll).toHaveBeenCalled();
-    const actionErrorCalls = send.mock.calls.filter(
-      ([data]) => data.type === 'actionError',
+  test('valid move sends a successful result', async () => {
+    await master.onUpdate(
+      ActionCreators.makeMove('valid'),
+      0,
+      'matchID',
+      '0',
+      3,
     );
-    expect(actionErrorCalls).toHaveLength(0);
+    expect(sendAll).toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      playerID: '0',
+      type: 'actionResult',
+      args: ['matchID', 3, {}],
+    });
+  });
+
+  test('pre-dispatch rejection sends a correlated result', async () => {
+    await master.onUpdate(
+      ActionCreators.makeMove('valid'),
+      100,
+      'matchID',
+      '0',
+      4,
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      playerID: '0',
+      type: 'actionResult',
+      args: ['matchID', 4, { error: { type: 'action/stale_state_id' } }],
+    });
   });
 });
 

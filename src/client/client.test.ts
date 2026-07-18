@@ -692,6 +692,10 @@ describe('action errors', () => {
         type: 'action/invalid_move',
         payload: { reason: 'not enough gold' },
       });
+      const errorNotifications = fn.mock.calls.filter(
+        ([, error]) => error !== undefined,
+      );
+      expect(errorNotifications).toHaveLength(1);
     });
 
     test('a subsequent successful move clears the error', () => {
@@ -719,8 +723,9 @@ describe('action errors', () => {
     let client: ReturnType<typeof Client>;
 
     beforeEach(() => {
+      const game: Game = { moves: { A: ({ G }) => G } };
       client = Client({
-        game: {},
+        game,
         matchID: 'A',
         debug: false,
         multiplayer: ({ transportDataCallback }) => {
@@ -731,39 +736,87 @@ describe('action errors', () => {
             subscribe() {},
             subscribeToConnectionStatus() {},
             requestSync() {},
+            sendAction() {},
           } as unknown as Transport;
         },
       });
       client.start();
+      const state = InitializeGame({ game: ProcessGameConfig(game) });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
     });
 
     afterEach(() => {
       client.stop();
     });
 
-    test('actionError from the master reaches subscribers', () => {
+    test('action result from the master reaches subscribers', () => {
       const fn = jest.fn();
       client.subscribe(fn);
       fn.mockClear();
+      client.moves.A();
       const error = {
         type: ActionErrorType.InvalidMove,
         payload: { reason: 'slot taken' },
       };
-      sendToClient({ type: 'actionError', args: ['A', error] });
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
       expect(client.lastActionError).toEqual(error);
-      // State is null here because this stub transport never syncs.
-      expect(fn).toHaveBeenCalledWith(null, error);
+      expect(fn).toHaveBeenCalledWith(expect.anything(), error);
     });
 
-    test('actionError for another match is ignored', () => {
+    test('action result for another match is ignored', () => {
+      client.moves.A();
       const error = { type: ActionErrorType.InvalidMove, payload: undefined };
-      sendToClient({ type: 'actionError', args: ['B', error] });
+      sendToClient({
+        type: 'actionResult',
+        args: ['B', 1, { error }],
+      });
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('a successful result clears the previous error', () => {
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'slot taken' },
+      };
+      client.moves.A();
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
+      expect(client.lastActionError).toEqual(error);
+
+      client.moves.A();
+      // Wait for the authoritative success before clearing the error.
+      expect(client.lastActionError).toEqual(error);
+      sendToClient({ type: 'actionResult', args: ['A', 2, {}] });
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('a stale result cannot overwrite a newer action', () => {
+      client.moves.A();
+      client.moves.A();
+      sendToClient({
+        type: 'actionResult',
+        args: [
+          'A',
+          1,
+          {
+            error: {
+              type: ActionErrorType.InvalidMove,
+              payload: { reason: 'stale' },
+            },
+          },
+        ],
+      });
       expect(client.lastActionError).toBeUndefined();
     });
   });
 
   describe('synchronous transport', () => {
-    test('an error delivered during dispatch is not cleared', () => {
+    test('an action result delivered during dispatch is reported once', () => {
       let sendToClient: (data: TransportData) => void;
       const error = {
         type: ActionErrorType.InvalidMove,
@@ -782,8 +835,11 @@ describe('action errors', () => {
             subscribe() {},
             subscribeToConnectionStatus() {},
             requestSync() {},
-            sendAction() {
-              sendToClient({ type: 'actionError', args: ['default', error] });
+            sendAction(_state, _action, actionID) {
+              sendToClient({
+                type: 'actionResult',
+                args: ['default', actionID, { error }],
+              });
             },
           } as unknown as Transport;
         },
@@ -792,8 +848,15 @@ describe('action errors', () => {
       // Sync a valid state so the move is accepted (and reaches sendAction).
       const state = InitializeGame({ game: ProcessGameConfig(game) });
       sendToClient({ type: 'sync', args: ['default', { state } as SyncInfo] });
+      const fn = jest.fn();
+      client.subscribe(fn);
+      fn.mockClear();
       client.moves.A();
       expect(client.lastActionError).toEqual(error);
+      const errorNotifications = fn.mock.calls.filter(
+        ([, receivedError]) => receivedError !== undefined,
+      );
+      expect(errorNotifications).toHaveLength(1);
       client.stop();
     });
   });

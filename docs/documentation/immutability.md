@@ -95,8 +95,10 @@ The move is discarded exactly as with `INVALID_MOVE`, and the payload
 is delivered to the client that made the move — and only that client —
 where you can read it from the second argument of
 [`subscribe`](/api/Client.md) or the `lastActionError` board prop and
-show it to the player. The payload can be any JSON-serializable value
-and never becomes part of the game state.
+show it to the player. The `subscribe` argument is emitted once for the
+new rejection, while `lastActionError` remains set until a later action
+succeeds. The payload can be any JSON-serializable value and never becomes
+part of the game state.
 
 ### Additional Reading
 
