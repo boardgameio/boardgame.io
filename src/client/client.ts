@@ -174,11 +174,16 @@ export class _ClientImpl<
   sendChatMessage: (message: any) => void;
   chatMessages: ChatMessage[];
   /**
-   * The most recent action error affecting this client, or undefined.
-   * Set when one of this client’s actions is rejected (locally or by
-   * the master) and cleared when a subsequent action succeeds.
+   * Why this client’s most recent action was rejected, or undefined.
+   * Cleared when a subsequent action succeeds.
    */
   lastActionError?: ActionError;
+  /**
+   * Count of action errors delivered via receiveActionError. Lets
+   * SubscriptionMiddleware detect a rejection that a synchronous transport
+   * delivered during `next(action)` and avoid clearing it on the same pass.
+   */
+  private actionErrorDeliveries = 0;
 
   constructor({
     game,
@@ -309,13 +314,14 @@ export class _ClientImpl<
 
     /**
      * Middleware that intercepts actions and invokes the subscription callback.
-     * Also tracks action errors: TransientHandlingMiddleware runs outside this
-     * middleware, so when we are notified the store still holds any transients
-     * produced by the action. A player action that produces an error records
-     * it; one that succeeds clears it. STRIP_TRANSIENTS passes are neutral.
+     * Also tracks action errors: the store still holds this action's transients
+     * here (TransientHandlingMiddleware strips them after we run), and the
+     * deliveries counter keeps the clear-on-success branch from wiping an
+     * error that a synchronous transport delivered during `next(action)`.
      */
     const SubscriptionMiddleware =
       (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
+        const deliveriesBefore = this.actionErrorDeliveries;
         const result = next(action);
         if (action.type !== Actions.STRIP_TRANSIENTS) {
           const transientError = (store.getState() as TransientState<G> | null)
@@ -323,8 +329,11 @@ export class _ClientImpl<
           if (transientError) {
             this.lastActionError = transientError;
           } else if (
-            action.type === Actions.MAKE_MOVE ||
-            action.type === Actions.GAME_EVENT
+            (action.type === Actions.MAKE_MOVE ||
+              action.type === Actions.GAME_EVENT ||
+              action.type === Actions.UNDO ||
+              action.type === Actions.REDO) &&
+            this.actionErrorDeliveries === deliveriesBefore
           ) {
             this.lastActionError = undefined;
           }
@@ -384,6 +393,7 @@ export class _ClientImpl<
 
   /** Handle an action error sent to this client by a multiplayer master. */
   private receiveActionError(error: ActionError): void {
+    this.actionErrorDeliveries++;
     this.lastActionError = error;
     this.notifySubscribers();
   }

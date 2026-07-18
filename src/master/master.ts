@@ -328,9 +328,7 @@ export class Master {
       });
     }
 
-    // Deliver any action error to the acting client only. The state
-    // broadcast above already rolls back optimistic updates; this
-    // tells the player *why* their action was rejected.
+    // The sendAll above rolls everyone back; only the actor learns why.
     if (dispatchResult?.transients?.error) {
       this.transportAPI.send({
         playerID,

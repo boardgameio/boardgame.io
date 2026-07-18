@@ -95,6 +95,26 @@ test('move returns Invalid() with a payload', () => {
   });
 });
 
+test('recognizes an Invalid result created by another bundle', () => {
+  const game: Game = {
+    moves: {
+      A: () =>
+        ({
+          [Symbol.for('boardgame.io/INVALID_MOVE')]: true,
+          payload: { reason: 'other-bundle' },
+        }) as any,
+    },
+  };
+  const reducer = CreateGameReducer({ game });
+  const state = reducer(initialState, makeMove('A'));
+  expect(state._stateID).toBe(0);
+  expect(state.G).toEqual(initialState.G);
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'other-bundle' },
+  });
+});
+
 test('makeMove', () => {
   let state = initialState;
   expect(state._stateID).toBe(0);

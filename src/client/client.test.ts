@@ -704,6 +704,14 @@ describe('action errors', () => {
         undefined,
       );
     });
+
+    test('a successful undo clears the error', () => {
+      client.moves.valid();
+      client.moves.rejected();
+      expect(client.lastActionError).toBeDefined();
+      client.undo();
+      expect(client.lastActionError).toBeUndefined();
+    });
   });
 
   describe('multiplayer client', () => {
@@ -751,6 +759,42 @@ describe('action errors', () => {
       const error = { type: ActionErrorType.InvalidMove, payload: undefined };
       sendToClient({ type: 'actionError', args: ['B', error] });
       expect(client.lastActionError).toBeUndefined();
+    });
+  });
+
+  describe('synchronous transport', () => {
+    test('an error delivered during dispatch is not cleared', () => {
+      let sendToClient: (data: TransportData) => void;
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'sync' },
+      };
+      const game: Game = { moves: { A: ({ G }) => G } };
+      const client = Client({
+        game,
+        matchID: 'default',
+        debug: false,
+        multiplayer: ({ transportDataCallback }) => {
+          sendToClient = transportDataCallback;
+          return {
+            connect() {},
+            disconnect() {},
+            subscribe() {},
+            subscribeToConnectionStatus() {},
+            requestSync() {},
+            sendAction() {
+              sendToClient({ type: 'actionError', args: ['default', error] });
+            },
+          } as unknown as Transport;
+        },
+      });
+      client.start();
+      // Sync a valid state so the move is accepted (and reaches sendAction).
+      const state = InitializeGame({ game: ProcessGameConfig(game) });
+      sendToClient({ type: 'sync', args: ['default', { state } as SyncInfo] });
+      client.moves.A();
+      expect(client.lastActionError).toEqual(error);
+      client.stop();
     });
   });
 });

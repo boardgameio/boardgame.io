@@ -5,16 +5,16 @@
  */
 export const INVALID_MOVE = 'INVALID_MOVE';
 
-/**
- * Brand for invalid-move results carrying a payload.
- * A module-private Symbol so that no value a move could
- * legitimately return as game state can collide with it.
- * (Same approach as immer's `nothing` sentinel.)
- */
-const InvalidMoveTag = Symbol('INVALID_MOVE');
+// Must be a registry symbol: each subpath bundle gets its own copy of this
+// module, and a per-module Symbol() would not match across them. Symbols
+// cannot occur in JSON, so game data cannot collide with this tag.
+const InvalidMoveTag = Symbol.for('boardgame.io/INVALID_MOVE');
+
+// Type-level brand only — never present at runtime.
+declare const InvalidMoveBrand: unique symbol;
 
 export interface InvalidMoveResult<Payload = any> {
-  [InvalidMoveTag]: true;
+  [InvalidMoveBrand]?: never;
   payload: Payload;
 }
 
@@ -26,24 +26,20 @@ export interface InvalidMoveResult<Payload = any> {
  */
 export const Invalid = <Payload>(
   payload?: Payload,
-): InvalidMoveResult<Payload> => ({
-  [InvalidMoveTag]: true,
-  payload,
-});
+): InvalidMoveResult<Payload> =>
+  ({ [InvalidMoveTag]: true, payload }) as InvalidMoveResult<Payload>;
+
+const hasInvalidMoveTag = (result: unknown): boolean =>
+  typeof result === 'object' &&
+  result !== null &&
+  (result as Record<symbol, unknown>)[InvalidMoveTag] === true;
 
 /** Check whether a move result declared the move invalid. */
 export const isInvalidMoveResult = (
   result: unknown,
 ): result is typeof INVALID_MOVE | InvalidMoveResult =>
-  result === INVALID_MOVE ||
-  (typeof result === 'object' &&
-    result !== null &&
-    (result as InvalidMoveResult)[InvalidMoveTag] === true);
+  result === INVALID_MOVE || hasInvalidMoveTag(result);
 
 /** Extract the payload from an invalid move result, if any. */
 export const getInvalidMovePayload = (result: unknown): unknown =>
-  typeof result === 'object' &&
-  result !== null &&
-  (result as InvalidMoveResult)[InvalidMoveTag] === true
-    ? (result as InvalidMoveResult).payload
-    : undefined;
+  hasInvalidMoveTag(result) ? (result as InvalidMoveResult).payload : undefined;

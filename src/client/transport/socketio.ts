@@ -157,7 +157,6 @@ export class SocketIOTransport extends Transport {
     });
 
     // Called when an action this client sent was rejected by the master.
-    // Delivered only to the acting client.
     this.socket.on('actionError', (matchID: string, error: ActionError) => {
       this.notifyClient({ type: 'actionError', args: [matchID, error] });
     });
