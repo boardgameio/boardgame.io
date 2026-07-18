@@ -1228,10 +1228,9 @@ describe('endIf', () => {
     expect(client.getState().ctx.currentPlayer).toBe('0');
     client.moves.A();
     expect(client.getState().ctx.gameover).toBe('A');
-    expect(
-      client.getState().deltalog[client.getState().deltalog.length - 1].action
-        .payload.type,
-    ).toBe('endPhase');
+    const action =
+      client.getState().deltalog[client.getState().deltalog.length - 1].action;
+    expect('type' in action.payload && action.payload.type).toBe('endPhase');
   });
 
   test('during game initialization with phases', () => {
@@ -1380,6 +1379,64 @@ describe('pass args', () => {
     expect(t.ctx.playOrderPos).toBe(1);
     expect(t.ctx.currentPlayer).toBe('2');
   });
+});
+
+test('removePlayer persists across phase starts', () => {
+  const flow = Flow({
+    phases: {
+      A: {
+        start: true,
+        next: 'B',
+        turn: {
+          order: {
+            first: () => 0,
+            next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+            playOrder: () => ['0', '1', '2'],
+          },
+        },
+      },
+      B: {
+        turn: {
+          order: {
+            first: () => 0,
+            next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+            playOrder: () => ['0', '1', '2'],
+          },
+        },
+      },
+    },
+  });
+
+  let t = { ctx: flow.ctx(3) } as State;
+  t = flow.init(t);
+  t = flow.processEvent(t, gameEvent('removePlayer', '1'));
+  t = flow.processEvent(t, gameEvent('endPhase'));
+
+  expect(t.ctx.phase).toBe('B');
+  expect(t.ctx.playOrder).toEqual(['0', '2']);
+  expect(t.ctx._removedPlayers).toEqual(['1']);
+});
+
+test('removePlayer ignores non-string playerID', () => {
+  const flow = Flow({});
+  let t = { ctx: flow.ctx(3) } as State;
+  t = flow.init(t);
+
+  t = flow.processEvent(t, gameEvent('removePlayer', 1));
+
+  expect(t.ctx.playOrder).toEqual(['0', '1', '2']);
+  expect(t.ctx._removedPlayers).toBeUndefined();
+});
+
+test('removed players are never active', () => {
+  const flow = Flow({});
+  let t = { ctx: flow.ctx(2) } as State;
+  t = flow.init(t);
+
+  expect(flow.isPlayerActive({}, t.ctx, '0')).toBe(true);
+
+  const staleCtx = { ...t.ctx, currentPlayer: '1', _removedPlayers: ['1'] };
+  expect(flow.isPlayerActive({}, staleCtx, '1')).toBe(false);
 });
 
 test('undoable moves', () => {
@@ -1640,6 +1697,12 @@ describe('events in hooks', () => {
       events.endTurn();
     };
 
+    const conditionalPass = ({ G, events }) => {
+      if (!G.shouldEnd) return;
+      G.shouldEnd = false;
+      events.pass();
+    };
+
     test('can end turn from turn.onBegin', () => {
       const client = Client({
         game: { moves, turn: { onBegin: conditionalEndTurn } },
@@ -1676,9 +1739,45 @@ describe('events in hooks', () => {
 
       client.events.setPhase('A');
       state = client.getState();
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBeNull();
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in a phase’s `onBegin` hook/,
+      );
+      expect(errorMessage).toMatch(
+        /Use `turn.order.first` to choose the starting player/,
+      );
+    });
+
+    test('cannot pass from phase.onBegin', () => {
+      const client = Client({
+        game: {
+          phases: {
+            A: {
+              start: true,
+              onBegin: ({ events }) => events.pass(),
+            },
+          },
+        },
+      });
+
+      const state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
       expect(state.ctx.phase).toBe('A');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in a phase’s `onBegin` hook/,
+      );
+      expect(errorMessage).toMatch(
+        /Use `turn.order.first` to choose the starting player/,
+      );
     });
 
     test('can end turn from turn.onBegin at start of phase', () => {
@@ -1727,7 +1826,34 @@ describe('events in hooks', () => {
       expect(error).toHaveBeenCalled();
       const errorMessage = (error as jest.Mock).mock.calls[0][0];
       expect(errorMessage).toMatch(/events plugin declared action invalid/);
-      expect(errorMessage).toMatch(/`endTurn` is disallowed in `onEnd` hooks/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
+    });
+
+    test('cannot pass from turn.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          turn: { onEnd: conditionalPass },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      client.moves.setAutoEnd();
+      client.events.endTurn();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
     });
 
     test('cannot end turn from phase.onEnd', () => {
@@ -1757,7 +1883,41 @@ describe('events in hooks', () => {
       expect(error).toHaveBeenCalled();
       const errorMessage = (error as jest.Mock).mock.calls[0][0];
       expect(errorMessage).toMatch(/events plugin declared action invalid/);
-      expect(errorMessage).toMatch(/`endTurn` is disallowed in `onEnd` hooks/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
+    });
+
+    test('cannot pass from phase.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: {
+              start: true,
+              onEnd: conditionalPass,
+            },
+          },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+
+      client.moves.setAutoEnd();
+      client.events.endPhase();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
     });
   });
 

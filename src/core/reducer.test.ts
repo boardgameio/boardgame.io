@@ -19,6 +19,7 @@ import {
   undo,
   redo,
   patch,
+  playerLeave,
 } from './action-creators';
 import { error } from '../core/logger';
 import type { Game, State, SyncInfo } from '../types';
@@ -776,6 +777,220 @@ describe('redo stack', () => {
         },
       },
     });
+  });
+});
+
+describe('playerLeave', () => {
+  test('runs onPlayerLeave and removes player from ctx', () => {
+    const game: Game = {
+      onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.G).toEqual({ left: '1' });
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state.ctx._removedPlayers).toEqual(['1']);
+    expect(state.ctx.activePlayers).toBeNull();
+    expect(state.deltalog).toEqual([
+      {
+        action: playerLeave('1'),
+        _stateID: 0,
+        phase: null,
+        turn: 1,
+      },
+    ]);
+  });
+
+  test('keeps playOrderPos aligned when removing player before current player', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+    let state = {
+      ...initialState,
+      ctx: {
+        ...initialState.ctx,
+        currentPlayer: '2',
+        playOrderPos: 2,
+      },
+    };
+
+    state = reducer(state, playerLeave('0'));
+
+    expect(state.ctx.playOrder).toEqual(['1', '2']);
+    expect(state.ctx.currentPlayer).toBe('2');
+    expect(state.ctx.playOrderPos).toBe(1);
+
+    state = reducer(state, gameEvent('endTurn', undefined, '2'));
+
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.playOrderPos).toBe(0);
+  });
+
+  test('rebases undo and clears redo', () => {
+    const game: Game = {
+      moves: {
+        move: ({ G }) => ({ ...G, moved: true }),
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    state = reducer(state, makeMove('move', null, '0'));
+    state = reducer(state, undo('0'));
+    expect(state._redo).toHaveLength(1);
+
+    state = reducer(state, playerLeave('1'));
+
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+    expect(state._redo).toEqual([]);
+  });
+
+  test('cleans active player history and queued active players', () => {
+    const game: Game = {
+      moves: {
+        active: ({ events }) => {
+          events.setActivePlayers({ value: { '1': 'A', '2': 'A' } });
+          events.setActivePlayers({
+            all: 'A',
+            revert: true,
+            next: { value: { '1': 'B', '2': 'B' } },
+          });
+        },
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    state = reducer(state, makeMove('active', null, '0'));
+    state = reducer(state, playerLeave('1'));
+
+    expect(state.ctx.activePlayers).toEqual({ '0': 'A', '2': 'A' });
+    expect(state.ctx._activePlayersNumMoves).toEqual({ '0': 0, '2': 0 });
+    expect(state.ctx._nextActivePlayers).toEqual({ value: { '2': 'B' } });
+    expect(state.ctx._prevActivePlayers).toEqual([
+      {
+        activePlayers: { '2': 'A' },
+        _activePlayersMinMoves: null,
+        _activePlayersMaxMoves: null,
+        _activePlayersNumMoves: { '2': 0 },
+      },
+    ]);
+  });
+
+  test('does not remove final player before gameover', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+
+    const state = reducer(initialState, playerLeave('0'));
+
+    expect(state).toMatchObject({
+      ...initialState,
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
+  });
+
+  test('allows hook to end game before final player is removed', () => {
+    const game: Game = {
+      onPlayerLeave: ({ G, events }) => {
+        events.endGame('left');
+        return G;
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+
+    const state = reducer(initialState, playerLeave('0'));
+
+    expect(state.ctx.gameover).toBe('left');
+    expect(state.ctx.playOrder).toEqual([]);
+    expect(state.ctx.currentPlayer).toBe('');
+    expect(state.ctx._removedPlayers).toEqual(['0']);
+  });
+
+  test('rejects non-string playerID', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+
+    const state = reducer(initialState, playerLeave(1 as any));
+
+    expect(state).toMatchObject({
+      ...initialState,
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
+  });
+
+  test('rejects leave after gameover', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    const stateWithGameover = {
+      ...initialState,
+      ctx: { ...initialState.ctx, gameover: true },
+    };
+
+    const state = reducer(stateWithGameover, playerLeave('0'));
+
+    expect(state).toMatchObject({
+      ...stateWithGameover,
+      transients: {
+        error: {
+          type: 'action/gameover',
+        },
+      },
+    });
+  });
+
+  test('leave is cancelled if plugin declares it invalid', () => {
+    const game: Game<{ value: number }> = {
+      setup: () => ({ value: 5 }),
+      plugins: [
+        {
+          name: 'validator',
+          isInvalid: ({ G }) => {
+            if (G.value % 5 !== 0) return 'G.value must divide by 5';
+            return false;
+          },
+        },
+      ],
+      onPlayerLeave: ({ G }) => ({ ...G, value: 6 }),
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.G).toEqual({ value: 5 });
+    expect(state.ctx.playOrder).toEqual(['0', '1']);
+    expect(state['transients'].error).toEqual({
+      type: 'action/plugin_invalid',
+      payload: { plugin: 'validator', message: 'G.value must divide by 5' },
+    });
+  });
+
+  test('clears undo history when undo is disabled', () => {
+    const game: Game = { disableUndo: true };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state._undo).toEqual([]);
+    expect(state._redo).toEqual([]);
   });
 });
 

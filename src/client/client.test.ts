@@ -871,6 +871,40 @@ describe('subscribe', () => {
     expect(fn2).not.toHaveBeenCalled();
   });
 
+  // https://github.com/boardgameio/boardgame.io/issues/1137
+  test('subscribers keep receiving updates after an earlier subscriber unsubscribes', () => {
+    const game: Game = {
+      moves: {
+        A: ({ G }) => {
+          G.moved = true;
+        },
+      },
+    };
+    const freshClient = Client({ game });
+
+    const subA = jest.fn();
+    const subB = jest.fn();
+    const subC = jest.fn();
+
+    const unsubscribeA = freshClient.subscribe(subA);
+    freshClient.subscribe(subB);
+
+    // The oldest subscriber leaves while a newer one remains.
+    unsubscribeA();
+
+    // A new subscriber arrives after the non-LIFO unsubscribe.
+    freshClient.subscribe(subC);
+
+    subA.mockClear();
+    subB.mockClear();
+    subC.mockClear();
+
+    freshClient.moves.A();
+    expect(subC).toHaveBeenCalled();
+    expect(subA).not.toHaveBeenCalled();
+    expect(subB).toHaveBeenCalled();
+  });
+
   test('transport notifies subscribers', () => {
     let transport: ReturnType<ReturnType<typeof SocketIO>>;
     const multiplayer = (opts: any) => {
@@ -915,7 +949,7 @@ describe('subscribe', () => {
   });
 });
 
-test('override game state', () => {
+test('preview state', () => {
   const game: Game = {
     moves: {
       A: ({ G }) => {
@@ -926,10 +960,57 @@ test('override game state', () => {
   const client = Client({ game });
   client.moves.A();
   expect(client.getState().G).toEqual({ moved: true });
-  client.overrideGameState({ G: { override: true }, ctx: {} });
+  client.previewState({ G: { override: true }, ctx: {} });
   expect(client.getState().G).toEqual({ override: true });
-  client.overrideGameState(null);
+  client.previewState(null);
   expect(client.getState().G).toEqual({ moved: true });
+});
+
+test('loadState allows moves from the loaded phase', () => {
+  const game: Game = {
+    phases: {
+      start: {
+        start: true,
+        moves: {
+          startMove: ({ G }) => {
+            G.started = true;
+          },
+        },
+        next: 'play',
+      },
+      play: {
+        moves: {
+          playMove: ({ G }) => {
+            G.played = true;
+          },
+        },
+      },
+    },
+  };
+  const client = Client({ game });
+
+  // Advance to 'play' phase
+  client.moves.startMove();
+  client.events.endPhase();
+  expect(client.getState().ctx.phase).toBe('play');
+
+  // Capture state
+  const savedState = client.getState();
+
+  // Fresh client (starts in 'start' phase)
+  const freshClient = Client({ game });
+  expect(freshClient.getState().ctx.phase).toBe('start');
+
+  // Move should fail in 'start' phase
+  freshClient.moves.playMove();
+  expect(freshClient.getState().G.played).toBeUndefined();
+
+  // Load saved state
+  freshClient.loadState(savedState);
+
+  // Move should now work
+  freshClient.moves.playMove();
+  expect(freshClient.getState().G.played).toBe(true);
 });
 
 // TODO(#941): These tests should validate DOM mounting/unmounting.

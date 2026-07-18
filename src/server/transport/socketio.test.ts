@@ -228,6 +228,22 @@ describe('TransportAPI', () => {
   });
 });
 
+describe('createTransportAPI', () => {
+  test('sendAll publishes to the match channel and send is a no-op', () => {
+    const transport = new SocketIOTestAdapter();
+    const pubSub = transport.getPubSub();
+    const publish = jest.spyOn(pubSub, 'publish');
+    const api = transport.createTransportAPI('matchID');
+
+    api.send({ type: 'A', playerID: '0', args: [] } as any);
+    expect(publish).not.toHaveBeenCalled();
+
+    const payload = { type: 'A', args: [] } as any;
+    api.sendAll(payload);
+    expect(publish).toHaveBeenCalledWith('MATCH-matchID', payload);
+  });
+});
+
 describe('sync / update', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
   const app: any = { context: { auth }, callback: () => () => {} };

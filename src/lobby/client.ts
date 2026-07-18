@@ -249,7 +249,10 @@ export class LobbyClient {
   }
 
   /**
-   * Leave a previously joined match.
+   * Leave a previously joined match’s lobby slot.
+   *
+   * @deprecated Use `leaveSlot` for lobby-slot-only leave or `leaveGame` for
+   * permanent game leave.
    * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
    * @param  matchID  Match ID for the match to leave.
    * @param  body     Options required to leave match.
@@ -278,6 +281,54 @@ export class LobbyClient {
     assertMatchID(matchID);
     validateBody(body, { playerID: 'string', credentials: 'string' });
     await this.post(`/games/${gameName}/${matchID}/leave`, { body, init });
+  }
+
+  /**
+   * Leave a previously joined lobby slot.
+   * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
+   * @param  matchID  Match ID for the match to leave.
+   * @param  body     Options required to leave slot.
+   * @param  init     Optional RequestInit interface to override defaults.
+   * @return Promise resolves if successful.
+   */
+  async leaveSlot(
+    gameName: string,
+    matchID: string,
+    body: {
+      playerID: string;
+      credentials: string;
+      [key: string]: any;
+    },
+    init?: RequestInit,
+  ): Promise<void> {
+    assertGameName(gameName);
+    assertMatchID(matchID);
+    validateBody(body, { playerID: 'string', credentials: 'string' });
+    await this.post(`/games/${gameName}/${matchID}/leaveSlot`, { body, init });
+  }
+
+  /**
+   * Permanently leave a game through its game-state lifecycle.
+   * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
+   * @param  matchID  Match ID for the match to leave.
+   * @param  body     Options required to leave game.
+   * @param  init     Optional RequestInit interface to override defaults.
+   * @return Promise resolves if successful.
+   */
+  async leaveGame(
+    gameName: string,
+    matchID: string,
+    body: {
+      playerID: string;
+      credentials: string;
+      [key: string]: any;
+    },
+    init?: RequestInit,
+  ): Promise<void> {
+    assertGameName(gameName);
+    assertMatchID(matchID);
+    validateBody(body, { playerID: 'string', credentials: 'string' });
+    await this.post(`/games/${gameName}/${matchID}/leaveGame`, { body, init });
   }
 
   /**

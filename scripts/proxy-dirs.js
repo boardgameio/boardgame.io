@@ -35,3 +35,12 @@ subpackages.forEach((name) => {
 });
 
 makeSubpackage('server', { mainDir: 'cjs' });
+
+writeFileSync(
+  path.resolve(__dirname, '../dist/esm/package.json'),
+  JSON.stringify({ type: 'module', sideEffects: false }, null, 2) + '\n',
+);
+writeFileSync(
+  path.resolve(__dirname, '../dist/cjs/package.json'),
+  JSON.stringify({ type: 'commonjs', sideEffects: false }, null, 2) + '\n',
+);
