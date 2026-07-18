@@ -130,6 +130,26 @@ The following properties are available on a client instance:
   ```
 
 
+- `lastActionError`: The reason this client’s most recent action was
+  rejected, or `undefined` if it wasn’t. Cleared when a subsequent
+  action succeeds. In multiplayer, rejections are delivered only to
+  the client that made the move. An error object has:
+
+    - `type`: an error code string, e.g. `'action/invalid_move'`
+    - `payload`: the value the move returned via
+      [`Invalid(payload)`](/immutability.md#telling-the-player-why),
+      if any
+
+  Example:
+
+  ```js
+  {
+    type: 'action/invalid_move',
+    payload: { message: 'That cell is already filled' },
+  }
+  ```
+
+
 #### Methods
 
 The following methods are available on a client instance:
@@ -171,11 +191,16 @@ The following methods are available on a client instance:
 
 - `subscribe(callback)`: Add a callback for every state change.
   The passed function will be called with the same value as returned by
-  `getState`. `subscribe` returns an unsubscribe function.
+  `getState`, and — if the client’s most recent action was rejected —
+  an error object as its second argument (see `lastActionError` below).
+  `subscribe` returns an unsubscribe function.
 
   ```js
-  const unsubscribe = client.subscribe(state => {
+  const unsubscribe = client.subscribe((state, error) => {
     // use updated state
+    if (error) {
+      // the last action was rejected, e.g. show error.payload.message
+    }
   });
 
   // unsubscribe from the client
@@ -372,6 +397,20 @@ following as `props`:
     { id: 'foo', sender: '0', payload: 'Ready to play?' },
     { id: 'bar', sender: '1', payload: 'Let’s go!' },
   ]
+  ```
+
+
+- `lastActionError`: The reason this client’s most recent action was
+  rejected (an object with `type` and optional `payload` — see the
+  Plain JS tab), or `undefined` if it wasn’t. Useful for showing the
+  player an error toast when the server turns down a move:
+
+  ```js
+  useEffect(() => {
+    if (props.lastActionError) {
+      showToast(props.lastActionError.payload?.message ?? 'Invalid action');
+    }
+  }, [props.lastActionError]);
   ```
 
 
