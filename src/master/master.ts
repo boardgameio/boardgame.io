@@ -32,6 +32,8 @@ import type {
   LogEntry,
   PlayerID,
   ChatMessage,
+  ActionError,
+  TransientMetadata,
 } from '../types';
 import { createMatch } from '../server/util';
 import type { Auth } from '../server/auth';
@@ -39,11 +41,7 @@ import * as StorageAPI from '../server/db/base';
 import type { Operation } from 'rfc6902';
 
 type DispatchResultWithTransients = {
-  transients?: {
-    error?: {
-      type: string;
-    };
-  };
+  transients?: TransientMetadata;
 };
 
 /**
@@ -88,6 +86,10 @@ type CommonTransportData =
   | {
       type: 'chat';
       args: [string, ChatMessage];
+    }
+  | {
+      type: 'actionError';
+      args: [string, ActionError];
     };
 
 /**
@@ -303,7 +305,9 @@ export class Master {
     const prevState = store.getState();
 
     // Update server's version of the store.
-    store.dispatch(action);
+    const dispatchResult = store.dispatch(
+      action,
+    ) as DispatchResultWithTransients;
     state = store.getState();
 
     this.subscribeCallback({
@@ -321,6 +325,17 @@ export class Master {
       this.transportAPI.sendAll({
         type: 'update',
         args: [matchID, state],
+      });
+    }
+
+    // Deliver any action error to the acting client only. The state
+    // broadcast above already rolls back optimistic updates; this
+    // tells the player *why* their action was rejected.
+    if (dispatchResult?.transients?.error) {
+      this.transportAPI.send({
+        playerID,
+        type: 'actionError',
+        args: [matchID, dispatchResult.transients.error],
       });
     }
 

@@ -8,7 +8,7 @@
 
 import * as plugins from '../plugins/main';
 import { Flow } from './flow';
-import type { INVALID_MOVE } from './constants';
+import type { INVALID_MOVE, InvalidMoveResult } from './constants';
 import type { ActionPayload, Game, Move, LongFormMove, State } from '../types';
 import * as logging from './logger';
 import { GameMethod } from './game-methods';
@@ -20,7 +20,7 @@ type ProcessedGame = Game & {
   processMove: (
     state: State,
     action: ActionPayload.MakeMove,
-  ) => State | typeof INVALID_MOVE;
+  ) => State | typeof INVALID_MOVE | InvalidMoveResult;
   processPlayerLeave: (state: State, playerID: string) => State['G'];
 };
 

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { INVALID_MOVE } from './constants';
+import { INVALID_MOVE, Invalid } from './constants';
 import { applyMiddleware, createStore } from 'redux';
 import { CreateGameReducer, TransientHandlingMiddleware } from './reducer';
 import { InitializeGame } from './initialize';
@@ -59,6 +59,40 @@ test('move returns INVALID_MOVE', () => {
   const state = reducer(initialState, makeMove('A'));
   expect(error).toHaveBeenCalledWith('invalid move: A args: undefined');
   expect(state._stateID).toBe(0);
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: undefined,
+  });
+});
+
+test('move returns Invalid() with a payload', () => {
+  const game: Game = {
+    moves: {
+      A: () => Invalid({ reason: 'not enough gold' }),
+      B: ({ G }) => {
+        G.mutated = true;
+        return Invalid({ reason: 'mutated then rejected' });
+      },
+    },
+  };
+  const reducer = CreateGameReducer({ game });
+
+  let state = reducer(initialState, makeMove('A'));
+  expect(error).toHaveBeenCalledWith('invalid move: A args: undefined');
+  expect(state._stateID).toBe(0);
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'not enough gold' },
+  });
+
+  // Draft mutations made before returning Invalid() are discarded.
+  state = reducer(initialState, makeMove('B'));
+  expect(state._stateID).toBe(0);
+  expect(state.G.mutated).toBeUndefined();
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'mutated then rejected' },
+  });
 });
 
 test('makeMove', () => {

@@ -31,6 +31,7 @@ type ExposedClientProps<G extends any = any> = Pick<
   | 'matchData'
   | 'sendChatMessage'
   | 'chatMessages'
+  | 'lastActionError'
 >;
 
 export type BoardProps<G extends any = any> = ClientState<G> &
@@ -183,6 +184,7 @@ export function Client<
           matchData: this.client.matchData,
           sendChatMessage: this.client.sendChatMessage,
           chatMessages: this.client.chatMessages,
+          lastActionError: this.client.lastActionError,
         });
       }
 

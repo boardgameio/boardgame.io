@@ -24,6 +24,7 @@ import { DummyTransport } from './transport/dummy';
 import { ClientManager } from './manager';
 import type { TransportData } from '../master/master';
 import type {
+  ActionError,
   ActivePlayersArg,
   ActionShape,
   CredentialedActionShape,
@@ -34,6 +35,7 @@ import type {
   Reducer,
   State,
   Store,
+  TransientState,
   ChatMessage,
 } from '../types';
 
@@ -141,7 +143,10 @@ export class _ClientImpl<
   readonly multiplayer: (opts: TransportOpts) => Transport;
   private reducer: Reducer;
   private _running: boolean;
-  private subscribers: Map<symbol, (state: State<G> | null) => void>;
+  private subscribers: Map<
+    symbol,
+    (state: State<G> | null, error?: ActionError) => void
+  >;
   private transport: Transport;
   private manager: ClientManager;
   readonly debugOpt?: DebugOpt | boolean;
@@ -168,6 +173,12 @@ export class _ClientImpl<
   redo: () => void;
   sendChatMessage: (message: any) => void;
   chatMessages: ChatMessage[];
+  /**
+   * The most recent action error affecting this client, or undefined.
+   * Set when one of this client’s actions is rejected (locally or by
+   * the master) and cleared when a subsequent action succeeds.
+   */
+  lastActionError?: ActionError;
 
   constructor({
     game,
@@ -298,10 +309,26 @@ export class _ClientImpl<
 
     /**
      * Middleware that intercepts actions and invokes the subscription callback.
+     * Also tracks action errors: TransientHandlingMiddleware runs outside this
+     * middleware, so when we are notified the store still holds any transients
+     * produced by the action. A player action that produces an error records
+     * it; one that succeeds clears it. STRIP_TRANSIENTS passes are neutral.
      */
     const SubscriptionMiddleware =
-      () => (next: Dispatch<Action>) => (action: Action) => {
+      (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
         const result = next(action);
+        if (action.type !== Actions.STRIP_TRANSIENTS) {
+          const transientError = (store.getState() as TransientState<G> | null)
+            ?.transients?.error;
+          if (transientError) {
+            this.lastActionError = transientError;
+          } else if (
+            action.type === Actions.MAKE_MOVE ||
+            action.type === Actions.GAME_EVENT
+          ) {
+            this.lastActionError = undefined;
+          }
+        }
         this.notifySubscribers();
         return result;
       };
@@ -355,6 +382,12 @@ export class _ClientImpl<
     this.notifySubscribers();
   }
 
+  /** Handle an action error sent to this client by a multiplayer master. */
+  private receiveActionError(error: ActionError): void {
+    this.lastActionError = error;
+    this.notifySubscribers();
+  }
+
   /** Handle all incoming updates from a multiplayer transport. */
   private receiveTransportData(data: TransportData): void {
     const [matchID] = data.args;
@@ -403,11 +436,16 @@ export class _ClientImpl<
         this.receiveChatMessage(chatMessage);
         break;
       }
+      case 'actionError': {
+        const [, error] = data.args;
+        this.receiveActionError(error);
+        break;
+      }
     }
   }
 
   private notifySubscribers() {
-    this.subscribers.forEach((fn) => fn(this.getState()));
+    this.subscribers.forEach((fn) => fn(this.getState(), this.lastActionError));
   }
 
   previewState(state: any) {
@@ -444,13 +482,13 @@ export class _ClientImpl<
     this.manager.unregister(this);
   }
 
-  subscribe(fn: (state: ClientState<G>) => void) {
+  subscribe(fn: (state: ClientState<G>, error?: ActionError) => void) {
     const id = Symbol();
     this.subscribers.set(id, fn);
     this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
     if (this._running || !this.multiplayer) {
-      fn(this.getState());
+      fn(this.getState(), this.lastActionError);
     }
 
     // Return a handle that allows the caller to unsubscribe.

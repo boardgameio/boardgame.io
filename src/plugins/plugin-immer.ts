@@ -8,7 +8,8 @@
 
 import { produce } from 'immer';
 import type { Plugin } from '../types';
-import { INVALID_MOVE } from '../core/constants';
+import { isInvalidMoveResult } from '../core/constants';
+import type { INVALID_MOVE, InvalidMoveResult } from '../core/constants';
 
 /**
  * Plugin that allows using Immer to make immutable changes
@@ -20,16 +21,16 @@ const ImmerPlugin: Plugin = {
   fnWrap:
     (move) =>
     (context, ...args) => {
-      let isInvalid = false;
+      let invalidResult: typeof INVALID_MOVE | InvalidMoveResult | undefined;
       const newG = produce(context.G, (G) => {
         const result = move({ ...context, G }, ...args);
-        if (result === INVALID_MOVE) {
-          isInvalid = true;
+        if (isInvalidMoveResult(result)) {
+          invalidResult = result;
           return;
         }
         return result;
       });
-      if (isInvalid) return INVALID_MOVE;
+      if (invalidResult !== undefined) return invalidResult;
       return newG;
     },
 };

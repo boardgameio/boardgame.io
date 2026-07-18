@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { INVALID_MOVE } from '../core/constants';
+import { INVALID_MOVE, Invalid } from '../core/constants';
+import { ActionErrorType } from '../core/errors';
 import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
@@ -661,6 +662,99 @@ describe('transient handling', () => {
   });
 });
 
+describe('action errors', () => {
+  describe('local client', () => {
+    let client = null;
+    let fn;
+
+    beforeEach(() => {
+      const game: Game = {
+        moves: {
+          valid: ({ G }) => {
+            G.moved = true;
+          },
+          rejected: () => Invalid({ reason: 'not enough gold' }),
+        },
+      };
+      client = Client({ game });
+      fn = jest.fn();
+      client.subscribe(fn);
+      fn.mockClear();
+    });
+
+    test('subscriber receives the error for a rejected move', () => {
+      client.moves.rejected();
+      expect(client.lastActionError).toEqual({
+        type: 'action/invalid_move',
+        payload: { reason: 'not enough gold' },
+      });
+      expect(fn).toHaveBeenCalledWith(expect.anything(), {
+        type: 'action/invalid_move',
+        payload: { reason: 'not enough gold' },
+      });
+    });
+
+    test('a subsequent successful move clears the error', () => {
+      client.moves.rejected();
+      expect(client.lastActionError).toBeDefined();
+      client.moves.valid();
+      expect(client.lastActionError).toBeUndefined();
+      expect(fn).toHaveBeenLastCalledWith(
+        expect.objectContaining({ G: { moved: true } }),
+        undefined,
+      );
+    });
+  });
+
+  describe('multiplayer client', () => {
+    let sendToClient: (data: TransportData) => void;
+    let client: ReturnType<typeof Client>;
+
+    beforeEach(() => {
+      client = Client({
+        game: {},
+        matchID: 'A',
+        debug: false,
+        multiplayer: ({ transportDataCallback }) => {
+          sendToClient = transportDataCallback;
+          return {
+            connect() {},
+            disconnect() {},
+            subscribe() {},
+            subscribeToConnectionStatus() {},
+            requestSync() {},
+          } as unknown as Transport;
+        },
+      });
+      client.start();
+    });
+
+    afterEach(() => {
+      client.stop();
+    });
+
+    test('actionError from the master reaches subscribers', () => {
+      const fn = jest.fn();
+      client.subscribe(fn);
+      fn.mockClear();
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'slot taken' },
+      };
+      sendToClient({ type: 'actionError', args: ['A', error] });
+      expect(client.lastActionError).toEqual(error);
+      // State is null here because this stub transport never syncs.
+      expect(fn).toHaveBeenCalledWith(null, error);
+    });
+
+    test('actionError for another match is ignored', () => {
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({ type: 'actionError', args: ['B', error] });
+      expect(client.lastActionError).toBeUndefined();
+    });
+  });
+});
+
 describe('log handling', () => {
   let client = null;
 
@@ -802,6 +896,7 @@ describe('subscribe', () => {
         G: {},
         ctx: expect.objectContaining({ turn: 1 }),
       }),
+      undefined,
     );
   });
 
@@ -812,6 +907,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
   });
 
@@ -822,6 +918,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         ctx: expect.objectContaining({ turn: 2 }),
       }),
+      undefined,
     );
   });
 
@@ -837,6 +934,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
 
     fn.mockClear();
@@ -849,11 +947,13 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
     expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
 
     unsubscribe();
@@ -867,6 +967,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
     expect(fn2).not.toHaveBeenCalled();
   });

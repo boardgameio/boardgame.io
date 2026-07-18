@@ -15,6 +15,7 @@ import { Transport } from './transport';
 import type { Operation } from 'rfc6902';
 import type { TransportOpts } from './transport';
 import type {
+  ActionError,
   CredentialedActionShape,
   FilteredMetadata,
   LogEntry,
@@ -153,6 +154,12 @@ export class SocketIOTransport extends Transport {
 
     this.socket.on('chat', (matchID: string, chatMessage: ChatMessage) => {
       this.notifyClient({ type: 'chat', args: [matchID, chatMessage] });
+    });
+
+    // Called when an action this client sent was rejected by the master.
+    // Delivered only to the acting client.
+    this.socket.on('actionError', (matchID: string, error: ActionError) => {
+      this.notifyClient({ type: 'actionError', args: [matchID, error] });
     });
 
     // Keep track of connection status.
