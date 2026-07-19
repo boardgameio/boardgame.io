@@ -10,6 +10,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
+import http from 'node:http';
+import { once } from 'node:events';
 import request from 'supertest';
 import Koa from 'koa';
 import Router from '@koa/router';
@@ -99,8 +101,26 @@ describe('.configureRouter', () => {
     return app;
   }
 
+  // A single suite-level server bound explicitly to 127.0.0.1. Letting
+  // supertest create a server per request would bind the wildcard address,
+  // where the kernel may allocate an ephemeral port that another local
+  // process holds on 127.0.0.1, silently routing requests to that process.
+  let currentApp: ReturnType<Koa['callback']>;
+  const httpServer = http.createServer((req, res) => currentApp(req, res));
+
+  beforeAll(async () => {
+    httpServer.listen(0, '127.0.0.1');
+    await once(httpServer, 'listening');
+  });
+
+  afterAll(async () => {
+    httpServer.close();
+    await once(httpServer, 'close');
+  });
+
   function apiCall(app: Koa) {
-    const agent = request(app.callback());
+    currentApp = app.callback();
+    const agent = request(httpServer);
     return {
       get: (path: string) => agent.get(path).set('Connection', 'close'),
       post: (path: string) => agent.post(path).set('Connection', 'close'),
