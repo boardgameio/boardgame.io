@@ -26,8 +26,6 @@ import { InMemory } from './db/inmemory';
 import { Origins } from './cors';
 import type { Game, Server } from '../types';
 
-jest.setTimeout(2_000_000_000);
-
 beforeEach(() => {
   dateMock.clear();
 });
