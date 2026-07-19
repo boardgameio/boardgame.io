@@ -174,7 +174,7 @@
     "@rollup/plugin-terser": "^1.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@testing-library/svelte": "5.3.1",
+    "@testing-library/svelte": "5.4.2",
     "@types/cors": "^2.8.19",
     "@types/jest": "^30.0.0",
     "@types/js-cookie": "^3.0.6",
