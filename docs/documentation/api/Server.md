@@ -119,6 +119,10 @@ boardgame.io `port`.
 - `apiCallback`: Called when the Koa server is ready. Only applicable if
 `apiPort` is specified.
 
+The run config also accepts a `host` alongside `port`, which binds both the
+game server and the Lobby API server to that host. It defaults to all
+interfaces.
+
 #### With HTTPS
 
 ```js
