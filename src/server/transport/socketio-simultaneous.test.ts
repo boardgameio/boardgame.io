@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2018 The boardgame.io Authors
  *
@@ -66,7 +70,7 @@ class InMemoryAsync extends Async {
 
   async fetch<O extends StorageAPI.FetchOpts>(
     matchID: string,
-    opts: O
+    opts: O,
   ): Promise<StorageAPI.FetchResult<O>> {
     await this.sleep();
     return this.db.fetch(matchID, opts);
@@ -80,6 +84,35 @@ class InMemoryAsync extends Async {
   async listMatches(opts?: StorageAPI.ListMatchesOpts): Promise<string[]> {
     await this.sleep();
     return this.db.listMatches(opts);
+  }
+}
+
+/**
+ * Variant of InMemoryAsync that returns deep copies on fetch.
+ * This makes read-modify-write races reproducible in tests.
+ */
+class CopyingInMemoryAsync extends InMemoryAsync {
+  async fetch<O extends StorageAPI.FetchOpts>(
+    matchID: string,
+    opts: O,
+  ): Promise<StorageAPI.FetchResult<O>> {
+    const result = (await super.fetch(matchID, opts)) as StorageAPI.FetchFields;
+    const copy = {} as StorageAPI.FetchFields;
+
+    if (opts.state && result.state !== undefined) {
+      copy.state = JSON.parse(JSON.stringify(result.state));
+    }
+    if (opts.metadata && result.metadata !== undefined) {
+      copy.metadata = JSON.parse(JSON.stringify(result.metadata));
+    }
+    if (opts.log && result.log !== undefined) {
+      copy.log = JSON.parse(JSON.stringify(result.log));
+    }
+    if (opts.initialState && result.initialState !== undefined) {
+      copy.initialState = JSON.parse(JSON.stringify(result.initialState));
+    }
+
+    return copy as StorageAPI.FetchResult<O>;
   }
 }
 
@@ -99,7 +132,7 @@ class SocketIOTestAdapter extends SocketIO {
   }
 }
 
-jest.mock('koa-socket-2', () => {
+jest.mock('socket.io', () => {
   class MockSocket {
     id: string;
     callbacks: Record<string, (...args: any[]) => Promise<void>>;
@@ -137,16 +170,12 @@ jest.mock('koa-socket-2', () => {
 
     constructor() {
       this.sockets = new Map(
-        ['0', '1'].map((id) => [id, new MockSocket({ id })])
+        ['0', '1'].map((id) => [id, new MockSocket({ id })]),
       );
     }
 
     adapter(socketAdapter) {
       this.socketAdapter = socketAdapter;
-    }
-
-    attach(app) {
-      app.io = app._io = this;
     }
 
     of() {
@@ -158,7 +187,7 @@ jest.mock('koa-socket-2', () => {
     }
   }
 
-  return MockIO;
+  return { Server: MockIO };
 });
 
 describe('simultaneous moves on server game', () => {
@@ -217,7 +246,7 @@ describe('simultaneous moves on server game', () => {
   test('two clients playing using sync storage', async () => {
     const db = new InMemory();
     const auth = new Auth();
-    app = { context: { db, auth } };
+    app = { context: { db, auth }, callback: () => () => {} };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
@@ -229,11 +258,11 @@ describe('simultaneous moves on server game', () => {
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'getMatchQueue'
+      'getMatchQueue',
     );
     const spyDeleteMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'deleteMatchQueue'
+      'deleteMatchQueue',
     );
 
     db.createMatch('matchID', {
@@ -341,7 +370,7 @@ describe('simultaneous moves on server game', () => {
     await db.connect();
     const auth = new Auth();
 
-    app = { context: { db, auth } };
+    app = { context: { db, auth }, callback: () => () => {} };
     transport = new SocketIOTestAdapter({
       clientInfo,
       roomInfo,
@@ -353,11 +382,11 @@ describe('simultaneous moves on server game', () => {
 
     const spyGetMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'getMatchQueue'
+      'getMatchQueue',
     );
     const spyDeleteMatchQueue = jest.spyOn(
       SocketIOTestAdapter.prototype,
-      'deleteMatchQueue'
+      'deleteMatchQueue',
     );
 
     await db.createMatch('matchID', {
@@ -485,7 +514,7 @@ describe('inauthentic clients', () => {
     db = new InMemoryAsync();
     await db.connect();
 
-    app = { context: { db, auth: new Auth() } };
+    app = { context: { db, auth: new Auth() }, callback: () => () => {} };
     transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
     transport.init(app, [ProcessGameConfig(game)]);
     io = app.context.io;
@@ -551,11 +580,11 @@ describe('inauthentic clients', () => {
             0: 'foo',
           },
         }),
-      })
+      }),
     );
 
     const syncEmits = authenticSocket.emit.mock.calls.filter(
-      ([type]) => type === 'sync'
+      ([type]) => type === 'sync',
     );
     expect(syncEmits).toHaveLength(1);
   });
@@ -592,12 +621,102 @@ describe('inauthentic clients', () => {
             0: 'foo',
           },
         }),
-      })
+      }),
     );
 
     const syncEmits = authenticSocket.emit.mock.calls.filter(
-      ([type]) => type === 'sync'
+      ([type]) => type === 'sync',
     );
     expect(syncEmits).toHaveLength(1);
+  });
+});
+
+describe('simultaneous sync race condition', () => {
+  const game: Game = {
+    name: 'test',
+    setup: () => ({
+      0: 'foo',
+      1: 'bar',
+    }),
+    playerView: ({ G, playerID }) => ({ [playerID]: G[playerID] }),
+  };
+
+  let app;
+  let db: CopyingInMemoryAsync;
+  let transport: SocketIOTestAdapter;
+  let clientInfo: Map<string, Record<string, any>>;
+  let roomInfo: Map<string, Set<string>>;
+  let io;
+  const matchID = 'matchID';
+
+  beforeEach(async () => {
+    clientInfo = new Map();
+    roomInfo = new Map();
+
+    db = new CopyingInMemoryAsync();
+    await db.connect();
+
+    app = { context: { db, auth: new Auth() }, callback: () => () => {} };
+    transport = new SocketIOTestAdapter({ clientInfo, roomInfo });
+    transport.init(app, [ProcessGameConfig(game)]);
+    io = app.context.io;
+
+    const metadata = createMetadata({ game, unlisted: false, numPlayers: 2 });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    await db.createMatch(matchID, { initialState, metadata });
+  });
+
+  afterEach(async () => {
+    await db.wipe(matchID);
+  });
+
+  test('concurrent syncs preserve both players isConnected status', async () => {
+    const socket0 = io.sockets.get('0');
+    const socket1 = io.sockets.get('1');
+
+    // Force a deterministic race by using zero delays for onSync fetches
+    // and a long delay for the first onConnectionChange setMetadata.
+    // Without queue protection, the second sync's onConnectionChange
+    // fetch will resolve before the first sync's setMetadata completes,
+    // causing the second player to overwrite the first player's isConnected.
+    db.delays = [0, 0, 0, 0, 50, 0, 50, 0];
+
+    await Promise.all([
+      (async () => {
+        const args: Parameters<Master['onSync']> = [matchID, '0', undefined];
+        await socket0.receive('sync', ...args);
+      })(),
+      (async () => {
+        const args: Parameters<Master['onSync']> = [matchID, '1', undefined];
+        await socket1.receive('sync', ...args);
+      })(),
+    ]);
+
+    const { metadata } = await db.fetch(matchID, { metadata: true });
+    expect(metadata.players['0'].isConnected).toBe(true);
+    expect(metadata.players['1'].isConnected).toBe(true);
+  });
+
+  test('concurrent sync and disconnect preserve connection status', async () => {
+    const socket0 = io.sockets.get('0');
+    const socket1 = io.sockets.get('1');
+
+    // Player 0 syncs, then immediately disconnects while player 1 syncs.
+    db.delays = [0, 0, 0, 0, 50, 0, 50, 0, 50, 0];
+
+    await socket0.receive('sync', matchID, '0', undefined);
+
+    await Promise.all([
+      (async () => {
+        await socket0.receive('disconnect');
+      })(),
+      (async () => {
+        await socket1.receive('sync', matchID, '1', undefined);
+      })(),
+    ]);
+
+    const { metadata } = await db.fetch(matchID, { metadata: true });
+    expect(metadata.players['0'].isConnected).toBe(false);
+    expect(metadata.players['1'].isConnected).toBe(true);
   });
 });

@@ -84,21 +84,21 @@ describe('update matchID / playerID / credentials', () => {
     m.updateMatchID('test');
     expect(m.getMatchID()).toBe('test');
     const args: SyncArgs = ['test', null, undefined, 2];
-    expect(socket.emit).lastCalledWith('sync', ...args);
+    expect(socket.emit).toHaveBeenLastCalledWith('sync', ...args);
   });
 
   test('playerID', () => {
     m.updatePlayerID('player');
     expect(m.getPlayerID()).toBe('player');
     const args: SyncArgs = ['test', 'player', undefined, 2];
-    expect(socket.emit).lastCalledWith('sync', ...args);
+    expect(socket.emit).toHaveBeenLastCalledWith('sync', ...args);
   });
 
   test('credentials', () => {
     m.updateCredentials('1234');
     expect(m.getCredentials()).toBe('1234');
     const args: SyncArgs = ['test', 'player', '1234', 2];
-    expect(socket.emit).lastCalledWith('sync', ...args);
+    expect(socket.emit).toHaveBeenLastCalledWith('sync', ...args);
   });
 });
 
@@ -200,7 +200,7 @@ describe('multiplayer', () => {
     const state = { _stateID: 0 } as State;
     transport.sendAction(state, action);
     const args: UpdateArgs = [action, state._stateID, 'default', null];
-    expect(mockSocket.emit).lastCalledWith('update', ...args);
+    expect(mockSocket.emit).toHaveBeenLastCalledWith('update', ...args);
   });
 
   test('receive chat-message', () => {
@@ -219,11 +219,11 @@ describe('multiplayer', () => {
       payload: { message: 'foo' },
     };
     transport.sendChatMessage('matchID', message);
-    expect(mockSocket.emit).lastCalledWith(
+    expect(mockSocket.emit).toHaveBeenLastCalledWith(
       'chat',
       'matchID',
       message,
-      transport.getCredentials()
+      transport.getCredentials(),
     );
   });
 });
@@ -260,28 +260,44 @@ describe('multiplayer delta state', () => {
 describe('server option', () => {
   const hostname = 'host';
   const port = '1234';
+  let m: TransportAdapter;
+  afterEach(() => {
+    m?.disconnect();
+  });
+
+  // socketOpts: { autoConnect: false } prevents socket.io-client from opening
+  // the engine.io transport. Without it, every `m.connect()` here starts an
+  // XHR long-poll that never resolves, leaking handles and forcing jest's
+  // worker to be terminated non-gracefully. With autoConnect off, the Manager
+  // is constructed and the URL is parsed, but no engine is created — so we
+  // assert on the Manager's `uri` (the only post-parse value it exposes
+  // before open). hostname/port/secure live on the engine.io Socket, which
+  // is never instantiated; see node_modules/engine.io-client/build/cjs/socket.js.
+  const noConnect = { socketOpts: { autoConnect: false } };
 
   test('without protocol', () => {
     const server = hostname + ':' + port;
-    const m = new TransportAdapter({
+    m = new TransportAdapter({
       server,
       transportDataCallback: () => {},
       game: ProcessGameConfig({}),
       gameKey: {},
+      ...noConnect,
     });
     m.connect();
-    expect(m.socket.io.engine.hostname).toEqual(hostname);
-    expect(m.socket.io.engine.port).toEqual(port);
-    expect(m.socket.io.engine.secure).toEqual(false);
+    expect((m.socket.io as any).uri).toEqual(
+      'http://' + hostname + ':' + port + '/default',
+    );
   });
 
   test('without trailing slash', () => {
     const server = 'http://' + hostname + ':' + port;
-    const m = new SocketIOTransport({
+    m = new TransportAdapter({
       server,
       transportDataCallback: () => {},
       game: ProcessGameConfig({}),
       gameKey: {},
+      ...noConnect,
     });
     m.connect();
     expect((m.socket.io as any).uri).toEqual(server + '/default');
@@ -289,40 +305,42 @@ describe('server option', () => {
 
   test('https', () => {
     const serverWithProtocol = 'https://' + hostname + ':' + port + '/';
-    const m = new TransportAdapter({
+    m = new TransportAdapter({
       server: serverWithProtocol,
       transportDataCallback: () => {},
       game: ProcessGameConfig({}),
       gameKey: {},
+      ...noConnect,
     });
     m.connect();
-    expect(m.socket.io.engine.hostname).toEqual(hostname);
-    expect(m.socket.io.engine.port).toEqual(port);
-    expect(m.socket.io.engine.secure).toEqual(true);
+    expect((m.socket.io as any).uri).toEqual(
+      'https://' + hostname + ':' + port + '/default',
+    );
   });
 
   test('http', () => {
     const serverWithProtocol = 'http://' + hostname + ':' + port + '/';
-    const m = new TransportAdapter({
+    m = new TransportAdapter({
       server: serverWithProtocol,
       transportDataCallback: () => {},
       game: ProcessGameConfig({}),
       gameKey: {},
+      ...noConnect,
     });
     m.connect();
-    expect(m.socket.io.engine.hostname).toEqual(hostname);
-    expect(m.socket.io.engine.port).toEqual(port);
-    expect(m.socket.io.engine.secure).toEqual(false);
+    expect((m.socket.io as any).uri).toEqual(
+      'http://' + hostname + ':' + port + '/default',
+    );
   });
 
   test('no server set', () => {
-    const m = new TransportAdapter({
+    m = new TransportAdapter({
       transportDataCallback: () => {},
       game: ProcessGameConfig({}),
       gameKey: {},
+      ...noConnect,
     });
     m.connect();
-    expect(m.socket.io.engine.hostname).not.toEqual(hostname);
-    expect(m.socket.io.engine.port).not.toEqual(port);
+    expect((m.socket.io as any).uri).not.toContain(hostname + ':' + port);
   });
 });

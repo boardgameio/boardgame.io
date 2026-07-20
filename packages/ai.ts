@@ -6,9 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Step, Simulate } from '../src/ai/ai';
-import { Bot } from '../src/ai/bot';
-import { RandomBot } from '../src/ai/random-bot';
-import { MCTSBot } from '../src/ai/mcts-bot';
+export { Step, Simulate } from '../src/ai/ai';
+export { RandomBot } from '../src/ai/random-bot';
+export { Bot } from '../src/ai/bot';
 
-export { Bot, RandomBot, MCTSBot, Step, Simulate };
+export { MCTSBot } from '../src/ai/mcts-bot';

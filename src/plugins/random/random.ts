@@ -123,7 +123,7 @@ export class Random {
         return diceCount === undefined
           ? Math.floor(random() * spotvalue) + 1
           : Array.from({ length: diceCount }).map(
-              () => Math.floor(random() * spotvalue) + 1
+              () => Math.floor(random() * spotvalue) + 1,
             );
       };
     }
@@ -134,7 +134,7 @@ export class Random {
       return diceCount === undefined
         ? Math.floor(random() * spotvalue) + 1
         : Array.from({ length: diceCount }).map(
-            () => Math.floor(random() * spotvalue) + 1
+            () => Math.floor(random() * spotvalue) + 1,
           );
     }
 

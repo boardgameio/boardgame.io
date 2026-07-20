@@ -12,7 +12,7 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 
 function validateNotTransientState(state: any) {
   expect(state).toEqual(
-    expect.not.objectContaining({ transients: expect.anything() })
+    expect.not.objectContaining({ transients: expect.anything() }),
   );
 }
 
@@ -39,7 +39,7 @@ describe('playerView - update', () => {
     const payload = send.mock.calls[0][0];
     const filterPlayerView = getFilterPlayerView(game);
     expect(
-      (filterPlayerView('0', payload).args[1] as SyncInfo).state
+      (filterPlayerView('0', payload).args[1] as SyncInfo).state,
     ).toMatchObject({
       G: { player: '0' },
     });
@@ -49,7 +49,7 @@ describe('playerView - update', () => {
     const action = ActionCreators.gameEvent('endTurn');
     await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(action, 0, 'matchID', '0');
-    const payload = sendAll.mock.calls[sendAll.mock.calls.length - 1][0];
+    const payload = sendAll.mock.calls.at(-1)[0];
     const filterPlayerView = getFilterPlayerView(game);
 
     const transportData0 = filterPlayerView('0', payload);
@@ -128,9 +128,9 @@ describe('playerView - patch', () => {
 
   test('patch', async () => {
     await master.onUpdate(move, 0, 'matchID', '0');
-    expect(sendAll).toBeCalled();
+    expect(sendAll).toHaveBeenCalled();
 
-    const payload = sendAll.mock.calls[sendAll.mock.calls.length - 1][0];
+    const payload = sendAll.mock.calls.at(-1)[0];
     expect(payload.type).toBe('patch');
 
     const filterPlayerView = getFilterPlayerView(game);
@@ -237,6 +237,21 @@ describe('redactLog', () => {
     expect(result).toMatchObject(logEvents);
   });
 
+  test('actions without args are not redacted', () => {
+    const logEvents = [
+      {
+        _stateID: 0,
+        turn: 0,
+        phase: '',
+        action: ActionCreators.playerLeave('0'),
+        redact: true,
+      },
+    ];
+
+    const result = redactLog(logEvents, '1');
+    expect(result).toMatchObject(logEvents);
+  });
+
   test('events are not redacted', () => {
     const logEvents = [
       {
@@ -279,9 +294,9 @@ describe('redactLog', () => {
     await master.onUpdate(actionB, 1, 'matchID', '0');
     await master.onSync('matchID', '1', undefined, 2);
 
-    const payload = send.mock.calls[send.mock.calls.length - 1][0];
+    const payload = send.mock.calls.at(-1)[0];
     expect(
-      (filterPlayerView('1', payload).args[1] as SyncInfo).log
+      (filterPlayerView('1', payload).args[1] as SyncInfo).log,
     ).toMatchObject([
       {
         action: {
@@ -340,9 +355,9 @@ test('make move args to be secret depends on G via conditional redact', async ()
   await master.onUpdate(actionA1, 2, 'matchID', '0');
   await master.onSync('matchID', '1', undefined, 2);
 
-  const payload = send.mock.calls[send.mock.calls.length - 1][0];
+  const payload = send.mock.calls.at(-1)[0];
   expect(
-    (filterPlayerView('1', payload).args[1] as SyncInfo).log
+    (filterPlayerView('1', payload).args[1] as SyncInfo).log,
   ).toMatchObject([
     {
       action: {

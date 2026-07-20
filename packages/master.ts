@@ -6,6 +6,4 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Master } from '../src/master/master';
-
-export { Master };
+export { Master } from '../src/master/master';

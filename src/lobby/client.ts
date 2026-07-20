@@ -20,7 +20,7 @@ type JSType =
 
 const validateBody = (
   body: { [key: string]: any } | undefined,
-  schema: { [key: string]: JSType | JSType[] }
+  schema: { [key: string]: JSType | JSType[] },
 ) => {
   if (!body) throw new Error(`Expected body, got “${body}”.`);
   for (const key in schema) {
@@ -30,7 +30,7 @@ const validateBody = (
     if (!types.includes(typeof received)) {
       const union = types.join('|');
       throw new TypeError(
-        `Expected body.${key} to be of type ${union}, got “${received}”.`
+        `Expected body.${key} to be of type ${union}, got “${received}”.`,
       );
     }
   }
@@ -146,7 +146,7 @@ export class LobbyClient {
        */
       updatedAfter?: number;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.MatchList> {
     assertGameName(gameName);
     let query = '';
@@ -179,7 +179,7 @@ export class LobbyClient {
   async getMatch(
     gameName: string,
     matchID: string,
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.Match> {
     assertGameName(gameName);
     assertMatchID(matchID);
@@ -206,7 +206,7 @@ export class LobbyClient {
       unlisted?: boolean;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.CreatedMatch> {
     assertGameName(gameName);
     validateBody(body, { numPlayers: 'number' });
@@ -237,7 +237,7 @@ export class LobbyClient {
       data?: any;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.JoinedMatch> {
     assertGameName(gameName);
     assertMatchID(matchID);
@@ -249,7 +249,10 @@ export class LobbyClient {
   }
 
   /**
-   * Leave a previously joined match.
+   * Leave a previously joined match’s lobby slot.
+   *
+   * @deprecated Use `leaveSlot` for lobby-slot-only leave or `leaveGame` for
+   * permanent game leave.
    * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
    * @param  matchID  Match ID for the match to leave.
    * @param  body     Options required to leave match.
@@ -272,12 +275,60 @@ export class LobbyClient {
       credentials: string;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<void> {
     assertGameName(gameName);
     assertMatchID(matchID);
     validateBody(body, { playerID: 'string', credentials: 'string' });
     await this.post(`/games/${gameName}/${matchID}/leave`, { body, init });
+  }
+
+  /**
+   * Leave a previously joined lobby slot.
+   * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
+   * @param  matchID  Match ID for the match to leave.
+   * @param  body     Options required to leave slot.
+   * @param  init     Optional RequestInit interface to override defaults.
+   * @return Promise resolves if successful.
+   */
+  async leaveSlot(
+    gameName: string,
+    matchID: string,
+    body: {
+      playerID: string;
+      credentials: string;
+      [key: string]: any;
+    },
+    init?: RequestInit,
+  ): Promise<void> {
+    assertGameName(gameName);
+    assertMatchID(matchID);
+    validateBody(body, { playerID: 'string', credentials: 'string' });
+    await this.post(`/games/${gameName}/${matchID}/leaveSlot`, { body, init });
+  }
+
+  /**
+   * Permanently leave a game through its game-state lifecycle.
+   * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
+   * @param  matchID  Match ID for the match to leave.
+   * @param  body     Options required to leave game.
+   * @param  init     Optional RequestInit interface to override defaults.
+   * @return Promise resolves if successful.
+   */
+  async leaveGame(
+    gameName: string,
+    matchID: string,
+    body: {
+      playerID: string;
+      credentials: string;
+      [key: string]: any;
+    },
+    init?: RequestInit,
+  ): Promise<void> {
+    assertGameName(gameName);
+    assertMatchID(matchID);
+    validateBody(body, { playerID: 'string', credentials: 'string' });
+    await this.post(`/games/${gameName}/${matchID}/leaveGame`, { body, init });
   }
 
   /**
@@ -307,7 +358,7 @@ export class LobbyClient {
       data?: any;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<void> {
     assertGameName(gameName);
     assertMatchID(matchID);
@@ -348,7 +399,7 @@ export class LobbyClient {
       unlisted?: boolean;
       [key: string]: any;
     },
-    init?: RequestInit
+    init?: RequestInit,
   ): Promise<LobbyAPI.NextMatch> {
     assertGameName(gameName);
     assertMatchID(matchID);

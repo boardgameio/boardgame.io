@@ -7,13 +7,12 @@
  */
 
 import { nanoid } from 'nanoid/non-secure';
-import 'svelte';
 import type { Dispatch, StoreEnhancer } from 'redux';
 import { createStore, compose, applyMiddleware } from 'redux';
 import * as Actions from '../core/action-types';
 import * as ActionCreators from '../core/action-creators';
 import { ProcessGameConfig } from '../core/game';
-import type Debug from './debug/Debug.svelte';
+import type { Component } from 'svelte';
 import {
   CreateGameReducer,
   TransientHandlingMiddleware,
@@ -39,18 +38,13 @@ import type {
 } from '../types';
 
 type ClientAction =
-  | ActionShape.Reset
-  | ActionShape.Sync
-  | ActionShape.Update
-  | ActionShape.Patch;
+  ActionShape.Reset | ActionShape.Sync | ActionShape.Update | ActionShape.Patch;
 type Action =
-  | CredentialedActionShape.Any
-  | ActionShape.StripTransients
-  | ClientAction;
+  CredentialedActionShape.Any | ActionShape.StripTransients | ClientAction;
 
 export interface DebugOpt {
   target?: HTMLElement;
-  impl?: typeof Debug;
+  impl?: Component;
   collapseOnLoad?: boolean;
   hideToggleButton?: boolean;
 }
@@ -66,7 +60,7 @@ const GlobalClientManager = new ClientManager();
 function assumedPlayerID(
   playerID: PlayerID | null | undefined,
   store: Store,
-  multiplayer?: unknown
+  multiplayer?: unknown,
 ): PlayerID {
   // In singleplayer mode, if the client does not have a playerID
   // associated with it, we attach the currentPlayer as playerID.
@@ -89,7 +83,7 @@ function createDispatchers(
   store: Store,
   playerID: PlayerID,
   credentials: string,
-  multiplayer?: unknown
+  multiplayer?: unknown,
 ) {
   const dispatchers: Record<string, (...args: any[]) => void> = {};
   for (const name of innerActionNames) {
@@ -98,7 +92,7 @@ function createDispatchers(
         name,
         args,
         assumedPlayerID(playerID, store, multiplayer),
-        credentials
+        credentials,
       );
       store.dispatch(action);
     };
@@ -115,7 +109,7 @@ export const createPluginDispatchers = createDispatchers.bind(null, 'plugin');
 
 export interface ClientOpts<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
   game: Game<G, PluginAPIs>;
   debug?: DebugOpt | boolean;
@@ -140,14 +134,14 @@ export type ClientState<G extends any = any> =
  */
 export class _ClientImpl<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 > {
-  private gameStateOverride?: any;
+  private previewStateData?: any;
   private initialState: State<G>;
   readonly multiplayer: (opts: TransportOpts) => Transport;
   private reducer: Reducer;
   private _running: boolean;
-  private subscribers: Record<string, (state: State<G> | null) => void>;
+  private subscribers: Map<symbol, (state: State<G> | null) => void>;
   private transport: Transport;
   private manager: ClientManager;
   readonly debugOpt?: DebugOpt | boolean;
@@ -192,8 +186,8 @@ export class _ClientImpl<
     this.multiplayer = multiplayer;
     this.debugOpt = debug;
     this.manager = GlobalClientManager;
-    this.gameStateOverride = null;
-    this.subscribers = {};
+    this.previewStateData = null;
+    this.subscribers = new Map();
     this._running = false;
 
     this.reducer = CreateGameReducer({
@@ -212,14 +206,14 @@ export class _ClientImpl<
     this.undo = () => {
       const undo = ActionCreators.undo(
         assumedPlayerID(this.playerID, this.store, this.multiplayer),
-        this.credentials
+        this.credentials,
       );
       this.store.dispatch(undo);
     };
     this.redo = () => {
       const redo = ActionCreators.redo(
         assumedPlayerID(this.playerID, this.store, this.multiplayer),
-        this.credentials
+        this.credentials,
       );
       this.store.dispatch(redo);
     };
@@ -258,7 +252,7 @@ export class _ClientImpl<
           case Actions.UPDATE: {
             let id = -1;
             if (this.log.length > 0) {
-              id = this.log[this.log.length - 1]._stateID;
+              id = this.log.at(-1)._stateID;
             }
 
             let deltalog = action.deltalog || [];
@@ -316,11 +310,12 @@ export class _ClientImpl<
       TransientHandlingMiddleware,
       SubscriptionMiddleware,
       TransportMiddleware,
-      LogMiddleware
+      LogMiddleware,
     );
 
-    enhancer =
-      enhancer !== undefined ? compose(middleware, enhancer) : middleware;
+    enhancer = (
+      enhancer === undefined ? middleware : compose(middleware, enhancer)
+    ) as StoreEnhancer;
 
     this.store = createStore(this.reducer, this.initialState, enhancer);
 
@@ -389,7 +384,7 @@ export class _ClientImpl<
           prevStateID,
           stateID,
           patch,
-          deltalog
+          deltalog,
         );
         this.store.dispatch(action);
         // Emit sync if patch apply failed.
@@ -412,12 +407,29 @@ export class _ClientImpl<
   }
 
   private notifySubscribers() {
-    Object.values(this.subscribers).forEach((fn) => fn(this.getState()));
+    this.subscribers.forEach((fn) => fn(this.getState()));
   }
 
-  overrideGameState(state: any) {
-    this.gameStateOverride = state;
+  previewState(state: any) {
+    this.previewStateData = state;
     this.notifySubscribers();
+  }
+
+  /**
+   * Replace the current game state with a saved state and continue playing.
+   * Unlike previewState, this updates the Redux store so that moves,
+   * events, and undo/redo work against the loaded state.
+   * Clears the log since we're starting from a new point in time.
+   */
+  loadState(state: State<G>) {
+    // Clear any active preview
+    this.previewStateData = null;
+
+    // Replace the store state via UPDATE action
+    this.store.dispatch(ActionCreators.update(state, []));
+
+    // Reset the log to prevent stale history
+    this.log = [];
   }
 
   start() {
@@ -433,8 +445,8 @@ export class _ClientImpl<
   }
 
   subscribe(fn: (state: ClientState<G>) => void) {
-    const id = Object.keys(this.subscribers).length;
-    this.subscribers[id] = fn;
+    const id = Symbol();
+    this.subscribers.set(id, fn);
     this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
     if (this._running || !this.multiplayer) {
@@ -443,7 +455,7 @@ export class _ClientImpl<
 
     // Return a handle that allows the caller to unsubscribe.
     return () => {
-      delete this.subscribers[id];
+      this.subscribers.delete(id);
     };
   }
 
@@ -454,8 +466,8 @@ export class _ClientImpl<
   getState(): ClientState<G> {
     let state = this.store.getState();
 
-    if (this.gameStateOverride !== null) {
-      state = this.gameStateOverride;
+    if (this.previewStateData !== null && this.previewStateData !== undefined) {
+      state = this.previewStateData;
     }
 
     // This is the state before a sync with the game master.
@@ -470,7 +482,7 @@ export class _ClientImpl<
     const isPlayerActive = this.game.flow.isPlayerActive(
       state.G,
       state.ctx,
-      this.playerID
+      this.playerID,
     );
 
     if (this.multiplayer && !isPlayerActive) {
@@ -522,7 +534,7 @@ export class _ClientImpl<
       this.store,
       this.playerID,
       this.credentials,
-      this.multiplayer
+      this.multiplayer,
     );
 
     this.events = createEventDispatchers(
@@ -530,7 +542,7 @@ export class _ClientImpl<
       this.store,
       this.playerID,
       this.credentials,
-      this.multiplayer
+      this.multiplayer,
     );
 
     this.plugins = createPluginDispatchers(
@@ -538,7 +550,7 @@ export class _ClientImpl<
       this.store,
       this.playerID,
       this.credentials,
-      this.multiplayer
+      this.multiplayer,
     );
   }
 
@@ -582,7 +594,7 @@ export class _ClientImpl<
  */
 export function Client<
   G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>
+  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
 >(opts: ClientOpts<G, PluginAPIs>) {
   return new _ClientImpl<G, PluginAPIs>(opts);
 }

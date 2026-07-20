@@ -21,9 +21,9 @@ function Init(seed) {
 test('random', () => {
   const r = Init('hi there');
   // make sure that subsequent calls are different.
-  expect(r._random()).toBe(0.573445922927931);
-  expect(r._random()).toBe(0.4695413049776107);
-  expect(r._random()).toBe(0.5943194630090147);
+  expect(r._random()).toBe(0.573_445_922_927_931);
+  expect(r._random()).toBe(0.469_541_304_977_610_7);
+  expect(r._random()).toBe(0.594_319_463_009_014_7);
 });
 
 test('predefined dice values', () => {

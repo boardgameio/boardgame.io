@@ -26,7 +26,7 @@ interface PluginPlayerOpts<PlayerState extends any = any> {
   setup?: (playerID: string) => PlayerState;
   playerView?: (
     players: Record<PlayerID, PlayerState>,
-    playerID?: string | null
+    playerID?: string | null,
   ) => any;
 }
 

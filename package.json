@@ -1,12 +1,16 @@
 {
   "name": "boardgame.io",
   "version": "0.50.2",
+  "packageManager": "pnpm@10.16.0",
   "description": "library for turn-based games",
-  "repository": "https://github.com/boardgameio/boardgame.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boardgameio/boardgame.io.git"
+  },
   "scripts": {
     "prestart": "run-p examples:install build",
     "start": "run-p dev:server dev:client",
-    "predev": "npm run examples:install",
+    "predev": "pnpm run examples:install",
     "dev": "run-p build:watch dev:server dev:client",
     "dev:client": "node scripts/dev-client.js",
     "dev:server": "cross-env NODE_ENV=development nodemon -w src -w examples -e js,ts --exec babel-node --extensions \".ts,.js\" --ignore \"src/**/*.test.ts\" --presets @babel/preset-env examples/react-web/server.js",
@@ -14,33 +18,107 @@
     "build:watch": "cross-env BABEL_ENV=rollup rollup -w --config rollup.config.js",
     "benchmark": "babel-node --extensions .ts,.js --presets @babel/preset-env,@babel/preset-typescript benchmark/index.js",
     "docs": "docsify serve docs",
-    "examples": "npm run start",
+    "examples": "pnpm run start",
     "examples:install": "node scripts/install-examples.js",
-    "pretest": "npm run lint",
+    "pretest": "pnpm run lint",
     "test": "cross-env NODE_ENV=test jest",
-    "test:watch": "npm test -- --watch",
-    "test:coverage": "npm test -- --coverage --collectCoverageFrom=\"src/**\"",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
+    "test:coverage": "pnpm run lint && cross-env NODE_ENV=test jest --coverage --collectCoverageFrom=\"src/**\"",
     "test:coveralls": "coveralls < coverage/lcov.info",
     "test:integration": "node ./scripts/integration.js",
     "ts": "tsc --noEmit",
     "ts:watch": "tsc --noEmit --watch",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "prepublishOnly": "npm run clean",
+    "prepublishOnly": "pnpm run clean",
     "proxydirs": "node scripts/proxy-dirs.js",
     "prepack": "run-s build proxydirs",
-    "postpack": "npm run clean",
+    "postpack": "pnpm run clean",
     "prettier": "prettier --write \"{examples,src,benchmark}/**/*.{ts,tsx,js,jsx,css,md}\"",
     "changelog": "node ./scripts/changelog.js",
-    "clean": "node ./scripts/clean.js"
+    "clean": "node ./scripts/clean.js",
+    "prepare": "husky"
   },
   "sideEffects": false,
   "main": "dist/boardgameio.js",
   "unpkg": "dist/boardgameio.min.js",
   "module": "dist/boardgameio.es.js",
   "types": "dist/types/src/types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/src/types.d.ts",
+      "import": "./dist/esm/main.js",
+      "require": "./dist/cjs/main.js"
+    },
+    "./client": {
+      "types": "./dist/types/packages/client.d.ts",
+      "import": "./dist/esm/client.js",
+      "require": "./dist/cjs/client.js"
+    },
+    "./core": {
+      "types": "./dist/types/packages/core.d.ts",
+      "import": "./dist/esm/core.js",
+      "require": "./dist/cjs/core.js"
+    },
+    "./debug": {
+      "types": "./dist/types/packages/debug.d.ts",
+      "import": "./dist/esm/debug.js",
+      "require": "./dist/cjs/debug.js"
+    },
+    "./react": {
+      "types": "./dist/types/packages/react.d.ts",
+      "import": "./dist/esm/react.js",
+      "require": "./dist/cjs/react.js"
+    },
+    "./react-native": {
+      "types": "./dist/types/packages/react-native.d.ts",
+      "import": "./dist/esm/react-native.js",
+      "require": "./dist/cjs/react-native.js"
+    },
+    "./ai": {
+      "types": "./dist/types/packages/ai.d.ts",
+      "import": "./dist/esm/ai.js",
+      "require": "./dist/cjs/ai.js"
+    },
+    "./plugins": {
+      "types": "./dist/types/packages/plugins.d.ts",
+      "import": "./dist/esm/plugins.js",
+      "require": "./dist/cjs/plugins.js"
+    },
+    "./master": {
+      "types": "./dist/types/packages/master.d.ts",
+      "import": "./dist/esm/master.js",
+      "require": "./dist/cjs/master.js"
+    },
+    "./multiplayer": {
+      "types": "./dist/types/packages/multiplayer.d.ts",
+      "import": "./dist/esm/multiplayer.js",
+      "require": "./dist/cjs/multiplayer.js"
+    },
+    "./internal": {
+      "types": "./dist/types/packages/internal.d.ts",
+      "import": "./dist/esm/internal.js",
+      "require": "./dist/cjs/internal.js"
+    },
+    "./testing": {
+      "types": "./dist/types/packages/testing.d.ts",
+      "import": "./dist/esm/testing.js",
+      "require": "./dist/cjs/testing.js"
+    },
+    "./server": {
+      "types": "./dist/types/packages/server.d.ts",
+      "import": "./dist/esm/server.js",
+      "require": "./dist/cjs/server.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!src/**/*.test.js",
+    "!src/**/*.test.jsx",
+    "!src/client/debug/tests",
     "dist/boardgameio.js",
     "dist/boardgameio.min.js",
     "dist/boardgameio.es.js",
@@ -67,8 +145,8 @@
     "game engine"
   ],
   "engines": {
-    "node": ">=10.0",
-    "npm": ">=6.0"
+    "node": ">=22",
+    "pnpm": ">=10.16"
   },
   "author": "nicolodavis@gmail.com",
   "license": "MIT",
@@ -80,101 +158,114 @@
     }
   ],
   "devDependencies": {
-    "@babel/cli": "^7.16.0",
-    "@babel/core": "^7.16.0",
-    "@babel/node": "^7.16.0",
-    "@babel/plugin-proposal-class-properties": "^7.16.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.16.0",
-    "@babel/plugin-transform-modules-commonjs": "^7.16.0",
-    "@babel/preset-env": "^7.16.0",
-    "@babel/preset-react": "^7.16.0",
-    "@babel/preset-typescript": "^7.16.0",
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/svelte": "^3.0.3",
-    "@types/enzyme": "^3.10.9",
-    "@types/jest": "^27.0.1",
-    "@types/koa__cors": "^3.0.3",
-    "@types/node": "^14.0.24",
-    "@types/react": "^16.14.11",
-    "@types/react-dom": "^16.9.14",
-    "@types/supertest": "^2.0.11",
-    "@typescript-eslint/eslint-plugin": "^4.29.3",
-    "@typescript-eslint/parser": "^4.29.3",
-    "babel-plugin-module-resolver": "^4.1.0",
+    "@babel/cli": "^7.28.6",
+    "@babel/core": "^7.29.0",
+    "@babel/node": "^7.29.0",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
+    "@babel/plugin-transform-modules-commonjs": "^7.28.6",
+    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.2",
+    "@rollup/plugin-replace": "^6.0.2",
+    "@rollup/plugin-terser": "^1.0.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/svelte": "5.3.1",
+    "@types/cors": "^2.8.19",
+    "@types/jest": "^30.0.0",
+    "@types/js-cookie": "^3.0.6",
+    "@types/koa__cors": "^5.0.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/supertest": "^7.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "babel-plugin-module-resolver": "^5.0.3",
     "benchmark": "^2.1.4",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "docsify-cli": "^4.4.4",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.6",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-jest": "^24.4.0",
-    "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-react": "^7.24.0",
-    "eslint-plugin-unicorn": "^30.0.0",
-    "husky": "^4.3.8",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-jest": "^28.14.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-unicorn": "^56.0.1",
+    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^27.1.0",
-    "jest-date-mock": "^1.0.8",
-    "jest-transform-svelte": "^2.1.1",
-    "lint-staged": "^10.5.4",
-    "node-persist": "^3.1.0",
-    "nodemon": "^2.0.12",
+    "jest": "^30.3.0",
+    "jest-date-mock": "^1.0.10",
+    "jest-environment-jsdom": "^30.2.0",
+    "lint-staged": "^17.0.2",
+    "node-persist": "^4.0.4",
+    "nodemon": "^3.1.14",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.3.2",
+    "prettier": "^3.8.3",
     "raf": "^3.4.1",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
-    "rollup": "^1.0.2",
-    "rollup-plugin-babel": "^4.2.0",
-    "rollup-plugin-commonjs": "^9.2.0",
-    "rollup-plugin-filesize": "^6.0.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-resolve": "^4.0.0",
-    "rollup-plugin-replace": "^2.1.0",
-    "rollup-plugin-svelte": "^6.1.1",
-    "rollup-plugin-terser": "^5.3.0",
-    "rollup-plugin-typescript2": "^0.22.0",
-    "shelljs": "^0.8.4",
-    "supertest": "^3.1.0",
-    "svelte-icons": "^2.1.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "rollup": "^4.60.3",
+    "rollup-plugin-svelte": "^7.2.3",
+    "rollup-plugin-typescript2": "^0.37.0",
+    "shelljs": "^0.10.0",
+    "supertest": "^7.2.2",
+    "svelte": "^5.0.0",
     "tempy": "^1.0.1",
-    "ts-jest": "^27.0.5",
-    "ts-transformer-imports": "^0.4.3",
-    "ttypescript": "^1.5.12",
-    "typescript": "^3.8.2"
+    "ts-jest": "^29.4.9",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@koa/cors": "^3.1.0",
-    "@koa/router": "^10.1.1",
-    "@types/koa": "^2.13.4",
-    "@types/koa__router": "^8.0.8",
-    "flatted": "^3.2.1",
-    "immer": "^9.0.5",
-    "koa": "^2.13.3",
-    "koa-body": "^5.0.0",
-    "koa-socket-2": "^2.0.0",
+    "@koa/bodyparser": "^6.1.0",
+    "@koa/cors": "^5.0.0",
+    "@koa/router": "^15.5.0",
+    "@types/koa": "^3.0.2",
+    "@types/koa__router": "^12.0.5",
+    "cors": "^2.8.6",
+    "flatted": "^3.4.2",
+    "immer": "^11.1.7",
+    "js-cookie": "^3.0.5",
+    "koa": "^3.2.0",
     "lodash.isplainobject": "^4.0.6",
-    "nanoid": "^3.1.30",
+    "nanoid": "^3.3.11",
     "p-queue": "^6.6.2",
-    "prop-types": "^15.5.10",
-    "react-cookies": "^0.1.0",
-    "redux": "^4.1.0",
-    "rfc6902": "^5.0.0",
+    "prop-types": "^15.8.1",
+    "redux": "^5.0.1",
+    "rfc6902": "^5.2.0",
     "setimmediate": "^1.0.5",
-    "socket.io": "^4.5.0",
-    "socket.io-client": "^4.1.3",
-    "svelte": "^3.41.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "svelte-json-tree-auto": "^0.1.0",
-    "ts-toolbelt": "^6.3.6"
+    "ts-toolbelt": "^9.6.0"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "svelte": {
+      "optional": true
+    }
   },
   "jest": {
     "preset": "ts-jest/presets/js-with-babel",
     "testEnvironment": "jsdom",
+    "testEnvironmentOptions": {
+      "customExportConditions": [
+        "node",
+        "node-addons"
+      ]
+    },
     "moduleNameMapper": {
       "\\.(css)$": "identity-obj-proxy",
       "\\.(svg)$": "<rootDir>/.empty_module.js",
-      "svelte-json-tree-auto": "<rootDir>/src/client/debug/tests/JSONTree.mock.svelte"
+      "svelte-json-tree-auto": "<rootDir>/src/client/debug/tests/JSONTree.mock.svelte",
+      "^svelte$": "<rootDir>/node_modules/svelte/src/index-client.js",
+      "^svelte/legacy$": "<rootDir>/node_modules/svelte/src/legacy/legacy-client.js",
+      "^svelte/reactivity$": "<rootDir>/node_modules/svelte/src/reactivity/index-client.js",
+      "^svelte/store$": "<rootDir>/node_modules/svelte/src/store/index-client.js"
     },
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -183,29 +274,26 @@
       "src/types.ts"
     ],
     "setupFiles": [
+      "<rootDir>/jest.setup.js",
       "raf/polyfill",
       "jest-date-mock"
     ],
     "setupFilesAfterEnv": [
-      "@testing-library/jest-dom/extend-expect"
+      "@testing-library/jest-dom"
     ],
     "transform": {
-      "^.+\\.svelte$": "jest-transform-svelte"
+      "^.+\\.svelte$": "<rootDir>/jest-svelte-transformer.cjs"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(boardgame.io|flatted|svelte-icons)/)"
+      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
+      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
       "integration/",
       "node_modules/",
-      ".npm/"
+      ".npm/",
+      ".claude/"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run test:coverage"
-    }
   }
 }

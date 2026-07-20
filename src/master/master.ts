@@ -11,7 +11,14 @@ import {
   TransientHandlingMiddleware,
 } from '../core/reducer';
 import { ProcessGameConfig, IsLongFormMove } from '../core/game';
-import { UNDO, REDO, MAKE_MOVE } from '../core/action-types';
+import {
+  GAME_EVENT,
+  MAKE_MOVE,
+  PLUGIN,
+  REDO,
+  UNDO,
+} from '../core/action-types';
+import { playerLeave } from '../core/action-creators';
 import { createStore, applyMiddleware } from 'redux';
 import * as logging from '../core/logger';
 import type {
@@ -31,6 +38,14 @@ import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import type { Operation } from 'rfc6902';
 
+type DispatchResultWithTransients = {
+  transients?: {
+    error?: {
+      type: string;
+    };
+  };
+};
+
 /**
  * Filter match data to get a player metadata object with credentials stripped.
  */
@@ -46,6 +61,10 @@ const filterMatchData = (matchData: Server.MatchData): FilteredMetadata =>
 const stripCredentialsFromAction = (action: CredentialedActionShape.Any) => {
   const { credentials, ...payload } = action.payload;
   return { ...action, payload };
+};
+
+const isPublicClientAction = (action: CredentialedActionShape.Any) => {
+  return [MAKE_MOVE, GAME_EVENT, UNDO, REDO, PLUGIN].includes(action.type);
 };
 
 type CallbackFn = (arg: {
@@ -104,7 +123,7 @@ export type IntermediateTransportData =
 /** API used by a master to emit data to any connected clients/client transports. */
 export interface TransportAPI {
   send: (
-    playerData: { playerID: PlayerID } & IntermediateTransportData
+    playerData: { playerID: PlayerID } & IntermediateTransportData,
   ) => void;
   sendAll: (payload: IntermediateTransportData) => void;
 }
@@ -127,7 +146,7 @@ export class Master {
     game: Game,
     storageAPI: StorageAPI.Sync | StorageAPI.Async,
     transportAPI: TransportAPI,
-    auth?: Auth
+    auth?: Auth,
   ) {
     this.game = ProcessGameConfig(game);
     this.storageAPI = storageAPI;
@@ -149,10 +168,24 @@ export class Master {
     credAction: CredentialedActionShape.Any,
     stateID: number,
     matchID: string,
-    playerID: string
+    playerID: string,
   ): Promise<void | { error: string }> {
-    if (!credAction || !credAction.payload) {
+    if (!credAction || !credAction.type) {
       return { error: 'missing action or action payload' };
+    }
+
+    if (!isPublicClientAction(credAction)) {
+      logging.error(`unauthorized action type: ${credAction.type}`);
+      return { error: 'unauthorized action' };
+    }
+
+    if (!credAction.payload) {
+      return { error: 'missing action or action payload' };
+    }
+
+    if ('automatic' in credAction && credAction.automatic === true) {
+      logging.error(`unauthorized automatic action: ${credAction.type}`);
+      return { error: 'unauthorized action' };
     }
 
     let metadata: Server.MatchData | undefined;
@@ -176,6 +209,14 @@ export class Master {
     const action = stripCredentialsFromAction(credAction);
     const key = matchID;
 
+    if (
+      action.type === GAME_EVENT &&
+      !this.game.flow.enabledEventNames.includes(action.payload.type)
+    ) {
+      logging.error(`unauthorized game event: ${action.payload.type}`);
+      return { error: 'unauthorized action' };
+    }
+
     let state: State;
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ state } = this.storageAPI.fetch(key, { state: true }));
@@ -191,7 +232,7 @@ export class Master {
     if (state.ctx.gameover !== undefined) {
       logging.error(
         `game over - matchID=[${key}] - playerID=[${playerID}]` +
-          ` - action[${action.payload.type}]`
+          ` - action[${action.payload.type}]`,
       );
       return;
     }
@@ -226,7 +267,7 @@ export class Master {
     if (!this.game.flow.isPlayerActive(state.G, state.ctx, playerID)) {
       logging.error(
         `player not active - playerID=[${playerID}]` +
-          ` - action[${action.payload.type}]`
+          ` - action[${action.payload.type}]`,
       );
       return;
     }
@@ -241,7 +282,7 @@ export class Master {
     if (action.type == MAKE_MOVE && !move) {
       logging.error(
         `move not processed - canPlayerMakeMove=false - playerID=[${playerID}]` +
-          ` - action[${action.payload.type}]`
+          ` - action[${action.payload.type}]`,
       );
       return;
     }
@@ -254,7 +295,7 @@ export class Master {
     ) {
       logging.error(
         `invalid stateID, was=[${stateID}], expected=[${state._stateID}]` +
-          ` - playerID=[${playerID}] - action[${action.payload.type}]`
+          ` - playerID=[${playerID}] - action[${action.payload.type}]`,
       );
       return;
     }
@@ -314,6 +355,123 @@ export class Master {
   }
 
   /**
+   * Called by the lobby API when a player permanently leaves a match.
+   * This runs the game lifecycle via a private action and broadcasts the
+   * resulting state like a normal update.
+   */
+  async onPlayerLeave(
+    matchID: string,
+    playerID: string,
+    credentials?: string,
+  ): Promise<void | { error: string }> {
+    const key = matchID;
+
+    let metadata: Server.MatchData | undefined;
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
+    } else {
+      ({ metadata } = await this.storageAPI.fetch(matchID, { metadata: true }));
+    }
+
+    if (metadata === undefined) {
+      logging.error(`metadata not found for matchID=[${key}]`);
+      return { error: 'metadata not found' };
+    }
+
+    if (
+      metadata.gameName !== undefined &&
+      metadata.gameName !== this.game.name
+    ) {
+      logging.error(
+        `metadata game mismatch - matchID=[${key}]` +
+          ` - expected=[${this.game.name}] actual=[${metadata.gameName}]`,
+      );
+      return { error: 'game not found' };
+    }
+
+    if (this.auth) {
+      const isAuthentic = await this.auth.authenticateCredentials({
+        playerID,
+        credentials,
+        metadata,
+      });
+      if (!isAuthentic) {
+        return { error: 'unauthorized' };
+      }
+    }
+
+    let state: State;
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      ({ state } = this.storageAPI.fetch(key, { state: true }));
+    } else {
+      ({ state } = await this.storageAPI.fetch(key, { state: true }));
+    }
+
+    if (state === undefined) {
+      logging.error(`game not found, matchID=[${key}]`);
+      return { error: 'game not found' };
+    }
+
+    if (state.ctx.gameover !== undefined) {
+      return;
+    }
+
+    const reducer = CreateGameReducer({
+      game: this.game,
+    });
+    const middleware = applyMiddleware(TransientHandlingMiddleware);
+    const store = createStore(reducer, state, middleware);
+    const prevState = store.getState();
+    const stateID = prevState._stateID;
+    const action = playerLeave(playerID);
+
+    const result = store.dispatch(action) as DispatchResultWithTransients;
+    if (result && result.transients && result.transients.error) {
+      return { error: result.transients.error.type };
+    }
+
+    state = store.getState();
+
+    this.subscribeCallback({
+      state,
+      action,
+      matchID,
+    });
+
+    if (this.game.deltaState) {
+      this.transportAPI.sendAll({
+        type: 'patch',
+        args: [matchID, stateID, prevState, state],
+      });
+    } else {
+      this.transportAPI.sendAll({
+        type: 'update',
+        args: [matchID, state],
+      });
+    }
+
+    const { deltalog, ...stateWithoutDeltalog } = state;
+
+    const newMetadata = {
+      ...metadata,
+      updatedAt: Date.now(),
+    };
+    if (state.ctx.gameover !== undefined) {
+      newMetadata.gameover = state.ctx.gameover;
+    }
+
+    if (StorageAPI.isSynchronous(this.storageAPI)) {
+      this.storageAPI.setState(key, stateWithoutDeltalog, deltalog);
+      this.storageAPI.setMetadata(key, newMetadata);
+    } else {
+      await Promise.all([
+        this.storageAPI.setState(key, stateWithoutDeltalog, deltalog),
+        this.storageAPI.setMetadata(key, newMetadata),
+      ]);
+    }
+  }
+
+  /**
    * Called when the client connects / reconnects.
    * Returns the latest game state and the entire log.
    */
@@ -321,7 +479,7 @@ export class Master {
     matchID: string,
     playerID: string | null | undefined,
     credentials?: string,
-    numPlayers = 2
+    numPlayers = 2,
   ): Promise<void | { error: string }> {
     const key = matchID;
 
@@ -401,7 +559,7 @@ export class Master {
     matchID: string,
     playerID: string | null | undefined,
     credentials: string | undefined,
-    connected: boolean
+    connected: boolean,
   ): Promise<void | { error: string }> {
     const key = matchID;
 
@@ -425,7 +583,7 @@ export class Master {
 
     if (metadata.players[playerID] === undefined) {
       logging.error(
-        `Player not in the match, matchID=[${key}] playerID=[${playerID}]`
+        `Player not in the match, matchID=[${key}] playerID=[${playerID}]`,
       );
       return { error: 'player not in the match' };
     }
@@ -460,7 +618,7 @@ export class Master {
   async onChatMessage(
     matchID: string,
     chatMessage: ChatMessage,
-    credentials: string | undefined
+    credentials: string | undefined,
   ): Promise<void | { error: string }> {
     const key = matchID;
 
@@ -469,7 +627,7 @@ export class Master {
         key,
         {
           metadata: true,
-        }
+        },
       );
       if (!(chatMessage && typeof chatMessage.sender === 'string')) {
         return { error: 'unauthorized' };

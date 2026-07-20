@@ -19,6 +19,7 @@ import {
   undo,
   redo,
   patch,
+  playerLeave,
 } from './action-creators';
 import { error } from '../core/logger';
 import type { Game, State, SyncInfo } from '../types';
@@ -56,7 +57,7 @@ test('move returns INVALID_MOVE', () => {
   };
   const reducer = CreateGameReducer({ game });
   const state = reducer(initialState, makeMove('A'));
-  expect(error).toBeCalledWith('invalid move: A args: undefined');
+  expect(error).toHaveBeenCalledWith('invalid move: A args: undefined');
   expect(state._stateID).toBe(0);
 });
 
@@ -67,7 +68,7 @@ test('makeMove', () => {
   state = reducer(state, makeMove('unknown'));
   expect(state._stateID).toBe(0);
   expect(state.G).not.toMatchObject({ moved: true });
-  expect(error).toBeCalledWith('disallowed move: unknown');
+  expect(error).toHaveBeenCalledWith('disallowed move: unknown');
 
   state = reducer(state, makeMove('A'));
   expect(state._stateID).toBe(1);
@@ -81,11 +82,11 @@ test('makeMove', () => {
 
   state = reducer(state, makeMove('B'));
   expect(state._stateID).toBe(2);
-  expect(error).toBeCalledWith('cannot make move after game end');
+  expect(error).toHaveBeenCalledWith('cannot make move after game end');
 
   state = reducer(state, gameEvent('endTurn'));
   expect(state._stateID).toBe(2);
-  expect(error).toBeCalledWith('cannot call event after game end');
+  expect(error).toHaveBeenCalledWith('cannot call event after game end');
 });
 
 test('disable move by invalid playerIDs', () => {
@@ -112,7 +113,7 @@ test('disable move by invalid playerIDs', () => {
 test('sync', () => {
   const state = reducer(
     undefined,
-    sync({ state: { G: 'restored' } } as SyncInfo)
+    sync({ state: { G: 'restored' } } as SyncInfo),
   );
   expect(state).toEqual({ G: 'restored' });
 });
@@ -126,7 +127,7 @@ test('valid patch', () => {
   const originalState = { _stateID: 0, G: 'patch' } as State;
   const state = reducer(
     originalState,
-    patch(0, 1, [{ op: 'replace', path: '/_stateID', value: 1 }], [])
+    patch(0, 1, [{ op: 'replace', path: '/_stateID', value: 1 }], []),
   );
   expect(state).toEqual({ _stateID: 1, G: 'patch' });
 });
@@ -135,7 +136,7 @@ test('invalid patch', () => {
   const originalState = { _stateID: 0, G: 'patch' } as State;
   const { transients, ...state } = reducer(
     originalState,
-    patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], [])
+    patch(0, 1, [{ op: 'replace', path: '/_stateIDD', value: 1 }], []),
   );
   expect(state).toEqual(originalState);
   expect(transients.error.type).toEqual('update/patch_failed');
@@ -516,14 +517,14 @@ describe('undo / redo', () => {
   test('undo restores previous state after event', () => {
     const initial = reducer(
       initialState,
-      gameEvent('setStage', 'special', '0')
+      gameEvent('setStage', 'special', '0'),
     );
     let newState = reducer(initial, gameEvent('endStage', undefined, '0'));
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
     // Make sure we actually modified the stage.
     expect(newState.ctx.activePlayers).not.toEqual(initial.ctx.activePlayers);
     newState = reducer(newState, undo());
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
     expect(newState.G).toEqual(initial.G);
     expect(newState.ctx).toEqual(initial.ctx);
     expect(newState.plugins).toEqual(initial.plugins);
@@ -779,6 +780,220 @@ describe('redo stack', () => {
   });
 });
 
+describe('playerLeave', () => {
+  test('runs onPlayerLeave and removes player from ctx', () => {
+    const game: Game = {
+      onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.G).toEqual({ left: '1' });
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state.ctx._removedPlayers).toEqual(['1']);
+    expect(state.ctx.activePlayers).toBeNull();
+    expect(state.deltalog).toEqual([
+      {
+        action: playerLeave('1'),
+        _stateID: 0,
+        phase: null,
+        turn: 1,
+      },
+    ]);
+  });
+
+  test('keeps playOrderPos aligned when removing player before current player', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+    let state = {
+      ...initialState,
+      ctx: {
+        ...initialState.ctx,
+        currentPlayer: '2',
+        playOrderPos: 2,
+      },
+    };
+
+    state = reducer(state, playerLeave('0'));
+
+    expect(state.ctx.playOrder).toEqual(['1', '2']);
+    expect(state.ctx.currentPlayer).toBe('2');
+    expect(state.ctx.playOrderPos).toBe(1);
+
+    state = reducer(state, gameEvent('endTurn', undefined, '2'));
+
+    expect(state.ctx.currentPlayer).toBe('1');
+    expect(state.ctx.playOrderPos).toBe(0);
+  });
+
+  test('rebases undo and clears redo', () => {
+    const game: Game = {
+      moves: {
+        move: ({ G }) => ({ ...G, moved: true }),
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    state = reducer(state, makeMove('move', null, '0'));
+    state = reducer(state, undo('0'));
+    expect(state._redo).toHaveLength(1);
+
+    state = reducer(state, playerLeave('1'));
+
+    expect(state._undo).toHaveLength(1);
+    expect(state._undo[0].ctx).toEqual(state.ctx);
+    expect(state._redo).toEqual([]);
+  });
+
+  test('cleans active player history and queued active players', () => {
+    const game: Game = {
+      moves: {
+        active: ({ events }) => {
+          events.setActivePlayers({ value: { '1': 'A', '2': 'A' } });
+          events.setActivePlayers({
+            all: 'A',
+            revert: true,
+            next: { value: { '1': 'B', '2': 'B' } },
+          });
+        },
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    state = reducer(state, makeMove('active', null, '0'));
+    state = reducer(state, playerLeave('1'));
+
+    expect(state.ctx.activePlayers).toEqual({ '0': 'A', '2': 'A' });
+    expect(state.ctx._activePlayersNumMoves).toEqual({ '0': 0, '2': 0 });
+    expect(state.ctx._nextActivePlayers).toEqual({ value: { '2': 'B' } });
+    expect(state.ctx._prevActivePlayers).toEqual([
+      {
+        activePlayers: { '2': 'A' },
+        _activePlayersMinMoves: null,
+        _activePlayersMaxMoves: null,
+        _activePlayersNumMoves: { '2': 0 },
+      },
+    ]);
+  });
+
+  test('does not remove final player before gameover', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+
+    const state = reducer(initialState, playerLeave('0'));
+
+    expect(state).toMatchObject({
+      ...initialState,
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
+  });
+
+  test('allows hook to end game before final player is removed', () => {
+    const game: Game = {
+      onPlayerLeave: ({ G, events }) => {
+        events.endGame('left');
+        return G;
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+
+    const state = reducer(initialState, playerLeave('0'));
+
+    expect(state.ctx.gameover).toBe('left');
+    expect(state.ctx.playOrder).toEqual([]);
+    expect(state.ctx.currentPlayer).toBe('');
+    expect(state.ctx._removedPlayers).toEqual(['0']);
+  });
+
+  test('rejects non-string playerID', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+
+    const state = reducer(initialState, playerLeave(1 as any));
+
+    expect(state).toMatchObject({
+      ...initialState,
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
+  });
+
+  test('rejects leave after gameover', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    const stateWithGameover = {
+      ...initialState,
+      ctx: { ...initialState.ctx, gameover: true },
+    };
+
+    const state = reducer(stateWithGameover, playerLeave('0'));
+
+    expect(state).toMatchObject({
+      ...stateWithGameover,
+      transients: {
+        error: {
+          type: 'action/gameover',
+        },
+      },
+    });
+  });
+
+  test('leave is cancelled if plugin declares it invalid', () => {
+    const game: Game<{ value: number }> = {
+      setup: () => ({ value: 5 }),
+      plugins: [
+        {
+          name: 'validator',
+          isInvalid: ({ G }) => {
+            if (G.value % 5 !== 0) return 'G.value must divide by 5';
+            return false;
+          },
+        },
+      ],
+      onPlayerLeave: ({ G }) => ({ ...G, value: 6 }),
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.G).toEqual({ value: 5 });
+    expect(state.ctx.playOrder).toEqual(['0', '1']);
+    expect(state['transients'].error).toEqual({
+      type: 'action/plugin_invalid',
+      payload: { plugin: 'validator', message: 'G.value must divide by 5' },
+    });
+  });
+
+  test('clears undo history when undo is disabled', () => {
+    const game: Game = { disableUndo: true };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state._undo).toEqual([]);
+    expect(state._redo).toEqual([]);
+  });
+});
+
 describe('undo / redo with stages', () => {
   const game: Game = {
     setup: () => ({ A: false, B: false, C: false }),
@@ -971,10 +1186,10 @@ describe('TransientHandlingMiddleware', () => {
   test('regular dispatch result has no transients', () => {
     const result = store.dispatch(makeMove('A'));
     expect(result).toEqual(
-      expect.not.objectContaining({ transients: expect.anything() })
+      expect.not.objectContaining({ transients: expect.anything() }),
     );
     expect(result).toEqual(
-      expect.not.objectContaining({ stripTransientsResult: expect.anything() })
+      expect.not.objectContaining({ stripTransientsResult: expect.anything() }),
     );
   });
 

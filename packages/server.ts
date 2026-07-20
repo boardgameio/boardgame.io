@@ -6,10 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Server } from '../src/server';
-import { Origins } from '../src/server/cors';
-import { FlatFile } from '../src/server/db';
-import { SocketIO } from '../src/server/transport/socketio';
-import { GenericPubSub } from '../src/server/transport/pubsub/generic-pub-sub';
-
-export { Server, Origins, FlatFile, SocketIO, GenericPubSub };
+export { Server } from '../src/server';
+export { FlatFile } from '../src/server/db';
+export { Origins } from '../src/server/cors';
+export { GenericPubSub } from '../src/server/transport/pubsub/generic-pub-sub';
+export { SocketIO } from '../src/server/transport/socketio';

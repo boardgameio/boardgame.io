@@ -114,13 +114,13 @@ export class SocketIOTransport extends Transport {
         prevStateID: number,
         stateID: number,
         patch: Operation[],
-        deltalog: LogEntry[]
+        deltalog: LogEntry[],
       ) => {
         this.notifyClient({
           type: 'patch',
           args: [matchID, prevStateID, stateID, patch, deltalog],
         });
-      }
+      },
     );
 
     // Called when another player makes a move and the
@@ -133,7 +133,7 @@ export class SocketIOTransport extends Transport {
           type: 'update',
           args: [matchID, state, deltalog],
         });
-      }
+      },
     );
 
     // Called when the client first connects to the master
@@ -148,7 +148,7 @@ export class SocketIOTransport extends Transport {
       'matchData',
       (matchID: string, matchData: FilteredMetadata) => {
         this.notifyClient({ type: 'matchData', args: [matchID, matchData] });
-      }
+      },
     );
 
     this.socket.on('chat', (matchID: string, chatMessage: ChatMessage) => {

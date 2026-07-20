@@ -43,7 +43,7 @@ export class FlatFile extends StorageAPI.Async {
 
   private async chainRequest(
     key: string,
-    request: () => Promise<any>
+    request: () => Promise<any>,
   ): Promise<any> {
     if (!(key in this.fileQueues)) this.fileQueues[key] = Promise.resolve();
 
@@ -57,7 +57,7 @@ export class FlatFile extends StorageAPI.Async {
 
   private async setItem<T extends any = any>(
     key: string,
-    value: T
+    value: T,
   ): Promise<any> {
     return this.chainRequest(key, () => this.games.setItem(key, value));
   }
@@ -84,7 +84,7 @@ export class FlatFile extends StorageAPI.Async {
    */
   async createMatch(
     matchID: string,
-    opts: StorageAPI.CreateMatchOpts
+    opts: StorageAPI.CreateMatchOpts,
   ): Promise<void> {
     // Store initial state separately for easy retrieval later.
     const key = InitialStateKey(matchID);
@@ -96,7 +96,7 @@ export class FlatFile extends StorageAPI.Async {
 
   async fetch<O extends StorageAPI.FetchOpts>(
     matchID: string,
-    opts: O
+    opts: O,
   ): Promise<StorageAPI.FetchResult<O>> {
     const result = {} as StorageAPI.FetchFields;
 
@@ -185,22 +185,22 @@ export class FlatFile extends StorageAPI.Async {
         }
 
         if (opts.where !== undefined) {
-          if (typeof opts.where.isGameover !== 'undefined') {
-            const isGameover = typeof game.metadata.gameover !== 'undefined';
+          if (opts.where.isGameover !== undefined) {
+            const isGameover = game.metadata.gameover !== undefined;
             if (isGameover !== opts.where.isGameover) {
               return false;
             }
           }
 
           if (
-            typeof opts.where.updatedBefore !== 'undefined' &&
+            opts.where.updatedBefore !== undefined &&
             game.metadata.updatedAt >= opts.where.updatedBefore
           ) {
             return false;
           }
 
           if (
-            typeof opts.where.updatedAfter !== 'undefined' &&
+            opts.where.updatedAfter !== undefined &&
             game.metadata.updatedAt <= opts.where.updatedAfter
           ) {
             return false;
@@ -208,7 +208,7 @@ export class FlatFile extends StorageAPI.Async {
         }
 
         return matchID;
-      })
+      }),
     );
 
     return arr.filter((r): r is string => typeof r === 'string');

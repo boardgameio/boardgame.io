@@ -14,7 +14,10 @@ enum Errors {
   CalledOutsideHook = 'Events must be called from moves or the `onBegin`, `onEnd`, and `onMove` hooks.\n' +
     'This error probably means you called an event from other game code, like an `endIf` trigger or one of the `turn.order` methods.',
 
-  EndTurnInOnEnd = '`endTurn` is disallowed in `onEnd` hooks — the turn is already ending.',
+  EndTurnInOnEnd = '`endTurn` & `pass` are disallowed in `onEnd` hooks — the turn is already ending.',
+
+  TurnEventInPhaseBegin = '`endTurn` & `pass` are disallowed in a phase’s `onBegin` hook — no turn has started yet.\n' +
+    'Use `turn.order.first` to choose the starting player.',
 
   MaxTurnEndings = 'Maximum number of turn endings exceeded for this update.\n' +
     'This likely means game code is triggering an infinite loop.',
@@ -37,6 +40,7 @@ export interface EventsAPI {
   endStage(): void;
   endTurn(arg?: { next: PlayerID }): void;
   pass(arg?: { remove: true }): void;
+  removePlayer(playerID: PlayerID): void;
   setActivePlayers(arg: ActivePlayersArg): void;
   setPhase(newPhase: string): void;
   setStage(newStage: string): void;
@@ -159,14 +163,17 @@ export class Events {
           switch (event.calledFrom) {
             // Disallow all stage events in onEnd and phase.onBegin hooks.
             case GameMethod.TURN_ON_END:
-            case GameMethod.PHASE_ON_END:
+            case GameMethod.PHASE_ON_END: {
               return stateWithError(event.error, Errors.StageEventInOnEnd);
-            case GameMethod.PHASE_ON_BEGIN:
+            }
+            case GameMethod.PHASE_ON_BEGIN: {
               return stateWithError(event.error, Errors.StageEventInPhaseBegin);
+            }
             // Disallow setStage & endStage in turn.onBegin hooks.
-            case GameMethod.TURN_ON_BEGIN:
+            case GameMethod.TURN_ON_BEGIN: {
               if (event.type === 'setActivePlayers') break;
               return stateWithError(event.error, Errors.StageEventInTurnBegin);
+            }
           }
 
           // If the turn already ended, don't try to process stage events.
@@ -174,7 +181,12 @@ export class Events {
           break;
         }
 
-        case 'endTurn': {
+        case 'endTurn':
+        case 'pass': {
+          if (event.calledFrom === GameMethod.PHASE_ON_BEGIN) {
+            return stateWithError(event.error, Errors.TurnEventInPhaseBegin);
+          }
+
           if (
             event.calledFrom === GameMethod.TURN_ON_END ||
             event.calledFrom === GameMethod.PHASE_ON_END

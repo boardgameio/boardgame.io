@@ -6,7 +6,6 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { Client, BoardProps } from '../src/client/react';
-import Lobby from '../src/lobby/react';
+export { Client, BoardProps } from '../src/client/react';
 
-export { Client, BoardProps, Lobby };
+export { default as Lobby } from '../src/lobby/react';

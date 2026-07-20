@@ -97,7 +97,7 @@
   }
 
   function Exit() {
-    client.overrideGameState(null);
+    client.previewState(null);
     secondaryPane.set(null);
     debug = false;
   }

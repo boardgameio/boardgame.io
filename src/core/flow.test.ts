@@ -198,7 +198,7 @@ describe('phases', () => {
 
       expect(state.ctx.phase).toBe('A');
       state = flow.processEvent(state, gameEvent('setPhase', 'C'));
-      expect(error).toBeCalledWith('invalid phase: C');
+      expect(error).toHaveBeenCalledWith('invalid phase: C');
       expect(state.ctx.phase).toBe(null);
     });
   });
@@ -249,7 +249,7 @@ describe('turn', () => {
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.processMove(
         state,
-        makeMove('', undefined, 'playerID').payload
+        makeMove('', undefined, 'playerID').payload,
       );
       expect(state.G.playerID).toEqual(playerID);
     });
@@ -605,12 +605,12 @@ describe('stages', () => {
   describe('no stage', () => {
     test('A is allowed', () => {
       client.moves.A();
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
     });
 
     test('B is not allowed', () => {
       client.moves.B();
-      expect(error).toBeCalledWith('disallowed move: B');
+      expect(error).toHaveBeenCalledWith('disallowed move: B');
     });
   });
 
@@ -621,12 +621,12 @@ describe('stages', () => {
 
     test('A is not allowed', () => {
       client.moves.A();
-      expect(error).toBeCalledWith('disallowed move: A');
+      expect(error).toHaveBeenCalledWith('disallowed move: A');
     });
 
     test('B is allowed', () => {
       client.moves.B();
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
     });
   });
 
@@ -637,12 +637,12 @@ describe('stages', () => {
 
     test('A is allowed', () => {
       client.moves.A();
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
     });
 
     test('B is not allowed', () => {
       client.moves.B();
-      expect(error).toBeCalledWith('disallowed move: B');
+      expect(error).toHaveBeenCalledWith('disallowed move: B');
     });
   });
 
@@ -745,13 +745,13 @@ describe('stage events', () => {
       expect(state.ctx.activePlayers).toEqual({ '0': 'A', '1': 'A', '2': 'A' });
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'B', minMoves: 1 })
+        gameEvent('setStage', { stage: 'B', minMoves: 1 }),
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'A', '2': 'A' });
 
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'B', maxMoves: 1 }, '1')
+        gameEvent('setStage', { stage: 'B', maxMoves: 1 }, '1'),
       );
       expect(state.ctx.activePlayers).toEqual({ '0': 'B', '1': 'B', '2': 'A' });
     });
@@ -782,7 +782,7 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersMaxMoves).toBeNull();
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'A', minMoves: 1 })
+        gameEvent('setStage', { stage: 'A', minMoves: 1 }),
       );
       expect(state.ctx._activePlayersMinMoves).toEqual({ '0': 1 });
       expect(state.ctx._activePlayersMaxMoves).toBeNull();
@@ -797,7 +797,7 @@ describe('stage events', () => {
       expect(state.ctx._activePlayersMaxMoves).toBeNull();
       state = flow.processEvent(
         state,
-        gameEvent('setStage', { stage: 'A', maxMoves: 1 })
+        gameEvent('setStage', { stage: 'A', maxMoves: 1 }),
       );
       expect(state.ctx._activePlayersMinMoves).toBeNull();
       expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 1 });
@@ -1228,10 +1228,9 @@ describe('endIf', () => {
     expect(client.getState().ctx.currentPlayer).toBe('0');
     client.moves.A();
     expect(client.getState().ctx.gameover).toBe('A');
-    expect(
-      client.getState().deltalog[client.getState().deltalog.length - 1].action
-        .payload.type
-    ).toBe('endPhase');
+    const action =
+      client.getState().deltalog[client.getState().deltalog.length - 1].action;
+    expect('type' in action.payload && action.payload.type).toBe('endPhase');
   });
 
   test('during game initialization with phases', () => {
@@ -1258,11 +1257,11 @@ test('isPlayerActive', () => {
     flow.isPlayerActive(
       {},
       { currentPlayer: '0', activePlayers: { '1': '' } } as unknown as Ctx,
-      playerID
-    )
+      playerID,
+    ),
   ).toBe(false);
   expect(flow.isPlayerActive({}, { currentPlayer: '0' } as Ctx, playerID)).toBe(
-    true
+    true,
   );
 });
 
@@ -1309,7 +1308,7 @@ describe('endTurn args', () => {
   test('invalid arg to endTurn', () => {
     let t = state;
     t = flow.processEvent(t, gameEvent('endTurn', '2'));
-    expect(error).toBeCalledWith(`invalid argument to endTurn: 2`);
+    expect(error).toHaveBeenCalledWith(`invalid argument to endTurn: 2`);
     expect(t.ctx.currentPlayer).toBe('0');
   });
 
@@ -1343,7 +1342,7 @@ describe('pass args', () => {
   test('invalid arg to pass', () => {
     let t = state;
     t = flow.processEvent(t, gameEvent('pass', '2'));
-    expect(error).toBeCalledWith(`invalid argument to endTurn: 2`);
+    expect(error).toHaveBeenCalledWith(`invalid argument to endTurn: 2`);
     expect(t.ctx.currentPlayer).toBe('0');
   });
 
@@ -1380,6 +1379,64 @@ describe('pass args', () => {
     expect(t.ctx.playOrderPos).toBe(1);
     expect(t.ctx.currentPlayer).toBe('2');
   });
+});
+
+test('removePlayer persists across phase starts', () => {
+  const flow = Flow({
+    phases: {
+      A: {
+        start: true,
+        next: 'B',
+        turn: {
+          order: {
+            first: () => 0,
+            next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+            playOrder: () => ['0', '1', '2'],
+          },
+        },
+      },
+      B: {
+        turn: {
+          order: {
+            first: () => 0,
+            next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
+            playOrder: () => ['0', '1', '2'],
+          },
+        },
+      },
+    },
+  });
+
+  let t = { ctx: flow.ctx(3) } as State;
+  t = flow.init(t);
+  t = flow.processEvent(t, gameEvent('removePlayer', '1'));
+  t = flow.processEvent(t, gameEvent('endPhase'));
+
+  expect(t.ctx.phase).toBe('B');
+  expect(t.ctx.playOrder).toEqual(['0', '2']);
+  expect(t.ctx._removedPlayers).toEqual(['1']);
+});
+
+test('removePlayer ignores non-string playerID', () => {
+  const flow = Flow({});
+  let t = { ctx: flow.ctx(3) } as State;
+  t = flow.init(t);
+
+  t = flow.processEvent(t, gameEvent('removePlayer', 1));
+
+  expect(t.ctx.playOrder).toEqual(['0', '1', '2']);
+  expect(t.ctx._removedPlayers).toBeUndefined();
+});
+
+test('removed players are never active', () => {
+  const flow = Flow({});
+  let t = { ctx: flow.ctx(2) } as State;
+  t = flow.init(t);
+
+  expect(flow.isPlayerActive({}, t.ctx, '0')).toBe(true);
+
+  const staleCtx = { ...t.ctx, currentPlayer: '1', _removedPlayers: ['1'] };
+  expect(flow.isPlayerActive({}, staleCtx, '1')).toBe(false);
 });
 
 test('undoable moves', () => {
@@ -1623,7 +1680,7 @@ describe('infinite loops', () => {
     const errorMessage = (error as jest.Mock).mock.calls[0][0];
     expect(errorMessage).toMatch(/events plugin declared action invalid/);
     expect(errorMessage).toMatch(
-      /Events must be called from moves or the `.+` hooks./
+      /Events must be called from moves or the `.+` hooks./,
     );
   });
 });
@@ -1638,6 +1695,12 @@ describe('events in hooks', () => {
       if (!G.shouldEnd) return;
       G.shouldEnd = false;
       events.endTurn();
+    };
+
+    const conditionalPass = ({ G, events }) => {
+      if (!G.shouldEnd) return;
+      G.shouldEnd = false;
+      events.pass();
     };
 
     test('can end turn from turn.onBegin', () => {
@@ -1676,9 +1739,45 @@ describe('events in hooks', () => {
 
       client.events.setPhase('A');
       state = client.getState();
-      expect(state.ctx.turn).toBe(2);
-      expect(state.ctx.currentPlayer).toBe('1');
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBeNull();
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in a phase’s `onBegin` hook/,
+      );
+      expect(errorMessage).toMatch(
+        /Use `turn.order.first` to choose the starting player/,
+      );
+    });
+
+    test('cannot pass from phase.onBegin', () => {
+      const client = Client({
+        game: {
+          phases: {
+            A: {
+              start: true,
+              onBegin: ({ events }) => events.pass(),
+            },
+          },
+        },
+      });
+
+      const state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
       expect(state.ctx.phase).toBe('A');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in a phase’s `onBegin` hook/,
+      );
+      expect(errorMessage).toMatch(
+        /Use `turn.order.first` to choose the starting player/,
+      );
     });
 
     test('can end turn from turn.onBegin at start of phase', () => {
@@ -1727,7 +1826,34 @@ describe('events in hooks', () => {
       expect(error).toHaveBeenCalled();
       const errorMessage = (error as jest.Mock).mock.calls[0][0];
       expect(errorMessage).toMatch(/events plugin declared action invalid/);
-      expect(errorMessage).toMatch(/`endTurn` is disallowed in `onEnd` hooks/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
+    });
+
+    test('cannot pass from turn.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          turn: { onEnd: conditionalPass },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+
+      client.moves.setAutoEnd();
+      client.events.endTurn();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
     });
 
     test('cannot end turn from phase.onEnd', () => {
@@ -1757,7 +1883,41 @@ describe('events in hooks', () => {
       expect(error).toHaveBeenCalled();
       const errorMessage = (error as jest.Mock).mock.calls[0][0];
       expect(errorMessage).toMatch(/events plugin declared action invalid/);
-      expect(errorMessage).toMatch(/`endTurn` is disallowed in `onEnd` hooks/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
+    });
+
+    test('cannot pass from phase.onEnd', () => {
+      const client = Client({
+        game: {
+          moves,
+          phases: {
+            A: {
+              start: true,
+              onEnd: conditionalPass,
+            },
+          },
+        },
+      });
+
+      let state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+
+      client.moves.setAutoEnd();
+      client.events.endPhase();
+      state = client.getState();
+      expect(state.ctx.turn).toBe(1);
+      expect(state.ctx.currentPlayer).toBe('0');
+      expect(state.ctx.phase).toBe('A');
+      expect(error).toHaveBeenCalled();
+      const errorMessage = (error as jest.Mock).mock.calls[0][0];
+      expect(errorMessage).toMatch(/events plugin declared action invalid/);
+      expect(errorMessage).toMatch(
+        /`endTurn` & `pass` are disallowed in `onEnd` hooks/,
+      );
     });
   });
 
@@ -1876,7 +2036,7 @@ describe('events in hooks', () => {
       const errorMessage = (error as jest.Mock).mock.calls[0][0];
       expect(errorMessage).toMatch(/events plugin declared action invalid/);
       expect(errorMessage).toMatch(
-        /`setPhase` & `endPhase` are disallowed in a phase’s `onEnd` hook/
+        /`setPhase` & `endPhase` are disallowed in a phase’s `onEnd` hook/,
       );
     });
   });
@@ -2036,7 +2196,7 @@ describe('backwards compatibility for moveLimit', () => {
 
     state = flow.processEvent(
       state,
-      gameEvent('setActivePlayers', { all: 'A', moveLimit: 1 })
+      gameEvent('setActivePlayers', { all: 'A', moveLimit: 1 }),
     );
 
     expect(state.ctx._activePlayersMinMoves).toBeNull();
@@ -2051,7 +2211,7 @@ describe('backwards compatibility for moveLimit', () => {
     expect(state.ctx._activePlayersMaxMoves).toBeNull();
     state = flow.processEvent(
       state,
-      gameEvent('setStage', { stage: 'A', moveLimit: 2 })
+      gameEvent('setStage', { stage: 'A', moveLimit: 2 }),
     );
     expect(state.ctx._activePlayersMinMoves).toBeNull();
     expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
@@ -2321,7 +2481,7 @@ describe('game function signatures', () => {
       turn: {
         order: {
           playOrder: jest.fn(({ ctx }) =>
-            [...Array.from({ length: ctx.numPlayers })].map((_, i) => i + '')
+            Array.from({ length: ctx.numPlayers }).map((_, i) => i + ''),
           ),
           first: jest.fn(TurnOrder.DEFAULT.first),
           next: jest.fn(TurnOrder.DEFAULT.next),
@@ -2353,7 +2513,7 @@ describe('game function signatures', () => {
   });
 
   test('game.setup', () => {
-    expect(game.setup).lastCalledWith(
+    expect(game.setup).toHaveBeenLastCalledWith(
       // setup context object
       expect.objectContaining({
         ctx: expectCtx,
@@ -2361,73 +2521,77 @@ describe('game function signatures', () => {
         random: expectRandom,
       }),
       // setupData
-      undefined
+      undefined,
     );
   });
 
   test('game.onEnd', () => {
     client.events.endGame();
-    expect(game.onEnd).lastCalledWith(FnContext());
+    expect(game.onEnd).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.endIf', () => {
     client.moves.endGame();
-    expect(game.endIf).lastCalledWith(FnContext({ G: 'gameover' }));
+    expect(game.endIf).toHaveBeenLastCalledWith(FnContext({ G: 'gameover' }));
   });
 
   test('game.turn.order.playOrder', () => {
-    expect(game.turn.order.playOrder).lastCalledWith(FnContext());
+    expect(game.turn.order.playOrder).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.order.first', () => {
-    expect(game.turn.order.first).lastCalledWith(FnContext());
+    expect(game.turn.order.first).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.order.next', () => {
     client.events.endTurn();
-    expect(game.turn.order.next).lastCalledWith(FnContext());
+    expect(game.turn.order.next).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.onBegin', () => {
-    expect(game.turn.onBegin).lastCalledWith(FnContext());
+    expect(game.turn.onBegin).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.onMove', () => {
     client.moves.A();
-    expect(game.turn.onMove).lastCalledWith(FnContext());
+    expect(game.turn.onMove).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.onEnd', () => {
     client.events.endTurn();
-    expect(game.turn.onEnd).lastCalledWith(FnContext());
+    expect(game.turn.onEnd).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.turn.endIf', () => {
     client.moves.A();
-    expect(game.turn.endIf).lastCalledWith(FnContext());
+    expect(game.turn.endIf).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('move', () => {
     client.moves.A('arg');
-    expect(moveA).lastCalledWith(FnContext({ playerID: '0' }), 'arg');
+    expect(moveA).toHaveBeenLastCalledWith(FnContext({ playerID: '0' }), 'arg');
     client.moves.A(2, 'args');
-    expect(moveA).lastCalledWith(FnContext({ playerID: '0' }), 2, 'args');
+    expect(moveA).toHaveBeenLastCalledWith(
+      FnContext({ playerID: '0' }),
+      2,
+      'args',
+    );
   });
 
   test('game.phases.phase.onBegin', () => {
     client.events.setPhase('A');
-    expect(game.phases.A.onBegin).lastCalledWith(FnContext());
+    expect(game.phases.A.onBegin).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.phases.phase.onEnd', () => {
     client.events.setPhase('A');
     client.updatePlayerID('1');
     client.events.endPhase();
-    expect(game.phases.A.onEnd).lastCalledWith(FnContext());
+    expect(game.phases.A.onEnd).toHaveBeenLastCalledWith(FnContext());
   });
 
   test('game.phases.phase.endIf', () => {
     client.events.setPhase('A');
-    expect(game.phases.A.endIf).lastCalledWith(FnContext());
+    expect(game.phases.A.endIf).toHaveBeenLastCalledWith(FnContext());
   });
 });

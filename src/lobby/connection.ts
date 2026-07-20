@@ -102,7 +102,7 @@ class _LobbyConnectionImpl {
       if (!inst) throw new Error('match instance not found');
       for (const player of inst.players) {
         if (player.name === this.playerName) {
-          await this.client.leaveMatch(gameName, matchID, {
+          await this.client.leaveSlot(gameName, matchID, {
             playerID: player.id.toString(),
             credentials: this.playerCredentials,
           });
@@ -138,7 +138,7 @@ class _LobbyConnectionImpl {
       await this.client.createMatch(gameName, { numPlayers });
     } catch (error) {
       throw new Error(
-        'failed to create match for ' + gameName + ' (' + error + ')'
+        'failed to create match for ' + gameName + ' (' + error + ')',
       );
     }
   }

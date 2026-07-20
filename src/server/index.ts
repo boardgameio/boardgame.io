@@ -22,11 +22,15 @@ export type KoaServer = ReturnType<Koa['listen']>;
 
 interface ServerConfig {
   port?: number;
+  /** Host or IP to bind to (both game server and Lobby API). Defaults to all interfaces. */
+  host?: string;
   callback?: () => void;
   lobbyConfig?: {
     apiPort: number;
     apiCallback?: () => void;
   };
+  // Future: apiBodyLimit could be added here to allow runtime overrides.
+  // Currently, it is set once at the factory level in ServerOpts.
 }
 
 interface HttpsOptions {
@@ -39,7 +43,7 @@ interface HttpsOptions {
  */
 export const createServerRunConfig = (
   portOrConfig: number | ServerConfig,
-  callback?: () => void
+  callback?: () => void,
 ): ServerConfig =>
   portOrConfig && typeof portOrConfig === 'object'
     ? {
@@ -49,7 +53,7 @@ export const createServerRunConfig = (
     : { port: portOrConfig as number, callback };
 
 export const getPortFromServer = (
-  server: KoaServer
+  server: KoaServer,
 ): string | number | null => {
   const address = server.address();
   if (typeof address === 'string') return address;
@@ -67,6 +71,14 @@ interface ServerOpts {
   authenticateCredentials?: ServerTypes.AuthenticateCredentials;
   generateCredentials?: ServerTypes.GenerateCredentials;
   https?: HttpsOptions;
+  /**
+   * Maximum size for request bodies parsed by the lobby API.
+   * Defaults to '5mb'. Increase only if you genuinely need large setupData.
+   *
+   * NOTE: Large setupData is an anti-pattern; prefer generating heavy data
+   * inside your game's setup() function rather than passing it via setupData.
+   */
+  apiBodyLimit?: string | number;
 }
 
 /**
@@ -92,6 +104,7 @@ export function Server({
   apiOrigins = origins,
   generateCredentials = uuid,
   authenticateCredentials,
+  apiBodyLimit = '5mb',
 }: ServerOpts) {
   const app: ServerTypes.App = new Koa();
 
@@ -113,7 +126,7 @@ export function Server({
       'Server `origins` option is not set.\n' +
         'Since boardgame.io@0.45, CORS is not enabled by default and you must ' +
         'explicitly set the origins that are allowed to connect to the server.\n' +
-        'See https://boardgame.io/documentation/#/api/Server'
+        'See https://boardgame.io/documentation/#/api/Server',
     );
   }
   transport.init(app, games, origins);
@@ -129,15 +142,23 @@ export function Server({
 
     run: async (portOrConfig: number | ServerConfig, callback?: () => void) => {
       const serverRunConfig = createServerRunConfig(portOrConfig, callback);
-      configureRouter({ router, db, games, uuid, auth });
+      configureRouter({
+        router,
+        db,
+        games,
+        uuid,
+        auth,
+        apiBodyLimit,
+        transport,
+      });
 
       // DB
       await db.connect();
 
       // Lobby API
-      const lobbyConfig = serverRunConfig.lobbyConfig;
+      const { port, host, lobbyConfig } = serverRunConfig;
       let apiServer: KoaServer | undefined;
-      if (!lobbyConfig || !lobbyConfig.apiPort) {
+      if (!lobbyConfig || lobbyConfig.apiPort == null) {
         configureApp(app, router, apiOrigins);
       } else {
         // Run API in a separate Koa app.
@@ -145,8 +166,8 @@ export function Server({
         api.context.db = db;
         api.context.auth = auth;
         configureApp(api, router, apiOrigins);
-        await new Promise((resolve) => {
-          apiServer = api.listen(lobbyConfig.apiPort, resolve);
+        await new Promise<void>((resolve) => {
+          apiServer = api.listen(lobbyConfig.apiPort, host, () => resolve());
         });
         if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
         logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
@@ -154,8 +175,11 @@ export function Server({
 
       // Run Game Server (+ API, if necessary).
       let appServer: KoaServer;
-      await new Promise((resolve) => {
-        appServer = app.listen(serverRunConfig.port, resolve);
+      const httpServer = transport.server;
+      await new Promise<void>((resolve) => {
+        appServer = httpServer
+          ? httpServer.listen(port, host, () => resolve())
+          : app.listen(port, host, () => resolve());
       });
       if (serverRunConfig.callback) serverRunConfig.callback();
       logger.info(`App serving on ${getPortFromServer(appServer)}...`);

@@ -5,12 +5,12 @@ import type { Server, PlayerID } from '../types';
  * Verifies that a match has metadata and is using credentials.
  */
 export const doesMatchRequireAuthentication = (
-  matchData?: Server.MatchData
+  matchData?: Server.MatchData,
 ) => {
   if (!matchData) return false;
   const { players } = matchData;
   const hasCredentials = Object.values(players).some(
-    (player) => !!(player && player.credentials)
+    (player) => !!(player && player.credentials),
   );
   return hasCredentials;
 };
@@ -21,7 +21,7 @@ export const doesMatchRequireAuthentication = (
  */
 export const areCredentialsAuthentic: Server.AuthenticateCredentials = (
   actionCredentials: string,
-  playerMetadata?: Server.PlayerMetadata
+  playerMetadata?: Server.PlayerMetadata,
 ) => {
   if (!actionCredentials) return false;
   if (!playerMetadata) return false;
@@ -33,7 +33,7 @@ export const areCredentialsAuthentic: Server.AuthenticateCredentials = (
  */
 export const extractPlayerMetadata = (
   matchData: Server.MatchData,
-  playerID: PlayerID
+  playerID: PlayerID,
 ): Server.PlayerMetadata => {
   if (matchData && matchData.players) {
     return matchData.players[playerID];
@@ -57,7 +57,7 @@ export class Auth {
     opts: {
       authenticateCredentials?: Server.AuthenticateCredentials;
       generateCredentials?: Server.GenerateCredentials;
-    } = {}
+    } = {},
   ) {
     if (typeof opts.authenticateCredentials === 'function') {
       this.authenticate = opts.authenticateCredentials;

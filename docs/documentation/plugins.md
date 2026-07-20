@@ -33,10 +33,16 @@ A plugin is an object that contains the following fields.
   // and returns another function that wraps it. This
   // wrapper can modify G before passing it down to
   // the wrapped function. It is a good practice to
-  // undo the change at the end of the call.
-  fnWrap: (fn) => ({ G, ...rest }, ...args) => {
+  // undo the change at the end of the call. 
+  // `fnType` gives the type of hook being wrapped
+  // and will be one of the `GameMethod` values —
+  // import { GameMethod } from 'boardgame.io/core' 
+  fnWrap: (fn, fnType) => ({ G, ...rest }, ...args) => {
     G = preprocess(G);
     G = fn({ G, ...rest }, ...args);
+    if (fnType === GameMethod.TURN_ON_END) {
+      // only run when wrapping a turn’s onEnd function
+    }
     G = postprocess(G);
     return G;
   },

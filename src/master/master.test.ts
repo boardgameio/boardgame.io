@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2018 The boardgame.io Authors
  *
@@ -61,7 +65,7 @@ class InMemoryAsync extends StorageAPI.Async {
 
   async fetch<O extends StorageAPI.FetchOpts>(
     matchID: string,
-    opts: O
+    opts: O,
   ): Promise<StorageAPI.FetchResult<O>> {
     await this.sleep();
     return this.db.fetch(matchID, opts);
@@ -86,7 +90,7 @@ function TransportAPI(send = jest.fn(), sendAll = jest.fn()) {
 
 function validateNotTransientState(state: any) {
   expect(state).toEqual(
-    expect.not.objectContaining({ transients: expect.anything() })
+    expect.not.objectContaining({ transients: expect.anything() }),
   );
 }
 
@@ -104,7 +108,7 @@ describe('sync', () => {
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'sync',
-      })
+      }),
     );
   });
 
@@ -150,7 +154,7 @@ describe('sync', () => {
       { id: 1, name: 'Bob' },
     ];
     expect(send.mock.calls[0][0].args[1].filteredMetadata).toMatchObject(
-      expectedMetadata
+      expectedMetadata,
     );
   });
 
@@ -191,7 +195,7 @@ describe('update', () => {
 
   test('basic', async () => {
     await master.onUpdate(action, 0, 'matchID', '0');
-    expect(sendAll).toBeCalled();
+    expect(sendAll).toHaveBeenCalled();
     const value = sendAll.mock.calls[0][0];
     expect(value.type).toBe('update');
     expect(value.args[0]).toBe('matchID');
@@ -221,11 +225,83 @@ describe('update', () => {
     expect(error).toBe('missing action or action payload');
   });
 
+  test('public action type with missing payload', async () => {
+    const { error } = await master.onUpdate(
+      { type: 'MAKE_MOVE' } as any,
+      0,
+      'matchID',
+      '0',
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(error).toBe('missing action or action payload');
+  });
+
+  test('rejects private action types', async () => {
+    const { error: updateError } = await master.onUpdate(
+      ActionCreators.update({} as State, []) as any,
+      0,
+      'matchID',
+      '0',
+    );
+    const { error: leaveError } = await master.onUpdate(
+      ActionCreators.playerLeave('0') as any,
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(updateError).toBe('unauthorized action');
+    expect(leaveError).toBe('unauthorized action');
+  });
+
+  test('rejects automatic client actions', async () => {
+    const { error: updateError } = await master.onUpdate(
+      ActionCreators.automaticGameEvent('endTurn', undefined, '0') as any,
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(updateError).toBe('unauthorized action');
+  });
+
+  test('rejects disabled and private game events', async () => {
+    const gameWithDisabledEvent: Game = {
+      events: {
+        setActivePlayers: false,
+      },
+      moves: game.moves,
+    };
+    const masterWithDisabledEvent = new Master(
+      gameWithDisabledEvent,
+      db,
+      TransportAPI(send, sendAll),
+    );
+    const disabledResult = await masterWithDisabledEvent.onUpdate(
+      ActionCreators.gameEvent('setActivePlayers', [{ all: 'A' }], '0'),
+      0,
+      'matchID',
+      '0',
+    );
+    const { error: privateError } = await master.onUpdate(
+      ActionCreators.gameEvent('removePlayer', '1', '0'),
+      0,
+      'matchID',
+      '0',
+    );
+
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(disabledResult).toEqual({ error: 'unauthorized action' });
+    expect(privateError).toBe('unauthorized action');
+  });
+
   test('invalid matchID', async () => {
     await master.onUpdate(action, 0, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `game not found, matchID=[default:unknown]`
+      `game not found, matchID=[default:unknown]`,
     );
   });
 
@@ -233,7 +309,7 @@ describe('update', () => {
     await master.onUpdate(action, 100, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `invalid stateID, was=[100], expected=[0] - playerID=[0] - action[endTurn]`
+      `invalid stateID, was=[100], expected=[0] - playerID=[0] - action[endTurn]`,
     );
   });
 
@@ -242,7 +318,7 @@ describe('update', () => {
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '100');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `player not active - playerID=[100] - action[move]`
+      `player not active - playerID=[100] - action[move]`,
     );
   });
 
@@ -250,7 +326,7 @@ describe('update', () => {
     await master.onUpdate(ActionCreators.makeMove('move'), 0, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `move not processed - canPlayerMakeMove=false - playerID=[0] - action[move]`
+      `move not processed - canPlayerMakeMove=false - playerID=[0] - action[move]`,
     );
   });
 
@@ -303,13 +379,13 @@ describe('update', () => {
     const master = new Master(
       game,
       new InMemory(),
-      TransportAPI(send, sendAll)
+      TransportAPI(send, sendAll),
     );
 
     const setActivePlayers = ActionCreators.gameEvent(
       'setActivePlayers',
       [{ all: 'A' }],
-      '0'
+      '0',
     );
     const actionA = ActionCreators.makeMove('A', null, '0');
     const actionB = ActionCreators.makeMove('B', null, '1');
@@ -328,7 +404,7 @@ describe('update', () => {
       master.onSync('matchID', '1', undefined, 2),
     ]);
 
-    const G = sendAll.mock.calls[sendAll.mock.calls.length - 1][0].args[1].G;
+    const G = sendAll.mock.calls.at(-1)[0].args[1].G;
 
     expect(G).toMatchObject({
       players: {
@@ -357,7 +433,7 @@ describe('update', () => {
     test('player 1 can’t undo', async () => {
       await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '1');
       expect(error).toHaveBeenCalledWith(
-        `playerID=[1] cannot undo / redo right now`
+        `playerID=[1] cannot undo / redo right now`,
       );
     });
 
@@ -365,12 +441,12 @@ describe('update', () => {
       const setActivePlayers = ActionCreators.gameEvent(
         'setActivePlayers',
         [{ all: 'A' }],
-        '0'
+        '0',
       );
       await master.onUpdate(setActivePlayers, 0, 'matchID', '0');
       await master.onUpdate(ActionCreators.undo('0'), 1, 'matchID', '0');
       expect(error).toHaveBeenCalledWith(
-        `playerID=[0] cannot undo / redo right now`
+        `playerID=[0] cannot undo / redo right now`,
       );
     });
 
@@ -380,9 +456,9 @@ describe('update', () => {
       expect(error).not.toHaveBeenCalled();
       const endStage = ActionCreators.gameEvent('endStage', undefined, '0');
       await master.onUpdate(endStage, 1, 'matchID', '0');
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
       await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
-      expect(error).not.toBeCalled();
+      expect(error).not.toHaveBeenCalled();
 
       // Clean-up active players.
       const endStage2 = ActionCreators.gameEvent('endStage', undefined, '1');
@@ -396,7 +472,7 @@ describe('update', () => {
     event = ActionCreators.gameEvent('endTurn');
     await master.onUpdate(event, 1, 'matchID', '0');
     expect(error).toHaveBeenCalledWith(
-      `game over - matchID=[matchID] - playerID=[0] - action[endTurn]`
+      `game over - matchID=[matchID] - playerID=[0] - action[endTurn]`,
     );
   });
 
@@ -523,6 +599,243 @@ describe('update', () => {
   });
 });
 
+describe('player leave', () => {
+  const send = jest.fn();
+  const sendAll = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('runs leave lifecycle, persists state, and broadcasts', async () => {
+    const game: Game = {
+      name: 'leave',
+      onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
+    };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 }, '2': { id: 2 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+    const { state, log } = db.fetch('matchID', { state: true, log: true });
+
+    expect(result).toBeUndefined();
+    expect(state.G).toEqual({ left: '1' });
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state.ctx._removedPlayers).toEqual(['1']);
+    expect(log.at(-1).action).toEqual(ActionCreators.playerLeave('1'));
+    expect(sendAll).toHaveBeenCalledWith({
+      type: 'update',
+      args: ['matchID', expect.objectContaining({ G: { left: '1' } })],
+    });
+  });
+
+  test('skips lifecycle after gameover', async () => {
+    const game: Game = {
+      name: 'leave',
+      onPlayerLeave: () => ({ changed: true }),
+    };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState: {
+        ...initialState,
+        ctx: { ...initialState.ctx, gameover: true },
+      },
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+    const { state } = db.fetch('matchID', { state: true });
+
+    expect(result).toBeUndefined();
+    expect(state.G).toEqual({});
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects metadata game mismatch', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'other',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+
+    expect(result).toEqual({ error: 'game not found' });
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('does not persist or broadcast when reducer rejects leave', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '0');
+    const { state, log } = db.fetch('matchID', { state: true, log: true });
+
+    expect(result).toEqual({ error: 'action/action_invalid' });
+    expect(state.ctx.playOrder).toEqual(['0']);
+    expect(log).toEqual([]);
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects unknown matchID', async () => {
+    const game: Game = { name: 'leave' };
+    const master = new Master(
+      game,
+      new InMemory(),
+      TransportAPI(send, sendAll),
+    );
+
+    const result = await master.onPlayerLeave('unknownMatchID', '0');
+
+    expect(result).toEqual({ error: 'metadata not found' });
+    expect(error).toHaveBeenCalledWith(
+      'metadata not found for matchID=[unknownMatchID]',
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects match with missing game state', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    db.setMetadata('matchID', {
+      gameName: 'leave',
+      players: { '0': { id: 0 }, '1': { id: 1 } },
+      createdAt: 0,
+      updatedAt: 0,
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '0');
+
+    expect(result).toEqual({ error: 'game not found' });
+    expect(error).toHaveBeenCalledWith('game not found, matchID=[matchID]');
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('rejects invalid credentials', async () => {
+    const game: Game = { name: 'leave' };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(
+      game,
+      db,
+      TransportAPI(send, sendAll),
+      new Auth({ authenticateCredentials: () => false }),
+    );
+
+    const result = await master.onPlayerLeave('matchID', '0', 'invalid');
+
+    expect(result).toEqual({ error: 'unauthorized' });
+    expect(sendAll).not.toHaveBeenCalled();
+  });
+
+  test('broadcasts a patch when deltaState is enabled', async () => {
+    const game: Game = { name: 'leave', deltaState: true };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 3 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 }, '2': { id: 2 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+
+    expect(result).toBeUndefined();
+    expect(sendAll).toHaveBeenCalledWith({
+      type: 'patch',
+      args: [
+        'matchID',
+        0,
+        expect.objectContaining({ _stateID: 0 }),
+        expect.objectContaining({ _stateID: 1 }),
+      ],
+    });
+  });
+
+  test('stores gameover in metadata when the leave ends the game', async () => {
+    const game: Game = {
+      name: 'leave',
+      onPlayerLeave: ({ G, events }) => {
+        events.endGame('done');
+        return G;
+      },
+    };
+    const db = new InMemory();
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+    db.createMatch('matchID', {
+      initialState,
+      metadata: {
+        gameName: 'leave',
+        players: { '0': { id: 0 }, '1': { id: 1 } },
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    });
+    const master = new Master(game, db, TransportAPI(send, sendAll));
+
+    const result = await master.onPlayerLeave('matchID', '1');
+    const { state, metadata } = db.fetch('matchID', {
+      state: true,
+      metadata: true,
+    });
+
+    expect(result).toBeUndefined();
+    expect(state.ctx.gameover).toBe('done');
+    expect(metadata.gameover).toBe('done');
+  });
+});
+
 describe('patch', () => {
   const send = jest.fn();
   const sendAll = jest.fn();
@@ -575,7 +888,7 @@ describe('patch', () => {
       },
     },
     db,
-    TransportAPI(send, sendAll)
+    TransportAPI(send, sendAll),
   );
   const move = ActionCreators.makeMove('A', null, '0');
   const action = ActionCreators.gameEvent('endTurn');
@@ -593,7 +906,7 @@ describe('patch', () => {
 
   test('basic', async () => {
     await master.onUpdate(move, 0, 'matchID', '0');
-    expect(sendAll).toBeCalled();
+    expect(sendAll).toHaveBeenCalled();
 
     const value = sendAll.mock.calls[0][0];
     expect(value.type).toBe('patch');
@@ -609,7 +922,7 @@ describe('patch', () => {
     await master.onUpdate(action, 1, 'default:unknown', '1');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `game not found, matchID=[default:unknown]`
+      `game not found, matchID=[default:unknown]`,
     );
   });
 
@@ -617,7 +930,7 @@ describe('patch', () => {
     await master.onUpdate(action, 100, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `invalid stateID, was=[100], expected=[1] - playerID=[0] - action[endTurn]`
+      `invalid stateID, was=[100], expected=[1] - playerID=[0] - action[endTurn]`,
     );
   });
 
@@ -626,7 +939,7 @@ describe('patch', () => {
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '102');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `player not active - playerID=[102] - action[move]`
+      `player not active - playerID=[102] - action[move]`,
     );
   });
 
@@ -634,7 +947,7 @@ describe('patch', () => {
     await master.onUpdate(ActionCreators.makeMove('move'), 1, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith(
-      `move not processed - canPlayerMakeMove=false - playerID=[0] - action[move]`
+      `move not processed - canPlayerMakeMove=false - playerID=[0] - action[move]`,
     );
   });
 
@@ -643,7 +956,7 @@ describe('patch', () => {
       ActionCreators.makeMove('Invalid', null, '0'),
       1,
       'matchID',
-      '0'
+      '0',
     );
     expect(sendAll).toHaveBeenCalled();
     expect(error).toHaveBeenCalledWith('invalid move: Invalid args: null');
@@ -664,7 +977,7 @@ describe('patch', () => {
     test('player 1 can’t undo', async () => {
       await master.onUpdate(ActionCreators.undo(), 2, 'matchID', '0');
       expect(error).toHaveBeenCalledWith(
-        `playerID=[0] cannot undo / redo right now`
+        `playerID=[0] cannot undo / redo right now`,
       );
     });
 
@@ -672,12 +985,12 @@ describe('patch', () => {
       const setActivePlayers = ActionCreators.gameEvent(
         'setActivePlayers',
         [{ all: 'A' }],
-        '0'
+        '0',
       );
       await master.onUpdate(setActivePlayers, 2, 'matchID', '0');
       await master.onUpdate(ActionCreators.undo('0'), 3, 'matchID', '0');
       expect(error).toHaveBeenCalledWith(
-        `playerID=[0] cannot undo / redo right now`
+        `playerID=[0] cannot undo / redo right now`,
       );
     });
 
@@ -700,7 +1013,7 @@ describe('patch', () => {
     event = ActionCreators.gameEvent('endTurn');
     await master.onUpdate(event, 3, 'matchID', '1');
     expect(error).toHaveBeenCalledWith(
-      `game over - matchID=[matchID] - playerID=[1] - action[endTurn]`
+      `game over - matchID=[matchID] - playerID=[1] - action[endTurn]`,
     );
   });
 });
@@ -766,10 +1079,10 @@ describe('connectionChange', () => {
       'invalidMatchID',
       '0',
       undefined,
-      true
+      true,
     );
     expect(error).toHaveBeenCalledWith(
-      'metadata not found for matchID=[invalidMatchID]'
+      'metadata not found for matchID=[invalidMatchID]',
     );
     expect(result && result.error).toEqual('metadata not found');
   });
@@ -779,10 +1092,10 @@ describe('connectionChange', () => {
       'matchID',
       '3',
       undefined,
-      true
+      true,
     );
     expect(error).toHaveBeenCalledWith(
-      'Player not in the match, matchID=[matchID] playerID=[3]'
+      'Player not in the match, matchID=[matchID] playerID=[3]',
     );
     expect(result && result.error).toEqual('player not in the match');
   });
@@ -792,7 +1105,7 @@ describe('connectionChange', () => {
     const masterWithAsyncDb = new Master(
       game,
       asyncDb,
-      TransportAPI(send, sendAll)
+      TransportAPI(send, sendAll),
     );
     await asyncDb.createMatch('matchID', {
       metadata,
@@ -816,7 +1129,7 @@ describe('subscribe', () => {
 
   test('sync', async () => {
     master.onSync('matchID', '0');
-    expect(callback).toBeCalledWith({
+    expect(callback).toHaveBeenCalledWith({
       matchID: 'matchID',
       state: expect.objectContaining({ _stateID: 0 }),
     });
@@ -825,7 +1138,7 @@ describe('subscribe', () => {
   test('update', async () => {
     const action = ActionCreators.gameEvent('endTurn');
     master.onUpdate(action, 0, 'matchID', '0');
-    expect(callback).toBeCalledWith({
+    expect(callback).toHaveBeenCalledWith({
       matchID: 'matchID',
       action,
       state: expect.objectContaining({ _stateID: 1 }),
@@ -859,7 +1172,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onUpdate(action, 0, matchID, '0');
       expect(ret && ret.error).toBe('unauthorized action');
@@ -872,7 +1185,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onUpdate(action, 0, matchID, '0');
       expect(ret).toBeUndefined();
@@ -884,7 +1197,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth()
+        new Auth(),
       );
       const ret = await master.onUpdate(action, 0, matchID, '0');
       expect(ret).toBeUndefined();
@@ -901,7 +1214,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onSync(matchID, '0');
       expect(ret && ret.error).toBe('unauthorized');
@@ -914,7 +1227,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onSync(matchID, '0');
       expect(ret).toBeUndefined();
@@ -927,7 +1240,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onSync(matchID, null);
       expect(ret).toBeUndefined();
@@ -944,7 +1257,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onConnectionChange(matchID, '0', null, true);
       expect(ret && ret.error).toBe('unauthorized');
@@ -957,7 +1270,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onConnectionChange(matchID, '0', null, true);
       expect(ret).toBeUndefined();
@@ -970,7 +1283,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onConnectionChange(matchID, null, null, true);
       expect(ret).toBeUndefined();
@@ -994,7 +1307,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onChatMessage(matchID, chatMessage, undefined);
       expect(ret).toBeUndefined();
@@ -1007,7 +1320,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onChatMessage(matchID, chatMessage, undefined);
       expect(ret && ret.error).toBe('unauthorized');
@@ -1020,7 +1333,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth({ authenticateCredentials })
+        new Auth({ authenticateCredentials }),
       );
       const ret = await master.onChatMessage(matchID, undefined, undefined);
       expect(ret && ret.error).toBe('unauthorized');
@@ -1032,7 +1345,7 @@ describe('authentication', () => {
         game,
         storage,
         TransportAPI(send, sendAll),
-        new Auth()
+        new Auth(),
       );
       const ret = await master.onChatMessage(matchID, chatMessage, undefined);
       expect(ret).toBeUndefined();
@@ -1055,7 +1368,7 @@ describe('chat', () => {
     master.onChatMessage(
       'matchID',
       { id: 'uuid', sender: '0', payload: { message: 'foo' } },
-      undefined
+      undefined,
     );
     expect(sendAll.mock.calls[0][0]).toEqual({
       type: 'chat',

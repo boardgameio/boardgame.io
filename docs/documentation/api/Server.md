@@ -45,6 +45,12 @@ A config object with the following options:
 8. `apiOrigins` (_array_): a list of allowed origins for requests to the Lobby API. Defaults
    to the value provided as the `origins` option (which also applies to the socket transport).
 
+9. `apiBodyLimit` (_string_ | _number_): maximum size for request bodies parsed
+   by the Lobby API (e.g. `'5mb'` or `5 * 1024 * 1024` bytes). Defaults to `'5mb'`.
+   Increase this only if your game legitimately needs large `setupData`. Note that
+   large `setupData` is generally an anti-pattern — prefer passing lightweight
+   config and generating heavy data inside your game's `setup()` function.
+
 #### Returns
 
 An object that contains:
@@ -112,6 +118,10 @@ this port. Otherwise, it shares the same Koa server running on the default
 boardgame.io `port`.
 - `apiCallback`: Called when the Koa server is ready. Only applicable if
 `apiPort` is specified.
+
+The run config also accepts a `host` alongside `port`, which binds both the
+game server and the Lobby API server to that host. It defaults to all
+interfaces.
 
 #### With HTTPS
 

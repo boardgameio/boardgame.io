@@ -6,9 +6,9 @@
  * https://opensource.org/licenses/MIT.
  */
 
-const path = require('path');
-const { spawnSync } = require('child_process');
-const { existsSync } = require('fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const { existsSync } = require('node:fs');
 
 const projectRoot = path.resolve(__dirname, '../');
 const webExamplePath = path.resolve(projectRoot, './examples/react-web');
@@ -24,7 +24,7 @@ console.log('Starting the application...');
 
 function installDependencies() {
   const isWindowsOs = process.platform === 'win32';
-  const npmCommand = isWindowsOs ? 'npm.cmd' : 'npm';
+  const npmCommand = isWindowsOs ? 'pnpm.cmd' : 'pnpm';
 
   console.log('Installing web dependencies...');
 

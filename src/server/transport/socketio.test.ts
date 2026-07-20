@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2018 The boardgame.io Authors
  *
@@ -18,6 +22,12 @@ jest.mock('../../core/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
 }));
+
+jest.mock('node:https', () => ({
+  createServer: jest.fn(() => ({ https: true })),
+}));
+
+import https from 'node:https';
 
 type SyncArgs = Parameters<Master['onSync']>;
 
@@ -60,7 +70,7 @@ jest.mock('../../master/master', () => {
   return { Master };
 });
 
-jest.mock('koa-socket-2', () => {
+jest.mock('socket.io', () => {
   class MockSocket {
     id: string;
     callbacks: Record<string, (...args: any[]) => any>;
@@ -105,10 +115,6 @@ jest.mock('koa-socket-2', () => {
       this.socketAdapter = socketAdapter;
     }
 
-    attach(app) {
-      app.io = app._io = this;
-    }
-
     of() {
       return this;
     }
@@ -118,12 +124,12 @@ jest.mock('koa-socket-2', () => {
     }
   }
 
-  return MockIO;
+  return { Server: MockIO };
 });
 
 describe('basic', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;
@@ -142,7 +148,7 @@ describe('basic', () => {
 
 describe('socketAdapter', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
 
   const socketAdapter = jest.fn();
@@ -153,7 +159,25 @@ describe('socketAdapter', () => {
   });
 
   test('socketAdapter is passed', () => {
-    expect(app.io.socketAdapter).toBe(socketAdapter);
+    expect(app.context.io.socketAdapter).toBe(socketAdapter);
+  });
+});
+
+describe('https', () => {
+  const auth = new Auth({ authenticateCredentials: () => true });
+  const app: any = { context: { auth }, callback: () => () => {} };
+  const games = [ProcessGameConfig({ seed: 0 })];
+
+  test('creates an HTTPS server when the https option is set', () => {
+    const httpsOptions = { key: 'KEY', cert: 'CERT' };
+    const transport = new SocketIOTestAdapter({ https: httpsOptions });
+    transport.init(app, games);
+
+    expect(https.createServer).toHaveBeenCalledWith(
+      httpsOptions,
+      expect.any(Function),
+    );
+    expect(transport.server).toEqual({ https: true });
   });
 });
 
@@ -164,7 +188,7 @@ describe('TransportAPI', () => {
 
   beforeAll(() => {
     const auth = new Auth({ authenticateCredentials: () => true });
-    const app: any = { context: { auth } };
+    const app: any = { context: { auth }, callback: () => () => {} };
     const games = [ProcessGameConfig({ seed: 0 })];
     const clientInfo = new Map();
     const roomInfo = new Map();
@@ -177,7 +201,7 @@ describe('TransportAPI', () => {
       matchID,
       socket,
       filterPlayerView,
-      transport.getPubSub()
+      transport.getPubSub(),
     );
   });
 
@@ -204,9 +228,25 @@ describe('TransportAPI', () => {
   });
 });
 
+describe('createTransportAPI', () => {
+  test('sendAll publishes to the match channel and send is a no-op', () => {
+    const transport = new SocketIOTestAdapter();
+    const pubSub = transport.getPubSub();
+    const publish = jest.spyOn(pubSub, 'publish');
+    const api = transport.createTransportAPI('matchID');
+
+    api.send({ type: 'A', playerID: '0', args: [] } as any);
+    expect(publish).not.toHaveBeenCalled();
+
+    const payload = { type: 'A', args: [] } as any;
+    api.sendAll(payload);
+    expect(publish).toHaveBeenCalledWith('MATCH-matchID', payload);
+  });
+});
+
 describe('sync / update', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
@@ -214,17 +254,17 @@ describe('sync / update', () => {
 
   test('sync', () => {
     io.socket.receive('sync', 'matchID', '0');
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 
   test('update', () => {
     io.socket.receive('update');
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 });
 
 describe('chat', () => {
-  const app: any = { context: {} };
+  const app: any = { context: {}, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   const transport = new SocketIOTestAdapter();
   transport.init(app, games);
@@ -232,13 +272,13 @@ describe('chat', () => {
 
   test('chat message', async () => {
     await io.socket.receive('chat', 'matchID', { message: 'foo' });
-    expect(error).not.toBeCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 });
 
 describe('connect / disconnect', () => {
   const auth = new Auth({ authenticateCredentials: () => true });
-  const app: any = { context: { auth } };
+  const app: any = { context: { auth }, callback: () => () => {} };
   const games = [ProcessGameConfig({ seed: 0 })];
   let clientInfo;
   let roomInfo;

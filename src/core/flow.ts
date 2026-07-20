@@ -11,6 +11,7 @@ import {
   UpdateActivePlayersOnceEmpty,
   InitTurnOrderState,
   UpdateTurnOrderState,
+  RemovePlayer,
   Stage,
   TurnOrder,
 } from './turn-order';
@@ -81,7 +82,7 @@ export function Flow({
 
   const HookWrapper = (
     hook: (context: FnContext) => any,
-    hookType: GameMethod
+    hookType: GameMethod,
   ) => {
     const withPlugins = plugin.FnWrap(hook, hookType, plugins);
     return (state: State & { playerID?: PlayerID }) => {
@@ -207,7 +208,7 @@ export function Flow({
       automatic?: boolean;
       playerID?: PlayerID;
       force?: boolean;
-    }[]
+    }[],
   ): State {
     const phasesEnded = new Set();
     const turnsEnded = new Set();
@@ -370,7 +371,7 @@ export function Flow({
       state,
       currentPlayer,
       phaseConfig.turn,
-      arg
+      arg,
     );
     ctx = newCtx;
 
@@ -490,7 +491,7 @@ export function Flow({
 
   function EndPhase(
     state: State,
-    { arg, next, turn: initialTurn, automatic }: any
+    { arg, next, turn: initialTurn, automatic }: any,
   ): State {
     // End the turn first.
     state = EndTurn(state, { turn: initialTurn, force: true, automatic: true });
@@ -526,7 +527,7 @@ export function Flow({
 
   function EndTurn(
     state: State,
-    { arg, next, turn: initialTurn, force, automatic, playerID }: any
+    { arg, next, turn: initialTurn, force, automatic, playerID }: any,
   ): State {
     // This is not the turn that EndTurn was originally
     // called for. The turn was probably ended some other way.
@@ -545,7 +546,7 @@ export function Flow({
       currentPlayerMoves < phaseConfig.turn.minMoves
     ) {
       logging.info(
-        `cannot end turn before making ${phaseConfig.turn.minMoves} moves`
+        `cannot end turn before making ${phaseConfig.turn.minMoves} moves`,
       );
       return state;
     }
@@ -590,7 +591,7 @@ export function Flow({
 
   function EndStage(
     state: State,
-    { arg, next, automatic, playerID }: any
+    { arg, next, automatic, playerID }: any,
   ): State {
     playerID = playerID || state.ctx.currentPlayer;
 
@@ -631,7 +632,7 @@ export function Flow({
       currentPlayerMoves < _activePlayersMinMoves[playerID]
     ) {
       logging.info(
-        `cannot end stage before making ${_activePlayersMinMoves[playerID]} moves`
+        `cannot end stage before making ${_activePlayersMinMoves[playerID]} moves`,
       );
       return state;
     }
@@ -766,15 +767,24 @@ export function Flow({
   function SetActivePlayersEvent(
     state: State,
     _playerID: PlayerID,
-    arg: ActivePlayersArg
+    arg: ActivePlayersArg,
   ): State {
     return Process(state, [{ fn: UpdateActivePlayers, arg }]);
+  }
+
+  function RemovePlayerEvent(
+    state: State,
+    _playerID: PlayerID,
+    playerID: PlayerID,
+  ): State {
+    if (typeof playerID !== 'string') return state;
+    return { ...state, ctx: RemovePlayer(state.ctx, playerID) };
   }
 
   function SetPhaseEvent(
     state: State,
     _playerID: PlayerID,
-    newPhase: string
+    newPhase: string,
   ): State {
     return Process(state, [
       {
@@ -825,6 +835,7 @@ export function Flow({
     setPhase: SetPhaseEvent,
     endGame: EndGameEvent,
     setActivePlayers: SetActivePlayersEvent,
+    removePlayer: RemovePlayerEvent,
   };
 
   const enabledEventNames = [];
@@ -860,11 +871,14 @@ export function Flow({
     return eventHandlers[type](
       state,
       playerID,
-      ...(Array.isArray(args) ? args : [args])
+      ...(Array.isArray(args) ? args : [args]),
     );
   }
 
   function IsPlayerActive(_G: any, ctx: Ctx, playerID: PlayerID): boolean {
+    if ((ctx._removedPlayers || []).includes(playerID)) {
+      return false;
+    }
     if (ctx.activePlayers) {
       return playerID in ctx.activePlayers;
     }
@@ -876,7 +890,7 @@ export function Flow({
       numPlayers,
       turn: 0,
       currentPlayer: '0',
-      playOrder: [...Array.from({ length: numPlayers })].map((_, i) => i + ''),
+      playOrder: Array.from({ length: numPlayers }).map((_, i) => i + ''),
       playOrderPos: 0,
       phase: startingPhase,
       activePlayers: null,

@@ -10,7 +10,7 @@
 
   const dispatch = createEventDispatcher();
 
-  const args = action.payload.args;
+  const args = 'args' in action.payload ? action.payload.args : undefined;
   const renderedArgs = Array.isArray(args)
     ? args.map(arg => JSON.stringify(arg, null, 2)).join(',')
     : JSON.stringify(args, null, 2) || '';
@@ -20,8 +20,12 @@
     case 'UNDO':
       actionType = 'undo';
       break;
+    case 'PLAYER_LEAVE':
+      actionType = 'leaveGame';
+      break;
     case 'REDO':
       actionType = 'redo';
+      break;
     case 'GAME_EVENT':
     case 'MAKE_MOVE':
     default:

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import Cookies from 'react-cookies';
+import Cookies from 'js-cookie';
 import PropTypes from 'prop-types';
 import type { DebugOpt } from '../client/client';
 import { Client } from '../client/react';
@@ -55,13 +55,13 @@ type LobbyProps = {
     handleJoinMatch: (
       gameName: string,
       matchID: string,
-      playerID: string
+      playerID: string,
     ) => Promise<void>;
     handleLeaveMatch: (gameName: string, matchID: string) => Promise<void>;
     handleExitMatch: () => void;
     handleRefreshMatches: () => Promise<void>;
     handleStartMatch: (gameName: string, matchOpts: MatchOpts) => void;
-  }) => JSX.Element;
+  }) => React.JSX.Element;
 };
 
 type LobbyState = {
@@ -123,7 +123,15 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   componentDidMount() {
-    const cookie = Cookies.load('lobbyState') || {};
+    const raw = Cookies.get('lobbyState');
+    let cookie: Partial<LobbyState> = {};
+    if (raw) {
+      try {
+        cookie = JSON.parse(raw);
+      } catch {
+        cookie = {};
+      }
+    }
     if (cookie.phase && cookie.phase === LobbyPhases.PLAY) {
       cookie.phase = LobbyPhases.LIST;
     }
@@ -152,7 +160,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
         playerName: name,
         credentialStore: this.state.credentialStore,
       };
-      Cookies.save('lobbyState', cookie, { path: '/' });
+      Cookies.set('lobbyState', JSON.stringify(cookie), { path: '/' });
     }
     if (prevProps.refreshInterval !== this.props.refreshInterval) {
       this._startRefreshInterval();
@@ -167,7 +175,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     this._clearRefreshInterval();
     this._currentInterval = setInterval(
       this._updateConnection,
-      this.props.refreshInterval
+      this.props.refreshInterval,
     );
   }
 
@@ -227,7 +235,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
-        this.connection.playerCredentials
+        this.connection.playerCredentials,
       );
     } catch (error) {
       this.setState({ errorMsg: error.message });
@@ -240,7 +248,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       await this.connection.refresh();
       this._updateCredentials(
         this.connection.playerName,
-        this.connection.playerCredentials
+        this.connection.playerCredentials,
       );
     } catch (error) {
       this.setState({ errorMsg: error.message });
@@ -296,12 +304,12 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
   };
 
   _getPhaseVisibility = (phase: LobbyPhases) => {
-    return this.state.phase !== phase ? 'hidden' : 'phase';
+    return this.state.phase === phase ? 'phase' : 'hidden';
   };
 
   renderMatches = (
     matches: LobbyAPI.MatchList['matches'],
-    playerName: string
+    playerName: string,
   ) => {
     return matches.map((match) => {
       const { matchID, gameName, players } = match;

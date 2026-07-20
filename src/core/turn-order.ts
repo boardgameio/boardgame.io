@@ -19,17 +19,127 @@ import type {
 } from '../types';
 import { supportDeprecatedMoveLimit } from './backwards-compatibility';
 
+function IsPlayerRemoved(ctx: Ctx, playerID: PlayerID): boolean {
+  return (ctx._removedPlayers || []).includes(playerID);
+}
+
+function RemovePlayerFromRecord<T>(
+  record: Record<PlayerID, T> | null | undefined,
+  playerID: PlayerID,
+) {
+  if (!record) return record;
+  const next = { ...record };
+  delete next[playerID];
+  return Object.keys(next).length > 0 ? next : null;
+}
+
+function RemovePlayerFromActivePlayersArg(
+  arg: ActivePlayersArg | null | undefined,
+  playerID: PlayerID,
+): ActivePlayersArg | null | undefined {
+  if (!arg) return arg;
+
+  if (Array.isArray(arg)) {
+    return arg.filter((id) => id !== playerID);
+  }
+
+  const next = { ...arg };
+
+  if (next.value) {
+    next.value = { ...next.value };
+    delete next.value[playerID];
+    if (Object.keys(next.value).length === 0) {
+      delete next.value;
+    }
+  }
+
+  if (next.next) {
+    next.next = RemovePlayerFromActivePlayersArg(next.next, playerID);
+  }
+
+  return next;
+}
+
+export function RemovePlayer(ctx: Ctx, playerID: PlayerID): Ctx {
+  const removedPlayers = (ctx._removedPlayers || []).includes(playerID)
+    ? ctx._removedPlayers
+    : [...(ctx._removedPlayers || []), playerID];
+  const playOrder = ctx.playOrder.filter((id) => id !== playerID);
+  let playOrderPos = 0;
+  let currentPlayer = ctx.currentPlayer;
+
+  if (playOrder.length === 0) {
+    currentPlayer = '';
+  } else if (ctx.currentPlayer === playerID) {
+    playOrderPos =
+      ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
+    currentPlayer = playOrder[playOrderPos];
+  } else {
+    const currentPlayerPos = playOrder.indexOf(ctx.currentPlayer);
+    if (currentPlayerPos === -1) {
+      playOrderPos =
+        ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
+      currentPlayer = playOrder[playOrderPos];
+    } else {
+      playOrderPos = currentPlayerPos;
+    }
+  }
+
+  return {
+    ...ctx,
+    currentPlayer,
+    playOrder,
+    playOrderPos,
+    activePlayers: RemovePlayerFromRecord(ctx.activePlayers, playerID),
+    _activePlayersMinMoves: RemovePlayerFromRecord(
+      ctx._activePlayersMinMoves,
+      playerID,
+    ),
+    _activePlayersMaxMoves: RemovePlayerFromRecord(
+      ctx._activePlayersMaxMoves,
+      playerID,
+    ),
+    _activePlayersNumMoves: RemovePlayerFromRecord(
+      ctx._activePlayersNumMoves,
+      playerID,
+    ),
+    _prevActivePlayers: (ctx._prevActivePlayers || []).map((entry) => ({
+      activePlayers: RemovePlayerFromRecord(entry.activePlayers, playerID),
+      _activePlayersMinMoves: RemovePlayerFromRecord(
+        entry._activePlayersMinMoves,
+        playerID,
+      ),
+      _activePlayersMaxMoves: RemovePlayerFromRecord(
+        entry._activePlayersMaxMoves,
+        playerID,
+      ),
+      _activePlayersNumMoves: RemovePlayerFromRecord(
+        entry._activePlayersNumMoves,
+        playerID,
+      ),
+    })),
+    _nextActivePlayers: RemovePlayerFromActivePlayersArg(
+      ctx._nextActivePlayers,
+      playerID,
+    ),
+    _removedPlayers: removedPlayers,
+  };
+}
+
 export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
   let activePlayers: typeof ctx.activePlayers = {};
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
   let _activePlayersMinMoves = {};
   let _activePlayersMaxMoves = {};
+  const removedPlayers = new Set(ctx._removedPlayers || []);
 
   if (Array.isArray(arg)) {
     // support a simple array of player IDs as active players
     const value = {};
-    arg.forEach((v) => (value[v] = Stage.NULL));
+    arg
+      .filter((v) => !removedPlayers.has(v))
+      .forEach((v) => (value[v] = Stage.NULL));
     activePlayers = value;
   } else {
     // process active players argument object
@@ -53,26 +163,29 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
       ];
     }
 
-    if (arg.currentPlayer !== undefined) {
+    if (
+      arg.currentPlayer !== undefined &&
+      !removedPlayers.has(ctx.currentPlayer)
+    ) {
       ApplyActivePlayerArgument(
         activePlayers,
         _activePlayersMinMoves,
         _activePlayersMaxMoves,
         ctx.currentPlayer,
-        arg.currentPlayer
+        arg.currentPlayer,
       );
     }
 
     if (arg.others !== undefined) {
       for (let i = 0; i < ctx.playOrder.length; i++) {
         const id = ctx.playOrder[i];
-        if (id !== ctx.currentPlayer) {
+        if (id !== ctx.currentPlayer && !removedPlayers.has(id)) {
           ApplyActivePlayerArgument(
             activePlayers,
             _activePlayersMinMoves,
             _activePlayersMaxMoves,
             id,
-            arg.others
+            arg.others,
           );
         }
       }
@@ -81,24 +194,26 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
     if (arg.all !== undefined) {
       for (let i = 0; i < ctx.playOrder.length; i++) {
         const id = ctx.playOrder[i];
+        if (removedPlayers.has(id)) continue;
         ApplyActivePlayerArgument(
           activePlayers,
           _activePlayersMinMoves,
           _activePlayersMaxMoves,
           id,
-          arg.all
+          arg.all,
         );
       }
     }
 
     if (arg.value) {
       for (const id in arg.value) {
+        if (removedPlayers.has(id)) continue;
         ApplyActivePlayerArgument(
           activePlayers,
           _activePlayersMinMoves,
           _activePlayersMaxMoves,
           id,
-          arg.value[id]
+          arg.value[id],
         );
       }
     }
@@ -212,7 +327,7 @@ function ApplyActivePlayerArgument(
   _activePlayersMinMoves: Ctx['_activePlayersMinMoves'],
   _activePlayersMaxMoves: Ctx['_activePlayersMaxMoves'],
   playerID: PlayerID,
-  arg: StageArg
+  arg: StageArg,
 ) {
   if (typeof arg !== 'object' || arg === Stage.NULL) {
     arg = { stage: arg as string | null };
@@ -235,7 +350,7 @@ function ApplyActivePlayerArgument(
  */
 function getCurrentPlayer(
   playOrder: Ctx['playOrder'],
-  playOrderPos: Ctx['playOrderPos']
+  playOrderPos: Ctx['playOrderPos'],
 ) {
   // convert to string in case playOrder is set to number[]
   return playOrder[playOrderPos] + '';
@@ -256,19 +371,26 @@ export function InitTurnOrderState(state: State, turn: TurnConfig) {
   const context = { ...pluginAPIs, G, ctx };
   const order = turn.order;
 
-  let playOrder = [...Array.from({ length: numPlayers })].map((_, i) => i + '');
+  let playOrder = Array.from({ length: numPlayers }).map((_, i) => i + '');
   if (order.playOrder !== undefined) {
     playOrder = order.playOrder(context);
   }
+  playOrder = playOrder
+    .map((playerID) => playerID + '')
+    .filter((playerID) => !IsPlayerRemoved(ctx, playerID));
 
-  const playOrderPos = order.first(context);
+  let playOrderPos = order.first(context);
   const posType = typeof playOrderPos;
   if (posType !== 'number') {
     logging.error(
-      `invalid value returned by turn.order.first — expected number got ${posType} “${playOrderPos}”.`
+      `invalid value returned by turn.order.first — expected number got ${posType} “${playOrderPos}”.`,
     );
   }
-  const currentPlayer = getCurrentPlayer(playOrder, playOrderPos);
+  if (playOrder.length > 0 && playOrderPos > playOrder.length - 1) {
+    playOrderPos = 0;
+  }
+  const currentPlayer =
+    playOrder.length > 0 ? getCurrentPlayer(playOrder, playOrderPos) : '';
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
   ctx = SetActivePlayers(ctx, turn.activePlayers || {});
@@ -288,7 +410,7 @@ export function UpdateTurnOrderState(
   state: State,
   currentPlayer: PlayerID,
   turn: TurnConfig,
-  endTurnArg?: true | { remove?: any; next?: string }
+  endTurnArg?: true | { remove?: any; next?: string },
 ) {
   const order = turn.order;
 
@@ -303,15 +425,18 @@ export function UpdateTurnOrderState(
 
     Object.keys(endTurnArg).forEach((arg) => {
       switch (arg) {
-        case 'remove':
+        case 'remove': {
           currentPlayer = getCurrentPlayer(ctx.playOrder, playOrderPos);
           break;
-        case 'next':
+        }
+        case 'next': {
           playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
           currentPlayer = endTurnArg.next;
           break;
-        default:
+        }
+        default: {
           logging.error(`invalid argument to endTurn: ${arg}`);
+        }
       }
     });
   } else {
@@ -321,7 +446,7 @@ export function UpdateTurnOrderState(
     const type = typeof t;
     if (t !== undefined && type !== 'number') {
       logging.error(
-        `invalid value returned by turn.order.next — expected number or undefined got ${type} “${t}”.`
+        `invalid value returned by turn.order.next — expected number or undefined got ${type} “${t}”.`,
       );
     }
 

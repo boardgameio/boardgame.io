@@ -85,7 +85,7 @@ class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
 
   _createInstanceButtons = (inst: Match) => {
     const playerSeat = inst.players.find(
-      (player) => player.name === this.props.playerName
+      (player) => player.name === this.props.playerName,
     );
     const freeSeat = inst.players.find((player) => !player.name);
     if (playerSeat && freeSeat) {

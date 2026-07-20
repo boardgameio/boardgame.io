@@ -232,20 +232,13 @@ server.run(8000);
 ?> See [the Server reference page](api/Server.md) for more detail on
    the various configuration options.
 
-Because `Game.js` is an ES module, we will use [esm](https://github.com/standard-things/esm)
-which enables us to use `import` statements in a Node environment:
-
-```
-npm install esm
-```
-
-We can then add a new script to our `package.json` to simplify
+Add a new script to our `package.json` to simplify
 running the server:
 
 ```json
 {
   "scripts": {
-    "serve": "node -r esm src/server.js"
+    "serve": "node src/server.js"
   }
 }
 ```

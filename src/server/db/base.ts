@@ -109,12 +109,12 @@ export abstract class Async {
     if (this.createGame) {
       console.warn(
         'The database connector does not implement a createMatch method.',
-        '\nUsing the deprecated createGame method instead.'
+        '\nUsing the deprecated createGame method instead.',
       );
       return this.createGame(matchID, opts);
     } else {
       console.error(
-        'The database connector does not implement a createMatch method.'
+        'The database connector does not implement a createMatch method.',
       );
     }
   }
@@ -143,7 +143,7 @@ export abstract class Async {
   abstract setState(
     matchID: string,
     state: State,
-    deltalog?: LogEntry[]
+    deltalog?: LogEntry[],
   ): Promise<void>;
 
   /**
@@ -151,7 +151,7 @@ export abstract class Async {
    */
   abstract setMetadata(
     matchID: string,
-    metadata: Server.MatchData
+    metadata: Server.MatchData,
   ): Promise<void>;
 
   /**
@@ -159,7 +159,7 @@ export abstract class Async {
    */
   abstract fetch<O extends FetchOpts>(
     matchID: string,
-    opts: O
+    opts: O,
   ): Promise<FetchResult<O>>;
 
   /**
@@ -175,12 +175,12 @@ export abstract class Async {
     if (this.listGames) {
       console.warn(
         'The database connector does not implement a listMatches method.',
-        '\nUsing the deprecated listGames method instead.'
+        '\nUsing the deprecated listGames method instead.',
       );
       return this.listGames(opts);
     } else {
       console.error(
-        'The database connector does not implement a listMatches method.'
+        'The database connector does not implement a listMatches method.',
       );
     }
   }
@@ -221,12 +221,12 @@ export abstract class Sync {
     if (this.createGame) {
       console.warn(
         'The database connector does not implement a createMatch method.',
-        '\nUsing the deprecated createGame method instead.'
+        '\nUsing the deprecated createGame method instead.',
       );
       return this.createGame(matchID, opts);
     } else {
       console.error(
-        'The database connector does not implement a createMatch method.'
+        'The database connector does not implement a createMatch method.',
       );
     }
   }
@@ -277,12 +277,12 @@ export abstract class Sync {
     if (this.listGames) {
       console.warn(
         'The database connector does not implement a listMatches method.',
-        '\nUsing the deprecated listGames method instead.'
+        '\nUsing the deprecated listGames method instead.',
       );
       return this.listGames(opts);
     } else {
       console.error(
-        'The database connector does not implement a listMatches method.'
+        'The database connector does not implement a listMatches method.',
       );
     }
   }
