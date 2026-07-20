@@ -44,8 +44,8 @@
   let bot;
   if (client.game.ai) {
     bot = new MCTSBot({
+      ...client.game.ai,
       game: client.game,
-      enumerate: client.game.ai.enumerate,
       iterationCallback,
     });
     bot.setOpt('async', true);
@@ -57,8 +57,8 @@
   function ChangeBot() {
     const botConstructor = bots[selectedBot];
     bot = new botConstructor({
+      ...client.game.ai,
       game: client.game,
-      enumerate: client.game.ai.enumerate,
       iterationCallback,
     });
     bot.setOpt('async', true);

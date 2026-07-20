@@ -356,6 +356,8 @@ export interface Game<
   plugins?: Array<Plugin<any, any, G>>;
   ai?: {
     enumerate: (G: G, ctx: Ctx, playerID: PlayerID) => AiEnumerate;
+    // bot options forwarded by the Debug Panel, e.g. MCTSBot's iterations/playoutDepth/objectives (#7)
+    [option: string]: unknown;
   };
   processMove?: (
     state: State<G>,

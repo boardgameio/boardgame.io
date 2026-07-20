@@ -39,6 +39,31 @@ test('switching panels', async () => {
   client.stop();
 });
 
+test('AI panel bot uses the game’s ai options', async () => {
+  const client = Client({
+    game: {
+      moves: { clickCell: () => {} },
+      ai: {
+        enumerate: () => [{ move: 'clickCell', args: [0] }],
+        iterations: 42,
+        playoutDepth: 7,
+      },
+    },
+  });
+  client.start();
+
+  await fireEvent.click(screen.getByText('AI'));
+
+  const iterations = screen.getByLabelText('iterations') as HTMLInputElement;
+  const playoutDepth = screen.getByLabelText(
+    'playoutDepth',
+  ) as HTMLInputElement;
+  expect(iterations.value).toBe('42');
+  expect(playoutDepth.value).toBe('7');
+
+  client.stop();
+});
+
 test('visibility toggle', async () => {
   const client = Client({ game: {} });
   client.start();
