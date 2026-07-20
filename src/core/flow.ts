@@ -27,6 +27,7 @@ import type {
   FnContext,
   LogEntry,
   Game,
+  MoveInfo,
   PhaseConfig,
   PlayerID,
   Move,
@@ -85,13 +86,14 @@ export function Flow({
     hookType: GameMethod,
   ) => {
     const withPlugins = plugin.FnWrap(hook, hookType, plugins);
-    return (state: State & { playerID?: PlayerID }) => {
+    return (state: State & { playerID?: PlayerID; move?: MoveInfo }) => {
       const pluginAPIs = plugin.GetAPIs(state);
       return withPlugins({
         ...pluginAPIs,
         G: state.G,
         ctx: state.ctx,
         playerID: state.playerID,
+        ...(state.move !== undefined && { move: state.move }),
       });
     };
   };
@@ -719,7 +721,7 @@ export function Flow({
   }
 
   function ProcessMove(state: State, action: ActionPayload.MakeMove): State {
-    const { playerID, type } = action;
+    const { playerID, type, args } = action;
     const { currentPlayer, activePlayers, _activePlayersMaxMoves } = state.ctx;
     const move = GetMove(state.ctx, type, playerID);
     const shouldCount =
@@ -748,7 +750,11 @@ export function Flow({
     }
 
     const phaseConfig = GetPhase(state.ctx);
-    const G = phaseConfig.turn.wrapped.onMove({ ...state, playerID });
+    const G = phaseConfig.turn.wrapped.onMove({
+      ...state,
+      playerID,
+      move: { name: type, args },
+    });
     state = { ...state, G };
 
     const events = [{ fn: OnMove }];

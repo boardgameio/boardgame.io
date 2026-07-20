@@ -253,6 +253,15 @@ describe('turn', () => {
       );
       expect(state.G.playerID).toEqual(playerID);
     });
+
+    test('ctx with move name and args', () => {
+      const flow = Flow({
+        turn: { onMove: ({ move }) => ({ move }) },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.processMove(state, makeMove('A', [1, 2], '0').payload);
+      expect(state.G.move).toEqual({ name: 'A', args: [1, 2] });
+    });
   });
 
   describe('minMoves', () => {
