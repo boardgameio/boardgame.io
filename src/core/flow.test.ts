@@ -255,6 +255,16 @@ describe('turn', () => {
     });
   });
 
+  describe('disableLog', () => {
+    test('events do not append log entries', () => {
+      const flow = Flow({ disableLog: true });
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.processEvent(state, gameEvent('endTurn'));
+      expect(state.ctx.turn).toBe(1);
+      expect(state.deltalog).toEqual([]);
+    });
+  });
+
   describe('minMoves', () => {
     describe('without phases', () => {
       const flow = Flow({
