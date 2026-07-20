@@ -112,6 +112,15 @@ export const configureRouter = ({
     sendAll: () => {},
   };
 
+  const broadcastMatchData = (matchID: string, metadata: Server.MatchData) => {
+    if (!transport) return;
+    const { players } = createClientMatchData(matchID, metadata);
+    transport.createTransportAPI(matchID).sendAll({
+      type: 'matchData',
+      args: [matchID, players],
+    });
+  };
+
   const getLeaveBody = (ctx: Koa.Context) => {
     const playerID = (ctx.request.body as any)?.playerID;
     const credentials = (ctx.request.body as any)?.credentials;
@@ -186,7 +195,12 @@ export const configureRouter = ({
     delete metadata.players[playerID].name;
     delete metadata.players[playerID].credentials;
     const hasPlayers = Object.values(metadata.players).some(({ name }) => name);
-    await (hasPlayers ? db.setMetadata(matchID, metadata) : db.wipe(matchID));
+    if (hasPlayers) {
+      await db.setMetadata(matchID, metadata);
+      broadcastMatchData(matchID, metadata);
+    } else {
+      await db.wipe(matchID);
+    }
   };
 
   const clearPlayerSlotFromRequest = async (ctx: Koa.Context) => {
@@ -387,6 +401,7 @@ export const configureRouter = ({
     metadata.players[playerID].credentials = playerCredentials;
 
     await db.setMetadata(matchID, metadata);
+    broadcastMatchData(matchID, metadata);
 
     const body: LobbyAPI.JoinedMatch = { playerID, playerCredentials };
     ctx.body = body;
@@ -572,6 +587,7 @@ export const configureRouter = ({
       metadata.players[playerID].data = data;
     }
     await db.setMetadata(matchID, metadata);
+    broadcastMatchData(matchID, metadata);
     ctx.body = {};
   };
 
