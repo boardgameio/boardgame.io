@@ -842,6 +842,73 @@ describe('action errors', () => {
     });
   });
 
+  describe('optimistic self-heal', () => {
+    let sendToClient: (data: TransportData) => void;
+    let requestSync: jest.Mock;
+    let client: ReturnType<typeof Client>;
+
+    beforeEach(() => {
+      const game: Game = {
+        moves: {
+          valid: ({ G }) => G,
+          invalidEverywhere: () => INVALID_MOVE,
+        },
+      };
+      requestSync = jest.fn();
+      client = Client({
+        game,
+        matchID: 'A',
+        debug: false,
+        multiplayer: ({ transportDataCallback }) => {
+          sendToClient = transportDataCallback;
+          return {
+            connect() {},
+            disconnect() {},
+            subscribe() {},
+            subscribeToConnectionStatus() {},
+            requestSync,
+            sendAction() {},
+          } as unknown as Transport;
+        },
+      });
+      client.start();
+      const state = InitializeGame({ game: ProcessGameConfig(game) });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    });
+
+    afterEach(() => {
+      client.stop();
+    });
+
+    test('a rejection while ahead of the master requests a sync', () => {
+      client.moves.valid();
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({ type: 'actionResult', args: ['A', 1, { error }] });
+      expect(requestSync).toHaveBeenCalledTimes(1);
+      expect(client.lastActionError).toEqual(error);
+
+      const state = InitializeGame({
+        game: ProcessGameConfig({ moves: { valid: ({ G }) => G } }),
+      });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('a rejection with no optimistic lead does not request a sync', () => {
+      client.moves.invalidEverywhere();
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({ type: 'actionResult', args: ['A', 1, { error }] });
+      expect(requestSync).not.toHaveBeenCalled();
+      expect(client.lastActionError).toEqual(error);
+    });
+
+    test('a successful result does not request a sync', () => {
+      client.moves.valid();
+      sendToClient({ type: 'actionResult', args: ['A', 1, {}] });
+      expect(requestSync).not.toHaveBeenCalled();
+    });
+  });
+
   describe('synchronous transport', () => {
     test('an action result delivered during dispatch is reported once', () => {
       let sendToClient: (data: TransportData) => void;

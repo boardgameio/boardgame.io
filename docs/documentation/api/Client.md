@@ -135,7 +135,10 @@ The following properties are available on a client instance:
   action succeeds, the client is reset, or an authoritative sync is received.
   In multiplayer, this reflects the authoritative
   result from the master, and rejections are delivered only to the
-  client that made the move. If several actions are still awaiting a result,
+  client that made the move. If the rejected move had been applied
+  optimistically, the client automatically requests a sync to restore the
+  authoritative state; that sync clears this field, so treat the
+  `subscribe` error argument as the one-time rejection signal. If several actions are still awaiting a result,
   only the latest action’s result is reflected here; older results are treated
   as stale. An error object has:
 

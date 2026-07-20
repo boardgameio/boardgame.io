@@ -181,6 +181,7 @@ export class _ClientImpl<
   private nextActionID = 0;
   private latestActionID?: number;
   private actionResultDeliveries = 0;
+  private latestAuthoritativeStateID = -1;
 
   constructor({
     game,
@@ -415,6 +416,14 @@ export class _ClientImpl<
     this.actionResultDeliveries++;
     this.lastActionError = error;
     this.notifySubscribers(error);
+    // Broadcasts older than the optimistic state are ignored, so a rejected
+    // optimistic move can only be rolled back by an explicit resync.
+    if (
+      error &&
+      this.store.getState()._stateID > this.latestAuthoritativeStateID
+    ) {
+      this.transport.requestSync();
+    }
   }
 
   /** Handle all incoming updates from a multiplayer transport. */
@@ -428,6 +437,7 @@ export class _ClientImpl<
         this.lastActionError = undefined;
         this.latestActionID = undefined;
         const [, syncInfo] = data.args;
+        this.latestAuthoritativeStateID = syncInfo.state._stateID;
         const action = ActionCreators.sync(syncInfo);
         this.receiveMatchData(syncInfo.filteredMetadata);
         this.store.dispatch(action);
@@ -435,6 +445,10 @@ export class _ClientImpl<
       }
       case 'update': {
         const [, state, deltalog] = data.args;
+        this.latestAuthoritativeStateID = Math.max(
+          this.latestAuthoritativeStateID,
+          state._stateID,
+        );
         const currentState = this.store.getState();
         if (state._stateID >= currentState._stateID) {
           const action = ActionCreators.update(state, deltalog);
@@ -444,6 +458,10 @@ export class _ClientImpl<
       }
       case 'patch': {
         const [, prevStateID, stateID, patch, deltalog] = data.args;
+        this.latestAuthoritativeStateID = Math.max(
+          this.latestAuthoritativeStateID,
+          stateID,
+        );
         const currentStateID = this.store.getState()._stateID;
         if (prevStateID !== currentStateID) break;
         const action = ActionCreators.patch(
