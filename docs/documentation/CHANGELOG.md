@@ -362,9 +362,12 @@ See [the Server reference page](https://boardgame.io/documentation/#/api/Server)
 
 ### v0.43.3
 
-#### Features
+#### Breaking Changes
 
 * [[01c522c](https://github.com/boardgameio/boardgame.io/commit/01c522c)] Throw error in development if non-serializable state is used in a move ([#896](https://github.com/boardgameio/boardgame.io/pull/896))
+
+#### Features
+
 * [[ccc9ada](https://github.com/boardgameio/boardgame.io/commit/ccc9ada)] Add details to exceptions raised in LobbyClient ([#898](https://github.com/boardgameio/boardgame.io/pull/898))
 
 #### Bugfixes
