@@ -325,6 +325,7 @@ export interface Game<
   maxPlayers?: number;
   deltaState?: boolean;
   disableUndo?: boolean;
+  disableLog?: boolean;
   seed?: string | number;
   setup?: (
     context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },

@@ -47,6 +47,7 @@ export function Flow({
   turn,
   events,
   plugins,
+  disableLog,
 }: Game) {
   // Attach defaults.
   if (moves === undefined) {
@@ -106,6 +107,9 @@ export function Flow({
       });
     };
   };
+
+  const appendLogEntry = (state: State, logEntry: LogEntry): LogEntry[] =>
+    disableLog ? state.deltalog || [] : [...(state.deltalog || []), logEntry];
 
   const wrapped = {
     onEnd: HookWrapper(onEnd, GameMethod.GAME_ON_END),
@@ -520,7 +524,7 @@ export function Flow({
     const logEntry: LogEntry = { action, _stateID, turn, phase };
     if (automatic) logEntry.automatic = true;
 
-    const deltalog = [...(state.deltalog || []), logEntry];
+    const deltalog = appendLogEntry(state, logEntry);
 
     return { ...state, G, ctx, deltalog };
   }
@@ -584,7 +588,7 @@ export function Flow({
     const logEntry: LogEntry = { action, _stateID, turn, phase };
     if (automatic) logEntry.automatic = true;
 
-    const deltalog = [...(state.deltalog || []), logEntry];
+    const deltalog = appendLogEntry(state, logEntry);
 
     return { ...state, G, ctx, deltalog, _undo: [], _redo: [] };
   }
@@ -665,7 +669,7 @@ export function Flow({
     const logEntry: LogEntry = { action, _stateID, turn, phase };
     if (automatic) logEntry.automatic = true;
 
-    const deltalog = [...(state.deltalog || []), logEntry];
+    const deltalog = appendLogEntry(state, logEntry);
 
     return { ...state, ctx, deltalog };
   }

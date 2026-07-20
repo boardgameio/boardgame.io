@@ -140,6 +140,10 @@
   // Disable undo feature for all the moves in the game
   disableUndo: true,
 
+  // Disable the game log: no log entries are created or stored.
+  // Note that the Debug Panel's log and time travel need the log.
+  disableLog: true,
+
   // Transfer delta state with JSON Patch in multiplayer
   deltaState: true,
 }
