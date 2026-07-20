@@ -66,7 +66,8 @@
     ),
 
     // Called after each move.
-    onMove: ({ G, ctx, events, random, ...plugins }) => G,
+    // move describes the move that was made: { name, args }.
+    onMove: ({ G, ctx, move, events, random, ...plugins }) => G,
 
     // Prevents ending the turn before a minimum number of moves.
     minMoves: 1,

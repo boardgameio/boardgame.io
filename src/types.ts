@@ -274,6 +274,12 @@ export interface TurnOrderConfig<
   playOrder?: (context: FnContext<G, PluginAPIs>) => PlayerID[];
 }
 
+/** Details of the move that invoked the `turn.onMove` hook. */
+export interface MoveInfo {
+  name: string;
+  args?: any;
+}
+
 export interface TurnConfig<
   G extends any = any,
   PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
@@ -289,7 +295,7 @@ export interface TurnConfig<
     context: FnContext<G, PluginAPIs>,
   ) => boolean | void | { next: PlayerID };
   onMove?: (
-    context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
+    context: FnContext<G, PluginAPIs> & { playerID: PlayerID; move: MoveInfo },
   ) => void | G;
   stages?: StageMap<G, PluginAPIs>;
   order?: TurnOrderConfig<G, PluginAPIs>;
@@ -297,7 +303,9 @@ export interface TurnConfig<
     endIf?: (state: State<G>) => boolean | void | { next: PlayerID };
     onBegin?: (state: State<G>) => void | G;
     onEnd?: (state: State<G>) => void | G;
-    onMove?: (state: State<G> & { playerID: PlayerID }) => void | G;
+    onMove?: (
+      state: State<G> & { playerID: PlayerID; move?: MoveInfo },
+    ) => void | G;
   };
 }
 
