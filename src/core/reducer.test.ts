@@ -95,6 +95,27 @@ test('move returns Invalid() with a payload', () => {
   });
 });
 
+test('move returns Invalid() with empty and primitive payloads', () => {
+  const game: Game = {
+    moves: {
+      Empty: () => Invalid(),
+      String: () => Invalid('not enough gold'),
+      Null: () => Invalid(null),
+    },
+  };
+  const reducer = CreateGameReducer({ game });
+
+  expect(
+    reducer(initialState, makeMove('Empty'))['transients'].error.payload,
+  ).toBeUndefined();
+  expect(
+    reducer(initialState, makeMove('String'))['transients'].error.payload,
+  ).toBe('not enough gold');
+  expect(
+    reducer(initialState, makeMove('Null'))['transients'].error.payload,
+  ).toBeNull();
+});
+
 test('recognizes an Invalid result created by another bundle', () => {
   const game: Game = {
     moves: {

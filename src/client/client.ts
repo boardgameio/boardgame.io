@@ -175,11 +175,12 @@ export class _ClientImpl<
   chatMessages: ChatMessage[];
   /**
    * Why this client’s most recent action was rejected, or undefined.
-   * Cleared when a subsequent action succeeds.
+   * Cleared when a subsequent action succeeds, or on reset / sync.
    */
   lastActionError?: ActionError;
   private nextActionID = 0;
   private latestActionID?: number;
+  private actionResultDeliveries = 0;
 
   constructor({
     game,
@@ -316,16 +317,33 @@ export class _ClientImpl<
      * Single-player clients read action errors directly from reducer
      * transients. Multiplayer clients wait for the master's correlated result.
      */
+    let pendingActionError: ActionError | undefined;
     const SubscriptionMiddleware =
       (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
+        const deliveriesBefore = this.actionResultDeliveries;
         const result = next(action);
-        let actionError: ActionError | undefined;
-        if (!this.multiplayer && action.type !== Actions.STRIP_TRANSIENTS) {
+
+        // Notify after transient metadata has been stripped, so subscribers
+        // receive one rejection event paired with clean public state.
+        if (action.type === Actions.STRIP_TRANSIENTS) {
+          const actionError = pendingActionError;
+          pendingActionError = undefined;
+          if (actionError) this.notifySubscribers(actionError);
+          return result;
+        }
+
+        if (action.type === Actions.RESET) {
+          this.lastActionError = undefined;
+          this.latestActionID = undefined;
+        }
+
+        if (!this.multiplayer) {
           const transientError = (store.getState() as TransientState<G> | null)
             ?.transients?.error;
           if (transientError) {
             this.lastActionError = transientError;
-            actionError = transientError;
+            pendingActionError = transientError;
+            return result;
           } else if (
             action.type === Actions.MAKE_MOVE ||
             action.type === Actions.GAME_EVENT ||
@@ -335,7 +353,8 @@ export class _ClientImpl<
             this.lastActionError = undefined;
           }
         }
-        this.notifySubscribers(actionError);
+        if (this.actionResultDeliveries !== deliveriesBefore) return result;
+        this.notifySubscribers();
         return result;
       };
 
@@ -390,7 +409,10 @@ export class _ClientImpl<
 
   /** Handle the authoritative result of an action sent to the master. */
   private receiveActionResult(actionID: number, error?: ActionError): void {
+    // Only the latest submitted action owns lastActionError. Older results are
+    // stale once the player has attempted another action.
     if (actionID !== this.latestActionID) return;
+    this.actionResultDeliveries++;
     this.lastActionError = error;
     this.notifySubscribers(error);
   }
@@ -401,6 +423,10 @@ export class _ClientImpl<
     if (matchID !== this.matchID) return;
     switch (data.type) {
       case 'sync': {
+        // Transient errors are not persisted by the master. A sync establishes
+        // a fresh authoritative baseline and invalidates any in-flight result.
+        this.lastActionError = undefined;
+        this.latestActionID = undefined;
         const [, syncInfo] = data.args;
         const action = ActionCreators.sync(syncInfo);
         this.receiveMatchData(syncInfo.filteredMetadata);

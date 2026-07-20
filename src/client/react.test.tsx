@@ -13,6 +13,7 @@ import type { BoardProps } from './react';
 import { Client } from './react';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
+import { Invalid } from '../core/constants';
 
 let lastBoardProps: (BoardProps & { doStuff?; extraValue? }) | null = null;
 
@@ -51,6 +52,28 @@ test('board props', () => {
   render(<Board />);
   expect(lastBoardProps.isMultiplayer).toEqual(false);
   expect(lastBoardProps.isActive).toBe(true);
+});
+
+test('board receives and clears lastActionError', () => {
+  const Board = Client({
+    game: {
+      moves: {
+        reject: () => Invalid({ reason: 'not allowed' }),
+      },
+    },
+    board: TestBoard,
+  });
+  render(<Board />);
+  expect(lastBoardProps.lastActionError).toBeUndefined();
+
+  act(() => lastBoardProps.moves.reject());
+  expect(lastBoardProps.lastActionError).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'not allowed' },
+  });
+
+  act(() => lastBoardProps.reset());
+  expect(lastBoardProps.lastActionError).toBeUndefined();
 });
 
 test('can pass extra props to Client', () => {

@@ -8,17 +8,31 @@
 
 import { Client } from '../client/client';
 import type { _ClientImpl } from '../client/client';
-import { INVALID_MOVE } from '../core/constants';
+import { Invalid, INVALID_MOVE } from '../core/constants';
 
 // Surpress invalid move error logging
 jest.mock('../core/logger');
 
+interface TestGameState {
+  deck: Array<{ id: string; details: { suit: string } }>;
+  moveBody?: boolean;
+  madeInvalidMove?: boolean;
+  onPhaseBegin?: boolean;
+  onPhaseEnd?: boolean;
+  onTurnBegin?: boolean;
+  onTurnEnd?: boolean;
+  onMove?: boolean;
+}
+
 describe('immer', () => {
-  let client: _ClientImpl;
+  let client: _ClientImpl<TestGameState>;
 
   beforeAll(() => {
-    client = Client({
+    client = Client<TestGameState>({
       game: {
+        setup: () => ({
+          deck: [{ id: 'ace', details: { suit: 'spades' } }],
+        }),
         moves: {
           A: ({ G }) => {
             G.moveBody = true;
@@ -27,6 +41,12 @@ describe('immer', () => {
             G.madeInvalidMove = true;
             return INVALID_MOVE;
           },
+          invalidWithDraftPayload: ({ G }) =>
+            Invalid({
+              card: G.deck[0],
+              cards: [G.deck[0]],
+              count: G.deck.length,
+            }),
         },
 
         phases: {
@@ -82,5 +102,15 @@ describe('immer', () => {
   test('invalid move', () => {
     client.moves.invalid();
     expect(client.getState().G.madeInvalidMove).toBeUndefined();
+  });
+
+  test('invalid move snapshots drafts in its payload', () => {
+    client.moves.invalidWithDraftPayload();
+    expect(client.lastActionError.payload).toEqual({
+      card: { id: 'ace', details: { suit: 'spades' } },
+      cards: [{ id: 'ace', details: { suit: 'spades' } }],
+      count: 1,
+    });
+    expect(() => JSON.stringify(client.lastActionError.payload)).not.toThrow();
   });
 });

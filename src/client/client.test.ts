@@ -684,18 +684,15 @@ describe('action errors', () => {
 
     test('subscriber receives the error for a rejected move', () => {
       client.moves.rejected();
-      expect(client.lastActionError).toEqual({
+      const expectedError = {
         type: 'action/invalid_move',
         payload: { reason: 'not enough gold' },
-      });
-      expect(fn).toHaveBeenCalledWith(expect.anything(), {
-        type: 'action/invalid_move',
-        payload: { reason: 'not enough gold' },
-      });
-      const errorNotifications = fn.mock.calls.filter(
-        ([, error]) => error !== undefined,
+      };
+      expect(client.lastActionError).toEqual(expectedError);
+      expect(fn.mock.calls.map(([, error]) => error)).toEqual([expectedError]);
+      expect(fn.mock.calls[0][0]).not.toEqual(
+        expect.objectContaining({ transients: expect.anything() }),
       );
-      expect(errorNotifications).toHaveLength(1);
     });
 
     test('a subsequent successful move clears the error', () => {
@@ -714,6 +711,13 @@ describe('action errors', () => {
       client.moves.rejected();
       expect(client.lastActionError).toBeDefined();
       client.undo();
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('reset clears the error', () => {
+      client.moves.rejected();
+      expect(client.lastActionError).toBeDefined();
+      client.reset();
       expect(client.lastActionError).toBeUndefined();
     });
   });
@@ -813,6 +817,29 @@ describe('action errors', () => {
       });
       expect(client.lastActionError).toBeUndefined();
     });
+
+    test('sync clears the error and invalidates an in-flight result', () => {
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'slot taken' },
+      };
+      client.moves.A();
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
+      expect(client.lastActionError).toEqual(error);
+
+      const state = client.store.getState();
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+      expect(client.lastActionError).toBeUndefined();
+
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
+      expect(client.lastActionError).toBeUndefined();
+    });
   });
 
   describe('synchronous transport', () => {
@@ -853,10 +880,9 @@ describe('action errors', () => {
       fn.mockClear();
       client.moves.A();
       expect(client.lastActionError).toEqual(error);
-      const errorNotifications = fn.mock.calls.filter(
-        ([, receivedError]) => receivedError !== undefined,
-      );
-      expect(errorNotifications).toHaveLength(1);
+      expect(fn.mock.calls.map(([, receivedError]) => receivedError)).toEqual([
+        error,
+      ]);
       client.stop();
     });
   });

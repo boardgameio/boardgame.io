@@ -682,6 +682,12 @@ describe('action results', () => {
     });
   });
 
+  test('old clients without an action ID receive no action result', async () => {
+    await master.onUpdate(ActionCreators.makeMove('valid'), 0, 'matchID', '0');
+    expect(sendAll).toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   test('pre-dispatch rejection sends a correlated result', async () => {
     await master.onUpdate(
       ActionCreators.makeMove('valid'),
@@ -695,6 +701,44 @@ describe('action results', () => {
       playerID: '0',
       type: 'actionResult',
       args: ['matchID', 4, { error: { type: 'action/stale_state_id' } }],
+    });
+  });
+
+  test.each([
+    {
+      name: 'unavailable move',
+      action: ActionCreators.makeMove('missing'),
+      matchID: 'matchID',
+      playerID: '0',
+      type: 'action/unavailable_move',
+    },
+    {
+      name: 'inactive player',
+      action: ActionCreators.makeMove('valid'),
+      matchID: 'matchID',
+      playerID: '1',
+      type: 'action/inactive_player',
+    },
+    {
+      name: 'missing match',
+      action: ActionCreators.makeMove('valid'),
+      matchID: 'missing',
+      playerID: '0',
+      type: 'update/match_not_found',
+    },
+  ])('$name sends a correlated result', async (testCase) => {
+    await master.onUpdate(
+      testCase.action,
+      0,
+      testCase.matchID,
+      testCase.playerID,
+      5,
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      playerID: testCase.playerID,
+      type: 'actionResult',
+      args: [testCase.matchID, 5, { error: { type: testCase.type } }],
     });
   });
 });

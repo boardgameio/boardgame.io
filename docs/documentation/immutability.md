@@ -98,7 +98,11 @@ where you can read it from the second argument of
 show it to the player. The `subscribe` argument is emitted once for the
 new rejection, while `lastActionError` remains set until a later action
 succeeds. The payload can be any JSON-serializable value and never becomes
-part of the game state.
+part of the game state. Values read from `G` are safe to include: boardgame.io
+snapshots them before delivering the payload.
+
+`INVALID_MOVE` and `Invalid(payload)` are supported as return values from move
+functions. They are not supported as return values from turn or phase hooks.
 
 ### Additional Reading
 

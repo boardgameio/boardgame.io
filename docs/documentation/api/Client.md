@@ -132,11 +132,15 @@ The following properties are available on a client instance:
 
 - `lastActionError`: The reason this client’s most recent action was
   rejected, or `undefined` if it wasn’t. Cleared when a subsequent
-  action succeeds. In multiplayer, this reflects the authoritative
+  action succeeds, the client is reset, or an authoritative sync is received.
+  In multiplayer, this reflects the authoritative
   result from the master, and rejections are delivered only to the
-  client that made the move. An error object has:
+  client that made the move. If several actions are still awaiting a result,
+  only the latest action’s result is reflected here; older results are treated
+  as stale. An error object has:
 
-    - `type`: an error code string, e.g. `'action/invalid_move'`
+    - `type`: an `ErrorType` code. Game-action failures use `action/*` codes
+      and update failures use `update/*` codes, e.g. `'action/invalid_move'`
     - `payload`: the value the move returned via
       [`Invalid(payload)`](/immutability.md#telling-the-player-why),
       if any

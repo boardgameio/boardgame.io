@@ -22,7 +22,8 @@ export interface InvalidMoveResult<Payload = any> {
  * Moves can return `Invalid(payload)` instead of the bare `INVALID_MOVE`
  * constant to attach a payload (e.g. a rejection reason) to the invalid
  * move. The payload is delivered to the acting client on the action
- * error and is never merged into game state.
+ * error and is never merged into game state. Payloads must be
+ * JSON-serializable.
  */
 export const Invalid = <Payload>(
   payload?: Payload,
