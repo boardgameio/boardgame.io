@@ -80,6 +80,12 @@ production build in `/build`, which you can host just about anywhere.
 <!-- tabs:end -->
 
 ## Heroku
+
+?> The single-port pattern shown here isn’t Heroku-specific: the same setup
+works on any Node.js host, for example [Render](https://render.com/),
+[Fly.io](https://fly.io/) or [Railway](https://railway.com/). Note that
+Heroku no longer offers a free tier.
+
 [Heroku](https://heroku.com) uses 2 different ways to determine the run command of a node application. It is possible to either:
 
 - Add a Procfile to the project root directory with the following line  
@@ -203,3 +209,35 @@ const GameClient = Client({
   multiplayer: SocketIO({ server: 'https://yourapplication.herokuapp.com' }),
 });
 ```
+
+## Self-hosting behind nginx
+
+If you run the game server on your own machine or VPS behind
+[nginx](https://nginx.org/), the proxy needs to upgrade WebSocket
+connections, otherwise socket.io clients will fail to connect or fall back
+to polling.
+
+This configuration proxies all traffic — the Lobby API and socket.io — to a
+boardgame.io server running on port 8000:
+
+```nginx
+server {
+  listen 80;
+  server_name example.com;
+
+  location / {
+    proxy_pass http://localhost:8000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  }
+}
+```
+
+If you also serve your client from the same server (see the single-port
+pattern above), this single `location` block covers the app, the Lobby API,
+and WebSocket traffic. For other setups — including Apache and HAProxy — see
+the [socket.io reverse proxy documentation](https://socket.io/docs/v4/reverse-proxy/).
