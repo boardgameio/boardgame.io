@@ -10,7 +10,7 @@ import * as Actions from './action-types';
 import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
 import { error } from './logger';
-import { INVALID_MOVE } from './constants';
+import { isInvalidMoveResult, getInvalidMovePayload } from './constants';
 import type { Dispatch } from 'redux';
 import type {
   ActionShape,
@@ -390,12 +390,15 @@ export function CreateGameReducer({
         const G = game.processMove(state, action.payload);
 
         // The game declared the move as invalid.
-        if (G === INVALID_MOVE) {
+        if (isInvalidMoveResult(G)) {
           error(
             `invalid move: ${action.payload.type} args: ${action.payload.args}`,
           );
-          // TODO(#723): Marshal a nice error payload with the processed move.
-          return WithError(state, ActionErrorType.InvalidMove);
+          return WithError(
+            state,
+            ActionErrorType.InvalidMove,
+            getInvalidMovePayload(G),
+          );
         }
 
         const newState = { ...state, G };

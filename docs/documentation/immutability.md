@@ -71,6 +71,39 @@ moves: {
 }
 ```
 
+### Telling the player why
+
+`INVALID_MOVE` discards the move, but the rejected player’s client
+is only told that _something_ was invalid. To attach a reason,
+return `Invalid(payload)` instead:
+
+```js
+import { Invalid } from 'boardgame.io/core';
+
+moves: {
+  clickCell: function({ G, ctx }, id) {
+    if (G.cells[id] !== null) {
+      return Invalid({ message: 'That cell is already filled' });
+    }
+
+    G.cells[id] = ctx.currentPlayer;
+  }
+}
+```
+
+The move is discarded exactly as with `INVALID_MOVE`, and the payload
+is delivered to the client that made the move — and only that client —
+where you can read it from the second argument of
+[`subscribe`](/api/Client.md) or the `lastActionError` board prop and
+show it to the player. The `subscribe` argument is emitted once for the
+new rejection, while `lastActionError` remains set until a later action
+succeeds. The payload can be any JSON-serializable value and never becomes
+part of the game state. Values read from `G` are safe to include: boardgame.io
+snapshots them before delivering the payload.
+
+`INVALID_MOVE` and `Invalid(payload)` are supported as return values from move
+functions. They are not supported as return values from turn or phase hooks.
+
 ### Additional Reading
 
 [Immutable Update Patterns](https://redux.js.org/recipes/structuring-reducers/immutable-update-patterns)

@@ -6,7 +6,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { INVALID_MOVE } from './constants';
+import { INVALID_MOVE, Invalid } from './constants';
 import { applyMiddleware, createStore } from 'redux';
 import { CreateGameReducer, TransientHandlingMiddleware } from './reducer';
 import { InitializeGame } from './initialize';
@@ -59,6 +59,81 @@ test('move returns INVALID_MOVE', () => {
   const state = reducer(initialState, makeMove('A'));
   expect(error).toHaveBeenCalledWith('invalid move: A args: undefined');
   expect(state._stateID).toBe(0);
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: undefined,
+  });
+});
+
+test('move returns Invalid() with a payload', () => {
+  const game: Game = {
+    moves: {
+      A: () => Invalid({ reason: 'not enough gold' }),
+      B: ({ G }) => {
+        G.mutated = true;
+        return Invalid({ reason: 'mutated then rejected' });
+      },
+    },
+  };
+  const reducer = CreateGameReducer({ game });
+
+  let state = reducer(initialState, makeMove('A'));
+  expect(error).toHaveBeenCalledWith('invalid move: A args: undefined');
+  expect(state._stateID).toBe(0);
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'not enough gold' },
+  });
+
+  // Draft mutations made before returning Invalid() are discarded.
+  state = reducer(initialState, makeMove('B'));
+  expect(state._stateID).toBe(0);
+  expect(state.G.mutated).toBeUndefined();
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'mutated then rejected' },
+  });
+});
+
+test('move returns Invalid() with empty and primitive payloads', () => {
+  const game: Game = {
+    moves: {
+      Empty: () => Invalid(),
+      String: () => Invalid('not enough gold'),
+      Null: () => Invalid(null),
+    },
+  };
+  const reducer = CreateGameReducer({ game });
+
+  expect(
+    reducer(initialState, makeMove('Empty'))['transients'].error.payload,
+  ).toBeUndefined();
+  expect(
+    reducer(initialState, makeMove('String'))['transients'].error.payload,
+  ).toBe('not enough gold');
+  expect(
+    reducer(initialState, makeMove('Null'))['transients'].error.payload,
+  ).toBeNull();
+});
+
+test('recognizes an Invalid result created by another bundle', () => {
+  const game: Game = {
+    moves: {
+      A: () =>
+        ({
+          [Symbol.for('boardgame.io/INVALID_MOVE')]: true,
+          payload: { reason: 'other-bundle' },
+        }) as any,
+    },
+  };
+  const reducer = CreateGameReducer({ game });
+  const state = reducer(initialState, makeMove('A'));
+  expect(state._stateID).toBe(0);
+  expect(state.G).toEqual(initialState.G);
+  expect(state['transients'].error).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'other-bundle' },
+  });
 });
 
 test('makeMove', () => {

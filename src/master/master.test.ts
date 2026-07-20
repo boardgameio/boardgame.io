@@ -20,7 +20,7 @@ import { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 import { PlayerView } from '../core/player-view';
-import { INVALID_MOVE } from '../core/constants';
+import { INVALID_MOVE, Invalid } from '../core/constants';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -596,6 +596,150 @@ describe('update', () => {
     ({ state, metadata } = await db.fetch(id, { state: true, metadata: true }));
     expect(state.ctx.turn).toBe(2);
     expect(metadata).toBeUndefined();
+  });
+});
+
+describe('action results', () => {
+  const send = jest.fn();
+  const sendAll = jest.fn();
+  const game: Game = {
+    moves: {
+      valid: () => ({ moved: true }),
+      rejected: () => Invalid({ reason: 'not allowed' }),
+      rejectedBare: () => INVALID_MOVE,
+    },
+  };
+  let db;
+  let master;
+
+  beforeEach(async () => {
+    db = new InMemory();
+    master = new Master(game, db, TransportAPI(send, sendAll));
+    await master.onSync('matchID', '0', undefined, 2);
+    jest.clearAllMocks();
+  });
+
+  test('invalid move sends its result to the acting client only', async () => {
+    await master.onUpdate(
+      ActionCreators.makeMove('rejected'),
+      0,
+      'matchID',
+      '0',
+      1,
+    );
+    // The rollback broadcast still goes out to everyone.
+    expect(sendAll).toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      playerID: '0',
+      type: 'actionResult',
+      args: [
+        'matchID',
+        1,
+        {
+          error: {
+            type: 'action/invalid_move',
+            payload: { reason: 'not allowed' },
+          },
+        },
+      ],
+    });
+  });
+
+  test('bare INVALID_MOVE sends a result without a payload', async () => {
+    await master.onUpdate(
+      ActionCreators.makeMove('rejectedBare'),
+      0,
+      'matchID',
+      '0',
+      2,
+    );
+    expect(send).toHaveBeenCalledWith({
+      playerID: '0',
+      type: 'actionResult',
+      args: [
+        'matchID',
+        2,
+        {
+          error: { type: 'action/invalid_move', payload: undefined },
+        },
+      ],
+    });
+  });
+
+  test('valid move sends a successful result', async () => {
+    await master.onUpdate(
+      ActionCreators.makeMove('valid'),
+      0,
+      'matchID',
+      '0',
+      3,
+    );
+    expect(sendAll).toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      playerID: '0',
+      type: 'actionResult',
+      args: ['matchID', 3, {}],
+    });
+  });
+
+  test('old clients without an action ID receive no action result', async () => {
+    await master.onUpdate(ActionCreators.makeMove('valid'), 0, 'matchID', '0');
+    expect(sendAll).toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  test('pre-dispatch rejection sends a correlated result', async () => {
+    await master.onUpdate(
+      ActionCreators.makeMove('valid'),
+      100,
+      'matchID',
+      '0',
+      4,
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      playerID: '0',
+      type: 'actionResult',
+      args: ['matchID', 4, { error: { type: 'action/stale_state_id' } }],
+    });
+  });
+
+  test.each([
+    {
+      name: 'unavailable move',
+      action: ActionCreators.makeMove('missing'),
+      matchID: 'matchID',
+      playerID: '0',
+      type: 'action/unavailable_move',
+    },
+    {
+      name: 'inactive player',
+      action: ActionCreators.makeMove('valid'),
+      matchID: 'matchID',
+      playerID: '1',
+      type: 'action/inactive_player',
+    },
+    {
+      name: 'missing match',
+      action: ActionCreators.makeMove('valid'),
+      matchID: 'missing',
+      playerID: '0',
+      type: 'update/match_not_found',
+    },
+  ])('$name sends a correlated result', async (testCase) => {
+    await master.onUpdate(
+      testCase.action,
+      0,
+      testCase.matchID,
+      testCase.playerID,
+      5,
+    );
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({
+      playerID: testCase.playerID,
+      type: 'actionResult',
+      args: [testCase.matchID, 5, { error: { type: testCase.type } }],
+    });
   });
 });
 

@@ -24,6 +24,7 @@ import { DummyTransport } from './transport/dummy';
 import { ClientManager } from './manager';
 import type { TransportData } from '../master/master';
 import type {
+  ActionError,
   ActivePlayersArg,
   ActionShape,
   CredentialedActionShape,
@@ -34,6 +35,7 @@ import type {
   Reducer,
   State,
   Store,
+  TransientState,
   ChatMessage,
 } from '../types';
 
@@ -141,7 +143,10 @@ export class _ClientImpl<
   readonly multiplayer: (opts: TransportOpts) => Transport;
   private reducer: Reducer;
   private _running: boolean;
-  private subscribers: Map<symbol, (state: State<G> | null) => void>;
+  private subscribers: Map<
+    symbol,
+    (state: State<G> | null, error?: ActionError) => void
+  >;
   private transport: Transport;
   private manager: ClientManager;
   readonly debugOpt?: DebugOpt | boolean;
@@ -168,6 +173,15 @@ export class _ClientImpl<
   redo: () => void;
   sendChatMessage: (message: any) => void;
   chatMessages: ChatMessage[];
+  /**
+   * Why this client’s most recent action was rejected, or undefined.
+   * Cleared when a subsequent action succeeds, or on reset / sync.
+   */
+  lastActionError?: ActionError;
+  private nextActionID = 0;
+  private latestActionID?: number;
+  private actionResultDeliveries = 0;
+  private latestAuthoritativeStateID = -1;
 
   constructor({
     game,
@@ -284,13 +298,16 @@ export class _ClientImpl<
     const TransportMiddleware =
       (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
         const baseState = store.getState();
+        const shouldSend =
+          !('clientOnly' in action) && action.type !== Actions.STRIP_TRANSIENTS;
+        const actionID =
+          shouldSend && this.multiplayer
+            ? (this.latestActionID = ++this.nextActionID)
+            : undefined;
         const result = next(action);
 
-        if (
-          !('clientOnly' in action) &&
-          action.type !== Actions.STRIP_TRANSIENTS
-        ) {
-          this.transport.sendAction(baseState, action);
+        if (shouldSend) {
+          this.transport.sendAction(baseState, action, actionID);
         }
 
         return result;
@@ -298,10 +315,46 @@ export class _ClientImpl<
 
     /**
      * Middleware that intercepts actions and invokes the subscription callback.
+     * Single-player clients read action errors directly from reducer
+     * transients. Multiplayer clients wait for the master's correlated result.
      */
+    let pendingActionError: ActionError | undefined;
     const SubscriptionMiddleware =
-      () => (next: Dispatch<Action>) => (action: Action) => {
+      (store: Store) => (next: Dispatch<Action>) => (action: Action) => {
+        const deliveriesBefore = this.actionResultDeliveries;
         const result = next(action);
+
+        // Notify after transient metadata has been stripped, so subscribers
+        // receive one rejection event paired with clean public state.
+        if (action.type === Actions.STRIP_TRANSIENTS) {
+          const actionError = pendingActionError;
+          pendingActionError = undefined;
+          if (actionError) this.notifySubscribers(actionError);
+          return result;
+        }
+
+        if (action.type === Actions.RESET) {
+          this.lastActionError = undefined;
+          this.latestActionID = undefined;
+        }
+
+        if (!this.multiplayer) {
+          const transientError = (store.getState() as TransientState<G> | null)
+            ?.transients?.error;
+          if (transientError) {
+            this.lastActionError = transientError;
+            pendingActionError = transientError;
+            return result;
+          } else if (
+            action.type === Actions.MAKE_MOVE ||
+            action.type === Actions.GAME_EVENT ||
+            action.type === Actions.UNDO ||
+            action.type === Actions.REDO
+          ) {
+            this.lastActionError = undefined;
+          }
+        }
+        if (this.actionResultDeliveries !== deliveriesBefore) return result;
         this.notifySubscribers();
         return result;
       };
@@ -355,13 +408,36 @@ export class _ClientImpl<
     this.notifySubscribers();
   }
 
+  /** Handle the authoritative result of an action sent to the master. */
+  private receiveActionResult(actionID: number, error?: ActionError): void {
+    // Only the latest submitted action owns lastActionError. Older results are
+    // stale once the player has attempted another action.
+    if (actionID !== this.latestActionID) return;
+    this.actionResultDeliveries++;
+    this.lastActionError = error;
+    this.notifySubscribers(error);
+    // Broadcasts older than the optimistic state are ignored, so a rejected
+    // optimistic move can only be rolled back by an explicit resync.
+    if (
+      error &&
+      this.store.getState()._stateID > this.latestAuthoritativeStateID
+    ) {
+      this.transport.requestSync();
+    }
+  }
+
   /** Handle all incoming updates from a multiplayer transport. */
   private receiveTransportData(data: TransportData): void {
     const [matchID] = data.args;
     if (matchID !== this.matchID) return;
     switch (data.type) {
       case 'sync': {
+        // Transient errors are not persisted by the master. A sync establishes
+        // a fresh authoritative baseline and invalidates any in-flight result.
+        this.lastActionError = undefined;
+        this.latestActionID = undefined;
         const [, syncInfo] = data.args;
+        this.latestAuthoritativeStateID = syncInfo.state._stateID;
         const action = ActionCreators.sync(syncInfo);
         this.receiveMatchData(syncInfo.filteredMetadata);
         this.store.dispatch(action);
@@ -369,6 +445,10 @@ export class _ClientImpl<
       }
       case 'update': {
         const [, state, deltalog] = data.args;
+        this.latestAuthoritativeStateID = Math.max(
+          this.latestAuthoritativeStateID,
+          state._stateID,
+        );
         const currentState = this.store.getState();
         if (state._stateID >= currentState._stateID) {
           const action = ActionCreators.update(state, deltalog);
@@ -378,6 +458,10 @@ export class _ClientImpl<
       }
       case 'patch': {
         const [, prevStateID, stateID, patch, deltalog] = data.args;
+        this.latestAuthoritativeStateID = Math.max(
+          this.latestAuthoritativeStateID,
+          stateID,
+        );
         const currentStateID = this.store.getState()._stateID;
         if (prevStateID !== currentStateID) break;
         const action = ActionCreators.patch(
@@ -403,11 +487,16 @@ export class _ClientImpl<
         this.receiveChatMessage(chatMessage);
         break;
       }
+      case 'actionResult': {
+        const [, actionID, result] = data.args;
+        this.receiveActionResult(actionID, result.error);
+        break;
+      }
     }
   }
 
-  private notifySubscribers() {
-    this.subscribers.forEach((fn) => fn(this.getState()));
+  private notifySubscribers(actionError?: ActionError) {
+    this.subscribers.forEach((fn) => fn(this.getState(), actionError));
   }
 
   previewState(state: any) {
@@ -444,13 +533,13 @@ export class _ClientImpl<
     this.manager.unregister(this);
   }
 
-  subscribe(fn: (state: ClientState<G>) => void) {
+  subscribe(fn: (state: ClientState<G>, error?: ActionError) => void) {
     const id = Symbol();
     this.subscribers.set(id, fn);
     this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
 
     if (this._running || !this.multiplayer) {
-      fn(this.getState());
+      fn(this.getState(), undefined);
     }
 
     // Return a handle that allows the caller to unsubscribe.

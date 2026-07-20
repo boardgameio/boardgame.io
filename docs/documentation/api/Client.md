@@ -130,6 +130,34 @@ The following properties are available on a client instance:
   ```
 
 
+- `lastActionError`: The reason this client’s most recent action was
+  rejected, or `undefined` if it wasn’t. Cleared when a subsequent
+  action succeeds, the client is reset, or an authoritative sync is received.
+  In multiplayer, this reflects the authoritative
+  result from the master, and rejections are delivered only to the
+  client that made the move. If the rejected move had been applied
+  optimistically, the client automatically requests a sync to restore the
+  authoritative state; that sync clears this field, so treat the
+  `subscribe` error argument as the one-time rejection signal. If several actions are still awaiting a result,
+  only the latest action’s result is reflected here; older results are treated
+  as stale. An error object has:
+
+    - `type`: an `ErrorType` code. Game-action failures use `action/*` codes
+      and update failures use `update/*` codes, e.g. `'action/invalid_move'`
+    - `payload`: the value the move returned via
+      [`Invalid(payload)`](/immutability.md#telling-the-player-why),
+      if any
+
+  Example:
+
+  ```js
+  {
+    type: 'action/invalid_move',
+    payload: { message: 'That cell is already filled' },
+  }
+  ```
+
+
 #### Methods
 
 The following methods are available on a client instance:
@@ -171,11 +199,18 @@ The following methods are available on a client instance:
 
 - `subscribe(callback)`: Add a callback for every state change.
   The passed function will be called with the same value as returned by
-  `getState`. `subscribe` returns an unsubscribe function.
+  `getState`. When a newly processed action is rejected, that notification
+  includes the error object as its second argument. Other notifications pass
+  `undefined`, so an error can be handled as a one-time event. Use
+  `lastActionError` when you need to inspect the current error between
+  notifications. `subscribe` returns an unsubscribe function.
 
   ```js
-  const unsubscribe = client.subscribe(state => {
+  const unsubscribe = client.subscribe((state, error) => {
     // use updated state
+    if (error) {
+      // a new action rejection arrived, e.g. show error.payload.message
+    }
   });
 
   // unsubscribe from the client
@@ -372,6 +407,20 @@ following as `props`:
     { id: 'foo', sender: '0', payload: 'Ready to play?' },
     { id: 'bar', sender: '1', payload: 'Let’s go!' },
   ]
+  ```
+
+
+- `lastActionError`: The reason this client’s most recent action was
+  rejected (an object with `type` and optional `payload` — see the
+  Plain JS tab), or `undefined` if it wasn’t. Useful for showing the
+  player an error toast when the server turns down a move:
+
+  ```js
+  useEffect(() => {
+    if (props.lastActionError) {
+      showToast(props.lastActionError.payload?.message ?? 'Invalid action');
+    }
+  }, [props.lastActionError]);
   ```
 
 

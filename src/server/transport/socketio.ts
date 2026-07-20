@@ -194,7 +194,7 @@ export class SocketIO {
 
       nsp.on('connection', (socket: IOTypes.Socket) => {
         socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
-          const [action, stateID, matchID, playerID] = args;
+          const matchID = args[2];
           const master = new Master(
             game,
             app.context.db,
@@ -203,9 +203,7 @@ export class SocketIO {
           );
 
           const matchQueue = this.getMatchQueue(matchID);
-          await matchQueue.add(() =>
-            master.onUpdate(action, stateID, matchID, playerID),
-          );
+          await matchQueue.add(() => master.onUpdate(...args));
         });
 
         socket.on('sync', async (...args: Parameters<Master['onSync']>) => {

@@ -5,7 +5,7 @@ import type * as ActionCreators from './core/action-creators';
 import type { ActionErrorType, UpdateErrorType } from './core/errors';
 import type { Flow } from './core/flow';
 import type { CreateGameReducer } from './core/reducer';
-import type { INVALID_MOVE } from './core/constants';
+import type { INVALID_MOVE, InvalidMoveResult } from './core/constants';
 import type { GameMethod } from './core/game-methods';
 import type { Auth } from './server/auth';
 import type * as StorageAPI from './server/db/base';
@@ -203,7 +203,7 @@ export type MoveFn<
 > = (
   context: FnContext<G, PluginAPIs> & { playerID: PlayerID },
   ...args: any[]
-) => void | G | typeof INVALID_MOVE;
+) => void | G | typeof INVALID_MOVE | InvalidMoveResult;
 
 export interface LongFormMove<
   G extends any = any,
@@ -360,7 +360,7 @@ export interface Game<
   processMove?: (
     state: State<G>,
     action: ActionPayload.MakeMove,
-  ) => State<G> | typeof INVALID_MOVE;
+  ) => State<G> | typeof INVALID_MOVE | InvalidMoveResult;
   processPlayerLeave?: (state: State<G>, playerID: PlayerID) => State<G>['G'];
   flow?: ReturnType<typeof Flow>;
 }
