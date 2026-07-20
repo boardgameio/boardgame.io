@@ -23,7 +23,7 @@ Add a build script to your `package.json`:
 ```json
 {
   "scripts": {
-    "build": "parcel build index.html --out-dir build",
+    "build": "parcel build index.html --dist-dir build",
   }
 }
 ```
