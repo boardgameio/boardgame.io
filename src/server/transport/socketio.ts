@@ -12,7 +12,16 @@ import https from 'node:https';
 import { Server as IOServer } from 'socket.io';
 import type IOTypes from 'socket.io';
 import type { ServerOptions as HttpsOptions } from 'node:https';
-import PQueue from 'p-queue';
+import PQueueModule from 'p-queue';
+import type PQueue from 'p-queue';
+
+// p-queue@6 ships CommonJS with `exports.default`. When this file is
+// bundled to CJS the default import interops cleanly, but in the native
+// ESM server build it binds to the CJS exports object itself, making
+// `new PQueue()` throw "PQueue is not a constructor". Unwrap so both
+// builds get the class.
+const PQueueCtor = ((PQueueModule as unknown as { default?: typeof PQueue })
+  .default ?? PQueueModule) as typeof PQueue;
 import { Master } from '../../master/master';
 import type {
   TransportAPI as MasterTransport,
@@ -276,7 +285,7 @@ export class SocketIO {
   getMatchQueue(matchID: string): PQueue {
     if (!this.perMatchQueue.has(matchID)) {
       // PQueue should process only one action at a time.
-      this.perMatchQueue.set(matchID, new PQueue({ concurrency: 1 }));
+      this.perMatchQueue.set(matchID, new PQueueCtor({ concurrency: 1 }));
     }
     return this.perMatchQueue.get(matchID);
   }

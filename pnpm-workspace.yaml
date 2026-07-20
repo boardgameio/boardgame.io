@@ -1,0 +1,11 @@
+onlyBuiltDependencies: []
+
+overrides:
+  jest: 30.4.1
+  '@jest/core': 30.4.1
+  jest-cli: 30.4.1
+  jest-circus: 30.4.1
+  jest-config: 30.4.1
+  jest-runner: 30.4.1
+  jest-runtime: 30.4.1
+  jest-resolve-dependencies: 30.4.1

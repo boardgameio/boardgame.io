@@ -146,6 +146,86 @@ and server. They are run on the client in order to facilitate
 a lag-free experience, and are run on the server to calculate the
 authoritative game state.
 
+### Hook Execution Order
+
+The game and phase `endIf` conditions are checked after each step in the
+game lifecycle. After a move or a change to active stages, the turn `endIf`
+condition is checked as well. These checks happen in order from the broadest
+scope to the narrowest:
+
+```text
+game.endIf? → phase.endIf? → turn.endIf?
+```
+
+If a condition returns a truthy value, the corresponding game, phase, or turn
+ends and the remaining checks in that sequence are skipped. The examples below
+show the order when all `endIf` conditions return false. A question mark means
+that a condition is evaluated.
+
+When the game starts in phase A, the phase begins before the first turn order
+is initialised:
+
+```text
+game.endIf?
+phaseA.endIf?
+phaseA.onBegin
+game.endIf?
+phaseA.endIf?
+turn.order.playOrder
+turn.order.first
+turn.onBegin
+game.endIf?
+phaseA.endIf?
+```
+
+After a move, the turn's `onMove` hook runs before end conditions are checked:
+
+```text
+move
+turn.onMove
+game.endIf?
+phase.endIf?
+turn.endIf?
+```
+
+When a turn ends, the next player is selected before the new turn begins:
+
+```text
+turn.onEnd
+game.endIf?
+phase.endIf?
+turn.order.next
+game.endIf?
+phase.endIf?
+turn.onBegin
+game.endIf?
+phase.endIf?
+```
+
+When phase A ends and its `next` option selects phase B, the current turn and
+phase end before phase B and its first turn begin:
+
+```text
+turn.onEnd
+phaseA.onEnd
+game.endIf?
+select phase B
+game.endIf?
+phaseB.endIf?
+phaseB.onBegin
+game.endIf?
+phaseB.endIf?
+turn.order.playOrder
+turn.order.first
+turn.onBegin
+game.endIf?
+phaseB.endIf?
+```
+
+Hooks can also call game events, although not every event is supported in every
+hook. See [Calling events from hooks](events.md#calling-events-from-hooks) for
+the supported combinations.
+
 ### Moving between Phases
 
 #### Using events
