@@ -62,7 +62,7 @@ export const getPortFromServer = (
 };
 
 interface ServerOpts {
-  games: Game[];
+  games: Game<any, any, any>[];
   origins?: CorsOptions['origin'];
   apiOrigins?: CorsOptions['origin'];
   db?: StorageAPI.Async | StorageAPI.Sync;
