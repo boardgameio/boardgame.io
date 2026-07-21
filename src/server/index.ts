@@ -22,6 +22,8 @@ export type KoaServer = ReturnType<Koa['listen']>;
 
 interface ServerConfig {
   port?: number;
+  /** Host or IP to bind to (both game server and Lobby API). Defaults to all interfaces. */
+  host?: string;
   callback?: () => void;
   lobbyConfig?: {
     apiPort: number;
@@ -60,7 +62,7 @@ export const getPortFromServer = (
 };
 
 interface ServerOpts {
-  games: Game[];
+  games: Game<any, any, any>[];
   origins?: CorsOptions['origin'];
   apiOrigins?: CorsOptions['origin'];
   db?: StorageAPI.Async | StorageAPI.Sync;
@@ -154,9 +156,9 @@ export function Server({
       await db.connect();
 
       // Lobby API
-      const lobbyConfig = serverRunConfig.lobbyConfig;
+      const { port, host, lobbyConfig } = serverRunConfig;
       let apiServer: KoaServer | undefined;
-      if (!lobbyConfig || !lobbyConfig.apiPort) {
+      if (!lobbyConfig || lobbyConfig.apiPort == null) {
         configureApp(app, router, apiOrigins);
       } else {
         // Run API in a separate Koa app.
@@ -165,7 +167,7 @@ export function Server({
         api.context.auth = auth;
         configureApp(api, router, apiOrigins);
         await new Promise<void>((resolve) => {
-          apiServer = api.listen(lobbyConfig.apiPort, () => resolve());
+          apiServer = api.listen(lobbyConfig.apiPort, host, () => resolve());
         });
         if (lobbyConfig.apiCallback) lobbyConfig.apiCallback();
         logger.info(`API serving on ${getPortFromServer(apiServer)}...`);
@@ -176,8 +178,8 @@ export function Server({
       const httpServer = transport.server;
       await new Promise<void>((resolve) => {
         appServer = httpServer
-          ? httpServer.listen(serverRunConfig.port, () => resolve())
-          : app.listen(serverRunConfig.port, () => resolve());
+          ? httpServer.listen(port, host, () => resolve())
+          : app.listen(port, host, () => resolve());
       });
       if (serverRunConfig.callback) serverRunConfig.callback();
       logger.info(`App serving on ${getPortFromServer(appServer)}...`);
