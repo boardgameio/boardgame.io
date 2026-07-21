@@ -26,7 +26,7 @@ import type {
   TransientState,
   Undo,
 } from '../types';
-import { stripTransients } from './action-creators';
+import { gameEvent, stripTransients } from './action-creators';
 import { ActionErrorType, UpdateErrorType } from './errors';
 import { applyPatch } from 'rfc6902';
 import { RemovePlayer } from './turn-order';
@@ -191,23 +191,41 @@ function getLogEventType(eventType: string): string | undefined {
 }
 
 /**
- * Add metadata set by the log plugin to the log entry for an event.
+ * Add metadata set by the log plugin to the canonical log entry for an event.
+ * If the event produced no such entry, add one for the dispatched event.
  */
-function addLogMetadata(state: State, action: ActionShape.GameEvent): State {
+function addLogMetadata(
+  state: State,
+  action: ActionShape.GameEvent,
+  actionState: State,
+): State {
   const metadata = state.plugins.log?.data.metadata;
-  const { deltalog } = state;
   const eventType = getLogEventType(action.payload.type);
 
-  if (metadata === undefined || !deltalog?.length || eventType === undefined) {
+  if (metadata === undefined || eventType === undefined) {
     return state;
   }
 
+  // GAME_EVENT processing initializes deltalog before running the flow.
+  const { deltalog } = state;
   const eventEntry = deltalog.findIndex(
     (entry) =>
       entry.action.type === Actions.GAME_EVENT &&
       entry.action.payload.type === eventType,
   );
-  if (eventEntry === -1) return state;
+
+  if (eventEntry === -1) {
+    // Recreate the action without credentials so they are never persisted.
+    const { type, args, playerID } = action.payload;
+    const logEntry: LogEntry = {
+      action: gameEvent(type, args, playerID),
+      _stateID: actionState._stateID,
+      turn: actionState.ctx.turn,
+      phase: actionState.ctx.phase,
+      metadata,
+    };
+    return { ...state, deltalog: [...deltalog, logEntry] };
+  }
 
   const updatedDeltalog = [...deltalog];
   updatedDeltalog[eventEntry] = {
@@ -404,7 +422,7 @@ export function CreateGameReducer({
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
-        newState = addLogMetadata(newState, action);
+        newState = addLogMetadata(newState, action, oldState);
 
         // Execute plugins.
         let stateWithError: TransientState | undefined;
