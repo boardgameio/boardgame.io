@@ -91,6 +91,54 @@ describe('log-metadata', () => {
     });
   });
 
+  test('It logs phase metadata when setPhase starts the first phase', () => {
+    const game: Game = {
+      phases: {
+        B: {
+          onBegin: ({ log }) => {
+            log.setMetadata({ message: 'phase B began' });
+          },
+        },
+      },
+    };
+    const client = Client({ game });
+
+    client.events.setPhase('B');
+
+    const log = client.getState().log;
+    const setPhase = log.find(
+      (entry) =>
+        entry.action.type === 'GAME_EVENT' &&
+        entry.action.payload.type === 'setPhase',
+    );
+
+    expect(client.getState().ctx.phase).toBe('B');
+    expect(setPhase.metadata).toEqual({ message: 'phase B began' });
+    expect(log.at(-2).metadata).toBeUndefined();
+  });
+
+  test('It logs metadata set by the game end hook', () => {
+    const game: Game = {
+      onEnd: ({ log }) => {
+        log.setMetadata({ message: 'game ended' });
+      },
+    };
+    const client = Client({ game });
+
+    client.events.endGame('winner');
+
+    const log = client.getState().log;
+    const endGame = log.find(
+      (entry) =>
+        entry.action.type === 'GAME_EVENT' &&
+        entry.action.payload.type === 'endGame',
+    );
+
+    expect(client.getState().ctx.gameover).toBe('winner');
+    expect(endGame.metadata).toEqual({ message: 'game ended' });
+    expect(log).toHaveLength(1);
+  });
+
   test('It attaches turn metadata before an automatically ended phase', () => {
     const game: Game = {
       phases: {
