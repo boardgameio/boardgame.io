@@ -52,7 +52,7 @@ jest.mock('socket.io', () => {
 });
 
 describe('new', () => {
-  test('accepts games with custom plugin APIs', () => {
+  test('processes custom-plugin and standard games through transport', () => {
     interface CustomPluginAPIs extends Record<string, unknown> {
       custom: { enabled: boolean };
     }
