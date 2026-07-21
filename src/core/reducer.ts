@@ -26,7 +26,7 @@ import type {
   TransientState,
   Undo,
 } from '../types';
-import { stripTransients } from './action-creators';
+import { gameEvent, stripTransients } from './action-creators';
 import { ActionErrorType, UpdateErrorType } from './errors';
 import { applyPatch } from 'rfc6902';
 import { RemovePlayer } from './turn-order';
@@ -168,6 +168,94 @@ function initializeDeltalog(
 }
 
 /**
+ * Get the event type used in the log for a directly dispatched game event.
+ */
+function getLogEventType(eventType: string): string | undefined {
+  switch (eventType) {
+    case 'endTurn':
+    case 'pass': {
+      return 'endTurn';
+    }
+    case 'endPhase':
+    case 'setPhase': {
+      return 'endPhase';
+    }
+    case 'endStage':
+    case 'setStage': {
+      return 'endStage';
+    }
+    case 'endGame': {
+      return 'endGame';
+    }
+  }
+}
+
+/**
+ * Add metadata set by the log plugin to the canonical log entry for an event.
+ * If the event produced no such entry, add one for the dispatched event.
+ */
+function addLogMetadata(
+  state: State,
+  action: ActionShape.GameEvent,
+  actionState: State,
+): State {
+  const metadata = state.plugins.log?.data.metadata;
+  const eventType = getLogEventType(action.payload.type);
+
+  if (metadata === undefined || eventType === undefined) {
+    return state;
+  }
+
+  // GAME_EVENT processing initializes deltalog before running the flow.
+  const { deltalog } = state;
+  const eventEntry = deltalog.findIndex(
+    (entry) =>
+      entry.action.type === Actions.GAME_EVENT &&
+      entry.action.payload.type === eventType,
+  );
+
+  if (eventEntry === -1) {
+    // Recreate the action without credentials so they are never persisted.
+    const { type, args, playerID } = action.payload;
+    const logEntry: LogEntry = {
+      action: gameEvent(type, args, playerID),
+      _stateID: actionState._stateID,
+      turn: actionState.ctx.turn,
+      phase: actionState.ctx.phase,
+      metadata,
+    };
+    return { ...state, deltalog: [...deltalog, logEntry] };
+  }
+
+  const updatedDeltalog = [...deltalog];
+  updatedDeltalog[eventEntry] = {
+    ...updatedDeltalog[eventEntry],
+    metadata,
+  };
+
+  return { ...state, deltalog: updatedDeltalog };
+}
+
+/**
+ * Remove metadata set during an action that was rejected.
+ */
+function clearLogMetadata(state: State): State {
+  const logPlugin = state.plugins.log;
+  if (logPlugin?.data.metadata === undefined) return state;
+
+  const data = { ...logPlugin.data };
+  delete data.metadata;
+
+  return {
+    ...state,
+    plugins: {
+      ...state.plugins,
+      log: { ...logPlugin, data },
+    },
+  };
+}
+
+/**
  * Update plugin state after move/event & check if plugins consider the action to be valid.
  * @param state Current version of state in the reducer.
  * @param oldState State to revert to in case of error.
@@ -184,7 +272,11 @@ function flushAndValidatePlugins(
   if (!isInvalid) return [newState];
   return [
     newState,
-    WithError(oldState, ActionErrorType.PluginActionInvalid, isInvalid),
+    WithError(
+      clearLogMetadata(oldState),
+      ActionErrorType.PluginActionInvalid,
+      isInvalid,
+    ),
   ];
 }
 
@@ -296,7 +388,7 @@ export function CreateGameReducer({
       }
 
       case Actions.GAME_EVENT: {
-        state = { ...state, deltalog: [] };
+        const oldState = (state = { ...state, deltalog: [] });
 
         // Process game events only on the server.
         // These events like `endTurn` typically
@@ -330,13 +422,18 @@ export function CreateGameReducer({
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
+        newState = addLogMetadata(newState, action, oldState);
 
         // Execute plugins.
         let stateWithError: TransientState | undefined;
-        [newState, stateWithError] = flushAndValidatePlugins(newState, state, {
-          game,
-          isClient: false,
-        });
+        [newState, stateWithError] = flushAndValidatePlugins(
+          newState,
+          oldState,
+          {
+            game,
+            isClient: false,
+          },
+        );
         if (stateWithError) return stateWithError;
 
         // Update undo / redo state.
