@@ -43,6 +43,9 @@
 </style>
 
 <ul id="debug-controls" class="controls">
+  {#if client.multiplayer}
+  <li>State controls are unavailable in multiplayer games.</li>
+  {:else}
   <li>
     <Hotkey value="1" onPress={client.reset} label="reset" />
   </li>
@@ -52,6 +55,7 @@
   <li>
     <Hotkey value="3" onPress={Restore} label="restore" />
   </li>
+  {/if}
   <li>
     <Hotkey value="." onPress={ToggleVisibility} label="hide" />
   </li>
