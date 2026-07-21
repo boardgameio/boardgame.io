@@ -26,6 +26,7 @@ shell.exec(`pnpm add --config.minimum-release-age=0 ./${packed}`);
 shell.set('-e');
 
 // Test
+shell.exec('pnpm run typecheck');
 shell.exec('pnpm test');
 shell.exec('pnpm run build');
 shell.exec('node node-smoke/esm-test.mjs');
