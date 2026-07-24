@@ -99,6 +99,17 @@ describe('.configureRouter', () => {
     return app;
   }
 
+  function createMatchTransport() {
+    const transportAPI = { send: jest.fn(), sendAll: jest.fn() };
+    const transport = {
+      createTransportAPI: jest.fn(() => transportAPI),
+      getMatchQueue: jest.fn(() => ({
+        add: <T>(task: () => PromiseLike<T>) => Promise.resolve(task()),
+      })),
+    };
+    return { transport, transportAPI };
+  }
+
   // A single suite-level server bound explicitly to 127.0.0.1. Letting
   // supertest create a server per request would bind the wildcard address,
   // where the kernel may allocate an ephemeral port that another local
@@ -456,7 +467,7 @@ describe('.configureRouter', () => {
               return {
                 metadata: {
                   players: {
-                    '0': {},
+                    '0': { id: 0 },
                   },
                 },
               };
@@ -465,11 +476,18 @@ describe('.configureRouter', () => {
         });
 
         describe('when the playerID is available', () => {
+          let transportAPI: ReturnType<
+            typeof createMatchTransport
+          >['transportAPI'];
+
           beforeEach(async () => {
+            const matchTransport = createMatchTransport();
+            transportAPI = matchTransport.transportAPI;
             const app = createApiServer({
               db,
               auth: new Auth({ generateCredentials: () => credentials }),
               games,
+              transport: matchTransport.transport,
               uuid: () => 'matchID',
             });
             response = await apiCall(app)
@@ -496,6 +514,13 @@ describe('.configureRouter', () => {
                 }),
               }),
             );
+          });
+
+          test('broadcasts public match data', async () => {
+            expect(transportAPI.sendAll).toHaveBeenCalledWith({
+              type: 'matchData',
+              args: ['1', [{ id: 0, name: 'alice' }]],
+            });
           });
 
           describe('when custom data is provided', () => {
@@ -816,6 +841,10 @@ describe('.configureRouter', () => {
 
       describe('when the game does exist', () => {
         describe('when the playerID does exist', () => {
+          let transportAPI: ReturnType<
+            typeof createMatchTransport
+          >['transportAPI'];
+
           beforeEach(async () => {
             db = new AsyncStorage({
               fetch: async () => {
@@ -823,10 +852,12 @@ describe('.configureRouter', () => {
                   metadata: {
                     players: {
                       '0': {
+                        id: 0,
                         name: 'alice',
                         credentials: 'SECRET1',
                       },
                       '1': {
+                        id: 1,
                         name: 'bob',
                         credentials: 'SECRET2',
                       },
@@ -835,7 +866,14 @@ describe('.configureRouter', () => {
                 };
               },
             });
-            const app = createApiServer({ db, auth, games });
+            const matchTransport = createMatchTransport();
+            transportAPI = matchTransport.transportAPI;
+            const app = createApiServer({
+              db,
+              auth,
+              games,
+              transport: matchTransport.transport,
+            });
             response = await apiCall(app)
               .post('/games/foo/1/update')
               .send('playerID=0&credentials=SECRET1&newName=ali');
@@ -868,6 +906,19 @@ describe('.configureRouter', () => {
                 }),
               }),
             );
+          });
+
+          test('broadcasts updated public match data', async () => {
+            expect(transportAPI.sendAll).toHaveBeenCalledWith({
+              type: 'matchData',
+              args: [
+                '1',
+                [
+                  { id: 0, name: 'ali' },
+                  { id: 1, name: 'bob' },
+                ],
+              ],
+            });
           });
         });
 
@@ -1172,11 +1223,13 @@ describe('.configureRouter', () => {
                   };
                 },
               });
-              const app = createApiServer({ db, auth, games });
+              const { transport, transportAPI } = createMatchTransport();
+              const app = createApiServer({ db, auth, games, transport });
               response = await apiCall(app)
                 .post('/games/foo/1/leave')
                 .send('playerID=0&credentials=SECRET1');
               expect(db.mocks.wipe).toHaveBeenCalledWith('1');
+              expect(transportAPI.sendAll).not.toHaveBeenCalled();
             });
           });
         });
@@ -1274,7 +1327,8 @@ describe('.configureRouter', () => {
           db = new AsyncStorage({
             fetch: async () => ({ metadata: createLeaveMetadata() }),
           });
-          const app = createApiServer({ db, auth, games });
+          const { transport, transportAPI } = createMatchTransport();
+          const app = createApiServer({ db, auth, games, transport });
 
           response = await apiCall(app)
             .post('/games/foo/1/leaveSlot')
@@ -1293,6 +1347,10 @@ describe('.configureRouter', () => {
               }),
             }),
           );
+          expect(transportAPI.sendAll).toHaveBeenCalledWith({
+            type: 'matchData',
+            args: ['1', [{ id: 0 }, { id: 1, name: 'bob' }]],
+          });
         });
       });
     });
@@ -1483,13 +1541,7 @@ describe('.configureRouter', () => {
           onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
         });
         const memory = createMemoryMatch(game);
-        const transportAPI = { send: jest.fn(), sendAll: jest.fn() };
-        const transport = {
-          createTransportAPI: jest.fn(() => transportAPI),
-          getMatchQueue: jest.fn(() => ({
-            add: <T>(task: () => PromiseLike<T>) => Promise.resolve(task()),
-          })),
-        };
+        const { transport, transportAPI } = createMatchTransport();
         const app = createApiServer({
           db: memory,
           auth,
@@ -1506,7 +1558,10 @@ describe('.configureRouter', () => {
         expect(state.G).toEqual({ left: '0' });
         expect(transport.createTransportAPI).toHaveBeenCalledWith('1');
         expect(transport.getMatchQueue).toHaveBeenCalledWith('1');
-        expect(transportAPI.sendAll).toHaveBeenCalled();
+        expect(transportAPI.sendAll).toHaveBeenLastCalledWith({
+          type: 'matchData',
+          args: ['1', [{ id: 0 }, { id: 1, name: 'bob' }]],
+        });
       });
 
       test('responds 403 when the game master rejects the credentials', async () => {
