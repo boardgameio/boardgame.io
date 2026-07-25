@@ -994,6 +994,32 @@ describe('playerLeave', () => {
   });
 });
 
+describe('disableLog', () => {
+  const game: Game = {
+    disableLog: true,
+    moves: { A: ({ G }) => G },
+  };
+  const reducer = CreateGameReducer({ game });
+  const initialState = InitializeGame({ game, numPlayers: 2 });
+
+  test('deltalog stays empty for moves and events', () => {
+    let state = reducer(initialState, makeMove('A', null, '0'));
+    expect(state.deltalog).toEqual([]);
+
+    state = reducer(state, gameEvent('endTurn', null, '0'));
+    expect(state.deltalog).toEqual([]);
+  });
+
+  test('deltalog stays empty for undo and redo', () => {
+    let state = reducer(initialState, makeMove('A', null, '0'));
+    state = reducer(state, undo('0'));
+    expect(state.deltalog).toEqual([]);
+
+    state = reducer(state, redo('0'));
+    expect(state.deltalog).toEqual([]);
+  });
+});
+
 describe('undo / redo with stages', () => {
   const game: Game = {
     setup: () => ({ A: false, B: false, C: false }),
