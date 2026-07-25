@@ -140,8 +140,13 @@ function initializeDeltalog(
     | ActionShape.Undo
     | ActionShape.Redo
     | ActionShape.PlayerLeave,
+  game: Game,
   move?: Move,
 ): TransientState {
+  if (game.disableLog) {
+    return { ...state, deltalog: [] };
+  }
+
   // Create a log entry for this action.
   const logEntry: LogEntry = {
     action,
@@ -430,7 +435,7 @@ export function CreateGameReducer({
         }
 
         // On the server, construct the deltalog.
-        state = initializeDeltalog(state, action, move);
+        state = initializeDeltalog(state, action, game, move);
 
         // Allow the flow reducer to process any triggers that happen after moves.
         state = game.flow.processMove(state, action.payload);
@@ -470,7 +475,7 @@ export function CreateGameReducer({
         });
 
         const G = game.processPlayerLeave(state, playerID);
-        state = initializeDeltalog({ ...state, G }, action);
+        state = initializeDeltalog({ ...state, G }, action, game);
 
         let stateWithError: TransientState | undefined;
         [state, stateWithError] = flushAndValidatePlugins(state, oldState, {
@@ -546,7 +551,7 @@ export function CreateGameReducer({
           }
         }
 
-        state = initializeDeltalog(state, action);
+        state = initializeDeltalog(state, action, game);
 
         return {
           ...state,
@@ -585,7 +590,7 @@ export function CreateGameReducer({
           return WithError(state, ActionErrorType.ActionInvalid);
         }
 
-        state = initializeDeltalog(state, action);
+        state = initializeDeltalog(state, action, game);
 
         return {
           ...state,

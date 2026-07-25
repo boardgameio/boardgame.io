@@ -48,7 +48,7 @@ We’re going to add boardgame.io and also Parcel to help us build our app:
 
 ```
 npm install boardgame.io
-npm install --save-dev parcel-bundler
+npm install --save-dev parcel
 ```
 
 
