@@ -1023,10 +1023,19 @@ describe('start / stop', () => {
   test('mount on custom element', () => {
     const el = document.createElement('div');
     const client = Client({ game: {}, debug: { target: el } });
-    expect(() => {
-      client.start();
-      client.stop();
-    }).not.toThrow();
+
+    client.start();
+    expect(el.childElementCount).toBeGreaterThan(0);
+
+    client.stop();
+    expect(el.childElementCount).toBe(0);
+
+    // Restarting the client mounts the debug panel again.
+    client.start();
+    expect(el.childElementCount).toBeGreaterThan(0);
+
+    client.stop();
+    expect(el.childElementCount).toBe(0);
     expect(error).not.toHaveBeenCalled();
   });
 
