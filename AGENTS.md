@@ -12,6 +12,8 @@ This file provides guidance to coding agents (e.g. Claude Code) working in this 
 
 `.npmrc` sets `minimum-release-age=2880` (48 hours) as supply-chain protection. The integration script overrides this with `--config.minimum-release-age=0` because it installs a local tarball.
 
+**pnpm settings live in `pnpm-workspace.yaml`, not `package.json`.** `overrides`, dependency pins and other pnpm config were moved there in #1273. If pnpm config also exists in `package.json`, `package.json` wins and the workspace file is ignored entirely — so adding a `pnpm.overrides` block to `package.json` silently disables every existing pin (e.g. `jest`) with no warning.
+
 ## Common commands
 
 - `pnpm test` — runs `lint` (pretest hook) then jest. Lint failures block tests.
