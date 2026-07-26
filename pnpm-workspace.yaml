@@ -9,3 +9,5 @@ overrides:
   jest-runner: 30.4.1
   jest-runtime: 30.4.1
   jest-resolve-dependencies: 30.4.1
+  brace-expansion@<1.1.16: '>=1.1.16 <2'
+  brace-expansion@>=2.0.0 <2.1.2: '>=2.1.2 <3'
