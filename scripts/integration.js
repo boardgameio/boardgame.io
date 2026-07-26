@@ -1,5 +1,12 @@
+const path = require('node:path');
 const shell = require('shelljs');
 const pkg = require('../package.json');
+
+// Resolved before the cd below, because these binaries live in the root
+// install while the checks themselves run inside integration/.
+const binDir = path.resolve(__dirname, '..', 'node_modules', '.bin');
+const publint = path.join(binDir, 'publint');
+const attw = path.join(binDir, 'attw');
 
 shell.rm('-rf', 'dist');
 const packResult = shell.exec('npm pack --silent', { silent: true });
@@ -31,10 +38,10 @@ shell.exec('pnpm test');
 shell.exec('pnpm run build');
 shell.exec('node node-smoke/esm-test.mjs');
 shell.exec('node node-smoke/cjs-test.cjs');
-shell.exec('pnpm dlx publint@latest', { cwd: 'node_modules/boardgame.io' });
+shell.exec(publint, { cwd: 'node_modules/boardgame.io' });
 
 shell.set('+e');
-shell.exec(`pnpm dlx @arethetypeswrong/cli@0.18.2 ./${packed} --format table`);
+shell.exec(`${attw} ./${packed} --format table`);
 shell.set('-e');
 
 shell.rm(packed);
