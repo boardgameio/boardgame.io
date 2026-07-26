@@ -139,6 +139,75 @@ describe('log-metadata', () => {
     expect(log).toHaveLength(1);
   });
 
+  test('It logs events without a canonical entry when no metadata is set', () => {
+    const game: Game = {
+      phases: {
+        B: {},
+      },
+    };
+    const client = Client({ game });
+
+    client.events.setPhase('B');
+
+    const setPhase = client
+      .getState()
+      .log.find(
+        (entry) =>
+          entry.action.type === 'GAME_EVENT' &&
+          entry.action.payload.type === 'setPhase',
+      );
+
+    expect(client.getState().ctx.phase).toBe('B');
+    expect(setPhase).toBeDefined();
+    expect(setPhase.metadata).toBeUndefined();
+
+    client.events.endGame('winner');
+
+    const endGame = client
+      .getState()
+      .log.find(
+        (entry) =>
+          entry.action.type === 'GAME_EVENT' &&
+          entry.action.payload.type === 'endGame',
+      );
+
+    expect(endGame).toBeDefined();
+    expect(endGame.metadata).toBeUndefined();
+  });
+
+  test('It does not log events when the log is disabled', () => {
+    const game: Game = {
+      disableLog: true,
+      onEnd: ({ log }) => {
+        log.setMetadata({ message: 'game ended' });
+      },
+    };
+    const client = Client({ game });
+
+    client.events.endGame('winner');
+
+    expect(client.getState().ctx.gameover).toBe('winner');
+    expect(client.getState().log).toEqual([]);
+  });
+
+  test('It does not log an event that the flow refused', () => {
+    const game: Game = {
+      moves: {
+        A: () => {},
+      },
+      turn: {
+        minMoves: 2,
+        maxMoves: 5,
+      },
+    };
+    const client = Client({ game });
+
+    client.events.endTurn();
+
+    expect(client.getState().ctx.turn).toBe(1);
+    expect(client.getState().log).toEqual([]);
+  });
+
   test('It attaches turn metadata before an automatically ended phase', () => {
     const game: Game = {
       phases: {

@@ -196,18 +196,29 @@ function getLogEventType(eventType: string): string | undefined {
 }
 
 /**
+ * Events whose flow implementation never appends a log entry even though their
+ * hooks run: `endGame` is never logged, and `setPhase` starting a phase from
+ * `ctx.phase === null` returns before `EndPhase` reaches its log entry.
+ * Other events either produce a canonical entry or run no hooks at all.
+ */
+const EVENTS_WITHOUT_LOG_ENTRY = new Set(['endGame', 'setPhase']);
+
+/**
  * Add metadata set by the log plugin to the canonical log entry for an event.
- * If the event produced no such entry, add one for the dispatched event.
+ * If the event never produces an entry of its own, add one for the dispatched
+ * event, whether or not metadata was set, so the log shape doesn’t depend on
+ * what a hook happened to do.
  */
 function addLogMetadata(
   state: State,
   action: ActionShape.GameEvent,
   actionState: State,
+  game: Game,
 ): State {
   const metadata = state.plugins.log?.data.metadata;
   const eventType = getLogEventType(action.payload.type);
 
-  if (metadata === undefined || eventType === undefined) {
+  if (game.disableLog || eventType === undefined) {
     return state;
   }
 
@@ -220,6 +231,7 @@ function addLogMetadata(
   );
 
   if (eventEntry === -1) {
+    if (!EVENTS_WITHOUT_LOG_ENTRY.has(action.payload.type)) return state;
     // Recreate the action without credentials so they are never persisted.
     const { type, args, playerID } = action.payload;
     const logEntry: LogEntry = {
@@ -227,10 +239,12 @@ function addLogMetadata(
       _stateID: actionState._stateID,
       turn: actionState.ctx.turn,
       phase: actionState.ctx.phase,
-      metadata,
     };
+    if (metadata !== undefined) logEntry.metadata = metadata;
     return { ...state, deltalog: [...deltalog, logEntry] };
   }
+
+  if (metadata === undefined) return state;
 
   const updatedDeltalog = [...deltalog];
   updatedDeltalog[eventEntry] = {
@@ -427,7 +441,7 @@ export function CreateGameReducer({
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
-        newState = addLogMetadata(newState, action, oldState);
+        newState = addLogMetadata(newState, action, oldState, game);
 
         // Execute plugins.
         let stateWithError: TransientState | undefined;
