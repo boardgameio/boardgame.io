@@ -47,6 +47,33 @@ describe('bots', () => {
     expect(client.getState().ctx.turn).toBe(3);
   });
 
+  test('bots are constructed with the game’s ai options', () => {
+    const botOptions = [];
+    class SpyBot extends RandomBot {
+      constructor(opts) {
+        super(opts);
+        botOptions.push(opts);
+      }
+    }
+    const objectives = () => ({});
+
+    new LocalMaster({
+      game: ProcessGameConfig({
+        ...game,
+        ai: { ...game.ai, iterations: 42, playoutDepth: 7, objectives },
+      }),
+      bots: { '1': SpyBot },
+    });
+
+    expect(botOptions).toHaveLength(1);
+    expect(botOptions[0]).toMatchObject({
+      enumerate: expect.any(Function),
+      iterations: 42,
+      playoutDepth: 7,
+      objectives,
+    });
+  });
+
   test('no bot move', async () => {
     const client = Client({
       numPlayers: 3,
