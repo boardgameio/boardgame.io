@@ -26,6 +26,16 @@ is ready to be merged. Name your branch something like
 Once you are ready, you can create a Pull Request for it to be
 merged into the `main` branch in this repo.
 
+#### One commit per concern
+
+Each commit should do one thing. Bundled commits are hard to review, so re-cut the
+branch into single-purpose commits before opening the Pull Request rather than
+leaving the history as it happened to be written.
+
+If a coding agent wrote the branch, ask it to do the re-cut as a separate pass.
+Agents tend to commit several things at once, and the pass doubles as a review —
+it often surfaces problems the implementation missed.
+
 #### Testing
 
 The following commands must pass for a Pull Request to be considered:
