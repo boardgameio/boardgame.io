@@ -364,6 +364,8 @@ See [the Server reference page](https://boardgame.io/documentation/#/api/Server)
 
 #### Breaking Changes
 
+Putting non-serializable values in `G` — class instances, `Map`/`Set`, `Date`, functions — now throws in development. The check runs on the state a move returns or mutates, and also on state produced by `setup` and by turn/phase hooks. Convert such values to plain objects or arrays before storing them in `G`. Production builds are unaffected.
+
 * [[01c522c](https://github.com/boardgameio/boardgame.io/commit/01c522c)] Throw error in development if non-serializable state is used in a move ([#896](https://github.com/boardgameio/boardgame.io/pull/896))
 
 #### Features
