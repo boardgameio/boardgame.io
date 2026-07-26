@@ -6,6 +6,12 @@ This file provides guidance to coding agents (e.g. Claude Code) working in this 
 
 **boardgame.io** is a turn-based game engine library — game logic lives in `src/`, public entry points in `packages/`, and rollup-built bundles in `dist/`. It is published on npm as `boardgame.io`. The toolchain runs on a modern **Node 24/26** baseline and uses **pnpm** as the package manager.
 
+## Contributing
+
+`CONTRIBUTING.md` governs how changes land, and applies to agent-authored work too. In short:
+commit to a separate branch rather than `main`, keep each commit to one concern, make sure
+`pnpm test` and `pnpm run lint` pass, and open a Pull Request. Read it before opening one.
+
 ## Package manager
 
 **pnpm 10.16+ is mandatory** (pinned via `packageManager` in `package.json`). Don't use npm or yarn — `pnpm-lock.yaml` is the only lockfile, and CI installs with `--frozen-lockfile`. Enable via `corepack enable`.
