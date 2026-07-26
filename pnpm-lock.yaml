@@ -97,6 +97,9 @@ importers:
       '@babel/plugin-proposal-object-rest-spread':
         specifier: ^7.20.7
         version: 7.20.7(@babel/core@7.29.7)
+      '@babel/plugin-transform-dynamic-import':
+        specifier: ^7.29.7
+        version: 7.29.7(@babel/core@7.29.7)
       '@babel/plugin-transform-modules-commonjs':
         specifier: ^7.28.6
         version: 7.29.7(@babel/core@7.29.7)
