@@ -11,7 +11,132 @@ import { TurnOrder } from '../core/turn-order';
 import type { Game } from '../types';
 
 describe('log-metadata', () => {
-  test.todo('preserves metadata from hooks triggered by moves');
+  test('preserves metadata from a hook triggered by a move-queued event', () => {
+    const game: Game = {
+      moves: {
+        finish: ({ events }) => events.endTurn(),
+      },
+      turn: {
+        onEnd: ({ log }) => {
+          log.setMetadata({ message: 'turn ended' });
+        },
+      },
+    };
+    const client = Client({ game });
+
+    client.moves.finish();
+
+    const log = client.getState().log;
+    const move = log.find((entry) => entry.action.type === 'MAKE_MOVE');
+    const endTurn = log.find(
+      (entry) =>
+        entry.action.type === 'GAME_EVENT' &&
+        entry.action.payload.type === 'endTurn',
+    );
+
+    expect(move.metadata).toBeUndefined();
+    expect(endTurn.metadata).toEqual({ message: 'turn ended' });
+    expect(client.getState().plugins.log.data).toEqual({});
+  });
+
+  test('attaches onMove metadata to the move that triggered it', () => {
+    const game: Game = {
+      moves: {
+        play: () => {},
+      },
+      turn: {
+        onMove: ({ log }) => {
+          log.setMetadata({ message: 'move processed' });
+        },
+      },
+    };
+    const client = Client({ game });
+
+    client.moves.play();
+
+    expect(client.getState().log.at(-1).metadata).toEqual({
+      message: 'move processed',
+    });
+  });
+
+  test('preserves metadata from hooks triggered by automatic turn and phase endings', () => {
+    const game: Game<{ endPhase: boolean }> = {
+      setup: () => ({ endPhase: false }),
+      phases: {
+        A: {
+          start: true,
+          next: 'B',
+          endIf: ({ G }) => G.endPhase,
+          onEnd: ({ log }) => {
+            log.setMetadata({ message: 'phase A ended' });
+          },
+          turn: {
+            maxMoves: 1,
+            onEnd: ({ log }) => {
+              log.setMetadata({ message: 'turn ended' });
+            },
+          },
+          moves: {
+            play: ({ G }) => {
+              G.endPhase = true;
+            },
+          },
+        },
+        B: {
+          onBegin: ({ log }) => {
+            log.setMetadata({ message: 'phase B began' });
+          },
+        },
+      },
+    };
+    const client = Client({ game });
+
+    client.moves.play();
+
+    const log = client.getState().log;
+    const endTurn = log.find(
+      (entry) =>
+        entry.action.type === 'GAME_EVENT' &&
+        entry.action.payload.type === 'endTurn',
+    );
+    const endPhase = log.find(
+      (entry) =>
+        entry.action.type === 'GAME_EVENT' &&
+        entry.action.payload.type === 'endPhase',
+    );
+
+    expect(endTurn.metadata).toEqual({ message: 'turn ended' });
+    expect(endPhase.metadata).toEqual({ message: 'phase B began' });
+  });
+
+  test('preserves game-end metadata when endIf ends the game', () => {
+    const game: Game<{ won: boolean }> = {
+      setup: () => ({ won: false }),
+      moves: {
+        win: ({ G }) => {
+          G.won = true;
+        },
+      },
+      endIf: ({ G }) => G.won && 'winner',
+      onEnd: ({ log }) => {
+        log.setMetadata({ message: 'game ended' });
+      },
+    };
+    const client = Client({ game });
+
+    client.moves.win();
+
+    const log = client.getState().log;
+
+    expect(
+      log.find(
+        (entry) =>
+          entry.action.type === 'GAME_EVENT' &&
+          entry.action.payload.type === 'endGame',
+      ),
+    ).toBeUndefined();
+    expect(log.at(-1).metadata).toEqual({ message: 'game ended' });
+  });
 
   test('It sets metadata in a move and then clears the metadata', () => {
     const game: Game = {
@@ -123,7 +248,7 @@ describe('log-metadata', () => {
         log.setMetadata({ message: 'game ended' });
       },
     };
-    const client = Client({ game });
+    const client = Client({ game, credentials: 'secret' });
 
     client.events.endGame('winner');
 
@@ -136,7 +261,27 @@ describe('log-metadata', () => {
 
     expect(client.getState().ctx.gameover).toBe('winner');
     expect(endGame.metadata).toEqual({ message: 'game ended' });
+    expect(endGame.action.payload).toEqual({
+      type: 'endGame',
+      args: ['winner'],
+      playerID: '0',
+      credentials: undefined,
+    });
     expect(log).toHaveLength(1);
+  });
+
+  test('It preserves empty endGame arguments in the log', () => {
+    const client = Client({ game: {} });
+
+    client.events.endGame();
+
+    const endGame = client.getState().log.at(-1);
+    expect(endGame.action.payload).toEqual({
+      type: 'endGame',
+      args: [],
+      playerID: '0',
+      credentials: undefined,
+    });
   });
 
   test('It logs events without a canonical entry when no metadata is set', () => {
@@ -160,6 +305,12 @@ describe('log-metadata', () => {
     expect(client.getState().ctx.phase).toBe('B');
     expect(setPhase).toBeDefined();
     expect(setPhase.metadata).toBeUndefined();
+    expect(setPhase.action.payload).toEqual({
+      type: 'setPhase',
+      args: ['B'],
+      playerID: '0',
+      credentials: undefined,
+    });
 
     client.events.endGame('winner');
 

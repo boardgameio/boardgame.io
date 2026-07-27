@@ -34,6 +34,7 @@ import type {
 } from '../types';
 import { GameMethod } from './game-methods';
 import { supportDeprecatedMoveLimit } from './backwards-compatibility';
+import { consumeLogMetadata } from '../plugins/plugin-log';
 
 /**
  * Flow
@@ -110,8 +111,40 @@ export function Flow({
     };
   };
 
-  const appendLogEntry = (state: State, logEntry: LogEntry): LogEntry[] =>
-    disableLog ? state.deltalog || [] : [...(state.deltalog || []), logEntry];
+  const appendLogEntry = (state: State, logEntry: LogEntry): LogEntry[] => {
+    if (disableLog) return state.deltalog || [];
+
+    const metadata = consumeLogMetadata(state.plugins?.log?.data);
+    if (metadata !== undefined) logEntry = { ...logEntry, metadata };
+
+    return [...(state.deltalog || []), logEntry];
+  };
+
+  const isPhaseTransitionLogEntry = (entry: LogEntry) =>
+    entry.action.type === 'GAME_EVENT' &&
+    (entry.action.payload.type === 'endPhase' ||
+      entry.action.payload.type === 'setPhase');
+
+  const updateLogEntry = (
+    state: State,
+    predicate: (entry: LogEntry) => boolean = () => true,
+  ): State => {
+    if (disableLog) return state;
+
+    const { deltalog = [] } = state;
+    for (let index = deltalog.length - 1; index >= 0; index--) {
+      if (!predicate(deltalog[index])) continue;
+
+      const metadata = consumeLogMetadata(state.plugins?.log?.data);
+      if (metadata === undefined) return state;
+
+      const updatedDeltalog = [...deltalog];
+      updatedDeltalog[index] = { ...updatedDeltalog[index], metadata };
+      return { ...state, deltalog: updatedDeltalog };
+    }
+
+    return state;
+  };
 
   const wrapped = {
     onEnd: HookWrapper(onEnd, GameMethod.GAME_ON_END),
@@ -214,6 +247,7 @@ export function Flow({
       automatic?: boolean;
       playerID?: PlayerID;
       force?: boolean;
+      logAction?: ActionShape.GameEvent;
     }[],
   ): State {
     const phasesEnded = new Set();
@@ -314,7 +348,7 @@ export function Flow({
 
     next.push({ fn: StartTurn });
 
-    return { ...state, G, ctx };
+    return updateLogEntry({ ...state, G, ctx }, isPhaseTransitionLogEntry);
   }
 
   function StartTurn(state: State, { currentPlayer }): State {
@@ -338,7 +372,14 @@ export function Flow({
 
     const G = phaseConfig.turn.wrapped.onBegin({ ...state, ctx });
 
-    return { ...state, G, ctx, _undo: [], _redo: [] } as State;
+    const stateWithTurn = { ...state, G, ctx, _undo: [], _redo: [] } as State;
+    const hasPhaseTransition = (stateWithTurn.deltalog || []).some((entry) =>
+      isPhaseTransitionLogEntry(entry),
+    );
+    return updateLogEntry(
+      stateWithTurn,
+      hasPhaseTransition ? isPhaseTransitionLogEntry : () => true,
+    );
   }
 
   ////////////
@@ -480,7 +521,8 @@ export function Flow({
   // End //
   /////////
 
-  function EndGame(state: State, { arg, phase }): State {
+  function EndGame(state: State, { arg, phase, automatic, logAction }): State {
+    const { turn } = state.ctx;
     state = EndPhase(state, { phase });
 
     if (arg === undefined) {
@@ -492,7 +534,23 @@ export function Flow({
     // Run game end hook.
     const G = wrapped.onEnd(state);
 
-    return { ...state, G };
+    // Automatic game endings historically do not add a separate endGame log
+    // entry. Attach their hook metadata to the canonical event that triggered
+    // the ending instead.
+    if (automatic) {
+      return updateLogEntry({ ...state, G });
+    }
+
+    const action = logAction || gameEvent('endGame', arg);
+    const { _stateID } = state;
+    const logEntry: LogEntry = {
+      action,
+      _stateID,
+      turn,
+      phase,
+    };
+    const deltalog = appendLogEntry(state, logEntry);
+    return { ...state, G, deltalog };
   }
 
   function EndPhase(
@@ -759,7 +817,10 @@ export function Flow({
       playerID,
       move: { name: type, args },
     });
-    state = { ...state, G };
+    state = updateLogEntry(
+      { ...state, G },
+      (entry) => entry.action.type === 'MAKE_MOVE',
+    );
 
     const events = [{ fn: OnMove }];
 
@@ -793,10 +854,22 @@ export function Flow({
 
   function SetPhaseEvent(
     state: State,
-    _playerID: PlayerID,
+    playerID: PlayerID,
     newPhase: string,
+    logAction?: ActionShape.GameEvent,
   ): State {
-    return Process(state, [
+    const startsFirstPhase = state.ctx.phase === null && newPhase in phaseMap;
+    if (startsFirstPhase) {
+      const logEntry: LogEntry = {
+        action: logAction || gameEvent('setPhase', [newPhase], playerID),
+        _stateID: state._stateID,
+        turn: state.ctx.turn,
+        phase: state.ctx.phase,
+      };
+      state = { ...state, deltalog: appendLogEntry(state, logEntry) };
+    }
+
+    state = Process(state, [
       {
         fn: EndPhase,
         phase: state.ctx.phase,
@@ -804,6 +877,31 @@ export function Flow({
         arg: { next: newPhase },
       },
     ]);
+
+    // The implicit initial endTurn is logged after setPhase. Keep the public
+    // log order consistent with other events, where the triggering event is
+    // the final entry.
+    if (startsFirstPhase) {
+      const { deltalog = [] } = state;
+      const index = deltalog.findIndex(
+        (entry) =>
+          entry.action.type === 'GAME_EVENT' &&
+          entry.action.payload.type === 'setPhase',
+      );
+      if (index !== -1) {
+        const logEntry = deltalog[index];
+        state = {
+          ...state,
+          deltalog: [
+            ...deltalog.slice(0, index),
+            ...deltalog.slice(index + 1),
+            logEntry,
+          ],
+        };
+      }
+    }
+
+    return state;
   }
 
   function EndPhaseEvent(state: State): State {
@@ -830,9 +928,21 @@ export function Flow({
     ]);
   }
 
-  function EndGameEvent(state: State, _playerID: PlayerID, arg: any): State {
+  function EndGameEvent(
+    state: State,
+    _playerID: PlayerID,
+    args: any,
+    logAction?: ActionShape.GameEvent,
+  ): State {
+    const arg = Array.isArray(args) ? args[0] : args;
     return Process(state, [
-      { fn: EndGame, turn: state.ctx.turn, phase: state.ctx.phase, arg },
+      {
+        fn: EndGame,
+        turn: state.ctx.turn,
+        phase: state.ctx.phase,
+        arg,
+        logAction,
+      },
     ]);
   }
 
@@ -878,6 +988,18 @@ export function Flow({
   function ProcessEvent(state: State, action: ActionShape.GameEvent): State {
     const { type, playerID, args } = action.payload;
     if (typeof eventHandlers[type] !== 'function') return state;
+
+    // Preserve the original argument shape and player ID in synthetic log
+    // entries, while ensuring credentials are never persisted.
+    const logAction = gameEvent(type, args, playerID);
+    if (type === 'endGame') {
+      return EndGameEvent(state, playerID, args, logAction);
+    }
+    if (type === 'setPhase') {
+      const newPhase = Array.isArray(args) ? args[0] : args;
+      return SetPhaseEvent(state, playerID, newPhase, logAction);
+    }
+
     return eventHandlers[type](
       state,
       playerID,
