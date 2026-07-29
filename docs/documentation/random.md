@@ -57,7 +57,7 @@ const game = {
 
 ?> `seed` can be either a string or a number.
 
-## API Reference
+### API Reference
 
 ### 1. Die
 

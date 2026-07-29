@@ -28,7 +28,7 @@ accessible to the client (for instance secret state), then optimistic
 updates may need to be disabled for that move. See the
 [secret state documentation](secret-state.md) for more details.
 
-## Local Master
+### Local Master
 
 The game master can run completely on the browser. This is useful to set
 up pass-and-play multiplayer or for prototyping the multiplayer experience
@@ -142,7 +142,7 @@ Local({
 });
 ```
 
-## Remote Master
+### Remote Master
 
 You can also run the game master on a separate server. Any boardgame.io
 client can connect to this master (whether it is a browser, an Android
