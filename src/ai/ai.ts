@@ -10,20 +10,19 @@ import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
 import type { Game, PlayerID, State, Store } from '../types';
 
+function getActivePlayer(state: State): PlayerID {
+  return state.ctx.activePlayers
+    ? Object.keys(state.ctx.activePlayers)[0]
+    : state.ctx.currentPlayer;
+}
+
 function getBotPlayer(
   state: State,
-  bots: Bot | Record<PlayerID, Bot>,
-  playerID?: PlayerID,
-) {
-  if (playerID !== undefined) return playerID;
-
-  if (state.ctx.activePlayers) {
-    const activePlayers = Object.keys(state.ctx.activePlayers);
-    if (bots instanceof Bot) return activePlayers[0];
-    return activePlayers.find((playerID) => playerID in bots);
-  }
-
-  return state.ctx.currentPlayer;
+  bots: Record<PlayerID, Bot>,
+): PlayerID | undefined {
+  return state.ctx.activePlayers
+    ? Object.keys(state.ctx.activePlayers).find((id) => id in bots)
+    : state.ctx.currentPlayer;
 }
 
 /**
@@ -39,7 +38,7 @@ export async function Step(
   playerID?: PlayerID,
 ) {
   const state = client.store.getState();
-  playerID = getBotPlayer(state, bot, playerID);
+  playerID = playerID ?? getActivePlayer(state);
 
   const { action, metadata } = await bot.play(state, playerID);
 
@@ -60,7 +59,7 @@ export async function Step(
  * Simulates the game till the end or a max depth.
  *
  * @param {...object} game - The game object.
- * @param {...object} bots - An array of bots.
+ * @param {...object} bots - A map of player IDs to bots, or one bot for every seat.
  * @param {...object} state - The game state to start from.
  */
 export async function Simulate({
@@ -75,14 +74,18 @@ export async function Simulate({
   depth?: number;
 }) {
   if (depth === undefined) depth = 10_000;
+  const botMap =
+    bots instanceof Bot
+      ? Object.fromEntries(state.ctx.playOrder.map((p) => [p, bots]))
+      : bots;
   const reducer = CreateGameReducer({ game });
 
   let metadata = null;
   let iter = 0;
   while (state.ctx.gameover === undefined && iter < depth) {
-    const playerID = getBotPlayer(state, bots);
+    const playerID = getBotPlayer(state, botMap);
 
-    const bot = bots instanceof Bot ? bots : bots[playerID];
+    const bot = botMap[playerID];
     if (!bot) break;
     const t = await bot.play(state, playerID);
 
