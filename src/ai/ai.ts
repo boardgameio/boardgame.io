@@ -10,19 +10,36 @@ import { CreateGameReducer } from '../core/reducer';
 import { Bot } from './bot';
 import type { Game, PlayerID, State, Store } from '../types';
 
+function getBotPlayer(
+  state: State,
+  bots: Bot | Record<PlayerID, Bot>,
+  playerID?: PlayerID,
+) {
+  if (playerID !== undefined) return playerID;
+
+  if (state.ctx.activePlayers) {
+    const activePlayers = Object.keys(state.ctx.activePlayers);
+    if (bots instanceof Bot) return activePlayers[0];
+    return activePlayers.find((playerID) => playerID in bots);
+  }
+
+  return state.ctx.currentPlayer;
+}
+
 /**
  * Make a single move on the client with a bot.
  *
  * @param {...object} client - The game client.
  * @param {...object} bot - The bot.
+ * @param {string} [playerID] - The player the bot should play as.
  */
-export async function Step(client: { store: Store }, bot: Bot) {
+export async function Step(
+  client: { store: Store },
+  bot: Bot,
+  playerID?: PlayerID,
+) {
   const state = client.store.getState();
-
-  let playerID = state.ctx.currentPlayer;
-  if (state.ctx.activePlayers) {
-    playerID = Object.keys(state.ctx.activePlayers)[0];
-  }
+  playerID = getBotPlayer(state, bot, playerID);
 
   const { action, metadata } = await bot.play(state, playerID);
 
@@ -63,12 +80,10 @@ export async function Simulate({
   let metadata = null;
   let iter = 0;
   while (state.ctx.gameover === undefined && iter < depth) {
-    let playerID = state.ctx.currentPlayer;
-    if (state.ctx.activePlayers) {
-      playerID = Object.keys(state.ctx.activePlayers)[0];
-    }
+    const playerID = getBotPlayer(state, bots);
 
     const bot = bots instanceof Bot ? bots : bots[playerID];
+    if (!bot) break;
     const t = await bot.play(state, playerID);
 
     if (!t.action) {

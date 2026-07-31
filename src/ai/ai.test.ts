@@ -140,6 +140,33 @@ describe('Step', () => {
     await Step(client, bot);
     expect(client.getState().G).toEqual({ moved: true });
   });
+
+  test('uses a requested active player', async () => {
+    const enumerate = jest.fn((_G, _ctx, playerID) => [
+      makeMove('A', undefined, playerID),
+    ]);
+    const client = Client({
+      numPlayers: 3,
+      game: {
+        setup: () => ({ movedBy: null }),
+        moves: {
+          A: ({ G, playerID }) => {
+            G.movedBy = playerID;
+          },
+        },
+        turn: {
+          activePlayers: { all: Stage.NULL },
+        },
+        ai: { enumerate },
+      },
+    });
+
+    const bot = new RandomBot({ enumerate });
+    await Step(client, bot, '2');
+
+    expect(enumerate.mock.calls[0][2]).toBe('2');
+    expect(client.getState().G.movedBy).toBe('2');
+  });
 });
 
 describe('Simulate', () => {
@@ -196,6 +223,35 @@ describe('Simulate', () => {
       depth: 1,
     });
     expect(endState.ctx.gameover).not.toBe(undefined);
+  });
+
+  test('selects an active player with a configured bot', async () => {
+    const game = ProcessGameConfig({
+      setup: () => ({ movedBy: null }),
+      moves: {
+        A: ({ G, playerID }) => {
+          G.movedBy = playerID;
+        },
+      },
+      turn: {
+        activePlayers: { all: Stage.NULL },
+      },
+      endIf: ({ G }) => G.movedBy !== null,
+    });
+    const bot = new RandomBot({
+      seed: 'test',
+      enumerate: (_G, _ctx, playerID) => [makeMove('A', undefined, playerID)],
+    });
+
+    const state = InitializeGame({ game, numPlayers: 3 });
+    const { state: endState } = await Simulate({
+      game,
+      bots: { '2': bot },
+      state,
+      depth: 1,
+    });
+
+    expect(endState.G.movedBy).toBe('2');
   });
 });
 
