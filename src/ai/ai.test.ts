@@ -253,6 +253,19 @@ describe('Simulate', () => {
 
     expect(endState.G.movedBy).toBe('2');
   });
+
+  test('stops when no bot is configured for the active player', async () => {
+    const state = InitializeGame({ game: TicTacToe });
+
+    const result = await Simulate({
+      game: TicTacToe,
+      bots: {},
+      state,
+      depth: 1,
+    });
+
+    expect(result).toEqual({ state, metadata: null });
+  });
 });
 
 describe('Bot', () => {
