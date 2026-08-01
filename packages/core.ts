@@ -6,7 +6,12 @@
  * https://opensource.org/licenses/MIT.
  */
 
-export { INVALID_MOVE } from '../src/core/constants';
+export {
+  INVALID_MOVE,
+  Invalid,
+  isInvalidMoveResult,
+} from '../src/core/constants';
+export type { InvalidMoveResult } from '../src/core/constants';
 export { ActivePlayers, TurnOrder, Stage } from '../src/core/turn-order';
 export { GameMethod } from '../src/core/game-methods';
 
