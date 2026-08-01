@@ -3,7 +3,6 @@
 
 const { EOL } = require('node:os');
 const shell = require('shelljs');
-const tempy = require('tempy');
 
 shell.config.silent = true;
 const P = EOL + EOL;
@@ -22,7 +21,7 @@ const PREVIOUS_TAG = shell
 /** This is a “major” release if the version is 0.x.0 or x.0.0 */
 const IS_MAJOR = /^v?(0\.\d+\.0|\d+.0.0)$/.test(CURRENT_TAG);
 
-const FILE = tempy.file();
+const CHANGELOG = 'docs/documentation/CHANGELOG.md';
 
 /** Tests for a `feat` commit type. */
 const isFeature = (s) => /feat(\([^)]+\))?:/.test(s);
@@ -68,8 +67,6 @@ const others = formatChanges(changes.filter((line) => !isFeature(line)));
 let NOTES = (IS_MAJOR ? '## ' : '### ') + CURRENT_TAG + P;
 if (features.length > 0) NOTES += '#### Features' + P + features + P;
 if (others.length > 0) NOTES += '#### Bugfixes' + P + others + P;
-shell.ShellString(NOTES).toEnd(FILE);
 shell.echo(NOTES);
 
-shell.cat('docs/documentation/CHANGELOG.md').toEnd(FILE);
-shell.cp(FILE, 'docs/documentation/CHANGELOG.md');
+shell.ShellString(NOTES + shell.cat(CHANGELOG)).to(CHANGELOG);
