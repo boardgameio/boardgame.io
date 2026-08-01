@@ -31,9 +31,17 @@ shell.exec('pnpm install --ignore-workspace --config.minimum-release-age=0');
 // `./` prefix is required so pnpm treats the filename as a local tarball
 // rather than a registry package name (npm install <name>.tgz is forgiving;
 // pnpm add is not).
+//
+// pnpm add always saves to the manifest and has no --no-save, so snapshot it
+// and put it back. The tarball name carries the version and must never be
+// committed. Restoring here rather than at the end means a failing check
+// below cannot leave the file dirty either; the checks resolve the package
+// through node_modules, which is already populated.
+const manifest = shell.cat('package.json').toString();
 shell.exec(
   `pnpm add --ignore-workspace --config.minimum-release-age=0 ./${packed}`,
 );
+shell.ShellString(manifest).to('package.json');
 
 shell.set('-e');
 
