@@ -256,6 +256,10 @@ export interface StageConfig<
 > {
   moves?: MoveMap<G, PluginAPIs>;
   next?: string;
+  /** Ends the stage automatically after this number of moves. */
+  maxMoves?: number;
+  /** @deprecated Use `maxMoves` instead. */
+  moveLimit?: number;
 }
 
 export interface StageMap<
