@@ -288,8 +288,8 @@
       "^.+\\.svelte$": "<rootDir>/jest-svelte-transformer.cjs"
     },
     "transformIgnorePatterns": [
-      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
-      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
+      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|nanoid|p-queue|p-timeout|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
+      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|nanoid|p-queue|p-timeout|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
