@@ -57,6 +57,18 @@ test('dispatch', () => {
   ]);
 });
 
+test('detects pending turn-ending events', () => {
+  const flow = { eventNames: ['setPhase', 'pass'] } as Game['flow'];
+  const e = new Events(flow, { phase: '', turn: 0 } as Ctx);
+  const events = e.api();
+
+  expect(e.isTurnEndPending()).toBe(false);
+  events.setPhase('B');
+  expect(e.isTurnEndPending()).toBe(false);
+  events.pass({ remove: true });
+  expect(e.isTurnEndPending()).toBe(true);
+});
+
 test('update ctx', () => {
   const game: Game = {
     moves: {
