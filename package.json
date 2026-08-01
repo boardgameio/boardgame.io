@@ -145,7 +145,7 @@
     "game engine"
   ],
   "engines": {
-    "node": ">=22",
+    "node": ">=22.12",
     "pnpm": ">=10.16"
   },
   "author": "nicolodavis@gmail.com",
