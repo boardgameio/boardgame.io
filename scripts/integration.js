@@ -24,11 +24,16 @@ shell.rm('-rf', 'node_modules');
 // the CLI flag wins. This sealed scaffold uses pinned deps, so the cooldown
 // adds no protection here. Also sidesteps pnpm 10.16's ERR_PNPM_MISSING_TIME
 // on packages whose abbreviated registry metadata lacks the time field.
-shell.exec('pnpm install --config.minimum-release-age=0');
+// --ignore-workspace stops pnpm walking up to the repo root. Without it,
+// `pnpm add` of a local tarball registers integration/ as an importer of the
+// root workspace and writes the tarball into the root pnpm-lock.yaml.
+shell.exec('pnpm install --ignore-workspace --config.minimum-release-age=0');
 // `./` prefix is required so pnpm treats the filename as a local tarball
 // rather than a registry package name (npm install <name>.tgz is forgiving;
 // pnpm add is not).
-shell.exec(`pnpm add --config.minimum-release-age=0 ./${packed}`);
+shell.exec(
+  `pnpm add --ignore-workspace --config.minimum-release-age=0 ./${packed}`,
+);
 
 shell.set('-e');
 
