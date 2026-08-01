@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": false,
     "strict": false,
     "allowSyntheticDefaultImports": true,
@@ -10,5 +10,8 @@
     "jsx": "react",
     "skipLibCheck": true
   },
-  "exclude": ["dist", "integration/type-tests"]
+  "exclude": [
+    "dist",
+    "integration/type-tests"
+  ]
 }
