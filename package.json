@@ -190,7 +190,7 @@
     "babel-plugin-module-resolver": "^5.0.3",
     "benchmark": "^2.1.4",
     "cross-env": "^10.1.0",
-    "docsify-cli": "^4.4.4",
+    "docsify-cli": "^5.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-jest": "^28.14.0",
