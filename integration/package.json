@@ -10,7 +10,7 @@
   "devDependencies": {
     "@testing-library/react": "^16.0.1",
     "@vitejs/plugin-react": "^6.0.5",
-    "jsdom": "^25.0.1",
+    "jsdom": "^29.1.1",
     "typescript": "^5.9.3",
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
