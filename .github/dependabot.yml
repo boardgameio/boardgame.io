@@ -20,6 +20,14 @@ updates:
       - "*"
     cooldown:
       default-days: 7
+    ignore:
+      # ESLint 9 replaces .eslintrc with flat config, so the bump cannot pass CI
+      # until that migration happens. Grouped, it would keep every other update
+      # in the weekly pull request unmergeable. Drop this once we are on flat
+      # config.
+      - dependency-name: eslint
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
