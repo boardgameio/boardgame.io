@@ -13,6 +13,20 @@ updates:
           - minor
           - patch
 
+  # The integration scaffold has its own manifest and no lockfile, so the
+  # root entry above never sees it.
+  - package-ecosystem: npm
+    directory: /integration
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      integration-minor-patch:
+        update-types:
+          - minor
+          - patch
+
   - package-ecosystem: github-actions
     directory: /
     schedule:

@@ -145,7 +145,7 @@
     "game engine"
   ],
   "engines": {
-    "node": ">=22",
+    "node": ">=22.12",
     "pnpm": ">=10.16"
   },
   "author": "nicolodavis@gmail.com",
@@ -219,7 +219,7 @@
     "svelte": "^5.0.0",
     "tempy": "^1.0.1",
     "ts-jest": "^29.4.9",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@koa/bodyparser": "^6.1.0",
@@ -233,8 +233,8 @@
     "js-cookie": "^3.0.5",
     "koa": "^3.2.0",
     "lodash.isplainobject": "^4.0.6",
-    "nanoid": "^3.3.11",
-    "p-queue": "^6.6.2",
+    "nanoid": "^6.0.0",
+    "p-queue": "^9.3.3",
     "prop-types": "^15.8.1",
     "redux": "^5.0.1",
     "rfc6902": "^5.2.0",
@@ -288,8 +288,8 @@
       "^.+\\.svelte$": "<rootDir>/jest-svelte-transformer.cjs"
     },
     "transformIgnorePatterns": [
-      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
-      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
+      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|nanoid|p-queue|p-timeout|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
+      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|nanoid|p-queue|p-timeout|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",

@@ -71,8 +71,8 @@ export class LocalMaster extends Master {
       for (const playerID in bots) {
         const bot = bots[playerID];
         initializedBots[playerID] = new bot({
+          ...game.ai,
           game,
-          enumerate: game.ai.enumerate,
           seed: game.seed,
         });
       }
