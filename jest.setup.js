@@ -1,4 +1,3 @@
-/* eslint-env es2020 */
 // Polyfill globals required by some dependencies (e.g. @noble/hashes via
 // supertest/formidable/cuid2; koa's request body parsing) when running under
 // jsdom.
