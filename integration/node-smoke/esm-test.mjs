@@ -16,4 +16,8 @@ const server = Server({
 assert.ok(server.app);
 assert.ok(server.run);
 
+// Constructing a queue exercises the p-queue default import, which loading
+// the bundle alone does not.
+assert.equal(typeof server.transport.getMatchQueue('smoke').add, 'function');
+
 console.log('ESM smoke OK');

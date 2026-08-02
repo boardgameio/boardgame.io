@@ -145,7 +145,7 @@
     "game engine"
   ],
   "engines": {
-    "node": ">=22",
+    "node": ">=22.12",
     "pnpm": ">=10.16"
   },
   "author": "nicolodavis@gmail.com",
@@ -181,7 +181,7 @@
     "@types/jest": "^30.0.0",
     "@types/js-cookie": "^3.0.6",
     "@types/koa__cors": "^5.0.1",
-    "@types/node": "^25.6.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/supertest": "^7.2.0",
@@ -190,10 +190,10 @@
     "babel-plugin-module-resolver": "^5.0.3",
     "benchmark": "^2.1.4",
     "cross-env": "^10.1.0",
-    "docsify-cli": "^4.4.4",
+    "docsify-cli": "^5.0.0",
     "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.2",
-    "eslint-plugin-jest": "^28.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jest": "^29.16.0",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-unicorn": "^56.0.1",
@@ -232,8 +232,8 @@
     "js-cookie": "^3.0.5",
     "koa": "^3.2.0",
     "lodash.isplainobject": "^4.0.6",
-    "nanoid": "^3.3.11",
-    "p-queue": "^6.6.2",
+    "nanoid": "^6.0.0",
+    "p-queue": "^9.3.3",
     "prop-types": "^15.8.1",
     "redux": "^5.0.1",
     "rfc6902": "^5.2.0",
@@ -287,8 +287,8 @@
       "^.+\\.svelte$": "<rootDir>/jest-svelte-transformer.cjs"
     },
     "transformIgnorePatterns": [
-      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
-      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
+      "node_modules/\\.pnpm/(?!(boardgame.io|flatted|nanoid|p-queue|p-timeout|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library\\+(svelte|svelte-core))@)",
+      "node_modules/(?!\\.pnpm/)(?!(boardgame.io|flatted|nanoid|p-queue|p-timeout|svelte|svelte-json-tree-auto|esm-env|devalue|zimmerframe|@testing-library/(svelte|svelte-core))/)"
     ],
     "testPathIgnorePatterns": [
       "examples/",
