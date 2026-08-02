@@ -218,7 +218,7 @@
     "supertest": "^7.2.2",
     "svelte": "^5.0.0",
     "ts-jest": "^29.4.9",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@koa/bodyparser": "^6.1.0",

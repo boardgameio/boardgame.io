@@ -2,13 +2,20 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": false,
     "strict": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "react",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "exclude": ["dist", "integration/type-tests"]
+  "exclude": [
+    "dist",
+    "integration/type-tests"
+  ]
 }
