@@ -14,6 +14,7 @@ import type {
   ActivePlayersArg,
   PlayerID,
   State,
+  StageMap,
   TurnConfig,
   FnContext,
 } from '../types';
@@ -126,7 +127,11 @@ export function RemovePlayer(ctx: Ctx, playerID: PlayerID): Ctx {
   };
 }
 
-export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
+export function SetActivePlayers(
+  ctx: Ctx,
+  arg: ActivePlayersArg,
+  stages: StageMap = {},
+): Ctx {
   let activePlayers: typeof ctx.activePlayers = {};
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
@@ -233,6 +238,14 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
         }
       }
     }
+
+    for (const id in activePlayers) {
+      const stage = stages[activePlayers[id]];
+      const maxMoves = stage && (stage.maxMoves || stage.moveLimit);
+      if (_activePlayersMaxMoves[id] === undefined && maxMoves) {
+        _activePlayersMaxMoves[id] = maxMoves;
+      }
+    }
   }
 
   if (Object.keys(activePlayers).length === 0) {
@@ -268,7 +281,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
  * when it becomes empty.
  * @param ctx
  */
-export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
+export function UpdateActivePlayersOnceEmpty(ctx: Ctx, stages?: StageMap) {
   let {
     activePlayers,
     _activePlayersMinMoves,
@@ -280,7 +293,7 @@ export function UpdateActivePlayersOnceEmpty(ctx: Ctx) {
 
   if (activePlayers && Object.keys(activePlayers).length === 0) {
     if (_nextActivePlayers) {
-      ctx = SetActivePlayers(ctx, _nextActivePlayers);
+      ctx = SetActivePlayers(ctx, _nextActivePlayers, stages);
       ({
         activePlayers,
         _activePlayersMinMoves,
@@ -393,7 +406,7 @@ export function InitTurnOrderState(state: State, turn: TurnConfig) {
     playOrder.length > 0 ? getCurrentPlayer(playOrder, playOrderPos) : '';
 
   ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-  ctx = SetActivePlayers(ctx, turn.activePlayers || {});
+  ctx = SetActivePlayers(ctx, turn.activePlayers || {}, turn.stages);
 
   return ctx;
 }

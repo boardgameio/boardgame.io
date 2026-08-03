@@ -728,6 +728,47 @@ describe('stages', () => {
     state = client.getState();
     expect(state.ctx.activePlayers).toEqual({ '1': 'A' });
   });
+
+  test('stage config provides a default move limit', () => {
+    const game: Game = {
+      turn: {
+        activePlayers: { currentPlayer: 'A' },
+        stages: {
+          A: {
+            maxMoves: 1,
+            moves: { A: () => {} },
+          },
+        },
+      },
+    };
+    const client = Client({ game });
+
+    expect(client.getState().ctx._activePlayersMaxMoves).toEqual({ '0': 1 });
+    client.moves.A();
+    expect(client.getState().ctx.activePlayers).toBeNull();
+  });
+
+  test('active player config overrides the stage move limit', () => {
+    const game: Game = {
+      turn: {
+        activePlayers: {
+          currentPlayer: { stage: 'A', maxMoves: 2 },
+        },
+        stages: {
+          A: {
+            maxMoves: 1,
+            moves: { A: () => {} },
+          },
+        },
+      },
+    };
+    const client = Client({ game });
+
+    client.moves.A();
+    expect(client.getState().ctx.activePlayers).toEqual({ '0': 'A' });
+    client.moves.A();
+    expect(client.getState().ctx.activePlayers).toBeNull();
+  });
 });
 
 describe('stage events', () => {
@@ -808,7 +849,7 @@ describe('stage events', () => {
     });
 
     test('with max moves', () => {
-      const flow = Flow({});
+      const flow = Flow({ turn: { stages: { A: { maxMoves: 2 } } } });
       let state = { G: {}, ctx: flow.ctx(2) } as State;
       state = flow.init(state);
 
@@ -820,6 +861,33 @@ describe('stage events', () => {
       );
       expect(state.ctx._activePlayersMinMoves).toBeNull();
       expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 1 });
+    });
+
+    test('uses max moves from the stage config by default', () => {
+      const flow = Flow({
+        turn: {
+          stages: { A: { maxMoves: 2 } },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.init(state);
+
+      state = flow.processEvent(state, gameEvent('setStage', 'A'));
+      expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
+    });
+
+    test('stage config replaces a previous move limit', () => {
+      const flow = Flow({
+        turn: {
+          activePlayers: { all: 'B', maxMoves: 5 },
+          stages: { A: { maxMoves: 2 } },
+        },
+      });
+      let state = { G: {}, ctx: flow.ctx(2) } as State;
+      state = flow.init(state);
+
+      state = flow.processEvent(state, gameEvent('setStage', 'A'));
+      expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2, '1': 5 });
     });
 
     test('empty argument ends stage', () => {
@@ -2234,6 +2302,26 @@ describe('backwards compatibility for moveLimit', () => {
     );
     expect(state.ctx._activePlayersMinMoves).toBeNull();
     expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
+  });
+
+  test('stage config maps moveLimit to maxMoves only', () => {
+    const flow = Flow({
+      turn: {
+        activePlayers: { currentPlayer: 'A' },
+        stages: { A: { moveLimit: 2 } },
+      },
+    });
+    const state = flow.init({ ctx: flow.ctx(2) } as State);
+
+    expect(state.ctx._activePlayersMinMoves).toBeNull();
+    expect(state.ctx._activePlayersMaxMoves).toEqual({ '0': 2 });
+
+    const eventFlow = Flow({
+      turn: { stages: { A: { moveLimit: 3 } } },
+    });
+    let eventState = eventFlow.init({ ctx: eventFlow.ctx(2) } as State);
+    eventState = eventFlow.processEvent(eventState, gameEvent('setStage', 'A'));
+    expect(eventState.ctx._activePlayersMaxMoves).toEqual({ '0': 3 });
   });
 });
 
