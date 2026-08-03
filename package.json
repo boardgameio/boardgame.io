@@ -217,7 +217,6 @@
     "shelljs": "^0.10.0",
     "supertest": "^7.2.2",
     "svelte": "^5.0.0",
-    "tempy": "^1.0.1",
     "ts-jest": "^29.4.9",
     "typescript": "^6.0.3"
   },
