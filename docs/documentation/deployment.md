@@ -1,6 +1,6 @@
 # Deployment
 
-## Serverless Options
+### Serverless Options
 
 For one-player or pass-and-play games, you may not need the boardgame.io game
 server and prefer to serve an app that runs entirely on the client. If you
@@ -79,7 +79,7 @@ production build in `/build`, which you can host just about anywhere.
 
 <!-- tabs:end -->
 
-## Heroku
+### Heroku
 
 ?> The single-port pattern shown here isn’t Heroku-specific: the same setup
 works on any Node.js host, for example [Render](https://render.com/),
@@ -210,7 +210,7 @@ const GameClient = Client({
 });
 ```
 
-## Self-hosting behind nginx
+### Self-hosting behind nginx
 
 If you run the game server on your own machine or VPS behind
 [nginx](https://nginx.org/), the proxy needs to upgrade WebSocket

@@ -14,7 +14,7 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
 
 
 
-## Setup
+### Setup
 
 We’re going to use ES2015 features like module [imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import)
 and the [object spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator)
@@ -119,7 +119,7 @@ and play around with it on CodeSandbox:<br/><br/>
 
 
 
-## Defining a Game
+### Defining a Game
 
 We define a game by creating an object whose contents
 tell boardgame.io how your game works. More or less everything
@@ -162,7 +162,7 @@ but we don't need that for Tic-Tac-Toe.
 
 
 
-## Creating a Client
+### Creating a Client
 
 <!-- tabs:start -->
 
@@ -253,7 +253,7 @@ in the `Client` config.
 
 
 
-## Game Improvements
+### Game Improvements
 
 ### Validating Moves
 
@@ -364,7 +364,7 @@ the return value is available at `ctx.gameover`.
 
 
 
-## Building a Board
+### Building a Board
 
 <!-- tabs:start -->
 
@@ -603,7 +603,7 @@ And there you have it. A basic tic-tac-toe game!
 
 
 
-## Bots
+### Bots
 
 In this section we will show you how to add a bot that is
 capable of playing your game. We need to tell the

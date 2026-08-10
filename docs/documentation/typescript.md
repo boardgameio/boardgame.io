@@ -19,7 +19,7 @@ export const MyGame: Game<MyGameState> = {
 };
 ```
 
-[Open this snippet in the TypeScript Playground ↗︎](https://www.typescriptlang.org/play?#code/PTAEHEEMFsFMDoAuBnAUAS2gBwPYCdFREBPLWUAbwhlgBpQBZHAN3IF9QAzPHaUAcgBGOSHgAmAcxrx0OfgG5UqWAA9cBUOgB2iWHk6QAxuQbEocAMqJIuyqlCgQoSAGtIA8P3rEcAVzygUnD8yKDI1rqobEqGOFrhoNAssABcjMkAPKbmsFY2sAB8oAC8oAAU4PSGiCoAlCVFFGyKymr4hLHxhNk0aTlZZjR5ukWlFPaOYPDTUUA)
+[Open this snippet in the TypeScript Playground ↗︎](https://www.typescriptlang.org/play/?#code/PTAEHEEMFsFMDoAuBnAsAKAJbQA4HsAnRURATx1lAG8IZYAaUAWTwDdKBfUAMwL2lAAiAEZ5IBACYBzOvEx5BAbgwZYAD3xFQmAHaJYBbpADGlJqShwAyokj7qGUKBChIAa0igA5OC+NSeACuBKAycF7IoMi2+hgcKujGeDrRoNBssABczBkAPOaWsDZ2sAB8oAC8oAAUNOCMxohqoBwAlJXlVBzK6KoahMRJKcQFdNmF+RZ0xfrlVVSOzmDwK3GKQA)
 
 ### React
 
