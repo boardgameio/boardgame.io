@@ -8,8 +8,20 @@
 
 import type { Plugin } from '../types';
 
-interface LogData {
+export interface LogData {
   metadata?: any;
+}
+
+/**
+ * Return metadata set by the current move or hook and clear it from the
+ * mutable plugin data object used by the log API.
+ */
+export function consumeLogMetadata(data: LogData | undefined): any {
+  const metadata = data?.metadata;
+  if (metadata !== undefined) {
+    delete data.metadata;
+  }
+  return metadata;
 }
 
 export interface LogAPI {
@@ -18,8 +30,8 @@ export interface LogAPI {
 
 /**
  * Plugin that makes it possible to add metadata to log entries.
- * Metadata set during a move, or during hooks triggered by a directly
- * dispatched game event, is attached to that action's log entry.
+ * Metadata set during a move or a lifecycle hook is attached to the log
+ * entry for the move or event that triggered it.
  */
 const LogPlugin: Plugin<LogAPI, LogData> = {
   name: 'log',

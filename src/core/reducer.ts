@@ -26,10 +26,11 @@ import type {
   TransientState,
   Undo,
 } from '../types';
-import { gameEvent, stripTransients } from './action-creators';
+import { stripTransients } from './action-creators';
 import { ActionErrorType, UpdateErrorType } from './errors';
 import { applyPatch } from 'rfc6902';
 import { RemovePlayer } from './turn-order';
+import { consumeLogMetadata } from '../plugins/plugin-log';
 
 /**
  * Check if the payload for the passed action contains a playerID.
@@ -155,7 +156,7 @@ function initializeDeltalog(
     phase: state.ctx.phase,
   };
 
-  const pluginLogMetadata = state.plugins.log.data.metadata;
+  const pluginLogMetadata = consumeLogMetadata(state.plugins.log.data);
   if (pluginLogMetadata !== undefined) {
     logEntry.metadata = pluginLogMetadata;
   }
@@ -170,89 +171,6 @@ function initializeDeltalog(
     ...state,
     deltalog: [logEntry],
   };
-}
-
-/**
- * Get the event type used in the log for a directly dispatched game event.
- */
-function getLogEventType(eventType: string): string | undefined {
-  switch (eventType) {
-    case 'endTurn':
-    case 'pass': {
-      return 'endTurn';
-    }
-    case 'endPhase':
-    case 'setPhase': {
-      return 'endPhase';
-    }
-    case 'endStage':
-    case 'setStage': {
-      return 'endStage';
-    }
-    case 'endGame': {
-      return 'endGame';
-    }
-  }
-}
-
-/**
- * Events whose flow implementation never appends a log entry even though their
- * hooks run: `endGame` is never logged, and `setPhase` starting a phase from
- * `ctx.phase === null` returns before `EndPhase` reaches its log entry.
- * Other events either produce a canonical entry or run no hooks at all.
- */
-const EVENTS_WITHOUT_LOG_ENTRY = new Set(['endGame', 'setPhase']);
-
-/**
- * Add metadata set by the log plugin to the canonical log entry for an event.
- * If the event never produces an entry of its own, add one for the dispatched
- * event, whether or not metadata was set, so the log shape doesn’t depend on
- * what a hook happened to do.
- */
-function addLogMetadata(
-  state: State,
-  action: ActionShape.GameEvent,
-  actionState: State,
-  game: Game,
-): State {
-  const metadata = state.plugins.log?.data.metadata;
-  const eventType = getLogEventType(action.payload.type);
-
-  if (game.disableLog || eventType === undefined) {
-    return state;
-  }
-
-  // GAME_EVENT processing initializes deltalog before running the flow.
-  const { deltalog } = state;
-  const eventEntry = deltalog.findIndex(
-    (entry) =>
-      entry.action.type === Actions.GAME_EVENT &&
-      entry.action.payload.type === eventType,
-  );
-
-  if (eventEntry === -1) {
-    if (!EVENTS_WITHOUT_LOG_ENTRY.has(action.payload.type)) return state;
-    // Recreate the action without credentials so they are never persisted.
-    const { type, args, playerID } = action.payload;
-    const logEntry: LogEntry = {
-      action: gameEvent(type, args, playerID),
-      _stateID: actionState._stateID,
-      turn: actionState.ctx.turn,
-      phase: actionState.ctx.phase,
-    };
-    if (metadata !== undefined) logEntry.metadata = metadata;
-    return { ...state, deltalog: [...deltalog, logEntry] };
-  }
-
-  if (metadata === undefined) return state;
-
-  const updatedDeltalog = [...deltalog];
-  updatedDeltalog[eventEntry] = {
-    ...updatedDeltalog[eventEntry],
-    metadata,
-  };
-
-  return { ...state, deltalog: updatedDeltalog };
 }
 
 /**
@@ -441,7 +359,6 @@ export function CreateGameReducer({
 
         // Process event.
         let newState = game.flow.processEvent(state, action);
-        newState = addLogMetadata(newState, action, oldState, game);
 
         // Execute plugins.
         let stateWithError: TransientState | undefined;

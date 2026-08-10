@@ -36,8 +36,8 @@ const client = Client({
 
 ### Custom metadata in game logs
 
-It can sometimes be helpful to surface some metadata during a move.
-You can do this by using the log plugin. For example,
+It can sometimes be helpful to surface metadata during a move or a lifecycle
+hook. You can do this by using the log plugin. For example,
 
 ```js
 const move = ({ log }) => {
@@ -46,7 +46,9 @@ const move = ({ log }) => {
 ```
 
 This metadata is stored in the `log` client property and displayed
-in the Log section of the debug panel.
+in the Log section of the debug panel. Metadata set in `onBegin`, `onEnd`, or
+`onMove` is attached to the log entry for the move or event that triggered the
+hook. If multiple hooks update the same entry, the last metadata set is used.
 
 ### Redux
 
