@@ -427,6 +427,21 @@ describe('turn', () => {
         expect(state.ctx.turn).toBe(2);
         expect(state.ctx.currentPlayer).toBe('1');
       });
+
+      test('explicit endTurn takes precedence over the automatic turn end', () => {
+        const game: Game = {
+          moves: {
+            endTurn: ({ events }) => events.endTurn({ next: '2' }),
+          },
+          turn: { maxMoves: 1 },
+        };
+        const client = Client({ game, numPlayers: 3 });
+
+        client.moves.endTurn();
+
+        expect(client.getState().ctx.turn).toBe(2);
+        expect(client.getState().ctx.currentPlayer).toBe('2');
+      });
     });
 
     describe('with phases', () => {

@@ -276,7 +276,12 @@ export function Flow({
       }
 
       // Check if we should end the turn.
-      if ([OnMove, UpdateStage, UpdateActivePlayers].includes(fn)) {
+      const turnEndPending =
+        state.plugins?.events?.api?._private?.isTurnEndPending() ?? false;
+      if (
+        [OnMove, UpdateStage, UpdateActivePlayers].includes(fn) &&
+        !turnEndPending
+      ) {
         const shouldEndTurn = ShouldEndTurn(state);
         if (shouldEndTurn) {
           events.push({
