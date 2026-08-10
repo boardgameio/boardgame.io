@@ -71,6 +71,21 @@ the global `moves` section for players in that stage (players are not allowed to
 any moves from the global `moves` section while they are in that stage). However, if
 a stage does not contain a `moves` section, then players can make moves from the global `moves`.
 
+A stage can also set a default move limit. The player automatically exits the stage
+after making that number of moves:
+
+```js
+stages: {
+  draw: {
+    moves: { DrawCard },
+    maxMoves: 3,
+  },
+}
+```
+
+An explicit `maxMoves` passed to `setStage` or `setActivePlayers` overrides the
+default from the stage configuration.
+
 !> A move defined in a stage can have the same name as a global move, but it isn't related to the global equivalent in any way.
 
 ### Entering Stages

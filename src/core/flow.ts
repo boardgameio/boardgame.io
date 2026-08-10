@@ -325,7 +325,11 @@ export function Flow({
     if (currentPlayer) {
       ctx = { ...ctx, currentPlayer };
       if (phaseConfig.turn.activePlayers) {
-        ctx = SetActivePlayers(ctx, phaseConfig.turn.activePlayers);
+        ctx = SetActivePlayers(
+          ctx,
+          phaseConfig.turn.activePlayers,
+          phaseConfig.turn.stages,
+        );
       }
     } else {
       // This is only called at the beginning of the phase
@@ -430,6 +434,15 @@ export function Flow({
           _activePlayersMaxMoves = {};
         }
         _activePlayersMaxMoves[playerID] = arg.maxMoves;
+      } else {
+        const stage = GetPhase(ctx).turn.stages[arg.stage];
+        const maxMoves = stage && (stage.maxMoves || stage.moveLimit);
+        if (maxMoves) {
+          if (_activePlayersMaxMoves === null) {
+            _activePlayersMaxMoves = {};
+          }
+          _activePlayersMaxMoves[playerID] = maxMoves;
+        }
       }
     }
 
@@ -445,7 +458,8 @@ export function Flow({
   }
 
   function UpdateActivePlayers(state: State, { arg }): State {
-    return { ...state, ctx: SetActivePlayers(state.ctx, arg) };
+    const stages = GetPhase(state.ctx).turn.stages;
+    return { ...state, ctx: SetActivePlayers(state.ctx, arg, stages) };
   }
 
   ///////////////
@@ -659,12 +673,15 @@ export function Flow({
       delete _activePlayersMaxMoves[playerID];
     }
 
-    ctx = UpdateActivePlayersOnceEmpty({
-      ...ctx,
-      activePlayers,
-      _activePlayersMinMoves,
-      _activePlayersMaxMoves,
-    });
+    ctx = UpdateActivePlayersOnceEmpty(
+      {
+        ...ctx,
+        activePlayers,
+        _activePlayersMinMoves,
+        _activePlayersMaxMoves,
+      },
+      phaseConfig.turn.stages,
+    );
 
     // Create log entry.
     const action = gameEvent('endStage', arg);
