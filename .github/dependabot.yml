@@ -1,33 +1,36 @@
 version: 2
-updates:
-  - package-ecosystem: npm
-    directory: /
-    schedule:
-      interval: weekly
-    cooldown:
-      default-days: 7
-    open-pull-requests-limit: 10
-    groups:
-      npm-minor-patch:
-        update-types:
-          - minor
-          - patch
 
-  # The integration scaffold has its own manifest and no lockfile, so the
-  # root entry above never sees it.
-  - package-ecosystem: npm
-    directory: /integration
+# Everything Dependabot finds lands in a single weekly pull request, across both
+# npm manifests and GitHub Actions. Only version updates are grouped: a security
+# fix still gets its own pull request rather than waiting behind the weekly batch.
+multi-ecosystem-groups:
+  all-dependencies:
     schedule:
       interval: weekly
+
+updates:
+  # The integration scaffold has its own manifest and no lockfile, so it has to
+  # be listed explicitly — a root-only entry never sees it.
+  - package-ecosystem: npm
+    directories:
+      - /
+      - /integration
+    multi-ecosystem-group: all-dependencies
+    patterns:
+      - "*"
     cooldown:
       default-days: 7
-    groups:
-      integration-minor-patch:
+    ignore:
+      # ESLint 9 replaces .eslintrc with flat config, so the bump cannot pass CI
+      # until that migration happens. Grouped, it would keep every other update
+      # in the weekly pull request unmergeable. Drop this once we are on flat
+      # config.
+      - dependency-name: eslint
         update-types:
-          - minor
-          - patch
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
-    schedule:
-      interval: weekly
+    multi-ecosystem-group: all-dependencies
+    patterns:
+      - "*"
