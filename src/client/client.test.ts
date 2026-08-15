@@ -6,7 +6,8 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import { INVALID_MOVE } from '../core/constants';
+import { INVALID_MOVE, Invalid } from '../core/constants';
+import { ActionErrorType } from '../core/errors';
 import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
@@ -661,6 +662,299 @@ describe('transient handling', () => {
   });
 });
 
+describe('action errors', () => {
+  describe('local client', () => {
+    let client = null;
+    let fn;
+
+    beforeEach(() => {
+      const game: Game = {
+        moves: {
+          valid: ({ G }) => {
+            G.moved = true;
+          },
+          rejected: () => Invalid({ reason: 'not enough gold' }),
+        },
+      };
+      client = Client({ game });
+      fn = jest.fn();
+      client.subscribe(fn);
+      fn.mockClear();
+    });
+
+    test('subscriber receives the error for a rejected move', () => {
+      client.moves.rejected();
+      const expectedError = {
+        type: 'action/invalid_move',
+        payload: { reason: 'not enough gold' },
+      };
+      expect(client.lastActionError).toEqual(expectedError);
+      expect(fn.mock.calls.map(([, error]) => error)).toEqual([expectedError]);
+      expect(fn.mock.calls[0][0]).not.toEqual(
+        expect.objectContaining({ transients: expect.anything() }),
+      );
+    });
+
+    test('a subsequent successful move clears the error', () => {
+      client.moves.rejected();
+      expect(client.lastActionError).toBeDefined();
+      client.moves.valid();
+      expect(client.lastActionError).toBeUndefined();
+      expect(fn).toHaveBeenLastCalledWith(
+        expect.objectContaining({ G: { moved: true } }),
+        undefined,
+      );
+    });
+
+    test('a successful undo clears the error', () => {
+      client.moves.valid();
+      client.moves.rejected();
+      expect(client.lastActionError).toBeDefined();
+      client.undo();
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('reset clears the error', () => {
+      client.moves.rejected();
+      expect(client.lastActionError).toBeDefined();
+      client.reset();
+      expect(client.lastActionError).toBeUndefined();
+    });
+  });
+
+  describe('multiplayer client', () => {
+    let sendToClient: (data: TransportData) => void;
+    let client: ReturnType<typeof Client>;
+
+    beforeEach(() => {
+      const game: Game = { moves: { A: ({ G }) => G } };
+      client = Client({
+        game,
+        matchID: 'A',
+        debug: false,
+        multiplayer: ({ transportDataCallback }) => {
+          sendToClient = transportDataCallback;
+          return {
+            connect() {},
+            disconnect() {},
+            subscribe() {},
+            subscribeToConnectionStatus() {},
+            requestSync() {},
+            sendAction() {},
+          } as unknown as Transport;
+        },
+      });
+      client.start();
+      const state = InitializeGame({ game: ProcessGameConfig(game) });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    });
+
+    afterEach(() => {
+      client.stop();
+    });
+
+    test('action result from the master reaches subscribers', () => {
+      const fn = jest.fn();
+      client.subscribe(fn);
+      fn.mockClear();
+      client.moves.A();
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'slot taken' },
+      };
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
+      expect(client.lastActionError).toEqual(error);
+      expect(fn).toHaveBeenCalledWith(expect.anything(), error);
+    });
+
+    test('action result for another match is ignored', () => {
+      client.moves.A();
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({
+        type: 'actionResult',
+        args: ['B', 1, { error }],
+      });
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('a successful result clears the previous error', () => {
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'slot taken' },
+      };
+      client.moves.A();
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
+      expect(client.lastActionError).toEqual(error);
+
+      client.moves.A();
+      // Wait for the authoritative success before clearing the error.
+      expect(client.lastActionError).toEqual(error);
+      sendToClient({ type: 'actionResult', args: ['A', 2, {}] });
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('a stale result cannot overwrite a newer action', () => {
+      client.moves.A();
+      client.moves.A();
+      sendToClient({
+        type: 'actionResult',
+        args: [
+          'A',
+          1,
+          {
+            error: {
+              type: ActionErrorType.InvalidMove,
+              payload: { reason: 'stale' },
+            },
+          },
+        ],
+      });
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('sync clears the error and invalidates an in-flight result', () => {
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'slot taken' },
+      };
+      client.moves.A();
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
+      expect(client.lastActionError).toEqual(error);
+
+      const state = client.store.getState();
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+      expect(client.lastActionError).toBeUndefined();
+
+      sendToClient({
+        type: 'actionResult',
+        args: ['A', 1, { error }],
+      });
+      expect(client.lastActionError).toBeUndefined();
+    });
+  });
+
+  describe('optimistic self-heal', () => {
+    let sendToClient: (data: TransportData) => void;
+    let requestSync: jest.Mock;
+    let client: ReturnType<typeof Client>;
+
+    beforeEach(() => {
+      const game: Game = {
+        moves: {
+          valid: ({ G }) => G,
+          invalidEverywhere: () => INVALID_MOVE,
+        },
+      };
+      requestSync = jest.fn();
+      client = Client({
+        game,
+        matchID: 'A',
+        debug: false,
+        multiplayer: ({ transportDataCallback }) => {
+          sendToClient = transportDataCallback;
+          return {
+            connect() {},
+            disconnect() {},
+            subscribe() {},
+            subscribeToConnectionStatus() {},
+            requestSync,
+            sendAction() {},
+          } as unknown as Transport;
+        },
+      });
+      client.start();
+      const state = InitializeGame({ game: ProcessGameConfig(game) });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    });
+
+    afterEach(() => {
+      client.stop();
+    });
+
+    test('a rejection while ahead of the master requests a sync', () => {
+      client.moves.valid();
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({ type: 'actionResult', args: ['A', 1, { error }] });
+      expect(requestSync).toHaveBeenCalledTimes(1);
+      expect(client.lastActionError).toEqual(error);
+
+      const state = InitializeGame({
+        game: ProcessGameConfig({ moves: { valid: ({ G }) => G } }),
+      });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+      expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('a rejection with no optimistic lead does not request a sync', () => {
+      client.moves.invalidEverywhere();
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({ type: 'actionResult', args: ['A', 1, { error }] });
+      expect(requestSync).not.toHaveBeenCalled();
+      expect(client.lastActionError).toEqual(error);
+    });
+
+    test('a successful result does not request a sync', () => {
+      client.moves.valid();
+      sendToClient({ type: 'actionResult', args: ['A', 1, {}] });
+      expect(requestSync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('synchronous transport', () => {
+    test('an action result delivered during dispatch is reported once', () => {
+      let sendToClient: (data: TransportData) => void;
+      const error = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'sync' },
+      };
+      const game: Game = { moves: { A: ({ G }) => G } };
+      const client = Client({
+        game,
+        matchID: 'default',
+        debug: false,
+        multiplayer: ({ transportDataCallback }) => {
+          sendToClient = transportDataCallback;
+          return {
+            connect() {},
+            disconnect() {},
+            subscribe() {},
+            subscribeToConnectionStatus() {},
+            requestSync() {},
+            sendAction(_state, _action, actionID) {
+              sendToClient({
+                type: 'actionResult',
+                args: ['default', actionID, { error }],
+              });
+            },
+          } as unknown as Transport;
+        },
+      });
+      client.start();
+      // Sync a valid state so the move is accepted (and reaches sendAction).
+      const state = InitializeGame({ game: ProcessGameConfig(game) });
+      sendToClient({ type: 'sync', args: ['default', { state } as SyncInfo] });
+      const fn = jest.fn();
+      client.subscribe(fn);
+      fn.mockClear();
+      client.moves.A();
+      expect(client.lastActionError).toEqual(error);
+      expect(fn.mock.calls.map(([, receivedError]) => receivedError)).toEqual([
+        error,
+      ]);
+      client.stop();
+    });
+  });
+});
+
 describe('log handling', () => {
   let client = null;
 
@@ -802,6 +1096,7 @@ describe('subscribe', () => {
         G: {},
         ctx: expect.objectContaining({ turn: 1 }),
       }),
+      undefined,
     );
   });
 
@@ -812,6 +1107,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
   });
 
@@ -822,6 +1118,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         ctx: expect.objectContaining({ turn: 2 }),
       }),
+      undefined,
     );
   });
 
@@ -837,6 +1134,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
 
     fn.mockClear();
@@ -849,11 +1147,13 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
     expect(fn2).toHaveBeenCalledWith(
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
 
     unsubscribe();
@@ -867,6 +1167,7 @@ describe('subscribe', () => {
       expect.objectContaining({
         G: { moved: true },
       }),
+      undefined,
     );
     expect(fn2).not.toHaveBeenCalled();
   });
