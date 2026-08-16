@@ -104,7 +104,6 @@ export interface Ctx {
     _activePlayersNumMoves?: Record<PlayerID, number>;
   }>;
   _nextActivePlayers?: ActivePlayersArg;
-  _removedPlayers?: PlayerID[];
   _random?: {
     seed: string | number;
   };

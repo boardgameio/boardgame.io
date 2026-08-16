@@ -19,127 +19,17 @@ import type {
 } from '../types';
 import { supportDeprecatedMoveLimit } from './backwards-compatibility';
 
-function IsPlayerRemoved(ctx: Ctx, playerID: PlayerID): boolean {
-  return (ctx._removedPlayers || []).includes(playerID);
-}
-
-function RemovePlayerFromRecord<T>(
-  record: Record<PlayerID, T> | null | undefined,
-  playerID: PlayerID,
-) {
-  if (!record) return record;
-  const next = { ...record };
-  delete next[playerID];
-  return Object.keys(next).length > 0 ? next : null;
-}
-
-function RemovePlayerFromActivePlayersArg(
-  arg: ActivePlayersArg | null | undefined,
-  playerID: PlayerID,
-): ActivePlayersArg | null | undefined {
-  if (!arg) return arg;
-
-  if (Array.isArray(arg)) {
-    return arg.filter((id) => id !== playerID);
-  }
-
-  const next = { ...arg };
-
-  if (next.value) {
-    next.value = { ...next.value };
-    delete next.value[playerID];
-    if (Object.keys(next.value).length === 0) {
-      delete next.value;
-    }
-  }
-
-  if (next.next) {
-    next.next = RemovePlayerFromActivePlayersArg(next.next, playerID);
-  }
-
-  return next;
-}
-
-export function RemovePlayer(ctx: Ctx, playerID: PlayerID): Ctx {
-  const removedPlayers = (ctx._removedPlayers || []).includes(playerID)
-    ? ctx._removedPlayers
-    : [...(ctx._removedPlayers || []), playerID];
-  const playOrder = ctx.playOrder.filter((id) => id !== playerID);
-  let playOrderPos = 0;
-  let currentPlayer = ctx.currentPlayer;
-
-  if (playOrder.length === 0) {
-    currentPlayer = '';
-  } else if (ctx.currentPlayer === playerID) {
-    playOrderPos =
-      ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
-    currentPlayer = playOrder[playOrderPos];
-  } else {
-    const currentPlayerPos = playOrder.indexOf(ctx.currentPlayer);
-    if (currentPlayerPos === -1) {
-      playOrderPos =
-        ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
-      currentPlayer = playOrder[playOrderPos];
-    } else {
-      playOrderPos = currentPlayerPos;
-    }
-  }
-
-  return {
-    ...ctx,
-    currentPlayer,
-    playOrder,
-    playOrderPos,
-    activePlayers: RemovePlayerFromRecord(ctx.activePlayers, playerID),
-    _activePlayersMinMoves: RemovePlayerFromRecord(
-      ctx._activePlayersMinMoves,
-      playerID,
-    ),
-    _activePlayersMaxMoves: RemovePlayerFromRecord(
-      ctx._activePlayersMaxMoves,
-      playerID,
-    ),
-    _activePlayersNumMoves: RemovePlayerFromRecord(
-      ctx._activePlayersNumMoves,
-      playerID,
-    ),
-    _prevActivePlayers: (ctx._prevActivePlayers || []).map((entry) => ({
-      activePlayers: RemovePlayerFromRecord(entry.activePlayers, playerID),
-      _activePlayersMinMoves: RemovePlayerFromRecord(
-        entry._activePlayersMinMoves,
-        playerID,
-      ),
-      _activePlayersMaxMoves: RemovePlayerFromRecord(
-        entry._activePlayersMaxMoves,
-        playerID,
-      ),
-      _activePlayersNumMoves: RemovePlayerFromRecord(
-        entry._activePlayersNumMoves,
-        playerID,
-      ),
-    })),
-    _nextActivePlayers: RemovePlayerFromActivePlayersArg(
-      ctx._nextActivePlayers,
-      playerID,
-    ),
-    _removedPlayers: removedPlayers,
-  };
-}
-
 export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
   let activePlayers: typeof ctx.activePlayers = {};
   let _prevActivePlayers: typeof ctx._prevActivePlayers = [];
   let _nextActivePlayers: ActivePlayersArg | null = null;
   let _activePlayersMinMoves = {};
   let _activePlayersMaxMoves = {};
-  const removedPlayers = new Set(ctx._removedPlayers || []);
 
   if (Array.isArray(arg)) {
     // support a simple array of player IDs as active players
     const value = {};
-    arg
-      .filter((v) => !removedPlayers.has(v))
-      .forEach((v) => (value[v] = Stage.NULL));
+    arg.forEach((v) => (value[v] = Stage.NULL));
     activePlayers = value;
   } else {
     // process active players argument object
@@ -163,10 +53,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
       ];
     }
 
-    if (
-      arg.currentPlayer !== undefined &&
-      !removedPlayers.has(ctx.currentPlayer)
-    ) {
+    if (arg.currentPlayer !== undefined) {
       ApplyActivePlayerArgument(
         activePlayers,
         _activePlayersMinMoves,
@@ -179,7 +66,7 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
     if (arg.others !== undefined) {
       for (let i = 0; i < ctx.playOrder.length; i++) {
         const id = ctx.playOrder[i];
-        if (id !== ctx.currentPlayer && !removedPlayers.has(id)) {
+        if (id !== ctx.currentPlayer) {
           ApplyActivePlayerArgument(
             activePlayers,
             _activePlayersMinMoves,
@@ -194,7 +81,6 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
     if (arg.all !== undefined) {
       for (let i = 0; i < ctx.playOrder.length; i++) {
         const id = ctx.playOrder[i];
-        if (removedPlayers.has(id)) continue;
         ApplyActivePlayerArgument(
           activePlayers,
           _activePlayersMinMoves,
@@ -207,7 +93,6 @@ export function SetActivePlayers(ctx: Ctx, arg: ActivePlayersArg): Ctx {
 
     if (arg.value) {
       for (const id in arg.value) {
-        if (removedPlayers.has(id)) continue;
         ApplyActivePlayerArgument(
           activePlayers,
           _activePlayersMinMoves,
@@ -375,9 +260,7 @@ export function InitTurnOrderState(state: State, turn: TurnConfig) {
   if (order.playOrder !== undefined) {
     playOrder = order.playOrder(context);
   }
-  playOrder = playOrder
-    .map((playerID) => playerID + '')
-    .filter((playerID) => !IsPlayerRemoved(ctx, playerID));
+  playOrder = playOrder.map((playerID) => playerID + '');
 
   let playOrderPos = order.first(context);
   const posType = typeof playOrderPos;

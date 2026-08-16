@@ -11,7 +11,6 @@ import {
   UpdateActivePlayersOnceEmpty,
   InitTurnOrderState,
   UpdateTurnOrderState,
-  RemovePlayer,
   Stage,
   TurnOrder,
 } from './turn-order';
@@ -782,15 +781,6 @@ export function Flow({
     return Process(state, [{ fn: UpdateActivePlayers, arg }]);
   }
 
-  function RemovePlayerEvent(
-    state: State,
-    _playerID: PlayerID,
-    playerID: PlayerID,
-  ): State {
-    if (typeof playerID !== 'string') return state;
-    return { ...state, ctx: RemovePlayer(state.ctx, playerID) };
-  }
-
   function SetPhaseEvent(
     state: State,
     _playerID: PlayerID,
@@ -845,7 +835,6 @@ export function Flow({
     setPhase: SetPhaseEvent,
     endGame: EndGameEvent,
     setActivePlayers: SetActivePlayersEvent,
-    removePlayer: RemovePlayerEvent,
   };
 
   const enabledEventNames = [];
@@ -886,9 +875,6 @@ export function Flow({
   }
 
   function IsPlayerActive(_G: any, ctx: Ctx, playerID: PlayerID): boolean {
-    if ((ctx._removedPlayers || []).includes(playerID)) {
-      return false;
-    }
     if (ctx.activePlayers) {
       return playerID in ctx.activePlayers;
     }

@@ -267,7 +267,7 @@ describe('update', () => {
     expect(updateError).toBe('unauthorized action');
   });
 
-  test('rejects disabled and private game events', async () => {
+  test('rejects disabled and unknown game events', async () => {
     const gameWithDisabledEvent: Game = {
       events: {
         setActivePlayers: false,
@@ -285,8 +285,8 @@ describe('update', () => {
       'matchID',
       '0',
     );
-    const { error: privateError } = await master.onUpdate(
-      ActionCreators.gameEvent('removePlayer', '1', '0'),
+    const { error: unknownError } = await master.onUpdate(
+      ActionCreators.gameEvent('notAnEvent', '1', '0'),
       0,
       'matchID',
       '0',
@@ -294,7 +294,7 @@ describe('update', () => {
 
     expect(sendAll).not.toHaveBeenCalled();
     expect(disabledResult).toEqual({ error: 'unauthorized action' });
-    expect(privateError).toBe('unauthorized action');
+    expect(unknownError).toBe('unauthorized action');
   });
 
   test('invalid matchID', async () => {
@@ -630,8 +630,6 @@ describe('player leave', () => {
 
     expect(result).toBeUndefined();
     expect(state.G).toEqual({ left: '1' });
-    expect(state.ctx.playOrder).toEqual(['0', '2']);
-    expect(state.ctx._removedPlayers).toEqual(['1']);
     expect(log.at(-1).action).toEqual(ActionCreators.playerLeave('1'));
     expect(sendAll).toHaveBeenCalledWith({
       type: 'update',
@@ -690,14 +688,27 @@ describe('player leave', () => {
   });
 
   test('does not persist or broadcast when reducer rejects leave', async () => {
-    const game: Game = { name: 'leave' };
+    const game: Game<{ value: number }> = {
+      name: 'leave',
+      setup: () => ({ value: 5 }),
+      plugins: [
+        {
+          name: 'validator',
+          isInvalid: ({ G }) => {
+            if (G.value % 5 !== 0) return 'G.value must divide by 5';
+            return false;
+          },
+        },
+      ],
+      onPlayerLeave: ({ G }) => ({ ...G, value: 6 }),
+    };
     const db = new InMemory();
-    const initialState = InitializeGame({ game, numPlayers: 1 });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
     db.createMatch('matchID', {
       initialState,
       metadata: {
         gameName: 'leave',
-        players: { '0': { id: 0 } },
+        players: { '0': { id: 0 }, '1': { id: 1 } },
         createdAt: 0,
         updatedAt: 0,
       },
@@ -707,8 +718,8 @@ describe('player leave', () => {
     const result = await master.onPlayerLeave('matchID', '0');
     const { state, log } = db.fetch('matchID', { state: true, log: true });
 
-    expect(result).toEqual({ error: 'action/action_invalid' });
-    expect(state.ctx.playOrder).toEqual(['0']);
+    expect(result).toEqual({ error: 'action/plugin_invalid' });
+    expect(state.G).toEqual({ value: 5 });
     expect(log).toEqual([]);
     expect(sendAll).not.toHaveBeenCalled();
   });

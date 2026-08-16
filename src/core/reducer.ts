@@ -29,7 +29,6 @@ import type {
 import { gameEvent, stripTransients } from './action-creators';
 import { ActionErrorType, UpdateErrorType } from './errors';
 import { applyPatch } from 'rfc6902';
-import { RemovePlayer } from './turn-order';
 
 /**
  * Check if the payload for the passed action contains a playerID.
@@ -591,19 +590,6 @@ export function CreateGameReducer({
           isClient: false,
         });
         if (stateWithError) return stateWithError;
-
-        state = {
-          ...state,
-          ctx: RemovePlayer(state.ctx, playerID),
-        };
-
-        if (
-          state.ctx.gameover === undefined &&
-          state.ctx.playOrder.length === 0
-        ) {
-          error(`cannot remove final player before game end`);
-          return WithError(oldState, ActionErrorType.ActionInvalid);
-        }
 
         state = rebaseUndoRedoState(state, { game, playerID });
 
