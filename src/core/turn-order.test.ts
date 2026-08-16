@@ -283,6 +283,17 @@ describe('turn orders', () => {
     expect(state.ctx.currentPlayer).toBe('0');
   });
 
+  test('CUSTOM_FROM stringifies a numeric play order', () => {
+    const flow = Flow({
+      turn: { order: TurnOrder.CUSTOM_FROM('order') },
+    });
+
+    let state = { G: { order: [2, 1, 0] }, ctx: flow.ctx(3) } as State;
+    state = flow.init(state);
+
+    expect(state.ctx.playOrder).toEqual(['2', '1', '0']);
+  });
+
   test('manual', () => {
     const flow = Flow({
       phases: {
@@ -360,6 +371,57 @@ test('playOrder', () => {
   expect(state.ctx.currentPlayer).toBe('1');
   state = reducer(state, gameEvent('endTurn'));
   expect(state.ctx.currentPlayer).toBe('2');
+});
+
+test('ctx.players is populated at match creation and playOrder defaults to it', () => {
+  const flow = Flow({});
+
+  const state = { ctx: flow.ctx(3) } as State;
+
+  expect(state.ctx.players).toEqual(['0', '1', '2']);
+  expect(state.ctx.playOrder).toEqual(state.ctx.players);
+});
+
+test('a phase-scoped CUSTOM order does not shrink playOrder for a later phase', () => {
+  const flow = Flow({
+    phases: {
+      A: {
+        start: true,
+        next: 'B',
+        turn: { order: TurnOrder.CUSTOM(['1', '3']) },
+      },
+      B: {},
+    },
+  });
+
+  let state = { ctx: flow.ctx(4) } as State;
+  state = flow.init(state);
+  expect(state.ctx.playOrder).toEqual(['1', '3']);
+
+  state = flow.processEvent(state, gameEvent('endPhase'));
+  expect(state.ctx.phase).toBe('B');
+  expect(state.ctx.playOrder).toEqual(['0', '1', '2', '3']);
+});
+
+test('a phase-specific custom order does not leak into the next phase', () => {
+  const flow = Flow({
+    phases: {
+      A: {
+        start: true,
+        next: 'B',
+        turn: { order: TurnOrder.CUSTOM(['2', '0', '1']) },
+      },
+      B: {},
+    },
+  });
+
+  let state = { ctx: flow.ctx(3) } as State;
+  state = flow.init(state);
+  expect(state.ctx.playOrder).toEqual(['2', '0', '1']);
+
+  state = flow.processEvent(state, gameEvent('endPhase'));
+  expect(state.ctx.phase).toBe('B');
+  expect(state.ctx.playOrder).toEqual(['0', '1', '2']);
 });
 
 describe('setActivePlayers', () => {

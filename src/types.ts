@@ -86,6 +86,8 @@ export interface ActivePlayers {
 
 export interface Ctx {
   numPlayers: number;
+  /** The players in this match, in seat order. `playOrder` defaults to this. */
+  players: Array<PlayerID>;
   playOrder: Array<PlayerID>;
   playOrderPos: number;
   activePlayers: null | ActivePlayers;

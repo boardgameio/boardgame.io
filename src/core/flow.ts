@@ -882,15 +882,19 @@ export function Flow({
   }
 
   return {
-    ctx: (numPlayers: number): Ctx => ({
-      numPlayers,
-      turn: 0,
-      currentPlayer: '0',
-      playOrder: Array.from({ length: numPlayers }).map((_, i) => i + ''),
-      playOrderPos: 0,
-      phase: startingPhase,
-      activePlayers: null,
-    }),
+    ctx: (numPlayers: number): Ctx => {
+      const players = Array.from({ length: numPlayers }).map((_, i) => i + '');
+      return {
+        numPlayers,
+        turn: 0,
+        currentPlayer: '0',
+        players,
+        playOrder: [...players],
+        playOrderPos: 0,
+        phase: startingPhase,
+        activePlayers: null,
+      };
+    },
     init: (state: State): State => {
       return Process(state, [{ fn: StartGame }]);
     },

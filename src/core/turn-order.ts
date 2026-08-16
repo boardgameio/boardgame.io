@@ -251,12 +251,11 @@ function getCurrentPlayer(
  */
 export function InitTurnOrderState(state: State, turn: TurnConfig) {
   let { G, ctx } = state;
-  const { numPlayers } = ctx;
   const pluginAPIs = plugin.GetAPIs(state);
   const context = { ...pluginAPIs, G, ctx };
   const order = turn.order;
 
-  let playOrder = Array.from({ length: numPlayers }).map((_, i) => i + '');
+  let playOrder = [...ctx.players];
   if (order.playOrder !== undefined) {
     playOrder = order.playOrder(context);
   }
