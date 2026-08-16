@@ -10,6 +10,7 @@ import { INVALID_MOVE } from './constants';
 import { applyMiddleware, createStore } from 'redux';
 import { CreateGameReducer, TransientHandlingMiddleware } from './reducer';
 import { InitializeGame } from './initialize';
+import { TurnOrder } from './turn-order';
 import {
   makeMove,
   gameEvent,
@@ -781,7 +782,7 @@ describe('redo stack', () => {
 });
 
 describe('playerLeave', () => {
-  test('runs onPlayerLeave and updates G', () => {
+  test('runs onPlayerLeave, keeps its returned G, and removes the player from the match', () => {
     const game: Game = {
       onPlayerLeave: ({ G, playerID }) => ({ ...G, left: playerID }),
     };
@@ -791,6 +792,9 @@ describe('playerLeave', () => {
     const state = reducer(initialState, playerLeave('1'));
 
     expect(state.G).toEqual({ left: '1' });
+    expect(state.ctx.players).toEqual(['0', '2']);
+    expect(state.ctx.playOrder).toEqual(['0', '2']);
+    expect(state.ctx.numPlayers).toBe(3);
     expect(state.ctx.activePlayers).toBeNull();
     expect(state.deltalog).toEqual([
       {
@@ -858,6 +862,139 @@ describe('playerLeave', () => {
         },
       },
     });
+  });
+
+  test('rejects removing the final player before game end', () => {
+    const game: Game = {};
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+
+    const state = reducer(initialState, playerLeave('0'));
+
+    expect(state).toMatchObject({
+      ...initialState,
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
+  });
+
+  test('allows removing the final player once the hook has ended the game', () => {
+    const game: Game = {
+      onPlayerLeave: ({ G, events }) => {
+        events.endGame('left');
+        return G;
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 1 });
+
+    const state = reducer(initialState, playerLeave('0'));
+
+    expect(state.ctx.gameover).toBe('left');
+    expect(state.ctx.players).toEqual([]);
+    expect(state.ctx.playOrder).toEqual([]);
+    expect(state.ctx.currentPlayer).toBe('');
+  });
+
+  test('rejects removing a player when it would empty playOrder, even though players remains non-empty', () => {
+    const game: Game = {
+      turn: { order: TurnOrder.CUSTOM(['1']) },
+    };
+    const reducer = CreateGameReducer({ game });
+    const initialState = InitializeGame({ game, numPlayers: 2 });
+
+    const state = reducer(initialState, playerLeave('1'));
+
+    expect(state).toMatchObject({
+      ...initialState,
+      transients: {
+        error: {
+          type: 'action/action_invalid',
+        },
+      },
+    });
+  });
+
+  test('a departed player named in turn.activePlayers.value is not resurrected at the next StartTurn', () => {
+    const game: Game = {
+      turn: { activePlayers: { value: { '0': 's', '1': 's', '2': 's' } } },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    state = reducer(state, playerLeave('1'));
+    expect(state.ctx.activePlayers).toEqual({ '0': 's', '2': 's' });
+
+    state = reducer(state, gameEvent('endTurn'));
+
+    expect(state.ctx.activePlayers).toEqual({ '0': 's', '2': 's' });
+  });
+
+  test('a player removed while queued in _prevActivePlayers is not resurrected by a later revert', () => {
+    const game: Game = {
+      moves: {
+        focus0: ({ events }) => {
+          events.setActivePlayers({ value: { '0': 'A' } });
+        },
+        focus1: ({ events }) => {
+          events.setActivePlayers({
+            value: { '1': 'B' },
+            revert: true,
+            minMoves: 1,
+            maxMoves: 1,
+          });
+        },
+        act: () => {},
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    // Player 0 is active, then a revert-queuing move snapshots that state
+    // (naming player 0) before switching control to player 1.
+    state = reducer(state, makeMove('focus0', null, '0'));
+    state = reducer(state, makeMove('focus1', null, '0'));
+    expect(state.ctx.activePlayers).toEqual({ '1': 'B' });
+
+    state = reducer(state, playerLeave('0'));
+
+    // Player 1 finishes their move, emptying activePlayers and triggering
+    // the revert to the stale snapshot naming player 0.
+    state = reducer(state, makeMove('act', null, '1'));
+
+    expect(state.ctx.activePlayers).toBeNull();
+  });
+
+  test('a player removed while named in a queued _nextActivePlayers spec is not resurrected', () => {
+    const game: Game = {
+      moves: {
+        focus1: ({ events }) => {
+          events.setActivePlayers({
+            value: { '1': 'A' },
+            minMoves: 1,
+            maxMoves: 1,
+            next: { value: { '0': 'B', '2': 'B' } },
+          });
+        },
+        act: () => {},
+      },
+    };
+    const reducer = CreateGameReducer({ game });
+    let state = InitializeGame({ game, numPlayers: 3 });
+
+    state = reducer(state, makeMove('focus1', null, '0'));
+    expect(state.ctx.activePlayers).toEqual({ '1': 'A' });
+
+    state = reducer(state, playerLeave('0'));
+
+    // Player 1 finishes their move, emptying activePlayers and applying the
+    // queued spec, which still names the now-departed player 0.
+    state = reducer(state, makeMove('act', null, '1'));
+
+    expect(state.ctx.activePlayers).toEqual({ '2': 'B' });
   });
 
   test('leave is cancelled if plugin declares it invalid', () => {

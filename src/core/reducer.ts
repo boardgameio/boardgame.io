@@ -9,6 +9,7 @@
 import * as Actions from './action-types';
 import * as plugins from '../plugins/main';
 import { ProcessGameConfig } from './game';
+import { RemovePlayer } from './turn-order';
 import { error } from './logger';
 import { INVALID_MOVE } from './constants';
 import type { Dispatch } from 'redux';
@@ -590,6 +591,19 @@ export function CreateGameReducer({
           isClient: false,
         });
         if (stateWithError) return stateWithError;
+
+        state = {
+          ...state,
+          ctx: RemovePlayer(state.ctx, playerID),
+        };
+
+        if (
+          state.ctx.gameover === undefined &&
+          (state.ctx.players.length === 0 || state.ctx.playOrder.length === 0)
+        ) {
+          error(`cannot remove final player before game end`);
+          return WithError(oldState, ActionErrorType.ActionInvalid);
+        }
 
         state = rebaseUndoRedoState(state, { game, playerID });
 

@@ -10,6 +10,9 @@ import { Flow } from './flow';
 import { Client } from '../client/client';
 import {
   UpdateTurnOrderState,
+  RemovePlayer,
+  SetActivePlayers,
+  GetPlayers,
   Stage,
   TurnOrder,
   ActivePlayers,
@@ -18,7 +21,7 @@ import { makeMove, gameEvent } from './action-creators';
 import { CreateGameReducer } from './reducer';
 import { InitializeGame } from './initialize';
 import { error } from '../core/logger';
-import type { Game, State } from '../types';
+import type { Ctx, Game, State } from '../types';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -382,13 +385,13 @@ test('ctx.players is populated at match creation and playOrder defaults to it', 
   expect(state.ctx.playOrder).toEqual(state.ctx.players);
 });
 
-test('a phase-scoped CUSTOM order does not shrink playOrder for a later phase', () => {
+test('a phase-scoped custom order does not leak into the next phase', () => {
   const flow = Flow({
     phases: {
       A: {
         start: true,
         next: 'B',
-        turn: { order: TurnOrder.CUSTOM(['1', '3']) },
+        turn: { order: TurnOrder.CUSTOM(['3', '1']) },
       },
       B: {},
     },
@@ -396,32 +399,207 @@ test('a phase-scoped CUSTOM order does not shrink playOrder for a later phase', 
 
   let state = { ctx: flow.ctx(4) } as State;
   state = flow.init(state);
-  expect(state.ctx.playOrder).toEqual(['1', '3']);
+  expect(state.ctx.playOrder).toEqual(['3', '1']);
 
   state = flow.processEvent(state, gameEvent('endPhase'));
   expect(state.ctx.phase).toBe('B');
   expect(state.ctx.playOrder).toEqual(['0', '1', '2', '3']);
 });
 
-test('a phase-specific custom order does not leak into the next phase', () => {
+test('a removed player stays out of playOrder across a phase boundary', () => {
   const flow = Flow({
-    phases: {
-      A: {
-        start: true,
-        next: 'B',
-        turn: { order: TurnOrder.CUSTOM(['2', '0', '1']) },
-      },
-      B: {},
-    },
+    phases: { A: { start: true, next: 'B' }, B: {} },
   });
 
   let state = { ctx: flow.ctx(3) } as State;
   state = flow.init(state);
-  expect(state.ctx.playOrder).toEqual(['2', '0', '1']);
+  state = { ...state, ctx: RemovePlayer(state.ctx, '1') };
+  expect(state.ctx.playOrder).toEqual(['0', '2']);
 
   state = flow.processEvent(state, gameEvent('endPhase'));
+
+  expect(state.ctx.phase).toBe('B');
+  expect(state.ctx.playOrder).toEqual(['0', '2']);
+});
+
+test('a custom play order does not resurrect a player who left during the previous phase', () => {
+  const flow = Flow({
+    turn: { order: TurnOrder.CUSTOM(['0', '1', '2']) },
+    phases: { one: { start: true, next: 'two' }, two: {} },
+  });
+
+  let state = { ctx: flow.ctx(3) } as State;
+  state = flow.init(state);
+  state = { ...state, ctx: RemovePlayer(state.ctx, '1') };
+  expect(state.ctx.players).toEqual(['0', '2']);
+  expect(state.ctx.playOrder).toEqual(['0', '2']);
+
+  state = flow.processEvent(state, gameEvent('endPhase'));
+
+  // turn.order.playOrder is static game config, so it has no way to know
+  // player '1' has since left — InitTurnOrderState must filter its result
+  // against ctx.players itself. ctx.playOrder is always a subset of
+  // ctx.players.
+  expect(state.ctx.phase).toBe('two');
+  expect(state.ctx.playOrder).toEqual(['0', '2']);
+});
+
+test('characterisation: endTurn({ next }) sets currentPlayer to an explicitly named departed player', () => {
+  const flow = Flow({});
+  let state = { ctx: flow.ctx(3) } as State;
+  state = flow.init(state);
+  state = { ...state, ctx: RemovePlayer(state.ctx, '1') };
+
+  state = flow.processEvent(state, gameEvent('endTurn', { next: '1' }));
+
+  // Outside the leave-game contract: a game that names a player ID
+  // explicitly still owns that ID, departed or not.
+  expect(state.ctx.currentPlayer).toBe('1');
+});
+
+test('a phase transition tolerates a legacy ctx that predates ctx.players', () => {
+  const flow = Flow({
+    phases: { A: { start: true, next: 'B' }, B: {} },
+  });
+
+  let state = { ctx: flow.ctx(3) } as State;
+  state = flow.init(state);
+  const { players: _players, ...legacyCtx } = state.ctx;
+  state = { ...state, ctx: legacyCtx as Ctx };
+
+  state = flow.processEvent(state, gameEvent('endPhase'));
+
   expect(state.ctx.phase).toBe('B');
   expect(state.ctx.playOrder).toEqual(['0', '1', '2']);
+});
+
+describe('GetPlayers', () => {
+  test('returns ctx.players when present', () => {
+    expect(GetPlayers({ players: ['0', '2'], numPlayers: 3 } as Ctx)).toEqual([
+      '0',
+      '2',
+    ]);
+  });
+
+  test('derives the roster from numPlayers when ctx.players is absent (a state persisted before ctx.players existed)', () => {
+    expect(GetPlayers({ numPlayers: 3 } as Ctx)).toEqual(['0', '1', '2']);
+  });
+});
+
+describe('RemovePlayer', () => {
+  test('3-player match: removing a middle player keeps players, playOrder, currentPlayer and playOrderPos consistent', () => {
+    const flow = Flow({});
+    let ctx = flow.ctx(3);
+    ctx = { ...ctx, currentPlayer: '2', playOrderPos: 2 };
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next.players).toEqual(['0', '2']);
+    expect(next.playOrder).toEqual(['0', '2']);
+    expect(next.currentPlayer).toBe('2');
+    expect(next.playOrderPos).toBe(1);
+  });
+
+  test('removing the current player advances the turn to the next player', () => {
+    const flow = Flow({});
+    const ctx = flow.ctx(3);
+
+    const next = RemovePlayer(ctx, '0');
+
+    expect(next.playOrder).toEqual(['1', '2']);
+    expect(next.playOrderPos).toBe(0);
+    expect(next.currentPlayer).toBe('1');
+  });
+
+  test('removing the current player wraps to the first player when they were last in playOrder', () => {
+    const flow = Flow({});
+    let ctx = flow.ctx(3);
+    ctx = { ...ctx, currentPlayer: '2', playOrderPos: 2 };
+
+    const next = RemovePlayer(ctx, '2');
+
+    expect(next.playOrder).toEqual(['0', '1']);
+    expect(next.playOrderPos).toBe(0);
+    expect(next.currentPlayer).toBe('0');
+  });
+
+  test('removing the current player from the middle of a longer playOrder shifts to the player who takes its slot', () => {
+    const flow = Flow({});
+    let ctx = flow.ctx(5);
+    ctx = { ...ctx, currentPlayer: '2', playOrderPos: 2 };
+
+    const next = RemovePlayer(ctx, '2');
+
+    expect(next.playOrder).toEqual(['0', '1', '3', '4']);
+    expect(next.playOrderPos).toBe(2);
+    expect(next.currentPlayer).toBe('3');
+  });
+
+  test('tolerates a legacy ctx that predates ctx.players, deriving the roster from numPlayers', () => {
+    const flow = Flow({});
+    const ctx = flow.ctx(3);
+    const { players: _players, ...legacyCtx } = ctx;
+
+    const next = RemovePlayer(legacyCtx as Ctx, '1');
+
+    expect(next.players).toEqual(['0', '2']);
+    expect(next.playOrder).toEqual(['0', '2']);
+  });
+
+  test('removing the last player empties playOrder and clears currentPlayer', () => {
+    const flow = Flow({});
+    const ctx = flow.ctx(1);
+
+    const next = RemovePlayer(ctx, '0');
+
+    expect(next.players).toEqual([]);
+    expect(next.playOrder).toEqual([]);
+    expect(next.currentPlayer).toBe('');
+    expect(next.playOrderPos).toBe(0);
+  });
+
+  test('leaves ctx.numPlayers unchanged', () => {
+    const flow = Flow({});
+    const ctx = flow.ctx(3);
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next.numPlayers).toBe(3);
+  });
+
+  test('removes an active player from activePlayers and the move-count maps, leaving the others alone', () => {
+    const flow = Flow({});
+    let ctx = flow.ctx(3);
+    ctx = SetActivePlayers(ctx, {
+      value: { '1': 'stage', '2': 'stage' },
+      minMoves: 1,
+      maxMoves: 2,
+    });
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next.activePlayers).toEqual({ '2': 'stage' });
+    expect(next._activePlayersMinMoves).toEqual({ '2': 1 });
+    expect(next._activePlayersMaxMoves).toEqual({ '2': 2 });
+    expect(next._activePlayersNumMoves).toEqual({ '2': 0 });
+  });
+
+  test('removing the sole active player clears activePlayers and the move-count maps entirely', () => {
+    const flow = Flow({});
+    let ctx = flow.ctx(3);
+    ctx = SetActivePlayers(ctx, {
+      value: { '1': 'stage' },
+      minMoves: 1,
+      maxMoves: 1,
+    });
+
+    const next = RemovePlayer(ctx, '1');
+
+    expect(next.activePlayers).toBeNull();
+    expect(next._activePlayersMinMoves).toBeNull();
+    expect(next._activePlayersMaxMoves).toBeNull();
+    expect(next._activePlayersNumMoves).toBeNull();
+  });
 });
 
 describe('setActivePlayers', () => {
@@ -445,6 +623,19 @@ describe('setActivePlayers', () => {
       '1': Stage.NULL,
       '2': Stage.NULL,
     });
+  });
+
+  test('characterisation: short form still activates a departed player named explicitly', () => {
+    const departedState = { ...state, ctx: RemovePlayer(state.ctx, '1') };
+
+    const newState = flow.processEvent(
+      departedState,
+      gameEvent('setActivePlayers', [['1']]),
+    );
+
+    // Outside the leave-game contract: the array short form is not
+    // reconciled against who's still in the match.
+    expect(newState.ctx.activePlayers).toMatchObject({ '1': Stage.NULL });
   });
 
   test('undefined stage leaves player inactive', () => {
