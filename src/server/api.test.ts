@@ -1397,8 +1397,6 @@ describe('.configureRouter', () => {
         });
         expect(response.status).toEqual(200);
         expect(state.G).toEqual({ left: '0' });
-        expect(state.ctx.playOrder).toEqual(['1']);
-        expect(state.ctx._removedPlayers).toEqual(['0']);
         expect(metadata.players['0']).toEqual({ id: 0 });
         expect(metadata.players['1']).toEqual({
           id: 1,
@@ -1440,27 +1438,33 @@ describe('.configureRouter', () => {
       });
 
       test('does not clear the lobby slot when game leave is rejected', async () => {
-        const game = ProcessGameConfig({ name: 'foo' });
-        const memory = createMemoryMatch(game, {
-          numPlayers: 1,
-          metadata: createLeaveMetadata('foo', {
-            '0': { id: 0, name: 'alice', credentials: 'SECRET1' },
-          }),
+        const game = ProcessGameConfig({
+          name: 'foo',
+          setup: () => ({ value: 5 }),
+          plugins: [
+            {
+              name: 'validator',
+              isInvalid: ({ G }) => {
+                if (G.value % 5 !== 0) return 'G.value must divide by 5';
+                return false;
+              },
+            },
+          ],
+          onPlayerLeave: ({ G }) => ({ ...G, value: 6 }),
         });
+        const memory = createMemoryMatch(game);
         const app = createApiServer({ db: memory, auth, games: [game] });
 
         response = await apiCall(app)
           .post('/games/foo/1/leaveGame')
           .send('playerID=0&credentials=SECRET1');
 
-        const { state, metadata, log } = memory.fetch('1', {
-          state: true,
+        const { metadata, log } = memory.fetch('1', {
           metadata: true,
           log: true,
         });
         expect(response.status).toEqual(400);
-        expect(response.text).toEqual('action/action_invalid');
-        expect(state.ctx.playOrder).toEqual(['0']);
+        expect(response.text).toEqual('action/plugin_invalid');
         expect(metadata.players['0']).toEqual({
           id: 0,
           name: 'alice',

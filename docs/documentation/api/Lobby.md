@@ -231,8 +231,15 @@ await lobbyClient.leaveSlot('tic-tac-toe', 'matchID', {
 
 Permanently remove the player from the game through the normal game-state
 lifecycle, then clear their lobby slot. This runs the game’s
-`onPlayerLeave` hook and removes the player from turn order and active-player
-state. If the match is already over, this only clears the lobby slot.
+`onPlayerLeave` hook and removes the player from `ctx.players`, from turn
+order and from active-player state. If the match is already over, this only
+clears the lobby slot.
+
+!> A game that names a player ID explicitly owns that ID. `endTurn({ next })`
+and the array form of `setActivePlayers` set the players you name without
+checking whether they are still in the match, so they can hand a turn to
+someone who has left. Read `ctx.players` if you need to know who is still
+playing.
 
 Accepts two JSON body parameters, all required:
 
