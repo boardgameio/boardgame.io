@@ -20,12 +20,29 @@ updates:
       - "*"
     cooldown:
       default-days: 7
+    # A grouped update is only as mergeable as its worst member, so majors that
+    # are known not to build are parked here instead of being left to redden the
+    # weekly pull request. Every hold says what has to happen before it can go.
     ignore:
-      # ESLint 9 replaces .eslintrc with flat config, so the bump cannot pass CI
-      # until that migration happens. Grouped, it would keep every other update
-      # in the weekly pull request unmergeable. Drop this once we are on flat
-      # config.
+      # Flat config landed in #1325, so .eslintrc is no longer what blocks this
+      # one — ESLint 10 is. eslint-plugin-react's latest release (7.37.5) peers
+      # `^9.7`, and on 10 it does not merely warn, it throws: `react/display-name`
+      # reaches for `contextOrFilename.getFilename`, which ESLint 10 removed.
+      # Drop this once eslint-plugin-react supports ESLint 10.
       - dependency-name: eslint
+        update-types:
+          - version-update:semver-major
+      # @eslint/js has to move with eslint's major. 10.0.1 installs happily
+      # against eslint 9 and quietly enables rules that 9 ships no baseline for,
+      # taking `eslint .` from 0 problems to 7. Drop it with the hold above.
+      - dependency-name: "@eslint/js"
+        update-types:
+          - version-update:semver-major
+      # eslint-plugin-unicorn 57+ is ESM-only and nine majors of recommended
+      # rules further on. 65 is the highest that resolves against ESLint 9, and
+      # it reports 24 problems whose autofixes reach past formatting into test
+      # semantics. That wants its own pass, not a slot in the weekly batch.
+      - dependency-name: eslint-plugin-unicorn
         update-types:
           - version-update:semver-major
 
