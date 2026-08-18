@@ -182,6 +182,7 @@ export class _ClientImpl<
   private latestActionID?: number;
   private actionResultDeliveries = 0;
   private latestAuthoritativeStateID = -1;
+  private healSyncPending = false;
 
   constructor({
     game,
@@ -336,6 +337,7 @@ export class _ClientImpl<
         if (action.type === Actions.RESET) {
           this.lastActionError = undefined;
           this.latestActionID = undefined;
+          this.healSyncPending = false;
         }
 
         if (!this.multiplayer) {
@@ -422,6 +424,7 @@ export class _ClientImpl<
       error &&
       this.store.getState()._stateID > this.latestAuthoritativeStateID
     ) {
+      this.healSyncPending = true;
       this.transport.requestSync();
     }
   }
@@ -432,10 +435,18 @@ export class _ClientImpl<
     if (matchID !== this.matchID) return;
     switch (data.type) {
       case 'sync': {
-        // Transient errors are not persisted by the master. A sync establishes
-        // a fresh authoritative baseline and invalidates any in-flight result.
-        this.lastActionError = undefined;
-        this.latestActionID = undefined;
+        // Transient errors are not persisted by the master. An unsolicited sync
+        // establishes a fresh authoritative baseline and invalidates any
+        // in-flight result. A sync this client requested to roll back a
+        // rejected action is not unsolicited: discarding the error here would
+        // erase the rejection that asked for the repair, and discarding the
+        // action ID would strand the result of an action sent since.
+        if (this.healSyncPending) {
+          this.healSyncPending = false;
+        } else {
+          this.lastActionError = undefined;
+          this.latestActionID = undefined;
+        }
         const [, syncInfo] = data.args;
         this.latestAuthoritativeStateID = syncInfo.state._stateID;
         const action = ActionCreators.sync(syncInfo);

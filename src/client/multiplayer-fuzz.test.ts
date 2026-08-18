@@ -111,6 +111,14 @@ type VirtualClient = {
   deliveredStateMessages: TransportData[];
   deliveryCounter: number;
   lastSyncSeq: number;
+  /** Delivery seq of every sync the client received. */
+  syncDeliverySeqs: number[];
+  /**
+   * Delivery seq of every sync the client asked for, with the action result
+   * being delivered at the time, if any. A request made while handling a
+   * result is a repair for that rejection.
+   */
+  syncRequests: Array<{ seq: number; actionID?: number }>;
   latestSentActionID?: number;
   deliveringActionResultID?: number;
   script: ScriptedAction[];
@@ -197,6 +205,8 @@ class VirtualNetwork {
       deliveredStateMessages: [],
       deliveryCounter: 0,
       lastSyncSeq: -1,
+      syncDeliverySeqs: [],
+      syncRequests: [],
       script: [],
       scriptIndex: 0,
     } as unknown as VirtualClient;
@@ -214,7 +224,13 @@ class VirtualNetwork {
           connect: () => record.clientToMaster.push({ type: 'sync' }),
           disconnect() {},
           subscribeToConnectionStatus() {},
-          requestSync: () => record.clientToMaster.push({ type: 'sync' }),
+          requestSync: () => {
+            record.syncRequests.push({
+              seq: record.deliveryCounter,
+              actionID: record.deliveringActionResultID,
+            });
+            record.clientToMaster.push({ type: 'sync' });
+          },
           sendAction: (state, action, actionID) => {
             if (actionID === undefined) {
               throw new Error(`missing actionID for player ${playerID}`);
@@ -383,7 +399,10 @@ class VirtualNetwork {
       message.data.type === 'patch'
     ) {
       client.deliveredStateMessages.push(message.data);
-      if (message.data.type === 'sync') client.lastSyncSeq = seq;
+      if (message.data.type === 'sync') {
+        client.lastSyncSeq = seq;
+        client.syncDeliverySeqs.push(seq);
+      }
     }
 
     const stateBefore = client.client.getState()?._stateID;
@@ -641,11 +660,29 @@ function collectInvariantViolations(seed: number, network: VirtualNetwork) {
     const highestResult = client.results.find(
       ({ actionID }) => actionID === highestSent?.actionID,
     );
-    // A sync delivered after the result clears lastActionError.
-    const expectedError =
-      highestResult !== undefined && client.lastSyncSeq > highestResult.seq
-        ? undefined
-        : highestResult?.result.error;
+    // An unsolicited sync delivered after the result clears lastActionError. A
+    // repair sync the client asked for while handling a rejection does not:
+    // erasing the error there would discard the rejection the repair exists to
+    // explain. Replay that rule over the delivery timeline, since each pending
+    // repair absorbs exactly one sync.
+    const repairRequestSeqs = new Set(
+      client.syncRequests
+        .filter(({ actionID }) => actionID !== undefined)
+        .map(({ seq }) => seq),
+    );
+    let repairPending = false;
+    let clearedAfterResult = false;
+    for (let seq = 1; seq <= client.deliveryCounter; seq++) {
+      if (repairRequestSeqs.has(seq)) repairPending = true;
+      if (!client.syncDeliverySeqs.includes(seq)) continue;
+      if (repairPending) repairPending = false;
+      else if (highestResult !== undefined && seq > highestResult.seq) {
+        clearedAfterResult = true;
+      }
+    }
+    const expectedError = clearedAfterResult
+      ? undefined
+      : highestResult?.result.error;
     if (!isDeepStrictEqual(client.client.lastActionError, expectedError)) {
       violations.push(
         `player ${client.playerID} lastActionError ${JSON.stringify(
@@ -962,8 +999,68 @@ describe('directed action-result interleavings', () => {
       'action/invalid_move',
     ]);
     expect(observed.errorEvents).toBe(1);
-    expect(observed.lastActionError).toBeUndefined();
+    // The repair rolls the three optimistic moves back without erasing the
+    // rejection that asked for it.
+    expect(observed.lastActionError).toEqual({
+      type: 'action/invalid_move',
+      payload: { code: 'TAKEN', cell: 3 },
+    });
     expect(observed.healSyncs).toBe(1);
+  });
+
+  test('a rejection arriving behind a repair sync is still reported', async () => {
+    const network = new VirtualNetwork();
+    await network.syncAll();
+    const actor = network.clients[0];
+    actor.notifications = [];
+
+    // p1 moves twice so p0's view of the authoritative state falls behind.
+    network.dispatch('1', { type: 'take', cell: 3 });
+    network.dispatch('1', { type: 'take', cell: 4 });
+    await network.deliverToMaster('1');
+    await network.deliverToMaster('1');
+
+    // p0 acts on its stale view: locally valid, rejected by the master, so p0
+    // is optimistically ahead and its result triggers a repair sync.
+    network.dispatch('0', { type: 'take', cell: 5 });
+    await network.deliverToMaster('0');
+    await network.deliverToClientByType('0', 'actionResult');
+    const errorAfterFirst = actor.client.lastActionError;
+
+    // p0 acts again before the repair lands. Channels are FIFO, so the sync is
+    // delivered ahead of the second action's result.
+    network.dispatch('0', { type: 'take', cell: 6 });
+    await network.deliverToMaster('0'); // the repair sync request
+    await network.deliverToMaster('0'); // the second action
+    await network.deliverToClientByType('0', 'sync');
+    await network.deliverToClientByType('0', 'actionResult');
+
+    const observed = {
+      resultErrors: actor.results.map(({ result }) => result.error?.type),
+      errorEvents: actor.notifications
+        .map(({ error }) => error?.type)
+        .filter(Boolean),
+      lastActionError: actor.client.lastActionError,
+    };
+    await network.drain();
+    expectConverged(network, ['0', '1']);
+    network.stop();
+
+    expect(errorAfterFirst).toBeDefined();
+    expect(observed.resultErrors).toEqual([
+      'action/stale_state_id',
+      'action/stale_state_id',
+    ]);
+    // Without the repair keeping the correlation ID alive, the second result
+    // matches nothing and is dropped in silence.
+    expect(observed.errorEvents).toEqual([
+      'action/stale_state_id',
+      'action/stale_state_id',
+    ]);
+    expect(observed.lastActionError).toEqual({
+      type: 'action/stale_state_id',
+      payload: undefined,
+    });
   });
 
   test('an error subscriber can synchronously dispatch the next action', async () => {

@@ -727,7 +727,9 @@ describe('action errors', () => {
     let client: ReturnType<typeof Client>;
 
     beforeEach(() => {
-      const game: Game = { moves: { A: ({ G }) => G } };
+      const game: Game = {
+        moves: { A: ({ G }) => G, invalidEverywhere: () => INVALID_MOVE },
+      };
       client = Client({
         game,
         matchID: 'A',
@@ -767,7 +769,11 @@ describe('action errors', () => {
         args: ['A', 1, { error }],
       });
       expect(client.lastActionError).toEqual(error);
-      expect(fn).toHaveBeenCalledWith(expect.anything(), error);
+      // Strict, so a duplicate delivery of the same error fails the test.
+      expect(fn.mock.calls.map(([, receivedError]) => receivedError)).toEqual([
+        undefined,
+        error,
+      ]);
     });
 
     test('action result for another match is ignored', () => {
@@ -818,12 +824,14 @@ describe('action errors', () => {
       expect(client.lastActionError).toBeUndefined();
     });
 
-    test('sync clears the error and invalidates an in-flight result', () => {
+    test('an unsolicited sync clears the error and invalidates an in-flight result', () => {
       const error = {
         type: ActionErrorType.InvalidMove,
         payload: { reason: 'slot taken' },
       };
-      client.moves.A();
+      // Rejected locally too, so the client never runs ahead of the master and
+      // never asks for a repair sync: the sync below is unsolicited.
+      client.moves.invalidEverywhere();
       sendToClient({
         type: 'actionResult',
         args: ['A', 1, { error }],
@@ -886,12 +894,70 @@ describe('action errors', () => {
       sendToClient({ type: 'actionResult', args: ['A', 1, { error }] });
       expect(requestSync).toHaveBeenCalledTimes(1);
       expect(client.lastActionError).toEqual(error);
+    });
+
+    test('the repair sync keeps the rejection that requested it', () => {
+      const fn = jest.fn();
+      client.subscribe(fn);
+      client.moves.valid();
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({ type: 'actionResult', args: ['A', 1, { error }] });
 
       const state = InitializeGame({
         game: ProcessGameConfig({ moves: { valid: ({ G }) => G } }),
       });
       sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+      // The repair rolls the optimistic move back, but the player still needs
+      // to be told why it went away.
+      expect(client.store.getState()._stateID).toBe(0);
+      expect(client.lastActionError).toEqual(error);
+      expect(
+        fn.mock.calls.filter(([, receivedError]) => receivedError),
+      ).toEqual([[expect.anything(), error]]);
+    });
+
+    test('a later unsolicited sync clears a healed rejection', () => {
+      client.moves.valid();
+      const error = { type: ActionErrorType.InvalidMove, payload: undefined };
+      sendToClient({ type: 'actionResult', args: ['A', 1, { error }] });
+
+      const state = InitializeGame({
+        game: ProcessGameConfig({ moves: { valid: ({ G }) => G } }),
+      });
+      // The first sync is the repair and preserves the error; a second one is
+      // a fresh baseline, e.g. after a reconnect.
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
       expect(client.lastActionError).toBeUndefined();
+    });
+
+    test('a move sent while the repair sync is in flight still reports', () => {
+      const fn = jest.fn();
+      client.subscribe(fn);
+      client.moves.valid();
+      const first = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'first' },
+      };
+      sendToClient({ type: 'actionResult', args: ['A', 1, { error: first }] });
+
+      // The player acts again before the repair sync lands. Channels are FIFO,
+      // so the sync arrives ahead of the second action's result.
+      client.moves.valid();
+      const state = InitializeGame({
+        game: ProcessGameConfig({ moves: { valid: ({ G }) => G } }),
+      });
+      sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+
+      const second = {
+        type: ActionErrorType.InvalidMove,
+        payload: { reason: 'second' },
+      };
+      sendToClient({ type: 'actionResult', args: ['A', 2, { error: second }] });
+      expect(client.lastActionError).toEqual(second);
+      expect(
+        fn.mock.calls.map(([, receivedError]) => receivedError).filter(Boolean),
+      ).toEqual([first, second]);
     });
 
     test('a rejection with no optimistic lead does not request a sync', () => {
