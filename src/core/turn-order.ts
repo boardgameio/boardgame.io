@@ -402,7 +402,12 @@ export function InitTurnOrderState(state: State, turn: TurnConfig) {
       `invalid value returned by turn.order.first — expected number got ${posType} “${playOrderPos}”.`,
     );
   }
-  if (playOrder.length > 0 && playOrderPos > playOrder.length - 1) {
+  if (playOrder.length === 0) {
+    // Nobody is left to play. TurnOrder.DEFAULT.first divides by
+    // playOrder.length, so playOrderPos would otherwise be NaN — pair it with
+    // the empty currentPlayer set just below.
+    playOrderPos = 0;
+  } else if (playOrderPos > playOrder.length - 1) {
     playOrderPos = 0;
   }
   const currentPlayer =

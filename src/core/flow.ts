@@ -10,6 +10,7 @@ import {
   SetActivePlayers,
   UpdateActivePlayersOnceEmpty,
   InitTurnOrderState,
+  RemovePlayer,
   UpdateTurnOrderState,
   Stage,
   TurnOrder,
@@ -559,28 +560,31 @@ export function Flow({
     // Run turn-end triggers.
     const G = phaseConfig.turn.wrapped.onEnd(state);
 
-    if (next) {
-      next.push({ fn: UpdateTurn, arg, currentPlayer });
-    }
-
     // Reset activePlayers.
     let ctx = { ...state.ctx, activePlayers: null };
 
-    // Remove player from playerOrder
+    // Remove the player from the match. This goes through RemovePlayer, the
+    // same path leaveGame takes, so the removal reaches ctx.players and
+    // survives the next phase — filtering playOrder alone was undone by the
+    // next InitTurnOrderState, which re-seeds playOrder from the roster.
+    let playOrderEmptied = false;
     if (arg && arg.remove) {
       playerID = playerID || currentPlayer;
+      ctx = RemovePlayer(ctx, playerID);
+      playOrderEmptied = ctx.playOrder.length === 0;
+    }
 
-      const playOrder = ctx.playOrder.filter((i) => i != playerID);
-
-      const playOrderPos =
-        ctx.playOrderPos > playOrder.length - 1 ? 0 : ctx.playOrderPos;
-
-      ctx = { ...ctx, playOrder, playOrderPos };
-
-      if (playOrder.length === 0) {
-        next.push({ fn: EndPhase, turn, phase });
-        return state;
-      }
+    if (next) {
+      // Removing the last player leaves no turn order to advance, so end the
+      // phase rather than run UpdateTurn against an empty playOrder. Deciding
+      // this after the removal is what lets the updated ctx below survive:
+      // this branch used to return the untouched `state`, throwing the
+      // removal away.
+      next.push(
+        playOrderEmptied
+          ? { fn: EndPhase, turn, phase }
+          : { fn: UpdateTurn, arg, currentPlayer },
+      );
     }
 
     // Create log entry.

@@ -1373,14 +1373,43 @@ describe('pass args', () => {
     expect(t.ctx.currentPlayer).toBe('1');
   });
 
-  test('removing all players ends phase', () => {
+  test('removing a player takes them out of the match, not just playOrder', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.players).toEqual(['1', '2']);
+    expect(t.ctx.playOrder).toEqual(['1', '2']);
+  });
+
+  test('a removed player does not come back at the next phase', () => {
+    let t = state;
+    t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    t = flow.processEvent(t, gameEvent('endPhase'));
+    expect(t.ctx.phase).toBe('B');
+    expect(t.ctx.players).toEqual(['1', '2']);
+    expect(t.ctx.playOrder).toEqual(['1', '2']);
+  });
+
+  test('removing all players empties the match and ends phase', () => {
     let t = state;
     t = flow.processEvent(t, gameEvent('pass', { remove: true }));
     t = flow.processEvent(t, gameEvent('pass', { remove: true }));
     t = flow.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.players).toEqual([]);
+    expect(t.ctx.playOrder).toEqual([]);
     expect(t.ctx.playOrderPos).toBe(0);
-    expect(t.ctx.currentPlayer).toBe('0');
+    expect(t.ctx.currentPlayer).toBe('');
     expect(t.ctx.phase).toBe('B');
+  });
+
+  test('removing the last player is not discarded when there are no phases', () => {
+    const phaseless = Flow({});
+    let t = { ctx: phaseless.ctx(2) } as State;
+    t = phaseless.processEvent(t, gameEvent('pass', { remove: true }));
+    t = phaseless.processEvent(t, gameEvent('pass', { remove: true }));
+    expect(t.ctx.players).toEqual([]);
+    expect(t.ctx.playOrder).toEqual([]);
+    expect(t.ctx.playOrderPos).toBe(0);
+    expect(t.ctx.currentPlayer).toBe('');
   });
 
   test('playOrderPos does not go out of bounds when passing at the end of the list', () => {
