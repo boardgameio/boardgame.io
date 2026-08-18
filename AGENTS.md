@@ -27,7 +27,7 @@ commit to a separate branch rather than `main`, keep each commit to one concern,
 - `pnpm exec jest path/to/file.test.ts` — run one test file. Add `-t "name"` for one test case.
 - `pnpm run test:coverage` — lint + jest with coverage scoped to `src/**`. This is what `pre-push` runs, so pushes aren't fast.
 - `pnpm run test:integration` — `scripts/integration.js` deletes `dist/`, `npm pack`s the lib, installs the tarball into `integration/`, and runs that project's tests + build. Use to verify the published artifact.
-- `pnpm run lint` / `pnpm run lint:fix` — eslint over the whole repo (`.eslintrc`).
+- `pnpm run lint` / `pnpm run lint:fix` — eslint over the whole repo (`eslint.config.js`).
 - `pnpm run ts` — typecheck only (`tsc --noEmit`).
 - `pnpm run build` — rollup build into `dist/` (silent).
 - `pnpm run build:watch` — rollup in watch mode.
