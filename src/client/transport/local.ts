@@ -158,8 +158,18 @@ export class LocalTransport extends Transport {
     this.master.onChatMessage(...args);
   }
 
-  sendAction(state: State, action: CredentialedActionShape.Any): void {
-    this.master.onUpdate(action, state._stateID, this.matchID, this.playerID);
+  sendAction(
+    state: State,
+    action: CredentialedActionShape.Any,
+    actionID?: number,
+  ): void {
+    this.master.onUpdate(
+      action,
+      state._stateID,
+      this.matchID,
+      this.playerID,
+      actionID,
+    );
   }
 
   requestSync(): void {

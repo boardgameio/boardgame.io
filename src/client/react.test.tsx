@@ -13,6 +13,7 @@ import type { BoardProps } from './react';
 import { Client } from './react';
 import { Local } from './transport/local';
 import { SocketIO } from './transport/socketio';
+import { Invalid } from '../core/constants';
 
 let lastBoardProps: (BoardProps & { doStuff?; extraValue? }) | null = null;
 
@@ -51,6 +52,58 @@ test('board props', () => {
   render(<Board />);
   expect(lastBoardProps.isMultiplayer).toEqual(false);
   expect(lastBoardProps.isActive).toBe(true);
+});
+
+test('board receives and clears lastActionError', () => {
+  const Board = Client({
+    game: {
+      moves: {
+        reject: () => Invalid({ reason: 'not allowed' }),
+      },
+    },
+    board: TestBoard,
+  });
+  render(<Board />);
+  expect(lastBoardProps.lastActionError).toBeUndefined();
+
+  act(() => lastBoardProps.moves.reject());
+  expect(lastBoardProps.lastActionError).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'not allowed' },
+  });
+
+  act(() => lastBoardProps.reset());
+  expect(lastBoardProps.lastActionError).toBeUndefined();
+});
+
+test('board receives lastActionError for a master-rejected optimistic move', () => {
+  const Board = Client({
+    game: {
+      setup: () => ({ secret: 'blocked', played: 0 }),
+      playerView: ({ G }) => ({ ...G, secret: null }),
+      moves: {
+        // Valid against the filtered view the client holds, rejected by the
+        // master, so the client applies it optimistically and then heals.
+        play: ({ G }) => {
+          if (G.secret === 'blocked') return Invalid({ reason: 'no' });
+          G.played++;
+        },
+      },
+    },
+    board: TestBoard,
+    multiplayer: Local(),
+    numPlayers: 2,
+    debug: false,
+  });
+  render(<Board playerID="0" />);
+
+  act(() => lastBoardProps.moves.play());
+
+  expect(lastBoardProps.G.played).toBe(0);
+  expect(lastBoardProps.lastActionError).toEqual({
+    type: 'action/invalid_move',
+    payload: { reason: 'no' },
+  });
 });
 
 test('can pass extra props to Client', () => {
