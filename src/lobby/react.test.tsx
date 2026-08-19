@@ -191,6 +191,7 @@ describe('lobby', () => {
               '1': { id: 1 },
             },
             gameName: 'GameName1',
+            status: 'open' as const,
           },
         ];
         act(() => {
@@ -395,6 +396,7 @@ describe('lobby', () => {
             matchID: 'matchID1',
             players: { '0': { id: 0 } },
             gameName: 'GameName1',
+            status: 'open' as const,
           },
         ];
         forceLobbyUpdate();
@@ -459,11 +461,13 @@ describe('lobby', () => {
             matchID: 'matchID1',
             players: { '0': { id: 0 } },
             gameName: 'GameName1',
+            status: 'open' as const,
           },
           {
             matchID: 'matchID2',
             players: { '0': { id: 0, name: 'Bob' } },
             gameName: 'GameName1',
+            status: 'running' as const,
           },
         ];
         forceLobbyUpdate();
@@ -521,6 +525,7 @@ describe('lobby', () => {
               '1': { id: 1 },
             },
             gameName: 'GameName1',
+            status: 'open' as const,
           },
         ];
         forceLobbyUpdate();
@@ -560,21 +565,25 @@ describe('lobby', () => {
               '1': { id: 1, name: 'Charly', credentials: 'SECRET2' },
             },
             gameName: 'GameName1',
+            status: 'running' as const,
           },
           {
             matchID: 'matchID2',
             players: { '0': { id: 0, name: 'Alice' } },
             gameName: 'GameName2',
+            status: 'running' as const,
           },
           {
             matchID: 'matchID3',
             players: { '0': { id: 0, name: 'Bob' } },
             gameName: 'GameName3',
+            status: 'running' as const,
           },
           {
             matchID: 'matchID4',
             players: { '0': { id: 0, name: 'Zoe' } },
             gameName: 'GameNameUnknown',
+            status: 'running' as const,
           },
         ];
         forceLobbyUpdate();
@@ -643,6 +652,7 @@ describe('lobby', () => {
               '1': { id: 1, name: 'Charly', credentials: 'SECRET2' },
             },
             gameName: 'GameName1',
+            status: 'running' as const,
           },
         ];
         forceLobbyUpdate();
