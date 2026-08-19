@@ -12,7 +12,13 @@ import type Router from '@koa/router';
 import { bodyParser as koaBodyParser } from '@koa/bodyparser';
 import { nanoid } from 'nanoid';
 import cors from '@koa/cors';
-import { createMatch, getFirstAvailablePlayerID, getNumPlayers } from './util';
+import {
+  createMatch,
+  getFirstAvailablePlayerID,
+  getMatchStatus,
+  getNumPlayers,
+  isFull,
+} from './util';
 import type { Auth } from './auth';
 import type { Server, LobbyAPI, Game, StorageAPI } from '../types';
 import { Master } from '../master/master';
@@ -73,6 +79,7 @@ const createClientMatchData = (
   return {
     ...metadata,
     matchID,
+    status: getMatchStatus(metadata),
     players: Object.values(metadata.players).map((player) => {
       // strip away credentials
       const { credentials, ...strippedInfo } = player;
@@ -194,13 +201,27 @@ export const configureRouter = ({
 
     delete metadata.players[playerID].name;
     delete metadata.players[playerID].credentials;
-    const hasPlayers = Object.values(metadata.players).some(({ name }) => name);
-    if (hasPlayers) {
-      await db.setMetadata(matchID, metadata);
-      broadcastMatchData(matchID, metadata);
-    } else {
+
+    const remaining = Object.values(metadata.players).filter(
+      ({ name }) => name,
+    );
+    if (remaining.length === 0) {
       await db.wipe(matchID);
+      return;
     }
+
+    // This seat is free again, so the match is open whatever it was before.
+    // Leaving it running with an empty seat would change what the lobby shows
+    // for fixed-seat matches, which previously read occupancy directly.
+    metadata.status = 'open';
+
+    // The creator has left, so hand the match to whoever is still sitting.
+    if (metadata.creator === playerID) {
+      metadata.creator = String(remaining[0].id);
+    }
+
+    await db.setMetadata(matchID, metadata);
+    broadcastMatchData(matchID, metadata);
   };
 
   const clearPlayerSlotFromRequest = async (ctx: Koa.Context) => {
@@ -400,11 +421,64 @@ export const configureRouter = ({
     const playerCredentials = await auth.generateCredentials(ctx);
     metadata.players[playerID].credentials = playerCredentials;
 
+    // Whoever sits down first owns the match and may start it.
+    if (metadata.creator === undefined) {
+      metadata.creator = playerID;
+    }
+
+    // A match with a fixed number of seats starts itself once they are all
+    // taken, which is what the lobby used to infer from occupancy alone.
+    if (isFull(metadata.players)) {
+      metadata.status = 'running';
+    }
+
     await db.setMetadata(matchID, metadata);
     broadcastMatchData(matchID, metadata);
 
     const body: LobbyAPI.JoinedMatch = { playerID, playerCredentials };
     ctx.body = body;
+  });
+
+  /**
+   * Start a given match, settling its seats so play can begin.
+   *
+   * A match with a fixed number of seats starts itself when the last one is
+   * taken and never needs this. It exists for matches that can begin before
+   * every seat is filled, where only the creator decides when that is.
+   *
+   * @param {string} name - The name of the game.
+   * @param {string} id - The ID of the match.
+   * @param {string} playerID - The ID of the player starting the match.
+   * @param {string} credentials - The credentials of that player.
+   * @return - Nothing.
+   */
+  router.post('/games/:name/:id/start', bodyParser, async (ctx) => {
+    const matchID = ctx.params.id;
+    const gameName = ctx.params.name;
+    const playerID = (ctx.request.body as any)?.playerID;
+    const credentials = (ctx.request.body as any)?.credentials;
+
+    if (typeof playerID !== 'string') {
+      ctx.throw(403, 'playerID is required');
+    }
+
+    const metadata = await fetchMetadataForGame(ctx, matchID, gameName);
+    await authenticatePlayer(ctx, metadata, playerID, credentials);
+
+    if (metadata.creator !== undefined && metadata.creator !== playerID) {
+      ctx.throw(403, 'Player ' + playerID + ' did not create match ' + matchID);
+    }
+
+    if (getMatchStatus(metadata) === 'running') {
+      ctx.throw(409, 'Match ' + matchID + ' has already started');
+    }
+
+    metadata.status = 'running';
+
+    await db.setMetadata(matchID, metadata);
+    broadcastMatchData(matchID, metadata);
+
+    ctx.body = {};
   });
 
   /**

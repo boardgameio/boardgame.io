@@ -337,6 +337,30 @@ describe('LobbyClient', () => {
     test('validates body', testBasicBody(client.leaveMatch));
   });
 
+  describe('startMatch', () => {
+    test('calls `/games/:name/:id/start`', async () => {
+      await client.startMatch('tic-tac-toe', 'xyz', {
+        playerID: '0',
+        credentials: 'pwd',
+      });
+      expect(fetch).toHaveBeenCalledWith(`/games/tic-tac-toe/xyz/start`, {
+        method: 'post',
+        body: '{"playerID":"0","credentials":"pwd"}',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    test('validates gameName', throwsWithInvalidGameName(client.startMatch));
+    test('validates matchID', throwsWithInvalidMatchID(client.startMatch));
+
+    test(
+      'throws without body',
+      throwsWithoutBody(() => client.startMatch('chess', 'id', undefined)),
+    );
+
+    test('validates body', testBasicBody(client.startMatch));
+  });
+
   describe('leaveSlot', () => {
     test('calls `/games/:name/:id/leaveSlot`', async () => {
       await client.leaveSlot('tic-tac-toe', 'xyz', {
