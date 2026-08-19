@@ -312,11 +312,11 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
     playerName: string,
   ) => {
     return matches.map((match) => {
-      const { matchID, gameName, players } = match;
+      const { matchID, gameName, players, status } = match;
       return (
         <LobbyMatchInstance
           key={'instance-' + matchID}
-          match={{ matchID, gameName, players: Object.values(players) }}
+          match={{ matchID, gameName, status, players: Object.values(players) }}
           playerName={playerName}
           onClickJoin={this._joinMatch}
           onClickLeave={this._leaveMatch}

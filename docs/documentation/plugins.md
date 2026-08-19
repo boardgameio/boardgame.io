@@ -145,9 +145,15 @@ players: {
 The initial values of these states are determined by the `setup` function in its options object, which creates the state for a particular `playerID`.
 
 The record associated with the current player can be accessed
-via `ctx.player.get()`. If this is a 2 player game,
-then the opponent's record is available using `ctx.player.opponent.get()`. These fields can be modified using their corresponding
-`set()` versions.
+via `ctx.player.get()`. If the game declares itself to be for exactly two
+players — `minPlayers: 2` and `maxPlayers: 2` — then the opponent's record is
+available using `ctx.player.opponent.get()`. These fields can be modified using
+their corresponding `set()` versions.
+
+?> `opponent` follows what the game declares rather than how many players are in
+the match, because the declaration holds for the life of the match and the live
+count does not. A two-player game that declares neither bound does not get
+`opponent`.
 
 ```js
 ctx.player.get() // Get the current player's record.

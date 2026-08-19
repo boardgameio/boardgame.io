@@ -523,6 +523,20 @@ describe('.configureRouter', () => {
             });
           });
 
+          test('records the first player to sit down as the creator', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({ creator: 0 }),
+            );
+          });
+
+          test('starts the match once the last seat is taken', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({ status: 'running' }),
+            );
+          });
+
           describe('when custom data is provided', () => {
             beforeEach(async () => {
               const app = createApiServer({ db, auth, games });
@@ -622,6 +636,75 @@ describe('.configureRouter', () => {
           });
         });
 
+        describe('when a seat is left free', () => {
+          beforeEach(async () => {
+            db = new AsyncStorage({
+              fetch: async () => ({
+                metadata: {
+                  gameName: 'foo',
+                  players: { '0': { id: 0 }, '1': { id: 1 } },
+                  status: 'open',
+                  createdAt: 0,
+                  updatedAt: 0,
+                } as Server.MatchData,
+              }),
+            });
+            const app = createApiServer({ db, auth, games });
+            response = await apiCall(app)
+              .post('/games/foo/1/join')
+              .send({ playerID: 0, playerName: 'alice' });
+          });
+
+          test('is successful', async () => {
+            expect(response.status).toEqual(200);
+          });
+
+          test('leaves the match open', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({ status: 'open' }),
+            );
+          });
+        });
+
+        describe('when the last free seat is taken', () => {
+          beforeEach(async () => {
+            db = new AsyncStorage({
+              fetch: async () => ({
+                metadata: {
+                  gameName: 'foo',
+                  players: {
+                    '0': { id: 0, name: 'alice', credentials: 'SECRET' },
+                    '1': { id: 1 },
+                  },
+                  status: 'open',
+                  creator: '0',
+                  createdAt: 0,
+                  updatedAt: 0,
+                } as Server.MatchData,
+              }),
+            });
+            const app = createApiServer({ db, auth, games });
+            response = await apiCall(app)
+              .post('/games/foo/1/join')
+              .send({ playerID: 1, playerName: 'bob' });
+          });
+
+          test('starts the match', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({ status: 'running' }),
+            );
+          });
+
+          test('leaves the original creator in place', async () => {
+            expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+              '1',
+              expect.objectContaining({ creator: '0' }),
+            );
+          });
+        });
+
         describe('when playerName is omitted', () => {
           beforeEach(async () => {
             const app = createApiServer({ db, auth, games });
@@ -662,6 +745,167 @@ describe('.configureRouter', () => {
             expect(response.status).toEqual(409);
           });
         });
+      });
+    });
+  });
+
+  describe('starting a match', () => {
+    const auth = new Auth();
+    const games: Game[] = [ProcessGameConfig({ name: 'foo' })];
+    let db: AsyncStorage;
+    let response;
+
+    const storageHolding = (metadata: Partial<Server.MatchData> | null) =>
+      new AsyncStorage({
+        fetch: async () => ({
+          metadata:
+            metadata === null
+              ? null
+              : ({
+                  gameName: 'foo',
+                  players: {
+                    '0': { id: 0, name: 'alice', credentials: 'SECRET' },
+                    '1': { id: 1 },
+                  },
+                  status: 'open',
+                  creator: '0',
+                  createdAt: 0,
+                  updatedAt: 0,
+                  ...metadata,
+                } as Server.MatchData),
+        }),
+      });
+
+    const start = async (
+      body: Record<string, unknown>,
+      storage: AsyncStorage,
+      transport?: ReturnType<typeof createMatchTransport>['transport'],
+    ) => {
+      db = storage;
+      const app = createApiServer({ db, auth, games, transport });
+      return apiCall(app).post('/games/foo/1/start').send(body);
+    };
+
+    beforeEach(() => {
+      delete process.env.API_SECRET;
+    });
+
+    describe('when the creator starts it', () => {
+      let transportAPI: ReturnType<typeof createMatchTransport>['transportAPI'];
+
+      beforeEach(async () => {
+        const matchTransport = createMatchTransport();
+        transportAPI = matchTransport.transportAPI;
+        response = await start(
+          { playerID: '0', credentials: 'SECRET' },
+          storageHolding({}),
+          matchTransport.transport,
+        );
+      });
+
+      test('is successful', () => {
+        expect(response.status).toEqual(200);
+      });
+
+      test('marks the match as running', () => {
+        expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+          '1',
+          expect.objectContaining({ status: 'running' }),
+        );
+      });
+
+      test('broadcasts the match data', () => {
+        expect(transportAPI.sendAll).toHaveBeenCalled();
+      });
+    });
+
+    describe('when a player who did not create it starts it', () => {
+      beforeEach(async () => {
+        response = await start(
+          { playerID: '1', credentials: 'OTHER' },
+          storageHolding({
+            players: {
+              '0': { id: 0, name: 'alice', credentials: 'SECRET' },
+              '1': { id: 1, name: 'bob', credentials: 'OTHER' },
+            },
+          }),
+        );
+      });
+
+      test('is forbidden', () => {
+        expect(response.status).toEqual(403);
+      });
+
+      test('leaves the match open', () => {
+        expect(db.mocks.setMetadata).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the credentials are invalid', () => {
+      beforeEach(async () => {
+        response = await start(
+          { playerID: '0', credentials: 'WRONG' },
+          storageHolding({}),
+        );
+      });
+
+      test('is forbidden', () => {
+        expect(response.status).toEqual(403);
+      });
+    });
+
+    describe('when playerID is omitted', () => {
+      beforeEach(async () => {
+        response = await start({ credentials: 'SECRET' }, storageHolding({}));
+      });
+
+      test('is forbidden', () => {
+        expect(response.status).toEqual(403);
+      });
+    });
+
+    describe('when the match is already running', () => {
+      beforeEach(async () => {
+        response = await start(
+          { playerID: '0', credentials: 'SECRET' },
+          storageHolding({ status: 'running' }),
+        );
+      });
+
+      test('is a conflict', () => {
+        expect(response.status).toEqual(409);
+      });
+    });
+
+    describe('when the match was stored before status existed', () => {
+      beforeEach(async () => {
+        response = await start(
+          { playerID: '0', credentials: 'SECRET' },
+          storageHolding({
+            status: undefined,
+            players: {
+              '0': { id: 0, name: 'alice', credentials: 'SECRET' },
+              '1': { id: 1, name: 'bob', credentials: 'OTHER' },
+            },
+          }),
+        );
+      });
+
+      test('reads every seat being taken as already running', () => {
+        expect(response.status).toEqual(409);
+      });
+    });
+
+    describe('when the match does not exist', () => {
+      beforeEach(async () => {
+        response = await start(
+          { playerID: '0', credentials: 'SECRET' },
+          storageHolding(null),
+        );
+      });
+
+      test('is not found', () => {
+        expect(response.status).toEqual(404);
       });
     });
   });
@@ -1149,6 +1393,42 @@ describe('.configureRouter', () => {
             .post('/games/foo/1/leave')
             .send('playerID=0&playerName=alice');
           expect(response.status).toEqual(404);
+        });
+      });
+
+      describe('when a player leaves a running match', () => {
+        beforeEach(async () => {
+          db = new AsyncStorage({
+            fetch: async () => ({
+              metadata: {
+                ...createLeaveMetadata(),
+                status: 'running',
+                creator: '0',
+              } as Server.MatchData,
+            }),
+          });
+          const app = createApiServer({ db, auth, games });
+          response = await apiCall(app)
+            .post('/games/foo/1/leaveSlot')
+            .send('playerID=0&credentials=SECRET1');
+        });
+
+        test('is successful', async () => {
+          expect(response.status).toEqual(200);
+        });
+
+        test('opens the match again, since a seat is free', async () => {
+          expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({ status: 'open' }),
+          );
+        });
+
+        test('hands the match to someone still seated', async () => {
+          expect(db.mocks.setMetadata).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({ creator: '1' }),
+          );
         });
       });
 

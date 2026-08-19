@@ -19,6 +19,7 @@ export const createMetadata = ({
     gameName: game.name,
     unlisted: !!unlisted,
     players: {},
+    status: 'open',
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -67,6 +68,25 @@ export const createMatch = ({
  */
 export const getNumPlayers = (players: Server.MatchData['players']): number =>
   Object.keys(players).length;
+
+/**
+ * Whether every seat in a match has been taken.
+ */
+export const isFull = (players: Server.MatchData['players']): boolean =>
+  Object.values(players).every((player) => !!player.name);
+
+/**
+ * The lobby lifecycle status of a match.
+ *
+ * Matches stored before `status` existed do not carry one, so fall back to the
+ * rule the lobby used to infer it with: a match is running once every seat has
+ * a name. That is only ever right for fixed-seat matches, which is exactly
+ * what every match predating this field is.
+ */
+export const getMatchStatus = (
+  metadata: Server.MatchData,
+): Server.MatchStatus =>
+  metadata.status ?? (isFull(metadata.players) ? 'running' : 'open');
 
 /**
  * Given players, tries to find the ID of the first player that can be joined.
