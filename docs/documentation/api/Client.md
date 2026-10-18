@@ -217,6 +217,33 @@ The following methods are available on a client instance:
 
 - `updateCredentials(credentials)`: Function to update the client’s credentials.
 
+#### Replay a game log
+
+`ReplayLog` returns one state for each visible log entry. When an action causes
+additional log entries, it replays the original action once and associates the
+resulting state with every visible entry from that transition. Automatic log
+entries are omitted because the reducer recreates their effects.
+
+```js
+import { Client, ReplayLog } from 'boardgame.io/client';
+
+const client = Client({ game });
+const current = client.getState();
+
+if (current) {
+  const states = ReplayLog({
+    game,
+    initialState: client.getInitialState(),
+    log: current.log,
+  });
+
+  const stateAfterFirstMove = states[0];
+}
+```
+
+Replay only data that is visible to the current player. This utility does not
+reconstruct server-only state or data removed by a game’s `playerView`.
+
 
 ### **React**
 
