@@ -10,7 +10,7 @@ import * as ioNamespace from 'socket.io-client';
 
 const io = ioNamespace.default;
 
-import type { Master } from '../../master/master';
+import type { Master, TransportActionResult } from '../../master/master';
 import { Transport } from './transport';
 import type { Operation } from 'rfc6902';
 import type { TransportOpts } from './transport';
@@ -68,12 +68,17 @@ export class SocketIOTransport extends Transport {
     this.socketOpts = socketOpts;
   }
 
-  sendAction(state: State, action: CredentialedActionShape.Any): void {
+  sendAction(
+    state: State,
+    action: CredentialedActionShape.Any,
+    actionID?: number,
+  ): void {
     const args: Parameters<Master['onUpdate']> = [
       action,
       state._stateID,
       this.matchID,
       this.playerID,
+      actionID,
     ];
     this.socket.emit('update', ...args);
   }
@@ -154,6 +159,17 @@ export class SocketIOTransport extends Transport {
     this.socket.on('chat', (matchID: string, chatMessage: ChatMessage) => {
       this.notifyClient({ type: 'chat', args: [matchID, chatMessage] });
     });
+
+    // Called with the authoritative result of an action this client sent.
+    this.socket.on(
+      'actionResult',
+      (matchID: string, actionID: number, result: TransportActionResult) => {
+        this.notifyClient({
+          type: 'actionResult',
+          args: [matchID, actionID, result],
+        });
+      },
+    );
 
     // Keep track of connection status.
     this.socket.on('connect', () => {
