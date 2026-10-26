@@ -145,6 +145,12 @@ const { matchID } = await lobbyClient.createMatch('tic-tac-toe', {
 
 Allows a player to join a particular match instance `id` of a game named `name`.
 
+The first player to join becomes the match’s `creator`, the only player allowed
+to start it. Once every seat is taken the match’s `status` becomes `running` on
+its own. Freeing a seat again — see [leaving a lobby slot](#leaving-a-lobby-slot)
+— puts it back to `open`, and hands `creator` to a player who is still seated if
+the creator was the one who left.
+
 Accepts three JSON body parameters:
 
 - `playerName` (required): the display name of the player joining the match.
@@ -167,6 +173,37 @@ const { playerCredentials } = await lobbyClient.joinMatch(
     playerName: 'Alice',
   }
 );
+```
+
+### Starting a match
+
+#### POST `/games/{name}/{id}/start`
+
+Settles the seats of match `id` so play can begin, moving its `status` from
+`open` to `running`.
+
+A match with a fixed number of seats does this by itself the moment the last
+seat is taken, and never needs this endpoint. It is for matches that can begin
+before every seat is filled, where only the player who created the match — the
+first one to sit down, reported as `creator` — decides when that is.
+
+Accepts two JSON body parameters, both required:
+
+- `playerID`: the ID of the player starting the match, which must be the match’s
+  `creator`.
+
+- `credentials`: that player’s authentication token.
+
+Responds `403` if the player is not the creator or the credentials do not match,
+and `409` if the match is already running.
+
+#### Using a LobbyClient instance
+
+```js
+await lobbyClient.startMatch('tic-tac-toe', 'matchID', {
+  playerID: '0',
+  credentials: 'playerCredentials',
+});
 ```
 
 ### Updating a player’s metadata

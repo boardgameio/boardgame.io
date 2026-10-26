@@ -54,7 +54,7 @@ const PlayerPlugin = <PlayerState extends any = any>({
     return { players: api.state };
   },
 
-  api: ({ ctx, data }): PlayerAPI => {
+  api: ({ ctx, game, data }): PlayerAPI => {
     const state = data.players;
 
     const get = () => {
@@ -67,7 +67,9 @@ const PlayerPlugin = <PlayerState extends any = any>({
 
     const result: PlayerAPI = { state, get, set };
 
-    if (ctx.numPlayers === 2) {
+    // What the game declared holds for the life of the match; the number of
+    // players in it right now does not.
+    if (game.minPlayers === 2 && game.maxPlayers === 2) {
       const other = ctx.currentPlayer === '0' ? '1' : '0';
       const get = () => {
         return data.players[other];

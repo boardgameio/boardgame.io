@@ -19,6 +19,7 @@ type Match = {
   gameName: string;
   matchID: string;
   players: LobbyAPI.Match['players'];
+  status: LobbyAPI.Match['status'];
 };
 
 type MatchInstanceProps = {
@@ -88,16 +89,11 @@ class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
       (player) => player.name === this.props.playerName,
     );
     const freeSeat = inst.players.find((player) => !player.name);
-    if (playerSeat && freeSeat) {
-      // already seated: waiting for match to start
-      return this._createButtonLeave(inst);
-    }
-    if (freeSeat) {
-      // at least 1 seat is available
-      return this._createButtonJoin(inst, freeSeat.id);
-    }
-    // match is full
+    // Already seated: wait while the match is open, play once it is running.
     if (playerSeat) {
+      if (inst.status === 'open') {
+        return this._createButtonLeave(inst);
+      }
       return (
         <div>
           {[
@@ -107,16 +103,17 @@ class LobbyMatchInstance extends React.Component<MatchInstanceProps> {
         </div>
       );
     }
+    // at least 1 seat is available
+    if (freeSeat) {
+      return this._createButtonJoin(inst, freeSeat.id);
+    }
     // allow spectating
     return this._createButtonSpectate(inst);
   };
 
   render() {
     const match = this.props.match;
-    let status = 'OPEN';
-    if (!match.players.some((player) => !player.name)) {
-      status = 'RUNNING';
-    }
+    const status = match.status === 'running' ? 'RUNNING' : 'OPEN';
     return (
       <tr key={'line-' + match.matchID}>
         <td key={'cell-name-' + match.matchID}>{match.gameName}</td>

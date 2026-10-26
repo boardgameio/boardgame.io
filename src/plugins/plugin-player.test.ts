@@ -40,6 +40,11 @@ describe('2 player game', () => {
 
   beforeAll(() => {
     const game: Game<any, { player: PlayerAPI }> = {
+      // `player.opponent` follows what the game declares, so a game that uses
+      // it has to say it is for exactly two players.
+      minPlayers: 2,
+      maxPlayers: 2,
+
       moves: {
         A: ({ player }) => {
           player.set({ field: 'A1' });

@@ -284,6 +284,42 @@ export class LobbyClient {
   }
 
   /**
+   * Start a match, settling its seats so play can begin.
+   *
+   * A match with a fixed number of seats starts itself once the last one is
+   * taken. This is for matches that can begin before every seat is filled,
+   * where only the player who created the match decides when that is.
+   * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
+   * @param  matchID  Match ID for the match to start.
+   * @param  body     Options required to start the match.
+   * @param  init     Optional RequestInit interface to override defaults.
+   * @return Promise resolves if successful.
+   *
+   * @example
+   * lobbyClient.startMatch('tic-tac-toe', 'xyz', {
+   *   playerID: '0',
+   *   credentials: 'credentials-returned-when-joining',
+   * })
+   *   .then(() => console.log('Match started.'))
+   *   .catch(error => console.error('Error starting match', error));
+   */
+  async startMatch(
+    gameName: string,
+    matchID: string,
+    body: {
+      playerID: string;
+      credentials: string;
+      [key: string]: any;
+    },
+    init?: RequestInit,
+  ): Promise<void> {
+    assertGameName(gameName);
+    assertMatchID(matchID);
+    validateBody(body, { playerID: 'string', credentials: 'string' });
+    await this.post(`/games/${gameName}/${matchID}/start`, { body, init });
+  }
+
+  /**
    * Leave a previously joined lobby slot.
    * @param  gameName The match’s game type, e.g. 'tic-tac-toe'.
    * @param  matchID  Match ID for the match to leave.

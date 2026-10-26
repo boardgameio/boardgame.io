@@ -19,6 +19,7 @@ describe('lobby', () => {
     match1 = {
       gameName: 'game1',
       matchID: 'matchID_1',
+      status: 'open',
       players: [{ id: 0 }],
       createdAt: 1,
       updatedAt: 4,
@@ -26,6 +27,7 @@ describe('lobby', () => {
     match2 = {
       gameName: 'game2',
       matchID: 'matchID_2',
+      status: 'open',
       players: [{ id: 1 }],
       createdAt: 2,
       updatedAt: 3,

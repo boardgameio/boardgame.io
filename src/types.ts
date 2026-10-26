@@ -404,9 +404,23 @@ export namespace Server {
     isConnected?: boolean;
   };
 
+  /**
+   * Where a match is in the lobby's own lifecycle, which is not the game's:
+   * `running` means the seats are settled and play can begin, and says
+   * nothing about whether the game is over.
+   */
+  export type MatchStatus = 'open' | 'running';
+
   export interface MatchData {
     gameName: string;
     players: { [id: number]: PlayerMetadata };
+    /**
+     * Absent on matches stored before this field existed; read it through
+     * `getMatchStatus`, which falls back to seat occupancy for those.
+     */
+    status?: MatchStatus;
+    /** The player who may start the match: whoever joined it first. */
+    creator?: PlayerID;
     setupData?: any;
     gameover?: any;
     nextMatchID?: string;
@@ -426,9 +440,11 @@ export namespace Server {
 export namespace LobbyAPI {
   export type GameList = string[];
   type PublicPlayerMetadata = Omit<Server.PlayerMetadata, 'credentials'>;
-  export type Match = Omit<Server.MatchData, 'players'> & {
+  export type Match = Omit<Server.MatchData, 'players' | 'status'> & {
     matchID: string;
     players: PublicPlayerMetadata[];
+    /** Always present here: the server resolves it before responding. */
+    status: Server.MatchStatus;
   };
   export interface MatchList {
     matches: Match[];
