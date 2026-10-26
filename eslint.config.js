@@ -3,7 +3,11 @@
 const js = require('@eslint/js');
 const globals = require('globals');
 const jest = require('eslint-plugin-jest');
-const unicorn = require('eslint-plugin-unicorn');
+// eslint-plugin-unicorn is ESM-only from v57 on, where `require()` hands back
+// the module namespace rather than the plugin and `.configs` is undefined.
+// Unwrap the default export when it is present so the config survives that bump.
+const unicornModule = require('eslint-plugin-unicorn');
+const unicorn = unicornModule.default ?? unicornModule;
 const react = require('eslint-plugin-react');
 const typescriptEslint = require('@typescript-eslint/eslint-plugin');
 const prettierRecommended = require('eslint-plugin-prettier/recommended');
