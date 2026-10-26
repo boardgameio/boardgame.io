@@ -121,8 +121,9 @@
     ...
   },
 
-  // The minimum and maximum number of players supported
-  // (This is only enforced when using the Lobby server component.)
+  // The minimum and maximum number of players supported.
+  // Enforced when a multiplayer match is created. If maxPlayers
+  // is not set, a match can have at most 100 players.
   minPlayers: 1,
   maxPlayers: 4,
 

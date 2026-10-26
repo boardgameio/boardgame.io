@@ -262,6 +262,26 @@ describe('.configureRouter', () => {
 
           expect(response.status).toEqual(400);
         });
+
+        test('negative numPlayers fails', async () => {
+          response = await apiCall(app)
+            .post('/games/foo/create')
+            .send({ numPlayers: -1 });
+
+          expect(response.status).toEqual(400);
+        });
+
+        test('caps numPlayers at 100 if the game sets no maxPlayers', async () => {
+          response = await apiCall(app)
+            .post('/games/foo/create')
+            .send({ numPlayers: 101 });
+          expect(response.status).toEqual(400);
+
+          response = await apiCall(app)
+            .post('/games/foo/create')
+            .send({ numPlayers: 100 });
+          expect(response.status).toEqual(200);
+        });
       });
 
       describe('for an unknown game name', () => {
@@ -1796,6 +1816,21 @@ describe('.configureRouter', () => {
         .send('credentials=foo');
       expect(response.status).toEqual(403);
     });
+
+    test.each([-1, 2, 5])(
+      'when numPlayers %p is out of range throws error 400',
+      async (numPlayers) => {
+        games = [
+          ProcessGameConfig({ name: 'foo', minPlayers: 3, maxPlayers: 4 }),
+        ];
+        const app = createApiServer({ db, auth, games });
+        response = await apiCall(app)
+          .post('/games/foo/1/playAgain')
+          .send({ playerID: '0', credentials: 'SECRET1', numPlayers });
+        expect(response.status).toEqual(400);
+        expect(db.mocks.createMatch).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('requesting room list', () => {
