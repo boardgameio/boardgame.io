@@ -155,6 +155,14 @@ export class SocketIOTransport extends Transport {
       this.notifyClient({ type: 'chat', args: [matchID, chatMessage] });
     });
 
+    // The master rejected an action from this client (e.g. stale `_stateID`
+    // after an optimistic move the server refused): our copy of the match has
+    // diverged, so request a full sync to adopt the server's state.
+    this.socket.on('updateError', (matchID: string) => {
+      if (matchID !== this.matchID) return;
+      this.requestSync();
+    });
+
     // Keep track of connection status.
     this.socket.on('connect', () => {
       // Initial sync to get game state.

@@ -31,6 +31,14 @@ import type { Auth } from '../server/auth';
 import * as StorageAPI from '../server/db/base';
 import type { Operation } from 'rfc6902';
 
+type DispatchResultWithTransients = {
+  transients?: {
+    error?: {
+      type: string;
+    };
+  };
+};
+
 /**
  * Filter match data to get a player metadata object with credentials stripped.
  */
@@ -256,13 +264,20 @@ export class Master {
         `invalid stateID, was=[${stateID}], expected=[${state._stateID}]` +
           ` - playerID=[${playerID}] - action[${action.payload.type}]`,
       );
-      return;
+      // Report the rejection so the client can resync instead of staying
+      // permanently one state ahead (every later action would be dropped).
+      return { error: 'invalid stateID' };
     }
 
     const prevState = store.getState();
 
     // Update server's version of the store.
-    store.dispatch(action);
+    const result = store.dispatch(action) as DispatchResultWithTransients;
+    if (result && result.transients && result.transients.error) {
+      // The move itself declared the action invalid: report it so the
+      // client can resync its diverged optimistic copy.
+      return { error: 'invalid move' };
+    }
     state = store.getState();
 
     this.subscribeCallback({

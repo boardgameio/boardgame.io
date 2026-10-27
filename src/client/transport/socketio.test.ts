@@ -212,6 +212,17 @@ describe('multiplayer', () => {
     });
   });
 
+  test('requestSyncs when the master rejects an action', () => {
+    mockSocket.receive('updateError', 'default', 'invalid stateID');
+    const args: SyncArgs = ['default', null, undefined, 2];
+    expect(mockSocket.emit).toHaveBeenCalledWith('sync', ...args);
+  });
+
+  test('ignores a rejection for a different match', () => {
+    mockSocket.receive('updateError', 'other', 'invalid stateID');
+    expect(mockSocket.emit).not.toHaveBeenCalledWith('sync', expect.anything());
+  });
+
   test('send chat-message', () => {
     const message: ChatMessage = {
       id: '0',

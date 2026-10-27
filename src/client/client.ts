@@ -384,7 +384,12 @@ export class _ClientImpl<
       case 'patch': {
         const [, prevStateID, stateID, patch, deltalog] = data.args;
         const currentStateID = this.store.getState()._stateID;
-        if (prevStateID !== currentStateID) break;
+        if (prevStateID !== currentStateID) {
+          // Patch for a state we don't have: our copy has diverged,
+          // so request a full sync instead of dropping the update.
+          this.transport.requestSync();
+          break;
+        }
         const action = ActionCreators.patch(
           prevStateID,
           stateID,

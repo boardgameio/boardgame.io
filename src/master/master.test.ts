@@ -234,8 +234,9 @@ describe('update', () => {
   });
 
   test('invalid stateID', async () => {
-    await master.onUpdate(action, 100, 'matchID', '0');
+    const result = await master.onUpdate(action, 100, 'matchID', '0');
     expect(sendAll).not.toHaveBeenCalled();
+    expect(result).toEqual({ error: 'invalid stateID' });
     expect(error).toHaveBeenCalledWith(
       `invalid stateID, was=[100], expected=[0] - playerID=[0] - action[endTurn]`,
     );
@@ -643,13 +644,16 @@ describe('patch', () => {
   });
 
   test('invalid move', async () => {
-    await master.onUpdate(
+    const result = await master.onUpdate(
       ActionCreators.makeMove('Invalid', null, '0'),
       1,
       'matchID',
       '0',
     );
-    expect(sendAll).toHaveBeenCalled();
+    // A rejected action must not broadcast or persist state, and the
+    // transport needs the error to notify the client.
+    expect(sendAll).not.toHaveBeenCalled();
+    expect(result).toEqual({ error: 'invalid move' });
     expect(error).toHaveBeenCalledWith('invalid move: Invalid args: null');
   });
 

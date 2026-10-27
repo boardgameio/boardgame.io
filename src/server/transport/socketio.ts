@@ -185,9 +185,14 @@ export class SocketIO {
           );
 
           const matchQueue = this.getMatchQueue(matchID);
-          await matchQueue.add(() =>
+          const result = await matchQueue.add(() =>
             master.onUpdate(action, stateID, matchID, playerID),
           );
+          // Tell the client its action was dropped so it can resync
+          // instead of staying permanently ahead of the server.
+          if (result && result.error) {
+            socket.emit('updateError', matchID, result.error);
+          }
         });
 
         socket.on('sync', async (...args: Parameters<Master['onSync']>) => {

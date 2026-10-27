@@ -397,14 +397,17 @@ describe('receiveTransportData', () => {
     expect(client.getState()._stateID).toBe(2);
   });
 
-  test('ignores patch for different state ID', () => {
+  test('resyncs when a patch does not match the current state', () => {
     const state = { G: 'G1', _stateID: 1, ctx: {} } as State;
     sendToClient({ type: 'sync', args: ['A', { state } as SyncInfo] });
+    expect(requestSync).not.toHaveBeenCalled();
+    // Patch for a state we don't have: drop it and get the truth.
     sendToClient({
       type: 'patch',
       args: ['A', 2, 3, [{ op: 'replace', path: '/_stateID', value: 3 }], []],
     });
     expect(client.getState()._stateID).toBe(1);
+    expect(requestSync).toHaveBeenCalled();
   });
 
   test('resyncs after failed patch', () => {

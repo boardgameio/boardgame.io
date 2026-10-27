@@ -46,6 +46,8 @@ class SocketIOTestAdapter extends SocketIO {
   }
 }
 
+let mockOnUpdateResult: void | { error: string };
+
 jest.mock('../../master/master', () => {
   class Master {
     onUpdate: jest.Mock<any, any>;
@@ -54,7 +56,7 @@ jest.mock('../../master/master', () => {
     onChatMessage: jest.Mock<any, any>;
 
     constructor() {
-      this.onUpdate = jest.fn();
+      this.onUpdate = jest.fn(async () => mockOnUpdateResult);
       this.onSync = jest.fn();
       this.onConnectionChange = jest.fn();
       this.onChatMessage = jest.fn();
@@ -220,6 +222,24 @@ describe('sync / update', () => {
   test('update', () => {
     io.socket.receive('update');
     expect(error).not.toHaveBeenCalled();
+  });
+
+  test('update emits updateError to the socket when the master rejects the action', async () => {
+    mockOnUpdateResult = { error: 'invalid stateID' };
+    io.socket.emit = jest.fn();
+    await io.socket.receive('update', {}, 100, 'matchID', '0');
+    expect(io.socket.emit).toHaveBeenCalledWith(
+      'updateError',
+      'matchID',
+      'invalid stateID',
+    );
+  });
+
+  test('update emits nothing when the master accepts the action', async () => {
+    mockOnUpdateResult = undefined;
+    io.socket.emit = jest.fn();
+    await io.socket.receive('update', {}, 0, 'matchID', '0');
+    expect(io.socket.emit).not.toHaveBeenCalled();
   });
 });
 
