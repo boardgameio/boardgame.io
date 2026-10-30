@@ -172,6 +172,22 @@ describe('sync', () => {
     expect(send).not.toHaveBeenCalled();
     expect(db.fetch(matchID, { state: true })).toEqual({ state: undefined });
   });
+
+  test.each([2.5, 101])(
+    'should not create match for numPlayers %p',
+    async (numPlayers) => {
+      const db = new InMemory();
+      const master = new Master(game, db, TransportAPI(send));
+
+      const res = await master.onSync('matchID', null, undefined, numPlayers);
+
+      expect(res).toEqual({ error: expect.any(String) });
+      expect(send).not.toHaveBeenCalled();
+      expect(db.fetch('matchID', { state: true })).toEqual({
+        state: undefined,
+      });
+    },
+  );
 });
 
 describe('update', () => {
