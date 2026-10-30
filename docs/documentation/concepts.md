@@ -14,6 +14,8 @@ boardgame.io captures game state in two objects: `G` and `ctx`.
     turn: 0,
     currentPlayer: '0',
     numPlayers: 2,
+    players: ['0', '1'],
+    playOrder: ['0', '1'],
   }
 }
 ```
@@ -26,6 +28,21 @@ state manually in `G` if you so desire.
 ?> `ctx` contains other fields not shown here that games
 can take advantage of, including support for game phases and complex
 turn orders.
+
+`numPlayers`, `players` and `playOrder` all count players, and they answer
+different questions.
+
+`ctx.numPlayers` is how many seats the match was **created** with. It does not
+change, so in a game players can leave it stops matching how many are playing.
+It stays fixed on purpose: games that never lose a player keep reading the value
+they always read.
+
+`ctx.players` is who is in the match now. A player leaving is taken out of it, so
+`ctx.players.length` — not `numPlayers` — is the live count.
+
+`ctx.playOrder` is who takes a turn in the current phase, in the order they take
+them. It is always a subset of `ctx.players`: a phase may deal in fewer players
+than the match holds, but never in someone who has left it.
 
 !> Because state can be sent between client and server,
 `G` must be a JSON-serializable object; in particular, it must
