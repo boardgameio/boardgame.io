@@ -33,9 +33,14 @@ export const createMetadata = ({
 };
 
 /**
+ * The most players a match can have when the game does not set `maxPlayers`.
+ */
+const DEFAULT_MAX_PLAYERS = 100;
+
+/**
  * Creates initial state and metadata for a new match.
- * If the provided `setupData` doesn’t pass the game’s validation,
- * an error object is returned instead.
+ * If `numPlayers` is out of range or the provided `setupData` doesn’t pass
+ * the game’s validation, an error object is returned instead.
  */
 export const createMatch = ({
   game,
@@ -51,6 +56,15 @@ export const createMatch = ({
   | { metadata: Server.MatchData; initialState: State }
   | { setupDataError: string } => {
   if (!numPlayers || typeof numPlayers !== 'number') numPlayers = 2;
+
+  if (
+    !Number.isInteger(numPlayers) ||
+    numPlayers < 1 ||
+    (game.minPlayers && numPlayers < game.minPlayers) ||
+    numPlayers > (game.maxPlayers || DEFAULT_MAX_PLAYERS)
+  ) {
+    return { setupDataError: 'Invalid numPlayers' };
+  }
 
   const setupDataError =
     game.validateSetupData && game.validateSetupData(setupData, numPlayers);
