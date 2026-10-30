@@ -40,7 +40,6 @@ export interface EventsAPI {
   endStage(): void;
   endTurn(arg?: { next: PlayerID }): void;
   pass(arg?: { remove: true }): void;
-  removePlayer(playerID: PlayerID): void;
   setActivePlayers(arg: ActivePlayersArg): void;
   setPhase(newPhase: string): void;
   setStage(newStage: string): void;

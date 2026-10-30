@@ -1400,64 +1400,6 @@ describe('pass args', () => {
   });
 });
 
-test('removePlayer persists across phase starts', () => {
-  const flow = Flow({
-    phases: {
-      A: {
-        start: true,
-        next: 'B',
-        turn: {
-          order: {
-            first: () => 0,
-            next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
-            playOrder: () => ['0', '1', '2'],
-          },
-        },
-      },
-      B: {
-        turn: {
-          order: {
-            first: () => 0,
-            next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length,
-            playOrder: () => ['0', '1', '2'],
-          },
-        },
-      },
-    },
-  });
-
-  let t = { ctx: flow.ctx(3) } as State;
-  t = flow.init(t);
-  t = flow.processEvent(t, gameEvent('removePlayer', '1'));
-  t = flow.processEvent(t, gameEvent('endPhase'));
-
-  expect(t.ctx.phase).toBe('B');
-  expect(t.ctx.playOrder).toEqual(['0', '2']);
-  expect(t.ctx._removedPlayers).toEqual(['1']);
-});
-
-test('removePlayer ignores non-string playerID', () => {
-  const flow = Flow({});
-  let t = { ctx: flow.ctx(3) } as State;
-  t = flow.init(t);
-
-  t = flow.processEvent(t, gameEvent('removePlayer', 1));
-
-  expect(t.ctx.playOrder).toEqual(['0', '1', '2']);
-  expect(t.ctx._removedPlayers).toBeUndefined();
-});
-
-test('removed players are never active', () => {
-  const flow = Flow({});
-  let t = { ctx: flow.ctx(2) } as State;
-  t = flow.init(t);
-
-  expect(flow.isPlayerActive({}, t.ctx, '0')).toBe(true);
-
-  const staleCtx = { ...t.ctx, currentPlayer: '1', _removedPlayers: ['1'] };
-  expect(flow.isPlayerActive({}, staleCtx, '1')).toBe(false);
-});
-
 test('undoable moves', () => {
   const game: Game = {
     moves: {
