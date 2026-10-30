@@ -5,32 +5,19 @@
 
   const { secondaryPane } = getContext('secondaryPane');
 
-  import { CreateGameReducer } from '../../../core/reducer';
+  import { ReplayLog } from '../../replay';
   import TurnMarker from './TurnMarker.svelte';
   import PhaseMarker from './PhaseMarker.svelte';
   import LogEvent from './LogEvent.svelte';
   import MCTS from '../mcts/MCTS.svelte';
 
-  const reducer = CreateGameReducer({ game: client.game });
   const initialState = client.getInitialState();
   let { log } = $client;
+  let replayedStates = [];
   let pinned = null;
 
   function rewind(logIndex) {
-    let state = initialState;
-    for (let i = 0; i < log.length; i++) {
-      const { action, automatic } = log[i];
-
-      if (!automatic) {
-        state = reducer(state, action);
-
-        if (logIndex == 0) {
-          break;
-        }
-
-        logIndex--;
-      }
-    }
+    const state = replayedStates[logIndex];
     return { G: state.G, ctx: state.ctx, plugins: state.plugins };
   }
 
@@ -88,6 +75,11 @@
   $: {
     log = $client.log;
     renderedLogEntries = log.filter(e => !e.automatic);
+    replayedStates = ReplayLog({
+      game: client.game,
+      initialState,
+      log,
+    });
 
     let eventsInCurrentPhase = 0;
     let eventsInCurrentTurn = 0;

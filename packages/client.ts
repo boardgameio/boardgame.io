@@ -7,4 +7,6 @@
  */
 
 export { Client } from '../src/client/client';
+export { ReplayLog } from '../src/client/replay';
+export type { ReplayLogOptions } from '../src/client/replay';
 export { LobbyClient, LobbyClientError } from '../src/lobby/client';
