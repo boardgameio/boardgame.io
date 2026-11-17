@@ -7,7 +7,7 @@ This tutorial walks through a simple game of Tic-Tac-Toe.
    and follow [the instructions on how to install Node][node]. You’ll also want
    a text editor to write code in like [VS Code][vsc] or [Atom][atom].
 
-[node]: https://nodejs.dev/learn/how-to-install-nodejs
+[node]: https://nodejs.org/en/download
 [cmd]: https://tutorial.djangogirls.org/en/intro_to_command_line/
 [vsc]: https://code.visualstudio.com/
 [atom]: https://atom.io/
