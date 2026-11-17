@@ -145,13 +145,13 @@ players: {
 The initial values of these states are determined by the `setup` function in its options object, which creates the state for a particular `playerID`.
 
 The record associated with the current player can be accessed
-via `ctx.player.get()`. If this is a 2 player game,
-then the opponent's record is available using `ctx.player.opponent.get()`. These fields can be modified using their corresponding
+via `player.get()`, using the `player` object passed to moves and other game logic. If this is a 2 player game,
+then the opponent's record is available using `player.opponent.get()`. These fields can be modified using their corresponding
 `set()` versions.
 
 ```js
-ctx.player.get() // Get the current player's record.
-ctx.player.set() // Update the current player's record.
-ctx.player.opponent.get() // Get the opponent player's record.
-ctx.player.opponent.set() // Update the opponent player's record.
+player.get() // Get the current player's record.
+player.set() // Update the current player's record.
+player.opponent.get() // Get the opponent player's record.
+player.opponent.set() // Update the opponent player's record.
 ```
