@@ -21,6 +21,7 @@ import * as StorageAPI from '../server/db/base';
 import * as dateMock from 'jest-date-mock';
 import { PlayerView } from '../core/player-view';
 import { INVALID_MOVE } from '../core/constants';
+import { ActivePlayers } from '../core/turn-order';
 
 jest.mock('../core/logger', () => ({
   info: jest.fn(),
@@ -1027,9 +1028,14 @@ describe('patch', () => {
     test('player can undo if they are the only active player', async () => {
       const endStage = ActionCreators.gameEvent('endStage', undefined, '1');
       await master.onUpdate(endStage, 2, 'matchID', '1');
-      await master.onUpdate(ActionCreators.undo('0'), 3, 'matchID', '1');
-      // The master allows this, but the reducer does not.
-      expect(error).toHaveBeenCalledWith(`Cannot undo other players' moves`);
+      const ret = await master.onUpdate(
+        ActionCreators.undo('0'),
+        3,
+        'matchID',
+        '1',
+      );
+      // Player 1 cannot send an undo on behalf of player 0.
+      expect(ret).toEqual({ error: 'unauthorized action' });
 
       // Clean-up active players.
       const endStage2 = ActionCreators.gameEvent('endStage', undefined, '1');
@@ -1380,6 +1386,75 @@ describe('authentication', () => {
       const ret = await master.onChatMessage(matchID, chatMessage, undefined);
       expect(ret).toBeUndefined();
       expect(sendAll).toHaveBeenCalled();
+    });
+  });
+
+  describe('onUpdate acting player', () => {
+    // Both seats are active at once and each has its own credentials.
+    const game: Game = {
+      name: 'seats',
+      setup: () => ({ movedBy: [] }),
+      turn: { activePlayers: ActivePlayers.ALL },
+      moves: {
+        A: ({ G, playerID }) => {
+          G.movedBy.push(playerID);
+        },
+      },
+    };
+    let db: InMemory;
+    let master: Master;
+
+    beforeEach(() => {
+      send.mockReset();
+      sendAll.mockReset();
+      db = new InMemory();
+      db.createMatch(matchID, {
+        initialState: InitializeGame({ game, numPlayers: 2 }),
+        metadata: {
+          gameName: 'seats',
+          players: {
+            '0': { id: 0, credentials: 'creds-0' },
+            '1': { id: 1, credentials: 'creds-1' },
+          },
+          createdAt: 0,
+          updatedAt: 0,
+        },
+      });
+      master = new Master(game, db, TransportAPI(send, sendAll), new Auth());
+    });
+
+    const movedBy = () => db.fetch(matchID, { state: true }).state.G.movedBy;
+
+    test('runs the action as the authenticated player', async () => {
+      const action = ActionCreators.makeMove('A', null, '1', 'creds-1');
+      const ret = await master.onUpdate(action, 0, matchID, '1');
+      expect(ret).toBeUndefined();
+      expect(movedBy()).toEqual(['1']);
+    });
+
+    test('rejects an action made for another player', async () => {
+      const action = ActionCreators.makeMove('A', null, '0', 'creds-1');
+      const ret = await master.onUpdate(action, 0, matchID, '1');
+      expect(movedBy()).toHaveLength(0);
+      expect(ret).toEqual({ error: 'unauthorized action' });
+      expect(sendAll).not.toHaveBeenCalled();
+    });
+
+    test('rejects an action without a playerID', async () => {
+      const action = ActionCreators.makeMove('A', null, undefined, 'creds-1');
+      const ret = await master.onUpdate(action, 0, matchID, '1');
+      expect(movedBy()).toHaveLength(0);
+      expect(ret).toEqual({ error: 'unauthorized action' });
+      expect(sendAll).not.toHaveBeenCalled();
+    });
+
+    test('rejects a playerID that is not a string', async () => {
+      const playerID = 0 as unknown as string;
+      const action = ActionCreators.makeMove('A', null, playerID, 'creds-0');
+      const ret = await master.onUpdate(action, 0, matchID, playerID);
+      expect(movedBy()).toHaveLength(0);
+      expect(ret).toEqual({ error: 'unauthorized action' });
+      expect(sendAll).not.toHaveBeenCalled();
     });
   });
 });
