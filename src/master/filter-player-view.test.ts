@@ -46,7 +46,7 @@ describe('playerView - update', () => {
   });
 
   test('update', async () => {
-    const action = ActionCreators.gameEvent('endTurn');
+    const action = ActionCreators.gameEvent('endTurn', undefined, '0');
     await master.onSync('matchID', '0', undefined, 2);
     await master.onUpdate(action, 0, 'matchID', '0');
     const payload = sendAll.mock.calls.at(-1)[0];
