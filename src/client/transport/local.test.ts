@@ -276,7 +276,7 @@ describe('LocalMaster', () => {
   });
 
   test('update', () => {
-    master.onUpdate(gameEvent('endTurn'), 0, 'matchID', '0');
+    master.onUpdate(gameEvent('endTurn', undefined, '0'), 0, 'matchID', '0');
     expect(player0Callback).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'update' }),
     );

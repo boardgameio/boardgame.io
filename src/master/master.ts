@@ -188,6 +188,16 @@ export class Master {
       return { error: 'unauthorized action' };
     }
 
+    // Credentials are checked against `playerID`, but the reducer acts as
+    // `payload.playerID`, so the two must be the same player.
+    if (
+      typeof playerID !== 'string' ||
+      credAction.payload.playerID !== playerID
+    ) {
+      logging.error(`action playerID does not match the sending player`);
+      return { error: 'unauthorized action' };
+    }
+
     let metadata: Server.MatchData | undefined;
     if (StorageAPI.isSynchronous(this.storageAPI)) {
       ({ metadata } = this.storageAPI.fetch(matchID, { metadata: true }));
