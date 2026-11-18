@@ -62,6 +62,49 @@ describe('playerView - update', () => {
   });
 });
 
+describe('playerView - sync initialState', () => {
+  const send = jest.fn();
+  // No `seed` in the config, so the random plugin generates one in setup.
+  const game: Game = {
+    setup: ({ random }) => ({
+      secret: { deck: random.Shuffle(['a', 'b', 'c', 'd', 'e']) },
+      players: { '0': { hand: ['zero'] }, '1': { hand: ['one'] } },
+    }),
+    playerView: PlayerView.STRIP_SECRETS,
+  };
+  const master = new Master(game, new InMemory(), TransportAPI(send));
+  const filterPlayerView = getFilterPlayerView(game);
+
+  beforeAll(async () => {
+    await master.onSync('matchID', '0', undefined, 2);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const syncInfoFor = async (playerID: string | null) => {
+    await master.onSync('matchID', playerID, undefined, 2);
+    const payload = send.mock.calls.at(-1)[0];
+    return filterPlayerView(playerID, payload).args[1] as SyncInfo;
+  };
+
+  test('spectators do not receive secrets or the seed in initialState', async () => {
+    const { state, initialState } = await syncInfoFor(null);
+    expect(state.plugins.random.data).toBeUndefined();
+    expect(initialState.plugins.random.data).toBeUndefined();
+    expect(state.G).toEqual({ players: {} });
+    expect(initialState.G).toEqual({ players: {} });
+  });
+
+  test('players only receive their own view of initialState', async () => {
+    const { state, initialState } = await syncInfoFor('1');
+    expect(initialState.G).toEqual({ players: { '1': { hand: ['one'] } } });
+    expect(initialState.G).toEqual(state.G);
+    expect(initialState.plugins.random.data).toBeUndefined();
+  });
+});
+
 describe('playerView - patch', () => {
   const send = jest.fn();
   const sendAll = jest.fn();

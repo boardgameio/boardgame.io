@@ -59,10 +59,14 @@ export const getFilterPlayerView =
       case 'sync': {
         const [matchID, syncInfo] = payload.args;
         const filteredState = applyPlayerView(game, playerID, syncInfo.state);
+        const filteredInitialState =
+          syncInfo.initialState &&
+          applyPlayerView(game, playerID, syncInfo.initialState);
         const log = redactLog(syncInfo.log, playerID);
         const newSyncInfo = {
           ...syncInfo,
           state: filteredState,
+          initialState: filteredInitialState,
           log,
         };
         return {

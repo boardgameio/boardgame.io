@@ -10,6 +10,7 @@ import { INVALID_MOVE } from '../core/constants';
 import { createStore } from 'redux';
 import { CreateGameReducer } from '../core/reducer';
 import { InitializeGame } from '../core/initialize';
+import { PlayerView } from '../core/player-view';
 import { Client, createMoveDispatchers } from './client';
 import { ProcessGameConfig } from '../core/game';
 import { Transport } from './transport/transport';
@@ -287,6 +288,44 @@ describe('multiplayer', () => {
         expect.objectContaining({ sender: '0', payload: { message: 'foo' } }),
         expect.objectContaining({ sender: '1', payload: { message: 'bar' } }),
       ]);
+    });
+  });
+
+  describe('local master with playerView', () => {
+    const game: Game = {
+      setup: () => ({
+        secret: 'hidden',
+        players: { '0': { hand: [] }, '1': { hand: [] } },
+      }),
+      playerView: PlayerView.STRIP_SECRETS,
+      moves: {
+        draw: ({ G, playerID }) => {
+          G.players[playerID].hand.push('card');
+        },
+      },
+    };
+    const ownView = { players: { '0': { hand: [] } } };
+
+    let client: ReturnType<typeof Client>;
+
+    afterEach(() => {
+      client.stop();
+    });
+
+    test('initial state is filtered and reset restores it', () => {
+      client = Client({ game, multiplayer: Local(), playerID: '0' });
+      client.start();
+
+      expect(client.getInitialState().G).toEqual(ownView);
+      expect(client.getInitialState().plugins.random.data).toBeUndefined();
+
+      client.moves.draw();
+      expect(client.getState().G).toEqual({
+        players: { '0': { hand: ['card'] } },
+      });
+
+      client.reset();
+      expect(client.getState().G).toEqual(ownView);
     });
   });
 
