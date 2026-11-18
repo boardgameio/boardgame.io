@@ -13,6 +13,7 @@ import { InitializeGame } from '../../core/initialize';
 import { Client } from '../../client/client';
 import type { Game } from '../../types';
 import { PlayerView } from '../main';
+import { advanceTo, clear } from 'jest-date-mock';
 
 function Init(seed) {
   return new Random({ seed });
@@ -164,4 +165,38 @@ test('turn.onBegin has ctx APIs at the beginning of the game', () => {
 test('PRNG state is not sent to the client', () => {
   const client = Client({ game: {} });
   expect(client.getState().plugins.random.data).toBeUndefined();
+});
+
+describe('default seed', () => {
+  afterEach(() => {
+    clear();
+  });
+
+  test('does not depend on the clock', () => {
+    advanceTo(new Date(2026, 0, 1));
+    const seeds = new Set([Random.seed(), Random.seed(), Random.seed()]);
+    expect(seeds.size).toBe(3);
+  });
+
+  test('matches created at the same moment get different seeds', () => {
+    advanceTo(new Date(2026, 0, 1));
+    const game: Game = {};
+    const a = InitializeGame({ game }).plugins.random.data.seed;
+    const b = InitializeGame({ game }).plugins.random.data.seed;
+    expect(a).not.toBe(b);
+  });
+
+  test('an explicit game seed is kept', () => {
+    const game: Game = { seed: 'fixed' };
+    expect(InitializeGame({ game }).plugins.random.data.seed).toBe('fixed');
+  });
+
+  test('a seed is still generated without Web Crypto', () => {
+    const crypto = jest
+      .spyOn(globalThis, 'crypto', 'get')
+      .mockReturnValue(undefined);
+    expect(Random.seed()).toEqual(expect.any(String));
+    expect(Random.seed()).not.toBe('');
+    crypto.mockRestore();
+  });
 });
