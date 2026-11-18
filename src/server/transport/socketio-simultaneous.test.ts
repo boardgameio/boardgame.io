@@ -20,6 +20,7 @@ import { ProcessGameConfig } from '../../core/game';
 import * as ActionCreators from '../../core/action-creators';
 import { InitializeGame } from '../../core/initialize';
 import { PlayerView } from '../../core/player-view';
+import { INVALID_MOVE } from '../../core/constants';
 import type { Master } from '../../master/master';
 import type { Game, LogEntry, Server, State, StorageAPI } from '../../types';
 
@@ -718,5 +719,89 @@ describe('simultaneous sync race condition', () => {
     const { metadata } = await db.fetch(matchID, { metadata: true });
     expect(metadata.players['0'].isConnected).toBe(false);
     expect(metadata.players['1'].isConnected).toBe(true);
+  });
+});
+
+// socket.io ignores the promise a listener returns, so a listener that
+// rejects becomes an unhandled rejection, which ends a Node process by
+// default. Every listener must resolve, whatever a client sends.
+describe('malformed packets', () => {
+  const game: Game = {
+    moves: { reject: () => INVALID_MOVE },
+  };
+  // Survives JSON decoding, but throws when converted to a string.
+  const unprintable = { toString: 1 };
+  const matchID = 'matchID';
+
+  let db: InMemory;
+  let clientInfo: Map<string, Record<string, any>>;
+  let io;
+  let consoleError: jest.SpyInstance;
+
+  beforeEach(async () => {
+    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    clientInfo = new Map();
+    db = new InMemory();
+    const app = { context: { db, auth: new Auth() }, callback: () => () => {} };
+    const transport = new SocketIOTestAdapter({ clientInfo });
+    transport.init(app as any, [ProcessGameConfig(game)]);
+    io = app.context['io'];
+    await io.sockets.get('0').receive('sync', matchID, '0', undefined, 2);
+    consoleError.mockClear();
+  });
+
+  afterEach(() => {
+    consoleError.mockRestore();
+  });
+
+  test('update with a matchID that is not a string', async () => {
+    const socket = io.sockets.get('1');
+    const action = ActionCreators.makeMove('reject', null, '0');
+    await expect(
+      socket.receive('update', action, 0, unprintable, '0'),
+    ).resolves.toBeUndefined();
+    expect(consoleError).toHaveBeenCalled();
+  });
+
+  test('update whose rejected move cannot be logged', async () => {
+    const socket = io.sockets.get('0');
+    const action = ActionCreators.makeMove('reject', [unprintable], '0');
+    await expect(
+      socket.receive('update', action, 0, matchID, '0'),
+    ).resolves.toBeUndefined();
+    expect(consoleError).toHaveBeenCalled();
+  });
+
+  test('sync with a playerID that is not a string', async () => {
+    const socket = io.sockets.get('1');
+    await expect(
+      socket.receive('sync', matchID, unprintable, undefined, 2),
+    ).resolves.toBeUndefined();
+    expect(consoleError).toHaveBeenCalled();
+    expect(clientInfo.get('1')).toBeUndefined();
+  });
+
+  test('chat with a matchID that is not a string', async () => {
+    const socket = io.sockets.get('1');
+    const message = { id: 'id', sender: '1', payload: 'hello' };
+    await expect(
+      socket.receive('chat', unprintable, message, undefined),
+    ).resolves.toBeUndefined();
+    expect(consoleError).toHaveBeenCalled();
+  });
+
+  test('storage errors are logged', async () => {
+    const socket = io.sockets.get('0');
+    jest.spyOn(db, 'fetch').mockImplementation(() => {
+      throw new Error('storage unavailable');
+    });
+    const action = ActionCreators.makeMove('reject', null, '0');
+    await expect(
+      socket.receive('update', action, 0, matchID, '0'),
+    ).resolves.toBeUndefined();
+    expect(consoleError).toHaveBeenCalledWith(
+      'ERROR:',
+      expect.stringContaining('storage unavailable'),
+    );
   });
 });

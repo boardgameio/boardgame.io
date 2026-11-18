@@ -23,9 +23,35 @@ import type { Game, Server } from '../../types';
 import type { GenericPubSub } from './pubsub/generic-pub-sub';
 import type { IntermediateTransportData } from '../../master/master';
 import { InMemoryPubSub } from './pubsub/in-memory-pub-sub';
+import * as logging from '../../core/logger';
 
 const PING_TIMEOUT = 20 * 1e3;
 const PING_INTERVAL = 10 * 1e3;
+
+/** A player ID, or `null` / `undefined` for a spectator. */
+const isOptionalPlayerID = (value: unknown): value is string | null =>
+  value === undefined || value === null || typeof value === 'string';
+
+/**
+ * Register a socket listener that never rejects. socket.io ignores the
+ * promise a listener returns, so a rejection would be unhandled, which ends
+ * a Node process by default. Errors are logged instead.
+ */
+const on = <Args extends any[]>(
+  socket: IOTypes.Socket,
+  event: string,
+  listener: (...args: Args) => Promise<void>,
+) => {
+  socket.on(event, async (...args: Args) => {
+    try {
+      await listener(...args);
+    } catch (error) {
+      const details =
+        error instanceof Error ? error.stack || error.message : typeof error;
+      logging.error(`error handling socket "${event}" event: ${details}`);
+    }
+  });
+};
 
 const emit = (socket: IOTypes.Socket, { type, args }: TransportData) => {
   socket.emit(type, ...args);
@@ -184,23 +210,35 @@ export class SocketIO {
       const filterPlayerView = getFilterPlayerView(game);
 
       nsp.on('connection', (socket: IOTypes.Socket) => {
-        socket.on('update', async (...args: Parameters<Master['onUpdate']>) => {
-          const [action, stateID, matchID, playerID] = args;
-          const master = new Master(
-            game,
-            app.context.db,
-            TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
-            app.context.auth,
-          );
+        on(
+          socket,
+          'update',
+          async (...args: Parameters<Master['onUpdate']>) => {
+            const [action, stateID, matchID, playerID] = args;
+            if (typeof matchID !== 'string' || !isOptionalPlayerID(playerID)) {
+              logging.error('invalid arguments for socket "update" event');
+              return;
+            }
+            const master = new Master(
+              game,
+              app.context.db,
+              TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
+              app.context.auth,
+            );
 
-          const matchQueue = this.getMatchQueue(matchID);
-          await matchQueue.add(() =>
-            master.onUpdate(action, stateID, matchID, playerID),
-          );
-        });
+            const matchQueue = this.getMatchQueue(matchID);
+            await matchQueue.add(() =>
+              master.onUpdate(action, stateID, matchID, playerID),
+            );
+          },
+        );
 
-        socket.on('sync', async (...args: Parameters<Master['onSync']>) => {
+        on(socket, 'sync', async (...args: Parameters<Master['onSync']>) => {
           const [matchID, playerID, credentials] = args;
+          if (typeof matchID !== 'string' || !isOptionalPlayerID(playerID)) {
+            logging.error('invalid arguments for socket "sync" event');
+            return;
+          }
           socket.join(matchID);
           this.removeClient(socket.id);
           const requestingClient = { socket, matchID, playerID, credentials };
@@ -233,7 +271,7 @@ export class SocketIO {
           });
         });
 
-        socket.on('disconnect', async () => {
+        on(socket, 'disconnect', async () => {
           const client = this.clientInfo.get(socket.id);
           this.removeClient(socket.id);
           if (client) {
@@ -251,17 +289,22 @@ export class SocketIO {
           }
         });
 
-        socket.on(
+        on(
+          socket,
           'chat',
           async (...args: Parameters<Master['onChatMessage']>) => {
             const [matchID] = args;
+            if (typeof matchID !== 'string') {
+              logging.error('invalid arguments for socket "chat" event');
+              return;
+            }
             const master = new Master(
               game,
               app.context.db,
               TransportAPI(matchID, socket, filterPlayerView, this.pubSub),
               app.context.auth,
             );
-            master.onChatMessage(...args);
+            await master.onChatMessage(...args);
           },
         );
       });

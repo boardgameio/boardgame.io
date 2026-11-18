@@ -258,7 +258,7 @@ describe('sync / update', () => {
   });
 
   test('update', () => {
-    io.socket.receive('update');
+    io.socket.receive('update', {}, 0, 'matchID', '0');
     expect(error).not.toHaveBeenCalled();
   });
 });
