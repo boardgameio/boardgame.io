@@ -50,10 +50,20 @@ export class Random {
   used: boolean;
 
   /**
-   * Generates a new seed from the current date / time.
+   * Generates a new seed.
+   *
+   * Uses the Web Crypto API (available in browsers and Node.js) so that a
+   * match’s seed cannot be worked out from the time it was created. Falls
+   * back to `Math.random` where Web Crypto is missing, for example React
+   * Native without a polyfill.
    */
-  static seed() {
-    return Date.now().toString(36).slice(-10);
+  static seed(): string {
+    const crypto = globalThis.crypto;
+    if (crypto && typeof crypto.getRandomValues === 'function') {
+      const values = crypto.getRandomValues(new Uint32Array(4));
+      return Array.from(values, (value) => value.toString(36)).join('');
+    }
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
 
   /**
