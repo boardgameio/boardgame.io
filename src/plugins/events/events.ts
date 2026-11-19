@@ -49,6 +49,7 @@ export interface EventsAPI {
 export interface PrivateEventsAPI {
   _private: {
     isUsed(): boolean;
+    isTurnEndPending(): boolean;
     updateTurnContext(ctx: Ctx, methodType: GameMethod | undefined): void;
     unsetCurrentMethod(): void;
     update(state: State): State;
@@ -109,6 +110,12 @@ export class Events {
 
   isUsed() {
     return this.dispatch.length > 0;
+  }
+
+  isTurnEndPending() {
+    return this.dispatch.some(
+      ({ type }) => type === 'endTurn' || type === 'pass',
+    );
   }
 
   updateTurnContext(ctx: Ctx, methodType: GameMethod | undefined) {
