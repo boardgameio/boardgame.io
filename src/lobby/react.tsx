@@ -284,6 +284,7 @@ class Lobby extends React.Component<LobbyProps, LobbyState> {
       game: gameCode.game,
       board: gameCode.board,
       debug: this.props.debug,
+      ...(matchOpts.numPlayers === 1 ? { numPlayers: 1 } : {}),
       multiplayer,
     });
 
