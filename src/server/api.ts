@@ -393,7 +393,7 @@ export const configureRouter = ({
       ctx.throw(409, 'Player ' + playerID + ' not available');
     }
 
-    if (data) {
+    if (data !== undefined) {
       metadata.players[playerID].data = data;
     }
     metadata.players[playerID].name = playerName;
@@ -583,7 +583,7 @@ export const configureRouter = ({
     if (newName) {
       metadata.players[playerID].name = newName;
     }
-    if (data) {
+    if (data !== undefined) {
       metadata.players[playerID].data = data;
     }
     await db.setMetadata(matchID, metadata);
