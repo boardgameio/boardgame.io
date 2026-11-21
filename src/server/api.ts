@@ -359,7 +359,7 @@ export const configureRouter = ({
    * @param {object} data - The default data of the player in the match.
    * @return - Player ID and credentials to use when interacting in the joined match.
    */
-  router.post('/games/:name/:id/join', bodyParser, async (ctx) => {
+  const joinMatch = async (ctx: Koa.Context) => {
     let playerID = (ctx.request.body as any)?.playerID;
     const playerName = (ctx.request.body as any)?.playerName;
     const data = (ctx.request.body as any)?.data;
@@ -405,7 +405,13 @@ export const configureRouter = ({
 
     const body: LobbyAPI.JoinedMatch = { playerID, playerCredentials };
     ctx.body = body;
-  });
+  };
+
+  router.post('/games/:name/:id/join', bodyParser, (ctx) =>
+    transport
+      ? transport.getMatchQueue(ctx.params.id).add(() => joinMatch(ctx))
+      : joinMatch(ctx),
+  );
 
   /**
    * Leave a given match.
